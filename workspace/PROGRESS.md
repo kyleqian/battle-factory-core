@@ -5,6 +5,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1391 — [main worker, 2026-08-23] **Scout lever 2 built and measured: `--policy oracle-strength` (the engine's own Factory AI scorer driving the PLAYER) wins 0/30 rounds at carry 28 — a clean NEGATIVE result that retires in-battle move choice as the challenge-4 lever**
+
+- **State:** master `81a98b2f` + this docs commit. `npm test` **1,100 files
+  / 10,364 passed / 223 skipped** (was 1,099 / 10,360), `npm run build`
+  green, typecheck green. New opt-in soak policy only — `winning` /
+  `winning-swap` / `full` / `vanilla` untouched (their pins all still pass);
+  zero `src/engine` edits.
+- **Did:** `--policy oracle-strength` = `winning` in every respect except the
+  fight slot, which `chooseFactoryAiScoredDecision` picks for the player
+  under mask 7. `buildOracleStrengthPlayerView` mirrors
+  `createFactoryAiViewFromLiveRules` with the sides swapped + full knowledge
+  of the opponent's moves/ability/item (instrument, not fairness); scorer runs
+  on a cursor from the soak's own seeded RNG, so the battle RNG is untouched;
+  no-legal-slot / non-move / barrier falls back to `pickWinningFightSlot` and
+  counts (`SeedResult.oracleStrengthFallbacks`). 4 Tier-1 pins in
+  `tests/randomRoundSoakOracleStrength.test.ts`.
+- **Next:** the four-gate wind-down set, or the next supervisor step. Do NOT
+  re-run levers 3/5 (retired by this measurement — see the scout doc's
+  "Result"); the only lever left at ch4 is a NEW coverage-first draft
+  heuristic.
+- **Notes:** anchor smoke `0:20` **20/20 OK, 0 CRASH, 0 HANG** (carry>=7
+  20/20, >=28 1/20). THE MEASUREMENT `--start-carry 28 --seeds 0:30`
+  (3 parallel chunks): **30/30 OK, rounds won 0/30** vs the scout's
+  predicted >=15/30 and the `winning` baseline's 0/30; loss table b1 **22**,
+  b2 6, b3 1, b5 1 — statistically identical to `winning`@28. **Fallbacks
+  summed to 0**, so the scorer really answered every decision. 0:120
+  confirmation sweep NOT run (out of session time).
+
+---
+
 ## 1390 — [main worker, 2026-08-22] **ISSUES #118 CLOSED: the wasm draft-selection wire format now carries a rental's six-IV spread, so an `ivs`-bearing instance round-trips intact**
 
 - **State:** master `47a8db42` + this docs commit. `npm test` **1,099 files
@@ -37,6 +67,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+---
+
 ## 1389 — [main worker, 2026-08-22] **ISSUES #118 commit 2/2 landed: the `sFixedIVTable[8]` overread is now ported end to end — TS + adapter + rebuilt wasm in lockstep; the challenge-8 crash repro goes clean**
 
 - **State:** master `0cb8aa26` + this docs commit. `npm test` **1,099 files
@@ -66,27 +98,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   for real). #118 is trimmed to ONE bounded remainder —
   the wasm draft-selection wire format drops a rental's `ivs` (test-only
   boundary today; production uses the TS `selectedRentalParty`).
-
----
-
-## 1388 — [main worker, 2026-08-22] **ISSUES #118 commit 1/2 landed: the retail `sFixedIVTable[8]` overread + `CreateBoxMon`'s two random-IV draws are ported in core-rs; TS untouched and still green**
-
-- **State:** master `5b51eac5` + this docs commit. `npm test` **10,242
-  passed / 1,099 files**, build green, **zero TS edits**
-  (`factoryRentalParity.test.ts` 290/290 as committed); cargo **1,027
-  passed / 0 failed** (was 1,020), `fmt --check` + `clippy -- -D warnings`
-  clean.
-- **Did (core-rs only; no `artifacts/` rebuild — commit 2 owns that):**
-  ninth (overread) `FIXED_IVS` row; `get_level50_initial_rental_fixed_iv`
-  total under retail's strictly-greater clamp (arg 8 -> 110, 9+ -> 31);
-  `Phase::RandomIvs = 2` / `Purpose::RandomIvsLow|High = 3|4` + the two
-  ledgered draws per random-IV rental; `RentalRecord.ivs` with `fixed_iv ==
-  ivs[1]` (the ATK IV, `battle_factory_screen.c:1824`); `GenerationError`
-  deleted; `create_factory_corpus_party_member_with_ivs`; wasm record 23 ->
-  **29 bytes** (`ivs` at 23, `ledger_count` 192, ledger 196) + the additive
-  `fw_create_factory_party_member_with_ivs`. +7 tests, two hand-derived.
-- **Next:** ISSUES #118 **commit 2** per that entry's explicit contract:
-  `build-wasm.sh` + adapter + all TS + parity flip in ONE commit, then the
-  `--start-carry 42/49` re-sweeps.
-- **Notes:** `clippy --all-targets` fails at HEAD on a pre-existing `op_ref`
-  in a generated vectors test — untouched. `RUST_PROGRESS.md` not edited.

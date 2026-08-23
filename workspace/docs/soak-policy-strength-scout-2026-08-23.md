@@ -181,3 +181,103 @@ NOT a correctness fix for them. It is a fidelity gap only for swap-accepting pol
 (`winning-swap`: up to +6 per won round post-#120), where the honest shape is an explicit
 `--start-rents N` flag, not a formula. Everything else in this doc stands; lever 2 remains the
 recommendation.
+
+---
+
+## Result (2026-08-23, main lane, worker step — lever 2 built and measured)
+
+`--policy oracle-strength` landed as an **opt-in** soak policy
+(`tools/soak/randomRoundSoakDriver.ts`, commits `3a49da5d` + `81a98b2f`):
+identical to `winning` in every respect (random 3-of-6 draft, swap offers
+declined, the same voluntary-switch heuristic, the same exploration/timing
+rolls) EXCEPT the fight-move choice, which is delegated to the engine's own
+source-derived scorer `chooseFactoryAiScoredDecision` under the full mask 7.
+`buildOracleStrengthPlayerView` mirrors `createFactoryAiViewFromLiveRules`
+with the two sides swapped (attacker battler 0, target battler 1, side
+statuses and `gLastMoves` indexed to match) and hands the player full
+knowledge of the opponent's live moves / real ability / real hold effect —
+a test instrument, not a fairness model. The scorer runs on a u32 cursor
+drawn from the **soak's own seeded RNG** (one draw per fight-menu decision)
+and its advanced cursor is discarded, so the live battle's RNG cursor is
+never touched by the player's decision. No engine edit was needed: everything
+it reads was already exported.
+
+### (2) Smoke from the anchor
+
+```
+npm run soak -- --policy oracle-strength --seeds 0:20 --render-every 0
+```
+```
+=== soak summary: 20 seeds (policy oracle-strength) in 463.7s ===
+OK 20  CRASH 0  HANG 0
+carry >= 7 (challengeNum >= 1): 20/20   carry >= 14: 16/20
+carry >= 21 (challengeNum >= 3): 4/20   carry >= 28 (challengeNum >= 4): 1/20
+deepest carry anywhere: 28   deepest battle-depth anywhere: 28
+```
+Every seed's sub-outcome is `budget`. The `winning` 2026-08-22 baseline over
+480 anchor seeds was carry >= 28 in **18/480 (3.75%)** and carry >= 35 in
+**0/480**; this 20-seed slice sits at 1/20 (5%) and 0/20 — the same order of
+magnitude, n far too small to call a difference. The 0:120 confirmation sweep
+was **not run** (out of session time), so the scout's §5 acceptance number
+(carry >= 35 in >= 6/120 with no `--start-carry`) is **unmeasured**.
+
+### (3) THE MEASUREMENT — boot at carry 28, the unbeaten tier
+
+```
+npm run soak -- --policy oracle-strength --start-carry 28 --seeds  0:10 --render-every 0
+npm run soak -- --policy oracle-strength --start-carry 28 --seeds 10:20 --render-every 0
+npm run soak -- --policy oracle-strength --start-carry 28 --seeds 20:30 --render-every 0
+```
+(three parallel chunks, one foreground call, ~4 min wall; union below)
+
+| policy | boot carry | n | OK | CRASH | HANG | deepest carry | deepest depth | **rounds won** |
+|---|---|---|---|---|---|---|---|---|
+| `oracle-strength` | 28 | 30 | 30 | 0 | 0 | 28 | 32 | **0/30** |
+
+**Scout prediction >= 15/30. Actual 0/30 — the same as the `winning`
+baseline's 0/30. Lever 2 is a NEGATIVE result.**
+
+Battle index where the boot round is lost (`maxBattleDepth - 28 + 1`), against
+sweep (a) `winning`@28 from §1:
+
+| lost at | **`oracle-strength`@28** | `winning`@28 (sweep (a)) |
+|---|---|---|
+| b1 | **22** (0,1,2,3,4,7,8,9,10,12,13,16,17,18,19,20,22,25,26,27,28,29) | **22** |
+| b2 | 6 (6,11,14,21,23,24) | 5 |
+| b3 | 1 (5) | 1 |
+| b4 | 0 | 1 |
+| b5 | 1 (15) | 1 |
+| **round won** | **0** | **0** |
+
+The distribution is statistically indistinguishable from `winning`'s: the same
+22/30 battle-1 losses, the same short tail.
+
+**The scorer really ran.** `SeedResult.oracleStrengthFallbacks` summed to **0**
+across all 30 seeds (and 0 on the anchor smoke) — every single fight-menu
+decision in the sweep was answered by `chooseFactoryAiScoredDecision`, not by
+the fallback. So this is a clean measurement of the lever, not of a policy
+that quietly degraded to `winning`.
+
+### What this settles
+
+§2's own ranked-mechanism paragraph was right and its lever ranking was
+wrong: *"the single dominant mechanism at ch4 is **party quality at draft
+time**, not in-battle move choice; the in-battle blind spots are the
+second-order tail."* Giving the player a **source-exact, full-knowledge,
+full-triad move chooser** — by construction as strong as the challenge-7
+opponent AI, against an opponent with IV 3 vs the player's 15 — moves the
+carry-28 round-win rate by **zero**. In-battle move choice is not what loses
+challenge 4; the party that walks into b1 is.
+
+That also retires levers 3 and 5 by implication: lever 3 (KO-first +
+accuracy weighting in `pickWinningFightSlot`) is a strictly weaker
+approximation of exactly what lever 2 just did with no effect, and lever 5
+(walled-switch tuning) is a b3+ lever in a distribution where 22/30 losses
+are at b1. What remains untested at ch4 is the **draft**, and lever 4 as
+built measured worse (§3). A genuinely new draft heuristic — coverage-first
+rather than the withheld base-stat+STAB one — is the only lever this
+measurement leaves standing, and it is a new design problem, not a rerun.
+
+The policy stays in the tree as an opt-in instrument (it is now the strongest
+in-battle player available for crash coverage at depth, and it costs nothing
+when unused), but it is **not** promoted to the gate set.

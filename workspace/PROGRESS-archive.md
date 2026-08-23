@@ -1,3 +1,28 @@
+
+## 1388 — [main worker, 2026-08-22] **ISSUES #118 commit 1/2 landed: the retail `sFixedIVTable[8]` overread + `CreateBoxMon`'s two random-IV draws are ported in core-rs; TS untouched and still green**
+
+- **State:** master `5b51eac5` + this docs commit. `npm test` **10,242
+  passed / 1,099 files**, build green, **zero TS edits**
+  (`factoryRentalParity.test.ts` 290/290 as committed); cargo **1,027
+  passed / 0 failed** (was 1,020), `fmt --check` + `clippy -- -D warnings`
+  clean.
+- **Did (core-rs only; no `artifacts/` rebuild — commit 2 owns that):**
+  ninth (overread) `FIXED_IVS` row; `get_level50_initial_rental_fixed_iv`
+  total under retail's strictly-greater clamp (arg 8 -> 110, 9+ -> 31);
+  `Phase::RandomIvs = 2` / `Purpose::RandomIvsLow|High = 3|4` + the two
+  ledgered draws per random-IV rental; `RentalRecord.ivs` with `fixed_iv ==
+  ivs[1]` (the ATK IV, `battle_factory_screen.c:1824`); `GenerationError`
+  deleted; `create_factory_corpus_party_member_with_ivs`; wasm record 23 ->
+  **29 bytes** (`ivs` at 23, `ledger_count` 192, ledger 196) + the additive
+  `fw_create_factory_party_member_with_ivs`. +7 tests, two hand-derived.
+- **Next:** ISSUES #118 **commit 2** per that entry's explicit contract:
+  `build-wasm.sh` + adapter + all TS + parity flip in ONE commit, then the
+  `--start-carry 42/49` re-sweeps.
+- **Notes:** `clippy --all-targets` fails at HEAD on a pre-existing `op_ref`
+  in a generated vectors test — untouched. `RUST_PROGRESS.md` not edited.
+
+---
+
 ## 1387 — [top-layer session, 2026-08-22] **User decisions recorded + next supervisor session set up: #116 RESOLVED (keep `vanilla` as the rigid canary; wind-down gates extended to four — `winning 0:60` + `winning-swap 0:60` added), #118 confirmed as the next session's first work item with a two-commit landing ladder written into its ISSUES entry**
 
 - **State:** docs-only commit on the 1386 final tree (`99429dc9` parent; no

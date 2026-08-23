@@ -1399,6 +1399,11 @@ supervisor wind-down runs all four gates and records each count:
 - `npm run soak -- --policy winning --seeds 0:60` — record the count;
 - `npm run soak -- --policy winning-swap --seeds 0:60` — record the count.
 
+Opt-in, NOT a gate: `--policy oracle-strength` (same as `winning` except the
+fight slot, which the engine's own Factory AI scorer picks for the player) —
+the lever-2 measurement instrument of
+`docs/soak-policy-strength-scout-2026-08-23.md`; see that doc's "Result".
+
 ISSUES #85 tracks the current crash wall. Receipt hygiene (ADVISORY —
 user-clarified 2026-08-09: worker TIME is the constraint, repo weight is
 not): prefer committing the staged scenario + probe/verify script +
