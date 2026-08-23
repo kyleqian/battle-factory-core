@@ -1,4 +1,37 @@
 
+## 1391 — [main worker, 2026-08-23] **Scout lever 2 built and measured: `--policy oracle-strength` (the engine's own Factory AI scorer driving the PLAYER) wins 0/30 rounds at carry 28 — a clean NEGATIVE result that retires in-battle move choice as the challenge-4 lever**
+
+- **State:** master `180a7e20` + this docs commit. `npm test` **1,103 files
+  / 10,381 passed / 223 skipped** (this step adds 1 file / 4 tests; the rest
+  of the delta over 1390's 1,099 / 10,360 came in with the side-lane merges
+  under this tree), `npm run build` green, typecheck green. New opt-in soak policy only — `winning` /
+  `winning-swap` / `full` / `vanilla` untouched (their pins all still pass);
+  zero `src/engine` edits.
+- **Did:** `--policy oracle-strength` = `winning` in every respect except the
+  fight slot, which `chooseFactoryAiScoredDecision` picks for the player
+  under mask 7. `buildOracleStrengthPlayerView` mirrors
+  `createFactoryAiViewFromLiveRules` with the sides swapped + full knowledge
+  of the opponent's moves/ability/item (instrument, not fairness); scorer runs
+  on a cursor from the soak's own seeded RNG, so the battle RNG is untouched;
+  no-legal-slot / non-move / barrier falls back to `pickWinningFightSlot` and
+  counts (`SeedResult.oracleStrengthFallbacks`). 4 Tier-1 pins in
+  `tests/randomRoundSoakOracleStrength.test.ts`.
+- **Next:** the four-gate wind-down set, or the next supervisor step. Do NOT
+  re-run levers 3/5 (retired by this measurement — see the scout doc's
+  "Result"); the only lever left at ch4 is a NEW coverage-first draft
+  heuristic.
+- **Notes:** anchor smoke `0:20` **20/20 OK, 0 CRASH, 0 HANG** (carry>=7
+  20/20, >=28 1/20). THE MEASUREMENT `--start-carry 28 --seeds 0:30`
+  (3 parallel chunks): **30/30 OK, rounds won 0/30** vs the scout's
+  predicted >=15/30 and the `winning` baseline's 0/30; loss table b1 **22**,
+  b2 6, b3 1, b5 1 — statistically identical to `winning`@28. **Fallbacks
+  summed to 0**, so the scorer really answered every decision. 0:120
+  confirmation sweep NOT run (out of session time).
+
+---
+
+---
+
 ## 1390 — [main worker, 2026-08-22] **ISSUES #118 CLOSED: the wasm draft-selection wire format now carries a rental's six-IV spread, so an `ivs`-bearing instance round-trips intact**
 
 - **State:** master `47a8db42` + this docs commit. `npm test` **1,099 files

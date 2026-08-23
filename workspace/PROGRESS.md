@@ -5,6 +5,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1394 — [supervisor final wind-down, 2026-08-23 03:10] **Bonus round closed: both remaining challenge-4 levers measured NEGATIVE at carry 28 (`oracle-strength` 0/30, `winning-coverage` 0/30); final tree re-gated green — entry 1392 is the full session record**
+
+- **Final gates on THIS tree (`b1480863` + this docs commit; supervisor-independent):**
+  vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60**,
+  winning-swap 0:60 **60/60** (0 CRASH / 0 HANG); full `npm test`
+  **1,106 files / 10,396 passed / 223 skipped**; `npm run build` green.
+  (Gates were also green at `0cabb82b`, `a5b06cfb`, and — vanilla/winning —
+  `77f4db64`; see 1392.)
+- **Did since 1392:** worker J landed opt-in `--policy winning-coverage`
+  (1393): 0/30 rounds won at carry 28 (29 lost at b1 — coverage-first starves
+  bulk, the mirror of the withheld bulk+STAB heuristic), anchor 0:120 carry
+  ≥ 28 **10/120** (8.3% vs `winning` 3.75%, suggestive only), ≥ 35 0/120.
+  With `oracle-strength` (1391) also at 0/30, move choice AND single-axis
+  draft scores are both retired as challenge-4 levers. One cross-lane stray
+  (an animation worker's edit to `tests/animation/glareEvidence.test.ts`
+  landed in this tree at 01:49) was saved as a patch and reverted
+  (PAPERCUTS hit 6).
+- **Next (for the next session / the user):** the only lever left for
+  natural deep play is a COMBINED draft score with a strength floor
+  (coverage subject to BST ≥ floor), measured by rounds won at
+  `--start-carry 28 --seeds 0:30` — or accept that `--start-carry` already
+  covers challenge 5-8 for crash coverage and stop here. Instruments from
+  the scout §4 (per-seed round ledger, loss shape, rentsCount/rank) would
+  make that measurement cheap. Open ISSUES: #121 (dormant note), #109/#114
+  (doubles-era), #71/#73/#39/#55 (parked/filler). DEFERRED.md: none open.
+- **Notes:** `animation-main` ahead of master at close: 7 commits (its
+  supervisor was live all night; folded twice this session at `3a8b58d7` +
+  `77f4db64`; the remainder folds at the next orient). `rust-main` ahead: 0.
+  11 worker rounds total (6 ts opus, 5 side), 0 failed steps, 0 cap-kills,
+  0 regressions folded. Trap of the hour: an UNQUOTED heredoc fed ledger
+  prose to zsh, which executed its backticked `npm test` — quote heredocs
+  (`<<'EOF'`) or write files with a tool.
+
+---
+
 ## 1393 — [main worker, 2026-08-23] **Scout lever 4' built and measured: `--policy winning-coverage` (coverage-first 3-of-6 draft) wins 0/30 rounds at carry 28 — challenge 4 stays unbeaten — but reaches carry >= 28 in 10/120 at the anchor vs `winning`'s 18/480**
 
 - **State:** master `2ea18c0b` + this docs commit. `npm test` **1,106 files
@@ -95,37 +130,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   path (hit 5 — my side brief lacked the standing clause). `animation-main`
   delta at close: folded `3a8b58d7` (Spikes) + `77f4db64` (Teeter Dance);
   its supervisor was live all session. `rust-main` delta 0.
-
----
-
-## 1391 — [main worker, 2026-08-23] **Scout lever 2 built and measured: `--policy oracle-strength` (the engine's own Factory AI scorer driving the PLAYER) wins 0/30 rounds at carry 28 — a clean NEGATIVE result that retires in-battle move choice as the challenge-4 lever**
-
-- **State:** master `180a7e20` + this docs commit. `npm test` **1,103 files
-  / 10,381 passed / 223 skipped** (this step adds 1 file / 4 tests; the rest
-  of the delta over 1390's 1,099 / 10,360 came in with the side-lane merges
-  under this tree), `npm run build` green, typecheck green. New opt-in soak policy only — `winning` /
-  `winning-swap` / `full` / `vanilla` untouched (their pins all still pass);
-  zero `src/engine` edits.
-- **Did:** `--policy oracle-strength` = `winning` in every respect except the
-  fight slot, which `chooseFactoryAiScoredDecision` picks for the player
-  under mask 7. `buildOracleStrengthPlayerView` mirrors
-  `createFactoryAiViewFromLiveRules` with the sides swapped + full knowledge
-  of the opponent's moves/ability/item (instrument, not fairness); scorer runs
-  on a cursor from the soak's own seeded RNG, so the battle RNG is untouched;
-  no-legal-slot / non-move / barrier falls back to `pickWinningFightSlot` and
-  counts (`SeedResult.oracleStrengthFallbacks`). 4 Tier-1 pins in
-  `tests/randomRoundSoakOracleStrength.test.ts`.
-- **Next:** the four-gate wind-down set, or the next supervisor step. Do NOT
-  re-run levers 3/5 (retired by this measurement — see the scout doc's
-  "Result"); the only lever left at ch4 is a NEW coverage-first draft
-  heuristic.
-- **Notes:** anchor smoke `0:20` **20/20 OK, 0 CRASH, 0 HANG** (carry>=7
-  20/20, >=28 1/20). THE MEASUREMENT `--start-carry 28 --seeds 0:30`
-  (3 parallel chunks): **30/30 OK, rounds won 0/30** vs the scout's
-  predicted >=15/30 and the `winning` baseline's 0/30; loss table b1 **22**,
-  b2 6, b3 1, b5 1 — statistically identical to `winning`@28. **Fallbacks
-  summed to 0**, so the scorer really answered every decision. 0:120
-  confirmation sweep NOT run (out of session time).
 
 ---
 
