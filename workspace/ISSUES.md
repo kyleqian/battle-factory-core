@@ -17,21 +17,20 @@ backlog.
 
 # Open
 
-## #121 — `gBattleStruct->AI_monToSwitchIntoId` is not modelled; `Cmd_openpartyscreen`'s opponent route is source-exact only for the `PARTY_SIZE` sentinel case
+## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 
-**Found 2026-08-22** (same audit). `OpponentHandleChoosePokemon`
-(`battle_controller_opponent.c:1625-1650`) calls
-`GetMostSuitableMonToSwitchInto()` only when
-`AI_monToSwitchIntoId[battler] == PARTY_SIZE`; otherwise it consumes the
-AI's pre-decided target and resets the sentinel. #110 (`890a8593`) routes
-every opponent pick through the scorer, which matches the sentinel case
-only. Divergence requires the AI to bank a voluntary-switch target and a
-forced switch to consume it in the same turn; the engine decides voluntary
-switches in `factoryAiLiveDriver.ts` rather than through the opcode, and the
-audit could not construct the path. Unmodelled source state, not a live bug:
-close with a bounded probe (stage an AI voluntary switch whose target then
-faints to Spikes/Future Sight the same turn) before treating
-`battleScriptOpenPartyScreenOpcode.ts` as fully source-exact.
+`docs/issue121-ai-mon-to-switch-into-probe.md` closes the reachability
+question: the banked id is consumed and reset during action selection
+(`battle_controller_opponent.c:1668-1669`), every `openpartyscreen` runs
+during turn execution, and `Cmd_openpartyscreen` clears
+`monToSwitchIntoId` before its emit (`battle_script_commands.c:5117`), so
+`battleScriptOpenPartyScreenOpcode.ts`'s unconditional scorer call (#110)
+is source-exact everywhere reachable. **Only this stays open, as dormant
+debt:** the engine omits BOTH the `:5117` clear and
+`GetMostSuitableMonToSwitchInto`'s `:646-647` early return
+(`battleAiSwitchInto.ts`), and the two omissions cancel exactly — port
+them together or not at all; porting either alone introduces the
+divergence the probe ruled out.
 
 ## #109 — `battleAiSwitchInto.ts` omits the `i != monToSwitchIntoId[battlerIn1/2]` exclusion in both passes
 
