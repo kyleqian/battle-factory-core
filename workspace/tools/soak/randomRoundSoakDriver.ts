@@ -561,16 +561,18 @@ export type CoverageDraftPick = Readonly<{
 }>;
 
 /**
- * "winning-coverage" policy draft pick: enumerates all 20 three-of-six
- * combinations in ascending slot order and keeps the best by
+ * Shared trio search for the coverage-first drafts: enumerates all 20
+ * three-of-six combinations in ascending slot order and keeps the best by
  * `compareCoverageScore` (strict `>` never overwrites an equal score, so
- * ties keep the earliest combination). No RNG at all -- the same six offers
- * always yield the same trio. Rent ORDER inside the chosen trio is
+ * ties keep the earliest combination) among trios whose summed base-stat
+ * total is >= `bstFloor` (0 = no floor). No RNG at all -- the same six
+ * offers always yield the same trio. Rent ORDER inside the chosen trio is
  * descending base-stat total (ties keep the lower slot) so the bulkiest of
  * the three leads battle 1; the trio ITSELF is chosen by coverage.
  */
-export function pickCoverageDraftPicks(
+function pickBestTrioAboveFloor(
   rentals: readonly CoverageDraftRental[],
+  bstFloor: number,
 ): CoverageDraftPick {
   const weights = coverageDraftTypeWeights(rentals);
   let bestSlots: number[] | null = null;
@@ -583,6 +585,7 @@ export function pickCoverageDraftPicks(
           slots.map((slot) => rentals[slot]!),
           weights,
         );
+        if (score.bst < bstFloor) continue;
         if (bestScore === null || compareCoverageScore(score, bestScore) > 0) {
           bestScore = score;
           bestSlots = slots;
@@ -593,6 +596,9 @@ export function pickCoverageDraftPicks(
   if (bestSlots === null || bestScore === null) {
     // Fewer than three rentals offered -- never happens in play (the draft
     // screen always offers six); rent whatever is there, in slot order.
+    // Unreachable via the floor: `combinedDraftBstFloor` is the MEAN trio
+    // total, and the max trio total (an integer >= that mean) always meets
+    // its ceiling.
     const slots = rentals.map((_, slot) => slot);
     return { picks: slots, score: scoreCoverageDraftTrio(rentals, weights) };
   }
@@ -602,6 +608,47 @@ export function pickCoverageDraftPicks(
     bstOf(y) !== bstOf(x) ? bstOf(y) - bstOf(x) : x - y,
   );
   return { picks, score: bestScore };
+}
+
+/** "winning-coverage" policy draft pick: pure coverage, no strength floor. */
+export function pickCoverageDraftPicks(
+  rentals: readonly CoverageDraftRental[],
+): CoverageDraftPick {
+  return pickBestTrioAboveFloor(rentals, 0);
+}
+
+/**
+ * "winning-combined" strength floor: the MEAN candidate-trio base-stat
+ * total, i.e. what a random 3-of-6 draft fields in expectation. Each rental
+ * appears in 3/n of the n-choose-3 trios, so the mean trio total is
+ * `3/n * sum(all offered BSTs)` -- for the real six-offer draft, exactly
+ * half the six offers' summed total. Ceiling'd to stay an integer bar; the
+ * max-BST trio (an integer >= the mean) always meets it, so the floored
+ * search can never come up empty.
+ */
+export function combinedDraftBstFloor(rentals: readonly CoverageDraftRental[]): number {
+  let total = 0;
+  for (const rental of rentals) {
+    total += BASE_STAT_TOTAL_BY_SPECIES.get(rental.species) ?? 0;
+  }
+  return Math.ceil((total * 3) / Math.max(3, rentals.length));
+}
+
+export type CombinedDraftPick = CoverageDraftPick & Readonly<{ floor: number }>;
+
+/**
+ * "winning-combined" policy draft pick: the same coverage-first lexicographic
+ * score as "winning-coverage", maximised only over trios whose summed
+ * base-stat total meets `combinedDraftBstFloor` -- coverage subject to a
+ * strength floor. The lever left standing after lever 4 (bulk+STAB) starved
+ * coverage and lever 4' (pure coverage) starved bulk
+ * (docs/soak-policy-strength-scout-2026-08-23.md, "Result -- lever 4'").
+ */
+export function pickCombinedDraftPicks(
+  rentals: readonly CoverageDraftRental[],
+): CombinedDraftPick {
+  const floor = combinedDraftBstFloor(rentals);
+  return { ...pickBestTrioAboveFloor(rentals, floor), floor };
 }
 
 // ---------------------------------------------------------------------------
@@ -1209,6 +1256,16 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * Deterministic given the six offers -- no RNG in the pick. The measurement
  * instrument for that doc's lever 4' (the last open challenge-4 lever);
  * results in its "Result -- lever 4'" section.
+ *
+ * "winning-combined": opt-in, identical to "winning-coverage" in every
+ * respect EXCEPT the draft's trio search, which maximises the same
+ * coverage-first lexicographic score only over trios whose summed base-stat
+ * total is >= the MEAN candidate-trio total (`combinedDraftBstFloor` --
+ * what a random draft fields in expectation), so coverage can never select
+ * an all-frail party. The COMBINED-score lever both single-axis drafts
+ * pointed at: lever 4 (bulk+STAB primary) starved coverage, lever 4'
+ * (coverage with bst a pure tiebreak) starved bulk -- mirror-image failure
+ * modes (scout doc, "Result -- lever 4'" closing paragraph).
  */
 export type SoakPolicy =
   | "full"
@@ -1216,7 +1273,8 @@ export type SoakPolicy =
   | "winning"
   | "winning-swap"
   | "oracle-strength"
-  | "winning-coverage";
+  | "winning-coverage"
+  | "winning-combined";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
 type PlayerPolicy = SoakPolicy | "strong-route";
 
@@ -1249,7 +1307,7 @@ export class RandomPlayer {
   public oracleStrengthFallbacks = 0;
   /** "winning-swap" only: the current swap screen's row plan, built once per swap occurrence. */
   private swapPlan: WinningSwapPlan | null = null;
-  /** "winning-coverage" only: identity of the offer the current draft plan was scored from, so each fresh round's draft re-scores. */
+  /** "winning-coverage"/"winning-combined" only: identity of the offer the current draft plan was scored from, so each fresh round's draft re-scores. */
   private coverageDraftOfferKey: string | null = null;
   public battle = 1;
   public turn = 0;
@@ -1257,17 +1315,23 @@ export class RandomPlayer {
   private readonly log: ActionLog;
   private readonly policy: PlayerPolicy;
 
-  /** "full", "winning", "winning-swap", "oracle-strength", and "winning-coverage" share the same menu/target exploration rolls. */
+  /** Every policy except "vanilla"/"strong-route" shares the same menu/target exploration rolls. */
   private get explores(): boolean {
     return this.policy === "full" || this.policy === "winning"
       || this.policy === "winning-swap" || this.policy === "oracle-strength"
-      || this.policy === "winning-coverage";
+      || this.policy === "winning-coverage" || this.policy === "winning-combined";
   }
 
-  /** "winning", "winning-swap", "oracle-strength", and "winning-coverage" share every winning-biased decision except the swap offer/screen, (for "oracle-strength") the fight slot, and (for "winning-coverage") the draft. */
+  /** The winning-biased policies share every decision except the swap offer/screen ("winning-swap"), the fight slot ("oracle-strength"), and the draft (the two coverage drafts). */
   private get winningLike(): boolean {
     return this.policy === "winning" || this.policy === "winning-swap"
-      || this.policy === "oracle-strength" || this.policy === "winning-coverage";
+      || this.policy === "oracle-strength" || this.policy === "winning-coverage"
+      || this.policy === "winning-combined";
+  }
+
+  /** "winning-coverage"/"winning-combined": the draft is planned by `planCoverageDraft`, not the constructor's random shuffle. */
+  private get coverageDraftLike(): boolean {
+    return this.policy === "winning-coverage" || this.policy === "winning-combined";
   }
 
   constructor(rng: Rng, log: ActionLog, policy: PlayerPolicy) {
@@ -1393,7 +1457,7 @@ export class RandomPlayer {
 
   private onDraft(state: EngineState): ReadonlySet<GbaButton> {
     const draft = state.draftScreen;
-    if (this.policy === "winning-coverage") this.planCoverageDraft(state, draft);
+    if (this.coverageDraftLike) this.planCoverageDraft(state, draft);
     const reveal = draft.confirmReveal;
     if (reveal) {
       if (reveal.phase !== "shown") return NO_BUTTONS;
@@ -1409,11 +1473,11 @@ export class RandomPlayer {
       }
       this.note(state, "draft confirm: A on NO (decline)");
       this.draft.rented = 2; // the 3rd pick is dropped; re-rent below
-      // "winning-coverage" re-rents the SAME third slot its coverage score
-      // chose (the trio is the policy); the roll is still drawn so its RNG
+      // The coverage drafts re-rent the SAME third slot their score chose
+      // (the trio is the policy); the roll is still drawn so their RNG
       // stream stays aligned with "winning"'s at every later decision.
       const rerolledThirdPick = this.rng.int(6);
-      if (this.policy !== "winning-coverage") this.draft.picks[2] = rerolledThirdPick;
+      if (!this.coverageDraftLike) this.draft.picks[2] = rerolledThirdPick;
       return this.press("A", 8);
     }
     if (draft.mode === "cursor") {
@@ -1449,8 +1513,9 @@ export class RandomPlayer {
   }
 
   /**
-   * "winning-coverage" only: score the six offered rentals and replace the
-   * constructor's random plan with the coverage-first trio. Keyed on the
+   * "winning-coverage"/"winning-combined" only: score the six offered
+   * rentals and replace the constructor's random plan with the scored trio
+   * (pure coverage, or coverage above the strength floor). Keyed on the
    * offer itself (species + personality of all six), so a NEW round's draft
    * re-scores while every frame of the SAME draft reuses the decision --
    * including after a NO decline, which re-rents the same third pick.
@@ -1460,15 +1525,19 @@ export class RandomPlayer {
     const key = draft.rentals.map((rental) => `${rental.species}#${rental.personality}`).join("|");
     if (key === this.coverageDraftOfferKey) return;
     this.coverageDraftOfferKey = key;
-    const chosen = pickCoverageDraftPicks(draft.rentals);
+    const combined = this.policy === "winning-combined";
+    const chosen = combined
+      ? pickCombinedDraftPicks(draft.rentals)
+      : pickCoverageDraftPicks(draft.rentals);
     // `draft.rented` is deliberately NOT reset: it gates only the one-shot
     // SUMMARY peek, and resetting it would draw an extra `rng.chance` on a
     // later round's draft that "winning" never draws.
     this.draft.picks = [...chosen.picks];
+    const floorSuffix = combined ? ` floor ${(chosen as CombinedDraftPick).floor}` : "";
     this.note(
       state,
-      `draft: coverage trio ${chosen.picks.join(",")} `
-        + `(off ${chosen.score.offensive} def ${chosen.score.defensive} bst ${chosen.score.bst}) `
+      `draft: ${combined ? "combined" : "coverage"} trio ${chosen.picks.join(",")} `
+        + `(off ${chosen.score.offensive} def ${chosen.score.defensive} bst ${chosen.score.bst}${floorSuffix}) `
         + chosen.picks.map((slot) => draft.rentals[slot]!.species).join(" "),
     );
   }
@@ -2201,6 +2270,7 @@ export const DEFAULT_MAX_FRAMES_BY_POLICY: Record<SoakPolicy, number> = {
   "winning-swap": 1_000_000,
   "oracle-strength": 1_000_000,
   "winning-coverage": 1_000_000,
+  "winning-combined": 1_000_000,
 };
 
 /** An explicit `maxFrames` always wins; otherwise resolve per policy. */

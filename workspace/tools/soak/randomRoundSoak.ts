@@ -34,6 +34,11 @@
 //                      (offensive coverage, defensive diversity, base-stat
 //                      total) score instead of a random 3-of-6 -- the
 //                      lever-4' measurement instrument of the same doc)
+//                      or "winning-combined" (opt-in: "winning-coverage"
+//                      with a strength floor -- the same coverage-first
+//                      score maximised only over trios whose summed
+//                      base-stat total is >= the mean candidate trio's,
+//                      so coverage cannot field an all-frail party)
 //   --max-frames N     per-seed tick budget before reporting HANG (default: resolveMaxFrames(policy), i.e. DEFAULT_MAX_FRAMES_BY_POLICY[policy])
 //   --stall-frames N   frames of zero progress before reporting HANG (default: DEFAULT_STALL_FRAMES, i.e. 30_000 — ISSUES #104 retune)
 //   --max-rounds N     finish OK ("max-rounds") once N round decisions have been observed (default: unlimited)
@@ -78,11 +83,11 @@ function main(): void {
   if (
     policy !== "full" && policy !== "vanilla" && policy !== "winning"
     && policy !== "winning-swap" && policy !== "oracle-strength"
-    && policy !== "winning-coverage"
+    && policy !== "winning-coverage" && policy !== "winning-combined"
   ) {
     console.error(
       `bad --policy: ${policy} `
-        + `(want full|vanilla|winning|winning-swap|oracle-strength|winning-coverage)`,
+        + `(want full|vanilla|winning|winning-swap|oracle-strength|winning-coverage|winning-combined)`,
     );
     process.exit(2);
   }
