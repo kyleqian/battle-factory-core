@@ -110,6 +110,11 @@ import {
   type OctazookaState,
 } from "./octazooka.ts";
 import {
+  spikesAtAge,
+  type SpikesProfile,
+  type SpikesState,
+} from "./spikes.ts";
+import {
   mudShotAtAge,
   type MudShotState,
 } from "./mudShot.ts";
@@ -2154,6 +2159,15 @@ export interface SceneOnOctazookaConfig {
   readonly animationProfile: Readonly<OctazookaProfile>;
 }
 
+/** Spikes presentation only; its hazard side condition remains battle-owned. */
+export interface SceneOnSpikesConfig {
+  readonly move: "SPIKES";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<SpikesProfile>;
+}
+
 export interface SceneOnMudShotConfig {
   readonly move: "MUD_SHOT";
   readonly attacker: SceneOnPresentationBattler;
@@ -3206,6 +3220,7 @@ export type SceneOnMoveConfig =
   | SceneOnSonicBoomConfig
   | SceneOnSmokescreenConfig
   | SceneOnOctazookaConfig
+  | SceneOnSpikesConfig
   | SceneOnMudShotConfig
   | SceneOnHydroPumpConfig
   | SceneOnWhirlpoolConfig
@@ -3432,6 +3447,8 @@ export type SceneOnLovelyKissPresentationState =
   SceneOnMovePresentationState<SceneOnLovelyKissConfig>;
 export type SceneOnOctazookaPresentationState =
   SceneOnMovePresentationState<SceneOnOctazookaConfig>;
+export type SceneOnSpikesPresentationState =
+  SceneOnMovePresentationState<SceneOnSpikesConfig>;
 export type SceneOnAttractPresentationState =
   SceneOnMovePresentationState<SceneOnAttractConfig>;
 export type SceneOnSporePresentationState =
@@ -3719,6 +3736,11 @@ export interface SceneOnSmokescreenView extends SmokescreenEffect {
 }
 
 export interface SceneOnOctazookaView extends OctazookaState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSpikesView extends SpikesState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -6760,6 +6782,28 @@ export function sceneOnOctazookaView(
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
       state.config.animationProfile,
+    ),
+  };
+}
+
+/** `age=0` is Move_SPIKES's first retained active source row. */
+export function sceneOnSpikesView(
+  state: SceneOnSpikesPresentationState,
+): SceneOnSpikesView {
+  if (state.config.move !== "SPIKES") {
+    throw new Error(`expected SPIKES presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...spikesAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.side,
+      state.config.target.geometry.battlePositionCenter,
+      state.config.animationProfile,
+      state.config.target.geometry.animationCenter,
     ),
   };
 }

@@ -5108,11 +5108,11 @@
    "move": "MOVE_WISH",
    "status": "exact",
    "covered": [
-    "fresh complete legal challenge-0 Level-50 set-173 ILLUMISE_1 versus ONIX Scene-ON parties pass the entire 271-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 65-335 reproduce evidence 9bd713db92f51208dba4faea9916549981545a864fd50bb7761b13ae00e7077b / raw RGB 2f82ec073d7f7e52b5a513733b991ef792b374d72c9b40c535f1e42438b86488 and opponent-front frames 69-339 reproduce evidence 8c223ec57b228721dd6df2137b8597388b44d4749cd501d898ec4c4da9be2669 / raw RGB f858c38f13030f4d3a173776ee2a1319835f2089b61f8b7ac6484f12a859315d",
+    "fresh complete legal challenge-0 Level-50 set-173 ILLUMISE_1 versus ONIX Scene-ON parties pass the entire 271-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 65-335 reproduce evidence 6693ded4620cba170830aab24c8960b72577cf61e388f7bdca0ee7ae002770fd / raw RGB 2f82ec073d7f7e52b5a513733b991ef792b374d72c9b40c535f1e42438b86488 / normalized map 8fc52ed8d0f508e904533e792f90323604c817c0a48a8a4127a51056456e7917 and opponent-front frames 69-339 reproduce evidence b1ec1f23294c6ca21c8b3137ca2d0dc6a07e0ed90f0f19b086213c10bdb80443 / raw RGB f858c38f13030f4d3a173776ee2a1319835f2089b61f8b7ac6484f12a859315d / normalized map e13e9ebfd7641f931381caf5cbfd96473886e89d50bd13e954530c61d7265329",
     "the source audit proves set 173 FRONTIER_MON_ILLUMISE_1 is the lowest suitable challenge-0 Level-50 carrier and pins species 387, move 273, Quirky nature, Attack/HP spread, Liechi Berry, and complete legal source-set parties",
     "the pure source-relative reducer ports ANIM_TAG_GOLD_STARS and ANIM_TAG_SPARKLE_2 lifetime, both simple BG palette blends, gWishStarSpriteTemplate's cross-screen parabolic travel, exactly 21 gMiniTwinklingStarSpriteTemplate presentation-Random2 variants and blink programs, the literal 60-frame hold, and both GrantingStarsEffect fixed-point/frame-animation bodies",
-    "the typed Scene-ON seam carries only resolved ILLUMISE/ONIX geometry, field state, and the 21 presentation-only Random2 results without consuming or mutating gameplay RNG; source-extracted Illumise front/back, GOLD_STARS, SPARKLE_2, and shared ONIX/chrome pass software/hardware OAM, matrices, palettes/tags, registers, both audio players, raw RGB, and every production framebuffer",
-    "wishPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 271 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup; the shared Synthesis GrantingStarsEffect control remains 130/130 exact in both orientations",
+    "the typed Scene-ON seam carries resolved live species/sides/geometry, field state, and the 21 presentation-only Random2 results without consuming or mutating gameplay RNG; generic source-extracted back/front battler art and chrome plus GOLD_STARS/SPARKLE_2 pass software/hardware OAM, matrices, palettes/tags, registers, both audio players, raw RGB, and every production framebuffer without a species/evidence-pair gate",
+    "wishPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 271 immutable dense source/task/sprite/software+hardware-OAM/matrix/palette/tag/register/audio/party/engine/gameplay-RNG/animation-RNG/reducer/seam/framebuffer rows twice fresh in both orientations through first inactive cleanup; all three whole-buffer transfers are RAM+1 at 270/270 bilaterally and the shared Synthesis/Heal Bell/Refresh/Aromatherapy/Cosmic Power controls retain independent credit",
     "no Wish battle state, delayed healing outcome/timing, damage, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
    ],
    "evidence": [
@@ -5120,6 +5120,8 @@
     "tools/battle-lab/mechanic-wish-opponent-illumise-player-onix.json",
     "tools/compare/fixtures/wish-player-illumise-opponent-onix.json",
     "tools/compare/fixtures/wish-opponent-illumise-player-onix.json",
+    "tools/compare/evidence/wish-changemap-player.json",
+    "tools/compare/evidence/wish-changemap-opponent.json",
     "tools/compare/wishProbe.py",
     "tools/compare/wishPortable.ts",
     "tools/compare/wishSourceAudit.ts",
@@ -5515,6 +5517,42 @@
     "tests/animation/rolloutEvidenceCheckpoint.test.ts",
     "tests/animation/rolloutReducer.test.ts",
     "tests/animation/rolloutFramebuffer.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_SPIKES",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 FRONTIER_MON_QWILFISH_1 set-211 versus ONIX parties retain both ordinary Battle Scene ON orientations through first inactive cleanup: player-back frames 67-180 and opponent-front 71-184, 114 dense source/state/raw-RGB rows each, repeated twice fresh with byte-identical probe and raw-RGB sequence hashes",
+    "the half-open 0x082d18cd..0x082d1924 Move_SPIKES source body, even/odd pointer parities, three source creates at ages 7/19/31, target-arc args/callback/data/visibility lifecycles, affine-off OAM, tags, audio, monbg BG/register cleanup, complete OAM/matrix/palette rows, immutable engine/battler/party state, gameplay RNG=0 transitions, animation RNG=111 transitions, and first inactive cleanup are retained in independent source/evidence/change-map receipts",
+    "source entry explicitly measures predecessor outgoing hardware OAM/matrices/palette; ordinary rows have 113/113 preceding software OAM/matrix transfers and 112/113 preceding faded-palette transfers, with the age-4 monbg palette load measured as a same-row exception. No new general latch is claimed.",
+    "the pure source-relative reducer and narrow typed Scene-ON seam reproduce all 114/114 player-back plus 114/114 opponent-front retained rows: cursor/waits/args, animation RNG, three 30-callback target arcs, affine-off OAM/neutral matrices, allocator slots, blink/destroy lifecycle, tags/palette handoffs, monbg/update/cleanup task data, delayed audio, and first inactive cleanup without side-condition gameplay, damage, battle RNG, turn, or facility ownership",
+    "the ordinary shared Battle Scene ON compositor uses reproducibly extracted ANIM_TAG_SPIKES art, typed live species/sides/geometry, generic back/front art lookup, preceding OAM/matrix transfer, the measured age-4 monbg palette handoff, source signed-y/equal-Y painter order, field chrome, audio timing, and cleanup without recorded RGB/framebuffer lookup, an evidence-pair gate, or absolute ticks",
+    "all 114 player-back plus 114 opponent-front component/seam/raw-RGB/shared-production-framebuffer rows match through first inactive cleanup with zero residual pixels; the committed two-fresh Scene-ON probes remain byte-identical per orientation; MOVE_MEGAHORN and MOVE_SPIKE_CANNON retain independent regression control only and the Spikes side condition remains out of scope"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-spikes-player-qwilfish-opponent-onix.json",
+    "tools/battle-lab/mechanic-spikes-opponent-qwilfish-player-onix.json",
+    "tools/compare/fixtures/spikes-evidence.json",
+    "tools/compare/spikesSourceAudit.ts",
+    "tools/compare/spikesProbe.py",
+    "tools/compare/spikesEvidence.ts",
+    "tools/compare/evidence/spikes-player-dense-state.json.gz",
+    "tools/compare/evidence/spikes-opponent-dense-state.json.gz",
+    "tools/compare/evidence/spikes-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/spikes-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/spikes-changemap-player.json",
+    "tools/compare/evidence/spikes-changemap-opponent.json",
+    "src/animation/spikes.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/spikesReducerAudit.ts",
+    "tools/compare/extractSpikesAssets.ts",
+    "src/animation/assets/spikes.json",
+    "tools/compare/spikesFramebuffer.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/spikesEvidence.test.ts",
+    "tests/animation/spikes.test.ts",
+    "tests/animation/spikesFramebuffer.test.ts"
    ]
   }
  ],
@@ -6335,7 +6373,7 @@
     "MOVE_AROMATHERAPY",
     "MOVE_COSMIC_POWER"
    ],
-   "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 rows. MOVE_AROMATHERAPY independently proves its nine-FLOWER, green blend/monbg, StatusClearedEffect, two SparklingStars, thin-ring, and cleanup body at 400/400 player-back and 396/396 opponent-front. MOVE_REFRESH independently proves its StatusClearedEffect, two GrantingStarsEffect stars, palette restoration, and thin ring at 209/209 bilateral rows. MOVE_COSMIC_POWER independently proves its non-attacker blend, BG_COSMIC/BLDY/slide, two stars, audio, and cleanup at 241/241 bilateral rows. MOVE_HEAL_BELL independently proves its bell, twelve runtime-palette music notes, three HealBellRing groups, two SparklingStars, final blended ring, and allocator cleanup at 522/522 bilateral rows. WISH remains unsupported pending its distinct GOLD_STARS, black-BG fade, panning, WishStar, and delay acceptance. Each move remains an independent acceptance unit."
+   "goal": "Fulfilled independently by all six representatives. MOVE_SYNTHESIS proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect at 130/130 bilateral rows. MOVE_AROMATHERAPY proves its nine-FLOWER, green blend/monbg, StatusClearedEffect, two SparklingStars, thin-ring, and cleanup at 400/400 player-back and 396/396 opponent-front. MOVE_REFRESH proves its StatusClearedEffect, two GrantingStarsEffect stars, palette restoration, and thin ring at 209/209 bilateral rows. MOVE_COSMIC_POWER proves its non-attacker blend, BG_COSMIC/BLDY/slide, two stars, audio, and cleanup at 241/241 bilateral rows. MOVE_HEAL_BELL proves its bell, twelve runtime-palette music notes, three HealBellRing groups, two SparklingStars, final blended ring, and allocator cleanup at 522/522 bilateral rows. MOVE_WISH independently proves GOLD_STARS, black-BG F_PAL_BG fades, side-relative panning, WishStar, 21 mini stars, two GrantingStars, typed live geometry, and cleanup at 271/271 bilateral rows twice fresh. Each move remains an independent acceptance unit."
   },
   {
    "id": "healing-blue-star",
@@ -6506,6 +6544,18 @@
    "representatives": ["MOVE_HAIL"],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_HAIL independently passes 158/158 player-back plus 158/158 opponent-front source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows (316/316 total) through first inactive cleanup with zero residual pixels, then reproduces both retained hashes in two fresh legal Scene ON probes per orientation. Its ordinary compositor uses source-extracted Hail and shared Ice Crystal art, typed live species/sides/OAM-derived geometry, generic back/front lookup, exact hardware palette/OAM/matrix timing, source allocation/painter order, field chrome, audio timing, and cleanup without replay lookup or gameplay ownership. Rain Dance, Ice Punch, Blizzard/Icy Wind, Crabhammer, Haze, Tri Attack, and every sibling receive no credit."
+  },
+  {
+   "id": "spikes-target-arc",
+   "components": [
+    "asset:ANIM_TAG_SPIKES",
+    "sprite:gSpikesSpriteTemplate",
+    "visualCommand:monbg",
+    "visualCommand:clearmonbg"
+   ],
+   "representatives": ["MOVE_SPIKES"],
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_SPIKES independently passes 114/114 player-back plus 114/114 opponent-front source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows (228/228 total) through first inactive cleanup with zero residual pixels. The source-relative compositor uses extracted ANIM_TAG_SPIKES art, typed live species/sides/geometry, generic back/front art, predecessor OAM/matrix latches, the age-4 monbg palette handoff, source painter order, chrome, audio timing, and cleanup without RGB/framebuffer replay or hazard gameplay ownership. MOVE_MEGAHORN and MOVE_SPIKE_CANNON remain independent controls only."
   }
  ],
  "variantAudits": {

@@ -1,0 +1,131 @@
+{
+  "schema": "spikes-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SPIKES",
+  "moveId": 191,
+  "status": "exact",
+  "coverageCredit": true,
+  "coverageCounts": "Level 50: 202/276 exact, 0 partial, 74 unsupported",
+  "components": [
+    "asset:ANIM_TAG_SPIKES",
+    "sprite:gSpikesSpriteTemplate",
+    "visualCommand:monbg",
+    "visualCommand:clearmonbg"
+  ],
+  "carrier": {
+    "setId": 211,
+    "label": "FRONTIER_MON_QWILFISH_1",
+    "species": 211,
+    "item": 133,
+    "nature": "NATURE_IMPISH"
+  },
+  "source": {
+    "audit": "tools/compare/spikesSourceAudit.ts",
+    "auditSha256": "addf6038fc34e3416e067ee7b5841cd6e9e5906a15fdb0680d7cb20d22388b54",
+    "probe": "tools/compare/spikesProbe.py",
+    "probeSha256": "0352be0d676da2b4352d7f0d5067175f57ef96965b291877396a8b6aebe8ae4b",
+    "sourceBounds": {
+      "start": "0x082d18cd",
+      "endExclusive": "0x082d1924",
+      "byteLength": 87,
+      "sha256": "298cbadac0aef90b702035bcce3ab005bc05be84b312d4b9d77fd313e960929f"
+    },
+    "pointerContract": "half-open-byte-interval-with-even-and-odd-command-pointers-observed",
+    "graph": [
+      "asset:ANIM_TAG_SPIKES",
+      "sprite:gSpikesSpriteTemplate",
+      "visualCommand:monbg",
+      "visualCommand:clearmonbg"
+    ],
+    "callbacks": [
+      "AnimSpikes",
+      "AnimSpikes_Step1",
+      "WaitAnimForDuration",
+      "AnimSpikes_Step2",
+      "DestroyAnimSprite"
+    ],
+    "audio": {
+      "launch": {"soundEffect":"SE_M_JUMP_KICK","id":143,"pan":"SOUND_PAN_ATTACKER","calls":2},
+      "landing": {"soundEffect":"SE_M_HORN_ATTACK","id":166,"pan":"SOUND_PAN_TARGET","delayedCalls":3,"delay":28}
+    }
+  },
+  "evidenceScope": {
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "framebufferCompared": true,
+    "coveragePromotion": true,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-spikes-player-qwilfish-opponent-onix.json",
+      "scenarioSha256": "04ea8dada3fb685376c2762ef10cd17a4f02165c62111cfb53827e4947ce00dd",
+      "sourceWindow": {"startFrame":67,"endFrame":180,"frameCount":114},
+      "probeJsonSha256": "d3c69c750b89ff621fa5eff25c7458ec0ab9e8fce22a966d46ba7058b4d2eda8",
+      "repeatProbeJsonSha256": "d3c69c750b89ff621fa5eff25c7458ec0ab9e8fce22a966d46ba7058b4d2eda8",
+      "denseState": "tools/compare/evidence/spikes-player-dense-state.json.gz",
+      "denseStateSha256": "2bcfe6bdbbb6f2d0cb2f10f4665694630f1c53be50586659396e6171542c053d",
+      "rawRgbArchive": "tools/compare/evidence/spikes-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "e528ce20e542e27973a4ffc89f07781722681bdb2e8e5a71b61ecc5752720f7c",
+      "rawRgbSequenceSha256": "e3b36abd70dc612b61c3faabba6de271006f648fac76434007c65e676d212b6c",
+      "changeMap": "tools/compare/evidence/spikes-changemap-player.json",
+      "changeMapSha256": "278ceb9ee7253611cec02e956572adad4cb0ba6335c1ccb85ce447d9602057aa"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-spikes-opponent-qwilfish-player-onix.json",
+      "scenarioSha256": "62b1937fd87fac752f36eb5efd92794faca9ff1fed32a81d12cb9360c52ec8ba",
+      "sourceWindow": {"startFrame":71,"endFrame":184,"frameCount":114},
+      "probeJsonSha256": "c551d3a2df797ad31dfb1d12b60becffdf86f921995975a7c3cafa42f5ec3df5",
+      "repeatProbeJsonSha256": "c551d3a2df797ad31dfb1d12b60becffdf86f921995975a7c3cafa42f5ec3df5",
+      "denseState": "tools/compare/evidence/spikes-opponent-dense-state.json.gz",
+      "denseStateSha256": "4415e326fb87142a518ca6f4554a9b2166a9848e90c6dc036ab4bd92e71be0b6",
+      "rawRgbArchive": "tools/compare/evidence/spikes-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "4730f42e00517505671d451e4f42b53f265b0950c1edd91a41c3e34a9796a59e",
+      "rawRgbSequenceSha256": "14d80f0ec513a221e3651406497b5631d9815f7902e3058b62842802fca8d132",
+      "changeMap": "tools/compare/evidence/spikes-changemap-opponent.json",
+      "changeMapSha256": "893a59dd003f3640ae756837f2ad472381f21120706e3ee5b2e904cb6a5f7310"
+    }
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "sourceRows": "114/114 + 114/114",
+    "rawRgbRows": "114/114 + 114/114",
+    "observedPointerParities": [0,1],
+    "spikeCreatesPerOrientation": 3,
+    "sourceCreationAges": [7,19,31],
+    "sourceDestroyAges": [84,96,108],
+    "oamLatch": "113/113 preceding-software rows per orientation; source entry is predecessor outgoing OAM",
+    "matrixLatch": "113/113 preceding-software rows per orientation; source entry is predecessor outgoing matrices",
+    "paletteLatch": "112/113 preceding-faded rows per orientation; age 4 monbg setup uses current faded palette",
+    "gameplayRngTransitions": 0,
+    "animationRngTransitions": 111,
+    "firstInactiveCleanupAge": 113,
+    "affine": "off-only; no fresh-affine credit",
+    "reducerRows": 228,
+    "typedSeamRows": 228,
+    "productionFramebufferRows": 228,
+    "framebufferCompared": true
+  },
+  "repeatability": {
+    "runsPerOrientation": 2,
+    "comparison": "byte-identical dense JSON and every raw RGB frame",
+    "allMatched": true
+  },
+  "controls": {
+    "megahorn": "adjacent source-boundary control only; no shared acceptance",
+    "spikeCannon": "name-neighbor control only; no shared acceptance",
+    "hazardOwnership": "Spikes side-condition gameplay remains outside this animation evidence checkpoint"
+  },
+  "productionAcceptance": {
+    "reducerRows": "114/114 + 114/114",
+    "typedSeamRows": "114/114 + 114/114",
+    "productionFramebufferRows": "114/114 + 114/114",
+    "productionFramebufferResidualPixels": 0,
+    "manualQueue": null
+  }
+}

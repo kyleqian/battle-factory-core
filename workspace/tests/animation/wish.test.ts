@@ -5,6 +5,11 @@ import {
   wishAtAge,
   type WishTwinkleVariant,
 } from "../../src/animation/wish.ts";
+import {
+  createSceneOnMovePresentation,
+  type SceneOnWishConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render } from "../../src/engine/core.ts";
 
 const twinkles: WishTwinkleVariant[] = Array.from(
   { length: 21 },
@@ -54,5 +59,38 @@ describe("MOVE_WISH source reducer", () => {
     expect(output).toContain(
       "Meteor Mash remains distinct: BG_COSMIC, spinning stars, IMPACT",
     );
+  });
+
+  it("uses typed sides and generic battler art without an evidence-pair gate", () => {
+    const stage = createSceneOnMovePresentation<SceneOnWishConfig>({
+      move: "WISH",
+      attacker: {
+        species: "ARON",
+        geometry: {
+          side: "player", spriteCorner: { x: 40, y: 54 },
+          animationCenter: { x: 72, y: 94 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "GROVYLE",
+        geometry: {
+          side: "opponent", spriteCorner: { x: 144, y: 16 },
+          animationCenter: { x: 176, y: 48 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 100, playerMaxHp: 100,
+        opponentHp: 100, opponentMaxHp: 100,
+        playerGender: "male", opponentGender: "male",
+      },
+      twinkles,
+    });
+    const framebuffer = render({
+      ...createInitialState(), rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age: 50 },
+    });
+    expect(framebuffer).toHaveLength(240 * 160 * 4);
   });
 });
