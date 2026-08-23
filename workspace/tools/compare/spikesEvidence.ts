@@ -35,7 +35,7 @@ function taskRanges(rows: readonly Json[], name: string): readonly [number, numb
       else { current = [age, age]; ranges.push(current); }
     }
   }
-  return ranges.toSorted((left, right) => left[0] - right[0]);
+  return [...ranges].sort((left, right) => left[0] - right[0]);
 }
 
 function rgbMembers(path: string, rows: readonly Json[]): Buffer[] {
