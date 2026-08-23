@@ -2051,7 +2051,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     });
   });
 
-  it("persists accepted swaps exactly once on completion and never on loss", () => {
+  it("persists rentsCount once per accepted swap paid at its next win, and never on loss", () => {
     const accepted = driveGeneratedRoundToCompletion(
       17,
       undefined,
@@ -2061,7 +2061,11 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       14,
     );
     expect(accepted.round.rules.phase).toBe("roundComplete");
-    expect(accepted.facilityState.rentsCount).toBe(15);
+    // Retail pays a swap accepted after battle k at battle k+1's WIN
+    // (EventScript_DefeatedOpponent increments unconditionally every win;
+    // SetBattleFactoryData commits only while sPerformedRentalSwap == TRUE).
+    // Two accepted swaps (after battles 0 and 1) -> +2, not +1.
+    expect(accepted.facilityState.rentsCount).toBe(16);
     expect(accepted.performedRentalSwap).toBe(false);
     const completion = {
       commandId: accepted.round.presentation!.command.commandId,
@@ -2074,8 +2078,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       acknowledged,
       completion,
     );
-    expect(acknowledged.facilityState.rentsCount).toBe(15);
-    expect(acknowledgedAgain.facilityState.rentsCount).toBe(15);
+    expect(acknowledged.facilityState.rentsCount).toBe(16);
+    expect(acknowledgedAgain.facilityState.rentsCount).toBe(16);
 
     const declined = driveGeneratedRoundToCompletion(17, undefined, undefined, 14);
     expect(declined.round.rules.phase).toBe("roundComplete");
