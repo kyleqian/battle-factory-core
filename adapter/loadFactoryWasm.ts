@@ -45,6 +45,21 @@ export interface FactoryWasmExports {
     ability_slot: number,
     ot_id: number,
   ): number;
+  /**
+   * `fw_create_factory_party_member` with an explicit six-IV spread — the
+   * one `CreateBoxMon`'s random-IV branch rolls (`pokemon.c:2273-2294`) —
+   * instead of a uniform fixed IV. Returns the SAME buffer layout.
+   * `ivs_packed` is the GBA's own `MON_DATA_IVS` word (`pokemon.c:3997-4004`):
+   * `hp | attack << 5 | defense << 10 | speed << 15 | sp_attack << 20 |
+   * sp_defense << 25`; every field is masked to five bits on unpack.
+   */
+  fw_create_factory_party_member_with_ivs(
+    set_id: number,
+    personality: number,
+    ivs_packed: number,
+    ability_slot: number,
+    ot_id: number,
+  ): number;
   /** `IS_TYPE_PHYSICAL(moveType)`; `move_type` truncates to u8 (0..17). Returns 0/1. */
   fw_is_type_physical(move_type: number): number;
   /** `IS_TYPE_SPECIAL(moveType)`; same `move_type` contract. Returns 0/1. */
