@@ -70,8 +70,8 @@ describe("animation coverage ledger", () => {
         total: 276,
         unsupported: 73,
         staged: 0,
-        partial: 1,
-        exact: 202,
+        partial: 0,
+        exact: 203,
       },
       {
         tier: "openOnly",
@@ -95,7 +95,6 @@ describe("animation coverage ledger", () => {
   it("keeps the manual acceptance queue inside Level 50 coverage", () => {
     const queue = queuedAnimationMoves();
     expect(queue.map(({ move, status }) => ({ move, status }))).toEqual([
-      { move: "MOVE_TEETER_DANCE", status: "partial" },
     ]);
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,

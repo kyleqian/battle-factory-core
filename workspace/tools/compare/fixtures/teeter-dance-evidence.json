@@ -63,7 +63,7 @@
   "reducer": {
     "module": "src/animation/teeterDance.ts",
     "sourceRows": "338/338 component rows",
-    "rawFramebufferResidual": "not yet accepted as exact; generic seam is wired for follow-up framebuffer verification"
+    "rawFramebufferResidual": "338/338 shared production rows exact; zero residual pixels"
   },
   "assetExtractor": "tools/compare/extractTeeterDanceAssets.ts",
   "assetSha256": "1be83e760b6d6fb063e4eef594bfd860493d023485beb5f129dcb54ff2259a43",

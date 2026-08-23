@@ -85,11 +85,11 @@ describe("MOVE_SPIKES bilateral dense evidence checkpoint", () => {
 
   it("records MOVE_SPIKES alone as exact and fulfills its non-exclusive component track", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(202);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(203);
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "partial"))
-      .toEqual([expect.objectContaining({ move: "MOVE_TEETER_DANCE", status: "partial" })]);
+      .toEqual([]);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SPIKES")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual(["MOVE_TEETER_DANCE"]);
+    expect(coverage.queue).toEqual([]);
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "spikes-target-arc")).toEqual({
       id: "spikes-target-arc", representatives: ["MOVE_SPIKES"],
       components: ["asset:ANIM_TAG_SPIKES", "sprite:gSpikesSpriteTemplate", "visualCommand:monbg", "visualCommand:clearmonbg"],
