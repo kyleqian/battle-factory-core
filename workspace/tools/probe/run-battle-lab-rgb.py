@@ -81,6 +81,7 @@ def main() -> None:
     lightning_template = oracle.symbols["gLightningSpriteTemplate"]
     speed_dust_template = oracle.symbols["gSpeedDustSpriteTemplate"]
     knock_off_strike_template = oracle.symbols["gKnockOffStrikeSpriteTemplate"]
+    sweet_scent_petal_template = oracle.symbols["gSweetScentPetalSpriteTemplate"]
     battle_mons = oracle.symbols["gBattleMons"]
     battler_sprite_ids = oracle.symbols["gBattlerSpriteIds"]
     pltt_unfaded = oracle.symbols["gPlttBufferUnfaded"]
@@ -188,6 +189,7 @@ def main() -> None:
         lightning_sprites = []
         speed_dust_sprites = []
         knock_off_strike_sprites = []
+        sweet_scent_petal_sprites = []
         for slot in range(64):
             base = sprites + slot * 0x44
             if not (oracle.read_u8(base + 0x3E) & 1):
@@ -237,6 +239,8 @@ def main() -> None:
                 speed_dust_sprites.append(feather_record(slot))
             elif template == knock_off_strike_template:
                 knock_off_strike_sprites.append(feather_record(slot))
+            elif template == sweet_scent_petal_template:
+                sweet_scent_petal_sprites.append(feather_record(slot))
         sand_attack_dirt_oam = []
         if sand_attack_dirt_sprites:
             dirt_base = sprites + sand_attack_dirt_sprites[0]["slot"] * 0x44
@@ -304,6 +308,7 @@ def main() -> None:
                 "lightningSprites": lightning_sprites,
                 "speedDustSprites": speed_dust_sprites,
                 "knockOffStrikeSprites": knock_off_strike_sprites,
+                "sweetScentPetalSprites": sweet_scent_petal_sprites,
                 "bg3X": s16(oracle.symbols["gBattle_BG3_X"]),
                 "bg3Y": s16(oracle.symbols["gBattle_BG3_Y"]),
                 "bg3cnt": u16(0x0400000E),

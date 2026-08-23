@@ -6625,6 +6625,18 @@
    "representatives": ["MOVE_SPIKES"],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_SPIKES independently passes 114/114 player-back plus 114/114 opponent-front source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows (228/228 total) through first inactive cleanup with zero residual pixels. The source-relative compositor uses extracted ANIM_TAG_SPIKES art, typed live species/sides/geometry, generic back/front art, predecessor OAM/matrix latches, the age-4 monbg palette handoff, source painter order, chrome, audio timing, and cleanup without RGB/framebuffer replay or hazard gameplay ownership. MOVE_MEGAHORN and MOVE_SPIKE_CANNON remain independent controls only."
+  },
+  {
+   "id": "pink-petal-sweet-scent",
+   "components": [
+    "asset:ANIM_TAG_PINK_PETAL",
+    "sprite:gSweetScentPetalSpriteTemplate",
+    "subroutine:SweetScentEffect",
+    "visualCommand:blend_color_cycle"
+   ],
+   "representatives": ["MOVE_SWEET_SCENT"],
+   "fulfilled": false,
+   "goal": "PARTIAL: MOVE_SWEET_SCENT has a source-relative 166-row reducer, typed bilateral Scene-ON seam, legal WEEPINBELL carrier, and complete three-mon stages in both orientations. The source interval, 24 expanded petal creations, 13-petal peak, and first inactive cleanup are pinned. Dense twice-fresh script/task/sprite/OAM/matrix/palette/tag/register/audio/immutable/RNG state, raw RGB/change maps, source art, and zero-residual production framebuffer comparison remain before this move or the track can promote; no sibling credit is claimed."
   }
  ],
  "variantAudits": {

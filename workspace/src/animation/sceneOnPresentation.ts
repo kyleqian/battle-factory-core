@@ -897,6 +897,11 @@ import {
   type SweetKissState,
 } from "./sweetKiss.ts";
 import {
+  sweetScentAtAge,
+  type SweetScentProfile,
+  type SweetScentState,
+} from "./sweetScent.ts";
+import {
   lovelyKissAtAge,
   type LovelyKissProfile,
   type LovelyKissState,
@@ -2561,6 +2566,16 @@ export interface SceneOnSweetKissConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Sweet Scent presentation only; evasion-stage mutation remains battle-owned. */
+export interface SceneOnSweetScentConfig {
+  readonly move: "SWEET_SCENT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source-selected allocation facts; no species or pair is encoded. */
+  readonly animationProfile: Readonly<SweetScentProfile>;
+}
+
 /** Lovely Kiss presentation only; sleep/status mutation remains battle-owned. */
 export interface SceneOnLovelyKissConfig {
   readonly move: "LOVELY_KISS";
@@ -3289,6 +3304,7 @@ export type SceneOnMoveConfig =
   | SceneOnYawnConfig
   | SceneOnRoarConfig
   | SceneOnSweetKissConfig
+  | SceneOnSweetScentConfig
   | SceneOnLovelyKissConfig
   | SceneOnAttractConfig
   | SceneOnSporeConfig
@@ -3479,6 +3495,8 @@ export type SceneOnRoarPresentationState =
   SceneOnMovePresentationState<SceneOnRoarConfig>;
 export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
+export type SceneOnSweetScentPresentationState =
+  SceneOnMovePresentationState<SceneOnSweetScentConfig>;
 export type SceneOnLovelyKissPresentationState =
   SceneOnMovePresentationState<SceneOnLovelyKissConfig>;
 export type SceneOnOctazookaPresentationState =
@@ -7563,6 +7581,11 @@ export interface SceneOnSweetKissView extends SweetKissState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnSweetScentView extends SweetScentState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnLovelyKissView extends LovelyKissState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -7585,6 +7608,25 @@ export function sceneOnSweetKissView(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_SWEET_SCENT's first active source-script frame. */
+export function sceneOnSweetScentView(
+  state: SceneOnSweetScentPresentationState,
+): SceneOnSweetScentView {
+  if (state.config.move !== "SWEET_SCENT") {
+    throw new Error(`expected SWEET_SCENT presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sweetScentAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.animationProfile,
     ),
   };
 }

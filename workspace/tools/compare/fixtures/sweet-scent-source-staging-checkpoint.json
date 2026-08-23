@@ -1,0 +1,56 @@
+{
+  "schema": "sweet-scent-source-staging-checkpoint/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SWEET_SCENT",
+  "status": "unsupported-source-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "symbols": {
+      "Move_SWEET_SCENT": "0x082d4c86",
+      "SweetScentEffect": "0x082d4cca",
+      "Move_HYPER_BEAM": "0x082d4d70"
+    },
+    "interval": { "start": "0x082d4c86", "endExclusive": "0x082d4d70", "bytes": 234 },
+    "directCreates": 13,
+    "effectCreates": 11,
+    "expandedCreates": 24,
+    "components": [
+      "asset:ANIM_TAG_PINK_PETAL",
+      "sprite:gSweetScentPetalSpriteTemplate",
+      "subroutine:SweetScentEffect",
+      "visualCommand:blend_color_cycle"
+    ]
+  },
+  "lowestLevel50Carrier": {
+    "setId": 165,
+    "label": "FRONTIER_MON_WEEPINBELL_1",
+    "species": "SPECIES_WEEPINBELL"
+  },
+  "orientations": [
+    {
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-sweet-scent-player-surskit-opponent-onix.json"
+    },
+    {
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-sweet-scent-opponent-surskit-player-onix.json"
+    }
+  ],
+  "reducer": {
+    "sourceRelativeRows": 166,
+    "firstInactiveAge": 165,
+    "peakLivePetals": 13,
+    "resourcesCleanup": true,
+    "typedLiveSpeciesSideGeometrySeam": true
+  },
+  "evidence": {
+    "stagedBothOrientations": true,
+    "freshOracleRuns": 1,
+    "denseStateRetained": false,
+    "rawRgbRetained": false,
+    "normalizedChangeMapsRetained": false,
+    "productionFramebufferCompared": false,
+    "zeroResidual": false
+  },
+  "blocker": "The source interval, legal carrier, bilateral complete-party stages, and a first Scene-ON petal trace are recorded. Dense consecutive script/task/sprite/OAM/matrix/palette/tag/register/audio/immutable/RNG rows, raw RGB, normalized change maps, second-fresh replay, source-art extraction, and production-framebuffer comparison remain; MOVE_SWEET_SCENT stays unsupported and no coverage credit is claimed."
+}
