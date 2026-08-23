@@ -29,3 +29,9 @@ fixes removed crashes, they did not move the policy's ceiling — see
 every policy's first round is the anchor draft, so "carry ≥ 7 = 100%" is anchor-biased; transcript
 round tables cannot tell a battle-7 loss from a round win — the driver's `maxCarriedWinStreak`
 is the carry source of record.
+
+**Post-wind-down addendum (final tree `2dc691ae`):** `winning --start-carry 28` seeds 60:150 → 90/90 OK
+(all at carry ≥ 28 by construction); `winning-swap` seeds 360:520 → 160/160 OK (carry ≥ 28 in 8/160).
+Session totals: 1,200 + 400 + 250 = **1,850 seeded continuous-play runs on this session's trees; the only
+crashes were the four fixed today (#102/#108/#112/#113 at start, #119 mid-session) and #118's
+challengeNum-8 guard.**

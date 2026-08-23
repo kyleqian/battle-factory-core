@@ -47,7 +47,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   first), 0 regressions folded. `check-oracle-freshness.sh` FAIL judged
   client-only (PAPERCUTS hit 8). Both sibling supervisors were live all
   session; `animation-main`/`rust-main` delta at close: 0 / 0 (both folded: `b2e453c4` animation +2 Hail exact; `2945bc78` rust +6 core-rs leaves).
-  DEFERRED.md: none open.
+  DEFERRED.md: none open. **Addendum 17:40:** two more discovery sweeps on
+  the final tree — `winning --start-carry 28` 60:150 **90/90 OK** (90 more
+  challenge-5 boots), `winning-swap` 360:520 **160/160 OK** — no new signature.
 
 ---
 
