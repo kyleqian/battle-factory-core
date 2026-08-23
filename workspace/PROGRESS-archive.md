@@ -1,3 +1,22 @@
+## 1383 — [main worker, 2026-08-22] **new opt-in `winning-swap` soak policy exercises the Factory swap screen at real carried-streak depth for the first time — 0:120 sweep clean, 0 CRASH/HANG**
+
+- **State:** master `7f89b708` + this docs commit. `npm test` 1095/10227
+  passed, build green, smoke 444/444, ratchet unchanged (no `src/` touch).
+- **Did:** `winning-swap`: identical to `winning` except it accepts every
+  swap offer then scores rentals/opponent mons and swaps the worst rental
+  for the best outscoring opponent mon. `winning` 0:10 byte-identical
+  before/after; 5 new pins. Sweep (6×20 chunks, not 4×30 — 30-seed chunks
+  exceed this tool's 600s/call cap): **120/120 OK, 0 CRASH, 0 HANG**, carry
+  ≥ 28 in 5/120 — `docs/soak-winning-swap-0-120-2026-08-22.md`. Fixed 2
+  stale doc comments claiming the withheld `pickWinningDraftPicks` (1380)
+  was merged.
+- **Next:** no crashes found, no ISSUES entries needed.
+- **Notes:** no new papercuts.
+
+---
+
+---
+
 ## 1382 — [supervisor fold, 2026-08-22 15:00] **#117 FIXED + folded (`521ae499`: record-menu arrow redraw lags the cursor flip by one tick; `loss-terminal-record-cursor-off` 80/80, yes-path 133/133 re-run by the supervisor); #71 Slice C found already done (1381, stale ISSUES text); final-tree `full` 0:240 → 240/240 OK**
 
 - **State:** master = 1381 + merge of `worker/side-20260822-141940`. Merged-

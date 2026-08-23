@@ -5,6 +5,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1386 — [supervisor wind-down, 2026-08-22 17:10] **Post-M-B crash burn-down: 14 worker rounds, queue to zero; final engine sweeps `full` 0:480 + `winning` 0:480 + `vanilla` 0:240 all clean; two new opt-in soak instruments (`winning-swap`, `--start-carry`) opened the swap screen and challenge 5-8 tiers to soak — #119 (swapped-party forced switch) fixed same session (`d41bc58c`), #118 remainder is a TS+Rust coupled port; animation + rust lanes folded**
+
+- **Final gates (supervisor-independent, final tree `2dc691ae` + this docs commit):** full `npm test`
+  **1,099 files / 10,242 passed / 223 skipped**; `npm run build` green; rust fold: cargo 79/79 result blocks (1,020 tests, exit 0; a first pass's exit code was the pipe's, re-run properly), wasm rebuilt
+  (`build-wasm.sh`, 505,163 B, sha 6c59da9e…), `POKEBENCH_ENGINE=wasm` parity 18 files **803/803**; animation
+  fold `b2e453c4` (+2, Hail exact, coverage 201/276); soak gates on the final
+  tree: vanilla 0:20 **20/20 OK**, full 0:60 **60/60 OK** (+ winning-swap 0:20 20/20). Session-scale sweeps
+  (`docs/soak-final-tree-sweeps-2026-08-22.md`): full 0:480 **480/480**,
+  winning 0:480 **480/480** (carry ≥ 28 18/480 = 3.75%), vanilla 0:240
+  240/240, winning-swap 0:360 359/360 (#119), --start-carry 28/35/42 sweeps
+  157/160 (3 × #118).
+- **Closed this session (each red-verified pin + supervisor re-run):** #102
+  (both halves: PARTY_SIZE switch-in fallback `5cc52595`; Future Sight/Perish
+  Song cursor `a6deb814` — new shared fields `wishPerishSongState/BattlerId`),
+  #104 (YES-branch message, trace 133/133), #106/#107/#108 (string-resolver
+  class closed by census), #110, #111 (rentsCount reset on loss), #112
+  (forced send-out display resume), #113 (`Cmd_getexp` writes
+  `gBattlerFainted`), #115 (post-switch names), #117 (record-cursor tick).
+  Filed: #109, #114 (doubles-era), #116 (`vanilla` is one trajectory — gate
+  semantics are the user's call), #118 (retail `sFixedIVTable[8]` = {110,0}
+  pinned from ROM; port blocked on the wasm parity coupling — needs a
+  coordinated TS + Rust step, see the entry), #119 was found by the new `winning-swap` instrument (seed 130) and CLOSED the same hour (`d41bc58c`: `BattleScript_HandleFaintedMon` may ask the player twice in one script run — replacement faints to its own side's Spikes, `battle_scripts_1.s:3427-3431`; pin `tests/forcedSwitchSecondChoiceIssue119.test.ts`).
+- **Findings:** the carry-28 ceiling is the challenge-5 AI tier, not an
+  instrument cap (4M-frame probe; but from a carry-42 boot `winning` DOES win
+  rounds — the wall is the challenge-4/5 rental-vs-opponent matchup, worth a
+  look when policy strength matters again); first-round win rates are
+  anchor-biased; draft-by-strength heuristic WITHHELD for good (n=180, ≥ 21
+  40 vs 7; `wip/mb-step2b-draft-heuristic` @ `1f500a92` is the record).
+- **Next session:** (1) #118 port as ONE coupled step
+  (TS rental/opponent/brain IV readers + `CreateBoxMon` two-draw random IVs
+  + Rust clamp/draws + `factory-wasm` ledger layout + `build-wasm.sh`) —
+  brief it with the rust supervisor or as a rust-lane worker from this
+  lane's side worktree; then re-run `--start-carry 42/49`; (2) #116 awaits
+  the user; (3) the `vanilla`/`full` standing gates are unchanged in
+  meaning — consider adding `winning 0:60` and `winning-swap 0:60` to the
+  wind-down gate list (they are the only seed-diverse deep coverage).
+- **Notes:** 14 worker rounds (9 ts + 5 side; 3 Opus diagnostics), 2
+  cap-kills salvaged by the supervisor (#111 part B, #115), 1 stale-premise
+  brief (#71 Slice C was already done — grep the archive for the slice name
+  first), 0 regressions folded. `check-oracle-freshness.sh` FAIL judged
+  client-only (PAPERCUTS hit 8). Both sibling supervisors were live all
+  session; `animation-main`/`rust-main` delta at close: 0 / 0 (both folded: `b2e453c4` animation +2 Hail exact; `2945bc78` rust +6 core-rs leaves).
+  DEFERRED.md: none open.
+
+---
+
 ## 1385 — [main worker, 2026-08-22] **ISSUES #118 half-landed: `sFixedIVTable`'s retail one-past-the-end row is now pinned ROM data (`{110, 0}`); the engine port itself is blocked on a core-rs/factory-wasm lockstep change and is NOT in**
 
 - **State:** master `9aaf1997` + this docs commit. `npm test` 1093/1140
@@ -61,21 +107,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no new papercuts.
 
 ---
-
-## 1383 — [main worker, 2026-08-22] **new opt-in `winning-swap` soak policy exercises the Factory swap screen at real carried-streak depth for the first time — 0:120 sweep clean, 0 CRASH/HANG**
-
-- **State:** master `7f89b708` + this docs commit. `npm test` 1095/10227
-  passed, build green, smoke 444/444, ratchet unchanged (no `src/` touch).
-- **Did:** `winning-swap`: identical to `winning` except it accepts every
-  swap offer then scores rentals/opponent mons and swaps the worst rental
-  for the best outscoring opponent mon. `winning` 0:10 byte-identical
-  before/after; 5 new pins. Sweep (6×20 chunks, not 4×30 — 30-seed chunks
-  exceed this tool's 600s/call cap): **120/120 OK, 0 CRASH, 0 HANG**, carry
-  ≥ 28 in 5/120 — `docs/soak-winning-swap-0-120-2026-08-22.md`. Fixed 2
-  stale doc comments claiming the withheld `pickWinningDraftPicks` (1380)
-  was merged.
-- **Next:** no crashes found, no ISSUES entries needed.
-- **Notes:** no new papercuts.
-
----
-
