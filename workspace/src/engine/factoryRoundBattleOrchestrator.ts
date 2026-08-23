@@ -1229,8 +1229,21 @@ function finishBattle(
     playerKernelParty,
     opponentKernelParty,
   });
-  const persistRentalSwap = round.rules.phase === "roundComplete"
-    && state.performedRentalSwap;
+  // EventScript_DefeatedOpponent (BattleFrontier_BattleFactoryBattleRoom/
+  // scripts.inc:92-97) increments FACTORY_DATA_WIN_STREAK_SWAPS on every
+  // defeated opponent (skipped only at MAX_STREAK==9999), independent of
+  // performedRentalSwap. SetBattleFactoryData (battle_factory.c:259-265)
+  // commits that value into save data, and clears sPerformedRentalSwap,
+  // only while sPerformedRentalSwap == TRUE. So a swap accepted after
+  // battle k is paid (and the flag cleared) at battle k+1's win, and at
+  // MAX_STREAK neither the increment nor the clear happens. A loss ends
+  // the challenge before either script runs; the chaining reset owns
+  // that case (factoryRoundChaining.ts:72), not this reducer.
+  const persistRentalSwap = (
+    round.rules.phase === "presentingBattleWin" || round.rules.phase === "roundComplete"
+  )
+    && state.performedRentalSwap
+    && state.facilityState.rentsCount < 9_999;
   const roundOutcome = round.rules.phase === "roundComplete" || round.rules.phase === "roundLost"
     ? factoryRoundOutcomeForResolution(
       state.config,
@@ -1243,7 +1256,7 @@ function finishBattle(
     ...state,
     facilityState: persistRentalSwap
       ? Object.freeze({
-        rentsCount: Math.min(9_999, state.facilityState.rentsCount + 1),
+        rentsCount: state.facilityState.rentsCount + 1,
       })
       : state.facilityState,
     performedRentalSwap: persistRentalSwap ? false : state.performedRentalSwap,
