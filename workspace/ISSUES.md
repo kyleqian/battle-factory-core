@@ -17,22 +17,21 @@ backlog.
 
 # Open
 
-## #118 — challengeNum 8 rental generation still throws: the retail `sFixedIVTable` overread is now pinned data, but the engine port has not landed
+## #118 — challengeNum 8 rental generation: core-rs is ported (commit 1 landed); the wasm rebuild + TypeScript half (commit 2) is still open
 
-**Found 2026-08-22**, ROM evidence landed 2026-08-22 (`9aaf1997`). A player
-who wins an 8th consecutive round (`factoryWinStreak >= 56`) reaches
-challengeNum 8 and hits `factoryRentalGeneration.ts`'s
-`challengeNum > 7` throw. Reachable in ~5% of `--policy winning
---start-carry 42` seeds (3/60: 2, 32, 49; `docs/soak-start-carry-2026-08-22.md`).
-Deterministic repro: `--policy winning --start-carry 42 --seed 2
---render-every 0`.
+**Found 2026-08-22.** A player who wins an 8th consecutive round
+(`factoryWinStreak >= 56`) reaches challengeNum 8 and hits
+`factoryRentalGeneration.ts`'s `challengeNum > 7` throw. Reachable in ~5% of
+`--policy winning --start-carry 42` seeds (3/60: 2, 32, 49;
+`docs/soak-start-carry-2026-08-22.md`). Deterministic repro:
+`--policy winning --start-carry 42 --seed 2 --render-every 0`.
 
-**Resolved — what retail actually does** (all of this is now pinned; no
-research left):
+**Retail semantics — settled, no research left** (each citation re-read
+2026-08-22 when commit 1 landed):
 - `GetFactoryMonId` (`battle_factory.c:829-866`) clamps every challenge
   `>= 7` to range row 7 and *ignores* `useBetterRange` there, so there is no
   out-of-bounds range read. `getLevel50FactoryRentalRange` already mirrors
-  this exactly.
+  this exactly — **do not touch range selection**.
 - `GetFactoryMonFixedIV` (`:739-757`) is the only OOB. Its non-BUGFIX bound
   check is `challengeNum > ARRAY_COUNT(sFixedIVTable)` — STRICTLY greater —
   so IV argument exactly 8 is unclamped and reads `sFixedIVTable[8]`, while
@@ -41,57 +40,90 @@ research left):
   1`, `battle_factory_screen.c:1762`, i.e. any `rentsCount >= 15`), and
   challengeNum 6 Frontier Brain parties (`challengeNum + 2`, `:772`).
 - Row 8 is **`{regular: 110, lastBattle: 0}`** — the two `.rodata` bytes
-  after the table, which are `sInitialRentalMonRanges[0][0]` (little-endian
-  FRONTIER_MON_GRIMER). Committed as
-  `factory-round-policy.json`'s ninth `fixedIvs` row with
-  `"retailOverread": true`; ROM-byte receipt in
+  after the table. Committed as `factory-round-policy.json`'s ninth
+  `fixedIvs` row with `"retailOverread": true`; ROM-byte receipt in
   `tests/factoryFixedIvTableRomBytes.test.ts`. 110 >= `USE_RANDOM_IVS` (32)
   so `CreateBoxMon` rolls random IVs; `lastBattle` 0 means the *last*
   trainer of such a round gets an all-zero IV spread.
-- Random-IV branch order (`CreateBoxMon`, `pokemon.c`): personality
-  (`Random32`, already ported) → OT (no draw for `OT_ID_PRESET`) → two
-  `Random()` calls, the first supplying HP/ATK/DEF and the second
-  SPEED/SPATK/SPDEF as consecutive 5-bit fields of the u16.
-- `RentalMon.ivs` is the saved **ATK IV**, not the fixedIV argument
-  (`battle_factory_screen.c:1824`, `battle_factory.c:396`), so the port's
-  `fixedIv` field keeps its meaning under a random spread.
+- Random-IV branch (`CreateBoxMon`, `pokemon.c:2265-2295`): the accepted
+  personality is passed in (no draw) and `OT_ID_PRESET` reads `fixedOtId`
+  (no draw), so exactly **two `Random()` words** follow each rental's
+  ACCEPTED personality pair in the same stream — first word
+  hp/attack/defense, second speed/spAttack/spDefense, five bits each
+  (`MAX_IV_MASK` 31). A fixed IV < 32 draws nothing and gives six equal IVs.
+- `RentalMon.ivs` is the saved **ATK IV** (`battle_factory_screen.c:1824`).
 
-**Still open — the port, which must land in lockstep with core-rs.** A TS-only
-fix is not committable: `tests/factoryRentalParity.test.ts` compares the full
-`drawLedger` and RNG cursor against `factory-wasm`, and 64 of its 288 configs
-(`winStreak=49`, `rentsCount` 20/100 → better-range → IV argument 8) currently
-expect *both* engines to throw. The port therefore needs, in one commit:
-`get_level50_initial_rental_fixed_iv`'s retail clamp + the two IV draws in
-`core-rs/crates/factory-core/src/rental_generation.rs`, new
-`Phase::RandomIvs` / `Purpose::RandomIvsLow|High` discriminants, whatever the
-`factory-wasm` binary record/ledger layout needs
-(`core-rs/crates/factory-wasm/src/lib.rs:169-263` documents the byte offsets;
-its snapshot tests assert them), the matching decode in
-`core-rs/adapter/factoryEngine.ts`, and a `core-rs/build-wasm.sh` rebuild —
-alongside the TS changes (remove the throw, retail clamp in
-`getLevel50InitialRentalFixedIv`, six real IVs threaded through
-`FactoryCorpusPartyInstance` so `factoryCorpusParty.ts`'s
-`uniformBattleScriptIvs(fixedIv)` is not asked to describe a random spread).
-The three engine readers of `fixedIvs` are currently bounded to the 8
-*declared* rows (`DECLARED_FIXED_IV_ROWS`) so the new data row is inert until
-that lands. Sized at more than one bounded worker step.
+**Commit 1 — LANDED (core-rs only, `5b51eac5`).** `FIXED_IVS` carries the
+ninth row; `get_level50_initial_rental_fixed_iv` is total (retail's clamp,
+never `None`); `Phase::RandomIvs` + `Purpose::RandomIvsLow|High` and the two
+ledgered draws exist; `RentalRecord` gained `ivs: [u8; 6]`;
+`GenerationError` and both its variants are gone (`generate_initial_factory_rentals`
+returns `GenerationResult` directly); `mon_construction` gained
+`create_factory_corpus_party_member_with_ivs`. The shipped `.wasm` was
+deliberately NOT rebuilt, so the TS engine and the committed binary both
+still throw at IV argument 8 and `factoryRentalParity.test.ts` is green
+unchanged. cargo 1,027 passed; `npm test` 10,242 with zero TS edits.
 
-**Queue setup (2026-08-22, user-approved next step — this is the first work
-item of the next supervisor session).** A green two-commit ladder that
-respects both the lockstep constraint and per-commit greenness:
-1. **Commit 1 (Rust-only, tree stays green):** the core-rs changes —
-   `get_level50_initial_rental_fixed_iv` retail clamp, the two IV draws in
-   `rental_generation.rs`, the new `Phase::RandomIvs` /
-   `Purpose::RandomIvsLow|High` discriminants, the `factory-wasm`
-   record/ledger layout + its snapshot-test updates — WITHOUT rebuilding the
-   shipped wasm binary. Cargo suite green; the TS suite never sees the
-   change (the committed `.wasm` still throws, TS still throws, parity still
-   agrees).
-2. **Commit 2 (the lockstep commit):** `build-wasm.sh` rebuild + the
-   `core-rs/adapter/factoryEngine.ts` decode + every TS-side change (remove
-   the throw, retail clamp in `getLevel50InitialRentalFixedIv`, six real IVs
-   through `FactoryCorpusPartyInstance`) + the
-   `factoryRentalParity.test.ts` expectation updates, together.
+**Commit 2 — STILL OPEN. This is the contract; the Rust side is fixed and
+must not be re-litigated.**
+
+1. `core-rs/build-wasm.sh` rebuild, committed together with everything below
+   (the artifact and the decoder change in ONE commit — a rebuild alone goes
+   red, and a decoder change alone goes red).
+2. `fw_generate_initial_rentals` buffer layout **as it now is in
+   `crates/factory-wasm/src/lib.rs`** (all little-endian; the export can no
+   longer return `status == 1`, though the status byte at offset 4 stays):
+   - `0` u32 `total_len`, `4` u8 `status` (always 0), `5` u32
+     `challenge_num`, `9` u8 `rental_rank`, `10` u32 `selection_rng_value`,
+     `14` u32 `rng_value`.
+   - `18` — six fixed-width **29-byte** rental records (was 23), back to
+     back, so the block runs `18..192`. In-record offsets, all unchanged
+     from before except the appended tail: `0` u16 `set_id`, `2` u32
+     `personality`, `6` u8 `fixed_iv`, `7` u8 `ability_slot`, `8` u32
+     `ot_id`, `12` u16 `species_id`, `14` u16 `item_id`, `16` u8 `nature`,
+     `17` u16 `selection_draw_position`, `19` u16
+     `personality_draw_positions[0]`, `21` u16
+     `personality_draw_positions[1]`, **`23` u8 x 6 `ivs`** (hp, attack,
+     defense, speed, sp_attack, sp_defense).
+   - `192` u32 `ledger_count`; `196` — the ledger, unchanged 26-byte
+     entries. `total_len == 196 + 26 * ledger_count`.
+   - Ledger `phase`: `0` set-selection, `1` personality, **`2` random-ivs**.
+     `purpose`: `0` set-candidate, `1` personality-low, `2`
+     personality-high, **`3` random-ivs-low, `4` random-ivs-high**. A
+     random-ivs entry populates NEITHER optional group — the drawn word is
+     its whole payload, and every other field must be read as absent.
+3. **`fixed_iv == ivs[1]` is a rule, not a coincidence.** The record's
+   `fixed_iv` is the constructed mon's ATK IV (`battle_factory_screen.c:1824`),
+   NOT the fixed-IV argument; it equals the argument only when that argument
+   is < 32. The TS side must adopt the same rule, and 110 must never appear
+   as a rental's `fixedIv`.
+4. New additive export, already present:
+   `fw_create_factory_party_member_with_ivs(set_id: u32, personality: u32,
+   ivs_packed: u32, ability_slot: u32, ot_id: u32) -> *mut u8`, returning
+   the SAME 96-byte member payload as `fw_create_factory_party_member`
+   (which is untouched and stays). `ivs_packed` is the GBA's own
+   `MON_DATA_IVS` word (`pokemon.c:3997-4004`): `hp | attack << 5 | defense
+   << 10 | speed << 15 | sp_attack << 20 | sp_defense << 25`; each field is
+   masked to five bits on unpack, so bits 30-31 are ignored.
+5. TypeScript, all in the same commit: `core-rs/adapter/factoryEngine.ts`
+   decodes the 29-byte record + the new phase/purpose values and can call
+   the new export; `getLevel50InitialRentalFixedIv` takes retail's clamp
+   (argument 8 -> 110, 9+ -> row 7's 31) and the `challengeNum > 7` throw
+   goes; `CreateBoxMon`'s two draws land in the TS rental generator in the
+   same ledger positions Rust puts them; six real IVs thread through
+   `FactoryCorpusPartyInstance` so `factoryCorpusParty.ts` stops asking
+   `uniformBattleScriptIvs(fixedIv)` to describe a random spread; the three
+   engine readers bounded by `DECLARED_FIXED_IV_ROWS` learn about the ninth
+   row; and `tests/factoryRentalParity.test.ts`'s 64 both-throw configs
+   (`winStreak=49`, `rentsCount` 20/100) become concrete-result configs.
+   Opponent and Frontier-Brain generation (`challengeNum + 1` / `+ 2`) are
+   TS-only and belong in this commit too.
+6. Cross-check targets from the Rust side (same seed 0, `playerTrainerId`
+   `0x12345678`, no construction checkpoint): `factoryWinStreak 56,
+   rentsCount 0` -> challenge 8, 305 ledger draws, rental 0 ivs
+   `[2, 18, 8, 26, 17, 1]` from words 41538/34362, `fixedIv` 18;
+   `factoryWinStreak 49, rentsCount 100` -> challenge 7, rank 5, 303 draws,
+   10 random-iv draws (slots 0-4), slot 5 uniform 31.
 
 After it lands, re-run the deep-streak sweeps that hit this crash:
 `--policy winning --start-carry 42` and `--start-carry 49` (the driver's

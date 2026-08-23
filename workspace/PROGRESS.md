@@ -5,6 +5,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1388 — [main worker, 2026-08-22] **ISSUES #118 commit 1/2 landed: the retail `sFixedIVTable[8]` overread + `CreateBoxMon`'s two random-IV draws are ported in core-rs; TS untouched and still green**
+
+- **State:** master `5b51eac5` + this docs commit. `npm test` **10,242
+  passed / 1,099 files**, build green, **zero TS edits**
+  (`factoryRentalParity.test.ts` 290/290 as committed); cargo **1,027
+  passed / 0 failed** (was 1,020), `fmt --check` + `clippy -- -D warnings`
+  clean.
+- **Did (core-rs only; no `artifacts/` rebuild — commit 2 owns that):**
+  ninth (overread) `FIXED_IVS` row; `get_level50_initial_rental_fixed_iv`
+  total under retail's strictly-greater clamp (arg 8 -> 110, 9+ -> 31);
+  `Phase::RandomIvs = 2` / `Purpose::RandomIvsLow|High = 3|4` + the two
+  ledgered draws per random-IV rental; `RentalRecord.ivs` with `fixed_iv ==
+  ivs[1]` (the ATK IV, `battle_factory_screen.c:1824`); `GenerationError`
+  deleted; `create_factory_corpus_party_member_with_ivs`; wasm record 23 ->
+  **29 bytes** (`ivs` at 23, `ledger_count` 192, ledger 196) + the additive
+  `fw_create_factory_party_member_with_ivs`. +7 tests, two hand-derived.
+- **Next:** ISSUES #118 **commit 2** per that entry's explicit contract:
+  `build-wasm.sh` + adapter + all TS + parity flip in ONE commit, then the
+  `--start-carry 42/49` re-sweeps.
+- **Notes:** `clippy --all-targets` fails at HEAD on a pre-existing `op_ref`
+  in a generated vectors test — untouched. `RUST_PROGRESS.md` not edited.
+
+---
+
 ## 1387 — [top-layer session, 2026-08-22] **User decisions recorded + next supervisor session set up: #116 RESOLVED (keep `vanilla` as the rigid canary; wind-down gates extended to four — `winning 0:60` + `winning-swap 0:60` added), #118 confirmed as the next session's first work item with a two-commit landing ladder written into its ISSUES entry**
 
 - **State:** docs-only commit on the 1386 final tree (`99429dc9` parent; no
@@ -78,29 +102,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1385 — [main worker, 2026-08-22] **ISSUES #118 half-landed: `sFixedIVTable`'s retail one-past-the-end row is now pinned ROM data (`{110, 0}`); the engine port itself is blocked on a core-rs/factory-wasm lockstep change and is NOT in**
-
-- **State:** master `9aaf1997` + this docs commit. `npm test` 1093/1140
-  files, 10232/10458 passed (3 animation source-staging fixtures re-pinned
-  to the new policy-JSON sha256), build green, smoke 444/444, frontier
-  ratchet unchanged (no pin moved).
-- **Did:** `nm pokeemerald.elf` -> `08612184 r sFixedIVTable`,
-  `08612194 r sInitialRentalMonRanges`; ROM bytes at 0x612184 are the known
-  16-byte table followed by `6e 00` = little-endian FRONTIER_MON_GRIMER.
-  `GetFactoryMonFixedIV`'s non-BUGFIX bound check is STRICTLY `>`, so IV
-  argument 8 reads that pair: row 8 = `{regular: 110, lastBattle: 0}`. The
-  extractor now emits it as a ninth `fixedIvs` row flagged `retailOverread`;
-  `tests/factoryFixedIvTableRomBytes.test.ts` (new, 4 pins) reads the 18 ROM
-  bytes back. The three engine readers are bounded to the 8 *declared* rows,
-  so the commit is behaviour-neutral.
-- **Next:** land the port — the rewritten **ISSUES #118** now carries the
-  full resolved semantics (clamp, three reachable call sites, CreateBoxMon's
-  two-`Random()` split, `RentalMon.ivs` == ATK IV) plus the exact
-  core-rs/factory-wasm surface that must move with it. The TS-only version
-  was written and reverted this session: it turns 64 of
-  `factoryRentalParity.test.ts`'s 288 configs red, because both engines
-  currently agree *by throwing* at IV argument 8.
-- **Notes:** step 3's `--start-carry` sweeps were NOT run (cap). No
-  `unsupported-branch` pin moved. `PAPERCUT:` none.
-
----

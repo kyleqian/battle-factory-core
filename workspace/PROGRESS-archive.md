@@ -1,3 +1,30 @@
+## 1385 — [main worker, 2026-08-22] **ISSUES #118 half-landed: `sFixedIVTable`'s retail one-past-the-end row is now pinned ROM data (`{110, 0}`); the engine port itself is blocked on a core-rs/factory-wasm lockstep change and is NOT in**
+
+- **State:** master `9aaf1997` + this docs commit. `npm test` 1093/1140
+  files, 10232/10458 passed (3 animation source-staging fixtures re-pinned
+  to the new policy-JSON sha256), build green, smoke 444/444, frontier
+  ratchet unchanged (no pin moved).
+- **Did:** `nm pokeemerald.elf` -> `08612184 r sFixedIVTable`,
+  `08612194 r sInitialRentalMonRanges`; ROM bytes at 0x612184 are the known
+  16-byte table followed by `6e 00` = little-endian FRONTIER_MON_GRIMER.
+  `GetFactoryMonFixedIV`'s non-BUGFIX bound check is STRICTLY `>`, so IV
+  argument 8 reads that pair: row 8 = `{regular: 110, lastBattle: 0}`. The
+  extractor now emits it as a ninth `fixedIvs` row flagged `retailOverread`;
+  `tests/factoryFixedIvTableRomBytes.test.ts` (new, 4 pins) reads the 18 ROM
+  bytes back. The three engine readers are bounded to the 8 *declared* rows,
+  so the commit is behaviour-neutral.
+- **Next:** land the port — the rewritten **ISSUES #118** now carries the
+  full resolved semantics (clamp, three reachable call sites, CreateBoxMon's
+  two-`Random()` split, `RentalMon.ivs` == ATK IV) plus the exact
+  core-rs/factory-wasm surface that must move with it. The TS-only version
+  was written and reverted this session: it turns 64 of
+  `factoryRentalParity.test.ts`'s 288 configs red, because both engines
+  currently agree *by throwing* at IV argument 8.
+- **Notes:** step 3's `--start-carry` sweeps were NOT run (cap). No
+  `unsupported-branch` pin moved. `PAPERCUT:` none.
+
+---
+
 ## 1384 — [main worker, 2026-08-22] **new opt-in `--start-carry` soak option boots the first chained round at a carried win streak — 0:160 across 3 sweeps, ISSUES #118 filed (challengeNum 8 draft-generation throw, real 2-round-win-from-42 state)**
 
 - **State:** master `f04c6227` + this docs commit. `npm test` 1095/1139
