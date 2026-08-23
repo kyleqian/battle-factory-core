@@ -1403,6 +1403,9 @@ Opt-in, NOT a gate: `--policy oracle-strength` (same as `winning` except the
 fight slot, which the engine's own Factory AI scorer picks for the player) —
 the lever-2 measurement instrument of
 `docs/soak-policy-strength-scout-2026-08-23.md`; see that doc's "Result".
+Opt-in, NOT a gate: `--policy winning-coverage` (same as `winning` except the
+draft, which rents the coverage-first 3-of-6 instead of a random 3-of-6) — the
+lever-4' measurement instrument of the same doc; see its "Result — lever 4'".
 
 ISSUES #85 tracks the current crash wall. Receipt hygiene (ADVISORY —
 user-clarified 2026-08-09: worker TIME is the constraint, repo weight is

@@ -281,3 +281,143 @@ measurement leaves standing, and it is a new design problem, not a rerun.
 The policy stays in the tree as an opt-in instrument (it is now the strongest
 in-battle player available for crash coverage at depth, and it costs nothing
 when unused), but it is **not** promoted to the gate set.
+
+---
+
+## Result — lever 4' (coverage-first draft), 2026-08-23, main lane, worker step
+
+`--policy winning-coverage` landed as an **opt-in** soak policy
+(`tools/soak/randomRoundSoakDriver.ts`, commit `b00f7e60`): identical to
+`winning` in every respect (same fight/switch/swap-decline/continuation
+decisions, same exploration and timing rolls, same shared-RNG-stream draws —
+the constructor's draft shuffle is still *drawn* and then overwritten, and the
+NO-decline reroll is still drawn but ignored) EXCEPT the **draft**, which rents
+the 3-of-6 offered rentals maximising a **coverage-first lexicographic score**
+instead of a random 3-of-6. This is the lever §3's ranking left standing after
+lever 2 measured 0/30 (the "Result" section above) — a NEW score, not a rerun
+of the withheld bulk+STAB heuristic (`1f500a92`), whose plumbing shape (score
+all six off the draft state, then drive the cursor to the chosen slots) is
+reused with its score replaced.
+
+**The score** (`pickCoverageDraftPicks`, deterministic — no RNG at all;
+enumerates all 20 three-of-six combinations, ties keep the earliest):
+
+| axis | definition |
+|---|---|
+| **offensive** (primary) | of the 17 Gen-3 defending types, those some damaging move (power > 0) anywhere in the trio is super-effective against, each weighted `1 + occurrences among the six offered rentals' own types` (the rental ranges are symmetric — §2 — so the offers are a free sample of the tier's opponent pool; the `+1` base keeps a type absent from the six offers still worth counting) |
+| **defensive** (secondary) | distinct primary/secondary types across the trio, minus the count of *shared* 4x weaknesses (attacking types two or more of the three take >= 4x from) |
+| **bst** (tiebreak only) | summed species base-stat total — the withheld heuristic's own axis, demoted from primary to a pure tiebreak precisely because §3 shows optimising it starves coverage |
+
+Rent ORDER inside the chosen trio is descending base-stat total (ties keep the
+lower slot), so the bulkiest of the three leads battle 1; the trio itself is
+chosen by coverage. The verbose transcript logs
+`draft: coverage trio 1,4,5 (off 27 def 5 bst 1234) SPECIES_… …`.
+Tier-1 pins: `tests/randomRoundSoakCoverageDraft.test.ts` (4 tests).
+
+### (2) Smoke from the anchor
+
+```
+npm run soak -- --policy winning-coverage --seeds  0:10 --render-every 0
+npm run soak -- --policy winning-coverage --seeds 10:20 --render-every 0
+```
+(two parallel 10-seed chunks — the 600 s foreground tool cap; union = the
+requested `--seeds 0:20`)
+
+```
+=== soak summary: 10 seeds (policy winning-coverage) in 239.4s ===
+OK 10  CRASH 0  HANG 0
+carry >= 7  (challengeNum >= 1): 10/10   carry >= 14: 10/10
+carry >= 21 (challengeNum >= 3): 4/10    carry >= 28 (challengeNum >= 4): 0/10
+deepest carry anywhere: 21   deepest battle-depth anywhere: 23
+
+=== soak summary: 10 seeds (policy winning-coverage) in 235.7s ===
+OK 10  CRASH 0  HANG 0
+carry >= 7  (challengeNum >= 1): 10/10   carry >= 14: 9/10
+carry >= 21 (challengeNum >= 3): 6/10    carry >= 28 (challengeNum >= 4): 1/10
+deepest carry anywhere: 28   deepest battle-depth anywhere: 28
+```
+Union: **20/20 OK, 0 CRASH, 0 HANG**, every seed's sub-outcome `budget`.
+
+### (3) THE MEASUREMENT — boot at carry 28, the unbeaten tier
+
+```
+npm run soak -- --policy winning-coverage --start-carry 28 --seeds  0:10 --render-every 0
+npm run soak -- --policy winning-coverage --start-carry 28 --seeds 10:20 --render-every 0
+npm run soak -- --policy winning-coverage --start-carry 28 --seeds 20:30 --render-every 0
+```
+(three parallel chunks, one foreground call, ~4 min wall; union below)
+
+| policy | boot carry | n | OK | CRASH | HANG | deepest carry | deepest depth | **rounds won** |
+|---|---|---|---|---|---|---|---|---|
+| `winning-coverage` | 28 | 30 | 30 | 0 | 0 | **28** | 29 | **0/30** |
+| `oracle-strength` (lever 2) | 28 | 30 | 30 | 0 | 0 | 28 | 32 | 0/30 |
+| `winning` (sweep (a)) | 28 | 30 | 30 | 0 | 0 | 28 | 32 | 0/30 |
+
+**0/30 — a NEGATIVE result on the load-bearing number**, and the third policy
+in a row to score exactly 0 at challenge 4. No seed's deepest carry left 28,
+i.e. no boot round was won.
+
+Battle index where the boot round is lost (`maxBattleDepth - 28 + 1`):
+
+| lost at | **`winning-coverage`@28** | `oracle-strength`@28 | `winning`@28 (sweep (a)) |
+|---|---|---|---|
+| b1 | **29** (every seed except 27) | 22 | 22 |
+| b2 | 1 (seed 27) | 6 | 5 |
+| b3 | 0 | 1 | 1 |
+| b4 | 0 | 0 | 1 |
+| b5 | 0 | 1 | 1 |
+| **round won** | **0** | **0** | **0** |
+
+The tail is *shorter* than either baseline's: 29/30 battle-1 losses vs 22/30.
+Booted cold at challenge 4, a coverage-first party is **frailer** than a random
+3-of-6 — base-stat total being a pure tiebreak means the trio that maximises
+type coverage is routinely three low-BST rentals, and at challengeNum 4 (player
+IV 15 vs opponent IV 3, full AI triad — §2) that party gets run over in the
+first battle. Coverage without a strength floor is a worse cold-boot draft.
+
+### (4) The anchor sweep — 0:120, no `--start-carry`
+
+```
+npm run soak -- --policy winning-coverage --seeds 0:15 --render-every 0    # ... and 15:30, 30:45,
+npm run soak -- --policy winning-coverage --seeds 105:120 --render-every 0 # 45:60, 60:75, 75:90, 90:105
+```
+(eight parallel 15-seed chunks in one foreground call, ~6.5 min wall — the
+brief's four 30-seed chunks would have exceeded the 600 s tool cap; seeds are
+independent per `runSeed`, so the chunking is scheduling only. Union = `--seeds 0:120`.)
+
+| arm | n | OK | CRASH | HANG | carry >= 21 | **carry >= 28** | **carry >= 35** | deepest carry / depth |
+|---|---|---|---|---|---|---|---|---|
+| **`winning-coverage`** | **120** | **120** | **0** | **0** | **39 (32.5%)** | **10 (8.3%)** | **0** | 28 / 33 |
+| `winning` (2026-08-22 baseline) | 480 | 480 | 0 | 0 | — | 18 (3.75%) | 0 (0%) | 28 / — |
+
+Seeds reaching carry >= 28: 16, 22, 25, 37, 59, 61, 86, 96, 101, 116. Deepest
+battle-depth 33 = battle 6 of a challenge-4 round.
+
+**This half is a suggestive POSITIVE, and it does not rescue the lever.**
+8.3% vs 3.75% of seeds reaching challengeNum 4 by natural chained play is a
+two-proportion z of ~2.1 (one-sided p ~ 0.017) — real enough to record,
+n=120 vs n=480 and far from conclusive. But the acceptance number §5 set for a
+draft lever was **carry >= 35**, i.e. *beating* challenge 4 at least once
+without `--start-carry`: **0/120**, exactly the `winning` baseline's 0/480.
+
+### What this settles
+
+Challenge 4 remains unbeaten by every lever the scout ranked. The two halves of
+this measurement point the same way as §2's mechanism paragraph, sharpened:
+
+- **Getting TO challenge 4 is a draft problem** and coverage is a real
+  improvement there (+2.2x rate of reaching it through tiers 1-3, where the
+  opponent's own parties are weak enough that having a super-effective answer
+  to everything decides battles).
+- **Getting THROUGH challenge 4 is a draft-QUALITY problem that coverage alone
+  makes worse** (29/30 b1 losses cold-booted, vs 22/30 for a random draft).
+  Lever 4 (bulk+STAB) starved coverage; lever 4' (coverage-first) starves bulk.
+  Neither single-axis draft score beats challenge 4, and the two failure modes
+  are mirror images — which is itself the strongest evidence yet that the ch4
+  wall wants a *combined* score with a strength floor (e.g. coverage maximised
+  subject to a minimum trio BST), not another single axis.
+
+The policy stays in the tree as an opt-in instrument (it is the deepest-reaching
+anchor player measured to date and costs nothing when unused) but is **not**
+promoted to the gate set. `winning` / `winning-swap` / `full` / `vanilla` /
+`oracle-strength` behaviour is byte-identical — their pins all still pass.
