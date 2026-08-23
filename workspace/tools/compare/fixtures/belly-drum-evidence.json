@@ -1,0 +1,31 @@
+{
+  "schema": "belly-drum-dense-evidence/v1",
+  "move": "MOVE_BELLY_DRUM",
+  "oracleProfile": "battle-scene-on",
+  "carrier": { "frontierMon": "FRONTIER_MON_POLIWRATH_2", "setId": 367, "species": "SPECIES_POLIWRATH", "speciesId": 62, "moveId": 187 },
+  "source": { "start": "0x082cf4d9", "endExclusive": "0x082d15ac", "byteLength": 8403, "sha256": "545ca5297336a1028f77ac7b5fb2d160b0aaea84671c1585953b73389e33455e" },
+  "orientations": {
+    "player-back": {
+      "window": { "startFrame": 231, "endFrame": 340, "frameCount": 110 },
+      "denseState": "tools/compare/evidence/belly-drum-player-dense-state.json.gz",
+      "rawRgb": "tools/compare/evidence/belly-drum-player-raw-rgb.tar.gz",
+      "changeMap": "tools/compare/evidence/belly-drum-changemap-player.txt",
+      "denseStateSha256": "0acf9be2f8f5b39c75512a89aae5405ab9c68f39abf043567438943a2c74a4b8",
+      "rawRgbArchiveSha256": "b410f36ad7ec2bb91f57e81da1ff9b126f63abfe86c866f5f366ef9cc83414b6",
+      "rawRgbSequenceSha256": "5f65aa09003de49b32649ea2559e46bca9c2d33ef5ac730bb26b55c6af831b67",
+      "changeMapSha256": "c7dd36dc1d3bb63bedb26a51f5514e455d71fe23a786297689f675d078a83b66"
+    },
+    "opponent-front": {
+      "window": { "startFrame": 211, "endFrame": 320, "frameCount": 110 },
+      "denseState": "tools/compare/evidence/belly-drum-opponent-dense-state.json.gz",
+      "rawRgb": "tools/compare/evidence/belly-drum-opponent-raw-rgb.tar.gz",
+      "changeMap": "tools/compare/evidence/belly-drum-changemap-opponent.txt",
+      "denseStateSha256": "4e524b8a8e88e9bf4b846dff8d27e2c583c2b78c2ed6bd9595fccf03b041945e",
+      "rawRgbArchiveSha256": "cc4dee1896eebbe074555032089304e6edbe2e71272145ab395b4bff33d30772",
+      "rawRgbSequenceSha256": "076634b8fc8d78cf360ccaba0c22693ee8cfcc3076ce8a15c6502cd6d2c4951e",
+      "changeMapSha256": "65c74ee058905fe553e2354a3faf9d1f5e848814bfdaf853ef52481464a7c146"
+    }
+  },
+  "freshReplay": { "runsPerOrientation": 2, "playerDenseStateByteIdentical": true, "opponentDenseStateByteIdentical": true, "playerRawRgbSequenceSha256": "5f65aa09003de49b32649ea2559e46bca9c2d33ef5ac730bb26b55c6af831b67", "opponentRawRgbSequenceSha256": "076634b8fc8d78cf360ccaba0c22693ee8cfcc3076ce8a15c6502cd6d2c4951e" },
+  "productionFramebufferCompared": false
+}

@@ -5577,7 +5577,7 @@
     "tools/compare/evidence/spikes-changemap-player.json",
     "tools/compare/evidence/spikes-changemap-opponent.json",
     "src/animation/spikes.ts",
-    "src/animation/sceneOnPresentation.ts",
+   "src/animation/sceneOnPresentation.ts",
     "tools/compare/spikesReducerAudit.ts",
     "tools/compare/extractSpikesAssets.ts",
     "src/animation/assets/spikes.json",
@@ -5587,9 +5587,37 @@
     "tests/animation/spikes.test.ts",
     "tests/animation/spikesFramebuffer.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_BELLY_DRUM",
+   "status": "partial",
+   "covered": [
+    "complete legal Level-50 Scene-ON mechanicLab parties use the lowest legal carrier FRONTIER_MON_POLIWRATH_2 set 367 (SPECIES_POLIWRATH 62, MOVE_BELLY_DRUM 187, Adamant Attack+HP spread) in player-back and opponent-front orientations; each 110-row window is retained through first inactive cleanup and reproduced twice fresh with byte-identical dense state and raw RGB",
+    "the authoritative half-open source interval is 0x082cf4d9..0x082d15ac (8403 bytes, 545ca5297336a1028f77ac7b5fb2d160b0aaea84671c1585953b73389e33455e); the generated graph is exactly the nine bounded music-note/hand/ShakeMon components, with six alternating hand/note calls, six SE_M_BELLY_DRUM cues, rainbow blend/clear, and both subroutines",
+    "the pure reducer and typed Scene-ON seam port all six alternating hand hits, six AnimTask_ShakeMon lifetimes, six slow-note arcs with distinct source arguments, attacker pan, source pointer transitions, allocation order, and first inactive cleanup without HP cost, stat stages, battle RNG, damage, status, turn, controller, round, or facility ownership",
+    "retained dense rows include script/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/battler/party/immutable/RNG state, raw RGB, and normalized bilateral change maps; ordinary created-sprite OAM and faded-palette transfers are RAM+1, and AnimTask_ShakeMon is RAM+1 with no distinct latch",
+   "the shared production compositor and framebuffer comparator remain deliberately unclaimed: the precise remainder is live six-note/hand art, preceding transfer wiring, runtime rainbow palette hardware colors, battler chrome, and bilateral framebuffer residuals through the 110-row window"
+   ],
+   "remaining": "Complete source-derived shared compositor/draw wiring for both player-back and opponent-front 110-row windows, including hand/music-note art, runtime rainbow palette transfer, live battler/chrome layering, then compare all 220 production framebuffer rows twice fresh with zero residual pixels before promotion.",
+   "evidence": [
+   "tools/battle-lab/mechanic-belly-drum-player-poliwrath-opponent-onix.json",
+   "tools/battle-lab/mechanic-belly-drum-opponent-poliwrath-player-onix.json",
+    "tools/compare/fixtures/belly-drum-evidence.json",
+   "tools/compare/bellyDrumProbe.py",
+    "tools/compare/bellyDrumSourceAudit.ts",
+    "tools/compare/evidence/belly-drum-player-dense-state.json.gz",
+    "tools/compare/evidence/belly-drum-opponent-dense-state.json.gz",
+    "tools/compare/evidence/belly-drum-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/belly-drum-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/belly-drum-changemap-player.txt",
+    "tools/compare/evidence/belly-drum-changemap-opponent.txt",
+    "src/animation/bellyDrum.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tests/animation/bellyDrum.test.ts"
+   ]
   }
  ],
- "queue": [],
+ "queue": ["MOVE_BELLY_DRUM"],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",

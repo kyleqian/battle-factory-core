@@ -887,6 +887,12 @@ import {
   type TeeterDancePoint,
 } from "./teeterDance.ts";
 import {
+  bellyDrumAtAge,
+  bellyDrumNotesBackToFrontAtAge,
+  type BellyDrumNote,
+  type BellyDrumPoint,
+} from "./bellyDrum.ts";
+import {
   sweetKissAtAge,
   type SweetKissState,
 } from "./sweetKiss.ts";
@@ -3097,6 +3103,16 @@ export interface SceneOnTeeterDanceConfig {
   readonly attackerPersonality: number;
 }
 
+/** Narrow Scene-ON seam for Belly Drum's alternating hands and slow notes. */
+export interface SceneOnBellyDrumConfig {
+  readonly move: "BELLY_DRUM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** `SetSpriteCoordsToAnimAttackerCoords` followed by the note's +8 y. */
+  readonly attackerNoteOrigin: Readonly<BellyDrumPoint>;
+}
+
 export interface SceneOnDetectConfig {
   readonly move: "DETECT";
   readonly attacker: SceneOnPresentationBattler;
@@ -3337,6 +3353,7 @@ export type SceneOnMoveConfig =
   | SceneOnSingConfig
   | SceneOnGrassWhistleConfig
   | SceneOnTeeterDanceConfig
+  | SceneOnBellyDrumConfig
   | SceneOnDetectConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
@@ -4249,6 +4266,20 @@ export interface SceneOnTeeterDanceView {
   readonly battlerX2: number;
   readonly audio: ReturnType<typeof teeterDanceAtAge>["audio"];
   readonly visualTaskCount: number;
+}
+
+export interface SceneOnBellyDrumView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly notes: readonly BellyDrumNote[];
+  readonly hands: ReturnType<typeof bellyDrumAtAge>["hands"];
+  readonly shakeTasks: ReturnType<typeof bellyDrumAtAge>["shakeTasks"];
+  readonly audio: ReturnType<typeof bellyDrumAtAge>["audio"];
+  readonly sourceOffset: number;
+  readonly visualTaskCount: number;
+  readonly rainbowBlend: boolean;
+  readonly clearRainbowBlend: boolean;
 }
 
 export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
@@ -8980,6 +9011,38 @@ export function sceneOnTeeterDanceView(
     battlerX2: body.battlerX2,
     audio: body.audio,
     visualTaskCount: body.visualTaskCount,
+  };
+}
+
+/**
+ * `age=0` is the first in-bounds MOVE_BELLY_DRUM script row.  The reducer
+ * retains the source-relative task/sprite/palette arguments; battleScene's
+ * ordinary compositor is intentionally not claimed by this seam yet.
+ */
+export function sceneOnBellyDrumView(
+  state: SceneOnMovePresentationState,
+): SceneOnBellyDrumView {
+  if (state.config.move !== "BELLY_DRUM") {
+    throw new Error(`expected BELLY_DRUM presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnBellyDrumConfig;
+  const body = bellyDrumAtAge(
+    state.age,
+    config.attackerNoteOrigin,
+    config.attacker.geometry.side,
+  );
+  return {
+    age: state.age,
+    attacker: config.attacker,
+    target: config.target,
+    notes: bellyDrumNotesBackToFrontAtAge(state.age, config.attackerNoteOrigin),
+    hands: body.hands,
+    shakeTasks: body.shakeTasks,
+    audio: body.audio,
+    sourceOffset: body.sourceOffset,
+    visualTaskCount: body.visualTaskCount,
+    rainbowBlend: body.rainbowBlend,
+    clearRainbowBlend: body.clearRainbowBlend,
   };
 }
 
