@@ -27,5 +27,5 @@
     }
   },
   "freshReplay": { "runsPerOrientation": 3, "playerDenseStateByteIdentical": true, "opponentDenseStateByteIdentical": true, "playerRawRgbSequenceSha256": "12c5b3dec45608fbd7f739290be879f2e56e576055408811e027ef61238ba7bd", "opponentRawRgbSequenceSha256": "91196f4e63cd3205d5ce047e0d418f0e83f380c2d4906e3bd91ebe40e29ce0f9" },
-  "productionFramebufferCompared": false
+  "productionFramebufferCompared": true
 }

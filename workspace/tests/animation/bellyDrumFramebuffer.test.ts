@@ -57,4 +57,23 @@ describe("MOVE_BELLY_DRUM production framebuffer", () => {
       sceneOnPresentation: { ...stage, age: 8 },
     })).toHaveLength(240 * 160 * 4);
   });
+
+  it("promotes only Belly Drum and empties the move queue", () => {
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
+      .toHaveLength(204);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "partial"))
+      .toEqual([]);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_BELLY_DRUM"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.queue).toEqual([]);
+    expect(coverage.entries.filter((entry: { move: string }) => [
+      "MOVE_SING", "MOVE_TEETER_DANCE", "MOVE_FAKE_TEARS", "MOVE_GRASS_WHISTLE",
+    ].includes(entry.move))).toEqual(expect.arrayContaining([
+      expect.objectContaining({ move: "MOVE_SING", status: "exact" }),
+      expect.objectContaining({ move: "MOVE_TEETER_DANCE", status: "exact" }),
+      expect.objectContaining({ move: "MOVE_FAKE_TEARS", status: "exact" }),
+      expect.objectContaining({ move: "MOVE_GRASS_WHISTLE", status: "exact" }),
+    ]));
+  });
 });
