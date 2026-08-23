@@ -1,3 +1,28 @@
+## 1387 — [top-layer session, 2026-08-22] **User decisions recorded + next supervisor session set up: #116 RESOLVED (keep `vanilla` as the rigid canary; wind-down gates extended to four — `winning 0:60` + `winning-swap 0:60` added), #118 confirmed as the next session's first work item with a two-commit landing ladder written into its ISSUES entry**
+
+- **State:** docs-only commit on the 1386 final tree (`99429dc9` parent; no
+  engine/`src` touch, no suites due).
+- **Did (all user-approved this session):** (1) **#116 resolved and
+  deleted** — decision: keep `vanilla 0:20` unchanged as a deliberate
+  single-trajectory canary (option (b) seed-backed draft DECLINED), and add
+  the two seed-diverse gates `winning 0:60` + `winning-swap 0:60` to the
+  standing wind-down set. Gate list updated in SUPERVISOR.md ("Wind-down
+  soak gates", now four commands) and ROADMAP "Soak + evidence policy" +
+  gate-coverage note. Both new gates start green on this tree (winning
+  0:480 = 480/480; winning-swap 0:360 = 359/360 with the one crash #119
+  already fixed). (2) **#118 queued first** for the next supervisor
+  session; its ISSUES entry now carries a concrete two-commit ladder
+  (commit 1 = core-rs + wasm snapshot tests WITHOUT rebuilding the shipped
+  binary, stays green; commit 2 = lockstep wasm rebuild + adapter + TS +
+  parity expectations) and the post-land re-sweeps
+  (`--start-carry 42`/`49`, expecting seeds 2/32/49 to go clean).
+- **Next:** launch the supervisor session; step 1 = #118 per its ISSUES
+  entry, then the `--start-carry 42/49` re-sweeps, then the (new) four-gate
+  wind-down set.
+- **Notes:** DEFERRED.md still empty — nothing blocks the launcher.
+
+---
+
 ## 1386 — [supervisor wind-down, 2026-08-22 17:10] **Post-M-B crash burn-down: 14 worker rounds, queue to zero; final engine sweeps `full` 0:480 + `winning` 0:480 + `vanilla` 0:240 all clean; two new opt-in soak instruments (`winning-swap`, `--start-carry`) opened the swap screen and challenge 5-8 tiers to soak — #119 (swapped-party forced switch) fixed same session (`d41bc58c`), #118 remainder is a TS+Rust coupled port; animation + rust lanes folded**
 
 - **Final gates (supervisor-independent, final tree `2dc691ae` + this docs commit):** full `npm test`

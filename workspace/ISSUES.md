@@ -17,38 +17,6 @@ backlog.
 
 # Open
 
-## #118 remainder — the wasm draft-selection wire format silently drops a rental's six-IV spread
-
-**The port itself is DONE** (commit 1 `5b51eac5` core-rs, commit 2
-`0cb8aa26` wasm rebuild + adapter + TS + parity). What is left is one
-bounded wire-format gap found while landing commit 2.
-
-`core-rs/adapter/factoryDraftSelectionEngine.ts`'s `writeRental` (`:167-175`)
-and `readRental` (`:228-238`) carry only `setId`/`personality`/`fixedIv`/
-`abilitySlot`/`otId`, and the Rust side's boundary struct
-`FactoryDraftRentalSource` (`crates/factory-wasm/src/lib.rs:5165`, decoded
-`:5267-5280`, encoded `:5486`) has the same five fields. So a
-`FactoryCorpusPartyInstance` carrying `ivs` (any challenge-8 / elevated
-challenge-7 rental) round-trips through the `selected-rental-party`
-operation **without** its spread — no error, just an instance that
-deserializes back to `fixedIv`-only and reads as a uniform ATK-IV mon.
-
-**Not reachable today, and the routing itself is provably IV-blind:**
-`factory_draft_selection::selected_rental_party`
-(`crates/factory-core/src/factory_draft_selection.rs:220-240`) is generic
-over `T: Clone` and only routes the six inputs into the three ranked output
-slots — it never reads a field. Production never crosses this boundary
-either: `src/engine/core.ts:2100` calls the TypeScript `selectedRentalParty`
-(`src/engine/factoryDraftScreen.ts:308`), and the wasm draft-selection
-engine's only consumer is `tests/factoryDraftSelectionParity.test.ts`.
-
-**The work** (smallest additive change): give both sides a packed u32
-`ivs_packed` with a presence flag — the same `MON_DATA_IVS` layout
-`fw_create_factory_party_member_with_ivs` already takes (`pokemon.c:3997-4004`)
-— in ONE lockstep commit (Rust + adapter + `build-wasm.sh` rebuild), pinned
-by a `selected-rental-party` case in `tests/factoryDraftSelectionParity.test.ts`
-that feeds an `ivs`-bearing instance and asserts the spread survives.
-
 ## #120 — `rentsCount` increments once per COMPLETED challenge; retail increments once per swap-then-win (draft-pool rank drifts low)
 
 **Found 2026-08-22** (read-only interaction audit of the 1386 burn-down;

@@ -5,6 +5,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1390 — [main worker, 2026-08-22] **ISSUES #118 CLOSED: the wasm draft-selection wire format now carries a rental's six-IV spread, so an `ivs`-bearing instance round-trips intact**
+
+- **State:** master `47a8db42` + this docs commit. `npm test` **1,099 files
+  / 10,360 passed / 223 skipped** (was 10,359), `npm run build` green,
+  cargo **79 blocks / 1,029 passed / 0 failed** (was 1,027), `fmt --check` +
+  `clippy -- -D warnings` clean, typecheck green. `POKEBENCH_ENGINE=wasm`
+  parity **4 files / 484 passed, none skipped** (rental 387, partyMember 89,
+  draftSelection 5, swap 3); `npm run test:smoke` 444. Rebuilt wasm
+  **511,638 B, sha256 `f55b03fc…`** (gitignored — every checkout still has
+  to run `core-rs/build-wasm.sh`).
+- **Did:** `selected-rental-party`'s rental record gained ONE additive
+  trailing optional, `ivs_presence:u8,[ivs_packed:u32]` — the GBA's own
+  `MON_DATA_IVS` word (`pokemon.c:3997-4004`), the same argument
+  `fw_create_factory_party_member_with_ivs` takes — in one lockstep commit:
+  `FactoryDraftRentalSource.ivs_packed` + decode/encode + the export's
+  byte-layout doc comment, adapter `writeRental`/`readRental` with
+  `packMonDataIvs` lifted into a shared `adapter/monDataIvs.ts` (plus a new
+  `unpackMonDataIvs`), and the `build-wasm.sh` rebuild. factory-core needed
+  nothing: `selected_rental_party` is generic over `T: Clone` and reads no
+  field (verified). NOT a version bump — additive trailing field, and an old
+  decoder can only under-read into the existing status-2 malformed message.
+- **Next:** the four-gate wind-down set (`full`/`winning`/`winning-swap`/
+  `vanilla`), or the next supervisor step; #120/#121 remain open for their
+  lanes.
+- **Notes:** absent stays absent on both sides, so every existing `toEqual`
+  pin is byte-identical (both parity suites run unchanged first). New pins:
+  2 factory-wasm boundary tests, a hand-spelled little-endian byte-for-byte
+  record check, 4 parity cases (180 -> 184) and a 57th malformed packet; a
+  PRESENT uniform spread is pinned distinct from an absent one.
+
+---
+
 ## 1389 — [main worker, 2026-08-22] **ISSUES #118 commit 2/2 landed: the `sFixedIVTable[8]` overread is now ported end to end — TS + adapter + rebuilt wasm in lockstep; the challenge-8 crash repro goes clean**
 
 - **State:** master `0cb8aa26` + this docs commit. `npm test` **1,099 files
@@ -58,28 +90,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `--start-carry 42/49` re-sweeps.
 - **Notes:** `clippy --all-targets` fails at HEAD on a pre-existing `op_ref`
   in a generated vectors test — untouched. `RUST_PROGRESS.md` not edited.
-
----
-
-## 1387 — [top-layer session, 2026-08-22] **User decisions recorded + next supervisor session set up: #116 RESOLVED (keep `vanilla` as the rigid canary; wind-down gates extended to four — `winning 0:60` + `winning-swap 0:60` added), #118 confirmed as the next session's first work item with a two-commit landing ladder written into its ISSUES entry**
-
-- **State:** docs-only commit on the 1386 final tree (`99429dc9` parent; no
-  engine/`src` touch, no suites due).
-- **Did (all user-approved this session):** (1) **#116 resolved and
-  deleted** — decision: keep `vanilla 0:20` unchanged as a deliberate
-  single-trajectory canary (option (b) seed-backed draft DECLINED), and add
-  the two seed-diverse gates `winning 0:60` + `winning-swap 0:60` to the
-  standing wind-down set. Gate list updated in SUPERVISOR.md ("Wind-down
-  soak gates", now four commands) and ROADMAP "Soak + evidence policy" +
-  gate-coverage note. Both new gates start green on this tree (winning
-  0:480 = 480/480; winning-swap 0:360 = 359/360 with the one crash #119
-  already fixed). (2) **#118 queued first** for the next supervisor
-  session; its ISSUES entry now carries a concrete two-commit ladder
-  (commit 1 = core-rs + wasm snapshot tests WITHOUT rebuilding the shipped
-  binary, stays green; commit 2 = lockstep wasm rebuild + adapter + TS +
-  parity expectations) and the post-land re-sweeps
-  (`--start-carry 42`/`49`, expecting seeds 2/32/49 to go clean).
-- **Next:** launch the supervisor session; step 1 = #118 per its ISSUES
-  entry, then the `--start-carry 42/49` re-sweeps, then the (new) four-gate
-  wind-down set.
-- **Notes:** DEFERRED.md still empty — nothing blocks the launcher.
