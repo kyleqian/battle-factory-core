@@ -738,7 +738,8 @@ export class Rng {
 
 type ActionEntry = { frame: number; battle: number; turn: number; what: string };
 
-class ActionLog {
+/** Exported for tests that drive a `RandomPlayer` directly (`new ActionLog(false)`). */
+export class ActionLog {
   private readonly entries: ActionEntry[] = [];
   private readonly verbose: boolean;
   private readonly onNote?: (entry: ActionEntry) => void;
