@@ -22,6 +22,12 @@
 //                      the swap screen, swaps its lowest-scoring rental for
 //                      the defeated opponent's highest-scoring mon -- covers
 //                      the Factory swap screen at real carried-streak depth)
+//                      or "oracle-strength" (opt-in: identical to "winning"
+//                      except the fight-move choice, which is delegated to
+//                      the engine's own source-derived Factory AI scorer
+//                      running for the player's side under the full mask 7
+//                      -- the lever-2 measurement instrument of
+//                      docs/soak-policy-strength-scout-2026-08-23.md)
 //   --max-frames N     per-seed tick budget before reporting HANG (default: resolveMaxFrames(policy), i.e. DEFAULT_MAX_FRAMES_BY_POLICY[policy])
 //   --stall-frames N   frames of zero progress before reporting HANG (default: DEFAULT_STALL_FRAMES, i.e. 30_000 — ISSUES #104 retune)
 //   --max-rounds N     finish OK ("max-rounds") once N round decisions have been observed (default: unlimited)
@@ -64,9 +70,12 @@ function main(): void {
   const policy = (getFlag("--policy") ?? "full") as SoakPolicy;
   const jsonPath = getFlag("--json");
   if (
-    policy !== "full" && policy !== "vanilla" && policy !== "winning" && policy !== "winning-swap"
+    policy !== "full" && policy !== "vanilla" && policy !== "winning"
+    && policy !== "winning-swap" && policy !== "oracle-strength"
   ) {
-    console.error(`bad --policy: ${policy} (want full|vanilla|winning|winning-swap)`);
+    console.error(
+      `bad --policy: ${policy} (want full|vanilla|winning|winning-swap|oracle-strength)`,
+    );
     process.exit(2);
   }
   const maxFramesFlag = getFlag("--max-frames");

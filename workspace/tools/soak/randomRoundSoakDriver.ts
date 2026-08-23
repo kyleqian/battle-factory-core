@@ -44,6 +44,41 @@ import {
 } from "../../src/engine/factoryRoundChaining.ts";
 import { ANCHOR_RNG_VALUE } from "../../src/engine/rng.ts";
 import { ANCHOR_FACTORY_METADATA } from "../../src/engine/factoryAnchorSession.ts";
+import {
+  chooseFactoryAiScoredDecision,
+  type FactoryAiScoredChoice,
+  type FactoryAiScoredView,
+} from "../../src/engine/factoryAiDecisionPolicy.ts";
+import {
+  FACTORY_BATTLE_MODE_SINGLES,
+  FACTORY_LEVEL_MODE_50,
+  type FactoryAiMaskSelectionInput,
+} from "../../src/engine/factoryAiMaskSelection.ts";
+import {
+  AI_WEATHER_HAIL,
+  AI_WEATHER_RAIN,
+  AI_WEATHER_SANDSTORM,
+  AI_WEATHER_SUN,
+  type AiWeatherValue,
+} from "../../src/engine/factoryAiCheckBadMove.ts";
+import {
+  resolveBattleScriptBattlerHoldEffect,
+  type BattleScriptRulesContext,
+} from "../../src/engine/battleScriptRulesContext.ts";
+import {
+  BATTLE_SCRIPT_STATUS1_REFRESH_CURE_MASK,
+  BATTLE_SCRIPT_STATUS1_SLEEP,
+  BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
+  BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY,
+  BATTLE_SCRIPT_STATUS2_FORESIGHT,
+  BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS3_LEECHSEED,
+  BATTLE_SCRIPT_STATUS3_PERISH_SONG,
+  BATTLE_SCRIPT_STATUS3_ROOTED,
+  BATTLE_SCRIPT_STATUS3_YAWN,
+} from "../../src/engine/battleScriptSourceConstants.ts";
+import type { BattleMoveDecision } from "../../src/engine/battleDecisionBoundary.ts";
+import abilityItemHooksData from "../../src/data/gen/ability-item-hooks.json" with { type: "json" };
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
 import speciesTypesData from "../../src/data/gen/species-types.json" with { type: "json" };
 import typeEffectivenessData from "../../src/data/gen/type-effectiveness.json" with { type: "json" };
@@ -366,6 +401,298 @@ export function buildWinningSwapPlan(rentalMons: FactoryRentalRoster): WinningSw
 }
 
 // ---------------------------------------------------------------------------
+// "oracle-strength" policy: the ENGINE'S OWN source-derived Factory AI move
+// scorer, run for the PLAYER's side.
+//
+// `chooseFactoryAiScoredDecision` (src/engine/factoryAiDecisionPolicy.ts) is
+// the ported `ChooseMoveOrAction_Singles` scoring loop the opponent uses; the
+// live opponent driver feeds it a `FactoryAiScoredView` built by
+// `createFactoryAiViewFromLiveRules` (src/engine/factoryAiLiveDriver.ts),
+// whose attacker is battler 1 (the trainer) and target is battler 0 (the
+// player). `buildOracleStrengthPlayerView` below is that same builder with
+// the two sides SWAPPED -- attacker battler 0 (the player), target battler 1
+// (the opponent), side statuses and `gLastMoves` indexed to match. The view's
+// `active` field still reads `{ aiBattler: 1, targetBattler: 0 }` because the
+// scorer's own validator requires those literals; nothing downstream of it
+// indexes real battle state by them (every field it reads comes from
+// `view.attacker`/`view.target`), so the swap is purely in what we hand it.
+//
+// THIS IS A TEST INSTRUMENT, NOT A FAIRNESS MODEL. The player side is given
+// full knowledge of the opponent's live moves, real ability and real held-item
+// hold effect (`knownMoveIds`/`knownAbility`/`knownItemEffect` filled from the
+// live rules context instead of from an observed BattleHistory). A real player
+// would only know what it had seen; the point of this policy is an upper bound
+// on in-battle move choice, so it reads the truth.
+//
+// The mask is pinned to the full triad (7 = CHECK_BAD_MOVE | TRY_TO_FAINT |
+// CHECK_VIABILITY) by handing `selectFactoryAiMask` a fixed
+// challengeNumber-4 input -- the player's own strength must not track the
+// round's own challenge tier.
+// ---------------------------------------------------------------------------
+
+/**
+ * Fixed mask-selection input: Level-50 singles, a non-Brain trainer, and a
+ * win streak of 28 -> challengeNumber 4 -> the `challengeAtLeast4` branch ->
+ * mask 7 (`battle_factory.c:889-911`, ported in `factoryAiMaskSelection.ts`).
+ * Constant on purpose: the player's scorer is always full strength.
+ */
+export const ORACLE_STRENGTH_FACTORY_INPUT: FactoryAiMaskSelectionInput = Object.freeze({
+  levelMode: FACTORY_LEVEL_MODE_50,
+  battleMode: FACTORY_BATTLE_MODE_SINGLES,
+  factoryWinStreak: 28,
+  trainerOpponentId: 0,
+});
+
+type SoakAbilityIdRow = Readonly<{ name: string; id: number }>;
+const ORACLE_STRENGTH_ABILITY_NAME_BY_ID = new Map(
+  (abilityItemHooksData as { universes: { abilities: SoakAbilityIdRow[] } })
+    .universes.abilities.map((row) => [row.id, row.name]),
+);
+
+const SIDE_STATUS_REFLECT = 1 << 0;
+const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
+const SIDE_STATUS_SPIKES = 1 << 4;
+const SIDE_STATUS_SAFEGUARD = 1 << 5;
+const SIDE_STATUS_FUTUREATTACK = 1 << 6;
+const STATUS2_ESCAPE_PREVENTION = 1 << 26;
+const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
+const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
+const B_WEATHER_SUN = (1 << 5) | (1 << 6);
+const B_WEATHER_HAIL = 1 << 7;
+
+/** Mirror of `factoryAiLiveDriver.ts`'s own private `abilityName`. */
+function oracleStrengthAbilityName(ability: number): string {
+  const name = ORACLE_STRENGTH_ABILITY_NAME_BY_ID.get(ability);
+  if (name === undefined) throw new Error(`oracle-strength view: unknown ability id ${ability}`);
+  return name;
+}
+
+/** Mirror of `factoryAiLiveDriver.ts`'s own private `currentWeather`. */
+function oracleStrengthWeather(weather: number): AiWeatherValue | undefined {
+  if ((weather & B_WEATHER_SUN) !== 0) return AI_WEATHER_SUN;
+  if ((weather & B_WEATHER_RAIN) !== 0) return AI_WEATHER_RAIN;
+  if ((weather & B_WEATHER_SANDSTORM) !== 0) return AI_WEATHER_SANDSTORM;
+  if ((weather & B_WEATHER_HAIL) !== 0) return AI_WEATHER_HAIL;
+  return undefined;
+}
+
+/** Mirror of `factoryAiLiveDriver.ts`'s own private `statStages`. */
+function oracleStrengthStatStages(battler: BattleScriptRulesContext["battlers"][number]) {
+  return Object.freeze({
+    atk: battler.statStages[1]!,
+    def: battler.statStages[2]!,
+    speed: battler.statStages[3]!,
+    spAtk: battler.statStages[4]!,
+    spDef: battler.statStages[5]!,
+    acc: battler.statStages[6]!,
+    evasion: battler.statStages[7]!,
+  });
+}
+
+/**
+ * `createFactoryAiViewFromLiveRules` with the sides swapped: the PLAYER
+ * (battler 0, side 0) is the attacker whose four move slots get scored, and
+ * the OPPONENT (battler 1, side 1) is the target. Field-for-field the same
+ * reads as the live builder, plus the three full-knowledge overrides
+ * documented in this section's header.
+ */
+export function buildOracleStrengthPlayerView(input: Readonly<{
+  rulesContext: BattleScriptRulesContext;
+  battleTurnCount: number;
+}>): FactoryAiScoredView {
+  const rulesContext = input.rulesContext;
+  const attacker = rulesContext.battlers[0];
+  const target = rulesContext.battlers[1];
+  const weather = oracleStrengthWeather(rulesContext.weather);
+  return Object.freeze({
+    schema: "factory-ai-scored-view/v1",
+    mode: "factory-level-50-singles",
+    // Required literals; see this section's header -- the swap lives in which
+    // real battler each of `attacker`/`target` below is read from.
+    active: Object.freeze({ aiBattler: 1, targetBattler: 0 }),
+    factory: ORACLE_STRENGTH_FACTORY_INPUT,
+    moves: attacker.moves,
+    attacker: Object.freeze({
+      types: attacker.types,
+      attack: attacker.attack,
+      defense: attacker.defense,
+      spAttack: attacker.spAttack,
+      spDefense: attacker.spDefense,
+      speed: attacker.speed,
+      level: attacker.level,
+      statStages: oracleStrengthStatStages(attacker),
+      isFirstTurn: attacker.isFirstTurn,
+      hp: attacker.hp,
+      maxHp: attacker.maxHP,
+      ability: oracleStrengthAbilityName(attacker.ability),
+      holdEffect: resolveBattleScriptBattlerHoldEffect(rulesContext, 0),
+      battleTurnCount: input.battleTurnCount,
+      lightScreenUp: (rulesContext.sideStatuses[0] & SIDE_STATUS_LIGHTSCREEN) !== 0,
+      reflectUp: (rulesContext.sideStatuses[0] & SIDE_STATUS_REFLECT) !== 0,
+      ...(weather === undefined ? {} : { currentWeather: weather }),
+      isRooted: (attacker.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0,
+      ...((rulesContext.sideStatuses[0] & SIDE_STATUS_FUTUREATTACK) !== 0
+        ? { attackerFutureAttackUp: true }
+        : {}),
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
+        ? { isInfatuated: true }
+        : {}),
+      ...((rulesContext.sideStatuses[0] & SIDE_STATUS_SAFEGUARD) !== 0
+        ? { safeguardUp: true }
+        : {}),
+      ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0 ? { isAsleep: true } : {}),
+      ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_REFRESH_CURE_MASK) !== 0
+        ? { hasCurableStatus: true }
+        : {}),
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE) !== 0
+        ? { hasSubstitute: true }
+        : {}),
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY) !== 0
+        ? { hasFocusEnergy: true }
+        : {}),
+      ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0
+        ? { isLeechSeeded: true }
+        : {}),
+      ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0 ? { hasYawn: true } : {}),
+      ...(attacker.protectUses !== 0 ? { protectUses: attacker.protectUses } : {}),
+    }),
+    target: Object.freeze({
+      species: target.species,
+      types: target.types,
+      attack: target.attack,
+      defense: target.defense,
+      spAttack: target.spAttack,
+      spDefense: target.spDefense,
+      speed: target.speed,
+      level: target.level,
+      statStages: oracleStrengthStatStages(target),
+      isFirstTurn: target.isFirstTurn,
+      hp: target.hp,
+      maxHp: target.maxHP,
+      lastUsedMoveId: rulesContext.moveHistory.lastMoves[1],
+      ...(target.status1 !== 0 ? { hasAnyStatus: true } : {}),
+      ...((target.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0 ? { isAsleep: true } : {}),
+      isToxicPoisoned: (target.status1 & BATTLE_SCRIPT_STATUS1_TOXIC_POISON) !== 0,
+      isLeechSeeded: (target.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0,
+      isCursed: (target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CURSED) !== 0,
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) !== 0
+        ? { isConfused: true }
+        : {}),
+      ...(target.tauntTimer !== 0 ? { isTaunted: true } : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
+        ? { isInfatuated: true }
+        : {}),
+      ...((target.status2 & STATUS2_ESCAPE_PREVENTION) !== 0 ? { isEscapePrevented: true } : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_TORMENT) !== 0
+        ? { isTormented: true }
+        : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) !== 0
+        ? { isNightmared: true }
+        : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_FORESIGHT) !== 0
+        ? { isForesighted: true }
+        : {}),
+      ...((target.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0 ? { hasYawn: true } : {}),
+      ...((target.status3 & BATTLE_SCRIPT_STATUS3_PERISH_SONG) !== 0
+        ? { hasPerishSong: true }
+        : {}),
+      // Full-knowledge overrides (test instrument, not a fairness model):
+      // the live opponent driver reads these three off an observed
+      // BattleHistory; the player reads the truth instead.
+      ability: oracleStrengthAbilityName(target.ability),
+      knownAbility: oracleStrengthAbilityName(target.ability),
+      knownItemEffect: resolveBattleScriptBattlerHoldEffect(rulesContext, 1),
+      holdEffect: resolveBattleScriptBattlerHoldEffect(rulesContext, 1),
+      knownMoveIds: target.moves.filter((moveId) => moveId !== 0),
+      ...((rulesContext.sideStatuses[1] & SIDE_STATUS_SAFEGUARD) !== 0
+        ? { safeguardUp: true }
+        : {}),
+      ...((rulesContext.sideStatuses[1] & SIDE_STATUS_SPIKES) !== 0 ? { spikesUp: true } : {}),
+      ...((rulesContext.sideStatuses[1] & SIDE_STATUS_FUTUREATTACK) !== 0
+        ? { targetFutureAttackUp: true }
+        : {}),
+      // `AI_CV_BrickBreak` reads the TARGET's own side Reflect; for the
+      // player-as-attacker view that is side 1.
+      targetSideReflectUp: (rulesContext.sideStatuses[1] & SIDE_STATUS_REFLECT) !== 0,
+    }),
+  });
+}
+
+export type OracleStrengthPick = Readonly<{
+  /** The fight slot to commit, or null when the caller must fall back. */
+  slot: number | null;
+  /** Non-null exactly when `slot` is null: the logged fallback reason. */
+  fallbackReason: string | null;
+}>;
+
+/**
+ * "oracle-strength" fight-slot chooser. Builds the swapped view pair from the
+ * live rules context, hands it to the engine's own
+ * `chooseFactoryAiScoredDecision` together with a synthetic battler-1 command
+ * request carrying the player's LEGAL move slots (the scorer's validator
+ * requires a trainer battler-1 request; it only ever reads the request's
+ * `legalDecisions` move slots), and returns the slot the scorer chose.
+ *
+ * RNG: the scorer's own setup/tie draws run on a CURSOR SUPPLIED BY THE
+ * CALLER and the advanced cursor is discarded, so the live battle's RNG is
+ * never touched by the player's decision. The soak passes a fresh u32 drawn
+ * from its own seeded stream (`Rng`), so the policy stays deterministic per
+ * soak seed while the four `simulatedRng` slots and the final tie index still
+ * vary from decision to decision.
+ *
+ * Returns a fallback reason instead of a slot when there is no legal fight
+ * slot, when the scorer yields anything other than a `use-move` decision, or
+ * when the scorer refuses/halts (e.g. an unsupported-branch barrier in a
+ * player-side configuration the engine itself never produces). Callers count
+ * those and use the "winning" policy's own choice.
+ */
+export function pickOracleStrengthFightSlot(input: Readonly<{
+  rulesContext: BattleScriptRulesContext;
+  legalSlots: readonly boolean[];
+  battleTurnCount: number;
+  rngValue: number;
+}>): OracleStrengthPick {
+  const attackerMoves = input.rulesContext.battlers[0].moves;
+  const legalDecisions: BattleMoveDecision[] = [];
+  for (let slot = 0; slot < 4; slot += 1) {
+    if (!input.legalSlots[slot]) continue;
+    if (attackerMoves[slot] === 0) continue;
+    legalDecisions.push({
+      kind: "use-move",
+      moveSlot: slot as 0 | 1 | 2 | 3,
+      targetBattler: 0,
+    });
+  }
+  if (legalDecisions.length === 0) {
+    return { slot: null, fallbackReason: "no legal fight slot" };
+  }
+  let choice: FactoryAiScoredChoice;
+  try {
+    choice = chooseFactoryAiScoredDecision({
+      view: buildOracleStrengthPlayerView({
+        rulesContext: input.rulesContext,
+        battleTurnCount: input.battleTurnCount,
+      }),
+      request: {
+        kind: "command",
+        requestId: 0,
+        side: "trainer",
+        battler: 1,
+        legalDecisions,
+      },
+      rng: { value: input.rngValue >>> 0, calls: 0 },
+    });
+  } catch (error) {
+    return { slot: null, fallbackReason: `scorer threw: ${(error as Error).message}` };
+  }
+  const decision = choice.submission.decision;
+  if (decision.kind !== "use-move") {
+    return { slot: null, fallbackReason: `scorer chose ${decision.kind}` };
+  }
+  return { slot: decision.moveSlot, fallbackReason: null };
+}
+
+// ---------------------------------------------------------------------------
 // Seeded PRNG (mulberry32)
 // ---------------------------------------------------------------------------
 
@@ -479,6 +806,13 @@ export type SeedResult = {
    * ever existed.
    */
   maxBattleDepth: number | null;
+  /**
+   * "oracle-strength" only: fight-slot decisions where the engine's own
+   * scorer could not answer and the policy fell back to "winning"'s
+   * `pickWinningFightSlot` (each one also logged as
+   * `oracle-strength fallback: <reason>`). Always 0 for every other policy.
+   */
+  oracleStrengthFallbacks: number;
   /** Opt-in test diagnostics; absent from ordinary CLI/full/vanilla runs. */
   diagnostics?: RunDiagnostics;
 };
@@ -633,8 +967,25 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * retrying the next-best candidate if the engine rejects one as a duplicate
  * species, and declining the whole screen (quit prompt, KEEP CURRENT POKéMON)
  * if no opponent mon outscores the worst rental at all.
+ *
+ * "oracle-strength": opt-in, identical to "winning" in every respect
+ * (random 3-of-6 draft, swap offers declined, the same voluntary-switch
+ * heuristic, the same exploration/timing rolls) EXCEPT the fight-move
+ * choice, which is delegated to the ENGINE'S OWN source-derived Factory AI
+ * scorer running for the player's side: `chooseFactoryAiScoredDecision`
+ * under the full mask 7 (CHECK_BAD_MOVE | TRY_TO_FAINT | CHECK_VIABILITY),
+ * fed a `FactoryAiScoredView` that mirrors the live opponent driver's own
+ * with the two sides swapped (see `buildOracleStrengthPlayerView`). The
+ * measurement instrument for docs/soak-policy-strength-scout-2026-08-23.md's
+ * lever 2 -- the scout found challengeNum 4 is the single unbeaten tier and
+ * predicted a source-strength move chooser converts it. NOT a fairness
+ * model: the player is handed the opponent's real moves/ability/item. When
+ * the scorer has no legal slot, returns a non-move decision, or halts on a
+ * barrier, the policy falls back to "winning"'s own
+ * `pickWinningFightSlot` choice and logs `oracle-strength fallback:
+ * <reason>` (counted in `SeedResult.oracleStrengthFallbacks`).
  */
-export type SoakPolicy = "full" | "vanilla" | "winning" | "winning-swap";
+export type SoakPolicy = "full" | "vanilla" | "winning" | "winning-swap" | "oracle-strength";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
 type PlayerPolicy = SoakPolicy | "strong-route";
 
@@ -663,6 +1014,8 @@ export class RandomPlayer {
   private switchedAgainstOpponentIndices = new Set<number>();
   /** "winning" only: count of voluntary switches the heuristic actually committed to (soak diagnostics). */
   public switchCount = 0;
+  /** "oracle-strength" only: fight-slot decisions that fell back to "winning"'s scorer (soak diagnostics). */
+  public oracleStrengthFallbacks = 0;
   /** "winning-swap" only: the current swap screen's row plan, built once per swap occurrence. */
   private swapPlan: WinningSwapPlan | null = null;
   public battle = 1;
@@ -671,14 +1024,16 @@ export class RandomPlayer {
   private readonly log: ActionLog;
   private readonly policy: PlayerPolicy;
 
-  /** "full", "winning", and "winning-swap" share the same menu/target exploration rolls. */
+  /** "full", "winning", "winning-swap", and "oracle-strength" share the same menu/target exploration rolls. */
   private get explores(): boolean {
-    return this.policy === "full" || this.policy === "winning" || this.policy === "winning-swap";
+    return this.policy === "full" || this.policy === "winning"
+      || this.policy === "winning-swap" || this.policy === "oracle-strength";
   }
 
-  /** "winning" and "winning-swap" share every winning-biased decision except the swap offer/screen. */
+  /** "winning", "winning-swap", and "oracle-strength" share every winning-biased decision except the swap offer/screen and (for "oracle-strength") the fight slot. */
   private get winningLike(): boolean {
-    return this.policy === "winning" || this.policy === "winning-swap";
+    return this.policy === "winning" || this.policy === "winning-swap"
+      || this.policy === "oracle-strength";
   }
 
   constructor(rng: Rng, log: ActionLog, policy: PlayerPolicy) {
@@ -707,6 +1062,12 @@ export class RandomPlayer {
 
   private note(state: EngineState, what: string): void {
     this.log.push(state.frame, this.battle, this.turn, what);
+  }
+
+  /** "oracle-strength" only: log + count one fight-slot fallback to "winning"'s own scorer. */
+  private noteOracleStrengthFallback(state: EngineState, reason: string): void {
+    this.oracleStrengthFallbacks += 1;
+    this.note(state, `oracle-strength fallback: ${reason}`);
   }
 
   /** Decide this frame's held buttons. */
@@ -957,6 +1318,30 @@ export class RandomPlayer {
             defenderTypes: battlers?.[1]?.types ?? DEFAULT_TYPES,
           });
         };
+        // "oracle-strength" only: delegate the slot to the engine's own
+        // Factory AI scorer running for the player's side (mask 7), on a
+        // cursor drawn from the soak's own seeded stream so the live
+        // battle's RNG is untouched. Falls back to "winning"'s own choice
+        // (and logs why) when the scorer can't answer.
+        const oracleStrengthSlot = (): number => {
+          const rulesContext = orch.battle?.rules.rulesContext;
+          const rngValue = this.rng.int(0x1_0000_0000);
+          if (!rulesContext) {
+            this.noteOracleStrengthFallback(state, "no live rules context");
+            return bestEffectivenessSlot();
+          }
+          const pick = pickOracleStrengthFightSlot({
+            rulesContext,
+            legalSlots: presentation.legalMoveBySlot.map((slot) => slot !== null),
+            battleTurnCount: this.turnsThisBattle,
+            rngValue,
+          });
+          if (pick.slot === null) {
+            this.noteOracleStrengthFallback(state, pick.fallbackReason ?? "unknown");
+            return bestEffectivenessSlot();
+          }
+          return pick.slot;
+        };
         const target = this.policy === "strong-route"
           && active?.partyIndex === 1
           && active.isFirstTurn === 2
@@ -964,9 +1349,11 @@ export class RandomPlayer {
           ? 3
           : this.policy === "vanilla" || this.policy === "strong-route"
             ? firstLegal
-            : this.winningLike
-              ? bestEffectivenessSlot()
-              : this.rng.int(4);
+            : this.policy === "oracle-strength"
+              ? oracleStrengthSlot()
+              : this.winningLike
+                ? bestEffectivenessSlot()
+                : this.rng.int(4);
         this.fightIntent = {
           key,
           target,
@@ -1211,12 +1598,13 @@ export class RandomPlayer {
       // it already chose and has played with is worth keeping over an
       // unscouted swap. "winning-swap" (opt-in coverage instrument) is the
       // opposite: always accept, then pick deliberately on the swap screen
-      // itself (see onWinningFactorySwap). The roll is still drawn
-      // (this.explores covers "full"/"winning"/"winning-swap" alike) so
+      // itself (see onWinningFactorySwap). "oracle-strength" declines
+      // exactly like "winning". The roll is still drawn (this.explores
+      // covers "full"/"winning"/"winning-swap"/"oracle-strength" alike) so
       // "full"'s own draw here is untouched; only the decision it feeds is
       // overridden.
       const rolledAccept = this.explores && this.rng.chance(0.5);
-      const accept = this.policy === "winning"
+      const accept = this.policy === "winning" || this.policy === "oracle-strength"
         ? false
         : this.policy === "winning-swap"
           ? true
@@ -1544,6 +1932,7 @@ export const DEFAULT_MAX_FRAMES_BY_POLICY: Record<SoakPolicy, number> = {
   vanilla: 600_000,
   winning: 1_000_000,
   "winning-swap": 1_000_000,
+  "oracle-strength": 1_000_000,
 };
 
 /** An explicit `maxFrames` always wins; otherwise resolve per policy. */
@@ -1668,6 +2057,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       turn: player.turn,
       maxCarriedWinStreak,
       maxBattleDepth,
+      oracleStrengthFallbacks: player.oracleStrengthFallbacks,
       lastActions: log.tail(15).map(
         (entry) => `f=${entry.frame} b${entry.battle} t${entry.turn} ${entry.what}`,
       ),
