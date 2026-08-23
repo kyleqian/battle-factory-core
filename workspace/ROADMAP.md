@@ -1388,13 +1388,18 @@ the S10 remainder in this order, ahead of everything else:
    only remainder is the two Noland items, which stay out of scope by the
    2026-07-28 ruling.
 
-**Soak + evidence policy (user-directed 2026-08-09):** `npm run soak`
+**Soak + evidence policy (user-directed 2026-08-09; gate set extended by
+user decision 2026-08-22):** `npm run soak`
 (`tools/soak/randomRoundSoak.ts` — seeded random legal play through the
 production path, full rounds) is the standing instrument for Gate 6's
 "multiple seeded legal Factory rounds run end-to-end" clause. Every
-supervisor wind-down runs `npm run soak -- --policy vanilla --seeds 0:20`
-(must stay 20/20 OK) and records the full-policy completion count; ISSUES
-#85 tracks the current crash wall. Receipt hygiene (ADVISORY —
+supervisor wind-down runs all four gates and records each count:
+- `npm run soak -- --policy vanilla --seeds 0:20` — must stay **20/20 OK**;
+- `npm run soak -- --seeds 0:60` (the `full` policy) — record the count;
+- `npm run soak -- --policy winning --seeds 0:60` — record the count;
+- `npm run soak -- --policy winning-swap --seeds 0:60` — record the count.
+
+ISSUES #85 tracks the current crash wall. Receipt hygiene (ADVISORY —
 user-clarified 2026-08-09: worker TIME is the constraint, repo weight is
 not): prefer committing the staged scenario + probe/verify script +
 compact assertion block; a dump that is expensive to regenerate MAY be
@@ -1412,12 +1417,19 @@ The standing gates therefore read "no stall and no crash within the budget".
 Every pre-#104 sweep's "OK" was a cumulative-grace artifact (the run stopped
 after ~3 re-chains) — compare depth numbers only within one semantics era.
 
-**Gate coverage note (2026-08-22, ISSUES #116):** `vanilla` draws no RNG of
-its own and the engine RNG advances only on draws, so every `vanilla` seed
-replays ONE trajectory (240/240 identical end states,
-`docs/soak-full-vanilla-0-240-2026-08-22.md`); the "vanilla 0:20 = 20/20"
-gate is a single-trajectory smoke. `full` and `winning` are seed-diverse.
-Changing the gate's semantics is the user's call (options in #116).
+**Gate coverage note (2026-08-22, resolved by user decision 2026-08-22 —
+closes ISSUES #116):** `vanilla` draws no RNG of its own and the engine RNG
+advances only on draws, so every `vanilla` seed replays ONE trajectory
+(240/240 identical end states, `docs/soak-full-vanilla-0-240-2026-08-22.md`);
+the "vanilla 0:20 = 20/20" gate is a single-trajectory smoke — kept
+deliberately as a rigid canary (any change in its result means engine
+behavior changed). The seed-diverse deep coverage comes from the two gates
+added by the same decision: `winning 0:60` and `winning-swap 0:60` (the only
+policies that win rounds and exercise the post-win swap screen). Baseline on
+the 2026-08-22 tree: winning 0:480 = 480/480, winning-swap 0:360 = 359/360
+(the one crash was #119, fixed at `d41bc58c`), so both 0:60 gates start
+green. `vanilla` itself stays unchanged (option (b)'s seed-backed draft was
+declined).
 
 
 **Gate-6 evidence granularity + sequencing (user decision 2026-08-09):**

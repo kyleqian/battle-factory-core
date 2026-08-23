@@ -76,6 +76,28 @@ The three engine readers of `fixedIvs` are currently bounded to the 8
 *declared* rows (`DECLARED_FIXED_IV_ROWS`) so the new data row is inert until
 that lands. Sized at more than one bounded worker step.
 
+**Queue setup (2026-08-22, user-approved next step — this is the first work
+item of the next supervisor session).** A green two-commit ladder that
+respects both the lockstep constraint and per-commit greenness:
+1. **Commit 1 (Rust-only, tree stays green):** the core-rs changes —
+   `get_level50_initial_rental_fixed_iv` retail clamp, the two IV draws in
+   `rental_generation.rs`, the new `Phase::RandomIvs` /
+   `Purpose::RandomIvsLow|High` discriminants, the `factory-wasm`
+   record/ledger layout + its snapshot-test updates — WITHOUT rebuilding the
+   shipped wasm binary. Cargo suite green; the TS suite never sees the
+   change (the committed `.wasm` still throws, TS still throws, parity still
+   agrees).
+2. **Commit 2 (the lockstep commit):** `build-wasm.sh` rebuild + the
+   `core-rs/adapter/factoryEngine.ts` decode + every TS-side change (remove
+   the throw, retail clamp in `getLevel50InitialRentalFixedIv`, six real IVs
+   through `FactoryCorpusPartyInstance`) + the
+   `factoryRentalParity.test.ts` expectation updates, together.
+
+After it lands, re-run the deep-streak sweeps that hit this crash:
+`--policy winning --start-carry 42` and `--start-carry 49` (the driver's
+legal max), expecting the 3 known #118 crash seeds (42: seeds 2/32/49) to
+go clean.
+
 ## #109 — `battleAiSwitchInto.ts` omits the `i != monToSwitchIntoId[battlerIn1/2]` exclusion in both passes
 
 **Found 2026-08-22** (side worker, #102 fix). Source `GetMostSuitableMonToSwitchInto`
@@ -85,25 +107,6 @@ does not. Unobservable in singles today because that slot is PARTY_SIZE at
 the only call site (one opponent battler), so this is an unmodelled source
 condition rather than a live bug — port it when doubles or a second consumer
 arrive, with a Tier-1 pin.
-
-## #116 — The `vanilla` soak policy is seed-invariant: the standing "vanilla 0:20 = 20/20" gate replays ONE trajectory twenty times
-
-**Found 2026-08-22** (supervisor's `vanilla` 0:240 re-sweep,
-`docs/soak-full-vanilla-0-240-2026-08-22.md`): all 240 seeds end at exactly
-`b7 t11 600000f carry<=7 depth<=10`. Cause, by design: `vanilla` makes no
-RNG-backed choice (rent 0/1/2, first legal move, offered forced pick, swap NO,
-GO ON — `randomRoundSoakDriver.ts:443-446`); its only seed use is press-timing
-jitter, and the engine's RNG advances on draws, not per frame (ISSUES #55's
-parked ambient-VBlank contract), so timing never changes the game. `full`
-and `winning` are seed-diverse (240 distinct end states). Consequence: the
-user-directed wind-down gate "vanilla 0:20 must stay 20/20" is a
-single-trajectory smoke — real, but narrower than its seed range suggests,
-and it has been so since the policy was written. Not a defect in play.
-Options (user-facing gate semantics, so recorded rather than changed):
-(a) keep it and say so in the ROADMAP soak-policy block; (b) give `vanilla`
-one seed-backed choice that stays plain (e.g. rent a random 3-of-6 in slot
-order) so 0:20 covers 20 drafts; (c) switch the gate to `full` 0:60 + this
-note. Recommendation: (b) — smallest change that makes the seed range honest.
 
 ## #114 — `runFutureAttacksAfterFaints` fires a delayed hit inline and keeps looping where source returns per effect (doubles-era divergence)
 

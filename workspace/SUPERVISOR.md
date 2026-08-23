@@ -353,13 +353,18 @@ every user-facing report including wind-down summaries.
   the last worker didn't); a short summary of the session — steps run,
   outcomes, what's next, and every new or still-blocking deferred question.
 - **Wind-down soak gates (standing, user-directed 2026-08-09; restated here
-  2026-08-10 after two sessions skipped it):** run
-  `npm run soak -- --policy vanilla --seeds 0:20` (must stay **20/20 OK**)
-  and `npm run soak -- --seeds 0:60`, and record both counts in the
-  wind-down `PROGRESS.md` entry. This is the playable-path regression gate;
-  a docs-only session may skip it, any session that folded engine/`src`
-  changes may not. Full policy text: ROADMAP S10 block "Soak + evidence
-  policy".
+  2026-08-10 after two sessions skipped it; extended to four gates by user
+  decision 2026-08-22):** run
+  `npm run soak -- --policy vanilla --seeds 0:20` (must stay **20/20 OK**),
+  `npm run soak -- --seeds 0:60`,
+  `npm run soak -- --policy winning --seeds 0:60`, and
+  `npm run soak -- --policy winning-swap --seeds 0:60`, and record all four
+  counts in the wind-down `PROGRESS.md` entry. `vanilla` is the rigid
+  single-trajectory canary; `winning`/`winning-swap` are the seed-diverse
+  deep gates (round wins + the swap screen). This is the playable-path
+  regression gate; a docs-only session may skip it, any session that folded
+  engine/`src` changes may not. Full policy text: ROADMAP S10 block "Soak +
+  evidence policy".
 
 ## Mechanics
 

@@ -5,6 +5,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1387 — [top-layer session, 2026-08-22] **User decisions recorded + next supervisor session set up: #116 RESOLVED (keep `vanilla` as the rigid canary; wind-down gates extended to four — `winning 0:60` + `winning-swap 0:60` added), #118 confirmed as the next session's first work item with a two-commit landing ladder written into its ISSUES entry**
+
+- **State:** docs-only commit on the 1386 final tree (`99429dc9` parent; no
+  engine/`src` touch, no suites due).
+- **Did (all user-approved this session):** (1) **#116 resolved and
+  deleted** — decision: keep `vanilla 0:20` unchanged as a deliberate
+  single-trajectory canary (option (b) seed-backed draft DECLINED), and add
+  the two seed-diverse gates `winning 0:60` + `winning-swap 0:60` to the
+  standing wind-down set. Gate list updated in SUPERVISOR.md ("Wind-down
+  soak gates", now four commands) and ROADMAP "Soak + evidence policy" +
+  gate-coverage note. Both new gates start green on this tree (winning
+  0:480 = 480/480; winning-swap 0:360 = 359/360 with the one crash #119
+  already fixed). (2) **#118 queued first** for the next supervisor
+  session; its ISSUES entry now carries a concrete two-commit ladder
+  (commit 1 = core-rs + wasm snapshot tests WITHOUT rebuilding the shipped
+  binary, stays green; commit 2 = lockstep wasm rebuild + adapter + TS +
+  parity expectations) and the post-land re-sweeps
+  (`--start-carry 42`/`49`, expecting seeds 2/32/49 to go clean).
+- **Next:** launch the supervisor session; step 1 = #118 per its ISSUES
+  entry, then the `--start-carry 42/49` re-sweeps, then the (new) four-gate
+  wind-down set.
+- **Notes:** DEFERRED.md still empty — nothing blocks the launcher.
+
+---
+
 ## 1386 — [supervisor wind-down, 2026-08-22 17:10] **Post-M-B crash burn-down: 14 worker rounds, queue to zero; final engine sweeps `full` 0:480 + `winning` 0:480 + `vanilla` 0:240 all clean; two new opt-in soak instruments (`winning-swap`, `--start-carry`) opened the swap screen and challenge 5-8 tiers to soak — #119 (swapped-party forced switch) fixed same session (`d41bc58c`), #118 remainder is a TS+Rust coupled port; animation + rust lanes folded**
 
 - **Final gates (supervisor-independent, final tree `2dc691ae` + this docs commit):** full `npm test`
@@ -77,35 +102,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   currently agree *by throwing* at IV argument 8.
 - **Notes:** step 3's `--start-carry` sweeps were NOT run (cap). No
   `unsupported-branch` pin moved. `PAPERCUT:` none.
-
-## 1384 — [main worker, 2026-08-22] **new opt-in `--start-carry` soak option boots the first chained round at a carried win streak — 0:160 across 3 sweeps, ISSUES #118 filed (challengeNum 8 draft-generation throw, real 2-round-win-from-42 state)**
-
-- **State:** master `f04c6227` + this docs commit. `npm test` 1095/1139
-  files, 10231/10454 passed, build green, smoke 444/444, ratchet unchanged
-  (no `src/` touch — the carry is injected entirely from already-public
-  `src/engine` exports via the existing `stateFactory` seam).
-- **Did:** `createStartCarryState(N)` (`tools/soak/randomRoundSoakDriver.ts`)
-  drives `generateFactoryChallengeDraft` from the anchor RNG cursor with a
-  synthetic carry `{factoryWinStreak: N, rentsCount: 0, battlePoints: 0,
-  factorySymbolsCount: <21⇒1, 42⇒2>, playerTrainerId: anchor}` — the same
-  chaining entry a real round-win handoff uses. `--start-carry 0`/omitted ==
-  `createInitialState()` verbatim (stashed before/after `winning` 0:10 byte-
-  identical). 4 new pins (carry 28 boot ⇒ challengeNum 4; carry 42 boot ⇒
-  its OWN 7th battle is NOT the brain — gold was already earned crossing 41
-  inside the round that carries 35→42, confirmed via
-  `getFactoryFrontierBrainStatus`; invalid values rejected; carry 0
-  identity). Sweeps (8×20-seed chunks, parallel `&`+`wait`, 16 cores):
-  (a) `winning --start-carry 28` 0:60 **60/60 OK**, every seed caps at
-  carry 28 (matches the goal's premise at n=60); (b) `winning --start-carry
-  42` 0:60 **57/60 OK, 3 CRASH** (seeds 2/32/49, all the same signature —
-  `generateInitialFactoryRentals`'s `challengeNum > 7` guard, reached when
-  two round-wins from a 42 boot hit carry 56); (c) `winning-swap
-  --start-carry 35` 0:40 **40/40 OK**. Filed **ISSUES #118** (needs the
-  retail non-BUGFIX out-of-range table behavior, not just a raised guard).
-  `docs/soak-start-carry-2026-08-22.md` has every log + repro.
-- **Next:** #118 unfixed (main-lane engine change, out of this step's
-  scope) — pick up with the `battle_tower.c` non-BUGFIX `#else` lookup.
-  `--start-carry 7/14/21` (the mid tiers) unswept.
-- **Notes:** no new papercuts.
 
 ---
