@@ -109,7 +109,12 @@ history.
   concludes "Edit/Write silently fails" and routes around it with shell
   writes; meanwhile the main tree accumulates stray uncommitted duplicates
   of its early drafts.
-- **Hits:** 5 (2026-08-22: the #120 side worker's first Edit calls landed in
+- **Hits:** 6 (2026-08-23 01:49: an ANIMATION-lane worker's one-line edit to
+  `tests/animation/glareEvidence.test.ts` (its in-progress Belly Drum
+  partial) landed in the MAIN tree while the main supervisor was at
+  wind-down; patch saved to the supervisor's scratchpad and the line
+  reverted so the main tree stayed clean — cross-lane, not just side→main).
+  (2026-08-22: the #120 side worker's first Edit calls landed in
   the main tree's `tests/factoryRoundBattleOrchestrator.test.ts` — the live
   main-lane worker saw the file "flap" modified/clean twice; self-healed,
   but the side brief had omitted the standing clause below — supervisor
