@@ -1,4 +1,36 @@
 
+## 1390 — [main worker, 2026-08-22] **ISSUES #118 CLOSED: the wasm draft-selection wire format now carries a rental's six-IV spread, so an `ivs`-bearing instance round-trips intact**
+
+- **State:** master `47a8db42` + this docs commit. `npm test` **1,099 files
+  / 10,360 passed / 223 skipped** (was 10,359), `npm run build` green,
+  cargo **79 blocks / 1,029 passed / 0 failed** (was 1,027), `fmt --check` +
+  `clippy -- -D warnings` clean, typecheck green. `POKEBENCH_ENGINE=wasm`
+  parity **4 files / 484 passed, none skipped** (rental 387, partyMember 89,
+  draftSelection 5, swap 3); `npm run test:smoke` 444. Rebuilt wasm
+  **511,638 B, sha256 `f55b03fc…`** (gitignored — every checkout still has
+  to run `core-rs/build-wasm.sh`).
+- **Did:** `selected-rental-party`'s rental record gained ONE additive
+  trailing optional, `ivs_presence:u8,[ivs_packed:u32]` — the GBA's own
+  `MON_DATA_IVS` word (`pokemon.c:3997-4004`), the same argument
+  `fw_create_factory_party_member_with_ivs` takes — in one lockstep commit:
+  `FactoryDraftRentalSource.ivs_packed` + decode/encode + the export's
+  byte-layout doc comment, adapter `writeRental`/`readRental` with
+  `packMonDataIvs` lifted into a shared `adapter/monDataIvs.ts` (plus a new
+  `unpackMonDataIvs`), and the `build-wasm.sh` rebuild. factory-core needed
+  nothing: `selected_rental_party` is generic over `T: Clone` and reads no
+  field (verified). NOT a version bump — additive trailing field, and an old
+  decoder can only under-read into the existing status-2 malformed message.
+- **Next:** the four-gate wind-down set (`full`/`winning`/`winning-swap`/
+  `vanilla`), or the next supervisor step; #120/#121 remain open for their
+  lanes.
+- **Notes:** absent stays absent on both sides, so every existing `toEqual`
+  pin is byte-identical (both parity suites run unchanged first). New pins:
+  2 factory-wasm boundary tests, a hand-spelled little-endian byte-for-byte
+  record check, 4 parity cases (180 -> 184) and a 57th malformed packet; a
+  PRESENT uniform spread is pinned distinct from an absent one.
+
+---
+
 ## 1389 — [main worker, 2026-08-22] **ISSUES #118 commit 2/2 landed: the `sFixedIVTable[8]` overread is now ported end to end — TS + adapter + rebuilt wasm in lockstep; the challenge-8 crash repro goes clean**
 
 - **State:** master `0cb8aa26` + this docs commit. `npm test` **1,099 files

@@ -5,6 +5,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1393 — [main worker, 2026-08-23] **Scout lever 4' built and measured: `--policy winning-coverage` (coverage-first 3-of-6 draft) wins 0/30 rounds at carry 28 — challenge 4 stays unbeaten — but reaches carry >= 28 in 10/120 at the anchor vs `winning`'s 18/480**
+
+- **State:** master `2ea18c0b` + this docs commit. `npm test` **1,106 files
+  / 10,396 passed / 223 skipped** (this step adds 1 file / 4 tests; the rest
+  of the delta over 1392's 1,105 / 10,392 came in with that entry's own
+  animation fold), `npm run build` + typecheck green. New opt-in soak policy
+  only — `winning` / `winning-swap` / `full` / `vanilla` / `oracle-strength`
+  untouched (all their pins still pass); zero `src/engine` edits.
+- **Did (`b00f7e60` policy+pins, `2ea18c0b` measurement):**
+  `--policy winning-coverage` = `winning` except the draft, which rents the
+  3-of-6 maximising lexicographic (offensive coverage weighted by the six
+  offers' own types, defensive diversity − shared 4x weaknesses, BST as a
+  pure TIEBREAK). Deterministic, no RNG; the shuffle/decline rolls are still
+  drawn so the stream stays aligned with `winning`. **Measured:** smoke 0:20
+  **20/20 OK**; `--start-carry 28` 0:30 **0/30 rounds won** (same as
+  `winning` and `oracle-strength`) with a WORSE loss shape — **29/30 lost at
+  b1** vs both baselines' 22/30; anchor 0:120 **120/120 OK**, carry ≥ 21
+  39/120, **carry ≥ 28 10/120 (8.3%)** vs `winning`'s 18/480 (3.75%), **carry
+  ≥ 35 0/120** (baseline 0/480). Full numbers + commands in
+  `docs/soak-policy-strength-scout-2026-08-23.md` §"Result — lever 4'".
+- **Next:** every single-axis draft lever is now spent — 4 (bulk+STAB)
+  starved coverage, 4' (coverage-first) starves bulk, and the two failure
+  modes are mirror images, so the only lever left for challenge 4 is a
+  COMBINED draft score (coverage maximised subject to a minimum trio BST),
+  measured the same way (`--start-carry 28 --seeds 0:30` rounds won). Also
+  still open: the scout §4 instruments (per-seed round ledger, loss shape,
+  rentsCount/rank) ~40 lines in the driver. Open ISSUES: #121 (dormant
+  note), #109/#114 (doubles-era), #71/#73/#39/#55 (parked/filler).
+- **Notes:** soak chunking deviates from the brief only in chunk COUNT (2x10
+  for the smoke, 8x15 for the 0:120) — the Bash foreground cap is 600 s and
+  seeds are independent per `runSeed`, so the unions are the requested
+  `0:20` / `0:120`. Tree clean, no foreign animation strays this session.
+
+---
+
 ## 1392 — [supervisor wind-down, 2026-08-23 ~02:15] **#118 CLOSED end to end (Rust `5b51eac5` → lockstep TS+wasm `0cb8aa26` → wire format `47a8db42`), #120 found by audit + fixed, #121 probed not-a-divergence, `oracle-strength` soak policy built and measured NEGATIVE; every gate green on the final tree; animation folded twice**
 
 - **Final gates (supervisor-independent):** on `a5b06cfb` (engine-final):
@@ -91,40 +126,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   b2 6, b3 1, b5 1 — statistically identical to `winning`@28. **Fallbacks
   summed to 0**, so the scorer really answered every decision. 0:120
   confirmation sweep NOT run (out of session time).
-
----
-
-## 1390 — [main worker, 2026-08-22] **ISSUES #118 CLOSED: the wasm draft-selection wire format now carries a rental's six-IV spread, so an `ivs`-bearing instance round-trips intact**
-
-- **State:** master `47a8db42` + this docs commit. `npm test` **1,099 files
-  / 10,360 passed / 223 skipped** (was 10,359), `npm run build` green,
-  cargo **79 blocks / 1,029 passed / 0 failed** (was 1,027), `fmt --check` +
-  `clippy -- -D warnings` clean, typecheck green. `POKEBENCH_ENGINE=wasm`
-  parity **4 files / 484 passed, none skipped** (rental 387, partyMember 89,
-  draftSelection 5, swap 3); `npm run test:smoke` 444. Rebuilt wasm
-  **511,638 B, sha256 `f55b03fc…`** (gitignored — every checkout still has
-  to run `core-rs/build-wasm.sh`).
-- **Did:** `selected-rental-party`'s rental record gained ONE additive
-  trailing optional, `ivs_presence:u8,[ivs_packed:u32]` — the GBA's own
-  `MON_DATA_IVS` word (`pokemon.c:3997-4004`), the same argument
-  `fw_create_factory_party_member_with_ivs` takes — in one lockstep commit:
-  `FactoryDraftRentalSource.ivs_packed` + decode/encode + the export's
-  byte-layout doc comment, adapter `writeRental`/`readRental` with
-  `packMonDataIvs` lifted into a shared `adapter/monDataIvs.ts` (plus a new
-  `unpackMonDataIvs`), and the `build-wasm.sh` rebuild. factory-core needed
-  nothing: `selected_rental_party` is generic over `T: Clone` and reads no
-  field (verified). NOT a version bump — additive trailing field, and an old
-  decoder can only under-read into the existing status-2 malformed message.
-- **Next:** the four-gate wind-down set (`full`/`winning`/`winning-swap`/
-  `vanilla`), or the next supervisor step; #120/#121 remain open for their
-  lanes.
-- **Notes:** absent stays absent on both sides, so every existing `toEqual`
-  pin is byte-identical (both parity suites run unchanged first). New pins:
-  2 factory-wasm boundary tests, a hand-spelled little-endian byte-for-byte
-  record check, 4 parity cases (180 -> 184) and a 57th malformed packet; a
-  PRESENT uniform spread is pinned distinct from an absent one.
-
----
 
 ---
 
