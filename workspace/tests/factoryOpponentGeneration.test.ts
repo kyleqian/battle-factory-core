@@ -177,6 +177,25 @@ describe("Battle Factory generic opponent generation", () => {
     expect(getLevel50FactoryOpponentFixedIv(35, 6)).toBe(31);
   });
 
+  it("pins GetFactoryMonFixedIV's own clamp: argument exactly 8 overreads, 9+ clamps to row 7", () => {
+    // Shared with the rentals' and the Brain's readers -- retail's
+    // GetFactoryMonFixedIV is one function serving all three call sites, and
+    // its non-BUGFIX bound check is `> ARRAY_COUNT(sFixedIVTable)`, STRICTLY
+    // greater than 8 (battle_factory.c:748-750, ISSUES #118). Unreachable
+    // through this caller today: battleTowerLevel50WinStreak is the Battle
+    // TOWER streak and every call site passes 0.
+    expect(getLevel50FactoryOpponentFixedIv(49, 0)).toBe(31); // argument 7
+    expect(getLevel50FactoryOpponentFixedIv(56, 0)).toBe(110); // argument 8 -> overread row
+    // The overread row's lastBattle column is 0: the round's LAST trainer
+    // gets an all-zero uniform spread, not a rolled one.
+    expect(getLevel50FactoryOpponentFixedIv(56, 6)).toBe(0);
+    expect(getLevel50FactoryOpponentFixedIv(62, 0)).toBe(110); // still argument 8
+    expect(getLevel50FactoryOpponentFixedIv(63, 0)).toBe(31); // argument 9 -> row 7
+    expect(getLevel50FactoryOpponentFixedIv(63, 6)).toBe(31);
+    expect(getLevel50FactoryOpponentFixedIv(70, 0)).toBe(31); // argument 10 -> row 7
+    expect(getLevel50FactoryOpponentFixedIv(700, 0)).toBe(31);
+  });
+
   it("proves the Level-50 high-tier rejection is source-real but unreachable", () => {
     // battle_factory.c:349-351 guards ids > FRONTIER_MONS_HIGH_TIER (849).
     // Every valid Level-50 GetFactoryMonId range ends at or below 849, so no

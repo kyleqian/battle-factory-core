@@ -22,6 +22,7 @@ import naturesData from "../data/gen/natures.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 import {
   uniformBattleScriptIvs,
+  type BattleScriptIvs,
   type BattleScriptPartyMemberState,
 } from "./battleScriptRulesContext.ts";
 import { getMonGender, type MonGender } from "./monGender.ts";
@@ -113,7 +114,24 @@ const EV_STAT_BY_FLAG: Readonly<Record<string, StatName>> = Object.freeze({
 export type FactoryCorpusPartyInstance = Readonly<{
   setId: number;
   personality: number;
+  /**
+   * The saved `RentalMon.ivs`, i.e. the constructed mon's ATK IV
+   * (`battle_factory_screen.c:1824` saves `MON_DATA_ATK_IV`) -- NOT the
+   * fixed-IV argument `GetFactoryMonFixedIV` returned. The two coincide
+   * whenever that argument is below `USE_RANDOM_IVS` (32), because then
+   * `CreateBoxMon` writes it into all six stats; when the argument is >= 32
+   * the mon gets a rolled spread and this stays its ATK IV. Always equal to
+   * `ivs.attack` when `ivs` is present.
+   */
   fixedIv: number;
+  /**
+   * The six IVs `CreateBoxMon` actually wrote (`pokemon.c:2265-2295`).
+   * Present whenever the fixed-IV argument was >= `USE_RANDOM_IVS` and the
+   * spread was therefore rolled rather than uniform; also carried on the
+   * uniform paths that construct records, so a record's spread never has to
+   * be re-derived from `fixedIv`. Absent means "uniform `fixedIv`".
+   */
+  ivs?: BattleScriptIvs;
   abilitySlot: 0 | 1;
   /**
    * Source OT id used solely for GET_SHINY_VALUE. Factory callers should pass
@@ -199,7 +217,15 @@ export function createFactoryCorpusPartyMember(
     );
   }
 
-  const ivs = uniformBattleScriptIvs(instance.fixedIv);
+  // A rolled spread (CreateBoxMon's random-IV branch, pokemon.c:2277-2293)
+  // arrives explicitly; every other instance is the uniform fixed-IV case.
+  // `fixedIv` is the ATK IV either way, so the two must agree.
+  if (instance.ivs !== undefined && instance.ivs.attack !== instance.fixedIv) {
+    throw new Error(
+      `instance ivs.attack ${instance.ivs.attack} must equal fixedIv ${instance.fixedIv}`,
+    );
+  }
+  const ivs = instance.ivs ?? uniformBattleScriptIvs(instance.fixedIv);
   const evs = deriveEvs(set);
   const moves = set.moves.map((name) => {
     const row = MOVES_BY_NAME.get(name);

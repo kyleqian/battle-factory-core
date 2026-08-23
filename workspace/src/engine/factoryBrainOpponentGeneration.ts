@@ -33,11 +33,19 @@ import frontierMonsData from "../data/gen/battle-frontier-mons.json" with { type
 import factoryRoundPolicyData from "../data/gen/factory-round-policy.json" with { type: "json" };
 import naturesData from "../data/gen/natures.json" with { type: "json" };
 import {
+  uniformBattleScriptIvs,
+  type BattleScriptIvs,
+} from "./battleScriptRulesContext.ts";
+import {
   createFactoryCorpusPartyMember,
   type FactoryCorpusPartyInstance,
   type FactoryCorpusPartyMemberState,
 } from "./factoryCorpusParty.ts";
-import { getLevel50FactoryRentalRange } from "./factoryRentalGeneration.ts";
+import {
+  battleScriptIvsFromRandomWords,
+  getLevel50FactoryRentalRange,
+  USE_RANDOM_IVS,
+} from "./factoryRentalGeneration.ts";
 import { natureFromPersonality, randomU16 } from "./opponentGen.ts";
 
 const FRONTIER_PARTY_SIZE = 3;
@@ -84,8 +92,13 @@ export type FactoryBrainOpponentSetRejection =
 export type FactoryBrainOpponentDrawLedgerEntry = Readonly<{
   /** Zero-based position among all source Random() calls represented here. */
   position: number;
-  phase: "set-selection" | "personality";
-  purpose: "set-candidate" | "personality-low" | "personality-high";
+  phase: "set-selection" | "personality" | "random-ivs";
+  purpose:
+    | "set-candidate"
+    | "personality-low"
+    | "personality-high"
+    | "random-ivs-low"
+    | "random-ivs-high";
   rngBefore: number;
   rngAfter: number;
   randomU16: number;
@@ -123,6 +136,12 @@ export type FactoryBrainOpponentGenerationInput = Readonly<{
 
 export type FactoryBrainOpponentGenerationResult = Readonly<{
   challengeNum: number;
+  /**
+   * The `GetFactoryMonFixedIV` ARGUMENT this party was built with, not any
+   * member's IV: at challengeNum 6 it is the overread row's 110, which is
+   * >= USE_RANDOM_IVS and therefore rolls a spread per member. Each
+   * record's own `fixedIv`/`ivs` carry what that member actually got.
+   */
   fixedIv: number;
   opponents: readonly [
     FactoryBrainOpponentRecord,
@@ -167,20 +186,18 @@ function setRow(setId: number, field: string): FrontierMonRow {
  * out-of-bounds `sFixedIVTable[8]` read: `ARRAY_COUNT(sFixedIVTable)` is 8,
  * and the non-BUGFIX clamp (`challengeNum > ARRAY_COUNT(...)`) only
  * triggers when the table argument is STRICTLY greater than 8, so argument
- * 8 falls through to the unclamped, one-past-the-end read. That read is
- * intentionally rejected as not portable rather than guessed at, matching
- * `getLevel50FactoryOpponentFixedIv`'s treatment of the ordinary opponent's
- * analogous challenge-8 bug.
+ * 8 falls through to the unclamped, one-past-the-end read. That read is the
+ * `.rodata` pair which follows the table, `{regular: 110, lastBattle: 0}`
+ * (the policy artifact's ninth `retailOverread` row; ROM-byte receipt in
+ * `tests/factoryFixedIvTableRomBytes.test.ts`), and 110 >= USE_RANDOM_IVS
+ * makes `CreateBoxMon` roll a random spread per party member. Arguments 9
+ * and up (challenge 7+) clamp to row 7 as usual.
  */
 export function getLevel50FactoryBrainFixedIv(challengeNum: number): number {
   requireNonnegativeInteger(challengeNum, "challengeNum");
   const ivArg = challengeNum + BRAIN_FIXED_IV_CHALLENGE_OFFSET;
-  if (ivArg > FIXED_IV_TABLE_LENGTH) {
-    return POLICY.rentalSelection.fixedIvs[FIXED_IV_TABLE_LENGTH - 1]!.regular;
-  }
-  const row = ivArg < FIXED_IV_TABLE_LENGTH
-    ? POLICY.rentalSelection.fixedIvs[ivArg]
-    : undefined;
+  const ivIndex = ivArg > FIXED_IV_TABLE_LENGTH ? FIXED_IV_TABLE_LENGTH - 1 : ivArg;
+  const row = POLICY.rentalSelection.fixedIvs[ivIndex];
   if (row === undefined) {
     throw new Error(
       `retail Factory Brain fixed IV is not portable for challenge ${challengeNum} `
@@ -212,7 +229,10 @@ export function generateFactoryBrainOpponent(
   const playerRentalSetIds = new Set(
     input.playerRentalSetIds.map((setId, index) => setRow(setId, `playerRentalSetIds[${index}]`).index),
   );
-  const fixedIv = getLevel50FactoryBrainFixedIv(challengeNum);
+  // The whole party shares one GetFactoryMonFixedIV argument; when that
+  // argument is the >= USE_RANDOM_IVS overread row, each member still rolls
+  // its OWN spread (CreateBoxMon runs per mon).
+  const fixedIvArgument = getLevel50FactoryBrainFixedIv(challengeNum);
   const range = getLevel50FactoryRentalRange(challengeNum, false);
 
   const ledger: FactoryBrainOpponentDrawLedgerEntry[] = [];
@@ -319,10 +339,48 @@ export function generateFactoryBrainOpponent(
       });
     } while (natureFromPersonality(personality) !== targetNature);
 
+    let ivs: BattleScriptIvs;
+    if (fixedIvArgument < USE_RANDOM_IVS) {
+      ivs = uniformBattleScriptIvs(fixedIvArgument);
+    } else {
+      // pokemon.c:2277-2293, immediately after this member's accepted
+      // personality pair: the personality is passed in and OT_ID_PRESET
+      // reads fixedOtId, so neither costs a draw before these two words.
+      const lowIvPosition = ledger.length;
+      const lowIvBefore = rngValue;
+      const lowIv = randomU16(rngValue);
+      rngValue = lowIv.rngValue;
+      ledger.push({
+        position: lowIvPosition,
+        phase: "random-ivs",
+        purpose: "random-ivs-low",
+        rngBefore: lowIvBefore,
+        rngAfter: lowIv.rngValue,
+        randomU16: lowIv.value,
+        opponentIndex,
+      });
+      const highIvPosition = ledger.length;
+      const highIvBefore = rngValue;
+      const highIv = randomU16(rngValue);
+      rngValue = highIv.rngValue;
+      ledger.push({
+        position: highIvPosition,
+        phase: "random-ivs",
+        purpose: "random-ivs-high",
+        rngBefore: highIvBefore,
+        rngAfter: highIv.rngValue,
+        randomU16: highIv.value,
+        opponentIndex,
+      });
+      ivs = battleScriptIvsFromRandomWords(lowIv.value, highIv.value);
+    }
+
     const instance: FactoryCorpusPartyInstance = {
       setId,
       personality,
-      fixedIv,
+      // battle_factory_screen.c:1824's rule: the saved IV byte is the ATK IV.
+      fixedIv: ivs.attack,
+      ivs,
       // CreateBoxMon derives the ability bit from personality; the corpus
       // adapter collapses this to slot 0 for single-ability species.
       abilitySlot: (personality & 1) as 0 | 1,
@@ -354,7 +412,7 @@ export function generateFactoryBrainOpponent(
   ];
   return Object.freeze({
     challengeNum,
-    fixedIv,
+    fixedIv: fixedIvArgument,
     opponents: Object.freeze(tuple),
     party: Object.freeze(party),
     rngValue,

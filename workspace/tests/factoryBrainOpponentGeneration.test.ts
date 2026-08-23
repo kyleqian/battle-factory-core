@@ -37,7 +37,7 @@ function expectContiguousRandomLedger(result: FactoryBrainOpponentGenerationResu
 }
 
 describe("Battle Factory Frontier Brain opponent generation", () => {
-  it("pins the fixed-IV receipts at challengeNum 2 and 5, plus the retail challenge-6 OOB rejection", () => {
+  it("pins the fixed-IV receipts at challengeNum 2 and 5, plus the retail challenge-6 OOB overread", () => {
     // sFixedIVTable rows, indexed by challengeNum + 2 (battle_factory.c:157-166, 772).
     expect(getLevel50FactoryBrainFixedIv(0)).toBe(9); // row 2: {9, 12}
     expect(getLevel50FactoryBrainFixedIv(1)).toBe(12); // row 3: {12, 15}
@@ -47,11 +47,14 @@ describe("Battle Factory Frontier Brain opponent generation", () => {
     expect(getLevel50FactoryBrainFixedIv(5)).toBe(31); // row 7: {31, 31}
     // challengeNum 6 -> ivArg 8 == ARRAY_COUNT(sFixedIVTable): the non-BUGFIX
     // clamp only fires when the argument is STRICTLY greater than 8, so this
-    // is the retail one-past-the-end sFixedIVTable[8] read and is rejected
-    // as not portable rather than guessed at.
-    expect(() => getLevel50FactoryBrainFixedIv(6)).toThrow(/not portable/);
+    // is the retail one-past-the-end sFixedIVTable[8] read -- the .rodata
+    // pair {110, 0} after the table (ISSUES #118;
+    // tests/factoryFixedIvTableRomBytes.test.ts pins the ROM bytes). 110 >=
+    // USE_RANDOM_IVS, so CreateBoxMon rolls a spread per member.
+    expect(getLevel50FactoryBrainFixedIv(6)).toBe(110);
     // challengeNum >= 7 -> ivArg >= 9 is safely clamped to the last row.
     expect(getLevel50FactoryBrainFixedIv(7)).toBe(31);
+    expect(getLevel50FactoryBrainFixedIv(8)).toBe(31);
     expect(getLevel50FactoryBrainFixedIv(100)).toBe(31);
   });
 
@@ -274,6 +277,75 @@ describe("Battle Factory Frontier Brain opponent generation", () => {
       });
       expect(opponent.member.friendship).toBe(0);
       expect(opponent.member.level).toBe(50);
+    }
+  });
+});
+
+// --- retail sFixedIVTable[8] overread (ISSUES #118) ------------------------
+
+describe("Frontier Brain party — retail's sFixedIVTable[8] random-IV overread", () => {
+  it("rolls two CreateBoxMon IV words per member at challengeNum 6 (fixed-IV argument 8)", () => {
+    // challengeNum + 2 == 8 (battle_factory.c:772), the one-past-the-end row
+    // {110, 0}. 110 >= USE_RANDOM_IVS, so every member rolls its own spread.
+    const result = generate(PLAYER_TRAINER_ID, { factoryWinStreak: 42 });
+    expect(result.challengeNum).toBe(6);
+    expect(result.fixedIv).toBe(110); // the ARGUMENT, never a stored IV
+    expectContiguousRandomLedger(result);
+
+    const ivDraws = result.drawLedger.filter((draw) => draw.phase === "random-ivs");
+    expect(ivDraws).toHaveLength(6); // two per member, three members
+    expect(ivDraws.map((draw) => draw.purpose)).toEqual(
+      [0, 1, 2].flatMap(() => ["random-ivs-low", "random-ivs-high"]),
+    );
+    for (const draw of ivDraws) {
+      expect(draw.range).toBeUndefined();
+      expect(draw.candidateSetId).toBeUndefined();
+      expect(draw.selectionOutcome).toBeUndefined();
+      expect(draw.personality).toBeUndefined();
+      expect(draw.personalityOutcome).toBeUndefined();
+    }
+    for (let opponentIndex = 0; opponentIndex < 3; opponentIndex += 1) {
+      const opponent = result.opponents[opponentIndex]!;
+      const [low, high] = result.drawLedger
+        .filter((draw) => draw.phase === "random-ivs" && draw.opponentIndex === opponentIndex);
+      // Immediately after that member's accepted personality pair.
+      expect(low!.position).toBe(opponent.personalityDrawPositions[1] + 1);
+      expect(high!.position).toBe(low!.position + 1);
+      expect(opponent.ivs).toBeDefined();
+      expect(opponent.fixedIv).toBe(opponent.ivs!.attack);
+      expect(opponent.fixedIv).toBeLessThan(32);
+      // The battle party carries the rolled spread, not a uniform ATK IV.
+      expect(opponent.member.ivs).toEqual(opponent.ivs);
+    }
+
+    // Member 0 derived by hand from its two words (pokemon.c:2274-2293):
+    //   3879 = 0b0000_1111_0010_0111
+    //     hp      =  3879        & 31 = 3879 - 32*121 = 7
+    //     attack  = (3879 >>  5) & 31 =  121 - 32*  3 = 25
+    //     defense = (3879 >> 10) & 31 =    3          = 3
+    //   9402 = 0b0010_0100_1011_1010
+    //     speed     =  9402        & 31 = 9402 - 32*293 = 26
+    //     spAttack  = (9402 >>  5) & 31 =  293 - 32*  9 = 5
+    //     spDefense = (9402 >> 10) & 31 =    9          = 9
+    expect(result.drawLedger
+      .filter((draw) => draw.phase === "random-ivs" && draw.opponentIndex === 0)
+      .map((draw) => draw.randomU16)).toEqual([3879, 9402]);
+    expect(result.opponents[0]!.ivs).toEqual({
+      hp: 7, attack: 25, defense: 3, speed: 26, spAttack: 5, spDefense: 9,
+    });
+    expect(result.opponents[0]!.fixedIv).toBe(25);
+  });
+
+  it("draws no IV words at challengeNum 5 (argument 7) and keeps the uniform 31 spread", () => {
+    const result = generate(PLAYER_TRAINER_ID, { factoryWinStreak: 35 });
+    expect(result.challengeNum).toBe(5);
+    expect(result.fixedIv).toBe(31);
+    expect(result.drawLedger.some((draw) => draw.phase === "random-ivs")).toBe(false);
+    for (const opponent of result.opponents) {
+      expect(opponent.fixedIv).toBe(31);
+      expect(opponent.ivs).toEqual({
+        hp: 31, attack: 31, defense: 31, speed: 31, spAttack: 31, spDefense: 31,
+      });
     }
   });
 });

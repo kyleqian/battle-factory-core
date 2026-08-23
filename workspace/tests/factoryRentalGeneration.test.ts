@@ -4,6 +4,7 @@ import {
   generateInitialFactoryRentals,
   getFactoryRentalRank,
   getLevel50FactoryRentalRange,
+  getLevel50InitialRentalFixedIv,
   type FactoryInitialRentalGenerationResult,
 } from "../src/engine/factoryRentalGeneration.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
@@ -255,5 +256,118 @@ describe("Battle Factory initial rental generation", () => {
     expect(getLevel50FactoryRentalRange(6, true)).toEqual({ start: 372, end: 849 });
     expect(getLevel50FactoryRentalRange(7, false)).toEqual({ start: 372, end: 849 });
     expect(getLevel50FactoryRentalRange(7, true)).toEqual({ start: 372, end: 849 });
+  });
+});
+
+// --- retail sFixedIVTable[8] overread (ISSUES #118) ------------------------
+
+describe("Battle Factory initial rentals — retail's sFixedIVTable[8] random-IV overread", () => {
+  it("pins GetFactoryMonFixedIV's own clamp: argument exactly 8 overreads, 9+ clamps to row 7", () => {
+    // battle_factory.c:748-750's non-BUGFIX `#else`: the bound check is
+    // `challengeNum > ARRAY_COUNT(sFixedIVTable)` -- STRICTLY greater than 8
+    // -- so argument 8 is unclamped and reads one row past the table.
+    expect(getLevel50InitialRentalFixedIv(7, false)).toBe(31); // row 7 {31, 31}
+    expect(getLevel50InitialRentalFixedIv(7, true)).toBe(110); // argument 8
+    expect(getLevel50InitialRentalFixedIv(8, false)).toBe(110); // argument 8
+    expect(getLevel50InitialRentalFixedIv(8, true)).toBe(31); // argument 9 -> row 7
+    expect(getLevel50InitialRentalFixedIv(9, false)).toBe(31); // argument 9 -> row 7
+    expect(getLevel50InitialRentalFixedIv(9, true)).toBe(31); // argument 10 -> row 7
+    expect(getLevel50InitialRentalFixedIv(10, false)).toBe(31); // argument 10 -> row 7
+    // Without the 9+ clamp the challenge-8 fix would only move the old throw
+    // one challenge deeper, so these two are the load-bearing pins.
+    expect(getLevel50InitialRentalFixedIv(50, true)).toBe(31);
+  });
+
+  it("rolls exactly two CreateBoxMon IV words per rental at challengeNum 8, right after its personality pair", () => {
+    const result = generate(PLAYER_TRAINER_ID, 56);
+    expect(result.challengeNum).toBe(8);
+    expect(result.rentalRank).toBe(0);
+
+    const ivDraws = result.drawLedger.filter((draw) => draw.phase === "random-ivs");
+    expect(ivDraws).toHaveLength(12); // two per rental, all six slots
+    expect(ivDraws.map((draw) => draw.purpose)).toEqual(
+      [0, 1, 2, 3, 4, 5].flatMap(() => ["random-ivs-low", "random-ivs-high"]),
+    );
+    // A random-ivs entry carries the drawn word and nothing else -- neither
+    // the selection group nor the personality group (pokemon.c:2277-2293).
+    for (const draw of ivDraws) {
+      expect(draw.range).toBeUndefined();
+      expect(draw.betterRange).toBeUndefined();
+      expect(draw.candidateSetId).toBeUndefined();
+      expect(draw.selectionOutcome).toBeUndefined();
+      expect(draw.personality).toBeUndefined();
+      expect(draw.personalityOutcome).toBeUndefined();
+      expect(draw.rngAfter).toBe(advanceRngValue(draw.rngBefore));
+      expect(draw.randomU16).toBe(draw.rngAfter >>> 16);
+    }
+    // The two words follow the ACCEPTED personality pair immediately: the
+    // personality is passed in and OT_ID_PRESET reads fixedOtId, so neither
+    // costs a draw in between.
+    for (let rentalIndex = 0; rentalIndex < 6; rentalIndex += 1) {
+      const rental = result.rentals[rentalIndex]!;
+      const [low, high] = result.drawLedger
+        .filter((draw) => draw.phase === "random-ivs" && draw.rentalIndex === rentalIndex);
+      expect(low!.position).toBe(rental.personalityDrawPositions[1] + 1);
+      expect(high!.position).toBe(low!.position + 1);
+      expect(rental.ivs).toBeDefined();
+      // battle_factory_screen.c:1824 saves MON_DATA_ATK_IV as RentalMon.ivs.
+      expect(rental.fixedIv).toBe(rental.ivs!.attack);
+      // 110 is the fixed-IV ARGUMENT, never a stored IV.
+      expect(rental.fixedIv).toBeLessThan(32);
+    }
+  });
+
+  it("derives rental 0's six IVs by hand from its two drawn words", () => {
+    const result = generate(PLAYER_TRAINER_ID, 56);
+    const [low, high] = result.drawLedger
+      .filter((draw) => draw.phase === "random-ivs" && draw.rentalIndex === 0)
+      .map((draw) => draw.randomU16);
+    expect([low, high]).toEqual([56_643, 28_792]);
+
+    // pokemon.c:2274-2293, five bits per stat, low bits first.
+    //   56643 = 0b1101_1101_0100_0011
+    //     hp      =  56643        & 31 = 56643 - 32*1770 = 3
+    //     attack  = (56643 >>  5) & 31 =  1770 - 32*  55 = 10
+    //     defense = (56643 >> 10) & 31 =    55 - 32      = 23
+    //   28792 = 0b0111_0000_0111_1000
+    //     speed     =  28792        & 31 = 28792 - 32*899 = 24
+    //     spAttack  = (28792 >>  5) & 31 =   899 - 32* 28 = 3
+    //     spDefense = (28792 >> 10) & 31 =    28          = 28
+    expect(result.rentals[0]!.ivs).toEqual({
+      hp: 3, attack: 10, defense: 23, speed: 24, spAttack: 3, spDefense: 28,
+    });
+    expect(result.rentals[0]!.fixedIv).toBe(10);
+
+    // The constructed mon carries the rolled spread, not a uniform ATK IV.
+    const member = createFactoryCorpusPartyMember(result.rentals[0]!);
+    expect(member.ivs).toEqual(result.rentals[0]!.ivs);
+  });
+
+  it("rolls IVs only for the better-range slots at challengeNum 7 (argument 8), leaving the rest uniform 31", () => {
+    // battle_factory_screen.c:1762-1764: slots below the rental rank use
+    // GetFactoryMonFixedIV(challengeNum + 1). rentsCount 100 -> rank 5, so
+    // slots 0..4 take argument 8 (the overread) and slot 5 takes argument 7.
+    const result = generate(PLAYER_TRAINER_ID, 49, 100);
+    expect(result.challengeNum).toBe(7);
+    expect(result.rentalRank).toBe(5);
+
+    const ivDraws = result.drawLedger.filter((draw) => draw.phase === "random-ivs");
+    expect(ivDraws).toHaveLength(10);
+    expect([...new Set(ivDraws.map((draw) => draw.rentalIndex))]).toEqual([0, 1, 2, 3, 4]);
+    expect(result.rentals[5]!.ivs).toEqual({
+      hp: 31, attack: 31, defense: 31, speed: 31, spAttack: 31, spDefense: 31,
+    });
+    expect(result.rentals[5]!.fixedIv).toBe(31);
+  });
+
+  it("draws no IV words and keeps the uniform spread below USE_RANDOM_IVS", () => {
+    const result = generate(PLAYER_TRAINER_ID, 0);
+    expect(result.drawLedger.some((draw) => draw.phase === "random-ivs")).toBe(false);
+    for (const rental of result.rentals) {
+      expect(rental.fixedIv).toBe(3); // row 0 {3, 6}
+      expect(rental.ivs).toEqual({
+        hp: 3, attack: 3, defense: 3, speed: 3, spAttack: 3, spDefense: 3,
+      });
+    }
   });
 });

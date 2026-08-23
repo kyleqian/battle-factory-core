@@ -29,11 +29,17 @@ import {
   type FactoryCorpusPartyMemberState,
 } from "./factoryCorpusParty.ts";
 import {
+  uniformBattleScriptIvs,
+  type BattleScriptIvs,
+} from "./battleScriptRulesContext.ts";
+import {
   selectFactoryTrainer,
   type FactoryTrainerDrawLedgerEntry,
 } from "./factoryTrainerSchedule.ts";
 import {
+  battleScriptIvsFromRandomWords,
   getLevel50FactoryRentalRange,
+  USE_RANDOM_IVS,
 } from "./factoryRentalGeneration.ts";
 import { natureFromPersonality, randomU16 } from "./opponentGen.ts";
 
@@ -88,8 +94,14 @@ export type FactoryOpponentSetRejection =
 export type FactoryOpponentDrawLedgerEntry = Readonly<{
   /** Zero-based position among all source Random() calls represented here. */
   position: number;
-  phase: "trainer-selection" | "set-selection" | "personality";
-  purpose: "trainer-candidate" | "set-candidate" | "personality-low" | "personality-high";
+  phase: "trainer-selection" | "set-selection" | "personality" | "random-ivs";
+  purpose:
+    | "trainer-candidate"
+    | "set-candidate"
+    | "personality-low"
+    | "personality-high"
+    | "random-ivs-low"
+    | "random-ivs-high";
   rngBefore: number;
   rngAfter: number;
   randomU16: number;
@@ -149,6 +161,12 @@ export type FactoryOpponentGenerationResult = Readonly<{
   trainerSourceId: string;
   trainerName: string;
   storedTrainerIds: readonly number[];
+  /**
+   * The `GetFactoryMonFixedIV` ARGUMENT this party was built with, not any
+   * member's IV: on the retail overread row it is 110, which is >=
+   * USE_RANDOM_IVS and rolls a spread per member. Each record's own
+   * `fixedIv`/`ivs` carry what that member actually got.
+   */
   fixedIv: number;
   opponents: readonly [
     FactoryOpponentRecord,
@@ -205,8 +223,18 @@ function setRow(setId: number, field: string): FrontierMonRow {
 /**
  * `GetFactoryMonFixedIV` through the retail
  * `FillFactoryFrontierTrainerParty` call site (`battle_factory.c:739-756`,
- * `battle_tower.c:1832-1847`). Challenge 8's out-of-bounds retail read is
- * intentionally rejected instead of pretending it is portable data.
+ * `battle_tower.c:1832-1847`), carrying retail's own clamp: the non-BUGFIX
+ * bound check is STRICTLY greater than `ARRAY_COUNT(sFixedIVTable)`, so
+ * argument exactly 8 reads one row past the table -- the `.rodata` pair
+ * `{regular: 110, lastBattle: 0}` (the policy artifact's ninth
+ * `retailOverread` row) -- while 9 and up clamp to row 7. 110 >=
+ * USE_RANDOM_IVS rolls a spread per mon; the row's `lastBattle` 0 means the
+ * round's LAST trainer instead gets an all-zero uniform spread.
+ *
+ * Unreachable today: `battleTowerLevel50WinStreak` is the Battle TOWER
+ * streak, which every current call site passes as 0, so `towerChallengeNum`
+ * never leaves row 0. The split is ported anyway because retail's
+ * `GetFactoryMonFixedIV` is one function serving all three callers.
  */
 export function getLevel50FactoryOpponentFixedIv(
   battleTowerLevel50WinStreak: number,
@@ -217,9 +245,10 @@ export function getLevel50FactoryOpponentFixedIv(
     throw new Error(`battleIndex must be an integer in [0, ${STAGES_PER_CHALLENGE - 1}]`);
   }
   const towerChallengeNum = Math.floor(battleTowerLevel50WinStreak / STAGES_PER_CHALLENGE);
-  const row = towerChallengeNum < DECLARED_FIXED_IV_ROWS
-    ? POLICY.rentalSelection.fixedIvs[towerChallengeNum]
-    : undefined;
+  const ivIndex = towerChallengeNum > DECLARED_FIXED_IV_ROWS
+    ? DECLARED_FIXED_IV_ROWS - 1
+    : towerChallengeNum;
+  const row = POLICY.rentalSelection.fixedIvs[ivIndex];
   if (row === undefined) {
     throw new Error(
       `retail Factory opponent fixed IV is not portable for Battle Tower challenge ${towerChallengeNum}`,
@@ -255,6 +284,46 @@ function freezeLedger(
     ...entry,
     range: entry.range === undefined ? undefined : Object.freeze({ ...entry.range }),
   })));
+}
+
+/**
+ * `CreateBoxMon`'s IV step for one opponent (`pokemon.c:2265-2295`): a
+ * fixed-IV argument below `USE_RANDOM_IVS` writes itself into all six stats
+ * and costs no draw; at or above it (retail's `sFixedIVTable[8]` overread)
+ * two `Random()` words are spent, immediately after this mon's accepted
+ * personality pair, since the personality is passed in and `OT_ID_PRESET`
+ * reads `fixedOtId`.
+ */
+function rollOpponentIvs(
+  ledger: FactoryOpponentDrawLedgerEntry[],
+  rngValue: number,
+  fixedIvArgument: number,
+  battleIndex: number,
+  opponentIndex: number,
+): { readonly ivs: BattleScriptIvs; readonly rngValue: number } {
+  if (fixedIvArgument < USE_RANDOM_IVS) {
+    return { ivs: uniformBattleScriptIvs(fixedIvArgument), rngValue };
+  }
+  let cursor = rngValue;
+  const words: number[] = [];
+  for (const purpose of ["random-ivs-low", "random-ivs-high"] as const) {
+    const position = ledger.length;
+    const rngBefore = cursor;
+    const draw = randomU16(cursor);
+    cursor = draw.rngValue;
+    ledger.push({
+      position,
+      phase: "random-ivs",
+      purpose,
+      rngBefore,
+      rngAfter: draw.rngValue,
+      randomU16: draw.value,
+      battleIndex,
+      opponentIndex,
+    });
+    words.push(draw.value);
+  }
+  return { ivs: battleScriptIvsFromRandomWords(words[0]!, words[1]!), rngValue: cursor };
 }
 
 /**
@@ -348,10 +417,14 @@ export function adoptFactoryOpponentSchedule(
       });
     } while (natureFromPersonality(personality) !== targetNature);
 
+    const rolled = rollOpponentIvs(ledger, rngValue, fixedIv, input.battleIndex, opponentIndex);
+    rngValue = rolled.rngValue;
     const instance: FactoryCorpusPartyInstance = {
       setId: set.index,
       personality,
-      fixedIv,
+      // battle_factory_screen.c:1824's rule: the saved IV byte is the ATK IV.
+      fixedIv: rolled.ivs.attack,
+      ivs: rolled.ivs,
       abilitySlot: (personality & 1) as 0 | 1,
       otId,
     };
@@ -545,10 +618,14 @@ export function generateFactoryOpponent(
       });
     } while (natureFromPersonality(personality) !== targetNature);
 
+    const rolled = rollOpponentIvs(ledger, rngValue, fixedIv, input.battleIndex, opponentIndex);
+    rngValue = rolled.rngValue;
     const instance: FactoryCorpusPartyInstance = {
       setId: selection.setId,
       personality,
-      fixedIv,
+      // battle_factory_screen.c:1824's rule: the saved IV byte is the ATK IV.
+      fixedIv: rolled.ivs.attack,
+      ivs: rolled.ivs,
       // CreateBoxMon derives the ability bit from personality; the rung-5
       // adapter collapses this to slot 0 for single-ability species.
       abilitySlot: (personality & 1) as 0 | 1,
