@@ -22,6 +22,7 @@ import {
 } from "../../src/engine/factoryDraftScreen.ts";
 import type { FactoryRentalParty } from "../../src/engine/battleScenario.ts";
 import type { FactoryCorpusPartyInstance } from "../../src/engine/factoryCorpusParty.ts";
+import { packMonDataIvs, unpackMonDataIvs } from "./monDataIvs.ts";
 import { defaultEngineId } from "./rngEngine.ts";
 import { loadFactoryWasm } from "./loadFactoryWasm.ts";
 
@@ -170,6 +171,11 @@ function writeRental(writer: Writer, rental: FactoryCorpusPartyInstance): void {
   writer.u8(rental.abilitySlot);
   if (rental.otId === undefined) writer.u8(0);
   else { writer.u8(1); writer.u32(rental.otId); }
+  // The optional six-IV spread crosses as the GBA's own packed MON_DATA_IVS
+  // word; absent stays absent, so a spread-less instance is never widened
+  // into a uniform one packed from `fixedIv`.
+  if (rental.ivs === undefined) writer.u8(0);
+  else { writer.u8(1); writer.u32(packMonDataIvs(rental.ivs)); }
 }
 
 function writePresence(writer: Writer, present: boolean): void { writer.u8(present ? 1 : 0); }
@@ -231,10 +237,22 @@ function readRental(reader: Reader): FactoryCorpusPartyInstance {
   const fixedIv = reader.u32();
   const abilitySlot = reader.u8();
   if (abilitySlot > 1) throw new Error("factory-wasm factoryDraftSelectionEngine: malformed result ability slot");
-  const present = reader.u8();
-  if (present === 0) return { setId, personality, fixedIv, abilitySlot: abilitySlot as 0 | 1 };
-  if (present !== 1) throw new Error("factory-wasm factoryDraftSelectionEngine: malformed result optional otId");
-  return { setId, personality, fixedIv, abilitySlot: abilitySlot as 0 | 1, otId: reader.u32() };
+  const otPresent = reader.u8();
+  if (otPresent > 1) throw new Error("factory-wasm factoryDraftSelectionEngine: malformed result optional otId");
+  const otId = otPresent === 1 ? reader.u32() : undefined;
+  const ivsPresent = reader.u8();
+  if (ivsPresent > 1) throw new Error("factory-wasm factoryDraftSelectionEngine: malformed result optional ivs");
+  const ivs = ivsPresent === 1 ? unpackMonDataIvs(reader.u32()) : undefined;
+  // Absent optionals stay absent keys, so an instance without `ivs`
+  // deep-equals the TypeScript engine's own source record exactly.
+  return {
+    setId,
+    personality,
+    fixedIv,
+    abilitySlot: abilitySlot as 0 | 1,
+    ...(otId === undefined ? {} : { otId }),
+    ...(ivs === undefined ? {} : { ivs }),
+  };
 }
 
 /** Decode a copied draft-selection boundary result. */

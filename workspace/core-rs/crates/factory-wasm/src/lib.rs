@@ -5168,6 +5168,13 @@ struct FactoryDraftRentalSource {
     fixed_iv: u32,
     ability_slot: u8,
     ot_id: Option<u32>,
+    /// The optional six-IV spread as the GBA's own packed `MON_DATA_IVS`
+    /// word (`pokemon.c:3997-4004`), carried verbatim: routing is IV-blind
+    /// (`factory_draft_selection::selected_rental_party` is generic over
+    /// `T: Clone`), so the boundary only has to round-trip it. Absent means
+    /// the instance carries no `ivs` key at all, which is NOT the same as a
+    /// uniform spread packed from `fixed_iv`.
+    ivs_packed: Option<u32>,
 }
 
 #[derive(Debug)]
@@ -5277,7 +5284,12 @@ fn decode_factory_draft_rental(
     } else {
         None
     };
-    Ok(FactoryDraftRentalSource { set_id, personality, fixed_iv, ability_slot, ot_id })
+    let ivs_packed = if factory_draft_presence(reader)? {
+        Some(reader.u32()?)
+    } else {
+        None
+    };
+    Ok(FactoryDraftRentalSource { set_id, personality, fixed_iv, ability_slot, ot_id, ivs_packed })
 }
 
 fn decode_factory_draft_packet(bytes: &[u8]) -> Result<FactoryDraftSelectionPacket, ()> {
@@ -5495,6 +5507,13 @@ fn encode_factory_draft_rental(buf: &mut Vec<u8>, rental: &FactoryDraftRentalSou
             buf.extend_from_slice(&value.to_le_bytes());
         }
     }
+    match rental.ivs_packed {
+        None => buf.push(0),
+        Some(value) => {
+            buf.push(1);
+            buf.extend_from_slice(&value.to_le_bytes());
+        }
+    }
 }
 
 fn encode_factory_draft_value(value: FactoryDraftSelectionValue) -> Result<Vec<u8>, ()> {
@@ -5587,7 +5606,12 @@ fn encode_factory_draft_value(value: FactoryDraftSelectionValue) -> Result<Vec<u
 ///
 /// A string is `byte_len:u32,utf8`. A rental record is
 /// `set_id:u32,personality:u32,fixed_iv:u32,ability_slot:u8,
-/// ot_id_presence:u8,[ot_id:u32]`, preserving absent versus present zero.
+/// ot_id_presence:u8,[ot_id:u32],ivs_presence:u8,[ivs_packed:u32]`,
+/// preserving absent versus present zero for both optionals. `ivs_packed` is
+/// the GBA's own `MON_DATA_IVS` word (`pokemon.c:3997-4004`,
+/// `hp|atk<<5|def<<10|speed<<15|spatk<<20|spdef<<25`) — the same argument
+/// `fw_create_factory_party_member_with_ivs` takes — and crosses verbatim,
+/// since routing never reads it.
 /// Controller ranks/cursors/states/elapsed values, directions, booleans,
 /// presence tags, UTF-8, lengths, exact suffixes, and full consumption are
 /// checked before execution. Projection rank cells intentionally retain the
@@ -8427,5 +8451,114 @@ mod factory_swap_boundary_tests {
             fw_apply_factory_swap_operation(appended.as_ptr(), appended.len() as u32)
         });
         assert_eq!(bytes[4], 2);
+    }
+}
+
+#[cfg(test)]
+mod factory_draft_boundary_tests {
+    use super::fw_apply_factory_draft_selection_operation;
+    use super::fw_free;
+
+    fn copy_output(ptr: *mut u8) -> Vec<u8> {
+        // SAFETY: every boundary result is allocated by fw_alloc and starts
+        // with its own total length.
+        unsafe {
+            let total_len =
+                u32::from_le_bytes(std::slice::from_raw_parts(ptr, 4).try_into().unwrap());
+            let bytes = std::slice::from_raw_parts(ptr, total_len as usize).to_vec();
+            fw_free(ptr, total_len);
+            bytes
+        }
+    }
+
+    /// Appends one draft-selection rental record in the exact documented
+    /// order: `set_id,personality,fixed_iv,ability_slot,ot_presence,[ot_id],
+    /// ivs_presence,[ivs_packed]`.
+    fn push_draft_rental(
+        buf: &mut Vec<u8>,
+        set_id: u32,
+        personality: u32,
+        fixed_iv: u32,
+        ability_slot: u8,
+        ot_id: Option<u32>,
+        ivs_packed: Option<u32>,
+    ) {
+        buf.extend_from_slice(&set_id.to_le_bytes());
+        buf.extend_from_slice(&personality.to_le_bytes());
+        buf.extend_from_slice(&fixed_iv.to_le_bytes());
+        buf.push(ability_slot);
+        for optional in [ot_id, ivs_packed] {
+            match optional {
+                None => buf.push(0),
+                Some(value) => {
+                    buf.push(1);
+                    buf.extend_from_slice(&value.to_le_bytes());
+                }
+            }
+        }
+    }
+
+    /// The six pool records for the packet below: slot 0 carries the distinct
+    /// spread, slot 2 an all-31 spread, and every other slot none.
+    fn draft_rental_pool(buf: &mut Vec<u8>) {
+        // 1 | 7 << 5 | 13 << 10 | 19 << 15 | 25 << 20 | 31 << 25, the packed
+        // word pinned by create_factory_party_member_with_ivs's own test.
+        push_draft_rental(
+            buf,
+            110,
+            813_709_149,
+            7,
+            1,
+            Some(0x1234_5678),
+            Some(1_067_037_921),
+        );
+        push_draft_rental(buf, 3, 4, 5, 0, None, None);
+        push_draft_rental(buf, 9, 10, 31, 0, None, Some(0x3fff_ffff));
+        for slot in 3..6u32 {
+            push_draft_rental(buf, slot, 0, 0, 0, None, None);
+        }
+    }
+
+    #[test]
+    fn factory_draft_selected_rental_party_round_trips_the_optional_packed_ivs() {
+        // Routing is IV-blind (selected_rental_party is generic over
+        // T: Clone), so the boundary's whole job here is to hand back each
+        // ranked source record byte-for-byte, absent optionals included.
+        let mut packet = vec![1, 5, 2, 1, 3, 0, 0, 0];
+        draft_rental_pool(&mut packet);
+        // SAFETY: the vector follows the export's complete documented layout.
+        let bytes = copy_output(unsafe {
+            fw_apply_factory_draft_selection_operation(packet.as_ptr(), packet.len() as u32)
+        });
+        assert_eq!(bytes[4], 0, "status");
+        assert_eq!(bytes[5], 4, "rental-party value kind");
+
+        let mut expected = Vec::new();
+        push_draft_rental(&mut expected, 3, 4, 5, 0, None, None);
+        push_draft_rental(
+            &mut expected,
+            110,
+            813_709_149,
+            7,
+            1,
+            Some(0x1234_5678),
+            Some(1_067_037_921),
+        );
+        push_draft_rental(&mut expected, 9, 10, 31, 0, None, Some(0x3fff_ffff));
+        assert_eq!(&bytes[6..], &expected[..], "ranked records, spreads intact");
+    }
+
+    #[test]
+    fn factory_draft_rental_rejects_an_out_of_domain_ivs_presence_tag() {
+        let mut packet = vec![1, 5, 2, 1, 3, 0, 0, 0];
+        draft_rental_pool(&mut packet);
+        // Record 0 starts at byte 8 and carries an ot_id, so its ivs presence
+        // tag sits at 4+4+4 + 1 + 1+4 = 18 bytes into the record.
+        packet[8 + 18] = 2;
+        // SAFETY: malformed packets are validated before any semantic access.
+        let bytes = copy_output(unsafe {
+            fw_apply_factory_draft_selection_operation(packet.as_ptr(), packet.len() as u32)
+        });
+        assert_eq!(bytes[4], 2, "malformed-packet status");
     }
 }

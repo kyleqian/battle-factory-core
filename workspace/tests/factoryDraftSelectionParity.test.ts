@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  decodeFactoryDraftSelectionResult,
   encodeFactoryDraftSelectionOperation,
   factoryDraftSelectionEngine,
   tsFactoryDraftSelectionEngine,
@@ -21,6 +22,27 @@ const RENTALS: readonly FactoryCorpusPartyInstance[] = [
   { setId: 0x8000_0000, personality: 1, fixedIv: 0x8000_0000, abilitySlot: 1, otId: MAX_U32 },
   { setId: MAX_U32 - 1, personality: MAX_U32 - 1, fixedIv: 1, abilitySlot: 0 },
   { setId: 2, personality: 3, fixedIv: 4, abilitySlot: 1, otId: 0x8000_0000 },
+];
+
+// The `ivs`-bearing pool: challenge-8 (and elevated challenge-7) rentals carry
+// the six-IV spread `CreateBoxMon` rolled, with the saved `RentalMon.ivs` rule
+// `fixedIv === ivs.attack` (battle_factory_screen.c:1824). Slots 1, 3 and 5
+// carry NO spread at all, which must stay distinct from slot 4's present
+// uniform one.
+const DISTINCT_IVS = { hp: 1, attack: 7, defense: 13, speed: 19, spAttack: 25, spDefense: 31 } as const;
+const MIRRORED_IVS = { hp: 31, attack: 25, defense: 19, speed: 13, spAttack: 7, spDefense: 1 } as const;
+const UNIFORM_IVS = { hp: 31, attack: 31, defense: 31, speed: 31, spAttack: 31, spDefense: 31 } as const;
+// hp | attack << 5 | defense << 10 | speed << 15 | spAttack << 20 | spDefense << 25
+const DISTINCT_IVS_PACKED = 1_067_037_921;
+const MIRRORED_IVS_PACKED = 41_340_735;
+const UNIFORM_IVS_PACKED = 0x3fff_ffff;
+const IVS_RENTALS: readonly FactoryCorpusPartyInstance[] = [
+  { setId: 110, personality: 813_709_149, fixedIv: 7, abilitySlot: 1, otId: 0x1234_5678, ivs: DISTINCT_IVS },
+  { setId: 3, personality: 4, fixedIv: 5, abilitySlot: 0 },
+  { setId: 9, personality: 10, fixedIv: 25, abilitySlot: 0, ivs: MIRRORED_IVS },
+  { setId: 11, personality: 12, fixedIv: 0, abilitySlot: 1, otId: 0 },
+  { setId: 13, personality: 14, fixedIv: 31, abilitySlot: 0, ivs: UNIFORM_IVS },
+  { setId: 15, personality: 16, fixedIv: 2, abilitySlot: 1 },
 ];
 
 type Case = Readonly<{ category: string; operation: FactoryDraftSelectionOperation }>;
@@ -127,6 +149,9 @@ function buildCases(): Case[] {
   }
   add("rental-error-order", { kind: "selected-rental-party", selectedIds: [1, 1, 200, 3, 0, 0], rentals: RENTALS });
   add("rental-error-order", { kind: "selected-rental-party", selectedIds: [1, 4, 1, 3, 0, 0], rentals: RENTALS });
+  for (const ids of [[2, 1, 3, 0, 0, 0], [0, 0, 3, 1, 2, 0], [1, 0, 2, 0, 3, 0], [0, 1, 0, 2, 0, 3]]) {
+    add("rental-ivs-spread", { kind: "selected-rental-party", selectedIds: ids, rentals: IVS_RENTALS });
+  }
   return cases;
 }
 
@@ -139,12 +164,12 @@ const EXPECTED_CATEGORY_COUNTS = new Map<string, number>([
   ["chosen-slot-rank", 18], ["chosen-permutation", 6], ["chosen-sparse", 4],
   ["chosen-duplicate-overwrite", 3], ["chosen-above-three", 2], ["rental-slot-rank", 18],
   ["rental-permutation", 6], ["rental-missing", 4], ["rental-duplicate", 3],
-  ["rental-invalid", 12], ["rental-error-order", 2],
+  ["rental-invalid", 12], ["rental-error-order", 2], ["rental-ivs-spread", 4],
 ]);
 
 describe("Factory draft-selection adapter parity", () => {
-  it("matches all 180 coherent canonical cases across 23 categories", async () => {
-    expect(CASES).toHaveLength(180);
+  it("matches all 184 coherent canonical cases across 24 categories", async () => {
+    expect(CASES).toHaveLength(184);
     const observed = new Map<string, number>();
     const canonical = tsFactoryDraftSelectionEngine();
     const selected = await factoryDraftSelectionEngine();
@@ -180,7 +205,7 @@ const wasmAvailable = existsSync(resolveWasmArtifactPath());
 const wasmRequired = process.env.POKEBENCH_ENGINE === "wasm";
 
 describe.skipIf(!wasmAvailable && !wasmRequired)("Factory draft-selection checked packet", () => {
-  it("returns one stable status-2 boundary error for all 56 malformed packets", async () => {
+  it("returns one stable status-2 boundary error for all 57 malformed packets", async () => {
     const wasm = await loadFactoryWasm();
     const valid: FactoryDraftSelectionOperation[] = [
       { kind: "select-mon-message", selectingMonsState: 1 },
@@ -220,7 +245,9 @@ describe.skipIf(!wasmAvailable && !wasmRequired)("Factory draft-selection checke
     ];
     const badAbility = encoded[5]!.slice(); badAbility[20] = 2; malformed.push(badAbility);
     const badOtPresence = encoded[5]!.slice(); badOtPresence[21] = 2; malformed.push(badOtPresence);
-    expect(malformed).toHaveLength(56);
+    // RENTALS[0] has no otId, so its ivs presence tag is the byte after that.
+    const badIvsPresence = encoded[5]!.slice(); badIvsPresence[22] = 2; malformed.push(badIvsPresence);
+    expect(malformed).toHaveLength(57);
     for (const packet of malformed) {
       const result = await rawBoundaryResult(wasm, packet);
       expect(status(result)).toBe(2);
@@ -242,6 +269,51 @@ describe.skipIf(!wasmAvailable && !wasmRequired)("Factory draft-selection checke
       expect(status(result)).toBe(1);
       expect(message(result)).toBe(semantic.message);
     }
+  });
+
+  it("carries a rental's six-IV spread through selected-rental-party byte-for-byte", async () => {
+    const wasm = await loadFactoryWasm();
+    // Hand-spelled little-endian records, independent of the adapter's own
+    // writer: `set_id,personality,fixed_iv,ability_slot,ot_presence,[ot_id],
+    // ivs_presence,[ivs_packed]`.
+    const le = (value: number): number[] => [value & 0xff, (value >>> 8) & 0xff, (value >>> 16) & 0xff, (value >>> 24) & 0xff];
+    const record = (setId: number, personality: number, fixedIv: number, abilitySlot: number, otId: number | null, ivsPacked: number | null): number[] => [
+      ...le(setId), ...le(personality), ...le(fixedIv), abilitySlot,
+      ...(otId === null ? [0] : [1, ...le(otId)]),
+      ...(ivsPacked === null ? [0] : [1, ...le(ivsPacked)]),
+    ];
+    const rankedBytes = async (selectedIds: readonly number[]): Promise<{ bytes: number[]; party: FactoryCorpusPartyInstance[] }> => {
+      const result = await rawBoundaryResult(wasm, encodeFactoryDraftSelectionOperation({ kind: "selected-rental-party", selectedIds, rentals: IVS_RENTALS }));
+      expect(status(result)).toBe(0);
+      expect(result[5]).toBe(4);
+      const party = decodeFactoryDraftSelectionResult(result) as unknown as FactoryCorpusPartyInstance[];
+      expect(party).toEqual(tsFactoryDraftSelectionEngine().selectedRentalParty(draftState(selectedIds, SPECIES, IVS_RENTALS)));
+      return { bytes: Array.from(result.slice(6)), party };
+    };
+
+    // Ranks 1,2,3 = pool slots 1, 0, 2: no spread, the distinct spread, the
+    // mirrored one. Six distinct IVs each, with fixedIv === ivs.attack.
+    const ranked = await rankedBytes([2, 1, 3, 0, 0, 0]);
+    expect(ranked.bytes).toEqual([
+      ...record(3, 4, 5, 0, null, null),
+      ...record(110, 813_709_149, 7, 1, 0x1234_5678, DISTINCT_IVS_PACKED),
+      ...record(9, 10, 25, 0, null, MIRRORED_IVS_PACKED),
+    ]);
+    expect(Object.hasOwn(ranked.party[0]!, "ivs")).toBe(false);
+    expect(ranked.party[1]!.ivs).toEqual(DISTINCT_IVS);
+    expect(ranked.party[2]!.ivs).toEqual(MIRRORED_IVS);
+
+    // A PRESENT uniform spread stays present, never collapsing into the
+    // absent form a uniform fixedIv would also produce.
+    const uniform = await rankedBytes([0, 0, 0, 3, 1, 2]);
+    expect(uniform.bytes).toEqual([
+      ...record(13, 14, 31, 0, null, UNIFORM_IVS_PACKED),
+      ...record(15, 16, 2, 1, null, null),
+      ...record(11, 12, 0, 1, 0, null),
+    ]);
+    expect(uniform.party[0]!.ivs).toEqual(UNIFORM_IVS);
+    expect(Object.hasOwn(uniform.party[1]!, "ivs")).toBe(false);
+    expect(Object.hasOwn(uniform.party[2]!, "ivs")).toBe(false);
   });
 
   it("exposes and directly uses the new export in forced mode with no fallback", async () => {
