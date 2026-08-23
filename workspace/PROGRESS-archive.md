@@ -1,4 +1,36 @@
 
+## 1389 — [main worker, 2026-08-22] **ISSUES #118 commit 2/2 landed: the `sFixedIVTable[8]` overread is now ported end to end — TS + adapter + rebuilt wasm in lockstep; the challenge-8 crash repro goes clean**
+
+- **State:** master `0cb8aa26` + this docs commit. `npm test` **1,099 files
+  / 10,359 passed / 223 skipped** (was 10,242), `npm run build` green,
+  `POKEBENCH_ENGINE=wasm` parity **6 files / 559 passed, none skipped**
+  (factoryRentalParity 387, factoryPartyMember 89, draftSelection 4, swap 3,
+  trainerSchedule 3, rngEngine 73), cargo **79 blocks / 1,027 passed / 0
+  failed** (no Rust edits this session). Rebuilt wasm **511,425 B, sha256
+  `08723925…`** — gitignored, so every checkout must run
+  `core-rs/build-wasm.sh`; without it `npm test` just skips the wasm suites
+  via their `skipIf(!wasmAvailable)`.
+- **Did:** adapter record stride 23 -> 29 with `ivs` at +23, phase-2 /
+  purpose-3-4 ledger decode, `fw_create_factory_party_member_with_ivs`
+  routing; `FactoryCorpusPartyInstance.ivs?` with the `fixedIv ===
+  ivs.attack` rule enforced; the `challengeNum > 7` throw removed and
+  retail's own clamp (argument 8 -> 110, **9+ -> row 7**, decision D-b)
+  landed in the rental, Brain and opponent readers; the two ledgered
+  `CreateBoxMon` IV draws in all three generators. Parity Part A lost its
+  error branch and gained streak 56 (288 -> 384 configs); Part B flipped
+  from both-throw to full-result parity plus the Rust-side cross-check
+  receipt; hand-derived six-IV pins added in three suites.
+- **Next:** the supervisor's `--start-carry 42`/`49` 0:60 re-sweeps, then
+  the four-gate wind-down set.
+- **Notes:** repro `--policy winning --start-carry 42 --seed 2` now prints
+  `OK ... carry<=56 depth<=57`, and `--start-carry 49 --seeds 0:20` is
+  **20/20 OK, 0 CRASH** (deepest carry 56, i.e. challengeNum 8 generated
+  for real). #118 is trimmed to ONE bounded remainder —
+  the wasm draft-selection wire format drops a rental's `ivs` (test-only
+  boundary today; production uses the TS `selectedRentalParty`).
+
+---
+
 ## 1388 — [main worker, 2026-08-22] **ISSUES #118 commit 1/2 landed: the retail `sFixedIVTable[8]` overread + `CreateBoxMon`'s two random-IV draws are ported in core-rs; TS untouched and still green**
 
 - **State:** master `5b51eac5` + this docs commit. `npm test` **10,242
