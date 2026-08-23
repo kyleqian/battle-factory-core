@@ -29,7 +29,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** the supervisor's `--start-carry 42`/`49` 0:60 re-sweeps, then
   the four-gate wind-down set.
 - **Notes:** repro `--policy winning --start-carry 42 --seed 2` now prints
-  `OK ... carry<=56 depth<=57`. #118 is trimmed to ONE bounded remainder —
+  `OK ... carry<=56 depth<=57`, and `--start-carry 49 --seeds 0:20` is
+  **20/20 OK, 0 CRASH** (deepest carry 56, i.e. challengeNum 8 generated
+  for real). #118 is trimmed to ONE bounded remainder —
   the wasm draft-selection wire format drops a rental's `ivs` (test-only
   boundary today; production uses the TS `selectedRentalParty`).
 
