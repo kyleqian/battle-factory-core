@@ -73,7 +73,7 @@ use factory_core::key_repeat::{
 use factory_core::mon_construction::{
     self, FactoryCorpusPartyInstance, FactoryCorpusPartyMemberState, PartyMemberError,
 };
-use factory_core::rental_generation::{self, GenerationError, GenerationInput, GenerationResult};
+use factory_core::rental_generation::{self, GenerationInput, GenerationResult};
 use factory_core::rng;
 use factory_core::turn_order::{self, TurnOrderBattler, WeatherState};
 use factory_core::turn_rng;
@@ -153,20 +153,23 @@ pub unsafe extern "C" fn fw_free(ptr: *mut u8, len: u32) {
 /// 4       1      status (u8) — 0 = ok, 1 = error.
 ///
 /// --- status == 1 (error) ---
-/// 5       2      message_len (u16)
-/// 7       message_len   message (utf8 bytes)
-///                total_len == 7 + message_len
+/// UNREACHABLE for this export: rental generation is total (see
+/// `factory_core::rental_generation::generate_initial_factory_rentals`).
+/// The status byte is kept so this buffer's preamble stays identical to
+/// `fw_create_factory_party_member`'s, which does still fail.
 ///
 /// --- status == 0 (ok) ---
 /// 5       4      challenge_num (u32)
 /// 9       1      rental_rank (u8)
 /// 10      4      selection_rng_value (u32)
 /// 14      4      rng_value (u32)
-/// 18      138    rentals: 6 fixed-width 23-byte records, back to back
+/// 18      174    rentals: 6 fixed-width 29-byte records, back to back
 ///                (offsets below are relative to each record's start):
 ///                  0   2   set_id (u16)
 ///                  2   4   personality (u32)
-///                  6   1   fixed_iv (u8)
+///                  6   1   fixed_iv (u8) — the ATK IV, i.e. always
+///                          ivs[1] (battle_factory_screen.c:1824 saves
+///                          MON_DATA_ATK_IV as RentalMon.ivs)
 ///                  7   1   ability_slot (u8)
 ///                  8   4   ot_id (u32)
 ///                  12  2   species_id (u16)
@@ -175,16 +178,22 @@ pub unsafe extern "C" fn fw_free(ptr: *mut u8, len: u32) {
 ///                  17  2   selection_draw_position (u16)
 ///                  19  2   personality_draw_positions[0] (u16)
 ///                  21  2   personality_draw_positions[1] (u16)
-/// 156     4      ledger_count (u32)
-/// 160     ledger_count * 26   draw_ledger: fixed-width 26-byte entries,
+///                  23  6   ivs (u8 x 6: hp, attack, defense, speed,
+///                          sp_attack, sp_defense) — appended at the END so
+///                          every pre-existing in-record offset is
+///                          unchanged
+/// 192     4      ledger_count (u32)
+/// 196     ledger_count * 26   draw_ledger: fixed-width 26-byte entries,
 ///                back to back (offsets below are relative to each entry's
 ///                start). Every entry carries all fields; fields the TS
 ///                engine leaves absent for that entry's `phase` are
 ///                encoded as 0 and MUST be ignored by the decoder (it
 ///                already knows which fields apply from `phase`):
-///                  0   1   phase (u8) — 0 = set-selection, 1 = personality
+///                  0   1   phase (u8) — 0 = set-selection, 1 = personality,
+///                          2 = random-ivs
 ///                  1   1   purpose (u8) — 0 = set-candidate,
-///                          1 = personality-low, 2 = personality-high
+///                          1 = personality-low, 2 = personality-high,
+///                          3 = random-ivs-low, 4 = random-ivs-high
 ///                  2   1   rental_index (u8)
 ///                  3   4   rng_before (u32)
 ///                  7   4   rng_after (u32)
@@ -199,7 +208,11 @@ pub unsafe extern "C" fn fw_free(ptr: *mut u8, len: u32) {
 ///                  21  4   personality (u32)         [personality only]
 ///                  25  1   personality_outcome (u8)  [personality only]
 ///                          0 = accepted, 1 = wrong-nature
-///                total_len == 160 + 26 * ledger_count
+///                A random-ivs entry (phase 2) populates NEITHER optional
+///                group: the drawn word is its whole payload, and its six
+///                5-bit IV fields are what the rental record's `ivs` above
+///                already decodes to (pokemon.c:2277-2293).
+///                total_len == 196 + 26 * ledger_count
 /// ```
 #[no_mangle]
 pub extern "C" fn fw_generate_initial_rentals(
@@ -232,53 +245,43 @@ pub extern "C" fn fw_generate_initial_rentals(
 /// Pure encoding — no logic beyond the byte layout documented on
 /// `fw_generate_initial_rentals`. All logic lives in
 /// `factory_core::rental_generation`.
-fn encode_generation_result(result: Result<GenerationResult, GenerationError>) -> Vec<u8> {
+fn encode_generation_result(r: GenerationResult) -> Vec<u8> {
     let mut buf: Vec<u8> = Vec::new();
     buf.extend_from_slice(&0u32.to_le_bytes()); // total_len placeholder, patched below
-    match result {
-        Err(err) => {
-            buf.push(1); // status: error
-            let message = err.to_string();
-            let message_bytes = message.as_bytes();
-            buf.extend_from_slice(&(message_bytes.len() as u16).to_le_bytes());
-            buf.extend_from_slice(message_bytes);
-        }
-        Ok(r) => {
-            buf.push(0); // status: ok
-            buf.extend_from_slice(&r.challenge_num.to_le_bytes());
-            buf.push(r.rental_rank);
-            buf.extend_from_slice(&r.selection_rng_value.to_le_bytes());
-            buf.extend_from_slice(&r.rng_value.to_le_bytes());
-            for rental in &r.rentals {
-                buf.extend_from_slice(&rental.set_id.to_le_bytes());
-                buf.extend_from_slice(&rental.personality.to_le_bytes());
-                buf.push(rental.fixed_iv);
-                buf.push(rental.ability_slot);
-                buf.extend_from_slice(&rental.ot_id.to_le_bytes());
-                buf.extend_from_slice(&rental.species_id.to_le_bytes());
-                buf.extend_from_slice(&rental.item_id.to_le_bytes());
-                buf.push(rental.nature);
-                buf.extend_from_slice(&rental.selection_draw_position.to_le_bytes());
-                buf.extend_from_slice(&rental.personality_draw_positions[0].to_le_bytes());
-                buf.extend_from_slice(&rental.personality_draw_positions[1].to_le_bytes());
-            }
-            buf.extend_from_slice(&(r.draw_ledger.len() as u32).to_le_bytes());
-            for entry in &r.draw_ledger {
-                buf.push(entry.phase as u8);
-                buf.push(entry.purpose as u8);
-                buf.push(entry.rental_index);
-                buf.extend_from_slice(&entry.rng_before.to_le_bytes());
-                buf.extend_from_slice(&entry.rng_after.to_le_bytes());
-                buf.extend_from_slice(&entry.random_u16.to_le_bytes());
-                buf.extend_from_slice(&entry.range.map_or(0u16, |range| range.start).to_le_bytes());
-                buf.extend_from_slice(&entry.range.map_or(0u16, |range| range.end).to_le_bytes());
-                buf.push(u8::from(entry.better_range.unwrap_or(false)));
-                buf.extend_from_slice(&entry.candidate_set_id.unwrap_or(0).to_le_bytes());
-                buf.push(entry.selection_outcome.map_or(0, |outcome| outcome as u8));
-                buf.extend_from_slice(&entry.personality.unwrap_or(0).to_le_bytes());
-                buf.push(entry.personality_outcome.map_or(0, |outcome| outcome as u8));
-            }
-        }
+    buf.push(0); // status: ok (this export cannot fail)
+    buf.extend_from_slice(&r.challenge_num.to_le_bytes());
+    buf.push(r.rental_rank);
+    buf.extend_from_slice(&r.selection_rng_value.to_le_bytes());
+    buf.extend_from_slice(&r.rng_value.to_le_bytes());
+    for rental in &r.rentals {
+        buf.extend_from_slice(&rental.set_id.to_le_bytes());
+        buf.extend_from_slice(&rental.personality.to_le_bytes());
+        buf.push(rental.fixed_iv);
+        buf.push(rental.ability_slot);
+        buf.extend_from_slice(&rental.ot_id.to_le_bytes());
+        buf.extend_from_slice(&rental.species_id.to_le_bytes());
+        buf.extend_from_slice(&rental.item_id.to_le_bytes());
+        buf.push(rental.nature);
+        buf.extend_from_slice(&rental.selection_draw_position.to_le_bytes());
+        buf.extend_from_slice(&rental.personality_draw_positions[0].to_le_bytes());
+        buf.extend_from_slice(&rental.personality_draw_positions[1].to_le_bytes());
+        buf.extend_from_slice(&rental.ivs);
+    }
+    buf.extend_from_slice(&(r.draw_ledger.len() as u32).to_le_bytes());
+    for entry in &r.draw_ledger {
+        buf.push(entry.phase as u8);
+        buf.push(entry.purpose as u8);
+        buf.push(entry.rental_index);
+        buf.extend_from_slice(&entry.rng_before.to_le_bytes());
+        buf.extend_from_slice(&entry.rng_after.to_le_bytes());
+        buf.extend_from_slice(&entry.random_u16.to_le_bytes());
+        buf.extend_from_slice(&entry.range.map_or(0u16, |range| range.start).to_le_bytes());
+        buf.extend_from_slice(&entry.range.map_or(0u16, |range| range.end).to_le_bytes());
+        buf.push(u8::from(entry.better_range.unwrap_or(false)));
+        buf.extend_from_slice(&entry.candidate_set_id.unwrap_or(0).to_le_bytes());
+        buf.push(entry.selection_outcome.map_or(0, |outcome| outcome as u8));
+        buf.extend_from_slice(&entry.personality.unwrap_or(0).to_le_bytes());
+        buf.push(entry.personality_outcome.map_or(0, |outcome| outcome as u8));
     }
     let total_len = buf.len() as u32;
     buf[0..4].copy_from_slice(&total_len.to_le_bytes());
@@ -374,6 +377,72 @@ pub extern "C" fn fw_create_factory_party_member(
     }
     ptr
 }
+
+/// `fw_create_factory_party_member` with an explicit six-IV spread instead
+/// of one uniform fixed IV — the shape `CreateBoxMon`'s random-IV branch
+/// produces (`reference/pokeemerald/src/pokemon.c:2273-2294`). Additive:
+/// `fw_create_factory_party_member` is unchanged, and this export returns
+/// the SAME 96-byte member payload documented on it.
+///
+/// `ivs_packed` is the GBA's own packed IV word, `MON_DATA_IVS`
+/// (`reference/pokeemerald/src/pokemon.c:3997-4004` reading it,
+/// `:4398-4407` writing it):
+///
+/// ```text
+/// hp | attack << 5 | defense << 10 | speed << 15 | sp_attack << 20
+///    | sp_defense << 25
+/// ```
+///
+/// Each field is masked to five bits (`MAX_IV_MASK`,
+/// `reference/pokeemerald/include/constants/pokemon.h:201`) on unpack, so
+/// bits 30-31 are ignored and no field can be out of range.
+///
+/// # Caller contract
+/// `ability_slot` must be 0 or 1 — see `fw_create_factory_party_member`.
+#[no_mangle]
+pub extern "C" fn fw_create_factory_party_member_with_ivs(
+    set_id: u32,
+    personality: u32,
+    ivs_packed: u32,
+    ability_slot: u32,
+    ot_id: u32,
+) -> *mut u8 {
+    let field = |shift: u32| ((ivs_packed >> shift) & u32::from(MAX_IV_MASK)) as u8;
+    let ivs = [
+        field(0),
+        field(5),
+        field(10),
+        field(15),
+        field(20),
+        field(25),
+    ];
+    let instance = FactoryCorpusPartyInstance {
+        set_id,
+        personality,
+        // Ignored by create_factory_corpus_party_member_with_ivs; carried
+        // as the ATK IV so the struct stays self-consistent with the
+        // `RentalRecord.fixed_iv == ivs[1]` rule
+        // (battle_factory_screen.c:1824).
+        fixed_iv: u32::from(ivs[1]),
+        ability_slot: ability_slot as u8,
+        ot_id,
+    };
+    let bytes = encode_party_member_result(
+        mon_construction::create_factory_corpus_party_member_with_ivs(instance, ivs),
+    );
+    let ptr = fw_alloc(bytes.len() as u32);
+    // SAFETY: `ptr` was just allocated by fw_alloc for exactly `bytes.len()`
+    // bytes (fw_alloc's contract), and `bytes` is a distinct, non-overlapping
+    // source buffer.
+    unsafe {
+        std::ptr::copy_nonoverlapping(bytes.as_ptr(), ptr, bytes.len());
+    }
+    ptr
+}
+
+/// `MAX_IV_MASK` (`reference/pokeemerald/include/constants/pokemon.h:201`),
+/// the five-bit field width of the packed `MON_DATA_IVS` word.
+const MAX_IV_MASK: u16 = 31;
 
 fn mon_gender_byte(gender: MonGender) -> u8 {
     match gender {
@@ -6903,18 +6972,25 @@ mod tests {
             23,
             "rental[0].personality_draw_positions[1]"
         );
+        assert_eq!(
+            &snapshot[r0 + 23..r0 + 29],
+            &[3, 3, 3, 3, 3, 3],
+            "rental[0].ivs (uniform: fixed IV 3 is below USE_RANDOM_IVS)"
+        );
+        // The six 29-byte records run 18..192.
+        assert_eq!(18 + 6 * 29, 192, "rentals block");
 
-        let ledger_count = read_u32(&snapshot, 156);
+        let ledger_count = read_u32(&snapshot, 192);
         assert_eq!(ledger_count, 198, "ledger_count");
         assert_eq!(
             total_len,
-            160 + 26 * ledger_count,
-            "total_len == 160 + 26 * ledger_count"
+            196 + 26 * ledger_count,
+            "total_len == 196 + 26 * ledger_count"
         );
         assert_eq!(snapshot.len() as u32, total_len);
 
         // ledger[0]: set-selection / set-candidate, rngBefore 0, accepted.
-        let e0 = 160;
+        let e0 = 196;
         assert_eq!(snapshot[e0], 0, "ledger[0].phase == set-selection");
         assert_eq!(snapshot[e0 + 1], 0, "ledger[0].purpose == set-candidate");
         assert_eq!(snapshot[e0 + 2], 0, "ledger[0].rental_index");
@@ -6941,10 +7017,12 @@ mod tests {
     }
 
     #[test]
-    fn generate_initial_rentals_error_buffer_names_the_0_7_constraint() {
-        // factoryWinStreak 56 / 7 == 8, same as
-        // factory-core::rental_generation::tests::rejects_challenge_8_with_the_0_7_rationale.
-        let ptr = fw_generate_initial_rentals(0, 56, 0, 0, 0, 0);
+    fn generate_initial_rentals_challenge_8_buffer_carries_random_ivs() {
+        // factoryWinStreak 56 / 7 == 8. Same input as
+        // factory-core::rental_generation::tests::challenge_8_rolls_random_ivs_for_all_six_rentals,
+        // which used to be the GenerationError::ChallengeOutOfRange case
+        // this export encoded as status 1.
+        let ptr = fw_generate_initial_rentals(0, 56, 0, 0x1234_5678, 0, 0);
         // SAFETY: see generate_initial_rentals_ok_buffer_matches_the_seed_0_fixture.
         let (total_len, snapshot) = unsafe {
             let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0);
@@ -6952,14 +7030,117 @@ mod tests {
             (total_len, snapshot)
         };
 
-        assert_eq!(snapshot[4], 1, "status: error");
-        let message_len = read_u16(&snapshot, 5) as usize;
-        let message = std::str::from_utf8(&snapshot[7..7 + message_len]).unwrap();
+        assert_eq!(snapshot[4], 0, "status: ok (no longer an error)");
+        assert_eq!(read_u32(&snapshot, 5), 8, "challenge_num");
+        let ledger_count = read_u32(&snapshot, 192);
+        assert_eq!(ledger_count, 305, "ledger_count");
+        assert_eq!(total_len, 196 + 26 * ledger_count);
+
+        // rental[0]'s spread, hand-derived in the factory-core test above.
+        let r0 = 18;
         assert_eq!(
-            message,
-            "Level-50 initial rental generation supports source challenges 0..7, got 8"
+            &snapshot[r0 + 23..r0 + 29],
+            &[2, 18, 8, 26, 17, 1],
+            "rental[0].ivs"
         );
-        assert_eq!(total_len as usize, 7 + message_len);
+        assert_eq!(
+            snapshot[r0 + 6],
+            18,
+            "rental[0].fixed_iv == ivs[1] (the ATK IV)"
+        );
+
+        // The two random-IV ledger entries for rental 0 sit at positions 91
+        // and 92 (immediately after its accepted personality pair, 89/90).
+        for (position, purpose, word) in [(91usize, 3u8, 41538u16), (92, 4, 34362)] {
+            let entry = 196 + 26 * position;
+            assert_eq!(snapshot[entry], 2, "ledger[{position}].phase == random-ivs");
+            assert_eq!(snapshot[entry + 1], purpose, "ledger[{position}].purpose");
+            assert_eq!(snapshot[entry + 2], 0, "ledger[{position}].rental_index");
+            assert_eq!(
+                read_u16(&snapshot, entry + 11),
+                word,
+                "ledger[{position}].random_u16"
+            );
+        }
+
+        // SAFETY: see generate_initial_rentals_ok_buffer_matches_the_seed_0_fixture.
+        unsafe {
+            fw_free(ptr, total_len);
+        }
+    }
+
+    #[test]
+    fn generate_initial_rentals_challenge_7_better_range_ivs_match_their_ledger_words() {
+        // factoryWinStreak 49 -> challengeNum 7; rentsCount 20 -> rank 1, so
+        // slot 0 alone is a better-range ("elevated") rental and reaches IV
+        // argument 8 (battle_factory_screen.c:1762-1764) -> the overread row
+        // -> random IVs. Slots 1..5 take argument 7 -> a uniform 31.
+        let ptr = fw_generate_initial_rentals(0, 49, 20, 0x1234_5678, 0, 0);
+        // SAFETY: see generate_initial_rentals_ok_buffer_matches_the_seed_0_fixture.
+        let (total_len, snapshot) = unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0);
+            let snapshot = std::slice::from_raw_parts(ptr, total_len as usize).to_vec();
+            (total_len, snapshot)
+        };
+
+        assert_eq!(snapshot[4], 0, "status: ok");
+        assert_eq!(read_u32(&snapshot, 5), 7, "challenge_num");
+        assert_eq!(snapshot[9], 1, "rental_rank");
+        let ledger_count = read_u32(&snapshot, 192) as usize;
+        assert_eq!(total_len as usize, 196 + 26 * ledger_count);
+
+        // Find slot 0's two random-IV ledger entries by scanning the encoded
+        // ledger for phase 2 / rental_index 0 — no offset arithmetic assumed.
+        let mut words: Vec<u16> = Vec::new();
+        for position in 0..ledger_count {
+            let entry = 196 + 26 * position;
+            if snapshot[entry] == 2 && snapshot[entry + 2] == 0 {
+                assert_eq!(
+                    snapshot[entry + 1],
+                    3 + words.len() as u8,
+                    "random-ivs purposes are low (3) then high (4)"
+                );
+                words.push(read_u16(&snapshot, entry + 11));
+            }
+        }
+        assert_eq!(words.len(), 2, "exactly two random-IV words for slot 0");
+
+        // The record's six IV bytes ARE those two words' 5-bit fields
+        // (pokemon.c:2277-2293): first word -> hp/attack/defense, second ->
+        // speed/sp_attack/sp_defense.
+        let r0 = 18;
+        let expected = [
+            (words[0] & 31) as u8,
+            ((words[0] >> 5) & 31) as u8,
+            ((words[0] >> 10) & 31) as u8,
+            (words[1] & 31) as u8,
+            ((words[1] >> 5) & 31) as u8,
+            ((words[1] >> 10) & 31) as u8,
+        ];
+        assert_eq!(&snapshot[r0 + 23..r0 + 29], &expected, "rental[0].ivs");
+        assert_eq!(
+            snapshot[r0 + 6],
+            expected[1],
+            "rental[0].fixed_iv == ivs[1]"
+        );
+
+        // Every ordinary slot is a uniform 31 with no random-IV draws.
+        for slot in 1..6usize {
+            let record = 18 + 29 * slot;
+            assert_eq!(
+                &snapshot[record + 23..record + 29],
+                &[31u8; 6],
+                "rental[{slot}].ivs"
+            );
+            assert_eq!(snapshot[record + 6], 31, "rental[{slot}].fixed_iv");
+        }
+        assert_eq!(
+            (0..ledger_count)
+                .filter(|position| snapshot[196 + 26 * position] == 2)
+                .count(),
+            2,
+            "only the one better-range rental draws random IVs"
+        );
 
         // SAFETY: see generate_initial_rentals_ok_buffer_matches_the_seed_0_fixture.
         unsafe {
@@ -7052,6 +7233,94 @@ mod tests {
         // exactly once.
         unsafe {
             fw_free(ptr, total_len);
+        }
+    }
+
+    #[test]
+    fn create_factory_party_member_with_ivs_buffer_matches_the_distinct_spread_fixture() {
+        // Same input as
+        // factory-core::mon_construction::tests::six_distinct_ivs_produce_calculate_mon_stats_values
+        // (GRIMER set 110, QUIRKY, ability slot 1), with the six IVs packed
+        // the way MON_DATA_IVS packs them (pokemon.c:3997-4004).
+        let ivs = [1u32, 7, 13, 19, 25, 31];
+        let ivs_packed = ivs[0]
+            | (ivs[1] << 5)
+            | (ivs[2] << 10)
+            | (ivs[3] << 15)
+            | (ivs[4] << 20)
+            | (ivs[5] << 25);
+        assert_eq!(ivs_packed, 1_067_037_921, "packed MON_DATA_IVS word");
+
+        let ptr =
+            fw_create_factory_party_member_with_ivs(110, 813_709_149, ivs_packed, 1, 0x1234_5678);
+        // SAFETY: see create_factory_party_member_ok_buffer_matches_the_grimer_fixture.
+        let (total_len, snapshot) = unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0);
+            let snapshot = std::slice::from_raw_parts(ptr, total_len as usize).to_vec();
+            (total_len, snapshot)
+        };
+
+        // The SAME 96-byte member payload the existing export returns.
+        assert_eq!(total_len, 96, "total_len == 5 + 91");
+        assert_eq!(snapshot[4], 0, "status: ok");
+        assert_eq!(read_u16(&snapshot, 5), 110, "set_id");
+        assert_eq!(read_u16(&snapshot, 7), 88, "species_id");
+        assert_eq!(read_u8(&snapshot, 11), 1, "ability_slot");
+        assert_eq!(&snapshot[14..20], &[1, 7, 13, 19, 25, 31], "ivs");
+        assert_eq!(read_u32(&snapshot, 20), 813_709_149, "personality");
+        assert_eq!(read_u32(&snapshot, 30), 161, "max_hp");
+        assert_eq!(read_u32(&snapshot, 34), 88, "attack");
+        assert_eq!(read_u32(&snapshot, 38), 82, "defense");
+        assert_eq!(read_u32(&snapshot, 42), 39, "speed");
+        assert_eq!(read_u32(&snapshot, 46), 57, "sp_attack");
+        assert_eq!(read_u32(&snapshot, 50), 91, "sp_defense");
+        assert_eq!(read_u32(&snapshot, 54), 161, "hp");
+        assert_eq!(read_u8(&snapshot, 81), 24, "nature");
+
+        // Bits 30-31 are outside every field and are ignored.
+        // SAFETY: see create_factory_party_member_ok_buffer_matches_the_grimer_fixture.
+        unsafe {
+            fw_free(ptr, total_len);
+        }
+        let ptr = fw_create_factory_party_member_with_ivs(
+            110,
+            813_709_149,
+            ivs_packed | 0xc000_0000,
+            1,
+            0x1234_5678,
+        );
+        // SAFETY: see create_factory_party_member_ok_buffer_matches_the_grimer_fixture.
+        let (total_len, high_bits) = unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0);
+            let high_bits = std::slice::from_raw_parts(ptr, total_len as usize).to_vec();
+            (total_len, high_bits)
+        };
+        assert_eq!(high_bits, snapshot, "bits 30-31 of ivs_packed are ignored");
+        // SAFETY: see create_factory_party_member_ok_buffer_matches_the_grimer_fixture.
+        unsafe {
+            fw_free(ptr, total_len);
+        }
+    }
+
+    #[test]
+    fn create_factory_party_member_with_ivs_matches_the_uniform_export_for_a_flat_spread() {
+        // The additive export is a superset: a flat spread reproduces
+        // fw_create_factory_party_member's buffer byte for byte.
+        let flat = 3u32 | (3 << 5) | (3 << 10) | (3 << 15) | (3 << 20) | (3 << 25);
+        let uniform = fw_create_factory_party_member(110, 813_709_149, 3, 1, 0x1234_5678);
+        let spread =
+            fw_create_factory_party_member_with_ivs(110, 813_709_149, flat, 1, 0x1234_5678);
+        // SAFETY: both pointers were just returned by their exports; each is
+        // read through its own total_len and freed exactly once below.
+        unsafe {
+            let uniform_len = read_u32(std::slice::from_raw_parts(uniform, 4), 0);
+            let spread_len = read_u32(std::slice::from_raw_parts(spread, 4), 0);
+            assert_eq!(
+                std::slice::from_raw_parts(uniform, uniform_len as usize),
+                std::slice::from_raw_parts(spread, spread_len as usize)
+            );
+            fw_free(uniform, uniform_len);
+            fw_free(spread, spread_len);
         }
     }
 

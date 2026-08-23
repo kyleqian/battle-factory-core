@@ -11868,10 +11868,16 @@ pub struct FixedIvRow {
 }
 
 /// Draft-rental fixed IV rows indexed by `challengeNum + (useBetterRange ? 1
-/// : 0)` (reference/pokeemerald/src/battle_factory_screen.c:1757-1771).
+/// : 0)` (reference/pokeemerald/src/battle_factory_screen.c:1757-1771),
+/// clamped the way retail clamps it (see
+/// `rental_data::get_level50_initial_rental_fixed_iv`). Row 8 is NOT part of
+/// `sFixedIVTable`: it is the one-past-the-end `.rodata` pair retail reads
+/// for IV argument exactly 8 (`GetFactoryMonFixedIV`,
+/// reference/pokeemerald/src/battle_factory.c:739-757, non-BUGFIX branch),
+/// carried here as `{regular: 110, last_battle: 0}`.
 /// Source: src/data/gen/factory-round-policy.json
 /// `.rentalSelection.fixedIvs`.
-pub const FIXED_IVS: [FixedIvRow; 8] = [
+pub const FIXED_IVS: [FixedIvRow; 9] = [
     FixedIvRow { regular: 3, last_battle: 6 },
     FixedIvRow { regular: 6, last_battle: 9 },
     FixedIvRow { regular: 9, last_battle: 12 },
@@ -11880,6 +11886,7 @@ pub const FIXED_IVS: [FixedIvRow; 8] = [
     FixedIvRow { regular: 21, last_battle: 31 },
     FixedIvRow { regular: 31, last_battle: 31 },
     FixedIvRow { regular: 31, last_battle: 31 },
+    FixedIvRow { regular: 110, last_battle: 0 },
 ];
 
 /// One inclusive Factory trainer-id range. Source:
