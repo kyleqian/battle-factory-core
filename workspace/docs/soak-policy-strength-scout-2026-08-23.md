@@ -167,3 +167,17 @@ at n=180 and section 3 explains why. Single acceptance command and number:
 **carry >= 35 in >= 6/120 seeds with no `--start-carry`** — the same 5% rate sweep (b) shows is
 achievable once a party survives challenge 4, and a strict improvement on the 2026-08-22 baseline of
 carry >= 28 in 18/480 (3.75%) and carry >= 35 in 0/480.
+
+---
+
+**Supervisor correction (2026-08-23, fold commit).** Section 2's "instrument caveat" and lever 1
+rest on a wrong premise: `factoryRentsCount` is NOT "mons rented". Its only writer is
+`SetBattleFactoryData`'s `FACTORY_DATA_WIN_STREAK_SWAPS` case, gated on `sPerformedRentalSwap`
+(`battle_factory.c:259-265`; the flag is set per ACCEPTED swap at `:300`) — it counts
+swap-then-win events, as ISSUES #120 (fixed this session, `64ad9f4e`) re-derived. A naturally
+chained `winning` player, which declines every swap, has `rentsCount 0` at every depth, so
+`createStartCarryState`'s `rentsCount: 0` is exactly faithful for sweeps (a)/(b) and lever 1 is
+NOT a correctness fix for them. It is a fidelity gap only for swap-accepting policies
+(`winning-swap`: up to +6 per won round post-#120), where the honest shape is an explicit
+`--start-rents N` flag, not a formula. Everything else in this doc stands; lever 2 remains the
+recommendation.

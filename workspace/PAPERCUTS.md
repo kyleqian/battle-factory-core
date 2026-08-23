@@ -1261,16 +1261,20 @@ current app stage should be rejected before replay.
   already wait); briefs that edit a shared ledger carry "re-read the file
   immediately before editing; never rewrite it from an earlier snapshot".
 
-## git pathspecs are relative to the repo root one level ABOVE `workspace/` — a bare `src/...` pathspec silently returns an empty diff
+## The launcher-printed worktree path is the REPO ROOT (one level above `workspace/`) — `git … -- src/...` run from there silently matches nothing
 
-- **What:** the git root is `pokeemerald-factory-core/`, so from the
-  `workspace/` cwd (main tree or any worktree) `git show <hash> -- src/x.ts`
+- **What:** git pathspecs are cwd-relative, and the git root is
+  `pokeemerald-factory-core/`, not `workspace/`. A worker that `cd`s to the
+  worktree path the launcher prints (or the supervisor `cd`ing to
+  `.worktrees/<id>`) is at the repo ROOT, where `git show <hash> -- src/x.ts`
   and `git diff A..B -- tests/` match nothing and print NOTHING — no error.
-  Two read-only audit workers and the supervisor each burned a round trip
-  of empty diffs before noticing; the fix is `-- workspace/src/x.ts`.
-- **Hits:** 3 (2026-08-22: audit R ~5 min, audit E ~2 min, supervisor ~2 min).
-- **Fix:** brief line "prefix pathspecs with `workspace/`"; durable fix is a
-  `git` alias or a `tools/gitw` wrapper that rewrites relative pathspecs.
+  From inside `workspace/`, plain `src/...` works and `workspace/src/...`
+  does NOT (one scout lost a commit to `workspace/workspace/docs`).
+- **Hits:** 4 (2026-08-22/23: audit R ~5 min, audit E ~2 min, supervisor
+  ~2 min, scout H ~2 min following the over-corrected brief line).
+- **Fix:** brief line "check `pwd` first: from the repo root prefix
+  `workspace/`, from `workspace/` do not"; durable fix is having the
+  launcher print (and `cd` workers into) `<worktree>/workspace`.
 
 ## macOS has no `timeout(1)` — briefs suggesting `timeout 600 npx vitest …` fail outright
 
