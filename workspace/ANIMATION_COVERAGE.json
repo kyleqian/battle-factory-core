@@ -5577,7 +5577,7 @@
     "tools/compare/evidence/spikes-changemap-player.json",
     "tools/compare/evidence/spikes-changemap-opponent.json",
     "src/animation/spikes.ts",
-   "src/animation/sceneOnPresentation.ts",
+    "src/animation/sceneOnPresentation.ts",
     "tools/compare/spikesReducerAudit.ts",
     "tools/compare/extractSpikesAssets.ts",
     "src/animation/assets/spikes.json",
@@ -5613,7 +5613,8 @@
     "tools/compare/evidence/belly-drum-changemap-opponent.txt",
     "src/animation/bellyDrum.ts",
     "src/animation/sceneOnPresentation.ts",
-    "tests/animation/bellyDrum.test.ts"
+    "tests/animation/bellyDrum.test.ts",
+    "tests/animation/bellyDrumEvidence.test.ts"
    ]
   }
  ],
