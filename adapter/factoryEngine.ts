@@ -37,6 +37,7 @@ import type {
 } from "../../src/engine/factoryRentalGeneration.ts";
 import type { MonGender } from "../../src/engine/monGender.ts";
 import { loadFactoryWasm } from "./loadFactoryWasm.ts";
+import { packMonDataIvs } from "./monDataIvs.ts";
 
 type SpeciesRow = Readonly<{ id: number; name: string }>;
 const SPECIES_NAME_BY_ID = new Map(
@@ -280,22 +281,6 @@ const MEMBER_NATURE_OFFSET = 81;
 const MEMBER_EVS_OFFSET = 82;
 const MEMBER_GENDER_OFFSET = 94;
 const MEMBER_SHINY_OFFSET = 95;
-
-/**
- * The GBA's own packed `MON_DATA_IVS` word (`pokemon.c:3997-4004`), which is
- * what `fw_create_factory_party_member_with_ivs` takes: five bits per stat
- * in HP/ATK/DEF/SPEED/SPATK/SPDEF order.
- */
-function packMonDataIvs(ivs: BattleScriptIvs): number {
-  return (
-    (ivs.hp & 31)
-    | ((ivs.attack & 31) << 5)
-    | ((ivs.defense & 31) << 10)
-    | ((ivs.speed & 31) << 15)
-    | ((ivs.spAttack & 31) << 20)
-    | ((ivs.spDefense & 31) << 25)
-  ) >>> 0;
-}
 
 function readSixU8(view: DataView, offset: number): BattleScriptIvs {
   const [hp, attack, defense, speed, spAttack, spDefense] = Array.from(
