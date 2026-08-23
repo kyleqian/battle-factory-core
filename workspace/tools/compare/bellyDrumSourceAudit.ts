@@ -92,6 +92,11 @@ const digest = createHash("sha256").update(bytes).digest("hex");
 if (digest !== "545ca5297336a1028f77ac7b5fb2d160b0aaea84671c1585953b73389e33455e") {
   throw new Error("Belly Drum ROM bytes drifted");
 }
+const assetPath = resolve(root, "src/animation/assets/belly-drum.json");
+const assetDigest = createHash("sha256").update(readFileSync(assetPath)).digest("hex");
+if (assetDigest !== "d0bb56ed76e6bca0072fbe10a49c2155c7f1db3a80aa52b57d094a7032ca7892") {
+  throw new Error("Belly Drum extracted asset drifted");
+}
 
 export const bellyDrumSourceReceipt = {
   move: "MOVE_BELLY_DRUM",
@@ -113,6 +118,11 @@ export const bellyDrumSourceReceipt = {
   ],
   templates: ["gBellyDrumHandSpriteTemplate", "gSlowFlyingMusicNotesSpriteTemplate"],
   loadedAssets: ["ANIM_TAG_MUSIC_NOTES", "ANIM_TAG_PURPLE_HAND_OUTLINE"],
+  extractedAsset: {
+    path: "src/animation/assets/belly-drum.json",
+    extractor: "tools/compare/extractBellyDrumAssets.ts",
+    sha256: assetDigest,
+  },
   audio: { soundEffect: "SE_M_BELLY_DRUM", pan: "SOUND_PAN_ATTACKER", id: 185, sourceCues: 6 },
 } as const;
 

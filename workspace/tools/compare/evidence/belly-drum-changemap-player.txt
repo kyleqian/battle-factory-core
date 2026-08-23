@@ -1,4 +1,4 @@
-# /var/folders/wk/mq92yc6s53jfllv0m6rwvydc0000gn/T/tmp.niuJhNliDG/rgb-player — 110 frames, 240x160
+# belly-drum-player raw RGB888 — 110 frames, 240x160
 # frames absent from this table are byte-identical to the previous frame
 frame  changedPx  bbox(minx,miny-maxx,maxy)
 231  (first frame)

@@ -608,6 +608,7 @@ import encoreAsset from "../animation/assets/encore.json" with { type: "json" };
 import dragonClawAsset from "../animation/assets/dragon-claw.json" with { type: "json" };
 import singAsset from "../animation/assets/sing.json" with { type: "json" };
 import teeterDanceAsset from "../animation/assets/teeter-dance.json" with { type: "json" };
+import bellyDrumAsset from "../animation/assets/belly-drum.json" with { type: "json" };
 import batonPassAsset from "../animation/assets/baton-pass.json" with { type: "json" };
 import rainDropsAsset from "../animation/assets/rain-drops.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
@@ -1031,6 +1032,7 @@ import {
   sceneOnSingView,
   sceneOnGrassWhistleView,
   sceneOnTeeterDanceView,
+  sceneOnBellyDrumView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -1148,6 +1150,7 @@ import {
   type SceneOnSubstituteConfig,
   type SceneOnCrabHammerConfig,
   type SceneOnTeeterDanceConfig,
+  type SceneOnBellyDrumConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   SPITE_CLONE_BLANK_POINTER_AGE,
@@ -2119,6 +2122,10 @@ const singArt = singAsset as {
 const teeterDanceArt = teeterDanceAsset as {
   musicNotes: { tileset: Tileset; palette: RgbColor[] };
   duck: { tileset: Tileset; palette: RgbColor[] };
+};
+const bellyDrumArt = bellyDrumAsset as {
+  musicNotes: { tileset: Tileset; palettes: RgbColor[][] };
+  purpleHandOutline: { tileset: Tileset; palette: RgbColor[] };
 };
 
 
@@ -32421,6 +32428,143 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LUNATONE used" : "Foe LUNATONE used",
       "CALM MIND!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "BELLY_DRUM") {
+    const bellyState = state as SceneOnMovePresentationState<SceneOnBellyDrumConfig>;
+    const view = sceneOnBellyDrumView(bellyState);
+    // All created OBJ state, affine matrices, the rainbow palettes, and the
+    // ShakeMon battler offset reach hardware from the preceding source row.
+    const displayed = sceneOnBellyDrumView({
+      ...bellyState,
+      age: bellyState.age - 1,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    if (!attackerSource) {
+      throw new Error(`BELLY_DRUM missing ${view.attacker.species} attacker art`);
+    }
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!targetSource) {
+      throw new Error(`BELLY_DRUM missing ${view.target.species} target art`);
+    }
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const shakeY = displayed.shakeTasks.some((task) => task.localAge === 0) ? 8 : 0;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerTileset,
+      attackerSource.palette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2 + shakeY,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetTileset,
+      targetSource.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const drawNotes = () => {
+      for (const note of displayed.notes) {
+        drawSpriteSheetAffineRotate(
+          fb,
+          {
+            columns: 2,
+            rows: 2,
+            tiles: bellyDrumArt.musicNotes.tileset.tiles.slice(
+              note.animation * 4,
+              note.animation * 4 + 4,
+            ),
+          },
+          bellyDrumArt.musicNotes.palettes[note.paletteRow]!,
+          note.x + note.x2,
+          note.y + note.y2,
+          note.affinePaPd,
+          0,
+          0,
+          note.affinePaPd,
+        );
+      }
+    };
+    const drawHands = () => {
+      for (const hand of displayed.hands) {
+        const draw = hand.hFlip ? drawSpriteSheetHFlip : drawSpriteSheet;
+        draw(
+          fb,
+          bellyDrumArt.purpleHandOutline.tileset,
+          bellyDrumArt.purpleHandOutline.palette,
+          hand.x - 16,
+          hand.y - 16,
+        );
+      }
+    };
+    // Source subpriorities place both effect classes over the attacker, with
+    // the hand over the notes. In the reversed orientation the player-side
+    // non-attacker remains ahead of the opponent-side effect pool.
+    if (playerAttacker) {
+      drawTarget();
+      drawAttacker();
+      drawNotes();
+      drawHands();
+    } else {
+      drawAttacker();
+      drawNotes();
+      drawHands();
+      drawTarget();
+    }
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: bellyState.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: bellyState.config.fieldProfile.opponentHp
+          / bellyState.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: bellyState.config.fieldProfile.playerGender ?? "male",
+        hpFraction: bellyState.config.fieldProfile.playerHp
+          / bellyState.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: bellyState.config.fieldProfile.playerHp,
+        maxHp: bellyState.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "BELLY DRUM!",
       99,
     );
     return;

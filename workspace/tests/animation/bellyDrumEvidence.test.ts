@@ -25,6 +25,11 @@ function sha256(path: string): string {
 describe("MOVE_BELLY_DRUM retained Scene-ON evidence", () => {
   it("pins the source receipt, bilateral windows, dense state, and change maps", () => {
     expect(bellyDrumSourceReceipt.sourceBounds).toMatchObject(fixture.source);
+    expect(bellyDrumSourceReceipt.extractedAsset).toEqual({
+      path: "src/animation/assets/belly-drum.json",
+      extractor: "tools/compare/extractBellyDrumAssets.ts",
+      sha256: "d0bb56ed76e6bca0072fbe10a49c2155c7f1db3a80aa52b57d094a7032ca7892",
+    });
     expect(fixture.productionFramebufferCompared).toBe(false);
     for (const orientation of ["player-back", "opponent-front"] as const) {
       const receipt = fixture.orientations[orientation];
