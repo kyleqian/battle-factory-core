@@ -7,9 +7,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1391 — [main worker, 2026-08-23] **Scout lever 2 built and measured: `--policy oracle-strength` (the engine's own Factory AI scorer driving the PLAYER) wins 0/30 rounds at carry 28 — a clean NEGATIVE result that retires in-battle move choice as the challenge-4 lever**
 
-- **State:** master `81a98b2f` + this docs commit. `npm test` **1,100 files
-  / 10,364 passed / 223 skipped** (was 1,099 / 10,360), `npm run build`
-  green, typecheck green. New opt-in soak policy only — `winning` /
+- **State:** master `180a7e20` + this docs commit. `npm test` **1,103 files
+  / 10,381 passed / 223 skipped** (this step adds 1 file / 4 tests; the rest
+  of the delta over 1390's 1,099 / 10,360 came in with the side-lane merges
+  under this tree), `npm run build` green, typecheck green. New opt-in soak policy only — `winning` /
   `winning-swap` / `full` / `vanilla` untouched (their pins all still pass);
   zero `src/engine` edits.
 - **Did:** `--policy oracle-strength` = `winning` in every respect except the
