@@ -1862,16 +1862,19 @@ export class RandomPlayer {
       // it already chose and has played with is worth keeping over an
       // unscouted swap. "winning-swap" (opt-in coverage instrument) is the
       // opposite: always accept, then pick deliberately on the swap screen
-      // itself (see onWinningFactorySwap). "oracle-strength" declines
-      // exactly like "winning". The roll is still drawn (this.explores
-      // covers "full"/"winning"/"winning-swap"/"oracle-strength" alike) so
+      // itself (see onWinningFactorySwap). Every OTHER winning-like policy
+      // declines exactly like "winning" -- keyed on `winningLike`, not a
+      // per-policy list, because "winning-coverage" originally missed this
+      // list and 50/50-accepted every offer against its own spec (the same
+      // trap class as ISSUES #99; see the Tier-1 decline pin). The roll is
+      // still drawn (this.explores covers every exploring policy alike) so
       // "full"'s own draw here is untouched; only the decision it feeds is
       // overridden.
       const rolledAccept = this.explores && this.rng.chance(0.5);
-      const accept = this.policy === "winning" || this.policy === "oracle-strength"
-        ? false
-        : this.policy === "winning-swap"
-          ? true
+      const accept = this.policy === "winning-swap"
+        ? true
+        : this.winningLike
+          ? false
           : rolledAccept;
       const targetPos = accept ? 0 : 1;
       if (postwin.swapCursorPos !== targetPos) {

@@ -23,6 +23,7 @@ import {
   Rng,
   coverageDraftTypeWeights,
   pickCoverageDraftPicks,
+  runSeed,
   scoreCoverageDraftTrio,
   type CoverageDraftRental,
 } from "../tools/soak/randomRoundSoakDriver.ts";
@@ -148,6 +149,30 @@ describe("winning-coverage soak policy: coverage-first draft scorer", () => {
         expect(again.score).toEqual(first.score);
       }
     }
+  });
+
+  it("always declines the postwin swap offer and never enters the swap screen", () => {
+    // Regression pin: the policy's spec is "identical to 'winning' except
+    // the draft", but as first landed it missed the swap-offer decline list
+    // (written per-policy for "oracle-strength") and fell through to
+    // "full"'s 50/50 roll -- seed 0 accepted 64 offers and random-walked
+    // the swap screen. Same trap class as ISSUES #99; the decline is now
+    // keyed on the driver's own `winningLike` so a future winning-like
+    // policy can't miss it again.
+    const notes: string[] = [];
+    // Seed 0 wins battle 1 and reaches its first swap offer well inside
+    // this cap (the "winning" pin in randomRoundSoak.test.ts sees one by
+    // frame ~15,000; 32,000 gives headroom for the different draft).
+    runSeed(0, {
+      policy: "winning-coverage",
+      maxFrames: 32_000,
+      renderEvery: 0,
+      onNote: (entry) => notes.push(entry.what),
+    });
+    const swapOfferNotes = notes.filter((note) => note.startsWith("swap offer:"));
+    expect(swapOfferNotes.length).toBeGreaterThan(0);
+    expect(swapOfferNotes.every((note) => note === "swap offer: NO")).toBe(true);
+    expect(notes.some((note) => note.startsWith("swap screen:"))).toBe(false);
   });
 
   it("rents exactly the scorer's trio, in the scorer's rent order, on a staged draft", () => {
