@@ -130,6 +130,56 @@ After it lands, re-run the deep-streak sweeps that hit this crash:
 legal max), expecting the 3 known #118 crash seeds (42: seeds 2/32/49) to
 go clean.
 
+## #120 — `rentsCount` increments once per COMPLETED challenge; retail increments once per swap-then-win (draft-pool rank drifts low)
+
+**Found 2026-08-22** (read-only interaction audit of the 1386 burn-down;
+supervisor re-verified every citation). Retail bumps
+`factoryRentsCount` after **every** defeated opponent — `EventScript_DefeatedOpponent`
+(`data/maps/BattleFrontier_BattleFactoryBattleRoom/scripts.inc:92-97`:
+`factory_get FACTORY_DATA_WIN_STREAK_SWAPS / addvar 1 / factory_set`,
+skipped only when the value already equals `MAX_STREAK`) — and
+`SetBattleFactoryData` commits it only while `sPerformedRentalSwap == TRUE`,
+then clears that static (`src/battle_factory.c:259-265`; set per accepted
+swap at `:300`, cleared by `InitFactoryChallenge` at `:214`). So N accepted
+swaps followed by wins in one challenge give **+N** (a swap after battle k
+is paid at battle k+1's win); the engine's
+`factoryRoundBattleOrchestrator.ts:1232-1249` gates `persistRentalSwap` on
+`round.rules.phase === "roundComplete"` with `performedRentalSwap`
+sticky-OR'd at `:1163`, so it gives **+1 per completed challenge** and +0 for
+a challenge lost after a swap. Consumer: `GetNumPastRentalsRank`
+(`:868-886`, thresholds 15/22/29/36/43) → `getFactoryRentalRank` → the next
+draft's `sInitialRentalMonRanges` tier, so a swap-every-battle player reaches
+rank 1 after ~3 challenges in retail vs 15 in the engine.
+
+**Pinned-as-correct today:** `tests/factoryRoundBattleOrchestrator.test.ts:2054`
+("persists accepted swaps exactly once on completion and never on loss")
+accepts two swaps (after battles 0 and 1) from `rentsCount` 14 and asserts
+**15**; retail yields **16** (paid at battle 1's and battle 2's wins).
+
+**Fix shape:** at every battle-WIN resolution (`presentingBattleWin` and
+`roundComplete`), if `performedRentalSwap` then `rentsCount += 1` (unless
+already 9,999 — retail skips the set AND leaves the flag set) and clear the
+flag; the loss path (#111's `advanceFactoryCarry`, `factoryRoundChaining.ts:72`)
+is already source-exact and stays. Re-pin the existing test to 16 and add:
+swap-after-every-battle (6 swaps → +6), swap then loss (+0, reset), swap
+after battle 5 paid at the seventh win (+1), and the 9,999 skip.
+
+## #121 — `gBattleStruct->AI_monToSwitchIntoId` is not modelled; `Cmd_openpartyscreen`'s opponent route is source-exact only for the `PARTY_SIZE` sentinel case
+
+**Found 2026-08-22** (same audit). `OpponentHandleChoosePokemon`
+(`battle_controller_opponent.c:1625-1650`) calls
+`GetMostSuitableMonToSwitchInto()` only when
+`AI_monToSwitchIntoId[battler] == PARTY_SIZE`; otherwise it consumes the
+AI's pre-decided target and resets the sentinel. #110 (`890a8593`) routes
+every opponent pick through the scorer, which matches the sentinel case
+only. Divergence requires the AI to bank a voluntary-switch target and a
+forced switch to consume it in the same turn; the engine decides voluntary
+switches in `factoryAiLiveDriver.ts` rather than through the opcode, and the
+audit could not construct the path. Unmodelled source state, not a live bug:
+close with a bounded probe (stage an AI voluntary switch whose target then
+faints to Spikes/Future Sight the same turn) before treating
+`battleScriptOpenPartyScreenOpcode.ts` as fully source-exact.
+
 ## #109 — `battleAiSwitchInto.ts` omits the `i != monToSwitchIntoId[battlerIn1/2]` exclusion in both passes
 
 **Found 2026-08-22** (side worker, #102 fix). Source `GetMostSuitableMonToSwitchInto`
