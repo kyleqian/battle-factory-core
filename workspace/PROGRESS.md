@@ -5,6 +5,55 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1395 — [interactive session, 2026-08-23] **Combined draft lever (4'') built + measured on a NEW honest instrument — challenge 4 was never unbeatable (winning 5.8%, combined 7.7% at n=1,000/arm); two policy/instrument bugs fixed, two engine finds filed (#122 crash, #123 endless battle)**
+
+- **State:** master = this docs commit (4 code commits under it: `a8445d42`
+  swap-decline fix, `83fa52af` `--policy winning-combined`, `679d1744`
+  `--vary-rng`/`--first-round` instruments, plus this entry). Full gates on
+  this tree: vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60
+  **60/60**, winning-swap 0:60 **60/60** (0 CRASH / 0 HANG); `npm test`
+  **1,107 files / 10,407 passed / 223 skipped** (+1 file / +11 tests);
+  build + typecheck green.
+- **Did:** (1) **Bug found+fixed before measuring**: `winning-coverage`
+  never declined swap offers (missed the per-policy list written for
+  `oracle-strength`; seed 0 accepted 64 offers and random-walked the swap
+  screen — ISSUES-#99 trap class). Decline now keyed on `winningLike`,
+  Tier-1-pinned; 1393's lever-4' numbers were of the buggy policy.
+  (2) `--policy winning-combined` landed: coverage-first draft subject to a
+  strength floor = the MEAN candidate-trio BST (6 pins, floor-binding pin
+  mutation-red-verified). (3) **Instrument finding that reframes every
+  `--start-carry` number to date**: the engine is seed-invariant, so
+  deterministic-draft policies collapse all seeds into ONE trajectory (30
+  identical chronologies), and even random-draft sweeps always faced the
+  same six boot offers. Landed `--vary-rng` (per-seed boot RNG walk) +
+  `--first-round` (direct roundComplete/roundLost at ~1 s/seed).
+  (4) **THE MEASUREMENT** (carry 28, varied offers, boot-round wins):
+  winning **58/1000 (5.8%)**, combined **77/1000 (7.7%)**, oracle-strength
+  4/100, coverage 5/100 — challenge 4's "0/30 wall" was one losing deal
+  measured repeatedly; the combined edge is suggestive-small (z ≈ 1.7),
+  no draft policy separates decisively. (5) ~2,400 varied boot rounds of
+  crash coverage → **#122** (Factory AI RNG-lockstep divergence crash,
+  plain `winning`, deterministic 0.1 s repro seed 681) and **#123**
+  (endless battle: 456 selections of a 15-PP DOUBLE TEAM then HANG, seed
+  755) filed. Full results in
+  `docs/soak-policy-strength-scout-2026-08-23.md` §"Result — lever 4''".
+- **Next:** (1) triage #122 (cheapest first: which of the 13 expected draws
+  diverged) and #123 (PP legality on the fallback path + Struggle
+  engagement); (2) decide whether `--vary-rng` sweeps per `--start-carry`
+  tier become a standing crash-coverage gate; (3) the draft-lever program is
+  at diminishing returns — recommend closing it. Open ISSUES: #122, #123
+  (new), #121 (dormant), #109/#114 (doubles-era), #71/#73/#39/#55
+  (parked/filler).
+- **Notes:** measurement is PAIRED (same walked offers per seed across
+  arms); first 500 seeds: both-won 0, winning-only 26, combined-only 41;
+  second 500: 32 vs 36 (no separation). The four standing gates stay
+  UNVARIED (pinned baseline) — `--vary-rng` is opt-in. Trap: two glob
+  collisions (`m-winning-*` matches `m-winning-coverage-*`) briefly
+  produced a wrong count — use exact filenames when policy names share
+  prefixes.
+
+---
+
 ## 1394 — [supervisor final wind-down, 2026-08-23 03:10] **Bonus round closed: both remaining challenge-4 levers measured NEGATIVE at carry 28 (`oracle-strength` 0/30, `winning-coverage` 0/30); final tree re-gated green — entry 1392 is the full session record**
 
 - **Final gates on THIS tree (`b1480863` + this docs commit; supervisor-independent):**
@@ -72,64 +121,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   for the smoke, 8x15 for the 0:120) — the Bash foreground cap is 600 s and
   seeds are independent per `runSeed`, so the unions are the requested
   `0:20` / `0:120`. Tree clean, no foreign animation strays this session.
-
----
-
-## 1392 — [supervisor wind-down, 2026-08-23 ~02:15] **#118 CLOSED end to end (Rust `5b51eac5` → lockstep TS+wasm `0cb8aa26` → wire format `47a8db42`), #120 found by audit + fixed, #121 probed not-a-divergence, `oracle-strength` soak policy built and measured NEGATIVE; every gate green on the final tree; animation folded twice**
-
-- **Final gates (supervisor-independent):** on `a5b06cfb` (engine-final):
-  vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60**,
-  winning-swap 0:60 **60/60** (0 CRASH / 0 HANG each; the same four gates
-  also ran 20/60/60/60 on `0cabb82b` before the soak-policy commits); full
-  `npm test` **1,103 files / 10,381 passed / 223 skipped** + build green on
-  `a5b06cfb`; after the second animation fold (`77f4db64`, Teeter Dance,
-  Scene-ON renderer branch only) union **1,105 / 10,392 / 223** + build
-  green, re-run vanilla 0:20 + winning 0:60 on that tree: vanilla **20/20**, winning **60/60**.
-  Insurance: full 60:240 **180/180**, winning 60:240 **180/180** (so 0:240 =
-  240/240 each on the engine-final tree). cargo **1,029/0**, wasm parity
-  **484/484** none skipped; rebuilt wasm `f55b03fc…` (gitignored).
-- **Did (9 worker rounds: 4 ts opus, 5 side — 2 read-only audits, 2 scouts,
-  2 fixes, 1 probe; 0 failed steps, 0 cap-kills):** #118 via the user's
-  two-commit ladder + one remainder (1388/1389/1390); post-land re-sweeps
-  `--start-carry 42` 60/60, `49` 0:180 **180/180**, `winning-swap 49` 60/60
-  (`docs/soak-start-carry-2026-08-22.md` §post-#118; deepest carry 56 =
-  challengeNum 8 drafts real; former crash seeds 2/32/49 clean). Audit of
-  the 1386 burn-down fixes → **#120** CONFIRMED (rentsCount paid once per
-  completed challenge vs retail's per-swap-then-win; the existing test pinned
-  the bug as correct) → fixed `664de9ee`/`64ad9f4e` with 5 pins; #121 filed →
-  probed UNREACHABLE (`docs/issue121-ai-mon-to-switch-into-probe.md`), trimmed
-  to a dormant coupled-pair note; audit of #118's TS-only halves → CLEAN +
-  `healFactoryKernelParty` six-IV guard `0cabb82b`. Scout
-  `docs/soak-policy-strength-scout-2026-08-23.md`: the wall is challengeNum 4
-  ALONE (winning@35 wins 5/30, @28 0/30, 22/30 lost at b1); lever 2
-  (`--policy oracle-strength`, the engine's own scorer for the player) built
-  + measured **0/30** at carry 28 with 0 fallbacks (1391) → move choice is
-  NOT the lever; party quality at draft is. PAPERCUTS: +4 entries, 1 bump.
-- **Decisions recorded:** six real IVs everywhere `ivs` exists with
-  `fixedIv === ivs.attack` (retail's scalar rebuild `SetPlayerAndOpponentParties`
-  is resume-only — `battle_factory.inc:59`, PreBattleRoom `:202`). Correction
-  to #118's text: the Brain's argument-8 call site is retail-correct but
-  UNREACHABLE in play (Brain-eligible banked streaks 20/41/62/… ⇒ challengeNum
-  2/5/8, never 6); the sweeps only ever exercised the rental path. Correction
-  to the scout: `rentsCount` counts swap-then-wins, so `--start-carry`'s
-  `rentsCount: 0` is faithful for `winning` (a `--start-rents` flag would be
-  the honest shape for swap-accepting policies, not a formula).
-- **Next:** (1) the only open ch-4 lever is a NEW coverage-first draft
-  heuristic (the withheld bulk+STAB one lost; the scorer-for-player one lost)
-  — measure-first via `--policy … --start-carry 28 --seeds 0:30` rounds won;
-  (2) optional instruments from the scout §4 (per-seed round ledger, loss
-  shape, rentsCount/rank) — ~40 lines in the driver; (3) the 0:120
-  `oracle-strength` confirmation sweep was not run (no longer load-bearing).
-  Open ISSUES: #121 (dormant note), #109/#114 (doubles-era), #71/#73/#39/#55
-  (parked/filler). DEFERRED.md: none open.
-- **Notes:** `check-oracle-freshness.sh` FAIL at orient = known timestamp
-  false positive (no harness commit touched `oracle/`), both services kept.
-  Two lessons filed in PAPERCUTS: a supervisor ISSUES commit mid-worker was
-  clobbered by the worker's stale-snapshot rewrite (caught + restored by the
-  worker `6daf244d`); the #120 side worker edited the main tree by absolute
-  path (hit 5 — my side brief lacked the standing clause). `animation-main`
-  delta at close: folded `3a8b58d7` (Spikes) + `77f4db64` (Teeter Dance);
-  its supervisor was live all session. `rust-main` delta 0.
-
----
 

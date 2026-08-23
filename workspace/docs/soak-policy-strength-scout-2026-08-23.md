@@ -421,3 +421,92 @@ The policy stays in the tree as an opt-in instrument (it is the deepest-reaching
 anchor player measured to date and costs nothing when unused) but is **not**
 promoted to the gate set. `winning` / `winning-swap` / `full` / `vanilla` /
 `oracle-strength` behaviour is byte-identical — their pins all still pass.
+
+---
+
+## Result — lever 4'' (combined draft) + two instrument findings that reframe every number above (2026-08-23, follow-on session)
+
+**Two instrument bugs were found before the lever could be measured, and the
+second dissolves this doc's central premise.**
+
+**Finding 1 — `winning-coverage` never declined swaps (fixed `a8445d42`).**
+The swap-offer decline was a per-policy list written for `oracle-strength`;
+`winning-coverage` missed it and fell through to `full`'s 50/50 roll — seed 0
+accepted 64 offers and random-walked the swap screen (same trap class as
+ISSUES #99). Every "Result — lever 4'" number above therefore measured
+coverage-draft + random swap-accepts, not the draft alone. The decline is now
+keyed on the driver's own `winningLike` getter and Tier-1-pinned.
+
+**Finding 2 — deterministic-draft seeds collapse into ONE trajectory.** The
+engine is seed-invariant (vanilla gate, #116); ALL soak variance is
+player-RNG-borne. A policy whose decisions never consume the player RNG — the
+deterministic coverage drafts — therefore plays essentially the same game on
+every seed: the first `winning-combined` carry-28 sweep returned **30
+byte-similar chronologies** (identical drafts, identical outcomes, frames
+within ~500). Every deterministic-draft `--start-carry` statistic to that
+point was effectively **n = 1**, and even the random-draft sweeps above all
+faced the SAME six boot offers. Landed instruments (`679d1744`): `--vary-rng`
+(advance the boot RNG cursor by the seed before generating the draft — the
+exact mechanism by which real players' cursors differ) and `--first-round`
+(CLI exposure of `stopAtFirstRoundDecision`, so rounds-won-at-boot reads
+directly from `endState` at ~1 s per losing seed instead of 24 s of
+budget-bound chaining).
+
+**Lever 4'' itself (`b00f7e60`-style opt-in, commit `83fa52af`):**
+`--policy winning-combined` = `winning-coverage` except the trio search,
+which maximises the same coverage-first lexicographic score only over trios
+whose summed base-stat total meets `combinedDraftBstFloor` — the MEAN
+candidate-trio total (half the six offers' sum), i.e. what a random draft
+fields in expectation. Deterministic; the max-BST trio always meets a
+mean-derived ceiling so the floored search cannot come up empty. Tier-1 pins
+in `tests/randomRoundSoakCombinedDraft.test.ts` (floor value, floor-binding
+pick red-verified by a floor:=0 mutation, floor-slack equivalence,
+determinism, swap decline, staged rent order).
+
+### THE MEASUREMENT — carry-28 boot rounds won, varied offers, honest n
+
+```
+npm run soak -- --policy <P> --start-carry 28 --vary-rng --first-round --seeds 0:100 --render-every 0
+```
+
+| policy | rounds won (n=100, seeds 0:100) |
+|---|---|
+| `winning` | 6/100 |
+| `oracle-strength` | 4/100 |
+| `winning-coverage` (post-fix) | 5/100 |
+| `winning-combined` | 7/100 |
+
+Extended to n=1,000 for the two decision-relevant arms (seeds 0:1000, same
+walked offers per seed across arms, i.e. PAIRED):
+
+| arm | wins | rate | loss-at-b1 |
+|---|---|---|---|
+| `winning` | **58/1000** | 5.8% | 462/941 |
+| `winning-combined` | **77/1000** | 7.7% | 433/922 |
+
+Paired detail, first 500 seeds: winning-only 26, combined-only 41,
+**both-won 0** (expected overlap ~2 under independence — consistent).
+Second 500: 32 vs 36 (no separation). Cumulative two-proportion z ≈ 1.7,
+one-sided p ≈ 0.045 — **a suggestive ~1.3–1.6x edge, small and not
+conclusive**; wave 2 alone shows none.
+
+### What this settles (and un-settles)
+
+1. **Challenge 4 was never unbeatable.** With varied boot offers, plain
+   `winning` wins **5.8%** of ch4 boot rounds. Every 0/30 above — `winning`,
+   `oracle-strength`, `winning-coverage` — was ONE fixed, losing deal of six
+   offers (`ANCHOR_RNG_VALUE`) measured repeatedly. The "unique local
+   minimum" mechanism (§2) still stands; the "wall" framing does not.
+2. **No draft policy separates decisively at ch4.** All four arms sit at
+   4–8%; the combined floor may add ~2 points on a ~6% base (p ≈ .045). The
+   draft-lever program has hit diminishing returns.
+3. **Crash coverage is the real winner**: ~2,400 varied boot rounds (a
+   surface no prior sweep ever touched — every previous `--start-carry` run
+   opened on the same draft) produced two real finds: **#122** (Factory AI
+   live-driver RNG-lockstep divergence crash under plain `winning`,
+   deterministic 0.1 s repro, seed 681) and **#123** (endless battle — 456
+   selections of a 15-PP DOUBLE TEAM, then HANG; seed 755).
+
+Recommended standing use: `--vary-rng` sweeps at each `--start-carry` tier as
+the crash-coverage instrument of record; the four standing gates stay
+unchanged (unvaried, pinned baseline).

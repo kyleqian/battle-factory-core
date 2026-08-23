@@ -17,6 +17,59 @@ backlog.
 
 # Open
 
+## #122 — Factory AI live driver RNG-lockstep divergence crash on a varied challenge-4 boot (deterministic 0.1 s repro)
+
+**Found 2026-08-23** by the first `--vary-rng` crash sweep (2,000 varied
+challenge-4 boot rounds; this was 1 of 2 finds). Under the PLAIN `winning`
+policy — no new policy code in the loop — one varied boot draft reaches a
+battle state where the engine's own lockstep invariant throws:
+`[engine/tick] Error: Factory AI RNG diverged before live draw 11/13`, stack
+`factoryAiLiveDriver.ts:452` → `submitBattleDecision`
+(`battleDecisionBoundary.ts:819`) → `submitLiveFactoryAiDecision`
+(`factoryAiLiveDriver.ts:558`). Repro (deterministic, crashes at battle 1
+turn 6, frame 5,266, ~0.1 s):
+
+```
+npm run soak -- --policy winning --start-carry 28 --vary-rng --first-round --seed 681 --render-every 0
+```
+
+The only nonstandard input is the boot RNG cursor (`--vary-rng` advances it
+681 LCG steps before generating the draft) — exactly how every real player's
+cursor differs — so this is a live-parity bug some real chain can hit, not an
+instrument artifact. Occurrence 1/2,000 varied ch4 boots. Triage: which of
+the 13 expected draws diverged at draw 11, and whether the miscount is in the
+live driver's expectation or the kernel's actual draw sequence for this
+matchup.
+
+## #123 — Endless battle under the soak's status-move fallback: 456 selections of a 15-PP DOUBLE TEAM, then HANG at `resolution:presenting`
+
+**Found 2026-08-23** by the same `--vary-rng` sweep (find 2 of 2). Repro
+(~27 s to HANG at the 1M budget; at 300k frames it is battle 3 turn 486 and
+still ticking):
+
+```
+npm run soak -- --policy winning-combined --start-carry 28 --vary-rng --seed 755 --render-every 0
+```
+
+Player trio CROBAT/BLASTOISE/JOLTEON (combined draft, boot carry 28). The
+battle-3 matchup walls the active mon, so the winning-like last-resort
+fallback picks slot 3 = move 104 (DOUBLE TEAM) every turn; the verbose
+transcript logs **456 `fight: confirm` selections of that one move in a
+single battle** with the turn counter advancing each time. Two coupled
+smells, either of which is a real bug:
+
+1. **PP**: DOUBLE TEAM carries 15 PP (24 max) — the real game cannot allow
+   456 uses; at 0 PP the slot must be rejected (#72's oracle-verified
+   NOPPLEFT path) and at all-slots-0 Struggle must engage. Check whether the
+   fight-menu legality mask this path consults reads live PP.
+2. **Termination**: at +6 evasion neither side lands hits and the battle
+   runs 1,600+ turns until the driver's 30k-frame stall detector fires at
+   `resolution:presenting` (b3 t1681 at the 1M budget). Even with PP fixed,
+   confirm Struggle-vs-Struggle ends this battle.
+
+Not an engine `tick` crash — the engine happily plays the endless battle;
+triage which half is engine vs driver-policy pathology before fixing either.
+
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 
 `docs/issue121-ai-mon-to-switch-into-probe.md` closes the reachability
