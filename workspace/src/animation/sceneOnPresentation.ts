@@ -881,6 +881,12 @@ import {
   type GrassWhistleNote,
 } from "./grassWhistle.ts";
 import {
+  teeterDanceAtAge,
+  teeterDanceNotesBackToFrontAtAge,
+  type TeeterDanceNote,
+  type TeeterDancePoint,
+} from "./teeterDance.ts";
+import {
   sweetKissAtAge,
   type SweetKissState,
 } from "./sweetKiss.ts";
@@ -3079,6 +3085,16 @@ export interface SceneOnGrassWhistleConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Narrow Scene-ON seam for Teeter Dance's fast-note and live-battler body. */
+export interface SceneOnTeeterDanceConfig {
+  readonly move: "TEETER_DANCE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `gSprites[gBattlerSpriteIds[attacker]]` x/y before the task. */
+  readonly attackerSpriteCenter: Readonly<TeeterDancePoint>;
+}
+
 export interface SceneOnDetectConfig {
   readonly move: "DETECT";
   readonly attacker: SceneOnPresentationBattler;
@@ -3318,6 +3334,7 @@ export type SceneOnMoveConfig =
   | SceneOnMetalClawConfig
   | SceneOnSingConfig
   | SceneOnGrassWhistleConfig
+  | SceneOnTeeterDanceConfig
   | SceneOnDetectConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
@@ -4217,6 +4234,18 @@ export interface SceneOnGrassWhistleView {
   readonly notes: readonly GrassWhistleNote[];
   readonly pan: SingPanTask | null;
   readonly greenBlendCoeff: number;
+  readonly visualTaskCount: number;
+}
+
+export interface SceneOnTeeterDanceView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly notes: readonly TeeterDanceNote[];
+  readonly task: ReturnType<typeof teeterDanceAtAge>["task"];
+  readonly battlerX: number;
+  readonly battlerX2: number;
+  readonly audio: ReturnType<typeof teeterDanceAtAge>["audio"];
   readonly visualTaskCount: number;
 }
 
@@ -8913,6 +8942,41 @@ export function sceneOnGrassWhistleView(
         ),
     pan: body.pan,
     greenBlendCoeff: body.greenBlendCoeff,
+    visualTaskCount: body.visualTaskCount,
+  };
+}
+
+/**
+ * `age=0` is the first in-bounds MOVE_TEETER_DANCE script row. Sprite/task
+ * state is returned at the current source age; the compositor applies the
+ * ordinary preceding-row latch at its seam.
+ */
+export function sceneOnTeeterDanceView(
+  state: SceneOnMovePresentationState,
+): SceneOnTeeterDanceView {
+  if (state.config.move !== "TEETER_DANCE") {
+    throw new Error(`expected TEETER_DANCE presentation, got ${state.config.move}`);
+  }
+  const config = state.config as SceneOnTeeterDanceConfig;
+  const body = teeterDanceAtAge(
+    state.age,
+    config.attacker.geometry.animationCenter,
+    config.attacker.geometry.side,
+    config.attackerSpriteCenter,
+  );
+  return {
+    age: state.age,
+    attacker: config.attacker,
+    target: config.target,
+    notes: teeterDanceNotesBackToFrontAtAge(
+      state.age,
+      config.attacker.geometry.animationCenter,
+      config.attacker.geometry.side,
+    ),
+    task: body.task,
+    battlerX: body.battlerX,
+    battlerX2: body.battlerX2,
+    audio: body.audio,
     visualTaskCount: body.visualTaskCount,
   };
 }

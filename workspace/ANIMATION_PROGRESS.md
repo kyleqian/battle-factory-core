@@ -1,3 +1,10 @@
+# MOVE_TEETER_DANCE bilateral dense source/component checkpoint — partial (2026-08-22 worker)
+
+- **State:** Level 50 is **202/276 exact, 1 partial, 73 unsupported**. MOVE_TEETER_DANCE is the sole queued increment; its music-notes component track is partial. MOVE_SING, MOVE_BELLY_DRUM, MOVE_FAKE_TEARS, and MOVE_GRASS_WHISTLE retain their independent pre-existing statuses.
+- **Did:** Added a source-relative `teeterDance.ts` reducer, typed Scene-ON seam, reproducible MUSIC_NOTES/DUCK and Spinda asset extraction, legal bilateral fixtures, source audit, and a generic Battle Scene ON draw case. The reducer ports the five fast-note paths, signed side geometry, two-slot reuse, affine program, five attacker-pan cues, live-battler TeeterDance task phases, preceding transfer latches, and inactive cleanup without gameplay/status/RNG/turn/facility ownership.
+- **Verified:** The exact source interval is `0x082ce78d..<0x082ce7f8` (107 bytes, SHA-256 `5dd532744b7f9bff1f8a88567122573d7da66e956961db734f56119247b21572`), carried by SPINDA set 145. Complete retained rows are **169/169 player-back** (`227..395`) and **169/169 opponent-front** (`222..390`), and both orientations reproduce twice-fresh byte-identically: dense `2054b48b…` / `b9ce33a2…`, raw RGB `5087f54b…` / `8e25beb6…`. Relevant note OAM/matrix latches are **235/235** and faded-palette transfer is **168/168** per orientation; normalized change maps are banked.
+- **Remainder:** The ordinary compositor seam is wired, but production framebuffer comparison has not yet run. The next action is to replay both complete retained orientations through the app twice fresh and require **169/169 + 169/169 zero-residual** framebuffers before promotion. No boundary, unsupported barrier, latch file, or sibling status changed.
+
 # MOVE_SPIKES bilateral exact production presentation (2026-08-22 worker)
 
 - **State:** Level 50 advances **201→202/276 exact**, **1→0 partial**, and remains **74 unsupported**. MOVE_SPIKES alone promotes; `spikes-target-arc` is fulfilled. MOVE_MEGAHORN and MOVE_SPIKE_CANNON remain independent controls.

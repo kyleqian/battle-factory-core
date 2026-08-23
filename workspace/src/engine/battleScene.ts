@@ -607,6 +607,7 @@ import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: 
 import encoreAsset from "../animation/assets/encore.json" with { type: "json" };
 import dragonClawAsset from "../animation/assets/dragon-claw.json" with { type: "json" };
 import singAsset from "../animation/assets/sing.json" with { type: "json" };
+import teeterDanceAsset from "../animation/assets/teeter-dance.json" with { type: "json" };
 import batonPassAsset from "../animation/assets/baton-pass.json" with { type: "json" };
 import rainDropsAsset from "../animation/assets/rain-drops.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
@@ -1029,6 +1030,7 @@ import {
   sceneOnTakeDownView,
   sceneOnSingView,
   sceneOnGrassWhistleView,
+  sceneOnTeeterDanceView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -1145,6 +1147,7 @@ import {
   type SceneOnFakeOutConfig,
   type SceneOnSubstituteConfig,
   type SceneOnCrabHammerConfig,
+  type SceneOnTeeterDanceConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   SPITE_CLONE_BLANK_POINTER_AGE,
@@ -2112,6 +2115,12 @@ const singArt = singAsset as {
   musicNotes: { tileset: Tileset; palettes: RgbColor[][] };
   azurillBack: { tileset: Tileset; palette: RgbColor[] };
   azurillFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const teeterDanceArt = teeterDanceAsset as {
+  musicNotes: { tileset: Tileset; palette: RgbColor[] };
+  duck: { tileset: Tileset; palette: RgbColor[] };
+  spindaBack: { tileset: Tileset; palette: RgbColor[] };
+  spindaFront: { tileset: Tileset; palette: RgbColor[] };
 };
 
 
@@ -32411,6 +32420,137 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LUNATONE used" : "Foe LUNATONE used",
       "CALM MIND!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "TEETER_DANCE") {
+    const teeterState = state as SceneOnMovePresentationState<SceneOnTeeterDanceConfig>;
+    const view = sceneOnTeeterDanceView(teeterState);
+    // Sprite/task RAM is consumed from the preceding source row. The duck
+    // sheet is intentionally extracted but never created by this move: the
+    // source script only loads ANIM_TAG_DUCK before creating five notes.
+    const displayed = sceneOnTeeterDanceView({
+      ...teeterState,
+      age: teeterState.age - 1,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const frontAsset = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[
+      view.attacker.species
+    ];
+    const backAsset = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[
+      view.attacker.species
+    ];
+    const attackerSource = view.attacker.species === "SPINDA"
+      ? (playerAttacker ? teeterDanceArt.spindaBack : teeterDanceArt.spindaFront)
+      : (playerAttacker ? backAsset : frontAsset) ?? onixBackSprite;
+    const attackerSprite = playerAttacker
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: subTileset(attackerSource.tileset, 0, 8),
+        };
+    const targetFrontAsset = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[
+      view.target.species
+    ];
+    const targetBackAsset = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[
+      view.target.species
+    ];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? targetFrontAsset ?? onixFrontSprite
+      : targetBackAsset ?? onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheet(
+      fb,
+      targetSource.tileset,
+      targetSource.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const attackerDeltaX = displayed.battlerX
+      - teeterState.config.attackerSpriteCenter.x;
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x
+        + attackerDeltaX + displayed.battlerX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawNotes = () => {
+      for (const note of displayed.notes) {
+        const current = view.notes.find((candidate) => candidate.index === note.index);
+        if (!current) continue;
+        drawSpriteSheetAffineRotate(
+          fb,
+          {
+            columns: 2,
+            rows: 2,
+            tiles: teeterDanceArt.musicNotes.tileset.tiles.slice(
+              note.tileOffset,
+              note.tileOffset + 4,
+            ),
+          },
+          teeterDanceArt.musicNotes.palette,
+          note.x + note.x2,
+          note.y + note.y2,
+          current.affinePaPd,
+          0,
+          0,
+          current.affinePaPd,
+        );
+      }
+    };
+    if (playerAttacker) {
+      drawNotes();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawNotes();
+    }
+    const opponentSpecies = view.target.geometry.side === "opponent"
+      ? view.target.species : view.attacker.species;
+    const playerSpecies = view.target.geometry.side === "player"
+      ? view.target.species : view.attacker.species;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: teeterState.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: teeterState.config.fieldProfile.opponentHp
+          / teeterState.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: teeterState.config.fieldProfile.playerGender ?? "male",
+        hpFraction: teeterState.config.fieldProfile.playerHp
+          / teeterState.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: teeterState.config.fieldProfile.playerHp,
+        maxHp: teeterState.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "TEETER DANCE!",
       99,
     );
     return;

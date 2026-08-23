@@ -3967,6 +3967,37 @@
    ]
   },
   {
+   "move": "MOVE_TEETER_DANCE",
+   "status": "partial",
+   "covered": [
+    "complete legal Level-50 Scene-ON mechanicLab parties use the lowest legal carrier FRONTIER_MON_SPINDA set 145 (SPECIES_SPINDA 327, MOVE_TEETER_DANCE 298, Relaxed Attack+HP spread) against complete legal Onix/Spinda reverse-orientation parties; player-back frames 227..395 and opponent-front frames 222..390 retain 169 consecutive rows each through the first inactive cleanup row",
+    "the authoritative half-open source interval is 0x082ce78d..0x082ce7f8 (107 bytes, 5dd532744b7f9bff1f8a88567122573d7da66e956961db734f56119247b21572); the generated graph is exactly ANIM_TAG_DUCK, ANIM_TAG_MUSIC_NOTES, gFastFlyingMusicNotesSpriteTemplate, and AnimTask_TeeterDanceMovement",
+    "the independent source-relative reducer matches 169/169 player-back plus 169/169 opponent-front component rows: five fast-note fixed-point paths with source offsets 16,0,-16,-8,8 and signed opponent reversal, affine scale/matrices, two-slot allocation reuse, five SE_M_TEETER_DANCE cues, the live-battler TeeterDance task's case-0/case-1/case-2 phases, and first inactive cleanup",
+    "the retained dense rows measure the ordinary preceding-row transfer at all five note lifecycles: relevant note OAM and matrices are 235/235 per orientation and full faded-to-hardware palette rows are 168/168; no gameplay RNG, battle HP/status, turn, facility, controller, or outcome field changes",
+    "twice-fresh probes are byte-identical per orientation; dense-state hashes are 2054b48b52a001b343f9242b7a934a9355dbd06838f517afc31236e7712814eb and b9ce33a2acb0c6b54b249e0350c67b95e39c32f8545cf05314042696ef35a581, raw-RGB sequence hashes are 5087f54b63fb70b9a999a99e805382d06b89e5deaad2e9cde8d86353f218fff0 and 8e25beb6e55a3c278f6f382d8eb665a443352e4b37026d02088514ef37ca3341, and normalized change maps are banked for both orientations"
+   ],
+   "evidence": [
+    "tools/compare/fixtures/teeter-dance-player-spinda-opponent-onix.json",
+    "tools/compare/fixtures/teeter-dance-player-onix-opponent-spinda.json",
+    "tools/compare/fixtures/teeter-dance-evidence.json",
+    "tools/compare/teeterDanceProbe.py",
+    "tools/compare/teeterDanceSourceAudit.ts",
+    "tools/compare/extractTeeterDanceAssets.ts",
+    "tools/compare/evidence/teeter-dance-player-dense-state.json.gz",
+    "tools/compare/evidence/teeter-dance-opponent-dense-state.json.gz",
+    "tools/compare/evidence/teeter-dance-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/teeter-dance-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/teeter-dance-changemap-player.txt",
+    "tools/compare/evidence/teeter-dance-changemap-opponent.txt",
+    "src/animation/assets/teeter-dance.json",
+    "src/animation/teeterDance.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/teeterDance.test.ts"
+   ],
+   "remaining": "The ordinary compositor seam is wired and the source/component gate is exact, but shared production framebuffer comparison has not yet been run. Re-run both complete retained orientations through the app twice fresh and require 169/169 + 169/169 zero-residual production framebuffers before promoting Teeter Dance; MOVE_SING, MOVE_BELLY_DRUM, MOVE_FAKE_TEARS, and MOVE_GRASS_WHISTLE retain independent statuses and no sibling credit."
+  },
+  {
    "move": "MOVE_SLASH",
    "status": "exact",
    "covered": [
@@ -5556,7 +5587,9 @@
    ]
   }
  ],
- "queue": [],
+ "queue": [
+  "MOVE_TEETER_DANCE"
+ ],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -5986,7 +6019,7 @@
     "MOVE_FAKE_TEARS",
     "MOVE_GRASS_WHISTLE"
    ],
-   "goal": "MOVE_SING is exact: its complete first animation-script block is 245/245 player-back and 248/248 opponent-front for strengthened component/OAM/matrix/palette/monbg and raw-RGB/shared-seam framebuffer evidence, reproduced twice. No sibling is promoted. BELLY DRUM has six alternating purple-hand hits, six ShakeMon tasks, six gSlowFlyingMusicNotesSpriteTemplate arcs with distinct animation/palette/phase argv, attacker-pan sounds, and rainbow cleanup. TEETER DANCE has AnimTask_TeeterDanceMovement, five gFastFlyingMusicNotesSpriteTemplate paths at three signed offsets, five attacker-pan sounds, and ANIM_TAG_DUCK. FAKE TEARS only loads MUSIC_NOTES for its distinct thought-bubble/music-note tear macro body and additionally needs SMALL_BUBBLES BlendParticle, RockMonBackAndForth, four looped tail-whip sounds, and eight type-varied tear sprites. GRASS WHISTLE shares the 12 wavy-note geometry but fixes every initial palette to index 1 with no cycling, uses a green whole-BG blend/restore instead of monbg, and has its distinct grass-whistle pan sweep. Every sibling remains unsupported pending its own complete dense evidence."
+   "goal": "MOVE_SING is exact: its complete first animation-script block is 245/245 player-back and 248/248 opponent-front for strengthened component/OAM/matrix/palette/monbg and raw-RGB/shared-seam framebuffer evidence, reproduced twice. MOVE_TEETER_DANCE is the bounded partial representative for this increment: its complete legal bilateral Scene-ON source/component evidence is 169/169 player-back plus 169/169 opponent-front through first inactive cleanup, reproduced twice fresh with source-relative reducer, typed seam, OAM/matrix/palette latches, audio, and normalized change maps; production framebuffer comparison remains the sole promotion remainder. No sibling status or credit changes. BELLY DRUM has six alternating purple-hand hits, six ShakeMon tasks, six gSlowFlyingMusicNotesSpriteTemplate arcs with distinct animation/palette/phase argv, attacker-pan sounds, and rainbow cleanup. FAKE TEARS only loads MUSIC_NOTES for its distinct thought-bubble/music-note tear macro body and additionally needs SMALL_BUBBLES BlendParticle, RockMonBackAndForth, four looped tail-whip sounds, and eight type-varied tear sprites. GRASS WHISTLE shares the 12 wavy-note geometry but fixes every initial palette to index 1 with no cycling, uses a green whole-BG blend/restore instead of monbg, and has its distinct grass-whistle pan sweep. Each sibling retains its independent pre-existing status and acceptance."
   },
   {
    "id": "music-notes-2",
