@@ -2051,7 +2051,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     });
   });
 
-  it("persists accepted swaps exactly once on completion and never on loss", () => {
+  it("persists rentsCount once per accepted swap paid at its next win, and never on loss", () => {
     const accepted = driveGeneratedRoundToCompletion(
       17,
       undefined,
@@ -2061,7 +2061,11 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       14,
     );
     expect(accepted.round.rules.phase).toBe("roundComplete");
-    expect(accepted.facilityState.rentsCount).toBe(15);
+    // Retail pays a swap accepted after battle k at battle k+1's WIN
+    // (EventScript_DefeatedOpponent increments unconditionally every win;
+    // SetBattleFactoryData commits only while sPerformedRentalSwap == TRUE).
+    // Two accepted swaps (after battles 0 and 1) -> +2, not +1.
+    expect(accepted.facilityState.rentsCount).toBe(16);
     expect(accepted.performedRentalSwap).toBe(false);
     const completion = {
       commandId: accepted.round.presentation!.command.commandId,
@@ -2074,8 +2078,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       acknowledged,
       completion,
     );
-    expect(acknowledged.facilityState.rentsCount).toBe(15);
-    expect(acknowledgedAgain.facilityState.rentsCount).toBe(15);
+    expect(acknowledged.facilityState.rentsCount).toBe(16);
+    expect(acknowledgedAgain.facilityState.rentsCount).toBe(16);
 
     const declined = driveGeneratedRoundToCompletion(17, undefined, undefined, 14);
     expect(declined.round.rules.phase).toBe("roundComplete");
@@ -2120,13 +2124,97 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     const acceptedNext = createNextChallenge(accepted, "accepted-next-challenge");
     const declinedNext = createNextChallenge(declined, "declined-next-challenge");
 
-    // GetNumPastRentalsRank's first band is <15. Crossing 14 -> 15 makes
+    // GetNumPastRentalsRank's first band is <15. Crossing 14 -> 16 makes
     // exactly rental slot 0 use the next-better source range.
     expect(acceptedNext.initialRentalGeneration?.rentalRank).toBe(1);
     expect(declinedNext.initialRentalGeneration?.rentalRank).toBe(0);
     expect(acceptedNext.initialRentalGeneration?.rentals[0]?.setId).not.toBe(
       declinedNext.initialRentalGeneration?.rentals[0]?.setId,
     );
+  });
+
+  it("pays +1 per accepted swap across all six intermediate wins (+6 total)", () => {
+    const accepted = driveGeneratedRoundToCompletion(
+      17,
+      undefined,
+      (state) => state.round.rules.battleIndex < 6
+        ? { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 }
+        : { type: "decline" },
+      0,
+    );
+    expect(accepted.round.rules.phase).toBe("roundComplete");
+    expect(accepted.facilityState.rentsCount).toBe(6);
+    expect(accepted.performedRentalSwap).toBe(false);
+  });
+
+  it("pays a single swap accepted only after battle 5 at the seventh (final) win", () => {
+    const accepted = driveGeneratedRoundToCompletion(
+      17,
+      undefined,
+      (state) => state.round.rules.battleIndex === 5
+        ? { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 }
+        : { type: "decline" },
+      0,
+    );
+    expect(accepted.round.rules.phase).toBe("roundComplete");
+    expect(accepted.facilityState.rentsCount).toBe(1);
+    expect(accepted.performedRentalSwap).toBe(false);
+  });
+
+  it("does not increment or clear the flag once rentsCount has saturated at MAX_STREAK (9999)", () => {
+    const playerRecords = [record(664), record(678), record(527)] as const;
+    const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
+    let state = createFactoryRoundBattleOrchestrator({
+      id: "generated-round-carrier-seed-17-saturated",
+      rngValue: 17,
+      factoryWinStreak: 0,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 9_999 },
+      rentals: {
+        type: "currentRecords",
+        playerRentalRecords: playerRecords,
+        savedRentalRecords,
+      },
+    });
+    // Stop the instant battle 1's win resolves -- i.e. right after the
+    // reducer under test runs for the second win -- rather than reusing
+    // driveGeneratedRoundToCompletion, which only stops at round end.
+    for (
+      let budget = 0;
+      budget < 1_000
+        && !(
+          state.battle === null
+          && state.round.rules.phase === "presentingBattleWin"
+          && state.round.rules.battleIndex === 1
+        );
+      budget += 1
+    ) {
+      if (state.battle !== null) {
+        state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+        continue;
+      }
+      if (
+        state.round.rules.phase === "presentingBattleStart"
+        || state.round.rules.phase === "presentingBattleWin"
+        || state.round.rules.phase === "presentingSwapResult"
+      ) {
+        state = acknowledgeAndAdvance(state);
+        continue;
+      }
+      if (state.round.rules.phase === "awaitingSwapDecision") {
+        const commandId = state.round.presentation?.command.commandId;
+        if (commandId === undefined) throw new Error("expected swap-offer presentation command");
+        state = completeFactoryRoundPresentation(state, { commandId });
+        state = chooseFactoryRoundSwap(state, { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 });
+        continue;
+      }
+      throw new Error(`unexpected carrier phase ${state.round.rules.phase}`);
+    }
+    expect(state.round.rules.battleIndex).toBe(1);
+    expect(state.round.rules.phase).toBe("presentingBattleWin");
+    expect(state.facilityState.rentsCount).toBe(9_999);
+    expect(state.performedRentalSwap).toBe(true);
   });
 
   it("starts challenge 2 generation from challenge 1's uninterrupted orchestrator cursor", () => {
