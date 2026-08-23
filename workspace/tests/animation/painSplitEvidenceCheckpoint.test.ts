@@ -95,7 +95,7 @@ describe("MOVE_PAIN_SPLIT exact source and bilateral evidence", () => {
 
   it("retains Pain Split at the current exact coverage gate", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(201);
+    expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(202);
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_PAIN_SPLIT"))
       .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: any) => track.id === "pain-split-projectile-affine")).toMatchObject({
