@@ -146,3 +146,89 @@ Enum (`:1440-1461`): `INGRAIN(0), ABILITIES(1), ITEMS1(2), LEECH_SEED(3), POISON
 | H4 | state 6 — `ABILITYEFFECT_INTIMIDATE1` → `ABILITYEFFECT_TRACE` → `ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)` → `ABILITYEFFECT_FORECAST`, in that order (`:1957-1963`) | same module (this is the ISSUES #128 path just fixed at HEAD in `fdc21ede`) | UNVERIFIED (declared) |
 
 Note H4's third call: `ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)` passes battler **0** literally and `moveTurn = TRUE` — it is a whole-field poll, not a per-battler one, and it is the one `ITEMEFFECT_NORMAL` call that is neither ITEMS1 nor ITEMS2. Flagged here so a future reader does not conflate it with B3/B19.
+
+---
+
+## §4. Cross-step interactions (the ten the step brief names)
+
+### (1) End-turn faint (poison / Leech Seed / Curse / Perish) — stop point, `HandleFaintedMonActions`, resume cursor — **SAME-ORDER**
+
+Source, re-derived from the C (not from the test names):
+
+* The damage scripts are `BattleScript_PoisonTurnDmg`/`BurnTurnDmg`/`NightmareTurnDmg`/`CurseTurnDmg`/`WrapTurnDmg` → `BattleScript_DoTurnDmg` (`data/battle_scripts_1.s:3739-3748`), whose tail is `tryfaintmon BS_ATTACKER` + `checkteamslost BattleScript_DoTurnDmgEnd` + `end2`. So an end-turn KO is resolved **inline, inside the tick script** — `checkteamslost` can set `gBattleOutcome` right there.
+* If the battle is NOT decided, the script just ends. `BattleTurnPassed` re-runs from step 1 (§1) and `DoBattlerEndTurnEffects` resumes at `turnEffectsTracker` — **which the firing case already incremented before returning** (e.g. `battle_util.c:1532` for POISON). So the just-fainted battler continues through its own remaining cases: `NIGHTMARES`..`ITEMS2` all still execute for it. Only the `hp != 0`-guarded cases (`ABILITIES` `:2602`, `ITEMS1`/`ITEMS2` `:3332`, `INGRAIN` `:1483`, `LEECH_SEED` `:1509`, `POISON`/`BAD_POISON`/`BURN`/`NIGHTMARES`/`CURSE`/`WRAP`) skip; `UPROAR`, `THRASH`, `DISABLE`, `ENCORE`, `LOCK_ON`, `CHARGE`, `TAUNT`, `YAWN` have **no hp guard** and still tick on a corpse. `gAbsentBattlerFlags` is not set until `BattleScript_HandleFaintedMon` runs later, so the outer `:1472` absent-skip does not fire either.
+* If the battle IS decided, `gBattleOutcome != 0` and the re-entered `BattleTurnPassed` skips **both** loops (`:3962`) and drops straight to `HandleFaintedMonActions`.
+
+Port: `runDoBattlerEndTurnEffects` (`battleEndTurnOrchestration.ts:1544`) continues to the next case after every `"fired"` outcome and only bails on `battleOutcome !== 0` (`:1568`, `:1580`, `:1590`, …) — the same two behaviours. The KO does not pause the loop; the pause happens later, inside `runBattleScriptFaintedActionsOrchestration` (`:2555`), which is exactly where source blocks too (`BattleScript_HandleFaintedMon`'s party-screen round trip). On resume, `resumeBattleEndTurnAfterFaintedActions` (`:2473`) re-enters at `runFutureAttacksAfterFaints` and **never** re-runs the field/battler loops — matching source, whose re-entered `DoFieldEndTurnEffects` returns immediately at `ENDTURN_FIELD_COUNT` (`:1432`) and whose `DoBattlerEndTurnEffects` `while` at `:1469` is already false (`turnEffectsBattlerId == gBattlersCount`).
+
+One real source detail the port reproduces: on that re-entry the exhausted `DoBattlerEndTurnEffects` still executes `:1468`'s raise and `:1781`'s clear, so `HandleFaintedMonActions` runs with `GRUDGE|IGNORE_BIDE` **down**, and `HandleWishPerishSongOnTurnEnd` raises them again at `:1787`. Port: `withoutEndTurnHitMarkers(state)` immediately before each fainted-actions call (`:2244`, `:2390`, `:2556` via `runDoBattlerEndTurnEffects`'s `:1740` clean return) and `withEndTurnHitMarkers` at `:2176`/`:2333`. Verified line by line.
+
+Pinned today by `tests/endTurnResumeCursorIssue102.test.ts` (3 cases), `tests/endTurnFaintResumeIssue104.test.ts` (1 case), `tests/bideEndTurnIgnoreBideIssue126.test.ts`.
+
+### (2) Leftovers / Shed Skin / Speed Boost order between two battlers, ties vs differences — `gBattlerByTurnOrder` computed WHEN? — **DIVERGENT (finding 1)**
+
+**Source answer: twice per turn, from two different call sites, with two different argument sets.**
+
+1. `SetActionsAndBattlersTurnOrder` (`battle_main.c:4817-4850`) — before the actions run, `GetWhoStrikesFirst(b1, b2, FALSE)` at `:4846`, and switch/item actions are force-ordered ahead of moves without any speed comparison (`:4820-4832`).
+2. `ENDTURN_ORDER` (`battle_util.c:1199-1218`) — **after** every action has resolved, identity-refill then `GetWhoStrikesFirst(gBattlerByTurnOrder[i], gBattlerByTurnOrder[j], FALSE)` at `:1209`, reading **current** `gBattleMons[].speed`, **current** `statStages[STAT_SPEED]`, **current** `STATUS1_PARALYSIS`, **current** weather (Swift Swim/Chlorophyll) and **current** hold effect — and still reading `gChosenActionByBattler`/`chosenMovePositions` for move priority, because those are not cleared until `battle_main.c:4001-4004`, i.e. after this.
+
+On an exact effective-speed tie the comparison consumes `Random() & 1` (`battle_main.c:4728` in the non-zero-priority branch, `:4745` in the both-zero branch — `&&` short-circuits, so no draw when speeds differ). That means a Factory turn with tied actives costs the ROM **two** speed-tie draws, not one.
+
+Within one battler the relative order Speed Boost/Shed Skin/Rain Dish (`ENDTURN_ABILITIES`, position 1) → Leftovers/berries (`ENDTURN_ITEMS1`, position 2) is correct in the port. It is the *between-battler* order that is wrong: `computeBattlerOrder` (`battleEndTurnOrchestration.ts:2058`) returns the action-time array untouched. See finding 1 for the failure scenarios and the staging recipe.
+
+### (3) Future Sight hitting a Substitute / a fainted target / a switched-in target — **SAME-ORDER**
+
+* **Substitute:** `BattleScript_MonTookFutureAttack` (`battle_scripts_1.s:3508-3538`) never sets `HITMARKER_IGNORE_SUBSTITUTE` (contrast `BattleScript_DoTurnDmg:3742` and `LeechSeedTurnDrain:3567`, which both do). Its `datahpupdate BS_TARGET` therefore goes through the substitute like a normal hit. It also runs `accuracycheck` (a real RNG draw and a real miss branch, `BattleScript_FutureAttackMiss:3539`) and `adjustnormaldamage2` (Focus Band / Endure / substitute-aware clamp). Port: same committed instruction stream — `src/data/gen/battle-script-program.json` blocks `BattleScript_MonTookFutureAttack` / `FutureAttackAnimate` / `DoFutureAttackHit` / `FutureAttackEnd` / `FutureAttackMiss` (source lines 3508-3546) are the assembled real script, executed by the same interpreter from `battleEndTurnOrchestration.ts:2369`.
+* **Fainted target:** the counter guard is `--futureSightCounter[b] == 0 && gBattleMons[b].hp != 0` (`battle_util.c:1802-1804`). Because `HandleFaintedMonActions` runs **before** `HandleWishPerishSongOnTurnEnd` (`battle_main.c:3968` vs `:3971`), a battler that fainted earlier this turn has already been **replaced** by the time the delayed hit resolves — so the hit lands on the replacement, at full HP, not on the corpse. Only a side with nothing left (absent flag set) is skipped, at `:1794`. Port: `:2337` absent-skip, `:2348` `hp === 0` skip, after `finishFaintedThenDelayed` (`:2442`) has already run the faints. Same.
+* **Switched-in target:** `futureSightCounter` is indexed by battler slot and is written only by `Cmd_setfutureattack` (`battle_script_commands.c:8940`) and decremented only here — nothing clears it on switch, in source or in port (`grep` over both trees). So a Baton Pass / forced switch does not dodge Future Sight; the incoming mon eats it. Same in both.
+* **Note for whoever reads this next:** `BattleScript_FutureAttackEnd` (`:3533-3537`) runs `moveendcase MOVEEND_RAGE` and `moveendfromto MOVEEND_ITEM_EFFECTS_ALL, MOVEEND_UPDATE_LAST_MOVES`. This is the one place where genuine **end-of-ACTION** machinery executes *inside* the end-of-TURN phase — by design, in both trees. Do not "fix" it.
+
+### (4) Perish Song count 0 on both battlers the same turn — **SAME-ORDER** (but the order it uses is finding 1's)
+
+Source (`battle_util.c:1834-1861`): state 1 walks `gBattlerByTurnOrder`, and the **first** battler found at `perishSongTimer == 0` clears its own `STATUS3_PERISH_SONG`, sets `gBattleMoveDamage = hp`, fires `BattleScript_PerishSongTakesLife`, and **returns TRUE**. `BattleTurnPassed` re-enters: the field/battler loops are exhausted, so `HandleFaintedMonActions` (`battle_main.c:3968`) runs *now* — full `GiveExp` + `HandleFaintedMon` + the replacement's switch-in hooks (Intimidate/Trace/`ITEMEFFECT_NORMAL`/Forecast at `battle_util.c:1957-1962`) — and only then does state 1 resume at `wishPerishSongBattlerId`, already bumped past the first battler (`:1841`), to kill the second one.
+
+So: **the faster battler (per `ENDTURN_ORDER`) faints first; its replacement is fully switched in, with entry abilities fired, before the slower battler's perish counter is even read.** If the first faint empties a party, `checkteamslost` inside `BattleScript_PerishSongTakesLife` ends the battle and the second battler never perishes. The AI's switch-in therefore sees a board where the opponent is still alive at full HP — that asymmetry is real ROM behaviour.
+
+Port: `runPerishSongAfterFutureAttacks` (`:2168`) — cursor bump before firing (`:2193`), inline `runBattleScriptFaintedActionsOrchestration` on a zero-timer KO (`:2237-2274`), loop continues afterwards. Structurally identical. The only defect is *which* battler is "first" — finding 1.
+
+### (5) Wish landing on a switched-in ally (Baton Pass / forced switch) — **SAME-ORDER**
+
+`gWishFutureKnock.wishCounter[]` is indexed by **battler slot**, set to 2 by `Cmd_trysetwish`-equivalent (`battle_script_commands.c:9297-9299`) on `gBattlerAttacker`, decremented only at `ENDTURN_WISH` (`battle_util.c:1323-1324`), and cleared by nothing else — no switch path in either tree touches it (verified by grepping `wishCounter` across `reference/pokeemerald/src/*.c` and `src/engine/*.ts`). The heal therefore lands on whatever mon occupies the slot one turn later, gated only by `hp != 0`. Port: `battleEndTurnOrchestration.ts:1999-2029` (decrement, `!== 0` continue, `hp === 0` continue, `selectorRoles.target = battler`), setter at `battleScriptTrywishOpcode.ts:66-82` (`wishCounter[attacker] = 2`, no-op if already set). Same.
+
+Caveat inherited from finding 1: `ENDTURN_WISH` iterates `gBattlerByTurnOrder`, so with two simultaneous Wishes the *message* order follows the (wrong) port order. HP outcomes are unaffected because the two heals are independent.
+
+### (6) Weather timer expiry vs weather-dependent end-turn abilities (Rain Dish under expiring rain) — **SAME-ORDER: same turn, and the ability loses**
+
+`ENDTURN_RAIN` (field step F7, `battle_util.c:1340-1372`) clears `B_WEATHER_RAIN_TEMPORARY` on the turn the duration hits 0. `ENDTURN_ABILITIES` (battler step B2, `:1494`) runs strictly later in the same `BattleTurnPassed` pass and re-reads `gBattleWeather` at `:2609`. So on rain's last turn, Rain Dish does **not** heal. Port: field loop at `battleEndTurnOrchestration.ts:2026-2047` mutates `rulesContext.weather` to `0`; `runAbilitiesTick` reads `state.rulesContext.weather` at `:1181` from the post-field state. Verified same. Same reasoning holds for Sandstorm/Hail damage vs anything later in the battler loop.
+
+### (7) Yawn → sleep vs Insomnia / Vital Spirit / Safeguard — **SAME-ORDER** (and Safeguard does **not** block it)
+
+Source `ENDTURN_YAWN` (`battle_util.c:1753-1773`) applies sleep iff: the packed counter just reached 0, **and** `!(status1 & STATUS1_ANY)`, **and** `ability != ABILITY_VITAL_SPIRIT`, **and** `ability != ABILITY_INSOMNIA`, **and** `!UproarWakeUpCheck(battler)`. There is **no `SIDE_STATUS_SAFEGUARD` check anywhere in this case** — Safeguard blocks the *setter* (`Cmd_setyawn`), not the delayed application. Sleep length is `(Random() & 3) + 2`, one draw, only on the branch that actually sleeps.
+
+Port `runYawnTick` (`battleEndTurnOrchestration.ts:1026-1082`) implements exactly those five conditions in that order, with the same single draw at `:1063` and the same absent Safeguard check. Insomnia/Vital Spirit silently swallow the yawn with no message in both. **SAME-ORDER.** The `ENDTURN_ITEMS2` step immediately after (`:1725`, `moveTurn = TRUE`) is what lets a Chesto Berry cure that brand-new sleep in the same pass — correct in both.
+
+### (8) Taunt / Encore / Disable decrement vs the move-selection lock (off-by-one) — **SAME-ORDER**
+
+| timer | set to | read for selection | decremented | port |
+| --- | --- | --- | --- | --- |
+| Taunt | `2` (`battle_script_commands.c:9160`) | `tauntTimer != 0 && power == 0` (`battle_util.c:1014`, `:1110`, `:2135`) | `ENDTURN_TAUNT`, bare `--`, no expiry message (`battle_util.c:1749-1750`) | setter `battleScriptSettauntOpcode.ts:70`, gate `battleScriptActionAdmission.ts:2481`, decrement `battleEndTurnOrchestration.ts:1704-1717` |
+| Disable | `Cmd_disablelastusedattack` | `disabledMove` match | `ENDTURN_DISABLE`: move-gone check first (silent clear), else `--disableTimer == 0` fires `DisabledNoMore` (`:1696-1719`) | `runDisableTick` `:455`, called at `:1634` |
+| Encore | `Cmd_setencore` | `encoredMove` forces the slot (`battle_util.c:1116`) | `ENDTURN_ENCORE`: slot-mismatch silent clear, else `--encoreTimer == 0 \|\| pp[slot] == 0` fires `EncoredNoMore` (`:1720-1737`) | inline `:1640-1675` |
+
+Because all three decrements sit at the **end** of the turn and every selection gate reads `!= 0`, "Taunt lasts the turn it lands plus the next one" falls out identically in both trees. No off-by-one found. The one asymmetry worth recording (present in both): Taunt's expiry is silent — no `BattleScript`, no message — while Disable and Encore both print, so a capture-diff of the end-turn window will show two messages, never three.
+
+### (9) Ingrain / Leech Seed heal vs Liquid Ooze — **SAME-ORDER**
+
+`ENDTURN_INGRAIN` (`battle_util.c:1480-1493`) is a pure self-heal: `gBattleMoveDamage = -(maxHP/16)`, script `BattleScript_IngrainTurnHeal`. **Liquid Ooze does not interact with it at all** in Emerald (no `jumpifability` in that script) — a claim worth stating explicitly because the sibling case does interact.
+
+`ENDTURN_LEECH_SEED` (`:1506-1522`) sets `gBattlerTarget` to the *receiver* (the seeder) and fires `BattleScript_LeechSeedTurnDrain` (`battle_scripts_1.s:3565-3585`), whose order is: `datahpupdate BS_ATTACKER` (the seeded mon loses HP) → `copyword gBattleMoveDamage, gHpDealt` → `jumpifability BS_ATTACKER, ABILITY_LIQUID_OOZE, …LeechSeedTurnPrintLiquidOoze` → (no ooze) `manipulatedamage DMG_CHANGE_SIGN` → `datahpupdate BS_TARGET` → `printfromtable gLeechSeedStringIds` → `tryfaintmon BS_ATTACKER` → `tryfaintmon BS_TARGET`. With Liquid Ooze the sign flip is skipped, so the seeder *takes* the drain, and the two `tryfaintmon`s in that order mean **the seeded mon's faint is processed before the seeder's**.
+
+Port: same committed script (the `jumpifability`/`copyword`/`manipulatedamage` opcodes are registered for exactly these operands — `src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts` header §0), driven from `runLeechSeedTick` (`battleEndTurnOrchestration.ts:766-785`) with the same three guards and the same target inversion. SAME-ORDER. (Liquid Ooze carriers at Factory L50: Tentacool/Tentacruel/Gulpin/Swalot lines — ability-slot dependent; not enumerated here.)
+
+### (10) Truant loaf-flag timing vs a Truant holder that switched in this turn — **SAME-ORDER**
+
+Source: `Cmd_switchineffects` sets `truantCounter = 1` on switch-in unless `truantSwitchInHack` (`battle_script_commands.c:5259-5262`), with the source's own comment "ensure the truant counter will be 0 when the battler's next turn starts". `ENDTURN_ABILITIES` then toggles `truantCounter ^= 1` (`battle_util.c:2653-2655`) for every living Truant holder — **including one that switched in this very turn** (unlike Speed Boost, this case has no `isFirstTurn` guard). Net: switch in on turn N ⇒ counter 1 → 0 at end of N ⇒ free to act on N+1. The action-side reader is `AtkCanceler_UnableToUseMove`'s `CANCELER_TRUANT` (`battle_util.c:2087`).
+
+A replacement installed by `HandleFaintedMonActions` **after** the battler loop has already run gets `truantCounter = 1` and is **not** toggled this turn — it still acts on the next turn because the toggle happens at that next turn's end… no: it is `CANCELER_TRUANT` that reads the flag at action time, so a post-faint replacement with `truantCounter = 1` **loafs on its first turn**. That asymmetry between a chosen switch (free) and a faint replacement (loafs) is real ROM behaviour and both trees reproduce it, because both put the switch-in write and the end-turn toggle at the same two positions.
+
+Port: switch-in write `battleScriptSwitchinOpcode.ts:1182-1186` (guarded `truantCounter !== 1`, the same net effect as source's hack flag, which the port does not model — the hack only fires after an Arena judgment), toggle `battleEndTurnOrchestration.ts:1216-1221`, action-time read `battleScriptActionAdmission.ts:1767`. SAME-ORDER.
