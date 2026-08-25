@@ -14,13 +14,13 @@ export const SWEET_SCENT_FIRST_INACTIVE_AGE = SWEET_SCENT_FRAME_COUNT - 1;
 /** `blend_color_cycle F_PAL_DEF_SIDE, 1, 5, 5, 13, RGB(31,21,21)`. */
 export const SWEET_SCENT_BLEND_TIMING: Readonly<BlendColorCycleTiming> = {
   legs: [
+    { startY: 5, targetY: 13 },
+    { startY: 13, targetY: 5 },
+    { startY: 5, targetY: 13 },
+    { startY: 13, targetY: 5 },
     // BlendColorCycle forces the final leg's target to zero when one blend
     // remains, regardless of the command's literal target argument.
     { startY: 5, targetY: 0 },
-    { startY: 13, targetY: 5 },
-    { startY: 5, targetY: 13 },
-    { startY: 13, targetY: 5 },
-    { startY: 5, targetY: 13 },
   ],
   deltaY: 2,
 };

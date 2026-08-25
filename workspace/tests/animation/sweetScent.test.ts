@@ -94,7 +94,13 @@ describe("MOVE_SWEET_SCENT source-relative reducer and typed seam", () => {
     expect(view.target.species).toBe("ONIX");
     expect(view.petals[0]).toMatchObject({ x: 5, y: 99, animNum: 0 });
     expect(view.soundPanSide).toBe("player");
-    expect(SWEET_SCENT_BLEND_TIMING.legs).toHaveLength(5);
+    expect(SWEET_SCENT_BLEND_TIMING.legs).toEqual([
+      { startY: 5, targetY: 13 },
+      { startY: 13, targetY: 5 },
+      { startY: 5, targetY: 13 },
+      { startY: 13, targetY: 5 },
+      { startY: 5, targetY: 0 },
+    ]);
   });
 
   it("keeps the reusable evidence checkpoint honest and outside exact coverage", () => {
