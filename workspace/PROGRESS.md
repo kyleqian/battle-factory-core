@@ -15,10 +15,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   all four** (baseline had 2 at carry 14). Full `npm test` **1,129 files /
   10,513 passed / 224 skipped**; `npm run build` green. DEFERRED.md: no
   open entries. ISSUES closed today: **#125, #127** (filed + fixed same
-  day); open: #124 (Rust lane — its un-skip is on `rust-main`, see the fold
-  note at the end), #121 (dormant, lead added), #109/#114 (doubles-era),
-  #71/#73/#39/#55 (parked). Worker spend ≈ $45 over 11 rounds (0 failed
-  steps; 2 cap-kills and 1 sibling-kill salvaged with the work committed).
+  day) and **#124** (Rust lane's mirror landed on `rust-main`, verified by
+  the fold below); open: #121 (dormant, lead added), #109/#114
+  (doubles-era), #71/#73/#39/#55 (parked). Worker spend ≈ $45 over 11
+  rounds (0 failed steps; 2 cap-kills and 1 sibling-kill salvaged with the
+  work committed).
+- **Wind-down folds (after both sibling caps ended 14:48; final tree
+  `72a4777a` = this docs commit's parent):** `animation-main` (23 commits,
+  Level-50 exact 208→211/276 + Scene-ON `battleScene.ts` draw cases +
+  evidence tooling) merged `60ba74d1`; `rust-main` (10 commits: ORWORD,
+  CheckViability tie-receipt = **#124 mirror**, Encore, field-ability scan,
+  Helping Hand ports) merged `72a4777a`; both clean. Union verification
+  (my own runs): `cargo test` **1,068 passed / 0 failed**; wasm rebuilt
+  (506,009 B, sha256 `de2fdfdf…`); the 20 `*Parity*` suites under
+  `POKEBENCH_ENGINE=wasm` **924/924** (the #124 case now runs, was 1
+  skipped); full `npm test` **1,140 files / 10,542 passed / 223 skipped**;
+  `npm run build` green. Neither branch touches the Scene-OFF engine, so
+  the five gates above (on `679b3ade`) stand for this tree. **#124
+  deleted.** Both sibling ledgers' top entries carry no "For the main
+  program" ask.
 - **Orient state:** master = `dbe18b3d` = `animation-main` tip. The live animation
   supervisor merged master `33592cba` into its branch at 08:48; my fold then
   fast-forwarded master onto that merge — one commit, both branches converge

@@ -17,26 +17,6 @@ backlog.
 
 # Open
 
-## #124 — core-rs `factory_ai_check_viability.rs` still drops SemiInvulnerable5's speed-tie receipt (the Rust mirror of the fixed #122)
-
-**Found 2026-08-24** while fixing #122 on the TS side. `SemiInvulnerable5`
-spends `GetWhoStrikesFirst`'s speed-tie `Random()` (`battle_main.c:4745`,
-reached from `Cmd_if_user_goes`, `battle_ai_script_commands.c:1268-1274`) and
-then falls into `TryEncourage`; the TS port now returns BOTH receipts, the
-Rust port (`core-rs/crates/factory-core/src/factory_ai_check_viability.rs`,
-`try_encourage` at `:6333`) still returns only the encourage roll while
-advancing the RNG twice. Consequence: for an equal-speed
-EFFECT_SEMI_INVULNERABLE input the wasm engine's draw list is one shorter than
-the TS spec's, so any live-lockstep consumer built on it would take the exact
-#122 crash. The single directed ts/wasm case that catches this is
-`it.skip`ped in `tests/factoryAiCheckViabilityParity.test.ts` with this issue
-number; the corrected TS receipt is pinned unconditionally in
-`tests/factoryAiSemiInvulnerableTieDraw.test.ts`. **Rust lane:** mirror the TS
-fix (carry the accumulated `draws` into the `try_encourage` return),
-regenerate `factory_ai_check_viability_m5d3_vectors_gen.rs`, rebuild
-`artifacts/wasm/factory_wasm.wasm`, then un-skip that case. Not fixed here:
-`core-rs/**` was out of scope for the #122 worker step.
-
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 
 `docs/issue121-ai-mon-to-switch-into-probe.md` closes the reachability
