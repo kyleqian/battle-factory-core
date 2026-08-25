@@ -2,6 +2,30 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_SMELLING_SALT",
+   "status": "partial",
+   "covered": [
+    "complete legal Level-50 set-376 GRANBULL_1 parties retain Battle Scene ON player-back and opponent-front frames 218-338, 121 consecutive source rows each through first inactive cleanup; both orientations reproduce byte-identically twice fresh",
+    "the authoritative six-component graph is pinned: ANIM_TAG_SMELLINGSALT_EFFECT, reused ANIM_TAG_TAG_HAND, both Smelling Salt sprite templates, AnimTask_SmellingSaltsSquish, and the exact short AnimTask_ShakeMon2(target,2,0,6,2); Encore and Helping Hand are TAG_HAND identity controls only, while Facade and Screech/Metal Sound remain independent boundary controls",
+    "the pure source-age reducer replays both hands, bilateral 12-frame affine squishes with source SetBattlerSpriteYOffsetFromYScale geometry, the short ShakeMon2 source schedule, three exclamation blinks, pointer lifecycle, and first inactive row across all 242 retained component rows",
+    "ordinary hardware OAM and palettes equal the preceding source buffers on 120/120 comparable rows per orientation; complete matrices equal age-2 source on 119/119 eligible rows, while age-1 is only 96/120; gameplay RNG/state are invariant and animation RNG changes 120/120"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-smelling-salt-player-granbull-opponent-onix.json",
+    "tools/battle-lab/mechanic-smelling-salt-opponent-granbull-player-onix.json",
+    "tools/compare/fixtures/smelling-salt-evidence.json",
+    "tools/compare/evidence/smelling-salt-player-dense-state.json.gz",
+    "tools/compare/evidence/smelling-salt-opponent-dense-state.json.gz",
+    "tools/compare/evidence/smelling-salt-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/smelling-salt-opponent-raw-rgb.tar.gz",
+    "tools/compare/smellingSaltProbe.py",
+    "src/animation/smellingSalt.ts",
+    "tests/animation/smellingSalt.test.ts",
+    "tests/animation/smellingSaltEvidence.test.ts"
+   ],
+   "remaining": "No move acceptance credit: deterministic SMELLINGSALT_EFFECT extraction, typed Scene-ON seam, generic compositor, normalized change maps, and actual core.ts -> renderSceneOnMovePresentation 242/242 zero-residual framebuffer equality remain."
+  },
+  {
    "move": "MOVE_SCREECH",
    "status": "exact",
    "covered": [
@@ -5739,6 +5763,18 @@
  ],
  "queue": [],
  "componentTracks": [
+  {
+   "id": "smelling-salt-hand-squish-effect",
+   "components": [
+    "asset:ANIM_TAG_SMELLINGSALT_EFFECT",
+    "sprite:gSmellingSaltExclamationSpriteTemplate",
+    "sprite:gSmellingSaltsHandSpriteTemplate",
+    "task:AnimTask_SmellingSaltsSquish"
+   ],
+   "representatives": ["MOVE_SMELLING_SALT"],
+   "fulfilled": false,
+   "goal": "PARTIAL: complete twice-fresh bilateral source/component evidence and a pure reducer exist, but the deterministic effect-art extraction, typed seam, generic compositor, normalized change maps, and 242/242 zero-residual shared production framebuffer acceptance remain. TAG_HAND and ShakeMon2 reuse conveys no MOVE_ENCORE or MOVE_HELPING_HAND credit."
+  },
   {
    "id": "seed-projectile-leech-seed",
    "components": [

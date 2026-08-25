@@ -1,3 +1,11 @@
+# MOVE_SMELLING_SALT bilateral source/reducer evidence checkpoint — partial (2026-08-25 worker)
+
+- **State:** Level 50 remains **208/276 exact** and gains **1 partial / 67 unsupported**. MOVE_SMELLING_SALT receives no exact or move-acceptance credit; Encore, Helping Hand, Facade, Screech, and Metal Sound retain their independent statuses.
+- **Did:** Pinned the six-component source graph and true lowest Level-50 carrier, set 376 GRANBULL_1. Added complete legal three-mon bilateral stages, a narrow generic dense probe wrapper, raw-RGB archives, a twice-fresh receipt, and a pure source-age reducer for both hand callbacks, the two SmellingSaltsSquish affine passes, exact short ShakeMon2 source schedule, exclamation blinks, and cleanup.
+- **Verified:** Player-back and opponent-front both retain frames **218..338 (121/121)** through first inactive cleanup and reproduce byte-identically twice fresh. Reducer/component acceptance is **121/121 each**. OAM and palette are RAM+1 **120/120**; complete matrices are RAM+2 **119/119 eligible** (RAM+1 only 96/120). Gameplay RNG/state are invariant; animation RNG changes **120/120**.
+- **Next:** Deterministically extract `smellingsalt_effect.png` while reusing and byte-checking Encore's TAG_HAND tiles 16..31, add the typed Scene-ON seam and ordinary generic live-species compositor, generate normalized bilateral change maps, and require actual `core.ts -> renderSceneOnMovePresentation` **242/242 zero-residual** rows twice fresh before promotion.
+- **Notes:** `ANIMATION_LATCHES.md` is unchanged: the prepared-affine RAM+2 plus ordinary OAM/palette RAM+1 split confirms the existing Defense Curl class rather than establishing a new mechanism. No boundary/barrier widening, production recording import, absolute tick/pair gate, or gameplay ownership was added.
+
 # Animation supervisor session — four exact promotions, clean handoff (2026-08-25)
 
 - **State:** Level 50 advances **204→208/276 exact**, remains **0 partial / 0 staged**, and drops **72→68 unsupported**. MOVE_SWEET_SCENT, MOVE_DEFENSE_CURL, MOVE_MEAN_LOOK, and MOVE_SCREECH each have independent complete bilateral production acceptance; no sibling credit was inferred.

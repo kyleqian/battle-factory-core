@@ -1,0 +1,49 @@
+{
+  "schema": "smelling-salt-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SMELLING_SALT",
+  "moveId": 265,
+  "status": "partial",
+  "coverageCredit": false,
+  "repeatability": {"runsPerOrientation": 2, "allMatched": true},
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-smelling-salt-player-granbull-opponent-onix.json",
+      "scenarioSha256": "bf0b334d7b938d1ecca2fce0523b035a7fc5684ee6b87bd33781b0791b07b8e7",
+      "denseState": "tools/compare/evidence/smelling-salt-player-dense-state.json.gz",
+      "denseStateSha256": "a405f3e7242426a140a394d9051c7af1278adae4043a53a4ac0edeedb1069532",
+      "probeJsonSha256": "c0657c5f274c1161458e7837c8d8a8b5b6420773c0d7cf255ba1540c181ce7fc",
+      "rawRgbArchive": "tools/compare/evidence/smelling-salt-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "eaf7472440ea7a477220f47f49e1643df2b2f9af43132978327f769930fcd01d",
+      "rawRgbSequenceSha256": "5370587f8f5ed6a571ab70882f08c4fbd93df5b7d9c11ac0670459998d206b84",
+      "window": {"startFrame": 218, "endFrame": 338, "frameCount": 121}
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-smelling-salt-opponent-granbull-player-onix.json",
+      "scenarioSha256": "ce2359e4b160cc4234fa6f11366cfcc69f87a29f6c006d5d51130451f852ff56",
+      "denseState": "tools/compare/evidence/smelling-salt-opponent-dense-state.json.gz",
+      "denseStateSha256": "9bc5aa7fe65115770dea7dc76d65b753e6c49b626bc9de4c9d584d131add8bdf",
+      "probeJsonSha256": "beb3ed68b6bcb421f6720539fc30837619aef94b90fc4fe2397387bb1d9b581b",
+      "rawRgbArchive": "tools/compare/evidence/smelling-salt-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "857c1846f5cd2220dcb2801dbf79098f446323691e2b74e8e16009f1ada3295f",
+      "rawRgbSequenceSha256": "758f00a7440feb4b661dd0264d126b761d0f16bde79b305bce7a34dfa5936236",
+      "window": {"startFrame": 218, "endFrame": 338, "frameCount": 121}
+    }
+  },
+  "measured": {
+    "pointerRows": "121/121 each",
+    "firstInactiveAge": 120,
+    "oamPredecessor": "120/120 each",
+    "matrixPredecessor": "96/120 each",
+    "matrixTwoRows": "119/119 eligible each",
+    "palettePredecessor": "120/120 each",
+    "gameplayRngTransitions": 0,
+    "animationRngTransitions": 120
+  },
+  "controls": {
+    "tagHandIdentity": ["MOVE_ENCORE", "MOVE_HELPING_HAND"],
+    "boundaryControls": ["MOVE_FACADE", "MOVE_SCREECH", "MOVE_METAL_SOUND"],
+    "statusesChanged": false
+  },
+  "boundedRemainder": "Deterministic SMELLINGSALT_EFFECT extraction, typed Scene-ON seam, generic compositor, normalized framebuffer change maps, and 242/242 zero-residual core.ts production framebuffer acceptance remain. MOVE_SMELLING_SALT stays non-promoted."
+}
