@@ -102,7 +102,9 @@ describe("soak coverage aggregation over a driven seed", () => {
     expect(executedCommits).toBeGreaterThan(0);
     // The reverse direction: the opponent executed at least one move the
     // player never committed, so the two sides are genuinely separate tallies.
-    const committedIds = new Set(report.playerFightCommits.entries.map((entry) => entry.id));
+    const committedIds = new Set<string | number>(
+      report.playerFightCommits.entries.map((entry) => entry.id),
+    );
     expect(report.moves.entries.some((entry) => entry.opponent > 0 && !committedIds.has(entry.id)))
       .toBe(true);
   });
