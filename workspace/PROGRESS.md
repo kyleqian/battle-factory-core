@@ -5,6 +5,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1399 — [bounded TS worker, 2026-08-25 ~15:05] **`tools/probe/premise-census.py` landed: reproducible premise-throw census tool (PAPERCUTS.md ask), pinned by `tools/test_premise_census.py`**
+
+- **Did:** wrote `tools/probe/premise-census.py` (stdlib-only) — walks
+  `src/**/*.ts`, reassembles `throw new <X>Error(...)` message arguments
+  across wrapped lines (balanced-paren/string/template scanner, `+`
+  concatenation folded to literal text with `${…}` placeholders kept
+  verbatim), attributes the enclosing function/method/`<anonymous>` by an
+  indentation-cascade scan, and emits sorted TSV with `--only`, `--premise`,
+  `--summary`, and `--exclude-unsupported-branch` filters. Pinned by 5
+  subprocess-driven cases in `tools/test_premise_census.py` (single-line,
+  3-line-wrapped template literal, `+`-concat, class method, arrow, and
+  anonymous-callback attribution) — `python3 tools/test_premise_census.py
+  -v` **5/5 pass**.
+- **Numbers:** `--summary` on HEAD runs in ~1.6s. `src/engine` only: **1,573
+  total throw sites / 256 premise-worded** vs. the audit doc's rg-based
+  **1,554 / 235** — the audit's stage-1 `rg "throw new Error"` only matches
+  the literal `Error` class, while this tool also counts `throw new
+  <X>Error(...)` subclasses per the step brief's spec (the delta), and the
+  step brief's premise keyword list swaps the audit's own `never happen`/
+  `should not` for `not reachable`, shifting the premise count independently
+  of site count. `--only src/engine --premise | wc -l` → **256**.
+  `--exclude-unsupported-branch` drops **2** rows repo-wide (near-zero, as
+  expected — the sanctioned barrier class is a result literal, not a throw).
+- **Next:** supervisor deletes the PAPERCUTS.md entry this closes; no other
+  follow-up from this rung. `npm run typecheck` unaffected — no `.ts` under
+  `src/` touched, only two new Python files under `tools/`.
+- **Notes:** `git status` was clean before commit (only the two new files).
+  No PAPERCUT — AGENTS.md's mgba-probe test convention
+  (`tools/test_run_mgba_probe.py`) was easy to follow directly.
+
+---
+
 ## 1398 — [supervisor wind-down, 2026-08-25 ~14:00] **Instrument + census day: premise-throw audit (50/50 classified; its top finding refuted by supervisor), #127 found+fixed with a stock-ROM receipt, #125 CLOSED (2 levers + a trap-gate regression), soak `--coverage-json` / `--policy coverage-fight` / `--parallel N` landed; ~2,400 varied chains and boot rounds 0 CRASH / 0 HANG; move+effect universe 276/276 + 166/166 executed; all five gates green on the final tree**
 
 - **Final gates on THIS tree (`679b3ade`, supervisor's own runs, all
