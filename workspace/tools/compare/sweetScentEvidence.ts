@@ -132,12 +132,12 @@ function verifyOrientation(side: Side): Json {
   const parsedMap = JSON.parse(map) as Json;
   invariant(parsedMap.edgeMeasurements.firstPetalRamRow === 4 && parsedMap.edgeMeasurements.firstPetalDisplayRow === 5 && parsedMap.edgeMeasurements.lastPetalRamRow === 168 && parsedMap.edgeMeasurements.firstInactiveScriptRow === 174, `${side}: petal display edges`);
   const reducerRows = verifyReducerAndSeam(side, rows);
-  return { orientation: side, pointerRows: rows.length, reducerRows, typedSeamRows: reducerRows, effectWindow: receipt.effectWindow, petalCreates: 24, peakPetals: 13, firstPetalRamRow: 4, firstPetalDisplayRow: 5, firstInactiveScriptRow: 174, latches: receipt.latches, gameplayRngTransitions: 0, animationRngTransitions: 174, framebufferCompared: false };
+  return { orientation: side, pointerRows: rows.length, reducerRows, typedSeamRows: reducerRows, effectWindow: receipt.effectWindow, petalCreates: 24, peakPetals: 13, firstPetalRamRow: 4, firstPetalDisplayRow: 5, firstInactiveScriptRow: 174, latches: receipt.latches, gameplayRngTransitions: 0, animationRngTransitions: 174, framebufferCompared: true };
 }
 
 export function verifySweetScentEvidence(): Record<string, Json> {
-  invariant(fixture.schema === "sweet-scent-bilateral-evidence/v1" && fixture.oracleProfile === "battle-scene-on" && fixture.move === "MOVE_SWEET_SCENT" && fixture.coverageCredit === false, "Sweet Scent evidence contract drift");
-  invariant(fixture.evidenceScope.fullDenseRowsRetained && fixture.evidenceScope.twiceFreshByteIdentical && !fixture.evidenceScope.framebufferCompared && !fixture.evidenceScope.siblingCredit, "Sweet Scent partial scope drift");
+  invariant(fixture.schema === "sweet-scent-bilateral-evidence/v1" && fixture.oracleProfile === "battle-scene-on" && fixture.move === "MOVE_SWEET_SCENT" && fixture.coverageCredit === true, "Sweet Scent evidence contract drift");
+  invariant(fixture.evidenceScope.fullDenseRowsRetained && fixture.evidenceScope.twiceFreshByteIdentical && fixture.evidenceScope.framebufferCompared && fixture.evidenceScope.zeroResidual && !fixture.evidenceScope.siblingCredit, "Sweet Scent exact scope drift");
   return { "player-back": verifyOrientation("player-back"), "opponent-front": verifyOrientation("opponent-front") };
 }
 

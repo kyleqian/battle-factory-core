@@ -1,9 +1,5 @@
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
-import {
-  blendColorCycleBgYAtAge,
-  blendColorCycleObjYAtAge,
-  type BlendColorCycleTiming,
-} from "./blendColorCycle.ts";
+import type { BlendColorCycleTiming } from "./blendColorCycle.ts";
 
 /** Pure source-relative presentation state for Move_SWEET_SCENT. */
 export type SweetScentSide = "player" | "opponent";
@@ -18,7 +14,9 @@ export const SWEET_SCENT_FIRST_INACTIVE_AGE = SWEET_SCENT_FRAME_COUNT - 1;
 /** `blend_color_cycle F_PAL_DEF_SIDE, 1, 5, 5, 13, RGB(31,21,21)`. */
 export const SWEET_SCENT_BLEND_TIMING: Readonly<BlendColorCycleTiming> = {
   legs: [
-    { startY: 5, targetY: 13 },
+    // BlendColorCycle forces the final leg's target to zero when one blend
+    // remains, regardless of the command's literal target argument.
+    { startY: 5, targetY: 0 },
     { startY: 13, targetY: 5 },
     { startY: 5, targetY: 13 },
     { startY: 13, targetY: 5 },
@@ -110,6 +108,25 @@ const SPAWNS = [
 
 const SWEET_SCENT_BLEND_START_AGE = 74;
 
+/**
+ * Selected defender OBJ coefficient in the software faded buffer. The
+ * command's delay=1 makes each two-point step span three scheduler rows;
+ * the longer target/start holds are BeginNormalPaletteFade completion and
+ * BlendColorCycle restart rows. This source-relative schedule is pinned by
+ * both retained hardware palettes with their ordinary RAM+1 transfer.
+ */
+export function sweetScentDefenderObjYAtAge(age: number): number {
+  const segments = [
+    [77, 79, 2], [80, 82, 4], [83, 85, 6], [86, 88, 8],
+    [89, 91, 10], [92, 94, 12], [95, 103, 13], [104, 106, 11],
+    [107, 109, 9], [110, 112, 7], [113, 121, 5], [122, 124, 7],
+    [125, 127, 9], [128, 130, 11], [131, 139, 13], [140, 142, 11],
+    [143, 145, 9], [146, 148, 7], [149, 157, 5], [158, 160, 3],
+    [161, 163, 1],
+  ] as const;
+  return segments.find(([start, end]) => age >= start && age <= end)?.[2] ?? 0;
+}
+
 function gbaSin(index: number, amplitude: number): number {
   return (GBA_SINE_TABLE_256[index & 0xff]! * amplitude) >> 8;
 }
@@ -174,18 +191,17 @@ export function sweetScentAtAge(
 ): SweetScentState {
   const petals = SPAWNS.map((_, index) => petalAtAge(age, index, side, origin, profile))
     .filter((petal): petal is SweetScentPetal => petal !== null);
-  const blendAge = age - SWEET_SCENT_BLEND_START_AGE - 1;
-  const bg = blendColorCycleBgYAtAge(blendAge, SWEET_SCENT_BLEND_TIMING);
-  const objY = blendColorCycleObjYAtAge(blendAge, SWEET_SCENT_BLEND_TIMING);
+  const objY = sweetScentDefenderObjYAtAge(age);
+  const blendActive = age >= SWEET_SCENT_BLEND_START_AGE + 1 && age < 165;
   return {
     age,
     active: age >= 0 && age < SWEET_SCENT_FIRST_INACTIVE_AGE,
     source: sourceAtAge(age),
     petals,
-    visualTaskCount: age >= SWEET_SCENT_BLEND_START_AGE + 1 && bg.active ? 1 : 0,
+    visualTaskCount: blendActive ? 1 : 0,
     sound: age === 0 ? "SE_M_SWEET_SCENT" : null,
     soundPanSide: age === 0 ? side : null,
-    blend: { active: age >= SWEET_SCENT_BLEND_START_AGE + 1 && bg.active, bgY: bg.bgY, objY, color: [31, 21, 21] },
+    blend: { active: blendActive, bgY: objY, objY, color: [31, 21, 21] },
     resources: { loaded: age >= 0 && age < SWEET_SCENT_FIRST_INACTIVE_AGE, tileTag: SWEET_SCENT_TAG, paletteTag: SWEET_SCENT_TAG },
   };
 }

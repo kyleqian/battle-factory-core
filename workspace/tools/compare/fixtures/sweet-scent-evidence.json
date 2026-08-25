@@ -3,8 +3,8 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_SWEET_SCENT",
   "moveId": 230,
-  "status": "partial-source-evidence",
-  "coverageCredit": false,
+  "status": "exact-production-framebuffer",
+  "coverageCredit": true,
   "source": {
     "start": "0x082d4c86",
     "effect": "0x082d4cca",
@@ -19,15 +19,15 @@
     ]
   },
   "evidenceScope": {
-    "productionAnimationChanged": false,
+    "productionAnimationChanged": true,
     "reducerAdded": true,
     "typedSeamAdded": true,
-    "compositorAdded": false,
-    "framebufferCompared": false,
+    "compositorAdded": true,
+    "framebufferCompared": true,
     "fullDenseRowsRetained": true,
     "twiceFreshByteIdentical": true,
-    "coveragePromotion": false,
-    "zeroResidual": false,
+    "coveragePromotion": true,
+    "zeroResidual": true,
     "siblingCredit": false
   },
   "repeatability": { "runsPerOrientation": 2, "allMatched": true },
@@ -70,10 +70,10 @@
     "reducerRows": "166/166 + 166/166",
     "typedSeamRows": "166/166 + 166/166",
     "rawRgbRows": "175/175 + 175/175",
-    "productionFramebufferRows": 0,
-    "framebufferCompared": false,
-    "zeroResidual": false,
+    "productionFramebufferRows": "175/175 + 175/175",
+    "framebufferCompared": true,
+    "zeroResidual": true,
     "monbgSameRowException": false,
-    "claim": "evidence/latch only; no exact or sibling credit"
+    "claim": "MOVE_SWEET_SCENT exact only; no sibling credit"
   }
 }

@@ -131,7 +131,7 @@ describe("MOVE_SWEET_SCENT source-relative reducer and typed seam", () => {
 
   it("replays both complete twice-fresh pointer windows and measures the own display edge", () => {
     const result = verifySweetScentEvidence();
-    expect(result["player-back"]).toMatchObject({ pointerRows: 175, reducerRows: 166, typedSeamRows: 166, petalCreates: 24, peakPetals: 13, firstPetalRamRow: 4, firstPetalDisplayRow: 5, firstInactiveScriptRow: 174, latches: { oam: "174/174", matrices: "174/174", palette: "174/174", paletteSameRow: "0/174" }, framebufferCompared: false });
-    expect(result["opponent-front"]).toMatchObject({ pointerRows: 175, reducerRows: 166, typedSeamRows: 166, petalCreates: 24, peakPetals: 13, firstPetalRamRow: 4, firstPetalDisplayRow: 5, firstInactiveScriptRow: 174, latches: { oam: "174/174", matrices: "174/174", palette: "174/174", paletteSameRow: "0/174" }, framebufferCompared: false });
+    expect(result["player-back"]).toMatchObject({ pointerRows: 175, reducerRows: 166, typedSeamRows: 166, petalCreates: 24, peakPetals: 13, firstPetalRamRow: 4, firstPetalDisplayRow: 5, firstInactiveScriptRow: 174, latches: { oam: "174/174", matrices: "174/174", palette: "174/174", paletteSameRow: "0/174" }, framebufferCompared: true });
+    expect(result["opponent-front"]).toMatchObject({ pointerRows: 175, reducerRows: 166, typedSeamRows: 166, petalCreates: 24, peakPetals: 13, firstPetalRamRow: 4, firstPetalDisplayRow: 5, firstInactiveScriptRow: 174, latches: { oam: "174/174", matrices: "174/174", palette: "174/174", paletteSameRow: "0/174" }, framebufferCompared: true });
   });
 });

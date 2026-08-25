@@ -609,6 +609,7 @@ import dragonClawAsset from "../animation/assets/dragon-claw.json" with { type: 
 import singAsset from "../animation/assets/sing.json" with { type: "json" };
 import teeterDanceAsset from "../animation/assets/teeter-dance.json" with { type: "json" };
 import bellyDrumAsset from "../animation/assets/belly-drum.json" with { type: "json" };
+import sweetScentAsset from "../animation/assets/sweet-scent.json" with { type: "json" };
 import batonPassAsset from "../animation/assets/baton-pass.json" with { type: "json" };
 import rainDropsAsset from "../animation/assets/rain-drops.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
@@ -996,6 +997,7 @@ import {
   sceneOnYawnView,
   sceneOnRoarView,
   sceneOnSweetKissView,
+  sceneOnSweetScentView,
   sceneOnLovelyKissView,
   sceneOnOctazookaView,
   sceneOnSpikesView,
@@ -1151,6 +1153,7 @@ import {
   type SceneOnCrabHammerConfig,
   type SceneOnTeeterDanceConfig,
   type SceneOnBellyDrumConfig,
+  type SceneOnSweetScentConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   SPITE_CLONE_BLANK_POINTER_AGE,
@@ -2126,6 +2129,9 @@ const teeterDanceArt = teeterDanceAsset as {
 const bellyDrumArt = bellyDrumAsset as {
   musicNotes: { tileset: Tileset; palettes: RgbColor[][] };
   purpleHandOutline: { tileset: Tileset; palette: RgbColor[] };
+};
+const sweetScentArt = sweetScentAsset as {
+  pinkPetal: { tileset: Tileset; palette: RgbColor[] };
 };
 
 
@@ -14288,6 +14294,118 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "SWEET_SCENT") {
+    const sweetState = state as SceneOnMovePresentationState<SceneOnSweetScentConfig>;
+    const view = sceneOnSweetScentView(sweetState);
+    // Sprite OAM and selected defender palette reach scanout from the
+    // preceding source row. Negative ages cover the pointer-owned setup
+    // rows before the first petal callback without a battle-clock branch.
+    const displayed = sceneOnSweetScentView({
+      ...sweetState,
+      age: sweetState.age - 1,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) {
+      throw new Error(`SWEET_SCENT missing ${view.attacker.species} attacker art`);
+    }
+    if (!targetSource) {
+      throw new Error(`SWEET_SCENT missing ${view.target.species} target art`);
+    }
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const targetPalette = blendPaletteToward(
+      targetSource.palette,
+      { r: 255, g: 173, b: 173 },
+      displayed.blend.active ? displayed.blend.objY : 0,
+    );
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerTileset,
+      attackerSource.palette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetTileset,
+      targetPalette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const drawPetals = () => {
+      const tileForCell = [0, 1, 2, 3, 3, 2, 0, 1] as const;
+      for (const petal of [...displayed.petals].sort((a, b) => b.slot - a.slot)) {
+        drawSpriteSheetFlipped(
+          fb,
+          subTileset(sweetScentArt.pinkPetal.tileset, tileForCell[petal.animFrame]!, 1),
+          sweetScentArt.pinkPetal.palette,
+          petal.x + petal.x2 - 4,
+          petal.y + petal.y2 - 4,
+          petal.hFlip,
+          petal.vFlip,
+        );
+      }
+    };
+    // Petals use attacker subpriority-2: ahead of a player attacker, but
+    // behind a player target when the opponent is the live attacker.
+    if (playerAttacker) {
+      drawTarget();
+      drawAttacker();
+      drawPetals();
+    } else {
+      drawAttacker();
+      drawPetals();
+      drawTarget();
+    }
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies,
+      level: 50,
+      gender: sweetState.config.fieldProfile.opponentGender ?? "male",
+      hpFraction: sweetState.config.fieldProfile.opponentHp
+        / sweetState.config.fieldProfile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies,
+      level: 50,
+      gender: sweetState.config.fieldProfile.playerGender ?? "male",
+      hpFraction: sweetState.config.fieldProfile.playerHp
+        / sweetState.config.fieldProfile.playerMaxHp,
+      status: "none",
+      currentHp: sweetState.config.fieldProfile.playerHp,
+      maxHp: sweetState.config.fieldProfile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "SWEET SCENT!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "BLIZZARD") {
     const blizzardState = state as SceneOnBlizzardPresentationState;
     const view = sceneOnBlizzardView(blizzardState);
