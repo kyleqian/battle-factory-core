@@ -102,7 +102,9 @@ const SPAWNS = [
   // first effect starts at row 27 after Move_SWEET_SCENT's delay 25; each
   // following row includes the callback's first step.
   ...EFFECT_ARGS.map((args, index) => ({ age: [27, 31, 38, 42, 46, 50, 54, 58, 62, 66, 70][index]!, args })),
-  { age: 74, args: [55, 0, 0] },
+  // The thirteenth direct create shares the final effect's 120-tick
+  // lifetime argument; only its y initializer is the distinct 55 value.
+  { age: 74, args: [55, 0, 120] },
   ...EFFECT_ARGS.map((args, index) => ({ age: [74, 78, 85, 89, 93, 97, 101, 105, 109, 113, 117][index]!, args })),
 ] as const;
 
@@ -137,7 +139,9 @@ function petalAtAge(
   const y = player ? args[0] - step : args[0] - 30 + step;
   const x2 = 0;
   const y2 = player ? gbaSin(data0, 16) : gbaSin(data0 + 64, 16);
-  const animFrame = (Math.floor(elapsed / 8) & 7) as SweetScentPetal["animFrame"];
+  // The source command advances after seven elapsed callback rows: the
+  // first displayed cell is 0, and cell 1 is present at elapsed 7.
+  const animFrame = (Math.floor((elapsed + 1) / 8) & 7) as SweetScentPetal["animFrame"];
   return {
     index,
     slot: profile.spriteSlots?.[index] ?? index,

@@ -1,3 +1,11 @@
+# MOVE_SWEET_SCENT bilateral dense Scene-ON evidence/latch checkpoint — partial (2026-08-24 worker)
+
+- **State:** Level 50 remains **204/276 exact, 0 partial, 72 unsupported**; MOVE_SWEET_SCENT receives no exact, coverage, or sibling credit. The pink-petal track remains partial and non-promoting.
+- **Did:** Retained complete pointer-owned Battle Scene ON windows **175/175 each**, player-back and opponent-front frames **222..396**, twice fresh and byte-identical through the first inactive script row. The full dense rows include script/task/sprite/software+hardware OAM/matrix/faded+hardware palette/tags/registers/audio/battler/party/immutable/gameplay-RNG/animation-RNG state, raw RGB archives, and normalized change maps. The source-relative petal effect subwindow is local rows **4..169 = 166/166 each**; reducer and typed seam both replay **166/166 per orientation**.
+- **Measured:** Both orientations create **24 petals**, peak at **13**, show the first petal in RAM at local row **4** and first own RGB display edge at local row **5**. Hardware OAM, matrices, and palette equal preceding software/faded rows **174/174**; no same-row palette exception and no `monbg` command occur in the assigned graph. Gameplay RNG/state remain invariant; animation RNG changes **174/174**.
+- **Next:** Source-art extraction, ordinary shared compositor wiring, and bilateral framebuffer comparison/zero-residual checks remain for a later promotion round. Do not promote MOVE_SWEET_SCENT or claim sibling credit.
+- **Notes:** `ANIMATION_LATCHES.md` is unchanged: the measured all-row RAM+1 OAM/palette transfer agrees with existing latch classes; Sweet Scent has no task-driven axis or monbg handoff to extend the ledger. Evidence is source/latch only, not framebuffer acceptance.
+
 # MOVE_SWEET_SCENT source/reducer + bilateral Scene-ON staging checkpoint — partial (2026-08-23 worker)
 
 - **State:** Level 50 remains **204/276 exact, 0 partial, 72 unsupported** in the move ledger; MOVE_SWEET_SCENT receives no exact or coverage credit. A new non-exclusive `pink-petal-sweet-scent` track records this bounded partial only; no sibling credit is claimed.
