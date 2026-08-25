@@ -254,15 +254,7 @@ describe.skipIf(!wasmAvailable)("runCheckViability - directed ts/wasm parity", (
     }
   });
 
-  // SKIPPED while the Rust port lags the spec -- ISSUES #124. The TS side
-  // landed ISSUES #122 (SemiInvulnerable5 now RETURNS the speed-tie receipt it
-  // spends, `battle_main.c:4745` through `battle_ai_script_commands.c:1268`),
-  // and factory-core's `factory_ai_check_viability.rs` still drops it, so this
-  // one input is the only directed case where ts and wasm disagree. The
-  // corrected TS receipt is pinned unconditionally in
-  // tests/factoryAiSemiInvulnerableTieDraw.test.ts; un-skip this the moment
-  // the Rust mirror + regenerated vectors land.
-  it.skip("keeps SemiInvulnerable5's tie receipt alongside its TryEncourage roll", async () => {
+  it("keeps SemiInvulnerable5's tie receipt alongside its TryEncourage roll", async () => {
     // Equal speeds generate the tie roll, and the non-target-faster branch
     // then enters TryEncourage: both receipts belong to the returned list and
     // both RNG calls are spent.
