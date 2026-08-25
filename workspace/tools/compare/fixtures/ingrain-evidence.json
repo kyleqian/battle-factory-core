@@ -1,0 +1,52 @@
+{
+  "move": "MOVE_INGRAIN",
+  "status": "exact",
+  "coverageCredit": true,
+  "oracleProfile": "battle-scene-on",
+  "schema": "ingrain-dense-evidence/v1",
+  "source": {
+    "scriptStart": "0x082d40e0",
+    "scriptEndExclusive": "0x082d4191",
+    "scriptTextSha256": "da8b20518a08d8473576c030359f26340ba646ade90c72c697ae29970d4ae56e",
+    "effectDefinitionsSha256": "97695a4f8c80e08b0fd140c9da7a28138247c9f4bdada82b288a3f3b497d2545",
+    "callbackDefinitionsSha256": "2146a63803387edebcb353318f3ab541261b74513178777eebb84e526e97c32e"
+  },
+  "sourcePointerContract": {
+    "start": 137183456,
+    "endExclusive": 137183633,
+    "observedParities": [0, 1]
+  },
+  "determinism": {
+    "freshRunsPerOrientation": 2,
+    "denseJsonByteIdentical": true,
+    "rawRgbSequenceByteIdentical": true
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-ingrain-player-lileep-opponent-onix.json",
+      "scenarioSha256": "1f2ccf3f4cbc2cf1b2b54a102beeb928c394e93c56a697c9035187b45480df1c",
+      "denseState": "tools/compare/evidence/ingrain-player-dense-state.json.gz",
+      "denseStateSha256": "51ef476241a4adbc397ad53604f076a718b6110ea22c32c97a19f1f55679001e",
+      "probeJsonSha256": "159dc54a225614723560cf74a82ae64aade78763566808c17409586cdb65b6e4",
+      "rawRgbArchive": "tools/compare/evidence/ingrain-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "8a74d73469c7fe2337051001b4039c3d9be0788eccff944298ae9af5afbb712a",
+      "rawRgbSequenceSha256": "e680d6b1ad463bb9d87670eb844ec67ae9544e74b6b638b5bdfa4fec55bbdfa0",
+      "changeMap": "tools/compare/evidence/ingrain-changemap-player.txt",
+      "changeMapSha256": "8aa5c2f61107ac07a837f08f09a3a4a2d13388c4b731389871c7920a7d524b5e",
+      "window": { "startFrame": 205, "endFrame": 368, "rows": 164 }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-ingrain-opponent-lileep-player-onix.json",
+      "scenarioSha256": "214691a8dbcde3e52890a74841a440a85ee61dc3dc1737d4bb3588f530bd6c6e",
+      "denseState": "tools/compare/evidence/ingrain-opponent-dense-state.json.gz",
+      "denseStateSha256": "5d62d790fbb3318bff00cabd97f4c5ce6cf18b643fafd2e7570636cfa9d7da7d",
+      "probeJsonSha256": "0799cd6827dbe855eddb3c6797ffa46fcc372a450853adee70a417f618e7948d",
+      "rawRgbArchive": "tools/compare/evidence/ingrain-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "f72022ed9c27ba38854f88aac27f7d4b822e3d00f00b17682387eb51529ecd5f",
+      "rawRgbSequenceSha256": "712043b5a4e4427c6d8700f5b9e2841def15681d22fe055dfc6d6ac11588821c",
+      "changeMap": "tools/compare/evidence/ingrain-changemap-opponent.txt",
+      "changeMapSha256": "99afce461e3f49eb7645661889f8d5c0db178da97e9700c16a07f9cac567c88a",
+      "window": { "startFrame": 293, "endFrame": 456, "rows": 164 }
+    }
+  }
+}

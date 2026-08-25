@@ -612,7 +612,10 @@ import teeterDanceAsset from "../animation/assets/teeter-dance.json" with { type
 import bellyDrumAsset from "../animation/assets/belly-drum.json" with { type: "json" };
 import sweetScentAsset from "../animation/assets/sweet-scent.json" with { type: "json" };
 import defenseCurlAsset from "../animation/assets/defense-curl.json" with { type: "json" };
+import ingrainAsset from "../animation/assets/ingrain.json" with { type: "json" };
 import meanLookAsset from "../animation/assets/mean-look.json" with { type: "json" };
+import smellingSaltAsset from "../animation/assets/smelling-salt.json" with { type: "json" };
+import recycleAsset from "../animation/assets/recycle.json" with { type: "json" };
 import batonPassAsset from "../animation/assets/baton-pass.json" with { type: "json" };
 import rainDropsAsset from "../animation/assets/rain-drops.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
@@ -899,6 +902,8 @@ import {
   sceneOnSupersonicView,
   sceneOnMetalSoundView,
   sceneOnScreechView,
+  sceneOnSmellingSaltView,
+  sceneOnRecycleView,
   sceneOnLeerView,
   sceneOnWaterGunView,
   sceneOnAcidView,
@@ -1003,6 +1008,7 @@ import {
   sceneOnSweetKissView,
   sceneOnSweetScentView,
   sceneOnDefenseCurlView,
+  sceneOnIngrainView,
   sceneOnMeanLookView,
   sceneOnLovelyKissView,
   sceneOnOctazookaView,
@@ -1162,7 +1168,10 @@ import {
   type SceneOnBellyDrumConfig,
   type SceneOnSweetScentConfig,
   type SceneOnDefenseCurlConfig,
+  type SceneOnIngrainConfig,
   type SceneOnMeanLookConfig,
+  type SceneOnSmellingSaltConfig,
+  type SceneOnRecycleConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   SPITE_CLONE_BLANK_POINTER_AGE,
@@ -1838,6 +1847,16 @@ const metalSoundArt = metalSoundAsset as {
 };
 const screechArt = screechAsset as {
   purpleRing: { tileset: Tileset; palette: RgbColor[] };
+};
+const smellingSaltArt = smellingSaltAsset as {
+  exclamation: { tileset: Tileset; palette: RgbColor[] };
+};
+const recycleArt = recycleAsset as {
+  arrow: { tileset: Tileset; palette: RgbColor[] };
+};
+const ingrainArt = ingrainAsset as {
+  roots: { tileset: Tileset; palette: RgbColor[] };
+  orbs: { tileset: Tileset; palette: RgbColor[] };
 };
 const waterGunArt = waterGunAsset as {
   smallBubbles: { tileset: Tileset; palette: RgbColor[] };
@@ -14367,6 +14386,130 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "INGRAIN") {
+    const ingrainState = state as SceneOnMovePresentationState<SceneOnIngrainConfig>;
+    const view = sceneOnIngrainView(ingrainState);
+    // The retained bilateral windows prove ordinary OBJ OAM, matrix, and
+    // palette scanout from the preceding source row. Ingrain has no affine
+    // or palette mutation, so its complete visual transfer is this one-row
+    // source-relative handoff.
+    const displayed = sceneOnIngrainView({
+      ...ingrainState,
+      age: ingrainState.age - 1,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) throw new Error(`INGRAIN missing ${view.attacker.species} attacker art`);
+    if (!targetSource) throw new Error(`INGRAIN missing ${view.target.species} target art`);
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const objects: Array<{ subpriority: number; slot: number; draw: () => void }> = [
+      {
+        subpriority: playerAttacker ? 30 : 40,
+        slot: playerAttacker ? 6 : 8,
+        draw: () => drawSpriteSheet(
+          fb,
+          attackerTileset,
+          attackerSource.palette,
+          view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+          view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+        ),
+      },
+      {
+        subpriority: view.target.geometry.side === "player" ? 30 : 40,
+        slot: view.target.geometry.side === "player" ? 6 : 8,
+        draw: () => drawSpriteSheet(
+          fb,
+          targetTileset,
+          targetSource.palette,
+          view.target.geometry.spriteCorner.x + targetIdle.x2,
+          view.target.geometry.spriteCorner.y + targetIdle.y2,
+        ),
+      },
+      ...displayed.roots.map((root) => ({
+        subpriority: root.subpriority,
+        slot: [3, 4, 5, 7][root.index]!,
+        draw: () => {
+          if (root.invisible) return;
+          const frame = subTileset(
+            ingrainArt.roots.tileset,
+            root.sourceCell / ingrainArt.roots.tileset.columns,
+            4,
+          );
+          const draw = root.hFlip ? drawSpriteSheetHFlip : drawSpriteSheet;
+          draw(
+            fb,
+            frame,
+            ingrainArt.roots.palette,
+            root.x + root.x2 - 16,
+            root.y + root.y2 - 16,
+          );
+        },
+      })),
+      ...displayed.orbs.map((orb) => ({
+        subpriority: orb.subpriority,
+        slot: 9 + orb.index,
+        draw: () => drawSpriteSheet(
+          fb,
+          { columns: 1, rows: 1, tiles: [ingrainArt.orbs.tileset.tiles[orb.sourceCell]!] },
+          ingrainArt.orbs.palette,
+          orb.x + orb.x2 - 4,
+          orb.y + orb.y2 - 4,
+        ),
+      })),
+    ];
+    // BuildOamBuffer orders the common priority-2 objects by subpriority,
+    // then allocation/OAM index. Draw back-to-front so smaller subpriority
+    // and lower slots win overlapping pixels exactly as hardware OBJ does.
+    objects.sort((a, b) => b.subpriority - a.subpriority || b.slot - a.slot);
+    for (const object of objects) object.draw();
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const profile = ingrainState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "INGRAIN!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "MEAN_LOOK") {
     const meanState = state as SceneOnMovePresentationState<SceneOnMeanLookConfig>;
     const view = sceneOnMeanLookView(meanState);
@@ -14488,6 +14631,115 @@ export function renderSceneOnMovePresentation(
       fb,
       playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
       "MEAN LOOK!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "RECYCLE") {
+    const recycleState = state as SceneOnMovePresentationState<SceneOnRecycleConfig>;
+    const view = sceneOnRecycleView(recycleState);
+    // OBJ OAM, its affine matrix, and the selected OBJ palette all scan out
+    // from the preceding source row. BLDALPHA is a live GPU register: the
+    // freshly allocated arrow is therefore blank at age 10, then first
+    // paints at age 11 with that row's coefficient.
+    const displayed = sceneOnRecycleView({
+      ...recycleState,
+      age: recycleState.age - 1,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) throw new Error(`RECYCLE missing ${view.attacker.species} attacker art`);
+    if (!targetSource) throw new Error(`RECYCLE missing ${view.target.species} target art`);
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const white = { r: 255, g: 255, b: 255 };
+    const attackerPalette = blendPaletteToward(
+      attackerSource.palette,
+      white,
+      displayed.blendTask?.data[2] ?? 0,
+    );
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb,
+      attackerTileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    );
+    const drawTarget = (): void => drawSpriteSheet(
+      fb,
+      targetTileset,
+      targetSource.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    if (playerAttacker) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    const nonObjTarget2 = fb.slice();
+    if (displayed.sprite) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        recycleArt.arrow.tileset,
+        recycleArt.arrow.palette,
+        displayed.sprite.x,
+        displayed.sprite.y,
+        displayed.sprite.matrix[0],
+        displayed.sprite.matrix[1],
+        displayed.sprite.matrix[2],
+        displayed.sprite.matrix[3],
+        view.registers.bldalpha[0],
+        view.registers.bldalpha[1],
+        false,
+      );
+    }
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const profile = recycleState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "RECYCLE!",
       99,
     );
     return;
@@ -32180,6 +32432,176 @@ export function renderSceneOnMovePresentation(
       fb,
       playerAttacker ? playerSpecies + " used" : "Foe " + opponentSpecies + " used",
       "SCREECH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SMELLING_SALT") {
+    const saltState = {
+      ...state,
+      config: state.config,
+    } satisfies SceneOnMovePresentationState<SceneOnSmellingSaltConfig>;
+    const view = sceneOnSmellingSaltView(saltState);
+    // Ordinary OAM and OBJ palettes scan out from the preceding source row.
+    // The prepared live-target affine matrix is the independently measured
+    // RAM+2 class; do not collapse these into one display-age coefficient.
+    const displayedOam = sceneOnSmellingSaltView({
+      ...saltState,
+      age: saltState.age - 1,
+    });
+    const displayedMatrix = sceneOnSmellingSaltView({
+      ...saltState,
+      age: saltState.age - 2,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) {
+      throw new Error("SMELLING_SALT missing " + view.attacker.species + " attacker art");
+    }
+    if (!targetSource) {
+      throw new Error("SMELLING_SALT missing " + view.target.species + " target art");
+    }
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const profile = saltState.config.animationProfile;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (!playerAttacker && saltState.age === 0) {
+      drawSourceOpponentEnemyShadow(
+        fb,
+        view.attacker.species,
+        view.attacker.geometry.battlePositionCenter,
+      );
+    }
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb,
+      attackerTileset,
+      attackerSource.palette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    );
+    const drawTarget = (): void => {
+      const cornerX = view.target.geometry.spriteCorner.x;
+      const cornerY = view.target.geometry.spriteCorner.y;
+      // The task-updated x2/y2 variables and prepared affine matrix are the
+      // independently measured RAM+2 class; ordinary effect OAM remains
+      // RAM+1. Squish cleanup leaves x2 at zero, replacing the front-idle
+      // offset until ShakeMon2 writes it again.
+      const targetX2 = displayedMatrix.squishTargetX2
+        ?? (displayedOam.age === 73
+          ? displayedOam.shakeTargetX2
+          : displayedMatrix.age >= 73 && displayedMatrix.age <= 88
+            ? displayedMatrix.shakeTargetX2
+          : displayedMatrix.age >= 53 ? 0 : targetIdle.x2);
+      if (displayedOam.squishTaskActive || displayedMatrix.targetMatrix.d !== 256) {
+        drawSpriteSheetAffineStretch(
+          fb,
+          targetTileset,
+          targetSource.palette,
+          cornerX,
+          cornerY,
+          displayedMatrix.targetMatrix.a,
+          displayedMatrix.targetMatrix.d,
+          displayedMatrix.targetY2,
+          { r: 0, g: 0, b: 0 },
+          0,
+          true,
+          targetX2,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          targetTileset,
+          targetSource.palette,
+          cornerX + targetX2,
+          cornerY + displayedMatrix.targetY2 + targetIdle.y2,
+        );
+      }
+    };
+    const drawEffects = (): void => {
+      // Equal-subpriority hand slots retain source creation order. Paint the
+      // larger hardware rank first so the lower rank wins an overlap.
+      for (const hand of Array.from(displayedOam.hands).reverse()) {
+        const centerX = hand.side === "left"
+          ? profile.targetLeft - 8
+          : profile.targetRight + 8;
+        const draw = hand.hFlip ? drawSpriteSheetHFlip : drawSpriteSheet;
+        draw(
+          fb,
+          encoreArt.clappingHand.tileset,
+          encoreArt.clappingHand.palette,
+          centerX + hand.x2 - 16,
+          profile.targetPictureY - 16,
+        );
+      }
+      if (displayedOam.exclamation?.visible) {
+        drawSpriteSheet(
+          fb,
+          smellingSaltArt.exclamation.tileset,
+          smellingSaltArt.exclamation.palette,
+          view.target.geometry.animationCenter.x - 16,
+          profile.targetTop - 16,
+        );
+      }
+    };
+    // The effects use target subpriority-2: between the player-back field
+    // sprites when the player attacks, and ahead of both when the foe does.
+    if (playerAttacker) {
+      drawTarget();
+      drawEffects();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawEffects();
+    }
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const field = saltState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(
+      healthboxAssemblyAssets,
+      {
+        name: opponentSpecies,
+        level: 50,
+        gender: field.opponentGender ?? "male",
+        hpFraction: field.opponentHp / field.opponentMaxHp,
+        status: "none",
+      },
+    ));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(
+      playerHealthboxAssets,
+      {
+        name: playerSpecies,
+        level: 50,
+        gender: field.playerGender ?? "male",
+        hpFraction: field.playerHp / field.playerMaxHp,
+        status: "none",
+        currentHp: field.playerHp,
+        maxHp: field.playerMaxHp,
+      },
+    ));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? playerSpecies + " used" : "Foe " + opponentSpecies + " used",
+      "SMELLINGSALT!",
       99,
     );
     return;

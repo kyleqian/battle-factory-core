@@ -1796,6 +1796,39 @@
    ]
   },
   {
+   "move": "MOVE_SMELLING_SALT",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 parties use the lowest carrier FRONTIER_MON_GRANBULL_1 (set 376) against ONIX with all four active slots constrained to SMELLING_SALT; player-back and opponent-front each retain the complete 121-row source-pointer window through first inactive cleanup and match a third fresh Scene-ON replay byte-for-byte",
+    "the source-derived reducer ports both hand sprites, the two AnimTask_SmellingSaltsSquish passes, the short AnimTask_ShakeMon2 target shake, and blinking exclamation lifecycle; deterministic extraction owns only ANIM_TAG_SMELLINGSALT_EFFECT while the hand cell is byte-checked against the existing TAG_HAND Encore asset rather than duplicated",
+    "the narrow typed seam and ordinary live-species compositor use generic front/back art and geometry, source target position attributes, hFlip, painter order, affine target squish/y2, short shake, exclamation, audio-independent field chrome and healthboxes, and complete cleanup without any carrier-pair gate, recording import, framebuffer lookup, absolute battle tick, gameplay, damage, RNG, controller, turn, round, or facility ownership",
+    "ordinary effect OAM and palette scanout prove RAM+1 on 120/120 comparable rows per orientation; prepared affine matrices and task-owned squish x2/y2 prove RAM+2 on all 119 eligible rows, with the ShakeMon2 creation write visible on its creation display before the steady RAM+2 cadence",
+    "actual core.ts through renderSceneOnMovePresentation matches player-back 121/121 plus opponent-front 121/121 = 242/242 retained raw RGB frames with zero residual pixels, including normalized bilateral change maps and the first inactive cleanup row",
+    "MOVE_ENCORE and MOVE_HELPING_HAND remain independent exact TAG_HAND controls, MOVE_FACADE remains the adjacent-body exact control, and MOVE_SCREECH/MOVE_METAL_SOUND remain independent exact ShakeMon2 controls; none receives sibling credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-smelling-salt-player-granbull-opponent-onix.json",
+    "tools/battle-lab/mechanic-smelling-salt-opponent-granbull-player-onix.json",
+    "tools/compare/fixtures/smelling-salt-evidence.json",
+    "tools/compare/evidence/smelling-salt-player-dense-state.json.gz",
+    "tools/compare/evidence/smelling-salt-opponent-dense-state.json.gz",
+    "tools/compare/evidence/smelling-salt-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/smelling-salt-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/smelling-salt-changemap-player.txt",
+    "tools/compare/evidence/smelling-salt-changemap-opponent.txt",
+    "tools/compare/smellingSaltProbe.py",
+    "tools/compare/extractSmellingSaltAssets.ts",
+    "tools/compare/smellingSaltFramebuffer.ts",
+    "src/animation/assets/smelling-salt.json",
+    "src/animation/smellingSalt.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/smellingSalt.test.ts",
+    "tests/animation/smellingSaltEvidence.test.ts",
+    "tests/animation/smellingSaltFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_FAKE_OUT",
    "status": "exact",
    "covered": [
@@ -5735,10 +5768,91 @@
     "tests/animation/meanLook.test.ts",
     "tests/animation/meanLookFramebuffer.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_RECYCLE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Porygon/Sitrus versus Gyarados parties retain both ordinary Battle Scene ON orientations for 203 consecutive source-owned rows each through first inactive cleanup; the retained dense state and raw RGB sequences are byte-identical across two fresh runs per orientation",
+    "the authoritative half-open Move_RECYCLE interval is 0x082ce05e..0x082ce092 (52 bytes); the pure source-age reducer and typed Scene-ON seam reproduce ANIM_TAG_RECYCLE, gRecycleSpriteTemplate, AnimRecycle_Step, its live affine matrix, AnimTask_BlendMonInAndOut, monbg/clearmonbg, BLDALPHA, resource and audio lifecycles, and cleanup",
+    "ANIM_TAG_RECYCLE regenerates byte-for-byte from the pinned 64x64 indexed source PNG (sha256 0b6b8150d35197eea9fa20efbc6021309b473950b3b94e4cafe05910d9a8f8ce); Porygon and Gyarados art come from the established generic front/back atlases and the compositor accepts live species, sides, and geometry without a carrier-pair gate",
+    "all 203 player-back plus 203 opponent-front component/seam/raw-RGB/actual core.ts-to-renderSceneOnMovePresentation framebuffer rows match with zero residual pixels through cleanup on two deterministic production-render passes; the source 64x64 affine-normal ObjBlend arrow uses current BLDALPHA over the monbg handoff and the selected attacker OBJ palette follows the complete BlendMonInAndOut white ramp",
+    "ordinary OAM, palette, and ongoing affine matrices retain the measured predecessor transfer on 202/202 transitions per orientation; the fresh affine allocation is blank at age 10 and first paints at age 11, gameplay RNG has zero transitions, animation RNG changes 200 times, and audio remains presentation-only",
+    "MOVE_SUPER_FANG remains an independently exact BlendMonInAndOut control and no sibling receives acceptance credit; no gameplay item, damage, RNG, AI, controller, turn, round, facility, absolute-tick, recording/framebuffer lookup, coordinate/RGB fit, or unsupported-boundary ownership is added"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-recycle-player-porygon-opponent-gyarados.json",
+    "tools/battle-lab/mechanic-recycle-opponent-porygon-player-gyarados.json",
+    "tools/compare/fixtures/recycle-evidence.json",
+    "tools/compare/recycleProbe.py",
+    "tools/compare/recycleEvidence.ts",
+    "tools/compare/recycleReducerAudit.ts",
+    "tools/compare/recycleFramebuffer.ts",
+    "tools/compare/extractRecycleAssets.ts",
+    "tools/compare/evidence/recycle-player-dense-state.json.gz",
+    "tools/compare/evidence/recycle-opponent-dense-state.json.gz",
+    "tools/compare/evidence/recycle-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/recycle-opponent-raw-rgb.tar.gz",
+    "src/animation/assets/recycle.json",
+    "src/animation/recycle.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/recycleEvidence.test.ts",
+    "tests/animation/recycle.test.ts",
+    "tests/animation/recycleFramebuffer.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_INGRAIN",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-140 Lileep semantic parties retain both ordinary Battle Scene ON orientations for 164 consecutive source-owned rows each through first inactive cleanup; player-back frames 205-368 and opponent-front frames 293-456 reproduce byte-identically across two fresh dense-state and raw-RGB runs",
+    "the authoritative half-open Move_INGRAIN interval is 0x082d40e0..0x082d4191 (177 bytes); the pure source-age reducer and typed Scene-ON seam reproduce ANIM_TAG_ROOTS, ANIM_TAG_ORBS, four create_ingrain_root_sprite programs, three create_ingrain_orb_sprite programs, source cells/hFlip/flicker/wave callbacks, allocation and OAM order, tags, audio, and cleanup",
+    "ROOTS and ORBS regenerate byte-for-byte from pinned indexed source PNGs (sha256 085fbb67a415cdff54c0462cc36835de29f033554805f8bb6b9bf934fbc71e23 / 91c48d207d5e6e0c2e5ca6804e431df390a8dddc9db6b20e30c0ba9d52e6b2d5); generic front/back battler art uses typed live visual species, sides, battle-position geometry, and attacker subpriority without a carrier/species pair gate",
+    "all 164 player-back plus 164 opponent-front component/seam/raw-RGB/actual core.ts-to-renderSceneOnMovePresentation framebuffer rows match with zero residual pixels through cleanup on two deterministic production-render passes; the compositor preserves source subpriority/allocation painter order around the live attacker and renders all root cells, hFlip/flicker, and orb cell/wave paths",
+    "ordinary OAM, all 32 affine matrices, and all 512 faded palette colors retain the measured predecessor transfer on 163/163 transitions per orientation; gameplay state and RNG remain invariant, animation RNG changes 163 times, registers remain unchanged, and the first inactive row clears all move resources",
+    "the retained mechanic stage's semantic Lileep override follows already-live Cacturne visual buffers, which the typed presentation config supplies explicitly; this evidence fact does not specialize the generic compositor. Absorb, Mega Drain, Dream Eater, and Giga Drain remain independent exact ORBS controls and receive no sibling credit; no gameplay rooting, healing, switching, status, damage, RNG, AI, controller, turn, round, facility, absolute-tick, recording/framebuffer lookup, or coordinate/RGB fitting is added"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-ingrain-player-lileep-opponent-onix.json",
+    "tools/battle-lab/mechanic-ingrain-opponent-lileep-player-onix.json",
+    "tools/compare/fixtures/ingrain-evidence.json",
+    "tools/compare/ingrainSourceAudit.ts",
+    "tools/compare/ingrainProbe.py",
+    "tools/compare/ingrainEvidence.ts",
+    "tools/compare/ingrainFramebuffer.ts",
+    "tools/compare/extractIngrainAssets.ts",
+    "tools/compare/evidence/ingrain-player-dense-state.json.gz",
+    "tools/compare/evidence/ingrain-opponent-dense-state.json.gz",
+    "tools/compare/evidence/ingrain-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/ingrain-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/ingrain-changemap-player.txt",
+    "tools/compare/evidence/ingrain-changemap-opponent.txt",
+    "src/animation/assets/ingrain.json",
+    "src/animation/ingrain.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/ingrainSource.test.ts",
+    "tests/animation/ingrainEvidence.test.ts",
+    "tests/animation/ingrain.test.ts",
+    "tests/animation/ingrainFramebuffer.test.ts"
+   ]
   }
  ],
  "queue": [],
  "componentTracks": [
+  {
+   "id": "smelling-salt-hand-squish-effect",
+   "components": [
+    "asset:ANIM_TAG_SMELLINGSALT_EFFECT",
+    "sprite:gSmellingSaltExclamationSpriteTemplate",
+    "sprite:gSmellingSaltsHandSpriteTemplate",
+    "task:AnimTask_SmellingSaltsSquish"
+   ],
+   "representatives": ["MOVE_SMELLING_SALT"],
+   "fulfilled": true,
+   "goal": "FULFILLED by MOVE_SMELLING_SALT bilateral 242/242 zero-residual shared-production acceptance through first inactive cleanup. Exclusive effect art is source-extracted; reused TAG_HAND bytes are checked without duplicate ownership. MOVE_ENCORE, MOVE_HELPING_HAND, MOVE_FACADE, MOVE_SCREECH, and MOVE_METAL_SOUND remain independent exact controls and receive no sibling credit."
+  },
   {
    "id": "seed-projectile-leech-seed",
    "components": [
@@ -6787,6 +6901,41 @@
    "representatives": ["MOVE_SCREECH"],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_SCREECH alone independently passes 63/63 player-back plus 63/63 opponent-front complete source/component/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation framebuffer rows through first inactive cleanup with zero residual pixels. Its source-age reducer, typed live species/sides/geometry, generic front/back battler art, source PURPLE_RING art, two-call painter ordering, own ShakeMon2/SwayMon task timing, ordinary predecessor OAM/matrix/palette transfer, field chrome, and the generic preceding-hardware elevated-opponent shadow use no carrier-pair gate, recording/framebuffer lookup, absolute tick, or gameplay ownership. MOVE_SUPERSONIC and MOVE_METAL_SOUND remain independent exact controls and receive no Screech sibling credit."
+  },
+  {
+   "id": "recycle-arrow",
+   "components": [
+    "asset:ANIM_TAG_RECYCLE",
+    "sprite:gRecycleSpriteTemplate"
+   ],
+   "representatives": ["MOVE_RECYCLE"],
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_RECYCLE independently passes 203/203 player-back plus 203/203 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two deterministic production-render passes. Its reproducibly extracted ANIM_TAG_RECYCLE art, typed live species/sides/geometry, generic front/back battler art, affine-normal ObjBlend arrow, current-row BLDALPHA, predecessor OAM/matrix/palette transfers, monbg handoff, BlendMonInAndOut palette ramp, chrome, audio, and cleanup use no pair gate, recording/framebuffer lookup, absolute tick, coordinate/RGB fitting, or gameplay ownership. MOVE_SUPER_FANG remains an independent exact control and receives no sibling credit."
+  },
+  {
+   "id": "ingrain-roots-orbs",
+   "components": [
+    "asset:ANIM_TAG_ORBS",
+    "asset:ANIM_TAG_ROOTS",
+    "visualCommand:create_ingrain_orb_sprite",
+    "visualCommand:create_ingrain_root_sprite"
+   ],
+   "representatives": ["MOVE_INGRAIN"],
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_INGRAIN independently passes 164/164 player-back plus 164/164 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two deterministic production-render passes. Reproducibly extracted ROOTS/ORBS art, typed live visual species/sides/battle-position geometry/subpriority, source root cells/hFlip/flicker and orb cells/waves, source subpriority/allocation painter order, ordinary predecessor OAM/matrix/palette transfer, field chrome, audio, and cleanup use no pair gate, recording/framebuffer lookup, absolute tick, coordinate/RGB fitting, or gameplay ownership. Absorb, Mega Drain, Dream Eater, and Giga Drain remain independent exact ORBS controls and receive no sibling credit."
+  },
+  {
+   "id": "eruption-warm-rock",
+   "components": [
+    "asset:ANIM_TAG_WARM_ROCK",
+    "sprite:gEruptionFallingRockSpriteTemplate",
+    "task:AnimTask_EruptionLaunchRocks",
+    "task:AnimTask_HorizontalShake",
+    "visualCommand:simple_palette_blend"
+   ],
+   "representatives": ["MOVE_ERUPTION"],
+   "fulfilled": false,
+   "goal": "UNFULFILLED evidence-only Eruption checkpoint: source audit and lowest legal set-346 FRONTIER_MON_CAMERUPT_2 bilateral Scene-ON stages pin the exclusive Warm Rock body. No reducer, typed seam, renderer, latch, sibling credit, or move acceptance is claimed. Complete twice-fresh dense pointer-owned state/raw-RGB/change-map receipts through first inactive cleanup, own display-transfer measurement, and a strict verifier remain required before any promotion."
   }
  ],
  "variantAudits": {
