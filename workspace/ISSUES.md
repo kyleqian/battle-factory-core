@@ -37,34 +37,25 @@ regenerate `factory_ai_check_viability_m5d3_vectors_gen.rs`, rebuild
 `artifacts/wasm/factory_wasm.wasm`, then un-skip that case. Not fixed here:
 `core-rs/**` was out of scope for the #122 worker step.
 
-## #123 — Endless battle under the soak's status-move fallback: 456 selections of a 15-PP DOUBLE TEAM, then HANG at `resolution:presenting`
+## #125 — Soak-instrument debt: the winning-like last-resort fight fallback can spam a maxed stat-stage move into a source-faithful Struggle stalemate (~0.4% of varied carry-14 boot rounds)
 
-**Found 2026-08-23** by the same `--vary-rng` sweep (find 2 of 2). Repro
-(~27 s to HANG at the 1M budget; at 300k frames it is battle 3 turn 486 and
-still ticking):
-
-```
-npm run soak -- --policy winning-combined --start-carry 28 --vary-rng --seed 755 --render-every 0
-```
-
-Player trio CROBAT/BLASTOISE/JOLTEON (combined draft, boot carry 28). The
-battle-3 matchup walls the active mon, so the winning-like last-resort
-fallback picks slot 3 = move 104 (DOUBLE TEAM) every turn; the verbose
-transcript logs **456 `fight: confirm` selections of that one move in a
-single battle** with the turn counter advancing each time. Two coupled
-smells, either of which is a real bug:
-
-1. **PP**: DOUBLE TEAM carries 15 PP (24 max) — the real game cannot allow
-   456 uses; at 0 PP the slot must be rejected (#72's oracle-verified
-   NOPPLEFT path) and at all-slots-0 Struggle must engage. Check whether the
-   fight-menu legality mask this path consults reads live PP.
-2. **Termination**: at +6 evasion neither side lands hits and the battle
-   runs 1,600+ turns until the driver's 30k-frame stall detector fires at
-   `resolution:presenting` (b3 t1681 at the 1M budget). Even with PP fixed,
-   confirm Struggle-vs-Struggle ends this battle.
-
-Not an engine `tick` crash — the engine happily plays the endless battle;
-triage which half is engine vs driver-policy pathology before fixing either.
+**Filed 2026-08-24** from the #123 verdict (closed the same day: NOT an engine
+bug — PP decrements, `legalMoveBySlot` nulls a 0-PP slot, forced Struggle
+engages; pinned by `tests/factoryBattleScriptNoPpStruggleFullTurn.test.ts`).
+The remaining pathology is the soak policy's: when `pickWinningFightSlot`
+finds no damaging legal slot it falls to the lowest legal slot, which can be
+a stat-stage move (DOUBLE TEAM) that it then repeats at +6 with no effect;
+the Factory AI mirrors it, both sides spend all PP, and Struggle-vs-Struggle
+at +6/+6 evasion (33%/29% accuracy) cannot outpace Leftovers/Ingrain
+regeneration — Gen 3 has no turn cap, so the battle never ends (seed 755
+`winning-combined` carry 28; `winning` `--vary-rng --first-round` carry 14
+seeds 116 and 418; 0/500 at carry 0 and carry 28). Costs one full frame
+budget (~25 s) per affected seed and reads `OK … budget` once the
+first-round semantics fix lands. A real player would switch or attack.
+**Lever (filler, supervisor call):** skip a stat-stage slot whose stage is
+already maxed / prefer any damaging resisted move over a pure status move in
+the fallback — note this re-baselines the `winning`/`winning-swap`
+trajectories (counts, not commands), so land it with a full gate rerun.
 
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 
