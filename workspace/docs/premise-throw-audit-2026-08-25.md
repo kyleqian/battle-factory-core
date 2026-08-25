@@ -19,8 +19,17 @@ hit-marker, status bit, ordering — at the same point the source does. A port
 that lacks the upstream marker is UNPROVEN even when the C comment says
 "cannot happen".
 
-Every C line cited below was read this session from `reference/pokeemerald/`.
+Every C line cited below was read from `reference/pokeemerald/`.
 No source file, test, or ledger was changed by this audit; nothing was fixed.
+
+> **Second pass, 2026-08-25.** Rows marked *(2nd pass)* and the four
+> *reclassified* rows were derived in a follow-up read. It closed §3.6's
+> UNCLASSIFIED list, resolved Drafts D and E (both PROVED), and **refuted
+> Draft B** — the first pass's reading of the orchestration result unions was
+> wrong. It also found one new UNPROVEN row with a constructed scenario
+> (`factoryBattleScriptFullTurnDecision.ts:2564`, §4 item 2 / Draft F). The
+> evidence bar is unchanged: every C citation names its enclosing function
+> and the condition guarding the line.
 
 ---
 
@@ -33,8 +42,8 @@ Commands, in order, with the count after each stage:
 | 1 | All throw sites | `rg -n "throw new Error" src/engine` | **1,554** sites across **194** files |
 | 2 | Premise-worded | message matches `must` / `expected` / `unexpected` / `impossible` / `cannot` / `should never` / `invariant` / `unreachable` / `never happen` / `should not` (messages reassembled across continuation lines, since ~40% of throws wrap) | **235** |
 | 3 | Minus exclusions (§2) | drop validator-function sites, presentation/staging modules, and construction/generation/parse-boundary modules | **48** live-kernel premise sites |
-| 4 | Classified (§3) | read the TS site *and* the C it claims to port | **24** |
-| 5 | Remainder | UNCLASSIFIED, listed in §3.5 | **24** |
+| 4 | Classified (§3) | read the TS site *and* the C it claims to port | **50** (24 first pass + 26 second pass) |
+| 5 | Remainder | UNCLASSIFIED | **0** in the files §3.6 named; see §3.7's caveat |
 
 The stage-2 regex is the one named in the step brief. It has a **known blind
 spot**: premises phrased without those words are missed. One was found by hand
@@ -81,7 +90,7 @@ Total excluded: **187**. Live-kernel premise sites remaining: **48**.
 
 ---
 
-## 3. The table — 24 classified live-kernel premise sites
+## 3. The table — 50 classified live-kernel premise sites
 
 Verdict key: **PROVED** = source rules it out AND the port carries the same
 guard at the same point. **TS-CONTRACT** = guards TypeScript-internal shape
@@ -100,6 +109,14 @@ upstream guard the source relies on (the #126 shape).
 | `battleScriptActionAdmission.ts:3547` *(bonus row; missed by the stage-2 regex)* | `STATUS2_BIDE counter 3 is not reachable from Cmd_setbide in the Level-50 singles locked-action flow` | **PROVED** | `Cmd_setbide` (`battle_script_commands.c:7122-7129`) ORs `STATUS2_BIDE_TURN(2)` into a 2-bit field; the only other write is the `-= STATUS2_BIDE_TURN(1)` at `battle_util.c:2225`. Reaching 3 needs a second `Cmd_setbide` while the field is 1, which the canceler forecloses: once `STATUS2_BIDE` is set, `battle_util.c:2225-2245` diverts the biding battler to `BattleScript_BideStoringEnergy` / `BideAttack` / `BideNoEnergyToAttack` inside `AtkCanceler`, before the move's own script (and so before `Cmd_setbide`) can run again. **Port half:** the port sets Bide only through `battleScriptSetbideOpcode.ts` and reaches it through the same canceler phase. |
 | `battleScriptActionAdmission.ts:3553` | `gBideDmg[N] must be nonnegative in reachable Level-50 singles state` | **PROVED** | `Cmd_datahpupdate` splits on sign first: `battle_script_commands.c:1897-1903` handles `gBattleMoveDamage < 0` as HP gain and touches neither `gBideDmg` nor `gBideTarget`; the accumulation `gBideDmg[gActiveBattler] += gBattleMoveDamage` at `:1912` is reachable only from the `else` at `:1904`, i.e. with non-negative damage. `Cmd_setbide` zeroes the cell at `:7125`. **Port half — both halves confirmed:** `battleScriptHitChainOpcode.ts:2521` (`if (damage < 0)`) early-returns on the heal branch *before* the bide accumulation at `:2551-2564`, exactly mirroring the C split, and `battleScriptSetbideOpcode.ts:44-46` zeroes the attacker's cell. The post-#126 `HITMARKER_IGNORE_BIDE` strip is at `battleScriptHitChainOpcode.ts:2552-2554`. |
 | `battleScriptActionAdmission.ts:3780` | `CANCELER_THAW Level-50 singles attacker must be battler 0 or 1` | **PROVED (by scope)** | Same gate as `:3512` (`battle_controllers.c:177`). |
+| `battleScriptActionAdmission.ts:2365` *(2nd pass)* | `imprisoned-move attacker must be a battler id 0..3` | **TS-CONTRACT** | Domain check at `scanBattleScriptImprisonedMoves`'s entry on a parameter already typed `BattleScriptBattlerId`. The C counterpart `GetImprisonedMovesCount` (`battle_util.c:1142-1163`) takes `u8 battler` and applies **no** guard at all — it calls `GetBattlerSide(battler)` unconditionally at `:1146`. The port's check is therefore port-internal, over a value no game state can widen. |
+| `battleScriptActionAdmission.ts:2368` *(2nd pass)* | `imprisoned-move move must be a u16` | **TS-CONTRACT** | Same entry block; mirrors the C parameter type `u16 move` (`battle_util.c:1142`). No C guard exists to port; the value comes from `rulesContext.currentMove`, itself `requireUnsigned(..., 0xffff)` at context construction (`battleScriptRulesContext.ts`, class C). |
+| `battleScriptActionAdmission.ts:2379` *(2nd pass)* | `imprisoned-move attacker side must be 0 or 1` | **TS-CONTRACT** | Reads `rulesContext.battlers[attacker].side`. In C the side is `GetBattlerSide(battler)` = `gBattlerPositions[battler] & BIT_SIDE` (`battle_util.c:1146`), a one-bit expression that cannot be anything else; there is no C state to rule out. The port's cell is fixed by `createBattleScriptRulesContext` and never written mid-turn. |
+| `battleScriptActionAdmission.ts:2385` *(2nd pass)* | `imprisoned-move battler <i> side must be 0 or 1` | **TS-CONTRACT** | Same cell, per-battler, inside the scan loop that ports `battle_util.c:1148`'s `battlerSide != GetBattlerSide(i)` test. Same reasoning. |
+| `battleScriptActionAdmission.ts:2388` *(2nd pass)* | `imprisoned-move battler <i> must have exactly four move slots` | **TS-CONTRACT** | Ports the fixed `MAX_MON_MOVES` loop bound at `battle_util.c:1152` (`for (j = 0; j < MAX_MON_MOVES; j++)`), which is a compile-time constant in C — not a checked condition. The port's `battlers[i].moves` is a frozen four-element tuple built at context construction. |
+| `battleScriptActionAdmission.ts:2400` *(2nd pass)* | `imprisoned-move battler <i> move slot <j> must be a u16` | **TS-CONTRACT** | Element-wise domain check on the same frozen tuple; C reads `gBattleMons[i].moves[j]` (`battle_util.c:1154`) with no validation. |
+
+> **Second-pass census correction.** The first pass's §3.6 tally listed **5** unclassified sites in this file ("the imprisoned-move scan cluster, `:2365`–`:2400`"). Re-running the stage-2 filter with reassembled messages yields **6** premise-worded sites in that cluster (the six above); a seventh sibling at `:2375` ("imprisoned-move scan requires exactly four indexed battlers") is the same TS-CONTRACT shape but is missed by the stage-2 word list, which has no `requires`. It is recorded here for completeness and is not counted in §3.7.
 
 ### 3.2 Switch / faint orchestration
 
@@ -107,14 +124,14 @@ upstream guard the source relies on (the #126 shape).
 | --- | --- | --- | --- |
 | `battleScriptSwitchinOpcode.ts:347` | `Cmd_switchhandleorder: battler N has no decided monToSwitchIntoId -- openpartyscreen must run first` | **UNPROVEN** | **The source has no such precondition.** `Cmd_switchhandleorder` cases 2 and 3 *write* the cell rather than requiring it: `battle_script_commands.c:5183-5191` does `gBattleCommunication[0] = gBattleBufferB[gActiveBattler][1]; *(gBattleStruct->monToSwitchIntoId + gActiveBattler) = gBattleBufferB[gActiveBattler][1];` — the value comes from the controller buffer at the moment the opcode runs, so a `PARTY_SIZE` sentinel there is simply not a state the C can be in. The port instead stores the decision directly in `monToSwitchIntoId` and asserts it was decided upstream, which makes the throw a *port-internal* contract with no source backing. The #126 tell is already on record: ISSUES #121 documents that the engine omits **both** the `Cmd_openpartyscreen` clear `*(gBattleStruct->monToSwitchIntoId + gActiveBattler) = PARTY_SIZE` (`battle_script_commands.c:5117`) **and** `GetMostSuitableMonToSwitchInto`'s early return on a pre-decided id (`battle_ai_switch_items.c:646-647`). The cell's lifecycle in the port therefore already diverges from the source's at both ends of this premise. |
 | `battleScriptSwitchinOpcode.ts:387` | `Cmd_getswitchedmondata: battler N has no decided monToSwitchIntoId -- openpartyscreen must run first` | **UNPROVEN** | Same defect, one opcode later. `Cmd_getswitchedmondata` (`battle_script_commands.c:4606-4619`) reads `gBattlerPartyIndexes[gActiveBattler] = *(gBattleStruct->monToSwitchIntoId + gActiveBattler)` unconditionally — no sentinel check, no failure mode. Whatever is in the cell is committed. The port adds a premise the C does not have. |
-| `battleScriptFaintedActionsOrchestration.ts:322` | `fainted-actions orchestration hit an unexpected <kind> step inside <label> -- outside this rung's modeled (setbyte/getexp/checkteamslost/jumpifbyte/openpartyscreen/end2) domain` | **UNPROVEN** | The neighbouring branches (`:302-319`) already surface `halted` with every real halt reason, including `unsupported-branch`, as a `barrier` result rather than a crash — the author's own note at `:317-319` says a barrier "is the same kind of real machine boundary … not a crash." This throw catches the residual `stepped.kind`, which for `stepBattleScriptMachine` includes the controller-busy `blocked` transition (`battleScriptMachine.ts:890`). `Cmd_openpartyscreen` is inside this rung and marks controllers pending, so a `blocked` step inside the rung is a state the machine itself produces. No C line rules it out — this is a port-orchestration domain guard, not a source premise. Scenario in §4. |
+| `battleScriptFaintedActionsOrchestration.ts:322` | `fainted-actions orchestration hit an unexpected <kind> step inside <label>` | **TS-CONTRACT** — *reclassified 2nd pass; the first pass's reading of the result union was wrong* | The throw's guard is `if (stepped.kind !== "advanced")` (`:321`), reached only after the three other variants are handled above it: `blocked` at `:286-297` (auto-acknowledged, then `continue`), `scheduler-progressed` at `:300-303`, and `halted` at `:304-320` — whose own tail at `:317-319` returns `kind: "barrier"` for a registered opcode's (b) halt. `stepBattleScriptMachine`'s return type is a closed four-variant union — `advanced` / `scheduler-progressed` / `blocked` / `halted` (`battleScriptMachine.ts:248-251`) — so the residual arm is a `never` exhaustiveness guard with no inhabitants. The first pass claimed the controller-busy `blocked` transition (`battleScriptMachine.ts:890`) reaches it; `blocked` is in fact consumed at `:286`, twenty-five lines earlier. Neither a barrier nor a `blocked` step can crash here. |
 
 ### 3.3 Damage / status / stat-stage handling
 
 | file:line | message (trimmed) | verdict | evidence |
 | --- | --- | --- | --- |
 | `battleScriptStatbuffchangeOpcode.ts:121` | `Cmd_statbuffchange: changeStatBuffs returned blocked-silent, but every concrete statbuffchange call site sets STAT_CHANGE_ALLOW_PTR -- unreachable in the real topology` | **PROVED** | All **31** `statbuffchange` invocations in `data/battle_scripts_1.s` carry `STAT_CHANGE_ALLOW_PTR` (verified by `rg -n "statbuffchange" data/*.s \| rg -v STAT_CHANGE_ALLOW_PTR` returning nothing); `include/constants/battle_script_commands.h:371` states the same ("Set in every use of statbuffchange"). The C tests exact equality `flags == STAT_CHANGE_ALLOW_PTR` (`battle_script_commands.c:6965`, `:6991`, `:7012`, `:7025`) *after* stripping the three co-flags at `:6943-6957` (`MOVE_EFFECT_AFFECTS_USER`, `MOVE_EFFECT_CERTAIN`, `STAT_CHANGE_NOT_PROTECT_AFFECTED`), so composite call sites still reduce to exactly the ALLOW_PTR bit. **Port half:** `battleScriptStatBuffs.ts:186-193` strips the identical three bits in the identical order and computes `allowPtr = flags === STAT_CHANGE_ALLOW_PTR`. The blocked-silent producer at `battleScriptStatBuffs.ts:302` fires only under `!allowPtr`, and its other caller (`battleScriptHitChainOpcode.ts:3964`, the Intimidate/ability route with `jumpProgramCounter: null`) handles it as an ordinary advance instead of throwing. |
-| `battleScriptHitChainOpcode.ts:3475` | `applySetMoveEffect: unreachable MOVE_EFFECT_BYTE <n>` | **UNPROVEN** | The `default:` arm of a switch whose only cases are the six primary statuses (SLEEP/POISON/BURN/FREEZE/PARALYSIS/TOXIC), guarded upstream by `if (effectByte > PRIMARY_STATUS_MOVE_EFFECT)` (`:2961`). That leaves `effectByte === 0` (`MOVE_EFFECT_NONE`) falling into the switch with no matching case. **In C this is a silent no-op, not an error:** `SetMoveEffect` switches on `sStatusFlagsForMoveEffects[gBattleCommunication[MOVE_EFFECT_BYTE]]` (`battle_script_commands.c:2268-2271`), whose entry for byte 0 is 0 and matches no `case`, so control falls out of the switch and the command simply advances. The port converts a source no-op into a crash — a distinct sub-species of the #126 shape (the source does not *rule out* the state, it *tolerates* it). Reachability of byte 0 at `Cmd_seteffectprimary` / `Cmd_seteffectwithchance` was not established; see §4. |
+| `battleScriptHitChainOpcode.ts:3475` | `applySetMoveEffect: unreachable MOVE_EFFECT_BYTE <n>` | **PROVED** — *reclassified 2nd pass; Draft D's open question resolved* | The `default:` arm of a switch whose cases are the six primary statuses, entered whenever `effectByte <= PRIMARY_STATUS_MOVE_EFFECT` (`include/constants/battle.h:253`, `= MOVE_EFFECT_TOXIC = 6`), so only `effectByte === 0` (`MOVE_EFFECT_NONE`) has no case. In C byte 0 is a **tolerated no-op**, not an error: `SetMoveEffect` switches on `sStatusFlagsForMoveEffects[...]` (`battle_script_commands.c:2268-2271`) whose entry for 0 is 0 and matches no `case`. So the C rules nothing out and the premise rests entirely on the port's callers — **and all five of them provably filter byte 0.** (1) `:2979` Tri Attack recursion passes `(randomValue % 3) + MOVE_EFFECT_BURN` ∈ {3,4,5}. (2) `:4051`, the secondary-effect roll in `createSeteffectwithchanceOpcodeHandler`, is guarded by `rolledSuccess && rulesContext.moveEffectByte !== 0 && !noEffect`, mirroring `Cmd_seteffectwithchance`'s own `&& gBattleCommunication[MOVE_EFFECT_BYTE]` (`battle_script_commands.c:2924-2926`). (3) `:4024`, the same handler's `certain` branch, computes `moveEffectByte & ~MOVE_EFFECT_CERTAIN` and so would pass 0 only for a bare `MOVE_EFFECT_CERTAIN` (0x80) byte; every one of the eight `MOVE_EFFECT_CERTAIN` uses in `data/battle_scripts_1.s` (`:898`, `:1114`, `:1717`, `:2051`, `:2270`, `:2389`, `:2568`, `:2649`) ORs it with a nonzero effect, so the committed program cannot produce that byte. (4) `:4073` `Cmd_seteffectprimary` passes `moveEffectByte` raw, but every `seteffectprimary` in `data/battle_scripts_1.s` (`:297`, `:702`, `:803`, `:915`, `:1002`, `:1022`, `:1126`, `:1454`, `:1471`, `:1628`, `:1916`, `:2171`, `:2188`, `:2588`, `:4248`, `:4406`) is preceded by a nonzero `setmoveeffect` in the same script; the sole exception is `BattleScript_SynchronizeActivates` (`:4205-4207`), entered only from `AbilityBattleEffects` cases `ABILITYEFFECT_SYNCHRONIZE` / `ATK_SYNCHRONIZE` (`battle_util.c:2971-3000`) under the guard `gLastUsedAbility == ABILITY_SYNCHRONIZE && (gHitMarker & HITMARKER_SYNCHRONIZE_EFFECT)`, whose byte is `gBattleStruct->synchronizeMoveEffect` — written only at `battle_script_commands.c:2508-2509` inside `SetMoveEffect`'s status tail, guarded at `:2503-2506` by the four-way `POISON/TOXIC/PARALYSIS/BURN` test that also raises the marker at `:2510`, hence never 0 (and the `&= ~(AFFECTS_USER \| CERTAIN)` at `:2975` cannot clear those low values). (5) `:4097` `Cmd_seteffectsecondary`: the only `seteffectsecondary` is `BattleScript_ApplySecondaryEffect` (`data/battle_scripts_1.s:4199-4202`), entered only from the four contact-ability branches at `battle_util.c:2801` / `:2816` / `:2831` / `:2846`, each assigning a nonzero byte — Effect Spore's `do { gBattleCommunication[MOVE_EFFECT_BYTE] = Random() & 3; } while (== 0)` (`:2790-2794`) excludes 0 explicitly. **Port half — both mirrors confirmed:** `battleScriptMoveEndOpcode.ts:604-607` writes `MOVE_EFFECT_AFFECTS_USER \| moveEffect` for the contact abilities with the same do-while at `:592-596`, and `battleScriptHitChainOpcode.ts:3493-3504` raises `HITMARKER_SYNCHRONIZE_EFFECT` and sets `synchronizeMoveEffect` only on the identical four-way `synchronizable` test, which `battleScriptMoveEndOpcode.ts:312-330` then requires before jumping to `BattleScript_SynchronizeActivates`. Byte 0 therefore cannot reach the switch. |
 | `battleScriptMoveEndOpcode.ts:271` | `Cmd_moveend: statStages width invariant violated` | **TS-CONTRACT** | `replaceStatStage` (`:264-275`) spreads a fixed-width tuple into `mutable`, assigns one index, then checks `mutable.length`. Array spread cannot change length and the index is a typed stat id. No game state is involved. |
 | `battleScriptMultiTurnCancellation.ts:52` | `CancelMultiTurnMoves battler must be a battler id 0..3` | **TS-CONTRACT** | Domain check on a `BattleScriptBattlerId`-typed parameter at a pure helper's entry; the type already excludes out-of-range values and no caller widens it. |
 
@@ -122,52 +139,87 @@ upstream guard the source relies on (the #126 shape).
 
 | file:line | message (trimmed) | verdict | evidence |
 | --- | --- | --- | --- |
-| `factoryBattleScriptFullTurnDecision.ts:2512` | `factory full-turn decision forced-switch resume cannot resolve the acting battler at the current turn position` | **UNPROVEN** | Fires when the resume path cannot map the turn position back to a battler. The source's equivalent, `Cmd_openpartyscreen` / `HandleFaintedMonActions`, has no such failure mode: `battle_script_commands.c:5108-5124` assigns `gActiveBattler = battler` from the opcode operand and proceeds. No C line was found that rules the port's unresolvable state out; scenario not constructed in time. |
-| `factoryBattleScriptFullTurnDecision.ts:2624` | `factory full-turn decision forced-switch resume produced an unexpected <kind> result` | **UNPROVEN** | Same family as `battleScriptFaintedActionsOrchestration.ts:322`: a premise over the *port's own* orchestration result union. Any opcode inside the resumed rung that returns an `unsupported-branch` barrier — the sanctioned (b) class, of which there are 43 live in `src/engine` — surfaces as a `kind` this arm rejects. A barrier is a designed outcome, so a throw here converts a sanctioned halt into a crash. |
-| `factoryBattleScriptTerminalDecision.ts:722` | `factory terminal decision forced-switch resume produced an unexpected <kind> result` | **UNPROVEN** | Identical shape to `:2624`, on the terminal-decision path. |
+| `factoryBattleScriptFullTurnDecision.ts:2512` | `factory full-turn decision forced-switch resume cannot resolve the acting battler at the current turn position` | **PROVED (by construction)** — *reclassified 2nd pass; Draft E resolved* | The throw is reached only when `resumeAt === "run-end-turn"` **and** (`actingBattler === undefined` **or** `actingBattler >= battleTopology.battlersCount`), where `actingBattler = rulesContext.battlerByTurnOrder[rulesContext.currentTurnActionNumber]` (`:2502-2503`). Neither disjunct has an inhabitant. `battlerByTurnOrder` is a frozen **four**-element tuple, typed `readonly [number, number, number, number]` (`battleScriptRulesContext.ts:883`) and built with four `requireUnsigned(..., 3, ...)` slots defaulting to `0,1,2,3` (`:2815-2819`), so indices 0..3 are always defined; the index can only escape that range if `currentTurnActionNumber >= 4`. Its sole writer on this path is `withTurnOrderPositions` (`factoryBattleScriptFullTurnDecision.ts:1930-1953`), called with the literal `0` at `:3007` (turn start, movers `mover1`/`mover2`) and the literal `1` at `:2771-2775` (between the two actions), writing `battlerByTurnOrder = [mover1, mover2, 2, 3]`; slots 2/3 are inert padding that `currentTurnActionNumber` never indexes here, and `mover1`/`mover2` are `BattleScriptBattlerId` values from this reducer's own two-mover singles shape, i.e. 0 and 1, both `< battlersCount === 2`. The only `resumeAt: "run-end-turn"` producer (`:2730`, inside `continueFullTurnAfterAction`) snapshots `faint.state.rulesContext` **before** `handleBattleActionFinished`'s `currentTurnActionNumber + 1` (`battleActionFinished.ts:140`) can run — that bump happens at `:2669-2677`, after the resume. **Source half:** the C carries the matching invariant. `gBattlerByTurnOrder[MAX_BATTLERS_COUNT]` (`battle_main.c:161`) is filled per battler by `SetActionsAndBattlersTurnOrder` (`:4766`, `:4800`, `:4807`, `:4822`, `:4831`) and `gCurrentTurnActionNumber` is zeroed at `:4926` and dispatched from `gActionsByTurnOrder[gCurrentTurnActionNumber]` at `:4927`, with `RunTurnActionsFunctions` handing off to the end-turn table the moment `gCurrentTurnActionNumber >= gBattlersCount` (`:4945`) — so the source never indexes the array past the live battler count either. Note this is a port-internal derivation corroborated by the C, not a C guard the port copies: the source has no equivalent failure mode at all (`Cmd_openpartyscreen` takes the battler as an opcode operand, `battle_script_commands.c:5108-5124`). |
+| `factoryBattleScriptFullTurnDecision.ts:2624` | `factory full-turn decision forced-switch resume produced an unexpected <kind> result` | **TS-CONTRACT** — *reclassified 2nd pass; the first pass mis-read this arm's guard* | The message interpolates `orchestration.kind`, but the arm is **not** a catch-all: its guard is `if (orchestration.kind === "no-fainted-battlers")` (`:2623`). It rejects exactly one named variant of `BattleScriptFaintedActionsResult`, and that variant is constructed at exactly one place — `battleScriptFaintedActionsOrchestration.ts:354`, inside the **fresh** entry `runBattleScriptFaintedActionsOrchestration`. The resume entry this seam calls, `resumeBattleScriptFaintedActionsAfterPlayerChoice` (`:592-650`), never constructs it: it requires a `player-choice-required` halt (`:598-603`), rewrites `monToSwitchIntoId`, and returns only what `runScriptToOwnEnd` yields — `player-choice` (republished as a second forced-switch boundary at `factoryBattleScriptFullTurnDecision.ts:2588-2621`, ISSUES #119), `non-terminal-barrier` (`:643`), `terminal`, or `resumed`. Barriers are therefore **not** rejected here; they flow to the terminal/finalize tail. |
+| `factoryBattleScriptTerminalDecision.ts:722` | `factory terminal decision forced-switch resume produced an unexpected <kind> result` | **TS-CONTRACT** — *reclassified 2nd pass* | Identical shape to `:2624`: the guard is `if (orchestration.kind === "no-fainted-battlers")` (`:721`), over the same `resumeBattleScriptFaintedActionsAfterPlayerChoice` call (`:682-687`) that cannot produce that variant, and the same ISSUES #119 second-player-choice republication sits above it at `:688-719`. |
 | `factoryBattleScriptDecision.ts:474` | `awaiting-command phase must not already own a selected move` | **TS-CONTRACT** | Phase invariant on the decision-boundary state machine, checked at `rulesAt` when rebuilding a context; the phase tag and the selected-move cell are both port-owned and set together. |
 | `factoryAiDecisionPolicy.ts:988` | `Factory AI turn-start random-number owner must be decision or battle-turn-boundary` | **TS-CONTRACT** | Exhaustiveness `else` over a two-variant discriminated union whose tag is validated by `exactKeys` on the two branches above (`:966`, `:976`). No game state can produce a third tag. |
 | `battleScriptCallbackStack.ts:223` | `activateAbilityScript: end3 underflow immediately after its own matching push -- unreachable, indicates a bug in this prototype` | **TS-CONTRACT** | `pushCursorAndCallback` at `:219` and `popEnd3` at `:221` operate on the same local `stack` value with no intervening mutation. The premise is about this function's four lines, not about battle state. |
 | `battleScriptTryhealhalfhealthOpcode.ts:51` | `Cmd_tryhealhalfhealth: unexpected battler operand <x> -- the committed program's only …` | **TS-CONTRACT** | Guards the operand of the *committed* battle-script program, a module-load constant; the same file asserts the instruction count at construction. Not reachable from a game state. |
 | `battleScriptMagicCoat.ts:471` | `Battle Script Magic Coat join cannot push a full BattleScriptsStack` | **UNPROVEN** | The C `BattleScriptPush` has no overflow error path — `gBattleResources->battleScriptsStack` overrun is silent in the source, so there is no C line that rules the state out and none that makes it an error. Depth reachability under Magic Coat + nested effect scripts was not computed; scenario not constructed in time. |
 
-### 3.5 UNCLASSIFIED — 24 live-kernel premise sites not reached
+| `factoryBattleScriptFullTurnDecision.ts:2564` *(2nd pass)* | `factory full-turn decision move-action resume unexpectedly halted on a second player-choice-required opcode` | **UNPROVEN** | The ISSUES #89 mid-action resume path (`resumeAt` `"run-action1"`/`"run-action2"`): the port rewrites `monToSwitchIntoId`, resumes the halted **move** script with `runScriptToOwnEnd` (`:2559`), and throws if that run halts on a second `player-choice-required` opcode (`:2562-2566`). The sibling *fainted-dance* path already knows this is a real state — `:2588-2621` republishes it as an ordinary second forced-switch boundary, citing ISSUES #119. **The source reaches the same re-entry from a move script.** `Cmd_switchineffects` (`battle_script_commands.c:5219`) applies Spikes to the switched-in battler under the guard at `:5228-5231` (`!(gSideStatuses[side] & SIDE_STATUS_SPIKES_DAMAGED) && (gSideStatuses[side] & SIDE_STATUS_SPIKES) && !IS_BATTLER_OF_TYPE(..., TYPE_FLYING) && ability != ABILITY_LEVITATE`) and then dispatches **by the opcode's own operand** at `:5248-5253`: `BS_TARGET` → `BattleScript_SpikesOnTarget`, `BS_ATTACKER` → `BattleScript_SpikesOnAttacker`, else → `BattleScript_SpikesOnFaintedBattler`. `BattleScript_EffectBatonPass` ends in `switchineffects BS_ATTACKER` (`data/battle_scripts_1.s:1713`) after its own `openpartyscreen BS_ATTACKER` at `:1702`, so a Baton-Passed replacement that faints to Spikes takes `tryfaintmon_spikes BS_ATTACKER, BattleScript_SpikesOnAttackerFainted`, and that script's tail is `goto BattleScript_HandleFaintedMon` (`:3396-3400`) — whose `openpartyscreen BS_FAINTED` halts player-choice-required **inside the same script run**, exactly #119's shape one script over. **Port half:** the port models this branch — `battleScriptSwitchinOpcode.ts:1143-1160` reproduces the same `SIDE_STATUS_SPIKES_DAMAGED` guard and picks `"BattleScript_SpikesOnAttacker"` vs `"BattleScript_SpikesOnFaintedBattler"` at `:1155-1156`. Scenario in §4. |
+| `factoryBattleScriptFullTurnDecision.ts:593` *(2nd pass)* | `staged parties must contain exactly PARTY_SIZE slots` | **TS-CONTRACT** | Runs inside `createInitialRules` on two array literals the same function just built (`:576-591`), before `createBattleScriptRulesContext`. Construction-time shape check, not a mid-turn state. |
+| `factoryBattleScriptFullTurnDecision.ts:760` *(2nd pass)* | `pendingScript.pendingSecondAction must be a valid resolved action` | **TS-CONTRACT** | `pendingSecondActionAt(value: unknown)` re-validates the port's own persisted JSON rules payload field-by-field (`:752-760`: `mover`, `switchPartyIndex`, `moveId`, `moveSlot`, `target`, `forcedStruggle`). Same class as §2b's class C, surviving the file-group filter only because the module also holds live-kernel code. |
+| `factoryBattleScriptFullTurnDecision.ts:797` *(2nd pass)* | `pendingScript must be a valid halted-script bundle` | **TS-CONTRACT** | Same: `pendingScriptAt(value: unknown)` checks `programCounter`/`callStack`/`resumeAt` on the deserialized durable bundle (`:783-797`). |
+| `factoryBattleScriptTerminalDecision.ts:342` *(2nd pass)* | `staged opponent party must contain exactly PARTY_SIZE slots` | **TS-CONTRACT** | Construction-time, mirroring `factoryBattleScriptFullTurnDecision.ts:593`. |
+| `factoryBattleScriptTerminalDecision.ts:427` *(2nd pass)* | `pendingScript must be a valid halted-script bundle` | **TS-CONTRACT** | Same parse-boundary validator as `factoryBattleScriptFullTurnDecision.ts:797`, minus the `resumeAt` arm. |
+| `factoryBattleScriptDecision.ts:168` *(2nd pass)* | `<label> must identify a complete Level-50 Factory set` | **TS-CONTRACT** | `frontierSet(...)` checks a generated-data lookup (`row.index !== setId \|\| row.moves.length !== 4`) at the JSON decision boundary. Generated-data contract, not battle state. |
+| `factoryBattleScriptDecision.ts:195` *(2nd pass)* | `commandSide must be player or trainer` | **TS-CONTRACT** | `commandSideAt(value: unknown)` — two-value domain check on a deserialized tag. |
+| `factoryAiDecisionPolicy.ts:126` *(2nd pass)* | `<label> must <expectation>` | **TS-CONTRACT** | The module's own `fail(label, expectation): never` helper — the message template for every validator in the file. It is the same class-A shape §2b excluded elsewhere; it survived the filter only because the helper is named `fail`, not `assert*`/`require*`. |
+| `factoryAiDecisionPolicy.ts:155` *(2nd pass)* | `<label> must have exactly keys <...>` | **TS-CONTRACT** | `exactKeys(...)` — frozen-shape check on a deserialized record; same class-A shape, same naming reason. |
 
-Counted honestly, not silently cut. All are premise-worded, all survive §2's
-exclusions, none were read against the C this session:
+### 3.5 Opcode-module, legacy-model, and round-controller singletons (second pass)
 
-| File | Sites |
-| --- | --- |
-| `src/engine/battleScriptActionAdmission.ts` | 5 (the imprisoned-move scan cluster, `:2365`–`:2400`) |
-| `src/engine/factoryBattleScriptFullTurnDecision.ts` | 3 |
-| `src/engine/factoryAiDecisionPolicy.ts` | 2 |
-| `src/engine/factoryBattleScriptTerminalDecision.ts` | 2 |
-| `src/engine/factoryBattleScriptDecision.ts` | 2 |
-| `src/engine/battleTurn.ts` | 2 (`:130` PP precondition, `:174`) |
-| `src/engine/battleScriptTrywishOpcode.ts` | 2 |
-| `src/engine/battleScriptSetsubstituteOpcode.ts` | 1 |
-| `src/engine/battleScriptTrysetfutureattackOpcode.ts` | 1 |
-| `src/engine/battleScriptSetdestinybondOpcode.ts` | 1 |
-| `src/engine/battleScriptDisablelastusedattackOpcode.ts` | 1 |
-| `src/engine/battleScriptFriendshipToDamageOpcode.ts` | 1 |
-| `src/engine/battleScriptWeightDamageOpcode.ts` | 1 |
-| `src/engine/core.ts` | 1 (`:1364`, `"generated postwin NO must publish swapResolved"` — round-controller seam) |
+| file:line | message (trimmed) | verdict | evidence |
+| --- | --- | --- | --- |
+| `core.ts:1364` | `generated postwin NO must publish swapResolved` | **TS-CONTRACT** | Inside `tick`, guarded by `pending?.type === "swapOffer"` (`:1354`). The two calls between the guard and the check are straight-line: `chooseFactoryRoundSwap` (`factoryRoundBattleOrchestrator.ts:1156-1165`) delegates to `chooseRoundSwap` (`roundController.ts:530-611`), whose decline path takes no `fail()` branch and ends in `issueCommand(..., { type: "swapResolved", ... })` at `:596-610`; `issueCommand` (`:112-127`) unconditionally sets `presentation = { command: fullCommand, completed: false }`. So `resolved?.type` is `"swapResolved"` or the call has already thrown a `RoundTransitionError` (`:108-110`) — the premise's own state is unreachable. Port-internal orchestration over the port's own reducer; no game state and no C counterpart (the real seam is the Lobby's swap script, `BattleFrontier_BattleFactoryBattleRoom/scripts.inc`). |
+| `battleTurn.ts:130` | `<actor> cannot use <move> with PP <pp>` | **TS-CONTRACT** | `resolveBattleTurn` is the **legacy fixture-driven staged-turn model**, not the kernel: `scenario.actions` and `scenario.initial.<side>.moves` are both authored in the `BattleTurnScenario` literal, and the function's only production consumer is `stagedBattleTurn.ts:173`, which feeds it `state.scenario` — a staged fixture (`:55-62`, `:88`, guarded by its own `if (!state.scenario)` at `:167`). No kernel transition writes that PP map. This is really §2b's class **B** (staging), surviving the file-group filter only because the filename does not match the `turn*PresentationStaging.ts` pattern. |
+| `battleTurn.ts:174` | `turnEndRngGroups[<g>] must be a non-negative integer` | **TS-CONTRACT** | Same function, same fixture-owned input: `turnEndRngGroups` is the scenario's own "source BattleTurnPassed/AI setup draw clusters, kept explicit" field (`battleTurn.ts:41-42`). |
+| `battleScriptTrywishOpcode.ts:122` | `committed Battle Script program must emit two B_SCR_OP_TRYWISH instructions, found <n>` | **TS-CONTRACT** | Runs inside `createBattleScriptTrywishOpcodeHandlers`, i.e. at handler construction against the **committed program constant**, before any battle exists. Shape assertion on a module-load artefact — the same class as the already-classified `battleScriptTryhealhalfhealthOpcode.ts:51`. |
+| `battleScriptTrywishOpcode.ts:126` | `committed B_SCR_OP_TRYWISH instructions must share source opcode 0xd4` | **TS-CONTRACT** | Same construction-time block, one line later. |
+| `battleScriptSetsubstituteOpcode.ts:81` | `committed Battle Script program must emit one B_SCR_OP_SETSUBSTITUTE, found <n>` | **TS-CONTRACT** | Same family, in `createBattleScriptSetsubstituteOpcodeHandlers`. |
+| `battleScriptTrysetfutureattackOpcode.ts:175` | `expected one B_SCR_OP_TRYSETFUTUREATTACK, got <n>` | **TS-CONTRACT** | Same family, in `createBattleScriptTrysetfutureattackOpcodeHandlers`. |
+| `battleScriptSetdestinybondOpcode.ts:50` | `committed Battle Script program must emit one B_SCR_OP_SETDESTINYBOND, found <n>` | **TS-CONTRACT** | Same family, in `createBattleScriptSetdestinybondOpcodeHandlers`. |
+| `battleScriptDisablelastusedattackOpcode.ts:98` | `expected one B_SCR_OP_DISABLELASTUSEDATTACK, got <n>` | **TS-CONTRACT** | Same family, in `createBattleScriptDisablelastusedattackOpcodeHandlers`. |
+| `battleScriptFriendshipToDamageOpcode.ts:38` | `attacker friendship must be a source u8, got <n>` | **TS-CONTRACT** | Domain check at `friendshipToDynamicBasePower`'s entry. The C (`Cmd_happinesstodamage`, `battle_script_commands.c`) reads `gBattleMons[gBattlerAttacker].friendship` — a `u8` field, unguarded. The port's cell is `requireUnsigned(..., 0xff)` at rules-context construction; nothing mid-turn can widen it. |
+| `battleScriptWeightDamageOpcode.ts:32` | `Pokédex weight must be a nonnegative integer hectogram value, got <n>` | **TS-CONTRACT** | Domain check at `lowKickPowerForWeight`'s entry on a generated `gSpeciesInfo` weight. Generated-data contract; the C indexes the same table unguarded. |
 
-Most of the opcode-module singletons look like committed-program shape checks
-(the `battleScriptTrywishOpcode.ts` / `battleScriptSetdestinybondOpcode.ts`
-"must emit N instructions" family), which would land TS-CONTRACT; they are
-counted UNCLASSIFIED because that was not verified. `battleTurn.ts:130` and
-`core.ts:1364` are the two with real game-state flavour and should head the
-next pass.
+### 3.6 UNCLASSIFIED — none remaining in the files the first pass listed
 
-### 3.6 Counts
+The first pass's §3.5 named 14 files holding 24 unclassified sites. Re-running
+the stage-2 filter over those 14 files with reassembled messages, minus §2's
+class-A/B/C exclusions, yields **26** — the per-file tallies for
+`battleScriptActionAdmission.ts` (6, not 5 — see §3.1's census-correction note)
+and `factoryBattleScriptFullTurnDecision.ts` (4, not 3: `:593`, `:760`, `:797`,
+`:2564`) were each one low. All 26 are classified above; the count moved up, not
+down.
 
-| Verdict | Count |
-| --- | --- |
-| **PROVED** (incl. PROVED-by-scope, incl. the bonus `:3547` row; `:3517` moved here by supervisor correction) | **8** |
-| **TS-CONTRACT** | **8** |
-| **UNPROVEN** | **8** |
-| **UNCLASSIFIED** | **24** |
+| File | Sites | Now classified in |
+| --- | --- | --- |
+| `battleScriptActionAdmission.ts` | 6 (`:2365`, `:2368`, `:2379`, `:2385`, `:2388`, `:2400`) | §3.1 |
+| `factoryBattleScriptFullTurnDecision.ts` | 4 (`:593`, `:760`, `:797`, `:2564`) | §3.4 |
+| `factoryAiDecisionPolicy.ts` | 2 (`:126`, `:155`) | §3.4 |
+| `factoryBattleScriptTerminalDecision.ts` | 2 (`:342`, `:427`) | §3.4 |
+| `factoryBattleScriptDecision.ts` | 2 (`:168`, `:195`) | §3.4 |
+| `battleTurn.ts` | 2 (`:130`, `:174`) | §3.5 |
+| `battleScriptTrywishOpcode.ts` | 2 (`:122`, `:126`) | §3.5 |
+| `battleScriptSetsubstituteOpcode.ts` | 1 (`:81`) | §3.5 |
+| `battleScriptTrysetfutureattackOpcode.ts` | 1 (`:175`) | §3.5 |
+| `battleScriptSetdestinybondOpcode.ts` | 1 (`:50`) | §3.5 |
+| `battleScriptDisablelastusedattackOpcode.ts` | 1 (`:98`) | §3.5 |
+| `battleScriptFriendshipToDamageOpcode.ts` | 1 (`:38`) | §3.5 |
+| `battleScriptWeightDamageOpcode.ts` | 1 (`:32`) | §3.5 |
+| `core.ts` | 1 (`:1364`) | §3.5 |
+
+**UNCLASSIFIED = 0** for these files. The honest caveat is in §3.7 and §6: this
+pass re-censused only the 14 files §3.5 named, so files outside that list were
+not re-derived, and the §1 stage-3 figure of 48 is superseded as an
+approximation (the first pass's own arithmetic — 23 in-population rows
+classified plus a 24-row remainder — already summed to 47 against it).
+
+### 3.7 Counts
+
+| Verdict | Count | Δ from the first pass |
+| --- | --- | --- |
+| **PROVED** (incl. PROVED-by-scope / by-construction, incl. the bonus `:3547` row) | **10** | +2 (`battleScriptHitChainOpcode.ts:3475`, `factoryBattleScriptFullTurnDecision.ts:2512`) |
+| **TS-CONTRACT** | **36** | +28 (25 second-pass rows + `:2624`, `:722`, `battleScriptFaintedActionsOrchestration.ts:322` reclassified) |
+| **UNPROVEN** | **4** | −4 (5 reclassified out, `factoryBattleScriptFullTurnDecision.ts:2564` classified in) |
+| **UNCLASSIFIED** | **0** | −24 |
+| Total rows in §3 | **50** | +26 |
+
+The four UNPROVEN rows are `battleScriptSwitchinOpcode.ts:347`, `:387`,
+`factoryBattleScriptFullTurnDecision.ts:2564`, and `battleScriptMagicCoat.ts:471`.
 
 *Supervisor note (2026-08-25):* the `HandleAction_ActionFinished` reset
 `*(gBattleStruct->monToSwitchIntoId + battler) = PARTY_SIZE` after **every**
@@ -178,6 +230,12 @@ two already-recorded omissions.
 ---
 
 ## 4. Ranked UNPROVEN list — most reachable first
+
+*Re-ranked on the second pass. Four rows survive; five of the first pass's
+eight were reclassified (`:3475` and `:2512` to PROVED; `:2624`, `:722` and
+`battleScriptFaintedActionsOrchestration.ts:322` to TS-CONTRACT), the
+withdrawn `:3517` item stays withdrawn below for the record, and one new row
+enters at #2.*
 
 **1. `battleScriptSwitchinOpcode.ts:347` + `:387` — undecided `monToSwitchIntoId` at `Cmd_switchhandleorder` / `Cmd_getswitchedmondata`.**
 *Why reachable:* the premise has no source counterpart at all — the C writes the
@@ -199,27 +257,52 @@ exactly this instrument at 1/600 chains.
 re-derive whether the sentinel state is a real machine state — if it is, the
 opcode should assign from the decision like the C does, not assert.
 
-**2. `factoryBattleScriptFullTurnDecision.ts:2624` + `factoryBattleScriptTerminalDecision.ts:722` + `battleScriptFaintedActionsOrchestration.ts:322` — orchestration result-union premises.**
-*Why reachable:* all three reject a `kind` that the port's own machine
-deliberately produces. `src/engine` has 43 live `unsupported-branch` barriers,
-each a sanctioned halt that the ratchet at
-`tests/executableFrontierRatchet.test.ts:482` expects to grow; the
-fainted-actions rung converts halts to `barrier` results at `:302-319` precisely
-so they are *not* crashes, but the sibling seams in the two Factory decision
-modules do not. Any barrier reached inside a forced-switch resume — a Focus
-Band, a multi-battler `switchhandleorder` case, an unmodeled `moveend` state —
-becomes a crash instead of a halt. Add the controller-busy `blocked` transition
-(`battleScriptMachine.ts:890`) for `:322`, which `openpartyscreen` inside the
-same rung can produce.
-*Cheapest instrument:* soak. `full` policy at high carry maximises barrier
-exposure per chain; `winning-coverage` widens the move pool. A directed
-alternative: stage a `mechanicLab` `overrides.parties` recipe with a Focus Band
-holder at 1 HP so the faint rung reaches the item barrier during a forced switch.
-*Likely fix layer:* **the throw** — these should return the same `barrier`
-result the fainted-actions rung already models at `:302-319`, and the two
-Factory decision modules should propagate it.
+**2. `factoryBattleScriptFullTurnDecision.ts:2564` — a second forced switch inside a mid-action resume (ISSUES #119's shape on the #89 path).** *(new, second pass)*
+*Why reachable:* the sibling path already concedes the state is real. When the
+**fainted dance** resumes and halts a second time on `openpartyscreen`, the same
+function republishes it as an ordinary forced-switch boundary and cites ISSUES
+#119 for why (`:2588-2621`). The **mid-action** resume — ISSUES #89's
+`resumeAt` `"run-action1"`/`"run-action2"`, where the halted script is a move
+script such as `BattleScript_EffectBatonPass` — throws instead (`:2562-2566`).
+The source reaches the same re-entry from a move script:
+`Cmd_switchineffects` (`battle_script_commands.c:5219`) applies Spikes under the
+guard at `:5228-5231` and dispatches by its own operand at `:5248-5253`, so
+Baton Pass's `switchineffects BS_ATTACKER`
+(`data/battle_scripts_1.s:1713`) selects `BattleScript_SpikesOnAttacker`, whose
+`tryfaintmon_spikes BS_ATTACKER, BattleScript_SpikesOnAttackerFainted` tail
+(`:3390-3400`) ends in `goto BattleScript_HandleFaintedMon` — and that script's
+`openpartyscreen BS_FAINTED` halts player-choice-required **inside the same
+`runScriptToOwnEnd`** the port just started at `:2559`. The port models the
+whole branch (`battleScriptSwitchinOpcode.ts:1143-1160`).
+*Concrete Level-50 singles scenario:* the opponent has Spikes down on the
+player's side from an earlier turn (one layer is enough: `spikesDmg = (5 -
+layers) * 2` → `maxHP / 8`). The player's active mon uses Baton Pass; the human
+picks a benched rental already chipped below `maxHP / 8` (residual damage from
+an earlier switch or a previous Spikes hit). On resume the replacement takes
+Spikes damage, faints on entry, and the same script re-enters
+`openpartyscreen`. Not Flying-type and not Levitate, per the `:5230-5231`
+guard.
+*Cheapest instrument:* soak with a directed pool — `winning-coverage
+--vary-rng` biased to rentals carrying SPIKES and BATON_PASS, since both must
+appear in one battle. A directed alternative: a `mechanicLab`
+`overrides.parties` recipe — opponent knows SPIKES only, player's lead knows
+BATON_PASS only, player's bench slot staged low by taking real damage first —
+then read whether the ROM asks for a second switch inside the same script.
+*Likely fix layer:* **the throw** — republish the pending bundle exactly as
+`:2588-2621` already does for the dance path, keeping this pause's own
+`resumeAt` and banked second action.
 
-**3. ~~`battleScriptActionAdmission.ts:3517` — `CANCELER_BIDE` with any absent battler.~~ WITHDRAWN (supervisor verification 2026-08-25 — see the corrected §3.1 row: the cited raise sites are `Cmd_openpartyscreen`'s no-replacement branches, unreachable in a continuing singles battle; the port's invariant holds). Original text retained below for the record.**
+**3. `battleScriptMagicCoat.ts:471` — Magic Coat join onto a full script stack.**
+*Why reachable:* no C error path exists to inherit; `BattleScriptPush` overruns
+silently in the source, so the port's premise is stricter than the game.
+*Scenario:* **not constructed.** Requires computing the port's maximum
+nested-script depth under Magic Coat plus ability/item callbacks against the
+source stack size. Unchanged from the first pass.
+*Cheapest instrument:* static depth analysis of `pushCursorAndCallback` callers;
+a soak is unlikely to reach it by chance.
+*Likely fix layer:* undetermined until depth is known.
+
+**4. ~~`battleScriptActionAdmission.ts:3517` — `CANCELER_BIDE` with any absent battler.~~ WITHDRAWN (supervisor verification 2026-08-25 — see the corrected §3.1 row: the cited raise sites are `Cmd_openpartyscreen`'s no-replacement branches, unreachable in a continuing singles battle; the port's invariant holds).**
 *Why reachable (original, refuted):* the source spends two lines handling this exact state
 (`battle_util.c:2237-2238`) — you do not write a redirect for a state that
 cannot occur. `gAbsentBattlerFlags` is nonzero for the whole window between a
@@ -227,67 +310,36 @@ faint (`battle_script_commands.c:4886`…`:5109`) and the replacement's switch-i
 (`:4689`). Note the port's condition is broader than the source's: it throws on
 `absentBattlerFlags !== 0` (any battler) where the C tests only the Bide
 target's bit.
-*Concrete Level-50 singles scenario:* attacker holds a Bide user (any rental
-with BIDE; Metronome can also roll it — that is how #126 surfaced). Bide's
-2-turn lock elapses while the opponent faints to residual damage in the same
-turn window (Wrap/Leech Seed/poison at `DoBattlerEndTurnEffects`, or Destiny
-Bond), so `CANCELER_BIDE` runs for the release on the following turn's action
-boundary while the opponent slot is still flagged absent.
-*Cheapest instrument:* `mechanicLab` `overrides.parties` against the stock ROM —
-three complete legal Level-50 mons per side; player mon knows BIDE only,
-opponent mons all know WRAP only (a single legal AI choice); let Wrap chip the
-opponent to a residual-damage faint on the turn Bide's counter expires, and read
-the ROM's `gBattlerTarget` at release. Falls back to the `winning --vary-rng`
-soak that found #126.
-*Likely fix layer:* **the throw** — port `battle_util.c:2237-2238`'s
-`GetMoveTarget` redirect verbatim, exactly as #126's fix ported the `:2236`
-target read verbatim.
 
-**4. `battleScriptHitChainOpcode.ts:3475` — `MOVE_EFFECT_NONE` reaches `applySetMoveEffect`'s `default:`.**
-*Why reachable:* the C tolerates byte 0 as a no-op
-(`battle_script_commands.c:2268-2271`; `sStatusFlagsForMoveEffects[0] == 0`
-matches no `case`, control falls through the switch), so there is no source
-guarantee to inherit — only whatever the port's callers happen to filter. Five
-call sites feed this function (`:2979`, `:4024`, `:4051`, `:4073`, `:4097`),
-including the Tri Attack recursion at `:2979` and the secondary-effect roll at
-`:4051`.
-*Scenario:* **not constructed in time.** The open question is whether any port
-caller can pass `rulesContext.moveEffectByte === 0` — the C's
-`Cmd_seteffectwithchance` filters a zero effect before dispatching, and whether
-the port reproduces that filter at all five sites was not checked.
-*Cheapest instrument:* a static read of the five call sites first (minutes, no
-ROM); only if one can pass 0, a `mechanicLab` recipe with a no-secondary-effect
-move routed through the same opcode.
-*Likely fix layer:* **the throw** — the C's fall-through is a silent advance;
-mirroring it costs one `return passThrough()`.
+**Resolved on the second pass, no longer ranked:**
 
-**5. `battleScriptMagicCoat.ts:471` — Magic Coat join onto a full script stack.**
-*Why reachable:* no C error path exists to inherit; `BattleScriptPush` overruns
-silently in the source, so the port's premise is stricter than the game.
-*Scenario:* **not constructed in time.** Requires computing the port's maximum
-nested-script depth under Magic Coat plus ability/item callbacks against the
-source stack size.
-*Cheapest instrument:* static depth analysis of `pushCursorAndCallback` callers;
-a soak is unlikely to reach it by chance.
-*Likely fix layer:* undetermined until depth is known.
-
-**6. `factoryBattleScriptFullTurnDecision.ts:2512` — forced-switch resume cannot resolve the acting battler.**
-*Why reachable:* no source counterpart (`battle_script_commands.c:5108-5124`
-assigns the battler from the opcode operand and cannot fail).
-*Scenario:* **not constructed in time** — it needs a resume whose turn position
-no longer maps to a battler, most plausibly a double-faint or a forced switch
-that lands on the last living slot.
-*Cheapest instrument:* `winning-swap --vary-rng` at carry 28, where double-KO
-turns are densest.
-*Likely fix layer:* likely **the throw**, but the resume's position→battler
-mapping should be re-derived from the C first.
+- `battleScriptHitChainOpcode.ts:3475` (`MOVE_EFFECT_NONE`) → **PROVED**. All
+  five port call sites filter byte 0; the two script-entered ones
+  (`BattleScript_SynchronizeActivates`, `BattleScript_ApplySecondaryEffect`) get
+  their byte from C paths that cannot write 0. Full citation chain in §3.3.
+- `factoryBattleScriptFullTurnDecision.ts:2512` (forced-switch resume battler)
+  → **PROVED (by construction)**. `battlerByTurnOrder` is a frozen four-tuple and
+  `currentTurnActionNumber` is written only as the literals 0 and 1 on this path.
+  Full derivation in §3.4.
+- `factoryBattleScriptFullTurnDecision.ts:2624`,
+  `factoryBattleScriptTerminalDecision.ts:722`,
+  `battleScriptFaintedActionsOrchestration.ts:322` → **TS-CONTRACT**. The first
+  pass's "sanctioned barriers become crashes" reading was wrong: the two Factory
+  seams reject only `orchestration.kind === "no-fainted-battlers"`, a variant the
+  resume entry never constructs, and `:322` is a `never` guard over a closed
+  four-variant step union whose other three variants are all handled above it.
+  See §3.2/§3.4 and the corrected Draft B.
 
 ---
 
-## 5. Ready-to-file ISSUES drafts (top 5 UNPROVEN)
+## 5. Ready-to-file ISSUES drafts
 
 Not appended to `ISSUES.md` — the supervisor files these. House style: symptom /
 confirmed / leads, with exact `file:line` on both the engine and the source.
+After the second pass **two remain fileable: Draft A and Draft F.** Drafts B, D
+and E are withdrawn (their rows were proved or reclassified TS-CONTRACT) and
+Draft C stays withdrawn from the supervisor's correction; all four are kept
+below for the record.
 
 ### Draft A — `battleScriptSwitchinOpcode.ts:347`/`:387` assert a `monToSwitchIntoId` precondition the source does not have
 
@@ -322,37 +374,40 @@ Roar/Whirlwind and Baton Pass carriers in the pool, so forced-switch paths that
 never run `openpartyscreen` (`src/engine/battleScriptForceSwitchOpcode.ts`) are
 exercised against the same cell.
 
-### Draft B — Orchestration seams crash on `unsupported-branch` barriers instead of propagating them
+### Draft B — ~~Orchestration seams crash on `unsupported-branch` barriers instead of propagating them~~ WITHDRAWN 2026-08-25 (second pass: the first pass mis-read the result unions — not filed)
 
-**Symptom.** Three orchestration seams throw on a result `kind` the machine
-deliberately produces:
-`src/engine/factoryBattleScriptFullTurnDecision.ts:2624`
-("forced-switch resume produced an unexpected … result"),
-`src/engine/factoryBattleScriptTerminalDecision.ts:722` (same message), and
-`src/engine/battleScriptFaintedActionsOrchestration.ts:322` ("hit an unexpected
-… step … outside this rung's modeled domain"). A sanctioned (b) barrier reached
-inside a forced-switch resume becomes a CRASH.
+**Correction.** The draft claimed three seams
+(`factoryBattleScriptFullTurnDecision.ts:2624`,
+`factoryBattleScriptTerminalDecision.ts:722`,
+`battleScriptFaintedActionsOrchestration.ts:322`) turn a sanctioned (b) barrier
+into a crash. Re-derived from the code, none of them does.
 
-**Confirmed.** `src/engine` carries 43 live `unsupported-branch` barriers
-(returned as `kind: "unsupported-branch"` result literals, e.g.
-`src/engine/battleScriptSwitchinOpcode.ts:184`,
-`src/engine/battleScriptMoveEndOpcode.ts:1026`), and
-`tests/executableFrontierRatchet.test.ts:482` pins their per-module counts as a
-growing, deliberate class. `src/engine/battleScriptFaintedActionsOrchestration.ts:302-319`
-already models the correct handling — halts, including barriers, are returned as
-`kind: "barrier"` with the author's note at `:317-319` that a barrier "is the
-same kind of real machine boundary as an unregistered opcode — surface it the
-same way, not a crash". The two Factory decision modules do not do this, and
-`:322` additionally rejects the controller-busy `blocked` transition that
-`src/engine/battleScriptMachine.ts:890` produces and that `openpartyscreen`
-inside the same rung can trigger.
+- `:2624` and `:722` are **not** catch-alls over the orchestration result union.
+  Their guards are `if (orchestration.kind === "no-fainted-battlers")`
+  (`src/engine/factoryBattleScriptFullTurnDecision.ts:2623` and
+  `src/engine/factoryBattleScriptTerminalDecision.ts:721`) — one named variant.
+  That variant is constructed at exactly one place,
+  `src/engine/battleScriptFaintedActionsOrchestration.ts:354`, inside the
+  **fresh** entry `runBattleScriptFaintedActionsOrchestration`. Both seams call
+  the **resume** entry `resumeBattleScriptFaintedActionsAfterPlayerChoice`
+  (`:592-650`), which returns only what `runScriptToOwnEnd` yields —
+  `player-choice`, `non-terminal-barrier` (`:643`), `terminal`, `resumed` — and
+  never constructs `no-fainted-battlers`. A `non-terminal-barrier` inside a
+  forced-switch resume propagates to the terminal/finalize tail; it does not
+  reach either throw.
+- `:322`'s guard is `if (stepped.kind !== "advanced")` (`:321`), placed *after*
+  explicit handling of `blocked` (`:286-297`, auto-acknowledged then `continue`),
+  `scheduler-progressed` (`:300-303`) and `halted` (`:304-320`, whose tail at
+  `:317-319` returns `kind: "barrier"` for a registered opcode's own (b) halt).
+  `stepBattleScriptMachine`'s return type is a closed four-variant union
+  (`src/engine/battleScriptMachine.ts:248-251`), so the arm is a `never`
+  exhaustiveness guard. The draft's specific claim that the controller-busy
+  `blocked` transition (`battleScriptMachine.ts:890`) reaches it is wrong —
+  `blocked` is consumed twenty-five lines earlier.
 
-**Leads.** Fix layer is the throw: return/propagate the existing `barrier`
-result instead. No C citation is needed to justify the change — the source has
-no equivalent failure mode, since an unimplemented opcode is not a concept it
-has. Repro: `full` policy soak at high carry (maximum barrier exposure per
-chain), or a staged `mechanicLab` `overrides.parties` recipe with a Focus Band
-holder at 1 HP to reach the item barrier during a forced switch.
+All three rows are reclassified **TS-CONTRACT** in §3. Nothing to file; the
+sanctioned-barrier propagation the draft asked for is already what the code
+does.
 
 ### Draft C — ~~`CANCELER_BIDE` throws on absent battlers where the source redirects (#126 sibling)~~ WITHDRAWN 2026-08-25 (supervisor verification: not filed — see the corrected §3.1 row; `gAbsentBattlerFlags` is only ever raised by `Cmd_openpartyscreen` when no replacement exists)
 
@@ -381,62 +436,121 @@ damage KO the opponent on the turn Bide's 2-turn counter expires, then read the
 ROM's `gBattlerTarget` at release. Fallback: the `winning --vary-rng` full-chain
 soak that found #126.
 
-### Draft D — `applySetMoveEffect` crashes on `MOVE_EFFECT_NONE`, which the source treats as a no-op
+### Draft D — ~~`applySetMoveEffect` crashes on `MOVE_EFFECT_NONE`, which the source treats as a no-op~~ WITHDRAWN 2026-08-25 (second pass: the open question resolved in the port's favour — not filed)
 
-**Symptom.** `src/engine/battleScriptHitChainOpcode.ts:3475` throws
-"applySetMoveEffect: unreachable MOVE_EFFECT_BYTE 0" — the `default:` arm of a
-switch whose cases are only the six primary statuses, entered whenever
-`effectByte <= PRIMARY_STATUS_MOVE_EFFECT` (guard at `:2961`). Byte 0 has no
-case.
+**Resolution.** The draft was right that the C *tolerates* byte 0
+(`SetMoveEffect`'s `switch (sStatusFlagsForMoveEffects[...])`,
+`reference/pokeemerald/src/battle_script_commands.c:2268-2271`, entry 0 matches
+no `case`) and therefore hands the port no guarantee to inherit. Its open
+question — can any of the five port call sites pass 0? — is now answered: **no.**
+`:2979` passes `(randomValue % 3) + MOVE_EFFECT_BURN`; `:4051` is guarded by
+`moveEffectByte !== 0`, mirroring `Cmd_seteffectwithchance`'s own
+`&& gBattleCommunication[MOVE_EFFECT_BYTE]` (`:2924-2926`); `:4024` would need a
+bare `MOVE_EFFECT_CERTAIN` byte, which no `setmoveeffect` in
+`data/battle_scripts_1.s` emits; `:4073` (`Cmd_seteffectprimary`) and `:4097`
+(`Cmd_seteffectsecondary`) are each preceded by a nonzero `setmoveeffect` in
+every committed script, and their two C-entered exceptions —
+`BattleScript_SynchronizeActivates` and `BattleScript_ApplySecondaryEffect` —
+take their byte from `battle_util.c:2971-3000` and `:2801/:2816/:2831/:2846`,
+all of which write nonzero values under guards the port mirrors
+(`battleScriptHitChainOpcode.ts:3493-3504`,
+`battleScriptMoveEndOpcode.ts:312-330`, `:592-607`). Row reclassified **PROVED**
+in §3.3 with the full citation chain.
 
-**Confirmed from the reference.** `SetMoveEffect` switches on
-`sStatusFlagsForMoveEffects[gBattleCommunication[MOVE_EFFECT_BYTE]]`
-(`reference/pokeemerald/src/battle_script_commands.c:2268-2271`). The table
-entry for byte 0 is 0, matching no `case`, so control falls out of the switch
-and the command advances — a silent no-op. The C therefore does not rule this
-state out; it tolerates it, and the port turns a tolerated state into a crash.
+### Draft E — ~~`factoryBattleScriptFullTurnDecision.ts:2512` asserts a battler resolution the source cannot fail~~ WITHDRAWN 2026-08-25 (second pass: premise proved unreachable by construction — not filed)
 
-**Leads.** Reachability unresolved: five call sites feed the function
-(`src/engine/battleScriptHitChainOpcode.ts:2979` Tri Attack recursion, `:4024`,
-`:4051` secondary-effect roll, `:4073`, `:4097`), and whether any can pass 0 —
-the C filters a zero `gBattleScripting.moveEffect` before dispatching from
-`Cmd_seteffectwithchance` — was not checked. Cheapest next step is a static read
-of those five sites (no ROM needed). Fix layer is the throw: mirror the C's
-fall-through with `return passThrough()`.
+**Resolution.** The draft's C observation stands — the source has no equivalent
+failure mode, because `Cmd_openpartyscreen` takes the battler as an opcode
+operand (`reference/pokeemerald/src/battle_script_commands.c:5108-5124`). But
+"no C line rules it out" is not the same as "reachable", and the port's own
+construction rules it out. `actingBattler =
+battlerByTurnOrder[currentTurnActionNumber]` (`:2502-2503`) indexes a frozen
+four-tuple (`src/engine/battleScriptRulesContext.ts:883`, `:2815-2819`), so it is
+never `undefined` unless the index reaches 4; the cell's only writer on this path
+is `withTurnOrderPositions`
+(`src/engine/factoryBattleScriptFullTurnDecision.ts:1930-1953`), called with the
+literal `0` at `:3007` and the literal `1` at `:2771-2775` and writing
+`[mover1, mover2, 2, 3]` — so slots 0/1 hold the two singles movers (0 and 1,
+both `< battlersCount === 2`) and the inert 2/3 padding is never indexed. The
+`handleBattleActionFinished` bump (`src/engine/battleActionFinished.ts:140`)
+happens at `:2669-2677`, *after* the resume, and the sole `resumeAt:
+"run-end-turn"` producer (`:2730`) snapshots the pre-bump context. The C carries
+the matching invariant: `gCurrentTurnActionNumber` is zeroed at
+`battle_main.c:4926` and `RunTurnActionsFunctions` hands off to the end-turn
+table as soon as it reaches `gBattlersCount` (`:4945`). Row reclassified
+**PROVED (by construction)** in §3.4. The double-faint and last-slot shapes the
+draft proposed do not reach it: both leave `currentTurnActionNumber` at 0 or 1.
 
-### Draft E — `factoryBattleScriptFullTurnDecision.ts:2512` asserts a battler resolution the source cannot fail
+### Draft F — `factoryBattleScriptFullTurnDecision.ts:2564` crashes on a second forced switch inside a mid-action resume (ISSUES #119's shape on the #89 path)
 
-**Symptom.** `src/engine/factoryBattleScriptFullTurnDecision.ts:2512` throws
-"factory full-turn decision forced-switch resume cannot resolve the acting
-battler at the current turn position".
+**Symptom.** `src/engine/factoryBattleScriptFullTurnDecision.ts:2562-2566` throws
+"factory full-turn decision move-action resume unexpectedly halted on a second
+player-choice-required opcode" when the ISSUES #89 mid-action resume
+(`resumeAt` `"run-action1"` / `"run-action2"`) re-runs a halted **move** script
+with `runScriptToOwnEnd` (`:2559`) and that run halts a second time on
+`openpartyscreen`'s player branch. This is a CRASH on a state the same function
+already treats as ordinary twenty lines later.
 
-**Confirmed from the reference.** The source's forced-switch/faint path has no
-equivalent failure: `Cmd_openpartyscreen`'s per-battler branch assigns
-`gActiveBattler = battler` from the opcode operand and proceeds
-(`reference/pokeemerald/src/battle_script_commands.c:5108-5124`), and
-`Cmd_getswitchedmondata` resolves the battler from `GetBattlerForBattleScript`
-(`:4610`). There is no C line making an unresolvable acting battler impossible,
-because in the source the battler is an operand, not a lookup.
+**Confirmed from the reference.** The fainted-dance sibling republishes exactly
+this halt as a second forced-switch boundary and cites ISSUES #119 for it
+(`src/engine/factoryBattleScriptFullTurnDecision.ts:2588-2621`). A move script
+reaches the same re-entry in the source: `Cmd_switchineffects`
+(`reference/pokeemerald/src/battle_script_commands.c:5219`) applies Spikes under
+the guard at `:5228-5231` (`!(gSideStatuses[side] & SIDE_STATUS_SPIKES_DAMAGED)
+&& (gSideStatuses[side] & SIDE_STATUS_SPIKES) && !IS_BATTLER_OF_TYPE(...,
+TYPE_FLYING) && ability != ABILITY_LEVITATE`) and then selects the damage script
+**by its own operand** at `:5248-5253`. `BattleScript_EffectBatonPass` ends in
+`switchineffects BS_ATTACKER`
+(`reference/pokeemerald/data/battle_scripts_1.s:1713`), so the replacement takes
+`BattleScript_SpikesOnAttacker` → `tryfaintmon_spikes BS_ATTACKER,
+BattleScript_SpikesOnAttackerFainted` → `goto BattleScript_HandleFaintedMon`
+(`:3390-3400`), whose `openpartyscreen BS_FAINTED` halts player-choice-required
+inside the same script run. The port models the branch:
+`src/engine/battleScriptSwitchinOpcode.ts:1143-1160` reproduces the
+`SIDE_STATUS_SPIKES_DAMAGED` guard and picks `"BattleScript_SpikesOnAttacker"`
+at `:1155`.
 
-**Leads.** Scenario not constructed. Most plausible shapes are a double-faint
-turn or a forced switch resolved onto the last living slot. Repro instrument:
-`winning-swap --vary-rng` at carry 28, where double-KO turns are densest. Before
-changing anything, re-derive the resume's turn-position→battler mapping from
-`battle_main.c`'s `gBattlerByTurnOrder` handling rather than from the port's
-comments.
+**Leads.** Fix layer is the throw: republish the pending bundle the way
+`:2588-2621` already does for the dance path, preserving this pause's own
+`resumeAt` and its banked `pendingSecondAction`. Repro (cheapest first):
+`winning-coverage --vary-rng` biased to a rental pool carrying both SPIKES and
+BATON_PASS — one Spikes layer costs `maxHP / 8`, so the bench slot must already
+be below that when it is passed to. Directed alternative: a `mechanicLab`
+`overrides.parties` recipe with three legal Level-50 mons per side, opponent
+slots knowing SPIKES only, player lead knowing BATON_PASS only, and the player's
+bench slot chipped by real damage first; then check whether the ROM asks for a
+second switch inside the same script. Same family as #119 and #89 — file
+alongside them.
 
 ---
 
 ## 6. Method caveats
 
 - The stage-2 word filter demonstrably under-collects (see the
-  `battleScriptActionAdmission.ts:3547` bonus row). Treat 235 as a lower bound
-  on premise-worded throws and 48 as a lower bound on live-kernel premises.
+  `battleScriptActionAdmission.ts:3547` bonus row, and the `:2375` sibling noted
+  in §3.1 whose message says *requires* rather than *must*). Treat 235 as a lower
+  bound on premise-worded throws and 50 as a lower bound on live-kernel premises.
+- The §1 stage-3 figure of **48** is superseded as an approximation. The second
+  pass re-ran the filter over the 14 files the first pass listed as unclassified
+  and found **26** sites there, not 24; it did not re-censure the other files, so
+  a third pass should re-derive stage 3 from scratch before treating any total as
+  exact. What matters for this document's purpose is that no row was dropped:
+  §3.6 accounts for every site the first pass listed, plus the two it undercounted.
 - Classes A/B/C in §2 were excluded by *file group and enclosing function name*,
-  not by reading each site. That is the correct trade at this cap, but a site
-  inside a class-C module that is actually called mid-turn would be missed. The
-  `battleScriptRulesContext.ts:2519-2531` Bide-cell contract is flagged above as
-  the one worth a second look.
+  not by reading each site. That trade has now visibly leaked in both directions:
+  `factoryAiDecisionPolicy.ts:126`/`:155` and `factoryBattleScriptDecision.ts:168`/`:195`
+  are class-A/C validators that survived the filter on naming alone, and
+  `battleTurn.ts:130`/`:174` are class-B staging that survived on filename alone —
+  all six are TS-CONTRACT in §3. The
+  `battleScriptRulesContext.ts:2519-2531` Bide-cell contract is still the one
+  flagged for a second look in the other direction.
 - Reachability rankings in §4 are argued from source structure and the port's
   call graph, not measured. Only #126 itself has a measured rate (1/600 varied
   full chains).
+- **Two first-pass verdicts were wrong for the same reason** (citing a line
+  without reading its enclosing function): the withdrawn Draft C read
+  `gAbsentBattlerFlags |=` sites outside `Cmd_openpartyscreen`, and the withdrawn
+  Draft B read `orchestration.kind` in the message string instead of the `if` on
+  the line above it. Both were premise-*worded* throws whose guard turned out to
+  be narrower than the message implied. When in doubt, read the guard, not the
+  message.
