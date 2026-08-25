@@ -57,4 +57,18 @@ describe("MOVE_DEFENSE_CURL production framebuffer", () => {
       sceneOnPresentation: { ...stage, age: 68 },
     })).toHaveLength(240 * 160 * 4);
   });
+
+  it("promotes Defense Curl alone and preserves palette-command controls", () => {
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
+      .toHaveLength(206);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_DEFENSE_CURL"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: { id: string }) =>
+      track.id === "defense-curl-source-component")).toMatchObject({ fulfilled: true });
+    for (const move of ["MOVE_PERISH_SONG", "MOVE_IRON_TAIL", "MOVE_POISON_TAIL"]) {
+      expect(coverage.entries.find((entry: { move: string }) => entry.move === move))
+        .toMatchObject({ status: "exact" });
+    }
+  });
 });

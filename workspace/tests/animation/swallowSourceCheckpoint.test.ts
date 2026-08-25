@@ -38,7 +38,7 @@ describe("MOVE_SWALLOW bounded source checkpoint", () => {
   it("records Swallow exact only after the complete portable six-branch gate", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact"))
-      .toHaveLength(205);
+      .toHaveLength(206);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SWALLOW"))
       .toMatchObject({ status: "exact" });
     const track = coverage.componentTracks.find(

@@ -5,7 +5,7 @@ import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { verifyDefenseCurlEvidence } from "../../tools/compare/defenseCurlEvidence.ts";
 
-describe("MOVE_DEFENSE_CURL bilateral evidence checkpoint", () => {
+describe("MOVE_DEFENSE_CURL bilateral evidence receipt", () => {
   it("pins all complete retained rows and the new live-attacker deformation latch", () => {
     expect(verifyDefenseCurlEvidence()).toEqual({
       "player-back": { pointerRows: 100, taskRows: 51, orbRows: 42, oamPredecessor: 99, palettePredecessor: 99, matrixAgeMinusTwo: 98, gameplayRngTransitions: 0, animationRngTransitions: 99 },

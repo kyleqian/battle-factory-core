@@ -86,7 +86,7 @@ function verifyControls(): void {
   const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
   const status = (move: string) => coverage.entries.find((entry: Json) => entry.move === move)?.status;
   invariant(status("MOVE_PERISH_SONG") === "exact" && status("MOVE_IRON_TAIL") === "exact" && status("MOVE_POISON_TAIL") === "exact", "palette control status changed");
-  invariant(status("MOVE_DEFENSE_CURL") === undefined, "Defense Curl must remain unsupported");
+  invariant(status("MOVE_DEFENSE_CURL") === "exact", "Defense Curl exact promotion missing");
   const scripts = readFileSync(resolve(root, "reference/pokeemerald/data/battle_anim_scripts.s"), "utf8");
   const move = (name: string, next: string) => scripts.slice(scripts.indexOf(`${name}:`), scripts.indexOf(`${next}:`));
   const perish = move("Move_PERISH_SONG", "Move_SLEEP_TALK");
@@ -95,7 +95,7 @@ function verifyControls(): void {
 }
 
 export function verifyDefenseCurlEvidence(): Record<Side, Json> {
-  invariant(receipt.status === "unsupported-evidence-checkpoint" && receipt.coverageCredit === false, "unsupported checkpoint overclaim");
+  invariant(receipt.status === "exact" && receipt.coverageCredit === true, "Defense Curl exact receipt missing");
   verifySource(); verifyControls();
   return { "player-back": verifyOrientation("player-back"), "opponent-front": verifyOrientation("opponent-front") };
 }
