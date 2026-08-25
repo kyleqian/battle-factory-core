@@ -14359,7 +14359,7 @@ export function renderSceneOnMovePresentation(
           corner.y,
           displayedMatrix.deformation.xScale,
           displayedMatrix.deformation.yScale,
-          displayedOam.deformation.y2,
+          displayedMatrix.deformation.y2,
           { r: 0, g: 0, b: 0 },
           0,
           true,
@@ -14387,16 +14387,17 @@ export function renderSceneOnMovePresentation(
         orb.y - 16,
       );
     };
-    // The orb's subpriority is attacker-2 in both orientations. It is below
-    // the attacker itself and above the opposing player-side battler.
+    // OAM sort establishes the orb's draw winner over the live attacker in
+    // both orientations (including the otherwise-hidden first cell), while
+    // the other battler keeps its normal field layer.
     if (playerAttacker) {
-      drawOrb();
-      drawAttacker();
       drawTarget();
+      drawAttacker();
+      drawOrb();
     } else {
       drawTarget();
-      drawOrb();
       drawAttacker();
+      drawOrb();
     }
 
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
