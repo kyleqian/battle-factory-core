@@ -36,7 +36,12 @@ import {
   isMonPicInputReady,
 } from "../../src/engine/monPic.ts";
 import { factoryTerminalRecordMenuInputReady } from "../../src/engine/factoryTerminalPresentation.ts";
-import { applyTypeEffectiveness, type TypeEffectivenessEntry } from "../../src/engine/damageCalc.ts";
+import {
+  applyTypeEffectiveness,
+  MAX_STAT_STAGE,
+  MIN_STAT_STAGE,
+  type TypeEffectivenessEntry,
+} from "../../src/engine/damageCalc.ts";
 import type { FactoryRentalRoster } from "../../src/engine/factorySwap.ts";
 import {
   generateFactoryChallengeDraft,
@@ -91,11 +96,90 @@ import battleFrontierMonsData from "../../src/data/gen/battle-frontier-mons.json
 // policy's fight-move bias only)
 // ---------------------------------------------------------------------------
 
-const MOVE_BY_ID = new Map<number, { power: number; type: string }>(
-  (movesData as { moves: { id: number; power: number; type: string }[] }).moves.map(
-    (move) => [move.id, { power: move.power, type: move.type }],
+const MOVE_BY_ID = new Map<number, { power: number; type: string; effect: string }>(
+  (movesData as { moves: { id: number; power: number; type: string; effect: string }[] }).moves.map(
+    (move) => [move.id, { power: move.power, type: move.type, effect: move.effect }],
   ),
 );
+
+/** Raw 0..12 stat-stage reading, same shape/convention as `oracleStrengthStatStages` below. */
+export type WinningFightStatStages = Readonly<{
+  atk: number;
+  def: number;
+  speed: number;
+  spAtk: number;
+  spDef: number;
+  acc: number;
+  evasion: number;
+}>;
+
+/**
+ * Pure-status stat-stage move effects, keyed by the engine's own generated
+ * `effect` field (`src/data/gen/moves.json`) rather than a hand-picked move
+ * list -- any current or future move sharing one of these effect constants
+ * is covered automatically. Only effects whose ENTIRE behaviour is the stat
+ * change are listed (the "_HIT" damaging+chance variants, and dual-purpose
+ * effects like EFFECT_SWAGGER/EFFECT_FLATTER/EFFECT_CURSE that also inflict
+ * confusion or fixed damage, are deliberately excluded -- those still do
+ * something even once the stat stage is maxed, so ISSUES #125's "no effect
+ * until PP runs out" pathology doesn't apply to them).
+ */
+const SELF_STAT_UP_EFFECTS: Readonly<Record<string, readonly (keyof WinningFightStatStages)[]>> = {
+  EFFECT_ATTACK_UP: ["atk"],
+  EFFECT_ATTACK_UP_2: ["atk"],
+  EFFECT_DEFENSE_UP: ["def"],
+  EFFECT_DEFENSE_UP_2: ["def"],
+  EFFECT_DEFENSE_CURL: ["def"],
+  EFFECT_SPEED_UP_2: ["speed"],
+  EFFECT_SPECIAL_ATTACK_UP: ["spAtk"],
+  EFFECT_SPECIAL_ATTACK_UP_2: ["spAtk"],
+  EFFECT_SPECIAL_DEFENSE_UP_2: ["spDef"],
+  EFFECT_EVASION_UP: ["evasion"],
+  EFFECT_MINIMIZE: ["evasion"],
+  EFFECT_BULK_UP: ["atk", "def"],
+  EFFECT_CALM_MIND: ["spAtk", "spDef"],
+  EFFECT_DRAGON_DANCE: ["atk", "speed"],
+  EFFECT_COSMIC_POWER: ["def", "spDef"],
+};
+
+const FOE_STAT_DOWN_EFFECTS: Readonly<Record<string, readonly (keyof WinningFightStatStages)[]>> = {
+  EFFECT_ATTACK_DOWN: ["atk"],
+  EFFECT_ATTACK_DOWN_2: ["atk"],
+  EFFECT_DEFENSE_DOWN: ["def"],
+  EFFECT_DEFENSE_DOWN_2: ["def"],
+  EFFECT_SPEED_DOWN: ["speed"],
+  EFFECT_SPEED_DOWN_2: ["speed"],
+  EFFECT_SPECIAL_DEFENSE_DOWN_2: ["spDef"],
+  EFFECT_ACCURACY_DOWN: ["acc"],
+  EFFECT_ACCURACY_DOWN_2: ["acc"],
+  EFFECT_EVASION_DOWN: ["evasion"],
+  EFFECT_EVASION_DOWN_2: ["evasion"],
+};
+
+/**
+ * True when `effect` is a pure self-boost already at +6 for every stat it
+ * touches, or a pure foe-stat-drop already at -6 for every stat it touches
+ * (ISSUES #125's lever). Returns false -- never skip -- when the relevant
+ * stages weren't supplied, so omitting them reproduces today's behaviour
+ * exactly.
+ */
+function isMaxedStatusEffect(
+  effect: string,
+  attackerStatStages: WinningFightStatStages | undefined,
+  defenderStatStages: WinningFightStatStages | undefined,
+): boolean {
+  const selfStats = SELF_STAT_UP_EFFECTS[effect];
+  if (selfStats) {
+    if (!attackerStatStages) return false;
+    return selfStats.every((stat) => attackerStatStages[stat] >= MAX_STAT_STAGE);
+  }
+  const foeStats = FOE_STAT_DOWN_EFFECTS[effect];
+  if (foeStats) {
+    if (!defenderStatStages) return false;
+    return foeStats.every((stat) => defenderStatStages[stat] <= MIN_STAT_STAGE);
+  }
+  return false;
+}
 
 const TYPE_EFFECTIVENESS =
   typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[];
@@ -120,18 +204,34 @@ function typesForSpecies(species: number): readonly [string, string] {
  * scores 0. Ties keep the lower slot (strict `>` never overwrites an equal
  * score). If every legal slot scores 0, falls back to the highest-power
  * legal slot (ties to the lower slot again), matching the policy's prior
- * behaviour.
+ * behaviour -- except a pure stat-stage status slot that's already maxed
+ * (ISSUES #125) is skipped in favour of any other non-maxed legal slot,
+ * when `attackerStatStages`/`defenderStatStages` are supplied. If every
+ * legal slot is maxed (or the stages are omitted), the original highest-
+ * power/lowest-slot fallback still applies unchanged.
  */
 export function pickWinningFightSlot(input: {
   legalSlots: readonly boolean[];
   moveIds: readonly number[];
   attackerTypes: readonly [string, string];
   defenderTypes: readonly [string, string];
+  attackerStatStages?: WinningFightStatStages;
+  defenderStatStages?: WinningFightStatStages;
 }): number {
-  const { legalSlots, moveIds, attackerTypes, defenderTypes } = input;
+  const {
+    legalSlots,
+    moveIds,
+    attackerTypes,
+    defenderTypes,
+    attackerStatStages,
+    defenderStatStages,
+  } = input;
   let fallbackSlot = 0;
   let fallbackFound = false;
   let fallbackPower = -1;
+  let nonMaxedFallbackSlot = 0;
+  let nonMaxedFallbackFound = false;
+  let nonMaxedFallbackPower = -1;
   let bestSlot = -1;
   let bestScore = 0;
   for (let slot = 0; slot < 4; slot += 1) {
@@ -145,6 +245,18 @@ export function pickWinningFightSlot(input: {
     if (power > fallbackPower) {
       fallbackPower = power;
       fallbackSlot = slot;
+    }
+    const maxed = move !== undefined
+      && isMaxedStatusEffect(move.effect, attackerStatStages, defenderStatStages);
+    if (!maxed) {
+      if (!nonMaxedFallbackFound) {
+        nonMaxedFallbackSlot = slot;
+        nonMaxedFallbackFound = true;
+      }
+      if (power > nonMaxedFallbackPower) {
+        nonMaxedFallbackPower = power;
+        nonMaxedFallbackSlot = slot;
+      }
     }
     if (!move || power <= 0) continue;
     const { multiplierTenths } = applyTypeEffectiveness(
@@ -161,7 +273,8 @@ export function pickWinningFightSlot(input: {
       bestSlot = slot;
     }
   }
-  return bestSlot >= 0 ? bestSlot : fallbackSlot;
+  if (bestSlot >= 0) return bestSlot;
+  return nonMaxedFallbackFound ? nonMaxedFallbackSlot : fallbackSlot;
 }
 
 /**
@@ -1647,11 +1760,23 @@ export class RandomPlayer {
         // pickWinningFightSlot); falls back to highest-power/lowest-slot.
         const bestEffectivenessSlot = (): number => {
           const battlers = orch.battle?.rules.rulesContext.battlers;
+          // Stat stages are wired in for the winning-like policies only
+          // (ISSUES #125's lever); the oracle-strength fallback path
+          // through this same helper stays on the stages-omitted branch,
+          // i.e. today's unchanged fallback rule.
+          const attacker = battlers?.[0];
+          const defender = battlers?.[1];
           return pickWinningFightSlot({
             legalSlots: presentation.legalMoveBySlot.map((slot) => slot !== null),
             moveIds: presentation.field.player.moveIds,
-            attackerTypes: battlers?.[0]?.types ?? DEFAULT_TYPES,
-            defenderTypes: battlers?.[1]?.types ?? DEFAULT_TYPES,
+            attackerTypes: attacker?.types ?? DEFAULT_TYPES,
+            defenderTypes: defender?.types ?? DEFAULT_TYPES,
+            ...(this.winningLike && attacker && defender
+              ? {
+                attackerStatStages: oracleStrengthStatStages(attacker),
+                defenderStatStages: oracleStrengthStatStages(defender),
+              }
+              : {}),
           });
         };
         // "oracle-strength" only: delegate the slot to the engine's own

@@ -630,6 +630,60 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     expect(slot).toBe(2);
   });
 
+  // ISSUES #125: the winning-like fallback (every legal slot scores 0) must
+  // not repeat a pure stat-stage status move whose target stage is already
+  // maxed. Neutral stages (6 = DEFAULT_STAT_STAGE, matching the engine's raw
+  // 0..12 stat-stage convention) everywhere except the one stat under test.
+  const NEUTRAL_STAT_STAGES = {
+    atk: 6, def: 6, speed: 6, spAtk: 6, spDef: 6, acc: 6, evasion: 6,
+  } as const;
+
+  it("(d) [#125] skips a maxed self-boost slot for the next non-maxed status slot", () => {
+    // DOUBLE_TEAM (evasion UP, self) at slot 0 with evasion already at +6
+    // (raw stage 12) is a no-op; GROWL (attack DOWN, foe) at slot 1 with the
+    // foe's attack stage still neutral (6) still has something to do. Both
+    // score 0 (non-damaging), so without the lever slot 0 would win the
+    // power tie (today's fallback, see test (b)); with the lever slot 1 wins.
+    const slot = pickWinningFightSlot({
+      legalSlots: [true, true, false, false],
+      moveIds: [104, 45, 0, 0], // MOVE_DOUBLE_TEAM, MOVE_GROWL
+      attackerTypes: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      defenderTypes: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      attackerStatStages: { ...NEUTRAL_STAT_STAGES, evasion: 12 },
+      defenderStatStages: NEUTRAL_STAT_STAGES,
+    });
+    expect(slot).toBe(1);
+  });
+
+  it("(e) [#125] stages omitted reproduces today's fallback exactly (DOUBLE_TEAM wins the slot-0 tie)", () => {
+    // Same legal slots as (d), stages omitted: identical to pre-#125
+    // behaviour -- the maxed-skip lever never engages without stage input.
+    const slot = pickWinningFightSlot({
+      legalSlots: [true, true, false, false],
+      moveIds: [104, 45, 0, 0], // MOVE_DOUBLE_TEAM, MOVE_GROWL
+      attackerTypes: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      defenderTypes: ["TYPE_NORMAL", "TYPE_NORMAL"],
+    });
+    expect(slot).toBe(0);
+  });
+
+  it("(f) [#125] falls back to today's highest-power/lowest-slot rule when every status slot is maxed", () => {
+    // DOUBLE_TEAM (evasion UP, self, already +6) and SWORDS_DANCE (attack
+    // UP x2, self, already +6) are both maxed no-ops; with no non-maxed
+    // legal slot left, the lever must not invent a new rule -- it falls
+    // back to the original highest-power/lowest-slot pick (both power 0,
+    // ties to slot 0), exactly like test (b)'s fallback shape.
+    const slot = pickWinningFightSlot({
+      legalSlots: [true, true, false, false],
+      moveIds: [104, 14, 0, 0], // MOVE_DOUBLE_TEAM, MOVE_SWORDS_DANCE
+      attackerTypes: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      defenderTypes: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      attackerStatStages: { ...NEUTRAL_STAT_STAGES, evasion: 12, atk: 12 },
+      defenderStatStages: NEUTRAL_STAT_STAGES,
+    });
+    expect(slot).toBe(0);
+  });
+
   it("(c) leaves \"full\" byte-identical for two seeds (winning-only change)", () => {
     const options = {
       maxFrames: 600_000,
