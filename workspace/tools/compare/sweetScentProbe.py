@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -18,9 +19,14 @@ sys.path.insert(0, str(HARNESS / "oracle"))
 from battle_lab import BattleLab, validate_request  # noqa: E402
 from emerald_core import EmeraldOracle  # noqa: E402
 
-MOVE = 230
-MOVE_NAME = "Move_SWEET_SCENT"
-END_NAME = "Move_HYPER_BEAM"
+MOVE = int(os.environ.get("POKEBENCH_ANIM_PROBE_MOVE_ID", "230"))
+MOVE_NAME = os.environ.get("POKEBENCH_ANIM_PROBE_MOVE_NAME", "Move_SWEET_SCENT")
+END_NAME = os.environ.get("POKEBENCH_ANIM_PROBE_END_NAME", "Move_HYPER_BEAM")
+SCHEMA = os.environ.get("POKEBENCH_ANIM_PROBE_SCHEMA", "sweet-scent-dense-evidence/v1")
+EXTRA_SYMBOLS = tuple(filter(None, os.environ.get(
+    "POKEBENCH_ANIM_PROBE_SYMBOLS",
+    "SweetScentEffect,gSweetScentPetalSpriteTemplate,AnimSweetScentPetal,AnimSweetScentPetal_Step,AnimTask_BlendColorCycleByTag,AnimTask_BlendColorCycleByTagLoop",
+).split(",")))
 
 
 def main() -> None:
@@ -148,19 +154,19 @@ def main() -> None:
         if done:
             break
     if not rows or not done or rows[-1]["animScriptActive"]:
-        raise RuntimeError(f"complete Sweet Scent source window not observed: rows={len(rows)}, frame={frame}, ptr={hex(u32(pointer))}")
+        raise RuntimeError(f"complete {MOVE_NAME} source window not observed: rows={len(rows)}, frame={frame}, ptr={hex(u32(pointer))}")
     topology = {
         "tasks": sorted({task["func"]["symbol"] for item in rows for task in item["tasks"] if task["func"]["symbol"]}),
         "templates": sorted({sprite["template"]["symbol"] for item in rows for sprite in item["sprites"] if sprite["template"]["symbol"]}),
         "callbacks": sorted({sprite["callback"]["symbol"] for item in rows for sprite in item["sprites"] if sprite["callback"]["symbol"]}),
     }
     result = {
-        "schema": "sweet-scent-dense-evidence/v1", "profile": "battle-scene-on", "move": MOVE, "setup": setup,
+        "schema": SCHEMA, "profile": "battle-scene-on", "move": MOVE, "setup": setup,
         "sourceWindow": {"startFrame": rows[0]["frame"], "endFrame": rows[-1]["frame"], "frameCount": len(rows),
                          "sourceFrameCount": sum(row["scriptOwner"] == MOVE_NAME for row in rows)},
         "sourcePointerContract": {"start": start, "endExclusive": end, "observedAddresses": sorted({row["scriptPtr"] for row in rows}),
                                   "observedParities": sorted({row["scriptPtrParity"] for row in rows if row["scriptOwner"] == MOVE_NAME})},
-        "sourceSymbols": {name: names[name] for name in (MOVE_NAME, "SweetScentEffect", END_NAME, "gSweetScentPetalSpriteTemplate", "AnimSweetScentPetal", "AnimSweetScentPetal_Step", "AnimTask_BlendColorCycleByTag", "AnimTask_BlendColorCycleByTagLoop") if name in names},
+        "sourceSymbols": {name: names[name] for name in (MOVE_NAME, END_NAME, *EXTRA_SYMBOLS) if name in names},
         "topology": topology, "bgSymbols": list(bg_names), "frames": rows,
     }
     OUTPUT.write_text(json.dumps(result, separators=(",", ":")) + "\n")

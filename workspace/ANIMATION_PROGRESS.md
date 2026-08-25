@@ -1,3 +1,11 @@
+# MOVE_DEFENSE_CURL bilateral dense evidence/latch checkpoint — remains unsupported (2026-08-24 worker)
+
+- **State:** Coverage remains **205/276 Level-50 exact, 0 partial, 0 staged, 71 unsupported**. Defense Curl receives no reducer, seam, compositor, framebuffer, exact, or sibling credit; its new component track is explicitly unfulfilled. Perish Song, Iron Tail, and Poison Tail remain exact controls with no coverage change.
+- **Did:** Added complete legal set-120 PHANPY three-mon Scene-ON stages and retained player-back **214..313 (100 rows)** plus opponent-front **215..314 (100 rows)** through first inactive cleanup, twice fresh byte-identically. Dense archives retain raw RGB, full software/hardware OAM and matrices, faded/unfaded/hardware palettes, tasks/sprites/tags/registers/audio, parties/engine/immutable state, gameplay RNG, and animation RNG; normalized bilateral change maps and a deterministic ECLIPSING_ORB extractor are banked. The pointer interval is **0x082cb37c..<0x082cb3b5 (57 bytes)** with observed even+odd pointers.
+- **Measured:** Both sides have deform-task RAM ages **4..54**, orb RAM ages **56..97**, first inactive age **99**, OAM+affine flags RAM+1 **99/99**, palette RAM+1 **99/99**, and complete matrix RAM+2 **98/98**. Matrix source/display edges are first deform **4/6**, neutral return **53/55**; affine flags clear source/display **55/56**. Gameplay state/RNG are invariant; animation RNG changes **99/99**; SE_M_TRI_ATTACK begins at age 4 and its loop task ends at 41.
+- **Next:** Implement the pure source-age reducer, typed Scene-ON seam, and ordinary compositor using live battlers/source art, then require **200/200 zero-residual production framebuffer rows** twice fresh before Defense Curl alone promotes.
+- **Notes:** Dense JSON hashes are player `0a249e0f…`, opponent `f66fcbd3…`; raw RGB sequences `9aae1f90…` / `bac309f5…`; normalized maps `015b4b5a…` / `bc68baef…`. No animation boundary, unsupported barrier, engine draw case, canonical recording import, or gameplay owner changed.
+
 # MOVE_SWEET_SCENT bilateral exact production presentation (2026-08-24 worker)
 
 - **State:** Level 50 advances **204→205/276 exact**, remains **0 partial**, and **72→71 unsupported**. MOVE_SWEET_SCENT alone promotes and the one-move `pink-petal-sweet-scent` track is fulfilled; Confuse Ray and Stun Spore receive no credit.

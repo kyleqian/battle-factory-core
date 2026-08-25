@@ -6663,6 +6663,19 @@
    "representatives": ["MOVE_SWEET_SCENT"],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_SWEET_SCENT independently passes 175/175 player-back plus 175/175 opponent-front complete pointer-owned retained rows through the actual core.ts -> renderSceneOnMovePresentation framebuffer with zero residual pixels. Its reproducibly extracted PINK_PETAL art, source-relative 24-petal reducer, typed live species/sides/geometry, generic front/back battler art, source animation hFlip/vFlip cells, allocation/OAM painter order, side-relative paths/audio, measured delay-1 defender palette cycle, field chrome, tags, and cleanup use no carrier-pair gate, recording/framebuffer lookup, absolute tick, or gameplay ownership. Confuse Ray and Stun Spore remain independent controls and receive no sibling credit."
+  },
+  {
+   "id": "defense-curl-source-component",
+   "components": [
+    "asset:ANIM_TAG_ECLIPSING_ORB",
+    "sprite:gEclipsingOrbSpriteTemplate",
+    "task:AnimTask_DefenseCurlDeformMon",
+    "visualCommand:set_grayscale_pal",
+    "visualCommand:set_original_pal"
+   ],
+   "representatives": ["MOVE_DEFENSE_CURL"],
+   "fulfilled": false,
+   "goal": "PARTIAL EVIDENCE ONLY: MOVE_DEFENSE_CURL retains complete legal set-120 PHANPY player-back 214..313 and opponent-front 215..314 Scene-ON windows, 100/100 rows each through first inactive cleanup, reproduced twice fresh byte-identically. Source interval 0x082cb37c..<0x082cb3b5, both pointer parities, source-extracted ECLIPSING_ORB art, all task/orb/audio/tag/palette/OAM/matrix/RNG lifecycle edges, normalized change maps, and the move-local live-attacker RAM+1 OAM/flags versus RAM+2 matrix latch are pinned. No reducer, typed seam, compositor, framebuffer equality, coverage credit, or move promotion is claimed. PERISH_SONG, IRON_TAIL, and POISON_TAIL remain exact palette-command controls only and receive no status change."
   }
  ],
  "variantAudits": {

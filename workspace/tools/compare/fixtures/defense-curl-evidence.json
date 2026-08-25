@@ -1,0 +1,72 @@
+{
+  "schema": "defense-curl-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_DEFENSE_CURL",
+  "moveId": 111,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "start": "0x082cb37c",
+    "endExclusive": "0x082cb3b5",
+    "bytes": 57,
+    "scriptTextSha256": "5e55855d9740d81b1230a8ee1ff720ba9dc4f396935e6a446a1b23795be0bad6",
+    "effectDefinitionsSha256": "23d3d7b9f9836f447eaaa9feff4beced57c7fc62e4bc8560a7753b99a63a794a",
+    "taskDefinitionSha256": "4a46bf58853a534d3ef66c8310b4cfc3936bfa11d35f5b36166c71effd663711",
+    "assetSha256": "35a4faeca5de5b476f4513da2c644940f320a4e299ce138828bf587736d4ce7d",
+    "components": [
+      "asset:ANIM_TAG_ECLIPSING_ORB",
+      "sprite:gEclipsingOrbSpriteTemplate",
+      "task:AnimTask_DefenseCurlDeformMon",
+      "visualCommand:set_grayscale_pal",
+      "visualCommand:set_original_pal"
+    ]
+  },
+  "repeatability": {"runsPerOrientation": 2, "allMatched": true},
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-defense-curl-player-phanpy-opponent-onix.json",
+      "scenarioSha256": "891a3bf36bc387f44cce631324b7635e9f730e5d18928ce1d0f64bec724d4499",
+      "denseState": "tools/compare/evidence/defense-curl-player-dense-state.json.gz",
+      "denseStateSha256": "54bb81fba63a7edd9844f046b376a15eb6572eb86b0b87226b8ebf77913cff10",
+      "probeJsonSha256": "0a249e0ff986db699a58759bfcd92b7959e4915cedebfc3bb8e0c5ba179462eb",
+      "rawRgbArchive": "tools/compare/evidence/defense-curl-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "a74a0cfec09d12506a1420a34916e9a9fcbb288ca28f71e14d615e8f89e453a6",
+      "rawRgbSequenceSha256": "9aae1f9082f39518d325e0aec6299caba7cedc2cbd37692f39129ead9f52966e",
+      "changeMap": "tools/compare/evidence/defense-curl-changemap-player.txt",
+      "changeMapSha256": "015b4b5ae1ed3a82c0436de90548ec9c9f5135676fdba3ac0a8431c9a043bf45",
+      "window": {"startFrame": 214, "endFrame": 313, "frameCount": 100}
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-defense-curl-opponent-phanpy-player-onix.json",
+      "scenarioSha256": "2738559fe65d5838f48523fac63a4768d6212b3d8e326bf79c906d5f02a9144a",
+      "denseState": "tools/compare/evidence/defense-curl-opponent-dense-state.json.gz",
+      "denseStateSha256": "61f747f6abc653fc3515e8a2ad4dda76cac34d25486d6275c4977f55f443fbe4",
+      "probeJsonSha256": "f66fcbd36ff3a23c315ba1a6237494a14a3a072bcef236e24df0b6751e1aa988",
+      "rawRgbArchive": "tools/compare/evidence/defense-curl-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "11f071fee77677305d0168351cf0f7b7e3279de5df6cc81bd5858f4e7b322f50",
+      "rawRgbSequenceSha256": "bac309f561304b7c4795210e89d667529c6b28d72320ce92d201bc10389600ad",
+      "changeMap": "tools/compare/evidence/defense-curl-changemap-opponent.txt",
+      "changeMapSha256": "bc68baef861cd4e489b7105b5a549d7af8699442459758b3083a72d6336ccdef",
+      "window": {"startFrame": 215, "endFrame": 314, "frameCount": 100}
+    }
+  },
+  "measured": {
+    "pointerRows": "100/100 + 100/100",
+    "observedPointerParities": [0, 1],
+    "taskRamRows": [4, 54],
+    "orbRamRows": [56, 97],
+    "firstInactiveAge": 99,
+    "oamPredecessor": "99/99 each",
+    "palettePredecessor": "99/99 each",
+    "matrixAgeMinusTwo": "98/98 each",
+    "gameplayRngTransitions": 0,
+    "animationRngTransitions": 99,
+    "audio": "SE_M_TRI_ATTACK at age 4; loop task ends age 41"
+  },
+  "controls": {
+    "setGrayscaleAndOriginal": ["MOVE_PERISH_SONG"],
+    "setOriginal": ["MOVE_IRON_TAIL", "MOVE_POISON_TAIL"],
+    "coverageChanged": false
+  },
+  "boundedRemainder": "No reducer, typed Scene-ON seam, production compositor, or framebuffer equality claim. MOVE_DEFENSE_CURL remains unsupported; named palette controls retain their prior exact status and receive no coverage change."
+}
