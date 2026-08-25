@@ -36,9 +36,9 @@ read in both halves at the cited `file:line`.
 
 | Ability | L50 carriers | Verdict | Sites audited/total | Note |
 | --- | ---: | --- | ---: | --- |
-| ABILITY_MAGNET_PULL | 4 | **DIVERGENT** | 3/6 | `ABILITY_ON_FIELD2` records a *false* ability onto battler 0; port has no such write (F1) |
-| ABILITY_PLUS | 2 | **DIVERGENT** | 2/2 | same `ABILITY_ON_FIELD2` side effect, via `CalculateBaseDamage` (F2) |
-| ABILITY_MINUS | 2 | **DIVERGENT** | 2/2 | mirror of Plus (F2) |
+| ABILITY_MAGNET_PULL | 4 | SOURCE-EXACT | 6/6 | `ABILITY_ON_FIELD2` writes **no** history record (`14 < 12` false); port's extra `absentBattlerFlags` skip is singles-unreachable (F1) |
+| ABILITY_PLUS | 2 | SOURCE-EXACT | 2/2 | same; `damageCalc.ts:370-376` matches the ungated `default:` scan (F2) |
+| ABILITY_MINUS | 2 | SOURCE-EXACT | 2/2 | mirror of Plus (F2) |
 | ABILITY_BATTLE_ARMOR | 8 | SOURCE-EXACT | 2/2 | crit denial short-circuits the `Random()` in both halves |
 | ABILITY_SHELL_ARMOR | 21 | SOURCE-EXACT | 1/1 | same `Cmd_critcalc` predicate |
 | ABILITY_STURDY | 42 | SOURCE-EXACT | 2/2 | Focus Band roll first, then unconditional OHKO block |
@@ -85,113 +85,71 @@ UNREACHABLE-IN-FACTORY-L50 **0**, UNVERIFIED **24**.
 
 ## §Findings (ranked by severity)
 
-### F1 — Magnet Pull: `ABILITY_ON_FIELD2` writes a *false* ability into the AI's battle history; the port writes nothing
+### F1 — Magnet Pull: `ABILITY_ON_FIELD2` — **REFUTED** (was DIVERGENT), now SOURCE-EXACT
 
-**Source.** `ABILITY_ON_FIELD2` does **not** dispatch to
-`ABILITYEFFECT_CHECK_ON_FIELD`. `include/battle_util.h:38` expands it to
-`AbilityBattleEffects(ABILITYEFFECT_FIELD_SPORT, 0, abilityId, 0, 0)`.
-`ABILITYEFFECT_FIELD_SPORT` (`src/battle_util.c:3111-3138`) switches on the
-**global `gLastUsedAbility`**, not on its `ability` argument; since
-`gLastUsedAbility` can never hold `ABILITYEFFECT_MUD_SPORT` (253) or
-`ABILITYEFFECT_WATER_SPORT` (254), the `default:` branch always runs — a
-scan of every battler for `gBattleMons[i].ability == ability` with **no
-`hp != 0` gate**.
-
-The tail at `src/battle_util.c:3194-3195` then runs:
+**Correction (2026-08-25, this session).** The earlier DIVERGENT verdict rested
+on the claim that `AbilityBattleEffects`' tail
+(`reference/pokeemerald/src/battle_util.c:3194-3195`)
 `if (effect && caseID < ABILITYEFFECT_CHECK_OTHER_SIDE && gLastUsedAbility != 0xFF) RecordAbilityBattle(battler, gLastUsedAbility);`
-`ABILITYEFFECT_FIELD_SPORT` is 14 and `ABILITYEFFECT_CHECK_OTHER_SIDE` is 15,
-so the guard passes, and `battler` is the literal `0` the macro hardcodes.
-`RecordAbilityBattle` (`src/battle_ai_script_commands.c:643-646`) has **no
-side guard** — it writes `BATTLE_HISTORY->abilities[0] = abilityId`
-unconditionally.
+fires for `ABILITYEFFECT_FIELD_SPORT`. **It does not.**
+`reference/pokeemerald/include/battle_util.h:24` defines
+`ABILITYEFFECT_CHECK_OTHER_SIDE` as **12** — the previous entry misread it as
+15, which is `ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER` (`:27`).
+`ABILITYEFFECT_FIELD_SPORT` is **14** (`:26`), so `14 < 12` is false and
+**no `RecordAbilityBattle` occurs**. There is no false history write, no
+poisoned `BATTLE_HISTORY->abilities[0]`, and no skipped `Random() & 1`.
 
-`src/battle_ai_switch_items.c:447` calls
-`ABILITY_ON_FIELD2(ABILITY_MAGNET_PULL)` from `ShouldSwitch`. In Factory
-singles battler 0 is the **player's** active mon. So the moment the AI runs
-its escape check with a Magnet Pull anywhere on the field (including the
-AI's own mon), the ROM records `ABILITY_MAGNET_PULL` as the *player's*
-ability.
+**Source (re-derived at HEAD).** `include/battle_util.h:38` expands
+`ABILITY_ON_FIELD2(abilityId)` to
+`AbilityBattleEffects(ABILITYEFFECT_FIELD_SPORT, 0, abilityId, 0, 0)`.
+The `ABILITYEFFECT_FIELD_SPORT` case (`src/battle_util.c:3111-3138`) switches
+on the **global `gLastUsedAbility`**, not on the `ability` argument; since
+`gLastUsedAbility` can never hold `ABILITYEFFECT_MUD_SPORT` (253) or
+`ABILITYEFFECT_WATER_SPORT` (254), the `default:` branch (`:3128-3137`) always
+runs: a scan of `i < gBattlersCount` for `gBattleMons[i].ability == ability`
+with **no `hp != 0` gate** (unlike `ABILITYEFFECT_CHECK_ON_FIELD` at
+`:3141-3148`) and **no `i != battler` exclusion** (unlike
+`ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER` at `:3151-3158`) — so the caller's
+own battler counts.
 
-That record is load-bearing for the AI: `Cmd_get_ability`
-(`src/battle_ai_script_commands.c:1361-1366`) and `Cmd_check_ability`
-(`:1414-1418`) return `BATTLE_HISTORY->abilities[battler]` first, **before**
-the two-ability `Random() & 1` guess at `:1383-1386`. So the poisoned record
-both (a) changes every ability-gated score gate against the player, and
-(b) **removes a `Random()` call** from the AI's scoring — an RNG-stream
-divergence, not just a score one.
+`src/battle_ai_switch_items.c:447` calls `ABILITY_ON_FIELD2(ABILITY_MAGNET_PULL)`
+from `ShouldSwitch`, gated on the escaping mon being `TYPE_STEEL`.
 
-**Port.** `src/engine/factoryAiSwitchPolicy.ts:56,254` implements the
-Magnet Pull escape check itself (`battler.ability === MAGNET_PULL`) but the
-file contains no ability-history write of any kind (`rg` for
-`recordAbility|abilityHistory` in that file: 0 hits). The false record and
-the skipped `Random() & 1` are both absent.
+**Port.** `src/engine/factoryAiSwitchPolicy.ts:250-257` (`"magnet-pull-steel"`
+hard gate) scans `rules.battlers.slice(0, 2)` for
+`battler.ability === MAGNET_PULL` and `&&`s it with
+`active.types.includes("TYPE_STEEL")` — same predicate, same no-`hp` gate, and
+it does **not** exclude the caller's own battler, matching the source
+`default:` branch. No history write on either side. **SOURCE-EXACT.**
 
-**Separating input.** AI-side mon with Magnet Pull (e.g. a Steel/Electric
-carrier) active while the AI evaluates a switch, then any later AI turn
-whose CheckBadMove/CheckViability path reads the player's ability where the
-player's species has two possible abilities.
+**Singles-unreachable nuance (not a divergence).** The port additionally
+requires `(rules.absentBattlerFlags & (1 << index)) === 0` for a battler to
+count; the ROM's `default:` scan has no absent check. In Factory singles
+`gBattlersCount` is 2 and neither active slot is ever flagged absent while
+`ShouldSwitch` runs (absent flags are a doubles/fainted-slot concept), so the
+extra conjunct can never change the result. Flagged here so a future doubles
+port does not inherit it silently.
 
-**Reachability.** 4 Level-50 Magnet Pull carriers in
-`src/data/gen/battle-frontier-mons.json`; `ShouldSwitch` runs on every AI
-turn, so once a Magnet Pull mon is out the record is set for the rest of the
-battle.
+**Reachability.** 4 Level-50 Magnet Pull carriers. No finding — nothing to file.
 
-**Staging recipe (`mechanicLab`, `overrides.parties`, stock ROM).** Give the
-opponent a Magnet Pull carrier in slot 1 plus two fillers; give the player a
-species with **two** legal abilities in slot 1 (so the AI's guess branch is
-the one being skipped) and two fillers. Give all opponent slots one legal
-move so the AI has one legal choice. Run two traces from the same seed —
-one with the Magnet Pull carrier active, one with a non-Magnet-Pull filler
-active — and diff the AI's chosen move / the post-turn RNG. Build both
-parties per `tools/battle-lab/README.md`'s complete-mon shape (species,
-level 50, nature, six IVs, six EVs, moves, PP Ups, item, `abilitySlot`,
-friendship, gender, shiny).
+### F2 — Plus / Minus: same refutation; the damage path matches
 
-**Proposed ISSUES.md entry (supervisor files this):**
-> **Magnet Pull / `ABILITY_ON_FIELD2` — the ROM's false `BATTLE_HISTORY`
-> write is not ported.** `ABILITY_ON_FIELD2` expands to
-> `ABILITYEFFECT_FIELD_SPORT` (`include/battle_util.h:38`), whose tail
-> (`src/battle_util.c:3194-3195`) calls `RecordAbilityBattle(0, abilityId)`
-> — unguarded (`src/battle_ai_script_commands.c:643-646`). In Factory
-> singles battler 0 is the player, so `ShouldSwitch`'s Magnet Pull check
-> (`src/battle_ai_switch_items.c:447`) stamps `ABILITY_MAGNET_PULL` onto the
-> player's history. `Cmd_get_ability` (`:1361`) then short-circuits ahead of
-> the `Random() & 1` two-ability guess (`:1383`), changing both AI scores and
-> the RNG stream. `src/engine/factoryAiSwitchPolicy.ts:254` ports the escape
-> check but not the write. 4 L50 carriers. Needs a stock-ROM receipt before
-> any fix.
+**Source.** `reference/pokeemerald/src/pokemon.c:3207-3210`:
+`if (attacker->ability == ABILITY_PLUS && ABILITY_ON_FIELD2(ABILITY_MINUS)) spAttack = (150 * spAttack) / 100;`
+and the `ABILITY_MINUS` mirror. Same `ABILITYEFFECT_FIELD_SPORT` expansion as
+F1, so — per the corrected constants above — a successful check performs **no**
+`RecordAbilityBattle`. The membership test is the ungated all-battler
+`default:` scan.
 
-### F2 — Plus / Minus: the same missing `ABILITY_ON_FIELD2` side effect, on the damage path
+**Port.** `src/engine/damageCalc.ts:370-376` computes exactly that:
+`activeBattlerAbilities` defaults to `[attacker.ability, defender.ability]` (the
+full singles battler set), the test is `.some((a) => a === ABILITY_MINUS)` with
+no `hp` gate and no self-exclusion, and the boost is
+`Math.trunc((150 * spAttack) / 100)` — C truncating division. It sits between
+Hustle (`:367-369`) and Guts (`:377-379`), matching `pokemon.c`'s order.
+No history write on either side. **SOURCE-EXACT.**
 
-**Source.** `src/pokemon.c:3207-3210`:
-`if (attacker->ability == ABILITY_PLUS && ABILITY_ON_FIELD2(ABILITY_MINUS)) spAttack = (150 * spAttack) / 100;` and the mirror.
-Same expansion as F1, so a successful check also performs
-`RecordAbilityBattle(0, ABILITY_MINUS)` / `(0, ABILITY_PLUS)`.
-
-**Port.** `src/engine/damageCalc.ts:370-376` computes the membership test
-correctly for singles (`activeBattlerAbilities` defaults to
-`[attacker.ability, defender.ability]`, and — matching the source's
-`default:` branch — applies no `hp != 0` gate), but performs no history
-write.
-
-**Separating input.** Plusle (Plus) attacking with a special move while a
-Minun (Minus) is the opposing active mon: the ROM's boost and the port's
-boost agree, but the ROM additionally reports `ABILITY_MINUS` as battler 0's
-ability to the AI for the rest of the battle.
-
-**Reachability.** 2 L50 Plus carriers and 2 L50 Minus carriers; the check
-only runs when the Plus/Minus holder is the *attacker*, so this is the
-lowest-reachability finding of the three. Rank: below F1.
-
-**Staging recipe.** Player slot 1 = Plusle (level 50, complete legal set,
-one special attacking move), opponent slot 1 = Minun, two legal fillers per
-side, all opponent slots given the same single move. Compare the AI's
-subsequent ability-gated scoring against a Minun→non-Minus control.
-
-**Proposed ISSUES.md entry:** as F1, naming `src/pokemon.c:3207-3210` ↔
-`src/engine/damageCalc.ts:370-376`; note it is the same root cause as the
-Magnet Pull entry and should be fixed in one place if a shared
-`ABILITY_ON_FIELD2` helper is introduced.
+**Reachability.** 2 L50 Plus carriers, 2 L50 Minus carriers. No finding.
 
 ### F3 — Trace: the "never on a lead in 114,756 samples" question is **undecided**, not resolved
 
@@ -252,7 +210,7 @@ without re-deriving the inventory.
 | `src/battle_script_commands.c:1156-1157` | `src/engine/damageCalc.ts:659` | Hustle's accuracy ×0.8 *is* gated on `IS_TYPE_PHYSICAL(type)` (the dynamic move type), and sits after Compound Eyes / Sand Veil in both. |
 | `src/pokemon.c:3213-3214` | `src/engine/damageCalc.ts:380-382` | Marvel Scale ×1.5 Defense on **any** `status1`, and it lands *before* the Explosion `defense /= 2` (`src/pokemon.c:3228-3230` ↔ `damageCalc.ts:398-400`), so the two stack. |
 | `src/pokemon.c:3223-3226` | `src/engine/damageCalc.ts:387-396` | Torrent/Swarm: `hp <= maxHP / 3` with C truncating division, power ×1.5, keyed off move type. |
-| `src/pokemon.c:3207-3210` | `src/engine/damageCalc.ts:370-376` | **DIVERGENT** — see F2. |
+| `src/pokemon.c:3207-3210` | `src/engine/damageCalc.ts:370-376` | Plus/Minus spAttack ×1.5 keyed off `ABILITY_ON_FIELD2`'s ungated all-battler scan; matches. See F1/F2 for the refuted history-write claim. |
 
 ### Everything else — UNVERIFIED, with the exact unread sites
 Source inventory below is complete (produced by the §Method sweep); the
