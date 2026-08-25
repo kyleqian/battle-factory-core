@@ -17,6 +17,41 @@ backlog.
 
 # Open
 
+## #127 — `factoryBattleScriptFullTurnDecision.ts:2564` crashes on a second forced switch inside a mid-action resume (Baton Pass into a Spikes KO; #119's shape on the #89 resume path)
+
+**Found 2026-08-25** by the premise-throw audit
+(`docs/premise-throw-audit-2026-08-25.md` §4 item 2 / §5 Draft F; the
+audit's other four drafts were refuted on verification and are withdrawn
+there). **Symptom:** the ISSUES-#89 mid-action resume (`resumeAt`
+`"run-action1"`/`"run-action2"`) re-runs a halted move script with
+`runScriptToOwnEnd` (`src/engine/factoryBattleScriptFullTurnDecision.ts:2559`)
+and `throw`s "move-action resume unexpectedly halted on a second
+player-choice-required opcode" (`:2562-2566`) when that run halts again on
+`openpartyscreen`'s player branch — a CRASH on a state the fainted-dance
+sibling twenty lines later (`:2588-2621`, ISSUES #119) republishes as an
+ordinary second forced-switch boundary.
+**Confirmed from the reference:** `BattleScript_EffectBatonPass` ends in
+`switchineffects BS_ATTACKER` (`data/battle_scripts_1.s:1713`);
+`Cmd_switchineffects` (`battle_script_commands.c:5219`) applies Spikes under
+the `:5228-5231` guard and selects the damage script by its own operand at
+`:5248-5253`, so the passed-to mon takes `BattleScript_SpikesOnAttacker` →
+`tryfaintmon_spikes BS_ATTACKER, BattleScript_SpikesOnAttackerFainted` →
+`goto BattleScript_HandleFaintedMon` (`:3390-3400`) → `openpartyscreen
+BS_FAINTED` — a second player choice inside the same script run. The port
+models the branch (`src/engine/battleScriptSwitchinOpcode.ts:1143-1160`
+picks `"BattleScript_SpikesOnAttacker"` at `:1155`) and then throws at the
+seam. Reach: a player Baton Pass onto a bench mon whose HP is at or below
+the Spikes damage (`maxHP/8` per layer, up to 3 layers) while the opponent
+has laid Spikes — rare under the `winning` policies (Baton Pass has power 0)
+but ordinary under `full`/random play.
+**Fix shape:** the throw — republish the pending bundle the way `:2588-2621`
+does, preserving this pause's own `resumeAt` and its banked
+`pendingSecondAction`; Tier-1-pin two forced-switch boundaries in one run
+and the resumed completion; oracle-stage the recipe (`mechanicLab`
+`overrides.parties`: opponent slots SPIKES-only, player lead BATON_PASS,
+bench mon pre-chipped by real damage) to confirm the ROM asks for the second
+switch inside the same script and to pin message/RNG order.
+
 ## #124 — core-rs `factory_ai_check_viability.rs` still drops SemiInvulnerable5's speed-tie receipt (the Rust mirror of the fixed #122)
 
 **Found 2026-08-24** while fixing #122 on the TS side. `SemiInvulnerable5`
@@ -37,25 +72,32 @@ regenerate `factory_ai_check_viability_m5d3_vectors_gen.rs`, rebuild
 `artifacts/wasm/factory_wasm.wasm`, then un-skip that case. Not fixed here:
 `core-rs/**` was out of scope for the #122 worker step.
 
-## #125 — Soak-instrument debt: the winning-like last-resort fight fallback can spam a maxed stat-stage move into a source-faithful Struggle stalemate (~0.4% of varied carry-14 boot rounds)
+## #125 — Soak-instrument debt (remainder): the winning-like policy keeps choosing FIGHT → Struggle once every slot is at 0 PP instead of switching (~0.4% of varied carry-14 boot rounds end at the frame budget)
 
-**Filed 2026-08-24** from the #123 verdict (closed the same day: NOT an engine
-bug — PP decrements, `legalMoveBySlot` nulls a 0-PP slot, forced Struggle
-engages; pinned by `tests/factoryBattleScriptNoPpStruggleFullTurn.test.ts`).
-The remaining pathology is the soak policy's: when `pickWinningFightSlot`
-finds no damaging legal slot it falls to the lowest legal slot, which can be
-a stat-stage move (DOUBLE TEAM) that it then repeats at +6 with no effect;
-the Factory AI mirrors it, both sides spend all PP, and Struggle-vs-Struggle
-at +6/+6 evasion (33%/29% accuracy) cannot outpace Leftovers/Ingrain
-regeneration — Gen 3 has no turn cap, so the battle never ends (seed 755
-`winning-combined` carry 28; `winning` `--vary-rng --first-round` carry 14
-seeds 116 and 418; 0/500 at carry 0 and carry 28). Costs one full frame
-budget (~25 s) per affected seed and reads `OK … budget` once the
-first-round semantics fix lands. A real player would switch or attack.
-**Lever (filler, supervisor call):** skip a stat-stage slot whose stage is
-already maxed / prefer any damaging resisted move over a pure status move in
-the fallback — note this re-baselines the `winning`/`winning-swap`
-trajectories (counts, not commands), so land it with a full gate rerun.
+**Filed 2026-08-24** from the #123 verdict (NOT an engine bug — PP decrements,
+`legalMoveBySlot` nulls a 0-PP slot, forced Struggle engages; pinned by
+`tests/factoryBattleScriptNoPpStruggleFullTurn.test.ts`). **Lever 1 landed
+2026-08-25** (`a030faf9`, merged `3b96ceb6`): `pickWinningFightSlot` now
+skips a pure stat-stage status slot whose target stage is already maxed
+(+6 self / -6 foe) when every legal slot scores 0, Tier-1-pinned
+(`tests/randomRoundSoak.test.ts` (d)/(e)/(f), mutation-checked); carry-14
+fifth gate 500/500 with `budget n=2` unchanged. **That lever was necessary
+but not sufficient:** seeds 116 and 418 (`winning --vary-rng --first-round
+--start-carry 14`) and seed 755 (`winning-combined --start-carry 28`) still
+end `OK … budget`. Transcript of seed 116 (worker diagnostic, 2026-08-25):
+by battle 2 turn ~1,690 the player's active is at `slot 3 (move 165
+STRUGGLE (all slots unusable))` every turn — all four slots at 0 PP — and the
+policy samples POKEMON/BAG/RUN intents but always returns to FIGHT →
+Struggle; the foe regenerates faster than +6-evasion Struggle connects, and
+Gen 3 has no turn cap. A real player would switch to a bench mon that still
+has PP. **Lever 2 (filler, supervisor call):** in the winning-like action
+phase, when the active's legal fight set is empty (every slot 0 PP →
+Struggle) and a bench mon has ≥ 1 damaging move with PP, switch to it
+(reuse the existing "cannot deal direct damage → switch" C2 path in
+`tools/soak/randomRoundSoakDriver.ts`, widening its trigger from
+"no damaging move by type" to "no usable move by PP"); if the whole party
+is out of PP the stalemate is source-faithful and stays `budget`. Land with
+a full gate rerun (re-baselines trajectories — counts, not commands).
 
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 
@@ -70,7 +112,18 @@ debt:** the engine omits BOTH the `:5117` clear and
 `GetMostSuitableMonToSwitchInto`'s `:646-647` early return
 (`battleAiSwitchInto.ts`), and the two omissions cancel exactly — port
 them together or not at all; porting either alone introduces the
-divergence the probe ruled out.
+divergence the probe ruled out. **Lead added 2026-08-25 (premise-throw
+audit §4 item 1, supervisor-verified):** the source has two MORE lifecycle
+writes on the same cell — `HandleAction_ActionFinished` resets
+`*(gBattleStruct->monToSwitchIntoId + battler) = PARTY_SIZE` after every
+action, and the turn-start loop at `battle_main.c:4008-4009` resets all four
+— while the port's `Cmd_switchhandleorder`/`Cmd_getswitchedmondata`
+(`battleScriptSwitchinOpcode.ts:347`/`:387`) `throw` on the `PARTY_SIZE`
+sentinel that the C simply overwrites from `gBattleBufferB`
+(`battle_script_commands.c:5183-5191`) and reads unguarded (`:4606-4619`).
+Dormant today only because the port's own sequencing never lets the sentinel
+reach those opcodes; if this pair is ever ported, port all four lifecycle
+events and drop the two premise throws in the same step.
 
 ## #109 — `battleAiSwitchInto.ts` omits the `i != monToSwitchIntoId[battlerIn1/2]` exclusion in both passes
 
