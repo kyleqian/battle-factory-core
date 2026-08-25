@@ -457,6 +457,11 @@ import {
   type SmellingSaltState,
 } from "./smellingSalt.ts";
 import {
+  recycleAtAge,
+  type RecycleState,
+  type RecycleProfile,
+} from "./recycle.ts";
+import {
   waterGunEffectAtAge,
   type WaterGunSprite,
 } from "./waterGun.ts";
@@ -1947,6 +1952,19 @@ export interface SceneOnSmellingSaltConfig {
   }>;
 }
 
+/**
+ * MOVE_RECYCLE presentation only.  Its `tryrecycleitem` success gate and
+ * restored held item stay in the battle-script owner; this seam receives only
+ * the already-active animation's live sprite facts.
+ */
+export interface SceneOnRecycleConfig {
+  readonly move: "RECYCLE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<RecycleProfile>;
+}
+
 export interface SceneOnLeerConfig {
   readonly move: "LEER";
   readonly attacker: SceneOnPresentationBattler;
@@ -3305,6 +3323,7 @@ export type SceneOnMoveConfig =
   | SceneOnMetalSoundConfig
   | SceneOnScreechConfig
   | SceneOnSmellingSaltConfig
+  | SceneOnRecycleConfig
   | SceneOnLeerConfig
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
@@ -3577,6 +3596,8 @@ export type SceneOnMeanLookPresentationState =
   SceneOnMovePresentationState<SceneOnMeanLookConfig>;
 export type SceneOnSmellingSaltPresentationState =
   SceneOnMovePresentationState<SceneOnSmellingSaltConfig>;
+export type SceneOnRecyclePresentationState =
+  SceneOnMovePresentationState<SceneOnRecycleConfig>;
 export type SceneOnLovelyKissPresentationState =
   SceneOnMovePresentationState<SceneOnLovelyKissConfig>;
 export type SceneOnOctazookaPresentationState =
@@ -3668,6 +3689,11 @@ export interface SceneOnScreechView {
 }
 
 export interface SceneOnSmellingSaltView extends SmellingSaltState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRecycleView extends RecycleState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -5053,6 +5079,7 @@ export function createSceneOnMovePresentation<
     | SceneOnAbsorbConfig | SceneOnLeechSeedConfig | SceneOnMegaDrainConfig | SceneOnGigaDrainConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
     | SceneOnBarrierConfig
     | SceneOnHazeConfig
+    | SceneOnRecycleConfig
     | SceneOnBiteConfig
     | SceneOnHeadbuttConfig | SceneOnSubmissionConfig | SceneOnDrillPeckConfig
     | SceneOnBodySlamConfig | SceneOnSlamConfig
@@ -6264,6 +6291,25 @@ export function sceneOnSmellingSaltView(
     ...smellingSaltAtAge(
       state.age,
       state.config.animationProfile.targetVerticalSpan,
+    ),
+  };
+}
+
+/** `age=0` is Move_RECYCLE's first retained source-pointer row. */
+export function sceneOnRecycleView(
+  state: SceneOnRecyclePresentationState,
+): SceneOnRecycleView {
+  if (state.config.move !== "RECYCLE") {
+    throw new Error(`expected RECYCLE presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...recycleAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.animationProfile,
     ),
   };
 }
