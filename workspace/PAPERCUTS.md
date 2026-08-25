@@ -1404,3 +1404,19 @@ current app stage should be rejected before replay.
 - **Real fix:** a `--parallel N` seed fan-out in `randomRoundSoak.ts`
   (seeds are independent processes already) so a 0:60 gate is wall-clock
   ~1/8 of today's.
+
+## `rg`/`grep -r` over `reference/pokeemerald/` return ZERO hits silently — it is a symlink
+
+- **Hit:** 2026-08-25 (ts opus audit worker, ~4 min lost; a second worker
+  the same day resolved it only because the brief warned it).
+- **What happens:** `reference/` is a symlink into the vendor checkout.
+  `rg reference/pokeemerald/src` (and `rg` from a cwd above it) does not
+  follow the symlink by default and prints nothing — no error, no hint — so
+  a source inventory looks EMPTY and a worker can conclude "no source sites"
+  for a symbol that has dozens.
+- **Workaround:** `rg ... "$(cd reference/pokeemerald && pwd -P)/src"`, or
+  `rg -L` / `--follow`, or `grep -rn` with the resolved path. Briefs that ask
+  for source sweeps should state this.
+- **Fix shape:** add `--follow` to a repo `.ripgreprc` (and export
+  `RIPGREP_CONFIG_PATH` from the launchers), or note it in AGENTS.md's
+  reference-material section.
