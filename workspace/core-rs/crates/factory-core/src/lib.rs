@@ -89,6 +89,8 @@ pub mod battle_script_tryhealhalfhealth;
 pub mod battle_script_tryhealhalfhealth_vectors_gen;
 pub mod battle_script_trysetdestinybondtohappen;
 pub mod battle_script_trysetdestinybondtohappen_vectors_gen;
+pub mod battle_script_trysetencore;
+pub mod battle_script_trysetencore_vectors_gen;
 pub mod battle_script_trysetgrudge;
 pub mod battle_script_trysetgrudge_vectors_gen;
 pub mod battle_script_trysetmagiccoat;
