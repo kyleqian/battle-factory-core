@@ -5,6 +5,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R53 — [supervised session, 2026-08-25] **M52 CheckViability tie-receipt repair + green checkpoint**
+
+- **State:** `rust-main` = merged master `33592cba`, verified ORWORD worker
+  `bb3c5ab7`, and verified CheckViability repair `de052e3c`. Rust now retains
+  the SemiInvulnerable5 speed-tie draw before its TryEncourage draw, matching
+  canonical TypeScript. The previously skipped forced-WASM parity case is
+  active. The session remains active, committed, and green.
+- **Did:** changed the M5d3 handler to append the encourage receipt to the
+  existing draw ledger instead of replacing that ledger. Added direct native
+  assertions for zero-, one-, and two-draw paths, ordered ordinals, and RNG
+  before/after chaining; regenerated the 181-case M5d3 corpus; and removed the
+  stale skip from the existing M2 parity test. Corpus sha256
+  `bcd17a59b071e204bc80b9880e2ee2580fdb7c802af23800d8f7cc54995ac30b`.
+- **Next:** select one more conflict-free pure Battle Script leaf while the
+  deadline reserve permits. Main owns removal of ISSUE #124 from `ISSUES.md`;
+  this lane must not edit that ledger.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the narrow write,
+  reproduced the generated corpus twice byte-identically, and passed focused
+  native and both-mode parity gates (**9/9** each). Full Rust passes at **1,042
+  listed tests**; fmt, required strict library Clippy, and wasm32 release pass.
+  Artifact is **506,010 bytes**, sha256
+  `e7ec069fddf1d9c0c4a3dfcf0a470a6f1b6d5f3dec47612d6d9224dd6185e028`.
+  Pre-fold npm is green at **1,121 files / 10,457 passed / 223 skipped** and
+  build is green. Scope stayed inside `core-rs/**` plus the existing M2 parity
+  file; no unsupported barrier or Rust deferral was added. PAPERCUT: the
+  nested Rust workspace needs the manifest directory for `cargo fmt`, ~1 min;
+  copying the rebuilt ignored WASM artifact is a separate required step, ~2
+  min.
+
 ## R52 — [supervised session, 2026-08-25] **M51 Battle Script ORWORD leaf + green checkpoint**
 
 - **State:** `rust-main` = merged master `33592cba` plus verified
@@ -76,45 +105,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   inside `core-rs/**`; no unsupported barrier, Rust deferral, or papercut was
   added. `animation-main` has one unfolded commit (`7f2ccb84`); its supervisor
   still owns that fold.
-
-## R50 — [supervised session, 2026-08-15] **M49 Battle Script weather-scaled recovery leaf + final wind-down**
-
-- **State:** `rust-main` = current master `ab862ad1`, including verified
-  `Cmd_recoverbasedonsunlight` worker `34be47ca`. The complete pure
-  `battleScriptRecoverBasedOnSunlightOpcode.ts` registration/state/control
-  projection is native and wasm32-compilable; no ABI or adapter surface was
-  widened. The session ends committed and green.
-- **Did:** ported exact first-match registration, attacker/target role
-  resolution and target rebinding, full-HP failure with late label resolution,
-  and success damage for neutral or suppressed weather, sun, and other
-  weather. Recovery is respectively `-max(1, maxHP / 2)`,
-  `-max(1, 20 * maxHP / 30)`, or `-max(1, maxHP / 4)`. Canonical TypeScript
-  execution supplies **808 handler cases** and **5 registration cases** plus
-  **786,424 applications** covering every maxHP u16 at full, lower, and
-  corrupt-higher HP across all four weather regimes, normalized to **125,607
-  intervals**. Corpus sha256
-  `7c3adaca45202f2f310eabccb3023344ca4acbed2bbaeaeb268bff4f600fdfe4`.
-- **Next:** merge current master at the next Rust session, recheck active work,
-  and select another conflict-free pure Battle Script leaf. M7c opponent
-  generation still waits on canonical TypeScript live generation; main and
-  animation moving targets remain excluded.
-- **Notes:** Sol/high worker, one commit. Supervisor audited decomp dispatch,
-  singleton registration, instruction/role/label ordering, full-HP equality,
-  weather suppression across living battlers, arithmetic, write set, and
-  repetitions; regenerated twice byte-identically (canonical corpus
-  **9,065,263 bytes**; exhaustive evidence **10,557,911 bytes**, sha256
-  `1b0e5b8f555a7b0ec7c60c9b2e97fa8b82a376afffd67d58ecee9e7992333599`;
-  generated file **8,516,856 bytes**, sha256
-  `ee8b01c1381f84684fe5dbbbb2c49a0fde14c3491d38532c8eca33acd52e0746`;
-  generator **19,904 bytes**, sha256
-  `128e9a6823732b5669ad163ea7d25ec1035288e593dd25d40faef288e75fb0b7`). Focused **5/5 +
-  3/3**, cargo **991/991**, fmt, strict Clippy, and wasm32 release pass. The
-  artifact is **492,683 bytes**, sha256
-  `782c1b2aa3addb23d4db916cf9c00d461fe6533875550e2513127c948c0d7728`.
-  Final latest-master npm is green at **1,040 files / 9,915 passed / 223
-  skipped**; build is green at **681 modules**. Final soaks are vanilla
-  **20/20 OK** and full policy **60/60 OK**, both with zero crashes and zero
-  hangs. Scope stayed inside `core-rs/**`; no unsupported barrier or Rust
-  deferral was added. PAPERCUT: `cargo clippy --all-targets` exposed an older
-  test-only `op_ref` lint outside this step; the required strict library
-  Clippy gate remained green, ~2 min.
