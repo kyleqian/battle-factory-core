@@ -239,9 +239,10 @@ together, since they share the tail.
 
 ## §Per-ability site tables
 
-Only the rows this session actually paired are given as `source` ↔ `engine`.
-Everything else is listed as an unread site so the next session can resume
-without re-deriving the inventory.
+Every one of the 38 rows is given as `source` ↔ `engine`, grouped by shared
+hook. Each row's site count in the summary table is the number of source sites
+in the complete inventory (§Method's sweep, minus `src/data/`), and each
+unreachable site is named with its proof inline rather than left implicit.
 
 ### Crit denial — BATTLE_ARMOR (8), SHELL_ARMOR (21) — SOURCE-EXACT
 | Source | Engine | Note |
@@ -526,11 +527,14 @@ Caveat found the hard way: the prose match makes `ABILITY_TRACE`,
 (449 / 203 / 169 / 81 hits — "trace", "plus", "minus" appear throughout the
 presentation modules). Filter those four by the literal token only.
 
-Throw-site census on any audited path:
+Throw-site census on any audited path (note the file is not executable —
+invoke it through `python3`):
 ```sh
-tools/probe/premise-census.py --help
+python3 tools/probe/premise-census.py --only src/engine/<file>.ts --premise
 ```
-No premise-worded throw was reached on any path audited above.
+Results for the 15 engine files audited here are in the header's
+§Throw-site census table: five premise-worded throws sit on audited paths and
+all five hold; none was *reached*.
 
 **Note on the zsh trap:** this workspace's shell is zsh, where
 `for n in $NAMES` does **not** word-split. Use `while read`.
