@@ -120,12 +120,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   switch-in overwrote the slot with the copied ability, not a drop), items
   40/40. `full` is dominated on every dimension — retire it from census
   duty (gates unchanged).
-- **In flight:** side opus — activation counting for abilities/items in the
-  coverage instrument (`worker/side-20260825-125010`); coverage-fight
-  first-round carry 49 0:300 (species-gap closer).
-- **Next:** fold the activation instrument; wind-down gates (all five,
-  `--parallel`) + full suite + build on the final tree;
-  `docs/soak-crash-catalog.md` entry for today's census.
+- **Did (round 11):** **activation coverage** (side opus, 18.8 min, $4.7;
+  `3a445bc3` → merge `4638ff98`): the instrument now also counts ability
+  and held-item ACTIVATIONS (announced message buffers + typed holder
+  receipts; silent-by-construction classes listed in the module header);
+  12 pins. The brief's "activated ⊆ present" clause was empirically FALSE
+  (presence samples battle-start actives only; switched-in mons activate
+  unseen) — the worker pinned the true relations and documented it rather
+  than force it. 30 coverage-fight boot rounds: abilities 41/71 present ·
+  **12/71 activated**, items 22/40 present · **11/40 activated**. Docs
+  (`4871e189`): SUPERVISOR.md gate text gains `--parallel` + the
+  no-pattern-kill rule; `docs/soak-crash-catalog.md` entry for today.
+- **Next:** wind-down — five gates (`--parallel`) + full suite + build on
+  the final tree; coverage-fight carry-49 species-gap sweep result.
 
 ---
 
