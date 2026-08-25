@@ -6,29 +6,43 @@
 `engine-referenced-no-oracle-receipt` **and** that have ≥1 Level-50 Factory
 carrier. Docs-only; no engine/test/tool/data edits.
 
-**Time budget: 45-minute bounded worker step.** The audit did NOT finish.
-11 abilities are fully paired source↔engine, 2 are DIVERGENT, and **25 are
-UNVERIFIED** — for each of those the exact unread site(s) are named in
-§Per-ability site tables. Nothing below is marked SOURCE-EXACT that was not
-read in both halves at the cited `file:line`.
+**Status: COMPLETE.** All 38 rows are paired source↔engine at cited
+`file:line`, both halves opened at HEAD. Two bounded worker sessions:
+the first paired 11 rows and raised 3 findings; this one refuted all 3,
+converted the remaining 24, and raised **one real finding (F1, Trace)** plus
+one latent ordering finding (F2) and one out-of-scope adjacent observation
+(Intimidate). Nothing below is marked SOURCE-EXACT that was not read in both
+halves.
 
-**What was NOT read at all** (named so the next session starts there):
-- `AbilityBattleEffects` `ABILITYEFFECT_ON_DAMAGE` engine pairing was read
-  (`battleScriptMoveEndOpcode.ts:507-608`) but its `ordinaryContactGate`
-  helper was not opened — so the contact family (Rough Skin / Effect Spore /
-  Poison Point / Flame Body / Cute Charm) is UNVERIFIED on the guard set
-  (`MOVE_RESULT_NO_EFFECT`, attacker hp, `confusionSelfDmg`,
-  `TARGET_TURN_DAMAGED`, `FLAG_MAKES_CONTACT`).
-- `ABILITYEFFECT_IMMUNITY` engine pairing (Insomnia / Vital Spirit /
-  Water Veil / Magma Armor end-turn cure) — source read
-  (`battle_util.c:2873-2953`), engine side not opened.
-- `ABILITYEFFECT_TRACE` engine pairing — source read in full
-  (`battle_util.c:3017-3073`), engine side not opened; the coverage
-  baseline §6b "Trace never on a lead in 114,756 samples" question is
-  therefore **undecided**, see §Findings F3.
-- Sticky Hold (4 source sites), Suction Cups, Liquid Ooze, Rock Head,
-  Clear Body / White Smoke, Shield Dust, Inner Focus, Rain Dish / Shed Skin /
-  Truant, Shadow Tag / Arena Trap — engine halves grep-located only.
+**Verdicts: SOURCE-EXACT 38, DIVERGENT 0, UNREACHABLE-IN-FACTORY-L50 0,
+UNVERIFIED 0.** Twelve *sites* inside otherwise-exact rows are
+UNREACHABLE-IN-FACTORY-L50 with proof (Battle Palace, Battle Arena, Battle
+Pike, doubles-only AI labels, the roaming-Pokémon AI, overworld code, and the
+Frontier disobedience short-circuit); each is called out in its row.
+
+**Findings:** F1 Trace's `RecordAbilityBattle(0, copiedAbility)` is unported
+(RNG-stream affecting, 16 L50 carriers) · F2 `nextGetAbilityDraw` inverts the
+history-vs-trapper order (latent, becomes live once F1 is fixed) · adjacent:
+Intimidate shares F1's tail and its record is outright false.
+
+**Throw-site census (`python3 tools/probe/premise-census.py --only <file> --premise`,
+run this session).** Across the 15 engine files audited here, **five**
+premise-worded `throw`s sit on an audited path; each is an assertion this audit
+independently confirms rather than a divergence, but all five are recorded
+because a premise is a claim:
+
+| Site | Premise | On which audited path | Status |
+| --- | --- | --- | --- |
+| `src/engine/factoryBattleStart.ts:242` | `${entryLabel} unexpectedly consumed battle RNG` | `runEntryScript("BattleScript_TraceActivates", …)` (`:509`) and the Intimidate twin (`:466-483`) | Holds — `BattleScript_TraceActivates` is message/wait only, no RNG opcode. |
+| `src/engine/factoryBattleStart.ts:307` and `:320` | battle-start `ON_SWITCHIN` callback/dispatch consumed no RNG | the Trace/Intimidate **arm** pass (`:437-462`) | Holds — arming is two flag writes (`battle_util.c:2575-2581`). |
+| `src/engine/battleScriptHitChainOpcode.ts:3475` | `applySetMoveEffect: unreachable MOVE_EFFECT_BYTE` | the family-A status switch behind Insomnia / Vital Spirit / Water Veil / Magma Armor / Shield Dust | Holds for every byte this audit reached; it is a genuine closed-world claim over `MOVE_EFFECT_*`, not a source guard. |
+| `src/engine/battleScriptMoveEndOpcode.ts:271` | `Cmd_moveend: statStages width invariant violated` | `MOVEEND_ON_DAMAGE_ABILITIES` / `MOVEEND_IMMUNITY_ABILITIES` | Holds — width is fixed by `battleScriptRulesContext`. |
+
+Two further `throw`s on audited paths are ordinary unresolved-label lookups
+against the committed program, not premises
+(`battleScriptIngrainLeechSeedWrapOpcode.ts:445`,
+`battleEndTurnOrchestration.ts:1123-1125`). No premise-worded throw was
+*reached* on any path audited above.
 
 ---
 
@@ -36,9 +50,9 @@ read in both halves at the cited `file:line`.
 
 | Ability | L50 carriers | Verdict | Sites audited/total | Note |
 | --- | ---: | --- | ---: | --- |
-| ABILITY_MAGNET_PULL | 4 | SOURCE-EXACT | 6/6 | `ABILITY_ON_FIELD2` writes **no** history record (`14 < 12` false); port's extra `absentBattlerFlags` skip is singles-unreachable (F1) |
-| ABILITY_PLUS | 2 | SOURCE-EXACT | 2/2 | same; `damageCalc.ts:370-376` matches the ungated `default:` scan (F2) |
-| ABILITY_MINUS | 2 | SOURCE-EXACT | 2/2 | mirror of Plus (F2) |
+| ABILITY_MAGNET_PULL | 4 | SOURCE-EXACT | 6/6 | `ABILITY_ON_FIELD2` writes **no** history record (`14 < 12` false); port's extra `absentBattlerFlags` skip is singles-unreachable (first pass's F1, refuted) |
+| ABILITY_PLUS | 2 | SOURCE-EXACT | 2/2 | same; `damageCalc.ts:370-376` matches the ungated `default:` scan (first pass's F2, refuted) |
+| ABILITY_MINUS | 2 | SOURCE-EXACT | 2/2 | mirror of Plus (refuted) |
 | ABILITY_BATTLE_ARMOR | 8 | SOURCE-EXACT | 2/2 | crit denial short-circuits the `Random()` in both halves |
 | ABILITY_SHELL_ARMOR | 21 | SOURCE-EXACT | 1/1 | same `Cmd_critcalc` predicate |
 | ABILITY_STURDY | 42 | SOURCE-EXACT | 2/2 | Focus Band roll first, then unconditional OHKO block |
@@ -50,127 +64,178 @@ read in both halves at the cited `file:line`.
 | ABILITY_MARVEL_SCALE | 4 | SOURCE-EXACT | 1/1 | def ×1.5 on any `status1`, before the Explosion halving |
 | ABILITY_TORRENT | 21 | SOURCE-EXACT | 1/1 | `hp <= maxHP/3` truncating divide, power ×1.5 |
 | ABILITY_SWARM | 18 | SOURCE-EXACT | 1/1 | same pinch shape, TYPE_BUG |
-| ABILITY_EARLY_BIRD | 29 | UNVERIFIED | 1/2 | AtkCanceler paired; `battle_util2.c:151` twin unpaired |
-| ABILITY_ROUGH_SKIN | 3 | UNVERIFIED | 1/1* | engine guard helper unread |
-| ABILITY_EFFECT_SPORE | 8 | UNVERIFIED | 1/2* | engine guard helper unread; AI table row unpaired |
-| ABILITY_POISON_POINT | 18 | UNVERIFIED | 1/1* | engine guard helper unread |
-| ABILITY_FLAME_BODY | 8 | UNVERIFIED | 1/1* | engine guard helper unread |
-| ABILITY_CUTE_CHARM | 13 | UNVERIFIED | 1/2* | engine guard helper unread; AI table row unpaired |
-| ABILITY_INSOMNIA | 15 | UNVERIFIED | 0/6 | 6 source sites; only `Cmd_jumpifcantmakeasleep`/Yawn read on the source side |
-| ABILITY_VITAL_SPIRIT | 6 | UNVERIFIED | 0/6 | as Insomnia |
-| ABILITY_WATER_VEIL | 9 | UNVERIFIED | 0/6 | inline burn block + `WaterVeilPrevents` + IMMUNITY cure + AI |
-| ABILITY_MAGMA_ARMOR | 5 | UNVERIFIED | 0/2 | freeze block + IMMUNITY cure |
-| ABILITY_TRACE | 16 | UNVERIFIED | 0/2 | source read in full; engine unread — see F3 |
-| ABILITY_CLEAR_BODY | 34 | UNVERIFIED | 0/4 | `Cmd_statbuffchange` + anim count + Intimidate script + AI |
-| ABILITY_WHITE_SMOKE | 2 | UNVERIFIED | 0/4 | mirror of Clear Body |
-| ABILITY_SHIELD_DUST | 6 | UNVERIFIED | 0/3 | `SetMoveEffect` gate + `statbuffchange` gate + AI table |
-| ABILITY_INNER_FOCUS | 24 | UNVERIFIED | 0/1 | flinch denial (`bsc:2548-2560`) |
-| ABILITY_SUCTION_CUPS | 7 | UNVERIFIED | 0/2 | Roar script jump + AI −10 |
-| ABILITY_STICKY_HOLD | 8 | UNVERIFIED | 0/5 | Thief/Covet, Knock Off, Trick, AI |
-| ABILITY_LIQUID_OOZE | 8 | UNVERIFIED | 0/2 | absorb + Leech Seed drain sign flip |
-| ABILITY_ROCK_HEAD | 40 | UNVERIFIED | 0/1 | recoil script incl. the Struggle bypass |
-| ABILITY_RAIN_DISH | 6 | UNVERIFIED | 0/3 | ENDTURN heal + AI Rain Dance bonus + AI table |
-| ABILITY_SHED_SKIN | 14 | UNVERIFIED | 0/2 | ENDTURN cure + AI table |
-| ABILITY_TRUANT | 5 | UNVERIFIED | 0/5 | switch-in hack, AtkCanceler, ENDTURN toggle, 2 doubles AI rows |
-| ABILITY_SHADOW_TAG | 3 | UNVERIFIED | 0/5 | AI escape checks + player switch legality |
-| ABILITY_ARENA_TRAP | 6 | UNVERIFIED | 0/5 | as Shadow Tag |
+| ABILITY_EARLY_BIRD | 29 | SOURCE-EXACT | 2/2 | AtkCanceler `toSub`; the `battle_util2.c:151` twin is Battle Palace only |
+| ABILITY_ROUGH_SKIN | 3 | SOURCE-EXACT | 1/1 | `ordinaryContactGate` opened — full guard set matches |
+| ABILITY_EFFECT_SPORE | 8 | SOURCE-EXACT | 2/2 | `%10` then `do{&3}while(==0)`; AI encourage-table row paired |
+| ABILITY_POISON_POINT | 18 | SOURCE-EXACT | 1/1 | `%3` → AFFECTS_USER\|POISON |
+| ABILITY_FLAME_BODY | 8 | SOURCE-EXACT | 1/1 | contact-before-damaged ordering is pure `&&` |
+| ABILITY_CUTE_CHARM | 13 | SOURCE-EXACT | 2/2 | hp test precedes the `%3` draw in both halves |
+| ABILITY_INSOMNIA | 15 | SOURCE-EXACT | 6/6 | one site (obedience) unreachable: Frontier short-circuit |
+| ABILITY_VITAL_SPIRIT | 6 | SOURCE-EXACT | 6/6 | as Insomnia |
+| ABILITY_WATER_VEIL | 9 | SOURCE-EXACT | 6/6 | announce needs `primary\|\|certain`; silent fall-through ported |
+| ABILITY_MAGMA_ARMOR | 5 | SOURCE-EXACT | 2/2 | freeze block + IMMUNITY cure, both silent |
+| ABILITY_TRACE | 16 | SOURCE-EXACT | 4/4 | **F1**: the tail's `RecordAbilityBattle(0, …)` is unported |
+| ABILITY_CLEAR_BODY | 34 | SOURCE-EXACT | 4/4 | `statLowered` short-circuit unrepresented — singles-unreachable |
+| ABILITY_WHITE_SMOKE | 2 | SOURCE-EXACT | 4/4 | mirror of Clear Body |
+| ABILITY_SHIELD_DUST | 6 | SOURCE-EXACT | 3/3 | the `flags == 0` stat-drop gate IS implemented (`statBuffs.ts:278`) |
+| ABILITY_INNER_FOCUS | 24 | SOURCE-EXACT | 1/1 | `primary` never TRUE on this path — re-derived from every producer |
+| ABILITY_SUCTION_CUPS | 7 | SOURCE-EXACT | 2/2 | jump precedes both `accuracycheck`s — no RNG on the block |
+| ABILITY_STICKY_HOLD | 8 | SOURCE-EXACT | 4/4 | Thief pushes, Knock Off / Trick jump — port matches each |
+| ABILITY_LIQUID_OOZE | 8 | SOURCE-EXACT | 2/2 | Absorb **adds** the sign flip, Leech Seed **skips** it (gloss corrected) |
+| ABILITY_ROCK_HEAD | 40 | SOURCE-EXACT | 5/5 | Struggle bypass precedes the ability jump; ROM has no AI recoil term |
+| ABILITY_RAIN_DISH | 6 | SOURCE-EXACT | 3/3 | ENDTURN heal + `AI_CV_RainDance` Gate R + encourage table |
+| ABILITY_SHED_SKIN | 14 | SOURCE-EXACT | 2/2 | status test precedes the `%3` draw; NIGHTMARE cleared |
+| ABILITY_TRUANT | 5 | SOURCE-EXACT | 5/5 | 2 doubles AI rows unreachable; `truantSwitchInHack` is Arena-only |
+| ABILITY_SHADOW_TAG | 3 | SOURCE-EXACT | 5/5 | AI/player gates differ in source and in the port, identically |
+| ABILITY_ARENA_TRAP | 6 | SOURCE-EXACT | 5/5 | the AI half's missing Flying/Levitate check is faithfully kept |
 
-`*` = the source site was read in full and the engine site was opened, but
-one shared engine guard helper was not — so the row cannot be called exact.
-
-**Counts:** SOURCE-EXACT **11**, DIVERGENT **3**,
-UNREACHABLE-IN-FACTORY-L50 **0**, UNVERIFIED **24**.
+**Counts:** SOURCE-EXACT **38**, DIVERGENT **0**,
+UNREACHABLE-IN-FACTORY-L50 **0** (rows) / **12** (individual sites inside
+exact rows, each proved in its row), UNVERIFIED **0**.
 
 ---
 
 ## §Findings (ranked by severity)
 
-### F1 — Magnet Pull: `ABILITY_ON_FIELD2` — **REFUTED** (was DIVERGENT), now SOURCE-EXACT
+### F1 — Trace: `AbilityBattleEffects`' tail records the copied ability onto **battler 0**; the port makes no such write
 
-**Correction (2026-08-25, this session).** The earlier DIVERGENT verdict rested
-on the claim that `AbilityBattleEffects`' tail
-(`reference/pokeemerald/src/battle_util.c:3194-3195`)
+**Source.** `AbilityBattleEffects` ends every non-Safari dispatch with
+(`reference/pokeemerald/src/battle_util.c:3194-3195`):
 `if (effect && caseID < ABILITYEFFECT_CHECK_OTHER_SIDE && gLastUsedAbility != 0xFF) RecordAbilityBattle(battler, gLastUsedAbility);`
-fires for `ABILITYEFFECT_FIELD_SPORT`. **It does not.**
-`reference/pokeemerald/include/battle_util.h:24` defines
-`ABILITYEFFECT_CHECK_OTHER_SIDE` as **12** — the previous entry misread it as
-15, which is `ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER` (`:27`).
-`ABILITYEFFECT_FIELD_SPORT` is **14** (`:26`), so `14 < 12` is false and
-**no `RecordAbilityBattle` occurs**. There is no false history write, no
-poisoned `BATTLE_HISTORY->abilities[0]`, and no skipped `Random() & 1`.
+`ABILITYEFFECT_CHECK_OTHER_SIDE` is **12** (`include/battle_util.h:24`) and
+`ABILITYEFFECT_TRACE` is **11** (`:23`), so **the guard passes for Trace.**
+The tail sits after the outer `switch (caseID)` inside the
+`if (!(gBattleTypeFlags & BATTLE_TYPE_SAFARI))` block (`:2464`), and the
+`ABILITYEFFECT_TRACE` case (`:3017-3072`) never reassigns `battler` — it works
+through `i`, `target1`, `target2`, `gActiveBattler`. Both Trace dispatch sites
+pass the literal **0** for `battler`
+(`src/battle_main.c:3882`, `src/battle_util.c:1960`). On a successful copy
+`gLastUsedAbility` holds the **copied** ability, so the ROM executes
+`RecordAbilityBattle(0, copiedAbility)` — and `RecordAbilityBattle`
+(`src/battle_ai_script_commands.c:643-646`) is an unguarded
+`BATTLE_HISTORY->abilities[battler] = abilityId`.
 
-**Source (re-derived at HEAD).** `include/battle_util.h:38` expands
-`ABILITY_ON_FIELD2(abilityId)` to
-`AbilityBattleEffects(ABILITYEFFECT_FIELD_SPORT, 0, abilityId, 0, 0)`.
-The `ABILITYEFFECT_FIELD_SPORT` case (`src/battle_util.c:3111-3138`) switches
-on the **global `gLastUsedAbility`**, not on the `ability` argument; since
-`gLastUsedAbility` can never hold `ABILITYEFFECT_MUD_SPORT` (253) or
-`ABILITYEFFECT_WATER_SPORT` (254), the `default:` branch (`:3128-3137`) always
-runs: a scan of `i < gBattlersCount` for `gBattleMons[i].ability == ability`
-with **no `hp != 0` gate** (unlike `ABILITYEFFECT_CHECK_ON_FIELD` at
-`:3141-3148`) and **no `i != battler` exclusion** (unlike
-`ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER` at `:3151-3158`) — so the caller's
-own battler counts.
+In Factory singles battler 0 is the **player**. The value written is not
+false — the tracer copies the opposing battler's ability, so when the AI's mon
+traces, `copiedAbility` *is* the player's ability — but that is exactly the
+point: **the ROM hands the AI the player's real ability for free**, and
+`Cmd_get_ability` (`src/battle_ai_script_commands.c:1361-1366`) /
+`Cmd_check_ability` (`:1414-1418`) read `BATTLE_HISTORY->abilities[battler]`
+**before** the two-ability `Random() & 1` guess (`:1383-1386`). So the record
+both changes ability-gated AI scores and **removes a `Random()` draw** from the
+AI's scoring — an RNG-stream divergence, not only a score one.
 
-`src/battle_ai_switch_items.c:447` calls `ABILITY_ON_FIELD2(ABILITY_MAGNET_PULL)`
-from `ShouldSwitch`, gated on the escaping mon being `TYPE_STEEL`.
+**Port.** Neither Trace resolution site writes the record:
+- `src/engine/factoryBattleStart.ts:484-513` (battle start) sets
+  `scriptingBattler`, `lastUsedAbility` and `battleTextBuff1MonNick` and makes
+  **no** `aiObservedAbilityIds` write at all.
+- `src/engine/battleScriptFaintedActionsOrchestration.ts:437-471` (post-faint)
+  *does* write, but to `aiObservedAbilityIds[id]` where `id` is the **tracer**
+  (`:454-459`), not the hardcoded battler 0.
 
-**Port.** `src/engine/factoryAiSwitchPolicy.ts:250-257` (`"magnet-pull-steel"`
-hard gate) scans `rules.battlers.slice(0, 2)` for
-`battler.ability === MAGNET_PULL` and `&&`s it with
-`active.types.includes("TYPE_STEEL")` — same predicate, same no-`hp` gate, and
-it does **not** exclude the caller's own battler, matching the source
-`default:` branch. No history write on either side. **SOURCE-EXACT.**
+That field is the port's `BATTLE_HISTORY->abilities`: it flows
+`aiObservedAbilityIds[0]` → `syncFactoryAiBattleHistory`
+(`src/engine/factoryAiLiveDriver.ts:230-238`) → `knownAbilities[0]` →
+`target.knownAbility` (`:395`) → the short-circuit at
+`src/engine/factoryAiCheckBadMove.ts:723-725` and
+`src/engine/factoryAiCheckViability.ts:8419-8421` that skips the `Random() & 1`.
 
-**Singles-unreachable nuance (not a divergence).** The port additionally
-requires `(rules.absentBattlerFlags & (1 << index)) === 0` for a battler to
-count; the ROM's `default:` scan has no absent check. In Factory singles
-`gBattlersCount` is 2 and neither active slot is ever flagged absent while
-`ShouldSwitch` runs (absent flags are a doubles/fainted-slot concept), so the
-extra conjunct can never change the result. Flagged here so a future doubles
-port does not inherit it silently.
+**Separating input.** Opponent lead = a Trace carrier (Gardevoir / Porygon /
+Porygon2); player lead = a **two-ability** species. The AI's Trace copies the
+player's ability at battle start. ROM: `BATTLE_HISTORY->abilities[0]` is set,
+so every later `get_ability AI_TARGET` / `check_ability AI_TARGET` returns it
+with **no draw**. Port: `knownAbilities[0]` is still `null`, so the same gate
+draws `Random() & 1` and may guess the wrong ability. First observable
+difference: the AI's RNG call count on the first turn that runs any
+ability-gated CBM/CV handler, and any score that depends on the guess.
 
-**Reachability.** 4 Level-50 Magnet Pull carriers. No finding — nothing to file.
+**Reachability.** 16 Level-50 Trace carriers
+(`docs/soak-coverage-baseline-2026-08-25.md:211`: Porygon ×2 sets, Porygon2 ×4,
+Gardevoir ×8), drafted on both sides; the AI-side case needs only the Trace mon
+to be active when the copy resolves, and the record then persists until that
+battler switches (`ClearBattlerAbilityHistory`, `src/battle_main.c:3260,3354`,
+mirrored by the port's party-index clear at `factoryAiLiveDriver.ts:198-208`).
 
-### F2 — Plus / Minus: same refutation; the damage path matches
+**Staging recipe (`mechanicLab`, `overrides.parties`, stock ROM).** Opponent
+slot 1 = GARDEVOIR (level 50, complete legal set per
+`tools/battle-lab/README.md`'s complete-mon shape: species, level, nature, six
+IVs, six EVs, four moves, PP Ups, item, `abilitySlot` = the Trace slot,
+friendship, gender, shiny) plus two fillers; player slot 1 = a species with
+**two** legal abilities (so the guess branch is the one being skipped) plus two
+fillers. Give every opponent slot a single legal move so the AI has one legal
+choice, and give the player's lead a move whose AI handler reads
+`get_ability AI_TARGET` (e.g. any of the stat-down family, so
+`CheckIfAbilityBlocksStatChange` runs). Trace two runs from the same seed —
+one with the Gardevoir active, one with a non-Trace filler active — and diff
+the AI's RNG call count and chosen move.
 
-**Source.** `reference/pokeemerald/src/pokemon.c:3207-3210`:
-`if (attacker->ability == ABILITY_PLUS && ABILITY_ON_FIELD2(ABILITY_MINUS)) spAttack = (150 * spAttack) / 100;`
-and the `ABILITY_MINUS` mirror. Same `ABILITYEFFECT_FIELD_SPORT` expansion as
-F1, so — per the corrected constants above — a successful check performs **no**
-`RecordAbilityBattle`. The membership test is the ungated all-battler
-`default:` scan.
+**Proposed ISSUES.md entry (supervisor files this):**
+> **Trace — the ROM's `RecordAbilityBattle(0, copiedAbility)` is not ported.**
+> `AbilityBattleEffects`' tail (`src/battle_util.c:3194-3195`) fires for
+> `ABILITYEFFECT_TRACE` (11 < 12, `include/battle_util.h:23-24`) with the
+> literal `battler = 0` both dispatch sites pass
+> (`src/battle_main.c:3882`, `src/battle_util.c:1960`), stamping the copied
+> ability into `BATTLE_HISTORY->abilities[0]` — the player's slot in Factory
+> singles. `Cmd_get_ability` (`:1361`) then short-circuits ahead of the
+> `Random() & 1` two-ability guess (`:1383`), changing AI scores **and** the
+> RNG stream. The port writes nothing at battle start
+> (`src/engine/factoryBattleStart.ts:484-513`) and writes the tracer's own
+> index post-faint (`src/engine/battleScriptFaintedActionsOrchestration.ts:454-459`).
+> 16 L50 carriers. Needs a stock-ROM receipt before any fix.
 
-**Port.** `src/engine/damageCalc.ts:370-376` computes exactly that:
-`activeBattlerAbilities` defaults to `[attacker.ability, defender.ability]` (the
-full singles battler set), the test is `.some((a) => a === ABILITY_MINUS)` with
-no `hp` gate and no self-exclusion, and the boost is
-`Math.trunc((150 * spAttack) / 100)` — C truncating division. It sits between
-Hustle (`:367-369`) and Guts (`:377-379`), matching `pokemon.c`'s order.
-No history write on either side. **SOURCE-EXACT.**
+### F2 — `nextGetAbilityDraw` tests the trapper abilities **before** the history cache; source tests the cache first
 
-**Reachability.** 2 L50 Plus carriers, 2 L50 Minus carriers. No finding.
+**Source.** `Cmd_get_ability` (`src/battle_ai_script_commands.c:1361-1376`) and
+`Cmd_check_ability` (`:1414-1425`) both read
+`BATTLE_HISTORY->abilities[battler]` **first** and only then fall through to
+the Shadow Tag / Magnet Pull / Arena Trap direct-field branch.
 
-### F3 — Trace: the "never on a lead in 114,756 samples" question is **undecided**, not resolved
+**Port.** `src/engine/factoryAiCheckViability.ts:8419-8427` has the source
+order. `src/engine/factoryAiCheckBadMove.ts:720-725` (`nextGetAbilityDraw`) and
+`:772-776` have it **inverted** — `TRAPPER_ABILITIES.has(target.realAbility)`
+is checked before `target.knownAbility`.
 
-Source read in full: `ABILITYEFFECT_ON_SWITCHIN` only *arms* Trace
-(`src/battle_util.c:2575-2581`: sets `STATUS3_TRACE` and
-`gSpecialStatuses[battler].traced`, copies nothing); the copy happens later
-under `ABILITYEFFECT_TRACE` (`:3017-3073`). The singles branch is `:3051-3060`
-— `gActiveBattler = target1` unconditionally, then copy only if
-`gBattleMons[target1].ability && gBattleMons[target1].hp`, i.e. Trace copies
-whatever the single opposing battler has, refuses `ABILITY_NONE` and a
-fainted target, and on success clears `STATUS3_TRACE` and announces via
-`BattleScript_TraceActivates` with the traced-**from** mon's nickname
-buffered (`:3063-3068`).
+**Currently unobservable, and why.** A nonzero history cell always equals the
+current occupant's real ability: `ClearBattlerAbilityHistory` runs on every
+switch-in and faint (`src/battle_main.c:3260,3354`), and every ordinary
+`RecordAbilityBattle` call site passes the battler whose ability it is. The two
+orders therefore return the same value today.
 
-The engine half was not opened, so this audit **cannot** say whether the
-coverage baseline's zero-Trace-lead observation is instrument sampling or a
-resolution bug. Do not close that question on this document. Next session:
-pair `src/battle_util.c:2575-2581` and `:3017-3073` against the port's
-switch-in path and re-run the lead census.
+**Why it still matters.** The `AbilityBattleEffects` tail is the one call site
+that writes a *different* battler's ability into slot 0 (F1, and the adjacent
+Intimidate observation below). The moment F1 is fixed, a player-side trapper
+carrier facing an AI-side Intimidate or Trace mon separates the two orders.
+Fix F2 in the same change as F1, or the fix will be half-right.
+**No separate ISSUES entry needed if F1's entry names this file:line.**
 
----
+### Adjacent observation (out of this audit's 24 rows) — Intimidate takes the same tail, and its record *is* false
+
+`ABILITYEFFECT_INTIMIDATE1` is **9** (`include/battle_util.h:21`), also `< 12`,
+and its case (`src/battle_util.c:3003-3016`) sets
+`gLastUsedAbility = ABILITY_INTIMIDATE` without touching `battler`. Its
+dispatch sites pass the literal 0 as well (`src/battle_main.c:3880`,
+`src/battle_util.c:1959`). So when the **AI's** mon has Intimidate the ROM
+records `ABILITY_INTIMIDATE` as **battler 0's** — the player's — ability, which
+unlike the Trace case is simply **wrong**, and it likewise removes the
+`Random() & 1` guess. The port writes the holder's own index
+(`src/engine/battleScriptFaintedActionsOrchestration.ts:424-433`,
+`src/engine/factoryBattleStart.ts:466-483` writes nothing). Intimidate is not
+one of this audit's 24 abilities (it has an oracle receipt), so this is
+recorded, not filed — but any F1 fix should cover caseIDs 9, 10 and 11
+together, since they share the tail.
+
+### Refuted by this session (were F1/F2/F3 in the first pass)
+
+- **Magnet Pull / Plus / Minus `ABILITY_ON_FIELD2` "false history write"** —
+  refuted. `ABILITYEFFECT_FIELD_SPORT` is **14** and the tail's guard is
+  `caseID < 12`, so `14 < 12` is false and no record is written. Details and
+  the corrected pairings are in the per-ability tables above
+  (§"Damage multipliers" and the Magnet Pull / Plus / Minus summary rows).
+  The first pass misread `ABILITYEFFECT_CHECK_OTHER_SIDE` as 15 (that is
+  `ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER`, `include/battle_util.h:27`).
+- **Trace "never on a lead in 114,756 samples" is undecided** — resolved:
+  **instrument sampling**, not a resolution bug. See the Trace row's F3
+  paragraph in §Per-ability site tables.
 
 ## §Per-ability site tables
 
