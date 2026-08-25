@@ -95,6 +95,8 @@ pub mod battle_script_trysetencore;
 pub mod battle_script_trysetencore_vectors_gen;
 pub mod battle_script_trysetgrudge;
 pub mod battle_script_trysetgrudge_vectors_gen;
+pub mod battle_script_trysethelpinghand;
+pub mod battle_script_trysethelpinghand_vectors_gen;
 pub mod battle_script_trysetmagiccoat;
 pub mod battle_script_trysetmagiccoat_vectors_gen;
 pub mod battle_script_trysetsnatch;
