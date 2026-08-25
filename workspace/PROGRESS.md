@@ -17,17 +17,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   false positive again (last `oracle/` commit 08-15 09:51 is client-side
   factoryBrain staging; only docs/engine commits since) — NOT restarted, the
   siblings are on the shared services. DEFERRED.md: no open entries.
-- **In flight:** (1) side sonnet — ISSUES #125 fallback lever
-  (`worker/side-20260825-085458`, cap 45); (2) ts opus — premise-throw audit
-  of the battle kernel (#126 class: `throw`s that encode a premise instead of
-  an oracle-proved barrier) → `docs/premise-throw-audit-2026-08-25.md`, new
-  file only (cap 50); (3) census batch A under `nohup`, default render cadence:
-  `--vary-rng` full chains 0:100 for winning-swap carry 14/28,
-  winning-coverage carry 0/14, full carry 0/14 (all new dimensions vs 1397's
-  winning c0/c14/c28 + winning-swap c0).
-- **Next:** verify + fold both workers; file then fix any census CRASH (ts
-  lane); batch B = wider seeds (100:300) on 1397's four sweeps + the audit's
-  top UNPROVEN rows staged live; wind-down: five gates + full suite.
+- **Did so far (3 worker rounds):** (1) **Premise-throw audit** (ts opus
+  ×2, 15.7 + 19.5 min, $10.4): `docs/premise-throw-audit-2026-08-25.md` —
+  1,554 throw sites → 50 live-kernel premise-worded sites, ALL classified:
+  **PROVED 10 / TS-CONTRACT 36 / UNPROVEN 4 / UNCLASSIFIED 0**. The first
+  pass's top finding (Bide `CANCELER_BIDE` absent-target redirect, "Draft C")
+  was **refuted by my own verification**: every `gAbsentBattlerFlags |=`
+  site it cited sits in `Cmd_openpartyscreen`'s `HasNoMonsToSwitch` branch
+  (`battle_script_commands.c:4865-5150`), never on faint — the port's
+  invariant holds; the second pass then refuted Drafts B/D/E on evidence.
+  Survivors: **#127 filed** (Baton Pass → Spikes KO → second
+  `openpartyscreen` inside the #89 mid-action resume → throw at
+  `factoryBattleScriptFullTurnDecision.ts:2564`; the #119 dance path already
+  republishes the same halt) and a #121 lead (two more `monToSwitchIntoId`
+  lifecycle writes). (2) **#125 lever 1** (side sonnet, cap-killed at 45
+  min under load ~40 with the work committed: `a030faf9` → merge
+  `3b96ceb6`): maxed-stat-stage status slots skipped in the winning-like
+  fallback, 3 pins mutation-checked, carry-14 fifth gate 500/500 (`budget`
+  2, unchanged) — necessary, not sufficient: seed 116's transcript shows
+  FIGHT → Struggle for 1,700 turns with every slot at 0 PP; #125 trimmed to
+  lever 2 (switch when no usable PP). (3) Census batch A (six `--vary-rng`
+  full-chain sweeps, `--render-every 64`, 0:100 each — winning-swap c14/c28,
+  winning-coverage c0/c14, full c0/c14): in flight, 0 CRASH / 0 HANG so far.
+- **In flight:** side opus — soak `--coverage-json` instrument (which
+  moves/effects/species/abilities/items the chains actually exercise vs the
+  L50 corpus; `worker/side-20260825-094448`); ts — #127 fix next.
+- **Next:** verify + fold both; aim census batch B with the coverage report;
+  #125 lever 2 (filler); wind-down: five gates + full suite on the final tree.
 
 ---
 
