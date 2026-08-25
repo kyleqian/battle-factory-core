@@ -6240,7 +6240,9 @@ fn cv_semi_invulnerable_encourage_roll(
 /// on. `if_target_faster` ends deterministically at the pre-existing write
 /// value; otherwise `get_last_used_bank_move`+`get_move_effect_from_result`
 /// ALWAYS overwrite funcResult with the target's last move's effect id,
-/// and only a non-Lock-On effect reaches the `TryEncourage` roll.
+/// and only a non-Lock-On effect reaches the `TryEncourage` roll. A preceding
+/// equal-speed `GetWhoStrikesFirst` tie draw remains part of that tail's
+/// returned receipt.
 fn cv_semi_invulnerable5(
     rng: BattleRngState,
     ordinal_start: u32,
@@ -6274,20 +6276,16 @@ fn cv_semi_invulnerable5(
             func_result_after,
         );
     }
-    // TS quirk (`factoryAiCheckViability.ts:2278-2280`): the tail
-    // `tryEncourage(rng, ordinal, funcResultAfter)` call returns its OWN
-    // fresh `draws: [roll]` array (`:2190-2196`), not merged with
-    // `semiInvulnerable5`'s own local `draws` built above -- so a tie draw
-    // that fired on THIS path still advances `rng`/`ordinal` (consumed
-    // before the encourage roll) but is silently dropped from the
-    // receipt. Only the target-faster and Lock-On short-circuits above
-    // return `semiInvulnerable5`'s own `draws` (tie draw included, if any).
+    // `GetWhoStrikesFirst`'s equal-speed tie draw above has already advanced
+    // this cursor and ordinal. Carry it ahead of TryEncourage's receipt so the
+    // returned draws remain a complete, ordered account of those two calls.
+    // The target-faster and Lock-On short-circuits intentionally return above.
     let (draw, rng_after, score_delta) =
         cv_semi_invulnerable_encourage_roll(rng_after_tie, ordinal);
-    let mut tail_draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
-    tail_draws[0] = draw;
+    draws[draw_count as usize] = draw;
+    draw_count += 1;
     (
-        CvDraws { rng: rng_after, draws: tail_draws, draw_count: 1, score_delta },
+        CvDraws { rng: rng_after, draws, draw_count, score_delta },
         func_result_after,
     )
 }
@@ -13499,6 +13497,7 @@ mod tests {
             1,
         );
         assert_eq!(result.draw_count, 0);
+        assert_eq!(result.rng.calls, 0);
         assert_eq!(result.score_delta, 0);
         assert_eq!(func_result, Some(AI_WEATHER_SANDSTORM));
     }
@@ -13519,6 +13518,7 @@ mod tests {
             1,
         );
         assert_eq!(result.draw_count, 0);
+        assert_eq!(result.rng.calls, 0);
         assert_eq!(result.score_delta, 0);
         assert_eq!(
             func_result,
@@ -13527,14 +13527,14 @@ mod tests {
     }
 
     #[test]
-    fn cv_semi_invulnerable5_non_lock_on_last_move_reaches_try_encourage() {
+    fn cv_semi_invulnerable5_non_tie_reaches_only_try_encourage() {
         let attacker = battler(FactoryAiCheckViabilityBattler { speed: 150, ..neutral_battler() });
         let target = battler(FactoryAiCheckViabilityBattler {
             speed: 50,
             last_used_move_id: Some(33), // MOVE_TACKLE, EFFECT_HIT
             ..neutral_battler()
         });
-        let (result, _) = run_cv_semi_invulnerable(
+        let (result, func_result) = run_cv_semi_invulnerable(
             BattleRngState { value: 1, calls: 0 },
             attacker,
             target,
@@ -13542,9 +13542,61 @@ mod tests {
             1,
         );
         assert_eq!(result.draw_count, 1);
-        let CheckViabilityDraw::SemiInvulnerableRoll { .. } = result.draws[0] else {
+        assert_eq!(result.rng.calls, 1);
+        assert_eq!(result.score_delta, 1);
+        assert_eq!(
+            func_result,
+            protect_last_move_effect_func_result(EFFECT_HIT)
+        );
+        let CheckViabilityDraw::SemiInvulnerableRoll { ordinal, .. } = result.draws[0] else {
             panic!("expected SemiInvulnerableRoll");
         };
+        assert_eq!(ordinal, 1);
+    }
+
+    #[test]
+    fn cv_semi_invulnerable5_tie_retains_ordered_draws_before_encourage() {
+        let attacker = battler(FactoryAiCheckViabilityBattler { speed: 100, ..neutral_battler() });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            speed: 100,
+            last_used_move_id: Some(33), // MOVE_TACKLE, EFFECT_HIT
+            ..neutral_battler()
+        });
+        let (result, func_result) = run_cv_semi_invulnerable(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            None,
+            17,
+        );
+        assert_eq!(result.draw_count, 2);
+        assert_eq!(result.rng.calls, 2);
+        assert_eq!(result.score_delta, 0);
+        assert_eq!(
+            func_result,
+            protect_last_move_effect_func_result(EFFECT_HIT)
+        );
+        let CheckViabilityDraw::TargetFasterTie {
+            ordinal: tie_ordinal,
+            after: tie_after,
+            strikes_first,
+            ..
+        } = result.draws[0]
+        else {
+            panic!("expected TargetFasterTie first");
+        };
+        let CheckViabilityDraw::SemiInvulnerableRoll {
+            ordinal: encourage_ordinal,
+            before: encourage_before,
+            ..
+        } = result.draws[1]
+        else {
+            panic!("expected SemiInvulnerableRoll second");
+        };
+        assert_eq!(tie_ordinal, 17);
+        assert_eq!(strikes_first, 0);
+        assert_eq!(encourage_ordinal, 18);
+        assert_eq!(encourage_before, tie_after);
     }
 
     // --- run_cv_trap (TS test:5295-5343) -------------------------------------

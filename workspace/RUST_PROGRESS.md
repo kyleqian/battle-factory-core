@@ -5,123 +5,103 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R51 — [supervised session, 2026-08-20] **M50 Battle Script Focus Punch no-damage gate + final wind-down**
+## R56 — [supervised session, 2026-08-25] **M55 Helping Hand leaf + final wind-down**
 
-- **State:** `rust-main` = current master `0dd3f36c` plus verified
-  `Cmd_jumpifnodamage` worker `09a1bcc1`. The complete pure
-  `battleScriptJumpifnodamageOpcode.ts` registration/state/control projection
-  is native and wasm32-compilable; no ABI or adapter surface was widened. The
-  session ends committed and green.
-- **Did:** ported exact singleton registration and complete Focus Punch shape,
-  attacker-first role resolution, ProtectStruct-only physical/special receipt
-  reads, nonzero-receipt advance without label lookup, and zero-receipt late
-  jump resolution. The command preserves every projected field and ignores the
-  same-named SpecialStatus copies. Canonical TypeScript execution supplies
-  **131 handler cases** and **16 registration cases**, including every four-
-  attacker × 25 signed-i32 receipt-edge combination, shadow-receipt controls,
-  ordered errors, malformed shapes, preservation, and repetitions. Corpus
-  sha256 `d0972bdc7764a77f4ab75ac3c3e52c91ca845e14a52315a0f2ab5e1defa1e046`.
-- **Next:** merge current master at the next Rust session, recheck active work,
-  and select another conflict-free pure Battle Script leaf. M7c opponent
-  generation still waits on canonical TypeScript live generation; main and
-  animation moving targets remain excluded.
-- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp
-  dispatch/body, source fields, macro, singleton Focus Punch site, registration
-  and role/label ordering, no-write boundary, shadow fields, and repetitions;
-  regenerated twice byte-identically (canonical corpus **343,093 bytes**;
-  generated file **885,070 bytes**, sha256
-  `cdf36b8c2fb11bdec08c9ba4d7dabd2a8e2af4bb061bc2e5657380ff999d5a78`;
-  generator **48,437 bytes**, sha256
-  `70848ab99e69b13bad3715fbe62d2581cf2fa01874848548a90ed878185dc9f1`).
-  Focused **10/10**, cargo **1,001/1,001**, fmt, strict Clippy, and wasm32
-  release pass. Artifact is **492,691 bytes**, sha256
-  `61f39cfe556864e1b44483297ed20a5192b7aef4b21391dc9cf87ec99e981574`.
-  Final npm is green at **1,068 files / 10,126 passed / 223 skipped**; build is
-  green at **691 modules**. Final soaks are vanilla **20/20 OK** and full
-  policy **60/60 OK**, both with zero crashes and zero hangs. Scope stayed
-  inside `core-rs/**`; no unsupported barrier, Rust deferral, or papercut was
-  added. `animation-main` has one unfolded commit (`7f2ccb84`); its supervisor
-  still owns that fold.
+- **State:** `rust-main` = session-start master `33592cba` plus five verified
+  increments through `Cmd_trysethelpinghand` worker `15b28803`. ORWORD,
+  CheckViability tie-receipt retention, Encore, field-ability scan, and Helping
+  Hand are committed and green; no ABI, adapter, recovery module, or canonical
+  TypeScript file was widened.
+- **Did:** ported Helping Hand's singleton `0xd1` registration, instruction-
+  before-attacker ordering, source positional-partner lookup, unconditional
+  target retarget before all guards, exact doubles/absence/corrupt-byte gates,
+  failure-only late label resolution, target-only success write, repetition,
+  and full no-RNG/no-event/no-scheduler preservation. Canonical TypeScript
+  supplies **2,632 behavior** and **10 registration** cases; corpus sha256
+  `28a79ba053c6e925a8357766f7d73f8adb715d82d1979625d7cd02b4e87fa5e0`.
+- **Next:** at the next Rust session, merge current master, recheck active lane
+  work, and select another stable pure leaf. Main owns deletion of ISSUE #124
+  after folding this lane; Rust has no open deferral.
+- **Notes:** Terra/max worker, one commit. Supervisor caught and corrected the
+  worker unit fixture's naive battler-id partner expectation; production code
+  and the canonical corpus already used `position ^ BIT_FLANK`. Two independent
+  regenerations were byte-identical. Generated Rust is **9,314,463 bytes**,
+  sha256 `5aac9cb75d4e039e7b81bd41dc5c5e88cc19a59e4e47d37935a04ddedb119972`;
+  generator is **41,575 bytes**, sha256
+  `c60ebdc8166bad3f26854a170d580334614cccef41ae7129363e1859d46b4156`.
+  Final Rust is green at **1,068/1,068** tests, fmt, strict workspace Clippy,
+  and wasm32 release. Artifact is **506,009 bytes**, sha256
+  `de2fdfdf67692881cb45d64907ad130ab607fc450d7b89bca510716ee6a554d4`.
+  Final npm is green at **1,121 files / 10,457 passed / 223 skipped** and build
+  is green at **712 modules**. Wind-down soaks: vanilla **20/20**, full
+  **60/60**, winning **60/60**, and winning-swap **60/60**, all with zero
+  crashes and zero hangs. Scope stayed inside `core-rs/**` plus the existing M2
+  parity file used by the receipt repair; no barrier or deferral was added.
 
-## R50 — [supervised session, 2026-08-15] **M49 Battle Script weather-scaled recovery leaf + final wind-down**
+## R55 — [supervised session, 2026-08-25] **M54 Battle Script field-ability scan + green checkpoint**
 
-- **State:** `rust-main` = current master `ab862ad1`, including verified
-  `Cmd_recoverbasedonsunlight` worker `34be47ca`. The complete pure
-  `battleScriptRecoverBasedOnSunlightOpcode.ts` registration/state/control
-  projection is native and wasm32-compilable; no ABI or adapter surface was
-  widened. The session ends committed and green.
-- **Did:** ported exact first-match registration, attacker/target role
-  resolution and target rebinding, full-HP failure with late label resolution,
-  and success damage for neutral or suppressed weather, sun, and other
-  weather. Recovery is respectively `-max(1, maxHP / 2)`,
-  `-max(1, 20 * maxHP / 30)`, or `-max(1, maxHP / 4)`. Canonical TypeScript
-  execution supplies **808 handler cases** and **5 registration cases** plus
-  **786,424 applications** covering every maxHP u16 at full, lower, and
-  corrupt-higher HP across all four weather regimes, normalized to **125,607
-  intervals**. Corpus sha256
-  `7c3adaca45202f2f310eabccb3023344ca4acbed2bbaeaeb268bff4f600fdfe4`.
-- **Next:** merge current master at the next Rust session, recheck active work,
-  and select another conflict-free pure Battle Script leaf. M7c opponent
-  generation still waits on canonical TypeScript live generation; main and
-  animation moving targets remain excluded.
-- **Notes:** Sol/high worker, one commit. Supervisor audited decomp dispatch,
-  singleton registration, instruction/role/label ordering, full-HP equality,
-  weather suppression across living battlers, arithmetic, write set, and
-  repetitions; regenerated twice byte-identically (canonical corpus
-  **9,065,263 bytes**; exhaustive evidence **10,557,911 bytes**, sha256
-  `1b0e5b8f555a7b0ec7c60c9b2e97fa8b82a376afffd67d58ecee9e7992333599`;
-  generated file **8,516,856 bytes**, sha256
-  `ee8b01c1381f84684fe5dbbbb2c49a0fde14c3491d38532c8eca33acd52e0746`;
-  generator **19,904 bytes**, sha256
-  `128e9a6823732b5669ad163ea7d25ec1035288e593dd25d40faef288e75fb0b7`). Focused **5/5 +
-  3/3**, cargo **991/991**, fmt, strict Clippy, and wasm32 release pass. The
-  artifact is **492,683 bytes**, sha256
-  `782c1b2aa3addb23d4db916cf9c00d461fe6533875550e2513127c948c0d7728`.
-  Final latest-master npm is green at **1,040 files / 9,915 passed / 223
-  skipped**; build is green at **681 modules**. Final soaks are vanilla
-  **20/20 OK** and full policy **60/60 OK**, both with zero crashes and zero
-  hangs. Scope stayed inside `core-rs/**`; no unsupported barrier or Rust
-  deferral was added. PAPERCUT: `cargo clippy --all-targets` exposed an older
-  test-only `op_ref` lint outside this step; the required strict library
-  Clippy gate remained green, ~2 min.
+- **State:** `rust-main` = merged master `33592cba` plus the four verified
+  session increments through `Cmd_jumpifabilitypresent` worker `70b3417f`.
+  The complete pure two-site registration/topology-scan/control projection is
+  native and wasm32-compilable; no ABI, adapter, or recovery module was
+  changed. The session remains active, committed, and green.
+- **Did:** ported exact two-start eager registration, first opcode binding,
+  Cloud Nine/Air Lock expression mapping, 2/4-slot topology scan, living-only
+  ability match, absent-path advance without label lookup, present-path late
+  label resolution, direct-handler unvalidated-ability error, repeated control,
+  and full narrow-state immutability. Canonical TypeScript supplies **153
+  behavior** and **15 registration** cases; corpus sha256
+  `fc70a470d096700098fbf5fe8454bfdecd38da0b599d30f52339820841aa46bc`.
+- **Next:** port one final stable pure Battle Script leaf if the deadline
+  reserve remains sound; prefer singleton `B_SCR_OP_TRYSETHELPINGHAND`, which
+  has bounded doubles topology, target rebinding, no RNG, and no active issue.
+- **Notes:** Sol/high worker, one commit. Supervisor audited source dispatch,
+  field scan, six-byte macro, both Solar Beam sites, constants, registration
+  predicates, late label boundary, ignored absent slots, and no-write output;
+  regenerated twice byte-identically and passed focused **8/8**, full Rust
+  **1,059/1,059**, fmt, strict workspace Clippy, and wasm32 release. Generated
+  Rust is **808,906 bytes**, sha256
+  `5ca4649b30f3692bce6fee05f884c4f1f75e9d65c6bfa4eebc6bdfe6201ab496`;
+  generator is **26,662 bytes**, sha256
+  `4923f0d7bcb94f7bd3c90533e2176422fe2893998732d1fba5a26a62ca24a2ee`.
+  Artifact is **505,897 bytes**, sha256
+  `6607385fe956f48e1a5f926da9625a40e61ea380bd15212dd8b348eebc6fb060`.
+  Worker npm is green at **1,121 files / 10,457 passed / 223 skipped** and
+  build is green. Scope stayed inside `core-rs/**`; no barrier or deferral was
+  added. PAPERCUT: silent TypeScript typecheck obscured liveness, ~4 min.
 
-## R49 — [supervised session, 2026-08-15] **M48 Battle Script Low Kick weight-damage leaf**
+## R54 — [supervised session, 2026-08-25] **M53 Battle Script Encore leaf + green checkpoint**
 
-- **State:** `rust-main` = current master `5b9a12af` plus verified
-  `Cmd_weightdamagecalculation` worker `d51a4db2`. The complete pure
-  `battleScriptWeightDamageOpcode.ts` registration/catalog/scalar/state/control
-  projection is native and wasm32-compilable; no ABI or adapter surface was
-  widened. The session remains active and committed.
-- **Did:** ported exact singleton/operand-free registration, target-first role
-  resolution, source species-to-Pokédex-weight lookup, all **25** legacy null
-  compatibility IDs, exact catalog errors, and strict Low Kick weight bands
-  `<100/<250/<500/<1000/<2000/else` to power
-  `20/40/60/80/100/120`. Success overwrites only dynamic base power and
-  advances. Canonical TypeScript execution supplies **1,132 handler cases**,
-  **66 scalar cases**, and **7 registration cases** across all **411** source
-  catalog rows, the complete **500** target/selector matrix, threshold and
-  safe-integer domains, malformed values, prior u16 power edges, ordered
-  errors, repetitions, and immutability. Corpus sha256
-  `5c970efa033a8fc982e81f962ed1372cf63166d1c842346445c51d2c7904fb6c`.
-- **Next:** recheck active work and select one final conflict-free pure Battle
-  Script leaf if the deadline reserve permits; otherwise perform the required
-  final full npm/build, soak, Rust, ledger, and clean-tree wind-down.
-- **Notes:** Terra/max worker, one commit. Supervisor audited decomp dispatch,
-  table/body, operand-free macro, single Low Kick site, extracted Pokédex
-  authority, all catalog IDs/nulls, registration and target ordering, scalar
-  errors, write set and repetitions; regenerated twice byte-identically
-  (catalog input **3,981 bytes**, sha256
-  `8831e5a6e21a42ab71dce857243f008a4efdac72e97cdf83148763e25ad6d85f`;
-  catalog Rust **11,788 bytes**, sha256
-  `d0f6e93d8d4e178eb23f091b16bdc9ad43b952d263fab163a082af35ae85215b`;
-  canonical corpus **490,486 bytes**; vectors **1,327,310 bytes**, sha256
-  `6a4bac03fa2a104056d2a37448c686556ad6ed24922723a51c409feaccb82376`;
-  generator **38,279 bytes**, sha256
-  `76d97de4b94527e7a777c2339c6311c4a8242ee364becdbeec9c7adee6d4897e`).
-  Focused **2/2 + 7/7**, cargo **983/983**, fmt, strict Clippy, and wasm32
-  release pass. Artifact is **492,690 bytes**, sha256
-  `223b5323d42125df2de7922e1b7ee4334db0cb620c8dbe6fa13b759974ac6f58`.
-  Latest-master npm is green at **1,029 files / 9,871 passed / 223 skipped**;
-  build is green at **677 modules**. Scope stayed inside `core-rs/**`; no
-  unsupported barrier or Rust deferral was added. PAPERCUT: long-command
-  completion detached from live subprocess reporting, ~4 min.
+- **State:** `rust-main` = merged master `33592cba` plus verified ORWORD,
+  CheckViability receipt, and `Cmd_trysetencore` workers through `431a40c7`.
+  The complete pure Encore registration/state/RNG/control projection is native
+  and wasm32-compilable; no ABI or adapter surface was widened. The session
+  remains active, committed, and green.
+- **Did:** ported exact two-stage singleton registration and handler validation,
+  target-role ordering, first matching move slot, existing-Encore/PP/missing-
+  slot/Struggle/Encore/Mirror Move gates, failure-only late label lookup,
+  success-only single RNG draw, duration 3..6, exact four-field target write,
+  and advance/jump control. Canonical TypeScript supplies **739 behavior** and
+  **12 registration** cases, including the 500 concrete selector matrix and 32
+  duplicate-slot PP-precedence cases. Corpus sha256
+  `17c24b5dfdeaf7f4d86a690219c6f278fd60ef41c7be38557a7c6e5345b13564`.
+- **Next:** port the stable, conflict-free pure
+  `B_SCR_OP_JUMPIFABILITYPRESENT` leaf. Preserve its two concrete Solar Beam
+  starts, living-battler topology scan, ability operands, eager registration,
+  and late jump-label resolution. Keep scope inside `core-rs/**`.
+- **Notes:** Terra/max worker, one commit. Supervisor rejected an initially
+  incorrect duplicate-slot unit fixture; the implementation and generated
+  differential were correct, and the corrected fixture now proves slot zero
+  wins when the later duplicate has zero PP. Supervisor audited the decomp
+  body, five-byte macro, sole call site, error/write/RNG boundaries, regenerated
+  twice byte-identically, and passed focused **7/7**, full Rust, fmt, required
+  strict library Clippy, and wasm32 release. Generated Rust is **8,066,126
+  bytes**, sha256
+  `53095904ebac7afe0a80a1673266afc82ffd79eff72b6655e323ba886e88e8d8`;
+  generator is **55,572 bytes**, sha256
+  `1de47b8144399f9b95f88cb37ffa395648ca5a880fa795c662f7d1df594a5b05`.
+  Artifact is **505,906 bytes**, sha256
+  `f4250d789d6cdabda3e407847bf1ae12e3552c4ab0a2c412fade7a83aa3a2fad`.
+  Worker npm is green at **1,121 files / 10,457 passed / 223 skipped** and
+  build is green. Scope stayed inside `core-rs/**`; no barrier, deferral, or
+  papercut was added.
