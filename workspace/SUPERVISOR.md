@@ -386,6 +386,16 @@ every user-facing report including wind-down summaries.
   `budget`), carry 28 **500/500**; winning-swap carry 0 **500/500**. Run all
   five gates concurrently under `nohup` (PAPERCUTS: gates vs the Bash 600 s
   ceiling). The four gates above stay UNVARIED either way.
+  **Fan-out (landed 2026-08-25, `b16e9009`):** every gate command accepts
+  `--parallel N` — the parent splits the seed range into N contiguous
+  slices run by child processes and prints/merges the identical per-seed
+  lines and summary; per-seed results are byte-identical to the serial run
+  (pinned by `tests/randomRoundSoakParallel.test.ts`). Use `--parallel 3`
+  on the 0:60 gates and `--parallel 2` on the fifth-gate sweeps; the
+  pinned commands otherwise stay exactly as written above. Never stop a
+  soak with a pattern kill (`pkill -f randomRoundSoak`) — it matches every
+  lane's sweeps and any worker whose brief names the file (PAPERCUTS,
+  2026-08-25); kill only the PID you launched.
 
 ## Mechanics
 

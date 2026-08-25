@@ -16,6 +16,39 @@ node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed <N> --verbo
 
 Runs are deterministic per seed (pinned by `tests/randomRoundSoak.test.ts`).
 
+## 2026-08-25 varied-RNG census, batches A/B/C — 0 CRASH / 0 HANG across ~1,200 full chains + 1,200 boot rounds; move/effect universe closed
+
+Supervisor census (PROGRESS 1398) on the `dbe18b3d`…`c8c94f5c` trees, every
+sweep `--vary-rng` (per-seed boot deal), `--render-every 64` for full
+chains. **Batch A** (0:100 each): winning-swap carry 14/28, winning-coverage
+carry 0/14, `full` carry 0/14 — **600/600 OK**. **Batch B** (seeds
+100:200 on 1397's four dimensions — winning carry 0/14/28, winning-swap
+carry 0 — plus winning-coverage carry 28 and `full` carry 28, 0:100):
+**all OK**. **Batch C**, the new `--policy coverage-fight` (least-used
+legal move first; `77db3504`): first-round carry 0/14/28 **300/300 each**
+(carry 14: 2 `budget` = trapped + out-of-PP Struggle, the accepted #125
+residual) and 20 full chains at carry 0 and 28 — **all OK**. Every
+winning-like full chain ends at the 1,000,000-frame budget still
+progressing (continuous play), typically 25-35 battles deep.
+
+Coverage (`--coverage-json`, landed `91938de7`; union in
+`docs/soak-coverage-baseline-2026-08-25.md`): the 15 reports together
+executed **276/276 corpus moves and 166/166 effects**, saw 252/264
+species (the missing 12 are carry-49 tier), 70/71 abilities present
+(Trace is overwritten by the copied ability at switch-in — instrument
+sampling, not a drop), 40/40 items. `full` is dominated on every dimension
+by the winning-like policies and is retired from census duty (its 0:60 gate
+stays).
+
+Not a crash but found by the carry-14 fifth gate on this tree: seed 406
+ping-ponged "switch row 1" ↔ "party: cancel" for the whole budget after
+#125 lever 2 — the engine never publishes a switch while the player is
+trapped (Shadow Tag) and the soak policy ignored trapping; fixed in the
+driver (`c8c94f5c`), 0:500 back to `budget 0`.
+
+Reproduce any row with `npm run soak -- --policy <p> --vary-rng
+[--first-round] --start-carry <c> --seed <n> --render-every 0 --verbose`.
+
 ## 2026-08-09 ability display-name frontier closed — `16ca008d`
 
 Full-policy seeds 22 (battle 2, turn 19) and 19 (battle 3, turn 12) exposed
