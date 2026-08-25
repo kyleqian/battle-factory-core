@@ -907,6 +907,11 @@ import {
   type DefenseCurlState,
 } from "./defenseCurl.ts";
 import {
+  meanLookAtAge,
+  type MeanLookProfile,
+  type MeanLookState,
+} from "./meanLook.ts";
+import {
   lovelyKissAtAge,
   type LovelyKissProfile,
   type LovelyKissState,
@@ -2594,6 +2599,15 @@ export interface SceneOnDefenseCurlConfig {
   readonly animationProfile: Readonly<DefenseCurlProfile>;
 }
 
+/** Mean Look presentation only; trapping/status ownership remains battle-owned. */
+export interface SceneOnMeanLookConfig {
+  readonly move: "MEAN_LOOK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<MeanLookProfile>;
+}
+
 /** Lovely Kiss presentation only; sleep/status mutation remains battle-owned. */
 export interface SceneOnLovelyKissConfig {
   readonly move: "LOVELY_KISS";
@@ -3324,6 +3338,7 @@ export type SceneOnMoveConfig =
   | SceneOnSweetKissConfig
   | SceneOnSweetScentConfig
   | SceneOnDefenseCurlConfig
+  | SceneOnMeanLookConfig
   | SceneOnLovelyKissConfig
   | SceneOnAttractConfig
   | SceneOnSporeConfig
@@ -3518,6 +3533,8 @@ export type SceneOnSweetScentPresentationState =
   SceneOnMovePresentationState<SceneOnSweetScentConfig>;
 export type SceneOnDefenseCurlPresentationState =
   SceneOnMovePresentationState<SceneOnDefenseCurlConfig>;
+export type SceneOnMeanLookPresentationState =
+  SceneOnMovePresentationState<SceneOnMeanLookConfig>;
 export type SceneOnLovelyKissPresentationState =
   SceneOnMovePresentationState<SceneOnLovelyKissConfig>;
 export type SceneOnOctazookaPresentationState =
@@ -7612,6 +7629,11 @@ export interface SceneOnDefenseCurlView extends DefenseCurlState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnMeanLookView extends MeanLookState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnLovelyKissView extends LovelyKissState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -7671,6 +7693,24 @@ export function sceneOnDefenseCurlView(
       state.age,
       state.config.attacker.geometry.animationCenter,
       state.config.animationProfile,
+    ),
+  };
+}
+
+/** `age=0` is Move_MEAN_LOOK's first retained pointer-owned row. */
+export function sceneOnMeanLookView(
+  state: SceneOnMeanLookPresentationState,
+): SceneOnMeanLookView {
+  if (state.config.move !== "MEAN_LOOK") {
+    throw new Error(`expected MEAN_LOOK presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...meanLookAtAge(
+      state.age,
+      state.config.target.geometry.animationCenter,
+      state.config.animationProfile.targetSubpriority,
     ),
   };
 }

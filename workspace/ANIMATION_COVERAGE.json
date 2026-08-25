@@ -6703,6 +6703,19 @@
    "representatives": ["MOVE_DEFENSE_CURL"],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_DEFENSE_CURL independently passes 100/100 player-back plus 100/100 opponent-front complete retained source/component/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation framebuffer rows through first inactive cleanup with zero residual pixels. Its source-age reducer, typed live species/sides/picture coordinates/geometry, generic front/back battler art, ECLIPSING_ORB cells/hFlip, grayscale/original palette, live task-owned RAM+2 deformation matrix/y offset, RAM+1 ordinary OAM/flags/palette, source painter order, field chrome, audio/tags, and cleanup have no carrier-pair gate, recording/framebuffer lookup, absolute tick, or gameplay ownership. MOVE_PERISH_SONG, MOVE_IRON_TAIL, and MOVE_POISON_TAIL remain independent exact controls and receive no sibling credit."
+  },
+  {
+   "id": "mean-look-eye",
+   "components": [
+    "asset:ANIM_TAG_EYE",
+    "sprite:gMeanLookEyeSpriteTemplate",
+    "visualCommand:monbg",
+    "visualCommand:clearmonbg",
+    "visualCommand:simple_palette_blend"
+   ],
+   "representatives": ["MOVE_MEAN_LOOK"],
+   "fulfilled": false,
+   "goal": "PARTIAL: MOVE_MEAN_LOOK retains complete 171-row player-back and opponent-front pointer-owned Scene-ON windows twice fresh, source EYE art, a pure source-age eye reducer, and its own OAM/matrix/palette/register/monbg lifecycle. It remains unsupported with no coverage credit until a typed Scene-ON seam, ordinary production compositor, and all 342 retained core.ts framebuffer rows pass with zero residual pixels. MOVE_PERISH_SONG and MOVE_CONFUSE_RAY retain independent exact control status and receive no sibling credit."
   }
  ],
  "variantAudits": {
