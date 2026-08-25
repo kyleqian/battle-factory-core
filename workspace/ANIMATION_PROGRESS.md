@@ -1,3 +1,11 @@
+# MOVE_ERUPTION authoritative source + legal bilateral Scene-ON staging — unsupported (2026-08-25 worker)
+
+- **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION remains unsupported; its five-component `eruption-warm-rock` track is explicitly unfulfilled and conveys no sibling credit.
+- **Did:** Pinned the exclusive `0x082ce30b..<0x082ce3d8` (205-byte, `d08f6fd6…`) source interval, its 24 command rows, WARM_ROCK asset, launch/falling-rock templates and callbacks, EruptionLaunchRocks, HorizontalShake platform/all-battler calls, red BG+battler palette ramps, explosion/rock-throw audio, and the sole lowest Level-50 carrier set-346 CAMERUPT_2. Added complete legal three-mon Scene-ON mechanicLab parties in both player-back and opponent-front orientations; all four active attacker slots force Eruption through ordinary controller/AI selection.
+- **Verified:** Each bilateral stage completes on the Scene-ON oracle at frame 934 with source-built complete parties, valid party checksums, Eruption PP consumed exactly once, and no injected transient state. The focused source/staging suite is **4/4**, source audit and coverage/audit pass, and baseline full-suite/build remain **1,135 files / 10,491 passed / 224 skipped** and **720 modules**.
+- **Next:** Remain evidence-only: capture each consecutive pointer-owned row through first inactive cleanup twice fresh, retain compressed dense state and chronological raw RGB888 banks, generate normalized change maps, then add a strict receipt to measure Eruption's own transfer latches. Do not add a reducer, typed seam, draw wiring, exact credit, a latch row, or sibling credit until that proof exists.
+- **Notes:** `ANIMATION_LATCHES.md`, production animation/core wiring, boundary lists, and unsupported barriers are unchanged. No gameplay damage/weather/RNG/controller/turn/round/facility ownership, pair gate, recording/RGB/framebuffer lookup, absolute tick, or coordinate/RGB fitting was added.
+
 # MOVE_INGRAIN bilateral exact production presentation (2026-08-25 worker)
 
 - **State:** Level 50 advances **210→211/276 exact**, remains **0 partial / 0 staged**, and drops **66→65 unsupported**. MOVE_INGRAIN alone promotes and `ingrain-roots-orbs` is fulfilled; Absorb, Mega Drain, Dream Eater, and Giga Drain retain independent exact status with no sibling credit.

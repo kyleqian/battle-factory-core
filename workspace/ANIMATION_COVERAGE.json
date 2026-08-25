@@ -6923,6 +6923,19 @@
    "representatives": ["MOVE_INGRAIN"],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_INGRAIN independently passes 164/164 player-back plus 164/164 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two deterministic production-render passes. Reproducibly extracted ROOTS/ORBS art, typed live visual species/sides/battle-position geometry/subpriority, source root cells/hFlip/flicker and orb cells/waves, source subpriority/allocation painter order, ordinary predecessor OAM/matrix/palette transfer, field chrome, audio, and cleanup use no pair gate, recording/framebuffer lookup, absolute tick, coordinate/RGB fitting, or gameplay ownership. Absorb, Mega Drain, Dream Eater, and Giga Drain remain independent exact ORBS controls and receive no sibling credit."
+  },
+  {
+   "id": "eruption-warm-rock",
+   "components": [
+    "asset:ANIM_TAG_WARM_ROCK",
+    "sprite:gEruptionFallingRockSpriteTemplate",
+    "task:AnimTask_EruptionLaunchRocks",
+    "task:AnimTask_HorizontalShake",
+    "visualCommand:simple_palette_blend"
+   ],
+   "representatives": ["MOVE_ERUPTION"],
+   "fulfilled": false,
+   "goal": "UNFULFILLED evidence-only Eruption checkpoint: source audit and lowest legal set-346 FRONTIER_MON_CAMERUPT_2 bilateral Scene-ON stages pin the exclusive Warm Rock body. No reducer, typed seam, renderer, latch, sibling credit, or move acceptance is claimed. Complete twice-fresh dense pointer-owned state/raw-RGB/change-map receipts through first inactive cleanup, own display-transfer measurement, and a strict verifier remain required before any promotion."
   }
  ],
  "variantAudits": {
