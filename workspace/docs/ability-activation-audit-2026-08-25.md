@@ -230,7 +230,7 @@ together, since they share the tail.
   refuted. `ABILITYEFFECT_FIELD_SPORT` is **14** and the tail's guard is
   `caseID < 12`, so `14 < 12` is false and no record is written. Details and
   the corrected pairings are in the per-ability tables above
-  (§"Damage multipliers" and the Magnet Pull / Plus / Minus summary rows).
+  (§"`ABILITY_ON_FIELD2` — MAGNET_PULL / PLUS / MINUS" in §Per-ability site tables).
   The first pass misread `ABILITYEFFECT_CHECK_OTHER_SIDE` as 15 (that is
   `ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER`, `include/battle_util.h:27`).
 - **Trace "never on a lead in 114,756 samples" is undecided** — resolved:
@@ -275,7 +275,24 @@ without re-deriving the inventory.
 | `src/battle_script_commands.c:1156-1157` | `src/engine/damageCalc.ts:659` | Hustle's accuracy ×0.8 *is* gated on `IS_TYPE_PHYSICAL(type)` (the dynamic move type), and sits after Compound Eyes / Sand Veil in both. |
 | `src/pokemon.c:3213-3214` | `src/engine/damageCalc.ts:380-382` | Marvel Scale ×1.5 Defense on **any** `status1`, and it lands *before* the Explosion `defense /= 2` (`src/pokemon.c:3228-3230` ↔ `damageCalc.ts:398-400`), so the two stack. |
 | `src/pokemon.c:3223-3226` | `src/engine/damageCalc.ts:387-396` | Torrent/Swarm: `hp <= maxHP / 3` with C truncating division, power ×1.5, keyed off move type. |
-| `src/pokemon.c:3207-3210` | `src/engine/damageCalc.ts:370-376` | Plus/Minus spAttack ×1.5 keyed off `ABILITY_ON_FIELD2`'s ungated all-battler scan; matches. See F1/F2 for the refuted history-write claim. |
+| `src/pokemon.c:3207-3210` | `src/engine/damageCalc.ts:370-376` | Plus/Minus spAttack ×1.5 keyed off `ABILITY_ON_FIELD2`'s ungated all-battler scan; matches. See §`ABILITY_ON_FIELD2` above for the refuted history-write claim. |
+
+### `ABILITY_ON_FIELD2` — MAGNET_PULL (4), PLUS (2), MINUS (2) — SOURCE-EXACT (first pass's DIVERGENT verdict refuted)
+| Source | Engine | Note |
+| --- | --- | --- |
+| `include/battle_util.h:38` — `ABILITY_ON_FIELD2(abilityId)` ⇒ `AbilityBattleEffects(ABILITYEFFECT_FIELD_SPORT, 0, abilityId, 0, 0)` | — | The dispatch is `ABILITYEFFECT_FIELD_SPORT` = **14** (`:26`). |
+| `src/battle_util.c:3111-3138` (`ABILITYEFFECT_FIELD_SPORT`) | — | Switches on the **global `gLastUsedAbility`**, not the `ability` argument; `gLastUsedAbility` can never hold `ABILITYEFFECT_MUD_SPORT` (253) or `ABILITYEFFECT_WATER_SPORT` (254), so the `default:` branch (`:3128-3137`) always runs: scan `i < gBattlersCount` for `gBattleMons[i].ability == ability` with **no `hp != 0` gate** (contrast `ABILITYEFFECT_CHECK_ON_FIELD`, `:3141-3148`) and **no `i != battler` exclusion** (contrast `ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER`, `:3151-3158`). |
+| `src/battle_util.c:3194-3195` (the shared record tail) | — | **No record is written for this caseID.** The guard is `caseID < ABILITYEFFECT_CHECK_OTHER_SIDE`, and that constant is **12** (`include/battle_util.h:24`); `14 < 12` is false. The first pass read the constant as 15 — that value is `ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER` (`:27`) — and filed a DIVERGENT verdict on the resulting phantom `RecordAbilityBattle(0, …)`. Refuted at source, both files opened at HEAD. (Contrast **F1**: caseIDs 9/10/11 *do* pass this guard.) |
+| `src/battle_ai_switch_items.c:447` (`ShouldSwitch`'s `ABILITY_ON_FIELD2(ABILITY_MAGNET_PULL)`, `&&`-gated on the escaper being `TYPE_STEEL`) | `src/engine/factoryAiSwitchPolicy.ts:250-257` (`"magnet-pull-steel"`) | Same predicate, same missing `hp` gate, and — matching the `default:` branch — **no self-exclusion**. |
+| `src/pokemon.c:3207-3210` (Plus / Minus, `spAttack = (150 * spAttack) / 100`) | `src/engine/damageCalc.ts:370-376` | `activeBattlerAbilities` defaults to `[attacker.ability, defender.ability]` (the full singles battler set), tested with `.some(...)`, no `hp` gate, no self-exclusion; `Math.trunc((150 * spAttack) / 100)` is C truncating division. Sits between Hustle (`:367-369`) and Guts (`:377-379`), matching `pokemon.c`'s order. |
+
+**One nuance, singles-unreachable.** The port additionally requires
+`(rules.absentBattlerFlags & (1 << index)) === 0` for a battler to count
+(`factoryAiSwitchPolicy.ts:252-253`); the ROM's `default:` scan has no absent
+check. In Factory singles `battlersCount` is 2 and `absentBattlerFlags` starts
+at 0 (`src/engine/factoryBattleStart.ts:424`) — absent flags are a doubles /
+empty-slot concept — so the extra conjunct can never change the result.
+Recorded so a future doubles port does not inherit it silently.
 
 ### Recoil denial — ROCK_HEAD (40) — SOURCE-EXACT
 | Source | Engine | Note |
