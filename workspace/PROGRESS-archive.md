@@ -1,3 +1,36 @@
+## 1393 — [main worker, 2026-08-23] **Scout lever 4' built and measured: `--policy winning-coverage` (coverage-first 3-of-6 draft) wins 0/30 rounds at carry 28 — challenge 4 stays unbeaten — but reaches carry >= 28 in 10/120 at the anchor vs `winning`'s 18/480**
+
+- **State:** master `2ea18c0b` + this docs commit. `npm test` **1,106 files
+  / 10,396 passed / 223 skipped** (this step adds 1 file / 4 tests; the rest
+  of the delta over 1392's 1,105 / 10,392 came in with that entry's own
+  animation fold), `npm run build` + typecheck green. New opt-in soak policy
+  only — `winning` / `winning-swap` / `full` / `vanilla` / `oracle-strength`
+  untouched (all their pins still pass); zero `src/engine` edits.
+- **Did (`b00f7e60` policy+pins, `2ea18c0b` measurement):**
+  `--policy winning-coverage` = `winning` except the draft, which rents the
+  3-of-6 maximising lexicographic (offensive coverage weighted by the six
+  offers' own types, defensive diversity − shared 4x weaknesses, BST as a
+  pure TIEBREAK). Deterministic, no RNG; the shuffle/decline rolls are still
+  drawn so the stream stays aligned with `winning`. **Measured:** smoke 0:20
+  **20/20 OK**; `--start-carry 28` 0:30 **0/30 rounds won** (same as
+  `winning` and `oracle-strength`) with a WORSE loss shape — **29/30 lost at
+  b1** vs both baselines' 22/30; anchor 0:120 **120/120 OK**, carry ≥ 21
+  39/120, **carry ≥ 28 10/120 (8.3%)** vs `winning`'s 18/480 (3.75%), **carry
+  ≥ 35 0/120** (baseline 0/480). Full numbers + commands in
+  `docs/soak-policy-strength-scout-2026-08-23.md` §"Result — lever 4'".
+- **Next:** every single-axis draft lever is now spent — 4 (bulk+STAB)
+  starved coverage, 4' (coverage-first) starves bulk, and the two failure
+  modes are mirror images, so the only lever left for challenge 4 is a
+  COMBINED draft score (coverage maximised subject to a minimum trio BST),
+  measured the same way (`--start-carry 28 --seeds 0:30` rounds won). Also
+  still open: the scout §4 instruments (per-seed round ledger, loss shape,
+  rentsCount/rank) ~40 lines in the driver. Open ISSUES: #121 (dormant
+  note), #109/#114 (doubles-era), #71/#73/#39/#55 (parked/filler).
+- **Notes:** soak chunking deviates from the brief only in chunk COUNT (2x10
+  for the smoke, 8x15 for the 0:120) — the Bash foreground cap is 600 s and
+  seeds are independent per `runSeed`, so the unions are the requested
+  `0:20` / `0:120`. Tree clean, no foreign animation strays this session.
+
 ## 1392 — [supervisor wind-down, 2026-08-23 ~02:15] **#118 CLOSED end to end (Rust `5b51eac5` → lockstep TS+wasm `0cb8aa26` → wire format `47a8db42`), #120 found by audit + fixed, #121 probed not-a-divergence, `oracle-strength` soak policy built and measured NEGATIVE; every gate green on the final tree; animation folded twice**
 
 - **Final gates (supervisor-independent):** on `a5b06cfb` (engine-final):

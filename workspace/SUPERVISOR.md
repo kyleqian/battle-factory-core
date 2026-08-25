@@ -365,6 +365,16 @@ every user-facing report including wind-down summaries.
   regression gate; a docs-only session may skip it, any session that folded
   engine/`src` changes may not. Full policy text: ROADMAP S10 block "Soak +
   evidence policy".
+- **Varied-RNG crash-coverage gate (user-adopted 2026-08-24; exact shape
+  pending):** the user decided `--vary-rng` sweeps become a fifth standing
+  wind-down gate — it is the only instrument that exercises varied boot
+  offers, and its first 2,400 rounds found ISSUES #122 and #123. Define the
+  exact shape (which `--start-carry` tiers × how many seeds; `--first-round`
+  for speed) in the first session AFTER #122/#123 are fixed — a gate with
+  known-red seeds is useless — then pin the final command(s) here beside the
+  four gates above and record baseline counts in that session's PROGRESS
+  entry. Until then, varied sweeps stay opt-in. The four gates above remain
+  UNVARIED (pinned single-trajectory baselines) either way.
 
 ## Mechanics
 

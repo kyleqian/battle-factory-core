@@ -5,6 +5,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1396 — [top-layer setup session, 2026-08-24] **Two user decisions recorded + next-supervisor mission staged: draft-lever program CLOSED, varied-RNG standing gate ADOPTED (shape defined after the #122/#123 fixes); orphaned Rust Refresh-port worker commit found unfolded**
+
+- **State:** docs-only commit on top of 1395's fully-gated tree (no
+  `src`/engine edits at this layer). Oracle services verified live: main
+  8012 (`bin/oracle info` answers), animation 8014, node harness 8001.
+  DEFERRED.md: no open entries. Tree was clean at audit start.
+- **Did (top-layer audit of what the next supervisor inherits):**
+  (1) **User decision:** the draft-lever program is CLOSED — 1395's
+  `--vary-rng` measurement settled it (challenge 4 was one losing deal, not
+  a wall; the best lever gains ~2 points, z ≈ 1.7, no policy separates
+  decisively). `winning-combined` stays available opt-in; no further
+  draft-axis measurement sessions. (2) **User decision:** varied-RNG crash
+  sweeps BECOME A STANDING WIND-DOWN GATE — adopted in principle
+  2026-08-24; the supervisor defines the exact shape (carry tiers × seed
+  count) AFTER #122/#123 are fixed and pins it in SUPERVISOR.md next to the
+  four existing gates (which stay unvaried). (3) **Found: orphaned worker
+  commit** — `worker/rust-20260822-123947` (`81609f44`, "Port Refresh
+  battle script opcode to Rust": impl + 36k-line vectors + tests, Codex
+  sol/high, 2026-08-22 12:49) is in NEITHER `rust-main` NOR master; it
+  predates that day's night session and was never folded.
+- **Next (the supervisor mission, in order):** (1) fold `animation-main`
+  (9 commits, idle since 08-23 03:21) at orient; (2) triage + fix **#122**
+  (start: which of the 13 expected draws diverged at draw 11) then **#123**
+  (PP legality on the fallback path + Struggle engagement); both repros are
+  in ISSUES.md (0.1 s and ~27 s, deterministic); (3) define + land the
+  varied-RNG gate, pin its text in SUPERVISOR.md, record baseline counts;
+  (4) verify (cargo + wasm parity) and fold-or-discard the Refresh worker
+  branch, with the reason recorded; (5) delete
+  `wip/mb-step2b-draft-heuristic` (program closed; git retains). Open
+  ISSUES after this queue: #121 (dormant), #109/#114 (doubles-era),
+  #71/#73/#39/#55 (parked/filler).
+- **Notes:** a Codex supervisor for a DIFFERENT repo (`pokered-pewter`)
+  holds an 8 h cap until ~04:40 on 08-25 — expect CPU contention for soak
+  sweeps if this repo's supervisor launches before then. The four standing
+  gates stay UNVARIED baselines; the new gate is additive crash coverage,
+  not a replacement. 1395's trap reminder stands: use exact filenames when
+  policy names share prefixes (`m-winning-*` glob collision).
+
+---
+
 ## 1395 — [interactive session, 2026-08-23] **Combined draft lever (4'') built + measured on a NEW honest instrument — challenge 4 was never unbeatable (winning 5.8%, combined 7.7% at n=1,000/arm); two policy/instrument bugs fixed, two engine finds filed (#122 crash, #123 endless battle)**
 
 - **State:** master = this docs commit (4 code commits under it: `a8445d42`
@@ -86,39 +126,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   0 regressions folded. Trap of the hour: an UNQUOTED heredoc fed ledger
   prose to zsh, which executed its backticked `npm test` — quote heredocs
   (`<<'EOF'`) or write files with a tool.
-
----
-
-## 1393 — [main worker, 2026-08-23] **Scout lever 4' built and measured: `--policy winning-coverage` (coverage-first 3-of-6 draft) wins 0/30 rounds at carry 28 — challenge 4 stays unbeaten — but reaches carry >= 28 in 10/120 at the anchor vs `winning`'s 18/480**
-
-- **State:** master `2ea18c0b` + this docs commit. `npm test` **1,106 files
-  / 10,396 passed / 223 skipped** (this step adds 1 file / 4 tests; the rest
-  of the delta over 1392's 1,105 / 10,392 came in with that entry's own
-  animation fold), `npm run build` + typecheck green. New opt-in soak policy
-  only — `winning` / `winning-swap` / `full` / `vanilla` / `oracle-strength`
-  untouched (all their pins still pass); zero `src/engine` edits.
-- **Did (`b00f7e60` policy+pins, `2ea18c0b` measurement):**
-  `--policy winning-coverage` = `winning` except the draft, which rents the
-  3-of-6 maximising lexicographic (offensive coverage weighted by the six
-  offers' own types, defensive diversity − shared 4x weaknesses, BST as a
-  pure TIEBREAK). Deterministic, no RNG; the shuffle/decline rolls are still
-  drawn so the stream stays aligned with `winning`. **Measured:** smoke 0:20
-  **20/20 OK**; `--start-carry 28` 0:30 **0/30 rounds won** (same as
-  `winning` and `oracle-strength`) with a WORSE loss shape — **29/30 lost at
-  b1** vs both baselines' 22/30; anchor 0:120 **120/120 OK**, carry ≥ 21
-  39/120, **carry ≥ 28 10/120 (8.3%)** vs `winning`'s 18/480 (3.75%), **carry
-  ≥ 35 0/120** (baseline 0/480). Full numbers + commands in
-  `docs/soak-policy-strength-scout-2026-08-23.md` §"Result — lever 4'".
-- **Next:** every single-axis draft lever is now spent — 4 (bulk+STAB)
-  starved coverage, 4' (coverage-first) starves bulk, and the two failure
-  modes are mirror images, so the only lever left for challenge 4 is a
-  COMBINED draft score (coverage maximised subject to a minimum trio BST),
-  measured the same way (`--start-carry 28 --seeds 0:30` rounds won). Also
-  still open: the scout §4 instruments (per-seed round ledger, loss shape,
-  rentsCount/rank) ~40 lines in the driver. Open ISSUES: #121 (dormant
-  note), #109/#114 (doubles-era), #71/#73/#39/#55 (parked/filler).
-- **Notes:** soak chunking deviates from the brief only in chunk COUNT (2x10
-  for the smoke, 8x15 for the 0:120) — the Bash foreground cap is 600 s and
-  seeds are independent per `runSeed`, so the unions are the requested
-  `0:20` / `0:120`. Tree clean, no foreign animation strays this session.
 
