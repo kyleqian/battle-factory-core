@@ -79,6 +79,6 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
       expect.objectContaining({ move: "MOVE_LOVELY_KISS", status: "exact" }),
     );
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GLARE")).toHaveLength(1);
-    expect(276 - coverage.entries.length).toBe(66);
+    expect(276 - coverage.entries.length).toBe(65);
   });
 });
