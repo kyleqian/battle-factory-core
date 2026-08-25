@@ -1,3 +1,11 @@
+# Animation supervisor session — four exact promotions, clean handoff (2026-08-25)
+
+- **State:** Level 50 advances **204→208/276 exact**, remains **0 partial / 0 staged**, and drops **72→68 unsupported**. MOVE_SWEET_SCENT, MOVE_DEFENSE_CURL, MOVE_MEAN_LOOK, and MOVE_SCREECH each have independent complete bilateral production acceptance; no sibling credit was inferred.
+- **Did:** Merged current master at session start, rebuilt the stale gitignored Rust WASM prerequisite, then dispatched, independently audited, and merged one bounded Animation worker at a time. Sweet Scent, Defense Curl, and Mean Look each landed evidence plus exact-production rounds; Screech landed one capped but clean three-commit exact round after independent supervisor verification. All disposable worker worktrees and branches are removed.
+- **Verified:** Final merged `npm test` passes **1,122 files / 10,452 tests** with 44 files / 223 tests skipped; `npm run build` passes **714 modules**. Coverage is **208 exact / 68 unsupported**. Fresh Scene-ON evidence reproduces Mean Look's **342/342** and Screech's **126/126** zero-residual core framebuffer acceptance; focused controls, typecheck, audit, coverage, inventory, ratchets, and diff checks are green.
+- **Next:** Start one bounded MOVE_SMELLING_SALT increment: it is the smallest ranked unsupported Level-50 body at **14 source lines / 4 new components** (`ANIM_TAG_SMELLINGSALT_EFFECT`, `gSmellingSaltExclamationSpriteTemplate`, `gSmellingSaltsHandSpriteTemplate`, `AnimTask_SmellingSaltsSquish`). Require complete bilateral dense evidence and ordinary zero-residual production acceptance before credit.
+- **Notes:** No animation boundary or unsupported-barrier widening, canonical-recording production import, absolute-tick/evidence-pair gate, gameplay/RNG/controller/turn/round/facility ownership, main-program doc edit, or animation deferral was added.
+
 # MOVE_SCREECH bilateral exact production presentation (2026-08-25 worker)
 
 - **State:** Level 50 advances **207→208/276 exact**, remains **0 partial / 0 staged**, and drops **69→68 unsupported**. MOVE_SCREECH alone promotes; the `purple-ring-screech` track is fulfilled. MOVE_SUPERSONIC and MOVE_METAL_SOUND remain independent exact controls.
@@ -5,14 +13,6 @@
 - **Verified:** Twice-fresh Scene-ON legal-party receipts retain player-back **72..134** and opponent-front **76..138**, **63 consecutive rows each** through first inactive cleanup. Dense/raw sequence receipts are player `ee7b444d…` / `9bad150c…`, opponent `55b1638c…` / `67428ea0…`. Each move-owned hardware OAM, affine-matrix, and palette row equals the preceding source buffer on **62/62** comparable rows; gameplay RNG is invariant and animation RNG changes **62/62**. Retained component/seam/raw-RGB and actual `core.ts → renderSceneOnMovePresentation` output are **126/126**, zero residual pixels. Source audit, extraction, focused Screech plus Supersonic/Metal Sound controls, typecheck, animation audit/coverage, full tests, build, and diff check are green.
 - **Next:** Select the next bounded unsupported move; do not infer acceptance from Screech's purple-ring or shared task components.
 - **Notes:** `ANIMATION_LATCHES.md` is unchanged: Screech independently confirms the existing ordinary RAM+1 OAM/matrix/palette transfer and generic opponent elevated-shadow pointer-entry behavior, but proves no new latch class.
-
-# Animation supervisor session — three exact promotions, clean handoff (2026-08-25)
-
-- **State:** Level 50 advances **204→207/276 exact**, remains **0 partial / 0 staged**, and drops **72→69 unsupported**. MOVE_SWEET_SCENT, MOVE_DEFENSE_CURL, and MOVE_MEAN_LOOK each have independent complete bilateral production acceptance; no sibling credit was inferred.
-- **Did:** Merged current master at session start, rebuilt the stale gitignored Rust WASM prerequisite, then dispatched, independently audited, and merged one bounded Animation worker at a time for Sweet Scent evidence/exact, Defense Curl evidence/exact, and Mean Look evidence/exact. All disposable worker worktrees and branches are removed.
-- **Verified:** Final merged `npm test` passes **1,118 files / 10,441 tests** with 44 files / 223 tests skipped; `npm run build` passes **712 modules**. Coverage is **207 exact / 69 unsupported**, typecheck/audit/diff checks are green, and Mean Look's final fresh Scene-ON probes reproduce both dense and raw-RGB hashes before **342/342 zero-residual** core framebuffer rows.
-- **Next:** Start one bounded MOVE_SCREECH increment: it is the smallest ranked unsupported Level-50 body at **14 source lines / 3 new components** (`ANIM_TAG_PURPLE_RING`, `gScreechRingSpriteTemplate`, `ScreechRing`). Require complete bilateral dense evidence and ordinary zero-residual production acceptance before credit.
-- **Notes:** No animation boundary or unsupported-barrier widening, canonical-recording production import, absolute-tick/evidence-pair gate, gameplay/RNG/controller/turn/round/facility ownership, main-program doc edit, or animation deferral was added.
 
 # MOVE_MEAN_LOOK bilateral exact production presentation (2026-08-25 worker)
 
