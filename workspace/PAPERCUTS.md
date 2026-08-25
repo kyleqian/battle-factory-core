@@ -1404,18 +1404,3 @@ current app stage should be rejected before replay.
 - **Real fix:** a `--parallel N` seed fan-out in `randomRoundSoak.ts`
   (seeds are independent processes already) so a 0:60 gate is wall-clock
   ~1/8 of today's.
-
-## No reproducible premise-throw census tool — `rg` cannot reassemble multi-line `throw new Error(...)` messages
-
-- **What:** ~40% of engine `throw new Error(` calls wrap their message over
-  2-4 lines, so a plain `rg` census truncates messages and miscounts word
-  filters; both 2026-08-25 audit workers hand-wrote a Node/Python
-  reassembler (with enclosing-function attribution) and their per-file
-  tallies still disagreed by 2 (26 vs 24 remaining rows).
-- **Hits:** 2 (2026-08-25, ~6 + ~8 min).
-- **Cost each:** ~6-8 min plus a count mismatch between passes.
-- **Workaround:** `docs/premise-throw-audit-2026-08-25.md` §1 records the
-  filter; copy its reassembler shape.
-- **Real fix:** check in `tools/probe/premise-census.py` (reassemble
-  `throw new Error(...)` across lines, attribute the enclosing function,
-  emit `file:line | function | message` TSV, optional premise-word filter).

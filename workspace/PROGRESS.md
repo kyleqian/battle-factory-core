@@ -5,38 +5,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1399 — [bounded TS worker, 2026-08-25 ~15:05] **`tools/probe/premise-census.py` landed: reproducible premise-throw census tool (PAPERCUTS.md ask), pinned by `tools/test_premise_census.py`**
-
-- **Did:** wrote `tools/probe/premise-census.py` (stdlib-only) — walks
-  `src/**/*.ts`, reassembles `throw new <X>Error(...)` message arguments
-  across wrapped lines (balanced-paren/string/template scanner, `+`
-  concatenation folded to literal text with `${…}` placeholders kept
-  verbatim), attributes the enclosing function/method/`<anonymous>` by an
-  indentation-cascade scan, and emits sorted TSV with `--only`, `--premise`,
-  `--summary`, and `--exclude-unsupported-branch` filters. Pinned by 5
-  subprocess-driven cases in `tools/test_premise_census.py` (single-line,
-  3-line-wrapped template literal, `+`-concat, class method, arrow, and
-  anonymous-callback attribution) — `python3 tools/test_premise_census.py
-  -v` **5/5 pass**.
-- **Numbers:** `--summary` on HEAD runs in ~1.6s. `src/engine` only: **1,573
-  total throw sites / 256 premise-worded** vs. the audit doc's rg-based
-  **1,554 / 235** — the audit's stage-1 `rg "throw new Error"` only matches
-  the literal `Error` class, while this tool also counts `throw new
-  <X>Error(...)` subclasses per the step brief's spec (the delta), and the
-  step brief's premise keyword list swaps the audit's own `never happen`/
-  `should not` for `not reachable`, shifting the premise count independently
-  of site count. `--only src/engine --premise | wc -l` → **256**.
-  `--exclude-unsupported-branch` drops **2** rows repo-wide (near-zero, as
-  expected — the sanctioned barrier class is a result literal, not a throw).
-- **Next:** supervisor deletes the PAPERCUTS.md entry this closes; no other
-  follow-up from this rung. `npm run typecheck` unaffected — no `.ts` under
-  `src/` touched, only two new Python files under `tools/`.
-- **Notes:** `git status` was clean before commit (only the two new files).
-  No PAPERCUT — AGENTS.md's mgba-probe test convention
-  (`tools/test_run_mgba_probe.py`) was easy to follow directly.
-
----
-
 ## 1398 — [supervisor wind-down, 2026-08-25 ~14:00] **Instrument + census day: premise-throw audit (50/50 classified; its top finding refuted by supervisor), #127 found+fixed with a stock-ROM receipt, #125 CLOSED (2 levers + a trap-gate regression), soak `--coverage-json` / `--policy coverage-fight` / `--parallel N` landed; ~2,400 varied chains and boot rounds 0 CRASH / 0 HANG; move+effect universe 276/276 + 166/166 executed; all five gates green on the final tree**
 
 - **Final gates on THIS tree (`679b3ade`, supervisor's own runs, all
@@ -66,6 +34,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the five gates above (on `679b3ade`) stand for this tree. **#124
   deleted.** Both sibling ledgers' top entries carry no "For the main
   program" ask.
+- **Round 12 (bonus, after the folds):** `tools/probe/premise-census.py` +
+  `tools/test_premise_census.py` (ts sonnet, 8 min; `835ece9f`, worker
+  ledger note folded here from its own `f7bb5514`): reproducible
+  premise-throw census — reassembles wrapped `throw new <X>Error(...)`
+  messages, attributes the enclosing function, TSV + `--only/--premise/
+  --summary/--exclude-unsupported-branch`; 5/5 tests, ~1.3 s. On this tree
+  `src/engine` = **1,573 sites / 256 premise-worded** (the audit's rg-based
+  1,554 / 235 counted only the literal `Error` class and used a slightly
+  different word list). Weakness to know: exported arrow/const functions
+  attribute as `<anonymous>` (e.g. the Bide canceler site). PAPERCUTS entry
+  deleted. Docs-only + Python; the gates and suites above stand.
 - **Orient state:** master = `dbe18b3d` = `animation-main` tip. The live animation
   supervisor merged master `33592cba` into its branch at 08:48; my fold then
   fast-forwarded master onto that merge — one commit, both branches converge
