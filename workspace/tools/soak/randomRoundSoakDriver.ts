@@ -364,6 +364,18 @@ export type WinningSwitchBenchCandidate = Readonly<{
  * healthy party member remains, or when this same opponent party slot was
  * already switched against once this battle
  * (`alreadySwitchedAgainstThisOpponent` -- the ping-pong guard).
+ *
+ * ISSUES #125 lever 2 widens the trigger for `forcedStruggle` callers (the
+ * active's whole legal fight set is empty -- every slot unusable, the real
+ * forced-Struggle state, mirrored by `battlerUsesForcedStruggle`): a real
+ * player facing forced Struggle switches to ANY bench mon that can still
+ * deal damage, not just a super-effective, >=50%-HP answer, so that branch
+ * drops the HP floor and the >=2x qualifier (any power>0/PP>0/non-0x-immune
+ * move is enough, i.e. `score > 0` from `bestBenchMoveScore`) and bypasses
+ * the ping-pong guard (the guard exists to stop a *preferred* re-switch
+ * against the same foe; here the active is out of PP -- there's no scored
+ * move left to prefer, so ping-pong cannot apply). The `healthyCount <= 1`
+ * floor (nothing to switch to) still applies unconditionally.
  */
 export function pickWinningSwitchRow(input: {
   activeMoveIds: readonly number[];
@@ -372,22 +384,26 @@ export function pickWinningSwitchRow(input: {
   bench: readonly WinningSwitchBenchCandidate[];
   healthyCount: number;
   alreadySwitchedAgainstThisOpponent: boolean;
+  forcedStruggle?: boolean;
 }): 0 | 1 | 2 | null {
   if (input.healthyCount <= 1) return null;
-  if (input.alreadySwitchedAgainstThisOpponent) return null;
-  if (!isWalledActive(input.activeMoveIds, input.activeLegalSlots, input.defenderTypes)) return null;
+  const forcedStruggle = input.forcedStruggle ?? false;
+  if (!forcedStruggle) {
+    if (input.alreadySwitchedAgainstThisOpponent) return null;
+    if (!isWalledActive(input.activeMoveIds, input.activeLegalSlots, input.defenderTypes)) return null;
+  }
   let bestRow: 0 | 1 | 2 | null = null;
   let bestScore = 0;
   for (const candidate of input.bench) {
     if (candidate.active || candidate.fainted) continue;
-    if (Math.floor((100 * candidate.hp) / candidate.maxHp) < 50) continue;
+    if (!forcedStruggle && Math.floor((100 * candidate.hp) / candidate.maxHp) < 50) continue;
     const { score, qualifies } = bestBenchMoveScore(
       candidate.moveIds,
       candidate.types,
       input.defenderTypes,
       candidate.movePp,
     );
-    if (!qualifies) continue;
+    if (!(forcedStruggle ? score > 0 : qualifies)) continue;
     // Ties keep the lower row regardless of `bench` iteration order.
     if (bestRow === null || score > bestScore || (score === bestScore && candidate.row < bestRow)) {
       bestScore = score;
@@ -1900,7 +1916,11 @@ export class RandomPlayer {
    * switch out of a walled matchup, reading only what a real player sees --
    * the active's own legal moves, the opponent's live types, and the
    * bench's known species/moves/PP/HP. Marks the ping-pong guard and bumps
-   * `switchCount` when it commits to a row.
+   * `switchCount` when it commits to a row. ISSUES #125 lever 2: also
+   * detects the forced-Struggle state (every legal slot unusable, same test
+   * the fight-menu phase already uses to name the Struggle move) and passes
+   * it through so `pickWinningSwitchRow` can switch on ANY usable damaging
+   * bench move instead of requiring a super-effective, >=50%-HP answer.
    */
   private computeSwitchRow(
     orch: NonNullable<EngineState["factoryRoundBattleOrchestrator"]>,
@@ -1941,6 +1961,7 @@ export class RandomPlayer {
       bench,
       healthyCount,
       alreadySwitchedAgainstThisOpponent: this.switchedAgainstOpponentIndices.has(opponentPartyIndex),
+      forcedStruggle: battlerUsesForcedStruggle(battle.rules.rulesContext, 0),
     });
     if (row !== null) {
       this.switchedAgainstOpponentIndices.add(opponentPartyIndex);

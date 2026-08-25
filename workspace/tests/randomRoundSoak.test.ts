@@ -973,6 +973,62 @@ describe("Milestone M-B step 2 part C (tightened by part C2): winning switches o
   });
 });
 
+describe("ISSUES #125 lever 2: forced-Struggle (all four slots at 0 PP) widens the switch trigger", () => {
+  const NORMAL: readonly [string, string] = ["TYPE_NORMAL", "TYPE_NORMAL"];
+  const GHOST: readonly [string, string] = ["TYPE_GHOST", "TYPE_GHOST"];
+  // Every slot illegal (0 PP): the real forced-Struggle state.
+  const allZeroPp = { activeMoveIds: [0, 0, 0, 0], activeLegalSlots: [false, false, false, false] };
+
+  it("(a) active all-0-PP + bench mon with a usable damaging move -> switch, even below the 50% HP floor / below the 2x qualifier / with the ping-pong guard already tripped", () => {
+    const row = pickWinningSwitchRow({
+      ...allZeroPp,
+      defenderTypes: NORMAL,
+      bench: [
+        // MOVE_TACKLE (Normal, power 35): only neutral (1x, not >= 2x) vs a
+        // Normal defender, and this candidate is at 10% HP -- both would
+        // disqualify it under the pre-lever-2 walled-switch criteria.
+        { row: 1 as const, fainted: false, active: false, moveIds: [33, 0, 0, 0], movePp: [35, 0, 0, 0], types: NORMAL, hp: 10, maxHp: 100 },
+      ],
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: true,
+      forcedStruggle: true,
+    });
+    expect(row).toBe(1);
+  });
+
+  it("(b) active all-0-PP + bench with only 0-PP or 0x-immune moves -> no switch", () => {
+    const row = pickWinningSwitchRow({
+      ...allZeroPp,
+      defenderTypes: GHOST,
+      bench: [
+        // MOVE_TACKLE is 0x-immune vs Ghost even with PP.
+        { row: 1 as const, fainted: false, active: false, moveIds: [33, 0, 0, 0], movePp: [35, 0, 0, 0], types: NORMAL, hp: 100, maxHp: 100 },
+        // MOVE_LICK would be super-effective vs Ghost, but it's out of PP.
+        { row: 2 as const, fainted: false, active: false, moveIds: [122, 0, 0, 0], movePp: [0, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
+      ],
+      healthyCount: 3,
+      alreadySwitchedAgainstThisOpponent: false,
+      forcedStruggle: true,
+    });
+    expect(row).toBeNull();
+  });
+
+  it("(c) active with any usable damaging move (not forced-Struggle) -> today's behaviour unchanged, no switch despite a qualifying bench", () => {
+    const row = pickWinningSwitchRow({
+      activeMoveIds: [33, 0, 0, 0], // MOVE_TACKLE, neutral 1x vs Water, legal (has PP) -- not walled
+      activeLegalSlots: [true, false, false, false],
+      defenderTypes: ["TYPE_WATER", "TYPE_WATER"],
+      bench: [
+        { row: 1 as const, fainted: false, active: false, moveIds: [122, 0, 0, 0], movePp: [10, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
+      ],
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+      forcedStruggle: false,
+    });
+    expect(row).toBeNull();
+  });
+});
+
 describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK = frame budget reached while progressing, HANG = no progress for stallFrames", () => {
   // The engine half (fd30ee13) made the terminal record prompt's YES and
   // B-cancel answers continue exactly like NO, so a decided round now
