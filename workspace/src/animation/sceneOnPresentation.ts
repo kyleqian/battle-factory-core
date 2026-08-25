@@ -902,6 +902,11 @@ import {
   type SweetScentState,
 } from "./sweetScent.ts";
 import {
+  defenseCurlAtAge,
+  type DefenseCurlProfile,
+  type DefenseCurlState,
+} from "./defenseCurl.ts";
+import {
   lovelyKissAtAge,
   type LovelyKissProfile,
   type LovelyKissState,
@@ -2576,6 +2581,19 @@ export interface SceneOnSweetScentConfig {
   readonly animationProfile: Readonly<SweetScentProfile>;
 }
 
+/**
+ * Defense Curl's visual body only. The controller supplies the source picture
+ * coordinate and ordinary attacker subpriority from the live field sprites;
+ * this seam never resolves a stat stage, damage, or battle outcome.
+ */
+export interface SceneOnDefenseCurlConfig {
+  readonly move: "DEFENSE_CURL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<DefenseCurlProfile>;
+}
+
 /** Lovely Kiss presentation only; sleep/status mutation remains battle-owned. */
 export interface SceneOnLovelyKissConfig {
   readonly move: "LOVELY_KISS";
@@ -3305,6 +3323,7 @@ export type SceneOnMoveConfig =
   | SceneOnRoarConfig
   | SceneOnSweetKissConfig
   | SceneOnSweetScentConfig
+  | SceneOnDefenseCurlConfig
   | SceneOnLovelyKissConfig
   | SceneOnAttractConfig
   | SceneOnSporeConfig
@@ -3497,6 +3516,8 @@ export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
 export type SceneOnSweetScentPresentationState =
   SceneOnMovePresentationState<SceneOnSweetScentConfig>;
+export type SceneOnDefenseCurlPresentationState =
+  SceneOnMovePresentationState<SceneOnDefenseCurlConfig>;
 export type SceneOnLovelyKissPresentationState =
   SceneOnMovePresentationState<SceneOnLovelyKissConfig>;
 export type SceneOnOctazookaPresentationState =
@@ -7586,6 +7607,11 @@ export interface SceneOnSweetScentView extends SweetScentState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnDefenseCurlView extends DefenseCurlState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnLovelyKissView extends LovelyKissState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -7625,6 +7651,24 @@ export function sceneOnSweetScentView(
     ...sweetScentAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.animationProfile,
+    ),
+  };
+}
+
+/** `age=0` is Move_DEFENSE_CURL's first retained active source-script row. */
+export function sceneOnDefenseCurlView(
+  state: SceneOnDefenseCurlPresentationState,
+): SceneOnDefenseCurlView {
+  if (state.config.move !== "DEFENSE_CURL") {
+    throw new Error(`expected DEFENSE_CURL presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...defenseCurlAtAge(
+      state.age,
       state.config.attacker.geometry.animationCenter,
       state.config.animationProfile,
     ),

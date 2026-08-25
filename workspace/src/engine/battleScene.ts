@@ -610,6 +610,7 @@ import singAsset from "../animation/assets/sing.json" with { type: "json" };
 import teeterDanceAsset from "../animation/assets/teeter-dance.json" with { type: "json" };
 import bellyDrumAsset from "../animation/assets/belly-drum.json" with { type: "json" };
 import sweetScentAsset from "../animation/assets/sweet-scent.json" with { type: "json" };
+import defenseCurlAsset from "../animation/assets/defense-curl.json" with { type: "json" };
 import batonPassAsset from "../animation/assets/baton-pass.json" with { type: "json" };
 import rainDropsAsset from "../animation/assets/rain-drops.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
@@ -998,6 +999,7 @@ import {
   sceneOnRoarView,
   sceneOnSweetKissView,
   sceneOnSweetScentView,
+  sceneOnDefenseCurlView,
   sceneOnLovelyKissView,
   sceneOnOctazookaView,
   sceneOnSpikesView,
@@ -1154,6 +1156,7 @@ import {
   type SceneOnTeeterDanceConfig,
   type SceneOnBellyDrumConfig,
   type SceneOnSweetScentConfig,
+  type SceneOnDefenseCurlConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   SPITE_CLONE_BLANK_POINTER_AGE,
@@ -2132,6 +2135,9 @@ const bellyDrumArt = bellyDrumAsset as {
 };
 const sweetScentArt = sweetScentAsset as {
   pinkPetal: { tileset: Tileset; palette: RgbColor[] };
+};
+const defenseCurlArt = defenseCurlAsset as {
+  eclipsingOrb: { tileset: Tileset; palette: RgbColor[] };
 };
 
 
@@ -14294,6 +14300,135 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "DEFENSE_CURL") {
+    const curlState = state as SceneOnMovePresentationState<SceneOnDefenseCurlConfig>;
+    const view = sceneOnDefenseCurlView(curlState);
+    // OAM/OBJ-palette state reaches scanout from RAM+1, while the live
+    // attacker's affine matrix has the independently measured RAM+2 handoff.
+    // Keep those two latches distinct: the source task itself is pure age and
+    // live picture geometry, never a recorded frame or battle clock.
+    const displayedOam = sceneOnDefenseCurlView({
+      ...curlState,
+      age: curlState.age - 1,
+    });
+    const displayedMatrix = sceneOnDefenseCurlView({
+      ...curlState,
+      age: curlState.age - 2,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) {
+      throw new Error(`DEFENSE_CURL missing ${view.attacker.species} attacker art`);
+    }
+    if (!targetSource) {
+      throw new Error(`DEFENSE_CURL missing ${view.target.species} target art`);
+    }
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const attackerPalette = displayedOam.attackerPalette === "grayscale"
+      ? grayscalePalette(attackerSource.palette)
+      : attackerSource.palette;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const drawAttacker = () => {
+      const corner = {
+        x: view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+        y: view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+      };
+      if (displayedOam.deformation.affineDouble) {
+        drawSpriteSheetAffineStretch(
+          fb,
+          attackerTileset,
+          attackerPalette,
+          corner.x,
+          corner.y,
+          displayedMatrix.deformation.xScale,
+          displayedMatrix.deformation.yScale,
+          displayedOam.deformation.y2,
+          { r: 0, g: 0, b: 0 },
+          0,
+          true,
+        );
+      } else {
+        drawSpriteSheet(fb, attackerTileset, attackerPalette, corner.x, corner.y);
+      }
+    };
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetTileset,
+      targetSource.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const drawOrb = () => {
+      const orb = displayedOam.orb;
+      if (!orb) return;
+      const draw = orb.hFlip ? drawSpriteSheetHFlip : drawSpriteSheet;
+      draw(
+        fb,
+        subTileset(defenseCurlArt.eclipsingOrb.tileset, orb.sourceCell / 4, 4),
+        defenseCurlArt.eclipsingOrb.palette,
+        orb.x - 16,
+        orb.y - 16,
+      );
+    };
+    // The orb's subpriority is attacker-2 in both orientations. It is below
+    // the attacker itself and above the opposing player-side battler.
+    if (playerAttacker) {
+      drawOrb();
+      drawAttacker();
+      drawTarget();
+    } else {
+      drawTarget();
+      drawOrb();
+      drawAttacker();
+    }
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies,
+      level: 50,
+      gender: curlState.config.fieldProfile.opponentGender ?? "male",
+      hpFraction: curlState.config.fieldProfile.opponentHp
+        / curlState.config.fieldProfile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies,
+      level: 50,
+      gender: curlState.config.fieldProfile.playerGender ?? "male",
+      hpFraction: curlState.config.fieldProfile.playerHp
+        / curlState.config.fieldProfile.playerMaxHp,
+      status: "none",
+      currentHp: curlState.config.fieldProfile.playerHp,
+      maxHp: curlState.config.fieldProfile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "DEFENSE CURL!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "SWEET_SCENT") {
     const sweetState = state as SceneOnMovePresentationState<SceneOnSweetScentConfig>;
     const view = sceneOnSweetScentView(sweetState);
