@@ -391,19 +391,17 @@ two ALLOW_PTR stat-lower attempts on the same battler inside one action —
 Intimidate's loop hits one target in singles, and this registration's scope is
 single-stat moves. No Level-50 singles separating input exists; recorded, not filed.
 
-### Everything else — UNVERIFIED, with the exact unread sites
-Source inventory below is complete (produced by the §Method sweep); the
-engine column names where to start, from `docs/ability-item-parity-census.md`
-plus this session's `rg`.
-
-- **Trapping.** Source: `src/battle_ai_switch_items.c:443-451`,
-  `src/battle_ai_script_commands.c:1369-1376` and `:1420-1425`,
-  `src/battle_main.c:4046,4056,4064,4248-4252`. Engine starts:
-  `factoryAiSwitchPolicy.ts:54,254`, `battleScriptSwitchinOpcode.ts:902-908`,
-  `factoryBattleScriptFullTurnDecision.ts:2104`.
-  Note `src/battle_ai_switch_items.c:445`'s stock comment "Misses the flying
-  type and Levitate check" — Arena Trap's AI half really does trap Flying/
-  Levitate mons; a port that fixed it would be DIVERGENT.
+### Trapping — ARENA_TRAP (6), SHADOW_TAG (3) — SOURCE-EXACT
+| Source | Engine | Note |
+| --- | --- | --- |
+| `src/battle_ai_switch_items.c:439-453` (`ShouldSwitch` hard prefix) | `src/engine/factoryAiSwitchPolicy.ts:230-260` (`factoryAiSwitchHardGates`) | Order preserved: wrapped/escape-prevention → rooted → `ABILITY_ON_OPPOSING_FIELD(SHADOW_TAG)` → `ABILITY_ON_OPPOSING_FIELD(ARENA_TRAP)` → Magnet Pull+Steel → Battle Arena. **The stock comment at `:445` ("Misses the flying type and Levitate check") is faithful in the port** — `{ name: "arena-trap", blocked: target.ability === ARENA_TRAP }` (`:248`) has no Flying/Levitate exception, and the port carries the source comment verbatim at `:247`. A port that "fixed" it would be DIVERGENT; it did not. |
+| `src/battle_ai_script_commands.c:1359-1402` (`Cmd_get_ability`) | `src/engine/factoryAiCheckViability.ts:8418-8442` | Source order — history cache → the three trapper abilities read straight off `gBattleMons` → one-ability species → two-ability `Random() & 1` (**one draw**) → the `abilities[1]` dead branch — is reproduced exactly, `known` first, trapper second. |
+| `src/battle_ai_script_commands.c:1408-1430` (`Cmd_check_ability`) | `src/engine/factoryAiCheckBadMove.ts:770-780` | Same ladder for the boolean form. **Order nuance:** `factoryAiCheckBadMove.ts:720-725` (`nextGetAbilityDraw`) and `:772-776` test `TRAPPER_ABILITIES` **before** `knownAbility`, the reverse of source. Currently indistinguishable — `ClearBattlerAbilityHistory` runs on every switch-in and faint (`src/battle_main.c:3260`, `:3354`), and every ordinary `RecordAbilityBattle` call site writes the battler's *own* ability, so a nonzero history cell always equals the real ability. It stops being indistinguishable the moment finding **F1** below is fixed; see F2. |
+| `src/battle_main.c:4043-4070` (run-away legality, `BATTLE_RUN_FAILURE`) | `src/engine/battleScriptSwitchinOpcode.ts:903-957` | Same nested scan: per candidate battler, Shadow Tag first then Arena Trap (the latter **with** the Levitate/Flying exception the AI half lacks), first match wins; then the separate `ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER` Magnet Pull scan whose **last** (highest-index) holder wins and which writes `gLastUsedAbility` even when the escaper is not Steel (`:929-944`). `gBattleScripting.battler` ↔ `scriptingBattler`, `B_MSG_PREVENTS_ESCAPE` ↔ `multistringChooser`. |
+| `src/battle_main.c:4240-4256` (`B_ACTION_SWITCH` party-menu legality) | `src/engine/factoryBattleScriptFullTurnDecision.ts:2088-2114` (`isVoluntarySwitchTrapped`) + `:2125-2135` | Source's `||` chain — Shadow Tag, then Arena Trap **gated on `!Flying && ability != LEVITATE`**, then Magnet Pull+Steel — is ported verbatim, and `legalCommandDecisions` correctly routes the **player** through this gate and the **AI** through `isFactoryAiSwitchPrecheckBlocked` (the Flying/Levitate-less one). The wrapped/arena/rooted prefix matches too. |
+| `data/battle_ai_scripts.s:2838` (`AI_DoubleBattleSkillSwap`, Shadow Tag → `Score_Plus2`) | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50** — doubles-only dispatch. |
+| `data/battle_ai_scripts.s:3211-3222` (`AI_Roaming`: Shadow Tag / Arena Trap gates on `flee`) | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50** — the roaming-Pokémon AI (Latias/Latios overworld encounters), never selected for a Frontier trainer battle. |
+| `src/wild_encounter.c:521` (Arena Trap wild-encounter rate) | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50** — overworld. |
 
 ---
 
