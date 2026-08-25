@@ -39,11 +39,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   lever 2 (switch when no usable PP). (3) Census batch A (six `--vary-rng`
   full-chain sweeps, `--render-every 64`, 0:100 each — winning-swap c14/c28,
   winning-coverage c0/c14, full c0/c14): in flight, 0 CRASH / 0 HANG so far.
-- **In flight:** side opus — soak `--coverage-json` instrument (which
-  moves/effects/species/abilities/items the chains actually exercise vs the
-  L50 corpus; `worker/side-20260825-094448`); ts — #127 fix next.
-- **Next:** verify + fold both; aim census batch B with the coverage report;
-  #125 lever 2 (filler); wind-down: five gates + full suite on the final tree.
+- **Did (rounds 4-5):** (4) **#127 FIXED** (ts opus, 48 min, $5.1;
+  `f018c5b8` fix + 3 mutation-checked pins + lab scenario, `6f1d4717`
+  ground truth): the stock ROM DOES open the party screen twice inside one
+  Baton Pass action (`playerControllerCommand` 22 at frames 880 and 2220,
+  no turn boundary; recipe: Aipom Swords Dance → Cloyster SPIKES ×4 → Baton
+  Pass to Shedinja, whose 1 max HP makes any layer lethal — real damage
+  only); the #89 resume now republishes the second forced switch like the
+  #119 dance path; passed stages do NOT chain past the KO; second switch
+  spends no RNG. Full suite 1,126 / 10,473 / 224 on `f018c5b8`, build green.
+  **#127 deleted.** (5) **Soak coverage instrument** (side opus, killed by
+  a sibling's pattern kill — see below — with the work committed
+  `91938de7` → merge `4aa81ff5`): `--coverage-json` aggregates executed
+  moves/effects (from `STRINGID_USEDMOVE` resolution receipts, both sides),
+  species seen, abilities/items PRESENT at battle start, vs the L50 corpus
+  (740 sets: 276 moves / 166 effects / 264 species / 71 abilities / 40
+  items); 8 pins. Demos: 50 `winning-coverage --first-round` seeds → moves
+  169/276, effects 110/166, species 134/264; 5 `winning` full chains →
+  **223/276 moves, 139/166 effects, 155/264 species, 64/71 abilities, 36/40
+  items**. One tsc error in its test (vitest does not typecheck) fixed by me
+  (`ba325c4b`).
+- **Incident:** the #127 worker ran `pkill -f "randomRoundSoak"` three
+  times (10:08/10:23/10:33) to stop its own over-long gates; the pattern
+  killed all ten in-flight census sweeps AND the coverage worker (its brief
+  text matched; SIGTERM 143 at 23 of 50 min). Batch A's four winning-like
+  sweeps stood at 83/100 each, 0 CRASH / 0 HANG; batch B at 12-20 seeds.
+  Relaunched from the last completed seed at 10:37; three PAPERCUTS entries
+  (`bfc91c90`); briefs now forbid pattern kills and cap soak runs at ~3 min.
+- **In flight:** side sonnet — #125 lever 2 (switch when the active has no
+  usable PP; `worker/side-20260825-103801`); census batch A tails (83:100
+  ×4) + batch B (winning c0/c14/c28 + winning-swap c0 at 113:200,
+  winning-coverage c28 13:100, full c28 21:100), all with `--coverage-json`.
+- **Next:** fold #125 lever 2; union coverage report over batch B → aim the
+  next census; wind-down: five gates + full suite on the final tree.
 
 ---
 
