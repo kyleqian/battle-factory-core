@@ -43,6 +43,8 @@ pub mod battle_script_negativedamage;
 pub mod battle_script_negativedamage_vectors_gen;
 pub mod battle_script_normalisebuffs;
 pub mod battle_script_normalisebuffs_vectors_gen;
+pub mod battle_script_orword;
+pub mod battle_script_orword_vectors_gen;
 pub mod battle_script_painsplit;
 pub mod battle_script_painsplit_vectors_gen;
 pub mod battle_script_recoverbasedonsunlight;
