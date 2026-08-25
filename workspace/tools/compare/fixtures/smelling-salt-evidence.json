@@ -3,9 +3,9 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_SMELLING_SALT",
   "moveId": 265,
-  "status": "unsupported",
-  "coverageCredit": false,
-  "repeatability": {"runsPerOrientation": 2, "allMatched": true},
+  "status": "exact",
+  "coverageCredit": true,
+  "repeatability": {"runsPerOrientation": 3, "allMatched": true},
   "orientations": {
     "player-back": {
       "scenario": "tools/battle-lab/mechanic-smelling-salt-player-granbull-opponent-onix.json",
@@ -16,6 +16,8 @@
       "rawRgbArchive": "tools/compare/evidence/smelling-salt-player-raw-rgb.tar.gz",
       "rawRgbArchiveSha256": "eaf7472440ea7a477220f47f49e1643df2b2f9af43132978327f769930fcd01d",
       "rawRgbSequenceSha256": "5370587f8f5ed6a571ab70882f08c4fbd93df5b7d9c11ac0670459998d206b84",
+      "changeMap": "tools/compare/evidence/smelling-salt-changemap-player.txt",
+      "changeMapSha256": "d6f05e71fe1b3665b8b2ebca7ecd77fea3571ef6d01d70c7cd21decba591c7fe",
       "window": {"startFrame": 218, "endFrame": 338, "frameCount": 121}
     },
     "opponent-front": {
@@ -27,6 +29,8 @@
       "rawRgbArchive": "tools/compare/evidence/smelling-salt-opponent-raw-rgb.tar.gz",
       "rawRgbArchiveSha256": "857c1846f5cd2220dcb2801dbf79098f446323691e2b74e8e16009f1ada3295f",
       "rawRgbSequenceSha256": "758f00a7440feb4b661dd0264d126b761d0f16bde79b305bce7a34dfa5936236",
+      "changeMap": "tools/compare/evidence/smelling-salt-changemap-opponent.txt",
+      "changeMapSha256": "009e32d5dd744ad43e47182e3c492dc99fc772072a5827f1149050e7675a7b82",
       "window": {"startFrame": 218, "endFrame": 338, "frameCount": 121}
     }
   },
@@ -45,5 +49,15 @@
     "boundaryControls": ["MOVE_FACADE", "MOVE_SCREECH", "MOVE_METAL_SOUND"],
     "statusesChanged": false
   },
-  "boundedRemainder": "Deterministic SMELLINGSALT_EFFECT extraction, typed Scene-ON seam, generic compositor, normalized framebuffer change maps, and 242/242 zero-residual core.ts production framebuffer acceptance remain. MOVE_SMELLING_SALT stays non-promoted."
+  "acceptance": {
+    "sourceReducerRows": "121/121 each",
+    "typedSeamRows": "121/121 each",
+    "rawRgbRows": "121/121 each",
+    "changeMapRows": "121/121 each",
+    "productionFramebufferRows": "121/121 each",
+    "totalProductionRows": "242/242",
+    "residualPixels": 0,
+    "firstInactiveCleanupIncluded": true,
+    "genericSpeciesCompositor": true
+  }
 }

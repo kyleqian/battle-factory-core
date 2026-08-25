@@ -2,7 +2,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
 import {
   createSceneOnMovePresentation,
@@ -89,6 +89,31 @@ function rowsFor(orientation: SmellingSaltOrientation): readonly DenseRow[] {
     throw new Error(orientation + " raw RGB sequence drifted");
   }
   return (JSON.parse(probeJson.toString("utf8")) as { frames: DenseRow[] }).frames;
+}
+
+function verifyChangeMap(
+  orientation: SmellingSaltOrientation,
+  rows: readonly DenseRow[],
+  rgbRoot: string,
+): void {
+  const item = receipt.orientations[orientation];
+  const first = rows[0];
+  if (!first) throw new Error(orientation + " empty change-map window");
+  const rgbDir = dirname(findRgb(
+    rgbRoot,
+    String(first.frame).padStart(5, "0") + ".rgb",
+  ));
+  const generated = execFileSync(
+    "python3",
+    [resolve(root, "tools/compare/frame-changemap.py"), rgbDir],
+    { cwd: root, encoding: "utf8" },
+  ).split("\n");
+  generated[0] = `# smelling-salt-${orientation === "player-back" ? "player" : "opponent"} raw RGB888 — 121 frames, 240x160`;
+  const normalized = generated.join("\n");
+  const retained = readFileSync(resolve(root, item.changeMap), "utf8");
+  if (normalized !== retained || sha256(retained) !== item.changeMapSha256) {
+    throw new Error(orientation + " normalized change map drifted");
+  }
 }
 
 function battler(
@@ -219,6 +244,7 @@ export function verifySmellingSaltFramebuffer(): readonly Readonly<{
   componentRows: 121;
   seamRows: 121;
   rawRgbRows: 121;
+  changeMapRows: 121;
   framebufferRows: 121;
   residualPixels: 0;
 }>[] {
@@ -234,6 +260,7 @@ export function verifySmellingSaltFramebuffer(): readonly Readonly<{
       "-C",
       scratch,
     ]);
+    verifyChangeMap(orientation, rows, scratch);
     const compared = compareSmellingSaltRows(orientation, rows, scratch);
     if (compared.failures.length > 0) {
       throw new Error(
@@ -247,6 +274,7 @@ export function verifySmellingSaltFramebuffer(): readonly Readonly<{
       componentRows: 121 as const,
       seamRows: 121 as const,
       rawRgbRows: 121 as const,
+      changeMapRows: 121 as const,
       framebufferRows: compared.matched as 121,
       residualPixels: compared.residualPixels as 0,
     });

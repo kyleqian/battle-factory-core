@@ -1,3 +1,11 @@
+# MOVE_SMELLING_SALT bilateral exact production presentation (2026-08-25 worker)
+
+- **State:** Level 50 advances **208→209/276 exact**, remains **0 partial / 0 staged**, and drops **68→67 unsupported**. MOVE_SMELLING_SALT alone promotes and `smelling-salt-hand-squish-effect` is fulfilled; Encore, Helping Hand, Facade, Screech, and Metal Sound retain independent exact status with no sibling credit.
+- **Did:** Deterministically extracted the exclusive SMELLINGSALT_EFFECT art/palette and byte-checked the reused TAG_HAND tiles 16..31 against Encore instead of duplicating them. Added the narrow typed Scene-ON seam and ordinary generic live-species compositor with source positions, front/back geometry, OAM painter order/hFlip, two target squishes, short ShakeMon2, exclamation visibility, generic shadow/chrome/healthboxes, and cleanup. No pair/evidence gate, production recording/RGB lookup, absolute battle tick, or gameplay/damage/RNG/controller/turn/round/facility ownership was added.
+- **Verified:** Player-back and opponent-front each pass **121/121** retained source/reducer/seam/raw-RGB/normalized-change-map and actual `core.ts → renderSceneOnMovePresentation` framebuffer rows through first inactive cleanup: **242/242 total, zero residual pixels**. A third fresh Scene-ON replay per orientation is byte-identical for all dense state and **121/121** per-row raw RGB hashes. OAM/palette RAM+1 remain **120/120** each; complete affine matrices and task-owned squish state fit RAM+2 **119/119 eligible**.
+- **Next:** Select the next bounded unsupported move/component track; do not infer acceptance from TAG_HAND or ShakeMon2 reuse.
+- **Notes:** `ANIMATION_LATCHES.md` stays unchanged because the measured prepared-affine split confirms its existing class. Source/evidence/reducer/seam/framebuffer/control/boundary/inventory, typecheck, animation audit/coverage, full tests, build, and diff checks are green at handoff.
+
 # MOVE_SMELLING_SALT bilateral source/reducer evidence checkpoint — unsupported (2026-08-25 worker)
 
 - **State:** Level 50 remains **208/276 exact, 0 partial / 68 unsupported**. MOVE_SMELLING_SALT receives no exact or move-acceptance credit; Encore, Helping Hand, Facade, Screech, and Metal Sound retain their independent statuses.

@@ -1796,6 +1796,39 @@
    ]
   },
   {
+   "move": "MOVE_SMELLING_SALT",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 parties use the lowest carrier FRONTIER_MON_GRANBULL_1 (set 376) against ONIX with all four active slots constrained to SMELLING_SALT; player-back and opponent-front each retain the complete 121-row source-pointer window through first inactive cleanup and match a third fresh Scene-ON replay byte-for-byte",
+    "the source-derived reducer ports both hand sprites, the two AnimTask_SmellingSaltsSquish passes, the short AnimTask_ShakeMon2 target shake, and blinking exclamation lifecycle; deterministic extraction owns only ANIM_TAG_SMELLINGSALT_EFFECT while the hand cell is byte-checked against the existing TAG_HAND Encore asset rather than duplicated",
+    "the narrow typed seam and ordinary live-species compositor use generic front/back art and geometry, source target position attributes, hFlip, painter order, affine target squish/y2, short shake, exclamation, audio-independent field chrome and healthboxes, and complete cleanup without any carrier-pair gate, recording import, framebuffer lookup, absolute battle tick, gameplay, damage, RNG, controller, turn, round, or facility ownership",
+    "ordinary effect OAM and palette scanout prove RAM+1 on 120/120 comparable rows per orientation; prepared affine matrices and task-owned squish x2/y2 prove RAM+2 on all 119 eligible rows, with the ShakeMon2 creation write visible on its creation display before the steady RAM+2 cadence",
+    "actual core.ts through renderSceneOnMovePresentation matches player-back 121/121 plus opponent-front 121/121 = 242/242 retained raw RGB frames with zero residual pixels, including normalized bilateral change maps and the first inactive cleanup row",
+    "MOVE_ENCORE and MOVE_HELPING_HAND remain independent exact TAG_HAND controls, MOVE_FACADE remains the adjacent-body exact control, and MOVE_SCREECH/MOVE_METAL_SOUND remain independent exact ShakeMon2 controls; none receives sibling credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-smelling-salt-player-granbull-opponent-onix.json",
+    "tools/battle-lab/mechanic-smelling-salt-opponent-granbull-player-onix.json",
+    "tools/compare/fixtures/smelling-salt-evidence.json",
+    "tools/compare/evidence/smelling-salt-player-dense-state.json.gz",
+    "tools/compare/evidence/smelling-salt-opponent-dense-state.json.gz",
+    "tools/compare/evidence/smelling-salt-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/smelling-salt-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/smelling-salt-changemap-player.txt",
+    "tools/compare/evidence/smelling-salt-changemap-opponent.txt",
+    "tools/compare/smellingSaltProbe.py",
+    "tools/compare/extractSmellingSaltAssets.ts",
+    "tools/compare/smellingSaltFramebuffer.ts",
+    "src/animation/assets/smelling-salt.json",
+    "src/animation/smellingSalt.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/smellingSalt.test.ts",
+    "tests/animation/smellingSaltEvidence.test.ts",
+    "tests/animation/smellingSaltFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_FAKE_OUT",
    "status": "exact",
    "covered": [
@@ -5748,8 +5781,8 @@
     "task:AnimTask_SmellingSaltsSquish"
    ],
    "representatives": ["MOVE_SMELLING_SALT"],
-   "fulfilled": false,
-   "goal": "PARTIAL: complete twice-fresh bilateral source/component evidence and a pure reducer exist, but the deterministic effect-art extraction, typed seam, generic compositor, normalized change maps, and 242/242 zero-residual shared production framebuffer acceptance remain. TAG_HAND and ShakeMon2 reuse conveys no MOVE_ENCORE or MOVE_HELPING_HAND credit."
+   "fulfilled": true,
+   "goal": "FULFILLED by MOVE_SMELLING_SALT bilateral 242/242 zero-residual shared-production acceptance through first inactive cleanup. Exclusive effect art is source-extracted; reused TAG_HAND bytes are checked without duplicate ownership. MOVE_ENCORE, MOVE_HELPING_HAND, MOVE_FACADE, MOVE_SCREECH, and MOVE_METAL_SOUND remain independent exact controls and receive no sibling credit."
   },
   {
    "id": "seed-projectile-leech-seed",

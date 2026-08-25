@@ -8,20 +8,24 @@ import { createScratchDir } from "../../tools/lib/scratch.ts";
 const sha = (value: Uint8Array) => createHash("sha256").update(value).digest("hex");
 const receipt = JSON.parse(readFileSync("tools/compare/fixtures/smelling-salt-evidence.json", "utf8"));
 
-describe("MOVE_SMELLING_SALT bilateral evidence checkpoint", () => {
-  it("pins complete twice-fresh legal Scene-ON windows without promotion", () => {
+describe("MOVE_SMELLING_SALT bilateral exact evidence", () => {
+  it("pins complete thrice-fresh legal Scene-ON windows and production acceptance", () => {
     expect(receipt).toMatchObject({
-      move: "MOVE_SMELLING_SALT", status: "unsupported", coverageCredit: false,
-      repeatability: { runsPerOrientation: 2, allMatched: true },
+      move: "MOVE_SMELLING_SALT", status: "exact", coverageCredit: true,
+      repeatability: { runsPerOrientation: 3, allMatched: true },
       measured: { pointerRows: "121/121 each", firstInactiveAge: 120,
         oamPredecessor: "120/120 each", matrixTwoRows: "119/119 eligible each",
         palettePredecessor: "120/120 each", gameplayRngTransitions: 0,
         animationRngTransitions: 120 },
+      acceptance: { productionFramebufferRows: "121/121 each",
+        totalProductionRows: "242/242", residualPixels: 0,
+        firstInactiveCleanupIncluded: true, genericSpeciesCompositor: true },
     });
     for (const item of Object.values(receipt.orientations) as any[]) {
       const compressed = readFileSync(item.denseState);
       expect(sha(compressed)).toBe(item.denseStateSha256);
       expect(sha(gunzipSync(compressed))).toBe(item.probeJsonSha256);
+      expect(sha(readFileSync(item.changeMap))).toBe(item.changeMapSha256);
       const scenario = JSON.parse(readFileSync(item.scenario, "utf8"));
       expect(scenario).toMatchObject({ mode: "mechanicLab", profile: "battle-scene-on", level: 50 });
       expect(scenario.overrides.parties.player).toHaveLength(3);
