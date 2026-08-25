@@ -17,41 +17,6 @@ backlog.
 
 # Open
 
-## #127 — `factoryBattleScriptFullTurnDecision.ts:2564` crashes on a second forced switch inside a mid-action resume (Baton Pass into a Spikes KO; #119's shape on the #89 resume path)
-
-**Found 2026-08-25** by the premise-throw audit
-(`docs/premise-throw-audit-2026-08-25.md` §4 item 2 / §5 Draft F; the
-audit's other four drafts were refuted on verification and are withdrawn
-there). **Symptom:** the ISSUES-#89 mid-action resume (`resumeAt`
-`"run-action1"`/`"run-action2"`) re-runs a halted move script with
-`runScriptToOwnEnd` (`src/engine/factoryBattleScriptFullTurnDecision.ts:2559`)
-and `throw`s "move-action resume unexpectedly halted on a second
-player-choice-required opcode" (`:2562-2566`) when that run halts again on
-`openpartyscreen`'s player branch — a CRASH on a state the fainted-dance
-sibling twenty lines later (`:2588-2621`, ISSUES #119) republishes as an
-ordinary second forced-switch boundary.
-**Confirmed from the reference:** `BattleScript_EffectBatonPass` ends in
-`switchineffects BS_ATTACKER` (`data/battle_scripts_1.s:1713`);
-`Cmd_switchineffects` (`battle_script_commands.c:5219`) applies Spikes under
-the `:5228-5231` guard and selects the damage script by its own operand at
-`:5248-5253`, so the passed-to mon takes `BattleScript_SpikesOnAttacker` →
-`tryfaintmon_spikes BS_ATTACKER, BattleScript_SpikesOnAttackerFainted` →
-`goto BattleScript_HandleFaintedMon` (`:3390-3400`) → `openpartyscreen
-BS_FAINTED` — a second player choice inside the same script run. The port
-models the branch (`src/engine/battleScriptSwitchinOpcode.ts:1143-1160`
-picks `"BattleScript_SpikesOnAttacker"` at `:1155`) and then throws at the
-seam. Reach: a player Baton Pass onto a bench mon whose HP is at or below
-the Spikes damage (`maxHP/8` per layer, up to 3 layers) while the opponent
-has laid Spikes — rare under the `winning` policies (Baton Pass has power 0)
-but ordinary under `full`/random play.
-**Fix shape:** the throw — republish the pending bundle the way `:2588-2621`
-does, preserving this pause's own `resumeAt` and its banked
-`pendingSecondAction`; Tier-1-pin two forced-switch boundaries in one run
-and the resumed completion; oracle-stage the recipe (`mechanicLab`
-`overrides.parties`: opponent slots SPIKES-only, player lead BATON_PASS,
-bench mon pre-chipped by real damage) to confirm the ROM asks for the second
-switch inside the same script and to pin message/RNG order.
-
 ## #124 — core-rs `factory_ai_check_viability.rs` still drops SemiInvulnerable5's speed-tie receipt (the Rust mirror of the fixed #122)
 
 **Found 2026-08-24** while fixing #122 on the TS side. `SemiInvulnerable5`
