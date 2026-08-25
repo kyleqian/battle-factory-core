@@ -613,6 +613,7 @@ import bellyDrumAsset from "../animation/assets/belly-drum.json" with { type: "j
 import sweetScentAsset from "../animation/assets/sweet-scent.json" with { type: "json" };
 import defenseCurlAsset from "../animation/assets/defense-curl.json" with { type: "json" };
 import meanLookAsset from "../animation/assets/mean-look.json" with { type: "json" };
+import smellingSaltAsset from "../animation/assets/smelling-salt.json" with { type: "json" };
 import batonPassAsset from "../animation/assets/baton-pass.json" with { type: "json" };
 import rainDropsAsset from "../animation/assets/rain-drops.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
@@ -899,6 +900,7 @@ import {
   sceneOnSupersonicView,
   sceneOnMetalSoundView,
   sceneOnScreechView,
+  sceneOnSmellingSaltView,
   sceneOnLeerView,
   sceneOnWaterGunView,
   sceneOnAcidView,
@@ -1163,6 +1165,7 @@ import {
   type SceneOnSweetScentConfig,
   type SceneOnDefenseCurlConfig,
   type SceneOnMeanLookConfig,
+  type SceneOnSmellingSaltConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   SPITE_CLONE_BLANK_POINTER_AGE,
@@ -1838,6 +1841,9 @@ const metalSoundArt = metalSoundAsset as {
 };
 const screechArt = screechAsset as {
   purpleRing: { tileset: Tileset; palette: RgbColor[] };
+};
+const smellingSaltArt = smellingSaltAsset as {
+  exclamation: { tileset: Tileset; palette: RgbColor[] };
 };
 const waterGunArt = waterGunAsset as {
   smallBubbles: { tileset: Tileset; palette: RgbColor[] };
@@ -32180,6 +32186,176 @@ export function renderSceneOnMovePresentation(
       fb,
       playerAttacker ? playerSpecies + " used" : "Foe " + opponentSpecies + " used",
       "SCREECH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SMELLING_SALT") {
+    const saltState = {
+      ...state,
+      config: state.config,
+    } satisfies SceneOnMovePresentationState<SceneOnSmellingSaltConfig>;
+    const view = sceneOnSmellingSaltView(saltState);
+    // Ordinary OAM and OBJ palettes scan out from the preceding source row.
+    // The prepared live-target affine matrix is the independently measured
+    // RAM+2 class; do not collapse these into one display-age coefficient.
+    const displayedOam = sceneOnSmellingSaltView({
+      ...saltState,
+      age: saltState.age - 1,
+    });
+    const displayedMatrix = sceneOnSmellingSaltView({
+      ...saltState,
+      age: saltState.age - 2,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) {
+      throw new Error("SMELLING_SALT missing " + view.attacker.species + " attacker art");
+    }
+    if (!targetSource) {
+      throw new Error("SMELLING_SALT missing " + view.target.species + " target art");
+    }
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const profile = saltState.config.animationProfile;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (!playerAttacker && saltState.age === 0) {
+      drawSourceOpponentEnemyShadow(
+        fb,
+        view.attacker.species,
+        view.attacker.geometry.battlePositionCenter,
+      );
+    }
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb,
+      attackerTileset,
+      attackerSource.palette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    );
+    const drawTarget = (): void => {
+      const cornerX = view.target.geometry.spriteCorner.x;
+      const cornerY = view.target.geometry.spriteCorner.y;
+      // The task-updated x2/y2 variables and prepared affine matrix are the
+      // independently measured RAM+2 class; ordinary effect OAM remains
+      // RAM+1. Squish cleanup leaves x2 at zero, replacing the front-idle
+      // offset until ShakeMon2 writes it again.
+      const targetX2 = displayedMatrix.squishTargetX2
+        ?? (displayedOam.age === 73
+          ? displayedOam.shakeTargetX2
+          : displayedMatrix.age >= 73 && displayedMatrix.age <= 88
+            ? displayedMatrix.shakeTargetX2
+          : displayedMatrix.age >= 53 ? 0 : targetIdle.x2);
+      if (displayedOam.squishTaskActive || displayedMatrix.targetMatrix.d !== 256) {
+        drawSpriteSheetAffineStretch(
+          fb,
+          targetTileset,
+          targetSource.palette,
+          cornerX,
+          cornerY,
+          displayedMatrix.targetMatrix.a,
+          displayedMatrix.targetMatrix.d,
+          displayedMatrix.targetY2,
+          { r: 0, g: 0, b: 0 },
+          0,
+          true,
+          targetX2,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          targetTileset,
+          targetSource.palette,
+          cornerX + targetX2,
+          cornerY + displayedMatrix.targetY2 + targetIdle.y2,
+        );
+      }
+    };
+    const drawEffects = (): void => {
+      // Equal-subpriority hand slots retain source creation order. Paint the
+      // larger hardware rank first so the lower rank wins an overlap.
+      for (const hand of Array.from(displayedOam.hands).reverse()) {
+        const centerX = hand.side === "left"
+          ? profile.targetLeft - 8
+          : profile.targetRight + 8;
+        const draw = hand.hFlip ? drawSpriteSheetHFlip : drawSpriteSheet;
+        draw(
+          fb,
+          encoreArt.clappingHand.tileset,
+          encoreArt.clappingHand.palette,
+          centerX + hand.x2 - 16,
+          profile.targetPictureY - 16,
+        );
+      }
+      if (displayedOam.exclamation?.visible) {
+        drawSpriteSheet(
+          fb,
+          smellingSaltArt.exclamation.tileset,
+          smellingSaltArt.exclamation.palette,
+          view.target.geometry.animationCenter.x - 16,
+          profile.targetTop - 16,
+        );
+      }
+    };
+    // The effects use target subpriority-2: between the player-back field
+    // sprites when the player attacks, and ahead of both when the foe does.
+    if (playerAttacker) {
+      drawTarget();
+      drawEffects();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawEffects();
+    }
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const field = saltState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(
+      healthboxAssemblyAssets,
+      {
+        name: opponentSpecies,
+        level: 50,
+        gender: field.opponentGender ?? "male",
+        hpFraction: field.opponentHp / field.opponentMaxHp,
+        status: "none",
+      },
+    ));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(
+      playerHealthboxAssets,
+      {
+        name: playerSpecies,
+        level: 50,
+        gender: field.playerGender ?? "male",
+        hpFraction: field.playerHp / field.playerMaxHp,
+        status: "none",
+        currentHp: field.playerHp,
+        maxHp: field.playerMaxHp,
+      },
+    ));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? playerSpecies + " used" : "Foe " + opponentSpecies + " used",
+      "SMELLINGSALT!",
       99,
     );
     return;

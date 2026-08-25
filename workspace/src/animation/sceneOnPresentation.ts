@@ -453,6 +453,10 @@ import {
   type ScreechRingSprite,
 } from "./screech.ts";
 import {
+  smellingSaltAtAge,
+  type SmellingSaltState,
+} from "./smellingSalt.ts";
+import {
   waterGunEffectAtAge,
   type WaterGunSprite,
 } from "./waterGun.ts";
@@ -1927,6 +1931,22 @@ export interface SceneOnScreechConfig {
   >;
 }
 
+/** Smelling Salt presentation only; damage/status ownership remains external. */
+export interface SceneOnSmellingSaltConfig {
+  readonly move: "SMELLING_SALT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `GetBattlerSpriteCoordAttr` and picture-height facts. */
+  readonly animationProfile: Readonly<{
+    readonly targetLeft: number;
+    readonly targetRight: number;
+    readonly targetTop: number;
+    readonly targetPictureY: number;
+    readonly targetVerticalSpan: number;
+  }>;
+}
+
 export interface SceneOnLeerConfig {
   readonly move: "LEER";
   readonly attacker: SceneOnPresentationBattler;
@@ -3284,6 +3304,7 @@ export type SceneOnMoveConfig =
   | SceneOnSupersonicConfig
   | SceneOnMetalSoundConfig
   | SceneOnScreechConfig
+  | SceneOnSmellingSaltConfig
   | SceneOnLeerConfig
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
@@ -3554,6 +3575,8 @@ export type SceneOnDefenseCurlPresentationState =
   SceneOnMovePresentationState<SceneOnDefenseCurlConfig>;
 export type SceneOnMeanLookPresentationState =
   SceneOnMovePresentationState<SceneOnMeanLookConfig>;
+export type SceneOnSmellingSaltPresentationState =
+  SceneOnMovePresentationState<SceneOnSmellingSaltConfig>;
 export type SceneOnLovelyKissPresentationState =
   SceneOnMovePresentationState<SceneOnLovelyKissConfig>;
 export type SceneOnOctazookaPresentationState =
@@ -3642,6 +3665,11 @@ export interface SceneOnScreechView {
     readonly song: "SE_M_SCREECH";
     readonly pan: number;
   }[];
+}
+
+export interface SceneOnSmellingSaltView extends SmellingSaltState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnLeerView extends LeerState {
@@ -6219,6 +6247,23 @@ export function sceneOnScreechView(
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** Age zero is MOVE_SMELLING_SALT's first retained source-pointer row. */
+export function sceneOnSmellingSaltView(
+  state: SceneOnSmellingSaltPresentationState,
+): SceneOnSmellingSaltView {
+  if (state.config.move !== "SMELLING_SALT") {
+    throw new Error("expected SMELLING_SALT presentation, got " + state.config.move);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...smellingSaltAtAge(
+      state.age,
+      state.config.animationProfile.targetVerticalSpan,
     ),
   };
 }
