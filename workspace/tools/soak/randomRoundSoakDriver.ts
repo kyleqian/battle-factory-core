@@ -1023,7 +1023,9 @@ export type SeedResult = {
   outcome: SeedOutcome;
   /**
    * OK sub-outcome: "budget" (frame budget reached while still making
-   * progress — ISSUES #104 retune), "max-rounds" (`--max-rounds` reached),
+   * progress — ISSUES #104 retune; since 2026-08-20 that includes the
+   * `stopAtFirstRoundDecision`/`stopAtFirstActionMenu` modes, whose target
+   * simply never arrived), "max-rounds" (`--max-rounds` reached),
    * roundComplete | roundLost | milestone:first-action-menu. Also set on a
    * HANG that stalled with some round already decided — the decided
    * round's own outcome (roundComplete | roundLost), so the CLI/summary
@@ -2247,9 +2249,12 @@ export type RunOptions = {
   stopAtFirstRoundDecision?: boolean;
   /**
    * Frames of zero observed progress (see `DEFAULT_STALL_FRAMES`) before a
-   * run reports HANG. Ignored under `stopAtFirstRoundDecision`, which keeps
-   * its own bounded post-decision grace window instead (ISSUES #104 driver
-   * retune, PROGRESS ~1368).
+   * run reports HANG. Applies to every mode, `stopAtFirstRoundDecision`
+   * included (ISSUES #104 driver retune, PROGRESS ~1368; extended to the
+   * milestone modes 2026-08-20). `stopAtFirstRoundDecision` additionally
+   * keeps its own bounded post-decision grace window, which — being much
+   * shorter than the default stall window — normally settles a decided
+   * round first.
    */
   stallFrames?: number;
   /**
@@ -2527,6 +2532,16 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
           return finish("OK", { endState: firstEndState, ...firstDecisionSnapshot! });
         }
       }
+      // Same generic stall rule as continuous play (ROADMAP S10 soak
+      // semantics, 2026-08-20): HANG means *stuck*, never merely
+      // "undecided". A first round that keeps genuinely progressing --
+      // a source-faithful stalemate advancing turn after turn, e.g. the
+      // ISSUES #123 forced-Struggle-vs-Struggle class -- must not be
+      // called a hang just because its decision never arrives; only
+      // `stallFrames` frames with every progress signal frozen is.
+      if (frame - lastProgressFrame >= stallFrames) {
+        return finish("HANG", { hangSurface: player.surface(state), endState: end ?? undefined });
+      }
       continue;
     }
 
@@ -2547,10 +2562,15 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   // still making genuine progress right up to the frame budget — report OK,
   // not HANG (ISSUES #104 retune: a run that keeps chaining rounds forever
   // is not "stuck", it simply outlived its budget).
-  if (options.stopAtFirstRoundDecision === true || options.stopAtFirstActionMenu === true) {
-    // Neither milestone was ever reached within budget — a genuine failure
-    // to reach the surface this run mode exists to observe.
-    return finish("HANG", { hangSurface: player.surface(state) });
-  }
+  //
+  // Since 2026-08-20 that holds for the milestone modes too: both
+  // `stopAtFirstRoundDecision` and `stopAtFirstActionMenu` now run the same
+  // in-loop stall check, so "the milestone never arrived" is by itself no
+  // evidence of a hang — a still-progressing run reads `OK ... budget` here
+  // exactly like continuous play does, and a genuinely stuck one has
+  // already returned HANG from inside the loop. The mode's own target is
+  // still readable from `endState`: a reached milestone reports
+  // roundComplete/roundLost/milestone:first-action-menu, so a pin that
+  // asserts the milestone still fails on "budget".
   return finish("OK", { endState: "budget" });
 }
