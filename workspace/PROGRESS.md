@@ -5,6 +5,71 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1401 — [ts worker, 2026-08-25 ~16:47] **ISSUES #128 CLOSED both halves: stock-ROM receipt first (Intimidate/Trace DO write `BATTLE_HISTORY->abilities[0]`, the PLAYER's slot, costing the AI 8 `Cmd_get_ability` draws), then the three-site fix + the history-before-trapper order**
+
+- **State:** #128 is fully landed and deleted from `ISSUES.md`. Receipt
+  `bf1a5484`, fix `fdc21ede`, trajectory re-pins `c2fd533c`. Green at HEAD:
+  `npm test` **1,143 files / 10,563 passed / 223 skipped / 0 failed**,
+  `npm run build` green, `npm run typecheck` green,
+  `npm test -- tests/factoryAi` 32 files / 1,432 tests green.
+- **RUNG 1 — receipt (stock ROM, tree unchanged).** Three `mechanicLab`
+  `overrides.parties` arms against the same two-ability player lead Golduck
+  (set 418, `ABILITY_DAMP` / `ABILITY_CLOUD_NINE`), all four AI slots one
+  move. `BATTLE_HISTORY->abilities[0..3]` read right after battle start via
+  `gBattleResources` → +24 (`struct BattleResources` member 6) → +64
+  (`struct BattleHistory`: `usedMoves[4]` × 16 bytes), `include/battle.h`:
+  - **INTIMIDATE** (AI Mightyena, set 202): **`[22, 0, 0, 0]`** — holder is
+    battler **1**, record lands on **0**. **PREMISE HELD.**
+  - **CONTROL** (AI Poochyena, single-ability Run Away 50): **`[0, 0, 0, 0]`**.
+  - **TRACE** (AI Gardevoir set 813, `abilitySlot 1`): **`[6, 0, 0, 0]`** —
+    the *copied* Damp, again on slot 0, not on the tracer.
+  Every `Random()` in turn 2's `HandleTurnActionSelectionState` window
+  attributed to its caller by targeted single-step (pass-1 `sRandCount`
+  totals reconcile 1:1 with pass-2 hits in all three arms): control **14**
+  draws = `Cmd_get_ability` **8** + `BattleAI_SetupAIData` 4 +
+  `BattleTurnPassed` 1 + `ChooseMoveOrAction_Singles` 1; intimidate and trace
+  **6** each = `Cmd_get_ability` **0** + the *identical* 6-draw remainder. So
+  a non-zero `abilities[0]` removes exactly 8 `get_ability AI_TARGET` guesses
+  per AI decision. Each arm run **twice** from a fresh oracle,
+  **byte-identical** (`a2194263…` / `c24e3d54…` / `9f520f8f…`).
+  Receipt `tools/probe/receipts/issue128-ability-history-off.json`; probe
+  `tools/probe/probe-issue128-ability-history-off.py`; fixtures from
+  `tools/probe/generate-issue128-ability-history-fixtures.ts`. (The battle-lab
+  checkpoint already sits inside turn 1's selection run — the AI has committed
+  and Intimidate has already fired — so the first fully observable AI decision
+  is turn 2's.)
+- **RUNG 2 — fix (3 sites + order, all mutation-checked).** (1)
+  `factoryBattleStart.ts` Intimidate/Trace loops now call
+  `recordBattleScriptAbilityReveal(rules, 0, …)`. (2)
+  `battleScriptFaintedActionsOrchestration.ts` state 6: both holder-index
+  writes → index 0. (3) `factoryAiCheckBadMove.ts` `nextGetAbilityDraw` +
+  `checkAbilityAiTarget` test `knownAbility` **before** the trapper shortcut
+  (`factoryAiCheckViability.ts` already had it). New
+  `tests/issue128AbilityHistoryReceipt.test.ts` (10 tests) drives all three
+  arms through battle start + the first live AI decision and pins the ROM's
+  8-vs-0 draw delta; the fainted-actions suite gains slot-0 Intimidate and
+  Trace pins. Reverting each item fails 5/7, 2/11 and 1/10 respectively.
+- **Next:** supervisor reruns the gates. **The vanilla soak canary trajectory
+  is EXPECTED to move** — source-required draws are now removed whenever an
+  Intimidate/Trace lead faces a two-ability player mon. Not a regression.
+- **Notes:** no existing test pinned the holder index, so nothing needed
+  re-pinning there; the AI parity suites were green before and after. Three
+  Tier-1 **trajectory** tests did move and were re-pinned in their own commit
+  (`c2fd533c`), all self-authored curated-seed scenarios, none an
+  oracle-verified ROM trajectory: `factoryWholeBattle` (Granbull/Intimidate vs
+  Azurill/two-ability — #128's exact shape: 12 → 13 AI decisions, cursor 196 →
+  199), `factoryBrainRoundShape` (SILVER_SEED 4 → 1, GOLD_SEED 2 → 8; the
+  file's own "pick a different seed" throw is the designed remedy),
+  `factoryRoundChaining` case (b) (seed 0 → 3). Live AI receipts unaffected as
+  predicted: `verify-factory-ai-cbm-preamble-live.ts` 4/4 MATCH and
+  `verify-factory-ai-curse-live.ts` 6/6 PASS (both stage single-ability
+  species). `docs/ability-item-parity-census.md` moved by pure line drift from
+  the new source-cite comments (same four `factoryAiCheckBadMove.ts` sites,
+  same abilities) — regenerated, all 17 validation checks pass. Executable
+  frontier ratchet untouched; no new `unsupported-branch` barrier.
+
+---
+
 ## 1400 — [ts worker, 2026-08-25 ~16:05] **Ability activation-path audit COMPLETE: 38/38 SOURCE-EXACT after the second pass; the first pass's 3 DIVERGENT rows are REFUTED, and one new real finding replaces them — Trace's `RecordAbilityBattle(0, copiedAbility)` is unported (RNG-stream affecting)**
 
 - **State:** `docs/ability-activation-audit-2026-08-25.md` is finished — all
@@ -261,73 +326,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `tools/probe/premise-census.py` (PAPERCUTS), broaden coverage "presence"
   to the whole party, retire `--policy full` from census duty (gate stays);
   (4) parked: #71/#73/#39/#55; dormant #121; doubles-era #109/#114.
-
----
-
-## 1397 — [supervisor wind-down, 2026-08-25 ~02:35] **Mission queue CLOSED + two bonus finds fixed: #122 (check-viability recorder dropped a speed-tie draw), #123 NOT-A-BUG (source-faithful Struggle stalemate), Refresh Rust port folded (cargo 1,036 + wasm parity), fifth varied-RNG gate PINNED (2,000/2,000 baseline), `--first-round` HANG-at-budget mislabel fixed, #126 (Bide ignored end-turn `HITMARKER_IGNORE_BIDE`) found by the first varied full-chain census and fixed; animation folded twice; all five gates green on the final tree**
-
-- **Final gates on THIS tree (`dae00750` = engine tree of the five gates; final tree `94da116c` = animation fold #3 on top (Scene-ON only), full suite + build rerun there` + this docs commit; supervisor's own runs,
-  all eight sweeps concurrent under `nohup`):** vanilla 0:20 **20/20**,
-  full 0:60 **60/60**, winning 0:60 **60/60**, winning-swap 0:60
-  **60/60**; fifth gate — winning `--vary-rng --first-round` carry 0
-  **100/100**, carry 14 **100/100**, carry 28 **100/100**, winning-swap carry 0
-  **100/100**. Full `npm test` **1,116 files / 10,442 passed / 224 skipped on `dae00750`; 1,121 / 10,456 / 224 on the final `94da116c`**; `npm run build` green.
-  DEFERRED.md: no open entries. `animation-main` folded three times: `4a8eec58`
-  (fast-forward), `dae00750` (4 commits), `94da116c` (7 commits, 66 files —
-  Scene-ON draw cases in `battleScene.ts` + animation-lane files); its Codex
-  supervisor was live all session — anything it lands after 02:35
-  folds at the next orient.
-- **Did (4 worker rounds — 2 ts opus, 2 side opus — all verified green, 0
-  failed, 0 cap-kills, ~$29 worker spend):** (1) **#122** ts opus 54 min: `runCvSemiInvulnerable` drew
-  `GetWhoStrikesFirst`'s speed-tie `Random()` (`battle_main.c:4745` via
-  `battle_ai_script_commands.c:1268-1274`) but returned only `tryEncourage`'s
-  fresh one-item list — recording one draw short of the cursor. One-line
-  carry `fa06db1c` + 7-case mutation-checked pin; seed 681 `OK b1 t12
-  roundLost`. **#124 filed** (Rust mirror has the same drop; one ts/wasm
-  case `it.skip`ped — Rust lane). (2) **#123** side opus 63 min: PP 15→0,
-  `legalMoveBySlot` nulls 0-PP, forced Struggle at selection 16
-  (`battle_util.c:99-106`, `:1125-1140`); "456 uses" = 15 + 441 Struggles;
-  +6/+6 Struggle (33%/29%) vs Leftovers/Ingrain regen never ends, no Gen-3
-  turn cap → `OK … budget`. Pin `factoryBattleScriptNoPpStruggleFullTurn`
-  (3× mutation-checked) + forced-Struggle transcript label `1dd081df`;
-  **#123 deleted, #125 filed** (soak-policy debt, filler). (3) **Refresh
-  fold** `d6753f0b` (`81609f44`, in neither `rust-main` nor master): union
-  `cargo test` 1,036/0, wasm rebuilt (511,638 B `72b84af1…`), 20 `*Parity*`
-  suites under `POKEBENCH_ENGINE=wasm` 923 passed / 1 skipped. (4)
-  **`--first-round` semantics** side opus 19 min `359505a9`: the branch
-  returned HANG at budget unconditionally, mislabelling the #125 stalemate
-  (seeds 116/418 at carry 14); now in-loop stall check + `OK … budget`,
-  summary prints `budget n`, 3 pins. (5) **Fifth gate pinned** `acb59111`
-  (SUPERVISOR.md + ROADMAP S10 block): baseline 0:500 per sweep on
-  `1dd081df` — winning c0 500/500, c14 500/500 (2 `budget`), c28 500/500,
-  winning-swap c0 500/500; ~1 s/seed. (6) **First varied FULL-chain census**
-  (`--vary-rng`, 0:100 × {winning c0/c14/c28, winning-swap c0}): 399/400 —
-  the one CRASH was **#126**: Metronome→Bide, release `throw` "gBideTarget
-  must be the opposing slot" — a premise. ts opus 32 min `ab9c158b`:
-  `DoBattlerEndTurnEffects` raises `HITMARKER_GRUDGE|IGNORE_BIDE` at every
-  entry (`battle_util.c:1468`), so Bide never stores end-turn damage;
-  oracle-staged (Shelgon Bide vs Poison Powder: `gBideDmg` 0, release =
-  `BideNoEnergyToAttack` ×3); throw dropped, target read verbatim
-  (`battle_util.c:2236`); 4 pins mutation-checked; seed 69 `OK … budget`;
-  **#126 deleted**. (7) `wip/mb-step2b-draft-heuristic` deleted (was
-  `1f500a92`). (8) PAPERCUTS: `--help` sweep hit 2, freshness false
-  positive hit 9, +3 entries (gate cost vs 600 s ceiling; manifest line
-  locators; repo root ≠ `workspace/`). Deep depth on varied chains: carry
-  ≥ 28 reached 4-8/100 at carry 0/14; carry 42 from carry 28.
-- **Next:** (1) **#124** is the Rust lane's (mirror the one-line carry,
-  regenerate the m5d3 vectors, rebuild wasm, un-skip the case); (2) more
-  varied full-chain census is the cheapest crash finder left
-  (`winning-swap --vary-rng` at carry 14/28, wider seed ranges) — file, then
-  fix; (3) filler: #125 (fallback skips a maxed stat-stage move; re-baselines
-  winning/winning-swap trajectories), #71/#73/#39/#55 (parked), #121
-  (dormant), #109/#114 (doubles-era). S11 stays OUT OF SCOPE (user 08-10).
-- **Notes:** oracle freshness FAIL judged client-only (last `oracle/` commit
-  08-15 09:51; 8014 restarted 09:45 that same session, 8012 08-17) — not
-  restarted because the Codex animation supervisor was live on the shared
-  services; the pokered-pewter Codex supervisor also ran all night (load
-  ~20 on 16 cores; soak ~1.5-2× slower). Traps: a side worktree's root is
-  the REPO root (`<wt>/workspace` for tests/paths); `git branch --list`
-  prefixes worktree-checked-out branches with `+`. Reduced soak canary rerun on the final `94da116c` (03:01): vanilla 0:20 **20/20**, fifth gate **100/100 × 4** (the three 0:60 deep gates stand on `dae00750`; the fold between them is Scene-ON-only). At close `animation-main` is 4 commits ahead again (its supervisor was still live) — fold at the next orient.
 
 ---
 

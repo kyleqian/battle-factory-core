@@ -17,62 +17,6 @@ backlog.
 
 # Open
 
-## #128 — Intimidate / Trace: the ROM records the fired ability onto `BATTLE_HISTORY->abilities[0]` (the PLAYER's slot), the port records the holder — AI RNG-stream divergence
-
-**Found 2026-08-25** (ability activation-path audit F1/F2,
-`docs/ability-activation-audit-2026-08-25.md`; supervisor-verified at source).
-`AbilityBattleEffects` ends every dispatch with
-`if (effect && caseID < ABILITYEFFECT_CHECK_OTHER_SIDE && gLastUsedAbility != 0xFF) RecordAbilityBattle(battler, gLastUsedAbility);`
-(`battle_util.c:3194-3195`; `ABILITYEFFECT_CHECK_OTHER_SIDE` = 12,
-`include/battle_util.h:24`). `ABILITYEFFECT_INTIMIDATE1` (9) and
-`ABILITYEFFECT_TRACE` (11) pass that guard, neither case reassigns `battler`,
-and BOTH of their only dispatch sites pass the literal `0`:
-`battle_main.c:3880/3882` (TryDoEventsBeforeFirstTurn) and
-`battle_util.c:1959/1960` (HandleFaintedMonActions state 6).
-`RecordAbilityBattle` is an unguarded `BATTLE_HISTORY->abilities[battler] = abilityId`
-(`battle_ai_script_commands.c:643-646`). So whenever ANY Intimidate fires at
-battle start or after a faint replacement, the ROM writes
-`abilities[0] = ABILITY_INTIMIDATE` — a FALSE record on the player's slot when
-the AI's mon is the Intimidate holder; whenever Trace fires it writes the copied
-ability onto slot 0. `Cmd_get_ability` / `Cmd_check_ability`
-(`battle_ai_script_commands.c`, definitions) read `abilities[battler]` FIRST,
-then the Shadow Tag/Magnet Pull/Arena Trap shortcut, then the two-ability
-`Random() & 1` guess — so a non-zero slot-0 record changes every ability-gated
-AI score against the player AND removes one `Random()` draw per evaluation of a
-two-ability player species (the CBM Soundproof prologue alone does that per
-move slot).
-
-**Port today:** battle start (`factoryBattleStart.ts:467-513`) writes no
-`aiObservedAbilityIds` at all for Intimidate/Trace; fainted-actions state 6
-(`battleScriptFaintedActionsOrchestration.ts:418-465`) writes the HOLDER's
-index (`index === id`), correct only when the holder is battler 0. Second
-half (F2): `factoryAiCheckBadMove.ts` `nextGetAbilityDraw` (~:720) and
-`checkAbilityAiTarget` (~:772) test the trapper abilities BEFORE
-`knownAbility`; source order is history first. Unobservable until a slot-0
-record can differ from the occupant's real ability — which #128's first half
-creates (player trapper carrier vs AI Intimidate lead) — so fix both together.
-`factoryAiCheckViability.ts:~8419` already has the source order.
-
-**Reach:** every battle whose AI lead or replacement has Intimidate (558
-activations in 5,316 soaked battles) or Trace, against any two-ability player
-species. Existing AI fixtures used single-ability species by rule, which is
-why no receipt caught it. **Fix shape:** record index 0 at the three port
-sites (battle start Intimidate loop, battle start Trace loop, fainted-actions
-state 6 for both), drop the holder-index writes, fix the two order sites,
-re-pin entry 677's tests to index 0, and expect the vanilla soak canary
-trajectory to move (source-required draws removed).
-
-**Receipt recipe (stock ROM, before the fix):** `mechanicLab`
-`overrides.parties`, AI lead Mightyena set 202 (Intimidate only; all four
-slots BITE) vs player lead Golduck set 418 (Damp/Cloud Nine, two abilities);
-read `gBattleResources->battleHistory->abilities[0..1]` after battle start
-(expect `[ABILITY_INTIMIDATE, 0]`) and count `sRandCount` across the AI's
-first decision vs a control whose AI lead is a non-Intimidate single-ability
-species (expect the control to draw one `Random()` per CBM prologue
-`get_ability` per move slot that the Intimidate arm does not). Trace arm:
-AI lead Gardevoir set 813 `abilitySlot: 1` vs the same Golduck (expect
-`abilities[0]` = Golduck's real ability).
-
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 
 `docs/issue121-ai-mon-to-switch-into-probe.md` closes the reachability
