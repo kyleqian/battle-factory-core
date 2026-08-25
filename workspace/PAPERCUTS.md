@@ -1362,3 +1362,60 @@ current app stage should be rejected before replay.
   `workspace/src/...`; for worktrees always `cd <wt>/workspace`.
 - **Real fix:** a one-line note in AGENTS.md's layout-migration paragraph, and
   the launcher's "worktree:" banner printing `<wt>/workspace` as the cwd.
+
+## A worker's `pkill -f "randomRoundSoak"` kills every lane's soak sweeps AND any sibling worker whose brief mentions the file
+
+- **What:** the 2026-08-25 #127 worker "stopped" its own over-long soak
+  gates with `pkill -f "randomRoundSoak"` (three times: 10:08, 10:23,
+  10:33). The pattern matched the supervisor's ten background census
+  sweeps (`node … randomRoundSoak.ts …`, ~70 seed-minutes lost twice over)
+  and the concurrent side worker's `claude -p <brief>` process — its brief
+  text contained `randomRoundSoak.ts` — which died with SIGTERM (exit 143)
+  23 min into a 50-min cap, mid-demonstration, and read as a cap-kill until
+  the launcher digest was checked for a missing "cap reached" line.
+- **Hits:** 1 session, 3 kills (2026-08-25; ~25 min supervisor time to
+  diagnose + relaunch, one worker's demo phase redone by hand).
+- **Cost each:** every in-flight soak on the box, plus any worker whose
+  command line contains the pattern.
+- **Workaround:** briefs now carry "never kill by pattern; kill only the PID
+  your own shell launched (`$!`), or let it finish"; size every soak run in
+  a worker brief to ≤ 3 min (`--first-round`, `--render-every 0`, small
+  ranges) so there is nothing to stop.
+- **Real fix:** `run-subagent.sh` could export a per-worker
+  `POKEBENCH_WORKER_ID` and the soak CLI could refuse to run a `--seeds`
+  range longer than N inside a worker unless `--i-am-a-gate` is passed;
+  cheaper: a `tools/soak/stop-mine.sh` that kills only children of `$$`.
+
+## Full-chain soak gates do not fit inside a worker cap on a loaded box
+
+- **What:** a 10-seed full-chain gate (`winning`/`full --seeds 0:10`, default
+  render cadence) is 93-167 s/seed under multi-lane load — 16-28 min for one
+  gate — so a brief that lists two such gates plus the 3-min full suite
+  cannot complete in a 45-55 min cap. Two workers were cap-killed today with
+  their code committed and only the demo/gate tail lost (#125 lever 1 at 45
+  min while running a 500-seed `--first-round` sweep; the coverage
+  instrument at 50 min — see the entry above for what actually killed it),
+  and the #127 worker burned ~20 min getting two partial gates.
+- **Hits:** 3 (2026-08-25).
+- **Cost each:** 10-20 min of a worker cap, a salvage pass by the supervisor.
+- **Workaround:** worker briefs use only `--first-round --render-every 0`
+  sweeps (≈ 1 s/seed idle, 2-4 s loaded) and ≤ 5-seed full chains with
+  `--render-every 0`; the standing gates are supervisor-only.
+- **Real fix:** a `--parallel N` seed fan-out in `randomRoundSoak.ts`
+  (seeds are independent processes already) so a 0:60 gate is wall-clock
+  ~1/8 of today's.
+
+## No reproducible premise-throw census tool — `rg` cannot reassemble multi-line `throw new Error(...)` messages
+
+- **What:** ~40% of engine `throw new Error(` calls wrap their message over
+  2-4 lines, so a plain `rg` census truncates messages and miscounts word
+  filters; both 2026-08-25 audit workers hand-wrote a Node/Python
+  reassembler (with enclosing-function attribution) and their per-file
+  tallies still disagreed by 2 (26 vs 24 remaining rows).
+- **Hits:** 2 (2026-08-25, ~6 + ~8 min).
+- **Cost each:** ~6-8 min plus a count mismatch between passes.
+- **Workaround:** `docs/premise-throw-audit-2026-08-25.md` §1 records the
+  filter; copy its reassembler shape.
+- **Real fix:** check in `tools/probe/premise-census.py` (reassemble
+  `throw new Error(...)` across lines, attribute the enclosing function,
+  emit `file:line | function | message` TSV, optional premise-word filter).
