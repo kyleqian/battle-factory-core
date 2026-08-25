@@ -325,23 +325,27 @@ zero-samples is exactly what a correct engine produces. The `unknown` WHY in
 | `data/battle_ai_scripts.s:2383` / `:2385` (Rain Dish, Shed Skin in the encourage table) | `src/engine/factoryAiCheckViability.ts:8356-8361` | Both present in the 16-entry set (see the contact-family row). |
 | `data/battle_ai_scripts.s:2836` (`AI_DoubleBattleSkillSwap`, Truant → `Score_Plus5`) and `:2883` (`AI_TrySkillSwapOnAlly`, Truant → `Score_Plus10`) | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50.** Both labels are reached only from the doubles dispatch (`AI_DoubleBattle*` / `AI_TryOnAlly`, which needs `AI_USER_PARTNER`/`AI_TARGET_PARTNER`). Factory battles are singles (`battlersCount: 2`, `factoryBattleStart.ts:420`). No port counterpart is expected. |
 
+### Status immunity — INSOMNIA (15), WATER_VEIL (9), VITAL_SPIRIT (6), MAGMA_ARMOR (5) — SOURCE-EXACT
+| Source | Engine | Note |
+| --- | --- | --- |
+| `src/battle_script_commands.c:2274-2298` (`SetMoveEffect` `STATUS1_SLEEP`: uproar scan skipped when the candidate has Soundproof, then `status1`, uproar result, Vital Spirit, Insomnia) | `src/engine/battleScriptHitChainOpcode.ts:3365-3392` | The Soundproof-gated uproar scan and the four `break` guards are ported as one `statusChanged = !(…)` disjunction in source order. Neither half announces anything here — Insomnia/Vital Spirit block **silently** on this path (no `RecordAbilityBattle`, no `BattleScript_*Prevention`). |
+| `src/battle_script_commands.c:2341-2377` (`STATUS1_BURN`) | `src/engine/battleScriptHitChainOpcode.ts:3412-3426` | Water Veil's announce branch needs `primary == TRUE \|\| certain == MOVE_EFFECT_CERTAIN`; it sets `gLastUsedAbility`, `RecordAbilityBattle`, **pushes** and jumps to `BattleScript_BRNPrevention`, and picks `B_MSG_ABILITY_PREVENTS_ABILITY_STATUS` vs `B_MSG_ABILITY_PREVENTS_MOVE_STATUS` off `HITMARKER_STATUS_ABILITY_EFFECT`, clearing that bit in the first case. The port's `preventionCall("BattleScript_BRNPrevention", true, ABILITY_WATER_VEIL)` (`:3300-3361`) does all four: `{kind: "call"}` (= push), the reveal, the multistring choice, and the conditional hitMarker clear. The **silent** fall-through `if (ability == ABILITY_WATER_VEIL) break;` (`:2373-2374`) is the port's `|| ability === ABILITY_WATER_VEIL` in `statusChanged` — no reveal, matching source. |
+| `src/battle_script_commands.c:2379-2394` (`STATUS1_FREEZE`) | `src/engine/battleScriptHitChainOpcode.ts:3428-3437` | `noSunCanFreeze` is computed from `WEATHER_HAS_EFFECT && (gBattleWeather & B_WEATHER_SUN)` first, then Ice type, `status1`, `noSunCanFreeze`, Magma Armor — the port's inverted `!noSunCanFreeze` disjunction preserves that exact order. Magma Armor is silent (no prevention script) in both. |
+| `src/battle_script_commands.c:6828-6848` (`Cmd_jumpifcantmakeasleep`) | `src/engine/battleScriptStatusPrimaryOpcode.ts:220-252` | Uproar first (with its own `B_MSG_CANT_SLEEP_UPROAR` / `B_MSG_UPROAR_KEPT_AWAKE` split), then Insomnia/Vital Spirit → `gLastUsedAbility`, `B_MSG_STAYED_AWAKE_USING`, jump, `RecordAbilityBattle`; else `+= 5` (advance). All four writes present in the port. |
+| `src/battle_util.c:2873-2953` (`ABILITYEFFECT_IMMUNITY`) | `src/engine/battleScriptMoveEndOpcode.ts:106-181` (per-ability cure table) and `:652-712` (`MOVEEND_IMMUNITY_ABILITIES`) | Per-ability status masks match one for one, incl. Insomnia/Vital Spirit sharing a case **and clearing `STATUS2_NIGHTMARE`** alongside `status1 = 0`, Water Veil on `STATUS1_BURN`, Magma Armor on `STATUS1_FREEZE`, and the "ability alone is a no-op" shape (`effect` stays 0, scan continues). Both halves scan every battler, `return` on the first cure, set `gBattleScripting.battler` ↔ `scriptingBattler`, emit `REQUEST_STATUS_BATTLE` ↔ `markBattleScriptControllerPending`, and **stay on moveend state 4** so the next `RETURN` rescans from battler 0 (`src/battle_script_commands.c:4285-4290`'s `else gBattleScripting.moveendState++` ↔ the port's `call-current`). |
+| `src/battle_util.c:1753-1769` (`ENDTURN_YAWN` gate) | `src/engine/battleEndTurnOrchestration.ts:1029-1078` | `STATUS3_YAWN` decrement happens **before** the gate and is kept even when the gate fails, in both. Gate: expired, no `STATUS1_ANY`, not Vital Spirit, not Insomnia, `!UproarWakeUpCheck` (Soundproof-gated scan). Sleep duration `(Random() & 3) + 2` drawn only after the gate passes. |
+| `data/battle_scripts_1.s:2181` (Will-O-Wisp `jumpifability BS_TARGET, ABILITY_WATER_VEIL, BattleScript_WaterVeilPrevents`, **before** the `accuracycheck` at `:2183`) | `src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:390` (`ABILITY_WATER_VEIL = 41`, registered in `JUMPIFABILITY_VALUES`) + the shared handler at `:418-465` | Water Veil makes Will-O-Wisp fail **without an accuracy roll**; the port's registered jumpifability id reproduces the pre-accuracy jump from the committed program. |
+| `data/battle_scripts_1.s:2455-2456` (Yawn `jumpifability` Vital Spirit / Insomnia → `BattleScript_PrintBankAbilityMadeIneffective`, before `jumpifstatus2`/`accuracycheck`/`jumpifcantmakeasleep`) | same handler; `ABILITY_VITAL_SPIRIT` / `ABILITY_INSOMNIA` are both in `JUMPIFABILITY_VALUES` (`:386-387`) | Same pre-accuracy shape. |
+| `data/battle_ai_scripts.s:216-222` (`AI_CBM_Sleep`) | `src/engine/factoryAiCheckBadMove.ts:2722-2741` (`runCbmSleep`) | One `get_ability AI_TARGET` draw, then Insomnia / Vital Spirit / any-status / Safeguard → −10, in source order, with the draw consumed exactly once. |
+| `data/battle_ai_scripts.s:531-539` (`AI_CBM_WillOWisp`) | `src/engine/factoryAiCheckBadMove.ts:2942-2965` (`runCbmWillOWisp`) | One ability draw, then Water Veil / any-status / x0 / x0.5 / x0.25 / Safeguard → −10. |
+| `src/battle_util.c:4005` (disobedience "try putting asleep" Vital Spirit/Insomnia exemption) | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50.** `IsMonDisobedient` returns `DISOBEDIENCE_OBEDIENT` at `src/battle_util.c:3939-3940` for `gBattleTypeFlags & BATTLE_TYPE_FRONTIER`, and `BATTLE_TYPE_FRONTIER` includes `BATTLE_TYPE_FACTORY` (`include/constants/battle.h:91`), which the port's battle-type invariant sets (`src/engine/factoryBattleScriptFullTurnDecision.ts:246-249`). Line 4005 can never execute in a Factory battle. |
+| `src/battle_pike.c:818,822,830` (Insomnia/Vital Spirit/Water Veil/Magma Armor status-room exemptions) | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50.** Battle Pike facility code. |
+
 ### Everything else — UNVERIFIED, with the exact unread sites
 Source inventory below is complete (produced by the §Method sweep); the
 engine column names where to start, from `docs/ability-item-parity-census.md`
 plus this session's `rg`.
 
-- **IMMUNITY family.** Source: inline "can't be inflicted" sites
-  `src/battle_script_commands.c:2291-2294` (Vital Spirit / Insomnia sleep),
-  `:2342-2374` (Water Veil burn, incl. the `primary || certain` announce
-  branch and the silent `break`), `:2389-2390` (Magma Armor freeze); the
-  end-turn/switch-in cure `src/battle_util.c:2899-2921` + apply at
-  `:2930-2951`; `Cmd_jumpifcantmakeasleep` `:6828-6848`; Yawn's end-turn
-  gate `src/battle_util.c:1753-1769`; script jumps
-  `data/battle_scripts_1.s:2181` (Will-O-Wisp), `:2455-2456` (Yawn); AI
-  `data/battle_ai_scripts.s:216-222` and `:531-539`. Engine starts:
-  `battleScriptStatusPrimaryOpcode.ts:236`,
-  `battleScriptHitChainOpcode.ts:3389`, `battleEndTurnOrchestration.ts:1042`,
-  `battleScriptMoveEndOpcode.ts:154`, `factoryAiCheckBadMove.ts:2733`.
 - **Stat-drop denial.** Source: `src/battle_script_commands.c:6987-7000`
   (the `!certain && gCurrentMove != MOVE_CURSE` guard),
   `:4142-4145` (the *animation* count, a separate predicate list),
