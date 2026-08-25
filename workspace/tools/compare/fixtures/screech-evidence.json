@@ -1,0 +1,77 @@
+{
+  "schema": "screech-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SCREECH",
+  "moveId": 103,
+  "status": "exact",
+  "coverageCredit": true,
+  "source": {
+    "start": "0x082c9a19",
+    "endExclusive": "0x082c9a66",
+    "bytes": 77,
+    "scriptTextSha256": "29f194e42f4d2a5e6bb7e84c3a1fb37fd501a69a6031d11df8ab8e9bfd1924a3",
+    "ringTemplateSha256": "72eac69ba619d440f97b6792accaaca45f90cae4592263265956529aec4df091",
+    "shakeTaskSha256": "8ed2cf676b9e7d29c5ae76f25ae6cb54873d9427f1622fd5533ea64d5b1a1ef7",
+    "swayTaskSha256": "072a377c9294801452919c1af80affd9e42900ed085d9aaceaee386198ce2b24",
+    "assetSha256": "c6faadb9b49a4163a0bf43fe96334bc5873a7c98735f0447e05604f66422b483",
+    "components": [
+      "asset:ANIM_TAG_PURPLE_RING",
+      "sprite:gScreechRingSpriteTemplate",
+      "subroutine:ScreechRing",
+      "task:AnimTask_ShakeMon2",
+      "task:AnimTask_SwayMon"
+    ]
+  },
+  "repeatability": {
+    "runsPerOrientation": 2,
+    "allMatched": true
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-screech-player-voltorb-opponent-onix.json",
+      "scenarioSha256": "bd7735528972c4bdf3a382df52f65e33be537f9610ed524777d8c035026eb43c",
+      "denseState": "tools/compare/evidence/screech-player-dense-state.json.gz",
+      "denseStateSha256": "24dc2d230c01129c85d38aa311e4a3187525121f2afa0109b4de0fb3c7a2009c",
+      "probeJsonSha256": "ee7b444db5c80f8fc285786941f65115fd97164b91a73a36f076bf3e53d9e760",
+      "rawRgbArchive": "tools/compare/evidence/screech-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "490c14a5d4bf79d4537dc7a07d98e5d4b70f90b96917677db6ebffc3923666d4",
+      "rawRgbSequenceSha256": "9bad150c16221808e80e853a4484cd0ccff259f460006119b09f6116f8cb4d1e",
+      "window": {
+        "startFrame": 72,
+        "endFrame": 134,
+        "frameCount": 63
+      }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-screech-opponent-voltorb-player-onix.json",
+      "scenarioSha256": "e94194fd6cbb4e685619dca707d91a29e62683d174aabffcad57438ab5c5b14d",
+      "denseState": "tools/compare/evidence/screech-opponent-dense-state.json.gz",
+      "denseStateSha256": "4ec999fd0759607aa21a747639e2238d178996a5e37887eab884ca8b155c0ee7",
+      "probeJsonSha256": "55b1638cc9e3fa2757c7915753337c529a72ab632a2d6d8c69c62badb124c250",
+      "rawRgbArchive": "tools/compare/evidence/screech-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "2c85cce790105e6b890afe83e21546c029b3ff75ea844a6e2643ae6759b27a8b",
+      "rawRgbSequenceSha256": "67428ea07340f59bd5e3e8089d8d6971dc8d726ffe20d0a5632861c228df1a15",
+      "window": {
+        "startFrame": 76,
+        "endFrame": 138,
+        "frameCount": 63
+      }
+    }
+  },
+  "measured": {
+    "pointerRows": "63/63 each",
+    "ringSourceAges": [4, 38],
+    "swaySourceAges": [30, 60],
+    "firstInactiveAge": 62,
+    "oamPredecessor": "62/62 each",
+    "matrixPredecessor": "62/62 each",
+    "palettePredecessor": "62/62 each",
+    "gameplayRngTransitions": 0,
+    "animationRngTransitions": 62
+  },
+  "controls": {
+    "independent": ["MOVE_SUPERSONIC", "MOVE_METAL_SOUND"],
+    "statusesChanged": false
+  },
+  "boundedRemainder": "No MOVE_SCREECH presentation remainder remains. The typed Scene-ON seam and ordinary generic compositor are checked only against retained legal-party evidence; gameplay damage, RNG, move choice, turn, round, and facility state remain outside the animation receipt."
+}

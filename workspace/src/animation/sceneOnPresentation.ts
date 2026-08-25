@@ -449,6 +449,10 @@ import {
   type MetalSoundWaveSprite,
 } from "./metalSound.ts";
 import {
+  screechEffectAtAge,
+  type ScreechRingSprite,
+} from "./screech.ts";
+import {
   waterGunEffectAtAge,
   type WaterGunSprite,
 } from "./waterGun.ts";
@@ -1909,6 +1913,14 @@ export interface SceneOnMetalSoundConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Screech presentation only; battle state and controller state remain external. */
+export interface SceneOnScreechConfig {
+  readonly move: "SCREECH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnLeerConfig {
   readonly move: "LEER";
   readonly attacker: SceneOnPresentationBattler;
@@ -3265,6 +3277,7 @@ export type SceneOnMoveConfig =
   | SceneOnRainDanceConfig
   | SceneOnSupersonicConfig
   | SceneOnMetalSoundConfig
+  | SceneOnScreechConfig
   | SceneOnLeerConfig
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
@@ -3597,6 +3610,27 @@ export interface SceneOnMetalSoundView {
   readonly targetMonbg: boolean;
   readonly shakeTaskActive: boolean;
   readonly waves: readonly MetalSoundWaveSprite[];
+  readonly soundEvents: readonly {
+    readonly age: number;
+    readonly song: "SE_M_SCREECH";
+    readonly pan: number;
+  }[];
+}
+
+export interface SceneOnScreechView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly active: boolean;
+  readonly scriptActive: boolean;
+  readonly sourceOffset: number | null;
+  readonly shakeTaskActive: boolean;
+  readonly swayTaskActive: boolean;
+  readonly targetOffsetOverwrite: boolean;
+  readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
+  readonly displayedAttackerOffset: Readonly<{ x2: number; y2: number }>;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly rings: readonly ScreechRingSprite[];
   readonly soundEvents: readonly {
     readonly age: number;
     readonly song: "SE_M_SCREECH";
@@ -6155,6 +6189,26 @@ export function sceneOnMetalSoundView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...metalSoundEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** Age zero is MOVE_SCREECH first retained source-pointer row. */
+export function sceneOnScreechView(
+  state: SceneOnMovePresentationState<SceneOnScreechConfig>,
+): SceneOnScreechView {
+  if (state.config.move !== "SCREECH") {
+    throw new Error("expected SCREECH presentation, got " + state.config.move);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...screechEffectAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,

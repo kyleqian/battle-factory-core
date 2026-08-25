@@ -2,6 +2,39 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_SCREECH",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 three-mon mechanicLab parties stage set-115 FRONTIER_MON_VOLTORB with all four active move slots constrained to SCREECH against a stable ONIX target in both player-back and opponent-front Scene-ON orientations",
+    "the authoritative 0x082c9a19..<0x082c9a66 (0x4d-byte) Move_SCREECH interval and complete generated graph are audited: ANIM_TAG_PURPLE_RING, gScreechRingSpriteTemplate, ScreechRing, AnimTask_ShakeMon2(ATTACKER,3,0,2,1), and AnimTask_SwayMon(0,6,2048,2,TARGET); the two literal purple-ring calls, 16-frame wait, source affine program, pan cues, task cleanup, and first inactive source row are source-relative",
+    "the pure source-age reducer and typed Scene-ON seam retain both side-relative 16x32 purple rings, exact Q8 translation/growing affine values, Screech's own short ShakeMon2 creation display, target SwayMon overwrite/reset, source pointer lifecycle, audio events, and cleanup without damage, state, RNG, turn, round, or facility ownership",
+    "the ordinary shared compositor consumes live species/sides/geometry with generic front/back battler art, source purple-ring art and painter ordering, live healthbox chrome, and the generic elevated-opponent source-shadow layer only on its preceding-hardware pointer-entry display; it has no carrier-pair gate, recording/RGB/framebuffer lookup, coordinate/RGB fit, or absolute-tick path",
+    "all retained dense player-back 72-134 and opponent-front 76-138 rows pass source component, typed seam, raw RGB888, and actual core.ts to renderSceneOnMovePresentation framebuffer equality: 63/63 plus 63/63 = 126/126, zero residual pixels through first inactive cleanup; ordinary hardware OAM, matrices, and palettes each prove the preceding RAM row on 62/62 comparable rows per orientation",
+    "gameplay state and RNG remain invariant while animation RNG changes 62/62; MOVE_SUPERSONIC and MOVE_METAL_SOUND remain independently exact controls only and receive no sibling credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-screech-player-voltorb-opponent-onix.json",
+    "tools/battle-lab/mechanic-screech-opponent-voltorb-player-onix.json",
+    "tools/compare/fixtures/screech-evidence.json",
+    "tools/compare/evidence/screech-player-dense-state.json.gz",
+    "tools/compare/evidence/screech-opponent-dense-state.json.gz",
+    "tools/compare/evidence/screech-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/screech-opponent-raw-rgb.tar.gz",
+    "tools/compare/screechProbe.py",
+    "tools/compare/screechSourceAudit.ts",
+    "tools/compare/screechFramebuffer.ts",
+    "tools/compare/extractScreechAssets.ts",
+    "src/animation/assets/screech.json",
+    "src/animation/screech.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/screechSource.test.ts",
+    "tests/animation/screechEvidence.test.ts",
+    "tests/animation/screech.test.ts",
+    "tests/animation/screechFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_DEFENSE_CURL",
    "status": "exact",
    "covered": [
@@ -6743,6 +6776,17 @@
    "representatives": ["MOVE_MEAN_LOOK"],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_MEAN_LOOK independently passes 171/171 player-back plus 171/171 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation framebuffer rows with zero residual pixels through first inactive cleanup. The ordinary compositor uses source EYE art, live species/sides/geometry, generic battler art, target monbg, predecessor field/OAM/matrix transfers, measured eye affine/visibility/BLDALPHA behavior, source painter order, chrome, and cleanup without a pair gate, recording lookup, absolute tick, or gameplay ownership. MOVE_PERISH_SONG and MOVE_CONFUSE_RAY remain independent exact controls and receive no sibling credit."
+  },
+  {
+   "id": "purple-ring-screech",
+   "components": [
+    "asset:ANIM_TAG_PURPLE_RING",
+    "sprite:gScreechRingSpriteTemplate",
+    "subroutine:ScreechRing"
+   ],
+   "representatives": ["MOVE_SCREECH"],
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_SCREECH alone independently passes 63/63 player-back plus 63/63 opponent-front complete source/component/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation framebuffer rows through first inactive cleanup with zero residual pixels. Its source-age reducer, typed live species/sides/geometry, generic front/back battler art, source PURPLE_RING art, two-call painter ordering, own ShakeMon2/SwayMon task timing, ordinary predecessor OAM/matrix/palette transfer, field chrome, and the generic preceding-hardware elevated-opponent shadow use no carrier-pair gate, recording/framebuffer lookup, absolute tick, or gameplay ownership. MOVE_SUPERSONIC and MOVE_METAL_SOUND remain independent exact controls and receive no Screech sibling credit."
   }
  ],
  "variantAudits": {

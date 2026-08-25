@@ -560,6 +560,7 @@ import wishAsset from "../animation/assets/wish.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
 import metalSoundAsset from "../animation/assets/metal-sound.json" with { type: "json" };
+import screechAsset from "../animation/assets/screech.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
@@ -897,6 +898,7 @@ import {
   sceneOnHealBellView,
   sceneOnSupersonicView,
   sceneOnMetalSoundView,
+  sceneOnScreechView,
   sceneOnLeerView,
   sceneOnWaterGunView,
   sceneOnAcidView,
@@ -1046,6 +1048,7 @@ import {
   type SceneOnMovePresentationState,
   type SceneOnLusterPurgePresentationState,
   type SceneOnMetalSoundConfig,
+  type SceneOnScreechConfig,
   type SceneOnLeerConfig,
   type SceneOnHiJumpKickConfig,
   type SceneOnKarateChopConfig,
@@ -1832,6 +1835,9 @@ const supersonicArt = supersonicAsset as {
 };
 const metalSoundArt = metalSoundAsset as {
   waves: { tileset: Tileset; palette: RgbColor[] };
+};
+const screechArt = screechAsset as {
+  purpleRing: { tileset: Tileset; palette: RgbColor[] };
 };
 const waterGunArt = waterGunAsset as {
   smallBubbles: { tileset: Tileset; palette: RgbColor[] };
@@ -32025,6 +32031,155 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ARON used" : "Foe ARON used",
       "METAL SOUND!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SCREECH") {
+    const screechState = {
+      ...state,
+      config: state.config,
+    } satisfies SceneOnMovePresentationState<SceneOnScreechConfig>;
+    const view = sceneOnScreechView(screechState);
+    // Screech's ordinary OAM, affine matrix, and OBJ palette all transfer
+    // through the preceding RAM row before scanout. The reducer remains
+    // source-relative; this is only the measured generic display latch.
+    const displayed = sceneOnScreechView({
+      ...screechState,
+      age: screechState.age - 1,
+    });
+    // Both live battlers follow the normal OAM transfer plus their own
+    // source callback handoff, so their x2 scanout reads one source row
+    // behind the created-ring OBJs. This is measured from Screech alone.
+    const displayedBattlers = sceneOnScreechView({
+      ...screechState,
+      age: screechState.age - 2,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) {
+      throw new Error("SCREECH missing " + view.attacker.species + " attacker art");
+    }
+    if (!targetSource) {
+      throw new Error("SCREECH missing " + view.target.species + " target art");
+    }
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const displayedTargetOffset = displayedBattlers.targetOffsetOverwrite
+      ? displayedBattlers.targetOffset
+      : targetIdle;
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb,
+      attackerTileset,
+      attackerSource.palette,
+      view.attacker.geometry.spriteCorner.x
+        + attackerIdle.x2 + view.displayedAttackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y
+        + attackerIdle.y2 + view.displayedAttackerOffset.y2,
+    );
+    const drawTarget = (): void => drawSpriteSheet(
+      fb,
+      targetTileset,
+      targetSource.palette,
+      view.target.geometry.spriteCorner.x + displayedTargetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayedTargetOffset.y2,
+    );
+    const drawRings = (): void => {
+      // The equal-subpriority ring slots preserve their source OAM order.
+      // The two field orientations inherit opposite slot ordering.
+      const paintOrder = playerAttacker
+        ? displayed.rings
+        : Array.from(displayed.rings).reverse();
+      for (const ring of paintOrder) {
+        drawSpriteSheetAffineRotate(
+          fb,
+          screechArt.purpleRing.tileset,
+          screechArt.purpleRing.palette,
+          ring.x + ring.x2,
+          ring.y + ring.y2,
+          ring.xScale,
+          0,
+          0,
+          ring.yScale,
+          undefined,
+          true,
+        );
+      }
+    };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // SpriteCB_EnemyShadow has already hidden the elevated attacker in
+    // software OAM when Screech first reaches its pointer row. Its preceding
+    // hardware-OAM image is still scanned out for that display, exactly like
+    // the ordinary opponent-side battle entry layer.
+    if (!playerAttacker && screechState.age === 0) {
+      drawSourceOpponentEnemyShadow(
+        fb,
+        view.attacker.species,
+        view.attacker.geometry.battlePositionCenter,
+      );
+    }
+    // Ring subpriority sits between the player-back battlers, but ahead of
+    // both front-side battlers in the opposite orientation.
+    if (playerAttacker) {
+      drawTarget();
+      drawRings();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawRings();
+    }
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const profile = screechState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(
+      healthboxAssemblyAssets,
+      {
+        name: opponentSpecies,
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      },
+    ));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(
+      playerHealthboxAssets,
+      {
+        name: playerSpecies,
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      },
+    ));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? playerSpecies + " used" : "Foe " + opponentSpecies + " used",
+      "SCREECH!",
       99,
     );
     return;
