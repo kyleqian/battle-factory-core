@@ -1,3 +1,11 @@
+# Animation supervisor session — three exact promotions, clean handoff (2026-08-25)
+
+- **State:** Level 50 advances **204→207/276 exact**, remains **0 partial / 0 staged**, and drops **72→69 unsupported**. MOVE_SWEET_SCENT, MOVE_DEFENSE_CURL, and MOVE_MEAN_LOOK each have independent complete bilateral production acceptance; no sibling credit was inferred.
+- **Did:** Merged current master at session start, rebuilt the stale gitignored Rust WASM prerequisite, then dispatched, independently audited, and merged one bounded Animation worker at a time for Sweet Scent evidence/exact, Defense Curl evidence/exact, and Mean Look evidence/exact. All disposable worker worktrees and branches are removed.
+- **Verified:** Final merged `npm test` passes **1,118 files / 10,441 tests** with 44 files / 223 tests skipped; `npm run build` passes **712 modules**. Coverage is **207 exact / 69 unsupported**, typecheck/audit/diff checks are green, and Mean Look's final fresh Scene-ON probes reproduce both dense and raw-RGB hashes before **342/342 zero-residual** core framebuffer rows.
+- **Next:** Start one bounded MOVE_SCREECH increment: it is the smallest ranked unsupported Level-50 body at **14 source lines / 3 new components** (`ANIM_TAG_PURPLE_RING`, `gScreechRingSpriteTemplate`, `ScreechRing`). Require complete bilateral dense evidence and ordinary zero-residual production acceptance before credit.
+- **Notes:** No animation boundary or unsupported-barrier widening, canonical-recording production import, absolute-tick/evidence-pair gate, gameplay/RNG/controller/turn/round/facility ownership, main-program doc edit, or animation deferral was added.
+
 # MOVE_MEAN_LOOK bilateral exact production presentation (2026-08-25 worker)
 
 - **State:** Level 50 advances **206→207/276 exact** and **70→69 unsupported**. MOVE_MEAN_LOOK alone promotes; the `mean-look-eye` track is fulfilled. Perish Song and Confuse Ray remain independent exact controls.
