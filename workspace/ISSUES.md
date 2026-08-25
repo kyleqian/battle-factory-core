@@ -17,29 +17,25 @@ backlog.
 
 # Open
 
-## #122 — Factory AI live driver RNG-lockstep divergence crash on a varied challenge-4 boot (deterministic 0.1 s repro)
+## #124 — core-rs `factory_ai_check_viability.rs` still drops SemiInvulnerable5's speed-tie receipt (the Rust mirror of the fixed #122)
 
-**Found 2026-08-23** by the first `--vary-rng` crash sweep (2,000 varied
-challenge-4 boot rounds; this was 1 of 2 finds). Under the PLAIN `winning`
-policy — no new policy code in the loop — one varied boot draft reaches a
-battle state where the engine's own lockstep invariant throws:
-`[engine/tick] Error: Factory AI RNG diverged before live draw 11/13`, stack
-`factoryAiLiveDriver.ts:452` → `submitBattleDecision`
-(`battleDecisionBoundary.ts:819`) → `submitLiveFactoryAiDecision`
-(`factoryAiLiveDriver.ts:558`). Repro (deterministic, crashes at battle 1
-turn 6, frame 5,266, ~0.1 s):
-
-```
-npm run soak -- --policy winning --start-carry 28 --vary-rng --first-round --seed 681 --render-every 0
-```
-
-The only nonstandard input is the boot RNG cursor (`--vary-rng` advances it
-681 LCG steps before generating the draft) — exactly how every real player's
-cursor differs — so this is a live-parity bug some real chain can hit, not an
-instrument artifact. Occurrence 1/2,000 varied ch4 boots. Triage: which of
-the 13 expected draws diverged at draw 11, and whether the miscount is in the
-live driver's expectation or the kernel's actual draw sequence for this
-matchup.
+**Found 2026-08-24** while fixing #122 on the TS side. `SemiInvulnerable5`
+spends `GetWhoStrikesFirst`'s speed-tie `Random()` (`battle_main.c:4745`,
+reached from `Cmd_if_user_goes`, `battle_ai_script_commands.c:1268-1274`) and
+then falls into `TryEncourage`; the TS port now returns BOTH receipts, the
+Rust port (`core-rs/crates/factory-core/src/factory_ai_check_viability.rs`,
+`try_encourage` at `:6333`) still returns only the encourage roll while
+advancing the RNG twice. Consequence: for an equal-speed
+EFFECT_SEMI_INVULNERABLE input the wasm engine's draw list is one shorter than
+the TS spec's, so any live-lockstep consumer built on it would take the exact
+#122 crash. The single directed ts/wasm case that catches this is
+`it.skip`ped in `tests/factoryAiCheckViabilityParity.test.ts` with this issue
+number; the corrected TS receipt is pinned unconditionally in
+`tests/factoryAiSemiInvulnerableTieDraw.test.ts`. **Rust lane:** mirror the TS
+fix (carry the accumulated `draws` into the `try_encourage` return),
+regenerate `factory_ai_check_viability_m5d3_vectors_gen.rs`, rebuild
+`artifacts/wasm/factory_wasm.wasm`, then un-skip that case. Not fixed here:
+`core-rs/**` was out of scope for the #122 worker step.
 
 ## #123 — Endless battle under the soak's status-move fallback: 456 selections of a 15-PP DOUBLE TEAM, then HANG at `resolution:presenting`
 

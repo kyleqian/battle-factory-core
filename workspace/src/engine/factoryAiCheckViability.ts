@@ -2276,8 +2276,16 @@ function runCvSemiInvulnerable(input: Readonly<{
       return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0, funcResultAfter });
     }
     // if_not_equal EFFECT_LOCK_ON -> TryEncourage (the roll continues off the
-    // same rng state, preserving ordinal order).
-    return tryEncourage(rng, ordinal, funcResultAfter);
+    // same rng state, preserving ordinal order). `Cmd_if_user_goes`'s
+    // `GetWhoStrikesFirst` speed-tie `Random()` (`battle_main.c:4745`, reached
+    // through `battle_ai_script_commands.c:1268-1274`) has already been drawn
+    // above on a tie, so its record must be carried into this result -- the
+    // encourage roll alone is a shorter list than the RNG cursor advanced by.
+    const encouraged = tryEncourage(rng, ordinal, funcResultAfter);
+    return Object.freeze({
+      ...encouraged,
+      draws: Object.freeze([...draws, ...encouraged.draws]),
+    });
   }
 }
 
