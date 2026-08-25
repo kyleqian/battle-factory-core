@@ -279,6 +279,43 @@ export function pickWinningFightSlot(input: {
 }
 
 /**
+ * "coverage-fight" policy's fight-slot chooser: among the LEGAL slots this
+ * turn, the one whose MOVE has been committed the fewest times so far in
+ * this run (`useCountByMoveId`, the driver's own per-run tally of confirmed
+ * player commits); ties break to the lowest slot. Deterministic -- no RNG,
+ * no scoring, no type table.
+ *
+ * The point is crash coverage, not winning: `pickWinningFightSlot` above
+ * commits the single best-scoring damaging move every turn, so a drafted
+ * set's status/utility slots (the class that produced ISSUES #126
+ * Metronome->Bide and #127 Baton Pass) are never spent at all. Spending the
+ * least-used legal slot walks every move of every drafted set instead.
+ *
+ * With NO legal slot (forced Struggle: every slot 0-PP/Torment/Disable/...)
+ * this returns 0, exactly like `pickWinningFightSlot`'s own no-legal-slot
+ * fallback, so the forced-Struggle path downstream is unchanged.
+ */
+export function pickCoverageFightSlot(input: {
+  legalSlots: readonly boolean[];
+  moveIds: readonly number[];
+  useCountByMoveId: ReadonlyMap<number, number>;
+}): number {
+  const { legalSlots, moveIds, useCountByMoveId } = input;
+  let bestSlot = 0;
+  let bestUses = Number.POSITIVE_INFINITY;
+  for (let slot = 0; slot < 4; slot += 1) {
+    if (!legalSlots[slot]) continue;
+    const uses = useCountByMoveId.get(moveIds[slot] ?? 0) ?? 0;
+    // Strictly-less keeps the tie on the LOWEST slot.
+    if (uses < bestUses) {
+      bestUses = uses;
+      bestSlot = slot;
+    }
+  }
+  return bestSlot;
+}
+
+/**
  * True when every legal move in `moveIds` is either non-damaging (power 0)
  * or 0x-immune against `defenderTypes` -- i.e. the active cannot deal direct
  * damage at all (Milestone M-B step 2 part C2: resisted-but-nonzero moves,
@@ -1399,6 +1436,22 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * pointed at: lever 4 (bulk+STAB primary) starved coverage, lever 4'
  * (coverage with bst a pure tiebreak) starved bulk -- mirror-image failure
  * modes (scout doc, "Result -- lever 4'" closing paragraph).
+ *
+ * "coverage-fight": opt-in CRASH-COVERAGE instrument, identical to
+ * "winning-coverage" in every respect (the same coverage-first 3-of-6
+ * draft via the shared `coverageDraftLike` path, the same swap declines,
+ * the same voluntary-switch levers, the same continuation/exploration/
+ * timing rolls, the same shared-RNG-stream draws) EXCEPT the fight slot,
+ * which commits the LEGAL slot whose move this run has used least so far
+ * (`pickCoverageFightSlot`, fed the player's own confirmed-commit tally;
+ * ties -> lowest slot) instead of the highest-scoring damaging move.
+ * Motivation: `--coverage-json` measured 5 full "winning" chains executing
+ * 223/276 corpus moves but leaving 27/166 move EFFECTS untouched, and the
+ * starved class is exactly status/utility -- the class that produced
+ * ISSUES #126 (Metronome->Bide) and #127 (Baton Pass). A least-used-first
+ * fight spends every move in every drafted set on purpose. Deliberately
+ * NOT a strength policy: it plays each set's worst moves as often as its
+ * best, so it wins less and is not a lever measurement.
  */
 export type SoakPolicy =
   | "full"
@@ -1407,7 +1460,8 @@ export type SoakPolicy =
   | "winning-swap"
   | "oracle-strength"
   | "winning-coverage"
-  | "winning-combined";
+  | "winning-combined"
+  | "coverage-fight";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
 type PlayerPolicy = SoakPolicy | "strong-route";
 
@@ -1440,8 +1494,17 @@ export class RandomPlayer {
   public oracleStrengthFallbacks = 0;
   /** "winning-swap" only: the current swap screen's row plan, built once per swap occurrence. */
   private swapPlan: WinningSwapPlan | null = null;
-  /** "winning-coverage"/"winning-combined" only: identity of the offer the current draft plan was scored from, so each fresh round's draft re-scores. */
+  /** "winning-coverage"/"winning-combined"/"coverage-fight" only: identity of the offer the current draft plan was scored from, so each fresh round's draft re-scores. */
   private coverageDraftOfferKey: string | null = null;
+  /**
+   * "coverage-fight" only: this RUN's tally of the player's own confirmed
+   * fight commits, keyed by move id (forced Struggle counted as 165, the
+   * same correction the commit note and the coverage collector use). Policy
+   * state on the player instance -- deliberately NOT module-level mutable
+   * state, so every `runSeed` starts from an empty tally and a seed's
+   * trajectory depends only on its own play.
+   */
+  private readonly fightUseCountByMoveId = new Map<number, number>();
   public battle = 1;
   public turn = 0;
   private readonly rng: Rng;
@@ -1458,19 +1521,21 @@ export class RandomPlayer {
   private get explores(): boolean {
     return this.policy === "full" || this.policy === "winning"
       || this.policy === "winning-swap" || this.policy === "oracle-strength"
-      || this.policy === "winning-coverage" || this.policy === "winning-combined";
+      || this.policy === "winning-coverage" || this.policy === "winning-combined"
+      || this.policy === "coverage-fight";
   }
 
-  /** The winning-biased policies share every decision except the swap offer/screen ("winning-swap"), the fight slot ("oracle-strength"), and the draft (the two coverage drafts). */
+  /** The winning-biased policies share every decision except the swap offer/screen ("winning-swap"), the fight slot ("oracle-strength"/"coverage-fight"), and the draft (the coverage drafts). */
   private get winningLike(): boolean {
     return this.policy === "winning" || this.policy === "winning-swap"
       || this.policy === "oracle-strength" || this.policy === "winning-coverage"
-      || this.policy === "winning-combined";
+      || this.policy === "winning-combined" || this.policy === "coverage-fight";
   }
 
-  /** "winning-coverage"/"winning-combined": the draft is planned by `planCoverageDraft`, not the constructor's random shuffle. */
+  /** "winning-coverage"/"winning-combined"/"coverage-fight": the draft is planned by `planCoverageDraft`, not the constructor's random shuffle. */
   private get coverageDraftLike(): boolean {
-    return this.policy === "winning-coverage" || this.policy === "winning-combined";
+    return this.policy === "winning-coverage" || this.policy === "winning-combined"
+      || this.policy === "coverage-fight";
   }
 
   constructor(
@@ -1832,6 +1897,14 @@ export class RandomPlayer {
           }
           return pick.slot;
         };
+        // "coverage-fight" only: the least-used LEGAL move of this run (the
+        // same `legalMoveBySlot` legality every other policy reads), so the
+        // whole drafted set gets spent instead of only its best slot.
+        const coverageFightSlot = (): number => pickCoverageFightSlot({
+          legalSlots: presentation.legalMoveBySlot.map((slot) => slot !== null),
+          moveIds: presentation.field.player.moveIds,
+          useCountByMoveId: this.fightUseCountByMoveId,
+        });
         const target = this.policy === "strong-route"
           && active?.partyIndex === 1
           && active.isFirstTurn === 2
@@ -1841,9 +1914,11 @@ export class RandomPlayer {
             ? firstLegal
             : this.policy === "oracle-strength"
               ? oracleStrengthSlot()
-              : this.winningLike
-                ? bestEffectivenessSlot()
-                : this.rng.int(4);
+              : this.policy === "coverage-fight"
+                ? coverageFightSlot()
+                : this.winningLike
+                  ? bestEffectivenessSlot()
+                  : this.rng.int(4);
         this.fightIntent = {
           key,
           target,
@@ -1891,17 +1966,25 @@ export class RandomPlayer {
         return this.press("A", 8);
       }
       this.note(state, `fight: confirm slot ${intent.target}${rejected ? " (will reject)" : ""}`);
-      if (this.coverage !== null && !rejected) {
+      if (!rejected && (this.coverage !== null || this.policy === "coverage-fight")) {
         // The confirmed slot at commit time, with the same forced-Struggle
         // correction the intent note above uses: a slot-indexed surface
         // cannot say "this is Struggle" (battle_util.c:99-106 keeps the
-        // banked slot and swaps the MOVE), so name it here too.
+        // banked slot and swaps the MOVE), so name it here too. Pure reads
+        // (no RNG draw), so an ordinary run's walk is untouched.
         const struggling = orch.battle
           ? battlerUsesForcedStruggle(orch.battle.rules.rulesContext, 0)
           : false;
-        this.coverage.recordPlayerFightCommit(
-          struggling ? 165 : presentation.field.player.moveIds[intent.target] ?? 0,
-        );
+        const committedMoveId = struggling
+          ? 165
+          : presentation.field.player.moveIds[intent.target] ?? 0;
+        this.coverage?.recordPlayerFightCommit(committedMoveId);
+        if (this.policy === "coverage-fight" && committedMoveId !== 0) {
+          this.fightUseCountByMoveId.set(
+            committedMoveId,
+            (this.fightUseCountByMoveId.get(committedMoveId) ?? 0) + 1,
+          );
+        }
       }
       this.fightIntent = null;
       return this.press("A", 8);
@@ -2488,6 +2571,9 @@ export const DEFAULT_MAX_FRAMES_BY_POLICY: Record<SoakPolicy, number> = {
   "oracle-strength": 1_000_000,
   "winning-coverage": 1_000_000,
   "winning-combined": 1_000_000,
+  // "coverage-fight" chains rounds exactly like "winning" (it just spends
+  // different slots on the way), so it shares "winning"'s budget verbatim.
+  "coverage-fight": 1_000_000,
 };
 
 /** An explicit `maxFrames` always wins; otherwise resolve per policy. */
