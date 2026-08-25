@@ -158,8 +158,8 @@ describe("MOVE_GIGA_DRAIN source and legal staging checkpoint", () => {
     }
     expect(coverage.entries.find((entry) => entry.move === "MOVE_GIGA_DRAIN")).toMatchObject({ status: "exact" });
     expect(coverage.queue).not.toContain("MOVE_GIGA_DRAIN");
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(206);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(207);
     const report = execFileSync("npm", ["run", "animation:coverage", "--silent"], { encoding: "utf8" });
-    expect(report).toContain("Level 50: 206/276 exact, 0 partial, 0 staged, 70 unsupported");
+    expect(report).toContain("Level 50: 207/276 exact, 0 partial, 0 staged, 69 unsupported");
   });
 });

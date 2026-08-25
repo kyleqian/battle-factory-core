@@ -71,7 +71,7 @@ describe("MOVE_FIRE_BLAST bilateral dense evidence checkpoint", () => {
     }
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: any) => entry.status === "exact"))
-      .toHaveLength(206);
+      .toHaveLength(207);
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_FIRE_BLAST"))
       .toMatchObject({ status: "exact" });
     for (const move of ["MOVE_DRAGON_BREATH", "MOVE_FLAMETHROWER", "MOVE_BLAZE_KICK",
