@@ -5,6 +5,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R56 — [supervised session, 2026-08-25] **M55 Helping Hand leaf + final wind-down**
+
+- **State:** `rust-main` = session-start master `33592cba` plus five verified
+  increments through `Cmd_trysethelpinghand` worker `15b28803`. ORWORD,
+  CheckViability tie-receipt retention, Encore, field-ability scan, and Helping
+  Hand are committed and green; no ABI, adapter, recovery module, or canonical
+  TypeScript file was widened.
+- **Did:** ported Helping Hand's singleton `0xd1` registration, instruction-
+  before-attacker ordering, source positional-partner lookup, unconditional
+  target retarget before all guards, exact doubles/absence/corrupt-byte gates,
+  failure-only late label resolution, target-only success write, repetition,
+  and full no-RNG/no-event/no-scheduler preservation. Canonical TypeScript
+  supplies **2,632 behavior** and **10 registration** cases; corpus sha256
+  `28a79ba053c6e925a8357766f7d73f8adb715d82d1979625d7cd02b4e87fa5e0`.
+- **Next:** at the next Rust session, merge current master, recheck active lane
+  work, and select another stable pure leaf. Main owns deletion of ISSUE #124
+  after folding this lane; Rust has no open deferral.
+- **Notes:** Terra/max worker, one commit. Supervisor caught and corrected the
+  worker unit fixture's naive battler-id partner expectation; production code
+  and the canonical corpus already used `position ^ BIT_FLANK`. Two independent
+  regenerations were byte-identical. Generated Rust is **9,314,463 bytes**,
+  sha256 `5aac9cb75d4e039e7b81bd41dc5c5e88cc19a59e4e47d37935a04ddedb119972`;
+  generator is **41,575 bytes**, sha256
+  `c60ebdc8166bad3f26854a170d580334614cccef41ae7129363e1859d46b4156`.
+  Final Rust is green at **1,068/1,068** tests, fmt, strict workspace Clippy,
+  and wasm32 release. Artifact is **506,009 bytes**, sha256
+  `de2fdfdf67692881cb45d64907ad130ab607fc450d7b89bca510716ee6a554d4`.
+  Final npm is green at **1,121 files / 10,457 passed / 223 skipped** and build
+  is green at **712 modules**. Wind-down soaks: vanilla **20/20**, full
+  **60/60**, winning **60/60**, and winning-swap **60/60**, all with zero
+  crashes and zero hangs. Scope stayed inside `core-rs/**` plus the existing M2
+  parity file used by the receipt repair; no barrier or deferral was added.
+
 ## R55 — [supervised session, 2026-08-25] **M54 Battle Script field-ability scan + green checkpoint**
 
 - **State:** `rust-main` = merged master `33592cba` plus the four verified
@@ -72,32 +105,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Worker npm is green at **1,121 files / 10,457 passed / 223 skipped** and
   build is green. Scope stayed inside `core-rs/**`; no barrier, deferral, or
   papercut was added.
-
-## R53 — [supervised session, 2026-08-25] **M52 CheckViability tie-receipt repair + green checkpoint**
-
-- **State:** `rust-main` = merged master `33592cba`, verified ORWORD worker
-  `bb3c5ab7`, and verified CheckViability repair `de052e3c`. Rust now retains
-  the SemiInvulnerable5 speed-tie draw before its TryEncourage draw, matching
-  canonical TypeScript. The previously skipped forced-WASM parity case is
-  active. The session remains active, committed, and green.
-- **Did:** changed the M5d3 handler to append the encourage receipt to the
-  existing draw ledger instead of replacing that ledger. Added direct native
-  assertions for zero-, one-, and two-draw paths, ordered ordinals, and RNG
-  before/after chaining; regenerated the 181-case M5d3 corpus; and removed the
-  stale skip from the existing M2 parity test. Corpus sha256
-  `bcd17a59b071e204bc80b9880e2ee2580fdb7c802af23800d8f7cc54995ac30b`.
-- **Next:** select one more conflict-free pure Battle Script leaf while the
-  deadline reserve permits. Main owns removal of ISSUE #124 from `ISSUES.md`;
-  this lane must not edit that ledger.
-- **Notes:** Terra/max worker, one commit. Supervisor audited the narrow write,
-  reproduced the generated corpus twice byte-identically, and passed focused
-  native and both-mode parity gates (**9/9** each). Full Rust passes at **1,042
-  listed tests**; fmt, required strict library Clippy, and wasm32 release pass.
-  Artifact is **506,010 bytes**, sha256
-  `e7ec069fddf1d9c0c4a3dfcf0a470a6f1b6d5f3dec47612d6d9224dd6185e028`.
-  Pre-fold npm is green at **1,121 files / 10,457 passed / 223 skipped** and
-  build is green. Scope stayed inside `core-rs/**` plus the existing M2 parity
-  file; no unsupported barrier or Rust deferral was added. PAPERCUT: the
-  nested Rust workspace needs the manifest directory for `cargo fmt`, ~1 min;
-  copying the rebuilt ignored WASM artifact is a separate required step, ~2
-  min.

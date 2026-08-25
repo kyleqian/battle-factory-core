@@ -5,6 +5,35 @@ full history regardless.
 
 ---
 
+## R53 — [supervised session, 2026-08-25] **M52 CheckViability tie-receipt repair + green checkpoint**
+
+- **State:** `rust-main` = merged master `33592cba`, verified ORWORD worker
+  `bb3c5ab7`, and verified CheckViability repair `de052e3c`. Rust now retains
+  the SemiInvulnerable5 speed-tie draw before its TryEncourage draw, matching
+  canonical TypeScript. The previously skipped forced-WASM parity case is
+  active. The session remains active, committed, and green.
+- **Did:** changed the M5d3 handler to append the encourage receipt to the
+  existing draw ledger instead of replacing that ledger. Added direct native
+  assertions for zero-, one-, and two-draw paths, ordered ordinals, and RNG
+  before/after chaining; regenerated the 181-case M5d3 corpus; and removed the
+  stale skip from the existing M2 parity test. Corpus sha256
+  `bcd17a59b071e204bc80b9880e2ee2580fdb7c802af23800d8f7cc54995ac30b`.
+- **Next:** select one more conflict-free pure Battle Script leaf while the
+  deadline reserve permits. Main owns removal of ISSUE #124 from `ISSUES.md`;
+  this lane must not edit that ledger.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the narrow write,
+  reproduced the generated corpus twice byte-identically, and passed focused
+  native and both-mode parity gates (**9/9** each). Full Rust passes at **1,042
+  listed tests**; fmt, required strict library Clippy, and wasm32 release pass.
+  Artifact is **506,010 bytes**, sha256
+  `e7ec069fddf1d9c0c4a3dfcf0a470a6f1b6d5f3dec47612d6d9224dd6185e028`.
+  Pre-fold npm is green at **1,121 files / 10,457 passed / 223 skipped** and
+  build is green. Scope stayed inside `core-rs/**` plus the existing M2 parity
+  file; no unsupported barrier or Rust deferral was added. PAPERCUT: the
+  nested Rust workspace needs the manifest directory for `cargo fmt`, ~1 min;
+  copying the rebuilt ignored WASM artifact is a separate required step, ~2
+  min.
+
 ## R52 — [supervised session, 2026-08-25] **M51 Battle Script ORWORD leaf + green checkpoint**
 
 - **State:** `rust-main` = merged master `33592cba` plus verified
