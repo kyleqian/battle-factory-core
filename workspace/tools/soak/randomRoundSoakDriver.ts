@@ -42,6 +42,7 @@ import {
   generateFactoryChallengeDraft,
   type FactoryCarry,
 } from "../../src/engine/factoryRoundChaining.ts";
+import { battlerUsesForcedStruggle } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { ANCHOR_RNG_VALUE, advanceRngValue } from "../../src/engine/rng.ts";
 import { ANCHOR_FACTORY_METADATA } from "../../src/engine/factoryAnchorSession.ts";
 import {
@@ -1693,10 +1694,21 @@ export class RandomPlayer {
           cancel: this.policy === "full" && this.rng.chance(0.10),
           futile: 0,
         };
+        // A slot-indexed surface cannot say "this is Struggle": when every
+        // slot is unusable, source keeps the banked chosenMovePositions slot
+        // and swaps the MOVE for MOVE_STRUGGLE (battle_util.c:99-106,
+        // :1125-1140), so the slot still reads as its exhausted move. Name it
+        // here or the transcript reports N uses of a move with far less PP
+        // than N (ISSUES #123 read 456 uses of a 15-PP DOUBLE TEAM).
+        const forcedStruggle = orch.battle
+          ? battlerUsesForcedStruggle(orch.battle.rules.rulesContext, 0)
+          : false;
         const slotMove = presentation.field.player.moveIds[this.fightIntent.target];
         this.note(state, this.fightIntent.cancel
           ? "fight menu intent: cancel (B)"
-          : `fight menu intent: slot ${this.fightIntent.target} (move ${slotMove})`);
+          : `fight menu intent: slot ${this.fightIntent.target} (move ${
+            forcedStruggle ? "165 STRUGGLE (all slots unusable)" : slotMove
+          })`);
       }
       const intent = this.fightIntent;
       if (intent.cancel) {

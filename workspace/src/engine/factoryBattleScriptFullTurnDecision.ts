@@ -2152,7 +2152,18 @@ function legalCommandDecisions(
   return Object.freeze([...moves, ...switches]);
 }
 
-function usesForcedStruggle(
+/**
+ * `AreAllMovesUnusable`'s own answer for one battler (`battle_util.c:1125-1140`):
+ * every slot masked by `CheckMoveLimitations(MOVE_LIMITATIONS_ALL)` means the
+ * battler's next move action is not the slot it "chose" at all -- source
+ * replaces it with MOVE_STRUGGLE in `HandleAction_UseMove`'s `noValidMoves`
+ * branch (`battle_util.c:99-106`) while still riding the banked
+ * `gBattleStruct->chosenMovePositions` slot. Exported because the published
+ * command surface is slot-indexed and therefore cannot say this by itself:
+ * ISSUES #123 read 456 Struggles as 456 uses of the 15-PP move sitting in
+ * that slot. Pure and side-effect-free.
+ */
+export function battlerUsesForcedStruggle(
   rulesContext: BattleScriptRulesContext,
   battler: BattleSinglesBattler,
 ): boolean {
@@ -2907,8 +2918,8 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   const trainerMoveSlot = trainerSwitch
     ? 0 as BattleMoveSlot
     : ctx.decision.moveSlot;
-  const playerForcedStruggle = !playerSwitch && usesForcedStruggle(rc0, 0);
-  const trainerForcedStruggle = !trainerSwitch && usesForcedStruggle(rc0, 1);
+  const playerForcedStruggle = !playerSwitch && battlerUsesForcedStruggle(rc0, 0);
+  const trainerForcedStruggle = !trainerSwitch && battlerUsesForcedStruggle(rc0, 1);
   const playerMoveId = playerSwitch
     ? 0
     : actionMoveId(
