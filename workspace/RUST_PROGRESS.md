@@ -5,6 +5,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R55 — [supervised session, 2026-08-25] **M54 Battle Script field-ability scan + green checkpoint**
+
+- **State:** `rust-main` = merged master `33592cba` plus the four verified
+  session increments through `Cmd_jumpifabilitypresent` worker `70b3417f`.
+  The complete pure two-site registration/topology-scan/control projection is
+  native and wasm32-compilable; no ABI, adapter, or recovery module was
+  changed. The session remains active, committed, and green.
+- **Did:** ported exact two-start eager registration, first opcode binding,
+  Cloud Nine/Air Lock expression mapping, 2/4-slot topology scan, living-only
+  ability match, absent-path advance without label lookup, present-path late
+  label resolution, direct-handler unvalidated-ability error, repeated control,
+  and full narrow-state immutability. Canonical TypeScript supplies **153
+  behavior** and **15 registration** cases; corpus sha256
+  `fc70a470d096700098fbf5fe8454bfdecd38da0b599d30f52339820841aa46bc`.
+- **Next:** port one final stable pure Battle Script leaf if the deadline
+  reserve remains sound; prefer singleton `B_SCR_OP_TRYSETHELPINGHAND`, which
+  has bounded doubles topology, target rebinding, no RNG, and no active issue.
+- **Notes:** Sol/high worker, one commit. Supervisor audited source dispatch,
+  field scan, six-byte macro, both Solar Beam sites, constants, registration
+  predicates, late label boundary, ignored absent slots, and no-write output;
+  regenerated twice byte-identically and passed focused **8/8**, full Rust
+  **1,059/1,059**, fmt, strict workspace Clippy, and wasm32 release. Generated
+  Rust is **808,906 bytes**, sha256
+  `5ca4649b30f3692bce6fee05f884c4f1f75e9d65c6bfa4eebc6bdfe6201ab496`;
+  generator is **26,662 bytes**, sha256
+  `4923f0d7bcb94f7bd3c90533e2176422fe2893998732d1fba5a26a62ca24a2ee`.
+  Artifact is **505,897 bytes**, sha256
+  `6607385fe956f48e1a5f926da9625a40e61ea380bd15212dd8b348eebc6fb060`.
+  Worker npm is green at **1,121 files / 10,457 passed / 223 skipped** and
+  build is green. Scope stayed inside `core-rs/**`; no barrier or deferral was
+  added. PAPERCUT: silent TypeScript typecheck obscured liveness, ~4 min.
+
 ## R54 — [supervised session, 2026-08-25] **M53 Battle Script Encore leaf + green checkpoint**
 
 - **State:** `rust-main` = merged master `33592cba` plus verified ORWORD,
@@ -69,37 +101,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   nested Rust workspace needs the manifest directory for `cargo fmt`, ~1 min;
   copying the rebuilt ignored WASM artifact is a separate required step, ~2
   min.
-
-## R52 — [supervised session, 2026-08-25] **M51 Battle Script ORWORD leaf + green checkpoint**
-
-- **State:** `rust-main` = merged master `33592cba` plus verified
-  `Cmd_orword` worker `bb3c5ab7`. The complete pure
-  `battleScriptOrwordOpcode.ts` registration/state/control projection is
-  native and wasm32-compilable; no ABI or adapter surface was widened. The
-  session is active, committed, and green.
-- **Did:** ported the exact 43-start eager registration, first-opcode binding,
-  ordered shape/pointer/value validation, the sole `gHitMarker` pointer, all
-  11 named HITMARKER terms and compound expressions, unsigned 32-bit OR, and
-  advance-only control. Canonical TypeScript execution supplies **66 handler
-  cases**, **18 registration cases**, and all **43 concrete program sites**;
-  corpus sha256
-  `b65a896f9ec084d073fe0fa0459fc07d50ca38968c9fa1edfa31b448e300ce08`.
-- **Next:** close main-program ISSUES #124 in Rust: carry the speed-tie draw
-  through `factory_ai_check_viability`, regenerate the M5d3 vectors, rebuild
-  wasm, and restore the skipped forced-WASM parity case. Keep all edits inside
-  `core-rs/**` and the existing M2 adapter-owned parity file only.
-- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp
-  dispatch/body, nine-byte macro, constants, 43 sites, registration order,
-  write boundary, errors, and repetitions; regenerated twice byte-identically
-  and independently passed focused **5/5**. Worker and merged-tree full Rust
-  gates pass at **1,041 listed tests**, fmt, strict Clippy, and wasm32 release.
-  Generated Rust is **568,225 bytes**, sha256
-  `4c9217fb59426ad2b2d7be892f64078bf667b4763f182d8eb888f70ab8d78210`;
-  generator is **41,540 bytes**, sha256
-  `dd6258cb620cc1edff4464945735099fa55b391369e2ec64c6e66b79e4a948ab`.
-  Artifact is **506,186 bytes**, sha256
-  `f902e75917b8301b8f653c456dd9092ee15f52bc9e21dc32e9a1dae9ebbe5a06`.
-  Worker npm is green at **1,121 files / 10,456 passed / 224 skipped** and
-  build is green. Scope stayed inside `core-rs/**`; no barrier or Rust
-  deferral was added. PAPERCUT: stale ignored WASM artifact caused 399 initial
-  parity failures before rebuild, ~5 min.

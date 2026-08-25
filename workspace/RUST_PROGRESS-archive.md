@@ -5,6 +5,40 @@ full history regardless.
 
 ---
 
+## R52 — [supervised session, 2026-08-25] **M51 Battle Script ORWORD leaf + green checkpoint**
+
+- **State:** `rust-main` = merged master `33592cba` plus verified
+  `Cmd_orword` worker `bb3c5ab7`. The complete pure
+  `battleScriptOrwordOpcode.ts` registration/state/control projection is
+  native and wasm32-compilable; no ABI or adapter surface was widened. The
+  session is active, committed, and green.
+- **Did:** ported the exact 43-start eager registration, first-opcode binding,
+  ordered shape/pointer/value validation, the sole `gHitMarker` pointer, all
+  11 named HITMARKER terms and compound expressions, unsigned 32-bit OR, and
+  advance-only control. Canonical TypeScript execution supplies **66 handler
+  cases**, **18 registration cases**, and all **43 concrete program sites**;
+  corpus sha256
+  `b65a896f9ec084d073fe0fa0459fc07d50ca38968c9fa1edfa31b448e300ce08`.
+- **Next:** close main-program ISSUES #124 in Rust: carry the speed-tie draw
+  through `factory_ai_check_viability`, regenerate the M5d3 vectors, rebuild
+  wasm, and restore the skipped forced-WASM parity case. Keep all edits inside
+  `core-rs/**` and the existing M2 adapter-owned parity file only.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp
+  dispatch/body, nine-byte macro, constants, 43 sites, registration order,
+  write boundary, errors, and repetitions; regenerated twice byte-identically
+  and independently passed focused **5/5**. Worker and merged-tree full Rust
+  gates pass at **1,041 listed tests**, fmt, strict Clippy, and wasm32 release.
+  Generated Rust is **568,225 bytes**, sha256
+  `4c9217fb59426ad2b2d7be892f64078bf667b4763f182d8eb888f70ab8d78210`;
+  generator is **41,540 bytes**, sha256
+  `dd6258cb620cc1edff4464945735099fa55b391369e2ec64c6e66b79e4a948ab`.
+  Artifact is **506,186 bytes**, sha256
+  `f902e75917b8301b8f653c456dd9092ee15f52bc9e21dc32e9a1dae9ebbe5a06`.
+  Worker npm is green at **1,121 files / 10,456 passed / 224 skipped** and
+  build is green. Scope stayed inside `core-rs/**`; no barrier or Rust
+  deferral was added. PAPERCUT: stale ignored WASM artifact caused 399 initial
+  parity failures before rebuild, ~5 min.
+
 ## R51 — [supervised session, 2026-08-20] **M50 Battle Script Focus Punch no-damage gate + final wind-down**
 
 - **State:** `rust-main` = current master `0dd3f36c` plus verified
