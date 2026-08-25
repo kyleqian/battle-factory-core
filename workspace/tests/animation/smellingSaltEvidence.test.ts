@@ -9,7 +9,7 @@ const receipt = JSON.parse(readFileSync("tools/compare/fixtures/smelling-salt-ev
 describe("MOVE_SMELLING_SALT bilateral evidence checkpoint", () => {
   it("pins complete twice-fresh legal Scene-ON windows without promotion", () => {
     expect(receipt).toMatchObject({
-      move: "MOVE_SMELLING_SALT", status: "partial", coverageCredit: false,
+      move: "MOVE_SMELLING_SALT", status: "unsupported", coverageCredit: false,
       repeatability: { runsPerOrientation: 2, allMatched: true },
       measured: { pointerRows: "121/121 each", firstInactiveAge: 120,
         oamPredecessor: "120/120 each", matrixTwoRows: "119/119 eligible each",

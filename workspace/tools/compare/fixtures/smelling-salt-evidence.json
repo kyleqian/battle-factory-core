@@ -3,7 +3,7 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_SMELLING_SALT",
   "moveId": 265,
-  "status": "partial",
+  "status": "unsupported",
   "coverageCredit": false,
   "repeatability": {"runsPerOrientation": 2, "allMatched": true},
   "orientations": {
