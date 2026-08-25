@@ -36,6 +36,7 @@ import { getFactoryFrontierBrainStatus } from "../src/engine/frontierBrainStatus
 import {
   buildWinningSwapPlan,
   createStartCarryState,
+  isPlayerVoluntarySwitchTrapped,
   pickWinningFightSlot,
   pickWinningSwitchRow,
   resolveMaxFrames,
@@ -45,6 +46,7 @@ import {
   Rng,
   runSeed,
 } from "../tools/soak/randomRoundSoakDriver.ts";
+import type { BattleScriptRulesContext } from "../src/engine/battleScriptRulesContext.ts";
 
 const PIN_SEEDS = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
@@ -1026,6 +1028,151 @@ describe("ISSUES #125 lever 2: forced-Struggle (all four slots at 0 PP) widens t
       forcedStruggle: false,
     });
     expect(row).toBeNull();
+  });
+});
+
+describe("ISSUES #125 lever 2 regression (54ad24a7): forced-Struggle switch must agree with the party screen's own trap gate", () => {
+  // Mirrors `isVoluntarySwitchTrapped`
+  // (src/engine/factoryBattleScriptFullTurnDecision.ts:2085-2114), the check
+  // `legalCommandDecisions` runs unconditionally -- forced Struggle or not --
+  // before it will ever publish a "switch" decision for the player battler.
+  const ABILITY_NONE = 0;
+  const ABILITY_SHADOW_TAG = 23;
+  const ABILITY_LEVITATE = 26;
+  const ABILITY_MAGNET_PULL = 42;
+  const ABILITY_ARENA_TRAP = 71;
+  const STATUS2_WRAPPED = 1 << 13;
+  const STATUS2_ESCAPE_PREVENTION = 1 << 26;
+  const STATUS3_ROOTED = 1 << 10;
+  const GRASS: readonly [string, string] = ["TYPE_GRASS", "TYPE_GRASS"];
+  const FLYING: readonly [string, string] = ["TYPE_FLYING", "TYPE_FLYING"];
+  const STEEL: readonly [string, string] = ["TYPE_STEEL", "TYPE_STEEL"];
+
+  function trapContext(input: Readonly<{
+    activeStatus2?: number;
+    activeStatus3?: number;
+    activeTypes?: readonly [string, string];
+    activeAbility?: number;
+    opponentAbility?: number;
+    opponentHp?: number;
+    absentBattlerFlags?: number;
+  }> = {}): BattleScriptRulesContext {
+    return {
+      battlers: [
+        {
+          partyIndex: 0,
+          status2: input.activeStatus2 ?? 0,
+          status3: input.activeStatus3 ?? 0,
+          types: input.activeTypes ?? GRASS,
+          ability: input.activeAbility ?? ABILITY_NONE,
+        },
+        {
+          partyIndex: 1,
+          hp: input.opponentHp ?? 100,
+          ability: input.opponentAbility ?? ABILITY_NONE,
+        },
+      ],
+      absentBattlerFlags: input.absentBattlerFlags ?? 0,
+    } as unknown as BattleScriptRulesContext;
+  }
+
+  it("seed 406 shape: opponent Shadow Tag traps a Grass active with all slots at 0 PP", () => {
+    expect(isPlayerVoluntarySwitchTrapped(
+      trapContext({ opponentAbility: ABILITY_SHADOW_TAG }),
+    )).toBe(true);
+  });
+
+  it("two-phase agreement: the shared trap gate forbids the exact row pickWinningSwitchRow would otherwise pick under forcedStruggle", () => {
+    const rules = trapContext({ opponentAbility: ABILITY_SHADOW_TAG });
+    const NORMAL: readonly [string, string] = ["TYPE_NORMAL", "TYPE_NORMAL"];
+    const bench = [
+      { row: 1 as const, fainted: false, active: false, moveIds: [33, 0, 0, 0], movePp: [35, 0, 0, 0], types: NORMAL, hp: 10, maxHp: 100 },
+    ];
+    // Proves the disagreement this regression exhibited: on its own,
+    // pickWinningSwitchRow (mirroring test (a) above) picks row 1 even
+    // though the party screen can never legally accept it while trapped.
+    expect(pickWinningSwitchRow({
+      activeMoveIds: [0, 0, 0, 0],
+      activeLegalSlots: [false, false, false, false],
+      defenderTypes: NORMAL,
+      bench,
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: true,
+      forcedStruggle: true,
+    })).toBe(1);
+    // `computeSwitchRow`'s actual gate: check the shared predicate first and
+    // skip `pickWinningSwitchRow` entirely when trapped, so no row is ever
+    // proposed -- agreeing with the party screen's own refusal.
+    const row = isPlayerVoluntarySwitchTrapped(rules)
+      ? null
+      : pickWinningSwitchRow({
+        activeMoveIds: [0, 0, 0, 0],
+        activeLegalSlots: [false, false, false, false],
+        defenderTypes: NORMAL,
+        bench,
+        healthyCount: 2,
+        alreadySwitchedAgainstThisOpponent: true,
+        forcedStruggle: true,
+      });
+    expect(row).toBeNull();
+  });
+
+  it("not trapped when the opponent has no trapping ability (carry-14 seeds 116/418 shape)", () => {
+    expect(isPlayerVoluntarySwitchTrapped(trapContext())).toBe(false);
+  });
+
+  it("own WRAPPED_MASK status2 traps regardless of the opponent", () => {
+    expect(isPlayerVoluntarySwitchTrapped(
+      trapContext({ activeStatus2: STATUS2_WRAPPED }),
+    )).toBe(true);
+  });
+
+  it("own ESCAPE_PREVENTION status2 (Mean Look/Block) traps regardless of the opponent", () => {
+    expect(isPlayerVoluntarySwitchTrapped(
+      trapContext({ activeStatus2: STATUS2_ESCAPE_PREVENTION }),
+    )).toBe(true);
+  });
+
+  it("own ROOTED status3 (Ingrain) traps regardless of the opponent", () => {
+    expect(isPlayerVoluntarySwitchTrapped(
+      trapContext({ activeStatus3: STATUS3_ROOTED }),
+    )).toBe(true);
+  });
+
+  it("Arena Trap traps a grounded active", () => {
+    expect(isPlayerVoluntarySwitchTrapped(
+      trapContext({ opponentAbility: ABILITY_ARENA_TRAP }),
+    )).toBe(true);
+  });
+
+  it("Arena Trap does NOT trap a Flying-type active", () => {
+    expect(isPlayerVoluntarySwitchTrapped(
+      trapContext({ opponentAbility: ABILITY_ARENA_TRAP, activeTypes: FLYING }),
+    )).toBe(false);
+  });
+
+  it("Arena Trap does NOT trap a Levitate active", () => {
+    expect(isPlayerVoluntarySwitchTrapped(
+      trapContext({ opponentAbility: ABILITY_ARENA_TRAP, activeAbility: ABILITY_LEVITATE }),
+    )).toBe(false);
+  });
+
+  it("Magnet Pull traps a Steel-type active but not a non-Steel active", () => {
+    expect(isPlayerVoluntarySwitchTrapped(
+      trapContext({ opponentAbility: ABILITY_MAGNET_PULL, activeTypes: STEEL }),
+    )).toBe(true);
+    expect(isPlayerVoluntarySwitchTrapped(
+      trapContext({ opponentAbility: ABILITY_MAGNET_PULL }),
+    )).toBe(false);
+  });
+
+  it("a fainted/absent opponent never traps, even with a trapping ability", () => {
+    expect(isPlayerVoluntarySwitchTrapped(
+      trapContext({ opponentAbility: ABILITY_SHADOW_TAG, opponentHp: 0 }),
+    )).toBe(false);
+    expect(isPlayerVoluntarySwitchTrapped(
+      trapContext({ opponentAbility: ABILITY_SHADOW_TAG, absentBattlerFlags: 1 << 1 }),
+    )).toBe(false);
   });
 });
 

@@ -414,6 +414,54 @@ export type WinningSwitchBenchCandidate = Readonly<{
  * move left to prefer, so ping-pong cannot apply). The `healthyCount <= 1`
  * floor (nothing to switch to) still applies unconditionally.
  */
+/**
+ * ISSUES #125 lever 2 regression: mirrors `isVoluntarySwitchTrapped`
+ * (src/engine/factoryBattleScriptFullTurnDecision.ts:2085-2114), the gate
+ * `legalCommandDecisions` consults there before publishing ANY "switch"
+ * decision for the player battler. That gate is unconditional -- it does not
+ * carve out an exception for forced Struggle -- so a battler trapped by
+ * WRAPPED_MASK/ESCAPE_PREVENTION status2, ROOTED status3, or the opponent's
+ * Shadow Tag/Arena Trap(non-Flying/non-Levitate)/Magnet Pull(vs Steel)
+ * NEVER sees a switch row on the party screen, forced Struggle or not. Seed
+ * 406 (carry 14) hit exactly this: the opponent's Shadow Tag trapped the
+ * player while every fight slot was also at 0 PP, so `pickWinningSwitchRow`'s
+ * forced-Struggle branch (which only checks PP/usability, not trapping) kept
+ * committing to row 1 while the party screen -- correctly, per the same rule
+ * the live engine enforces -- had no legal row to accept, ping-ponging
+ * forever. `computeSwitchRow` below calls this first and skips
+ * `pickWinningSwitchRow` entirely when trapped, so both phases agree: no
+ * proposed switch, ever, while trapped (the actor falls through to FIGHT and,
+ * once every slot is unusable, genuinely Struggles).
+ */
+export function isPlayerVoluntarySwitchTrapped(
+  rulesContext: BattleScriptRulesContext,
+): boolean {
+  const active = rulesContext.battlers[0]!;
+  const WRAPPED_OR_ESCAPE_PREVENTION = (1 << 13) | (1 << 14) | (1 << 15) | (1 << 26);
+  const ROOTED = 1 << 10;
+  if (
+    (active.status2 & WRAPPED_OR_ESCAPE_PREVENTION) !== 0
+    || (active.status3 & ROOTED) !== 0
+  ) {
+    return true;
+  }
+  const opponent = rulesContext.battlers[1]!;
+  if (opponent.hp === 0 || (rulesContext.absentBattlerFlags & (1 << 1)) !== 0) return false;
+  const ABILITY_SHADOW_TAG = 23;
+  const ABILITY_LEVITATE = 26;
+  const ABILITY_MAGNET_PULL = 42;
+  const ABILITY_ARENA_TRAP = 71;
+  if (opponent.ability === ABILITY_SHADOW_TAG) return true;
+  if (
+    opponent.ability === ABILITY_ARENA_TRAP
+    && !active.types.includes("TYPE_FLYING")
+    && active.ability !== ABILITY_LEVITATE
+  ) {
+    return true;
+  }
+  return opponent.ability === ABILITY_MAGNET_PULL && active.types.includes("TYPE_STEEL");
+}
+
 export function pickWinningSwitchRow(input: {
   activeMoveIds: readonly number[];
   activeLegalSlots: readonly boolean[];
@@ -2004,6 +2052,10 @@ export class RandomPlayer {
    * the fight-menu phase already uses to name the Struggle move) and passes
    * it through so `pickWinningSwitchRow` can switch on ANY usable damaging
    * bench move instead of requiring a super-effective, >=50%-HP answer.
+   * ISSUES #125 lever 2 regression fix: checks `isPlayerVoluntarySwitchTrapped`
+   * first and returns null unconditionally when trapped, since the party
+   * screen (`legalCommandDecisions`) never exposes a switch row in that case
+   * regardless of forced Struggle -- see that helper's docstring.
    */
   private computeSwitchRow(
     orch: NonNullable<EngineState["factoryRoundBattleOrchestrator"]>,
@@ -2013,6 +2065,7 @@ export class RandomPlayer {
   ): 0 | 1 | 2 | null {
     const battle = orch.battle;
     if (!battle) return null;
+    if (isPlayerVoluntarySwitchTrapped(battle.rules.rulesContext)) return null;
     const battlers = battle.rules.rulesContext.battlers;
     const activePartyIndex = battlers[0]?.partyIndex;
     const opponentPartyIndex = battlers[1]?.partyIndex;
