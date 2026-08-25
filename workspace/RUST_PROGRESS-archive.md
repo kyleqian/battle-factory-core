@@ -5,6 +5,47 @@ full history regardless.
 
 ---
 
+## R49 — [supervised session, 2026-08-15] **M48 Battle Script Low Kick weight-damage leaf**
+
+- **State:** `rust-main` = current master `5b9a12af` plus verified
+  `Cmd_weightdamagecalculation` worker `d51a4db2`. The complete pure
+  `battleScriptWeightDamageOpcode.ts` registration/catalog/scalar/state/control
+  projection is native and wasm32-compilable; no ABI or adapter surface was
+  widened. The session remains active and committed.
+- **Did:** ported exact singleton/operand-free registration, target-first role
+  resolution, source species-to-Pokédex-weight lookup, all **25** legacy null
+  compatibility IDs, exact catalog errors, and strict Low Kick weight bands
+  `<100/<250/<500/<1000/<2000/else` to power
+  `20/40/60/80/100/120`. Success overwrites only dynamic base power and
+  advances. Canonical TypeScript execution supplies **1,132 handler cases**,
+  **66 scalar cases**, and **7 registration cases** across all **411** source
+  catalog rows, the complete **500** target/selector matrix, threshold and
+  safe-integer domains, malformed values, prior u16 power edges, ordered
+  errors, repetitions, and immutability. Corpus sha256
+  `5c970efa033a8fc982e81f962ed1372cf63166d1c842346445c51d2c7904fb6c`.
+- **Next:** recheck active work and select one final conflict-free pure Battle
+  Script leaf if the deadline reserve permits; otherwise perform the required
+  final full npm/build, soak, Rust, ledger, and clean-tree wind-down.
+- **Notes:** Terra/max worker, one commit. Supervisor audited decomp dispatch,
+  table/body, operand-free macro, single Low Kick site, extracted Pokédex
+  authority, all catalog IDs/nulls, registration and target ordering, scalar
+  errors, write set and repetitions; regenerated twice byte-identically
+  (catalog input **3,981 bytes**, sha256
+  `8831e5a6e21a42ab71dce857243f008a4efdac72e97cdf83148763e25ad6d85f`;
+  catalog Rust **11,788 bytes**, sha256
+  `d0f6e93d8d4e178eb23f091b16bdc9ad43b952d263fab163a082af35ae85215b`;
+  canonical corpus **490,486 bytes**; vectors **1,327,310 bytes**, sha256
+  `6a4bac03fa2a104056d2a37448c686556ad6ed24922723a51c409feaccb82376`;
+  generator **38,279 bytes**, sha256
+  `76d97de4b94527e7a777c2339c6311c4a8242ee364becdbeec9c7adee6d4897e`).
+  Focused **2/2 + 7/7**, cargo **983/983**, fmt, strict Clippy, and wasm32
+  release pass. Artifact is **492,690 bytes**, sha256
+  `223b5323d42125df2de7922e1b7ee4334db0cb620c8dbe6fa13b759974ac6f58`.
+  Latest-master npm is green at **1,029 files / 9,871 passed / 223 skipped**;
+  build is green at **677 modules**. Scope stayed inside `core-rs/**`; no
+  unsupported barrier or Rust deferral was added. PAPERCUT: long-command
+  completion detached from live subprocess reporting, ~4 min.
+
 ## R48 — [supervised session, 2026-08-15] **M47 Battle Script Pain Split leaf + green checkpoint**
 
 - **State:** `rust-main` = current master `d23e6e3a` plus verified Pain Split
