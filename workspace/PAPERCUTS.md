@@ -1420,3 +1420,18 @@ current app stage should be rejected before replay.
 - **Fix shape:** add `--follow` to a repo `.ripgreprc` (and export
   `RIPGREP_CONFIG_PATH` from the launchers), or note it in AGENTS.md's
   reference-material section.
+
+## Battle-lab checkpoint lands PAST turn 1's AI decision — a receipt probe cannot observe the first AI decision
+
+- **Hit:** 2026-08-25 (ts opus worker, ISSUES #128 receipt; ~10 min lost to a
+  frame-1 false positive on `gChosenMoveByBattler`).
+- **What happens:** `mechanicLab` checkpoints inside turn 1's
+  `HandleTurnActionSelectionState` run after the AI has already committed and
+  the switch-in hooks (Intimidate/Trace) have fired, so the first AI decision a
+  probe can window is TURN 2's. A probe keyed on `gChosenMoveByBattler` at
+  frame 1 reads the pre-committed value and mis-attributes draws.
+- **Workaround:** window the AI decision on
+  `gBattleMainFunc == HandleTurnActionSelectionState` and read turn 2 (the
+  `probe-issue128-ability-history-off.py` shape).
+- **Fix shape:** a line in `tools/battle-lab/README.md` under mechanicLab
+  ("the checkpoint is past turn 1's AI decision; window turn 2").
