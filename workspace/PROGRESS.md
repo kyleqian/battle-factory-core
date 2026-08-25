@@ -84,12 +84,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Census batch A COMPLETE: **600/600 varied full chains, 0 CRASH / 0 HANG**
   (winning-swap c14/c28, winning-coverage c0/c14, full c0/c14; 83:100
   tails rerun after the pattern kill).
-- **In flight:** side opus — `--policy coverage-fight` (least-used legal
-  move first; stacked on lever 2, `worker/side-20260825-105948`); census
-  batch B (~350 chains with coverage) — ETA ~12:15.
-- **Next:** fold coverage-fight → first-round census with it at c0/c14/c28;
-  union coverage report over batch B; mid-session gates with `--parallel`;
-  wind-down: five gates + full suite on the final tree.
+- **Did (rounds 8-9):** (8) **`--policy coverage-fight`** (side opus, 41.6
+  min, $3.9; `77db3504` → merge `f6c98cf0`, one conflict in
+  `randomRoundSoak.ts` resolved by me: fan-out kept + policy added to the
+  validation list): winning-coverage's draft, `winning`'s switch/swap
+  rules, FIGHT = least-used legal move (run-wide tally, ties → lowest slot);
+  8 pins (mutation-checked). On 100 boot rounds it executes **2× the
+  player-side distinct moves (140 vs 70) and 2.3× the effects (95 vs 42)**
+  of winning-coverage; run totals look lower only because it loses more
+  (271 vs 534 battles). Its first census: first-round `--vary-rng` c0/c14/
+  c28 **300/300 each** (c14 `budget` 2 = trapped + out-of-PP Struggle, the
+  accepted #125 residual) + full chains c0/c28 **20/20 each** — 0 CRASH /
+  0 HANG. (9) **Lever-2 regression fixed** (side sonnet, 29 min, $2.8;
+  `c8c94f5c`): my carry-14 gate diagnostic found seed 406 ping-ponging
+  "switch row 1" ↔ "party: cancel" for the whole budget — the engine's
+  `legalCommandDecisions` never publishes a switch while the player is
+  trapped (`factoryBattleScriptFullTurnDecision.ts:2085-2153`; Shadow Tag
+  here) and lever 2 ignored trapping; the driver now mirrors the trap gate
+  (`isPlayerVoluntarySwitchTrapped`, 12 pins) → seed 406 `roundLost`,
+  116/418/755 still resolve, carry-14 first-round 0:500 **500/500 budget 0**.
+- **Mid-session gates on `4dbe8fe9`+ (with `--parallel`):** vanilla 0:20
+  **20/20**, full 0:60 **60/60**, fifth gate **500/500 ×4** (c14 `budget`
+  1 = seed 406, fixed above); winning/winning-swap 0:60 still running.
+- **In flight:** census batch B (winning c0/c14/c28 + winning-swap c0 at
+  113:200, winning-coverage c28, all with coverage; ~68/87 each); then a ts
+  scout merges every coverage JSON into
+  `docs/soak-coverage-baseline-2026-08-25.md` (never-executed lists + why).
+- **Next:** coverage baseline doc; wind-down gates (all five, `--parallel`)
+  + full suite + build on the final tree; `docs/soak-crash-catalog.md`
+  entry for today's census.
 
 ---
 
