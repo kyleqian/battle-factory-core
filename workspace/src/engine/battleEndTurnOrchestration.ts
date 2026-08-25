@@ -70,6 +70,8 @@ import {
 import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import {
   BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
+  BATTLE_SCRIPT_HITMARKER_GRUDGE,
+  BATTLE_SCRIPT_HITMARKER_IGNORE_BIDE,
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS2_LOCK_CONFUSE_TURN_1,
   BATTLE_SCRIPT_STATUS2_MASKS,
@@ -1471,6 +1473,51 @@ type BattlerLoopResult =
   | Readonly<{ kind: "case-barrier"; state: MachineState } & BattleEndTurnCaseBarrier>;
 
 /**
+ * `gHitMarker |= (HITMARKER_GRUDGE | HITMARKER_IGNORE_BIDE)` -- the pair
+ * `DoBattlerEndTurnEffects` (`battle_util.c:1468`) and
+ * `HandleWishPerishSongOnTurnEnd` (`battle_util.c:1787`) raise at *every*
+ * entry, clear at their own completion (`:1781`, `:1887`), and that
+ * `DoFieldEndTurnEffects` deliberately does not raise at all.
+ *
+ * IGNORE_BIDE is what makes end-turn damage invisible to Bide:
+ * `Cmd_datahpupdate` consumes and clears it instead of running its
+ * `gBideDmg[gActiveBattler] += gBattleMoveDamage` /
+ * `gBideTarget[gActiveBattler] = ...` block
+ * (`battle_script_commands.c:1905-1917`). GRUDGE is the paired suppression
+ * of Destiny Bond/Grudge on an end-turn KO (`:1902`/`:4369` readers here).
+ *
+ * Source re-raises them on each C re-entry, i.e. once per fired script,
+ * because the first `datahpupdate` of the previous script cleared
+ * IGNORE_BIDE. This reducer collapses the whole loop into one call, so it
+ * re-raises after every case instead -- the same "set before each script"
+ * guarantee. Ground truth (ISSUES #126, 2026-08-24): a Bide user poisoned
+ * through three full store/release cycles keeps `gBideDmg[0] == 0`,
+ * `gBideTarget[0]` unwritten, and releases through
+ * `BattleScript_BideNoEnergyToAttack` every time, with the opponent's HP
+ * never changing.
+ */
+const END_TURN_BATTLER_HIT_MARKERS =
+  (BATTLE_SCRIPT_HITMARKER_GRUDGE | BATTLE_SCRIPT_HITMARKER_IGNORE_BIDE) >>> 0;
+
+function withEndTurnHitMarkers(state: MachineState): MachineState {
+  const hitMarker = (state.rulesContext.hitMarker | END_TURN_BATTLER_HIT_MARKERS) >>> 0;
+  if (hitMarker === state.rulesContext.hitMarker) return state;
+  return Object.freeze({
+    ...state,
+    rulesContext: Object.freeze({ ...state.rulesContext, hitMarker }),
+  });
+}
+
+function withoutEndTurnHitMarkers(state: MachineState): MachineState {
+  const hitMarker = (state.rulesContext.hitMarker & ~END_TURN_BATTLER_HIT_MARKERS) >>> 0;
+  if (hitMarker === state.rulesContext.hitMarker) return state;
+  return Object.freeze({
+    ...state,
+    rulesContext: Object.freeze({ ...state.rulesContext, hitMarker }),
+  });
+}
+
+/**
  * `DoBattlerEndTurnEffects` (`battle_util.c:1464-1783`): per battler (turn
  * order), all 19 `ENDTURN_*` cases in real enum/execution order (INGRAIN,
  * ABILITIES, ITEMS1, LEECH_SEED, POISON, BAD_POISON, BURN, NIGHTMARES,
@@ -1500,7 +1547,8 @@ function runDoBattlerEndTurnEffects(
   initialState: MachineState,
   battlerOrder: readonly BattleScriptBattlerId[],
 ): BattlerLoopResult {
-  let state = initialState;
+  // `battle_util.c:1468` -- raised at entry, and again below after every fired case.
+  let state = withEndTurnHitMarkers(initialState);
   for (const battler of battlerOrder) {
     if ((state.rulesContext.absentBattlerFlags & (1 << battler)) !== 0) continue;
 
@@ -1509,7 +1557,7 @@ function runDoBattlerEndTurnEffects(
       return Object.freeze({ kind: "opcode-barrier", state: ingrain.state, instruction: ingrain.instruction });
     }
     if (ingrain.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: ingrain.state });
-    state = ingrain.state;
+    state = withEndTurnHitMarkers(ingrain.state);
 
     const abilities = runAbilitiesTick(program, handlers, state, battler);
     if (abilities.kind === "opcode-barrier") {
@@ -1521,7 +1569,7 @@ function runDoBattlerEndTurnEffects(
     if (abilities.kind === "fired" && abilities.state.rulesContext.battleOutcome !== 0) {
       return Object.freeze({ kind: "outcome-decided", state: abilities.state });
     }
-    state = abilities.state;
+    state = withEndTurnHitMarkers(abilities.state);
 
     const items1 = runItemsTick(program, handlers, state, battler, false);
     if (items1.kind === "opcode-barrier") {
@@ -1533,62 +1581,62 @@ function runDoBattlerEndTurnEffects(
     if (items1.kind === "fired" && items1.state.rulesContext.battleOutcome !== 0) {
       return Object.freeze({ kind: "outcome-decided", state: items1.state });
     }
-    state = items1.state;
+    state = withEndTurnHitMarkers(items1.state);
 
     const leechSeed = applyTickOutcome(runLeechSeedTick(program, handlers, state, battler));
     if (leechSeed.kind === "opcode-barrier") {
       return Object.freeze({ kind: "opcode-barrier", state: leechSeed.state, instruction: leechSeed.instruction });
     }
     if (leechSeed.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: leechSeed.state });
-    state = leechSeed.state;
+    state = withEndTurnHitMarkers(leechSeed.state);
 
     const statusDamage = applyTickOutcome(runBattlerStatusDamageTick(program, handlers, state, battler));
     if (statusDamage.kind === "opcode-barrier") {
       return Object.freeze({ kind: "opcode-barrier", state: statusDamage.state, instruction: statusDamage.instruction });
     }
     if (statusDamage.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: statusDamage.state });
-    state = statusDamage.state;
+    state = withEndTurnHitMarkers(statusDamage.state);
 
     const nightmare = applyTickOutcome(runNightmareTick(program, handlers, state, battler));
     if (nightmare.kind === "opcode-barrier") {
       return Object.freeze({ kind: "opcode-barrier", state: nightmare.state, instruction: nightmare.instruction });
     }
     if (nightmare.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: nightmare.state });
-    state = nightmare.state;
+    state = withEndTurnHitMarkers(nightmare.state);
 
     const curse = applyTickOutcome(runCurseTick(program, handlers, state, battler));
     if (curse.kind === "opcode-barrier") {
       return Object.freeze({ kind: "opcode-barrier", state: curse.state, instruction: curse.instruction });
     }
     if (curse.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: curse.state });
-    state = curse.state;
+    state = withEndTurnHitMarkers(curse.state);
 
     const wrap = applyTickOutcome(runWrapTick(program, handlers, state, battler));
     if (wrap.kind === "opcode-barrier") {
       return Object.freeze({ kind: "opcode-barrier", state: wrap.state, instruction: wrap.instruction });
     }
     if (wrap.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: wrap.state });
-    state = wrap.state;
+    state = withEndTurnHitMarkers(wrap.state);
     const uproar = applyTickOutcome(runUproarTick(program, handlers, state, battler));
     if (uproar.kind === "opcode-barrier") {
       return Object.freeze({ kind: "opcode-barrier", state: uproar.state, instruction: uproar.instruction });
     }
     if (uproar.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: uproar.state });
-    state = uproar.state;
+    state = withEndTurnHitMarkers(uproar.state);
 
     const thrash = applyTickOutcome(runThrashTick(program, handlers, state, battler));
     if (thrash.kind === "opcode-barrier") {
       return Object.freeze({ kind: "opcode-barrier", state: thrash.state, instruction: thrash.instruction });
     }
     if (thrash.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: thrash.state });
-    state = thrash.state;
+    state = withEndTurnHitMarkers(thrash.state);
 
     const disable = applyTickOutcome(runDisableTick(program, handlers, state, battler));
     if (disable.kind === "opcode-barrier") {
       return Object.freeze({ kind: "opcode-barrier", state: disable.state, instruction: disable.instruction });
     }
     if (disable.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: disable.state });
-    state = disable.state;
+    state = withEndTurnHitMarkers(disable.state);
     const encoreSource = state.rulesContext.battlers[battler];
     if (encoreSource.encoreTimer !== 0) {
       const slotMatches =
@@ -1621,7 +1669,7 @@ function runDoBattlerEndTurnEffects(
             return Object.freeze({ kind: "opcode-barrier", state: encore.state, instruction: encore.instruction });
           }
           if (encore.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: encore.state });
-          state = encore.state;
+          state = withEndTurnHitMarkers(encore.state);
         } else {
           state = Object.freeze({ ...state, rulesContext });
         }
@@ -1672,7 +1720,7 @@ function runDoBattlerEndTurnEffects(
       return Object.freeze({ kind: "opcode-barrier", state: yawn.state, instruction: yawn.instruction });
     }
     if (yawn.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: yawn.state });
-    state = yawn.state;
+    state = withEndTurnHitMarkers(yawn.state);
 
     const items2 = runItemsTick(program, handlers, state, battler, true);
     if (items2.kind === "opcode-barrier") {
@@ -1684,9 +1732,10 @@ function runDoBattlerEndTurnEffects(
     if (items2.kind === "fired" && items2.state.rulesContext.battleOutcome !== 0) {
       return Object.freeze({ kind: "outcome-decided", state: items2.state });
     }
-    state = items2.state;
+    state = withEndTurnHitMarkers(items2.state);
   }
-  return Object.freeze({ kind: "clean", state });
+  // `battle_util.c:1781`: cleared only when the whole loop finishes with effect == 0.
+  return Object.freeze({ kind: "clean", state: withoutEndTurnHitMarkers(state) });
 }
 
 type FieldCaseOutcome =
@@ -2122,7 +2171,9 @@ function runPerishSongAfterFutureAttacks(
   initialState: MachineState,
   initialCompletionKind: PostFaintKind,
 ): BattleEndTurnResult {
-  let state = initialState;
+  // `battle_util.c:1787` -- HandleWishPerishSongOnTurnEnd raises the same
+  // GRUDGE/IGNORE_BIDE pair at every entry as DoBattlerEndTurnEffects does.
+  let state = withEndTurnHitMarkers(initialState);
   let completionKind = initialCompletionKind;
   const count = state.rulesContext.battleTopology.battlersCount;
   if (state.rulesContext.wishPerishSongState > 1) {
@@ -2184,10 +2235,17 @@ function runPerishSongAfterFutureAttacks(
         instruction: fired.instruction,
       });
     }
-    state = fired.state;
+    state = withEndTurnHitMarkers(fired.state);
 
     if (currentTimer === 0 && state.rulesContext.battlers[battler].hp === 0) {
-      const fainted = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
+      // The KO re-enters BattleTurnPassed, whose DoBattlerEndTurnEffects pass
+      // is already exhausted and therefore falls straight to its `:1781`
+      // clear before HandleFaintedMonActions runs.
+      const fainted = runBattleScriptFaintedActionsOrchestration(
+        program,
+        handlers,
+        withoutEndTurnHitMarkers(state),
+      );
       if (fainted.kind === "terminal") {
         return Object.freeze({
           kind: "terminal",
@@ -2215,7 +2273,7 @@ function runPerishSongAfterFutureAttacks(
           instruction: fainted.instruction,
         });
       }
-      state = fainted.state;
+      state = withEndTurnHitMarkers(fainted.state);
       if (fainted.kind === "resumed") completionKind = "resumed";
     }
   }
@@ -2229,9 +2287,11 @@ function runPerishSongAfterFutureAttacks(
  * through to `BattleTurnPassed`'s closing cleanup (`battle_main.c:3974-3992`).
  */
 function finishWishPerishSong(
-  state: MachineState,
+  initialState: MachineState,
   completionKind: PostFaintKind,
 ): BattleEndTurnResult {
+  // `battle_util.c:1887`: the paired clear on the FALSE return.
+  const state = withoutEndTurnHitMarkers(initialState);
   if (completionKind === "terminal") {
     return Object.freeze({
       kind: "terminal",
@@ -2261,7 +2321,8 @@ function runFutureAttacksAfterFaints(
   initialState: MachineState,
   completionKind: PostFaintKind,
 ): BattleEndTurnResult {
-  let state = initialState;
+  // `battle_util.c:1787`, same raise as the Perish Song sweep below.
+  let state = withEndTurnHitMarkers(initialState);
   const count = state.rulesContext.battleTopology.battlersCount;
   if (state.rulesContext.wishPerishSongState !== 0) {
     return runPerishSongAfterFutureAttacks(program, handlers, state, completionKind);
@@ -2315,12 +2376,17 @@ function runFutureAttacksAfterFaints(
     if (fired.kind === "opcode-barrier") {
       return Object.freeze({ kind: "non-terminal-barrier", state: fired.state, instruction: fired.instruction });
     }
-    state = fired.state;
+    state = withEndTurnHitMarkers(fired.state);
 
     // A delayed KO re-enters BattleTurnPassed and therefore reaches
-    // HandleFaintedMonActions before this positional scan resumes.
+    // HandleFaintedMonActions before this positional scan resumes -- through
+    // the same exhausted DoBattlerEndTurnEffects `:1781` clear.
     if (state.rulesContext.battlers[battler].hp === 0) {
-      const fainted = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
+      const fainted = runBattleScriptFaintedActionsOrchestration(
+        program,
+        handlers,
+        withoutEndTurnHitMarkers(state),
+      );
       if (fainted.kind === "terminal") {
         return Object.freeze({
           kind: "terminal",
@@ -2344,7 +2410,7 @@ function runFutureAttacksAfterFaints(
       if (fainted.kind === "non-terminal-barrier") {
         return Object.freeze({ kind: "non-terminal-barrier", state: fainted.state, instruction: fainted.instruction });
       }
-      state = fainted.state;
+      state = withEndTurnHitMarkers(fainted.state);
     }
   }
 
