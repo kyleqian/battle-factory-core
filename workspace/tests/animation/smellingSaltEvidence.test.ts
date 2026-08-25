@@ -1,7 +1,9 @@
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
+import { createScratchDir } from "../../tools/lib/scratch.ts";
 
 const sha = (value: Uint8Array) => createHash("sha256").update(value).digest("hex");
 const receipt = JSON.parse(readFileSync("tools/compare/fixtures/smelling-salt-evidence.json", "utf8"));
@@ -41,5 +43,19 @@ describe("MOVE_SMELLING_SALT bilateral evidence checkpoint", () => {
     const carriers = mons.entries.filter((entry: any) => entry.index >= 110 && entry.moves.includes("MOVE_SMELLING_SALT"));
     expect(carriers[0]).toMatchObject({ index: 376, label: "FRONTIER_MON_GRANBULL_1", species: "SPECIES_GRANBULL" });
     expect(receipt.controls.statusesChanged).toBe(false);
+  });
+
+  it("re-extracts exclusive effect art and byte-checks the reused TAG_HAND cell", () => {
+    const scratch = createScratchDir("smelling-salt-assets-");
+    const output = `${scratch}/smelling-salt.json`;
+    execFileSync(process.execPath, [
+      "--experimental-strip-types",
+      "tools/compare/extractSmellingSaltAssets.ts",
+      "--out",
+      output,
+    ]);
+    expect(readFileSync(output)).toEqual(readFileSync(
+      "src/animation/assets/smelling-salt.json",
+    ));
   });
 });
