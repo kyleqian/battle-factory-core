@@ -1,0 +1,219 @@
+{
+  "schema": "gate6-leppa-berry-off-semantic-receipt/v1",
+  "cardId": "LEPPA_BERRY",
+  "oracleProfile": "battle-scene-off",
+  "runner": "tools/run-mgba-probe.py",
+  "probe": "tools/probe/probe-gate6-leppa-berry-off.py",
+  "fixture": "tools/battle-lab/gate6-leppa-berry-off.json",
+  "seed": 305419897,
+  "source": {
+    "block": "src/battle_util.c ItemBattleEffects, ITEMEFFECT_NORMAL -> case HOLD_EFFECT_RESTORE_PP (battle_util.c:3347-3377)",
+    "moveTurnGate": "guarded by `if (!moveTurn)`, so the poll is the end-of-turn one, not the post-move one",
+    "slotChoice": "scans MON_DATA_MOVE1..MOVE4 in order and breaks on the FIRST slot with move != 0 and PP == 0",
+    "amount": "changedPP + battlerHoldEffectParam (LEPPA = 10), capped at CalculatePPWithBonus(move, ppBonuses, i)",
+    "message": "PREPARE_MOVE_BUFFER(gBattleTextBuff1, move) then BattleScriptExecute(BattleScript_BerryPPHealEnd2) -> STRINGID_PKMNSITEMRESTOREDPP"
+  },
+  "freshRunCount": 2,
+  "byteIdenticalAcrossFreshRuns": true,
+  "probeOutputSha256": "0cabf4c12a286004a51aea1328422f838baf7241411d352fcdce8ed9e5eefb2b",
+  "parties": {
+    "leppaNidoking": {
+      "species": 34,
+      "item": 138,
+      "abilitySlot": 0,
+      "ability": 38,
+      "moves": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "pp": [
+        5,
+        5,
+        5,
+        5
+      ]
+    },
+    "ghostMisdreavus": {
+      "species": 200,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 26,
+      "moves": [
+        212,
+        212,
+        212,
+        212
+      ],
+      "pp": [
+        5,
+        5,
+        5,
+        5
+      ]
+    }
+  },
+  "ppTimeline": [
+    {
+      "frame": 67,
+      "ppBefore": 5,
+      "ppAfter": 4,
+      "recordPp": 4,
+      "randomCallsSincePreviousChange": 0,
+      "rngValue": 960307641
+    },
+    {
+      "frame": 467,
+      "ppBefore": 4,
+      "ppAfter": 3,
+      "recordPp": 3,
+      "randomCallsSincePreviousChange": 7,
+      "rngValue": 2654154342
+    },
+    {
+      "frame": 847,
+      "ppBefore": 3,
+      "ppAfter": 2,
+      "recordPp": 2,
+      "randomCallsSincePreviousChange": 7,
+      "rngValue": 3152970951
+    },
+    {
+      "frame": 1227,
+      "ppBefore": 2,
+      "ppAfter": 1,
+      "recordPp": 1,
+      "randomCallsSincePreviousChange": 7,
+      "rngValue": 2863507372
+    },
+    {
+      "frame": 1607,
+      "ppBefore": 1,
+      "ppAfter": 0,
+      "recordPp": 0,
+      "randomCallsSincePreviousChange": 7,
+      "rngValue": 757241125
+    },
+    {
+      "frame": 1918,
+      "ppBefore": 0,
+      "ppAfter": 5,
+      "recordPp": 5,
+      "randomCallsSincePreviousChange": 1,
+      "rngValue": 2160666420
+    },
+    {
+      "frame": 2147,
+      "ppBefore": 5,
+      "ppAfter": 4,
+      "recordPp": 4,
+      "randomCallsSincePreviousChange": 6,
+      "rngValue": 259421058
+    },
+    {
+      "frame": 2527,
+      "ppBefore": 4,
+      "ppAfter": 3,
+      "recordPp": 3,
+      "randomCallsSincePreviousChange": 7,
+      "rngValue": 74642003
+    },
+    {
+      "frame": 2907,
+      "ppBefore": 3,
+      "ppAfter": 2,
+      "recordPp": 2,
+      "randomCallsSincePreviousChange": 7,
+      "rngValue": 1992568680
+    },
+    {
+      "frame": 3287,
+      "ppBefore": 2,
+      "ppAfter": 1,
+      "recordPp": 1,
+      "randomCallsSincePreviousChange": 7,
+      "rngValue": 1702965201
+    }
+  ],
+  "itemTimeline": [
+    {
+      "frame": 2066,
+      "itemBefore": 138,
+      "itemAfter": 0,
+      "recordItem": 0,
+      "pp": [
+        5,
+        5,
+        5,
+        5
+      ]
+    }
+  ],
+  "hornDrillUsesBeforeRestore": 9,
+  "restore": {
+    "frame": 1918,
+    "ppAfter": [
+      5,
+      5,
+      5,
+      5
+    ],
+    "recordPpAfter": [
+      5,
+      5,
+      5,
+      5
+    ],
+    "itemAfter": 138,
+    "recordItemAfter": 138
+  },
+  "restoreMessage": [
+    {
+      "frame": 1953,
+      "text": "NIDOKING’s LEPPA BERRY\nrestored HORN DRILL’s PP!"
+    }
+  ],
+  "playerHpAcrossTrace": {
+    "initial": 156,
+    "final": 156,
+    "maxHp": 156
+  },
+  "final": {
+    "player": {
+      "partyIndex": 0,
+      "species": 34,
+      "item": 0,
+      "hp": 156,
+      "maxHp": 156,
+      "status1": 0,
+      "pp": [
+        1,
+        5,
+        5,
+        5
+      ]
+    },
+    "opponent": {
+      "partyIndex": 0,
+      "species": 200,
+      "ability": 26,
+      "hp": 135,
+      "maxHp": 135,
+      "pp": [
+        4,
+        3,
+        1,
+        4
+      ]
+    }
+  },
+  "assertions": [
+    "HORN DRILL's slot-0 PP walks 5->4->3->2->1->0 across five consecutive turns (frames 67/467/847/1227/1607); every use is a Normal move into a pure-Ghost MISDREAVUS, so no damage and no faint perturbs the trace.",
+    "The FIFTH use empties slot 0 at frame 1607; the LEPPA BERRY fires at that turn's END-of-turn poll (frame 1918), restoring slot 0 to 5 -- 0 + holdEffectParam 10 capped at HORN DRILL's max PP of 5, not to 10.",
+    "The restore reaches BOTH the battler copy and the persistent party record on the same frame (player.pp[0] and parties.player[0].pp[0] both 5).",
+    "The message 'NIDOKING's LEPPA BERRY restored HORN DRILL's PP!' (STRINGID_PKMNSITEMRESTOREDPP) prints at frame 1953 -- AFTER the PP write, and the held item clears (138 -> 0, battler and record together) later still at frame 2066.",
+    "The berry is one-shot: HORN DRILL walks 5->1 again over the next four turns with no second restore, and the final held item is 0.",
+    "This is semantic RAM evidence; no framebuffer fitting or runtime oracle dependency is used."
+  ]
+}
