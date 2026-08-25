@@ -274,6 +274,57 @@ Poison Point, Flame Body and Rough Skin have **exactly one** source site each
 complete at 1/1; Effect Spore and Cute Charm are 2/2. (`src/wild_encounter.c:397`
 Cute Charm and `src/egg_hatch.c:934` Flame Body are overworld, not battle.)
 
+### Ability copy — TRACE (16) — SOURCE-EXACT; the coverage question is **instrument sampling**
+| Source | Engine | Note |
+| --- | --- | --- |
+| `src/battle_util.c:2575-2581` (`ABILITYEFFECT_ON_SWITCHIN` arm: `if (!gSpecialStatuses[battler].traced) { gStatuses3[battler] \|= STATUS3_TRACE; traced = 1; }` — copies nothing) | `src/engine/battleScriptSwitchinOpcode.ts:1236-1246` and `src/engine/factoryBattleStart.ts:449-456` | Arm-only in both; `STATUS3_TRACE = 1 << 20` (`switchinOpcode.ts:117`, `factoryBattleStart.ts:53`) matches `include/constants/battle.h:177`. **Nuance:** the port has no `SpecialStatus::traced` (explicitly unrepresented, `src/engine/battleActionFinished.ts:15`) and guards on `!(status3 & STATUS3_TRACE)` instead. The two differ only if `ON_SWITCHIN` re-dispatches for the same battler after a *successful* copy within one `SpecialStatusesClear` window — which requires the tracer to still hold `ABILITY_TRACE` after copying, i.e. to have traced a Trace. Not reachable through a single switch-in per battler per turn; recorded, not filed. |
+| `src/battle_util.c:3017-3073` (`ABILITYEFFECT_TRACE`), singles branch `:3050-3060` | `src/engine/factoryBattleStart.ts:484-513` (battle start) and `src/engine/battleScriptFaintedActionsOrchestration.ts:437-471` (post-faint) | Singles: source sets `gActiveBattler = target1` unconditionally, then copies only if `gBattleMons[target1].ability && gBattleMons[target1].hp`. The port's `findIndex(candidate.side !== active.side && hp !== 0 && ability !== 0)` is the same predicate with `battlersCount === 2`. Both **refuse `ABILITY_NONE` and a fainted target**, both write the copied id into the live slot (`gBattleMons[i].ability` ↔ `battlers[id].ability`), both set `gLastUsedAbility` ↔ `lastUsedAbility`, clear `STATUS3_TRACE`, set `gBattleScripting.battler` ↔ `scriptingBattler`, and call `BattleScript_TraceActivates`. `RecordAbilityBattle` equivalence: `faintedActionsOrchestration.ts:454-459` writes `aiObservedAbilityIds[id] = copiedAbility`. |
+| `PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff1, gActiveBattler, …)` + `PREPARE_ABILITY_BUFFER(gBattleTextBuff2, gLastUsedAbility)` (`:3067-3068`) | `battleTextBuff1MonNick = {battler: opposing, partyIndex}` (`factoryBattleStart.ts:503-506`, `faintedActionsOrchestration.ts:466-469`); `{B_BUFF2}` ← `lastUsedAbility` at `src/engine/factoryBattleScriptFullTurnDecision.ts:1205-1215,1345-1352`; message wiring at `src/engine/battleResolutionPresentation.ts:2753-2756` | `STRINGID_PKMNTRACED` buffers the **traced-from** mon's name-with-prefix in `{B_BUFF1}` and the **copied** ability in `{B_BUFF2}` in both halves. |
+| dispatch sites: `src/battle_main.c:3880-3883` (before turn 1, Intimidate1 then Trace, both battler-index ordered) and `src/battle_util.c:1959-1963` (`DoFaintedActions` case 6) | `factoryBattleStart.ts:466-513` and `battleScriptFaintedActionsOrchestration.ts:412-471` | **Exactly two dispatch sites in each half**, in the same order relative to Intimidate. A voluntary mid-battle switch arms but does not dispatch, in both halves. |
+
+**Refusal set (asked for explicitly):** Trace refuses `ABILITY_NONE` (id 0) and
+a fainted opposing battler. It does **not** refuse any named ability — unlike
+later generations there is no Multitype/Illusion exclusion list in Emerald, so
+a Trace mon facing a Trace mon copies Trace.
+
+**One ordering nuance, singles-unreachable.** Source clears `STATUS3_TRACE`
+*only inside* `if (effect != 0)` (`:3061-3069`), so a refused copy leaves the
+flag armed for a later dispatch. `factoryBattleStart.ts:487-497` clears the
+flag **before** testing `copiedAbility === 0 || hp === 0` and then `continue`s,
+so a refused copy at battle start would disarm. Unreachable: at battle start
+both leads have `hp > 0` and every Level-50 corpus species resolves to a
+non-zero ability id, and `absentBattlerFlags` is 0 (`factoryBattleStart.ts:424`).
+The post-faint copy (`faintedActionsOrchestration.ts:440,451`) has the source's
+order. Recorded as a latent shape difference, not a finding.
+
+**F3 resolved — the baseline's zero-Trace question is INSTRUMENT SAMPLING, not
+a resolution bug.** `docs/soak-coverage-baseline-2026-08-25.md:205-224` records
+lead abilities from `rulesContext.battlers[0]/[1].ability`
+(`tools/soak/randomRoundSoakCoverage.ts:56-58,567-583`), sampled on the first
+ticked frame at which the kernel party is populated
+(`:547 if (!this.battleStartRecorded) this.recordBattleStart(rulesContext)`).
+`createFactoryBattleStart` resolves the whole switch-in chain — including the
+Trace copy that **overwrites `battlers[battler].ability`** at
+`factoryBattleStart.ts:494-501` — *before* it returns the state the driver ever
+ticks. So a Trace lead is observable only as its **copied** ability;
+`ABILITY_TRACE` is structurally uncountable in that dimension, and 114,756
+zero-samples is exactly what a correct engine produces. The `unknown` WHY in
+§6b should be changed to a sampling note by whoever next regenerates that doc
+(out of scope here). No engine finding.
+
+### End-turn — SHED_SKIN (14), RAIN_DISH (6), TRUANT (5) — SOURCE-EXACT
+| Source | Engine | Note |
+| --- | --- | --- |
+| `src/battle_util.c:2601-2604` (`ABILITYEFFECT_ENDTURN` prologue: `hp != 0`, then `gBattlerAttacker = battler`) | `src/engine/battleEndTurnOrchestration.ts:1172-1179` | `if (b.hp === 0) return advance` — same guard, same per-battler shape, no early return on a miss. |
+| `src/battle_util.c:2607-2618` (Rain Dish) | `battleEndTurnOrchestration.ts:1180-1192` | `WEATHER_HAS_EFFECT && (gBattleWeather & B_WEATHER_RAIN) && maxHP > hp`, heal `maxHP / 16` clamped to ≥1 then negated — the port's `floorDivAtLeastOne(b.maxHP, 16)` stored as `battleMoveDamage: -heal` is the same signed value, and `BattleScript_RainDishActivates` is entered through the push-cursor-and-callback helper. |
+| `src/battle_util.c:2620-2641` (Shed Skin) | `battleEndTurnOrchestration.ts:1114-1160` | `(status1 & STATUS1_ANY)` is tested **before** `Random() % 3`, so a clean mon consumes no draw — the port draws only after the same test (`:1121` then `:1127`). Both clear `status1 = 0` **and** `STATUS2_NIGHTMARE`. The five sequential `StringCopy` branches are last-match-wins in source (poison → sleep → paralysis → burn → freeze); the port's `statusName` chain (`:1140-1144`) reproduces exactly that precedence, and has no confusion branch (Shed Skin never touches `STATUS2_CONFUSION`). |
+| `src/battle_util.c:2653-2655` (Truant `truantCounter ^= 1`, **unconditional, no script, no `effect++`**) | `battleEndTurnOrchestration.ts:1218-1222` | Straight XOR with `advance`; no reveal, no message — matches the source's silent toggle. |
+| `src/battle_script_commands.c:5260-5263` (switch-in hack: `if (ability == TRUANT && !truantSwitchInHack) truantCounter = 1;` then `truantSwitchInHack = 0`) | `src/engine/battleScriptSwitchinOpcode.ts:1182-1188` | The port guards on `active.truantCounter !== 1` instead of on `truantSwitchInHack`, and writes the same `1`. Equivalent in the Factory: **`truantSwitchInHack` is written only by the Battle Arena judgment cases** `VARIOUS_ARENA_OPPONENT_MON_LOST` / `_PLAYER_MON_LOST` / `_BOTH_MONS_LOST` (`src/battle_script_commands.c:6413,6420,6430-6431`), which the Factory never reaches, so the source guard is always true and setting an already-1 counter to 1 is a no-op. |
+| `src/battle_util.c:2085-2095` (`CANCELER_TRUANT`) | `src/engine/battleScriptActionAdmission.ts:1734-1810` | `ability == TRUANT && truantCounter != 0` → `CancelMultiTurnMoves`, `HITMARKER_UNABLE_TO_USE_MOVE`, `B_MSG_LOAFING`, `BattleScript_MoveUsedLoafingAround`, `MOVE_RESULT_MISSED`, `effect = 1`; tracker advances to `CANCELER_RECHARGE` exactly once either way. |
+| `data/battle_ai_scripts.s:2037-2058` (`AI_CV_RainDance`, incl. `:2048 if_equal ABILITY_RAIN_DISH, AI_CV_RainDance3`) | `src/engine/factoryAiCheckViability.ts:4486-4516` (documented gate map) and `:4533-4557` (`rainDanceFuncResultAfter`, Gate R) | Gate R (`get_ability AI_USER` → Rain Dish → `+1`) is ported as its own tail branch, including the `funcResult` collision write that Gate S/R leave behind. |
+| `data/battle_ai_scripts.s:2383` / `:2385` (Rain Dish, Shed Skin in the encourage table) | `src/engine/factoryAiCheckViability.ts:8356-8361` | Both present in the 16-entry set (see the contact-family row). |
+| `data/battle_ai_scripts.s:2836` (`AI_DoubleBattleSkillSwap`, Truant → `Score_Plus5`) and `:2883` (`AI_TrySkillSwapOnAlly`, Truant → `Score_Plus10`) | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50.** Both labels are reached only from the doubles dispatch (`AI_DoubleBattle*` / `AI_TryOnAlly`, which needs `AI_USER_PARTNER`/`AI_TARGET_PARTNER`). Factory battles are singles (`battlersCount: 2`, `factoryBattleStart.ts:420`). No port counterpart is expected. |
+
 ### Everything else — UNVERIFIED, with the exact unread sites
 Source inventory below is complete (produced by the §Method sweep); the
 engine column names where to start, from `docs/ability-item-parity-census.md`
@@ -307,13 +358,6 @@ plus this session's `rg`.
   Note `src/battle_ai_switch_items.c:445`'s stock comment "Misses the flying
   type and Levitate check" — Arena Trap's AI half really does trap Flying/
   Levitate mons; a port that fixed it would be DIVERGENT.
-- **ENDTURN.** Source: `src/battle_util.c:2607-2618` (Rain Dish),
-  `:2620-2641` (Shed Skin, `Random() % 3 == 0`, and it clears
-  `STATUS2_NIGHTMARE`), `:2653-2655` (Truant's `^= 1`),
-  `src/battle_script_commands.c:5260-5263` (the switch-in truant hack),
-  `src/battle_util.c:2087-2095` (AtkCanceler half). Engine starts:
-  `battleEndTurnOrchestration.ts:1181-1221`,
-  `battleScriptSwitchinOpcode.ts:1182-1184`.
 - **Item theft/swap denial (Sticky Hold).** Source:
   `src/battle_script_commands.c:2767-2775` (Thief/Covet — note it sits
   *after* the Frontier-exempt knocked-off check at `:2757-2766`),
