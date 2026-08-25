@@ -24,7 +24,9 @@ function config(): SceneOnRecycleConfig {
   return {
     move: "RECYCLE",
     attacker: {
-      species: "PORYGON",
+      // The reducer is species-agnostic. Keep this seam-only unit harness on
+      // already-renderable species until the separate art/compositor round.
+      species: "ONIX",
       geometry: {
         side: "player",
         spriteCorner: { x: 40, y: 58 },
@@ -33,7 +35,7 @@ function config(): SceneOnRecycleConfig {
       },
     },
     target: {
-      species: "GYARADOS",
+      species: "MAGBY",
       geometry: {
         side: "opponent",
         spriteCorner: { x: 144, y: 10 },

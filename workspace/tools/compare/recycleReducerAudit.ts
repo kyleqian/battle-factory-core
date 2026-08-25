@@ -38,7 +38,7 @@ function profileFor(rows: readonly Json[]): RecycleProfile {
 }
 
 function battler(
-  species: "PORYGON" | "GYARADOS",
+  species: "ONIX" | "MAGBY",
   side: "player" | "opponent",
   center: { x: number; y: number },
 ) {
@@ -115,8 +115,10 @@ for (const orientation of ["player-back", "opponent-front"] as const) {
   const attacker = arrow(rows[10]!)!;
   const config: SceneOnRecycleConfig = {
     move: "RECYCLE",
-    attacker: battler("PORYGON", attackerSide, { x: attacker.x, y: attacker.y }),
-    target: battler("GYARADOS", targetSide, attackerSide === "player" ? { x: 176, y: 42 } : { x: 72, y: 90 }),
+    // The checkpoint deliberately has no Recycle art/compositor draw case;
+    // use existing renderable species to exercise only the typed seam.
+    attacker: battler("ONIX", attackerSide, { x: attacker.x, y: attacker.y }),
+    target: battler("MAGBY", targetSide, attackerSide === "player" ? { x: 176, y: 42 } : { x: 72, y: 90 }),
     fieldProfile: {
       playerHp: 100,
       playerMaxHp: 100,
