@@ -2,6 +2,33 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_DEFENSE_CURL",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-120 PHANPY parties retain ordinary Battle Scene ON player-back frames 214-313 and opponent-front frames 215-314, 100 consecutive pointer-owned rows each through first inactive cleanup; two fresh local mGBA probes per orientation reproduce the retained dense/raw-RGB hashes byte-for-byte",
+    "the pure source-age reducer and typed Scene-ON seam cover ANIM_TAG_ECLIPSING_ORB, gEclipsingOrbSpriteTemplate, AnimTask_DefenseCurlDeformMon, set_grayscale_pal, and set_original_pal: task ages 4-54, three (-12,+20,8)/(+12,-20,8) affine passes, live source picture-height y offset, source palette/audio/tag lifecycle, seven 3-frame orb cells with hFlip loop, terminal OAM cell, and first inactive age 99",
+    "the ordinary shared compositor consumes typed live species, sides, picture coordinates, geometry, generic back/front battler art, source ECLIPSING_ORB art/cells, source painter order, grayscale/original attacker palette, field chrome, and cleanup; OAM/flags and palette use the measured RAM+1 handoff while the task-owned live-attacker deformation matrix/y offset uses RAM+2, without a PHANPY/ONIX pair gate, recording/RGB/framebuffer lookup, or absolute tick",
+    "all 100 player-back plus 100 opponent-front retained component/seam/raw-RGB/core.ts-to-renderSceneOnMovePresentation framebuffer rows match with zero residual pixels, including first displayed deformation at source/display ages 4/6, neutral return 53/55, flag clear 55/56, orb display through terminal cleanup, and first inactive row",
+    "gameplay state and RNG remain invariant while animation RNG changes 99/99; MOVE_PERISH_SONG, MOVE_IRON_TAIL, and MOVE_POISON_TAIL remain independent exact palette-command controls only and receive no sibling credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-defense-curl-player-phanpy-opponent-onix.json",
+    "tools/battle-lab/mechanic-defense-curl-opponent-phanpy-player-onix.json",
+    "tools/compare/fixtures/defense-curl-evidence.json",
+    "tools/compare/defenseCurlProbe.py",
+    "tools/compare/defenseCurlEvidence.ts",
+    "tools/compare/defenseCurlFramebuffer.ts",
+    "tools/compare/extractDefenseCurlAssets.ts",
+    "src/animation/assets/defense-curl.json",
+    "src/animation/defenseCurl.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/defenseCurlEvidence.test.ts",
+    "tests/animation/defenseCurl.test.ts",
+    "tests/animation/defenseCurlFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SWEET_SCENT",
    "status": "exact",
    "covered": [
@@ -5648,6 +5675,33 @@
     "tests/animation/bellyDrumEvidence.test.ts",
     "tests/animation/bellyDrumFramebuffer.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_MEAN_LOOK",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-289 MURKROW three-mon parties retain ordinary Battle Scene ON player-back frames 71-241 and opponent-front frames 75-245, 171 consecutive pointer-owned rows each through first inactive cleanup; both orientations are twice-fresh byte-identical and the retained dense/raw hashes remain pinned",
+    "the authoritative half-open source interval is 0x082cbf1a..0x082cbf5f (69 bytes); the pure source-age reducer and typed Scene-ON seam cover ANIM_TAG_EYE, gMeanLookEyeSpriteTemplate, monbg, clearmonbg, simple_palette_blend, eye pulse/hidden/growth/wobble/fade/destruction, target monbg offsets, field palette ramps, source painter lifecycle, and cleanup",
+    "the ordinary shared compositor consumes source EYE art, live species/sides/geometry, generic front/back battler art, target monbg copy, predecessor field palette/OAM/matrix display latches, measured eye affine/visibility/BLDALPHA behavior, source priority, field chrome, and cleanup without an evidence-pair gate, recorded RGB/framebuffer lookup, absolute tick, or gameplay ownership",
+    "all 171 player-back plus 171 opponent-front component/seam/raw-RGB/core.ts-to-renderSceneOnMovePresentation framebuffer rows match with zero residual pixels through first inactive cleanup; OAM and whole affine matrices are RAM+1 on 170/170 transitions, palette is RAM+1 on 169/170 with the age-4 monbg setup exception, and the move's own source-relative BLDALPHA edges are retained",
+    "gameplay state and RNG remain invariant while animation RNG changes 168/170; MOVE_PERISH_SONG and MOVE_CONFUSE_RAY retain independent exact status and receive no Mean Look sibling credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-mean-look-player-murkrow-opponent-onix.json",
+    "tools/battle-lab/mechanic-mean-look-opponent-murkrow-player-onix.json",
+    "tools/compare/fixtures/mean-look-evidence.json",
+    "tools/compare/meanLookProbe.py",
+    "tools/compare/meanLookEvidence.ts",
+    "tools/compare/meanLookFramebuffer.ts",
+    "tools/compare/extractMeanLookAssets.ts",
+    "src/animation/assets/mean-look.json",
+    "src/animation/meanLook.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/meanLookEvidence.test.ts",
+    "tests/animation/meanLook.test.ts",
+    "tests/animation/meanLookFramebuffer.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -6674,8 +6728,21 @@
     "visualCommand:set_original_pal"
    ],
    "representatives": ["MOVE_DEFENSE_CURL"],
-   "fulfilled": false,
-   "goal": "PARTIAL EVIDENCE ONLY: MOVE_DEFENSE_CURL retains complete legal set-120 PHANPY player-back 214..313 and opponent-front 215..314 Scene-ON windows, 100/100 rows each through first inactive cleanup, reproduced twice fresh byte-identically. Source interval 0x082cb37c..<0x082cb3b5, both pointer parities, source-extracted ECLIPSING_ORB art, all task/orb/audio/tag/palette/OAM/matrix/RNG lifecycle edges, normalized change maps, and the move-local live-attacker RAM+1 OAM/flags versus RAM+2 matrix latch are pinned. No reducer, typed seam, compositor, framebuffer equality, coverage credit, or move promotion is claimed. PERISH_SONG, IRON_TAIL, and POISON_TAIL remain exact palette-command controls only and receive no status change."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_DEFENSE_CURL independently passes 100/100 player-back plus 100/100 opponent-front complete retained source/component/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation framebuffer rows through first inactive cleanup with zero residual pixels. Its source-age reducer, typed live species/sides/picture coordinates/geometry, generic front/back battler art, ECLIPSING_ORB cells/hFlip, grayscale/original palette, live task-owned RAM+2 deformation matrix/y offset, RAM+1 ordinary OAM/flags/palette, source painter order, field chrome, audio/tags, and cleanup have no carrier-pair gate, recording/framebuffer lookup, absolute tick, or gameplay ownership. MOVE_PERISH_SONG, MOVE_IRON_TAIL, and MOVE_POISON_TAIL remain independent exact controls and receive no sibling credit."
+  },
+  {
+   "id": "mean-look-eye",
+   "components": [
+    "asset:ANIM_TAG_EYE",
+    "sprite:gMeanLookEyeSpriteTemplate",
+    "visualCommand:monbg",
+    "visualCommand:clearmonbg",
+    "visualCommand:simple_palette_blend"
+   ],
+   "representatives": ["MOVE_MEAN_LOOK"],
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_MEAN_LOOK independently passes 171/171 player-back plus 171/171 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation framebuffer rows with zero residual pixels through first inactive cleanup. The ordinary compositor uses source EYE art, live species/sides/geometry, generic battler art, target monbg, predecessor field/OAM/matrix transfers, measured eye affine/visibility/BLDALPHA behavior, source painter order, chrome, and cleanup without a pair gate, recording lookup, absolute tick, or gameplay ownership. MOVE_PERISH_SONG and MOVE_CONFUSE_RAY remain independent exact controls and receive no sibling credit."
   }
  ],
  "variantAudits": {

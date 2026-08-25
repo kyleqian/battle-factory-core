@@ -3,8 +3,8 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_DEFENSE_CURL",
   "moveId": 111,
-  "status": "unsupported-evidence-checkpoint",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "source": {
     "start": "0x082cb37c",
     "endExclusive": "0x082cb3b5",
@@ -68,5 +68,5 @@
     "setOriginal": ["MOVE_IRON_TAIL", "MOVE_POISON_TAIL"],
     "coverageChanged": false
   },
-  "boundedRemainder": "No reducer, typed Scene-ON seam, production compositor, or framebuffer equality claim. MOVE_DEFENSE_CURL remains unsupported; named palette controls retain their prior exact status and receive no coverage change."
+  "boundedRemainder": "FULFILLED: the retained source/latch checkpoint is now consumed by the pure source-age reducer, typed Scene-ON seam, and ordinary production compositor. MOVE_DEFENSE_CURL alone passes every retained player-back and opponent-front framebuffer row with zero residual pixels; named palette controls retain their independent exact status and receive no coverage change."
 }

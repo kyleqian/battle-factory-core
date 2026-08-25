@@ -1,0 +1,62 @@
+{
+  "schema": "mean-look-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_MEAN_LOOK",
+  "moveId": 212,
+  "status": "exact",
+  "coverageCredit": true,
+  "source": {
+    "start": "0x082cbf1a",
+    "endExclusive": "0x082cbf5f",
+    "bytes": 69,
+    "scriptTextSha256": "ee984166f741b41c15c007a187d54ce955bb9b79eacaedacbcb01d7bb97c521d",
+    "effectDefinitionsSha256": "421734a6a664ad4080d218fd3024df59312c3120ea93768618274b6ebc9cac8b",
+    "callbackDefinitionsSha256": "16ea43c9d144dc840d35556a5a4dfcdb10d928be5f0137f72f32f8ce363f8fa8",
+    "assetSha256": "d8c2ce19b284b9ac471aee4b9416ca55a3dcb6c1ec30de38b2ca4d8b1e10c192",
+    "components": ["asset:ANIM_TAG_EYE", "sprite:gMeanLookEyeSpriteTemplate", "visualCommand:monbg", "visualCommand:clearmonbg", "visualCommand:simple_palette_blend"]
+  },
+  "repeatability": {"runsPerOrientation": 2, "allMatched": true},
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-mean-look-player-murkrow-opponent-onix.json",
+      "scenarioSha256": "d90748b313cf96da73b039678bca619b93d87f5e7af3b7a6e0b9882537c5b3d4",
+      "denseState": "tools/compare/evidence/mean-look-player-dense-state.json.gz",
+      "denseStateSha256": "dfef9011dbadc5bfdfcfc5dff71f364028d1d1ddddae85cf2ab8e9cd7c957897",
+      "probeJsonSha256": "f7fbe24ce7eff91c7d185e95ea1780a3dd9d9cac8f9da40a9969a3f324c5f7d9",
+      "rawRgbArchive": "tools/compare/evidence/mean-look-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "de1b1daa02b0836aad1e11e302329be07ac5b74acd8bcdae23a87a00d7d2839e",
+      "rawRgbSequenceSha256": "cda741ed184c44c3ed6338b3c481e43c5eaf5bffea614a0db72c90b7732eacec",
+      "changeMap": "tools/compare/evidence/mean-look-changemap-player.txt",
+      "changeMapSha256": "821673214ae25b0d905c33b8b95a9bf94232a58333e4fd74a723e280149195e0",
+      "window": {"startFrame": 71, "endFrame": 241, "frameCount": 171}
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-mean-look-opponent-murkrow-player-onix.json",
+      "scenarioSha256": "8961625bd46c67b5659394a6ed00b30b5e3ef7b15ba9ca8df66291da26314f2e",
+      "denseState": "tools/compare/evidence/mean-look-opponent-dense-state.json.gz",
+      "denseStateSha256": "1811e2f70fe3cf3fd299653c551ac0e415c08b450e74e43c5bba7c353e501db4",
+      "probeJsonSha256": "c76f2d61cceab3f7c098354d5dba9b97c9554985c684252bb99aab6d613880a6",
+      "rawRgbArchive": "tools/compare/evidence/mean-look-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "64bc7c133c70e746abd109359891c7f323bed1884594ba7d676c8c96ff24ec2e",
+      "rawRgbSequenceSha256": "4cde21d07e53263b56a9eb9adf1fc3b959035b2fb6ef2963e36470d08d4d144c",
+      "changeMap": "tools/compare/evidence/mean-look-changemap-opponent.txt",
+      "changeMapSha256": "dc3c59ec04c288c078233232030bb87b4019dba08b2f3819279771cd4d97de60",
+      "window": {"startFrame": 75, "endFrame": 245, "frameCount": 171}
+    }
+  },
+  "measured": {
+    "pointerRows": "171/171 + 171/171",
+    "observedPointerParities": [0, 1],
+    "eyeRamRows": [7, 165],
+    "step2HiddenRows": [78, 88],
+    "wobbleRows": [97, 112],
+    "firstInactiveAge": 170,
+    "oamPredecessor": "170/170 each",
+    "matrixPredecessor": "170/170 each",
+    "palettePredecessor": "169/170 each; age 4 monbg setup is same-row",
+    "gameplayRngTransitions": 0,
+    "animationRngTransitions": 168
+  },
+  "controls": {"simplePaletteBlend": ["MOVE_PERISH_SONG"], "monbgClearPaletteRegisters": ["MOVE_CONFUSE_RAY"], "statusesChanged": false},
+  "boundedRemainder": "No MOVE_MEAN_LOOK presentation remainder remains. The typed Scene-ON seam and ordinary compositor pass the complete bilateral production framebuffer; gameplay status/trapping, damage, RNG, controller, turn, round, and facility ownership remain outside this animation receipt."
+}
