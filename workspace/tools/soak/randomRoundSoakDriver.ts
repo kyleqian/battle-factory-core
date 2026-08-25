@@ -42,8 +42,43 @@ import {
   generateFactoryChallengeDraft,
   type FactoryCarry,
 } from "../../src/engine/factoryRoundChaining.ts";
-import { ANCHOR_RNG_VALUE } from "../../src/engine/rng.ts";
+import { ANCHOR_RNG_VALUE, advanceRngValue } from "../../src/engine/rng.ts";
 import { ANCHOR_FACTORY_METADATA } from "../../src/engine/factoryAnchorSession.ts";
+import {
+  chooseFactoryAiScoredDecision,
+  type FactoryAiScoredChoice,
+  type FactoryAiScoredView,
+} from "../../src/engine/factoryAiDecisionPolicy.ts";
+import {
+  FACTORY_BATTLE_MODE_SINGLES,
+  FACTORY_LEVEL_MODE_50,
+  type FactoryAiMaskSelectionInput,
+} from "../../src/engine/factoryAiMaskSelection.ts";
+import {
+  AI_WEATHER_HAIL,
+  AI_WEATHER_RAIN,
+  AI_WEATHER_SANDSTORM,
+  AI_WEATHER_SUN,
+  type AiWeatherValue,
+} from "../../src/engine/factoryAiCheckBadMove.ts";
+import {
+  resolveBattleScriptBattlerHoldEffect,
+  type BattleScriptRulesContext,
+} from "../../src/engine/battleScriptRulesContext.ts";
+import {
+  BATTLE_SCRIPT_STATUS1_REFRESH_CURE_MASK,
+  BATTLE_SCRIPT_STATUS1_SLEEP,
+  BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
+  BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY,
+  BATTLE_SCRIPT_STATUS2_FORESIGHT,
+  BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS3_LEECHSEED,
+  BATTLE_SCRIPT_STATUS3_PERISH_SONG,
+  BATTLE_SCRIPT_STATUS3_ROOTED,
+  BATTLE_SCRIPT_STATUS3_YAWN,
+} from "../../src/engine/battleScriptSourceConstants.ts";
+import type { BattleMoveDecision } from "../../src/engine/battleDecisionBoundary.ts";
+import abilityItemHooksData from "../../src/data/gen/ability-item-hooks.json" with { type: "json" };
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
 import speciesTypesData from "../../src/data/gen/species-types.json" with { type: "json" };
 import typeEffectivenessData from "../../src/data/gen/type-effectiveness.json" with { type: "json" };
@@ -366,6 +401,549 @@ export function buildWinningSwapPlan(rentalMons: FactoryRentalRoster): WinningSw
 }
 
 // ---------------------------------------------------------------------------
+// "winning-coverage" draft scorer: a COVERAGE-FIRST 3-of-6 rental pick
+// (docs/soak-policy-strength-scout-2026-08-23.md lever 4', the last open
+// challenge-4 lever after the withheld bulk+STAB draft heuristic and the
+// oracle-strength move chooser both measured negative). It reads only what
+// the draft screen's own SUMMARY peek already shows a real player before
+// renting -- the six offered rentals' species, types and full movesets --
+// so weighing them is arbitrary-but-legal play, not hidden-state reading.
+// ---------------------------------------------------------------------------
+
+/**
+ * The 17 real Gen-3 types, in `type-effectiveness.json`'s own
+ * `attackingType`/`defendingType` spelling. `TYPE_FORESIGHT` (like
+ * `TYPE_MYSTERY`) is a pseudo-type row of that table, never a party's type,
+ * so it is not a coverage target.
+ */
+export const GEN3_TYPES = [
+  "TYPE_NORMAL",
+  "TYPE_FIGHTING",
+  "TYPE_FLYING",
+  "TYPE_POISON",
+  "TYPE_GROUND",
+  "TYPE_ROCK",
+  "TYPE_BUG",
+  "TYPE_GHOST",
+  "TYPE_STEEL",
+  "TYPE_FIRE",
+  "TYPE_WATER",
+  "TYPE_GRASS",
+  "TYPE_ELECTRIC",
+  "TYPE_PSYCHIC",
+  "TYPE_ICE",
+  "TYPE_DRAGON",
+  "TYPE_DARK",
+] as const;
+
+/** One offered rental, structurally satisfied by `DraftScreenState.rentals[i]`. */
+export type CoverageDraftRental = Readonly<{
+  species: string;
+  types: readonly string[];
+  moves: readonly Readonly<{ power: number; type: string }>[];
+}>;
+
+/** Lexicographic score of a candidate trio: offensive, then defensive, then bulk. */
+export type CoverageDraftScore = Readonly<{
+  /**
+   * Offensive coverage: for each of the 17 defending types, 1 point (times
+   * that type's pool weight) when at least one damaging move (power > 0)
+   * anywhere in the trio is super-effective (> 1x) against it.
+   */
+  offensive: number;
+  /**
+   * Defensive diversity: distinct primary/secondary types across the trio
+   * (0..6) minus the count of SHARED 4x weaknesses -- attacking types that
+   * two or more of the three take >= 4x from, i.e. one attacker that sweeps
+   * most of the party.
+   */
+  defensive: number;
+  /** Tiebreak only: sum of the trio's species base-stat totals. */
+  bst: number;
+}>;
+
+/** Distinct types of one rental (mono-types repeat the same string twice). */
+function coverageRentalTypes(rental: CoverageDraftRental): string[] {
+  return [...new Set(rental.types)];
+}
+
+/** The rental's own types as a defender pair for `applyTypeEffectiveness`. */
+function coverageDefenderPair(rental: CoverageDraftRental): readonly [string, string] {
+  const first = rental.types[0] ?? DEFAULT_TYPES[0];
+  return [first, rental.types[1] ?? first];
+}
+
+/** Type multiplier in tenths (10 = 1x), independent of the damage argument. */
+function coverageMultiplierTenths(
+  moveType: string,
+  defenderTypes: readonly [string, string],
+): number {
+  return applyTypeEffectiveness(1, moveType, defenderTypes, TYPE_EFFECTIVENESS).multiplierTenths;
+}
+
+/**
+ * Pool weight per defending type for the offensive term. The rental ranges
+ * `sInitialRentalMonRanges` are symmetric -- the opponent's party is drawn
+ * from the SAME species row as the player's offers
+ * (`battle_factory.c:334`/`:560`; scout doc §2) -- so the types present
+ * among the six offered rentals are a free, cheap sample of the tier's
+ * opponent pool. Weight is `1 + occurrences` (never 0): the six offers are
+ * only a sample of a ~96-species row, so a type absent from them still
+ * counts for its base 1, it just doesn't get the observed-commonness bonus.
+ */
+export function coverageDraftTypeWeights(
+  rentals: readonly CoverageDraftRental[],
+): ReadonlyMap<string, number> {
+  const weights = new Map<string, number>(GEN3_TYPES.map((type) => [type, 1]));
+  for (const rental of rentals) {
+    for (const type of coverageRentalTypes(rental)) {
+      const current = weights.get(type);
+      if (current !== undefined) weights.set(type, current + 1);
+    }
+  }
+  return weights;
+}
+
+/**
+ * Scores one candidate trio. Deterministic and RNG-free: the same six
+ * offered rentals always produce the same score for the same trio.
+ */
+export function scoreCoverageDraftTrio(
+  trio: readonly CoverageDraftRental[],
+  weights: ReadonlyMap<string, number>,
+): CoverageDraftScore {
+  let offensive = 0;
+  for (const defendingType of GEN3_TYPES) {
+    let hits = false;
+    for (const rental of trio) {
+      for (const move of rental.moves) {
+        if (move.power <= 0) continue;
+        if (coverageMultiplierTenths(move.type, [defendingType, defendingType]) > 10) {
+          hits = true;
+          break;
+        }
+      }
+      if (hits) break;
+    }
+    if (hits) offensive += weights.get(defendingType) ?? 1;
+  }
+  const distinctTypes = new Set<string>();
+  for (const rental of trio) {
+    for (const type of coverageRentalTypes(rental)) distinctTypes.add(type);
+  }
+  let shared4x = 0;
+  for (const attackingType of GEN3_TYPES) {
+    let quadCount = 0;
+    for (const rental of trio) {
+      if (coverageMultiplierTenths(attackingType, coverageDefenderPair(rental)) >= 40) {
+        quadCount += 1;
+      }
+    }
+    if (quadCount >= 2) shared4x += 1;
+  }
+  let bst = 0;
+  for (const rental of trio) bst += BASE_STAT_TOTAL_BY_SPECIES.get(rental.species) ?? 0;
+  return { offensive, defensive: distinctTypes.size - shared4x, bst };
+}
+
+/** Lexicographic (offensive, defensive, bst) comparison; > 0 means `a` is better. */
+function compareCoverageScore(a: CoverageDraftScore, b: CoverageDraftScore): number {
+  if (a.offensive !== b.offensive) return a.offensive - b.offensive;
+  if (a.defensive !== b.defensive) return a.defensive - b.defensive;
+  return a.bst - b.bst;
+}
+
+export type CoverageDraftPick = Readonly<{
+  /** Slots 0..5 in rent order (bulkiest first). */
+  picks: readonly number[];
+  /** The winning trio's score, for the verbose transcript. */
+  score: CoverageDraftScore;
+}>;
+
+/**
+ * Shared trio search for the coverage-first drafts: enumerates all 20
+ * three-of-six combinations in ascending slot order and keeps the best by
+ * `compareCoverageScore` (strict `>` never overwrites an equal score, so
+ * ties keep the earliest combination) among trios whose summed base-stat
+ * total is >= `bstFloor` (0 = no floor). No RNG at all -- the same six
+ * offers always yield the same trio. Rent ORDER inside the chosen trio is
+ * descending base-stat total (ties keep the lower slot) so the bulkiest of
+ * the three leads battle 1; the trio ITSELF is chosen by coverage.
+ */
+function pickBestTrioAboveFloor(
+  rentals: readonly CoverageDraftRental[],
+  bstFloor: number,
+): CoverageDraftPick {
+  const weights = coverageDraftTypeWeights(rentals);
+  let bestSlots: number[] | null = null;
+  let bestScore: CoverageDraftScore | null = null;
+  for (let a = 0; a < rentals.length; a += 1) {
+    for (let b = a + 1; b < rentals.length; b += 1) {
+      for (let c = b + 1; c < rentals.length; c += 1) {
+        const slots = [a, b, c];
+        const score = scoreCoverageDraftTrio(
+          slots.map((slot) => rentals[slot]!),
+          weights,
+        );
+        if (score.bst < bstFloor) continue;
+        if (bestScore === null || compareCoverageScore(score, bestScore) > 0) {
+          bestScore = score;
+          bestSlots = slots;
+        }
+      }
+    }
+  }
+  if (bestSlots === null || bestScore === null) {
+    // Fewer than three rentals offered -- never happens in play (the draft
+    // screen always offers six); rent whatever is there, in slot order.
+    // Unreachable via the floor: `combinedDraftBstFloor` is the MEAN trio
+    // total, and the max trio total (an integer >= that mean) always meets
+    // its ceiling.
+    const slots = rentals.map((_, slot) => slot);
+    return { picks: slots, score: scoreCoverageDraftTrio(rentals, weights) };
+  }
+  const bstOf = (slot: number): number =>
+    BASE_STAT_TOTAL_BY_SPECIES.get(rentals[slot]!.species) ?? 0;
+  const picks = [...bestSlots].sort((x, y) =>
+    bstOf(y) !== bstOf(x) ? bstOf(y) - bstOf(x) : x - y,
+  );
+  return { picks, score: bestScore };
+}
+
+/** "winning-coverage" policy draft pick: pure coverage, no strength floor. */
+export function pickCoverageDraftPicks(
+  rentals: readonly CoverageDraftRental[],
+): CoverageDraftPick {
+  return pickBestTrioAboveFloor(rentals, 0);
+}
+
+/**
+ * "winning-combined" strength floor: the MEAN candidate-trio base-stat
+ * total, i.e. what a random 3-of-6 draft fields in expectation. Each rental
+ * appears in 3/n of the n-choose-3 trios, so the mean trio total is
+ * `3/n * sum(all offered BSTs)` -- for the real six-offer draft, exactly
+ * half the six offers' summed total. Ceiling'd to stay an integer bar; the
+ * max-BST trio (an integer >= the mean) always meets it, so the floored
+ * search can never come up empty.
+ */
+export function combinedDraftBstFloor(rentals: readonly CoverageDraftRental[]): number {
+  let total = 0;
+  for (const rental of rentals) {
+    total += BASE_STAT_TOTAL_BY_SPECIES.get(rental.species) ?? 0;
+  }
+  return Math.ceil((total * 3) / Math.max(3, rentals.length));
+}
+
+export type CombinedDraftPick = CoverageDraftPick & Readonly<{ floor: number }>;
+
+/**
+ * "winning-combined" policy draft pick: the same coverage-first lexicographic
+ * score as "winning-coverage", maximised only over trios whose summed
+ * base-stat total meets `combinedDraftBstFloor` -- coverage subject to a
+ * strength floor. The lever left standing after lever 4 (bulk+STAB) starved
+ * coverage and lever 4' (pure coverage) starved bulk
+ * (docs/soak-policy-strength-scout-2026-08-23.md, "Result -- lever 4'").
+ */
+export function pickCombinedDraftPicks(
+  rentals: readonly CoverageDraftRental[],
+): CombinedDraftPick {
+  const floor = combinedDraftBstFloor(rentals);
+  return { ...pickBestTrioAboveFloor(rentals, floor), floor };
+}
+
+// ---------------------------------------------------------------------------
+// "oracle-strength" policy: the ENGINE'S OWN source-derived Factory AI move
+// scorer, run for the PLAYER's side.
+//
+// `chooseFactoryAiScoredDecision` (src/engine/factoryAiDecisionPolicy.ts) is
+// the ported `ChooseMoveOrAction_Singles` scoring loop the opponent uses; the
+// live opponent driver feeds it a `FactoryAiScoredView` built by
+// `createFactoryAiViewFromLiveRules` (src/engine/factoryAiLiveDriver.ts),
+// whose attacker is battler 1 (the trainer) and target is battler 0 (the
+// player). `buildOracleStrengthPlayerView` below is that same builder with
+// the two sides SWAPPED -- attacker battler 0 (the player), target battler 1
+// (the opponent), side statuses and `gLastMoves` indexed to match. The view's
+// `active` field still reads `{ aiBattler: 1, targetBattler: 0 }` because the
+// scorer's own validator requires those literals; nothing downstream of it
+// indexes real battle state by them (every field it reads comes from
+// `view.attacker`/`view.target`), so the swap is purely in what we hand it.
+//
+// THIS IS A TEST INSTRUMENT, NOT A FAIRNESS MODEL. The player side is given
+// full knowledge of the opponent's live moves, real ability and real held-item
+// hold effect (`knownMoveIds`/`knownAbility`/`knownItemEffect` filled from the
+// live rules context instead of from an observed BattleHistory). A real player
+// would only know what it had seen; the point of this policy is an upper bound
+// on in-battle move choice, so it reads the truth.
+//
+// The mask is pinned to the full triad (7 = CHECK_BAD_MOVE | TRY_TO_FAINT |
+// CHECK_VIABILITY) by handing `selectFactoryAiMask` a fixed
+// challengeNumber-4 input -- the player's own strength must not track the
+// round's own challenge tier.
+// ---------------------------------------------------------------------------
+
+/**
+ * Fixed mask-selection input: Level-50 singles, a non-Brain trainer, and a
+ * win streak of 28 -> challengeNumber 4 -> the `challengeAtLeast4` branch ->
+ * mask 7 (`battle_factory.c:889-911`, ported in `factoryAiMaskSelection.ts`).
+ * Constant on purpose: the player's scorer is always full strength.
+ */
+export const ORACLE_STRENGTH_FACTORY_INPUT: FactoryAiMaskSelectionInput = Object.freeze({
+  levelMode: FACTORY_LEVEL_MODE_50,
+  battleMode: FACTORY_BATTLE_MODE_SINGLES,
+  factoryWinStreak: 28,
+  trainerOpponentId: 0,
+});
+
+type SoakAbilityIdRow = Readonly<{ name: string; id: number }>;
+const ORACLE_STRENGTH_ABILITY_NAME_BY_ID = new Map(
+  (abilityItemHooksData as { universes: { abilities: SoakAbilityIdRow[] } })
+    .universes.abilities.map((row) => [row.id, row.name]),
+);
+
+const SIDE_STATUS_REFLECT = 1 << 0;
+const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
+const SIDE_STATUS_SPIKES = 1 << 4;
+const SIDE_STATUS_SAFEGUARD = 1 << 5;
+const SIDE_STATUS_FUTUREATTACK = 1 << 6;
+const STATUS2_ESCAPE_PREVENTION = 1 << 26;
+const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
+const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
+const B_WEATHER_SUN = (1 << 5) | (1 << 6);
+const B_WEATHER_HAIL = 1 << 7;
+
+/** Mirror of `factoryAiLiveDriver.ts`'s own private `abilityName`. */
+function oracleStrengthAbilityName(ability: number): string {
+  const name = ORACLE_STRENGTH_ABILITY_NAME_BY_ID.get(ability);
+  if (name === undefined) throw new Error(`oracle-strength view: unknown ability id ${ability}`);
+  return name;
+}
+
+/** Mirror of `factoryAiLiveDriver.ts`'s own private `currentWeather`. */
+function oracleStrengthWeather(weather: number): AiWeatherValue | undefined {
+  if ((weather & B_WEATHER_SUN) !== 0) return AI_WEATHER_SUN;
+  if ((weather & B_WEATHER_RAIN) !== 0) return AI_WEATHER_RAIN;
+  if ((weather & B_WEATHER_SANDSTORM) !== 0) return AI_WEATHER_SANDSTORM;
+  if ((weather & B_WEATHER_HAIL) !== 0) return AI_WEATHER_HAIL;
+  return undefined;
+}
+
+/** Mirror of `factoryAiLiveDriver.ts`'s own private `statStages`. */
+function oracleStrengthStatStages(battler: BattleScriptRulesContext["battlers"][number]) {
+  return Object.freeze({
+    atk: battler.statStages[1]!,
+    def: battler.statStages[2]!,
+    speed: battler.statStages[3]!,
+    spAtk: battler.statStages[4]!,
+    spDef: battler.statStages[5]!,
+    acc: battler.statStages[6]!,
+    evasion: battler.statStages[7]!,
+  });
+}
+
+/**
+ * `createFactoryAiViewFromLiveRules` with the sides swapped: the PLAYER
+ * (battler 0, side 0) is the attacker whose four move slots get scored, and
+ * the OPPONENT (battler 1, side 1) is the target. Field-for-field the same
+ * reads as the live builder, plus the three full-knowledge overrides
+ * documented in this section's header.
+ */
+export function buildOracleStrengthPlayerView(input: Readonly<{
+  rulesContext: BattleScriptRulesContext;
+  battleTurnCount: number;
+}>): FactoryAiScoredView {
+  const rulesContext = input.rulesContext;
+  const attacker = rulesContext.battlers[0];
+  const target = rulesContext.battlers[1];
+  const weather = oracleStrengthWeather(rulesContext.weather);
+  return Object.freeze({
+    schema: "factory-ai-scored-view/v1",
+    mode: "factory-level-50-singles",
+    // Required literals; see this section's header -- the swap lives in which
+    // real battler each of `attacker`/`target` below is read from.
+    active: Object.freeze({ aiBattler: 1, targetBattler: 0 }),
+    factory: ORACLE_STRENGTH_FACTORY_INPUT,
+    moves: attacker.moves,
+    attacker: Object.freeze({
+      types: attacker.types,
+      attack: attacker.attack,
+      defense: attacker.defense,
+      spAttack: attacker.spAttack,
+      spDefense: attacker.spDefense,
+      speed: attacker.speed,
+      level: attacker.level,
+      statStages: oracleStrengthStatStages(attacker),
+      isFirstTurn: attacker.isFirstTurn,
+      hp: attacker.hp,
+      maxHp: attacker.maxHP,
+      ability: oracleStrengthAbilityName(attacker.ability),
+      holdEffect: resolveBattleScriptBattlerHoldEffect(rulesContext, 0),
+      battleTurnCount: input.battleTurnCount,
+      lightScreenUp: (rulesContext.sideStatuses[0] & SIDE_STATUS_LIGHTSCREEN) !== 0,
+      reflectUp: (rulesContext.sideStatuses[0] & SIDE_STATUS_REFLECT) !== 0,
+      ...(weather === undefined ? {} : { currentWeather: weather }),
+      isRooted: (attacker.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0,
+      ...((rulesContext.sideStatuses[0] & SIDE_STATUS_FUTUREATTACK) !== 0
+        ? { attackerFutureAttackUp: true }
+        : {}),
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
+        ? { isInfatuated: true }
+        : {}),
+      ...((rulesContext.sideStatuses[0] & SIDE_STATUS_SAFEGUARD) !== 0
+        ? { safeguardUp: true }
+        : {}),
+      ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0 ? { isAsleep: true } : {}),
+      ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_REFRESH_CURE_MASK) !== 0
+        ? { hasCurableStatus: true }
+        : {}),
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE) !== 0
+        ? { hasSubstitute: true }
+        : {}),
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY) !== 0
+        ? { hasFocusEnergy: true }
+        : {}),
+      ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0
+        ? { isLeechSeeded: true }
+        : {}),
+      ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0 ? { hasYawn: true } : {}),
+      ...(attacker.protectUses !== 0 ? { protectUses: attacker.protectUses } : {}),
+    }),
+    target: Object.freeze({
+      species: target.species,
+      types: target.types,
+      attack: target.attack,
+      defense: target.defense,
+      spAttack: target.spAttack,
+      spDefense: target.spDefense,
+      speed: target.speed,
+      level: target.level,
+      statStages: oracleStrengthStatStages(target),
+      isFirstTurn: target.isFirstTurn,
+      hp: target.hp,
+      maxHp: target.maxHP,
+      lastUsedMoveId: rulesContext.moveHistory.lastMoves[1],
+      ...(target.status1 !== 0 ? { hasAnyStatus: true } : {}),
+      ...((target.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0 ? { isAsleep: true } : {}),
+      isToxicPoisoned: (target.status1 & BATTLE_SCRIPT_STATUS1_TOXIC_POISON) !== 0,
+      isLeechSeeded: (target.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0,
+      isCursed: (target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CURSED) !== 0,
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) !== 0
+        ? { isConfused: true }
+        : {}),
+      ...(target.tauntTimer !== 0 ? { isTaunted: true } : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) !== 0
+        ? { isInfatuated: true }
+        : {}),
+      ...((target.status2 & STATUS2_ESCAPE_PREVENTION) !== 0 ? { isEscapePrevented: true } : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_TORMENT) !== 0
+        ? { isTormented: true }
+        : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) !== 0
+        ? { isNightmared: true }
+        : {}),
+      ...((target.status2 & BATTLE_SCRIPT_STATUS2_FORESIGHT) !== 0
+        ? { isForesighted: true }
+        : {}),
+      ...((target.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0 ? { hasYawn: true } : {}),
+      ...((target.status3 & BATTLE_SCRIPT_STATUS3_PERISH_SONG) !== 0
+        ? { hasPerishSong: true }
+        : {}),
+      // Full-knowledge overrides (test instrument, not a fairness model):
+      // the live opponent driver reads these three off an observed
+      // BattleHistory; the player reads the truth instead.
+      ability: oracleStrengthAbilityName(target.ability),
+      knownAbility: oracleStrengthAbilityName(target.ability),
+      knownItemEffect: resolveBattleScriptBattlerHoldEffect(rulesContext, 1),
+      holdEffect: resolveBattleScriptBattlerHoldEffect(rulesContext, 1),
+      knownMoveIds: target.moves.filter((moveId) => moveId !== 0),
+      ...((rulesContext.sideStatuses[1] & SIDE_STATUS_SAFEGUARD) !== 0
+        ? { safeguardUp: true }
+        : {}),
+      ...((rulesContext.sideStatuses[1] & SIDE_STATUS_SPIKES) !== 0 ? { spikesUp: true } : {}),
+      ...((rulesContext.sideStatuses[1] & SIDE_STATUS_FUTUREATTACK) !== 0
+        ? { targetFutureAttackUp: true }
+        : {}),
+      // `AI_CV_BrickBreak` reads the TARGET's own side Reflect; for the
+      // player-as-attacker view that is side 1.
+      targetSideReflectUp: (rulesContext.sideStatuses[1] & SIDE_STATUS_REFLECT) !== 0,
+    }),
+  });
+}
+
+export type OracleStrengthPick = Readonly<{
+  /** The fight slot to commit, or null when the caller must fall back. */
+  slot: number | null;
+  /** Non-null exactly when `slot` is null: the logged fallback reason. */
+  fallbackReason: string | null;
+}>;
+
+/**
+ * "oracle-strength" fight-slot chooser. Builds the swapped view pair from the
+ * live rules context, hands it to the engine's own
+ * `chooseFactoryAiScoredDecision` together with a synthetic battler-1 command
+ * request carrying the player's LEGAL move slots (the scorer's validator
+ * requires a trainer battler-1 request; it only ever reads the request's
+ * `legalDecisions` move slots), and returns the slot the scorer chose.
+ *
+ * RNG: the scorer's own setup/tie draws run on a CURSOR SUPPLIED BY THE
+ * CALLER and the advanced cursor is discarded, so the live battle's RNG is
+ * never touched by the player's decision. The soak passes a fresh u32 drawn
+ * from its own seeded stream (`Rng`), so the policy stays deterministic per
+ * soak seed while the four `simulatedRng` slots and the final tie index still
+ * vary from decision to decision.
+ *
+ * Returns a fallback reason instead of a slot when there is no legal fight
+ * slot, when the scorer yields anything other than a `use-move` decision, or
+ * when the scorer refuses/halts (e.g. an unsupported-branch barrier in a
+ * player-side configuration the engine itself never produces). Callers count
+ * those and use the "winning" policy's own choice.
+ */
+export function pickOracleStrengthFightSlot(input: Readonly<{
+  rulesContext: BattleScriptRulesContext;
+  legalSlots: readonly boolean[];
+  battleTurnCount: number;
+  rngValue: number;
+}>): OracleStrengthPick {
+  const attackerMoves = input.rulesContext.battlers[0].moves;
+  const legalDecisions: BattleMoveDecision[] = [];
+  for (let slot = 0; slot < 4; slot += 1) {
+    if (!input.legalSlots[slot]) continue;
+    if (attackerMoves[slot] === 0) continue;
+    legalDecisions.push({
+      kind: "use-move",
+      moveSlot: slot as 0 | 1 | 2 | 3,
+      targetBattler: 0,
+    });
+  }
+  if (legalDecisions.length === 0) {
+    return { slot: null, fallbackReason: "no legal fight slot" };
+  }
+  let choice: FactoryAiScoredChoice;
+  try {
+    choice = chooseFactoryAiScoredDecision({
+      view: buildOracleStrengthPlayerView({
+        rulesContext: input.rulesContext,
+        battleTurnCount: input.battleTurnCount,
+      }),
+      request: {
+        kind: "command",
+        requestId: 0,
+        side: "trainer",
+        battler: 1,
+        legalDecisions,
+      },
+      rng: { value: input.rngValue >>> 0, calls: 0 },
+    });
+  } catch (error) {
+    return { slot: null, fallbackReason: `scorer threw: ${(error as Error).message}` };
+  }
+  const decision = choice.submission.decision;
+  if (decision.kind !== "use-move") {
+    return { slot: null, fallbackReason: `scorer chose ${decision.kind}` };
+  }
+  return { slot: decision.moveSlot, fallbackReason: null };
+}
+
+// ---------------------------------------------------------------------------
 // Seeded PRNG (mulberry32)
 // ---------------------------------------------------------------------------
 
@@ -411,7 +989,8 @@ export class Rng {
 
 type ActionEntry = { frame: number; battle: number; turn: number; what: string };
 
-class ActionLog {
+/** Exported for tests that drive a `RandomPlayer` directly (`new ActionLog(false)`). */
+export class ActionLog {
   private readonly entries: ActionEntry[] = [];
   private readonly verbose: boolean;
   private readonly onNote?: (entry: ActionEntry) => void;
@@ -479,6 +1058,13 @@ export type SeedResult = {
    * ever existed.
    */
   maxBattleDepth: number | null;
+  /**
+   * "oracle-strength" only: fight-slot decisions where the engine's own
+   * scorer could not answer and the policy fell back to "winning"'s
+   * `pickWinningFightSlot` (each one also logged as
+   * `oracle-strength fallback: <reason>`). Always 0 for every other policy.
+   */
+  oracleStrengthFallbacks: number;
   /** Opt-in test diagnostics; absent from ordinary CLI/full/vanilla runs. */
   diagnostics?: RunDiagnostics;
 };
@@ -600,7 +1186,9 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * built and measured (M-B step 2 part B, rung 2) but stays WITHHELD: it wins
  * round 2 more often but collapses at challenge 3+ (7 vs 40 completions at
  * carry >= 21, n=180 — docs/soak-draft-heuristic-n180-2026-08-22.md), so
- * "winning"'s draft is unchanged from "full"'s random 3-of-6; (5) at the
+ * "winning"'s draft is unchanged from "full"'s random 3-of-6 (a
+ * coverage-first draft is available opt-in as "winning-coverage" below);
+ * (5) at the
  * action menu, when the active is "walled" (every legal move is non-damaging
  * or 0x-immune
  * against the opponent's live types -- a merely resisted move, e.g.
@@ -633,8 +1221,60 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * retrying the next-best candidate if the engine rejects one as a duplicate
  * species, and declining the whole screen (quit prompt, KEEP CURRENT POKéMON)
  * if no opponent mon outscores the worst rental at all.
+ *
+ * "oracle-strength": opt-in, identical to "winning" in every respect
+ * (random 3-of-6 draft, swap offers declined, the same voluntary-switch
+ * heuristic, the same exploration/timing rolls) EXCEPT the fight-move
+ * choice, which is delegated to the ENGINE'S OWN source-derived Factory AI
+ * scorer running for the player's side: `chooseFactoryAiScoredDecision`
+ * under the full mask 7 (CHECK_BAD_MOVE | TRY_TO_FAINT | CHECK_VIABILITY),
+ * fed a `FactoryAiScoredView` that mirrors the live opponent driver's own
+ * with the two sides swapped (see `buildOracleStrengthPlayerView`). The
+ * measurement instrument for docs/soak-policy-strength-scout-2026-08-23.md's
+ * lever 2 -- the scout found challengeNum 4 is the single unbeaten tier and
+ * predicted a source-strength move chooser converts it. NOT a fairness
+ * model: the player is handed the opponent's real moves/ability/item. When
+ * the scorer has no legal slot, returns a non-move decision, or halts on a
+ * barrier, the policy falls back to "winning"'s own
+ * `pickWinningFightSlot` choice and logs `oracle-strength fallback:
+ * <reason>` (counted in `SeedResult.oracleStrengthFallbacks`).
+ *
+ * "winning-coverage": opt-in, identical to "winning" in every respect (same
+ * fight/switch/swap-decline/continuation decisions, the same
+ * exploration/timing rolls, the same shared-RNG-stream draws -- the
+ * constructor's draft shuffle is still DRAWN and then overwritten) EXCEPT
+ * the draft, which picks the 3-of-6 rentals maximising a COVERAGE-FIRST
+ * lexicographic score instead of a random 3-of-6 (see
+ * `pickCoverageDraftPicks`): (offensive, defensive, bst), where offensive =
+ * the number of the 17 Gen-3 defending types some damaging move in the trio
+ * hits super-effectively, each weighted `1 + occurrences among the six
+ * offered rentals' own types` (the rental ranges are symmetric, so the
+ * offers sample the tier's opponent pool -- scout doc §2); defensive =
+ * distinct trio types minus shared 4x weaknesses; bst = the trio's summed
+ * base-stat total, the WITHHELD bulk+STAB heuristic's own axis demoted to a
+ * pure tiebreak because it starves type coverage (scout doc §3 lever 4).
+ * Deterministic given the six offers -- no RNG in the pick. The measurement
+ * instrument for that doc's lever 4' (the last open challenge-4 lever);
+ * results in its "Result -- lever 4'" section.
+ *
+ * "winning-combined": opt-in, identical to "winning-coverage" in every
+ * respect EXCEPT the draft's trio search, which maximises the same
+ * coverage-first lexicographic score only over trios whose summed base-stat
+ * total is >= the MEAN candidate-trio total (`combinedDraftBstFloor` --
+ * what a random draft fields in expectation), so coverage can never select
+ * an all-frail party. The COMBINED-score lever both single-axis drafts
+ * pointed at: lever 4 (bulk+STAB primary) starved coverage, lever 4'
+ * (coverage with bst a pure tiebreak) starved bulk -- mirror-image failure
+ * modes (scout doc, "Result -- lever 4'" closing paragraph).
  */
-export type SoakPolicy = "full" | "vanilla" | "winning" | "winning-swap";
+export type SoakPolicy =
+  | "full"
+  | "vanilla"
+  | "winning"
+  | "winning-swap"
+  | "oracle-strength"
+  | "winning-coverage"
+  | "winning-combined";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
 type PlayerPolicy = SoakPolicy | "strong-route";
 
@@ -663,22 +1303,35 @@ export class RandomPlayer {
   private switchedAgainstOpponentIndices = new Set<number>();
   /** "winning" only: count of voluntary switches the heuristic actually committed to (soak diagnostics). */
   public switchCount = 0;
+  /** "oracle-strength" only: fight-slot decisions that fell back to "winning"'s scorer (soak diagnostics). */
+  public oracleStrengthFallbacks = 0;
   /** "winning-swap" only: the current swap screen's row plan, built once per swap occurrence. */
   private swapPlan: WinningSwapPlan | null = null;
+  /** "winning-coverage"/"winning-combined" only: identity of the offer the current draft plan was scored from, so each fresh round's draft re-scores. */
+  private coverageDraftOfferKey: string | null = null;
   public battle = 1;
   public turn = 0;
   private readonly rng: Rng;
   private readonly log: ActionLog;
   private readonly policy: PlayerPolicy;
 
-  /** "full", "winning", and "winning-swap" share the same menu/target exploration rolls. */
+  /** Every policy except "vanilla"/"strong-route" shares the same menu/target exploration rolls. */
   private get explores(): boolean {
-    return this.policy === "full" || this.policy === "winning" || this.policy === "winning-swap";
+    return this.policy === "full" || this.policy === "winning"
+      || this.policy === "winning-swap" || this.policy === "oracle-strength"
+      || this.policy === "winning-coverage" || this.policy === "winning-combined";
   }
 
-  /** "winning" and "winning-swap" share every winning-biased decision except the swap offer/screen. */
+  /** The winning-biased policies share every decision except the swap offer/screen ("winning-swap"), the fight slot ("oracle-strength"), and the draft (the two coverage drafts). */
   private get winningLike(): boolean {
-    return this.policy === "winning" || this.policy === "winning-swap";
+    return this.policy === "winning" || this.policy === "winning-swap"
+      || this.policy === "oracle-strength" || this.policy === "winning-coverage"
+      || this.policy === "winning-combined";
+  }
+
+  /** "winning-coverage"/"winning-combined": the draft is planned by `planCoverageDraft`, not the constructor's random shuffle. */
+  private get coverageDraftLike(): boolean {
+    return this.policy === "winning-coverage" || this.policy === "winning-combined";
   }
 
   constructor(rng: Rng, log: ActionLog, policy: PlayerPolicy) {
@@ -707,6 +1360,12 @@ export class RandomPlayer {
 
   private note(state: EngineState, what: string): void {
     this.log.push(state.frame, this.battle, this.turn, what);
+  }
+
+  /** "oracle-strength" only: log + count one fight-slot fallback to "winning"'s own scorer. */
+  private noteOracleStrengthFallback(state: EngineState, reason: string): void {
+    this.oracleStrengthFallbacks += 1;
+    this.note(state, `oracle-strength fallback: ${reason}`);
   }
 
   /** Decide this frame's held buttons. */
@@ -798,6 +1457,7 @@ export class RandomPlayer {
 
   private onDraft(state: EngineState): ReadonlySet<GbaButton> {
     const draft = state.draftScreen;
+    if (this.coverageDraftLike) this.planCoverageDraft(state, draft);
     const reveal = draft.confirmReveal;
     if (reveal) {
       if (reveal.phase !== "shown") return NO_BUTTONS;
@@ -813,7 +1473,11 @@ export class RandomPlayer {
       }
       this.note(state, "draft confirm: A on NO (decline)");
       this.draft.rented = 2; // the 3rd pick is dropped; re-rent below
-      this.draft.picks[2] = this.rng.int(6);
+      // The coverage drafts re-rent the SAME third slot their score chose
+      // (the trio is the policy); the roll is still drawn so their RNG
+      // stream stays aligned with "winning"'s at every later decision.
+      const rerolledThirdPick = this.rng.int(6);
+      if (!this.coverageDraftLike) this.draft.picks[2] = rerolledThirdPick;
       return this.press("A", 8);
     }
     if (draft.mode === "cursor") {
@@ -846,6 +1510,36 @@ export class RandomPlayer {
     this.note(state, `draft: RENT slot ${draft.cursorPos}`);
     this.draft.rented += 1;
     return this.press("A", 10);
+  }
+
+  /**
+   * "winning-coverage"/"winning-combined" only: score the six offered
+   * rentals and replace the constructor's random plan with the scored trio
+   * (pure coverage, or coverage above the strength floor). Keyed on the
+   * offer itself (species + personality of all six), so a NEW round's draft
+   * re-scores while every frame of the SAME draft reuses the decision --
+   * including after a NO decline, which re-rents the same third pick.
+   */
+  private planCoverageDraft(state: EngineState, draft: EngineState["draftScreen"]): void {
+    if (draft.rentals.length < 3) return;
+    const key = draft.rentals.map((rental) => `${rental.species}#${rental.personality}`).join("|");
+    if (key === this.coverageDraftOfferKey) return;
+    this.coverageDraftOfferKey = key;
+    const combined = this.policy === "winning-combined";
+    const chosen = combined
+      ? pickCombinedDraftPicks(draft.rentals)
+      : pickCoverageDraftPicks(draft.rentals);
+    // `draft.rented` is deliberately NOT reset: it gates only the one-shot
+    // SUMMARY peek, and resetting it would draw an extra `rng.chance` on a
+    // later round's draft that "winning" never draws.
+    this.draft.picks = [...chosen.picks];
+    const floorSuffix = combined ? ` floor ${(chosen as CombinedDraftPick).floor}` : "";
+    this.note(
+      state,
+      `draft: ${combined ? "combined" : "coverage"} trio ${chosen.picks.join(",")} `
+        + `(off ${chosen.score.offensive} def ${chosen.score.defensive} bst ${chosen.score.bst}${floorSuffix}) `
+        + chosen.picks.map((slot) => draft.rentals[slot]!.species).join(" "),
+    );
   }
 
   private nextDraftTarget(selectedIds: readonly number[]): number | null {
@@ -957,6 +1651,30 @@ export class RandomPlayer {
             defenderTypes: battlers?.[1]?.types ?? DEFAULT_TYPES,
           });
         };
+        // "oracle-strength" only: delegate the slot to the engine's own
+        // Factory AI scorer running for the player's side (mask 7), on a
+        // cursor drawn from the soak's own seeded stream so the live
+        // battle's RNG is untouched. Falls back to "winning"'s own choice
+        // (and logs why) when the scorer can't answer.
+        const oracleStrengthSlot = (): number => {
+          const rulesContext = orch.battle?.rules.rulesContext;
+          const rngValue = this.rng.int(0x1_0000_0000);
+          if (!rulesContext) {
+            this.noteOracleStrengthFallback(state, "no live rules context");
+            return bestEffectivenessSlot();
+          }
+          const pick = pickOracleStrengthFightSlot({
+            rulesContext,
+            legalSlots: presentation.legalMoveBySlot.map((slot) => slot !== null),
+            battleTurnCount: this.turnsThisBattle,
+            rngValue,
+          });
+          if (pick.slot === null) {
+            this.noteOracleStrengthFallback(state, pick.fallbackReason ?? "unknown");
+            return bestEffectivenessSlot();
+          }
+          return pick.slot;
+        };
         const target = this.policy === "strong-route"
           && active?.partyIndex === 1
           && active.isFirstTurn === 2
@@ -964,9 +1682,11 @@ export class RandomPlayer {
           ? 3
           : this.policy === "vanilla" || this.policy === "strong-route"
             ? firstLegal
-            : this.winningLike
-              ? bestEffectivenessSlot()
-              : this.rng.int(4);
+            : this.policy === "oracle-strength"
+              ? oracleStrengthSlot()
+              : this.winningLike
+                ? bestEffectivenessSlot()
+                : this.rng.int(4);
         this.fightIntent = {
           key,
           target,
@@ -1211,15 +1931,19 @@ export class RandomPlayer {
       // it already chose and has played with is worth keeping over an
       // unscouted swap. "winning-swap" (opt-in coverage instrument) is the
       // opposite: always accept, then pick deliberately on the swap screen
-      // itself (see onWinningFactorySwap). The roll is still drawn
-      // (this.explores covers "full"/"winning"/"winning-swap" alike) so
+      // itself (see onWinningFactorySwap). Every OTHER winning-like policy
+      // declines exactly like "winning" -- keyed on `winningLike`, not a
+      // per-policy list, because "winning-coverage" originally missed this
+      // list and 50/50-accepted every offer against its own spec (the same
+      // trap class as ISSUES #99; see the Tier-1 decline pin). The roll is
+      // still drawn (this.explores covers every exploring policy alike) so
       // "full"'s own draw here is untouched; only the decision it feeds is
       // overridden.
       const rolledAccept = this.explores && this.rng.chance(0.5);
-      const accept = this.policy === "winning"
-        ? false
-        : this.policy === "winning-swap"
-          ? true
+      const accept = this.policy === "winning-swap"
+        ? true
+        : this.winningLike
+          ? false
           : rolledAccept;
       const targetPos = accept ? 0 : 1;
       if (postwin.swapCursorPos !== targetPos) {
@@ -1425,14 +2149,33 @@ function factorySymbolsCountForStartCarry(startCarry: number): 0 | 1 | 2 {
  * room -> battle room path (unmodified) later builds the round's orchestrator
  * from this same carry, exactly like a real chain.
  *
- * `startCarry === 0` returns `createInitialState()` verbatim -- required to
- * stay byte-identical to today's default/omitted behavior, and safer than
- * relying on the generated path to coincidentally reproduce the anchor's own
- * pinned battle-1 draft records bit-for-bit.
+ * `startCarry === 0` (with no `rngWalk`) returns `createInitialState()`
+ * verbatim -- required to stay byte-identical to today's default/omitted
+ * behavior, and safer than relying on the generated path to coincidentally
+ * reproduce the anchor's own pinned battle-1 draft records bit-for-bit.
+ *
+ * `rngWalk` (opt-in, default 0 = today's behavior, byte-identical) advances
+ * the boot RNG cursor `rngWalk` LCG steps past `ANCHOR_RNG_VALUE` before
+ * generating the draft -- the exact mechanism by which two real players'
+ * draft offers differ (the GBA RNG advances every idle frame, so the cursor
+ * at draft time is arrival-timing-dependent). THE VARIANCE INSTRUMENT for
+ * deterministic-draft policies: the engine itself is seed-invariant, so
+ * without a walk every seed of a policy whose decisions don't consume the
+ * player RNG (winning-coverage / winning-combined drafts) collapses into
+ * essentially ONE trajectory -- 30 seeds, one sample (found 2026-08-23; the
+ * winning-combined carry-28 sweep returned 30 identical chronologies).
+ * A nonzero walk with `startCarry === 0` takes the generated carry-0 path
+ * (a legal fresh challenge-0 draft off the walked cursor) instead of the
+ * pinned anchor snapshot, so anchor-style sweeps can be varied too.
  */
-export function createStartCarryState(startCarry: number): EngineState {
+export function createStartCarryState(startCarry: number, rngWalk = 0): EngineState {
   validateStartCarry(startCarry);
-  if (startCarry === 0) return createInitialState();
+  if (!Number.isInteger(rngWalk) || rngWalk < 0) {
+    throw new Error(`bad rngWalk: ${rngWalk} (want a non-negative integer)`);
+  }
+  if (startCarry === 0 && rngWalk === 0) return createInitialState();
+  let bootRngValue = ANCHOR_RNG_VALUE;
+  for (let step = 0; step < rngWalk; step += 1) bootRngValue = advanceRngValue(bootRngValue);
   const carry: FactoryCarry = Object.freeze({
     factoryWinStreak: startCarry,
     factorySymbolsCount: factorySymbolsCountForStartCarry(startCarry),
@@ -1440,13 +2183,13 @@ export function createStartCarryState(startCarry: number): EngineState {
     rentsCount: 0,
     playerTrainerId: ANCHOR_FACTORY_METADATA.playerTrainerId,
   });
-  const { generation, draftScreen } = generateFactoryChallengeDraft(carry, ANCHOR_RNG_VALUE);
+  const { generation, draftScreen } = generateFactoryChallengeDraft(carry, bootRngValue);
   return {
     ...createInitialState(),
     draftScreen,
     rngValue: generation.rngValue,
     factoryCarry: carry,
-    pendingGeneratedRound: Object.freeze({ rngValueBefore: ANCHOR_RNG_VALUE, carry }),
+    pendingGeneratedRound: Object.freeze({ rngValueBefore: bootRngValue, carry }),
   };
 }
 
@@ -1462,10 +2205,13 @@ export type RunOptions = {
   /** Test-only override; intentionally unavailable from the CLI policy flag. */
   testPolicy?: "strong-route";
   /**
-   * Test-only initial-state seam. The default is exactly the production
-   * draft anchor returned by createInitialState(); the CLI never supplies it.
+   * Initial-state seam. The default is exactly the production draft anchor
+   * returned by createInitialState(); the CLI supplies it for `--start-carry`
+   * / `--vary-rng` (via `createStartCarryState`), tests for staged states.
+   * Receives the running seed so a factory can vary the boot per seed
+   * (`--vary-rng`'s per-seed RNG walk); ignore it for a fixed state.
    */
-  stateFactory?: () => EngineState;
+  stateFactory?: (seed: number) => EngineState;
   /** Opt into read-only route diagnostics without changing ordinary results. */
   collectDiagnostics?: boolean;
   /**
@@ -1544,6 +2290,9 @@ export const DEFAULT_MAX_FRAMES_BY_POLICY: Record<SoakPolicy, number> = {
   vanilla: 600_000,
   winning: 1_000_000,
   "winning-swap": 1_000_000,
+  "oracle-strength": 1_000_000,
+  "winning-coverage": 1_000_000,
+  "winning-combined": 1_000_000,
 };
 
 /** An explicit `maxFrames` always wins; otherwise resolve per policy. */
@@ -1581,7 +2330,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   const rng = new Rng(seed);
   const log = new ActionLog(options.verbose, options.onNote);
   const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy);
-  let state = options.stateFactory?.() ?? createInitialState();
+  let state = options.stateFactory?.(seed) ?? createInitialState();
   let frame = 0;
   let firstEndState: string | null = null;
   let chainingCommitted = false;
@@ -1668,6 +2417,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       turn: player.turn,
       maxCarriedWinStreak,
       maxBattleDepth,
+      oracleStrengthFallbacks: player.oracleStrengthFallbacks,
       lastActions: log.tail(15).map(
         (entry) => `f=${entry.frame} b${entry.battle} t${entry.turn} ${entry.what}`,
       ),

@@ -22,6 +22,23 @@
 //                      the swap screen, swaps its lowest-scoring rental for
 //                      the defeated opponent's highest-scoring mon -- covers
 //                      the Factory swap screen at real carried-streak depth)
+//                      or "oracle-strength" (opt-in: identical to "winning"
+//                      except the fight-move choice, which is delegated to
+//                      the engine's own source-derived Factory AI scorer
+//                      running for the player's side under the full mask 7
+//                      -- the lever-2 measurement instrument of
+//                      docs/soak-policy-strength-scout-2026-08-23.md)
+//                      or "winning-coverage" (opt-in: identical to
+//                      "winning" except the draft, which rents the 3-of-6
+//                      offered rentals maximising a coverage-first
+//                      (offensive coverage, defensive diversity, base-stat
+//                      total) score instead of a random 3-of-6 -- the
+//                      lever-4' measurement instrument of the same doc)
+//                      or "winning-combined" (opt-in: "winning-coverage"
+//                      with a strength floor -- the same coverage-first
+//                      score maximised only over trios whose summed
+//                      base-stat total is >= the mean candidate trio's,
+//                      so coverage cannot field an all-frail party)
 //   --max-frames N     per-seed tick budget before reporting HANG (default: resolveMaxFrames(policy), i.e. DEFAULT_MAX_FRAMES_BY_POLICY[policy])
 //   --stall-frames N   frames of zero progress before reporting HANG (default: DEFAULT_STALL_FRAMES, i.e. 30_000 — ISSUES #104 retune)
 //   --max-rounds N     finish OK ("max-rounds") once N round decisions have been observed (default: unlimited)
@@ -32,6 +49,20 @@
 //                      natural chaining almost never reaches. N must be a
 //                      multiple of 7 in 0..49 (rejected otherwise); 0 or
 //                      omitted is byte-identical to today.
+//   --vary-rng         opt-in: advance the boot RNG cursor by the seed (one
+//                      LCG step per seed unit) before generating the
+//                      start-carry draft, so every seed opens on different
+//                      offers. THE VARIANCE INSTRUMENT for deterministic-
+//                      draft policies (winning-coverage/winning-combined),
+//                      whose seeds otherwise collapse into one trajectory
+//                      because the engine itself is seed-invariant. Works
+//                      with --start-carry 0/omitted too (generated carry-0
+//                      draft off the walked cursor instead of the pinned
+//                      anchor snapshot).
+//   --first-round      stop each seed at its FIRST round's own decided
+//                      outcome (endState roundComplete/roundLost) instead of
+//                      chaining to the frame budget -- the direct
+//                      rounds-won-at-boot measurement
 //   --milestone        stop each seed at battle 1's first action menu (the
 //                      Tier-1 pin surface)
 //   --verbose          per-action log for a single-seed repro
@@ -58,15 +89,22 @@ function main(): void {
   };
   const verbose = args.includes("--verbose");
   const milestone = args.includes("--milestone");
+  const varyRng = args.includes("--vary-rng");
+  const firstRound = args.includes("--first-round");
   const singleSeed = getFlag("--seed");
   const seedsRange = getFlag("--seeds") ?? "0:50";
   const renderEvery = Number(getFlag("--render-every") ?? 8);
   const policy = (getFlag("--policy") ?? "full") as SoakPolicy;
   const jsonPath = getFlag("--json");
   if (
-    policy !== "full" && policy !== "vanilla" && policy !== "winning" && policy !== "winning-swap"
+    policy !== "full" && policy !== "vanilla" && policy !== "winning"
+    && policy !== "winning-swap" && policy !== "oracle-strength"
+    && policy !== "winning-coverage" && policy !== "winning-combined"
   ) {
-    console.error(`bad --policy: ${policy} (want full|vanilla|winning|winning-swap)`);
+    console.error(
+      `bad --policy: ${policy} `
+        + `(want full|vanilla|winning|winning-swap|oracle-strength|winning-coverage|winning-combined)`,
+    );
     process.exit(2);
   }
   const maxFramesFlag = getFlag("--max-frames");
@@ -103,9 +141,12 @@ function main(): void {
     verbose,
     policy,
     stopAtFirstActionMenu: milestone,
+    stopAtFirstRoundDecision: firstRound,
     stallFrames,
     maxRounds,
-    ...(startCarry !== 0 ? { stateFactory: () => createStartCarryState(startCarry) } : {}),
+    ...(startCarry !== 0 || varyRng
+      ? { stateFactory: (seed: number) => createStartCarryState(startCarry, varyRng ? seed : 0) }
+      : {}),
   };
   const results: SeedResult[] = [];
   const startedAt = Date.now();

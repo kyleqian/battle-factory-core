@@ -199,3 +199,74 @@ describe.skipIf(!wasmAvailable)("createFactoryCorpusParty — full 3-member part
     expect(wasm).toEqual(ts);
   });
 });
+
+// --- Part E: six-IV instances (CreateBoxMon's random-IV branch) ------------
+//
+// ISSUES #118: a rental whose fixed-IV argument was retail's
+// `sFixedIVTable[8]` overread (110 >= USE_RANDOM_IVS) carries a real rolled
+// spread on `instance.ivs`, which routes the wasm engine through
+// `fw_create_factory_party_member_with_ivs` (packed MON_DATA_IVS word)
+// instead of `fw_create_factory_party_member`. The two exports must produce
+// byte-identical members, and both must match the TS engine.
+
+const SIX_IV_SPREADS = [
+  { hp: 3, attack: 10, defense: 23, speed: 24, spAttack: 3, spDefense: 28 },
+  { hp: 0, attack: 0, defense: 0, speed: 0, spAttack: 0, spDefense: 0 },
+  { hp: 31, attack: 31, defense: 31, speed: 31, spAttack: 31, spDefense: 31 },
+  { hp: 31, attack: 0, defense: 31, speed: 0, spAttack: 31, spDefense: 0 },
+  { hp: 7, attack: 25, defense: 3, speed: 26, spAttack: 5, spDefense: 9 },
+] as const;
+
+describe.skipIf(!wasmAvailable)("Six-IV instances — ts vs wasm through the with-ivs export", () => {
+  for (const setId of [110, 140] as const) {
+    const personality = personalityForSet(setId);
+    for (const ivs of SIX_IV_SPREADS) {
+      it(`setId=${setId} ivs=${Object.values(ivs).join(",")}`, async () => {
+        const engine = await getWasmEngine();
+        const instance: FactoryCorpusPartyInstance = {
+          setId,
+          personality,
+          // The saved RentalMon.ivs is the ATK IV (battle_factory_screen.c:1824).
+          fixedIv: ivs.attack,
+          ivs,
+          abilitySlot: (personality & 1) as 0 | 1,
+          otId: PLAYER_TRAINER_ID,
+        };
+        const ts = createFactoryCorpusPartyMember(instance);
+        const wasm = engine.createFactoryCorpusPartyMember(instance);
+        expect(wasm, "six-IV member parity").toEqual(ts);
+        expect(ts.ivs).toEqual(ivs);
+      });
+    }
+  }
+
+  it("a uniform six-IV spread matches the same instance expressed as a bare fixedIv", async () => {
+    const engine = await getWasmEngine();
+    const personality = personalityForSet(110);
+    const bare: FactoryCorpusPartyInstance = {
+      setId: 110, personality, fixedIv: 8, abilitySlot: (personality & 1) as 0 | 1, otId: PLAYER_TRAINER_ID,
+    };
+    const spread: FactoryCorpusPartyInstance = {
+      ...bare,
+      ivs: { hp: 8, attack: 8, defense: 8, speed: 8, spAttack: 8, spDefense: 8 },
+    };
+    // Same member on both engines and across both wasm exports.
+    expect(engine.createFactoryCorpusPartyMember(spread)).toEqual(createFactoryCorpusPartyMember(bare));
+    expect(engine.createFactoryCorpusPartyMember(spread)).toEqual(engine.createFactoryCorpusPartyMember(bare));
+  });
+
+  it("rejects an ivs spread whose attack disagrees with fixedIv (the RentalMon.ivs rule)", () => {
+    const personality = personalityForSet(110);
+    const instance: FactoryCorpusPartyInstance = {
+      setId: 110,
+      personality,
+      fixedIv: 5,
+      ivs: { hp: 3, attack: 10, defense: 23, speed: 24, spAttack: 3, spDefense: 28 },
+      abilitySlot: (personality & 1) as 0 | 1,
+      otId: PLAYER_TRAINER_ID,
+    };
+    expect(() => createFactoryCorpusPartyMember(instance)).toThrow(
+      "instance ivs.attack 10 must equal fixedIv 5",
+    );
+  });
+});

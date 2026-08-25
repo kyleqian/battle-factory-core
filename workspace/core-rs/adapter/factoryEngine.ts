@@ -37,6 +37,7 @@ import type {
 } from "../../src/engine/factoryRentalGeneration.ts";
 import type { MonGender } from "../../src/engine/monGender.ts";
 import { loadFactoryWasm } from "./loadFactoryWasm.ts";
+import { packMonDataIvs } from "./monDataIvs.ts";
 
 type SpeciesRow = Readonly<{ id: number; name: string }>;
 const SPECIES_NAME_BY_ID = new Map(
@@ -101,8 +102,13 @@ function monGenderForByte(byte: number): MonGender {
   return gender;
 }
 
-const PHASE_NAMES = ["set-selection", "personality"] as const;
-const PURPOSE_NAMES = ["set-candidate", "personality-low", "personality-high"] as const;
+// Discriminant order is the Rust `Phase`/`Purpose` enums'
+// (crates/factory-core/src/rental_generation.rs); these are byte-indexed.
+const PHASE_NAMES = ["set-selection", "personality", "random-ivs"] as const;
+const PURPOSE_NAMES = [
+  "set-candidate", "personality-low", "personality-high",
+  "random-ivs-low", "random-ivs-high",
+] as const;
 const SELECTION_OUTCOME_NAMES = [
   "accepted", "unown", "duplicate-set", "duplicate-species", "duplicate-item",
 ] as const;
@@ -117,10 +123,11 @@ const OK_RENTAL_RANK_OFFSET = 9;
 const OK_SELECTION_RNG_VALUE_OFFSET = 10;
 const OK_RNG_VALUE_OFFSET = 14;
 const OK_RENTALS_OFFSET = 18;
-const RENTAL_RECORD_WIDTH = 23;
+const RENTAL_RECORD_WIDTH = 29;
+const RENTAL_IVS_OFFSET = 23;
 const RENTALS_COUNT = 6;
-const LEDGER_COUNT_OFFSET = OK_RENTALS_OFFSET + RENTAL_RECORD_WIDTH * RENTALS_COUNT; // 156
-const LEDGER_ENTRIES_OFFSET = LEDGER_COUNT_OFFSET + 4; // 160
+const LEDGER_COUNT_OFFSET = OK_RENTALS_OFFSET + RENTAL_RECORD_WIDTH * RENTALS_COUNT; // 192
+const LEDGER_ENTRIES_OFFSET = LEDGER_COUNT_OFFSET + 4; // 196
 const LEDGER_ENTRY_WIDTH = 26;
 
 function lookupOrThrow<T>(names: readonly T[], byte: number, what: string): T {
@@ -168,7 +175,10 @@ export function decodeRentalGeneration(bytes: Uint8Array): FactoryInitialRentalG
     rentals.push(Object.freeze({
       setId: view.getUint16(offset, true),
       personality: view.getUint32(offset + 2, true) >>> 0,
+      // The record's fixed_iv is the constructed mon's ATK IV, i.e. always
+      // ivs[1] (battle_factory_screen.c:1824), not the fixed-IV argument.
       fixedIv: view.getUint8(offset + 6),
+      ivs: readSixU8(view, offset + RENTAL_IVS_OFFSET),
       abilitySlot: view.getUint8(offset + 7) as 0 | 1,
       otId: view.getUint32(offset + 8, true) >>> 0,
       speciesName: speciesNameForId(speciesId),
@@ -206,6 +216,11 @@ export function decodeRentalGeneration(bytes: Uint8Array): FactoryInitialRentalG
         candidateSetId: view.getUint16(offset + 18, true),
         selectionOutcome: lookupOrThrow(SELECTION_OUTCOME_NAMES, view.getUint8(offset + 20), "selection outcome"),
       }));
+    } else if (phase === "random-ivs") {
+      // CreateBoxMon's two IV words populate NEITHER optional group: the
+      // drawn word is the entry's whole payload, and the three 5-bit fields
+      // it carries are already decoded into the record's `ivs`.
+      drawLedger.push(Object.freeze({ ...base }));
     } else {
       drawLedger.push(Object.freeze({
         ...base,
@@ -393,13 +408,21 @@ export interface FactoryEngine {
 export async function wasmFactoryEngine(): Promise<FactoryEngine> {
   const exports = await loadFactoryWasm();
   function createFactoryCorpusPartyMember(instance: FactoryCorpusPartyInstance): FactoryCorpusPartyMemberState {
-    const ptr = exports.fw_create_factory_party_member(
-      instance.setId >>> 0,
-      instance.personality >>> 0,
-      instance.fixedIv >>> 0,
-      instance.abilitySlot >>> 0,
-      (instance.otId ?? 0) >>> 0,
-    );
+    const ptr = instance.ivs === undefined
+      ? exports.fw_create_factory_party_member(
+        instance.setId >>> 0,
+        instance.personality >>> 0,
+        instance.fixedIv >>> 0,
+        instance.abilitySlot >>> 0,
+        (instance.otId ?? 0) >>> 0,
+      )
+      : exports.fw_create_factory_party_member_with_ivs(
+        instance.setId >>> 0,
+        instance.personality >>> 0,
+        packMonDataIvs(instance.ivs),
+        instance.abilitySlot >>> 0,
+        (instance.otId ?? 0) >>> 0,
+      );
     const totalLen = new DataView(exports.memory.buffer, ptr, 4).getUint32(0, true);
     const bytes = new Uint8Array(exports.memory.buffer, ptr, totalLen).slice();
     exports.fw_free(ptr, totalLen);

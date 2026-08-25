@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import anchorStateData from "../src/data/gen/anchor-state.json" with { type: "json" };
 import {
   healFactoryKernelParty,
   type BattleMon,
@@ -202,5 +203,39 @@ describe("RoundController full Factory rental persistence", () => {
       (basePp, index) => basePp + Math.floor(basePp * 20 * index / 100),
     ));
     expect(healed[0].ppBonuses).toBe(0b11_10_01_00);
+  });
+
+  function sixIvSpreadRecords(): FactoryRentalParty {
+    const base = anchorStateData.rentals.slice(0, 3);
+    const spreadIvs = { hp: 5, attack: 3, defense: 7, speed: 11, spAttack: 13, spDefense: 17 };
+    return base.map((rental, index) => ({
+      setId: rental.frontierMonIndex,
+      personality: rental.personality,
+      fixedIv: index === 0 ? spreadIvs.attack : rental.ivs.hp,
+      abilitySlot: rental.abilityNum,
+      otId: rental.otId,
+      ...(index === 0 ? { ivs: spreadIvs } : {}),
+    })) as unknown as FactoryRentalParty;
+  }
+
+  it("throws when a live member's non-attack IV diverges from its record's six-IV spread", () => {
+    const records = sixIvSpreadRecords();
+    const healed = healFactoryKernelParty(records);
+    const tampered = healed.map((member, index) => (
+      index === 0 ? { ...member, ivs: { ...member.ivs, speed: member.ivs.speed + 1 } } : member
+    )) as unknown as FactoryKernelParty;
+
+    expect(() => healFactoryKernelParty(records, tampered)).toThrow(
+      /does not match its rental record/,
+    );
+  });
+
+  it("heals cleanly when a live member's six IVs match its record's spread", () => {
+    const records = sixIvSpreadRecords();
+    const healed = healFactoryKernelParty(records);
+    const restaged = healed.map((member) => ({ ...member })) as unknown as FactoryKernelParty;
+
+    const rehealed = healFactoryKernelParty(records, restaged);
+    expect(rehealed[0].ivs).toEqual(records[0]!.ivs);
   });
 });

@@ -49,16 +49,35 @@ pub fn get_level50_factory_rental_range(challenge_num: u32, use_better_range: bo
 /// Draft-rental fixed IV selection
 /// (`reference/pokeemerald/src/battle_factory_screen.c:1757-1771`). The
 /// ordinary IV column is selected because this is not an opponent's last
-/// battle (`reference/pokeemerald/src/battle_factory.c:739-756`). Returns
-/// `None` where the TS `getLevel50InitialRentalFixedIv` throws (the
-/// `challengeNum + useBetterRange` index falls outside the source-defined
-/// 0..=7 row range).
+/// battle (`reference/pokeemerald/src/battle_factory.c:739-756`).
+///
+/// The clamp is retail's, from `GetFactoryMonFixedIV`
+/// (`reference/pokeemerald/src/battle_factory.c:739-757`, the non-BUGFIX
+/// `#else` branch): `if (challengeNum > ARRAY_COUNT(sFixedIVTable)) ivSet =
+/// ARRAY_COUNT(sFixedIVTable) - 1; else ivSet = challengeNum;`. The bound
+/// check is STRICTLY greater than 8, so IV argument exactly 8 is unclamped
+/// and reads `sFixedIVTable[8]` — one row past the end of the table. That
+/// row is the `.rodata` pair that follows it, `{regular: 110, lastBattle:
+/// 0}` (`FIXED_IVS`'s ninth row; ROM-byte receipt in
+/// `tests/factoryFixedIvTableRomBytes.test.ts`), and 110 >=
+/// `USE_RANDOM_IVS` (32) makes `CreateBoxMon` roll random IVs
+/// (`reference/pokeemerald/src/pokemon.c:2265-2295`). Arguments 9 and up
+/// clamp to row 7. The result is therefore total — every
+/// challenge/better-range pair has a row, so this never returns `None`.
 #[must_use]
 pub fn get_level50_initial_rental_fixed_iv(
     challenge_num: u32,
     use_better_range: bool,
 ) -> Option<u8> {
-    let iv_index = challenge_num.checked_add(u32::from(use_better_range))?;
+    let iv_argument = challenge_num.saturating_add(u32::from(use_better_range));
+    // ARRAY_COUNT(sFixedIVTable) == 8 == FIXED_IVS.len() - 1 (the ninth row
+    // is the overread, not a table row).
+    let declared_rows = (FIXED_IVS.len() - 1) as u32;
+    let iv_index = if iv_argument > declared_rows {
+        declared_rows - 1
+    } else {
+        iv_argument
+    };
     let FixedIvRow { regular, .. } = *FIXED_IVS.get(iv_index as usize)?;
     Some(regular)
 }
@@ -105,8 +124,12 @@ mod tests {
     }
 
     #[test]
-    fn fixed_ivs_has_8_rows() {
-        assert_eq!(FIXED_IVS.len(), 8);
+    fn fixed_ivs_has_9_rows_the_8_declared_plus_the_retail_overread() {
+        // src/data/gen/factory-round-policy.json .rentalSelection.fixedIvs:
+        // eight declared sFixedIVTable rows plus the ninth `retailOverread`
+        // row the retail bound check reads for IV argument exactly 8.
+        assert_eq!(FIXED_IVS.len(), 9);
+        assert_eq!(FIXED_IVS[8], FixedIvRow { regular: 110, last_battle: 0 });
     }
 
     #[test]
@@ -336,11 +359,12 @@ mod tests {
     fn level50_initial_rental_fixed_iv_rows() {
         // src/data/gen/factory-round-policy.json .rentalSelection.fixedIvs
         // (regular column; index = challengeNum + (useBetterRange ? 1 : 0)):
-        //   [3, 6, 9, 12, 15, 21, 31, 31]
-        // Index 8 (challengeNum 7 + better range) is out of the 0..=7 row
-        // range: TS throws there, this port returns None
-        // (battle_factory_screen.c:1757-1771).
-        let cases: [(u32, bool, Option<u8>); 16] = [
+        //   [3, 6, 9, 12, 15, 21, 31, 31, 110]
+        // IV argument exactly 8 (challengeNum 7 + better range, or
+        // challengeNum 8) is UNCLAMPED by retail's strictly-greater bound
+        // check and reads the ninth (overread) row, 110. Arguments 9+ clamp
+        // to row 7, i.e. 31 (battle_factory.c:739-757).
+        let cases: [(u32, bool, Option<u8>); 20] = [
             (0, false, Some(3)),
             (0, true, Some(6)),
             (1, false, Some(6)),
@@ -356,7 +380,11 @@ mod tests {
             (6, false, Some(31)),
             (6, true, Some(31)),
             (7, false, Some(31)),
-            (7, true, None),
+            (7, true, Some(110)),
+            (8, false, Some(110)),
+            (8, true, Some(31)),
+            (9, false, Some(31)),
+            (u32::MAX, true, Some(31)),
         ];
         for (challenge_num, use_better_range, expected) in cases {
             assert_eq!(

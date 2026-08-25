@@ -5,102 +5,125 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1387 — [top-layer session, 2026-08-22] **User decisions recorded + next supervisor session set up: #116 RESOLVED (keep `vanilla` as the rigid canary; wind-down gates extended to four — `winning 0:60` + `winning-swap 0:60` added), #118 confirmed as the next session's first work item with a two-commit landing ladder written into its ISSUES entry**
+## 1396 — [top-layer setup session, 2026-08-24] **Two user decisions recorded + next-supervisor mission staged: draft-lever program CLOSED, varied-RNG standing gate ADOPTED (shape defined after the #122/#123 fixes); orphaned Rust Refresh-port worker commit found unfolded**
 
-- **State:** docs-only commit on the 1386 final tree (`99429dc9` parent; no
-  engine/`src` touch, no suites due).
-- **Did (all user-approved this session):** (1) **#116 resolved and
-  deleted** — decision: keep `vanilla 0:20` unchanged as a deliberate
-  single-trajectory canary (option (b) seed-backed draft DECLINED), and add
-  the two seed-diverse gates `winning 0:60` + `winning-swap 0:60` to the
-  standing wind-down set. Gate list updated in SUPERVISOR.md ("Wind-down
-  soak gates", now four commands) and ROADMAP "Soak + evidence policy" +
-  gate-coverage note. Both new gates start green on this tree (winning
-  0:480 = 480/480; winning-swap 0:360 = 359/360 with the one crash #119
-  already fixed). (2) **#118 queued first** for the next supervisor
-  session; its ISSUES entry now carries a concrete two-commit ladder
-  (commit 1 = core-rs + wasm snapshot tests WITHOUT rebuilding the shipped
-  binary, stays green; commit 2 = lockstep wasm rebuild + adapter + TS +
-  parity expectations) and the post-land re-sweeps
-  (`--start-carry 42`/`49`, expecting seeds 2/32/49 to go clean).
-- **Next:** launch the supervisor session; step 1 = #118 per its ISSUES
-  entry, then the `--start-carry 42/49` re-sweeps, then the (new) four-gate
-  wind-down set.
-- **Notes:** DEFERRED.md still empty — nothing blocks the launcher.
-
----
-
-## 1386 — [supervisor wind-down, 2026-08-22 17:10] **Post-M-B crash burn-down: 14 worker rounds, queue to zero; final engine sweeps `full` 0:480 + `winning` 0:480 + `vanilla` 0:240 all clean; two new opt-in soak instruments (`winning-swap`, `--start-carry`) opened the swap screen and challenge 5-8 tiers to soak — #119 (swapped-party forced switch) fixed same session (`d41bc58c`), #118 remainder is a TS+Rust coupled port; animation + rust lanes folded**
-
-- **Final gates (supervisor-independent, final tree `2dc691ae` + this docs commit):** full `npm test`
-  **1,099 files / 10,242 passed / 223 skipped**; `npm run build` green; rust fold: cargo 79/79 result blocks (1,020 tests, exit 0; a first pass's exit code was the pipe's, re-run properly), wasm rebuilt
-  (`build-wasm.sh`, 505,163 B, sha 6c59da9e…), `POKEBENCH_ENGINE=wasm` parity 18 files **803/803**; animation
-  fold `b2e453c4` (+2, Hail exact, coverage 201/276); soak gates on the final
-  tree: vanilla 0:20 **20/20 OK**, full 0:60 **60/60 OK** (+ winning-swap 0:20 20/20). Session-scale sweeps
-  (`docs/soak-final-tree-sweeps-2026-08-22.md`): full 0:480 **480/480**,
-  winning 0:480 **480/480** (carry ≥ 28 18/480 = 3.75%), vanilla 0:240
-  240/240, winning-swap 0:360 359/360 (#119), --start-carry 28/35/42 sweeps
-  157/160 (3 × #118).
-- **Closed this session (each red-verified pin + supervisor re-run):** #102
-  (both halves: PARTY_SIZE switch-in fallback `5cc52595`; Future Sight/Perish
-  Song cursor `a6deb814` — new shared fields `wishPerishSongState/BattlerId`),
-  #104 (YES-branch message, trace 133/133), #106/#107/#108 (string-resolver
-  class closed by census), #110, #111 (rentsCount reset on loss), #112
-  (forced send-out display resume), #113 (`Cmd_getexp` writes
-  `gBattlerFainted`), #115 (post-switch names), #117 (record-cursor tick).
-  Filed: #109, #114 (doubles-era), #116 (`vanilla` is one trajectory — gate
-  semantics are the user's call), #118 (retail `sFixedIVTable[8]` = {110,0}
-  pinned from ROM; port blocked on the wasm parity coupling — needs a
-  coordinated TS + Rust step, see the entry), #119 was found by the new `winning-swap` instrument (seed 130) and CLOSED the same hour (`d41bc58c`: `BattleScript_HandleFaintedMon` may ask the player twice in one script run — replacement faints to its own side's Spikes, `battle_scripts_1.s:3427-3431`; pin `tests/forcedSwitchSecondChoiceIssue119.test.ts`).
-- **Findings:** the carry-28 ceiling is the challenge-5 AI tier, not an
-  instrument cap (4M-frame probe; but from a carry-42 boot `winning` DOES win
-  rounds — the wall is the challenge-4/5 rental-vs-opponent matchup, worth a
-  look when policy strength matters again); first-round win rates are
-  anchor-biased; draft-by-strength heuristic WITHHELD for good (n=180, ≥ 21
-  40 vs 7; `wip/mb-step2b-draft-heuristic` @ `1f500a92` is the record).
-- **Next session:** (1) #118 port as ONE coupled step
-  (TS rental/opponent/brain IV readers + `CreateBoxMon` two-draw random IVs
-  + Rust clamp/draws + `factory-wasm` ledger layout + `build-wasm.sh`) —
-  brief it with the rust supervisor or as a rust-lane worker from this
-  lane's side worktree; then re-run `--start-carry 42/49`; (2) #116 awaits
-  the user; (3) the `vanilla`/`full` standing gates are unchanged in
-  meaning — consider adding `winning 0:60` and `winning-swap 0:60` to the
-  wind-down gate list (they are the only seed-diverse deep coverage).
-- **Notes:** 14 worker rounds (9 ts + 5 side; 3 Opus diagnostics), 2
-  cap-kills salvaged by the supervisor (#111 part B, #115), 1 stale-premise
-  brief (#71 Slice C was already done — grep the archive for the slice name
-  first), 0 regressions folded. `check-oracle-freshness.sh` FAIL judged
-  client-only (PAPERCUTS hit 8). Both sibling supervisors were live all
-  session; `animation-main`/`rust-main` delta at close: 0 / 0 (both folded: `b2e453c4` animation +2 Hail exact; `2945bc78` rust +6 core-rs leaves).
-  DEFERRED.md: none open. **Addendum 17:40:** two more discovery sweeps on
-  the final tree — `winning --start-carry 28` 60:150 **90/90 OK** (90 more
-  challenge-5 boots), `winning-swap` 360:520 **160/160 OK** — no new signature.
+- **State:** docs-only commit on top of 1395's fully-gated tree (no
+  `src`/engine edits at this layer). Oracle services verified live: main
+  8012 (`bin/oracle info` answers), animation 8014, node harness 8001.
+  DEFERRED.md: no open entries. Tree was clean at audit start.
+- **Did (top-layer audit of what the next supervisor inherits):**
+  (1) **User decision:** the draft-lever program is CLOSED — 1395's
+  `--vary-rng` measurement settled it (challenge 4 was one losing deal, not
+  a wall; the best lever gains ~2 points, z ≈ 1.7, no policy separates
+  decisively). `winning-combined` stays available opt-in; no further
+  draft-axis measurement sessions. (2) **User decision:** varied-RNG crash
+  sweeps BECOME A STANDING WIND-DOWN GATE — adopted in principle
+  2026-08-24; the supervisor defines the exact shape (carry tiers × seed
+  count) AFTER #122/#123 are fixed and pins it in SUPERVISOR.md next to the
+  four existing gates (which stay unvaried). (3) **Found: orphaned worker
+  commit** — `worker/rust-20260822-123947` (`81609f44`, "Port Refresh
+  battle script opcode to Rust": impl + 36k-line vectors + tests, Codex
+  sol/high, 2026-08-22 12:49) is in NEITHER `rust-main` NOR master; it
+  predates that day's night session and was never folded.
+- **Next (the supervisor mission, in order):** (1) fold `animation-main`
+  (9 commits, idle since 08-23 03:21) at orient; (2) triage + fix **#122**
+  (start: which of the 13 expected draws diverged at draw 11) then **#123**
+  (PP legality on the fallback path + Struggle engagement); both repros are
+  in ISSUES.md (0.1 s and ~27 s, deterministic); (3) define + land the
+  varied-RNG gate, pin its text in SUPERVISOR.md, record baseline counts;
+  (4) verify (cargo + wasm parity) and fold-or-discard the Refresh worker
+  branch, with the reason recorded; (5) delete
+  `wip/mb-step2b-draft-heuristic` (program closed; git retains). Open
+  ISSUES after this queue: #121 (dormant), #109/#114 (doubles-era),
+  #71/#73/#39/#55 (parked/filler).
+- **Notes:** a Codex supervisor for a DIFFERENT repo (`pokered-pewter`)
+  holds an 8 h cap until ~04:40 on 08-25 — expect CPU contention for soak
+  sweeps if this repo's supervisor launches before then. The four standing
+  gates stay UNVARIED baselines; the new gate is additive crash coverage,
+  not a replacement. 1395's trap reminder stands: use exact filenames when
+  policy names share prefixes (`m-winning-*` glob collision).
 
 ---
 
-## 1385 — [main worker, 2026-08-22] **ISSUES #118 half-landed: `sFixedIVTable`'s retail one-past-the-end row is now pinned ROM data (`{110, 0}`); the engine port itself is blocked on a core-rs/factory-wasm lockstep change and is NOT in**
+## 1395 — [interactive session, 2026-08-23] **Combined draft lever (4'') built + measured on a NEW honest instrument — challenge 4 was never unbeatable (winning 5.8%, combined 7.7% at n=1,000/arm); two policy/instrument bugs fixed, two engine finds filed (#122 crash, #123 endless battle)**
 
-- **State:** master `9aaf1997` + this docs commit. `npm test` 1093/1140
-  files, 10232/10458 passed (3 animation source-staging fixtures re-pinned
-  to the new policy-JSON sha256), build green, smoke 444/444, frontier
-  ratchet unchanged (no pin moved).
-- **Did:** `nm pokeemerald.elf` -> `08612184 r sFixedIVTable`,
-  `08612194 r sInitialRentalMonRanges`; ROM bytes at 0x612184 are the known
-  16-byte table followed by `6e 00` = little-endian FRONTIER_MON_GRIMER.
-  `GetFactoryMonFixedIV`'s non-BUGFIX bound check is STRICTLY `>`, so IV
-  argument 8 reads that pair: row 8 = `{regular: 110, lastBattle: 0}`. The
-  extractor now emits it as a ninth `fixedIvs` row flagged `retailOverread`;
-  `tests/factoryFixedIvTableRomBytes.test.ts` (new, 4 pins) reads the 18 ROM
-  bytes back. The three engine readers are bounded to the 8 *declared* rows,
-  so the commit is behaviour-neutral.
-- **Next:** land the port — the rewritten **ISSUES #118** now carries the
-  full resolved semantics (clamp, three reachable call sites, CreateBoxMon's
-  two-`Random()` split, `RentalMon.ivs` == ATK IV) plus the exact
-  core-rs/factory-wasm surface that must move with it. The TS-only version
-  was written and reverted this session: it turns 64 of
-  `factoryRentalParity.test.ts`'s 288 configs red, because both engines
-  currently agree *by throwing* at IV argument 8.
-- **Notes:** step 3's `--start-carry` sweeps were NOT run (cap). No
-  `unsupported-branch` pin moved. `PAPERCUT:` none.
+- **State:** master = this docs commit (4 code commits under it: `a8445d42`
+  swap-decline fix, `83fa52af` `--policy winning-combined`, `679d1744`
+  `--vary-rng`/`--first-round` instruments, plus this entry). Full gates on
+  this tree: vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60
+  **60/60**, winning-swap 0:60 **60/60** (0 CRASH / 0 HANG); `npm test`
+  **1,107 files / 10,407 passed / 223 skipped** (+1 file / +11 tests);
+  build + typecheck green.
+- **Did:** (1) **Bug found+fixed before measuring**: `winning-coverage`
+  never declined swap offers (missed the per-policy list written for
+  `oracle-strength`; seed 0 accepted 64 offers and random-walked the swap
+  screen — ISSUES-#99 trap class). Decline now keyed on `winningLike`,
+  Tier-1-pinned; 1393's lever-4' numbers were of the buggy policy.
+  (2) `--policy winning-combined` landed: coverage-first draft subject to a
+  strength floor = the MEAN candidate-trio BST (6 pins, floor-binding pin
+  mutation-red-verified). (3) **Instrument finding that reframes every
+  `--start-carry` number to date**: the engine is seed-invariant, so
+  deterministic-draft policies collapse all seeds into ONE trajectory (30
+  identical chronologies), and even random-draft sweeps always faced the
+  same six boot offers. Landed `--vary-rng` (per-seed boot RNG walk) +
+  `--first-round` (direct roundComplete/roundLost at ~1 s/seed).
+  (4) **THE MEASUREMENT** (carry 28, varied offers, boot-round wins):
+  winning **58/1000 (5.8%)**, combined **77/1000 (7.7%)**, oracle-strength
+  4/100, coverage 5/100 — challenge 4's "0/30 wall" was one losing deal
+  measured repeatedly; the combined edge is suggestive-small (z ≈ 1.7),
+  no draft policy separates decisively. (5) ~2,400 varied boot rounds of
+  crash coverage → **#122** (Factory AI RNG-lockstep divergence crash,
+  plain `winning`, deterministic 0.1 s repro seed 681) and **#123**
+  (endless battle: 456 selections of a 15-PP DOUBLE TEAM then HANG, seed
+  755) filed. Full results in
+  `docs/soak-policy-strength-scout-2026-08-23.md` §"Result — lever 4''".
+- **Next:** (1) triage #122 (cheapest first: which of the 13 expected draws
+  diverged) and #123 (PP legality on the fallback path + Struggle
+  engagement); (2) decide whether `--vary-rng` sweeps per `--start-carry`
+  tier become a standing crash-coverage gate; (3) the draft-lever program is
+  at diminishing returns — recommend closing it. Open ISSUES: #122, #123
+  (new), #121 (dormant), #109/#114 (doubles-era), #71/#73/#39/#55
+  (parked/filler).
+- **Notes:** measurement is PAIRED (same walked offers per seed across
+  arms); first 500 seeds: both-won 0, winning-only 26, combined-only 41;
+  second 500: 32 vs 36 (no separation). The four standing gates stay
+  UNVARIED (pinned baseline) — `--vary-rng` is opt-in. Trap: two glob
+  collisions (`m-winning-*` matches `m-winning-coverage-*`) briefly
+  produced a wrong count — use exact filenames when policy names share
+  prefixes.
 
 ---
+
+## 1394 — [supervisor final wind-down, 2026-08-23 03:10] **Bonus round closed: both remaining challenge-4 levers measured NEGATIVE at carry 28 (`oracle-strength` 0/30, `winning-coverage` 0/30); final tree re-gated green — entry 1392 is the full session record**
+
+- **Final gates on THIS tree (`b1480863` + this docs commit; supervisor-independent):**
+  vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60**,
+  winning-swap 0:60 **60/60** (0 CRASH / 0 HANG); full `npm test`
+  **1,106 files / 10,396 passed / 223 skipped**; `npm run build` green.
+  (Gates were also green at `0cabb82b`, `a5b06cfb`, and — vanilla/winning —
+  `77f4db64`; see 1392.)
+- **Did since 1392:** worker J landed opt-in `--policy winning-coverage`
+  (1393): 0/30 rounds won at carry 28 (29 lost at b1 — coverage-first starves
+  bulk, the mirror of the withheld bulk+STAB heuristic), anchor 0:120 carry
+  ≥ 28 **10/120** (8.3% vs `winning` 3.75%, suggestive only), ≥ 35 0/120.
+  With `oracle-strength` (1391) also at 0/30, move choice AND single-axis
+  draft scores are both retired as challenge-4 levers. One cross-lane stray
+  (an animation worker's edit to `tests/animation/glareEvidence.test.ts`
+  landed in this tree at 01:49) was saved as a patch and reverted
+  (PAPERCUTS hit 6).
+- **Next (for the next session / the user):** the only lever left for
+  natural deep play is a COMBINED draft score with a strength floor
+  (coverage subject to BST ≥ floor), measured by rounds won at
+  `--start-carry 28 --seeds 0:30` — or accept that `--start-carry` already
+  covers challenge 5-8 for crash coverage and stop here. Instruments from
+  the scout §4 (per-seed round ledger, loss shape, rentsCount/rank) would
+  make that measurement cheap. Open ISSUES: #121 (dormant note), #109/#114
+  (doubles-era), #71/#73/#39/#55 (parked/filler). DEFERRED.md: none open.
+- **Notes:** `animation-main` ahead of master at close: 7 commits (its
+  supervisor was live all night; folded twice this session at `3a8b58d7` +
+  `77f4db64`; the remainder folds at the next orient). `rust-main` ahead: 0.
+  11 worker rounds total (6 ts opus, 5 side), 0 failed steps, 0 cap-kills,
+  0 regressions folded. Trap of the hour: an UNQUOTED heredoc fed ledger
+  prose to zsh, which executed its backticked `npm test` — quote heredocs
+  (`<<'EOF'`) or write files with a tool.
+

@@ -17,86 +17,73 @@ backlog.
 
 # Open
 
-## #118 — challengeNum 8 rental generation still throws: the retail `sFixedIVTable` overread is now pinned data, but the engine port has not landed
+## #122 — Factory AI live driver RNG-lockstep divergence crash on a varied challenge-4 boot (deterministic 0.1 s repro)
 
-**Found 2026-08-22**, ROM evidence landed 2026-08-22 (`9aaf1997`). A player
-who wins an 8th consecutive round (`factoryWinStreak >= 56`) reaches
-challengeNum 8 and hits `factoryRentalGeneration.ts`'s
-`challengeNum > 7` throw. Reachable in ~5% of `--policy winning
---start-carry 42` seeds (3/60: 2, 32, 49; `docs/soak-start-carry-2026-08-22.md`).
-Deterministic repro: `--policy winning --start-carry 42 --seed 2
---render-every 0`.
+**Found 2026-08-23** by the first `--vary-rng` crash sweep (2,000 varied
+challenge-4 boot rounds; this was 1 of 2 finds). Under the PLAIN `winning`
+policy — no new policy code in the loop — one varied boot draft reaches a
+battle state where the engine's own lockstep invariant throws:
+`[engine/tick] Error: Factory AI RNG diverged before live draw 11/13`, stack
+`factoryAiLiveDriver.ts:452` → `submitBattleDecision`
+(`battleDecisionBoundary.ts:819`) → `submitLiveFactoryAiDecision`
+(`factoryAiLiveDriver.ts:558`). Repro (deterministic, crashes at battle 1
+turn 6, frame 5,266, ~0.1 s):
 
-**Resolved — what retail actually does** (all of this is now pinned; no
-research left):
-- `GetFactoryMonId` (`battle_factory.c:829-866`) clamps every challenge
-  `>= 7` to range row 7 and *ignores* `useBetterRange` there, so there is no
-  out-of-bounds range read. `getLevel50FactoryRentalRange` already mirrors
-  this exactly.
-- `GetFactoryMonFixedIV` (`:739-757`) is the only OOB. Its non-BUGFIX bound
-  check is `challengeNum > ARRAY_COUNT(sFixedIVTable)` — STRICTLY greater —
-  so IV argument exactly 8 is unclamped and reads `sFixedIVTable[8]`, while
-  9+ clamps to row 7 (`{31, 31}`). Argument 8 is reachable three ways:
-  challengeNum 8 rentals, challengeNum 7 *elevated* rentals (`challengeNum +
-  1`, `battle_factory_screen.c:1762`, i.e. any `rentsCount >= 15`), and
-  challengeNum 6 Frontier Brain parties (`challengeNum + 2`, `:772`).
-- Row 8 is **`{regular: 110, lastBattle: 0}`** — the two `.rodata` bytes
-  after the table, which are `sInitialRentalMonRanges[0][0]` (little-endian
-  FRONTIER_MON_GRIMER). Committed as
-  `factory-round-policy.json`'s ninth `fixedIvs` row with
-  `"retailOverread": true`; ROM-byte receipt in
-  `tests/factoryFixedIvTableRomBytes.test.ts`. 110 >= `USE_RANDOM_IVS` (32)
-  so `CreateBoxMon` rolls random IVs; `lastBattle` 0 means the *last*
-  trainer of such a round gets an all-zero IV spread.
-- Random-IV branch order (`CreateBoxMon`, `pokemon.c`): personality
-  (`Random32`, already ported) → OT (no draw for `OT_ID_PRESET`) → two
-  `Random()` calls, the first supplying HP/ATK/DEF and the second
-  SPEED/SPATK/SPDEF as consecutive 5-bit fields of the u16.
-- `RentalMon.ivs` is the saved **ATK IV**, not the fixedIV argument
-  (`battle_factory_screen.c:1824`, `battle_factory.c:396`), so the port's
-  `fixedIv` field keeps its meaning under a random spread.
+```
+npm run soak -- --policy winning --start-carry 28 --vary-rng --first-round --seed 681 --render-every 0
+```
 
-**Still open — the port, which must land in lockstep with core-rs.** A TS-only
-fix is not committable: `tests/factoryRentalParity.test.ts` compares the full
-`drawLedger` and RNG cursor against `factory-wasm`, and 64 of its 288 configs
-(`winStreak=49`, `rentsCount` 20/100 → better-range → IV argument 8) currently
-expect *both* engines to throw. The port therefore needs, in one commit:
-`get_level50_initial_rental_fixed_iv`'s retail clamp + the two IV draws in
-`core-rs/crates/factory-core/src/rental_generation.rs`, new
-`Phase::RandomIvs` / `Purpose::RandomIvsLow|High` discriminants, whatever the
-`factory-wasm` binary record/ledger layout needs
-(`core-rs/crates/factory-wasm/src/lib.rs:169-263` documents the byte offsets;
-its snapshot tests assert them), the matching decode in
-`core-rs/adapter/factoryEngine.ts`, and a `core-rs/build-wasm.sh` rebuild —
-alongside the TS changes (remove the throw, retail clamp in
-`getLevel50InitialRentalFixedIv`, six real IVs threaded through
-`FactoryCorpusPartyInstance` so `factoryCorpusParty.ts`'s
-`uniformBattleScriptIvs(fixedIv)` is not asked to describe a random spread).
-The three engine readers of `fixedIvs` are currently bounded to the 8
-*declared* rows (`DECLARED_FIXED_IV_ROWS`) so the new data row is inert until
-that lands. Sized at more than one bounded worker step.
+The only nonstandard input is the boot RNG cursor (`--vary-rng` advances it
+681 LCG steps before generating the draft) — exactly how every real player's
+cursor differs — so this is a live-parity bug some real chain can hit, not an
+instrument artifact. Occurrence 1/2,000 varied ch4 boots. Triage: which of
+the 13 expected draws diverged at draw 11, and whether the miscount is in the
+live driver's expectation or the kernel's actual draw sequence for this
+matchup.
 
-**Queue setup (2026-08-22, user-approved next step — this is the first work
-item of the next supervisor session).** A green two-commit ladder that
-respects both the lockstep constraint and per-commit greenness:
-1. **Commit 1 (Rust-only, tree stays green):** the core-rs changes —
-   `get_level50_initial_rental_fixed_iv` retail clamp, the two IV draws in
-   `rental_generation.rs`, the new `Phase::RandomIvs` /
-   `Purpose::RandomIvsLow|High` discriminants, the `factory-wasm`
-   record/ledger layout + its snapshot-test updates — WITHOUT rebuilding the
-   shipped wasm binary. Cargo suite green; the TS suite never sees the
-   change (the committed `.wasm` still throws, TS still throws, parity still
-   agrees).
-2. **Commit 2 (the lockstep commit):** `build-wasm.sh` rebuild + the
-   `core-rs/adapter/factoryEngine.ts` decode + every TS-side change (remove
-   the throw, retail clamp in `getLevel50InitialRentalFixedIv`, six real IVs
-   through `FactoryCorpusPartyInstance`) + the
-   `factoryRentalParity.test.ts` expectation updates, together.
+## #123 — Endless battle under the soak's status-move fallback: 456 selections of a 15-PP DOUBLE TEAM, then HANG at `resolution:presenting`
 
-After it lands, re-run the deep-streak sweeps that hit this crash:
-`--policy winning --start-carry 42` and `--start-carry 49` (the driver's
-legal max), expecting the 3 known #118 crash seeds (42: seeds 2/32/49) to
-go clean.
+**Found 2026-08-23** by the same `--vary-rng` sweep (find 2 of 2). Repro
+(~27 s to HANG at the 1M budget; at 300k frames it is battle 3 turn 486 and
+still ticking):
+
+```
+npm run soak -- --policy winning-combined --start-carry 28 --vary-rng --seed 755 --render-every 0
+```
+
+Player trio CROBAT/BLASTOISE/JOLTEON (combined draft, boot carry 28). The
+battle-3 matchup walls the active mon, so the winning-like last-resort
+fallback picks slot 3 = move 104 (DOUBLE TEAM) every turn; the verbose
+transcript logs **456 `fight: confirm` selections of that one move in a
+single battle** with the turn counter advancing each time. Two coupled
+smells, either of which is a real bug:
+
+1. **PP**: DOUBLE TEAM carries 15 PP (24 max) — the real game cannot allow
+   456 uses; at 0 PP the slot must be rejected (#72's oracle-verified
+   NOPPLEFT path) and at all-slots-0 Struggle must engage. Check whether the
+   fight-menu legality mask this path consults reads live PP.
+2. **Termination**: at +6 evasion neither side lands hits and the battle
+   runs 1,600+ turns until the driver's 30k-frame stall detector fires at
+   `resolution:presenting` (b3 t1681 at the 1M budget). Even with PP fixed,
+   confirm Struggle-vs-Struggle ends this battle.
+
+Not an engine `tick` crash — the engine happily plays the endless battle;
+triage which half is engine vs driver-policy pathology before fixing either.
+
+## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
+
+`docs/issue121-ai-mon-to-switch-into-probe.md` closes the reachability
+question: the banked id is consumed and reset during action selection
+(`battle_controller_opponent.c:1668-1669`), every `openpartyscreen` runs
+during turn execution, and `Cmd_openpartyscreen` clears
+`monToSwitchIntoId` before its emit (`battle_script_commands.c:5117`), so
+`battleScriptOpenPartyScreenOpcode.ts`'s unconditional scorer call (#110)
+is source-exact everywhere reachable. **Only this stays open, as dormant
+debt:** the engine omits BOTH the `:5117` clear and
+`GetMostSuitableMonToSwitchInto`'s `:646-647` early return
+(`battleAiSwitchInto.ts`), and the two omissions cancel exactly — port
+them together or not at all; porting either alone introduces the
+divergence the probe ruled out.
 
 ## #109 — `battleAiSwitchInto.ts` omits the `i != monToSwitchIntoId[battlerIn1/2]` exclusion in both passes
 

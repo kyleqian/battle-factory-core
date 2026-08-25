@@ -184,12 +184,21 @@ export function healFactoryKernelParty(
   const canonical = createFactoryCorpusParty(records);
   return canonical.map((member, index) => {
     const currentMember = current?.[index];
+    const recordIvs = records[index]!.ivs;
+    const ivsMismatch = currentMember !== undefined && recordIvs !== undefined
+      ? currentMember.ivs.hp !== recordIvs.hp
+        || currentMember.ivs.attack !== recordIvs.attack
+        || currentMember.ivs.defense !== recordIvs.defense
+        || currentMember.ivs.speed !== recordIvs.speed
+        || currentMember.ivs.spAttack !== recordIvs.spAttack
+        || currentMember.ivs.spDefense !== recordIvs.spDefense
+      : currentMember?.ivs.attack !== records[index]!.fixedIv;
     if (
       currentMember !== undefined
       && (
         currentMember.setId !== member.setId
         || currentMember.personality !== member.personality
-        || currentMember.ivs.attack !== records[index]!.fixedIv
+        || ivsMismatch
         || currentMember.abilitySlot !== member.abilitySlot
       )
     ) {
@@ -200,12 +209,14 @@ export function healFactoryKernelParty(
               setId: currentMember.setId,
               personality: currentMember.personality,
               fixedIv: currentMember.ivs.attack,
+              ...(recordIvs !== undefined ? { ivs: currentMember.ivs } : {}),
               abilitySlot: currentMember.abilitySlot,
             },
             rebuilt: {
               setId: member.setId,
               personality: member.personality,
               fixedIv: records[index]!.fixedIv,
+              ...(recordIvs !== undefined ? { ivs: recordIvs } : {}),
               abilitySlot: member.abilitySlot,
             },
           })

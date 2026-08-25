@@ -12,6 +12,12 @@
  *    `Random32()` (`pokemon.c:2569-2575`), i.e. two ordered `Random()` calls
  *    (`include/random.h:7-16`).
  *
+ * 3. A slot whose fixed-IV argument is >= `USE_RANDOM_IVS` (only reachable
+ *    through retail's `sFixedIVTable[8]` overread -- see
+ *    `getLevel50InitialRentalFixedIv`) then spends two more `Random()` calls
+ *    on `CreateBoxMon`'s IV words, immediately after its accepted
+ *    personality pair (`pokemon.c:2265-2295`).
+ *
  * In the ROM those phases are separated by presentation time, so callers
  * reconciling a live receipt may provide `constructionRngValue`. Omitting it
  * runs the two source loops back-to-back, which is the useful pure-generation
@@ -24,6 +30,10 @@ import frontierMonsData from "../data/gen/battle-frontier-mons.json" with { type
 import factoryRoundPolicyData from "../data/gen/factory-round-policy.json" with { type: "json" };
 import naturesData from "../data/gen/natures.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
+import {
+  uniformBattleScriptIvs,
+  type BattleScriptIvs,
+} from "./battleScriptRulesContext.ts";
 import {
   type FactoryCorpusPartyInstance,
 } from "./factoryCorpusParty.ts";
@@ -38,6 +48,34 @@ const STAGES_PER_CHALLENGE = 7;
  * deliberately never reached by plain array indexing.
  */
 const DECLARED_FIXED_IV_ROWS = 8;
+/**
+ * `USE_RANDOM_IVS` (`include/constants/pokemon.h:202`, `MAX_PER_STAT_IVS +
+ * 1`): a fixed-IV argument at or above this makes `CreateBoxMon` roll two
+ * `Random()` words into a real six-stat spread instead of writing the
+ * argument into all six (`pokemon.c:2265-2295`).
+ */
+export const USE_RANDOM_IVS = 32;
+/** `MAX_IV_MASK` (`include/constants/pokemon.h:201`). */
+const MAX_IV_MASK = 31;
+
+/**
+ * `CreateBoxMon`'s random-IV branch (`pokemon.c:2274-2293`): the first
+ * `Random()` word supplies HP/ATK/DEF and the second SPEED/SPATK/SPDEF, five
+ * bits each, low bits first.
+ */
+export function battleScriptIvsFromRandomWords(
+  lowWord: number,
+  highWord: number,
+): BattleScriptIvs {
+  return Object.freeze({
+    hp: lowWord & MAX_IV_MASK,
+    attack: (lowWord >> 5) & MAX_IV_MASK,
+    defense: (lowWord >> 10) & MAX_IV_MASK,
+    speed: highWord & MAX_IV_MASK,
+    spAttack: (highWord >> 5) & MAX_IV_MASK,
+    spDefense: (highWord >> 10) & MAX_IV_MASK,
+  });
+}
 
 type FrontierMonRow = Readonly<{
   index: number;
@@ -88,9 +126,14 @@ export type FactoryRentalSelectionRejection =
 export type FactoryRentalDrawLedgerEntry = Readonly<{
   /** Zero-based position among all source Random() calls represented here. */
   position: number;
-  phase: "set-selection" | "personality";
+  phase: "set-selection" | "personality" | "random-ivs";
   rentalIndex: number;
-  purpose: "set-candidate" | "personality-low" | "personality-high";
+  purpose:
+    | "set-candidate"
+    | "personality-low"
+    | "personality-high"
+    | "random-ivs-low"
+    | "random-ivs-high";
   rngBefore: number;
   rngAfter: number;
   randomU16: number;
@@ -102,6 +145,11 @@ export type FactoryRentalDrawLedgerEntry = Readonly<{
   /** Present on both words of a completed Random32() personality attempt. */
   personality?: number;
   personalityOutcome?: "accepted" | "wrong-nature";
+  /**
+   * A `random-ivs` draw populates NEITHER optional group above: the drawn
+   * word is its whole payload, and the three 5-bit fields it carries are
+   * already decoded into the record's `ivs`.
+   */
 }>;
 
 export type FactoryInitialRentalRecord = FactoryCorpusPartyInstance & Readonly<{
@@ -187,18 +235,28 @@ export function getLevel50FactoryRentalRange(
  * (`battle_factory_screen.c:1757-1771`). The ordinary IV column is selected
  * because this is not an opponent's last battle (`battle_factory.c:739-756`).
  *
- * This rung deliberately supports the source-defined Level-50 range rows
- * through challenge 7. Later out-of-bounds retail behavior is not portable.
+ * The clamp is retail's own, from the non-BUGFIX `#else` branch of
+ * `GetFactoryMonFixedIV` (`battle_factory.c:739-757`): `if (challengeNum >
+ * ARRAY_COUNT(sFixedIVTable)) ivSet = ARRAY_COUNT(sFixedIVTable) - 1; else
+ * ivSet = challengeNum;`. The bound check is STRICTLY greater than 8, so IV
+ * argument exactly 8 is unclamped and reads `sFixedIVTable[8]` -- one row
+ * past the end of the table. That row is the `.rodata` pair which follows
+ * it, `{regular: 110, lastBattle: 0}` (the policy artifact's ninth
+ * `retailOverread` row; ROM-byte receipt in
+ * `tests/factoryFixedIvTableRomBytes.test.ts`), and 110 >= USE_RANDOM_IVS
+ * makes `CreateBoxMon` roll a random spread. Arguments 9 and up clamp to
+ * row 7. Every challenge therefore has an answer; this never throws.
  */
 export function getLevel50InitialRentalFixedIv(
   challengeNum: number,
   useBetterRange: boolean,
 ): number {
   requireNonnegativeInteger(challengeNum, "challengeNum");
-  const ivIndex = challengeNum + (useBetterRange ? 1 : 0);
-  const row = ivIndex < DECLARED_FIXED_IV_ROWS
-    ? POLICY.rentalSelection.fixedIvs[ivIndex]
-    : undefined;
+  const ivArgument = challengeNum + (useBetterRange ? 1 : 0);
+  const ivIndex = ivArgument > DECLARED_FIXED_IV_ROWS
+    ? DECLARED_FIXED_IV_ROWS - 1
+    : ivArgument;
+  const row = POLICY.rentalSelection.fixedIvs[ivIndex];
   if (row === undefined) {
     throw new Error(
       `initial-rental fixed IV is undefined for challenge ${challengeNum}`
@@ -235,19 +293,14 @@ export function generateInitialFactoryRentals(
   let rngValue = requireU32(input.rngValue, "rngValue");
   const factoryWinStreak = requireNonnegativeInteger(input.factoryWinStreak, "factoryWinStreak");
   const challengeNum = Math.floor(factoryWinStreak / STAGES_PER_CHALLENGE);
-  // See getLevel50InitialRentalFixedIv: avoid pretending the retail OOB read
-  // for challenge 8+ is a stable rule. GetFactoryMonFixedIV's bound check
-  // (`challengeNum > ARRAY_COUNT(sFixedIVTable)`, should be `>=`,
-  // battle_factory.c:748-750) is only corrected behind `#ifdef BUGFIX`; the
-  // pinned reference build defines neither BUGFIX (commented out,
+  // Every challenge generates: getLevel50InitialRentalFixedIv carries
+  // retail's own clamp, including the `sFixedIVTable[8]` overread that IV
+  // argument exactly 8 reads (challenge 8, or challenge 7's better-range
+  // slots) -- see that function and ISSUES #118. The pinned reference build
+  // defines neither BUGFIX (commented out,
   // reference/pokeemerald/include/config.h:48) nor MODERN (defaults to 0,
-  // reference/pokeemerald/Makefile:6), so this build takes the unpatched
-  // `#else` branch and challengeNum==8 genuinely reads `sFixedIVTable[8]`,
-  // one row past the declared 8-row table, on real hardware -- there is no
-  // stable value to port, so this throws instead of guessing at one.
-  if (challengeNum > 7) {
-    throw new Error(`Level-50 initial rental generation supports source challenges 0..7, got ${challengeNum}`);
-  }
+  // reference/pokeemerald/Makefile:6), so it takes the unpatched `#else`
+  // branch on real hardware and the overread row is the behaviour to port.
   const rentalRank = getFactoryRentalRank(input.rentsCount);
   const otId = requireU32(input.playerTrainerId, "playerTrainerId");
   const ledger: FactoryRentalDrawLedgerEntry[] = [];
@@ -391,11 +444,50 @@ export function generateInitialFactoryRentals(
       });
     } while (natureFromPersonality(personality) !== targetNature);
 
-    const fixedIv = getLevel50InitialRentalFixedIv(challengeNum, selection.betterRange);
+    // battle_factory_screen.c:1762-1764: slots below the rental rank use
+    // GetFactoryMonFixedIV(challengeNum + 1), the rest challengeNum.
+    const fixedIvArgument = getLevel50InitialRentalFixedIv(challengeNum, selection.betterRange);
+    let ivs: BattleScriptIvs;
+    if (fixedIvArgument < USE_RANDOM_IVS) {
+      ivs = uniformBattleScriptIvs(fixedIvArgument);
+    } else {
+      // pokemon.c:2277-2293. The accepted personality is passed in (no draw)
+      // and OT_ID_PRESET reads fixedOtId (no draw), so these two words follow
+      // the accepted personality pair immediately in the same stream.
+      const lowIvPosition = ledger.length;
+      const lowIvBefore = rngValue;
+      const lowIv = randomU16(rngValue);
+      rngValue = lowIv.rngValue;
+      ledger.push({
+        position: lowIvPosition,
+        phase: "random-ivs",
+        rentalIndex,
+        purpose: "random-ivs-low",
+        rngBefore: lowIvBefore,
+        rngAfter: lowIv.rngValue,
+        randomU16: lowIv.value,
+      });
+      const highIvPosition = ledger.length;
+      const highIvBefore = rngValue;
+      const highIv = randomU16(rngValue);
+      rngValue = highIv.rngValue;
+      ledger.push({
+        position: highIvPosition,
+        phase: "random-ivs",
+        rentalIndex,
+        purpose: "random-ivs-high",
+        rngBefore: highIvBefore,
+        rngAfter: highIv.rngValue,
+        randomU16: highIv.value,
+      });
+      ivs = battleScriptIvsFromRandomWords(lowIv.value, highIv.value);
+    }
     rentals.push(Object.freeze({
       setId: selection.setId,
       personality,
-      fixedIv,
+      // battle_factory_screen.c:1824 saves MON_DATA_ATK_IV as RentalMon.ivs.
+      fixedIv: ivs.attack,
+      ivs,
       abilitySlot: abilitySlotForPersonality(selection.speciesName, personality),
       otId,
       speciesName: selection.speciesName,

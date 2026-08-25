@@ -333,9 +333,18 @@ const level50Ranges = policy.ranges.level50;
 if (level50Ranges.length !== 8) {
   throw new Error(`gen-data: expected 8 level50 rental ranges, got ${level50Ranges.length}`);
 }
+// Nine rows: the eight declared `sFixedIVTable` rows plus the ninth
+// `retailOverread` row (`{regular: 110, lastBattle: 0}`), which is the two
+// .rodata bytes the retail `GetFactoryMonFixedIV` reads past the end of the
+// table for IV argument exactly 8 (battle_factory.c:739-757, non-BUGFIX
+// branch). See tests/factoryFixedIvTableRomBytes.test.ts for the ROM-byte
+// receipt.
 const fixedIvs = policy.fixedIvs;
-if (fixedIvs.length !== 8) {
-  throw new Error(`gen-data: expected 8 fixed IV rows, got ${fixedIvs.length}`);
+if (fixedIvs.length !== 9) {
+  throw new Error(`gen-data: expected 9 fixed IV rows, got ${fixedIvs.length}`);
+}
+if (fixedIvs[8].retailOverread !== true) {
+  throw new Error("gen-data: fixed IV row 8 must be the retailOverread row");
 }
 const rentalRankThresholds = policy.rentalRankThresholds;
 const maximumRentalRank = policy.maximumRentalRank;
@@ -845,7 +854,13 @@ pub struct FixedIvRow {
 }
 
 /// Draft-rental fixed IV rows indexed by \`challengeNum + (useBetterRange ? 1
-/// : 0)\` (reference/pokeemerald/src/battle_factory_screen.c:1757-1771).
+/// : 0)\` (reference/pokeemerald/src/battle_factory_screen.c:1757-1771),
+/// clamped the way retail clamps it (see
+/// \`rental_data::get_level50_initial_rental_fixed_iv\`). Row 8 is NOT part of
+/// \`sFixedIVTable\`: it is the one-past-the-end \`.rodata\` pair retail reads
+/// for IV argument exactly 8 (\`GetFactoryMonFixedIV\`,
+/// reference/pokeemerald/src/battle_factory.c:739-757, non-BUGFIX branch),
+/// carried here as \`{regular: 110, last_battle: 0}\`.
 /// Source: src/data/gen/factory-round-policy.json
 /// \`.rentalSelection.fixedIvs\`.
 pub const FIXED_IVS: [FixedIvRow; ${fixedIvs.length}] = [
