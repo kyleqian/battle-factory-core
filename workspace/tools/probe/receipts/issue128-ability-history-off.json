@@ -1,0 +1,1310 @@
+{
+  "schema": "issue128-ability-history-off-receipt/v1",
+  "issue": "ISSUES #128 \u2014 Intimidate / Trace record onto BATTLE_HISTORY->abilities[0] (the PLAYER's slot)",
+  "oracleProfile": "battle-scene-off",
+  "runner": "tools/run-mgba-probe.py",
+  "probe": "tools/probe/probe-issue128-ability-history-off.py",
+  "fixtureGenerator": "tools/probe/generate-issue128-ability-history-fixtures.ts",
+  "seed": 305419897,
+  "treeState": "stock ROM, port unchanged \u2014 this receipt was taken BEFORE the port fix",
+  "freshRunCountPerArm": 2,
+  "byteIdenticalAcrossFreshRuns": true,
+  "source": {
+    "recordTail": "src/battle_util.c:3194-3195 \u2014 AbilityBattleEffects ends with `if (effect && caseID < ABILITYEFFECT_CHECK_OTHER_SIDE && gLastUsedAbility != 0xFF) RecordAbilityBattle(battler, gLastUsedAbility);`",
+    "caseIds": "include/battle_util.h:21/23/24 \u2014 ABILITYEFFECT_INTIMIDATE1 = 9, ABILITYEFFECT_TRACE = 11, ABILITYEFFECT_CHECK_OTHER_SIDE = 12, so both pass the guard",
+    "battleStartDispatch": "src/battle_main.c:3880 `AbilityBattleEffects(ABILITYEFFECT_INTIMIDATE1, 0, 0, 0, 0)` / :3882 `AbilityBattleEffects(ABILITYEFFECT_TRACE, 0, 0, 0, 0)` \u2014 the literal 0 IS the recorded battler; neither case reassigns `battler`",
+    "faintedActionsDispatch": "src/battle_util.c:1959-1960 \u2014 HandleFaintedMonActions state 6 passes the same literal 0",
+    "record": "src/battle_ai_script_commands.c:643-646 \u2014 `void RecordAbilityBattle(u8 battler, u8 abilityId) { BATTLE_HISTORY->abilities[battler] = abilityId; }` (unguarded)",
+    "consumer": "src/battle_ai_script_commands.c Cmd_get_ability \u2014 reads BATTLE_HISTORY->abilities[battler] FIRST and returns without drawing when non-zero; only the two-ability fallthrough draws `Random() & 1`"
+  },
+  "assertions": {
+    "1_intimidateRecordsPlayerSlot": "INTIMIDATE arm: the AI's Mightyena (battler 1) holds ABILITY_INTIMIDATE (22), yet BATTLE_HISTORY->abilities == [22, 0, 0, 0] \u2014 the record lands on abilities[0], the PLAYER's slot, and abilities[1] (the real holder) stays 0.",
+    "2_controlRecordsNothing": "CONTROL arm: an AI lead with a single non-Intimidate ability (Poochyena, ABILITY_RUN_AWAY 50) leaves BATTLE_HISTORY->abilities == [0, 0, 0, 0].",
+    "3_traceRecordsCopiedAbilityOnPlayerSlot": "TRACE arm: Gardevoir (abilitySlot 1 = ABILITY_TRACE) copies the player Golduck's ABILITY_DAMP (6), and BATTLE_HISTORY->abilities == [6, 0, 0, 0] \u2014 the COPIED ability on the player's slot, again not the holder's.",
+    "4_drawDelta": "Turn-2 HandleTurnActionSelectionState window, every Random() attributed to its caller by single-step: control = 14 draws of which 8 are Cmd_get_ability; intimidate = 6 draws of which 0 are Cmd_get_ability; trace = 6 draws of which 0 are Cmd_get_ability. The non-get_ability remainder is identical in all three arms (BattleAI_SetupAIData 4, BattleTurnPassed 1, ChooseMoveOrAction_Singles 1), so the 8-draw delta is exactly the `get_ability AI_TARGET` guesses that a non-zero abilities[0] short-circuits against the two-ability player lead (Golduck, ABILITY_DAMP / ABILITY_CLOUD_NINE).",
+    "5_windowChoice": "The battle-lab checkpoint already sits inside turn 1's HandleTurnActionSelectionState run (the AI has committed BITE and Intimidate has already dropped the player's Attack stage to 5), so the first fully observable AI decision is turn 2's. abilities[0] is unchanged by then in every arm.",
+    "6_controlFaint": "CONTROL arm caveat: the player's turn-1 HYDRO PUMP KOes Poochyena and the AI sends out MURKROW, so its turn-2 window belongs to a different AI battler. This does not touch the measurement \u2014 every counted get_ability call targets AI_TARGET (the unchanged player Golduck) \u2014 and the identical 6-draw non-get_ability remainder confirms the windows are comparable."
+  },
+  "portFindingAtReceiptTime": {
+    "battleStart": "src/engine/factoryBattleStart.ts Intimidate loop (~:465-478) and Trace loop (~:484-513) write no aiObservedAbilityIds at all",
+    "faintedActions": "src/engine/battleScriptFaintedActionsOrchestration.ts state 6 (~:418-465) writes the HOLDER's index (`index === id`), correct only when the holder is battler 0",
+    "orderSites": "src/engine/factoryAiCheckBadMove.ts nextGetAbilityDraw (~:715) and checkAbilityAiTarget (~:772) test the trapper abilities BEFORE knownAbility; source order is history first"
+  },
+  "arms": {
+    "intimidate": {
+      "fixture": "tools/battle-lab/issue128-ability-history-intimidate-off.json",
+      "probeOutputSha256": "a2194263d007881a7bc8041e084a8e499a64047a8ed593fca4f87388900ab885",
+      "parties": {
+        "playerLead": {
+          "species": 55,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 6,
+          "moves": [
+            56,
+            91,
+            280,
+            113
+          ]
+        },
+        "aiLead": {
+          "species": 287,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 22,
+          "moves": [
+            44,
+            44,
+            44,
+            44
+          ]
+        }
+      },
+      "abilityHistoryAfterBattleStart": [
+        22,
+        0,
+        0,
+        0
+      ],
+      "aiDecisionWindow": {
+        "gBattleMainFunc": "HandleTurnActionSelectionState",
+        "turn": 2,
+        "startExclusive": 427,
+        "endInclusive": 475
+      },
+      "windowTotalRandomCalls": 6,
+      "cmdGetAbilityDraws": 0,
+      "callerSummary": [
+        {
+          "callerFunction": "BattleAI_SetupAIData+0x83",
+          "count": 4
+        },
+        {
+          "callerFunction": "BattleTurnPassed+0x157",
+          "count": 1
+        },
+        {
+          "callerFunction": "ChooseMoveOrAction_Singles+0xf7",
+          "count": 1
+        }
+      ],
+      "randomLedgerInWindow": [
+        {
+          "frame": 428,
+          "randomCalls": 1,
+          "rngBefore": 3167892961,
+          "rngAfter": 1056038720,
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 123,
+          "opponentHp": 33
+        },
+        {
+          "frame": 435,
+          "randomCalls": 4,
+          "rngBefore": 1056038720,
+          "rngAfter": 419524900,
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 123,
+          "opponentHp": 33
+        },
+        {
+          "frame": 449,
+          "randomCalls": 1,
+          "rngBefore": 419524900,
+          "rngAfter": 3152970951,
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 123,
+          "opponentHp": 33
+        }
+      ],
+      "messageEvents": [
+        {
+          "frame": 2,
+          "text": "BRICK BREAK",
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 3,
+          "text": "<77>5/<77>5",
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 4,
+          "text": "TYPE/<FC><06><01>WATER",
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 43,
+          "text": "GOLDUCK used\nHYDRO PUMP!",
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 278,
+          "text": "Foe MIGHTYENA used\nBITE!",
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 432,
+          "text": "What will\nGOLDUCK do?",
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 454,
+          "text": "BRICK BREAK",
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 455,
+          "text": "<77>4/<77>5",
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 456,
+          "text": "TYPE/<FC><06><01>WATER",
+          "abilityHistory": [
+            22,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        }
+      ],
+      "battleMainFuncTransitions": [
+        {
+          "frame": 36,
+          "func": "SetActionsAndBattlersTurnOrder"
+        },
+        {
+          "frame": 37,
+          "func": "CheckFocusPunch_ClearVarsBeforeTurnStarts"
+        },
+        {
+          "frame": 38,
+          "func": "RunTurnActionsFunctions"
+        },
+        {
+          "frame": 426,
+          "func": "HandleEndTurn_ContinueBattle"
+        },
+        {
+          "frame": 427,
+          "func": "BattleTurnPassed"
+        },
+        {
+          "frame": 428,
+          "func": "HandleTurnActionSelectionState"
+        },
+        {
+          "frame": 476,
+          "func": "SetActionsAndBattlersTurnOrder"
+        }
+      ],
+      "atBattleStart": {
+        "rngValue": 960307641,
+        "abilityHistory": [
+          22,
+          0,
+          0,
+          0
+        ],
+        "chosenMoveByBattler": [
+          0,
+          44,
+          0,
+          0
+        ],
+        "battleMainFunc": 134463092,
+        "lastUsedAbility": 6,
+        "player": {
+          "species": 55,
+          "ability": 6,
+          "hp": 155,
+          "statStages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        "opponent": {
+          "species": 287,
+          "ability": 22,
+          "hp": 145
+        },
+        "displayedString": "What will\nGOLDUCK do?"
+      },
+      "addressing": {
+        "gBattleResources": "symbol -> u32 ptr to struct BattleResources",
+        "battleHistoryPtrOffset": 24,
+        "abilitiesOffset": 64,
+        "cite": "include/battle.h struct BattleResources (battleHistory = member 6) + struct BattleHistory (usedMoves[4] of struct UsedMoves = 4*(4*2+4*2) = 64 bytes)"
+      },
+      "pass1Pass2Reconcile": {
+        "windowTotal": 6,
+        "pass2Hits": 6,
+        "matches": true
+      }
+    },
+    "control": {
+      "fixture": "tools/battle-lab/issue128-ability-history-control-off.json",
+      "probeOutputSha256": "c24e3d542aa51641878a506336e9c7bc77b58eb00b172fde448d1d7371724576",
+      "parties": {
+        "playerLead": {
+          "species": 55,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 6,
+          "moves": [
+            56,
+            91,
+            280,
+            113
+          ]
+        },
+        "aiLead": {
+          "species": 286,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 50,
+          "moves": [
+            44,
+            44,
+            44,
+            44
+          ]
+        }
+      },
+      "abilityHistoryAfterBattleStart": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "aiDecisionWindow": {
+        "gBattleMainFunc": "HandleTurnActionSelectionState",
+        "turn": 2,
+        "startExclusive": 631,
+        "endInclusive": 675
+      },
+      "windowTotalRandomCalls": 14,
+      "cmdGetAbilityDraws": 8,
+      "callerSummary": [
+        {
+          "callerFunction": "Cmd_get_ability+0x9d",
+          "count": 8
+        },
+        {
+          "callerFunction": "BattleAI_SetupAIData+0x83",
+          "count": 4
+        },
+        {
+          "callerFunction": "BattleTurnPassed+0x157",
+          "count": 1
+        },
+        {
+          "callerFunction": "ChooseMoveOrAction_Singles+0xf7",
+          "count": 1
+        }
+      ],
+      "randomLedgerInWindow": [
+        {
+          "frame": 632,
+          "randomCalls": 1,
+          "rngBefore": 1973883093,
+          "rngAfter": 419524900,
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 155,
+          "opponentHp": 135
+        },
+        {
+          "frame": 639,
+          "randomCalls": 6,
+          "rngBefore": 419524900,
+          "rngAfter": 2576805362,
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 155,
+          "opponentHp": 135
+        },
+        {
+          "frame": 640,
+          "randomCalls": 2,
+          "rngBefore": 2576805362,
+          "rngAfter": 2863507372,
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 155,
+          "opponentHp": 135
+        },
+        {
+          "frame": 641,
+          "randomCalls": 3,
+          "rngBefore": 2863507372,
+          "rngAfter": 1700205873,
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 155,
+          "opponentHp": 135
+        },
+        {
+          "frame": 642,
+          "randomCalls": 1,
+          "rngBefore": 1700205873,
+          "rngAfter": 2205111376,
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 155,
+          "opponentHp": 135
+        },
+        {
+          "frame": 644,
+          "randomCalls": 1,
+          "rngBefore": 2205111376,
+          "rngAfter": 1744283267,
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 155,
+          "opponentHp": 135
+        }
+      ],
+      "messageEvents": [
+        {
+          "frame": 2,
+          "text": "BRICK BREAK",
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 3,
+          "text": "<77>5/<77>5",
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 4,
+          "text": "TYPE/<FC><06><01>WATER",
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 43,
+          "text": "GOLDUCK used\nHYDRO PUMP!",
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 347,
+          "text": "Foe POOCHYENA\nfainted!\n",
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 500,
+          "text": "<53><54> RANGER DELANEY sent\nout MURKROW!",
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 573,
+          "text": "<FC><02><02>MURKROW<FC><01><0B><B5>",
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 635,
+          "text": "What will\nGOLDUCK do?",
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 654,
+          "text": "BRICK BREAK",
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 655,
+          "text": "<77>4/<77>5",
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 656,
+          "text": "TYPE/<FC><06><01>WATER",
+          "abilityHistory": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        }
+      ],
+      "battleMainFuncTransitions": [
+        {
+          "frame": 36,
+          "func": "SetActionsAndBattlersTurnOrder"
+        },
+        {
+          "frame": 37,
+          "func": "CheckFocusPunch_ClearVarsBeforeTurnStarts"
+        },
+        {
+          "frame": 38,
+          "func": "RunTurnActionsFunctions"
+        },
+        {
+          "frame": 382,
+          "func": "RunBattleScriptCommands_PopCallbacksStack"
+        },
+        {
+          "frame": 387,
+          "func": "RunTurnActionsFunctions"
+        },
+        {
+          "frame": 388,
+          "func": "RunBattleScriptCommands_PopCallbacksStack"
+        },
+        {
+          "frame": 627,
+          "func": "RunTurnActionsFunctions"
+        },
+        {
+          "frame": 630,
+          "func": "HandleEndTurn_ContinueBattle"
+        },
+        {
+          "frame": 631,
+          "func": "BattleTurnPassed"
+        },
+        {
+          "frame": 632,
+          "func": "HandleTurnActionSelectionState"
+        },
+        {
+          "frame": 676,
+          "func": "SetActionsAndBattlersTurnOrder"
+        }
+      ],
+      "atBattleStart": {
+        "rngValue": 3167892961,
+        "abilityHistory": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "chosenMoveByBattler": [
+          0,
+          44,
+          0,
+          0
+        ],
+        "battleMainFunc": 134463092,
+        "lastUsedAbility": 6,
+        "player": {
+          "species": 55,
+          "ability": 6,
+          "hp": 155,
+          "statStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        "opponent": {
+          "species": 286,
+          "ability": 50,
+          "hp": 110
+        },
+        "displayedString": "What will\nGOLDUCK do?"
+      },
+      "addressing": {
+        "gBattleResources": "symbol -> u32 ptr to struct BattleResources",
+        "battleHistoryPtrOffset": 24,
+        "abilitiesOffset": 64,
+        "cite": "include/battle.h struct BattleResources (battleHistory = member 6) + struct BattleHistory (usedMoves[4] of struct UsedMoves = 4*(4*2+4*2) = 64 bytes)"
+      },
+      "pass1Pass2Reconcile": {
+        "windowTotal": 14,
+        "pass2Hits": 14,
+        "matches": true
+      }
+    },
+    "trace": {
+      "fixture": "tools/battle-lab/issue128-ability-history-trace-off.json",
+      "probeOutputSha256": "9f520f8f1469a22f7ad7fb8ece9b5d53b3aefd77a4f754badb77442d68764768",
+      "parties": {
+        "playerLead": {
+          "species": 55,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 6,
+          "moves": [
+            56,
+            91,
+            280,
+            113
+          ]
+        },
+        "aiLead": {
+          "species": 394,
+          "item": 0,
+          "abilitySlot": 1,
+          "ability": 36,
+          "moves": [
+            94,
+            94,
+            94,
+            94
+          ]
+        }
+      },
+      "abilityHistoryAfterBattleStart": [
+        6,
+        0,
+        0,
+        0
+      ],
+      "aiDecisionWindow": {
+        "gBattleMainFunc": "HandleTurnActionSelectionState",
+        "turn": 2,
+        "startExclusive": 438,
+        "endInclusive": 495
+      },
+      "windowTotalRandomCalls": 6,
+      "cmdGetAbilityDraws": 0,
+      "callerSummary": [
+        {
+          "callerFunction": "BattleAI_SetupAIData+0x83",
+          "count": 4
+        },
+        {
+          "callerFunction": "BattleTurnPassed+0x157",
+          "count": 1
+        },
+        {
+          "callerFunction": "ChooseMoveOrAction_Singles+0xf7",
+          "count": 1
+        }
+      ],
+      "randomLedgerInWindow": [
+        {
+          "frame": 439,
+          "randomCalls": 1,
+          "rngBefore": 3167892961,
+          "rngAfter": 1056038720,
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 70,
+          "opponentHp": 76
+        },
+        {
+          "frame": 446,
+          "randomCalls": 4,
+          "rngBefore": 1056038720,
+          "rngAfter": 419524900,
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 70,
+          "opponentHp": 76
+        },
+        {
+          "frame": 456,
+          "randomCalls": 1,
+          "rngBefore": 419524900,
+          "rngAfter": 3152970951,
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "chosenMoveByBattler": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "battleMainFunc": "HandleTurnActionSelectionState",
+          "playerHp": 70,
+          "opponentHp": 76
+        }
+      ],
+      "messageEvents": [
+        {
+          "frame": 2,
+          "text": "BRICK BREAK",
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 3,
+          "text": "<77>5/<77>5",
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 4,
+          "text": "TYPE/<FC><06><01>WATER",
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 43,
+          "text": "GOLDUCK used\nHYDRO PUMP!",
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 233,
+          "text": "Foe GARDEVOIR used\nPSYCHIC!",
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 443,
+          "text": "What will\nGOLDUCK do?",
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 474,
+          "text": "BRICK BREAK",
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 475,
+          "text": "<77>4/<77>5",
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "frame": 476,
+          "text": "TYPE/<FC><06><01>WATER",
+          "abilityHistory": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "playerStatStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        }
+      ],
+      "battleMainFuncTransitions": [
+        {
+          "frame": 36,
+          "func": "SetActionsAndBattlersTurnOrder"
+        },
+        {
+          "frame": 37,
+          "func": "CheckFocusPunch_ClearVarsBeforeTurnStarts"
+        },
+        {
+          "frame": 38,
+          "func": "RunTurnActionsFunctions"
+        },
+        {
+          "frame": 437,
+          "func": "HandleEndTurn_ContinueBattle"
+        },
+        {
+          "frame": 438,
+          "func": "BattleTurnPassed"
+        },
+        {
+          "frame": 439,
+          "func": "HandleTurnActionSelectionState"
+        },
+        {
+          "frame": 496,
+          "func": "SetActionsAndBattlersTurnOrder"
+        }
+      ],
+      "atBattleStart": {
+        "rngValue": 960307641,
+        "abilityHistory": [
+          6,
+          0,
+          0,
+          0
+        ],
+        "chosenMoveByBattler": [
+          0,
+          94,
+          0,
+          0
+        ],
+        "battleMainFunc": 134463092,
+        "lastUsedAbility": 6,
+        "player": {
+          "species": 55,
+          "ability": 6,
+          "hp": 155,
+          "statStages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        "opponent": {
+          "species": 394,
+          "ability": 6,
+          "hp": 143
+        },
+        "displayedString": "What will\nGOLDUCK do?"
+      },
+      "addressing": {
+        "gBattleResources": "symbol -> u32 ptr to struct BattleResources",
+        "battleHistoryPtrOffset": 24,
+        "abilitiesOffset": 64,
+        "cite": "include/battle.h struct BattleResources (battleHistory = member 6) + struct BattleHistory (usedMoves[4] of struct UsedMoves = 4*(4*2+4*2) = 64 bytes)"
+      },
+      "pass1Pass2Reconcile": {
+        "windowTotal": 6,
+        "pass2Hits": 6,
+        "matches": true
+      }
+    }
+  }
+}
