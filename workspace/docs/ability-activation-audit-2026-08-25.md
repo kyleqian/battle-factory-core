@@ -212,29 +212,73 @@ without re-deriving the inventory.
 | `src/pokemon.c:3223-3226` | `src/engine/damageCalc.ts:387-396` | Torrent/Swarm: `hp <= maxHP / 3` with C truncating division, power ×1.5, keyed off move type. |
 | `src/pokemon.c:3207-3210` | `src/engine/damageCalc.ts:370-376` | Plus/Minus spAttack ×1.5 keyed off `ABILITY_ON_FIELD2`'s ungated all-battler scan; matches. See F1/F2 for the refuted history-write claim. |
 
+### Recoil denial — ROCK_HEAD (40) — SOURCE-EXACT
+| Source | Engine | Note |
+| --- | --- | --- |
+| `data/battle_scripts_1.s:3938-3949` (`BattleScript_MoveEffectRecoil`) | `src/data/gen/battle-script-program.json` block `BattleScript_MoveEffectRecoil` (`line: 3938`) | The port carries the assembly verbatim, statement for statement: `jumpifmove MOVE_STRUGGLE, BattleScript_DoRecoil` is statement 0 (line 3939) and `jumpifability BS_ATTACKER, ABILITY_ROCK_HEAD, BattleScript_RecoilEnd` is statement 1 (line 3940). **The Struggle bypass precedes the ability jump in both halves**, so Struggle's 25% recoil is dealt to a Rock Head user. `BattleScript_DoRecoil` (3941) and `BattleScript_RecoilEnd` (3948, bare `return`) are present as their own blocks. |
+| `src/battle_script_commands.c:2636-2643` (`MOVE_EFFECT_RECOIL_25`: `gHpDealt / 4`, clamp to 1, **push**+jump) | `src/engine/battleScriptHitChainOpcode.ts:3038-3053` | `Math.max(1, Math.trunc(hpDealt / 4))` then a `{kind: "call"}` transition — the source's `BattleScriptPush(instr+1)` is a call, not a jump. Matches. |
+| `src/battle_script_commands.c:2843-2850` (`MOVE_EFFECT_RECOIL_33`: `gHpDealt / 3`) | `src/engine/battleScriptHitChainOpcode.ts:3055-3072` | Same shape, `/3`. |
+| `src/battle_script_commands.c:3105-3149` (`Cmd_jumpifability`, plain `GetBattlerForBattleScript` branch: compare, set `gLastUsedAbility`, jump, `RecordAbilityBattle`, `gBattleScripting.battlerWithAbility`) | `src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:418-465` | All four writes ported: `lastUsedAbility`, `battlerWithAbility`, the jump, and `recordBattleScriptAbilityReveal` (`src/engine/battleScriptAiReveal.ts:10-24` — the port **does** model `RecordAbilityBattle`, as `aiObservedAbilityIds[battler]`). `ABILITY_ROCK_HEAD = 69` (`:371`) matches `include/constants/abilities.h:73`. |
+| callers: `data/battle_scripts_1.s:897-902` (`BattleScript_EffectRecoil`, incl. Struggle's own `jumpifnotmove` detour) and `:2567-2569` (`BattleScript_EffectDoubleEdge`) | same program JSON | Take Down / Submission / Struggle reach the 25% case; Double-Edge the 33% case. |
+
+**Site count 5/5.** There is **no** AI recoil scoring to pair:
+`rg -in recoil` over `data/battle_ai_scripts.s` and
+`src/battle_ai_script_commands.c` returns **zero** hits, and
+`data/battle_ai_scripts.s` contains no `DOUBLE_EDGE`/`EFFECT_RECOIL` gate —
+Emerald's AI has no recoil-specific term, so Rock Head has no AI half. (The
+step brief's "AI's recoil scoring" does not exist in this ROM.)
+
+### Sleep countdown — EARLY_BIRD (29) — SOURCE-EXACT (2/2, one site unreachable)
+| Source | Engine | Note |
+| --- | --- | --- |
+| `src/battle_util.c:2015-2050` (`AtkCanceler` `CANCELER_ASLEEP`) | `src/engine/battleScriptActionAdmission.ts:1401-1441` | `toSub = 2` for Early Bird else 1; then `if ((status1 & STATUS1_SLEEP) < toSub) clear else status1 -= toSub` — the port is the same two-branch subtract on the **whole** `status1` word (`sourceBattler.status1 - sleepDecrement`), not on the masked counter, so the borrow behaviour is identical. `ABILITY_EARLY_BIRD = 48` (`battleScriptSourceConstants.ts:162`) matches `include/constants/abilities.h:52`. The post-decrement branch (`Snore`/`Sleep Talk` still-asleep exemption, `HITMARKER_UNABLE_TO_USE_MOVE`, `effect = 2`, `BattleScript_MoveUsedIsAsleep`; else clear `STATUS2_NIGHTMARE` + `MoveUsedWokeUp`) is ported line for line. `UproarWakeUpCheck` runs first in both. |
+| `src/battle_util2.c:151-153` | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50.** This `toSub` twin lives in `BattlePalace_TryEscapeStatus` (`src/battle_util2.c:126`), whose only caller is `src/battle_script_commands.c:6484` inside the Battle **Palace** action-selection path. The Factory never enters it. No divergence: the port correctly has no counterpart. |
+
+### Flinch denial — INNER_FOCUS (24) — SOURCE-EXACT
+| Source | Engine | Note |
+| --- | --- | --- |
+| `src/battle_script_commands.c:2521-2523` (family-B prologue: `if (status2 & sStatusFlagsForMoveEffects[MOVE_EFFECT_BYTE]) gBattlescriptCurrInstr++;`) | `src/engine/battleScriptHitChainOpcode.ts:3652-3659` | The already-flinched early-out precedes the Inner Focus test in **both**; `sStatusFlagsForMoveEffects[MOVE_EFFECT_FLINCH] = STATUS2_FLINCHED` (`:617`). |
+| `src/battle_script_commands.c:2547-2560` (`MOVE_EFFECT_FLINCH`) | `src/engine/battleScriptHitChainOpcode.ts:3660-3679` | `primary == TRUE \|\| certain == MOVE_EFFECT_CERTAIN` → set `gLastUsedAbility`, `RecordAbilityBattle`, **plain assignment** to `BattleScript_FlinchPrevention` (no `BattleScriptPush`); else silent `gBattlescriptCurrInstr++` with no reveal. The port's `{kind: "jump"}` (not `"call"`) matches the un-pushed assignment, and the non-certain path returns `advance` with `baseRulesContext` untouched — no reveal, no message. |
+| `src/battle_script_commands.c:2561-2565` (non-Inner-Focus fall-through, gated on `GetBattlerTurnOrderNum(gEffectBattler) > gCurrentTurnActionNumber`) | `src/engine/battleScriptHitChainOpcode.ts:3681-3706` and `:3739-3751` | Both the `certain` and the non-certain writers re-test Inner Focus / turn order; `gBattlescriptCurrInstr++` unconditionally either way. |
+
+**`primary` is never TRUE on this path** — re-derived, not assumed. Every
+`MOVE_EFFECT_FLINCH` producer in the ROM is secondary or certain:
+`data/battle_scripts_1.s:669,792,1272,1831` are plain `setmoveeffect`
+(secondary chance), `:2051` is **Fake Out**'s
+`setmoveeffect MOVE_EFFECT_FLINCH | MOVE_EFFECT_CERTAIN` (so Fake Out *does*
+announce Flinch Prevention against Inner Focus, and the port takes the
+`certain` branch), King's Rock calls `SetMoveEffect(FALSE, 0)`
+(`src/battle_util.c:3781-3784`), and Secret Power's cave environment
+(`src/battle_script_commands.c:9645`) sets the byte for a secondary. No
+`seteffectprimary` script sets `MOVE_EFFECT_FLINCH`. The engine's
+"`primary` is always FALSE here" comment (`:3627-3629`) is therefore correct.
+
+### Contact family (ABILITYEFFECT_ON_DAMAGE) — POISON_POINT (18), CUTE_CHARM (13), EFFECT_SPORE (8), FLAME_BODY (8), ROUGH_SKIN (3) — SOURCE-EXACT
+The previous session's one open item was the `ordinaryContactGate` helper; it
+is `src/engine/battleScriptMoveEndOpcode.ts:479-480` —
+`attackerState.hp !== 0 && attackerState.confusionSelfDmg !== 1 && makesContact`
+— with `!(moveResultFlags & MOVE_RESULT_NO_EFFECT) && targetTurnDamaged`
+hoisted above it at `:470-476`.
+
+| Source | Engine | Note |
+| --- | --- | --- |
+| `src/battle_util.c:2767-2780` (Rough Skin) | `moveEndOpcode.ts:507-521` | Guard set matches exactly: `!NO_EFFECT`, attacker `hp != 0`, `!confusionSelfDmg`, `TARGET_TURN_DAMAGED`, `FLAG_MAKES_CONTACT`. Damage `maxHP / 16` clamped to ≥1 (`Math.max(1, Math.floor(...))` — unsigned, so `floor` ≡ C truncation). |
+| `src/battle_util.c:2782-2804` (Effect Spore) | `moveEndOpcode.ts:523-598` | `Random() % 10 == 0`, then `do { Random() & 3 } while (== 0)`, then the burn→paralysis remap, then `\|= MOVE_EFFECT_AFFECTS_USER` and `HITMARKER_STATUS_ABILITY_EFFECT`. Same draw count, same order. |
+| `src/battle_util.c:2806-2819` (Poison Point) | `moveEndOpcode.ts:523-535,555-598` | `Random() % 3 == 0` → `MOVE_EFFECT_AFFECTS_USER \| MOVE_EFFECT_POISON`, `BattleScript_ApplySecondaryEffect`. |
+| `src/battle_util.c:2836-2849` (Flame Body) | same | Source orders `FLAG_MAKES_CONTACT` **before** `TARGET_TURN_DAMAGED` here (Rough Skin/Effect Spore/Poison Point/Static order them the other way); both are pure `&&` with no side effects, so hoisting `targetTurnDamaged` above the dispatch is semantically identical. Every one of the seven `ON_DAMAGE` cases carries `!NO_EFFECT` **and** `TARGET_TURN_DAMAGED`, including Color Change (`:2752-2757`) — verified case by case, so the hoist is sound for the whole switch. |
+| `src/battle_util.c:2851-2869` (Cute Charm) | `moveEndOpcode.ts:533-535,559-586` | **RNG ordering confirmed:** source's `&&` chain places `gBattleMons[gBattlerTarget].hp != 0` (`:2857`) *before* `(Random() % 3) == 0` (`:2858`); the port's `if (ability === ABILITY_CUTE_CHARM && targetState.hp === 0) return` sits at `:533-535`, above the `drawBattleScriptRng` at `:558`. Same draw is skipped in both. The post-roll six-way eligibility (target hp, attacker not Oblivious, genders differ, no existing `STATUS2_INFATUATION`, neither genderless) is ported at `:566-572` in source order, and the infatuation bit is `(1 << target) << 16` ≡ `STATUS2_INFATUATED_WITH(gBattlerTarget)`. |
+| `data/battle_ai_scripts.s:2373-2390` (`AI_CV_ChangeSelfAbility_AbilitiesToEncourage`, 16 entries incl. `ABILITY_EFFECT_SPORE` :2380 and `ABILITY_CUTE_CHARM` :2384) | `src/engine/factoryAiCheckViability.ts:8356-8361` | The port's `AI_CV_CHANGE_SELF_ABILITY_ENCOURAGED` set holds all 16 names in source order. This is the only AI site either ability has. |
+
+Poison Point, Flame Body and Rough Skin have **exactly one** source site each
+(`rg ABILITY_<n>` over `src` ∪ `data`, minus `src/data/`), so those rows are
+complete at 1/1; Effect Spore and Cute Charm are 2/2. (`src/wild_encounter.c:397`
+Cute Charm and `src/egg_hatch.c:934` Flame Body are overworld, not battle.)
+
 ### Everything else — UNVERIFIED, with the exact unread sites
 Source inventory below is complete (produced by the §Method sweep); the
 engine column names where to start, from `docs/ability-item-parity-census.md`
 plus this session's `rg`.
 
-- **Contact family (ON_DAMAGE).** Source read in full:
-  `src/battle_util.c:2767-2780` (Rough Skin), `:2782-2804` (Effect Spore),
-  `:2806-2819` (Poison Point), `:2836-2849` (Flame Body), `:2851-2869`
-  (Cute Charm). Engine read: `src/engine/battleScriptMoveEndOpcode.ts:507-608`
-  — the proc divisors (10 for Effect Spore, 3 for the rest), the Effect
-  Spore `do { Random() & 3 } while (== 0)` + burn→paralysis remap, and Cute
-  Charm's full six-way eligibility guard all match at the line level.
-  **Unread:** the `ordinaryContactGate` helper that stands in for source's
-  `!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) && attacker hp != 0 &&
-  !confusionSelfDmg && TARGET_TURN_DAMAGED && FLAG_MAKES_CONTACT`. Note the
-  source's per-sibling ordering differs (Flame Body and Cute Charm test
-  contact *before* `TARGET_TURN_DAMAGED`; Rough Skin/Effect Spore/Poison
-  Point/Static test it after) — pure `&&`, so semantically identical, but a
-  port that reordered the RNG draw relative to a gate would not be.
-  Cute Charm additionally re-tests `gBattleMons[gBattlerTarget].hp != 0`
-  **before** its `Random() % 3` (`:2857-2858`); the port hoists that test
-  above the draw (`moveEndOpcode.ts:533-535`) — same predicate, but the RNG
-  ordering needs one confirming read.
 - **IMMUNITY family.** Source: inline "can't be inflicted" sites
   `src/battle_script_commands.c:2291-2294` (Vital Spirit / Insomnia sleep),
   `:2342-2374` (Water Veil burn, incl. the `primary || certain` announce
@@ -281,13 +325,6 @@ plus this session's `rg`.
 - **Drain reversal (Liquid Ooze).** `data/battle_scripts_1.s:345-350`
   (absorb) and `:3271-3276` (Leech Seed) — in both, Liquid Ooze *skips* the
   `manipulatedamage DMG_CHANGE_SIGN`, it does not add one.
-- **Recoil denial (Rock Head).** `data/battle_scripts_1.s:3938-3949` —
-  `jumpifmove MOVE_STRUGGLE, BattleScript_DoRecoil` comes **first**, so
-  Struggle ignores Rock Head. 40 L50 carriers; this is the highest-carrier
-  unread row and should be first next session.
-- **Flinch immunity (Inner Focus).** `src/battle_script_commands.c:2548-2560`
-  — the announce only happens on `primary || certain`; otherwise the flinch
-  is dropped silently.
 - **Shield Dust.** `src/battle_script_commands.c:2253-2255` (needs
   `!HITMARKER_STATUS_ABILITY_EFFECT && !primary && effectByte <= 9`) and
   `:7035-7037` (the `flags == 0` stat-drop gate). Engine notes at
