@@ -6875,6 +6875,18 @@
    "representatives": ["MOVE_RECYCLE"],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_RECYCLE independently passes 203/203 player-back plus 203/203 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two deterministic production-render passes. Its reproducibly extracted ANIM_TAG_RECYCLE art, typed live species/sides/geometry, generic front/back battler art, affine-normal ObjBlend arrow, current-row BLDALPHA, predecessor OAM/matrix/palette transfers, monbg handoff, BlendMonInAndOut palette ramp, chrome, audio, and cleanup use no pair gate, recording/framebuffer lookup, absolute tick, coordinate/RGB fitting, or gameplay ownership. MOVE_SUPER_FANG remains an independent exact control and receives no sibling credit."
+  },
+  {
+   "id": "ingrain-roots-orbs",
+   "components": [
+    "asset:ANIM_TAG_ORBS",
+    "asset:ANIM_TAG_ROOTS",
+    "visualCommand:create_ingrain_orb_sprite",
+    "visualCommand:create_ingrain_root_sprite"
+   ],
+   "representatives": ["MOVE_INGRAIN"],
+   "fulfilled": false,
+   "goal": "UNFULFILLED: MOVE_INGRAIN has bilateral legal Scene-ON source/dense-RGB evidence plus a source-relative reducer and typed seam checkpoint only. Production remainder: implement the generic ROOTS/ORBS asset extraction, Sprite/OAM/palette compositor, root/orb painter order, source animation/flicker/wave callbacks, audio, transfer latches, and first-inactive cleanup through the shared presentation seam, then earn MOVE_INGRAIN exact independently. This four-component track grants no exact or sibling credit."
   }
  ],
  "variantAudits": {

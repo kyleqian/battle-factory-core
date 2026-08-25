@@ -1,3 +1,11 @@
+# MOVE_INGRAIN bilateral source/reducer evidence checkpoint — unsupported (2026-08-25 worker)
+
+- **State:** Level 50 remains **210/276 exact, 0 partial / 0 staged, 66 unsupported**. MOVE_INGRAIN receives no exact or sibling credit; the four-component `ingrain-roots-orbs` track is explicitly unfulfilled.
+- **Did:** Pinned the exclusive `0x082d40e0..<0x082d4191` body, ROOTS/ORBS assets, OAM/animation programs, callbacks, audio, macro-expanded graph, and set-140 Lileep carrier. Added legal complete three-mon bilateral Scene-ON stages, source-relative root/orb reducer, typed seam, dense probe/evidence verifier, raw-RGB archives, and change maps—with no engine/core draw path.
+- **Verified:** Player-back frames **205..368** and opponent-front **293..456** retain **164** consecutive rows each through first inactive cleanup and repeat byte-identically fresh (dense `159dc54a…` / `0799cd68…`; RGB sequences `e680d6b1…` / `712043b5…`). Both orientations fit every root/orb row, allocation/order, callback/frame/flicker lifecycle, tags, audio, source-pointer parity, and source reducer/seam state. OAM, matrices, and faded palettes are RAM+1 **163/163**; gameplay state/RNG are invariant, animation RNG changes **163** times, and registers do not change.
+- **Next:** Deterministically extract the ordinary ROOTS/ORBS assets and implement the generic source-derived compositor/draw wiring, then require twice-fresh bilateral live framebuffer equality before independent Ingrain promotion.
+- **Notes:** `ANIMATION_LATCHES.md`, animation import/unsupported barriers, `battleScene.ts`, and `core.ts` are unchanged. Focused audit/evidence/reducer/ratchet checks, typecheck, animation audit/coverage, full **1,134-file / 10,489-test** suite, and **719-module** build are green.
+
 # MOVE_RECYCLE bilateral exact production presentation (2026-08-25 worker)
 
 - **State:** Level 50 advances **209→210/276 exact**, remains **0 partial / 0 staged**, and drops **67→66 unsupported**. MOVE_RECYCLE alone promotes and `recycle-arrow` is fulfilled; Super Fang and all other siblings retain independent status.

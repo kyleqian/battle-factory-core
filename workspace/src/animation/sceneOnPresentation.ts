@@ -920,6 +920,11 @@ import {
   type DefenseCurlState,
 } from "./defenseCurl.ts";
 import {
+  ingrainAtAge,
+  type IngrainProfile,
+  type IngrainState,
+} from "./ingrain.ts";
+import {
   meanLookAtAge,
   type MeanLookProfile,
   type MeanLookState,
@@ -2657,6 +2662,19 @@ export interface SceneOnDefenseCurlConfig {
   readonly animationProfile: Readonly<DefenseCurlProfile>;
 }
 
+/**
+ * Ingrain's visual body only. The controller supplies live attacker geometry
+ * and subpriority; rooting, healing, switching, and all battle state remain
+ * outside this presentation seam.
+ */
+export interface SceneOnIngrainConfig {
+  readonly move: "INGRAIN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<IngrainProfile>;
+}
+
 /** Mean Look presentation only; trapping/status ownership remains battle-owned. */
 export interface SceneOnMeanLookConfig {
   readonly move: "MEAN_LOOK";
@@ -3399,6 +3417,7 @@ export type SceneOnMoveConfig =
   | SceneOnSweetKissConfig
   | SceneOnSweetScentConfig
   | SceneOnDefenseCurlConfig
+  | SceneOnIngrainConfig
   | SceneOnMeanLookConfig
   | SceneOnLovelyKissConfig
   | SceneOnAttractConfig
@@ -3594,6 +3613,8 @@ export type SceneOnSweetScentPresentationState =
   SceneOnMovePresentationState<SceneOnSweetScentConfig>;
 export type SceneOnDefenseCurlPresentationState =
   SceneOnMovePresentationState<SceneOnDefenseCurlConfig>;
+export type SceneOnIngrainPresentationState =
+  SceneOnMovePresentationState<SceneOnIngrainConfig>;
 export type SceneOnMeanLookPresentationState =
   SceneOnMovePresentationState<SceneOnMeanLookConfig>;
 export type SceneOnSmellingSaltPresentationState =
@@ -7782,6 +7803,11 @@ export interface SceneOnDefenseCurlView extends DefenseCurlState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnIngrainView extends IngrainState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnMeanLookView extends MeanLookState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -7845,6 +7871,24 @@ export function sceneOnDefenseCurlView(
     ...defenseCurlAtAge(
       state.age,
       state.config.attacker.geometry.animationCenter,
+      state.config.animationProfile,
+    ),
+  };
+}
+
+/** `age=0` is Move_INGRAIN's first retained active source-script row. */
+export function sceneOnIngrainView(
+  state: SceneOnIngrainPresentationState,
+): SceneOnIngrainView {
+  if (state.config.move !== "INGRAIN") {
+    throw new Error(`expected INGRAIN presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...ingrainAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
       state.config.animationProfile,
     ),
   };
