@@ -37,33 +37,6 @@ regenerate `factory_ai_check_viability_m5d3_vectors_gen.rs`, rebuild
 `artifacts/wasm/factory_wasm.wasm`, then un-skip that case. Not fixed here:
 `core-rs/**` was out of scope for the #122 worker step.
 
-## #125 — Soak-instrument debt (remainder): the winning-like policy keeps choosing FIGHT → Struggle once every slot is at 0 PP instead of switching (~0.4% of varied carry-14 boot rounds end at the frame budget)
-
-**Filed 2026-08-24** from the #123 verdict (NOT an engine bug — PP decrements,
-`legalMoveBySlot` nulls a 0-PP slot, forced Struggle engages; pinned by
-`tests/factoryBattleScriptNoPpStruggleFullTurn.test.ts`). **Lever 1 landed
-2026-08-25** (`a030faf9`, merged `3b96ceb6`): `pickWinningFightSlot` now
-skips a pure stat-stage status slot whose target stage is already maxed
-(+6 self / -6 foe) when every legal slot scores 0, Tier-1-pinned
-(`tests/randomRoundSoak.test.ts` (d)/(e)/(f), mutation-checked); carry-14
-fifth gate 500/500 with `budget n=2` unchanged. **That lever was necessary
-but not sufficient:** seeds 116 and 418 (`winning --vary-rng --first-round
---start-carry 14`) and seed 755 (`winning-combined --start-carry 28`) still
-end `OK … budget`. Transcript of seed 116 (worker diagnostic, 2026-08-25):
-by battle 2 turn ~1,690 the player's active is at `slot 3 (move 165
-STRUGGLE (all slots unusable))` every turn — all four slots at 0 PP — and the
-policy samples POKEMON/BAG/RUN intents but always returns to FIGHT →
-Struggle; the foe regenerates faster than +6-evasion Struggle connects, and
-Gen 3 has no turn cap. A real player would switch to a bench mon that still
-has PP. **Lever 2 (filler, supervisor call):** in the winning-like action
-phase, when the active's legal fight set is empty (every slot 0 PP →
-Struggle) and a bench mon has ≥ 1 damaging move with PP, switch to it
-(reuse the existing "cannot deal direct damage → switch" C2 path in
-`tools/soak/randomRoundSoakDriver.ts`, widening its trigger from
-"no damaging move by type" to "no usable move by PP"); if the whole party
-is out of PP the stalemate is source-faithful and stays `budget`. Land with
-a full gate rerun (re-baselines trajectories — counts, not commands).
-
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 
 `docs/issue121-ai-mon-to-switch-into-probe.md` closes the reachability
