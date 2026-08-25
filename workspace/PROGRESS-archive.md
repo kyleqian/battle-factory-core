@@ -1,3 +1,53 @@
+## 1395 — [interactive session, 2026-08-23] **Combined draft lever (4'') built + measured on a NEW honest instrument — challenge 4 was never unbeatable (winning 5.8%, combined 7.7% at n=1,000/arm); two policy/instrument bugs fixed, two engine finds filed (#122 crash, #123 endless battle)**
+
+- **State:** master = this docs commit (4 code commits under it: `a8445d42`
+  swap-decline fix, `83fa52af` `--policy winning-combined`, `679d1744`
+  `--vary-rng`/`--first-round` instruments, plus this entry). Full gates on
+  this tree: vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60
+  **60/60**, winning-swap 0:60 **60/60** (0 CRASH / 0 HANG); `npm test`
+  **1,107 files / 10,407 passed / 223 skipped** (+1 file / +11 tests);
+  build + typecheck green.
+- **Did:** (1) **Bug found+fixed before measuring**: `winning-coverage`
+  never declined swap offers (missed the per-policy list written for
+  `oracle-strength`; seed 0 accepted 64 offers and random-walked the swap
+  screen — ISSUES-#99 trap class). Decline now keyed on `winningLike`,
+  Tier-1-pinned; 1393's lever-4' numbers were of the buggy policy.
+  (2) `--policy winning-combined` landed: coverage-first draft subject to a
+  strength floor = the MEAN candidate-trio BST (6 pins, floor-binding pin
+  mutation-red-verified). (3) **Instrument finding that reframes every
+  `--start-carry` number to date**: the engine is seed-invariant, so
+  deterministic-draft policies collapse all seeds into ONE trajectory (30
+  identical chronologies), and even random-draft sweeps always faced the
+  same six boot offers. Landed `--vary-rng` (per-seed boot RNG walk) +
+  `--first-round` (direct roundComplete/roundLost at ~1 s/seed).
+  (4) **THE MEASUREMENT** (carry 28, varied offers, boot-round wins):
+  winning **58/1000 (5.8%)**, combined **77/1000 (7.7%)**, oracle-strength
+  4/100, coverage 5/100 — challenge 4's "0/30 wall" was one losing deal
+  measured repeatedly; the combined edge is suggestive-small (z ≈ 1.7),
+  no draft policy separates decisively. (5) ~2,400 varied boot rounds of
+  crash coverage → **#122** (Factory AI RNG-lockstep divergence crash,
+  plain `winning`, deterministic 0.1 s repro seed 681) and **#123**
+  (endless battle: 456 selections of a 15-PP DOUBLE TEAM then HANG, seed
+  755) filed. Full results in
+  `docs/soak-policy-strength-scout-2026-08-23.md` §"Result — lever 4''".
+- **Next:** (1) triage #122 (cheapest first: which of the 13 expected draws
+  diverged) and #123 (PP legality on the fallback path + Struggle
+  engagement); (2) decide whether `--vary-rng` sweeps per `--start-carry`
+  tier become a standing crash-coverage gate; (3) the draft-lever program is
+  at diminishing returns — recommend closing it. Open ISSUES: #122, #123
+  (new), #121 (dormant), #109/#114 (doubles-era), #71/#73/#39/#55
+  (parked/filler).
+- **Notes:** measurement is PAIRED (same walked offers per seed across
+  arms); first 500 seeds: both-won 0, winning-only 26, combined-only 41;
+  second 500: 32 vs 36 (no separation). The four standing gates stay
+  UNVARIED (pinned baseline) — `--vary-rng` is opt-in. Trap: two glob
+  collisions (`m-winning-*` matches `m-winning-coverage-*`) briefly
+  produced a wrong count — use exact filenames when policy names share
+  prefixes.
+
+
+---
+
 ## 1394 — [supervisor final wind-down, 2026-08-23 03:10] **Bonus round closed: both remaining challenge-4 levers measured NEGATIVE at carry 28 (`oracle-strength` 0/30, `winning-coverage` 0/30); final tree re-gated green — entry 1392 is the full session record**
 
 - **Final gates on THIS tree (`b1480863` + this docs commit; supervisor-independent):**

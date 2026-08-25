@@ -5,6 +5,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1398 — [supervisor, 2026-08-25 ~09:00, IN PROGRESS] **Orient: animation folded (fast-forward onto its own master-sync `dbe18b3d`; Screech exact, 208/276), union suite green; census batch A + #125 lever + premise-throw audit launched**
+
+- **State:** master = `dbe18b3d` = `animation-main` tip. The live animation
+  supervisor merged master `33592cba` into its branch at 08:48; my fold then
+  fast-forwarded master onto that merge — one commit, both branches converge
+  (4 animation commits folded: Screech Scene-ON exact + ratchets). `rust-main`
+  had 0 commits to fold. Union `npm test` **1,125 files / 10,467 passed / 224
+  skipped**; `npm run build` green. Both sibling Codex supervisors (animation,
+  rust) are LIVE since 08:48 with 14:48 caps. Oracle freshness FAIL judged a
+  false positive again (last `oracle/` commit 08-15 09:51 is client-side
+  factoryBrain staging; only docs/engine commits since) — NOT restarted, the
+  siblings are on the shared services. DEFERRED.md: no open entries.
+- **In flight:** (1) side sonnet — ISSUES #125 fallback lever
+  (`worker/side-20260825-085458`, cap 45); (2) ts opus — premise-throw audit
+  of the battle kernel (#126 class: `throw`s that encode a premise instead of
+  an oracle-proved barrier) → `docs/premise-throw-audit-2026-08-25.md`, new
+  file only (cap 50); (3) census batch A under `nohup`, default render cadence:
+  `--vary-rng` full chains 0:100 for winning-swap carry 14/28,
+  winning-coverage carry 0/14, full carry 0/14 (all new dimensions vs 1397's
+  winning c0/c14/c28 + winning-swap c0).
+- **Next:** verify + fold both workers; file then fix any census CRASH (ts
+  lane); batch B = wider seeds (100:300) on 1397's four sweeps + the audit's
+  top UNPROVEN rows staged live; wind-down: five gates + full suite.
+
+---
+
 ## 1397 — [supervisor wind-down, 2026-08-25 ~02:35] **Mission queue CLOSED + two bonus finds fixed: #122 (check-viability recorder dropped a speed-tie draw), #123 NOT-A-BUG (source-faithful Struggle stalemate), Refresh Rust port folded (cargo 1,036 + wasm parity), fifth varied-RNG gate PINNED (2,000/2,000 baseline), `--first-round` HANG-at-budget mislabel fixed, #126 (Bide ignored end-turn `HITMARKER_IGNORE_BIDE`) found by the first varied full-chain census and fixed; animation folded twice; all five gates green on the final tree**
 
 - **Final gates on THIS tree (`dae00750` = engine tree of the five gates; final tree `94da116c` = animation fold #3 on top (Scene-ON only), full suite + build rerun there` + this docs commit; supervisor's own runs,
@@ -109,54 +135,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   gates stay UNVARIED baselines; the new gate is additive crash coverage,
   not a replacement. 1395's trap reminder stands: use exact filenames when
   policy names share prefixes (`m-winning-*` glob collision).
-
----
-
-## 1395 — [interactive session, 2026-08-23] **Combined draft lever (4'') built + measured on a NEW honest instrument — challenge 4 was never unbeatable (winning 5.8%, combined 7.7% at n=1,000/arm); two policy/instrument bugs fixed, two engine finds filed (#122 crash, #123 endless battle)**
-
-- **State:** master = this docs commit (4 code commits under it: `a8445d42`
-  swap-decline fix, `83fa52af` `--policy winning-combined`, `679d1744`
-  `--vary-rng`/`--first-round` instruments, plus this entry). Full gates on
-  this tree: vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60
-  **60/60**, winning-swap 0:60 **60/60** (0 CRASH / 0 HANG); `npm test`
-  **1,107 files / 10,407 passed / 223 skipped** (+1 file / +11 tests);
-  build + typecheck green.
-- **Did:** (1) **Bug found+fixed before measuring**: `winning-coverage`
-  never declined swap offers (missed the per-policy list written for
-  `oracle-strength`; seed 0 accepted 64 offers and random-walked the swap
-  screen — ISSUES-#99 trap class). Decline now keyed on `winningLike`,
-  Tier-1-pinned; 1393's lever-4' numbers were of the buggy policy.
-  (2) `--policy winning-combined` landed: coverage-first draft subject to a
-  strength floor = the MEAN candidate-trio BST (6 pins, floor-binding pin
-  mutation-red-verified). (3) **Instrument finding that reframes every
-  `--start-carry` number to date**: the engine is seed-invariant, so
-  deterministic-draft policies collapse all seeds into ONE trajectory (30
-  identical chronologies), and even random-draft sweeps always faced the
-  same six boot offers. Landed `--vary-rng` (per-seed boot RNG walk) +
-  `--first-round` (direct roundComplete/roundLost at ~1 s/seed).
-  (4) **THE MEASUREMENT** (carry 28, varied offers, boot-round wins):
-  winning **58/1000 (5.8%)**, combined **77/1000 (7.7%)**, oracle-strength
-  4/100, coverage 5/100 — challenge 4's "0/30 wall" was one losing deal
-  measured repeatedly; the combined edge is suggestive-small (z ≈ 1.7),
-  no draft policy separates decisively. (5) ~2,400 varied boot rounds of
-  crash coverage → **#122** (Factory AI RNG-lockstep divergence crash,
-  plain `winning`, deterministic 0.1 s repro seed 681) and **#123**
-  (endless battle: 456 selections of a 15-PP DOUBLE TEAM then HANG, seed
-  755) filed. Full results in
-  `docs/soak-policy-strength-scout-2026-08-23.md` §"Result — lever 4''".
-- **Next:** (1) triage #122 (cheapest first: which of the 13 expected draws
-  diverged) and #123 (PP legality on the fallback path + Struggle
-  engagement); (2) decide whether `--vary-rng` sweeps per `--start-carry`
-  tier become a standing crash-coverage gate; (3) the draft-lever program is
-  at diminishing returns — recommend closing it. Open ISSUES: #122, #123
-  (new), #121 (dormant), #109/#114 (doubles-era), #71/#73/#39/#55
-  (parked/filler).
-- **Notes:** measurement is PAIRED (same walked offers per seed across
-  arms); first 500 seeds: both-won 0, winning-only 26, combined-only 41;
-  second 500: 32 vs 36 (no separation). The four standing gates stay
-  UNVARIED (pinned baseline) — `--vary-rng` is opt-in. Trap: two glob
-  collisions (`m-winning-*` matches `m-winning-coverage-*`) briefly
-  produced a wrong count — use exact filenames when policy names share
-  prefixes.
 
 ---
