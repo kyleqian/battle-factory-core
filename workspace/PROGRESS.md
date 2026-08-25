@@ -5,6 +5,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1397 — [supervisor session, 2026-08-24 21:36 → IN PROGRESS] **#122 FIXED (check-viability recorder dropped a speed-tie draw), #123 closed NOT-A-BUG (stalemate is source-faithful), Refresh Rust port folded + wasm-parity green, animation folded, wip branch deleted; fifth gate measured (2,000 varied boot rounds, 0 CRASH) — shape lands once the `--first-round` mislabel fix merges**
+
+- **State:** master = this docs commit on `ff1ddb8b` (ISSUES) ← `1dd081df`
+  (#123 side fold) ← `95966ca5` (PAPERCUTS) ← `d6753f0b` (Refresh fold) ←
+  `5582c407`/`fa06db1c` (#122) ← `4a8eec58` (animation fast-forward). Union
+  at `4a8eec58`: `npm test` **1,111 files / 10,420 passed / 223 skipped**,
+  build green; after #122 (worker's full run) **1,112 / 10,426 / 224**;
+  after #123 fold (worker's full run) **1,112 / 10,422 / 223** + supervisor
+  smoke 444/444 + pins. Refresh fold: union `cargo test` **1,036 passed /
+  0 failed**, wasm rebuilt (511,638 B, sha `72b84af1…`), all 20 `*Parity*`
+  suites under `POKEBENCH_ENGINE=wasm` **923 passed / 1 skipped** (#124).
+  A side-lane worker (`worker/side-…`, 45-min cap from 22:54) is aligning
+  `--first-round` outcome semantics; the deep full-chain varied census
+  (`winning`/`winning-swap` `--vary-rng` carry 0, 0:100) is running.
+- **Did:** (1) orient: `animation-main` fold was a fast-forward (the Codex
+  animation supervisor, live concurrently, had merged master); oracle
+  freshness FAIL judged client-only (last `oracle/` commit 08-15 09:51;
+  8014 restarted 09:45 that same session, 8012 08-17) — not restarted.
+  (2) **#122** (ts opus, 53 min): `runCvSemiInvulnerable` drew
+  `GetWhoStrikesFirst`'s speed-tie `Random()` (`battle_main.c:4745` via
+  `battle_ai_script_commands.c:1268-1274`) but returned only
+  `tryEncourage`'s one-item list, so the lockstep recording was one draw
+  short of the cursor. One-line carry, 7-case pin mutation-checked, seed 681
+  now `OK b1 t12 roundLost`; 600:700 varied first-round 100/100. **#124
+  filed**: the Rust mirror has the identical drop (one ts/wasm case
+  `it.skip`ped) — Rust lane. (3) **#123** (side opus, 63 min): PP 15→0,
+  `legalMoveBySlot` nulls the 0-PP slot, forced Struggle at selection 16
+  (`battle_util.c:99-106`, `:1125-1140`); the "456 uses" were 15 DOUBLE
+  TEAMs + 441 Struggles; +6/+6 Struggle (33%/29%) vs Leftovers/Ingrain regen
+  never ends and Gen 3 has no turn cap → seed 755 is `OK … budget`. Pin
+  `tests/factoryBattleScriptNoPpStruggleFullTurn.test.ts` (3× mutation-
+  checked) + forced-Struggle transcript label; **#123 deleted, #125 filed**
+  (soak-policy debt, filler). (4) **Refresh fold** `d6753f0b` (`81609f44`
+  was in neither `rust-main` nor master; merge clean; verified above);
+  nested worker worktree + branch removed. (5) `wip/mb-step2b-draft-heuristic`
+  deleted (was `1f500a92`, 3 commits, program CLOSED 08-24). (6) PAPERCUTS:
+  `--help` sweep trap hit 2, freshness false positive hit 9, new gate-cost
+  vs 600 s ceiling entry. (7) **Fifth-gate census on the #122-fixed tree**
+  (`winning --vary-rng --first-round`, 0:500 each): carry 0 **500/500**,
+  carry 14 **498/500 + 2 HANG** (seeds 116/418 = the #125 stalemate,
+  mislabelled HANG only because first-round mode returns HANG at budget),
+  carry 28 **500/500**; `winning-swap` carry 0 **500/500**. 0 CRASH in
+  2,000 varied boot rounds. Timing ~1 s/seed (0.9-1.1 s under load 22).
+- **Next:** (1) verify + fold the first-round semantics worker; rerun seeds
+  116/418 (expect `OK … budget`); (2) pin the fifth gate in SUPERVISOR.md +
+  ROADMAP S10 soak block: `winning --vary-rng --first-round` at
+  `--start-carry 0/14/28` + `winning-swap` at carry 0, `--seeds 0:100` each,
+  `--render-every 0`; (3) deep census results → fix briefs if red; else
+  filler; (4) wind-down: fold `animation-main` again (moved to `5a6ace87`+),
+  all five gates concurrently under `nohup`, one full `npm test` + build.
+- **Notes:** concurrent load: Codex animation supervisor + pokered-pewter
+  supervisor on the same 16-core box (load 22 at start). Trap: a side
+  worktree's root is the REPO root — run tests from `<worktree>/workspace`.
+  DEFERRED.md: no open entries.
+
+---
+
 ## 1396 — [top-layer setup session, 2026-08-24] **Two user decisions recorded + next-supervisor mission staged: draft-lever program CLOSED, varied-RNG standing gate ADOPTED (shape defined after the #122/#123 fixes); orphaned Rust Refresh-port worker commit found unfolded**
 
 - **State:** docs-only commit on top of 1395's fully-gated tree (no
@@ -93,37 +150,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   prefixes.
 
 ---
-
-## 1394 — [supervisor final wind-down, 2026-08-23 03:10] **Bonus round closed: both remaining challenge-4 levers measured NEGATIVE at carry 28 (`oracle-strength` 0/30, `winning-coverage` 0/30); final tree re-gated green — entry 1392 is the full session record**
-
-- **Final gates on THIS tree (`b1480863` + this docs commit; supervisor-independent):**
-  vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60**,
-  winning-swap 0:60 **60/60** (0 CRASH / 0 HANG); full `npm test`
-  **1,106 files / 10,396 passed / 223 skipped**; `npm run build` green.
-  (Gates were also green at `0cabb82b`, `a5b06cfb`, and — vanilla/winning —
-  `77f4db64`; see 1392.)
-- **Did since 1392:** worker J landed opt-in `--policy winning-coverage`
-  (1393): 0/30 rounds won at carry 28 (29 lost at b1 — coverage-first starves
-  bulk, the mirror of the withheld bulk+STAB heuristic), anchor 0:120 carry
-  ≥ 28 **10/120** (8.3% vs `winning` 3.75%, suggestive only), ≥ 35 0/120.
-  With `oracle-strength` (1391) also at 0/30, move choice AND single-axis
-  draft scores are both retired as challenge-4 levers. One cross-lane stray
-  (an animation worker's edit to `tests/animation/glareEvidence.test.ts`
-  landed in this tree at 01:49) was saved as a patch and reverted
-  (PAPERCUTS hit 6).
-- **Next (for the next session / the user):** the only lever left for
-  natural deep play is a COMBINED draft score with a strength floor
-  (coverage subject to BST ≥ floor), measured by rounds won at
-  `--start-carry 28 --seeds 0:30` — or accept that `--start-carry` already
-  covers challenge 5-8 for crash coverage and stop here. Instruments from
-  the scout §4 (per-seed round ledger, loss shape, rentsCount/rank) would
-  make that measurement cheap. Open ISSUES: #121 (dormant note), #109/#114
-  (doubles-era), #71/#73/#39/#55 (parked/filler). DEFERRED.md: none open.
-- **Notes:** `animation-main` ahead of master at close: 7 commits (its
-  supervisor was live all night; folded twice this session at `3a8b58d7` +
-  `77f4db64`; the remainder folds at the next orient). `rust-main` ahead: 0.
-  11 worker rounds total (6 ts opus, 5 side), 0 failed steps, 0 cap-kills,
-  0 regressions folded. Trap of the hour: an UNQUOTED heredoc fed ledger
-  prose to zsh, which executed its backticked `npm test` — quote heredocs
-  (`<<'EOF'`) or write files with a tool.
-
