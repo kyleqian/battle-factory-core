@@ -186,6 +186,10 @@ describe.skipIf(!wasmAvailable)("Factory DecisionPolicy native/WASM complete par
     });
     const completeTarget = target({
       ...complete,
+      // Deliberately NOT the attacker's speed: this case exists to round-trip
+      // the optional-field presence table, and an exact speed tie would drag
+      // FLY's AI_CV_SemiInvulnerable tie roll (ISSUES #122/#124) into it.
+      speed: 73,
       species: 105,
       ability: "ABILITY_NONE",
       knownAbility: null,
@@ -218,20 +222,26 @@ describe.skipIf(!wasmAvailable)("Factory DecisionPolicy native/WASM complete par
     await compareScored(maxInput!);
 
     let repeated: ScoredDecisionInput | undefined;
-    let dropped: ScoredDecisionInput | undefined;
-    for (let seed = 1; seed < 4_096 && (!repeated || !dropped); seed++) {
+    let tieCarried: ScoredDecisionInput | undefined;
+    for (let seed = 1; seed < 4_096 && (!repeated || !tieCarried); seed++) {
       const hazeInput = { view: scoredView(28, [114, 150, 150, 150], battler({ statStages: { ...stages, atk: 9 } }), target({ statStages: { ...stages, atk: 9 } })), request: request(1), rng: { value: seed, calls: 0 } } satisfies ScoredDecisionInput;
       const haze = ts.chooseFactoryAiScoredDecision(hazeInput);
       const cv = haze.trace.draws.filter((draw) => "phase" in draw && draw.phase === "check-viability");
       if (new Set(cv.map((draw) => draw.ordinal)).size < cv.length) repeated = hazeInput;
       const flyInput = { view: scoredView(28, [19, 150, 150, 150], battler({ speed: 100 }), target({ speed: 100, hp: 999, maxHp: 999, lastUsedMoveId: 0 })), request: request(1), rng: { value: seed, calls: 0 } } satisfies ScoredDecisionInput;
       const fly = ts.chooseFactoryAiScoredDecision(flyInput);
-      if (fly.rng.calls > fly.trace.draws.length) dropped = flyInput;
+      if (fly.trace.draws.some((draw) => draw.kind === "target-faster-tie")) tieCarried = flyInput;
     }
     expect(repeated).toBeDefined();
-    expect(dropped).toBeDefined();
+    expect(tieCarried).toBeDefined();
     await compareScored(repeated!);
-    await compareScored(dropped!);
+    // ISSUES #122: SemiInvulnerable5's speed-tie receipt used to be dropped
+    // from the trace while its RNG advance survived, and this family pinned
+    // that drop. It is now a completeness pin -- every spent call has a
+    // receipt. The ts/wasm half stays TS-only until the Rust mirror lands
+    // (ISSUES #124); `compareScored` on this input is the divergence.
+    const tie = ts.chooseFactoryAiScoredDecision(tieCarried!);
+    expect(tie.rng.calls - tieCarried!.rng.calls).toBe(tie.trace.draws.length);
 
     const x4 = await compareScored({
       view: scoredView(28, [58, 150, 150, 150]), request: request(1), rng: { value: 99, calls: 7 },
