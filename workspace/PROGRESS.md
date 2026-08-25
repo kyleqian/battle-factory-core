@@ -66,12 +66,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   sweeps stood at 83/100 each, 0 CRASH / 0 HANG; batch B at 12-20 seeds.
   Relaunched from the last completed seed at 10:37; three PAPERCUTS entries
   (`bfc91c90`); briefs now forbid pattern kills and cap soak runs at ~3 min.
-- **In flight:** side sonnet — #125 lever 2 (switch when the active has no
-  usable PP; `worker/side-20260825-103801`); census batch A tails (83:100
-  ×4) + batch B (winning c0/c14/c28 + winning-swap c0 at 113:200,
-  winning-coverage c28 13:100, full c28 21:100), all with `--coverage-json`.
-- **Next:** fold #125 lever 2; union coverage report over batch B → aim the
-  next census; wind-down: five gates + full suite on the final tree.
+- **Did (rounds 6-7):** (6) **#125 lever 2** (side sonnet, 19.7 min,
+  $1.4; `54ad24a7` → merge `4dbe8fe9`): the winning-like switch path
+  (`pickWinningSwitchRow` C2) now also fires on forced Struggle (every slot
+  0 PP) whenever a bench mon has a usable non-immune damaging move; 3
+  mutation-checked pins; seeds 116/418 (`winning --vary-rng --first-round`
+  c14) and 755 (`winning-combined` c28) go `budget` → `roundLost` (my
+  rerun agrees); carry-14 first-round 0:100 **100/100, budget 0** (was 2).
+  **#125 deleted.** Trajectory re-baseline → all gates rerun at wind-down.
+  (7) **`--parallel N` seed fan-out** (ts opus, 20.7 min, $2.8; `b16e9009`):
+  `randomRoundSoak.ts` spawns N contiguous-slice children, prints per-seed
+  lines in seed order, merges `--json`/`--coverage-json`
+  (`mergeCoverageReports`), summary lifted into `printSoakSummary`; 6+4
+  pins incl. serial-vs-parallel deep-equality (mutation-checked); default 1
+  byte-identical. Measured 38.0 s → 21.6 s at `--parallel 4` under load 62
+  (contended floor); full suite 1,128 / 10,487 / 224 on `b16e9009`.
+  Census batch A COMPLETE: **600/600 varied full chains, 0 CRASH / 0 HANG**
+  (winning-swap c14/c28, winning-coverage c0/c14, full c0/c14; 83:100
+  tails rerun after the pattern kill).
+- **In flight:** side opus — `--policy coverage-fight` (least-used legal
+  move first; stacked on lever 2, `worker/side-20260825-105948`); census
+  batch B (~350 chains with coverage) — ETA ~12:15.
+- **Next:** fold coverage-fight → first-round census with it at c0/c14/c28;
+  union coverage report over batch B; mid-session gates with `--parallel`;
+  wind-down: five gates + full suite on the final tree.
 
 ---
 
