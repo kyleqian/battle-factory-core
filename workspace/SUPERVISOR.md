@@ -365,16 +365,27 @@ every user-facing report including wind-down summaries.
   regression gate; a docs-only session may skip it, any session that folded
   engine/`src` changes may not. Full policy text: ROADMAP S10 block "Soak +
   evidence policy".
-- **Varied-RNG crash-coverage gate (user-adopted 2026-08-24; exact shape
-  pending):** the user decided `--vary-rng` sweeps become a fifth standing
-  wind-down gate — it is the only instrument that exercises varied boot
-  offers, and its first 2,400 rounds found ISSUES #122 and #123. Define the
-  exact shape (which `--start-carry` tiers × how many seeds; `--first-round`
-  for speed) in the first session AFTER #122/#123 are fixed — a gate with
-  known-red seeds is useless — then pin the final command(s) here beside the
-  four gates above and record baseline counts in that session's PROGRESS
-  entry. Until then, varied sweeps stay opt-in. The four gates above remain
-  UNVARIED (pinned single-trajectory baselines) either way.
+- **Varied-RNG crash-coverage gate (FIFTH standing gate; user-adopted
+  2026-08-24, shape pinned the same day after ISSUES #122/#123 closed):**
+  in addition to the four UNVARIED gates above, run these four sweeps and
+  record all four counts — each must stay **100/100 OK** (`budget`-ended
+  seeds count as OK; they are the #125 stalemate class, not stalls):
+  `npm run soak -- --policy winning --vary-rng --first-round --start-carry 0 --seeds 0:100 --render-every 0`,
+  the same with `--start-carry 14` and with `--start-carry 28`, and
+  `npm run soak -- --policy winning-swap --vary-rng --first-round --start-carry 0 --seeds 0:100 --render-every 0`.
+  `--vary-rng` walks the boot RNG cursor by the seed, so every seed drafts
+  from a DIFFERENT six-offer boot deal — the only instrument that exercises
+  varied offers (its first 2,400 rounds found #122 and #123); `--first-round`
+  ends each seed at its first round decision (~1 s/seed, ~2 min per sweep on
+  a loaded box) and, since 2026-08-24, follows the standing OK/HANG
+  semantics (`budget` = still progressing at the frame budget). Carry
+  0/14/28 span three opponent/rental tiers; the `winning-swap` sweep sits at
+  carry 0 because that is where rounds are won — and the post-win swap screen
+  reached — most often. Baseline (PROGRESS 1397, engine tree `1dd081df`,
+  0:500 each): winning carry 0 **500/500**, carry 14 **500/500** (2
+  `budget`), carry 28 **500/500**; winning-swap carry 0 **500/500**. Run all
+  five gates concurrently under `nohup` (PAPERCUTS: gates vs the Bash 600 s
+  ceiling). The four gates above stay UNVARIED either way.
 
 ## Mechanics
 

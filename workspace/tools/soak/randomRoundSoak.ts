@@ -39,7 +39,9 @@
 //                      score maximised only over trios whose summed
 //                      base-stat total is >= the mean candidate trio's,
 //                      so coverage cannot field an all-frail party)
-//   --max-frames N     per-seed tick budget before reporting HANG (default: resolveMaxFrames(policy), i.e. DEFAULT_MAX_FRAMES_BY_POLICY[policy])
+//   --max-frames N     per-seed tick budget; a seed still progressing when it
+//                      runs out finishes OK ("budget"), not HANG (default:
+//                      resolveMaxFrames(policy), i.e. DEFAULT_MAX_FRAMES_BY_POLICY[policy])
 //   --stall-frames N   frames of zero progress before reporting HANG (default: DEFAULT_STALL_FRAMES, i.e. 30_000 — ISSUES #104 retune)
 //   --max-rounds N     finish OK ("max-rounds") once N round decisions have been observed (default: unlimited)
 //   --render-every N   call render() every N frames (0 disables; default 8)
@@ -62,7 +64,10 @@
 //   --first-round      stop each seed at its FIRST round's own decided
 //                      outcome (endState roundComplete/roundLost) instead of
 //                      chaining to the frame budget -- the direct
-//                      rounds-won-at-boot measurement
+//                      rounds-won-at-boot measurement. A first round that
+//                      never decides is OK ("budget") while it keeps
+//                      progressing; HANG only after --stall-frames frozen
+//                      frames, exactly as in continuous play.
 //   --milestone        stop each seed at battle 1's first action menu (the
 //                      Tier-1 pin surface)
 //   --verbose          per-action log for a single-seed repro
@@ -197,7 +202,14 @@ function main(): void {
   const totalSeconds = ((Date.now() - startedAt) / 1000).toFixed(1);
   console.log("");
   console.log(`=== soak summary: ${results.length} seeds (policy ${policy}) in ${totalSeconds}s ===`);
-  console.log(`OK ${counts.OK}  CRASH ${counts.CRASH}  HANG ${counts.HANG}`);
+  // `budget` is a subset of OK (broken out again in the OK breakdown
+  // below): seeds that reached --max-frames while still progressing — a
+  // stalemate or an endlessly chaining run, not a hang. On the headline
+  // line so a gate reader sees them without grepping the per-seed lines.
+  const budgetSeeds = results.filter((r) => r.endState === "budget").length;
+  console.log(
+    `OK ${counts.OK}  CRASH ${counts.CRASH}  HANG ${counts.HANG}  budget ${budgetSeeds}`,
+  );
 
   // Depth distribution: how many seeds ever carried a win streak reaching
   // each challengeNum threshold (challengeNum = floor(factoryWinStreak / 7),

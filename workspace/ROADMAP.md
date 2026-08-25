@@ -1398,6 +1398,13 @@ supervisor wind-down runs all four gates and records each count:
 - `npm run soak -- --seeds 0:60` (the `full` policy) — record the count;
 - `npm run soak -- --policy winning --seeds 0:60` — record the count;
 - `npm run soak -- --policy winning-swap --seeds 0:60` — record the count.
+- **Fifth gate (varied-RNG crash coverage, user decision 2026-08-24, shape
+  pinned in SUPERVISOR.md the same day):** `npm run soak -- --policy winning
+  --vary-rng --first-round --start-carry {0,14,28} --seeds 0:100
+  --render-every 0` (three sweeps) plus `--policy winning-swap --vary-rng
+  --first-round --start-carry 0 --seeds 0:100 --render-every 0` — record
+  all four counts; each must stay 100/100 OK (`budget` counts as OK). The
+  four gates above stay UNVARIED.
 
 Opt-in, NOT a gate: `--policy oracle-strength` (same as `winning` except the
 fight slot, which the engine's own Factory AI scorer picks for the player) —

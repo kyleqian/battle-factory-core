@@ -389,14 +389,21 @@ describe("source-shaped attack-canceler Bide phase", () => {
       PC,
       RNG,
     )).toThrow(/must be nonnegative/);
-    expect(() => advanceBattleScriptAttackCancelerBide(
+    // ISSUES #126: `gBattlerTarget = gBideTarget[gBattlerAttacker]`
+    // (battle_util.c:2236) constrains nothing about the saved battler, so a
+    // self-target release resolves rather than throwing. Pinned in full by
+    // tests/bideEndTurnIgnoreBideIssue126.test.ts.
+    const selfTarget = advanceBattleScriptAttackCancelerBide(
       withAttacker(0, 0x1100, {
         bideDmg: [1, 0, 0, 0],
         bideTarget: [0, 0, 0, 0],
       }),
       PC,
       RNG,
-    )).toThrow(/must be the opposing active singles slot 1/);
+    );
+    if (selfTarget.kind !== "advance") throw new Error("expected phase advance");
+    expect(selfTarget.reason).toBe("released-attack");
+    expect(selfTarget.rulesContext.selectorRoles.target).toBe(0);
     for (const invalid of [-1, 0x1_0000_0000, 1.5, Number.NaN]) {
       expect(() => advanceBattleScriptAttackCancelerBide(rules(), PC, invalid))
         .toThrow(/RNG value must be a u32/);

@@ -17,58 +17,45 @@ backlog.
 
 # Open
 
-## #122 — Factory AI live driver RNG-lockstep divergence crash on a varied challenge-4 boot (deterministic 0.1 s repro)
+## #124 — core-rs `factory_ai_check_viability.rs` still drops SemiInvulnerable5's speed-tie receipt (the Rust mirror of the fixed #122)
 
-**Found 2026-08-23** by the first `--vary-rng` crash sweep (2,000 varied
-challenge-4 boot rounds; this was 1 of 2 finds). Under the PLAIN `winning`
-policy — no new policy code in the loop — one varied boot draft reaches a
-battle state where the engine's own lockstep invariant throws:
-`[engine/tick] Error: Factory AI RNG diverged before live draw 11/13`, stack
-`factoryAiLiveDriver.ts:452` → `submitBattleDecision`
-(`battleDecisionBoundary.ts:819`) → `submitLiveFactoryAiDecision`
-(`factoryAiLiveDriver.ts:558`). Repro (deterministic, crashes at battle 1
-turn 6, frame 5,266, ~0.1 s):
+**Found 2026-08-24** while fixing #122 on the TS side. `SemiInvulnerable5`
+spends `GetWhoStrikesFirst`'s speed-tie `Random()` (`battle_main.c:4745`,
+reached from `Cmd_if_user_goes`, `battle_ai_script_commands.c:1268-1274`) and
+then falls into `TryEncourage`; the TS port now returns BOTH receipts, the
+Rust port (`core-rs/crates/factory-core/src/factory_ai_check_viability.rs`,
+`try_encourage` at `:6333`) still returns only the encourage roll while
+advancing the RNG twice. Consequence: for an equal-speed
+EFFECT_SEMI_INVULNERABLE input the wasm engine's draw list is one shorter than
+the TS spec's, so any live-lockstep consumer built on it would take the exact
+#122 crash. The single directed ts/wasm case that catches this is
+`it.skip`ped in `tests/factoryAiCheckViabilityParity.test.ts` with this issue
+number; the corrected TS receipt is pinned unconditionally in
+`tests/factoryAiSemiInvulnerableTieDraw.test.ts`. **Rust lane:** mirror the TS
+fix (carry the accumulated `draws` into the `try_encourage` return),
+regenerate `factory_ai_check_viability_m5d3_vectors_gen.rs`, rebuild
+`artifacts/wasm/factory_wasm.wasm`, then un-skip that case. Not fixed here:
+`core-rs/**` was out of scope for the #122 worker step.
 
-```
-npm run soak -- --policy winning --start-carry 28 --vary-rng --first-round --seed 681 --render-every 0
-```
+## #125 — Soak-instrument debt: the winning-like last-resort fight fallback can spam a maxed stat-stage move into a source-faithful Struggle stalemate (~0.4% of varied carry-14 boot rounds)
 
-The only nonstandard input is the boot RNG cursor (`--vary-rng` advances it
-681 LCG steps before generating the draft) — exactly how every real player's
-cursor differs — so this is a live-parity bug some real chain can hit, not an
-instrument artifact. Occurrence 1/2,000 varied ch4 boots. Triage: which of
-the 13 expected draws diverged at draw 11, and whether the miscount is in the
-live driver's expectation or the kernel's actual draw sequence for this
-matchup.
-
-## #123 — Endless battle under the soak's status-move fallback: 456 selections of a 15-PP DOUBLE TEAM, then HANG at `resolution:presenting`
-
-**Found 2026-08-23** by the same `--vary-rng` sweep (find 2 of 2). Repro
-(~27 s to HANG at the 1M budget; at 300k frames it is battle 3 turn 486 and
-still ticking):
-
-```
-npm run soak -- --policy winning-combined --start-carry 28 --vary-rng --seed 755 --render-every 0
-```
-
-Player trio CROBAT/BLASTOISE/JOLTEON (combined draft, boot carry 28). The
-battle-3 matchup walls the active mon, so the winning-like last-resort
-fallback picks slot 3 = move 104 (DOUBLE TEAM) every turn; the verbose
-transcript logs **456 `fight: confirm` selections of that one move in a
-single battle** with the turn counter advancing each time. Two coupled
-smells, either of which is a real bug:
-
-1. **PP**: DOUBLE TEAM carries 15 PP (24 max) — the real game cannot allow
-   456 uses; at 0 PP the slot must be rejected (#72's oracle-verified
-   NOPPLEFT path) and at all-slots-0 Struggle must engage. Check whether the
-   fight-menu legality mask this path consults reads live PP.
-2. **Termination**: at +6 evasion neither side lands hits and the battle
-   runs 1,600+ turns until the driver's 30k-frame stall detector fires at
-   `resolution:presenting` (b3 t1681 at the 1M budget). Even with PP fixed,
-   confirm Struggle-vs-Struggle ends this battle.
-
-Not an engine `tick` crash — the engine happily plays the endless battle;
-triage which half is engine vs driver-policy pathology before fixing either.
+**Filed 2026-08-24** from the #123 verdict (closed the same day: NOT an engine
+bug — PP decrements, `legalMoveBySlot` nulls a 0-PP slot, forced Struggle
+engages; pinned by `tests/factoryBattleScriptNoPpStruggleFullTurn.test.ts`).
+The remaining pathology is the soak policy's: when `pickWinningFightSlot`
+finds no damaging legal slot it falls to the lowest legal slot, which can be
+a stat-stage move (DOUBLE TEAM) that it then repeats at +6 with no effect;
+the Factory AI mirrors it, both sides spend all PP, and Struggle-vs-Struggle
+at +6/+6 evasion (33%/29% accuracy) cannot outpace Leftovers/Ingrain
+regeneration — Gen 3 has no turn cap, so the battle never ends (seed 755
+`winning-combined` carry 28; `winning` `--vary-rng --first-round` carry 14
+seeds 116 and 418; 0/500 at carry 0 and carry 28). Costs one full frame
+budget (~25 s) per affected seed and reads `OK … budget` once the
+first-round semantics fix lands. A real player would switch or attack.
+**Lever (filler, supervisor call):** skip a stat-stage slot whose stage is
+already maxed / prefer any damaging resisted move over a pure status move in
+the fallback — note this re-baselines the `winning`/`winning-swap`
+trajectories (counts, not commands), so land it with a full gate rerun.
 
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 

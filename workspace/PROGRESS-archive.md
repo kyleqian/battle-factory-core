@@ -1,3 +1,38 @@
+## 1394 — [supervisor final wind-down, 2026-08-23 03:10] **Bonus round closed: both remaining challenge-4 levers measured NEGATIVE at carry 28 (`oracle-strength` 0/30, `winning-coverage` 0/30); final tree re-gated green — entry 1392 is the full session record**
+
+- **Final gates on THIS tree (`b1480863` + this docs commit; supervisor-independent):**
+  vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60**,
+  winning-swap 0:60 **60/60** (0 CRASH / 0 HANG); full `npm test`
+  **1,106 files / 10,396 passed / 223 skipped**; `npm run build` green.
+  (Gates were also green at `0cabb82b`, `a5b06cfb`, and — vanilla/winning —
+  `77f4db64`; see 1392.)
+- **Did since 1392:** worker J landed opt-in `--policy winning-coverage`
+  (1393): 0/30 rounds won at carry 28 (29 lost at b1 — coverage-first starves
+  bulk, the mirror of the withheld bulk+STAB heuristic), anchor 0:120 carry
+  ≥ 28 **10/120** (8.3% vs `winning` 3.75%, suggestive only), ≥ 35 0/120.
+  With `oracle-strength` (1391) also at 0/30, move choice AND single-axis
+  draft scores are both retired as challenge-4 levers. One cross-lane stray
+  (an animation worker's edit to `tests/animation/glareEvidence.test.ts`
+  landed in this tree at 01:49) was saved as a patch and reverted
+  (PAPERCUTS hit 6).
+- **Next (for the next session / the user):** the only lever left for
+  natural deep play is a COMBINED draft score with a strength floor
+  (coverage subject to BST ≥ floor), measured by rounds won at
+  `--start-carry 28 --seeds 0:30` — or accept that `--start-carry` already
+  covers challenge 5-8 for crash coverage and stop here. Instruments from
+  the scout §4 (per-seed round ledger, loss shape, rentsCount/rank) would
+  make that measurement cheap. Open ISSUES: #121 (dormant note), #109/#114
+  (doubles-era), #71/#73/#39/#55 (parked/filler). DEFERRED.md: none open.
+- **Notes:** `animation-main` ahead of master at close: 7 commits (its
+  supervisor was live all night; folded twice this session at `3a8b58d7` +
+  `77f4db64`; the remainder folds at the next orient). `rust-main` ahead: 0.
+  11 worker rounds total (6 ts opus, 5 side), 0 failed steps, 0 cap-kills,
+  0 regressions folded. Trap of the hour: an UNQUOTED heredoc fed ledger
+  prose to zsh, which executed its backticked `npm test` — quote heredocs
+  (`<<'EOF'`) or write files with a tool.
+
+---
+
 ## 1393 — [main worker, 2026-08-23] **Scout lever 4' built and measured: `--policy winning-coverage` (coverage-first 3-of-6 draft) wins 0/30 rounds at carry 28 — challenge 4 stays unbeaten — but reaches carry >= 28 in 10/120 at the anchor vs `winning`'s 18/480**
 
 - **State:** master `2ea18c0b` + this docs commit. `npm test` **1,106 files

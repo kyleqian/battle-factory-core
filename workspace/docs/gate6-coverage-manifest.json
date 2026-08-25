@@ -92127,12 +92127,12 @@
         "id": "state:B_WEATHER_HAIL",
         "label": "B_WEATHER_HAIL",
         "family": "weather",
-        "sourceLine": 271,
+        "sourceLine": 273,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:271",
+            "locator": "line:273",
             "kind": "source-state-symbol"
           },
           {
@@ -92170,12 +92170,12 @@
         "id": "state:B_WEATHER_RAIN",
         "label": "B_WEATHER_RAIN",
         "family": "weather",
-        "sourceLine": 268,
+        "sourceLine": 270,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:268",
+            "locator": "line:270",
             "kind": "source-state-symbol"
           },
           {
@@ -92217,12 +92217,12 @@
         "id": "state:B_WEATHER_SANDSTORM",
         "label": "B_WEATHER_SANDSTORM",
         "family": "weather",
-        "sourceLine": 269,
+        "sourceLine": 271,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:269",
+            "locator": "line:271",
             "kind": "source-state-symbol"
           },
           {
@@ -92264,12 +92264,12 @@
         "id": "state:B_WEATHER_SUN",
         "label": "B_WEATHER_SUN",
         "family": "weather",
-        "sourceLine": 270,
+        "sourceLine": 272,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:270",
+            "locator": "line:272",
             "kind": "source-state-symbol"
           },
           {
@@ -93010,12 +93010,12 @@
         "id": "state:SIDE_STATUS_FUTUREATTACK",
         "label": "SIDE_STATUS_FUTUREATTACK",
         "family": "side-state",
-        "sourceLine": 110,
+        "sourceLine": 112,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:110",
+            "locator": "line:112",
             "kind": "source-state-symbol"
           },
           {
@@ -93037,12 +93037,12 @@
         "id": "state:SIDE_STATUS_LIGHTSCREEN",
         "label": "SIDE_STATUS_LIGHTSCREEN",
         "family": "side-state",
-        "sourceLine": 263,
+        "sourceLine": 265,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:263",
+            "locator": "line:265",
             "kind": "source-state-symbol"
           },
           {
@@ -93056,12 +93056,12 @@
         "id": "state:SIDE_STATUS_MIST",
         "label": "SIDE_STATUS_MIST",
         "family": "side-state",
-        "sourceLine": 265,
+        "sourceLine": 267,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:265",
+            "locator": "line:267",
             "kind": "source-state-symbol"
           },
           {
@@ -93075,12 +93075,12 @@
         "id": "state:SIDE_STATUS_REFLECT",
         "label": "SIDE_STATUS_REFLECT",
         "family": "side-state",
-        "sourceLine": 262,
+        "sourceLine": 264,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:262",
+            "locator": "line:264",
             "kind": "source-state-symbol"
           },
           {
@@ -93098,12 +93098,12 @@
         "id": "state:SIDE_STATUS_SAFEGUARD",
         "label": "SIDE_STATUS_SAFEGUARD",
         "family": "side-state",
-        "sourceLine": 264,
+        "sourceLine": 266,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:264",
+            "locator": "line:266",
             "kind": "source-state-symbol"
           },
           {
@@ -93137,12 +93137,12 @@
         "id": "state:SIDE_STATUS_WORE_OFF_LABEL",
         "label": "SIDE_STATUS_WORE_OFF_LABEL",
         "family": "side-state",
-        "sourceLine": 274,
+        "sourceLine": 276,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:274",
+            "locator": "line:276",
             "kind": "source-state-symbol"
           },
           {
@@ -93179,6 +93179,10 @@
           },
           {
             "path": "tests/battleScriptSetbideOpcode.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/bideEndTurnIgnoreBideIssue126.test.ts",
             "kind": "tier-1-test"
           },
           {

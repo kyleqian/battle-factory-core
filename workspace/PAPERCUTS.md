@@ -66,7 +66,7 @@ history.
   **zero** commits touching `oracle/` since either process started, so both were
   serving byte-identical code. The check is a commit-date heuristic wearing the
   clothes of a schema check.
-- **Hits:** 8 (2026-08-22 supervisor orient: same shape again, both ports; judged client-only in ~3 min and NOT restarted because the animation and rust supervisors were live on the shared services.) (2026-08-19 supervisor orient: both ports FAILed again — same
+- **Hits:** 9 (2026-08-24 supervisor orient: both ports FAILed again against a docs-only HEAD; the last `oracle/` commit is 2026-08-15 09:51 and 8014 was restarted at 09:45 in that same top-layer session, 8012 on 08-17 — judged client-only in ~3 min, NOT restarted because the Codex animation supervisor was live on the shared services.) (2026-08-22 supervisor orient: same shape again, both ports; judged client-only in ~3 min and NOT restarted because the animation and rust supervisors were live on the shared services.) (2026-08-19 supervisor orient: both ports FAILed again — same
   09:45:59-vs-09:51:59 shape for 8014, zero `oracle/` commits since the 8012
   start; disproved in ~3 min via the commit-date check plus three sessions of
   walk-up staging evidence on the running 8014, kept both, no restart.)
@@ -1109,7 +1109,8 @@ current app stage should be rejected before replay.
   Asking for help therefore ignores the flag and starts the default 50-seed
   full-policy run. The supervisor caught and stopped it only after it had
   already consumed several seeds.
-- **Hits:** 1.
+- **Hits:** 2 (2026-08-24 supervisor orient: same shape, killed within
+  ~60 s while sizing the varied-RNG gate).
 - **Cost each:** ~3 min.
 - **Workaround:** read `tools/soak/randomRoundSoak.ts`'s header or pass only a
   known bounded `--seed`/`--seeds` invocation.
@@ -1307,3 +1308,57 @@ current app stage should be rejected before replay.
   skipping (with a one-line notice) instead of failing on a mismatch; put
   the cargo PATH export in `tools/run-subagent.sh`'s worker environment.
 
+## Wind-down soak gates exceed the Bash tool's 600 s ceiling — `vanilla 0:20` alone is ~30 min on a loaded box
+
+- **What:** each `vanilla` seed plays to its 600k-frame budget (~92 s/seed
+  with two sibling supervisors contending; ~30 min for 0:20), and the three
+  0:60 deep gates are a similar order each. A worker or supervisor that runs
+  a gate in a foreground Bash call hits the 600 s ceiling mid-run; the call is
+  force-backgrounded and its piped output is invisible until exit, so the
+  natural reaction is to kill and retry.
+- **Hits:** 1 (2026-08-24 #122 ts worker: ~10 min lost to one killed attempt;
+  recovered the second with `caffeinate -w <pid>`, still only finished 0:10 of
+  the 0:20 canary inside its cap).
+- **Cost each:** ~10 min plus an unfinished acceptance item.
+- **Workaround:** never run a gate in a foreground call. `nohup npm run soak
+  -- ... > <log> 2>&1 &` per gate, all gates concurrently (they are
+  independent node processes), then poll the logs; or chunk the seed range
+  (`0:10`, `10:20`) so each chunk fits the ceiling. The supervisor, not the
+  worker, owns the four+one wind-down gates — brief workers with the rigid
+  `vanilla` canary only when the step touched what it pins.
+- **Real fix:** a `--jobs N` flag on `tools/soak/randomRoundSoak.ts` (seeds are
+  independent; a 16-core box could finish `vanilla 0:20` in ~2 min), or a
+  documented `tools/soak/run-gates.sh` that launches the standing gates
+  concurrently and prints the five counts.
+
+## `docs/gate6-coverage-manifest.{json,md}` pin per-line source locators, so two import lines in an engine file break a ratchet only the full suite reveals
+
+- **What:** the manifest embeds `file:line` locators for engine sites. Adding
+  imports near the top of a tracked engine file shifts every locator below,
+  the regeneration ratchet fails, and the failure is only visible in the full
+  `npm test` because the manifest test OOMs when run in isolation under load
+  (no fast confirm path). Same shape as `tools/report/ability-item-parity-census.ts`'s
+  line-pinned recovery sites (the #122 worker moved five of them by +8).
+- **Hits:** 2 (2026-08-24 #126 worker ~8 min; #122 worker's census bump, ~3 min).
+- **Cost each:** ~5-8 min.
+- **Workaround:** after touching an engine file's import block, regenerate the
+  manifest/census before the full suite (`npm run` scripts named in the
+  test's failure message) and commit the regenerated artifact with the fix.
+- **Real fix:** key the locators by symbol (function name + ordinal) instead
+  of line, or give the manifest test the 8 GB heap so it runs in isolation.
+
+## The repo root is one directory ABOVE `workspace/` — `git show <rev>:src/...` and worktree-root paths silently miss
+
+- **What:** `workspace/` is a subdirectory of the git repo, so object paths
+  are `workspace/src/...`, not `src/...`: `git show HEAD~1:src/x.ts` (used
+  for a mutation check) returns nothing and a `>` redirect zeroes the target;
+  a side worktree's root is `.worktrees/<id>/` (repo root), so
+  `git -C <wt> show -- src/...` and `cd <wt> && npx vitest ...` match no
+  files and print nothing — easy to read as "no diff" / "no tests".
+- **Hits:** 2 (2026-08-24 #126 worker ~3 min, two source files zeroed
+  mid-check; supervisor ~2 min, an empty diff and a silent vitest run).
+- **Cost each:** ~2-3 min plus a wrong reading if unnoticed.
+- **Workaround:** `git show <rev>:./src/x.ts` (the `./` is cwd-relative) or
+  `workspace/src/...`; for worktrees always `cd <wt>/workspace`.
+- **Real fix:** a one-line note in AGENTS.md's layout-migration paragraph, and
+  the launcher's "worktree:" banner printing `<wt>/workspace` as the cwd.

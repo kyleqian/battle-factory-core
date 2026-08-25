@@ -42,6 +42,7 @@ import {
   generateFactoryChallengeDraft,
   type FactoryCarry,
 } from "../../src/engine/factoryRoundChaining.ts";
+import { battlerUsesForcedStruggle } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { ANCHOR_RNG_VALUE, advanceRngValue } from "../../src/engine/rng.ts";
 import { ANCHOR_FACTORY_METADATA } from "../../src/engine/factoryAnchorSession.ts";
 import {
@@ -1022,7 +1023,9 @@ export type SeedResult = {
   outcome: SeedOutcome;
   /**
    * OK sub-outcome: "budget" (frame budget reached while still making
-   * progress — ISSUES #104 retune), "max-rounds" (`--max-rounds` reached),
+   * progress — ISSUES #104 retune; since 2026-08-24 that includes the
+   * `stopAtFirstRoundDecision`/`stopAtFirstActionMenu` modes, whose target
+   * simply never arrived), "max-rounds" (`--max-rounds` reached),
    * roundComplete | roundLost | milestone:first-action-menu. Also set on a
    * HANG that stalled with some round already decided — the decided
    * round's own outcome (roundComplete | roundLost), so the CLI/summary
@@ -1693,10 +1696,21 @@ export class RandomPlayer {
           cancel: this.policy === "full" && this.rng.chance(0.10),
           futile: 0,
         };
+        // A slot-indexed surface cannot say "this is Struggle": when every
+        // slot is unusable, source keeps the banked chosenMovePositions slot
+        // and swaps the MOVE for MOVE_STRUGGLE (battle_util.c:99-106,
+        // :1125-1140), so the slot still reads as its exhausted move. Name it
+        // here or the transcript reports N uses of a move with far less PP
+        // than N (ISSUES #123 read 456 uses of a 15-PP DOUBLE TEAM).
+        const forcedStruggle = orch.battle
+          ? battlerUsesForcedStruggle(orch.battle.rules.rulesContext, 0)
+          : false;
         const slotMove = presentation.field.player.moveIds[this.fightIntent.target];
         this.note(state, this.fightIntent.cancel
           ? "fight menu intent: cancel (B)"
-          : `fight menu intent: slot ${this.fightIntent.target} (move ${slotMove})`);
+          : `fight menu intent: slot ${this.fightIntent.target} (move ${
+            forcedStruggle ? "165 STRUGGLE (all slots unusable)" : slotMove
+          })`);
       }
       const intent = this.fightIntent;
       if (intent.cancel) {
@@ -2235,9 +2249,12 @@ export type RunOptions = {
   stopAtFirstRoundDecision?: boolean;
   /**
    * Frames of zero observed progress (see `DEFAULT_STALL_FRAMES`) before a
-   * run reports HANG. Ignored under `stopAtFirstRoundDecision`, which keeps
-   * its own bounded post-decision grace window instead (ISSUES #104 driver
-   * retune, PROGRESS ~1368).
+   * run reports HANG. Applies to every mode, `stopAtFirstRoundDecision`
+   * included (ISSUES #104 driver retune, PROGRESS ~1368; extended to the
+   * milestone modes 2026-08-24). `stopAtFirstRoundDecision` additionally
+   * keeps its own bounded post-decision grace window, which — being much
+   * shorter than the default stall window — normally settles a decided
+   * round first.
    */
   stallFrames?: number;
   /**
@@ -2515,6 +2532,16 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
           return finish("OK", { endState: firstEndState, ...firstDecisionSnapshot! });
         }
       }
+      // Same generic stall rule as continuous play (ROADMAP S10 soak
+      // semantics, 2026-08-20): HANG means *stuck*, never merely
+      // "undecided". A first round that keeps genuinely progressing --
+      // a source-faithful stalemate advancing turn after turn, e.g. the
+      // ISSUES #123 forced-Struggle-vs-Struggle class -- must not be
+      // called a hang just because its decision never arrives; only
+      // `stallFrames` frames with every progress signal frozen is.
+      if (frame - lastProgressFrame >= stallFrames) {
+        return finish("HANG", { hangSurface: player.surface(state), endState: end ?? undefined });
+      }
       continue;
     }
 
@@ -2535,10 +2562,15 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   // still making genuine progress right up to the frame budget — report OK,
   // not HANG (ISSUES #104 retune: a run that keeps chaining rounds forever
   // is not "stuck", it simply outlived its budget).
-  if (options.stopAtFirstRoundDecision === true || options.stopAtFirstActionMenu === true) {
-    // Neither milestone was ever reached within budget — a genuine failure
-    // to reach the surface this run mode exists to observe.
-    return finish("HANG", { hangSurface: player.surface(state) });
-  }
+  //
+  // Since 2026-08-24 that holds for the milestone modes too: both
+  // `stopAtFirstRoundDecision` and `stopAtFirstActionMenu` now run the same
+  // in-loop stall check, so "the milestone never arrived" is by itself no
+  // evidence of a hang — a still-progressing run reads `OK ... budget` here
+  // exactly like continuous play does, and a genuinely stuck one has
+  // already returned HANG from inside the loop. The mode's own target is
+  // still readable from `endState`: a reached milestone reports
+  // roundComplete/roundLost/milestone:first-action-menu, so a pin that
+  // asserts the milestone still fails on "budget".
   return finish("OK", { endState: "budget" });
 }

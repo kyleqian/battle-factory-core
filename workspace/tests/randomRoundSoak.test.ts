@@ -978,6 +978,78 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
   });
 });
 
+describe("ROADMAP S10 soak semantics: the milestone modes follow the same OK/HANG rule as continuous play", () => {
+  // 2026-08-24 defect: `stopAtFirstRoundDecision` `continue`d past the
+  // generic in-loop stall check and then returned HANG unconditionally at
+  // budget exhaustion ("neither milestone was ever reached"), so a first
+  // round that never decides but keeps genuinely progressing was reported
+  // `HANG ... stuck at resolution:presenting`. The concrete class is
+  // ISSUES #123's proven-not-an-engine-bug stalemate (all PP spent, forced
+  // Struggle vs Struggle at +6/+6 evasion against Leftovers/Ingrain
+  // regeneration, no Gen-3 turn cap): seeds 116/418 at `--policy winning
+  // --vary-rng --first-round --start-carry 14` advance a turn every ~600
+  // frames right up to the 1,000,000-frame budget, and the SAME stalemate
+  // without `--first-round` already read `OK ... budget`. HANG means stuck,
+  // never merely undecided.
+  it("(a) --first-round + budget reached while still progressing is OK/\"budget\", not HANG", () => {
+    // Seed 0 "winning" needs far more than 5,000 frames to decide its first
+    // round (its own pins above settle in the tens of thousands), so this
+    // budget lands mid-round with every progress signal still moving --
+    // exactly the shape seeds 116/418 hold for a million frames, at ~0.1s
+    // instead of ~25s.
+    const result = runSeed(0, {
+      policy: "winning",
+      stopAtFirstRoundDecision: true,
+      maxFrames: 5_000,
+      renderEvery: 0,
+    });
+    expect(result.outcome).toBe("OK");
+    expect(result.endState).toBe("budget");
+    // The snapshot is the final frame's, exactly as continuous play reports
+    // it (`seed 116 OK b2 t1699 1000000f ... budget`).
+    expect(result.frames).toBe(5_000);
+    expect(result.hangSurface).toBeUndefined();
+  });
+
+  it("(b) --first-round still reports HANG on a genuine zero-progress stall, from inside the loop", () => {
+    // Same cheapest-exact-trip construction as the ISSUES #104 pin above:
+    // `stallFrames: 1` makes frame 2 -- the first frame whose progress
+    // signals are unchanged -- the stall, so the HANG lands ~3 frames in,
+    // three orders of magnitude short of the budget. Before the fix this
+    // mode had no in-loop stall check at all and could only ever HANG by
+    // exhausting `maxFrames`.
+    const stalled = runSeed(0, {
+      policy: "winning",
+      stopAtFirstRoundDecision: true,
+      stallFrames: 1,
+      maxFrames: 5_000,
+      renderEvery: 0,
+    });
+    expect(stalled.outcome).toBe("HANG");
+    expect(stalled.hangSurface).toBeTruthy();
+    expect(stalled.frames).toBeLessThanOrEqual(3);
+  });
+
+  it("(c) --milestone shares the rule: a budget reached while progressing is OK/\"budget\", and the milestone pins still fail on it", () => {
+    // `stopAtFirstActionMenu` sat in the same post-loop branch, and nothing
+    // pinned its budget exhaustion as HANG, so it gets the same semantics:
+    // "the action menu never arrived" is not evidence of a stall by itself.
+    // The mode's own target stays readable from `endState` -- 500 frames is
+    // well short of the ~1.4-1.6k-frame draft->intro route, so the
+    // milestone pins above (which assert endState
+    // "milestone:first-action-menu") would still fail here.
+    const result = runSeed(0, {
+      policy: "winning",
+      stopAtFirstActionMenu: true,
+      maxFrames: 500,
+      renderEvery: 0,
+    });
+    expect(result.outcome).toBe("OK");
+    expect(result.endState).toBe("budget");
+    expect(result.endState).not.toBe("milestone:first-action-menu");
+  });
+});
+
 // Fabricates only the fields RandomPlayer.trackProgress reads
 // (round.rules.battleIndex, config.id, battleCommandPresentation.request.
 // requestId) -- a mechanism-level probe of the driver's own bookkeeping, not

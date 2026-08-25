@@ -3593,17 +3593,15 @@ export function advanceBattleScriptAttackCancelerBide(
       targetLabel: "BattleScript_BideNoEnergyToAttack",
     });
   } else if (encodedBefore === 1) {
+    // `gBattlerTarget = gBideTarget[gBattlerAttacker]` verbatim
+    // (battle_util.c:2236). Source imposes no shape on the saved battler --
+    // it is whatever `Cmd_datahpupdate` last recorded while this battler was
+    // storing (`gBattlerAttacker` for a BS_TARGET update, otherwise the then-
+    // current `gBattlerTarget`, battle_script_commands.c:1913-1916) -- so no
+    // "must be the opposing slot" invariant is asserted here. The paired
+    // `gAbsentBattlerFlags` re-target through GetMoveTarget is the barrier
+    // already taken above.
     const savedTarget = rulesContext.bideTarget[attacker];
-    const expectedSinglesTarget = (attacker ^ 1) as BattleScriptBattlerId;
-    if (
-      savedTarget !== expectedSinglesTarget
-      || rulesContext.battlers[savedTarget].side === sourceBattler.side
-    ) {
-      throw new Error(
-        `gBideTarget[${attacker}] must be the opposing active singles slot `
-        + `${expectedSinglesTarget}, got ${savedTarget}`,
-      );
-    }
     reason = "released-attack";
     nextCurrentMove = BATTLE_SCRIPT_MOVE_BIDE;
     nextCurrentMoveEffect = resolveBattleScriptCurrentMoveEffect(

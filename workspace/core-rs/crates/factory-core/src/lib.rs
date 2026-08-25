@@ -47,6 +47,8 @@ pub mod battle_script_painsplit;
 pub mod battle_script_painsplit_vectors_gen;
 pub mod battle_script_recoverbasedonsunlight;
 pub mod battle_script_recoverbasedonsunlight_vectors_gen;
+pub mod battle_script_refresh;
+pub mod battle_script_refresh_vectors_gen;
 pub mod battle_script_remaininghptopower;
 pub mod battle_script_remaininghptopower_vectors_gen;
 pub mod battle_script_setalwayshitflag;
