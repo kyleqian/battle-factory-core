@@ -17,6 +17,7 @@ import {
   stepBattleScriptMachine,
   type BattleScriptMachineState,
 } from "./battleScriptMachine.ts";
+import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import { loadBattleScriptProgram } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
@@ -475,6 +476,12 @@ export function initializeFreshFactoryBattle(
       scriptingBattler: battler,
       lastUsedAbility: INTIMIDATE_ID,
     });
+    // `AbilityBattleEffects` records `(battler, gLastUsedAbility)` on every
+    // successful dispatch below ABILITYEFFECT_CHECK_OTHER_SIDE
+    // (`battle_util.c:3194-3195`), and the battle-start ABILITYEFFECT_INTIMIDATE1
+    // dispatch passes the LITERAL 0 (`battle_main.c:3880`) — so the record lands
+    // on battler 0, the player's slot, whoever holds Intimidate.
+    rulesContextBeforeB = recordBattleScriptAbilityReveal(rulesContextBeforeB, 0, INTIMIDATE_ID);
     const resolved = runEntryScript(
       "BattleScript_IntimidateActivatesEnd3",
       rulesContextBeforeB,
@@ -506,6 +513,10 @@ export function initializeFreshFactoryBattle(
         partyIndex: rulesContextBeforeB.battlers[opposing].partyIndex,
       }),
     });
+    // Same record tail, and the battle-start ABILITYEFFECT_TRACE dispatch also
+    // passes the LITERAL 0 (`battle_main.c:3882`): the COPIED ability is
+    // recorded onto battler 0, not onto the tracer.
+    rulesContextBeforeB = recordBattleScriptAbilityReveal(rulesContextBeforeB, 0, copiedAbility);
     const resolved = runEntryScript("BattleScript_TraceActivates", rulesContextBeforeB, rngBeforeB);
     rulesContextBeforeB = resolved.rulesContext;
     lifecycleEvents.push(...resolved.events);

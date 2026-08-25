@@ -717,11 +717,17 @@ function nextGetAbilityDraw(
   reason: string,
   target: FactoryAiCheckBadMoveTarget,
 ): Readonly<{ rng: BattleRngState; draw: FactoryAiCheckBadMoveDraw | null; ability: string }> {
-  if (TRAPPER_ABILITIES.has(target.realAbility)) {
-    return { rng, draw: null, ability: target.realAbility };
-  }
+  // `Cmd_get_ability` tests `BATTLE_HISTORY->abilities[battler]` FIRST and
+  // returns immediately when it is non-zero; only then does it fall through to
+  // the Shadow Tag / Magnet Pull / Arena Trap shortcut and the two-ability
+  // `Random() & 1` guess. Order matters now that battle-start Intimidate/Trace
+  // record onto battler 0 (`battle_util.c:3194-3195` + `battle_main.c:3880/3882`),
+  // so a recorded ability can differ from the occupant's real one.
   if (target.knownAbility !== null) {
     return { rng, draw: null, ability: target.knownAbility };
+  }
+  if (TRAPPER_ABILITIES.has(target.realAbility)) {
+    return { rng, draw: null, ability: target.realAbility };
   }
   const species = SPECIES_BY_ID.get(target.species);
   if (!species) throw new Error(`factory-ai-check-bad-move: unknown species ${target.species}`);
@@ -769,11 +775,14 @@ const ABILITY_OWN_TEMPO = "ABILITY_OWN_TEMPO";
  * ported exactly rather than "simplified" to a coin flip.
  */
 function checkAbilityAiTarget(target: FactoryAiCheckBadMoveTarget, wantedAbility: string): boolean {
-  if (TRAPPER_ABILITIES.has(target.realAbility)) {
-    return target.realAbility === wantedAbility;
-  }
+  // `Cmd_check_ability` has the same history-before-trapper order as
+  // `Cmd_get_ability` (`BATTLE_HISTORY->abilities[battler] != ABILITY_NONE`
+  // is the first `if`, the trapper shortcut its `else if`).
   if (target.knownAbility !== null) {
     return target.knownAbility === wantedAbility;
+  }
+  if (TRAPPER_ABILITIES.has(target.realAbility)) {
+    return target.realAbility === wantedAbility;
   }
   const species = SPECIES_BY_ID.get(target.species);
   if (!species) throw new Error(`factory-ai-check-bad-move: unknown species ${target.species}`);
