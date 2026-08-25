@@ -71,6 +71,17 @@
 //   --milestone        stop each seed at battle 1's first action menu (the
 //                      Tier-1 pin surface)
 //   --verbose          per-action log for a single-seed repro
+//   --parallel N       opt-in: run the seed list as N contiguous slices in N
+//                      child processes of this same script (default 1 =
+//                      today's single-process behaviour, byte-identical
+//                      output). Seeds are independent runs of runSeed(), so
+//                      each slice's per-seed results are exactly what the
+//                      serial run would have produced; the parent buffers
+//                      each child's per-seed lines and prints them in
+//                      ASCENDING seed order (never interleaved), then prints
+//                      the SAME summary blocks computed from the merged
+//                      results. Exits non-zero if any child does; child
+//                      stderr is forwarded. Ignored for a --seed run.
 //   --json PATH        also write the full per-seed results as JSON
 //   --coverage-json PATH  opt-in: aggregate, ACROSS ALL SEEDS of this run,
 //                      which moves / move effects / species / abilities /
@@ -81,8 +92,17 @@
 //                      byte-identical to today (see
 //                      tools/soak/randomRoundSoakCoverage.ts).
 
-import { writeFileSync } from "node:fs";
-import { SoakCoverageCollector } from "./randomRoundSoakCoverage.ts";
+import { spawn } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  coverageSummaryLines,
+  mergeCoverageReports,
+  SoakCoverageCollector,
+  type SoakCoverageReport,
+} from "./randomRoundSoakCoverage.ts";
 import {
   createStartCarryState,
   DEFAULT_STALL_FRAMES,
@@ -95,107 +115,194 @@ import {
   type SoakPolicy,
 } from "./randomRoundSoakDriver.ts";
 
-function main(): void {
-  const args = process.argv.slice(2);
-  const getFlag = (name: string): string | null => {
-    const index = args.indexOf(name);
-    return index >= 0 && index + 1 < args.length ? args[index + 1]! : null;
-  };
-  const verbose = args.includes("--verbose");
-  const milestone = args.includes("--milestone");
-  const varyRng = args.includes("--vary-rng");
-  const firstRound = args.includes("--first-round");
-  const singleSeed = getFlag("--seed");
-  const seedsRange = getFlag("--seeds") ?? "0:50";
-  const renderEvery = Number(getFlag("--render-every") ?? 8);
-  const policy = (getFlag("--policy") ?? "full") as SoakPolicy;
-  const jsonPath = getFlag("--json");
-  const coverageJsonPath = getFlag("--coverage-json");
-  if (
-    policy !== "full" && policy !== "vanilla" && policy !== "winning"
-    && policy !== "winning-swap" && policy !== "oracle-strength"
-    && policy !== "winning-coverage" && policy !== "winning-combined"
-  ) {
-    console.error(
-      `bad --policy: ${policy} `
-        + `(want full|vanilla|winning|winning-swap|oracle-strength|winning-coverage|winning-combined)`,
+// ---------------------------------------------------------------------------
+// --parallel fan-out (parent side)
+// ---------------------------------------------------------------------------
+
+const SCRIPT_PATH = fileURLToPath(import.meta.url);
+
+/**
+ * Flags the parent REPLACES for each child: the seed selection it slices and
+ * the two output paths it redirects to per-slice temp files. Every other flag
+ * (policy, budgets, --vary-rng, --first-round, --verbose, …) is passed through
+ * verbatim, so a slice runs the parent's exact configuration.
+ */
+const PARENT_ONLY_VALUE_FLAGS = ["--parallel", "--seed", "--seeds", "--json", "--coverage-json"];
+
+function childArgs(
+  args: readonly string[],
+  seedStart: number,
+  seedEnd: number,
+  jsonPath: string,
+  coverageJsonPath: string | null,
+): string[] {
+  const kept: string[] = [];
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index]!;
+    // Each of these carries a value; skip both tokens.
+    if (PARENT_ONLY_VALUE_FLAGS.includes(arg)) {
+      index += 1;
+      continue;
+    }
+    kept.push(arg);
+  }
+  kept.push("--seeds", `${seedStart}:${seedEnd}`, "--json", jsonPath);
+  if (coverageJsonPath !== null) kept.push("--coverage-json", coverageJsonPath);
+  return kept;
+}
+
+/**
+ * Contiguous, near-equal slices of an ascending seed list, as the half-open
+ * `--seeds A:B` ranges the children take. The first `length % sliceCount`
+ * slices carry one extra seed; empty slices are dropped.
+ */
+function sliceSeeds(
+  seeds: readonly number[],
+  sliceCount: number,
+): { start: number; end: number }[] {
+  const slices: { start: number; end: number }[] = [];
+  const base = Math.floor(seeds.length / sliceCount);
+  const remainder = seeds.length % sliceCount;
+  let index = 0;
+  for (let slice = 0; slice < sliceCount; slice += 1) {
+    const size = base + (slice < remainder ? 1 : 0);
+    if (size === 0) continue;
+    slices.push({ start: seeds[index]!, end: seeds[index + size - 1]! + 1 });
+    index += size;
+  }
+  return slices;
+}
+
+/** One child's captured stdout plus its exit status (stderr is inherited). */
+function runChild(childArgv: readonly string[]): Promise<{ code: number; stdout: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(
+      process.execPath,
+      ["--experimental-strip-types", SCRIPT_PATH, ...childArgv],
+      // stderr is inherited, so a child's diagnostics reach the parent's
+      // stderr as they happen instead of being buffered and reordered.
+      { stdio: ["ignore", "pipe", "inherit"] },
     );
-    process.exit(2);
-  }
-  const maxFramesFlag = getFlag("--max-frames");
-  const maxFrames = resolveMaxFrames(policy, maxFramesFlag !== null ? Number(maxFramesFlag) : undefined);
-  const stallFramesFlag = getFlag("--stall-frames");
-  const stallFrames = stallFramesFlag !== null ? Number(stallFramesFlag) : DEFAULT_STALL_FRAMES;
-  const maxRoundsFlag = getFlag("--max-rounds");
-  const maxRounds = maxRoundsFlag !== null ? Number(maxRoundsFlag) : undefined;
-  const startCarryFlag = getFlag("--start-carry");
-  const startCarry = startCarryFlag !== null ? Number(startCarryFlag) : 0;
-  try {
-    validateStartCarry(startCarry);
-  } catch (error) {
-    console.error((error as Error).message);
-    process.exit(2);
-  }
+    const chunks: string[] = [];
+    child.stdout.setEncoding("utf8");
+    child.stdout.on("data", (chunk: string) => chunks.push(chunk));
+    child.on("error", reject);
+    child.on("close", (code) => resolve({ code: code ?? 1, stdout: chunks.join("") }));
+  });
+}
 
-  let seeds: number[];
-  if (singleSeed !== null) {
-    seeds = [Number(singleSeed)];
-  } else {
-    const match = seedsRange.match(/^(-?\d+):(-?\d+)$/);
-    if (!match) {
-      console.error(`bad --seeds range: ${seedsRange} (want A:B)`);
-      process.exit(2);
-    }
-    const [start, end] = [Number(match![1]), Number(match![2])];
-    seeds = Array.from({ length: Math.max(0, end - start) }, (_, i) => start + i);
-  }
+/**
+ * A child's per-seed lines only: everything it printed before its own
+ * `=== soak summary` block (verbose stack/action lines included, blank
+ * separator trimmed). The parent prints the summary itself, from the merged
+ * results.
+ */
+function perSeedLines(stdout: string): string[] {
+  const lines = stdout.split("\n");
+  const summaryIndex = lines.findIndex((line) => line.startsWith("=== soak summary"));
+  const head = summaryIndex >= 0 ? lines.slice(0, summaryIndex) : lines;
+  while (head.length > 0 && head[head.length - 1] === "") head.pop();
+  return head;
+}
 
-  // Constructed only when the flag is present, so a flagless run never
-  // enters a single line of the instrument.
-  const coverage = coverageJsonPath !== null ? new SoakCoverageCollector(policy) : null;
-
-  const options: Partial<RunOptions> = {
-    maxFrames,
-    renderEvery,
-    verbose,
-    policy,
-    stopAtFirstActionMenu: milestone,
-    stopAtFirstRoundDecision: firstRound,
-    stallFrames,
-    maxRounds,
-    ...(startCarry !== 0 || varyRng
-      ? { stateFactory: (seed: number) => createStartCarryState(startCarry, varyRng ? seed : 0) }
-      : {}),
-    ...(coverage !== null ? { coverage } : {}),
-  };
-  const results: SeedResult[] = [];
+/**
+ * Runs the seed list as `parallel` contiguous slices in child processes of
+ * this same script and reassembles their output as if it had been one serial
+ * run: per-seed lines buffered per child and emitted in ascending seed order,
+ * then the shared summary blocks over the merged results. Sets a non-zero
+ * exit code if any child failed (a CRASH *seed* is a normal finding and still
+ * exits 0, exactly as in the serial path).
+ */
+async function runParallelFanOut(options: {
+  args: readonly string[];
+  seeds: readonly number[];
+  parallel: number;
+  policy: SoakPolicy;
+  jsonPath: string | null;
+  coverageJsonPath: string | null;
+}): Promise<void> {
+  const { args, seeds, parallel, policy, jsonPath, coverageJsonPath } = options;
+  const temporaryDirectory = mkdtempSync(join(tmpdir(), "soak-parallel-"));
   const startedAt = Date.now();
+  let failed = false;
+  try {
+    const plans = sliceSeeds(seeds, Math.min(parallel, seeds.length)).map((slice, index) => ({
+      slice,
+      jsonPath: join(temporaryDirectory, `slice-${index}.json`),
+      coverageJsonPath: coverageJsonPath !== null
+        ? join(temporaryDirectory, `slice-${index}-coverage.json`)
+        : null,
+    }));
+    const runs = await Promise.all(plans.map((plan) =>
+      runChild(childArgs(args, plan.slice.start, plan.slice.end, plan.jsonPath, plan.coverageJsonPath))
+    ));
 
-  for (const seed of seeds) {
-    const seedStart = Date.now();
-    const result = runSeed(seed, options);
-    results.push(result);
-    const elapsed = ((Date.now() - seedStart) / 1000).toFixed(1);
-    const head = `seed ${String(seed).padStart(4)}  ${result.outcome.padEnd(5)}`
-      + `  b${result.battle} t${result.turn}  ${String(result.frames).padStart(6)}f  ${elapsed}s`;
-    const depthSuffix = `  carry<=${result.maxCarriedWinStreak ?? "-"} depth<=${result.maxBattleDepth ?? "-"}`;
-    if (result.outcome === "OK") {
-      console.log(`${head}  ${result.endState}${depthSuffix}`);
-    } else if (result.outcome === "CRASH") {
-      console.log(`${head}  [${result.errorOrigin}/${result.errorPhase}] ${result.errorName}: ${result.errorMessage}${depthSuffix}`);
-      if (verbose) {
-        for (const frame of result.stackTop ?? []) console.log(`    ${frame}`);
-        for (const action of result.lastActions ?? []) console.log(`    ${action}`);
+    // Slice order IS ascending seed order, and each child's own lines are
+    // ascending within its slice: printing them buffered, child by child,
+    // reproduces the serial ordering exactly (never interleaved).
+    for (const run of runs) {
+      for (const line of perSeedLines(run.stdout)) console.log(line);
+    }
+
+    const results: SeedResult[] = [];
+    const coverageReports: SoakCoverageReport[] = [];
+    for (const [index, plan] of plans.entries()) {
+      const run = runs[index]!;
+      const label = `slice ${plan.slice.start}:${plan.slice.end}`;
+      if (run.code !== 0) {
+        failed = true;
+        console.error(`soak --parallel: ${label} exited ${run.code}`);
       }
-    } else {
-      const decidedSuffix = result.endState ? ` (decided: ${result.endState})` : "";
-      console.log(`${head}  stuck at ${result.hangSurface}${decidedSuffix}${depthSuffix}`);
-      if (verbose) {
-        for (const action of result.lastActions ?? []) console.log(`    ${action}`);
+      try {
+        const parsed = JSON.parse(readFileSync(plan.jsonPath, "utf8")) as { results: SeedResult[] };
+        results.push(...parsed.results);
+      } catch (error) {
+        failed = true;
+        console.error(`soak --parallel: ${label} wrote no readable results (${(error as Error).message})`);
+        continue;
+      }
+      if (plan.coverageJsonPath === null) continue;
+      try {
+        coverageReports.push(
+          JSON.parse(readFileSync(plan.coverageJsonPath, "utf8")) as SoakCoverageReport,
+        );
+      } catch (error) {
+        failed = true;
+        console.error(`soak --parallel: ${label} wrote no readable coverage (${(error as Error).message})`);
       }
     }
-  }
 
+    const counts = printSoakSummary(results, policy, ((Date.now() - startedAt) / 1000).toFixed(1));
+
+    if (jsonPath) {
+      writeFileSync(jsonPath, JSON.stringify({ counts, results }, null, 2));
+      console.log(`\nwrote ${jsonPath}`);
+    }
+    if (coverageJsonPath !== null && coverageReports.length > 0) {
+      const merged = mergeCoverageReports(coverageReports);
+      console.log("");
+      for (const line of coverageSummaryLines(merged)) console.log(line);
+      writeFileSync(coverageJsonPath, JSON.stringify(merged, null, 2));
+      console.log(`wrote ${coverageJsonPath}`);
+    }
+  } finally {
+    rmSync(temporaryDirectory, { recursive: true, force: true });
+  }
+  if (failed) process.exitCode = 1;
+}
+
+/**
+ * The whole post-run stdout tail -- `=== soak summary`, the depth
+ * distribution, the OK breakdown, and the CRASH/HANG signature groups --
+ * plus the outcome counts that go into `--json`. Called by BOTH the serial
+ * path (on the seeds it just ran) and the `--parallel` parent (on the merged
+ * results of every slice), so a fan-out prints exactly the serial blocks.
+ */
+function printSoakSummary(
+  results: readonly SeedResult[],
+  policy: SoakPolicy,
+  totalSeconds: string,
+): Record<SeedOutcome, number> {
   // Aggregate
   const counts = { OK: 0, CRASH: 0, HANG: 0 } as Record<SeedOutcome, number>;
   const bySignature = new Map<string, SeedResult[]>();
@@ -214,7 +321,6 @@ function main(): void {
     }
   }
 
-  const totalSeconds = ((Date.now() - startedAt) / 1000).toFixed(1);
   console.log("");
   console.log(`=== soak summary: ${results.length} seeds (policy ${policy}) in ${totalSeconds}s ===`);
   // `budget` is a subset of OK (broken out again in the OK breakdown
@@ -276,6 +382,125 @@ function main(): void {
     console.log(`  first at: seed ${sample.seed}, battle ${sample.battle}, turn ${sample.turn}, frame ${sample.frames}`);
   }
 
+  return counts;
+}
+
+async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+  const getFlag = (name: string): string | null => {
+    const index = args.indexOf(name);
+    return index >= 0 && index + 1 < args.length ? args[index + 1]! : null;
+  };
+  const verbose = args.includes("--verbose");
+  const milestone = args.includes("--milestone");
+  const varyRng = args.includes("--vary-rng");
+  const firstRound = args.includes("--first-round");
+  const singleSeed = getFlag("--seed");
+  const seedsRange = getFlag("--seeds") ?? "0:50";
+  const renderEvery = Number(getFlag("--render-every") ?? 8);
+  const policy = (getFlag("--policy") ?? "full") as SoakPolicy;
+  const jsonPath = getFlag("--json");
+  const coverageJsonPath = getFlag("--coverage-json");
+  const parallelFlag = getFlag("--parallel");
+  const parallel = parallelFlag !== null ? Number(parallelFlag) : 1;
+  if (!Number.isInteger(parallel) || parallel < 1) {
+    console.error(`bad --parallel: ${parallelFlag} (want a positive integer)`);
+    process.exit(2);
+  }
+  if (
+    policy !== "full" && policy !== "vanilla" && policy !== "winning"
+    && policy !== "winning-swap" && policy !== "oracle-strength"
+    && policy !== "winning-coverage" && policy !== "winning-combined"
+  ) {
+    console.error(
+      `bad --policy: ${policy} `
+        + `(want full|vanilla|winning|winning-swap|oracle-strength|winning-coverage|winning-combined)`,
+    );
+    process.exit(2);
+  }
+  const maxFramesFlag = getFlag("--max-frames");
+  const maxFrames = resolveMaxFrames(policy, maxFramesFlag !== null ? Number(maxFramesFlag) : undefined);
+  const stallFramesFlag = getFlag("--stall-frames");
+  const stallFrames = stallFramesFlag !== null ? Number(stallFramesFlag) : DEFAULT_STALL_FRAMES;
+  const maxRoundsFlag = getFlag("--max-rounds");
+  const maxRounds = maxRoundsFlag !== null ? Number(maxRoundsFlag) : undefined;
+  const startCarryFlag = getFlag("--start-carry");
+  const startCarry = startCarryFlag !== null ? Number(startCarryFlag) : 0;
+  try {
+    validateStartCarry(startCarry);
+  } catch (error) {
+    console.error((error as Error).message);
+    process.exit(2);
+  }
+
+  let seeds: number[];
+  if (singleSeed !== null) {
+    seeds = [Number(singleSeed)];
+  } else {
+    const match = seedsRange.match(/^(-?\d+):(-?\d+)$/);
+    if (!match) {
+      console.error(`bad --seeds range: ${seedsRange} (want A:B)`);
+      process.exit(2);
+    }
+    const [start, end] = [Number(match![1]), Number(match![2])];
+    seeds = Array.from({ length: Math.max(0, end - start) }, (_, i) => start + i);
+  }
+
+  // Opt-in process fan-out. A --seed run (and a degenerate 1-seed range) has
+  // nothing to split, so it stays in-process regardless of --parallel.
+  if (singleSeed === null && parallel > 1 && seeds.length > 1) {
+    await runParallelFanOut({ args, seeds, parallel, policy, jsonPath, coverageJsonPath });
+    return;
+  }
+
+  // Constructed only when the flag is present, so a flagless run never
+  // enters a single line of the instrument.
+  const coverage = coverageJsonPath !== null ? new SoakCoverageCollector(policy) : null;
+
+  const options: Partial<RunOptions> = {
+    maxFrames,
+    renderEvery,
+    verbose,
+    policy,
+    stopAtFirstActionMenu: milestone,
+    stopAtFirstRoundDecision: firstRound,
+    stallFrames,
+    maxRounds,
+    ...(startCarry !== 0 || varyRng
+      ? { stateFactory: (seed: number) => createStartCarryState(startCarry, varyRng ? seed : 0) }
+      : {}),
+    ...(coverage !== null ? { coverage } : {}),
+  };
+  const results: SeedResult[] = [];
+  const startedAt = Date.now();
+
+  for (const seed of seeds) {
+    const seedStart = Date.now();
+    const result = runSeed(seed, options);
+    results.push(result);
+    const elapsed = ((Date.now() - seedStart) / 1000).toFixed(1);
+    const head = `seed ${String(seed).padStart(4)}  ${result.outcome.padEnd(5)}`
+      + `  b${result.battle} t${result.turn}  ${String(result.frames).padStart(6)}f  ${elapsed}s`;
+    const depthSuffix = `  carry<=${result.maxCarriedWinStreak ?? "-"} depth<=${result.maxBattleDepth ?? "-"}`;
+    if (result.outcome === "OK") {
+      console.log(`${head}  ${result.endState}${depthSuffix}`);
+    } else if (result.outcome === "CRASH") {
+      console.log(`${head}  [${result.errorOrigin}/${result.errorPhase}] ${result.errorName}: ${result.errorMessage}${depthSuffix}`);
+      if (verbose) {
+        for (const frame of result.stackTop ?? []) console.log(`    ${frame}`);
+        for (const action of result.lastActions ?? []) console.log(`    ${action}`);
+      }
+    } else {
+      const decidedSuffix = result.endState ? ` (decided: ${result.endState})` : "";
+      console.log(`${head}  stuck at ${result.hangSurface}${decidedSuffix}${depthSuffix}`);
+      if (verbose) {
+        for (const action of result.lastActions ?? []) console.log(`    ${action}`);
+      }
+    }
+  }
+
+  const counts = printSoakSummary(results, policy, ((Date.now() - startedAt) / 1000).toFixed(1));
+
   if (jsonPath) {
     writeFileSync(jsonPath, JSON.stringify({ counts, results }, null, 2));
     console.log(`\nwrote ${jsonPath}`);
@@ -289,4 +514,7 @@ function main(): void {
   }
 }
 
-main();
+main().catch((error: unknown) => {
+  console.error(error);
+  process.exit(1);
+});

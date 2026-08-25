@@ -488,28 +488,120 @@ export class SoakCoverageCollector {
 
   /** The `=== coverage ===` stdout block (the CLI prints these verbatim). */
   summaryLines(): string[] {
-    const report = this.report();
-    const { run } = report;
-    const seedSpan = run.seedCount === 0
-      ? "none"
-      : `${run.seedCount} (${run.seeds[0]}..${run.seeds[run.seedCount - 1]})`;
-    const lines = [
-      "=== coverage ===",
-      `policy ${run.policy}  seeds ${seedSpan}  battles ${run.battles}`
-        + `  turns ${run.turns}  move actions ${run.executedMoveActions}`,
-    ];
-    const row = (label: string, dimension: CoverageDimensionReport): string =>
-      `${label.padEnd(10)}${String(dimension.observed).padStart(4)}/`
-        + `${String(dimension.universe).padEnd(4)} ${dimension.verb}`
-        + ` (${dimension.never} never)`
-        + (dimension.outsideUniverse.length > 0
-          ? `  [+${dimension.outsideUniverse.length} outside corpus]`
-          : "");
-    lines.push(row("moves", report.moves));
-    lines.push(row("effects", report.effects));
-    lines.push(row("species", report.species));
-    lines.push(row("abilities", report.abilities));
-    lines.push(row("items", report.items));
-    return lines;
+    return coverageSummaryLines(this.report());
   }
+}
+
+/**
+ * The `=== coverage ===` stdout block for ANY report -- a live collector's
+ * (`SoakCoverageCollector.summaryLines`) or a merged one from a `--parallel`
+ * fan-out (`mergeCoverageReports`), so both paths print the same block from
+ * the same code.
+ */
+export function coverageSummaryLines(report: SoakCoverageReport): string[] {
+  const { run } = report;
+  const seedSpan = run.seedCount === 0
+    ? "none"
+    : `${run.seedCount} (${run.seeds[0]}..${run.seeds[run.seedCount - 1]})`;
+  const lines = [
+    "=== coverage ===",
+    `policy ${run.policy}  seeds ${seedSpan}  battles ${run.battles}`
+      + `  turns ${run.turns}  move actions ${run.executedMoveActions}`,
+  ];
+  const row = (label: string, dimension: CoverageDimensionReport): string =>
+    `${label.padEnd(10)}${String(dimension.observed).padStart(4)}/`
+      + `${String(dimension.universe).padEnd(4)} ${dimension.verb}`
+      + ` (${dimension.never} never)`
+      + (dimension.outsideUniverse.length > 0
+        ? `  [+${dimension.outsideUniverse.length} outside corpus]`
+        : "");
+  lines.push(row("moves", report.moves));
+  lines.push(row("effects", report.effects));
+  lines.push(row("species", report.species));
+  lines.push(row("abilities", report.abilities));
+  lines.push(row("items", report.items));
+  return lines;
+}
+
+// ---------------------------------------------------------------------------
+// Merge (the CLI's --parallel fan-out)
+// ---------------------------------------------------------------------------
+
+/**
+ * Rebuilds a dimension's tally from an already-reported dimension's entries.
+ * `DimensionTally.record` only ever adds a positive count, so a zero on one
+ * side means that side never had the key -- reconstructing with `> 0` guards
+ * restores the exact per-side map membership `bySide.distinct` reports.
+ */
+function tallyFromReports<K extends number | string>(
+  dimensions: readonly CoverageDimensionReport[],
+): DimensionTally<K> {
+  const tally = new DimensionTally<K>();
+  for (const dimension of dimensions) {
+    for (const entry of dimension.entries) {
+      if (entry.player > 0) tally.record("player", entry.id as K, entry.player);
+      if (entry.opponent > 0) tally.record("opponent", entry.id as K, entry.opponent);
+    }
+  }
+  return tally;
+}
+
+/**
+ * Merges the per-slice reports of one `--parallel` soak run into the report
+ * the equivalent serial run would have produced: per-id per-side counts sum,
+ * run totals (battles/turns/move actions) sum, seeds concatenate in the given
+ * order, and every DERIVED field (`observed`/`never`/`neverObserved`,
+ * `outsideUniverse`, `bySide`, entry ordering) is RECOMPUTED from the merged
+ * tallies against the Level-50 universe by the same `DimensionTally.report`
+ * the serial path uses -- never unioned by hand, so a move that only one
+ * slice executed correctly drops out of the merged never-list.
+ *
+ * Every report must come from the same policy/schema; the first report's
+ * policy and notes are carried over.
+ */
+export function mergeCoverageReports(
+  reports: readonly SoakCoverageReport[],
+): SoakCoverageReport {
+  const first = reports[0];
+  if (first === undefined) throw new Error("mergeCoverageReports: no reports to merge");
+  const universe = level50Universe();
+  const commits = new Map<number, number>();
+  for (const report of reports) {
+    for (const entry of report.playerFightCommits.entries) {
+      commits.set(entry.id, (commits.get(entry.id) ?? 0) + entry.commits);
+    }
+  }
+  const commitEntries = [...commits.entries()]
+    .map(([id, count]) => Object.freeze({ id, name: moveDisplayName(id), commits: count }))
+    .sort((a, b) => b.commits - a.commits || a.id - b.id);
+  const sum = (pick: (report: SoakCoverageReport) => number): number =>
+    reports.reduce((total, report) => total + pick(report), 0);
+  const seeds = reports.flatMap((report) => [...report.run.seeds]);
+  return Object.freeze({
+    schemaVersion: 1,
+    run: Object.freeze({
+      policy: first.run.policy,
+      seeds: Object.freeze(seeds),
+      seedCount: seeds.length,
+      battles: sum((report) => report.run.battles),
+      turns: sum((report) => report.run.turns),
+      executedMoveActions: sum((report) => report.run.executedMoveActions),
+    }),
+    notes: first.notes,
+    moves: tallyFromReports<number>(reports.map((report) => report.moves))
+      .report("executed", universe.moveIds, moveDisplayName),
+    effects: tallyFromReports<string>(reports.map((report) => report.effects))
+      .report("executed", universe.effects, (effect) => effect),
+    species: tallyFromReports<number>(reports.map((report) => report.species))
+      .report("seen", universe.speciesIds, speciesDisplayName),
+    abilities: tallyFromReports<number>(reports.map((report) => report.abilities))
+      .report("present", universe.abilityIds, abilityDisplayName),
+    items: tallyFromReports<number>(reports.map((report) => report.items))
+      .report("present", universe.itemIds, itemDisplayName),
+    playerFightCommits: Object.freeze({
+      distinct: commitEntries.length,
+      total: commitEntries.reduce((total, entry) => total + entry.commits, 0),
+      entries: Object.freeze(commitEntries),
+    }),
+  });
 }
