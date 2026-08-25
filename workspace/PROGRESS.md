@@ -106,13 +106,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Mid-session gates on `4dbe8fe9`+ (with `--parallel`):** vanilla 0:20
   **20/20**, full 0:60 **60/60**, fifth gate **500/500 ×4** (c14 `budget`
   1 = seed 406, fixed above); winning/winning-swap 0:60 still running.
-- **In flight:** census batch B (winning c0/c14/c28 + winning-swap c0 at
-  113:200, winning-coverage c28, all with coverage; ~68/87 each); then a ts
-  scout merges every coverage JSON into
-  `docs/soak-coverage-baseline-2026-08-25.md` (never-executed lists + why).
-- **Next:** coverage baseline doc; wind-down gates (all five, `--parallel`)
-  + full suite + build on the final tree; `docs/soak-crash-catalog.md`
-  entry for today's census.
+- **Did (round 10):** census batch B COMPLETE and clean (winning c0/c14/
+  c28 + winning-swap c0 at 113:200, winning-coverage c28 13:100, full c28
+  21:100 — **0 CRASH / 0 HANG**; with batch A that is ~1,200 varied full
+  chains + 900 coverage-fight boot rounds today, all clean).
+  **Coverage baseline** (ts opus, 19 min, $2.8; `3e19fd17`, two new files:
+  `docs/soak-coverage-baseline-2026-08-25.md` +
+  `tools/soak/mergeCoverageReports.ts` CLI, my rerun agrees): union of 15
+  coverage JSONs (1,522 seeds, 57,378 battles, 910k turns) — **moves
+  276/276, effects 166/166** (the L50 universe is closed by today's
+  policies), species 252/264 (12 never — the carry-49 tier, closable in
+  ~2.5 seed-min), abilities 70/71 (Trace "never present" = sampling after
+  switch-in overwrote the slot with the copied ability, not a drop), items
+  40/40. `full` is dominated on every dimension — retire it from census
+  duty (gates unchanged).
+- **In flight:** side opus — activation counting for abilities/items in the
+  coverage instrument (`worker/side-20260825-125010`); coverage-fight
+  first-round carry 49 0:300 (species-gap closer).
+- **Next:** fold the activation instrument; wind-down gates (all five,
+  `--parallel`) + full suite + build on the final tree;
+  `docs/soak-crash-catalog.md` entry for today's census.
 
 ---
 
