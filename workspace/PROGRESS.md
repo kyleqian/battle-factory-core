@@ -5,9 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1398 — [supervisor, 2026-08-25 ~09:00, IN PROGRESS] **Orient: animation folded (fast-forward onto its own master-sync `dbe18b3d`; Screech exact, 208/276), union suite green; census batch A + #125 lever + premise-throw audit launched**
+## 1398 — [supervisor wind-down, 2026-08-25 ~14:00] **Instrument + census day: premise-throw audit (50/50 classified; its top finding refuted by supervisor), #127 found+fixed with a stock-ROM receipt, #125 CLOSED (2 levers + a trap-gate regression), soak `--coverage-json` / `--policy coverage-fight` / `--parallel N` landed; ~2,400 varied chains and boot rounds 0 CRASH / 0 HANG; move+effect universe 276/276 + 166/166 executed; all five gates green on the final tree**
 
-- **State:** master = `dbe18b3d` = `animation-main` tip. The live animation
+- **Final gates on THIS tree (`679b3ade`, supervisor's own runs, all
+  `--parallel`):** vanilla 0:20 **20/20**, full 0:60 **60/60**, winning
+  0:60 **60/60**, winning-swap 0:60 **60/60**; fifth gate — winning
+  `--vary-rng --first-round` carry 0 **500/500**, carry 14 **500/500**,
+  carry 28 **500/500**, winning-swap carry 0 **500/500** — **`budget` 0 on
+  all four** (baseline had 2 at carry 14). Full `npm test` **1,129 files /
+  10,513 passed / 224 skipped**; `npm run build` green. DEFERRED.md: no
+  open entries. ISSUES closed today: **#125, #127** (filed + fixed same
+  day); open: #124 (Rust lane — its un-skip is on `rust-main`, see the fold
+  note at the end), #121 (dormant, lead added), #109/#114 (doubles-era),
+  #71/#73/#39/#55 (parked). Worker spend ≈ $45 over 11 rounds (0 failed
+  steps; 2 cap-kills and 1 sibling-kill salvaged with the work committed).
+- **Orient state:** master = `dbe18b3d` = `animation-main` tip. The live animation
   supervisor merged master `33592cba` into its branch at 08:48; my fold then
   fast-forwarded master onto that merge — one commit, both branches converge
   (4 animation commits folded: Screech Scene-ON exact + ratchets). `rust-main`
@@ -131,8 +143,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **12/71 activated**, items 22/40 present · **11/40 activated**. Docs
   (`4871e189`): SUPERVISOR.md gate text gains `--parallel` + the
   no-pattern-kill rule; `docs/soak-crash-catalog.md` entry for today.
-- **Next:** wind-down — five gates (`--parallel`) + full suite + build on
-  the final tree; coverage-fight carry-49 species-gap sweep result.
+- **Carry-49 sweep** (coverage-fight first-round 0:300): **300/300 OK**
+  (1 `budget`); union coverage over all 16 reports → species **263/264**
+  (only UNOWN never drafted), abilities 70/71 (Trace = overwritten at
+  switch-in by the copied ability, `battle_util.c` ABILITYEFFECT_TRACE —
+  instrument sampling, not a drop), moves/effects/items 100%.
+- **Sibling folds:** both sibling Codex supervisors were live all day
+  (caps 14:48). At ~14:00 `animation-main` is 16 ahead (Scene-ON
+  `battleScene.ts` draw cases + `src/animation`/`tests/animation`/
+  `tools/compare` evidence) and `rust-main` 9 ahead (Helping Hand /
+  jumpifabilitypresent / Encore ports + the **#124 un-skip** in
+  `tests/factoryAiCheckViabilityParity.test.ts`; nothing under `src/`).
+  Fold + cargo/wasm/parity verification runs after their caps end — result
+  appended below; the five gates above stand either way because neither
+  branch touches the Scene-OFF engine.
+- **Next session:** (1) if `rust-main` folded green, delete #124; (2) more
+  census is cheap now (`--parallel`, coverage-fight at carry 49, seeds
+  ≥ 300) but the universe is closed — the next crash finder is
+  INTERACTION coverage (never-activated abilities/items from the activation
+  dimension; stage them via `mechanicLab`), not more seeds; (3) filler:
+  `tools/probe/premise-census.py` (PAPERCUTS), broaden coverage "presence"
+  to the whole party, retire `--policy full` from census duty (gate stays);
+  (4) parked: #71/#73/#39/#55; dormant #121; doubles-era #109/#114.
 
 ---
 
