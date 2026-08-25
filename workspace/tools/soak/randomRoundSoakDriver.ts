@@ -1023,7 +1023,7 @@ export type SeedResult = {
   outcome: SeedOutcome;
   /**
    * OK sub-outcome: "budget" (frame budget reached while still making
-   * progress — ISSUES #104 retune; since 2026-08-20 that includes the
+   * progress — ISSUES #104 retune; since 2026-08-24 that includes the
    * `stopAtFirstRoundDecision`/`stopAtFirstActionMenu` modes, whose target
    * simply never arrived), "max-rounds" (`--max-rounds` reached),
    * roundComplete | roundLost | milestone:first-action-menu. Also set on a
@@ -2251,7 +2251,7 @@ export type RunOptions = {
    * Frames of zero observed progress (see `DEFAULT_STALL_FRAMES`) before a
    * run reports HANG. Applies to every mode, `stopAtFirstRoundDecision`
    * included (ISSUES #104 driver retune, PROGRESS ~1368; extended to the
-   * milestone modes 2026-08-20). `stopAtFirstRoundDecision` additionally
+   * milestone modes 2026-08-24). `stopAtFirstRoundDecision` additionally
    * keeps its own bounded post-decision grace window, which — being much
    * shorter than the default stall window — normally settles a decided
    * round first.
@@ -2563,7 +2563,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   // not HANG (ISSUES #104 retune: a run that keeps chaining rounds forever
   // is not "stuck", it simply outlived its budget).
   //
-  // Since 2026-08-20 that holds for the milestone modes too: both
+  // Since 2026-08-24 that holds for the milestone modes too: both
   // `stopAtFirstRoundDecision` and `stopAtFirstActionMenu` now run the same
   // in-loop stall check, so "the milestone never arrived" is by itself no
   // evidence of a hang — a still-progressing run reads `OK ... budget` here
