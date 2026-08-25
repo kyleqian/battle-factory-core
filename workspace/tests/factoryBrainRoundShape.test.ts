@@ -240,11 +240,21 @@ function assertBrainRoundOutcome(
 
 // Silver: entering factoryWinStreak 14 (challenge index 2), symbols 0 —
 // battleIndex 6's effective streak is 20, the silver threshold.
-const SILVER_SEED = 4;
+//
+// The two seeds are curated only for "the move-slot-0 policy wins all six
+// ordinary battles"; every assertion below is structural (which battleIndex
+// is the brain, and the cursor handoff), not seed-valued. Re-scanned for
+// ISSUES #128 (silver 4 -> 1, gold 2 -> 8): recording battle-start
+// Intimidate/Trace onto aiObservedAbilityIds[0] removes the AI's
+// `get_ability` draws against two-ability player mons, which shifts every
+// trajectory riding the shared RNG cursor, and the old seeds now lose before
+// the sixth win. `driveToSixthWin`'s own "pick a different seed" throw is the
+// designed remedy.
+const SILVER_SEED = 1;
 const SILVER_STREAK = 14;
 // Gold: entering factoryWinStreak 35 (challenge index 5), symbols 1 —
 // battleIndex 6's effective streak is 41, the gold threshold.
-const GOLD_SEED = 2;
+const GOLD_SEED = 8;
 const GOLD_STREAK = 35;
 
 describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)", () => {

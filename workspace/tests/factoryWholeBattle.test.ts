@@ -213,7 +213,7 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
     expect(state.boundary).toEqual({ kind: "terminal", outcome: "player-win" });
     if (state.boundary.kind !== "terminal") throw new Error("expected terminal boundary");
     expect(forcedSwitches).toBe(1);
-    expect(aiChosenSubmissions).toHaveLength(12);
+    expect(aiChosenSubmissions).toHaveLength(13);
     expect(aiChosenSubmissions.every((entry) => entry.side === "trainer")).toBe(true);
     expect(aiDecisionDrawRanges.every(([before, after]) => after > before)).toBe(true);
     for (let decision = 1; decision < aiDecisionDrawRanges.length; decision += 1) {
@@ -227,11 +227,21 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
     // continuing-turn boundary draws share one cursor. Repeated entries are
     // player/forced-switch submissions (zero draws); no transition resets or
     // splices the stream.
+    // Re-pinned for ISSUES #128 (was 12 AI decisions ending at cursor 196).
+    // Granbull leads with Intimidate, so battle start now records
+    // ABILITY_INTIMIDATE onto aiObservedAbilityIds[0] exactly as the ROM's
+    // RecordAbilityBattle(0, ...) does (battle_main.c:3880 +
+    // battle_util.c:3194-3195). While Azurill (Thick Fat / Huge Power, two
+    // abilities) is the active target that record short-circuits
+    // Cmd_get_ability's `Random() & 1` guess -- the first AI decision drops
+    // from 15 draws to 9. syncFactoryAiBattleHistory clears the cell on the
+    // player's forced replacement, so the later decisions keep their original
+    // 21-draw shape; the battle simply runs one extra turn on the new stream.
     expect(cursorCheckpoints).toEqual([
-      2, 2, 17, 18, 18, 29, 29, 40, 40, 51, 51, 62, 62,
-      // Four later trainer decisions each add absorber reluctance +
+      2, 2, 11, 12, 12, 23, 23, 34, 34, 45, 45, 56, 56, 67, 67,
+      // Later trainer decisions each add absorber reluctance +
       // active-super-effective suppression before the unchanged move policy.
-      83, 83, 104, 104, 126, 126, 148, 148, 164, 164, 180, 180, 196,
+      88, 88, 109, 109, 131, 131, 153, 153, 169, 169, 183, 183, 199,
     ]);
 
     const resolution = deriveBattleResolutionFromTerminalBoundary({
@@ -243,9 +253,9 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
     });
     expect(resolution).toMatchObject({
       outcome: "win",
-      rngValue: expectedRngValue(196),
+      rngValue: expectedRngValue(199),
     });
-    expect(resolution.playerParty.map((member) => member.hp)).toEqual([0, 251, 186]);
+    expect(resolution.playerParty.map((member) => member.hp)).toEqual([0, 236, 186]);
     expect(resolution.opponentParty.map((member) => member.hp)).toEqual([0, 0, 0]);
   });
 });
