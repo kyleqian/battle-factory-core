@@ -68,7 +68,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   services; the pokered-pewter Codex supervisor also ran all night (load
   ~20 on 16 cores; soak ~1.5-2× slower). Traps: a side worktree's root is
   the REPO root (`<wt>/workspace` for tests/paths); `git branch --list`
-  prefixes worktree-checked-out branches with `+`. Reduced soak canary on the final `94da116c` (vanilla 0:20 + fifth gate ×4): RUNNING at 02:35 — counts patched in below when done.
+  prefixes worktree-checked-out branches with `+`. Reduced soak canary rerun on the final `94da116c` (03:01): vanilla 0:20 **20/20**, fifth gate **100/100 × 4** (the three 0:60 deep gates stand on `dae00750`; the fold between them is Scene-ON-only). At close `animation-main` is 4 commits ahead again (its supervisor was still live) — fold at the next orient.
 
 ---
 
