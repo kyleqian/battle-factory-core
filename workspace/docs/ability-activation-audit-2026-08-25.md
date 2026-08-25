@@ -341,19 +341,61 @@ zero-samples is exactly what a correct engine produces. The `unknown` WHY in
 | `src/battle_util.c:4005` (disobedience "try putting asleep" Vital Spirit/Insomnia exemption) | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50.** `IsMonDisobedient` returns `DISOBEDIENCE_OBEDIENT` at `src/battle_util.c:3939-3940` for `gBattleTypeFlags & BATTLE_TYPE_FRONTIER`, and `BATTLE_TYPE_FRONTIER` includes `BATTLE_TYPE_FACTORY` (`include/constants/battle.h:91`), which the port's battle-type invariant sets (`src/engine/factoryBattleScriptFullTurnDecision.ts:246-249`). Line 4005 can never execute in a Factory battle. |
 | `src/battle_pike.c:818,822,830` (Insomnia/Vital Spirit/Water Veil/Magma Armor status-room exemptions) | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50.** Battle Pike facility code. |
 
+### Item theft/swap denial — STICKY_HOLD (8) — SOURCE-EXACT
+| Source | Engine | Note |
+| --- | --- | --- |
+| `src/battle_script_commands.c:2738-2775` (`MOVE_EFFECT_STEAL_ITEM`, Thief/Covet) | `src/engine/battleScriptHitChainOpcode.ts:3106-3138` | The whole prologue ladder is ported in source order: Trainer Hill skip; the opponent-side skip that is itself **exempted** for `BATTLE_TYPE_EREADER_TRAINER \| FRONTIER \| LINK \| RECORDED_LINK \| SECRET_BASE` (port: `ITEM_STEAL_ALLOWED_SPECIAL_BATTLES`, `:2865-2871`, so the Factory's AI *can* steal); the same-mask `knockedOffMons` skip; then `target.item != ITEM_NONE && ability == STICKY_HOLD` → `BattleScriptPushCursor()` + `BattleScript_NoItemSteal` + reveal. The port uses `{kind: "call"}` for that **push**, and reveals via `recordBattleScriptAbilityReveal`. |
+| `src/battle_script_commands.c:2863-2877` (`MOVE_EFFECT_KNOCK_OFF`) | `src/engine/battleScriptHitChainOpcode.ts:3267-3290` | Sticky Hold is tested **before** the item test; an empty-handed Sticky Hold holder falls through silently (`gBattlescriptCurrInstr++` ↔ `passThrough()`), a holding one jumps to `BattleScript_StickyHoldActivates` by **plain assignment** (port: `{kind: "jump"}`, not `call`) with the reveal. |
+| `src/battle_script_commands.c:9229-9234` (`Cmd_tryswapitems`, Trick) | `src/engine/battleScriptTryswapitemsOpcode.ts:152-176` | Sticky Hold sits **after** the both-empty / Enigma Berry / mail ladder and before the swap, and again uses a plain jump + reveal. Both halves check only the **target's** ability. |
+| `data/battle_ai_scripts.s:545-548` (`AI_CBM_TrickAndKnockOff`) | `src/engine/factoryAiCheckBadMove.ts:3006-3022` | One `get_ability AI_TARGET` draw, Sticky Hold → −10, everything else falls through to 0. |
+| `src/field_player_avatar.c:1860` | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50** — overworld escape-rope/`Cmd_...` field code. |
+
+### Drain reversal — LIQUID_OOZE (8) — SOURCE-EXACT
+| Source | Engine | Note |
+| --- | --- | --- |
+| `data/battle_scripts_1.s:345-350` (Absorb family) | `src/data/gen/battle-script-program.json` (`BattleScript_AbsorbLiquidOoze`) + `src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:383` (`ABILITY_LIQUID_OOZE` in `JUMPIFABILITY_VALUES`) and the `Cmd_manipulatedamage` `DMG_CHANGE_SIGN` handler at `:481-495` | Confirmed at source: `negativedamage` runs **first**, then `jumpifability BS_TARGET, ABILITY_LIQUID_OOZE, BattleScript_AbsorbLiquidOoze`, and the Liquid Ooze label **adds** `manipulatedamage DMG_CHANGE_SIGN` (flipping the already-negated drain back to damage) plus `B_MSG_ABSORB_OOZE`. The port executes the committed program, so the two-`manipulatedamage` composition is structural. |
+| `data/battle_scripts_1.s:3271-3276` (Leech Seed end-turn drain) | same handler | Here the polarity is the other way: the **non**-Liquid-Ooze path takes `manipulatedamage DMG_CHANGE_SIGN`, and `BattleScript_LeechSeedTurnPrintLiquidOoze` **skips** it (only setting `B_MSG_LEECH_SEED_OOZE`). The audit's earlier one-line gloss ("in both, Liquid Ooze *skips* the sign flip") is right for Leech Seed and **wrong for Absorb** — corrected here. Selector differs too: Leech Seed tests `BS_ATTACKER` (the seeded mon draining), Absorb tests `BS_TARGET`. Both selectors are registered in the port's handler (`:421-428`). |
+
+### Forced switch — SUCTION_CUPS (7) — SOURCE-EXACT
+| Source | Engine | Note |
+| --- | --- | --- |
+| `data/battle_scripts_1.s:593-601` (`BattleScript_EffectRoar`) | committed program + `src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:365,389` (`ABILITY_SUCTION_CUPS = 21`) | Re-derived: `jumpifability BS_TARGET, ABILITY_SUCTION_CUPS, BattleScript_AbilityPreventsPhasingOut` (`:597`) precedes the `jumpifstatus3 ROOTED` **and both** `accuracycheck`s (`:599-600`), so Roar/Whirlwind fail against Suction Cups with **no accuracy roll and no RNG draw** in either half. |
+| `data/battle_ai_scripts.s:334-339` (`AI_CBM_Roar`) | `src/engine/factoryAiCheckBadMove.ts:2976-2995` (`runCbmRoar`) | `count_usable_party_mons AI_TARGET == 0` → −10 **without** an ability read (no draw consumed); otherwise exactly one `get_ability` draw, Suction Cups → −10. |
+| `src/field_player_avatar.c:1860` | *(no engine site)* | **UNREACHABLE-IN-FACTORY-L50** — overworld. |
+
+### Secondary-effect denial — SHIELD_DUST (6) — SOURCE-EXACT
+| Source | Engine | Note |
+| --- | --- | --- |
+| `src/battle_script_commands.c:2253-2255` | `src/engine/battleScriptHitChainOpcode.ts:2929-2934` | All four conjuncts ported: `ability == SHIELD_DUST`, `!(gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)`, `!primary`, `MOVE_EFFECT_BYTE <= 9`. `INCREMENT_RESET_RETURN` ↔ `passThrough()`. Sits immediately before the structurally identical Safeguard gate (`<= 7`), same order. |
+| `src/battle_script_commands.c:7035-7037` (`ChangeStatBuffs`, `flags == 0`) | `src/engine/battleScriptStatBuffs.ts:278-280` | **The port DOES implement it** — the previous session's flag ("an engine comment claims it structurally unreachable") was about the *primary* route only. The file header (`:16-19`) states the correct, narrower claim: on the secondary route (`flags == 0`) Shield Dust is reachable and implemented; on the ALLOW_PTR route it can't fire because `flags != 0`. Guard-ladder position matches source exactly: Mist → Protect → Clear Body/White Smoke → Keen Eye → Hyper Cutter → **Shield Dust** → apply. |
+| `data/battle_ai_scripts.s:2389` (encourage table) | `src/engine/factoryAiCheckViability.ts:8356-8361` | Present, same position. |
+
+### Stat-drop denial — CLEAR_BODY (34), WHITE_SMOKE (2) — SOURCE-EXACT
+| Source | Engine | Note |
+| --- | --- | --- |
+| `src/battle_script_commands.c:6987-7009` (`ChangeStatBuffs`) | `src/engine/battleScriptStatBuffs.ts:266-271` | Guard is `(ability == CLEAR_BODY \|\| ability == WHITE_SMOKE) && !certain && gCurrentMove != MOVE_CURSE`, positioned after Mist and Protect and before Keen Eye — identical in the port. `flags == STAT_CHANGE_ALLOW_PTR` → `BattleScriptPush(BS_ptr)` + `BattleScript_AbilityNoStatLoss` + `gLastUsedAbility` + `RecordAbilityBattle` (port: `blockedMessage`, `:202-232`, a `call-explicit` with `returnProgramCounter = BS_ptr` — the push modelled exactly); otherwise a silent `STAT_CHANGE_DIDNT_WORK` (`blockedSilent`). |
+| `src/battle_script_commands.c:4141-4145` (`Cmd_playstatchangeanimation`'s **separate** changeable-stat count) | `src/engine/battleScriptPlaystatchangeanimationOpcode.ts:159-170` | This second predicate list (`mistTimer`, Clear Body, White Smoke, Keen Eye+ACC, Hyper Cutter+ATK) is *not* the ChangeStatBuffs ladder and is ported as its own loop, including the `STAT_CHANGE_CANT_PREVENT` bypass branch and the `changeableStatsCount > 1` multi-anim collapse. |
+| `data/battle_scripts_1.s:4030-4032` (Intimidate: `jumpifability BS_TARGET` Clear Body / Hyper Cutter / White Smoke → `BattleScript_IntimidatePrevented`, **before** the `statbuffchange`) | `src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:392-394` (`ABILITY_CLEAR_BODY = 29`, `ABILITY_HYPER_CUTTER = 52`, `ABILITY_WHITE_SMOKE = 73` all registered) + the committed program | Intimidate is blocked before the stat machinery runs, so the `AbilityNoStatLoss` message never appears for Intimidate — the dedicated `IntimidatePrevented` script does. Same in both. |
+| `data/battle_ai_scripts.s:306-312` (`CheckIfAbilityBlocksStatChange`, shared tail of the stat-down handlers) | `src/engine/factoryAiCheckBadMove.ts:810`, `:846`, `:871`, `:918` | Every stat-down handler's shared tail tests Clear Body **and** White Smoke → −10 off one `get_ability AI_TARGET` draw; `AI_CBM_AttackDown`'s documented **second** draw (its own Hyper Cutter read plus the tail's) is preserved (`:815-846`). |
+
+**One nuance, unreachable in Factory singles.** Source's ALLOW_PTR branch has
+an inner short-circuit: `if (gSpecialStatuses[gActiveBattler].statLowered) gBattlescriptCurrInstr = BS_ptr;`
+(`:6993-6995`) — a *second* blocked stat-drop against the same battler skips
+the message and the push. The port does not represent `statLowered`
+(`src/engine/battleActionFinished.ts:11-16`) and always takes the push branch.
+Re-derived reachability: `statLowered` is written **only** at `:6976` and
+`:7004` (both inside the same ALLOW_PTR message branches) and cleared by
+`SpecialStatusesClear()`, which runs per **action** (`HandleAction_ActionFinished`,
+`src/battle_util.c:657-663`; also `battle_main.c:3041,3902`). Reaching it needs
+two ALLOW_PTR stat-lower attempts on the same battler inside one action —
+Intimidate's loop hits one target in singles, and this registration's scope is
+single-stat moves. No Level-50 singles separating input exists; recorded, not filed.
+
 ### Everything else — UNVERIFIED, with the exact unread sites
 Source inventory below is complete (produced by the §Method sweep); the
 engine column names where to start, from `docs/ability-item-parity-census.md`
 plus this session's `rg`.
 
-- **Stat-drop denial.** Source: `src/battle_script_commands.c:6987-7000`
-  (the `!certain && gCurrentMove != MOVE_CURSE` guard),
-  `:4142-4145` (the *animation* count, a separate predicate list),
-  `data/battle_scripts_1.s:4030-4032` (Intimidate), AI
-  `data/battle_ai_scripts.s:306-312`. Engine starts:
-  `battleScriptStatBuffs.ts:266`,
-  `battleScriptPlaystatchangeanimationOpcode.ts:161`,
-  `factoryAiCheckBadMove.ts:810,846,871,918`.
 - **Trapping.** Source: `src/battle_ai_switch_items.c:443-451`,
   `src/battle_ai_script_commands.c:1369-1376` and `:1420-1425`,
   `src/battle_main.c:4046,4056,4064,4248-4252`. Engine starts:
@@ -362,22 +404,6 @@ plus this session's `rg`.
   Note `src/battle_ai_switch_items.c:445`'s stock comment "Misses the flying
   type and Levitate check" — Arena Trap's AI half really does trap Flying/
   Levitate mons; a port that fixed it would be DIVERGENT.
-- **Item theft/swap denial (Sticky Hold).** Source:
-  `src/battle_script_commands.c:2767-2775` (Thief/Covet — note it sits
-  *after* the Frontier-exempt knocked-off check at `:2757-2766`),
-  `:2864-2877` (Knock Off, with the empty-hand fall-through),
-  `:9229-9234` (Trick), AI `data/battle_ai_scripts.s:545-548`.
-- **Forced switch (Suction Cups).** `data/battle_scripts_1.s:597` — the jump
-  is **before** both `accuracycheck`s, so Roar fails against Suction Cups
-  without an accuracy roll; AI `data/battle_ai_scripts.s:334-339`.
-- **Drain reversal (Liquid Ooze).** `data/battle_scripts_1.s:345-350`
-  (absorb) and `:3271-3276` (Leech Seed) — in both, Liquid Ooze *skips* the
-  `manipulatedamage DMG_CHANGE_SIGN`, it does not add one.
-- **Shield Dust.** `src/battle_script_commands.c:2253-2255` (needs
-  `!HITMARKER_STATUS_ABILITY_EFFECT && !primary && effectByte <= 9`) and
-  `:7035-7037` (the `flags == 0` stat-drop gate). Engine notes at
-  `battleScriptStatBuffs.ts:16-18` claim the second is structurally
-  unreachable — an engine comment is not evidence; re-derive it.
 
 ---
 
