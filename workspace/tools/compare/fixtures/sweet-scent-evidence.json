@@ -1,0 +1,79 @@
+{
+  "schema": "sweet-scent-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SWEET_SCENT",
+  "moveId": 230,
+  "status": "exact-production-framebuffer",
+  "coverageCredit": true,
+  "source": {
+    "start": "0x082d4c86",
+    "effect": "0x082d4cca",
+    "endExclusive": "0x082d4d70",
+    "bytes": 234,
+    "expandedCreates": 24,
+    "components": [
+      "asset:ANIM_TAG_PINK_PETAL",
+      "sprite:gSweetScentPetalSpriteTemplate",
+      "subroutine:SweetScentEffect",
+      "visualCommand:blend_color_cycle"
+    ]
+  },
+  "evidenceScope": {
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "framebufferCompared": true,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true,
+    "coveragePromotion": true,
+    "zeroResidual": true,
+    "siblingCredit": false
+  },
+  "repeatability": { "runsPerOrientation": 2, "allMatched": true },
+  "orientations": {
+    "player-back": {
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-sweet-scent-player-weepinbell-opponent-onix.json",
+      "scenarioSha256": "0ffd6e81955cebdf24b352cf2b386f1c501dc4289e8de62c3dc30e0269ea9597",
+      "denseState": "tools/compare/evidence/sweet-scent-player-dense-state.json.gz",
+      "denseStateSha256": "6f705867456f5f8ccbe3011e7190f955dd3d8b570e0fd67faa340c57e1bd89c1",
+      "probeJsonSha256": "34bb347719923a7432443ac33ece39e79869a8acb3eeb984f2cbe03fe90b42cf",
+      "rawRgbArchive": "tools/compare/evidence/sweet-scent-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "4e6ddbc216c877b607f3f0214595ba5592e60feac63008d6636c8ec3bdd55f42",
+      "rawRgbSequenceSha256": "3b1d53bb4cab447e01442074104ec790abd41980ac32f2b089cf6aeb10e6dfcf",
+      "changeMap": "tools/compare/evidence/sweet-scent-changemap-player.json",
+      "changeMapSha256": "b596a7bdba416297fcd7cf8987600a31988c2c148ca7a91d7a1afe8197216ddf",
+      "window": { "startFrame": 222, "endFrame": 396, "frameCount": 175 },
+      "effectWindow": { "startRow": 4, "endRow": 169, "frameCount": 166 },
+      "latches": { "oam": "174/174", "matrices": "174/174", "palette": "174/174", "paletteSameRow": "0/174" }
+    },
+    "opponent-front": {
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-sweet-scent-opponent-weepinbell-player-onix.json",
+      "scenarioSha256": "806284fcfcfeed961504a9a76f758f7da46892c90355ce564dcbee189a1365b8",
+      "denseState": "tools/compare/evidence/sweet-scent-opponent-dense-state.json.gz",
+      "denseStateSha256": "bcb272f0a58b5b07118573fe44b30365213534b489e8c791a1f3444b715e8457",
+      "probeJsonSha256": "a8119b2174b0f122aadbd0b3ebb75bbbe07e4e64ae3beb4594fcb11ce8aab4c3",
+      "rawRgbArchive": "tools/compare/evidence/sweet-scent-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "05ed9242bd79b6f4e9754645347598f0f30724e3aa5fbc19fef7aac4ad694f4f",
+      "rawRgbSequenceSha256": "0c4fa1c33a937feb16a5d577a1a86d8bf687baeee02ad64b755cc2ca77c8f48b",
+      "changeMap": "tools/compare/evidence/sweet-scent-changemap-opponent.json",
+      "changeMapSha256": "6ef960302b1b8dff159937a5cf96c8789b47b0c1b169a22cb930d0e58a43a70c",
+      "window": { "startFrame": 222, "endFrame": 396, "frameCount": 175 },
+      "effectWindow": { "startRow": 4, "endRow": 169, "frameCount": 166 },
+      "latches": { "oam": "174/174", "matrices": "174/174", "palette": "174/174", "paletteSameRow": "0/174" }
+    }
+  },
+  "acceptance": {
+    "pointerRows": "175/175 + 175/175",
+    "reducerRows": "166/166 + 166/166",
+    "typedSeamRows": "166/166 + 166/166",
+    "rawRgbRows": "175/175 + 175/175",
+    "productionFramebufferRows": "175/175 + 175/175",
+    "framebufferCompared": true,
+    "zeroResidual": true,
+    "monbgSameRowException": false,
+    "claim": "MOVE_SWEET_SCENT exact only; no sibling credit"
+  }
+}

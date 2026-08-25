@@ -45,12 +45,20 @@
   },
   "evidence": {
     "stagedBothOrientations": true,
-    "freshOracleRuns": 1,
-    "denseStateRetained": false,
-    "rawRgbRetained": false,
-    "normalizedChangeMapsRetained": false,
+    "freshOracleRuns": 2,
+    "denseStateRetained": true,
+    "rawRgbRetained": true,
+    "normalizedChangeMapsRetained": true,
     "productionFramebufferCompared": false,
     "zeroResidual": false
   },
-  "blocker": "The source interval, legal carrier, bilateral complete-party stages, and a first Scene-ON petal trace are recorded. Dense consecutive script/task/sprite/OAM/matrix/palette/tag/register/audio/immutable/RNG rows, raw RGB, normalized change maps, second-fresh replay, source-art extraction, and production-framebuffer comparison remain; MOVE_SWEET_SCENT stays unsupported and no coverage credit is claimed."
+  "denseEvidence": {
+    "fixture": "tools/compare/fixtures/sweet-scent-evidence.json",
+    "pointerRowsPerOrientation": 175,
+    "sourceRelativeReducerRowsPerOrientation": 166,
+    "effectWindowRows": "local 4..169; first inactive script row local 174",
+    "latches": "hardware OAM/matrices/palette equal preceding software/faded rows 174/174 in both orientations; no same-row monbg exception",
+    "ownDisplayEdge": "first petal RAM row local 4, first RGB change row local 5"
+  },
+  "blocker": "Complete twice-fresh pointer-owned dense rows, raw RGB archives, normalized change maps, and reducer/seam/latch checks are retained. Source-art extraction and ordinary production compositor/framebuffer comparison remain; MOVE_SWEET_SCENT stays unsupported and no coverage or sibling credit is claimed."
 }

@@ -2,6 +2,32 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_SWEET_SCENT",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-165 WEEPINBELL parties retain both ordinary Battle Scene ON orientations over frames 222-396, 175 consecutive pointer-owned rows each through first inactive cleanup; both orientations repeat twice fresh byte-identically",
+    "the source-relative 166-row effect reducer and typed seam cover ANIM_TAG_PINK_PETAL, gSweetScentPetalSpriteTemplate, SweetScentEffect, and blend_color_cycle: 24 source allocations, a 13-petal peak, eight animation cells with source hFlip/vFlip, bilateral edge paths/audio, tags, and cleanup",
+    "the reproducible PINK_PETAL extractor pins graphics/palette source identity; the ordinary shared compositor consumes typed live species, sides, geometry, generic back/front art, field chrome, source sprite allocation/OAM painter order, and the measured delay-1 defender palette cycle including its forced final return to zero",
+    "all 175 player-back plus 175 opponent-front retained component/seam/raw-RGB/core.ts-to-renderSceneOnMovePresentation framebuffer rows match with zero residual pixels, including four setup rows, the first displayed petal at local row 5, and first inactive cleanup; preceding OAM/matrix/palette latches remain 174/174 bilaterally",
+    "gameplay RNG and battle state remain invariant while animation RNG changes 174/174; no monbg or same-row palette exception exists; Confuse Ray and Stun Spore retain independent status and receive no sibling credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-sweet-scent-player-weepinbell-opponent-onix.json",
+    "tools/battle-lab/mechanic-sweet-scent-opponent-weepinbell-player-onix.json",
+    "tools/compare/fixtures/sweet-scent-evidence.json",
+    "tools/compare/sweetScentProbe.py",
+    "tools/compare/sweetScentEvidence.ts",
+    "tools/compare/sweetScentFramebuffer.ts",
+    "tools/compare/extractSweetScentAssets.ts",
+    "src/animation/assets/sweet-scent.json",
+    "src/animation/sweetScent.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/sweetScent.test.ts",
+    "tests/animation/sweetScentFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_HAIL",
    "status": "exact",
    "covered": [
@@ -6635,8 +6661,21 @@
     "visualCommand:blend_color_cycle"
    ],
    "representatives": ["MOVE_SWEET_SCENT"],
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_SWEET_SCENT independently passes 175/175 player-back plus 175/175 opponent-front complete pointer-owned retained rows through the actual core.ts -> renderSceneOnMovePresentation framebuffer with zero residual pixels. Its reproducibly extracted PINK_PETAL art, source-relative 24-petal reducer, typed live species/sides/geometry, generic front/back battler art, source animation hFlip/vFlip cells, allocation/OAM painter order, side-relative paths/audio, measured delay-1 defender palette cycle, field chrome, tags, and cleanup use no carrier-pair gate, recording/framebuffer lookup, absolute tick, or gameplay ownership. Confuse Ray and Stun Spore remain independent controls and receive no sibling credit."
+  },
+  {
+   "id": "defense-curl-source-component",
+   "components": [
+    "asset:ANIM_TAG_ECLIPSING_ORB",
+    "sprite:gEclipsingOrbSpriteTemplate",
+    "task:AnimTask_DefenseCurlDeformMon",
+    "visualCommand:set_grayscale_pal",
+    "visualCommand:set_original_pal"
+   ],
+   "representatives": ["MOVE_DEFENSE_CURL"],
    "fulfilled": false,
-   "goal": "PARTIAL: MOVE_SWEET_SCENT has a source-relative 166-row reducer, typed bilateral Scene-ON seam, legal WEEPINBELL carrier, and complete three-mon stages in both orientations. The source interval, 24 expanded petal creations, 13-petal peak, and first inactive cleanup are pinned. Dense twice-fresh script/task/sprite/OAM/matrix/palette/tag/register/audio/immutable/RNG state, raw RGB/change maps, source art, and zero-residual production framebuffer comparison remain before this move or the track can promote; no sibling credit is claimed."
+   "goal": "PARTIAL EVIDENCE ONLY: MOVE_DEFENSE_CURL retains complete legal set-120 PHANPY player-back 214..313 and opponent-front 215..314 Scene-ON windows, 100/100 rows each through first inactive cleanup, reproduced twice fresh byte-identically. Source interval 0x082cb37c..<0x082cb3b5, both pointer parities, source-extracted ECLIPSING_ORB art, all task/orb/audio/tag/palette/OAM/matrix/RNG lifecycle edges, normalized change maps, and the move-local live-attacker RAM+1 OAM/flags versus RAM+2 matrix latch are pinned. No reducer, typed seam, compositor, framebuffer equality, coverage credit, or move promotion is claimed. PERISH_SONG, IRON_TAIL, and POISON_TAIL remain exact palette-command controls only and receive no status change."
   }
  ],
  "variantAudits": {

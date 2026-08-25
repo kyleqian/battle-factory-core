@@ -14,6 +14,7 @@ import {
   type SceneOnDragonRageFieldProfile,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { verifySweetScentEvidence } from "../../tools/compare/sweetScentEvidence.ts";
 
 const sourceScript = readFileSync("reference/pokeemerald/data/battle_anim_scripts.s", "utf8");
 const sourceEffects = readFileSync("reference/pokeemerald/src/battle_anim_effects_3.c", "utf8");
@@ -55,6 +56,7 @@ describe("MOVE_SWEET_SCENT source-relative reducer and typed seam", () => {
     expect(sourceEffects).toContain("static void AnimSweetScentPetal(struct Sprite *sprite)");
     expect(sourceEffects).toContain("sprite->x += 5");
     expect(sourceEffects).toContain("sprite->y2 = Cos(sprite->data[0] & 0xFF, 16)");
+    expect(block).not.toContain("monbg");
     expect(SWEET_SCENT_SOURCE_END - SWEET_SCENT_SOURCE_BASE).toBe(234);
   });
 
@@ -70,6 +72,8 @@ describe("MOVE_SWEET_SCENT source-relative reducer and typed seam", () => {
     expect(sweetScentAtAge(75, "player", { x: 72, y: 90 }).blend.active).toBe(true);
     const first = sweetScentAtAge(0, "player", { x: 72, y: 90 });
     expect(first.petals[0]).toMatchObject({ x: 5, y: 99, x2: 0, y2: 1, callback: "AnimSweetScentPetal" });
+    expect(first.petals[0]?.animFrame).toBe(0);
+    expect(sweetScentAtAge(7, "player", { x: 72, y: 90 }).petals[0]?.animFrame).toBe(1);
     const final = sweetScentAtAge(SWEET_SCENT_FIRST_INACTIVE_AGE, "player", { x: 72, y: 90 });
     expect(final.active).toBe(false);
     expect(final.resources.loaded).toBe(false);
@@ -90,7 +94,13 @@ describe("MOVE_SWEET_SCENT source-relative reducer and typed seam", () => {
     expect(view.target.species).toBe("ONIX");
     expect(view.petals[0]).toMatchObject({ x: 5, y: 99, animNum: 0 });
     expect(view.soundPanSide).toBe("player");
-    expect(SWEET_SCENT_BLEND_TIMING.legs).toHaveLength(5);
+    expect(SWEET_SCENT_BLEND_TIMING.legs).toEqual([
+      { startY: 5, targetY: 13 },
+      { startY: 13, targetY: 5 },
+      { startY: 5, targetY: 13 },
+      { startY: 13, targetY: 5 },
+      { startY: 5, targetY: 0 },
+    ]);
   });
 
   it("keeps the reusable evidence checkpoint honest and outside exact coverage", () => {
@@ -102,10 +112,10 @@ describe("MOVE_SWEET_SCENT source-relative reducer and typed seam", () => {
       reducer: { sourceRelativeRows: 166, firstInactiveAge: 165, peakLivePetals: 13 },
       evidence: {
         stagedBothOrientations: true,
-        freshOracleRuns: 1,
-        denseStateRetained: false,
-        rawRgbRetained: false,
-        normalizedChangeMapsRetained: false,
+        freshOracleRuns: 2,
+        denseStateRetained: true,
+        rawRgbRetained: true,
+        normalizedChangeMapsRetained: true,
         productionFramebufferCompared: false,
         zeroResidual: false,
       },
@@ -123,5 +133,11 @@ describe("MOVE_SWEET_SCENT source-relative reducer and typed seam", () => {
         expect(mon.ppUps).toHaveLength(4);
       }
     }
+  });
+
+  it("replays both complete twice-fresh pointer windows and measures the own display edge", () => {
+    const result = verifySweetScentEvidence();
+    expect(result["player-back"]).toMatchObject({ pointerRows: 175, reducerRows: 166, typedSeamRows: 166, petalCreates: 24, peakPetals: 13, firstPetalRamRow: 4, firstPetalDisplayRow: 5, firstInactiveScriptRow: 174, latches: { oam: "174/174", matrices: "174/174", palette: "174/174", paletteSameRow: "0/174" }, framebufferCompared: true });
+    expect(result["opponent-front"]).toMatchObject({ pointerRows: 175, reducerRows: 166, typedSeamRows: 166, petalCreates: 24, peakPetals: 13, firstPetalRamRow: 4, firstPetalDisplayRow: 5, firstInactiveScriptRow: 174, latches: { oam: "174/174", matrices: "174/174", palette: "174/174", paletteSameRow: "0/174" }, framebufferCompared: true });
   });
 });
