@@ -37,35 +37,6 @@ regenerate `factory_ai_check_viability_m5d3_vectors_gen.rs`, rebuild
 `artifacts/wasm/factory_wasm.wasm`, then un-skip that case. Not fixed here:
 `core-rs/**` was out of scope for the #122 worker step.
 
-## #126 — Bide release throws `gBideTarget[0] must be the opposing active singles slot 1, got 0` (Metronome→Bide on a varied `winning-swap` re-chain; deterministic 14 s repro)
-
-**Found 2026-08-24** by the first varied FULL-chain crash census
-(`winning-swap --vary-rng --start-carry 0 --seeds 0:100`; 1 of 100). The
-player spams slot 0 = MOVE_METRONOME (118) on turns 16-21 of a re-chained
-battle 1 (carry <= 14); Metronome calls Bide, and at the release turn the
-port's `advanceBattleScriptAttackCancelerBide`
-(`src/engine/battleScriptActionAdmission.ts:3596-3605`) finds
-`rulesContext.bideTarget[0] === 0` and throws instead of resolving the
-source path. Repro:
-
-```
-npm run soak -- --policy winning-swap --vary-rng --start-carry 0 --seed 69 --render-every 0
-```
-
-Source: `Cmd_attackcanceler`'s Bide release sets `gBattlerTarget =
-gTakenDmgByBattler[gBattlerAttacker]` (`src/battle_script_commands.c`,
-`STATUS2_BIDE` branch) and only re-targets via `GetMoveTarget` when that
-battler is ABSENT; `gTakenDmgByBattler` is written by `Cmd_datahpupdate`
-(`= gBattlerAttacker` for a `BS_TARGET` update, else `= gBattlerTarget`,
-which is stale for end-turn/self damage). So a stored-energy release whose
-only damage came from a non-`BS_TARGET` update legitimately carries a
-target of 0 in source (a self-target release) — the port's "must be slot
-1" invariant is a premise, not a proof. Triage: (1) which damage the
-player took while storing (opponent hit vs end-turn/self) and what
-`datahpupdate`'s port wrote; (2) what the stock ROM does on that release
-(stage it with `mechanicLab` `overrides.parties`: Bide user, damage only
-from poison/burn while storing); (3) implement the source path, no throw.
-
 ## #125 — Soak-instrument debt: the winning-like last-resort fight fallback can spam a maxed stat-stage move into a source-faithful Struggle stalemate (~0.4% of varied carry-14 boot rounds)
 
 **Filed 2026-08-24** from the #123 verdict (closed the same day: NOT an engine
