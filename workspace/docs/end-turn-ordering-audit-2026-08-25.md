@@ -11,7 +11,7 @@
 | Out of scope | Fixing anything; `Cmd_moveend`'s end-of-ACTION steps beyond the disambiguation in §0; doubles; Battle Scene ON; the internals of `battleScriptFaintedActionsOrchestration.ts` (audited only at its call seams). |
 | NOT read (declared) | `battleScriptFaintedActionsOrchestration.ts` body (its 7 `faintedActionsState` cases were checked only through the seam contract `runBattleEndTurnOrchestration` consumes); the ~1,100-line body of `runItemsTick`'s per-hold-effect branches (the two call positions and their `moveTurn` flags were verified; the individual berry branches were spot-checked, not exhaustively diffed — that is `docs/endturn-abilities-items-ground-truth.md`'s slice); `battleScriptDamagingWeatherOpcode.ts`'s per-battler damage math (only its `battlerByTurnOrder` read at `:153` was checked); Arena (`wishPerishSongState` case 2) — unreachable in Factory. |
 
-**Verdict counts** — see §4.
+**Verdict counts** — see §6.
 
 ---
 
