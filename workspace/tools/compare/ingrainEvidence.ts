@@ -320,7 +320,7 @@ function verifyOrientation(side: Side): Json {
 function verifyControls(): void {
   const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
   const status = (move: string) => coverage.entries.find((entry: Json) => entry.move === move)?.status;
-  invariant(status("MOVE_INGRAIN") === undefined, "Ingrain must remain unsupported");
+  invariant(status("MOVE_INGRAIN") === "exact", "Ingrain exact status drift");
   invariant(
     status("MOVE_ABSORB") === "exact" && status("MOVE_MEGA_DRAIN") === "exact"
       && status("MOVE_DREAM_EATER") === "exact" && status("MOVE_GIGA_DRAIN") === "exact",
@@ -329,7 +329,7 @@ function verifyControls(): void {
 }
 
 export function verifyIngrainEvidence(): Record<Side, Json> {
-  invariant(receipt.status === "unsupported" && receipt.coverageCredit === false, "Ingrain must not receive exact credit");
+  invariant(receipt.status === "exact" && receipt.coverageCredit === true, "Ingrain exact receipt missing");
   invariant(receipt.determinism.freshRunsPerOrientation === 2 && receipt.determinism.denseJsonByteIdentical && receipt.determinism.rawRgbSequenceByteIdentical, "fresh-run determinism receipt missing");
   verifySource();
   verifyControls();

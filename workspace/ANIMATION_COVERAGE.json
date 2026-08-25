@@ -5801,6 +5801,42 @@
     "tests/animation/recycle.test.ts",
     "tests/animation/recycleFramebuffer.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_INGRAIN",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-140 Lileep semantic parties retain both ordinary Battle Scene ON orientations for 164 consecutive source-owned rows each through first inactive cleanup; player-back frames 205-368 and opponent-front frames 293-456 reproduce byte-identically across two fresh dense-state and raw-RGB runs",
+    "the authoritative half-open Move_INGRAIN interval is 0x082d40e0..0x082d4191 (177 bytes); the pure source-age reducer and typed Scene-ON seam reproduce ANIM_TAG_ROOTS, ANIM_TAG_ORBS, four create_ingrain_root_sprite programs, three create_ingrain_orb_sprite programs, source cells/hFlip/flicker/wave callbacks, allocation and OAM order, tags, audio, and cleanup",
+    "ROOTS and ORBS regenerate byte-for-byte from pinned indexed source PNGs (sha256 085fbb67a415cdff54c0462cc36835de29f033554805f8bb6b9bf934fbc71e23 / 91c48d207d5e6e0c2e5ca6804e431df390a8dddc9db6b20e30c0ba9d52e6b2d5); generic front/back battler art uses typed live visual species, sides, battle-position geometry, and attacker subpriority without a carrier/species pair gate",
+    "all 164 player-back plus 164 opponent-front component/seam/raw-RGB/actual core.ts-to-renderSceneOnMovePresentation framebuffer rows match with zero residual pixels through cleanup on two deterministic production-render passes; the compositor preserves source subpriority/allocation painter order around the live attacker and renders all root cells, hFlip/flicker, and orb cell/wave paths",
+    "ordinary OAM, all 32 affine matrices, and all 512 faded palette colors retain the measured predecessor transfer on 163/163 transitions per orientation; gameplay state and RNG remain invariant, animation RNG changes 163 times, registers remain unchanged, and the first inactive row clears all move resources",
+    "the retained mechanic stage's semantic Lileep override follows already-live Cacturne visual buffers, which the typed presentation config supplies explicitly; this evidence fact does not specialize the generic compositor. Absorb, Mega Drain, Dream Eater, and Giga Drain remain independent exact ORBS controls and receive no sibling credit; no gameplay rooting, healing, switching, status, damage, RNG, AI, controller, turn, round, facility, absolute-tick, recording/framebuffer lookup, or coordinate/RGB fitting is added"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-ingrain-player-lileep-opponent-onix.json",
+    "tools/battle-lab/mechanic-ingrain-opponent-lileep-player-onix.json",
+    "tools/compare/fixtures/ingrain-evidence.json",
+    "tools/compare/ingrainSourceAudit.ts",
+    "tools/compare/ingrainProbe.py",
+    "tools/compare/ingrainEvidence.ts",
+    "tools/compare/ingrainFramebuffer.ts",
+    "tools/compare/extractIngrainAssets.ts",
+    "tools/compare/evidence/ingrain-player-dense-state.json.gz",
+    "tools/compare/evidence/ingrain-opponent-dense-state.json.gz",
+    "tools/compare/evidence/ingrain-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/ingrain-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/ingrain-changemap-player.txt",
+    "tools/compare/evidence/ingrain-changemap-opponent.txt",
+    "src/animation/assets/ingrain.json",
+    "src/animation/ingrain.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/ingrainSource.test.ts",
+    "tests/animation/ingrainEvidence.test.ts",
+    "tests/animation/ingrain.test.ts",
+    "tests/animation/ingrainFramebuffer.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -6885,8 +6921,8 @@
     "visualCommand:create_ingrain_root_sprite"
    ],
    "representatives": ["MOVE_INGRAIN"],
-   "fulfilled": false,
-   "goal": "UNFULFILLED: MOVE_INGRAIN has bilateral legal Scene-ON source/dense-RGB evidence plus a source-relative reducer and typed seam checkpoint only. Production remainder: implement the generic ROOTS/ORBS asset extraction, Sprite/OAM/palette compositor, root/orb painter order, source animation/flicker/wave callbacks, audio, transfer latches, and first-inactive cleanup through the shared presentation seam, then earn MOVE_INGRAIN exact independently. This four-component track grants no exact or sibling credit."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_INGRAIN independently passes 164/164 player-back plus 164/164 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two deterministic production-render passes. Reproducibly extracted ROOTS/ORBS art, typed live visual species/sides/battle-position geometry/subpriority, source root cells/hFlip/flicker and orb cells/waves, source subpriority/allocation painter order, ordinary predecessor OAM/matrix/palette transfer, field chrome, audio, and cleanup use no pair gate, recording/framebuffer lookup, absolute tick, coordinate/RGB fitting, or gameplay ownership. Absorb, Mega Drain, Dream Eater, and Giga Drain remain independent exact ORBS controls and receive no sibling credit."
   }
  ],
  "variantAudits": {

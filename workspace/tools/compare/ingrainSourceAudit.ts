@@ -159,15 +159,15 @@ if (
   || JSON.stringify(carrier?.moves) !== JSON.stringify([
     "MOVE_ANCIENT_POWER", "MOVE_ACID", "MOVE_INGRAIN", "MOVE_CONFUSE_RAY",
   ])
-  || status("MOVE_INGRAIN") !== undefined
+  || status("MOVE_INGRAIN") !== "exact"
   || status("MOVE_ABSORB") !== "exact"
   || status("MOVE_MEGA_DRAIN") !== "exact"
   || status("MOVE_DREAM_EATER") !== "exact"
   || status("MOVE_GIGA_DRAIN") !== "exact"
-  || track?.fulfilled !== false
+  || track?.fulfilled !== true
   || JSON.stringify(track?.components) !== JSON.stringify(expectedComponents)
   || JSON.stringify(track?.representatives) !== JSON.stringify(["MOVE_INGRAIN"])
-  || coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length !== 210
+  || coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length !== 211
 ) {
   throw new Error("MOVE_INGRAIN source/carrier/component/control contract changed");
 }
@@ -184,6 +184,6 @@ console.log(JSON.stringify({
   controls: {
     moves: ["MOVE_ABSORB", "MOVE_MEGA_DRAIN", "MOVE_DREAM_EATER", "MOVE_GIGA_DRAIN"],
     statuses: ["exact", "exact", "exact", "exact"],
-    independence: "Shared ORBS controls are independently exact; Ingrain remains unsupported and receives no shared-component credit.",
+    independence: "Ingrain is independently exact; shared ORBS controls retain independent exact status and receive no sibling credit.",
   },
 }));

@@ -27,7 +27,7 @@ describe("MOVE_INGRAIN authoritative source graph", () => {
       controls: {
         moves: ["MOVE_ABSORB", "MOVE_MEGA_DRAIN", "MOVE_DREAM_EATER", "MOVE_GIGA_DRAIN"],
         statuses: ["exact", "exact", "exact", "exact"],
-        independence: "Shared ORBS controls are independently exact; Ingrain remains unsupported and receives no shared-component credit.",
+        independence: "Ingrain is independently exact; shared ORBS controls retain independent exact status and receive no sibling credit.",
       },
     });
   });

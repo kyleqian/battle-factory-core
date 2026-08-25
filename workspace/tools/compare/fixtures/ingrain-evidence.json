@@ -1,7 +1,7 @@
 {
   "move": "MOVE_INGRAIN",
-  "status": "unsupported",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "oracleProfile": "battle-scene-on",
   "schema": "ingrain-dense-evidence/v1",
   "source": {
