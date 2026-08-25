@@ -1330,3 +1330,35 @@ current app stage should be rejected before replay.
   independent; a 16-core box could finish `vanilla 0:20` in ~2 min), or a
   documented `tools/soak/run-gates.sh` that launches the standing gates
   concurrently and prints the five counts.
+
+## `docs/gate6-coverage-manifest.{json,md}` pin per-line source locators, so two import lines in an engine file break a ratchet only the full suite reveals
+
+- **What:** the manifest embeds `file:line` locators for engine sites. Adding
+  imports near the top of a tracked engine file shifts every locator below,
+  the regeneration ratchet fails, and the failure is only visible in the full
+  `npm test` because the manifest test OOMs when run in isolation under load
+  (no fast confirm path). Same shape as `tools/report/ability-item-parity-census.ts`'s
+  line-pinned recovery sites (the #122 worker moved five of them by +8).
+- **Hits:** 2 (2026-08-24 #126 worker ~8 min; #122 worker's census bump, ~3 min).
+- **Cost each:** ~5-8 min.
+- **Workaround:** after touching an engine file's import block, regenerate the
+  manifest/census before the full suite (`npm run` scripts named in the
+  test's failure message) and commit the regenerated artifact with the fix.
+- **Real fix:** key the locators by symbol (function name + ordinal) instead
+  of line, or give the manifest test the 8 GB heap so it runs in isolation.
+
+## The repo root is one directory ABOVE `workspace/` — `git show <rev>:src/...` and worktree-root paths silently miss
+
+- **What:** `workspace/` is a subdirectory of the git repo, so object paths
+  are `workspace/src/...`, not `src/...`: `git show HEAD~1:src/x.ts` (used
+  for a mutation check) returns nothing and a `>` redirect zeroes the target;
+  a side worktree's root is `.worktrees/<id>/` (repo root), so
+  `git -C <wt> show -- src/...` and `cd <wt> && npx vitest ...` match no
+  files and print nothing — easy to read as "no diff" / "no tests".
+- **Hits:** 2 (2026-08-24 #126 worker ~3 min, two source files zeroed
+  mid-check; supervisor ~2 min, an empty diff and a silent vitest run).
+- **Cost each:** ~2-3 min plus a wrong reading if unnoticed.
+- **Workaround:** `git show <rev>:./src/x.ts` (the `./` is cwd-relative) or
+  `workspace/src/...`; for worktrees always `cd <wt>/workspace`.
+- **Real fix:** a one-line note in AGENTS.md's layout-migration paragraph, and
+  the launcher's "worktree:" banner printing `<wt>/workspace` as the cwd.
