@@ -96,7 +96,7 @@ upstream guard the source relies on (the #126 shape).
 | `battleScriptActionAdmission.ts:2973` | `confusionDamage level, attack, and defense must be nonzero` | **TS-CONTRACT** | Guards a staging-only optional cell (`sourceBattler.confusionDamage ?? confusionDamageFromLiveBattler(...)`, `:2969-2971`). On the live path the three values are derived from the battler's own level and stats, which are ≥ 1 for every Level-50 rental; only a hand-staged rules context can supply zeros. No game state reaches it. |
 | `battleScriptActionAdmission.ts:3302` | `STATUS2_INFATUATION must encode exactly one source battler bit when nonzero` | **PROVED (by scope)** | `STATUS2_INFATUATION` is a 4-bit field, one bit per battler. Both setters name a single battler: Attract at `battle_script_commands.c:7693` (`\|= STATUS2_INFATUATED_WITH(gBattlerAttacker)`, guarded at `:7685` on the target already being infatuated) and Cute Charm at `battle_util.c:2865` (guarded at `:2861` by `!(status2 & STATUS2_INFATUATION)`). In singles there are exactly two battlers (`battle_controllers.c:161-177`, `InitSinglePlayerBtlControllers`, non-`BATTLE_TYPE_DOUBLE` branch → `gBattlersCount = 2`), so a battler's only possible infatuation source is its single opponent — one bit. Multi-bit accumulation needs two simultaneous opposing attackers, i.e. doubles. **Port half:** the port reads the same `>>> 16 & 0xf` encoding and sets it only from the opposing battler. |
 | `battleScriptActionAdmission.ts:3512` | `CANCELER_BIDE Level-50 singles attacker must be battler 0 or 1` | **PROVED (by scope)** | Same scope gate: `battle_controllers.c:177` sets `gBattlersCount = 2` for every non-double battle, so battlers 2/3 are never instantiated and `gBattlerAttacker` (assigned from `gBattlerByTurnOrder`, `battle_util.c:1471`) cannot exceed 1. |
-| `battleScriptActionAdmission.ts:3517` | `CANCELER_BIDE does not accept absent battlers: the GetMoveTarget fallback is source-unreachable at a continuing Level-50 singles action boundary` | **UNPROVEN** | **The source models this exact state rather than ruling it out.** `battle_util.c:2237-2238`: `if (gAbsentBattlerFlags & gBitTable[gBattlerTarget]) gBattlerTarget = GetMoveTarget(MOVE_BIDE, MOVE_TARGET_SELECTED + 1);` — a live redirect sitting three lines after the `gBideTarget` read that #126 crashed on. `gAbsentBattlerFlags` is raised on faint at `battle_script_commands.c:4886/4915/4937/4958/4980/5043/5059/5109` and cleared only on switch-in (`:4689`, `battle_util.c:1909`), so it is nonzero for the whole window between a faint and its replacement. The port replaces a modeled source branch with a premise; that is the #126 shape by definition. Scenario in §4. |
+| `battleScriptActionAdmission.ts:3517` | `CANCELER_BIDE does not accept absent battlers: the GetMoveTarget fallback is source-unreachable at a continuing Level-50 singles action boundary` | **PROVED (by scope)** — *supervisor correction 2026-08-25; the worker's UNPROVEN verdict is withdrawn* | The redirect at `battle_util.c:2235-2237` is real, but the worker's premise that `gAbsentBattlerFlags` "is raised on faint" is a citation-context slip: every `gAbsentBattlerFlags \|= gBitTable[...]` site it cites (`battle_script_commands.c:4886/4915/4937/4958/4980/5043/5059/5109`) sits inside `Cmd_openpartyscreen` (`:4865-5150`) and fires only when `HasNoMonsToSwitch(...)` is true — a slot with **no replacement**, the doubles one-mon-left case. A faint by itself never sets the bit (`Cmd_tryfaintmon`, `:2965`, raises `HITMARKER_FAINTED` only). In a continuing Level-50 singles battle a fainted slot always has a replacement (otherwise `checkteamslost` has already ended the battle), so `gAbsentBattlerFlags` is 0 at every continuing action boundary — exactly the port's stated invariant. **Port half:** the port never raises `absentBattlerFlags` on faint either (`factoryBattleStart.ts:425` starts it at 0; the only write is the switch-in clear at `battleScriptSwitchinOpcode.ts:705`), matching the source. §4 item 3 and §5 Draft C below are withdrawn accordingly. |
 | `battleScriptActionAdmission.ts:3547` *(bonus row; missed by the stage-2 regex)* | `STATUS2_BIDE counter 3 is not reachable from Cmd_setbide in the Level-50 singles locked-action flow` | **PROVED** | `Cmd_setbide` (`battle_script_commands.c:7122-7129`) ORs `STATUS2_BIDE_TURN(2)` into a 2-bit field; the only other write is the `-= STATUS2_BIDE_TURN(1)` at `battle_util.c:2225`. Reaching 3 needs a second `Cmd_setbide` while the field is 1, which the canceler forecloses: once `STATUS2_BIDE` is set, `battle_util.c:2225-2245` diverts the biding battler to `BattleScript_BideStoringEnergy` / `BideAttack` / `BideNoEnergyToAttack` inside `AtkCanceler`, before the move's own script (and so before `Cmd_setbide`) can run again. **Port half:** the port sets Bide only through `battleScriptSetbideOpcode.ts` and reaches it through the same canceler phase. |
 | `battleScriptActionAdmission.ts:3553` | `gBideDmg[N] must be nonnegative in reachable Level-50 singles state` | **PROVED** | `Cmd_datahpupdate` splits on sign first: `battle_script_commands.c:1897-1903` handles `gBattleMoveDamage < 0` as HP gain and touches neither `gBideDmg` nor `gBideTarget`; the accumulation `gBideDmg[gActiveBattler] += gBattleMoveDamage` at `:1912` is reachable only from the `else` at `:1904`, i.e. with non-negative damage. `Cmd_setbide` zeroes the cell at `:7125`. **Port half — both halves confirmed:** `battleScriptHitChainOpcode.ts:2521` (`if (damage < 0)`) early-returns on the heal branch *before* the bide accumulation at `:2551-2564`, exactly mirroring the C split, and `battleScriptSetbideOpcode.ts:44-46` zeroes the attacker's cell. The post-#126 `HITMARKER_IGNORE_BIDE` strip is at `battleScriptHitChainOpcode.ts:2552-2554`. |
 | `battleScriptActionAdmission.ts:3780` | `CANCELER_THAW Level-50 singles attacker must be battler 0 or 1` | **PROVED (by scope)** | Same gate as `:3512` (`battle_controllers.c:177`). |
@@ -164,10 +164,16 @@ next pass.
 
 | Verdict | Count |
 | --- | --- |
-| **PROVED** (incl. PROVED-by-scope, incl. the bonus `:3547` row) | **7** |
+| **PROVED** (incl. PROVED-by-scope, incl. the bonus `:3547` row; `:3517` moved here by supervisor correction) | **8** |
 | **TS-CONTRACT** | **8** |
-| **UNPROVEN** | **9** |
+| **UNPROVEN** | **8** |
 | **UNCLASSIFIED** | **24** |
+
+*Supervisor note (2026-08-25):* the `HandleAction_ActionFinished` reset
+`*(gBattleStruct->monToSwitchIntoId + battler) = PARTY_SIZE` after **every**
+action and the turn-start loop at `battle_main.c:4008-4009` are additional
+source lifecycle events for §4 item 1's cell; they belong with ISSUES #121's
+two already-recorded omissions.
 
 ---
 
@@ -213,8 +219,8 @@ holder at 1 HP so the faint rung reaches the item barrier during a forced switch
 result the fainted-actions rung already models at `:302-319`, and the two
 Factory decision modules should propagate it.
 
-**3. `battleScriptActionAdmission.ts:3517` — `CANCELER_BIDE` with any absent battler.**
-*Why reachable:* the source spends two lines handling this exact state
+**3. ~~`battleScriptActionAdmission.ts:3517` — `CANCELER_BIDE` with any absent battler.~~ WITHDRAWN (supervisor verification 2026-08-25 — see the corrected §3.1 row: the cited raise sites are `Cmd_openpartyscreen`'s no-replacement branches, unreachable in a continuing singles battle; the port's invariant holds). Original text retained below for the record.**
+*Why reachable (original, refuted):* the source spends two lines handling this exact state
 (`battle_util.c:2237-2238`) — you do not write a redirect for a state that
 cannot occur. `gAbsentBattlerFlags` is nonzero for the whole window between a
 faint (`battle_script_commands.c:4886`…`:5109`) and the replacement's switch-in
@@ -348,9 +354,9 @@ has. Repro: `full` policy soak at high carry (maximum barrier exposure per
 chain), or a staged `mechanicLab` `overrides.parties` recipe with a Focus Band
 holder at 1 HP to reach the item barrier during a forced switch.
 
-### Draft C — `CANCELER_BIDE` throws on absent battlers where the source redirects (#126 sibling)
+### Draft C — ~~`CANCELER_BIDE` throws on absent battlers where the source redirects (#126 sibling)~~ WITHDRAWN 2026-08-25 (supervisor verification: not filed — see the corrected §3.1 row; `gAbsentBattlerFlags` is only ever raised by `Cmd_openpartyscreen` when no replacement exists)
 
-**Symptom.** `src/engine/battleScriptActionAdmission.ts:3515-3519` throws
+**Symptom (original, refuted).** `src/engine/battleScriptActionAdmission.ts:3515-3519` throws
 "CANCELER_BIDE does not accept absent battlers: the GetMoveTarget fallback is
 source-unreachable at a continuing Level-50 singles action boundary" whenever
 `rulesContext.absentBattlerFlags !== 0` at the Bide phase.
