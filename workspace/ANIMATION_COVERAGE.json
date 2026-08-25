@@ -6832,6 +6832,16 @@
    "representatives": ["MOVE_SCREECH"],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_SCREECH alone independently passes 63/63 player-back plus 63/63 opponent-front complete source/component/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation framebuffer rows through first inactive cleanup with zero residual pixels. Its source-age reducer, typed live species/sides/geometry, generic front/back battler art, source PURPLE_RING art, two-call painter ordering, own ShakeMon2/SwayMon task timing, ordinary predecessor OAM/matrix/palette transfer, field chrome, and the generic preceding-hardware elevated-opponent shadow use no carrier-pair gate, recording/framebuffer lookup, absolute tick, or gameplay ownership. MOVE_SUPERSONIC and MOVE_METAL_SOUND remain independent exact controls and receive no Screech sibling credit."
+  },
+  {
+   "id": "recycle-arrow",
+   "components": [
+    "asset:ANIM_TAG_RECYCLE",
+    "sprite:gRecycleSpriteTemplate"
+   ],
+   "representatives": ["MOVE_RECYCLE"],
+   "fulfilled": false,
+   "goal": "UNFULFILLED: MOVE_RECYCLE has legal bilateral 203-row Scene-ON source/evidence/reducer/typed-seam acceptance only, after real Sitrus consumption and successful tryrecycleitem restoration. It remains unsupported and receives no exact or sibling credit. Production remainder: extract ANIM_TAG_RECYCLE source art; add ordinary generic affine ObjBlend/palette/BLDALPHA/monbg composition through the shared Scene-ON compositor; then pass every retained player-back and opponent-front core-render row with zero residual pixels twice fresh."
   }
  ],
  "variantAudits": {

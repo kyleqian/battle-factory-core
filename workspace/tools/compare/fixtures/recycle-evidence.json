@@ -1,0 +1,74 @@
+{
+  "schema": "recycle-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_RECYCLE",
+  "moveId": 278,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "source": {
+    "start": "0x082ce05e",
+    "endExclusive": "0x082ce092",
+    "bytes": 52,
+    "scriptTextSha256": "b180a1924880d2427b9a9cf2f1692119996738da19ebce0f8d8a79f81ce4e6b8",
+    "templateTextSha256": "83495cd3fd7d99e4e7e03e4f44b9a6e8bbb10dfd226bdccff513622f1dc8aee8",
+    "callbackTextSha256": "ba88d860f3d62bc09b1a9c0fc8db3ae22f948d811f7d16efa6534a1f76f3e540",
+    "blendTaskTextSha256": "82ba3b6f854646aa720dea4f53c94223dc37ec5c91cac7b4b447e52d4923f905",
+    "components": [
+      "asset:ANIM_TAG_RECYCLE",
+      "sprite:gRecycleSpriteTemplate",
+      "task:AnimTask_BlendMonInAndOut",
+      "visualCommand:blendoff",
+      "visualCommand:clearmonbg",
+      "visualCommand:monbg",
+      "visualCommand:setalpha"
+    ]
+  },
+  "repeatability": {"runsPerOrientation": 2, "denseStateByteIdentical": true, "rawRgbSequenceByteIdentical": true},
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-recycle-player-porygon-opponent-gyarados.json",
+      "scenarioSha256": "eedaa91e096cf448b524832ab8ec3bba112e790dc34bc91e340ac3a9b3e5cafe",
+      "denseState": "tools/compare/evidence/recycle-player-dense-state.json.gz",
+      "denseStateSha256": "ffbb0d719996687554430d895d34588bb37d37ee607356592a5adda7f56a4de0",
+      "probeJsonSha256": "3bead7adcfb00323aa367b0881c6481465d29e1d50f4e1e4db79003445d96a30",
+      "rawRgbArchive": "tools/compare/evidence/recycle-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "0d90472356e4d7a8e83c7d7ccd3e38f52c37cc1f77b5e1534d07322ecbd05210",
+      "rawRgbSequenceSha256": "1fc80beb00a64d5d6fc87ae7063c492c947a1694a7bf2814b1511f4f9ffe562b",
+      "changeMap": "tools/compare/evidence/recycle-changemap-player.txt",
+      "changeMapSha256": "033580fe1466c04f3eae9b589b61a90e9cfe6bde98ac5d476bd3c4cdaa84e231",
+      "window": {"startFrame": 2589, "endFrame": 2791, "frameCount": 203}
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-recycle-opponent-porygon-player-gyarados.json",
+      "scenarioSha256": "63d068a57d86f60b435fc901f3f85a004b4ae1183a1d39634febc614ea9284dd",
+      "denseState": "tools/compare/evidence/recycle-opponent-dense-state.json.gz",
+      "denseStateSha256": "67bdb9fa321890d919dea4de4a3b0128de4156cad2f0278437dd4bc375fe5f2f",
+      "probeJsonSha256": "7692a84c4a2aab4d00241bcd05402423b78a8d136c092b50a596dd5513f8d8dc",
+      "rawRgbArchive": "tools/compare/evidence/recycle-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "d5ed9261d3e9550992be500d19ff47a08ca843e8edcbe74db40f84d61652c43c",
+      "rawRgbSequenceSha256": "3e3501d401b80379f9f5fd981728c84606dcd65dc0e08ecf7bac21896d9d1255",
+      "changeMap": "tools/compare/evidence/recycle-changemap-opponent.txt",
+      "changeMapSha256": "129bab383ce3019f897ed58b35293e670c4a0a3db2c54dbfd45525d2a0602450",
+      "window": {"startFrame": 2193, "endFrame": 2395, "frameCount": 203}
+    }
+  },
+  "measured": {
+    "pointerRows": "203/203 each, first active through first inactive cleanup",
+    "observedPointerParities": [0, 1],
+    "recycleSpriteRamRows": [10, 147],
+    "blendMonInAndOutRamRows": [149, 195],
+    "firstInactiveAge": 202,
+    "oamPredecessor": "202/202 each",
+    "palettePredecessor": "202/202 each",
+    "ongoingMatrixPredecessor": "202/202 each",
+    "freshAffinePaint": "sprite is allocated at age 10, unchanged raw RGB at age 10, and first arrow pixels at age 11; removal remains ordinary OAM RAM+1",
+    "gameplayRngTransitions": 0,
+    "animationRngTransitions": 200,
+    "audio": "SE_M_TAKE_DOWN at source ages 10, 34, 59, and 149; attacker pan -64 player / 63 opponent"
+  },
+  "controls": {
+    "blendMonInAndOut": ["MOVE_SUPER_FANG"],
+    "coverageChanged": false
+  },
+  "boundedRemainder": "SOURCE/STAGING/EVIDENCE/REDUCER CHECKPOINT ONLY. MOVE_RECYCLE remains unsupported with no exact or sibling credit. The remaining production work is source art extraction for ANIM_TAG_RECYCLE, ordinary generic Scene-ON compositing of its affine ObjBlend sprite and palette/BLDALPHA/monbg handoffs, and actual core-render zero-residual verification of every retained bilateral row twice fresh."
+}
