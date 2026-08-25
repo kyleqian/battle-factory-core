@@ -84,6 +84,7 @@ import {
   BATTLE_SCRIPT_STATUS3_YAWN,
 } from "../../src/engine/battleScriptSourceConstants.ts";
 import type { BattleMoveDecision } from "../../src/engine/battleDecisionBoundary.ts";
+import type { SoakCoverageCollector } from "./randomRoundSoakCoverage.ts";
 import abilityItemHooksData from "../../src/data/gen/ability-item-hooks.json" with { type: "json" };
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
 import speciesTypesData from "../../src/data/gen/species-types.json" with { type: "json" };
@@ -1430,6 +1431,12 @@ export class RandomPlayer {
   private readonly rng: Rng;
   private readonly log: ActionLog;
   private readonly policy: PlayerPolicy;
+  /**
+   * `--coverage-json` only (null on every ordinary run): the run-scoped
+   * coverage collector, used ONLY to record the fight menu's confirmed slot.
+   * Observation, never a decision input.
+   */
+  private readonly coverage: SoakCoverageCollector | null;
 
   /** Every policy except "vanilla"/"strong-route" shares the same menu/target exploration rolls. */
   private get explores(): boolean {
@@ -1450,10 +1457,16 @@ export class RandomPlayer {
     return this.policy === "winning-coverage" || this.policy === "winning-combined";
   }
 
-  constructor(rng: Rng, log: ActionLog, policy: PlayerPolicy) {
+  constructor(
+    rng: Rng,
+    log: ActionLog,
+    policy: PlayerPolicy,
+    coverage: SoakCoverageCollector | null = null,
+  ) {
     this.rng = rng;
     this.log = log;
     this.policy = policy;
+    this.coverage = coverage;
     // Random 3 distinct rental slots, random order (vanilla: first three).
     const slots = [0, 1, 2, 3, 4, 5];
     if (this.explores) {
@@ -1862,6 +1875,18 @@ export class RandomPlayer {
         return this.press("A", 8);
       }
       this.note(state, `fight: confirm slot ${intent.target}${rejected ? " (will reject)" : ""}`);
+      if (this.coverage !== null && !rejected) {
+        // The confirmed slot at commit time, with the same forced-Struggle
+        // correction the intent note above uses: a slot-indexed surface
+        // cannot say "this is Struggle" (battle_util.c:99-106 keeps the
+        // banked slot and swaps the MOVE), so name it here too.
+        const struggling = orch.battle
+          ? battlerUsesForcedStruggle(orch.battle.rules.rulesContext, 0)
+          : false;
+        this.coverage.recordPlayerFightCommit(
+          struggling ? 165 : presentation.field.player.moveIds[intent.target] ?? 0,
+        );
+      }
       this.fightIntent = null;
       return this.press("A", 8);
     }
@@ -2391,6 +2416,13 @@ export type RunOptions = {
   maxRounds?: number;
   /** Test-only opt-in observer for every action-log note, independent of `verbose`. */
   onNote?: (entry: { frame: number; battle: number; turn: number; what: string }) => void;
+  /**
+   * `--coverage-json` only: a RUN-scoped (not seed-scoped) coverage
+   * collector, fed the post-tick EngineState every frame. Absent on every
+   * ordinary run, and purely observational -- it never reads back into a
+   * decision, the RNG walk, or the frame budget.
+   */
+  coverage?: SoakCoverageCollector;
 };
 
 export const DEFAULT_RUN_OPTIONS: RunOptions = {
@@ -2471,7 +2503,9 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   const stallFrames = options.stallFrames ?? DEFAULT_STALL_FRAMES;
   const rng = new Rng(seed);
   const log = new ActionLog(options.verbose, options.onNote);
-  const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy);
+  const coverage = options.coverage ?? null;
+  coverage?.beginSeed(seed);
+  const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy, coverage);
   let state = options.stateFactory?.(seed) ?? createInitialState();
   let frame = 0;
   let firstEndState: string | null = null;
@@ -2512,6 +2546,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   let prevEnd: string | null = null;
 
   const observe = (): void => {
+    coverage?.observe(state);
     if (state.factoryTerminal !== null) {
       terminalOutcome = state.factoryTerminal.profile.outcome;
       terminalRecordMenuInputReadyReached ||=

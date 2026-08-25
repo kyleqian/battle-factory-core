@@ -72,8 +72,17 @@
 //                      Tier-1 pin surface)
 //   --verbose          per-action log for a single-seed repro
 //   --json PATH        also write the full per-seed results as JSON
+//   --coverage-json PATH  opt-in: aggregate, ACROSS ALL SEEDS of this run,
+//                      which moves / move effects / species / abilities /
+//                      held items the chains actually touched, against the
+//                      Level-50 rental corpus as the universe; writes the
+//                      full report to PATH and prints an `=== coverage ===`
+//                      summary block. Observation only -- absent, the run is
+//                      byte-identical to today (see
+//                      tools/soak/randomRoundSoakCoverage.ts).
 
 import { writeFileSync } from "node:fs";
+import { SoakCoverageCollector } from "./randomRoundSoakCoverage.ts";
 import {
   createStartCarryState,
   DEFAULT_STALL_FRAMES,
@@ -101,6 +110,7 @@ function main(): void {
   const renderEvery = Number(getFlag("--render-every") ?? 8);
   const policy = (getFlag("--policy") ?? "full") as SoakPolicy;
   const jsonPath = getFlag("--json");
+  const coverageJsonPath = getFlag("--coverage-json");
   if (
     policy !== "full" && policy !== "vanilla" && policy !== "winning"
     && policy !== "winning-swap" && policy !== "oracle-strength"
@@ -140,6 +150,10 @@ function main(): void {
     seeds = Array.from({ length: Math.max(0, end - start) }, (_, i) => start + i);
   }
 
+  // Constructed only when the flag is present, so a flagless run never
+  // enters a single line of the instrument.
+  const coverage = coverageJsonPath !== null ? new SoakCoverageCollector(policy) : null;
+
   const options: Partial<RunOptions> = {
     maxFrames,
     renderEvery,
@@ -152,6 +166,7 @@ function main(): void {
     ...(startCarry !== 0 || varyRng
       ? { stateFactory: (seed: number) => createStartCarryState(startCarry, varyRng ? seed : 0) }
       : {}),
+    ...(coverage !== null ? { coverage } : {}),
   };
   const results: SeedResult[] = [];
   const startedAt = Date.now();
@@ -264,6 +279,13 @@ function main(): void {
   if (jsonPath) {
     writeFileSync(jsonPath, JSON.stringify({ counts, results }, null, 2));
     console.log(`\nwrote ${jsonPath}`);
+  }
+
+  if (coverage !== null && coverageJsonPath !== null) {
+    console.log("");
+    for (const line of coverage.summaryLines()) console.log(line);
+    writeFileSync(coverageJsonPath, JSON.stringify(coverage.report(), null, 2));
+    console.log(`wrote ${coverageJsonPath}`);
   }
 }
 
