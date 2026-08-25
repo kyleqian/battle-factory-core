@@ -22,8 +22,14 @@ describe("MOVE_MEAN_LOOK pure source-age reducer", () => {
   it("pins script, monbg, palette-phase and inactive cleanup edges", () => {
     expect(meanLookAtAge(0, target, 30)).toMatchObject({ active: true, sourceOffset: 0, monBgTargetCopy: false });
     expect(meanLookAtAge(4, target, 30)).toMatchObject({ sourceOffset: 5, monBgTargetCopy: true });
+    expect(meanLookAtAge(8, target, 30)).toMatchObject({ fieldBlackCoefficient: 0, eyeBlendAlpha: 5 });
+    expect(meanLookAtAge(9, target, 30)).toMatchObject({ fieldBlackCoefficient: 2, eyeBlendAlpha: 6 });
     expect(meanLookAtAge(30, target, 30).fieldPalette).toBe("black");
+    expect(meanLookAtAge(30, target, 30).fieldBlackCoefficient).toBe(16);
     expect(meanLookAtAge(129, target, 30)).toMatchObject({ sourceOffset: 65, fieldPalette: "fade-from-black" });
+    expect(meanLookAtAge(129, target, 30).eyeBlendAlpha).toBe(12);
+    expect(meanLookAtAge(161, target, 30).eyeBlendAlpha).toBe(1);
+    expect(meanLookAtAge(160, target, 30).fieldBlackCoefficient).toBe(0);
     expect(meanLookAtAge(164, target, 30).monBgTargetCopy).toBe(false);
     expect(meanLookAtAge(170, target, 30)).toMatchObject({ active: false, sourceOffset: 68, eye: null });
   });

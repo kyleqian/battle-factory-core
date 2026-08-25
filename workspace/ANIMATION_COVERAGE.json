@@ -5675,6 +5675,33 @@
     "tests/animation/bellyDrumEvidence.test.ts",
     "tests/animation/bellyDrumFramebuffer.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_MEAN_LOOK",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-289 MURKROW three-mon parties retain ordinary Battle Scene ON player-back frames 71-241 and opponent-front frames 75-245, 171 consecutive pointer-owned rows each through first inactive cleanup; both orientations are twice-fresh byte-identical and the retained dense/raw hashes remain pinned",
+    "the authoritative half-open source interval is 0x082cbf1a..0x082cbf5f (69 bytes); the pure source-age reducer and typed Scene-ON seam cover ANIM_TAG_EYE, gMeanLookEyeSpriteTemplate, monbg, clearmonbg, simple_palette_blend, eye pulse/hidden/growth/wobble/fade/destruction, target monbg offsets, field palette ramps, source painter lifecycle, and cleanup",
+    "the ordinary shared compositor consumes source EYE art, live species/sides/geometry, generic front/back battler art, target monbg copy, predecessor field palette/OAM/matrix display latches, measured eye affine/visibility/BLDALPHA behavior, source priority, field chrome, and cleanup without an evidence-pair gate, recorded RGB/framebuffer lookup, absolute tick, or gameplay ownership",
+    "all 171 player-back plus 171 opponent-front component/seam/raw-RGB/core.ts-to-renderSceneOnMovePresentation framebuffer rows match with zero residual pixels through first inactive cleanup; OAM and whole affine matrices are RAM+1 on 170/170 transitions, palette is RAM+1 on 169/170 with the age-4 monbg setup exception, and the move's own source-relative BLDALPHA edges are retained",
+    "gameplay state and RNG remain invariant while animation RNG changes 168/170; MOVE_PERISH_SONG and MOVE_CONFUSE_RAY retain independent exact status and receive no Mean Look sibling credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-mean-look-player-murkrow-opponent-onix.json",
+    "tools/battle-lab/mechanic-mean-look-opponent-murkrow-player-onix.json",
+    "tools/compare/fixtures/mean-look-evidence.json",
+    "tools/compare/meanLookProbe.py",
+    "tools/compare/meanLookEvidence.ts",
+    "tools/compare/meanLookFramebuffer.ts",
+    "tools/compare/extractMeanLookAssets.ts",
+    "src/animation/assets/mean-look.json",
+    "src/animation/meanLook.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/meanLookEvidence.test.ts",
+    "tests/animation/meanLook.test.ts",
+    "tests/animation/meanLookFramebuffer.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -6714,8 +6741,8 @@
     "visualCommand:simple_palette_blend"
    ],
    "representatives": ["MOVE_MEAN_LOOK"],
-   "fulfilled": false,
-   "goal": "PARTIAL: MOVE_MEAN_LOOK retains complete 171-row player-back and opponent-front pointer-owned Scene-ON windows twice fresh, source EYE art, a pure source-age eye reducer, and its own OAM/matrix/palette/register/monbg lifecycle. It remains unsupported with no coverage credit until a typed Scene-ON seam, ordinary production compositor, and all 342 retained core.ts framebuffer rows pass with zero residual pixels. MOVE_PERISH_SONG and MOVE_CONFUSE_RAY retain independent exact control status and receive no sibling credit."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_MEAN_LOOK independently passes 171/171 player-back plus 171/171 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation framebuffer rows with zero residual pixels through first inactive cleanup. The ordinary compositor uses source EYE art, live species/sides/geometry, generic battler art, target monbg, predecessor field/OAM/matrix transfers, measured eye affine/visibility/BLDALPHA behavior, source painter order, chrome, and cleanup without a pair gate, recording lookup, absolute tick, or gameplay ownership. MOVE_PERISH_SONG and MOVE_CONFUSE_RAY remain independent exact controls and receive no sibling credit."
   }
  ],
  "variantAudits": {

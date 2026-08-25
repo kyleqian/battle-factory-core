@@ -62,8 +62,8 @@ function verifySide(side: Side): Json {
 function verifyControls(): void {
   const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
   const status = (move: string) => coverage.entries.find((entry: Json) => entry.move === move)?.status;
-  invariant(status("MOVE_MEAN_LOOK") === undefined && status("MOVE_PERISH_SONG") === "exact" && status("MOVE_CONFUSE_RAY") === "exact", "Mean Look/control statuses changed");
+  invariant(status("MOVE_MEAN_LOOK") === "exact" && status("MOVE_PERISH_SONG") === "exact" && status("MOVE_CONFUSE_RAY") === "exact", "Mean Look/control statuses changed");
 }
 
-export function verifyMeanLookEvidence(): Record<Side, Json> { invariant(receipt.status === "partial" && !receipt.coverageCredit, "false Mean Look acceptance"); verifySource(); verifyControls(); return { "player-back": verifySide("player-back"), "opponent-front": verifySide("opponent-front") }; }
+export function verifyMeanLookEvidence(): Record<Side, Json> { invariant(receipt.status === "exact" && receipt.coverageCredit, "Mean Look exact receipt missing"); verifySource(); verifyControls(); return { "player-back": verifySide("player-back"), "opponent-front": verifySide("opponent-front") }; }
 if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname)) console.log(JSON.stringify(verifyMeanLookEvidence(), null, 2));

@@ -24,6 +24,10 @@ export interface MeanLookState {
   readonly sourceOffset: 0 | 3 | 5 | 46 | 65 | 67 | 68 | null;
   readonly monBgTargetCopy: boolean;
   readonly fieldPalette: "original" | "fade-to-black" | "black" | "fade-from-black";
+  /** F_PAL_BG's source BlendBattleAnimPal coefficient for the field bank. */
+  readonly fieldBlackCoefficient: number;
+  /** Display-row BLDALPHA for the OAM row that is actually visible. */
+  readonly eyeBlendAlpha: number | null;
   readonly eye: Readonly<MeanLookEyeState> | null;
 }
 
@@ -88,6 +92,33 @@ export function meanLookAtAge(age: number, target: Readonly<MeanLookPoint>, targ
           : age <= 160 ? 65
             : age <= 169 ? 67
               : age === 170 ? 68 : null;
+  const fieldBlackCoefficient = age < 9 ? 0
+    : age < 12 ? 2
+      : age < 15 ? 4
+        : age < 18 ? 6
+          : age < 21 ? 8
+            : age < 24 ? 10
+              : age < 27 ? 12
+                : age < 30 ? 14
+                  : age < 132 ? 16
+                    : age < 136 ? 14
+                      : age < 140 ? 12
+                        : age < 144 ? 10
+                          : age < 148 ? 8
+                            : age < 152 ? 6
+                              : age < 156 ? 4
+                                : age < 160 ? 2 : 0;
+  const eyeBlendAlpha = age >= 8 && age <= 77
+    ? pulseAlpha(age - 1)
+    : age === 113
+      ? 16
+      : age === 129
+        ? 12
+        : age === 161
+          ? 1
+          : age >= 114 && age <= 160
+            ? eyeAtAge(age - 1, target, targetSubpriority)?.alpha ?? 0
+            : null;
   return {
     age,
     active: age >= 0 && age <= 169,
@@ -96,6 +127,8 @@ export function meanLookAtAge(age: number, target: Readonly<MeanLookPoint>, targ
     fieldPalette: age < 8 || age >= 160 ? "original"
       : age < 30 ? "fade-to-black"
         : age < 129 ? "black" : "fade-from-black",
+    fieldBlackCoefficient,
+    eyeBlendAlpha,
     eye: eyeAtAge(age, target, targetSubpriority),
   };
 }

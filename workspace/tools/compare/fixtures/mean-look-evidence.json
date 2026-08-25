@@ -3,8 +3,8 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_MEAN_LOOK",
   "moveId": 212,
-  "status": "partial",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "source": {
     "start": "0x082cbf1a",
     "endExclusive": "0x082cbf5f",
@@ -58,5 +58,5 @@
     "animationRngTransitions": 168
   },
   "controls": {"simplePaletteBlend": ["MOVE_PERISH_SONG"], "monbgClearPaletteRegisters": ["MOVE_CONFUSE_RAY"], "statusesChanged": false},
-  "boundedRemainder": "Typed Scene-ON presentation seam, ordinary production compositor, normalized change-map artifact, and bilateral core.ts framebuffer equality remain. MOVE_MEAN_LOOK stays unsupported and receives no coverage credit."
+  "boundedRemainder": "No MOVE_MEAN_LOOK presentation remainder remains. The typed Scene-ON seam and ordinary compositor pass the complete bilateral production framebuffer; gameplay status/trapping, damage, RNG, controller, turn, round, and facility ownership remain outside this animation receipt."
 }

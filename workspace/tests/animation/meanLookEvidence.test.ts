@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { verifyMeanLookEvidence } from "../../tools/compare/meanLookEvidence.ts";
 
 describe("MOVE_MEAN_LOOK bilateral evidence checkpoint", () => {
-  it("replays every retained source/state/latch/RGB row without claiming acceptance", () => {
+  it("replays every retained source/state/latch/RGB row for the exact promotion", () => {
     expect(verifyMeanLookEvidence()).toEqual({
       "player-back": { pointerRows: 171, eyeRows: 159, hiddenRows: 11, wobbleRows: 16, oamPredecessor: 170, matrixPredecessor: 170, palettePredecessor: 169, gameplayRngTransitions: 0, animationRngTransitions: 168 },
       "opponent-front": { pointerRows: 171, eyeRows: 159, hiddenRows: 11, wobbleRows: 16, oamPredecessor: 170, matrixPredecessor: 170, palettePredecessor: 169, gameplayRngTransitions: 0, animationRngTransitions: 168 },

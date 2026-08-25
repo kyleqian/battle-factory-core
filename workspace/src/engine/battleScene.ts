@@ -611,6 +611,7 @@ import teeterDanceAsset from "../animation/assets/teeter-dance.json" with { type
 import bellyDrumAsset from "../animation/assets/belly-drum.json" with { type: "json" };
 import sweetScentAsset from "../animation/assets/sweet-scent.json" with { type: "json" };
 import defenseCurlAsset from "../animation/assets/defense-curl.json" with { type: "json" };
+import meanLookAsset from "../animation/assets/mean-look.json" with { type: "json" };
 import batonPassAsset from "../animation/assets/baton-pass.json" with { type: "json" };
 import rainDropsAsset from "../animation/assets/rain-drops.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
@@ -1000,6 +1001,7 @@ import {
   sceneOnSweetKissView,
   sceneOnSweetScentView,
   sceneOnDefenseCurlView,
+  sceneOnMeanLookView,
   sceneOnLovelyKissView,
   sceneOnOctazookaView,
   sceneOnSpikesView,
@@ -1157,6 +1159,7 @@ import {
   type SceneOnBellyDrumConfig,
   type SceneOnSweetScentConfig,
   type SceneOnDefenseCurlConfig,
+  type SceneOnMeanLookConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   SPITE_CLONE_BLANK_POINTER_AGE,
@@ -2138,6 +2141,9 @@ const sweetScentArt = sweetScentAsset as {
 };
 const defenseCurlArt = defenseCurlAsset as {
   eclipsingOrb: { tileset: Tileset; palette: RgbColor[] };
+};
+const meanLookArt = meanLookAsset as {
+  eye: { tileset: Tileset; palette: RgbColor[] };
 };
 
 
@@ -6048,6 +6054,61 @@ function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tile
       fb[o + 1] = blendChannel(c.g, field.g, eva, evb);
       fb[o + 2] = blendChannel(c.b, field.b, eva, evb);
       fb[o + 3] = 255;
+    }
+  }
+}
+
+/**
+ * MOVE_MEAN_LOOK's gMeanLookEyeSpriteTemplate is a doubled 64x64
+ * semitransparent OBJ.  Its target-2 is the target's frozen monbg copy, not
+ * the later attacker OBJ, so the caller supplies the pre-attacker backdrop.
+ * The source affine scales are the same direct 8.8 values used by the eye's
+ * affine command table; x2/y2 remain separate OAM offsets.
+ */
+function drawMeanLookEyeAffineBlended(
+  fb: Uint8Array,
+  backdrop: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+  xScale: number,
+  yScale: number,
+  x2: number,
+  y2: number,
+  eva: number,
+  evb: number,
+  invisible: boolean,
+): void {
+  if (invisible) return;
+  const w = tileset.columns * 8;
+  const h = tileset.rows * 8;
+  const halfW = w / 2;
+  const halfH = h / 2;
+  const centerX = ox + halfW + x2;
+  const centerY = oy + halfH + y2;
+  const pa = Math.trunc(0x10000 / xScale);
+  const pd = Math.trunc(0x10000 / yScale);
+  for (let dy = -h; dy < h; dy += 1) {
+    const y = centerY + dy;
+    const sy = ((dy * pd) >> 8) + halfH;
+    if (sy < 0 || sy >= h || y < 0 || y >= 160) continue;
+    const tileRow = Math.floor(sy / 8);
+    const inTileY = sy % 8;
+    for (let dx = -w; dx < w; dx += 1) {
+      const x = centerX + dx;
+      const sx = ((dx * pa) >> 8) + halfW;
+      if (sx < 0 || sx >= w || x < 0 || x >= 240) continue;
+      const tile = tileset.tiles[tileRow * tileset.columns + Math.floor(sx / 8)];
+      const index = tile?.[inTileY * 8 + (sx % 8)] ?? 0;
+      if (index === 0) continue;
+      const color = palette[index];
+      if (!color) continue;
+      const offset = (y * 240 + x) * 4;
+      fb[offset] = blendChannel(color.r, backdrop[offset]!, eva, evb);
+      fb[offset + 1] = blendChannel(color.g, backdrop[offset + 1]!, eva, evb);
+      fb[offset + 2] = blendChannel(color.b, backdrop[offset + 2]!, eva, evb);
+      fb[offset + 3] = 255;
     }
   }
 }
@@ -14300,6 +14361,132 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "MEAN_LOOK") {
+    const meanState = state as SceneOnMovePresentationState<SceneOnMeanLookConfig>;
+    const view = sceneOnMeanLookView(meanState);
+    // OAM, affine matrices, and the eye's BLDALPHA all reach scanout from
+    // the preceding source row.  The field palette has the same RAM+1
+    // handoff, while the monbg setup has its source-age-4 exception and is
+    // therefore kept on the current reducer row.
+    const displayed = sceneOnMeanLookView({
+      ...meanState,
+      age: meanState.age - 1,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) {
+      throw new Error(`MEAN_LOOK missing ${view.attacker.species} attacker art`);
+    }
+    if (!targetSource) {
+      throw new Error(`MEAN_LOOK missing ${view.target.species} target art`);
+    }
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const black = { r: 0, g: 0, b: 0 };
+    const fieldPalette = displayed.fieldBlackCoefficient === 0
+      ? battleBg.palette.map((palette) => [...palette])
+      : blendPaletteBanksToward(
+        battleBg.palette,
+        black,
+        displayed.fieldBlackCoefficient,
+      );
+    const targetCorner = {
+      x: view.target.geometry.spriteCorner.x + targetIdle.x2,
+      y: view.target.geometry.spriteCorner.y + targetIdle.y2,
+    };
+    const attackerCorner = {
+      x: view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      y: view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, fieldPalette);
+    const drawTarget = (): void => drawSpriteSheet(
+      fb,
+      targetTileset,
+      targetSource.palette,
+      targetCorner.x,
+      targetCorner.y,
+    );
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb,
+      attackerTileset,
+      attackerSource.palette,
+      attackerCorner.x,
+      attackerCorner.y,
+    );
+    // `monbg ANIM_DEF_PARTNER` turns the target into a BG target-2 copy;
+    // otherwise ordinary OAM subpriority determines the two battlers' order.
+    if (view.monBgTargetCopy) {
+      drawTarget();
+    } else if (playerAttacker) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    const targetBackdrop = fb.slice();
+    if (view.monBgTargetCopy) drawAttacker();
+    if (displayed.eye) {
+      drawMeanLookEyeAffineBlended(
+        fb,
+        targetBackdrop,
+        meanLookArt.eye.tileset,
+        meanLookArt.eye.palette,
+        displayed.eye.x - 32,
+        displayed.eye.y - 32,
+        displayed.eye.xScale,
+        displayed.eye.yScale,
+        displayed.eye.x2,
+        displayed.eye.y2,
+        view.eyeBlendAlpha ?? 16,
+        16 - (view.eyeBlendAlpha ?? 16),
+        displayed.eye.invisible,
+      );
+    }
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const profile = meanState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "MEAN LOOK!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "DEFENSE_CURL") {
     const curlState = state as SceneOnMovePresentationState<SceneOnDefenseCurlConfig>;
     const view = sceneOnDefenseCurlView(curlState);
