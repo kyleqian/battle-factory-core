@@ -76,8 +76,8 @@ function config(
     player: {
       species: 169,
       moveId: playerMoves[0],
-      moves: [...playerMoves] as unknown as readonly number[],
-      pp: [...playerPp] as unknown as readonly number[],
+      moves: playerMoves,
+      pp: playerPp,
       attack: 60,
       defense: 500,
       spAttack: 60,
@@ -97,7 +97,7 @@ function config(
       speed: 50,
       hp: 1000,
     },
-  } as FactoryFullTurnConfig;
+  };
 }
 
 type FullTurnState = ReturnType<typeof createFactoryFullTurnBattleState>;
