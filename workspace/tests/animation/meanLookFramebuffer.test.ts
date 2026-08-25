@@ -70,7 +70,7 @@ describe("MOVE_MEAN_LOOK production framebuffer", () => {
   it("promotes Mean Look alone and preserves named controls", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(208);
+      .toHaveLength(209);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_MEAN_LOOK"))
       .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "mean-look-eye"))
