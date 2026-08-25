@@ -1,9 +1,25 @@
 import { execFileSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { verifyRecycleEvidence } from "../../tools/compare/recycleEvidence.ts";
+import { createScratchDir } from "../../tools/lib/scratch.ts";
 
 describe("MOVE_RECYCLE legal bilateral source/evidence checkpoint", () => {
+  it("re-extracts the pinned 64x64 ANIM_TAG_RECYCLE art byte-for-byte", () => {
+    const scratch = createScratchDir("recycle-assets-");
+    const output = `${scratch}/recycle.json`;
+    execFileSync(process.execPath, [
+      "--experimental-strip-types",
+      "tools/compare/extractRecycleAssets.ts",
+      "--out",
+      output,
+    ]);
+    expect(readFileSync(output)).toEqual(readFileSync(
+      "src/animation/assets/recycle.json",
+    ));
+  });
+
   it("pins both complete 203-row windows, latches, legal staging, and no coverage credit", () => {
     expect(verifyRecycleEvidence()).toEqual({
       "player-back": {
