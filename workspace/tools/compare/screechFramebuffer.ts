@@ -26,6 +26,7 @@ export type ScreechOrientation = "player-back" | "opponent-front";
 
 type DenseSprite = Readonly<{
   slot: number;
+  active: boolean;
   x: number;
   y: number;
   x2: number;
@@ -33,6 +34,12 @@ type DenseSprite = Readonly<{
   matrix: readonly number[];
   template: Readonly<{ symbol?: string }>;
 }>;
+
+function visualGender(
+  gender: DensePartyMon["gender"],
+): "male" | "female" | "none" {
+  return gender === "genderless" ? "none" : gender;
+}
 
 type DensePartyMon = Readonly<{
   hp: number;
@@ -209,8 +216,8 @@ export function screechConfigFor(
       playerMaxHp: player.maxHp,
       opponentHp: opponent.hp,
       opponentMaxHp: opponent.maxHp,
-      playerGender: player.gender === "genderless" ? "none" : player.gender,
-      opponentGender: opponent.gender === "genderless" ? "none" : opponent.gender,
+      playerGender: visualGender(player.gender),
+      opponentGender: visualGender(opponent.gender),
     },
   };
 }
