@@ -39,6 +39,13 @@
 //                      score maximised only over trios whose summed
 //                      base-stat total is >= the mean candidate trio's,
 //                      so coverage cannot field an all-frail party)
+//                      or "coverage-fight" (opt-in CRASH-COVERAGE
+//                      instrument: "winning-coverage"'s draft and every
+//                      other winning-like decision, but the fight menu
+//                      commits the LEGAL slot whose move this run has used
+//                      least so far -- ties to the lowest slot -- so every
+//                      move in every drafted set gets spent, including the
+//                      status/utility slots a strength policy never plays)
 //   --max-frames N     per-seed tick budget; a seed still progressing when it
 //                      runs out finishes OK ("budget"), not HANG (default:
 //                      resolveMaxFrames(policy), i.e. DEFAULT_MAX_FRAMES_BY_POLICY[policy])
@@ -115,10 +122,12 @@ function main(): void {
     policy !== "full" && policy !== "vanilla" && policy !== "winning"
     && policy !== "winning-swap" && policy !== "oracle-strength"
     && policy !== "winning-coverage" && policy !== "winning-combined"
+    && policy !== "coverage-fight"
   ) {
     console.error(
       `bad --policy: ${policy} `
-        + `(want full|vanilla|winning|winning-swap|oracle-strength|winning-coverage|winning-combined)`,
+        + `(want full|vanilla|winning|winning-swap|oracle-strength|winning-coverage`
+        + `|winning-combined|coverage-fight)`,
     );
     process.exit(2);
   }
