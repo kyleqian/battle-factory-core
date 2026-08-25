@@ -995,6 +995,8 @@ export interface SceneOnPresentationBattler {
     | "SWINUB"
     | "JYNX"
     | "ONIX"
+    | "PORYGON"
+    | "GYARADOS"
     | "WOOPER"
     | "DROWZEE"
     | "KRABBY"

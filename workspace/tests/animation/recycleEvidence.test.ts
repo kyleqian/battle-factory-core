@@ -1,11 +1,10 @@
 import { execFileSync } from "node:child_process";
-import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { verifyRecycleEvidence } from "../../tools/compare/recycleEvidence.ts";
 import { createScratchDir } from "../../tools/lib/scratch.ts";
 
-describe("MOVE_RECYCLE legal bilateral source/evidence checkpoint", () => {
+describe("MOVE_RECYCLE legal bilateral production presentation", () => {
   it("re-extracts the pinned 64x64 ANIM_TAG_RECYCLE art byte-for-byte", () => {
     const scratch = createScratchDir("recycle-assets-");
     const output = `${scratch}/recycle.json`;
@@ -20,7 +19,7 @@ describe("MOVE_RECYCLE legal bilateral source/evidence checkpoint", () => {
     ));
   });
 
-  it("pins both complete 203-row windows, latches, legal staging, and no coverage credit", () => {
+  it("pins both complete 203-row windows, latches, and legal staging", () => {
     expect(verifyRecycleEvidence()).toEqual({
       "player-back": {
         pointerRows: 203,
@@ -70,15 +69,17 @@ describe("MOVE_RECYCLE legal bilateral source/evidence checkpoint", () => {
     });
   });
 
-  it("records an unfulfilled non-exclusive Recycle-arrow track without promoting the move", () => {
+  it("promotes Recycle alone and fulfills its non-exclusive arrow track", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_RECYCLE")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: any) => track.id === "recycle-arrow")).toEqual({
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_RECYCLE")).toMatchObject({
+      status: "exact",
+    });
+    expect(coverage.componentTracks.find((track: any) => track.id === "recycle-arrow")).toMatchObject({
       id: "recycle-arrow",
       components: ["asset:ANIM_TAG_RECYCLE", "sprite:gRecycleSpriteTemplate"],
       representatives: ["MOVE_RECYCLE"],
-      fulfilled: false,
-      goal: expect.stringContaining("UNFULFILLED"),
+      fulfilled: true,
+      goal: expect.stringContaining("FULFILLED"),
     });
   });
 });

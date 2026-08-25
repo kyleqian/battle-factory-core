@@ -5768,6 +5768,39 @@
     "tests/animation/meanLook.test.ts",
     "tests/animation/meanLookFramebuffer.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_RECYCLE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Porygon/Sitrus versus Gyarados parties retain both ordinary Battle Scene ON orientations for 203 consecutive source-owned rows each through first inactive cleanup; the retained dense state and raw RGB sequences are byte-identical across two fresh runs per orientation",
+    "the authoritative half-open Move_RECYCLE interval is 0x082ce05e..0x082ce092 (52 bytes); the pure source-age reducer and typed Scene-ON seam reproduce ANIM_TAG_RECYCLE, gRecycleSpriteTemplate, AnimRecycle_Step, its live affine matrix, AnimTask_BlendMonInAndOut, monbg/clearmonbg, BLDALPHA, resource and audio lifecycles, and cleanup",
+    "ANIM_TAG_RECYCLE regenerates byte-for-byte from the pinned 64x64 indexed source PNG (sha256 0b6b8150d35197eea9fa20efbc6021309b473950b3b94e4cafe05910d9a8f8ce); Porygon and Gyarados art come from the established generic front/back atlases and the compositor accepts live species, sides, and geometry without a carrier-pair gate",
+    "all 203 player-back plus 203 opponent-front component/seam/raw-RGB/actual core.ts-to-renderSceneOnMovePresentation framebuffer rows match with zero residual pixels through cleanup on two deterministic production-render passes; the source 64x64 affine-normal ObjBlend arrow uses current BLDALPHA over the monbg handoff and the selected attacker OBJ palette follows the complete BlendMonInAndOut white ramp",
+    "ordinary OAM, palette, and ongoing affine matrices retain the measured predecessor transfer on 202/202 transitions per orientation; the fresh affine allocation is blank at age 10 and first paints at age 11, gameplay RNG has zero transitions, animation RNG changes 200 times, and audio remains presentation-only",
+    "MOVE_SUPER_FANG remains an independently exact BlendMonInAndOut control and no sibling receives acceptance credit; no gameplay item, damage, RNG, AI, controller, turn, round, facility, absolute-tick, recording/framebuffer lookup, coordinate/RGB fit, or unsupported-boundary ownership is added"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-recycle-player-porygon-opponent-gyarados.json",
+    "tools/battle-lab/mechanic-recycle-opponent-porygon-player-gyarados.json",
+    "tools/compare/fixtures/recycle-evidence.json",
+    "tools/compare/recycleProbe.py",
+    "tools/compare/recycleEvidence.ts",
+    "tools/compare/recycleReducerAudit.ts",
+    "tools/compare/recycleFramebuffer.ts",
+    "tools/compare/extractRecycleAssets.ts",
+    "tools/compare/evidence/recycle-player-dense-state.json.gz",
+    "tools/compare/evidence/recycle-opponent-dense-state.json.gz",
+    "tools/compare/evidence/recycle-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/recycle-opponent-raw-rgb.tar.gz",
+    "src/animation/assets/recycle.json",
+    "src/animation/recycle.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/recycleEvidence.test.ts",
+    "tests/animation/recycle.test.ts",
+    "tests/animation/recycleFramebuffer.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -6840,8 +6873,8 @@
     "sprite:gRecycleSpriteTemplate"
    ],
    "representatives": ["MOVE_RECYCLE"],
-   "fulfilled": false,
-   "goal": "UNFULFILLED: MOVE_RECYCLE has legal bilateral 203-row Scene-ON source/evidence/reducer/typed-seam acceptance only, after real Sitrus consumption and successful tryrecycleitem restoration. It remains unsupported and receives no exact or sibling credit. Production remainder: extract ANIM_TAG_RECYCLE source art; add ordinary generic affine ObjBlend/palette/BLDALPHA/monbg composition through the shared Scene-ON compositor; then pass every retained player-back and opponent-front core-render row with zero residual pixels twice fresh."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_RECYCLE independently passes 203/203 player-back plus 203/203 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two deterministic production-render passes. Its reproducibly extracted ANIM_TAG_RECYCLE art, typed live species/sides/geometry, generic front/back battler art, affine-normal ObjBlend arrow, current-row BLDALPHA, predecessor OAM/matrix/palette transfers, monbg handoff, BlendMonInAndOut palette ramp, chrome, audio, and cleanup use no pair gate, recording/framebuffer lookup, absolute tick, coordinate/RGB fitting, or gameplay ownership. MOVE_SUPER_FANG remains an independent exact control and receives no sibling credit."
   }
  ],
  "variantAudits": {

@@ -233,7 +233,7 @@ function verifyOrientation(side: Orientation): Json {
 function verifyControls(): void {
   const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
   const status = (move: string): string => coverage.entries.find((entry: Json) => entry.move === move)?.status ?? "unsupported";
-  invariant(status("MOVE_RECYCLE") === "unsupported", "Recycle must remain unsupported at this checkpoint");
+  invariant(status("MOVE_RECYCLE") === "exact", "Recycle exact coverage regressed");
   invariant(status("MOVE_SUPER_FANG") === "exact", "BlendMonInAndOut exact control regressed");
   const scripts = readFileSync(resolve(root, "reference/pokeemerald/data/battle_anim_scripts.s"), "utf8");
   const superFang = scripts.slice(scripts.indexOf("Move_SUPER_FANG:"), scripts.indexOf("Move_SLASH:"));
@@ -241,7 +241,7 @@ function verifyControls(): void {
 }
 
 export function verifyRecycleEvidence(): Record<Orientation, Json> {
-  invariant(receipt.status === "unsupported" && receipt.coverageCredit === false, "Recycle checkpoint must not claim exact credit");
+  invariant(receipt.status === "exact" && receipt.coverageCredit === true, "Recycle production acceptance regressed");
   verifySource();
   verifyControls();
   return {
