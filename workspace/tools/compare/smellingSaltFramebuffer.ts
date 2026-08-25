@@ -123,7 +123,7 @@ function battler(
   animationCenter: Readonly<{ x: number; y: number }>,
 ): SceneOnPresentationBattler {
   return {
-    species,
+    species: species as SceneOnPresentationBattler["species"],
     geometry: {
       side,
       spriteCorner: { x: source.x - 32, y: source.y - 32 },
@@ -133,8 +133,11 @@ function battler(
   };
 }
 
-function visualGender(value: DensePartyMon["gender"]): "male" | "female" | "none" {
-  return value === "genderless" ? "none" : value;
+function visualGender(value: DensePartyMon["gender"]): "male" | "female" {
+  if (value === "genderless") {
+    throw new Error("Smelling Salt evidence field profile requires visible gender");
+  }
+  return value;
 }
 
 export function smellingSaltConfigFor(
