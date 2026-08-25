@@ -612,6 +612,7 @@ import teeterDanceAsset from "../animation/assets/teeter-dance.json" with { type
 import bellyDrumAsset from "../animation/assets/belly-drum.json" with { type: "json" };
 import sweetScentAsset from "../animation/assets/sweet-scent.json" with { type: "json" };
 import defenseCurlAsset from "../animation/assets/defense-curl.json" with { type: "json" };
+import ingrainAsset from "../animation/assets/ingrain.json" with { type: "json" };
 import meanLookAsset from "../animation/assets/mean-look.json" with { type: "json" };
 import smellingSaltAsset from "../animation/assets/smelling-salt.json" with { type: "json" };
 import recycleAsset from "../animation/assets/recycle.json" with { type: "json" };
@@ -1007,6 +1008,7 @@ import {
   sceneOnSweetKissView,
   sceneOnSweetScentView,
   sceneOnDefenseCurlView,
+  sceneOnIngrainView,
   sceneOnMeanLookView,
   sceneOnLovelyKissView,
   sceneOnOctazookaView,
@@ -1166,6 +1168,7 @@ import {
   type SceneOnBellyDrumConfig,
   type SceneOnSweetScentConfig,
   type SceneOnDefenseCurlConfig,
+  type SceneOnIngrainConfig,
   type SceneOnMeanLookConfig,
   type SceneOnSmellingSaltConfig,
   type SceneOnRecycleConfig,
@@ -1850,6 +1853,10 @@ const smellingSaltArt = smellingSaltAsset as {
 };
 const recycleArt = recycleAsset as {
   arrow: { tileset: Tileset; palette: RgbColor[] };
+};
+const ingrainArt = ingrainAsset as {
+  roots: { tileset: Tileset; palette: RgbColor[] };
+  orbs: { tileset: Tileset; palette: RgbColor[] };
 };
 const waterGunArt = waterGunAsset as {
   smallBubbles: { tileset: Tileset; palette: RgbColor[] };
@@ -14379,6 +14386,130 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "INGRAIN") {
+    const ingrainState = state as SceneOnMovePresentationState<SceneOnIngrainConfig>;
+    const view = sceneOnIngrainView(ingrainState);
+    // The retained bilateral windows prove ordinary OBJ OAM, matrix, and
+    // palette scanout from the preceding source row. Ingrain has no affine
+    // or palette mutation, so its complete visual transfer is this one-row
+    // source-relative handoff.
+    const displayed = sceneOnIngrainView({
+      ...ingrainState,
+      age: ingrainState.age - 1,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) throw new Error(`INGRAIN missing ${view.attacker.species} attacker art`);
+    if (!targetSource) throw new Error(`INGRAIN missing ${view.target.species} target art`);
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const objects: Array<{ subpriority: number; slot: number; draw: () => void }> = [
+      {
+        subpriority: playerAttacker ? 30 : 40,
+        slot: playerAttacker ? 6 : 8,
+        draw: () => drawSpriteSheet(
+          fb,
+          attackerTileset,
+          attackerSource.palette,
+          view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+          view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+        ),
+      },
+      {
+        subpriority: view.target.geometry.side === "player" ? 30 : 40,
+        slot: view.target.geometry.side === "player" ? 6 : 8,
+        draw: () => drawSpriteSheet(
+          fb,
+          targetTileset,
+          targetSource.palette,
+          view.target.geometry.spriteCorner.x + targetIdle.x2,
+          view.target.geometry.spriteCorner.y + targetIdle.y2,
+        ),
+      },
+      ...displayed.roots.map((root) => ({
+        subpriority: root.subpriority,
+        slot: [3, 4, 5, 7][root.index]!,
+        draw: () => {
+          if (root.invisible) return;
+          const frame = subTileset(
+            ingrainArt.roots.tileset,
+            root.sourceCell / ingrainArt.roots.tileset.columns,
+            4,
+          );
+          const draw = root.hFlip ? drawSpriteSheetHFlip : drawSpriteSheet;
+          draw(
+            fb,
+            frame,
+            ingrainArt.roots.palette,
+            root.x + root.x2 - 16,
+            root.y + root.y2 - 16,
+          );
+        },
+      })),
+      ...displayed.orbs.map((orb) => ({
+        subpriority: orb.subpriority,
+        slot: 9 + orb.index,
+        draw: () => drawSpriteSheet(
+          fb,
+          { columns: 1, rows: 1, tiles: [ingrainArt.orbs.tileset.tiles[orb.sourceCell]!] },
+          ingrainArt.orbs.palette,
+          orb.x + orb.x2 - 4,
+          orb.y + orb.y2 - 4,
+        ),
+      })),
+    ];
+    // BuildOamBuffer orders the common priority-2 objects by subpriority,
+    // then allocation/OAM index. Draw back-to-front so smaller subpriority
+    // and lower slots win overlapping pixels exactly as hardware OBJ does.
+    objects.sort((a, b) => b.subpriority - a.subpriority || b.slot - a.slot);
+    for (const object of objects) object.draw();
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const profile = ingrainState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "INGRAIN!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "MEAN_LOOK") {
     const meanState = state as SceneOnMovePresentationState<SceneOnMeanLookConfig>;
     const view = sceneOnMeanLookView(meanState);
