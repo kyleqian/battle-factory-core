@@ -2561,8 +2561,41 @@ function resumeFullTurnForcedSwitch(
     });
     const run = runScriptToOwnEnd(PROGRAM, handlers, resumedState);
     if (run.kind === "player-choice") {
-      throw new Error(
-        "factory full-turn decision move-action resume unexpectedly halted on a second player-choice-required opcode",
+      // ISSUES #127: the replacement this pause just sent out fainted on entry
+      // to its own side's Spikes, so `Cmd_switchineffects`' BS_ATTACKER branch
+      // (battle_script_commands.c:5228-5253) ran `BattleScript_SpikesOnAttacker`
+      // -> `tryfaintmon_spikes` -> `goto BattleScript_HandleFaintedMon`
+      // (data/battle_scripts_1.s:3390-3400), re-entering `openpartyscreen
+      // BS_FAINTED` inside the SAME script run. The stock ROM asks the player a
+      // second time inside the one action -- oracle receipt in
+      // `docs/issue127-baton-pass-spikes-ko-ground-truth.md` -- so this is an
+      // ordinary second forced-switch boundary, exactly like the fainted-dance
+      // sibling below (ISSUES #119): re-publish the pending bundle at the new
+      // halt, keeping this pause's own `resumeAt` and its banked
+      // `pendingSecondAction` so the eventual completion still lands on the
+      // same post-action tail.
+      return finishFullTurn(
+        ctx.rng, rngBefore.calls, run.state,
+        buildForcedSwitchPendingRules(run.state.rulesContext, {
+          programCounter: run.state.programCounter,
+          callStack: run.state.callStack,
+          scheduler: run.state.scheduler,
+          resumeAt: pending.pendingScript.resumeAt,
+          ...(pending.pendingScript.pendingSecondAction !== undefined
+            ? { pendingSecondAction: pending.pendingScript.pendingSecondAction }
+            : {}),
+        }),
+        Object.freeze({
+          kind: "decision-required",
+          request: Object.freeze({
+            kind: "forced-switch",
+            requestId: ctx.request.requestId + 1,
+            side: run.battler === 0 ? "player" as const : "trainer" as const,
+            battler: run.battler as BattleSinglesBattler,
+            faintedPartyIndex: run.faintedPartyIndex as BattlePartyIndex,
+            legalPartyIndexes: run.legalPartyIndexes as readonly BattlePartyIndex[],
+          }),
+        }),
       );
     }
     if (run.kind === "barrier") {
