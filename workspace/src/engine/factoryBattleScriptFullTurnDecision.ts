@@ -2149,7 +2149,38 @@ export function battlerUsesForcedStruggle(
   rulesContext: BattleScriptRulesContext,
   battler: BattleSinglesBattler,
 ): boolean {
-  if (lockedMoveDecision(rulesContext, battler) !== null) return false;
+  // Only the STATUS2_MULTIPLETURNS/RECHARGE lock hides this test: source
+  // settles those at STATE_BEFORE_ACTION_CHOSEN (`battle_main.c:4098-4104`),
+  // before the `B_ACTION_USE_MOVE` case runs `AreAllMovesUnusable` at all. An
+  // Encore lock does NOT (ISSUES #138) -- `:4184` precedes `:4192`.
+  if (battlerStatusMoveLock(rulesContext, battler) !== 0) return false;
+  return battlerHasNoUsableMoveSlot(rulesContext, battler);
+}
+
+/**
+ * `battle_main.c:4098-4104`: the STATUS2_MULTIPLETURNS / STATUS2_RECHARGE
+ * lock is settled one state earlier than every other auto-confirm, so it is
+ * the one condition that keeps `AreAllMovesUnusable` from running.
+ */
+function battlerStatusMoveLock(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): number {
+  return rulesContext.battlers[battler]!.status2 & (
+    BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+    | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+  );
+}
+
+/**
+ * `AreAllMovesUnusable`'s predicate alone (`battle_util.c:1125-1130`), split
+ * out so `lockedMoveDecision` can consult it in source order without
+ * recursing through `battlerUsesForcedStruggle`.
+ */
+function battlerHasNoUsableMoveSlot(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): boolean {
   return (
     checkBattleScriptMoveLimitations(rulesContext, battler) & 0x0f
   ) === 0x0f;
@@ -2168,11 +2199,19 @@ function lockedMoveDecision(
   battler: BattleSinglesBattler,
 ): BattleMoveDecision | null {
   const battlerState = rulesContext.battlers[battler]!;
-  const statusLock = battlerState.status2 & (
-    BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
-    | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
-  );
+  const statusLock = battlerStatusMoveLock(rulesContext, battler);
   if (statusLock === 0) {
+    // ISSUES #138 / `battle_main.c:4183-4197`: `AreAllMovesUnusable()` is
+    // tested BEFORE `else if (gDisableStructs[b].encoredMove != 0)`, and
+    // `CheckMoveLimitations`' own Encore bit (`battle_util.c:1116-1117`)
+    // masks every slot that is not the encored move -- so an Encored battler
+    // whose encored move is itself Disabled / 0-PP / Taunted / Tormented
+    // masks all four slots and takes the `noValidMoves` branch instead of
+    // the auto-confirm. Returning null hands it to `legalMoveDecisions`'
+    // Struggle projection, which is right in both directions: the source's
+    // `AreAllMovesUnusable` arm is reached from the action menu (it does not
+    // suppress B_ACTION_SWITCH the way this auto-confirm does).
+    if (battlerHasNoUsableMoveSlot(rulesContext, battler)) return null;
     if (battlerState.encoreTimer !== 0 && battlerState.encoredMove !== 0) {
       // battle_util.c:95-112: action selection remains tied to the stored
       // position. If that slot was overwritten, HandleAction_UseMove clears
