@@ -265,6 +265,147 @@ const EXPLICIT_STATE_BEHAVIOR_ROWS = [
   ],
 ] as const;
 
+// The 2026-08-25 stock-ROM receipt packs joined into the manifest's hand-coded
+// hook registry: each row's own effect was observed by a committed receipt, so
+// each flips to oracle-receipted-hook and carries the pack's id verbatim.
+const RECEIPT_PACK_FLIPS = [
+  {
+    axis: "abilities", label: "ABILITY_WATER_VEIL", receiptId: "gate6-water-veil-off",
+    evidencePaths: [
+      "tools/battle-lab/gate6-water-veil-prevents-off.json",
+      "tools/battle-lab/gate6-water-veil-control-off.json",
+      "tools/probe/probe-gate6-water-veil-off.py",
+      "tools/probe/receipts/gate6-water-veil-off.json",
+      "tests/gate6WaterVeilReceipt.test.ts",
+    ],
+    notes: /BattleScript_WaterVeilPrevents -> BattleScript_BRNPrevention/,
+  },
+  {
+    axis: "abilities", label: "ABILITY_ARENA_TRAP", receiptId: "gate6-arena-trap-off",
+    evidencePaths: [
+      "tools/battle-lab/gate6-arena-trap-trapped-off.json",
+      "tools/battle-lab/gate6-arena-trap-control-off.json",
+      "tools/probe/probe-gate6-arena-trap-off.py",
+      "tools/probe/receipts/gate6-arena-trap-off.json",
+      "tests/gate6ArenaTrapReceipt.test.ts",
+    ],
+    // The refusal is a party-menu refusal, not Cmd_jumpifcantswitch.
+    notes: /PARTY-MENU refusal, not a battle script.*PARTY_ACTION_ABILITY_PREVENTS.*Cmd_jumpifcantswitch has no ability branch/s,
+  },
+  {
+    axis: "abilities", label: "ABILITY_STURDY", receiptId: "gate6-ohko-off",
+    evidencePaths: [
+      "tools/battle-lab/gate6-ohko-sturdy-off.json",
+      "tools/battle-lab/gate6-ohko-hit-off.json",
+      "tools/battle-lab/gate6-ohko-miss-off.json",
+      "tools/probe/probe-gate6-ohko-off.py",
+      "tools/probe/receipts/gate6-ohko-off.json",
+      "tests/gate6OhkoReceipt.test.ts",
+    ],
+    notes: /BattleScript_SturdyPreventsOHKO.*ZERO Random\(\) draws/s,
+  },
+  {
+    axis: "abilities", label: "ABILITY_DAMP", receiptId: "gate6-damp-explosion-off",
+    evidencePaths: [
+      "tools/battle-lab/gate6-damp-explosion-attacker-off.json",
+      "tools/battle-lab/gate6-damp-explosion-target-off.json",
+      "tools/battle-lab/gate6-damp-explosion-control-off.json",
+      "tools/probe/probe-gate6-damp-explosion-off.py",
+      "tools/probe/receipts/gate6-damp-explosion-off.json",
+      "tests/gate6DampExplosionReceipt.test.ts",
+    ],
+    notes: /BattleScript_DampStopsExplosion.*zero action RNG calls/s,
+  },
+  {
+    axis: "abilities", label: "ABILITY_TRACE", receiptId: "issue128-ability-history-off",
+    evidencePaths: [
+      "tools/battle-lab/issue128-ability-history-trace-off.json",
+      "tools/probe/probe-issue128-ability-history-off.py",
+      "tools/probe/receipts/issue128-ability-history-off.json",
+      "tests/issue128AbilityHistoryReceipt.test.ts",
+    ],
+    notes: /copies the player GOLDUCK's ABILITY_DAMP.*BATTLE_HISTORY->abilities\[0\]/s,
+  },
+  {
+    axis: "holdEffects", label: "HOLD_EFFECT_RESTORE_PP", receiptId: "gate6-leppa-berry-off",
+    evidencePaths: [
+      "tools/battle-lab/gate6-leppa-berry-off.json",
+      "tools/probe/probe-gate6-leppa-berry-off.py",
+      "tools/probe/receipts/gate6-leppa-berry-off.json",
+      "tests/gate6LeppaBerryReceipt.test.ts",
+    ],
+    notes: /end-of-turn item poll.*one-shot/s,
+  },
+  {
+    axis: "holdEffects", label: "HOLD_EFFECT_FLINCH", receiptId: "issue129-kingsrock-ko-off",
+    evidencePaths: [
+      "tools/battle-lab/issue129-kingsrock-ohko-off.json",
+      "tools/battle-lab/issue129-kingsrock-eq-ko-off.json",
+      "tools/battle-lab/issue129-kingsrock-eq-survive-off.json",
+      "tools/battle-lab/issue129-noitem-ohko-off.json",
+      "tools/probe/probe-issue129-kingsrock-ko-off.py",
+      "tools/probe/receipts/issue129-kingsrock-ko-off.json",
+      "tests/issue129KingsRockKoReceipt.test.ts",
+    ],
+    notes: /MOVEEND_KINGSROCK_SHELLBELL Random\(\) draw.*ABSENT in the same fixture with the item removed/s,
+  },
+] as const;
+
+// Packs whose ability/item is present but whose own effect was NOT observed
+// live: evidence only, status and receipt-card list must not move.
+const RECEIPT_PACK_EVIDENCE_ONLY = [
+  {
+    axis: "abilities", label: "ABILITY_INTIMIDATE",
+    status: "oracle-receipted-hook", receiptIds: ["R12", "R12b", "R13"],
+    evidencePaths: [
+      "tools/battle-lab/issue128-ability-history-intimidate-off.json",
+      "tools/probe/receipts/issue128-ability-history-off.json",
+      "tests/issue128AbilityHistoryReceipt.test.ts",
+    ],
+    notes: /R12\/R12b\/R13 remain the direct Intimidate receipts/,
+  },
+  {
+    axis: "abilities", label: "ABILITY_SPEED_BOOST",
+    status: "oracle-receipted-hook", receiptIds: ["R11"],
+    evidencePaths: [
+      "tools/battle-lab/gate6-first-turn-decay-off.json",
+      "tools/probe/receipts/gate6-first-turn-decay-off.json",
+      "tests/gate6IsFirstTurnDecayReceipt.test.ts",
+    ],
+    notes: /R11 remains the direct Speed Boost receipt.*gated OFF on NINJASK's switch-in turn/s,
+  },
+  {
+    axis: "holdEffects", label: "HOLD_EFFECT_SHELL_BELL",
+    status: "engine-referenced-no-oracle-receipt", receiptIds: [],
+    evidencePaths: [
+      "tools/probe/receipts/issue129-kingsrock-ko-off.json",
+      "tests/issue129KingsRockKoReceipt.test.ts",
+    ],
+    notes: /No direct Shell Bell receipt is claimed.*no heal was staged live/is,
+  },
+] as const;
+
+// Full hook-row status multisets after the 2026-08-25 pack join. These are the
+// "no other row moved" pins: before the join, abilities read
+// engine-referenced-no-oracle-receipt 38 / oracle-receipted-hook 27 and hold
+// effects read 38 / 4, and every other bucket is unchanged.
+const HOOK_STATUS_MULTISETS = {
+  abilities: {
+    "engine-referenced-no-oracle-receipt": 33,
+    "no-battle-hooks": 4,
+    "oracle-receipted-hook": 32,
+    "sentinel-not-a-hook-member": 1,
+    "shared-dispatcher-sibling-tier1-verified": 4,
+    "zero-factory-carrier-widened-scope": 4,
+  },
+  holdEffects: {
+    "engine-referenced-no-oracle-receipt": 36,
+    "oracle-receipted-hook": 6,
+    "sentinel-not-a-hook-member": 1,
+    "zero-factory-carrier-widened-scope": 24,
+  },
+} as const;
+
 function readManifest(): JsonObject {
   return JSON.parse(readFileSync(JSON_PATH, "utf8")) as JsonObject;
 }
@@ -1225,5 +1366,59 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/24\/24.*scenario receipts documented; \*\*0\*\* request-level gaps/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).toMatch(/Receipt count alone does not close the broader Gate-6 breadth acceptance/);
     expect(readFileSync(MARKDOWN_PATH, "utf8")).not.toMatch(/fixture-only-no-committed-receipt/);
+  });
+
+  it("credits the 2026-08-25 receipt packs to exactly the hooks whose own effect the ROM observed", () => {
+    const manifest = readManifest();
+    const hookSections = record(record(manifest.sections).hooks);
+    const rowsByAxis = {
+      abilities: array(hookSections.abilities).map(record),
+      holdEffects: array(hookSections.holdEffects).map(record),
+    } as const;
+    const rowFor = (axis: "abilities" | "holdEffects", label: string): JsonObject => {
+      const row = rowsByAxis[axis].find((candidate) => candidate.label === label);
+      expect(row, `${axis} row ${label} is missing`).toBeDefined();
+      return row!;
+    };
+    const markdown = readFileSync(MARKDOWN_PATH, "utf8");
+
+    for (const flip of RECEIPT_PACK_FLIPS) {
+      const row = rowFor(flip.axis, flip.label);
+      expect(row.status, `${flip.label} status`).toBe("oracle-receipted-hook");
+      expect(row.oracleReceiptCards, `${flip.label} receipt cards`).toEqual([flip.receiptId]);
+      const paths = array(row.evidence).map(pathWithoutLocator);
+      for (const path of flip.evidencePaths) expect(paths, `${flip.label} evidence`).toContain(path);
+      // A hand-joined pack id is not an R-card, so it must NOT claim a scout
+      // completed-receipt-note entry the way receiptIdsFor's R-cards do.
+      expect(array(row.evidence)).not.toContainEqual(
+        expect.objectContaining({ path: "docs/gate6-interaction-matrix-scout.md", locator: flip.receiptId }),
+      );
+      expect(String(row.notes), `${flip.label} notes`).toMatch(flip.notes);
+      expect(markdown).toContain(`| ${flip.label} | oracle-receipted-hook |`);
+    }
+
+    for (const pack of RECEIPT_PACK_EVIDENCE_ONLY) {
+      const row = rowFor(pack.axis, pack.label);
+      expect(row.status, `${pack.label} status must not move`).toBe(pack.status);
+      expect(row.oracleReceiptCards, `${pack.label} receipt cards must not move`).toEqual([...pack.receiptIds]);
+      const paths = array(row.evidence).map(pathWithoutLocator);
+      for (const path of pack.evidencePaths) expect(paths, `${pack.label} evidence`).toContain(path);
+      expect(String(row.notes), `${pack.label} notes`).toMatch(pack.notes);
+    }
+
+    // Shell Bell is the explicit non-flip: the King's Rock pack observed
+    // shellBellDmg at moveend state 12 but staged no live heal.
+    const shellBell = rowFor("holdEffects", "HOLD_EFFECT_SHELL_BELL");
+    expect(String(shellBell.notes)).toMatch(/kernel-pinned only/);
+
+    // No other hook row's status moved: pin both full multisets.
+    for (const axis of ["abilities", "holdEffects"] as const) {
+      const counts: Record<string, number> = {};
+      for (const row of rowsByAxis[axis]) counts[String(row.status)] = (counts[String(row.status)] ?? 0) + 1;
+      expect(counts, `${axis} hook status multiset`).toEqual(HOOK_STATUS_MULTISETS[axis]);
+    }
+    const summaryHooks = record(record(manifest.summary).hooks);
+    expect(record(summaryHooks.abilities)).toEqual({ total: 78, oracleReceipted: 32, zeroFactoryWidened: 4 });
+    expect(record(summaryHooks.holdEffects)).toEqual({ total: 67, oracleReceipted: 6, zeroFactoryWidened: 24 });
   });
 });
