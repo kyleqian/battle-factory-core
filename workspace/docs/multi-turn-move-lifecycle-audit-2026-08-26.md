@@ -521,6 +521,5 @@ does not exist in Gen 3.
 `tests/battleScriptSetbideOpcode.test.ts`, `tests/battleScriptRolloutOpcode.test.ts`,
 `tests/battleScriptFuryCutterOpcode.test.ts`,
 `tests/battleScriptConfuseifrepeatingattackendsOpcode.test.ts`,
-`tests/battleScriptAttackCanceler*.test.ts`, `tests/battleScriptMultiTurnCancellation.test.ts`
-(names as they appear in `tests/`). **No test pins finding 1's sleep-cancel**,
+the 14 `tests/battleScriptAttackCanceler*.test.ts` files (Asleep, Bide, Confused, Disabled, Flinch, Frozen, Imprisoned, InLove, Loop, Opcode, Paralyzed, PpJoin, Recharge, Taunted, Thaw, Truant), `tests/battleScriptMultiTurnCancellation.test.ts` (all filenames verified present with `ls tests/`). **No test pins finding 1's sleep-cancel**,
 which is why it survived the 2026-08-25 audit that first named it.
