@@ -1,3 +1,11 @@
+# MOVE_ERUPTION simple-palette component banked — move unsupported (2026-08-25 worker)
+
+- **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION remains unsupported and `eruption-warm-rock` remains unfulfilled; only its two `visualCommand:simple_palette_blend` programs and palette-transfer lifecycle are banked.
+- **Did:** Added a narrow pure reducer for the opening `(31,2,0,4,RGB_RED)` and closing `(31,4,4,0,RGB_RED)` commands. Typed source ages, geometry, sprite slots, battler identities, and palette snapshots feed source cursor/wait/args, selector-derived BG/OBJ banks, invisible palette-sprite lifetime, stock BG/OBJ alternating fade cadence, `gPlttBufferUnfaded`/software-faded/hardware-predecessor arrays, and Warm Rock palette tag allocation/free.
+- **Verified:** The focused audit iterates all **476 player-back + 494 opponent-front rows** through first inactive cleanup and matches both command windows, both palette-sprite lifecycles, selected mask `0x0003000e` (banks 1/2/3/16/17), Warm Rock tag 10201 in slot 7 / OBJ bank 23, every palette array, and palette/OAM predecessor transfers (**475/475 + 493/493**). Scary Face remains an independent exact palette control. No framebuffer or move acceptance is claimed.
+- **Next:** Keep Eruption unsupported until separately bounded rock launch/fall, HorizontalShake, audio, seam, compositor, and complete bilateral framebuffer work are proven; do not infer sibling credit from the banked palette command.
+- **Notes:** No `battleScene.ts`/`core.ts`, latch, boundary/barrier, gameplay/RNG/controller, production asset/draw path, canonical-recording import, absolute tick/species/evidence gate, or RGB/framebuffer lookup changed.
+
 # MOVE_ERUPTION bilateral dense display-latch evidence checkpoint — unsupported (2026-08-25 worker)
 
 - **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION remains unsupported; `eruption-warm-rock` is still unfulfilled and conveys no sibling credit.
