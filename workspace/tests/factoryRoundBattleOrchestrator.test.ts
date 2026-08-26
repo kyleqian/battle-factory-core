@@ -2678,13 +2678,21 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.lastBattle?.outcome).toBe("win");
     expect(state.rngSegments.filter((segment) => segment.kind === "battle")).toHaveLength(7);
-    expect(state.facilityRngCalls).toBe(1911);
+    // ISSUES #131: ENDTURN_ORDER's re-sort changes both the end-turn traversal
+    // and the tie-draw count, so this curated seed's whole trajectory shifts.
+    // ROM receipt: tools/probe/receipts/issue131-endturn-order-off.json.
+    expect(state.facilityRngCalls).toBe(1904);
   });
 
   it.each([
     // Each comment is the entry-685 cursor plus its complete downstream
     // ShouldSwitch-induced trajectory delta, not merely the direct precheck
     // draw count: later generation, move, damage, and turn lengths may change.
+    // Seeds 16/21/23 moved again for ISSUES #131 (ENDTURN_ORDER's per-turn
+    // gBattlerByTurnOrder re-sort and its speed-tie Random(); ROM receipt
+    // tools/probe/receipts/issue131-endturn-order-off.json) -- the other
+    // eighteen seeds are byte-unchanged, so the delta is genuinely the tied
+    // turns, not a blanket stream shift.
     [4, 2415, "roundComplete", 6, "win"], // 1517 + 898
     [5, 2156, "roundComplete", 6, "win"], // 1688 + 468
     [6, 791, "roundLost", 1, "loss"],
@@ -2694,13 +2702,13 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     [13, 2415, "roundComplete", 6, "win"], // 2224 + 191
     [14, 1946, "roundComplete", 6, "win"], // 2325 - 379
     [15, 1602, "roundComplete", 6, "win"], // 2036 - 434
-    [16, 1878, "roundComplete", 6, "win"], // 1660 + 218
+    [16, 1608, "roundComplete", 6, "win"], // ISSUES #131 ENDTURN_ORDER tie draws: 1878 - 270
     [18, 2143, "roundComplete", 6, "win"], // 2478 - 335
     [19, 1691, "roundComplete", 6, "win"], // 1842 - 151
     [20, 2326, "roundComplete", 6, "win"], // 2140 + 186
-    [21, 1911, "roundComplete", 6, "win"], // unchanged after divergence reconverges
+    [21, 1904, "roundComplete", 6, "win"], // ISSUES #131 ENDTURN_ORDER tie draws: 1911 - 7
     [22, 1389, "roundComplete", 6, "win"], // 1377 + 12
-    [23, 2114, "roundComplete", 6, "win"], // 1436 + 678
+    [23, 2068, "roundComplete", 6, "win"], // ISSUES #131 ENDTURN_ORDER tie draws: 2114 - 46
     [24, 1751, "roundComplete", 6, "win"], // 1690 + 61
     [26, 1680, "roundComplete", 6, "win"], // 1556 + 124
     [29, 1869, "roundComplete", 6, "win"], // 1543 + 326

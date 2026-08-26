@@ -51,6 +51,10 @@ function battler(
     defense: changes.defense ?? 0,
     spAttack: changes.spAttack ?? 0,
     spDefense: changes.spDefense ?? 0,
+    // ENDTURN_ORDER (battle_util.c:1199-1218) re-sorts by CURRENT effective
+    // speed and draws Random() & 1 on an exact tie (battle_main.c:4728) --
+    // this helper dropped `speed` entirely, so every fixture tied at 0.
+    speed: changes.speed ?? (changes.side === 1 ? 50 : 100),
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 0,
     partyIndex: changes.partyIndex ?? 0,
@@ -70,6 +74,7 @@ function rules(status3: number) {
         species: 51,
         hp: 142,
         maxHP: 142,
+        speed: 100,
         status3,
         types: ["TYPE_GROUND", "TYPE_GROUND"],
       }),
@@ -78,6 +83,7 @@ function rules(status3: number) {
         species: 144,
         hp: 197,
         maxHP: 197,
+        speed: 50,
         types: ["TYPE_ICE", "TYPE_FLYING"],
       }),
       battler({ side: 0 }),
@@ -98,6 +104,10 @@ function rules(status3: number) {
     multiHitCounter: 0,
     weather: B_WEATHER_HAIL_TEMPORARY,
     weatherTimer: 5,
+    // ENDTURN_ORDER (battle_util.c:1199-1218) recomputes this array from
+    // CURRENT effective speed every pass, so the staged value below is only a
+    // starting point; the SUNKERN/ARTICUNO speeds above are what actually keep
+    // the traversal at [0, 1] (ISSUES #131).
     battlerByTurnOrder: [0, 1, 2, 3],
     party: {
       player: [partySlot(51, 142), empty, empty, empty, empty, empty],

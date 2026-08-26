@@ -50,6 +50,11 @@ export function gate6Battler(
     defense: changes.defense ?? 0,
     spAttack: changes.spAttack ?? 0,
     spDefense: changes.spDefense ?? 0,
+    // ENDTURN_ORDER (battle_util.c:1199-1218) re-sorts by CURRENT effective
+    // speed and draws Random() & 1 on an exact tie (battle_main.c:4728), so
+    // the two sides need distinct default speeds -- side 0 faster, keeping
+    // the end-turn traversal at [0, 1] and the ledger tie-draw-free.
+    speed: changes.speed ?? (changes.side === 1 ? 50 : 100),
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 70,
     partyIndex: changes.partyIndex ?? 0,
@@ -74,8 +79,12 @@ export function gate6Context(
     gate6Battler({ side: 0 }),
     gate6Battler({ side: 1 }),
   ];
-  battlers[attacker] = gate6Battler({ side: attacker, ...attackerChanges });
-  battlers[target] = gate6Battler({ side: target, ...targetChanges });
+  // ENDTURN_ORDER (battle_util.c:1199-1218) re-sorts the end-turn traversal by
+  // CURRENT effective speed and draws Random() & 1 on an exact tie
+  // (battle_main.c:4728). Side 0 is stamped faster than side 1 last, after the
+  // caller's changes, so no Gate-6 fixture accidentally ties (ISSUES #131).
+  battlers[attacker] = gate6Battler({ side: attacker, ...attackerChanges, speed: attacker === 1 ? 50 : 100 });
+  battlers[target] = gate6Battler({ side: target, ...targetChanges, speed: target === 1 ? 50 : 100 });
   return createBattleScriptRulesContext({
     battlers,
     selectorRoles: { attacker, target, effectBattler: target },
