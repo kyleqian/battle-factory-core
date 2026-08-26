@@ -33,7 +33,7 @@ export interface EruptionAudioProfile {
 
 export interface EruptionAudioTask {
   readonly slot: number;
-  /** Linked-list predecessor byte exposed by the dense probe. */
+  /** Scheduler linked-list predecessor byte retained by the source task. */
   readonly priority: number;
   readonly sourcePriority: 1;
   readonly callback: "Task_LoopAndPlaySE";
