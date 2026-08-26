@@ -5,8 +5,8 @@
   "dmgMultiplierByteOffset": 14,
   "dmgMultiplierOffsetDerivation": "include/battle.h:489-518 struct BattleScripting: s32 painSplitHp @0, s32 bideDmg @4, u8 multihitString[6] @8..13, u8 dmgMultiplier @14, u8 twoTurnsMoveStringId @15, u8 animArg1 @16, u8 animArg2 @17, u16 tripleKickPower @18, u8 moveendState @20 (cross-checked against ISSUES #129's probe, which read moveendState at gBattleScripting+20).",
   "sourceUnderTest": {
-    "setbyte": "data/battle_scripts_1.s:3089 BattleScript_ActionSwitch `setbyte sDMG_MULTIPLIER, 2`",
-    "entry": "data/battle_scripts_1.s:3094-3096 goto BattleScript_PursuitSwitchDmgLoop",
+    "setbyte": "data/battle_scripts_1.s:3091 BattleScript_ActionSwitch `setbyte sDMG_MULTIPLIER, 2`",
+    "entry": "data/battle_scripts_1.s:3094 goto BattleScript_PursuitSwitchDmgLoop",
     "hitScript": "data/battle_scripts_1.s:3123-3148 BattleScript_PursuitDmgOnSwitchOut",
     "consumer": "src/battle_script_commands.c:1296 Cmd_damagecalc",
     "variance": "src/battle_script_commands.c:1638-1650 ApplyRandomDmgMultiplier (one Random())",
@@ -544,5 +544,25 @@
       ],
       "battleOutcome": 0
     }
+  },
+  "engineDivergence": {
+    "measuredAt": "pre-fix HEAD f3fcaca6 (stageVoluntarySwitchRules staged dmgMultiplier: 1)",
+    "harness": "tests/issue135PursuitSwitchReceipt.test.ts, same fixture, intercept seed 305419897 / control seed 6",
+    "intercept": {
+      "romDamage": 54,
+      "romPartyHp": 71,
+      "unfixedKernelDamage": 27,
+      "unfixedKernelPartyHp": 98,
+      "note": "The un-doubled base 31 took the same 85-100% roll the fixed kernel doubles, so the departing mon lost 27 instead of 54 -- exactly half the ROM's hit, modulo the roll."
+    },
+    "control": {
+      "romDamage": 30,
+      "romPartyHp": 95,
+      "unfixedKernelDamage": 30,
+      "unfixedKernelPartyHp": 95,
+      "note": "The control arm never runs the setbyte, so the pre-fix kernel already matched the ROM here."
+    },
+    "fix": "src/engine/factoryBattleScriptFullTurnDecision.ts stageVoluntarySwitchRules stages dmgMultiplier: 2, reproducing data/battle_scripts_1.s:3091.",
+    "mutationCheck": "Reverting that field to 1 fails tests/issue135PursuitSwitchReceipt.test.ts with 'expected 98 to be 71'."
   }
 }

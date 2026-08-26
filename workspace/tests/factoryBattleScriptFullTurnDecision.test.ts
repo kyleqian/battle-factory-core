@@ -728,6 +728,10 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     expect(rc.hitMarker & HITMARKER_ATTACKSTRING_PRINTED).toBe(0);
     // The switch script completes and the double-power Pursuit hit lands on
     // the OUTGOING mon (party slot 0 synced by datahpupdate).
+    // #135: BattleScript_ActionSwitch's `setbyte sDMG_MULTIPLIER, 2`
+    // (battle_scripts_1.s:3091) is staged before the loop is entered -- ROM
+    // receipt tools/probe/receipts/issue135-pursuit-switch-off.json.
+    expect(rc.dmgMultiplier).toBe(2);
     expect(completed.rulesContext.party.player[0]!.hp).toBeLessThan(300);
   });
 
@@ -745,6 +749,9 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     // The jump landed on BattleScript_DoSwitchOut: no Pursuit block ran.
     expect(program.instructions[atBranch.programCounter]!.source.label)
       .toBe("BattleScript_DoSwitchOut");
+    // #135: same setbyte, jump path -- ROM receipt
+    // tools/probe/receipts/issue135-pursuit-switch-off.json.
+    expect(rc.dmgMultiplier).toBe(2);
     expect(completed.rulesContext.party.player[0]!.hp).toBe(300);
   });
 
@@ -766,6 +773,10 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     expect(rc.actionsByTurnOrder[1]).toBe(0);
     expect(program.instructions[atBranch.programCounter]!.source.label)
       .toBe("BattleScript_DoSwitchOut");
+    // #135: the prelude's `setbyte sDMG_MULTIPLIER, 2` runs even when the
+    // guard jumps past the hit; HandleAction_UseMove resets it for the next
+    // move action (battle_util.c:92).
+    expect(rc.dmgMultiplier).toBe(2);
     expect(completed.rulesContext.party.player[0]!.hp).toBe(300);
   });
 

@@ -3,7 +3,7 @@
 
 Run only through tools/run-mgba-probe.py.
 
-Source under test: `data/battle_scripts_1.s:3086-3098` `BattleScript_ActionSwitch`
+Source under test: `data/battle_scripts_1.s:3088-3094` `BattleScript_ActionSwitch`
 executes `setbyte sDMG_MULTIPLIER, 2` BEFORE falling into
 `BattleScript_PursuitSwitchDmgLoop`; `jumpifnopursuitswitchdmg` then calls
 `BattleScript_PursuitDmgOnSwitchOut` (`:3123-3148`), whose `damagecalc`

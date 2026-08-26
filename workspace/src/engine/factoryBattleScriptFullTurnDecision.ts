@@ -1722,7 +1722,8 @@ function runVoluntarySwitchAction(
   );
   // The skipped ActionSwitch prelude is presentation bookkeeping
   // (hpthresholds2/RETURNMON text) plus the singles counter/setbyte writes
-  // staged above; begin at its first logical branch.
+  // staged above -- `setbyte sDMG_MULTIPLIER, 2` (battle_scripts_1.s:3091) and
+  // `setmultihit 1` (:3092); begin at its first logical branch.
   const started = startBattleScriptExecute(PROGRAM, "BattleScript_PursuitSwitchDmgLoop", {
     ...priorState,
     rulesContext,
@@ -1760,9 +1761,10 @@ function runVoluntarySwitchAction(
 
 /**
  * BattleScript_ActionSwitch's singles prelude (battle_scripts_1.s:3088-3094):
- * staging monToSwitchIntoId where the controller path would have left it and
- * resetting the action-local move values, shared by the reducer's switch
- * action and the staged Tier-1 seam below.
+ * staging monToSwitchIntoId where the controller path would have left it,
+ * resetting the action-local move values, and reproducing the prelude's
+ * `setbyte sDMG_MULTIPLIER, 2` (:3091) that doubles a Pursuit interception.
+ * Shared by the reducer's switch action and the staged Tier-1 seam below.
  */
 function stageVoluntarySwitchRules(
   priorRulesContext: BattleScriptRulesContext,
@@ -1790,10 +1792,19 @@ function stageVoluntarySwitchRules(
     monToSwitchIntoId,
     atkCancelerTracker: 0,
     critMultiplier: 1,
-    dmgMultiplier: 1,
+    // `setbyte sDMG_MULTIPLIER, 2` (battle_scripts_1.s:3091), executed by
+    // BattleScript_ActionSwitch BEFORE the loop this port enters at, is what
+    // doubles a Pursuit interception: BattleScript_PursuitDmgOnSwitchOut's
+    // `damagecalc` multiplies by it (Cmd_damagecalc,
+    // battle_script_commands.c:1296) and nothing on the interception path
+    // resets it in between. Staging it here reproduces that setbyte. It does
+    // not leak: HandleAction_UseMove's reset (battle_util.c:92, ported at
+    // :1516 above) puts the next move action back at 1, exactly as the ROM
+    // does at frame 787 of tools/probe/receipts/issue135-pursuit-switch-off.json.
+    dmgMultiplier: 2,
     moveResultFlags: 0,
     // BattleScript_ActionSwitch's singles prelude writes one before entering
-    // BattleScript_PursuitSwitchDmgLoop (battle_scripts_1.s:3093-3098). The
+    // BattleScript_PursuitSwitchDmgLoop (battle_scripts_1.s:3092-3094). The
     // staged seam preserves the caller's counter so the doubles right-flank
     // barrier stays reachable with a staged `setmultihit 2`.
     multiHitCounter,
