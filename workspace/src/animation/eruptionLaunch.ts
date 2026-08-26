@@ -18,11 +18,9 @@ export const ERUPTION_LAUNCH_SOURCE_BASE = 0x082c_e30b;
 export const ERUPTION_WARM_ROCK_TAG = 10201;
 
 const DISPLAY_WIDTH = 240;
-const DISPLAY_HEIGHT = 160;
-const LAUNCH_ROCK_TILE_SIZE = 16;
 const LAUNCH_ROCK_SUBPRIORITY = 2;
 const LAUNCH_ROCK_OAM_PRIORITY = 2;
-const TASK_PRIORITY = 2;
+const TASK_PRIORITY: 2 = 2;
 const TASK_LIST_END = 0xfe;
 const ACTIVE_SPRITES_INDEX = 6;
 const LAUNCH_SPEEDS = [
@@ -345,7 +343,7 @@ function runTaskStep(wave: MutableWave, profile: Readonly<EruptionLaunchProfile>
       task[1] = 0;
       task[2] = 0;
       task[3] = 0;
-      // Deliberate source fall-through into case 1.
+      // falls through
     case 1:
       task[1]! += 1;
       if (task[1]! > 1) {
@@ -475,11 +473,14 @@ function taskLifetime(wave: MutableWave): readonly [number, number] {
 }
 
 function sourceAtAge(wave: MutableWave): EruptionLaunchSourceCursor {
+  const pointer = ERUPTION_LAUNCH_SOURCE_BASE + wave.input.sourceOffset;
+  // The masked source pointer can only retain its low bit.
+  const pointerParity = (pointer & 1) as 0 | 1;
   return {
     owner: "Move_ERUPTION", command: "AnimTask_EruptionLaunchRocks",
     offset: wave.input.sourceOffset,
-    pointer: ERUPTION_LAUNCH_SOURCE_BASE + wave.input.sourceOffset,
-    pointerParity: (ERUPTION_LAUNCH_SOURCE_BASE + wave.input.sourceOffset) & 1 as 0 | 1,
+    pointer,
+    pointerParity,
     wait: 1, args: [], priority: TASK_PRIORITY,
   };
 }
