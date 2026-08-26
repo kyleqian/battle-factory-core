@@ -2678,19 +2678,27 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.lastBattle?.outcome).toBe("win");
     expect(state.rngSegments.filter((segment) => segment.kind === "battle")).toHaveLength(7);
-    expect(state.facilityRngCalls).toBe(1911);
+    // ISSUES #131: ENDTURN_ORDER's re-sort changes both the end-turn traversal
+    // and the tie-draw count, so this curated seed's whole trajectory shifts.
+    // ROM receipt: tools/probe/receipts/issue131-endturn-order-off.json.
+    expect(state.facilityRngCalls).toBe(1904);
   });
 
   it.each([
-    // Re-pinned 2026-08-25 for the TurnValuesCleanUp(FALSE) isFirstTurn decay
-    // (audit FINDING 2 / ISSUES #130) and the end-turn STATUS2_FLINCHED clear
-    // (FINDING 6 / ISSUES #133). Both change live-AI trajectories: the AI's
+    // Re-pinned 2026-08-25 for the UNION of the four end-turn source fixes:
+    // TurnValuesCleanUp(FALSE)'s isFirstTurn/rechargeTimer decay (ISSUES #130),
+    // the case-major field loop (#132), the end-turn STATUS2_FLINCHED clear
+    // (#133), and ENDTURN_ORDER's per-turn gBattlerByTurnOrder re-sort with its
+    // speed-tie Random() (#131). All four change live-AI trajectories: the AI's
     // `is_first_turn_for` now reads a decaying value (AI_CBM_FakeOut and the
-    // AI_CV first-turn branches), Fake Out stops re-flinching every turn, and a
-    // shadowed flinch no longer costs a mon a second turn. Stock-ROM evidence:
-    // tools/probe/receipts/gate6-first-turn-decay-off.json. Seed 6 now WINS the
-    // round (it previously lost at battleIndex 1) -- the same seed, a different
-    // and now source-faithful trajectory.
+    // AI_CV first-turn branches), Fake Out stops re-flinching every turn, a
+    // shadowed flinch no longer costs a mon a second turn, and end-turn effects
+    // traverse in re-sorted speed order. ROM receipts:
+    // tools/probe/receipts/gate6-first-turn-decay-off.json and
+    // tools/probe/receipts/issue131-endturn-order-off.json.
+    // Each row is the whole-round facility RNG cursor plus its complete
+    // downstream trajectory (generation, moves, damage, turn lengths), not a
+    // direct draw-count delta. Values regenerated from the union engine.
     [4, 1809, "roundComplete", 6, "win"],
     [5, 1658, "roundComplete", 6, "win"],
     [6, 1675, "roundComplete", 6, "win"],

@@ -850,9 +850,13 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     expect(result.events).toContainEqual(expect.objectContaining({
       payload: { kind: "switch", side: "opponent", fromPartyIndex: 0, toPartyIndex: 1 },
     }));
-    // The player hit chain owns four draws and BattleTurnPassed owns one.
-    // The already-selected trainer switch and the bypassed speed tie own zero.
-    expect(result.state.rng.calls).toBe(5);
+    // The player hit chain owns four draws and BattleTurnPassed owns two: the
+    // ENDTURN_ORDER speed-tie draw (battle_util.c:1209 -> battle_main.c:4728,
+    // both actives at speed 50) plus the unconditional gRandomTurnNumber.
+    // The already-selected trainer switch and the bypassed ACTION-order speed
+    // tie still own zero (battle_main.c:4820-4832).
+    // ROM receipt: tools/probe/receipts/issue131-endturn-order-off.json.
+    expect(result.state.rng.calls).toBe(6);
   });
 
   it("trainer voluntary switch clears only the trainer battler's revealed ability and last move", () => {
@@ -941,7 +945,11 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     )).toEqual(["player", "opponent"]);
     expect(result.state.rules.rulesContext.battlers[0]!.partyIndex).toBe(1);
     expect(result.state.rules.rulesContext.battlers[1]!.partyIndex).toBe(1);
-    expect(result.state.rng.calls).toBe(1);
+    // Two draws, both inside BattleTurnPassed: ENDTURN_ORDER's speed tie (the
+    // two incoming mons are both speed 50) and the boundary gRandomTurnNumber.
+    // Neither switch action compares speed. ROM receipt:
+    // tools/probe/receipts/issue131-endturn-order-off.json.
+    expect(result.state.rng.calls).toBe(2);
   });
 });
 
@@ -1130,7 +1138,13 @@ describe("factory full-turn decision -- GetWhoStrikesFirst production inputs", (
     }));
     expect(tie.ppOrder.slice(0, 2)).toHaveLength(2);
     expect(nonTie.ppOrder.slice(0, 2)).toEqual([0, 1]);
-    expect(tie.rngCalls).toBe(10);
+    // A tied turn costs the ROM TWO speed-tie draws, not one:
+    // SetActionsAndBattlersTurnOrder's (battle_main.c:4846) and
+    // ENDTURN_ORDER's (battle_util.c:1209). The oracle receipt measures
+    // exactly that -- 12 total Random() calls on the tie arm vs 10 on the
+    // speed-91-vs-92 control, and 2 vs 1 inside the end-turn pass
+    // (tools/probe/receipts/issue131-endturn-order-off.json).
+    expect(tie.rngCalls).toBe(11);
     expect(nonTie.rngCalls).toBe(9);
   });
 });
@@ -1204,7 +1218,7 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
       .toBe((afterTurn2.state.rng.value >>> 16) & 0xffff);
   });
 
-  it("keeps the second boundary at position 15 when turn 2 is a voluntary switch (the switch action adds no draw)", () => {
+  it("keeps the second boundary at position 16 when turn 2 is a voluntary switch (the switch action adds no draw; ENDTURN_ORDER's tie does)", () => {
     const initial = createFactoryFullTurnBattleState(config({
       player: {
         species: 1, moveId: RAIN_DANCE, attack: 50, defense: 200,
@@ -1249,8 +1263,12 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
     });
     if (afterTurn2.kind !== "decision-required") throw new Error("expected turn-3 player decision");
     // positions 11-14 are the trainer's accuracy/crit/damage/effect rolls;
-    // position 15 is the one continuing-turn boundary draw.
-    expect(afterTurn2.state.rng.calls).toBe(15);
+    // position 15 is ENDTURN_ORDER's speed-tie draw (battle_util.c:1209 --
+    // the switched-in mon and the trainer are both speed 50, and the switch
+    // action's own order comparison is skipped, battle_main.c:4820-4832) and
+    // position 16 is the continuing-turn boundary draw.
+    // ROM receipt: tools/probe/receipts/issue131-endturn-order-off.json.
+    expect(afterTurn2.state.rng.calls).toBe(16);
     expect(afterTurn2.state.rules.rulesContext.randomTurnNumber)
       .toBe((afterTurn2.state.rng.value >>> 16) & 0xffff);
   });

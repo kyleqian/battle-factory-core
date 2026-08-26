@@ -75,7 +75,11 @@ function battler(
     defense: changes.defense ?? 100,
     spAttack: changes.spAttack ?? 100,
     spDefense: changes.spDefense ?? 100,
-    speed: changes.speed ?? 100,
+    // ENDTURN_ORDER (battle_util.c:1199-1218) re-sorts by CURRENT effective
+    // speed and draws Random() & 1 on an exact tie (battle_main.c:4728), so
+    // the two sides need distinct default speeds -- side 0 faster, keeping
+    // the end-turn traversal at [0, 1] and the ledger tie-draw-free.
+    speed: changes.speed ?? (changes.side === 1 ? 50 : 100),
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 70,
     partyIndex: changes.partyIndex ?? 0,
@@ -422,7 +426,11 @@ describe("source-complete B_SCR_OP_TRYSETHELPINGHAND registration", () => {
     expect(turn.state.rulesContext.battlers.map(
       ({ helpingHand }) => helpingHand,
     )).toEqual([0, 0, 0, 0]);
-    expect(turn.state.rng.calls).toBe(0);
+    // battlersCount 4 with speeds [100, 50, 100, 50]: ENDTURN_ORDER's bubble
+    // sort (battle_util.c:1203-1213) ties on the two same-side pairs, and each
+    // tie draws Random() & 1 (battle_main.c:4728). ISSUES #131 receipt:
+    // tools/probe/receipts/issue131-endturn-order-off.json.
+    expect(turn.state.rng.calls).toBe(2);
 
     const faintSource = withHelpingHand(rules({
       selectorRoles: {

@@ -219,6 +219,10 @@ describe("source-shaped Battle Script rules context", () => {
       "calledMove",
       "changedItems",
       "choicedMove",
+      // gChosenActionByBattler (battle_main.c:159), live through the end-turn
+      // pass because BattleTurnPassed does not clear it until :4001-4004 --
+      // ENDTURN_ORDER's GetWhoStrikesFirst(..., FALSE) reads it (ISSUES #131).
+      "chosenActionByBattler",
       "chosenMove",
       "chosenMovePositions",
       "critMultiplier",

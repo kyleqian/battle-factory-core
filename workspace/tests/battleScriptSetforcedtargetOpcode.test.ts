@@ -69,7 +69,11 @@ function battler(
     defense: changes.defense ?? 100,
     spAttack: changes.spAttack ?? 50,
     spDefense: changes.spDefense ?? 100,
-    speed: changes.speed ?? 100,
+    // ENDTURN_ORDER (battle_util.c:1199-1218) re-sorts by CURRENT effective
+    // speed and draws Random() & 1 on an exact tie (battle_main.c:4728), so
+    // the two sides need distinct default speeds -- side 0 faster, keeping
+    // the end-turn traversal at [0, 1] and the ledger tie-draw-free.
+    speed: changes.speed ?? (changes.side === 1 ? 50 : 100),
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 70,
     partyIndex: changes.partyIndex ?? 0,

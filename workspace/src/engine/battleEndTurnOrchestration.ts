@@ -57,7 +57,18 @@ import {
   type BattleScriptRulesContext,
   type BattleScriptSideTimerState,
 } from "./battleScriptRulesContext.ts";
-import { applyConfusionStatus2Mutation, withBattler } from "./battleScriptHitChainOpcode.ts";
+import {
+  applyConfusionStatus2Mutation,
+  HOLD_EFFECT_NAME_BY_ID,
+  withBattler,
+} from "./battleScriptHitChainOpcode.ts";
+import { ABILITY_SYMBOLS } from "./battleScriptSwitchinOpcode.ts";
+import {
+  getWhoStrikesFirst,
+  isSpeedTie,
+  type TurnOrderBattler,
+  type WeatherState,
+} from "./turnOrder.ts";
 import { moveEndLumStatusName } from "./battleScriptMoveEndOpcode.ts";
 import {
   runBattleScriptFaintedActionsOrchestration,
@@ -85,6 +96,13 @@ import {
   BATTLE_SCRIPT_STATUS3_YAWN,
   BATTLE_SCRIPT_STATUS3_YAWN_TURN_1,
 } from "./battleScriptSourceConstants.ts";
+import movesData from "../data/gen/moves.json" with { type: "json" };
+
+/** gBattleMoves' priority column (src/data/battle_moves.h), keyed by move id. */
+const MOVE_PRIORITY_BY_ID = new Map(
+  (movesData.moves as readonly Readonly<{ id: number; priority: number }>[])
+    .map((move) => [move.id, move.priority] as const),
+);
 
 const POISON_TURN_DMG_LABEL = "BattleScript_PoisonTurnDmg";
 const BURN_TURN_DMG_LABEL = "BattleScript_BurnTurnDmg";
@@ -193,6 +211,9 @@ const ABILITY_INSOMNIA = 15;
 const ABILITY_CLOUD_NINE = 13;
 /** battleScriptStatBuffs.ts's own STAT_SPEED/MAX_STAT_STAGE convention. */
 const STAT_SPEED = 3;
+/** include/constants/moves.h MOVE_NONE; include/constants/battle.h B_ACTION_USE_MOVE. */
+const MOVE_NONE = 0;
+const B_ACTION_USE_MOVE = 0;
 const MAX_STAT_STAGE = 12;
 /** include/constants/battle.h -- STAT_ATK/STAT_SPATK. */
 const STAT_ATK = 1;
@@ -2082,18 +2103,158 @@ function runDoFieldEndTurnEffects(
   return Object.freeze({ kind: "clean", state });
 }
 
+/** gBattleMoves[moveId].priority; gBattleMoves[MOVE_NONE].priority is 0. */
+export function movePriority(moveId: number): number {
+  if (moveId === MOVE_NONE) return 0;
+  const priority = MOVE_PRIORITY_BY_ID.get(moveId);
+  if (priority === undefined) throw new Error(`move ${moveId} has no source move data row`);
+  return priority;
+}
+
 /**
- * `ENDTURN_ORDER`'s `gBattlerByTurnOrder` recompute, narrowed to what this
- * engine receives from the full-turn seam. That seam has already run
- * SetActionsAndBattlersTurnOrder and stores its positional order in the
- * source-shaped `gBattlerByTurnOrder` field. Standalone contexts default the
- * field to ascending battler id.
+ * `GetWhoStrikesFirst`'s WEATHER_HAS_EFFECT branch (`battle_main.c:4604-4622`).
+ * The shared Frontier precedent suppresses weather for Cloud Nine; Air Lock
+ * has no legal Frontier carrier.
  */
-function computeBattlerOrder(rulesContext: BattleScriptRulesContext): readonly BattleScriptBattlerId[] {
+export function turnOrderWeather(rulesContext: BattleScriptRulesContext): WeatherState {
+  if (!weatherHasEffect(rulesContext)) return {};
+  return {
+    isRaining: (rulesContext.weather & B_WEATHER_RAIN) !== 0,
+    isSunny: (rulesContext.weather & B_WEATHER_SUN) !== 0,
+  };
+}
+
+/**
+ * `GetWhoStrikesFirst`'s per-battler effective-speed inputs
+ * (`battle_main.c:4624-4692`): raw `gBattleMons[].speed`, the Speed stat
+ * stage, the weather-doubling abilities, the hold effect (Macho Brace,
+ * Quick Claw + its param compared against `gRandomTurnNumber`) and
+ * paralysis. Shared verbatim by both `GetWhoStrikesFirst` call sites this
+ * engine has -- `SetActionsAndBattlersTurnOrder`'s action-order comparison
+ * in the full-turn seam and `ENDTURN_ORDER`'s per-turn re-sort below -- so
+ * the two cannot drift apart. Badge boosts are unreachable
+ * (BATTLE_TYPE_FRONTIER, `:4640-4645`).
+ */
+export function turnOrderBattlerInputs(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  moveId: number,
+): TurnOrderBattler {
+  const b = rulesContext.battlers[battler];
+  const holdEffect = resolveBattleScriptBattlerHoldEffect(rulesContext, battler);
+  return {
+    speed: b.speed,
+    speedStage: b.statStages[STAT_SPEED]!,
+    movePriority: movePriority(moveId),
+    ability: ABILITY_SYMBOLS[b.ability] ?? null,
+    holdEffect: HOLD_EFFECT_NAME_BY_ID[holdEffect] ?? null,
+    holdEffectParam: resolveBattleScriptBattlerHoldEffectParam(rulesContext, battler),
+    isParalyzed: (b.status1 & STATUS1_PARALYSIS) !== 0,
+  };
+}
+
+/**
+ * `GetWhoStrikesFirst`'s `ignoreChosenMoves == FALSE` move resolution
+ * (`battle_main.c:4694-4720`). `gChosenActionByBattler` and
+ * `gBattleStruct->chosenMovePositions` are still the turn's own values here:
+ * `BattleTurnPassed` does not reset them until its closing block
+ * (`battle_main.c:4001-4004`), i.e. after every end-turn effect.
+ *
+ * KNOWN GAP: source substitutes MOVE_STRUGGLE when
+ * `gProtectStructs[battler].noValidMoves` is set (`:4700`); this engine has
+ * no `noValidMoves` cell, so a forced-Struggle battler contributes its
+ * unusable slot's own priority instead of Struggle's 0. Reachable only when
+ * every slot of a battler is unusable AND one of them has a non-zero
+ * priority bracket.
+ */
+function endTurnChosenMove(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+): number {
+  if (rulesContext.chosenActionByBattler[battler] !== B_ACTION_USE_MOVE) return MOVE_NONE;
+  return rulesContext.battlers[battler].moves[rulesContext.chosenMovePositions[battler]!] ?? MOVE_NONE;
+}
+
+/**
+ * `ENDTURN_ORDER` (`battle_util.c:1199-1218`), the first thing every
+ * `DoFieldEndTurnEffects` pass does: identity-refill `gBattlerByTurnOrder`,
+ * then bubble-sort it -- `for (i) for (j > i) if (GetWhoStrikesFirst(order[i],
+ * order[j], FALSE)) SwapTurnOrder(i, j)` (`:1203-1213`).
+ *
+ * This is a SECOND, independent turn-order computation, not a copy of
+ * `SetActionsAndBattlersTurnOrder`'s: it runs AFTER every action resolved, so
+ * it reads the CURRENT speed, Speed stage, paralysis, weather and hold
+ * effect. It therefore disagrees with the action order whenever either side
+ * switched (switch actions are ordered first with no speed comparison at all,
+ * `battle_main.c:4820-4832`), whenever paralysis or a Speed stage landed
+ * mid-turn, or whenever weather started under a Swift Swim/Chlorophyll
+ * carrier. On an exact effective-speed tie the comparison also consumes
+ * `Random() & 1` (`battle_main.c:4728`/`:4745`) -- a real draw that lands
+ * here, ahead of every field case.
+ *
+ * ROM receipt (Battle Scene OFF, two fresh byte-identical runs per arm):
+ * `tools/probe/receipts/issue131-endturn-order-off.json` -- the ORDER arm
+ * watches `gBattlerByTurnOrder` flip [0,1] -> [1,0] inside `BattleTurnPassed`
+ * on a switch turn (and the sandstorm messages follow it), and the TIE arm
+ * costs exactly one more end-turn `Random()` than its speed-91-vs-92 control.
+ *
+ * NOT ported: `SwapTurnOrder` also swaps `gActionsByTurnOrder`
+ * (`battle_main.c:4587-4594`), which `ENDTURN_ORDER` never identity-refills.
+ * Nothing reads that array after the turn's last action -- the one reader,
+ * `Cmd_jumpifnopursuitswitchdmg`'s slot rewrite, is consumed between actions
+ * (`factoryBattleScriptFullTurnDecision.ts:2794`) -- so the scramble is
+ * unobservable and deliberately omitted.
+ */
+function computeBattlerOrder(
+  program: BattleScriptProgram,
+  state: MachineState,
+): Readonly<{ order: readonly BattleScriptBattlerId[]; state: MachineState }> {
+  const rulesContext = state.rulesContext;
   const count = rulesContext.battleTopology.battlersCount;
-  return Object.freeze(
-    rulesContext.battlerByTurnOrder.slice(0, count) as BattleScriptBattlerId[],
+  // battle_util.c:1201-1204 -- gBattlerByTurnOrder[i] = i for every battler.
+  const order: BattleScriptBattlerId[] = [];
+  for (let i = 0; i < count; i++) order.push(i as BattleScriptBattlerId);
+
+  const weather = turnOrderWeather(rulesContext);
+  const inputs = order.map((battler) =>
+    turnOrderBattlerInputs(rulesContext, battler, endTurnChosenMove(rulesContext, battler))
   );
+  let rng = state.rng;
+
+  for (let i = 0; i < count - 1; i++) {
+    for (let j = i + 1; j < count; j++) {
+      const b1 = inputs[order[i]!]!;
+      const b2 = inputs[order[j]!]!;
+      let speedTieRngRoll = 0;
+      if (isSpeedTie(b1, b2, weather, rulesContext.randomTurnNumber)) {
+        const entry = resolveBattleScriptLabel(program, DAMAGING_WEATHER_CONTINUES_LABEL);
+        if (!entry) throw new Error(`unknown Battle Script entry label ${DAMAGING_WEATHER_CONTINUES_LABEL}`);
+        const entryInstruction = program.instructions[entry.programCounter];
+        if (!entryInstruction) throw new Error(`Battle Script program has no instruction at ${entry.programCounter}`);
+        // ENDTURN_ORDER is pure C with no script of its own; the ledger entry
+        // is anchored on BattleScript_DamagingWeatherContinues, the only
+        // battle script that reads gBattlerByTurnOrder back out
+        // (copyarraywithindex, battle_scripts_1.s:3705).
+        const drawn = drawBattleScriptRng(
+          rng,
+          entryInstruction,
+          "ENDTURN_ORDER GetWhoStrikesFirst speed tie (Random() & 1)",
+        );
+        rng = drawn.rng;
+        speedTieRngRoll = drawn.randomValue;
+      }
+      if (getWhoStrikesFirst(b1, b2, speedTieRngRoll, weather, rulesContext.randomTurnNumber) !== 0) {
+        const swapped = order[i]!;
+        order[i] = order[j]!;
+        order[j] = swapped;
+      }
+    }
+  }
+
+  return Object.freeze({
+    order: Object.freeze(order),
+    state: rng === state.rng ? state : Object.freeze({ ...state, rng }),
+  });
 }
 
 /**
@@ -2704,8 +2865,16 @@ export function runBattleEndTurnOrchestration(
   );
 
   if (state.rulesContext.battleOutcome === 0) {
-    const battlerOrder = computeBattlerOrder(state.rulesContext);
-    // ENDTURN_ORDER (doc §1a): gBattlerByTurnOrder is (re)computed once for the whole end-turn pass, ahead of both the field and battler loops -- Cmd_copyarraywithindex's own read (BattleScript_DamagingWeatherLoop) is this field's only consumer.
+    // ENDTURN_ORDER (battle_util.c:1199-1218): gBattlerByTurnOrder is
+    // re-sorted from scratch once per end-turn pass, ahead of both the field
+    // and battler loops, and its speed-tie Random() draw lands here -- before
+    // any field case. Consumers: DoBattlerEndTurnEffects' outer loop
+    // (:1469-1471), ENDTURN_WISH (:1316-1338), HandleWishPerishSongOnTurnEnd
+    // state 1 (:1836) and BattleScript_DamagingWeatherContinues'
+    // copyarraywithindex (battle_scripts_1.s:3705).
+    const ordered = computeBattlerOrder(program, state);
+    state = ordered.state;
+    const battlerOrder = ordered.order;
     state = Object.freeze({
       ...state,
       rulesContext: Object.freeze({

@@ -344,7 +344,17 @@ describe("random round soak driver (green milestone pin)", () => {
       // snapshot, and the typewriter print duration depends on the printed
       // name's own length -- a genuinely different (correct) string, not a
       // driver regression.
-      frames: 40_563,
+      //
+      // ISSUES #131's fix (battleEndTurnOrchestration.ts) then moved them a
+      // fifth time: ENDTURN_ORDER (battle_util.c:1199-1218) re-sorts
+      // gBattlerByTurnOrder by CURRENT effective speed at the top of every
+      // end-turn pass and draws Random() & 1 on an exact tie
+      // (battle_main.c:4728) -- so this seed's end-turn traversal, its RNG
+      // stream, and with them the strong-route policy's own move choices are
+      // a genuine new (correct) trajectory. ROM receipt:
+      // tools/probe/receipts/issue131-endturn-order-off.json. It still earns
+      // all seven wins and both re-runs stay identical.
+      frames: 39_569,
       battle: 7,
       turn: 5,
       diagnostics: {
@@ -356,7 +366,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_956,
+        renderCalls: 2_893,
       },
     });
     expect(second).toEqual(first);

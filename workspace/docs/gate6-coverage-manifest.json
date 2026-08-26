@@ -92127,12 +92127,12 @@
         "id": "state:B_WEATHER_HAIL",
         "label": "B_WEATHER_HAIL",
         "family": "weather",
-        "sourceLine": 274,
+        "sourceLine": 295,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:274",
+            "locator": "line:295",
             "kind": "source-state-symbol"
           },
           {
@@ -92170,12 +92170,12 @@
         "id": "state:B_WEATHER_RAIN",
         "label": "B_WEATHER_RAIN",
         "family": "weather",
-        "sourceLine": 271,
+        "sourceLine": 292,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:271",
+            "locator": "line:292",
             "kind": "source-state-symbol"
           },
           {
@@ -92217,12 +92217,12 @@
         "id": "state:B_WEATHER_SANDSTORM",
         "label": "B_WEATHER_SANDSTORM",
         "family": "weather",
-        "sourceLine": 272,
+        "sourceLine": 293,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:272",
+            "locator": "line:293",
             "kind": "source-state-symbol"
           },
           {
@@ -92250,11 +92250,11 @@
             "kind": "tier-1-test"
           },
           {
-            "path": "tests/gate6KernelInteractions.test.ts",
+            "path": "tests/gate6EndTurnOrderReceipt.test.ts",
             "kind": "tier-1-test"
           },
           {
-            "path": "tests/gate6WeatherAbilityInteractions.test.ts",
+            "path": "tests/gate6KernelInteractions.test.ts",
             "kind": "tier-1-test"
           }
         ],
@@ -92264,12 +92264,12 @@
         "id": "state:B_WEATHER_SUN",
         "label": "B_WEATHER_SUN",
         "family": "weather",
-        "sourceLine": 273,
+        "sourceLine": 294,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:273",
+            "locator": "line:294",
             "kind": "source-state-symbol"
           },
           {
@@ -93010,12 +93010,12 @@
         "id": "state:SIDE_STATUS_FUTUREATTACK",
         "label": "SIDE_STATUS_FUTUREATTACK",
         "family": "side-state",
-        "sourceLine": 113,
+        "sourceLine": 131,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:113",
+            "locator": "line:131",
             "kind": "source-state-symbol"
           },
           {
@@ -93037,12 +93037,12 @@
         "id": "state:SIDE_STATUS_LIGHTSCREEN",
         "label": "SIDE_STATUS_LIGHTSCREEN",
         "family": "side-state",
-        "sourceLine": 266,
+        "sourceLine": 287,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:266",
+            "locator": "line:287",
             "kind": "source-state-symbol"
           },
           {
@@ -93060,12 +93060,12 @@
         "id": "state:SIDE_STATUS_MIST",
         "label": "SIDE_STATUS_MIST",
         "family": "side-state",
-        "sourceLine": 268,
+        "sourceLine": 289,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:268",
+            "locator": "line:289",
             "kind": "source-state-symbol"
           },
           {
@@ -93083,12 +93083,12 @@
         "id": "state:SIDE_STATUS_REFLECT",
         "label": "SIDE_STATUS_REFLECT",
         "family": "side-state",
-        "sourceLine": 265,
+        "sourceLine": 286,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:265",
+            "locator": "line:286",
             "kind": "source-state-symbol"
           },
           {
@@ -93110,12 +93110,12 @@
         "id": "state:SIDE_STATUS_SAFEGUARD",
         "label": "SIDE_STATUS_SAFEGUARD",
         "family": "side-state",
-        "sourceLine": 267,
+        "sourceLine": 288,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:267",
+            "locator": "line:288",
             "kind": "source-state-symbol"
           },
           {
@@ -93153,12 +93153,12 @@
         "id": "state:SIDE_STATUS_WORE_OFF_LABEL",
         "label": "SIDE_STATUS_WORE_OFF_LABEL",
         "family": "side-state",
-        "sourceLine": 277,
+        "sourceLine": 298,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:277",
+            "locator": "line:298",
             "kind": "source-state-symbol"
           },
           {
@@ -93413,7 +93413,7 @@
             "kind": "tier-1-test"
           },
           {
-            "path": "tests/tormentOracleEvidence.test.ts",
+            "path": "tests/factoryRoundBattleOrchestrator.test.ts",
             "kind": "tier-1-test"
           }
         ],
