@@ -1433,6 +1433,12 @@ current app stage should be rejected before replay.
 - **Workaround:** window the AI decision on
   `gBattleMainFunc == HandleTurnActionSelectionState` and read turn 2 (the
   `probe-issue128-ability-history-off.py` shape).
+- **Bumped 2026-08-26** (ts opus worker, ISSUES #135 receipt; ~8 min): the
+  precise position is INSIDE turn 1's action selection — frame 0 IS the
+  turn-1 action menu with the AI already committed. A "two-A prelude" before
+  the intended action silently executes turn 1 (the lead takes a hit) and the
+  fixture lands on turn 2 with a damaged lead. Press nothing before the
+  turn-1 action you actually want; window later turns for AI decisions.
 - **Fix shape:** a line in `tools/battle-lab/README.md` under mechanicLab
   ("the checkpoint is past turn 1's AI decision; window turn 2").
 
