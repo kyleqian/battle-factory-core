@@ -92127,12 +92127,12 @@
         "id": "state:B_WEATHER_HAIL",
         "label": "B_WEATHER_HAIL",
         "family": "weather",
-        "sourceLine": 273,
+        "sourceLine": 274,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:273",
+            "locator": "line:274",
             "kind": "source-state-symbol"
           },
           {
@@ -92170,12 +92170,12 @@
         "id": "state:B_WEATHER_RAIN",
         "label": "B_WEATHER_RAIN",
         "family": "weather",
-        "sourceLine": 270,
+        "sourceLine": 271,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:270",
+            "locator": "line:271",
             "kind": "source-state-symbol"
           },
           {
@@ -92217,12 +92217,12 @@
         "id": "state:B_WEATHER_SANDSTORM",
         "label": "B_WEATHER_SANDSTORM",
         "family": "weather",
-        "sourceLine": 271,
+        "sourceLine": 272,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:271",
+            "locator": "line:272",
             "kind": "source-state-symbol"
           },
           {
@@ -92264,12 +92264,12 @@
         "id": "state:B_WEATHER_SUN",
         "label": "B_WEATHER_SUN",
         "family": "weather",
-        "sourceLine": 272,
+        "sourceLine": 273,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:272",
+            "locator": "line:273",
             "kind": "source-state-symbol"
           },
           {
@@ -93010,12 +93010,12 @@
         "id": "state:SIDE_STATUS_FUTUREATTACK",
         "label": "SIDE_STATUS_FUTUREATTACK",
         "family": "side-state",
-        "sourceLine": 112,
+        "sourceLine": 113,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:112",
+            "locator": "line:113",
             "kind": "source-state-symbol"
           },
           {
@@ -93037,6 +93037,52 @@
         "id": "state:SIDE_STATUS_LIGHTSCREEN",
         "label": "SIDE_STATUS_LIGHTSCREEN",
         "family": "side-state",
+        "sourceLine": 266,
+        "status": "tier1-covered",
+        "evidence": [
+          {
+            "path": "src/engine/battleEndTurnOrchestration.ts",
+            "locator": "line:266",
+            "kind": "source-state-symbol"
+          },
+          {
+            "path": "tests/battleScriptScreensWeatherOrchestration.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/gate6ScreenExpiryOrderReceipt.test.ts",
+            "kind": "tier-1-test"
+          }
+        ],
+        "notes": "State-family coverage is reported independently from move/effect reachability and oracle receipts."
+      },
+      {
+        "id": "state:SIDE_STATUS_MIST",
+        "label": "SIDE_STATUS_MIST",
+        "family": "side-state",
+        "sourceLine": 268,
+        "status": "tier1-covered",
+        "evidence": [
+          {
+            "path": "src/engine/battleEndTurnOrchestration.ts",
+            "locator": "line:268",
+            "kind": "source-state-symbol"
+          },
+          {
+            "path": "tests/battleScriptStatusPrimaryOpcode.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/gate6ScreenExpiryOrderReceipt.test.ts",
+            "kind": "tier-1-test"
+          }
+        ],
+        "notes": "State-family coverage is reported independently from move/effect reachability and oracle receipts."
+      },
+      {
+        "id": "state:SIDE_STATUS_REFLECT",
+        "label": "SIDE_STATUS_REFLECT",
+        "family": "side-state",
         "sourceLine": 265,
         "status": "tier1-covered",
         "evidence": [
@@ -93048,43 +93094,9 @@
           {
             "path": "tests/battleScriptScreensWeatherOrchestration.test.ts",
             "kind": "tier-1-test"
-          }
-        ],
-        "notes": "State-family coverage is reported independently from move/effect reachability and oracle receipts."
-      },
-      {
-        "id": "state:SIDE_STATUS_MIST",
-        "label": "SIDE_STATUS_MIST",
-        "family": "side-state",
-        "sourceLine": 267,
-        "status": "tier1-covered",
-        "evidence": [
-          {
-            "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:267",
-            "kind": "source-state-symbol"
           },
           {
-            "path": "tests/battleScriptStatusPrimaryOpcode.test.ts",
-            "kind": "tier-1-test"
-          }
-        ],
-        "notes": "State-family coverage is reported independently from move/effect reachability and oracle receipts."
-      },
-      {
-        "id": "state:SIDE_STATUS_REFLECT",
-        "label": "SIDE_STATUS_REFLECT",
-        "family": "side-state",
-        "sourceLine": 264,
-        "status": "tier1-covered",
-        "evidence": [
-          {
-            "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:264",
-            "kind": "source-state-symbol"
-          },
-          {
-            "path": "tests/battleScriptScreensWeatherOrchestration.test.ts",
+            "path": "tests/gate6ScreenExpiryOrderReceipt.test.ts",
             "kind": "tier-1-test"
           },
           {
@@ -93098,12 +93110,12 @@
         "id": "state:SIDE_STATUS_SAFEGUARD",
         "label": "SIDE_STATUS_SAFEGUARD",
         "family": "side-state",
-        "sourceLine": 266,
+        "sourceLine": 267,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:266",
+            "locator": "line:267",
             "kind": "source-state-symbol"
           },
           {
@@ -93127,6 +93139,10 @@
             "kind": "tier-1-test"
           },
           {
+            "path": "tests/gate6ScreenExpiryOrderReceipt.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/secretPowerOracleEvidence.test.ts",
             "kind": "tier-1-test"
           }
@@ -93137,12 +93153,12 @@
         "id": "state:SIDE_STATUS_WORE_OFF_LABEL",
         "label": "SIDE_STATUS_WORE_OFF_LABEL",
         "family": "side-state",
-        "sourceLine": 276,
+        "sourceLine": 277,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:276",
+            "locator": "line:277",
             "kind": "source-state-symbol"
           },
           {
@@ -93187,6 +93203,10 @@
           },
           {
             "path": "tests/bideOracleEvidence.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/endTurnFlinchClearIssue133.test.ts",
             "kind": "tier-1-test"
           }
         ],
@@ -93389,6 +93409,10 @@
             "kind": "tier-1-test"
           },
           {
+            "path": "tests/endTurnFlinchClearIssue133.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/tormentOracleEvidence.test.ts",
             "kind": "tier-1-test"
           }
@@ -93468,6 +93492,10 @@
           },
           {
             "path": "tests/battleScriptRolloutOpcode.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/endTurnFlinchClearIssue133.test.ts",
             "kind": "tier-1-test"
           }
         ],
@@ -93593,6 +93621,10 @@
           },
           {
             "path": "tests/factoryBattleScriptLockedMoveFullTurn.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/gate6IsFirstTurnDecayReceipt.test.ts",
             "kind": "tier-1-test"
           }
         ],
@@ -93729,7 +93761,7 @@
             "kind": "tier-1-test"
           },
           {
-            "path": "tests/factoryBattleScriptWakeUpFullTurn.test.ts",
+            "path": "tests/endTurnFlinchClearIssue133.test.ts",
             "kind": "tier-1-test"
           }
         ],

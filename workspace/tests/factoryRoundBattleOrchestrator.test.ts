@@ -2682,29 +2682,35 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
   });
 
   it.each([
-    // Each comment is the entry-685 cursor plus its complete downstream
-    // ShouldSwitch-induced trajectory delta, not merely the direct precheck
-    // draw count: later generation, move, damage, and turn lengths may change.
-    [4, 2415, "roundComplete", 6, "win"], // 1517 + 898
-    [5, 2156, "roundComplete", 6, "win"], // 1688 + 468
-    [6, 791, "roundLost", 1, "loss"],
-    [7, 1337, "roundComplete", 6, "win"], // 1827 - 490
-    [8, 1922, "roundComplete", 6, "win"], // 2089 - 167
-    [11, 2012, "roundComplete", 6, "win"], // 1970 + 42
-    [13, 2415, "roundComplete", 6, "win"], // 2224 + 191
-    [14, 1946, "roundComplete", 6, "win"], // 2325 - 379
-    [15, 1602, "roundComplete", 6, "win"], // 2036 - 434
-    [16, 1878, "roundComplete", 6, "win"], // 1660 + 218
-    [18, 2143, "roundComplete", 6, "win"], // 2478 - 335
-    [19, 1691, "roundComplete", 6, "win"], // 1842 - 151
-    [20, 2326, "roundComplete", 6, "win"], // 2140 + 186
-    [21, 1911, "roundComplete", 6, "win"], // unchanged after divergence reconverges
-    [22, 1389, "roundComplete", 6, "win"], // 1377 + 12
-    [23, 2114, "roundComplete", 6, "win"], // 1436 + 678
-    [24, 1751, "roundComplete", 6, "win"], // 1690 + 61
-    [26, 1680, "roundComplete", 6, "win"], // 1556 + 124
-    [29, 1869, "roundComplete", 6, "win"], // 1543 + 326
-    [30, 1825, "roundComplete", 6, "win"], // 1558 + 267
+    // Re-pinned 2026-08-25 for the TurnValuesCleanUp(FALSE) isFirstTurn decay
+    // (audit FINDING 2 / ISSUES #130) and the end-turn STATUS2_FLINCHED clear
+    // (FINDING 6 / ISSUES #133). Both change live-AI trajectories: the AI's
+    // `is_first_turn_for` now reads a decaying value (AI_CBM_FakeOut and the
+    // AI_CV first-turn branches), Fake Out stops re-flinching every turn, and a
+    // shadowed flinch no longer costs a mon a second turn. Stock-ROM evidence:
+    // tools/probe/receipts/gate6-first-turn-decay-off.json. Seed 6 now WINS the
+    // round (it previously lost at battleIndex 1) -- the same seed, a different
+    // and now source-faithful trajectory.
+    [4, 1809, "roundComplete", 6, "win"],
+    [5, 1658, "roundComplete", 6, "win"],
+    [6, 1675, "roundComplete", 6, "win"],
+    [7, 1269, "roundComplete", 6, "win"],
+    [8, 1922, "roundComplete", 6, "win"],
+    [11, 1745, "roundComplete", 6, "win"],
+    [13, 2221, "roundComplete", 6, "win"],
+    [14, 1921, "roundComplete", 6, "win"],
+    [15, 1509, "roundComplete", 6, "win"],
+    [16, 1523, "roundComplete", 6, "win"],
+    [18, 1948, "roundComplete", 6, "win"],
+    [19, 1938, "roundComplete", 6, "win"],
+    [20, 1999, "roundComplete", 6, "win"],
+    [21, 1449, "roundComplete", 6, "win"],
+    [22, 1516, "roundComplete", 6, "win"],
+    [23, 2330, "roundComplete", 6, "win"],
+    [24, 1473, "roundComplete", 6, "win"],
+    [26, 1672, "roundComplete", 6, "win"],
+    [29, 1823, "roundComplete", 6, "win"],
+    [30, 1366, "roundComplete", 6, "win"],
   ])("seed %i pins the post-ShouldSwitch round census", (
     seed,
     calls,
@@ -2727,8 +2733,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       outcome,
       battles: battleIndex + 1,
       calls,
-      playerHp: seed === 6 ? [0, 0, 0] : expect.any(Array),
-      opponentHp: seed === 6 ? [0, 0, 126] : expect.any(Array),
+      playerHp: seed === 6 ? [22, 251, 186] : expect.any(Array),
+      opponentHp: expect.any(Array),
     });
   });
 
