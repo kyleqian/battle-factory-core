@@ -295,8 +295,15 @@ describe("factory round chaining (tick() scenario)", () => {
     // `get_ability` draws against two-ability player mons, so every
     // trajectory that rides the shared RNG cursor shifts. Nothing about the
     // carry arithmetic below changed.
+    // Re-scanned again 3 -> 6 (2026-08-25) for the four end-turn source fixes
+    // (ISSUES #130 isFirstTurn/rechargeTimer decay, #131 ENDTURN_ORDER re-sort
+    // + tie draw, #132 case-major field loop, #133 end-turn STATUS2_FLINCHED
+    // clear): Fake Out now fails from turn 2 and a shadowed flinch no longer
+    // costs a second turn, so seed 3's hop-3 round loses. Scanned 0..60 for a
+    // seed whose natural outcomes still chain four wins deep and took the
+    // first, 6. The carry arithmetic below is unchanged, as before.
     const carry0 = createInitialFactoryCarry(PLAYER_TRAINER_ID);
-    const round1 = driveGeneratedRoundToCompletion(carry0, 3);
+    const round1 = driveGeneratedRoundToCompletion(carry0, 6);
     expect(round1.round.rules.phase).toBe("roundComplete");
     const chained1 = driveTerminalToNextDraft(stateAtDecidedRound(round1, carry0));
     const carry1 = chained1.factoryCarry;
