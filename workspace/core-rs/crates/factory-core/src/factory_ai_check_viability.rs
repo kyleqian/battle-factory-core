@@ -10218,6 +10218,7 @@ mod tests {
                 overrides,
                 neutral_battler(),
                 1,
+                None,
             );
             assert_eq!(result.draw_count, 0);
             assert_eq!(result.score_delta, 0);
@@ -10236,7 +10237,7 @@ mod tests {
             ..neutral_battler()
         });
         let (result, _) =
-            run_cv_protect(BattleRngState { value: 1, calls: 0 }, attacker, target, 1);
+            run_cv_protect(BattleRngState { value: 1, calls: 0 }, attacker, target, 1, None);
         assert_eq!(result.draw_count, 0);
         assert_eq!(result.score_delta, -2);
     }
@@ -10261,6 +10262,7 @@ mod tests {
             attacker,
             target,
             1,
+            None,
         );
         // Reaches the normal (non-early) path -- at least the first roll.
         assert!(result.draw_count >= 1);
@@ -10276,6 +10278,7 @@ mod tests {
             neutral_battler(),
             neutral_battler(),
             1,
+            None,
         );
         assert_eq!(jumped.0.draw_count, 1);
         let CheckViabilityDraw::ProtectRoll { kind, jumped: j, .. } = jumped.0.draws[0] else {
@@ -10290,16 +10293,20 @@ mod tests {
             neutral_battler(),
             neutral_battler(),
             1,
+            None,
         );
         assert_eq!(not_jumped.0.score_delta, 1); // base 2 - 1 (roll1 did NOT jump, roll>=128)
 
         let attacker_with_uses =
-            battler(FactoryAiCheckViabilityBattler { protect_uses: Some(3), ..neutral_battler() });
+            // protect_uses 1: the Protect4 tail (extra roll) -- values > 1 now take the
+            // `if_more_than 1` first rung (ISSUES #137) and draw nothing.
+            battler(FactoryAiCheckViabilityBattler { protect_uses: Some(1), ..neutral_battler() });
         let (with_uses, _) = run_cv_protect(
             BattleRngState { value: 249_678_687, calls: 0 },
             attacker_with_uses,
             neutral_battler(),
             1,
+            None,
         );
         assert_eq!(with_uses.draw_count, 2);
         let CheckViabilityDraw::ProtectRoll { kind, .. } = with_uses.draws[1] else {
@@ -10316,6 +10323,7 @@ mod tests {
             neutral_battler(),
             neutral_battler(),
             1,
+            None,
         );
         assert_eq!(func_result_after, Some(AI_WEATHER_SUN));
     }
