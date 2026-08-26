@@ -17,6 +17,44 @@ backlog.
 
 # Open
 
+## #141 — Two `SetMoveEffect` exits must RE-RUN `seteffectwithchance` (which then wastes one `Random() % 100`): the THRASH lock-in `break`s without advancing the cursor, and Thief/Covet-vs-Sticky-Hold uses `BattleScriptPushCursor()` — the port `advance`s / `"call"`s instead (RNG-affecting)
+
+**Found 2026-08-26** (move-effect application audit,
+`docs/move-effect-application-audit-2026-08-26.md` §4 rows S13/S21 + Findings 1-2; supervisor-verified
+at source and port). Mechanism, `battle_script_commands.c` `Cmd_seteffectwithchance` (`:2908-2937`):
+`else if (Random() % 100 < percentChance && gBattleCommunication[MOVE_EFFECT_BYTE] && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))`
+— the draw is the FIRST conjunct, so when the opcode executes with the byte already 0 (cleared by
+`SetMoveEffect`'s tail `:2905` and by `:2937`) it still spends one `Random()` and then `gBattlescriptCurrInstr++`.
+The opcode re-executes in exactly two singles-reachable situations, and the port models neither:
+
+1. **THRASH / OUTRAGE / PETAL DANCE lock-in** — `SetMoveEffect` `case MOVE_EFFECT_THRASH` (`:2851-2862`): the
+   not-yet-locked branch writes `STATUS2_MULTIPLETURNS`, `gLockedMoves[]`, `STATUS2_LOCK_CONFUSE_TURN((Random() & 1) + 2)`
+   and `break`s WITHOUT touching `gBattlescriptCurrInstr` (the only family-B case that does so); the tail only
+   clears the byte, `Cmd_seteffectwithchance` does not increment either → the cursor still points at
+   `seteffectwithchance` → re-run → one wasted draw. Entry path (verified): `BattleScript_EffectRampage` →
+   `confuseifrepeatingattackends` (sets `THRASH | AFFECTS_USER`) → `BattleScript_HitFromCritCalc` … `seteffectwithchance`
+   (chance 100). Port `battleScriptHitChainOpcode.ts:3917-3921` (`applyThrashMoveEffect`) returns `{ kind: "advance" }`.
+   ROM draw order on the lock-in turn: chance roll, `(Random() & 1) + 2` duration, **wasted chance roll**; port stops
+   after the duration draw. Carriers: Thrash 2, Outrage 2, Petal Dance 5 rental entries.
+2. **Thief/Covet into Sticky Hold** — `case MOVE_EFFECT_STEAL_ITEM` (`:2767-2775`): `BattleScriptPushCursor()` pushes
+   the CURRENT cursor (`battle_util.c:966-969`), then `BattleScript_NoItemSteal` (`battle_scripts_1.s:4209-4213`,
+   ends in `return`) → the opcode re-runs → one wasted draw. Port `battleScriptHitChainOpcode.ts:3122-3138` uses
+   `{ kind: "call", programCounter }` (returns to the NEXT opcode; `battleScriptMachine.ts:998-1009`) although the
+   machine already offers `"call-current"` (`:1010-1021`). Under `BATTLE_TYPE_FRONTIER` the two "regular battle"
+   arms short-circuit, so the Sticky Hold arm is reached whenever the target holds a non-Enigma/mail item.
+
+The port's own `seteffectwithchance` handler already draws unconditionally before testing the byte
+(`battleScriptHitChainOpcode.ts` `drawBattleScriptRng(…, "seteffectwithchance")` then `rolledSuccess && moveEffectByte !== 0`),
+so the fix is purely the two transition kinds: THRASH → leave the cursor on the opcode (re-run), Sticky Hold →
+`"call-current"`. **Consequence:** every later draw in the battle is offset by one (next turn's damage/crit/
+secondary rolls, `gRandomTurnNumber`) — no message differs. **Receipt recipes** (`mechanicLab` `overrides.parties`,
+Battle Scene OFF, frame 0 = turn-1 action menu, A pulses past prompts): (1) player slot 0 = a Thrash/Outrage/Petal
+Dance carrier, opponent = a bulky mon with one move ×4; window turns 1-3 and count the turn-1 draws attributed to
+`seteffectwithchance` (ROM 2, port 1) — the turn-2 damage roll differs; (2) player slot 0 = LINOONE with COVET,
+opponent = GULPIN/SWALOT with `abilitySlot` = Sticky Hold holding a plain item, one move ×4; window turn 2+ and compare
+the draw count / next damage roll. Fix both sites in one step, pin each with the receipt's draw counts, re-pin moved
+curated-seed trajectories with attribution, and rerun all five gates (the vanilla canary trajectory will move).
+
 ## #139 — The `CheckFocusPunch_ClearVarsBeforeTurnStarts` pre-pass ("…is tightening its focus!" before ANY action) has no port site
 
 **Found 2026-08-26** (turn-machinery audit §3 row 3.20 / Finding 2; supervisor-verified that
