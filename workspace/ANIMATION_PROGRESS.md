@@ -1,3 +1,10 @@
+# MOVE_SAND_TOMB source/asset/legal-staging checkpoint — unsupported (2026-08-26 worker)
+
+- **State:** Level 50 remains **213/276 exact, 0 partial / 0 staged, 63 unsupported**. MOVE_SAND_TOMB remains unsupported; `sand-tomb-vortex` is an explicitly unfulfilled source/asset/staging track with no move, framebuffer, component, or sibling credit.
+- **Did:** Pinned the complete authoritative root+subroutine half-open ROM interval, exact script rows, five-component generated graph, all 18 vortex calls, sprite callback, ShakeMon task, two palette programs, target-panned audio, tag allocation/free cleanup, sole and lowest legal Level-50 carrier set-372 Dugtrio, and all legal carriers. Added complete capture-free/transient-free bilateral mechanicLab parties with every active Dugtrio slot constrained to SAND_TOMB. Deterministically banked the complete shared MUD_SAND source sheet/palette and proved Sand Tomb has no exclusive art beyond its gSwirlingDirt tile-0 view.
+- **Checks:** Strict dev-time source audit and hermetic source/asset/staging tests pin sibling isolation for Sand Attack, Fissure, Dig, Mud-Slap, Rollout, and Mud Sport. No reducer, seam, compositor, production renderer, boundary/barrier, gameplay/status/damage/RNG/controller/turn/round/facility logic, recording import, or acceptance status changed.
+- **Next:** A separately bounded step must retain complete bilateral dense Scene-ON windows through cleanup, then implement a source-relative reducer, typed seam, and ordinary compositor before Sand Tomb alone can receive any acceptance credit.
+
 # MOVE_ICE_BEAM bilateral exact production presentation (2026-08-26 worker)
 
 - **State:** Level 50 advances **212→213/276 exact**, remains **0 partial / 0 staged**, and drops **64→63 unsupported**. MOVE_ICE_BEAM alone promotes and `ice-beam-crystals` is fulfilled; Blizzard, Icy Wind, and Psybeam retain independent exact status with no sibling credit.

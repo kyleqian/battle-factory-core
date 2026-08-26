@@ -7036,6 +7036,27 @@
    "goal": "FULFILLED: MOVE_INGRAIN independently passes 164/164 player-back plus 164/164 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two deterministic production-render passes. Reproducibly extracted ROOTS/ORBS art, typed live visual species/sides/battle-position geometry/subpriority, source root cells/hFlip/flicker and orb cells/waves, source subpriority/allocation painter order, ordinary predecessor OAM/matrix/palette transfer, field chrome, audio, and cleanup use no pair gate, recording/framebuffer lookup, absolute tick, coordinate/RGB fitting, or gameplay ownership. Absorb, Mega Drain, Dream Eater, and Giga Drain remain independent exact ORBS controls and receive no sibling credit."
   },
   {
+   "id": "sand-tomb-vortex",
+   "components": [
+    "asset:ANIM_TAG_MUD_SAND",
+    "sprite:gSwirlingDirtSpriteTemplate",
+    "subroutine:SandTombSwirlingDirt",
+    "task:AnimTask_ShakeMon",
+    "visualCommand:simple_palette_blend"
+   ],
+   "representatives": ["MOVE_SAND_TOMB"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/battle-lab/mechanic-sand-tomb-player-dugtrio-opponent-onix.json",
+    "tools/battle-lab/mechanic-sand-tomb-opponent-dugtrio-player-onix.json",
+    "tools/compare/sandTombSourceAudit.ts",
+    "tools/compare/extractSandTombAssets.ts",
+    "src/animation/assets/sand-tomb-mud-sand.json",
+    "tests/animation/sandTombSourceCheckpoint.test.ts"
+   ],
+   "goal": "UNFULFILLED source/asset/staging checkpoint only: complete Move_SAND_TOMB plus SandTombSwirlingDirt ROM/source intervals, all five generated components, sole legal Level-50 set-372 Dugtrio carrier, bilateral capture-free legal parties, callback/task/audio/resource/cleanup branches, and the shared MUD_SAND source asset are pinned. Sand Tomb remains unsupported with no exact, partial, staged, framebuffer, reducer, seam, renderer, or sibling credit."
+  },
+  {
    "id": "eruption-warm-rock",
    "components": [
     "asset:ANIM_TAG_WARM_ROCK",
