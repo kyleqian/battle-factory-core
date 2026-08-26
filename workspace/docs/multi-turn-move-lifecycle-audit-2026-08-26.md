@@ -152,3 +152,48 @@ HITMARKER_CHARGING` (bit 27) and `gHitMarker & HITMARKER_IGNORE_BIDE` (bit 5).
 | U12 | sleep-blocking read #1 — `CANCELER_ASLEEP` calls `UproarWakeUpCheck(attacker)` **first**, before the Early Bird decrement, and on a hit clears `STATUS1_SLEEP` + `STATUS2_NIGHTMARE` and prints `B_MSG_WOKE_UP_UPROAR` with `effect = 2` | `battle_util.c:2016-2026`; helper `battle_script_commands.c:6801-6826` | `battleScriptActionAdmission.ts:1341` (`uproarSource` scan) + the `uproarScan` receipt at `:208-239`, including the `B_MSG_WOKE_UP_UPROAR` overwrite note at `:224` | SAME-ORDER |
 | U13 | sleep-blocking read #2 — `SetMoveEffect`'s `STATUS1_SLEEP` case: Soundproof short-circuits the scan, then `status1 != 0` → uproar-active → Vital Spirit → Insomnia, and only then `CancelMultiTurnMoves(gEffectBattler)` + `statusChanged = TRUE` | `battle_script_commands.c:2273-2298` | `battleScriptHitChainOpcode.ts:3366-3392` (identical short-circuit order; `finishStatusWrite` applies the shared cancel before writing `status1`) | SAME-ORDER |
 | U14 | sleep-blocking read #3 — `ENDTURN_YAWN`'s `!UproarWakeUpCheck(gActiveBattler)` term | `battle_util.c:1759` | `battleEndTurnOrchestration.ts:1031-1041` + `runYawnTick` at `:1049` | SAME (cell semantics only; the Yawn case's own ordering belongs to `docs/end-turn-ordering-audit-2026-08-25.md`) |
+
+## §3. ROLLOUT / ICE BALL, and FURY CUTTER
+
+**Cells.** Rollout: `gDisableStructs[].rolloutTimer` (4-bit, `include/battle.h:87`),
+`gDisableStructs[].rolloutTimerStartValue` (4-bit, `:88`),
+`status2 & STATUS2_MULTIPLETURNS`, `gLockedMoves[]`, and the read-only
+`status2 & STATUS2_DEFENSE_CURL` (bit 30). Fury Cutter: only
+`gDisableStructs[].furyCutterCounter` (u8, `include/battle.h:86`).
+
+**The miss mechanism, pinned first because it is a constant-definition trap.**
+`BattleScript_EffectRollout`'s `accuracycheck BattleScript_RolloutHit`
+(`data/battle_scripts_1.s:1602`) has its *fail* target equal to the very next
+instruction, so a miss does **not** branch away. What actually ends the chain is
+that `MOVE_RESULT_NO_EFFECT` is a **mask**, not a bit:
+`MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE | MOVE_RESULT_FAILED`
+(`include/constants/battle.h:228`). So a plain accuracy miss (`:1178` sets
+`MOVE_RESULT_MISSED`) satisfies `gMoveResultFlags & MOVE_RESULT_NO_EFFECT` in
+both `Cmd_rolloutdamagecalculation` (`:8538`) and `Cmd_furycuttercalc`
+(`:8582`). The port defines the identical mask at
+`battleScriptRulesContext.ts:150`.
+
+**Turn-by-turn (Rollout).** Turn 1: `attackcanceler`, `attackstring`,
+`jumpifstatus2 MULTIPLETURNS` (not taken) → **`ppreduce`** → `accuracycheck` →
+`typecalc2` → `rolloutdamagecalculation` (first hit: timer 5→4, lock set) →
+`HitFromCritCalc`. Turns 2-5: the lock re-selects; the `jumpifstatus2` skips
+`ppreduce`; the timer walks 4→3→2→1→0 and `MULTIPLETURNS` is cleared on the
+pass that reaches 0. **No `Random()` in either family's own lifecycle** — the
+escalation is a pure shift.
+
+| # | step | source | port site | verdict |
+| --- | --- | --- | --- | --- |
+| R1 | miss / no-effect → `CancelMultiTurnMoves(attacker)` **then** jump to `BattleScript_MoveMissedPause` | `battle_script_commands.c:8538-8542` | `battleScriptRolloutOpcode.ts:34-46` (cancel, then `jump` to the resolved `BattleScript_MoveMissedPause`) | SAME-ORDER |
+| R2 | first hit detected by `!(status2 & STATUS2_MULTIPLETURNS)`; sets `rolloutTimer = 5`, `rolloutTimerStartValue = 5`, `STATUS2_MULTIPLETURNS`, `gLockedMoves[attacker] = gCurrentMove` | `battle_script_commands.c:8547-8553` | `battleScriptRolloutOpcode.ts:49-54` (`firstHit`), `:84-97` (`lockedMoves`, `rolloutTimerStartValues`), `:27` `ROLLOUT_HIT_COUNT = 5` | SAME |
+| R3 | `if (--rolloutTimer == 0) status2 &= ~STATUS2_MULTIPLETURNS` — pre-decrement, so the fifth hit both fires and unlocks in one opcode | `battle_script_commands.c:8554-8557` | `battleScriptRolloutOpcode.ts:61-72` (`rolloutTimer = timerBeforeDecrement - 1`; clear when `rolloutTimer === 0`) | SAME-ORDER |
+| R4 | escalation `for (i = 1; i < (5 - rolloutTimer); i++) gDynamicBasePower *= 2` → `power << (4 - rolloutTimer)` | `battle_script_commands.c:8559-8562` | `battleScriptRolloutOpcode.ts:98-99` (`successfulHits = 5 - rolloutTimer`; `power * 2 ** (successfulHits - 1)` — the same exponent `4 - rolloutTimer`) | SAME |
+| R5 | Defense Curl doubling applied **after** the escalation loop, on `status2 & STATUS2_DEFENSE_CURL` | `battle_script_commands.c:8564-8565` | `battleScriptRolloutOpcode.ts:101-106` | SAME-ORDER |
+| R6 | `gDynamicBasePower` is a `u16`, so the source escalation wraps at 65536 | `include/battle.h` / `battle_script_commands.c:8559` | `battleScriptRolloutOpcode.ts:99` computes in JS number space with **no** `& 0xffff` | DIVERGENT-BENIGN — the maximum reachable value is Rollout/Ice Ball base 30 × 2⁴ × 2 (Defense Curl) = **960**, far under 65536, so no input in Level-50 singles can reach the wrap. (Fury Cutter's port *does* mask, `battleScriptFuryCutterOpcode.ts:55-57`.) |
+| R7 | `rolloutTimerStartValue` is written but read **only** by animation code (`battle_anim_rock.c:759`, `battle_anim_ice.c:1540`, `:1613`) | `battle_script_commands.c:8550`; readers as cited | `battleScriptRolloutOpcode.ts:91-97` writes it; no logic reader | SAME (write parity; the readers are Battle-Scene-ON animation, declared out of scope) |
+| R8 | PP deducted turn 1 only, via `jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_RolloutCheckAccuracy` guarding `ppreduce` | `data/battle_scripts_1.s:1599-1600` | mechanical script extraction | SAME |
+| F1 | `Cmd_furycuttercalc` miss / no-effect → `furyCutterCounter = 0` **then** jump to `BattleScript_MoveMissedPause` (note: it does **not** call `CancelMultiTurnMoves` — Fury Cutter never sets a lock) | `battle_script_commands.c:8582-8586` | `battleScriptFuryCutterOpcode.ts:35-48` (same two effects, same order, no cancel) | SAME-ORDER |
+| F2 | counter saturates at 5: `if (counter != 5) counter++` | `battle_script_commands.c:8591-8592` | `battleScriptFuryCutterOpcode.ts:51-53` | SAME |
+| F3 | escalation `for (i = 1; i < counter; i++) power *= 2` → `power << (counter - 1)`, max ×16 | `battle_script_commands.c:8594-8597` | `battleScriptFuryCutterOpcode.ts:55-57` (u16-masked doubling loop) | SAME |
+| F4 | **there is no reset on "chose a different move"** — the step brief's `TryClearRageAndFuryCutter` does **not exist in Emerald** (`grep -rn "TryClearRageAndFuryCutter" $REF/src $REF/include` → zero hits; it is a pokeemerald-expansion symbol). Emerald resets `furyCutterCounter` in exactly four places: `Cmd_furycuttercalc`'s miss branch (`:8584`), `CancelMultiTurnMoves` (`battle_util.c:887`), and `ClearFuryCutterDestinyBondGrudge` (`battle_util.c:3815-3819`) called from `HandleAction_UseItem` (`:317`) and the failed-run branch of `HandleAction_Run` (`:518`) | as cited | port has the matching set: `battleScriptFuryCutterOpcode.ts:45`, `battleScriptMultiTurnCancellation.ts:76`, plus the switch-out/faint clear at `battleScriptHitChainOpcode.ts:4558-4559` and the switch-in clear at `battleScriptSwitchinOpcode.ts:578`; **no** port site resets it on a different move either | SAME (both sides let the counter survive an intervening different move; the two `ClearFuryCutterDestinyBondGrudge` call sites are UNREACHABLE-IN-SINGLES-FRONTIER — bag items are disabled and running from a trainer battle is impossible, `battle_util.c:487-540`) |
+| F5 | the switch-out / switch-in clears (`gDisableStructs` wipe) | audit A's slice — `docs/switch-lifecycle-audit-2026-08-26.md` | `battleScriptHitChainOpcode.ts:4550-4570`, `battleScriptSwitchinOpcode.ts:578` | cross-ref only, not re-audited here |
+| F6 | `CheckMoveLimitations`'s Torment branch calls `CancelMultiTurnMoves` during action selection (so Torment can break a Rollout/Thrash/Uproar lock before the move is even chosen) | `battle_util.c:999-1001` | choose-move ladder — `docs/turn-machinery-audit-2026-08-26.md` §4's slice | cross-ref only, not re-audited here |
