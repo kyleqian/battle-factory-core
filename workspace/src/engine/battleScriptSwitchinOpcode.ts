@@ -1178,12 +1178,16 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
         },
       );
     }
-    let nextRules = rules;
+    // `battle_script_commands.c:5226` clears HITMARKER_FAINTED(gActiveBattler)
+    // UNCONDITIONALLY, at the top of the opcode -- before the Spikes gate and
+    // before any ability hook -- so every exit below carries it, including the
+    // weather/Forecast `callSwitchinScript` paths (ISSUES #134).
+    let nextRules: BattleScriptRulesContext = Object.freeze({ ...rules, hitMarker: hitMarkerWithoutFainted });
     if (active.ability === ABILITY_TRUANT && active.truantCounter !== 1) {
-      const battlers = rules.battlers.map((candidate, index) =>
+      const battlers = nextRules.battlers.map((candidate, index) =>
         index === battler ? Object.freeze({ ...candidate, truantCounter: 1 as const }) : candidate
       ) as unknown as BattleScriptRulesBattlers;
-      nextRules = Object.freeze({ ...rules, battlers: Object.freeze(battlers) });
+      nextRules = Object.freeze({ ...nextRules, battlers: Object.freeze(battlers) });
     }
     const nextActive = nextRules.battlers[battler as BattleScriptBattlerId];
     const abilityRules = Object.freeze({
@@ -1221,17 +1225,21 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
         }), battler as BattleScriptBattlerId, nextActive.ability),
       );
     }
+    // `battle_util.c:2559-2565` (Intimidate) and `:2575-2581` (Trace) set only
+    // their `gStatuses3` bit (+ a `gSpecialStatuses` flag) and `break` with NO
+    // `effect++`, so `AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN)` returns
+    // 0 and source FALLS INTO the `if (!Ability && !Item)` body below -- which
+    // is what clears SIDE_STATUS_SPIKES_DAMAGED (`:5268`) and advances
+    // (`:5296`). Marking here and falling through is that shape; returning
+    // early was ISSUES #134 (receipt:
+    // `tools/probe/receipts/issue134-switchineffects-clears-off.json`).
     if (nextActive.ability === ABILITY_INTIMIDATE && !(nextActive.status3 & STATUS3_INTIMIDATE_POKES)) {
       const battlers = nextRules.battlers.map((candidate, index) =>
         index === battler
           ? Object.freeze({ ...candidate, status3: (candidate.status3 | STATUS3_INTIMIDATE_POKES) >>> 0 })
           : candidate
       ) as unknown as BattleScriptRulesBattlers;
-      return transitionBattleScriptCommand(
-        context,
-        Object.freeze({ kind: "advance" }),
-        { rulesContext: Object.freeze({ ...nextRules, battlers: Object.freeze(battlers) }) },
-      );
+      nextRules = Object.freeze({ ...nextRules, battlers: Object.freeze(battlers) });
     }
     if (nextActive.ability === ABILITY_TRACE && !(nextActive.status3 & STATUS3_TRACE)) {
       const battlers = nextRules.battlers.map((candidate, index) =>
@@ -1239,11 +1247,7 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
           ? Object.freeze({ ...candidate, status3: (candidate.status3 | STATUS3_TRACE) >>> 0 })
           : candidate
       ) as unknown as BattleScriptRulesBattlers;
-      return transitionBattleScriptCommand(
-        context,
-        Object.freeze({ kind: "advance" }),
-        { rulesContext: Object.freeze({ ...nextRules, battlers: Object.freeze(battlers) }) },
-      );
+      nextRules = Object.freeze({ ...nextRules, battlers: Object.freeze(battlers) });
     }
     if (
       nextActive.ability === ABILITY_FORECAST
@@ -1267,6 +1271,8 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
         );
       }
     }
+    // `battle_script_commands.c:5268` + `:5296` -- the one `if (!Ability && !Item)`
+    // body. `nextRules` already carries the unconditional HITMARKER_FAINTED clear.
     const sideStatuses = [...nextRules.sideStatuses] as [number, number];
     sideStatuses[side] = (sideStatuses[side] & ~SIDE_STATUS_SPIKES_DAMAGED) >>> 0;
     return transitionBattleScriptCommand(
@@ -1275,7 +1281,6 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
       {
         rulesContext: Object.freeze({
           ...nextRules,
-          hitMarker: hitMarkerWithoutFainted,
           sideStatuses: Object.freeze(sideStatuses),
         }),
       },

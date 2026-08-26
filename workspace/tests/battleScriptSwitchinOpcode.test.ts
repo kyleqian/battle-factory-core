@@ -1468,6 +1468,51 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(state.rng.calls).toBe(0);
   });
 
+  it.each([
+    ["Intimidate", ABILITY_INTIMIDATE, 1 << 19],
+    ["Trace", ABILITY_TRACE, 1 << 20],
+  ] as const)(
+    "switchineffects: a %s switch-in clears SPIKES_DAMAGED and the FAINTED hit-marker bit (ISSUES #134)",
+    (_name, ability, status3Bit) => {
+      // `battle_util.c:2559-2581`: both ON_SWITCHIN cases only set their
+      // gStatuses3 bit and break with no `effect++`, so AbilityBattleEffects
+      // returns 0 and `Cmd_switchineffects` runs its `if (!Ability && !Item)`
+      // body -- the SIDE_STATUS_SPIKES_DAMAGED clear (`:5268`) and the advance
+      // (`:5296`). The HITMARKER_FAINTED clear (`:5226`) is unconditional and
+      // above every branch. Stock-ROM receipt:
+      // tools/probe/receipts/issue134-switchineffects-clears-off.json.
+      const HITMARKER_FAINTED_1 = 1 << (28 + 1);
+      const rc = context({
+        battlers: [
+          battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+          battler({
+            side: 1,
+            species: SUNKERN,
+            hp: 100,
+            types: ["TYPE_GRASS", "TYPE_GRASS"],
+            partyIndex: 0,
+            ability,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        // The guard the entrant's own Spikes pass just set: source clears it
+        // here so the NEXT switch-in on this side is damaged again.
+        sideStatuses: [0, (1 << 4) | (1 << 9)],
+        sideTimers: [{}, { spikesAmount: 1 }],
+        hitMarker: HITMARKER_FAINTED_1,
+      });
+      const { result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
+      expect(result.state.rulesContext.battlers[1].status3 & status3Bit).toBe(status3Bit);
+      expect(result.state.rulesContext.sideStatuses[1]).toBe(1 << 4);
+      expect(result.state.rulesContext.hitMarker & HITMARKER_FAINTED_1).toBe(0);
+      expect(result.state.rulesContext.battlers[1].hp).toBe(100);
+      expect(result.state.rng.calls).toBe(0);
+    },
+  );
+
   it("switchineffects: Drizzle sets permanent rain once and same-weather re-entry is a no-op", () => {
     const rc = context({ battlers: [
       battler({ side: 0 }),
