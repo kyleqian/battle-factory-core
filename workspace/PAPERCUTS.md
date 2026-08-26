@@ -1463,3 +1463,18 @@ current app stage should be rejected before replay.
   (`tools/run-mgba-probe.py` consumers): fail when `gBattlescriptCurrInstr`
   is unchanged for N frames while `gBattleControllerExecFlags != 0` and the
   input script has ended.
+
+## `switchindataupdate`'s `as unknown as BattleScriptRulesBattlers` cast hides misspelled/unknown battler fields from the typecheck
+
+- **Hit:** 2026-08-26 (side opus worker, ISSUES #136 fix; ~5 min).
+- **What happens:** `battleScriptSwitchinOpcode.ts` rebuilds the incoming
+  battler through `rules.battlers.map(...) as unknown as BattleScriptRulesBattlers`,
+  which suppresses TypeScript's excess-property check on the object literal.
+  A `rolloutTimerStartValue: 0` written onto the battler literal (the field
+  actually lives on the context-level `rolloutTimerStartValues` row) compiled
+  clean as a dead property; only the new Tier-1 pin caught it.
+- **Workaround:** pin every reset with a test that reads the field back
+  through the real context shape.
+- **Fix shape:** type the mapped array as `readonly BattleScriptRulesBattler[]`
+  first and narrow to the tuple type in one place, so literal excess
+  properties fail `npm run typecheck`.
