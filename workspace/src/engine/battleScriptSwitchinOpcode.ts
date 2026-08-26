@@ -525,6 +525,16 @@ function createSwitchindataupdateOpcodeHandler(
           status3: isBatonPass ? (candidate.status3 & BATON_PASS_STATUS3) >>> 0 : 0,
           substituteHP: isBatonPass ? candidate.substituteHP : 0,
           rolloutTimer: 0,
+          // `battle_main.c:3206-3208` memsets the WHOLE DisableStruct, in the
+          // ordinary AND the Baton Pass branch (`:3210-3217` restores only
+          // substituteHP/battlerWithSureHit/perishSongTimer{,StartValue}/
+          // battlerPreventingEscape), so protectUses goes to 0 with the rest.
+          // It is AI_CV_Protect4's own `get_protect_count AI_USER` input
+          // (`data/battle_ai_scripts.s:1921-1927`), so a value inherited from
+          // the outgoing mon costs a Random() the ROM never draws (ISSUES
+          // #136). DisableStruct::rolloutTimerStartValue is the context-level
+          // `rolloutTimerStartValues` row here; it is zeroed below.
+          protectUses: 0,
           furyCutterCounter: 0,
           mimickedMoves: 0,
           stockpileCounter: 0,
@@ -638,6 +648,12 @@ function createSwitchindataupdateOpcodeHandler(
     const choicedMove = Object.freeze(
       rules.choicedMove.map((move, index) => index === battler ? 0 : move),
     ) as BattleScriptRulesContext["choicedMove"];
+    // The rest of the `battle_main.c:3206-3208` DisableStruct memset: this
+    // battler's four-bit rolloutTimerStartValue lives in a context-level row,
+    // not on the battler record (ISSUES #136).
+    const rolloutTimerStartValues = Object.freeze(
+      rules.rolloutTimerStartValues.map((value, index) => index === battler ? 0 : value),
+    ) as BattleScriptRulesContext["rolloutTimerStartValues"];
     const nextRules = Object.freeze({
       ...rules,
       battlers: Object.freeze(battlers),
@@ -645,6 +661,7 @@ function createSwitchindataupdateOpcodeHandler(
       currentMove: 0,
       choicedMove,
       aiObservedAbilityIds,
+      rolloutTimerStartValues,
       moveHistory: Object.freeze({
         ...rules.moveHistory,
         lastMoves,

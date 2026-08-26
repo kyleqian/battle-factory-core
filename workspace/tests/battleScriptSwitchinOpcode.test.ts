@@ -22,6 +22,8 @@ const program = loadBattleScriptProgram();
 const TACKLE = 33;
 const KARATE_CHOP = 2;
 const TELEPORT = 100;
+/** include/constants/moves.h -- EFFECT_BATON_PASS's own move. */
+const BATON_PASS = 226;
 /**
  * include/constants/battle.h. `BATTLE_TYPE_FRONTIER` (`:91`) is itself an OR
  * of every frontier facility's own bit, including `BATTLE_TYPE_ARENA` (`:77`)
@@ -421,6 +423,51 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.disableTimerStartValue).toBe(0);
     expect(updated.tauntTimer).toBe(0);
   });
+
+  it.each([
+    ["an ordinary switch", TACKLE, 0],
+    ["a Baton Pass", BATON_PASS, 40],
+  ] as const)(
+    "switchindataupdate zeroes protectUses and rolloutTimerStartValue across %s (ISSUES #136)",
+    (_name, currentMove, expectedSubstituteHP) => {
+      // `battle_main.c:3206-3208` memsets the WHOLE DisableStruct before the
+      // Baton Pass branch (`:3210-3217`) restores its five fields, and neither
+      // protectUses nor rolloutTimerStartValue is among them. A stale
+      // protectUses is what AI_CV_Protect4 reads (`data/battle_ai_scripts.s:1921-1927`),
+      // so it costs a Random() the ROM never draws.
+      const rc = context({
+        currentMove,
+        rolloutTimerStartValues: [5, 3, 0, 0],
+        battlers: [
+          battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+          Object.freeze({
+            ...battler({
+              side: 1,
+              species: SUNKERN,
+              hp: 0,
+              types: ["TYPE_GRASS", "TYPE_GRASS"],
+              partyIndex: 2, // already flipped by getswitchedmondata
+              substituteHP: 40,
+              rolloutTimer: 3,
+            }),
+            protectUses: 2,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      const updated = result.state.rulesContext.battlers[1];
+      expect(updated.protectUses).toBe(0);
+      expect(updated.rolloutTimer).toBe(0);
+      // DisableStruct::rolloutTimerStartValue is a context-level row in the port.
+      expect(result.state.rulesContext.rolloutTimerStartValues[1]).toBe(0);
+      expect(result.state.rulesContext.rolloutTimerStartValues[0]).toBe(5);
+      // Proves the Baton Pass arm really took the preserving branch.
+      expect(updated.substituteHP).toBe(expectedSubstituteHP);
+    },
+  );
 
   it("switchindataupdate literally clears only the incoming battler's move/result and AI move/ability history", () => {
     const lastTakenMove = Array.from({ length: 16 }, (_, index) => 101 + index);
