@@ -1,0 +1,399 @@
+{
+  "schema": "gate6-first-turn-decay-off-semantic-receipt/v1",
+  "cardId": "IS_FIRST_TURN_DECAY",
+  "oracleProfile": "battle-scene-off",
+  "runner": "tools/run-mgba-probe.py",
+  "probe": "tools/probe/probe-gate6-first-turn-decay-off.py",
+  "fixture": "tools/battle-lab/gate6-first-turn-decay-off.json",
+  "seed": 305419897,
+  "source": {
+    "primaryBlock": "src/battle_main.c TurnValuesCleanUp (4857-4891), var0 == FALSE branch: `if (gDisableStructs[i].isFirstTurn) gDisableStructs[i].isFirstTurn--;` (4876-4877), plus the rechargeTimer-- / STATUS2_RECHARGE clear (4878-4886) and the unconditional `substituteHP == 0 => clear STATUS2_SUBSTITUTE` sync (4887-4888)",
+    "callSites": "src/battle_main.c BattleTurnPassed:3974 (once per turn, after every end-turn effect) and TryDoEventsBeforeFirstTurn:3901 (the pre-turn-1 decrement 2 -> 1)",
+    "readerFakeOut": "data/battle_scripts_1.s BattleScript_EffectFakeOut:2048-2052 -> `jumpifnotfirstturn BattleScript_FailedFromAtkString`; Cmd_jumpifnotfirstturn is that opcode's only consumer in the whole script tree",
+    "readerSpeedBoost": "src/battle_util.c ABILITYEFFECT_ENDTURN case ABILITY_SPEED_BOOST (2642-2652): `statStages[STAT_SPEED] < MAX_STAT_STAGE && gDisableStructs[battler].isFirstTurn != 2`",
+    "switchInWrite": "SwitchInClearSetData sets isFirstTurn = 2 on every switch-in (ported at src/engine/battleScriptSwitchinOpcode.ts:550)"
+  },
+  "ramLayout": {
+    "gDisableStructs": "0x020242bc (pokeemerald.map); next symbol gPauseCounterBattle 0x0202432c => sizeof(struct DisableStruct) == 0x70/4 == 28",
+    "isFirstTurnOffset": "0x16 (include/battle.h struct DisableStruct, between battlerWithSureHit 0x15 and filler_17 0x17)",
+    "rechargeTimerOffset": "0x1A"
+  },
+  "freshRunCount": 2,
+  "byteIdenticalAcrossFreshRuns": true,
+  "probeOutputSha256": "95b0bfc05482ee2b765ef8ab785e31cbff404788e3f0dc20fdf368529ff1862f",
+  "parties": {
+    "playerLeadFakeOut": {
+      "species": 335,
+      "ability": 47,
+      "moves": [
+        252,
+        252,
+        252,
+        252
+      ]
+    },
+    "playerBenchSpeedBoost": {
+      "species": 302,
+      "ability": 3,
+      "moves": [
+        106,
+        106,
+        106,
+        106
+      ]
+    },
+    "opponentLead": {
+      "species": 113,
+      "ability": 30,
+      "moves": [
+        106,
+        106,
+        106,
+        106
+      ]
+    }
+  },
+  "setCitations": {
+    "playerLeadFakeOut": "FRONTIER_MON_MAKUHITA, src/data/gen/battle-frontier-mons.json index 22, moves [MOVE_FAKE_OUT, MOVE_SEISMIC_TOSS, MOVE_DETECT, MOVE_WHIRLWIND] -- one of 20 FAKE OUT rows in the 882-entry L50 catalog. All four slots are staged as FAKE OUT so slot 0 is the only legal pick on both turns.",
+    "playerBenchSpeedBoost": "FRONTIER_MON_NINJASK_1, index 238 (SPECIES_NINJASK); NINJASK's ability array is {ABILITY_SPEED_BOOST, ABILITY_NONE}, so abilitySlot 0 is unconditionally SPEED BOOST. Second NINJASK row: index 343.",
+    "opponent": "Three legal L50 mons each with four identical MOVE_HARDEN slots -- one legal AI choice, zero damage, so the battle runs to turn 5 without an HP confound."
+  },
+  "turnMarks": [
+    {
+      "turn": 1,
+      "kind": "attack",
+      "notes": [
+        "FAKE OUT turn 1: isFirstTurn == 1, flinch lands"
+      ],
+      "frameAtPrompt": 0,
+      "isFirstTurnAtPrompt": [
+        1,
+        1
+      ],
+      "playerPartyIndex": 0,
+      "playerSpeedStage": 6
+    },
+    {
+      "turn": 2,
+      "kind": "attack",
+      "notes": [
+        "FAKE OUT turn 2: isFirstTurn == 0, But it failed!"
+      ],
+      "frameAtPrompt": 384,
+      "isFirstTurnAtPrompt": [
+        0,
+        0
+      ],
+      "playerPartyIndex": 0,
+      "playerSpeedStage": 6
+    },
+    {
+      "turn": 3,
+      "kind": "shift1",
+      "notes": [
+        "shift NINJASK in: isFirstTurn := 2, SPEED BOOST suppressed"
+      ],
+      "frameAtPrompt": 887,
+      "isFirstTurnAtPrompt": [
+        0,
+        0
+      ],
+      "playerPartyIndex": 0,
+      "playerSpeedStage": 6
+    },
+    {
+      "turn": 4,
+      "kind": "attack",
+      "notes": [
+        "NINJASK's first full turn: isFirstTurn == 1, SPEED BOOST fires"
+      ],
+      "frameAtPrompt": 1720,
+      "isFirstTurnAtPrompt": [
+        1,
+        0
+      ],
+      "playerPartyIndex": 1,
+      "playerSpeedStage": 6
+    },
+    {
+      "turn": 5,
+      "kind": "attack",
+      "notes": [
+        "NINJASK second full turn: isFirstTurn == 0, SPEED BOOST fires"
+      ],
+      "frameAtPrompt": 2493,
+      "isFirstTurnAtPrompt": [
+        0,
+        0
+      ],
+      "playerPartyIndex": 1,
+      "playerSpeedStage": 7
+    }
+  ],
+  "isFirstTurnEvents": [
+    {
+      "frame": 324,
+      "before": [
+        1,
+        1
+      ],
+      "after": [
+        0,
+        0
+      ],
+      "playerPartyIndex": 0
+    },
+    {
+      "frame": 1289,
+      "before": [
+        0,
+        0
+      ],
+      "after": [
+        2,
+        0
+      ],
+      "playerPartyIndex": 1
+    },
+    {
+      "frame": 1660,
+      "before": [
+        2,
+        0
+      ],
+      "after": [
+        1,
+        0
+      ],
+      "playerPartyIndex": 1
+    },
+    {
+      "frame": 2433,
+      "before": [
+        1,
+        0
+      ],
+      "after": [
+        0,
+        0
+      ],
+      "playerPartyIndex": 1
+    }
+  ],
+  "speedStageEvents": [
+    {
+      "frame": 2250,
+      "before": 6,
+      "after": 7,
+      "playerSpecies": 302
+    },
+    {
+      "frame": 3023,
+      "before": 7,
+      "after": 8,
+      "playerSpecies": 302
+    }
+  ],
+  "messageEvents": [
+    {
+      "frame": 2,
+      "text": "FAKE OUT"
+    },
+    {
+      "frame": 3,
+      "text": "10/10"
+    },
+    {
+      "frame": 4,
+      "text": "TYPE/<FC><06><01>NORMAL"
+    },
+    {
+      "frame": 57,
+      "text": "MAKUHITA used\nFAKE OUT!"
+    },
+    {
+      "frame": 229,
+      "text": "Foe CHANSEY flinched!"
+    },
+    {
+      "frame": 328,
+      "text": "What will\nMAKUHITA do?"
+    },
+    {
+      "frame": 386,
+      "text": "FAKE OUT"
+    },
+    {
+      "frame": 387,
+      "text": "<77>9/10"
+    },
+    {
+      "frame": 388,
+      "text": "TYPE/<FC><06><01>NORMAL"
+    },
+    {
+      "frame": 436,
+      "text": "MAKUHITA used\nFAKE OUT!"
+    },
+    {
+      "frame": 494,
+      "text": "But it failed!"
+    },
+    {
+      "frame": 586,
+      "text": "Foe CHANSEY used\nHARDEN!"
+    },
+    {
+      "frame": 727,
+      "text": "Foe CHANSEY\u2019s DEFENSE\nrose!"
+    },
+    {
+      "frame": 831,
+      "text": "What will\nMAKUHITA do?"
+    },
+    {
+      "frame": 1176,
+      "text": "<FC><02><02>MAKUHITA<FC><01><0B><B5>"
+    },
+    {
+      "frame": 1178,
+      "text": "<FC><02><02>CHANSEY<FC><01><0A><B6>"
+    },
+    {
+      "frame": 1208,
+      "text": "MAKUHITA, that\u2019s enough!\nCome back!"
+    },
+    {
+      "frame": 1291,
+      "text": "Go! NINJASK!"
+    },
+    {
+      "frame": 1370,
+      "text": "<FC><02><02>NINJASK<FC><01><0B><B5>"
+    },
+    {
+      "frame": 1419,
+      "text": "Foe CHANSEY used\nHARDEN!"
+    },
+    {
+      "frame": 1560,
+      "text": "Foe CHANSEY\u2019s DEFENSE\nrose!"
+    },
+    {
+      "frame": 1664,
+      "text": "What will\nNINJASK do?"
+    },
+    {
+      "frame": 1722,
+      "text": "HARDEN"
+    },
+    {
+      "frame": 1723,
+      "text": "TYPE/<FC><06><01>NORMAL"
+    },
+    {
+      "frame": 1773,
+      "text": "NINJASK used\nHARDEN!"
+    },
+    {
+      "frame": 1910,
+      "text": "NINJASK\u2019s DEFENSE\nrose!"
+    },
+    {
+      "frame": 2009,
+      "text": "Foe CHANSEY used\nHARDEN!"
+    },
+    {
+      "frame": 2150,
+      "text": "Foe CHANSEY\u2019s DEFENSE\nrose!"
+    },
+    {
+      "frame": 2328,
+      "text": "NINJASK\u2019s SPEED BOOST\nraised its SPEED!"
+    },
+    {
+      "frame": 2436,
+      "text": "What will\nNINJASK do?"
+    },
+    {
+      "frame": 2495,
+      "text": "HARDEN"
+    },
+    {
+      "frame": 2496,
+      "text": "TYPE/<FC><06><01>NORMAL"
+    },
+    {
+      "frame": 2546,
+      "text": "NINJASK used\nHARDEN!"
+    },
+    {
+      "frame": 2683,
+      "text": "NINJASK\u2019s DEFENSE\nrose!"
+    },
+    {
+      "frame": 2782,
+      "text": "Foe CHANSEY used\nHARDEN!"
+    },
+    {
+      "frame": 2923,
+      "text": "Foe CHANSEY\u2019s DEFENSE\nrose!"
+    },
+    {
+      "frame": 3101,
+      "text": "NINJASK\u2019s SPEED BOOST\nraised its SPEED!"
+    },
+    {
+      "frame": 3209,
+      "text": "What will\nNINJASK do?"
+    }
+  ],
+  "totalRandomCalls": 79,
+  "totalFrames": 3266,
+  "final": {
+    "battleMainFunc": 134463093,
+    "isFirstTurn": [
+      0,
+      0
+    ],
+    "rechargeTimer": [
+      0,
+      0
+    ],
+    "player": {
+      "partyIndex": 1,
+      "species": 302,
+      "speedStage": 8,
+      "speed": 180,
+      "hp": 136,
+      "pp": [
+        28,
+        30,
+        30,
+        30
+      ]
+    },
+    "opponent": {
+      "partyIndex": 0,
+      "species": 113,
+      "hp": 273,
+      "pp": [
+        29,
+        29,
+        29,
+        29
+      ]
+    },
+    "displayedString": "What will\nNINJASK do?"
+  },
+  "assertions": [
+    "gDisableStructs[0].isFirstTurn is 1 (not 2) at turn 1's action prompt: TryDoEventsBeforeFirstTurn's own TurnValuesCleanUp(FALSE) already pre-decremented the lead's switch-in value of 2.",
+    "It decays 1 -> 0 for BOTH battlers at frame 324, inside turn 1's end-of-turn phase; turn 2's prompt reads [0, 0].",
+    "Turn 1 FAKE OUT (isFirstTurn == 1) flinches: 'Foe CHANSEY flinched!'. Turn 2 FAKE OUT (isFirstTurn == 0) prints 'But it failed!' and CHANSEY then acts normally ('Foe CHANSEY used HARDEN!').",
+    "Shifting NINJASK in on turn 3 sets isFirstTurn[0] := 2 at frame 1289, and NO 'SPEED BOOST' message appears anywhere in turn 3's end-of-turn window (frames 1291-1664) -- the isFirstTurn != 2 gate is closed on the switch-in turn.",
+    "That 2 decays to 1 at frame 1660 (turn 3's TurnValuesCleanUp(FALSE)), and turn 4's end-of-turn fires 'NINJASK's SPEED BOOST raised its SPEED!' with statStages[STAT_SPEED] 6 -> 7 at frame 2250.",
+    "isFirstTurn decays 1 -> 0 at frame 2433 and SPEED BOOST fires AGAIN at the end of turn 5 (stage 7 -> 8, frame 3023/3101): the gate is `!= 2`, not `== 0`.",
+    "Both battlers' rechargeTimer stays 0 for the whole trace (no recharge move staged); the receipt records the field so the decrement port has a control.",
+    "This is semantic RAM evidence sampled on every controller frame; no framebuffer fitting and no runtime oracle dependency."
+  ]
+}
