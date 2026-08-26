@@ -155,7 +155,7 @@ describe("MOVE_HEAL_BELL dense evidence and pure presentation checkpoint", () =>
     }
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: any) => entry.status === "exact"))
-      .toHaveLength(212);
+      .toHaveLength(213);
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_HEAL_BELL"))
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_PERISH_SONG"))
