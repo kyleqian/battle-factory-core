@@ -305,3 +305,76 @@ Scoped, per the brief, to `STATUS2_MULTIPLETURNS` + `gLockedMoves` +
 | X8 | `Cmd_twoturnmoveschargestringid` — the brief's symbol — **does not exist in Emerald**; the charge string is `setbyte sTWOTURN_STRINGID` per branch + `copybyte cMULTISTRING_CHOOSER, sTWOTURN_STRINGID` + `printfromtable gFirstTurnOfTwoStringIds` | `data/battle_scripts_1.s:781/1979/1983/1987/1991`, `:804-805` | mechanical script extraction | SAME (brief-symbol correction, not a divergence) |
 | X9 | `Cmd_jumpifnotfirstturn` is **not** part of the two-turn machinery — its only user in the whole script file is Fake Out (`data/battle_scripts_1.s:2050`); it reads `gDisableStructs[].isFirstTurn`, which `TurnValuesCleanUp(FALSE)` decrements | `battle_script_commands.c:6786-6794`; `battle_main.c:4875-4876` | `battleScriptJumpifnotfirstturnOpcode.ts:56-62`; decrement `battleEndTurnOrchestration.ts:2375-2377` | SAME (brief-scope correction) |
 | X10 | Power Herb | does not exist in Gen 3 | — | UNREACHABLE-IN-SINGLES (no such item in Emerald's item table; the "Power-Herb-less second turn" the brief names is simply *the* second turn) |
+
+## §6. The shared reads
+
+### §6a. `HandleAction_UseMove`'s lock
+
+`battle_util.c:107-110` — `else if (status2 & STATUS2_MULTIPLETURNS || status2 &
+STATUS2_RECHARGE) gCurrentMove = gChosenMove = gLockedMoves[attacker];`. It is
+the **second** branch, after the `noValidMoves`/Struggle branch (`:104-108`) and
+**before** both Encore branches (`:112-125`). It overrides only `gCurrentMove` /
+`gChosenMove` — it does **not** touch `gCurrMovePos`/`gChosenMovePos` (so PP,
+if it were deducted, would come off the originally-chosen slot) and it does
+**not** re-run `GetMoveTarget` (unlike the Encore branch at `:117`).
+
+| # | step | source | port site | verdict |
+| --- | --- | --- | --- | --- |
+| S1 | the lock is branch 2 of the ladder, after Struggle, before Encore | `battle_util.c:104-125` | `factoryBattleScriptFullTurnDecision.ts:2364-2392` `actionMoveId` (`forcedStruggle` first, then the lock) | SAME-ORDER |
+| S2 | the lock does **not** rewrite the move position | `battle_util.c:109` | `factoryBattleScriptFullTurnDecision.ts:2345` (`moveSlot` stays the caller's PP slot; comment at `:2386-2388`) | SAME |
+| S3 | the lock does **not** re-run `GetMoveTarget` (contrast Encore, `:117`) | `battle_util.c:109` | `factoryBattleScriptFullTurnDecision.ts:2356` uses `sourceMoveTarget(moveId, battler)` on the locked move — a target derivation the source does **not** re-run here | DIVERGENT-BENIGN — in Level-50 **singles** there is exactly one opposing slot, so any target derivation for a `MOVE_TARGET_SELECTED` move yields the same battler that `gBattleStruct->moveTarget` already held. The two would only separate in doubles (declared out of scope) or via a mid-lock redirection (Follow Me is the only Gen-3 source, and it re-targets at `Cmd_attackcanceler`, not here). |
+| S4 | the same pair of bits also gates action **selection** — a locked battler never opens the move menu | `battle_main.c:4098-4104` | `factoryBattleScriptFullTurnDecision.ts:2285-2293` `battlerStatusMoveLock`, documented at `:2281-2284` as settled one state earlier than every other auto-confirm | SAME-ORDER (the rest of the ladder is `docs/turn-machinery-audit-2026-08-26.md` §4) |
+| S5 | a locked battler with `gLockedMoves[] == MOVE_NONE` is not defended against in source (it reads a zeroed cell and would run move 0) | `battle_util.c:109`; only zeroing at `battle_main.c:3058` | `factoryBattleScriptFullTurnDecision.ts:2349-2353` and `:2384-2390` **throw** | SAME-ORDER-EQUIVALENT (a barrier on a state the source cannot reach either — the lock bits are only ever set in the same statement that writes `gLockedMoves`; explicit, not silent) |
+
+### §6b. `CancelMultiTurnMoves` — every cell, every call site
+
+**Cells cleared** (`battle_util.c:877-888`), in source statement order:
+`status2 &= ~STATUS2_MULTIPLETURNS`, `~STATUS2_LOCK_CONFUSE`, `~STATUS2_UPROAR`,
+`~STATUS2_BIDE`; `gStatuses3 &= ~STATUS3_SEMI_INVULNERABLE`;
+`gDisableStructs[].rolloutTimer = 0`; `gDisableStructs[].furyCutterCounter = 0`.
+**Not** cleared: `STATUS2_RECHARGE`, `STATUS2_WRAPPED`, `STATUS2_CONFUSION`,
+`gLockedMoves[]`, `gBideDmg[]`, `gBideTarget[]`, `rolloutTimerStartValue`,
+`gProtectStructs[].chargingTurn`.
+
+Port: `battleScriptMultiTurnCancellation.ts:27-32` (the 4-bit status2 mask),
+`:57-63` (status2 + status3), `:73-77` (`rolloutTimer`, `furyCutterCounter`).
+**Cell-for-cell identical, including every omission** — verified against the
+source function body line by line. **SAME.**
+
+| # | source call site | context | port site | verdict |
+| --- | --- | --- | --- | --- |
+| M1 | `battle_util.c:2089` | `CANCELER_TRUANT` | `battleScriptActionAdmission.ts:1836` | SAME |
+| M2 | `battle_util.c:2103` | `CANCELER_RECHARGE` | `battleScriptActionAdmission.ts:1972` | SAME |
+| M3 | `battle_util.c:2115` | `CANCELER_FLINCH` | `battleScriptActionAdmission.ts:2099` | SAME |
+| M4 | `battle_util.c:2127` | `CANCELER_DISABLED` | `battleScriptActionAdmission.ts:2224` | SAME |
+| M5 | `battle_util.c:2138` | `CANCELER_TAUNTED` | `battleScriptActionAdmission.ts:2333` | SAME |
+| M6 | `battle_util.c:2149` | `CANCELER_IMPRISONED` | `battleScriptActionAdmission.ts:2838` | SAME |
+| M7 | `battle_util.c:2213` | `CANCELER_IN_LOVE`, **only on the immobilized (`Random() & 1 == 0`) branch** | `battleScriptActionAdmission.ts:3358-3360` (`if (immobilized)`), receipt key `multiTurnCancellation` | SAME |
+| M8 | `battle_util.c:2193` | `CANCELER_PARALYZED` — **commented out** ("removed in FRLG and Emerald"): a full-paralysis turn does **not** break a rampage/uproar/bide | port has no cancel in the paralysis phase | SAME |
+| M9 | `battle_script_commands.c:2296` | `SetMoveEffect` `STATUS1_SLEEP` success | `battleScriptHitChainOpcode.ts:3366-3392` (`finishStatusWrite`) | SAME |
+| M10 | `battle_script_commands.c:2392` | `SetMoveEffect` `STATUS1_FREEZE` success | same helper | SAME |
+| M11 | `battle_script_commands.c:996` | `Cmd_attackcanceler`'s Protect branch, gated on `!IsTwoTurnsMove(gCurrentMove) \|\| (status2 & STATUS2_MULTIPLETURNS)` | `docs/attack-canceler-lightning-rod-protect-audit.md`'s slice | cross-ref only |
+| M12 | `battle_script_commands.c:6328` | `Cmd_various` `VARIOUS_CANCEL_MULTI_TURN_MOVES` | port `Cmd_various` slice | UNVERIFIED — the port cite for this `various` subcommand was not located inside this row's budget; what is missing is the `VARIOUS_CANCEL_MULTI_TURN_MOVES` handler cite |
+| M13 | `battle_script_commands.c:8357` | `Cmd_tryspiteppreduce`, when Spite empties the target's PP | `battleScriptTryspiteppreduceOpcode.ts:18` (imports the shared helper) | SAME |
+| M14 | `battle_script_commands.c:8540` | `Cmd_rolloutdamagecalculation` miss | `battleScriptRolloutOpcode.ts:36` | SAME (= R1) |
+| M15 | `battle_util.c:1001` | `CheckMoveLimitations` Torment | turn-machinery §4's slice | cross-ref only |
+| M16 | `battle_util.c:1654`, `:1665` | `ENDTURN_UPROAR` (unable-to-move, and expiry) | `battleEndTurnOrchestration.ts:964-965` | SAME (= U8/U10) |
+| M17 | `battle_util.c:1679` | `ENDTURN_THRASH` unable-to-move | `battleEndTurnOrchestration.ts:987` | SAME (= T4) |
+| M18 | `battle_util.c:1761` | `ENDTURN_YAWN`'s fall-asleep | `battleEndTurnOrchestration.ts` `runYawnTick` | SAME (cell semantics; case ordering is the 08-25 audit's) |
+| M19 | `battle_util.c:1877` | Battle Arena judgment | — | UNREACHABLE-IN-SINGLES (`BATTLE_TYPE_ARENA`; the Factory is not the Arena — same exclusion `docs/end-turn-ordering-audit-2026-08-25.md` §6 already proved by battle type) |
+| M20 | `battle_main.c:3945` | `HandleEndTurn_ContinueBattle`: for every battler, `if ((status1 & STATUS1_SLEEP) && (status2 & STATUS2_MULTIPLETURNS)) CancelMultiTurnMoves(i)` | **no port site** | **DIVERGENT — finding 1** (see §7; this is the same root cause as `docs/end-turn-ordering-audit-2026-08-25.md` finding 6, re-confirmed here from the multi-turn side and still unported at this tree) |
+| M21 | `battle_script_commands.c:8551`/`8556` etc. | Rollout's own `MULTIPLETURNS` set/clear (not via the helper) | `battleScriptRolloutOpcode.ts:62-72` | SAME (= R2/R3) |
+
+### §6c. `Cmd_attackcanceler`'s phase ORDER for these cells only
+
+Source enum `battle_util.c:1985-1999`; the loop is
+`do { switch } while (tracker != CANCELER_END && effect == 0)` (`:2006-2268`),
+so **non-firing phases advance within the same call** and a firing phase leaves
+the tracker parked one past itself.
+
+| # | step | source | port site | verdict |
+| --- | --- | --- | --- | --- |
+| P1 | phase numbering `FLAGS 0 … BIDE 12, THAW 13, END 14` | `battle_util.c:1984-1999` | `battleScriptSourceConstants.ts:69-85` (identical 0..14) | SAME |
+| P2 | `CANCELER_RECHARGE` (4) runs **before** `CANCELER_BIDE` (12), so a Hyper-Beam recharge always pre-empts a Bide countdown on the same battler (unreachable pairing, but the order is pinned) | `battle_util.c:1989` vs `:1997` | `battleScriptAttackCanceler.ts:307` vs `:370` | SAME-ORDER |
+| P3 | `CANCELER_CONFUSED` (9) decrements confusion **before** `CANCELER_BIDE` (12) decrements Bide — two independent counters, both stepped in the same call when neither fires | `battle_util.c:2159` vs `:2223` | `battleScriptAttackCanceler.ts:337` vs `:370` | SAME-ORDER |
+| P4 | `effect == 2` (asleep/frozen/thaw) triggers a `BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE)` after the loop; `effect == 1` does not | `battle_util.c:2270-2275` | `battleScriptAttackCanceler.ts:192-198` (the `effect = 2` phase set: FROZEN, CONFUSED?, PARALYZED?, IN_LOVE?, BIDE?, THAW) | UNVERIFIED — the port's `:192-198` switch lists FROZEN/CONFUSED/PARALYZED/IN_LOVE/BIDE/THAW together, while source assigns `effect = 2` only in `CANCELER_ASLEEP`, `CANCELER_FROZEN` and `CANCELER_THAW` (`:2025/2044/2053/2082/2260`) and `effect = 1` in CONFUSED/PARALYZED/IN_LOVE/BIDE (`:2184/2196/2216/2246`). What is missing is a read of the port switch's actual return values at `battleScriptAttackCanceler.ts:186-200` to confirm it is a *different* classification (e.g. "consumes a decision" vs "emits status") rather than the `effect` code itself. Not closed inside the row budget; flagged rather than guessed. |
