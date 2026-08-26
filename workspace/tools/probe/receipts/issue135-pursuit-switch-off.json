@@ -1,0 +1,548 @@
+{
+  "schema": "issue135-pursuit-switch-off-receipt/v1",
+  "issue": 135,
+  "oracleProfile": "battle-scene-off",
+  "dmgMultiplierByteOffset": 14,
+  "dmgMultiplierOffsetDerivation": "include/battle.h:489-518 struct BattleScripting: s32 painSplitHp @0, s32 bideDmg @4, u8 multihitString[6] @8..13, u8 dmgMultiplier @14, u8 twoTurnsMoveStringId @15, u8 animArg1 @16, u8 animArg2 @17, u16 tripleKickPower @18, u8 moveendState @20 (cross-checked against ISSUES #129's probe, which read moveendState at gBattleScripting+20).",
+  "sourceUnderTest": {
+    "setbyte": "data/battle_scripts_1.s:3089 BattleScript_ActionSwitch `setbyte sDMG_MULTIPLIER, 2`",
+    "entry": "data/battle_scripts_1.s:3094-3096 goto BattleScript_PursuitSwitchDmgLoop",
+    "hitScript": "data/battle_scripts_1.s:3123-3148 BattleScript_PursuitDmgOnSwitchOut",
+    "consumer": "src/battle_script_commands.c:1296 Cmd_damagecalc",
+    "variance": "src/battle_script_commands.c:1638-1650 ApplyRandomDmgMultiplier (one Random())",
+    "physicality": "TYPE_DARK > TYPE_MYSTERY, so Pursuit is a SPECIAL move in Gen 3 (spAttack 85 vs spDefense 50)"
+  },
+  "fixture": {
+    "cards": {
+      "intercept": "tools/battle-lab/issue135-pursuit-switch-intercept-off.json",
+      "control": "tools/battle-lab/issue135-pursuit-switch-control-off.json"
+    },
+    "seed": 305419897,
+    "parties": {
+      "player": [
+        {
+          "species": 27,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 8,
+          "moves": [
+            111,
+            10,
+            28,
+            91
+          ],
+          "hp": 125,
+          "maxHp": 125,
+          "stats": {
+            "attack": 95,
+            "defense": 105,
+            "speed": 60,
+            "spAttack": 40,
+            "spDefense": 50
+          }
+        },
+        {
+          "species": 218,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 40,
+          "moves": [
+            52,
+            157,
+            281,
+            34
+          ],
+          "hp": 115,
+          "maxHp": 115,
+          "stats": {
+            "attack": 60,
+            "defense": 60,
+            "speed": 40,
+            "spAttack": 90,
+            "spDefense": 60
+          }
+        },
+        {
+          "species": 194,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 6,
+          "moves": [
+            281,
+            91,
+            352,
+            240
+          ],
+          "hp": 130,
+          "maxHp": 130,
+          "stats": {
+            "attack": 65,
+            "defense": 65,
+            "speed": 35,
+            "spAttack": 45,
+            "spDefense": 45
+          }
+        }
+      ],
+      "opponent": [
+        {
+          "species": 53,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 7,
+          "moves": [
+            228,
+            228,
+            228,
+            228
+          ],
+          "hp": 140,
+          "maxHp": 140,
+          "stats": {
+            "attack": 90,
+            "defense": 80,
+            "speed": 135,
+            "spAttack": 85,
+            "spDefense": 85
+          }
+        },
+        {
+          "species": 19,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 50,
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "hp": 105,
+          "maxHp": 105,
+          "stats": {
+            "attack": 76,
+            "defense": 55,
+            "speed": 92,
+            "spAttack": 45,
+            "spDefense": 55
+          }
+        },
+        {
+          "species": 19,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 50,
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "hp": 105,
+          "maxHp": 105,
+          "stats": {
+            "attack": 76,
+            "defense": 55,
+            "speed": 92,
+            "spAttack": 45,
+            "spDefense": 55
+          }
+        }
+      ]
+    },
+    "note": "The battle-lab checkpoint already sits inside turn 1's action selection with the AI committed, so both arms act on TURN 1 with the player lead at full HP. The opponent lead's four slots are all MOVE_PURSUIT (one legal AI choice)."
+  },
+  "arms": {
+    "intercept": {
+      "playerAction": "party menu, switch slot 0 -> slot 1",
+      "digest": "b989aef8dbe7a2eec554511d6ecac3bc4038069989cbad90c8fa6557866b3322",
+      "dmgMultiplierTransitions": [
+        {
+          "frame": 388,
+          "from": 1,
+          "to": 2,
+          "script": "BattleScript_ActionSwitch+11"
+        },
+        {
+          "frame": 787,
+          "from": 2,
+          "to": 1,
+          "script": "BattleScript_DoSwitchOut+50"
+        }
+      ],
+      "pursuitHit": {
+        "frameWindow": [
+          380,
+          640
+        ],
+        "battleMoveDamageTransitions": [
+          {
+            "frame": 456,
+            "from": 40,
+            "to": 62,
+            "script": "BattleScript_PursuitDmgOnSwitchOut+7"
+          },
+          {
+            "frame": 458,
+            "from": 62,
+            "to": 54,
+            "script": "BattleScript_PursuitDmgOnSwitchOut+9"
+          }
+        ],
+        "playerPartyHpTransitions": [
+          {
+            "frame": 586,
+            "from": [
+              125,
+              115,
+              130
+            ],
+            "to": [
+              71,
+              115,
+              130
+            ],
+            "script": "BattleScript_PursuitDmgOnSwitchOut+19"
+          }
+        ],
+        "randomDraws": [
+          {
+            "frame": 455,
+            "calls": 1,
+            "script": "BattleScript_PursuitDmgOnSwitchOut+6",
+            "dmgMultiplier": 2,
+            "battleMoveDamage": 40
+          },
+          {
+            "frame": 458,
+            "calls": 1,
+            "script": "BattleScript_PursuitDmgOnSwitchOut+9",
+            "dmgMultiplier": 2,
+            "battleMoveDamage": 54
+          }
+        ],
+        "randomDrawCount": 2
+      },
+      "totalRandomCalls": 45,
+      "messageEvents": [
+        {
+          "frame": 319,
+          "text": "<FC><02><02>SANDSHREW<FC><01><0B><B5>"
+        },
+        {
+          "frame": 321,
+          "text": "<FC><02><02>PERSIAN<FC><01><0B><B5>"
+        },
+        {
+          "frame": 351,
+          "text": "SANDSHREW, that\u2019s enough!\nCome back!"
+        },
+        {
+          "frame": 428,
+          "text": "Foe PERSIAN used\nPURSUIT!"
+        },
+        {
+          "frame": 640,
+          "text": "Go! SLUGMA!"
+        },
+        {
+          "frame": 718,
+          "text": "<FC><02><02>SLUGMA<FC><01><0B><B5>"
+        },
+        {
+          "frame": 784,
+          "text": "What will\nSLUGMA do?"
+        },
+        {
+          "frame": 822,
+          "text": "BODY SLAM"
+        },
+        {
+          "frame": 823,
+          "text": "TYPE/<FC><06><01>FIRE"
+        },
+        {
+          "frame": 861,
+          "text": "Foe PERSIAN used\nPURSUIT!"
+        },
+        {
+          "frame": 1014,
+          "text": "A critical hit!"
+        },
+        {
+          "frame": 1112,
+          "text": "SLUGMA used\nEMBER!"
+        },
+        {
+          "frame": 1254,
+          "text": "What will\nSLUGMA do?"
+        },
+        {
+          "frame": 1302,
+          "text": "BODY SLAM"
+        },
+        {
+          "frame": 1303,
+          "text": "24/25"
+        },
+        {
+          "frame": 1304,
+          "text": "TYPE/<FC><06><01>FIRE"
+        },
+        {
+          "frame": 1341,
+          "text": "Foe PERSIAN used\nPURSUIT!"
+        },
+        {
+          "frame": 1487,
+          "text": "SLUGMA used\nEMBER!"
+        }
+      ]
+    },
+    "control": {
+      "playerAction": "FIGHT, move slot 0 (DEFENSE_CURL); PERSIAN is faster so Pursuit lands first",
+      "digest": "b348acfd288e4b6eba3c35b86d707e5dac0901e916f97dbb7306f4b37f260f3b",
+      "dmgMultiplierTransitions": [],
+      "pursuitHit": {
+        "frameWindow": [
+          60,
+          240
+        ],
+        "battleMoveDamageTransitions": [
+          {
+            "frame": 109,
+            "from": 40,
+            "to": 31,
+            "script": "BattleScript_HitFromCritCalc+2"
+          },
+          {
+            "frame": 111,
+            "from": 31,
+            "to": 30,
+            "script": "BattleScript_HitFromAtkAnimation"
+          },
+          {
+            "frame": 228,
+            "from": 30,
+            "to": 0,
+            "script": "BattleScript_MoveEnd+9"
+          }
+        ],
+        "playerPartyHpTransitions": [
+          {
+            "frame": 215,
+            "from": [
+              125,
+              115,
+              130
+            ],
+            "to": [
+              95,
+              115,
+              130
+            ],
+            "script": "BattleScript_HitFromAtkAnimation+10"
+          }
+        ],
+        "randomDraws": [
+          {
+            "frame": 80,
+            "calls": 1,
+            "script": "BattleScript_HitFromAtkString",
+            "dmgMultiplier": 1,
+            "battleMoveDamage": 40
+          },
+          {
+            "frame": 108,
+            "calls": 1,
+            "script": "BattleScript_HitFromCritCalc+1",
+            "dmgMultiplier": 1,
+            "battleMoveDamage": 40
+          },
+          {
+            "frame": 111,
+            "calls": 1,
+            "script": "BattleScript_HitFromAtkAnimation",
+            "dmgMultiplier": 1,
+            "battleMoveDamage": 30
+          },
+          {
+            "frame": 220,
+            "calls": 1,
+            "script": "BattleScript_HitFromAtkAnimation+19",
+            "dmgMultiplier": 1,
+            "battleMoveDamage": 30
+          }
+        ],
+        "randomDrawCount": 4
+      },
+      "totalRandomCalls": 24,
+      "messageEvents": [
+        {
+          "frame": 32,
+          "text": "SAND-ATTACK"
+        },
+        {
+          "frame": 33,
+          "text": "40/40"
+        },
+        {
+          "frame": 34,
+          "text": "TYPE/<FC><06><01>NORMAL"
+        },
+        {
+          "frame": 81,
+          "text": "Foe PERSIAN used\nPURSUIT!"
+        },
+        {
+          "frame": 231,
+          "text": "SANDSHREW used\nDEFENSE CURL!"
+        },
+        {
+          "frame": 379,
+          "text": "SANDSHREW\u2019s DEFENSE\nrose!"
+        },
+        {
+          "frame": 481,
+          "text": "What will\nSANDSHREW do?"
+        },
+        {
+          "frame": 502,
+          "text": "SAND-ATTACK"
+        },
+        {
+          "frame": 503,
+          "text": "39/40"
+        },
+        {
+          "frame": 504,
+          "text": "TYPE/<FC><06><01>NORMAL"
+        }
+      ]
+    }
+  },
+  "finals": {
+    "intercept": {
+      "watch": {
+        "dmgMultiplier": 1,
+        "critMultiplier": 1,
+        "battleMoveDamage": 29,
+        "moveResultFlags": 0,
+        "multiHitCounter": 0,
+        "currentMove": 52,
+        "attacker": 0,
+        "target": 1,
+        "activeHp": [
+          45,
+          114
+        ],
+        "activePartyIndexes": [
+          1,
+          0
+        ],
+        "playerPartyHp": [
+          71,
+          45,
+          130
+        ],
+        "script": "BattleScript_HitFromAtkAnimation"
+      },
+      "playerParty": [
+        {
+          "species": 27,
+          "hp": 71,
+          "maxHp": 125
+        },
+        {
+          "species": 218,
+          "hp": 45,
+          "maxHp": 115
+        },
+        {
+          "species": 194,
+          "hp": 130,
+          "maxHp": 130
+        }
+      ],
+      "opponentParty": [
+        {
+          "species": 53,
+          "hp": 114,
+          "maxHp": 140
+        },
+        {
+          "species": 19,
+          "hp": 105,
+          "maxHp": 105
+        },
+        {
+          "species": 19,
+          "hp": 105,
+          "maxHp": 105
+        }
+      ],
+      "battleOutcome": 0
+    },
+    "control": {
+      "watch": {
+        "dmgMultiplier": 1,
+        "critMultiplier": 1,
+        "battleMoveDamage": 0,
+        "moveResultFlags": 0,
+        "multiHitCounter": 0,
+        "currentMove": 111,
+        "attacker": 0,
+        "target": 0,
+        "activeHp": [
+          39,
+          140
+        ],
+        "activePartyIndexes": [
+          0,
+          0
+        ],
+        "playerPartyHp": [
+          39,
+          115,
+          130
+        ],
+        "script": "BattleScript_StatUpPrintString"
+      },
+      "playerParty": [
+        {
+          "species": 27,
+          "hp": 39,
+          "maxHp": 125
+        },
+        {
+          "species": 218,
+          "hp": 115,
+          "maxHp": 115
+        },
+        {
+          "species": 194,
+          "hp": 130,
+          "maxHp": 130
+        }
+      ],
+      "opponentParty": [
+        {
+          "species": 53,
+          "hp": 140,
+          "maxHp": 140
+        },
+        {
+          "species": 19,
+          "hp": 105,
+          "maxHp": 105
+        },
+        {
+          "species": 19,
+          "hp": 105,
+          "maxHp": 105
+        }
+      ],
+      "battleOutcome": 0
+    }
+  }
+}
