@@ -30,8 +30,9 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlerContext,
   type BattleScriptOpcodeHandlers,
+  type BattleScriptRngState,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptInstruction, type BattleScriptProgram } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerId, BattleScriptSemanticEventPayload } from "./battleScriptEvents.ts";
 import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
@@ -234,6 +235,45 @@ const VARIOUS_CANCEL_MULTI_TURN_MOVES = 0;
 const VARIOUS_SET_MAGIC_COAT_TARGET = 1;
 const VARIOUS_IS_RUNNING_IMPOSSIBLE = 2;
 const VARIOUS_GET_MOVE_TARGET = 3;
+
+/**
+ * `GetMoveTarget`'s `MOVE_TARGET_SELECTED` draw loop (`battle_util.c:119-122`):
+ *
+ *     do { targetBattler = Random() % gBattlersCount; }
+ *     while (targetBattler == gBattlerAttacker
+ *            || side == GetBattlerSide(targetBattler)
+ *            || gAbsentBattlerFlags & gBitTable[targetBattler]);
+ *
+ * With two active battlers exactly one of the two outcomes exits, so the loop
+ * costs a geometric(1/2) number of `Random()`s -- always >= 1, 2+ half the
+ * time. It is deliberately the LOOP ONLY: the `MOVE_TARGET_SELECTED` arm's
+ * Follow Me short-circuit (`:113-116`) and its Lightning Rod redirect
+ * (`:123-131`) sit outside it and belong to each caller, because
+ * `Cmd_various VARIOUS_GET_MOVE_TARGET` and `HandleAction_UseMove` reach this
+ * loop by different routes. Exported so `HandleAction_UseMove`'s four
+ * re-target branches spend the same draws the ROM does (ISSUES #140).
+ */
+export function drawBattleScriptSelectedMoveTarget(
+  rules: BattleScriptRulesContext,
+  attacker: BattleScriptBattlerId,
+  initialRng: BattleScriptRngState,
+  instruction: BattleScriptInstruction,
+): Readonly<{ rng: BattleScriptRngState; target: BattleScriptBattlerId }> {
+  const attackerState = rules.battlers[attacker];
+  let rng = initialRng;
+  let target: BattleScriptBattlerId;
+  do {
+    const draw = drawBattleScriptRng(rng, instruction, "GetMoveTarget(MOVE_TARGET_SELECTED)");
+    rng = draw.rng;
+    target = (draw.randomValue % rules.battleTopology.battlersCount) as BattleScriptBattlerId;
+  } while (
+    target === attacker
+    || rules.battlers[target].side === attackerState.side
+    || (rules.absentBattlerFlags & (1 << target)) !== 0
+  );
+  return Object.freeze({ rng, target });
+}
+
 const VARIOUS_GET_BATTLER_FAINTED = 4;
 const VARIOUS_RESET_PLAYER_FAINTED = 7;
 const VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT = 23;
@@ -1035,17 +1075,11 @@ function createVariousOpcodeHandler(
       );
     }
     if (id === VARIOUS_GET_MOVE_TARGET) {
-      const attackerState = rules.battlers[battler];
-      let rng = context.state.rng;
-      let target: 0 | 1 | 2 | 3;
-      do {
-        const draw = drawBattleScriptRng(rng, context.instruction, "GetMoveTarget(MOVE_TARGET_SELECTED)");
-        rng = draw.rng;
-        target = (draw.randomValue % rules.battleTopology.battlersCount) as 0 | 1 | 2 | 3;
-      } while (
-        target === battler
-        || rules.battlers[target].side === attackerState.side
-        || (rules.absentBattlerFlags & (1 << target)) !== 0
+      const { rng, target } = drawBattleScriptSelectedMoveTarget(
+        rules,
+        battler as BattleScriptBattlerId,
+        context.state.rng,
+        context.instruction,
       );
       const nextRules = Object.freeze({
         ...rules,
