@@ -1,3 +1,11 @@
+# MOVE_ERUPTION loopsewithpan audio component banked — move unsupported (2026-08-25 worker)
+
+- **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION and `eruption-warm-rock` remain unsupported/unfulfilled; this audio component grants no move, framebuffer, or sibling credit.
+- **Did:** Added a pure typed source-relative reducer for only `loopsewithpan SE_M_ROCK_THROW, SOUND_PAN_TARGET, 16, 12`: ordinary attacker/target-side panning, command cursor/args, `Task_LoopAndPlaySE` slot/data/counter/play-count cadence, 12 SE1 starts, sound-task teardown, song/status/track lifecycle, and final inactivity. The prior Explosion commands and all visuals/gameplay remain separate.
+- **Verified:** The source-pinned strict Battle Scene ON audit checks every **476 player-back + 494 opponent-front row**. Player audio begins at age **239** with pan **+63**, opponent at **257** with pan **-63**; each task owns **186 rows**, starts 12 times through relative age **186**, tears down on the final start, stays audibly active through relative age **235**, and reaches first inactive audio at **236**. All task data, sound counts, song identity, track flags/status/pan, immutable gameplay, and gameplay RNG pass.
+- **Next:** Keep Eruption unsupported until the typed seam, compositor, and complete bilateral framebuffer acceptance are independently proven.
+- **Notes:** No `battleScene.ts`/`core.ts`, launch/falling/shake/palette/asset, boundary/barrier, coverage counts, gameplay/RNG/controller, canonical-recording production import, absolute-tick/species/evidence gate, or RGB/framebuffer lookup changed.
+
 # MOVE_ERUPTION HorizontalShake component banked — move unsupported (2026-08-25 worker)
 
 - **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION and `eruption-warm-rock` remain unsupported/unfulfilled; the shake task alone grants no move, framebuffer, or sibling credit.
