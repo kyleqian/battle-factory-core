@@ -258,6 +258,14 @@ function oamAttributes(
   return [attr0, attr1, attr2];
 }
 
+function stepFallingRock(rock: MutableRock): void {
+  rock.y += 8;
+  if (rock.y >= rock.targetY) {
+    rock.y = rock.targetY;
+    rock.state = 2;
+  }
+}
+
 function stepRock(rock: MutableRock, age: number): void {
   switch (rock.state) {
     case 0:
@@ -266,14 +274,11 @@ function stepRock(rock: MutableRock, age: number): void {
         return;
       }
       rock.state = 1;
-      // Deliberate source fall-through from case 0 into case 1.
-      // falls through
+      // The source callback deliberately falls through into the falling body.
+      stepFallingRock(rock);
+      return;
     case 1:
-      rock.y += 8;
-      if (rock.y >= rock.targetY) {
-        rock.y = rock.targetY;
-        rock.state = 2;
-      }
+      stepFallingRock(rock);
       return;
     case 2:
       rock.bounceTimer += 1;
