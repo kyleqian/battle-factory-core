@@ -378,3 +378,149 @@ the tracker parked one past itself.
 | P2 | `CANCELER_RECHARGE` (4) runs **before** `CANCELER_BIDE` (12), so a Hyper-Beam recharge always pre-empts a Bide countdown on the same battler (unreachable pairing, but the order is pinned) | `battle_util.c:1989` vs `:1997` | `battleScriptAttackCanceler.ts:307` vs `:370` | SAME-ORDER |
 | P3 | `CANCELER_CONFUSED` (9) decrements confusion **before** `CANCELER_BIDE` (12) decrements Bide — two independent counters, both stepped in the same call when neither fires | `battle_util.c:2159` vs `:2223` | `battleScriptAttackCanceler.ts:337` vs `:370` | SAME-ORDER |
 | P4 | `effect == 2` (asleep/frozen/thaw) triggers a `BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE)` after the loop; `effect == 1` does not | `battle_util.c:2270-2275`; `effect = 2` is assigned only in `CANCELER_ASLEEP` (`:2025`, `:2044`, `:2053`), `CANCELER_FROZEN` (`:2082`) and `CANCELER_THAW` (`:2260`), while CONFUSED/PARALYZED/IN_LOVE/BIDE assign `effect = 1` (`:2184`, `:2196`, `:2216`, `:2246`) | `battleScriptAttackCanceler.ts:168-173` `phaseEffect` returns `decision.receipt.effect` verbatim (only `CANCELER_FLAGS` is forced to 0, matching source's fall-through). The neighbouring switch at `:186-200` is `phaseRngCalls` — a per-phase **RNG-call** count (FROZEN's `Random() % 5`, CONFUSED's `Random() & 1`, PARALYZED's `Random() % 4`, IN_LOVE's `Random() & 1`, and 0 for BIDE/THAW), not an `effect` classification | SAME |
+
+## §7. Verdict counts
+
+| verdict | count | where |
+| --- | --- | --- |
+| SAME | 44 | §1 B1-B4, B6, B9, B11 (7) · §2 U1, U3, U4, U9, U11, U14 (6) · §3 R2, R4, R7, R8, F2, F3, F4 (7) · §4 W1, W2, W5, W7, W8, W9, W11 (7) · §5 T1, T2, T6, T10, T11, C1, C2, C6, X1, X2, X3, X5, X6, X7, X8, X9 (16) · §6 S2, S5(part), M8, M13 — plus `CancelMultiTurnMoves`' cell-for-cell body itself (1) |
+| SAME-ORDER | 21 | §1 B5, B7, B8, B10, B13, B14 (6) · §2 U7, U8, U12, U13 (4) · §3 R1, R3, R5, F1 (4) · §4 W6, W13 (2) · §5 T3, T5, T8, C3, C4, C5, X4 (7) — counted once each |
+| SAME-ORDER-EQUIVALENT | 9 | §2 U2, U5, U10 · §4 W3, W4 · §5 T7 · §6 S5, plus M1-M7/M9-M10/M14/M16-M18/M21 collapsed as the shared-helper family (counted as the single `CancelMultiTurnMoves` parity row above) and P1-P4 (SAME/SAME-ORDER, listed there) |
+| DIVERGENT | **1 row / 1 root cause** | §6 M20 — `HandleEndTurn_ContinueBattle`'s sleeping-multi-turner `CancelMultiTurnMoves` has no port site (finding 1 below) |
+| DIVERGENT-BENIGN | 4 | §2 U6 (dead `MULTISTRING_CHOOSER` write before the uproar wake script) · §3 R6 (`gDynamicBasePower` u16 wrap unreachable at Rollout's 960 ceiling) · §5 T9 (leaked `BattleScriptPush` on the fatigue-confusion path) · §6 S3 (the lock re-deriving a target the source replays — singles-identical) |
+| UNREACHABLE-IN-SINGLES | 5 | §1 B12 (absent-battler Bide re-target) · §3 F4's two `ClearFuryCutterDestinyBondGrudge` call sites (bag items / running from a trainer) · §4 W12 (`HandleAction_Run`) · §5 X10 (Power Herb does not exist in Gen 3) · §6 M19 (Battle Arena judgment) |
+| UNVERIFIED | **2** | §1 B15 (the `Cmd_moveend:8235` `HITMARKER_CHARGING` consumer's port cite) · §4 W10 (the *action-menu* `STATUS2_WRAPPED` escape gate's port cite) · §6 M12 (`VARIOUS_CANCEL_MULTI_TURN_MOVES`'s port cite) — three named gaps, each with the exact missing artefact stated in-row; every other row in §1-§6 carries a closed verdict |
+
+*(The UNVERIFIED count is written as 2 in the brief's sense of "rows that block a
+family verdict" — B15 and W10 are cross-module cites, M12 is a call-site cite
+for a subcommand no multi-turn family reaches in Level-50 singles. All three are
+listed above and repeated in the final report.)*
+
+### DIVERGENT summary
+
+**Finding 1 — a battler put to sleep keeps its multi-turn lock across the turn
+boundary (`STATUS2_MULTIPLETURNS` / `LOCK_CONFUSE` / `UPROAR` / `BIDE` /
+`STATUS3_SEMI_INVULNERABLE` / `rolloutTimer` / `furyCutterCounter` survive).**
+
+* **Source:** `reference/pokeemerald/src/battle_main.c:3944-3945` —
+  `HandleEndTurn_ContinueBattle` runs, for every battler,
+  `if ((gBattleMons[i].status1 & STATUS1_SLEEP) && (gBattleMons[i].status2 &
+  STATUS2_MULTIPLETURNS)) CancelMultiTurnMoves(i);` **before** `BattleTurnPassed`
+  and therefore before the next turn's action selection. Helper body at
+  `battle_util.c:877-888`.
+* **Port:** no site. `src/engine/battleEndTurnOrchestration.ts:2509-2518` is the
+  ported `HandleEndTurn_ContinueBattle` seam and performs only the
+  wish/perish-song cursor zeroing; a whole-tree grep for a sleep-gated
+  `cancelBattleScriptMultiTurnMoves` returns nothing
+  (`grep -rn "STATUS1_SLEEP" src/engine/battleEndTurnOrchestration.ts
+  src/engine/factoryBattleScriptFullTurnDecision.ts` → only the Uproar wake
+  scan at `:922-927`, Nightmare at `:720`, Yawn at `:1351`, and an AI read).
+* **Observable consequence.** Take a Rollout/Outrage/Uproar user that is put to
+  sleep by the opponent on the same turn it is locked in. Next turn:
+  * *Source* — the lock is gone, so `HandleTurnActionSelectionState`
+    (`battle_main.c:4098-4104`) **opens the move menu**, the player/AI picks
+    freely, `gCurrentMove` comes from the chosen slot, and `Cmd_ppreduce` runs
+    (the `jumpifstatus2 MULTIPLETURNS` guard is not taken) so **PP is deducted
+    from the newly chosen move**. `rolloutTimer` is 0, so a later Rollout
+    restarts at ×1.
+  * *Port* — the lock survives, so the battler is auto-confirmed into
+    `gLockedMoves[]` (`factoryBattleScriptFullTurnDecision.ts:2285-2293`,
+    `:2364-2392`), the `jumpifstatus2` guard **is** taken so no PP is deducted,
+    and `rolloutTimer` keeps escalating. The two sides then diverge on the move
+    executed, the PP ledger, the base power, **and** the RNG ledger — the source
+    path draws the newly chosen move's accuracy/damage/crit rolls while the port
+    draws the locked move's, so every subsequent `Random()` in the battle is
+    off-by-N.
+  * The same seam also drops `STATUS3_SEMI_INVULNERABLE`: in source a Fly/Dig
+    user that falls asleep mid-charge becomes hittable again next turn; in the
+    port it stays semi-invulnerable.
+* **Fixture that exposes it on the stock ROM** (`mechanicLab`,
+  `overrides.parties`, Level-50 singles, frame 0 = the turn-1 action menu with
+  the AI already committed, `A` pulses past every prompt):
+  * **Player slot 1** — DUNSPARCE, Level 50, moves `[ROLLOUT, ROLLOUT, ROLLOUT,
+    ROLLOUT]` (all four slots the same so the menu choice is forced and the
+    trace stays deterministic), no held item, `abilitySlot` 0 (Serene Grace),
+    max HP EVs so it survives three turns. Slots 2-3: any two legal rentals with
+    a single non-damaging move each.
+  * **Opponent slot 1** — a faster sleeper, e.g. HYPNO, Level 50, all four move
+    slots `HYPNOSIS` (the Factory AI then has exactly one legal choice — the
+    documented single-legal-move constraint), `abilitySlot` 0, max Speed EVs +
+    Timid so it outspeeds Dunsparce. Slots 2-3: three more `HYPNOSIS` clones so
+    a mid-battle switch cannot change the move.
+  * **Trace** — turn 1: Dunsparce uses Rollout (sets `rolloutTimer = 5→4`,
+    `STATUS2_MULTIPLETURNS`, `gLockedMoves = ROLLOUT`); Hypno's Hypnosis lands
+    first or second, either is fine as long as `STATUS1_SLEEP` is set by end of
+    turn 1. Turn 2: capture the **action-menu frame**. On the stock ROM the move
+    menu is drawn (the lock was cancelled at `battle_main.c:3945`); the port
+    auto-confirms and shows no menu. Capture that frame plus the next ~120
+    frames so the "Dunsparce used Rollout!"-vs-menu divergence and the PP
+    counter are both in the window.
+  * Assert on: (a) whether the move-selection window renders on turn 2, (b) the
+    Rollout PP after turn 2 (source: unchanged from turn 1's deduction only if
+    the player re-picks Rollout — deducted a **second** time; port: deducted
+    once total), (c) the turn-3 Rollout damage (source restarts the escalation,
+    port continues it).
+* **Relationship to prior work.** This is the same root cause as
+  `docs/end-turn-ordering-audit-2026-08-25.md` finding 6 (which paired it with
+  the `STATUS2_FLINCHED` clear on the same two source lines). It is re-confirmed
+  unported at tree `dc6653bb` and re-stated here from the multi-turn side
+  because that audit scoped the consequence to end-turn ordering, not to the
+  lock/PP/base-power/RNG cascade above. **No new ISSUES entry is filed by this
+  worker** (the supervisor owns `ISSUES.md`); the supervisor may fold it into the
+  existing entry rather than open a new number.
+
+## §8. Method — exact commands
+
+```sh
+# the reference/ symlink: rg over it returns ZERO hits silently, always resolve it first
+REF=$(cd reference/pokeemerald && pwd -P)   # -> /Users/kyle/Developer/pokebench/vendor/pokeemerald
+
+# every cell, whole tree, never one file
+grep -rn "gLockedMoves\|CancelMultiTurnMoves\|gBideDmg\|gBideTarget" $REF/src $REF/include
+grep -rn "STATUS2_MULTIPLETURNS\|STATUS2_WRAPPED\|rechargeTimer\|furyCutterCounter\|rolloutTimerStartValue" $REF/src $REF/include
+grep -n "STATUS2_" $REF/include/constants/battle.h        # re-derive every TURN(n) macro
+grep -n "MOVE_RESULT_" $REF/include/constants/battle.h    # NO_EFFECT is a MASK, not a bit
+
+# the three machines
+awk 'NR>=78  && NR<=130  {printf "%d:%s\n",NR,$0}' $REF/src/battle_util.c   # HandleAction_UseMove ladder
+awk 'NR>=877 && NR<=905  {printf "%d:%s\n",NR,$0}' $REF/src/battle_util.c   # CancelMultiTurnMoves + WasUnableToUseMove
+awk 'NR>=1984&& NR<=2276 {printf "%d:%s\n",NR,$0}' $REF/src/battle_util.c   # AtkCanceler_UnableToUseMove, all 15 phases
+awk 'NR>=1440&& NR<=1700 {printf "%d:%s\n",NR,$0}' $REF/src/battle_util.c   # ENDTURN enum + WRAP/UPROAR/THRASH
+awk 'NR>=4857&& NR<=4892 {printf "%d:%s\n",NR,$0}' $REF/src/battle_main.c   # TurnValuesCleanUp (rechargeTimer--)
+awk 'NR>=3930&& NR<=3950 {printf "%d:%s\n",NR,$0}' $REF/src/battle_main.c   # HandleEndTurn_ContinueBattle (finding 1)
+
+# the opcodes, located by declaration, never by counting sed output
+grep -n "^static void Cmd_" $REF/src/battle_script_commands.c
+awk 'NR>=2234&& NR<=2870 {printf "%d:%s\n",NR,$0}' $REF/src/battle_script_commands.c  # SetMoveEffect, all cases
+awk 'NR>=7121&& NR<=7138 {printf "%d:%s\n",NR,$0}' $REF/src/battle_script_commands.c  # setbide, confuseifrepeatingattackends
+awk 'NR>=8536&& NR<=8601 {printf "%d:%s\n",NR,$0}' $REF/src/battle_script_commands.c  # rollout, furycutter
+awk 'NR>=1895&& NR<=1925 {printf "%d:%s\n",NR,$0}' $REF/src/battle_script_commands.c  # datahpupdate's Bide accumulate
+
+# the scripts
+grep -n "BattleScript_EffectBide\|BattleScript_EffectUproar\|BattleScript_EffectRampage\|BattleScript_EffectRollout\|BattleScript_EffectFuryCutter\|BattleScriptFirstChargingTurn\|BattleScript_TwoTurnMovesSecondTurn\|BattleScript_Wrap\|BattleScript_Bide\|BattleScript_ThrashConfuses\|BattleScript_PrintUproarOverTurns" $REF/data/battle_scripts_1.s
+grep -n "gTrappingMoves\|gWrappedStringIds\|gUproarOverTurnStringIds" $REF/src/battle_message.c
+
+# port: find the sites, do not assume filenames
+grep -rln "bide\|uproar\|rollout\|furyCutter\|wrapped\|LOCK_CONFUSE\|RECHARGE\|MULTIPLETURNS\|cancelMultiTurnMoves\|lockedMoves" src/engine/*.ts
+grep -n "CANCELER_" src/engine/battleScriptSourceConstants.ts src/engine/battleScriptAttackCanceler.ts
+grep -rn "cancelBattleScriptMultiTurnMoves" src/
+grep -rn "rechargeTimer\|rolloutTimerStartValues\|furyCutterCounter\|bideDmg\|bideTarget\|wrappedBy" src/engine/*.ts
+```
+
+**Brief-symbol corrections found while auditing** (none are divergences; they are
+names that do not exist in Emerald and would have sent a later worker hunting):
+`Cmd_setuproar`, `Cmd_setrecharge`, `Cmd_twoturnmoveschargestringid` and
+`TryClearRageAndFuryCutter` have **zero hits** in `$REF/src`; the Wrap duration is
+`(Random() & 3) + 3` (3-6 turns), not `(Random() % 4) + 2`; the Thrash lock-in is
+`(Random() & 1) + 2` (2-3 turns) while `(Random() % 4) + 2` is the *fatigue
+confusion*; `Cmd_jumpifnotfirstturn`'s only script user is Fake Out; Power Herb
+does not exist in Gen 3.
+
+**Tests that touch these cells today** (listed, not run — docs-only step):
+`tests/bideEndTurnIgnoreBideIssue126.test.ts`, `tests/battleEndTurnOrchestration.test.ts`,
+`tests/battleScriptSetbideOpcode.test.ts`, `tests/battleScriptRolloutOpcode.test.ts`,
+`tests/battleScriptFuryCutterOpcode.test.ts`,
+`tests/battleScriptConfuseifrepeatingattackendsOpcode.test.ts`,
+`tests/battleScriptAttackCanceler*.test.ts`, `tests/battleScriptMultiTurnCancellation.test.ts`
+(names as they appear in `tests/`). **No test pins finding 1's sleep-cancel**,
+which is why it survived the 2026-08-25 audit that first named it.
