@@ -250,7 +250,18 @@ function assertBrainRoundOutcome(
 // trajectory riding the shared RNG cursor, and the old seeds now lose before
 // the sixth win. `driveToSixthWin`'s own "pick a different seed" throw is the
 // designed remedy.
-const SILVER_SEED = 1;
+//
+// Re-scanned again 2026-08-25 (silver 1 -> 2; gold 8 is still viable) for the
+// four end-turn source fixes: TurnValuesCleanUp(FALSE)'s isFirstTurn decay
+// (ISSUES #130) makes Fake Out fail from turn 2 and gates Speed Boost on the
+// switch-in turn, the end-turn STATUS2_FLINCHED clear (#133) stops a shadowed
+// flinch costing a second turn, the field loop is case-major (#132), and
+// ENDTURN_ORDER re-sorts per turn with a speed-tie draw (#131). Seed 1 now
+// loses before the sixth win, so `driveToSixthWin` throws its designed
+// "pick a different seed" -- taking the lowest seed that still wins six
+// ordinary battles under BOTH symbol counts (scanned 1..40) rather than
+// re-pinning any assertion to a now-arbitrary value.
+const SILVER_SEED = 2;
 const SILVER_STREAK = 14;
 // Gold: entering factoryWinStreak 35 (challenge index 5), symbols 1 —
 // battleIndex 6's effective streak is 41, the gold threshold.
