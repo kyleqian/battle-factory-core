@@ -1,0 +1,731 @@
+{
+  "schema": "gate6-screen-expiry-order-off-semantic-receipt/v1",
+  "cardId": "SCREEN_EXPIRY_ORDER",
+  "oracleProfile": "battle-scene-off",
+  "runner": "tools/run-mgba-probe.py",
+  "probe": "tools/probe/probe-gate6-screen-expiry-order-off.py",
+  "fixture": "tools/battle-lab/gate6-screen-expiry-order-off.json",
+  "seed": 305419897,
+  "source": {
+    "primaryBlock": "src/battle_util.c DoFieldEndTurnEffects 1220-1315: ENDTURN_REFLECT (:1221), ENDTURN_LIGHT_SCREEN (:1246), ENDTURN_MIST (:1272), ENDTURN_SAFEGUARD (:1294) each own a `while (gBattleStruct->turnSideTracker < 2)` loop",
+    "cursorSemantics": "Inside a case: side = turnSideTracker; the side's work runs; turnSideTracker++; `if (effect != 0) break`. After the loop, `if (effect == 0) { turnCountersTracker++; turnSideTracker = 0; }` -- so a case that FIRES leaves both cursors put and BattleTurnPassed re-enters at the same case with the side cursor already past the side that fired.",
+    "executionOrder": "Reflect(0), Reflect(1), LightScreen(0), LightScreen(1), Mist(0), Mist(1), Safeguard(0), Safeguard(1) -- case-major, not side-major",
+    "scripts": "BattleScript_SideStatusWoreOff (Reflect/Light Screen/Mist) and BattleScript_SafeguardEnds (Safeguard)"
+  },
+  "setCitations": {
+    "playerLeadLightScreen": "FRONTIER_MON_SUNKERN, src/data/gen/battle-frontier-mons.json index 0, moves [MEGA_DRAIN, HELPING_HAND, SUNNY_DAY, LIGHT_SCREEN] -- staged as four identical LIGHT SCREEN slots so slot 0 is the only pick.",
+    "opponentLeadReflect": "FRONTIER_MON_HOOTHOOT, index 38, moves [CONFUSION, HYPNOSIS, SUPERSONIC, REFLECT] -- staged as four identical REFLECT slots, which pins the Factory AI to one legal choice.",
+    "bench": "Two more legal L50 mons per side, four identical HARDEN slots each; nothing in the trace deals damage."
+  },
+  "freshRunCount": 2,
+  "byteIdenticalAcrossFreshRuns": true,
+  "probeOutputSha256": "745c7a14a706e2ea2376811280cb51bcc75e1ca9e527bc36d8f95874e90a4b59",
+  "parties": {
+    "playerLeadLightScreen": {
+      "species": 191,
+      "ability": 34,
+      "moves": [
+        113,
+        113,
+        113,
+        113
+      ]
+    },
+    "opponentLeadReflect": {
+      "species": 163,
+      "ability": 15,
+      "moves": [
+        115,
+        115,
+        115,
+        115
+      ]
+    }
+  },
+  "turnMarks": [
+    {
+      "turn": 1,
+      "kind": "attack",
+      "notes": [
+        "turn 1: LIGHT SCREEN (player, side 0) and REFLECT (opponent, side 1) both go up, timer 5"
+      ],
+      "frameAtPrompt": 0,
+      "sideStatusesAtPrompt": [
+        0,
+        0
+      ],
+      "sideConditionsAtPrompt": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    },
+    {
+      "turn": 2,
+      "kind": "attack",
+      "notes": [
+        "turn 2: both re-uses fail; timers 4"
+      ],
+      "frameAtPrompt": 451,
+      "sideStatusesAtPrompt": [
+        2,
+        1
+      ],
+      "sideConditionsAtPrompt": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 4,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 4,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    },
+    {
+      "turn": 3,
+      "kind": "attack",
+      "notes": [
+        "turn 3: timers 3"
+      ],
+      "frameAtPrompt": 868,
+      "sideStatusesAtPrompt": [
+        2,
+        1
+      ],
+      "sideConditionsAtPrompt": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 3,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 3,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    },
+    {
+      "turn": 4,
+      "kind": "attack",
+      "notes": [
+        "turn 4: timers 2"
+      ],
+      "frameAtPrompt": 1285,
+      "sideStatusesAtPrompt": [
+        2,
+        1
+      ],
+      "sideConditionsAtPrompt": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 2,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 2,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    },
+    {
+      "turn": 5,
+      "kind": "attack",
+      "notes": [
+        "turn 5: timers 1 -> 0, both screens expire in the SAME end-turn pass"
+      ],
+      "frameAtPrompt": 1702,
+      "sideStatusesAtPrompt": [
+        2,
+        1
+      ],
+      "sideConditionsAtPrompt": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 1,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 1,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    }
+  ],
+  "sideTimerEvents": [
+    {
+      "frame": 79,
+      "before": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      },
+      "after": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 5,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    },
+    {
+      "frame": 246,
+      "before": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 5,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      },
+      "after": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 5,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 5,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    },
+    {
+      "frame": 391,
+      "before": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 5,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 5,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      },
+      "after": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 4,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 4,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    },
+    {
+      "frame": 808,
+      "before": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 4,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 4,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      },
+      "after": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 3,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 3,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    },
+    {
+      "frame": 1225,
+      "before": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 3,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 3,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      },
+      "after": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 2,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 2,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    },
+    {
+      "frame": 1642,
+      "before": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 2,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 2,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      },
+      "after": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 1,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 1,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    },
+    {
+      "frame": 2059,
+      "before": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 1,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 1,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      },
+      "after": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 1,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    },
+    {
+      "frame": 2150,
+      "before": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 1,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      },
+      "after": {
+        "player": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        },
+        "opponent": {
+          "reflectTurns": 0,
+          "lightScreenTurns": 0,
+          "mistTurns": 0,
+          "safeguardTurns": 0,
+          "spikes": 0
+        }
+      }
+    }
+  ],
+  "sideStatusEvents": [
+    {
+      "frame": 79,
+      "before": [
+        0,
+        0
+      ],
+      "after": [
+        0,
+        1
+      ]
+    },
+    {
+      "frame": 246,
+      "before": [
+        0,
+        1
+      ],
+      "after": [
+        2,
+        1
+      ]
+    },
+    {
+      "frame": 2059,
+      "before": [
+        2,
+        1
+      ],
+      "after": [
+        2,
+        0
+      ]
+    },
+    {
+      "frame": 2150,
+      "before": [
+        2,
+        0
+      ],
+      "after": [
+        0,
+        0
+      ]
+    }
+  ],
+  "messageEvents": [
+    {
+      "frame": 2,
+      "text": "LIGHT SCREEN"
+    },
+    {
+      "frame": 4,
+      "text": "TYPE/<FC><06><01>PSYCHC"
+    },
+    {
+      "frame": 51,
+      "text": "Foe HOOTHOOT used\nREFLECT!"
+    },
+    {
+      "frame": 115,
+      "text": "Foe’s REFLECT\nraised DEFENSE!"
+    },
+    {
+      "frame": 218,
+      "text": "SUNKERN used\nLIGHT SCREEN!"
+    },
+    {
+      "frame": 283,
+      "text": "Ally’s LIGHT SCREEN\nraised SP. DEF!"
+    },
+    {
+      "frame": 395,
+      "text": "What will\nSUNKERN do?"
+    },
+    {
+      "frame": 453,
+      "text": "LIGHT SCREEN"
+    },
+    {
+      "frame": 455,
+      "text": "TYPE/<FC><06><01>PSYCHC"
+    },
+    {
+      "frame": 502,
+      "text": "Foe HOOTHOOT used\nREFLECT!"
+    },
+    {
+      "frame": 566,
+      "text": "But it failed!"
+    },
+    {
+      "frame": 655,
+      "text": "SUNKERN used\nLIGHT SCREEN!"
+    },
+    {
+      "frame": 720,
+      "text": "But it failed!"
+    },
+    {
+      "frame": 812,
+      "text": "What will\nSUNKERN do?"
+    },
+    {
+      "frame": 870,
+      "text": "LIGHT SCREEN"
+    },
+    {
+      "frame": 872,
+      "text": "TYPE/<FC><06><01>PSYCHC"
+    },
+    {
+      "frame": 919,
+      "text": "Foe HOOTHOOT used\nREFLECT!"
+    },
+    {
+      "frame": 983,
+      "text": "But it failed!"
+    },
+    {
+      "frame": 1072,
+      "text": "SUNKERN used\nLIGHT SCREEN!"
+    },
+    {
+      "frame": 1137,
+      "text": "But it failed!"
+    },
+    {
+      "frame": 1229,
+      "text": "What will\nSUNKERN do?"
+    },
+    {
+      "frame": 1287,
+      "text": "LIGHT SCREEN"
+    },
+    {
+      "frame": 1289,
+      "text": "TYPE/<FC><06><01>PSYCHC"
+    },
+    {
+      "frame": 1336,
+      "text": "Foe HOOTHOOT used\nREFLECT!"
+    },
+    {
+      "frame": 1400,
+      "text": "But it failed!"
+    },
+    {
+      "frame": 1489,
+      "text": "SUNKERN used\nLIGHT SCREEN!"
+    },
+    {
+      "frame": 1554,
+      "text": "But it failed!"
+    },
+    {
+      "frame": 1646,
+      "text": "What will\nSUNKERN do?"
+    },
+    {
+      "frame": 1704,
+      "text": "LIGHT SCREEN"
+    },
+    {
+      "frame": 1706,
+      "text": "TYPE/<FC><06><01>PSYCHC"
+    },
+    {
+      "frame": 1753,
+      "text": "Foe HOOTHOOT used\nREFLECT!"
+    },
+    {
+      "frame": 1817,
+      "text": "But it failed!"
+    },
+    {
+      "frame": 1906,
+      "text": "SUNKERN used\nLIGHT SCREEN!"
+    },
+    {
+      "frame": 1971,
+      "text": "But it failed!"
+    },
+    {
+      "frame": 2060,
+      "text": "Foe’s REFLECT\nwore off!"
+    },
+    {
+      "frame": 2151,
+      "text": "Ally’s LIGHT SCREEN\nwore off!"
+    },
+    {
+      "frame": 2250,
+      "text": "What will\nSUNKERN do?"
+    }
+  ],
+  "expiryMessageOrder": [
+    {
+      "frame": 2060,
+      "text": "Foe’s REFLECT\nwore off!"
+    },
+    {
+      "frame": 2151,
+      "text": "Ally’s LIGHT SCREEN\nwore off!"
+    }
+  ],
+  "totalRandomCalls": 50,
+  "totalFrames": 2307,
+  "final": {
+    "battleMainFunc": 134463093,
+    "sideStatuses": [
+      0,
+      0
+    ],
+    "sideConditions": {
+      "player": {
+        "reflectTurns": 0,
+        "lightScreenTurns": 0,
+        "mistTurns": 0,
+        "safeguardTurns": 0,
+        "spikes": 0
+      },
+      "opponent": {
+        "reflectTurns": 0,
+        "lightScreenTurns": 0,
+        "mistTurns": 0,
+        "safeguardTurns": 0,
+        "spikes": 0
+      }
+    },
+    "player": {
+      "partyIndex": 0,
+      "species": 191,
+      "hp": 105,
+      "pp": [
+        25,
+        30,
+        30,
+        30
+      ]
+    },
+    "opponent": {
+      "partyIndex": 0,
+      "species": 163,
+      "hp": 135,
+      "pp": [
+        19,
+        20,
+        19,
+        17
+      ]
+    },
+    "displayedString": "What will\nSUNKERN do?"
+  },
+  "assertions": [
+    "Turn 1 puts both screens up in the same turn: gSideStatuses becomes [2, 1] (player SIDE_STATUS_LIGHTSCREEN = 1<<1, opponent SIDE_STATUS_REFLECT = 1<<0) and both timers read 5, decremented to 4 by turn 1's own end-turn pass -- turn 2's prompt reads player lightScreenTurns 4 / opponent reflectTurns 4.",
+    "Turns 2-5 are inert re-uses ('But it failed!' for both leads), so the timers step 4 -> 3 -> 2 -> 1 with no other confound.",
+    "At the end of turn 5 BOTH screens expire in the SAME DoFieldEndTurnEffects pass, and the ROM prints them in CASE-major order: frame 2060 “Foe’s REFLECT wore off!” then frame 2151 “Ally’s LIGHT SCREEN wore off!”.",
+    "That is Reflect(side 1) BEFORE LightScreen(side 0): a side-major loop would have emitted the player's Light Screen first, since side 0 precedes side 1.",
+    "Final state is order-independent (both timers reach 0 and both side statuses clear), so this is a message/trace-order fact, not an HP one.",
+    "This is semantic RAM evidence sampled on every controller frame; no framebuffer fitting and no runtime oracle dependency."
+  ]
+}
