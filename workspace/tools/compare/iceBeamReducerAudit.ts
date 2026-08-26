@@ -24,18 +24,12 @@ const crystalTemplates = new Set([
   "gIceCrystalHitSmallSpriteTemplate",
   "gSimplePaletteBlendSpriteTemplate",
 ]);
-const owners = ["Move_ICE_BEAM", "IceBeamCreateCrystals", "IceCrystalEffectShort"] as const;
 const taskCallbacks = [
   "SoundTask_LoopSEAdjustPanning_Step",
   "Task_UpdateMonBg",
   "AnimTask_ShakeMon2_Step",
   "Task_ClearMonBg",
 ] as const;
-const initialOrder = [
-  62, 60, 0, 63, 1, 61, 6, 8, 2, 4, 3, 21, 20, 5, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 7,
-  54, 55, 56, 57, 58, 59, 23, 22, 48, 49, 50, 51, 52, 53, 24, 25, 26, 27, 28, 29, 30, 31,
-  32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
-];
 const expectedCreations = {
   gIceBeamOuterCrystalSpriteTemplate: [[26, 3], [26, 4], [29, 5], [29, 7], [32, 10], [32, 11], [35, 13], [35, 14], [38, 17], [38, 18], [41, 20], [41, 21], [44, 9], [44, 23], [47, 12], [47, 25], [50, 3], [50, 4], [53, 5], [53, 7], [56, 10], [56, 11], [59, 13], [59, 14]],
   gIceBeamInnerCrystalSpriteTemplate: [[29, 9], [32, 12], [35, 15], [38, 19], [41, 22], [44, 24], [47, 26], [50, 15], [53, 19], [56, 22], [59, 16], [62, 17], [65, 15]],
