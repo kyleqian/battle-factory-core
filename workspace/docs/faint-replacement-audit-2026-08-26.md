@@ -229,3 +229,95 @@ Two chains reach the machine; which one applies is decided by which `end` opcode
 | 6.9 | `various RETURN_OPPONENT_MON1` targets battler 1 unconditionally and only emits when `gBattleMons[1].hp != 0`; `MON2` is gated on `gBattlersCount > 3` | `battle_script_commands.c:6455-6472` | `battleScriptSwitchinOpcode.ts` `VARIOUS_RETURN_OPPONENT_MON1/2` arm | SAME (MON2 a proven no-op at 2 battlers) |
 | 6.10 | Factory round-controller consumption of the outcome | — | `factoryBattleScriptTerminalDecision.ts:90-95` `mapFactoryBattleOutcome` (WON→`player-win`, LOST→`trainer-win`, DREW→`draw`, anything else throws) and `:615-623` publishes `{kind:"terminal", outcome}`; `factoryRoundBattleOrchestrator.ts:1196-1214` `finishBattle` requires a real terminal boundary and records `outcome`, `:1431-1491` routes it to `roundComplete`/`roundLost` | SAME-ORDER — the DREW→`draw` arm is reachable only through row 6.1's mutual wipe (e.g. a Destiny Bond or Explosion that fells both sides' last mon) |
 | 6.11 | `gBattleOutcome`'s other table entries (`RAN`, `PLAYER_TELEPORTED`, `MON_FLED`, `CAUGHT`, `NO_SAFARI_BALLS`, `FORFEITED`, `MON_TELEPORTED`) | `battle_main.c:560-565` | `mapFactoryBattleOutcome` throws outside 1..3 | UNREACHABLE-IN-SINGLES on the faint path — `checkteamslost` writes only WON/LOST/DREW; the others are set by run/catch/forfeit paths outside this audit's scope |
+
+## §7. Verdict counts
+
+**116 rows total** (§1 23 · §2 23 · §3 26 · §4 22 · §5 11 · §6 11). Every row carries a verdict.
+
+| verdict | count | per section |
+| --- | --- | --- |
+| SAME | 40 | §1 14 · §2 4 · §3 10 · §4 5 · §6 7 |
+| SAME-ORDER | 31 | §1 1 · §2 11 · §3 3 · §4 3 · §5 10 · §6 3 |
+| SAME-ORDER-EQUIVALENT | 26 | §1 5 · §2 6 · §3 6 · §4 8 · §5 1 |
+| **DIVERGENT** | **5 rows / 1 root cause** | §4 only: 4.2, 4.10, 4.11, 4.15, 4.19 — all one bug, `Cmd_switchineffects`' Intimidate/Trace early exit |
+| UNREACHABLE-IN-SINGLES | 12 | §1 3 (Steven multi, Arena, link empty-spot) · §2 1 (Safari) · §3 6 (link-multiple, wild yes/no ×2, `faintedHasReplacement`, `HasNoMonsToSwitch`, the enemy-about-to-switch block) · §4 1 (link-multiple cursor) · §6 1 (non-faint outcome bytes) |
+| NOT-PORTED | 1 | §2 2.15 (`ABILITYEFFECT_FORECAST` in state 6 — latent, inherited from 2026-08-25 finding 7) |
+| cross-reference | 1 | §3 3.23 (`switchineffects BS_FAINTED`, whose verdict is §4's 22 rows) |
+| **UNVERIFIED** | **0 full rows; 2 named sub-claims** | (i) row 3.26 / 5k — whether the kernel's own turn-tail cancel is equivalent to `cancelallactions` + `B_ACTION_CANCEL_PARTNER` when the *slower* battler faints (needs the `resumed` seam's turn-tail test, `docs/forced-switch-ground-truth.md`'s slice). (ii) §4a's `HITMARKER_FAINTED` half — the bit demonstrably lingers, but no reachable singles *read* of a stale bit was constructed inside the row budget. |
+
+### DIVERGENT summary
+
+**Finding 1 (high) — `Cmd_switchineffects`' Intimidate/Trace branches skip the opcode's two clears.**
+
+* Source: `reference/pokeemerald/src/battle_script_commands.c:5225` (`gHitMarker &= ~HITMARKER_FAINTED(gActiveBattler)`, unconditional at the top of `Cmd_switchineffects`) and `reference/pokeemerald/src/battle_script_commands.c:5268` (`gSideStatuses[side] &= ~SIDE_STATUS_SPIKES_DAMAGED`, inside the `if (!AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN,…) && !ItemBattleEffects(ITEMEFFECT_ON_SWITCH_IN,…))` body). Source really reaches that body for Intimidate and Trace because `battle_util.c:2559-2565` and `battle_util.c:2575-2581` set only `gStatuses3[battler]` and a `gSpecialStatuses` bit with **no `effect++`**, so `AbilityBattleEffects` returns 0.
+* Port: `src/engine/battleScriptSwitchinOpcode.ts:1224` (Intimidate) and `src/engine/battleScriptSwitchinOpcode.ts:1236` (Trace) both `return … {kind:"advance"}` carrying neither clear; the clears live only at `src/engine/battleScriptSwitchinOpcode.ts:1173` (Spikes branch) and `src/engine/battleScriptSwitchinOpcode.ts:1270-1281` (fall-through tail).
+* **Observable consequence:** with Spikes on a side, the *first* replacement on that side having Intimidate or Trace leaves `SIDE_STATUS_SPIKES_DAMAGED` set for the rest of the battle (its only other writers are the set at `:5236`/`:1160` and `Cmd_tryfaintmon` mode≠0's faint-branch clear at `:2978`/`:4323` — verified by tree-wide grep on both sides). The **second** replacement on that side therefore takes **zero Spikes damage** in the port and `maxHP/((5 - layers) * 2)` (⌊·⌋, min 1) on the ROM — `maxHP/8` at one layer. Every subsequent HP-threshold effect (Pinch Berries, Endeavor, Flail/Reversal power, a lethal chip) diverges from there. The same handler serves `switchineffects BS_ATTACKER`, so a *voluntary* switch into an Intimidate/Trace mon under Spikes has the identical effect.
+* **Fixture that would expose it on the stock ROM** (`mechanicLab`, `overrides.parties`, Battle Scene OFF): player slot 0 a fragile non-Flying/non-Levitate lead; **slot 1 a non-Flying/non-Levitate Intimidate holder whose species has Intimidate as its only ability** (MAWILE or TAUROS — unambiguous `abilitySlot`); slot 2 another grounded mon with a distinctive `maxHP/8`. Opponent: three complete legal mons, all four move slots identical so the Factory AI has exactly one legal choice — `MOVE_SPIKES` for the layer turn, then a KO-capable set. Lay the layer with a real move (no transient-state injection). Watch `gSideStatuses[0]` bit 9 and `gBattleMons[0].hp` across **both** switch-ins. Trace variant: swap in a GARDEVOIR-line `ABILITY_TRACE` holder (`abilitySlot` 1) facing a non-zero-ability opponent. **The trace must append A pulses past every `\p` prompt** — `STRINGID_TARGETFAINTED`/`STRINGID_ATTACKERFAINTED`/`STRINGID_SWITCHINMON` and the party menu each block the controller until a button press, so a window that ends on a faint message has observed nothing after it (PROGRESS 1402 / ISSUES #129).
+* Remedy shape (not applied — this is a docs-only step): move the `hitMarker`/`sideStatuses` clears to a single exit that all five `return`s share, exactly as source does with one `if` body.
+
+### Doc-accuracy notes (comment-only, no code consequence)
+
+1. `src/engine/battleScriptFaintedActionsOrchestration.ts:17-22` justifies skipping state 0 with "`HasNoMonsToSwitch` is always true for them". In singles `HasNoMonsToSwitch` is always **FALSE** (`battle_util.c:2285-2286`). The conclusion (state 0 is a provable no-op) holds via row 2.1's argument instead.
+2. `src/engine/battleScriptFaintedActionsOrchestration.ts:71-75` attributes the frontier win-script dispatch to "`BattleScript_LocalTrainerBattleWon`'s own frontier dispatch". The dispatch is the C `if/else if` in `HandleEndTurn_BattleWon` (`battle_main.c:4971-4977`); `BattleScript_LocalTrainerBattleWon` is the arm Factory never takes (row 6.5).
+
+## §8. Method — exact commands
+
+```sh
+# reference/ is a symlink: bare `rg` over it returns ZERO hits silently. Always resolve first.
+REF=$(cd reference/pokeemerald && pwd -P)          # -> /Users/kyle/Developer/pokebench/vendor/pokeemerald
+
+# §1 faint detection
+sed -n '2965,3060p'  $REF/src/battle_script_commands.c   # Cmd_tryfaintmon (both modes)
+sed -n '3255,3300p'  $REF/src/battle_script_commands.c   # Cmd_getexp case 0 (Frontier early exit)
+sed -n '3534,3620p'  $REF/src/battle_script_commands.c   # Cmd_checkteamslost
+sed -n '2805,2830p'  $REF/data/battle_scripts_1.s        # FaintAttacker / FaintTarget / GiveExp
+grep -n "HITMARKER_FAINTED\|HITMARKER_PLAYER_FAINTED\|SIDE_STATUS_SPIKES_DAMAGED" $REF/include/constants/battle.h
+sed -n '70,100p'     $REF/src/battle_util2.c             # AdjustFriendshipOnBattleFaint
+
+# §2 HandleFaintedMonActions -- and its ONLY two callers (whole-tree grep, not one file)
+sed -n '1880,1975p'  $REF/src/battle_util.c              # the state machine
+grep -rn "HandleFaintedMonActions" $REF/src $REF/include
+sed -n '615,665p'    $REF/src/battle_util.c              # HandleAction_TryFinish / ActionFinished
+sed -n '3956,4015p'  $REF/src/battle_main.c              # BattleTurnPassed step 4
+sed -n '2279,2300p'  $REF/src/battle_util.c              # HasNoMonsToSwitch -- the singles short-circuit
+grep -rn "HasNoMonsToSwitch" $REF/src                    # all 9 call sites
+grep -n "case ITEMEFFECT_NORMAL:" -A 12 $REF/src/battle_util.c   # battler is the literal arg, no loop
+
+# §3 the script + openpartyscreen + the AI call site
+sed -n '2830,2900p'  $REF/data/battle_scripts_1.s        # HandleFaintedMon -> FaintedMonEnd
+sed -n '4865,5150p'  $REF/src/battle_script_commands.c   # Cmd_openpartyscreen (all branches)
+sed -n '5152,5217p'  $REF/src/battle_script_commands.c   # Cmd_switchhandleorder cases 0-3
+sed -n '1621,1675p'  $REF/src/battle_controller_opponent.c   # OpponentHandleChoosePokemon
+sed -n '629,680p'    $REF/src/battle_ai_switch_items.c   # GetMostSuitableMonToSwitchInto head
+awk 'NR>=629 && NR<=810 && /Random\(\)/ {print NR": "$0}' $REF/src/battle_ai_switch_items.c  # -> exactly ONE, doubles-only
+grep -rn "faintedHasReplacement" $REF/src $REF/include   # every TRUE writer is doubles/link
+grep -n "BS_FAINTED\|PARTY_SCREEN_OPTIONAL" $REF/include/constants/battle_script_commands.h
+grep -n "PARTY_ACTION_" $REF/include/constants/party_menu.h
+
+# §4 the replacement's entry
+sed -n '5219,5300p'  $REF/src/battle_script_commands.c   # Cmd_switchineffects
+L=$(grep -n 'case ABILITYEFFECT_ON_SWITCHIN:' $REF/src/battle_util.c | cut -d: -f1)
+sed -n "$((L-6)),$((L+120))p" $REF/src/battle_util.c     # the inner switch: which cases do effect++
+sed -n '3185,3200p'  $REF/src/battle_util.c              # the RecordAbilityBattle tail (#128)
+grep -rn "SIDE_STATUS_SPIKES_DAMAGED" $REF/src $REF/include   # 3 source sites
+grep -rn "hpOnSwitchout" $REF/src $REF/include                # only Cmd_hpthresholds2 reads it
+sed -n '3152,3260p'  $REF/src/battle_main.c              # SwitchInClearSetData (isFirstTurn = 2 at :3220)
+sed -n '3418,3432p'  $REF/data/battle_scripts_1.s        # SpikesOnFaintedBattler -> goto HandleFaintedMon
+
+# §5/§6 sequencing + terminal
+grep -rn "B_ACTION_TRY_FINISH" $REF/src $REF/include
+sed -n '3945,3975p'  $REF/src/battle_script_commands.c   # Cmd_end / end2 / end3
+sed -n '4937,4958p'  $REF/src/battle_main.c              # RunTurnActionsFunctions (the gBattleOutcome skip)
+sed -n '552,570p'    $REF/src/battle_main.c              # sEndTurnFuncsTable
+sed -n '4960,5054p'  $REF/src/battle_main.c              # HandleEndTurn_BattleWon / BattleLost
+
+# port
+wc -l src/engine/battleScriptFaintedActionsOrchestration.ts        # 670 -- read in full this session
+rg -n "runBattleScriptFaintedActionsOrchestration|resumeBattleScriptFaintedActionsAfterPlayerChoice" src/engine/*.ts
+sed -n '1125,1285p' src/engine/battleScriptSwitchinOpcode.ts       # Cmd_switchineffects port
+sed -n '154,305p'   src/engine/battleScriptOpenPartyScreenOpcode.ts
+sed -n '4270,4460p' src/engine/battleScriptHitChainOpcode.ts       # Cmd_tryfaintmon port
+rg -n "SPIKES_DAMAGED" src/                                        # 3 port sites, same shape as source
+```
+
+**Not run** (declared): the oracle, `npm test`'s full suite, `tools/compare`. This is a static audit and changes no engine, test, tool or data file.
