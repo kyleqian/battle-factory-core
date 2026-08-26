@@ -1,0 +1,568 @@
+{
+  "schema": "issue140-getmovetarget-off-receipt/v1",
+  "issue": 140,
+  "oracleProfile": "battle-scene-off",
+  "oracleUrl": "http://127.0.0.1:8014",
+  "probe": "tools/probe/probe-issue140-getmovetarget-off.py",
+  "sourceUnderTest": {
+    "getMoveTarget": "src/battle_util.c:98-146 (MOVE_TARGET_SELECTED arm :112-141; do/while :119-122; Follow Me short-circuit :113-116)",
+    "callers": [
+      "battle_util.c:105 -- noValidMoves -> forced MOVE_STRUGGLE",
+      "battle_util.c:117 -- Encore match",
+      "battle_util.c:128 -- Encore whose slot was overwritten",
+      "battle_util.c:133 -- chosen slot overwritten between selection and execution"
+    ],
+    "drawFreePath": "battle_util.c:135-138 -- the ordinary chosen-move path calls no GetMoveTarget"
+  },
+  "attribution": "BattleMainCB2 calls gBattleMainFunc() once per frame, so HandleAction_UseMove runs alone in its frame and ends with gCurrentActionFuncId = B_ACTION_EXEC_SCRIPT (battle_util.c:291); the move script's first opcode runs on the NEXT frame (HandleAction_RunBattleScript, battle_util.c:92-96, one opcode per frame). Every Random() observed on that 0->10 frame is therefore a GetMoveTarget draw -- HandleAction_UseMove's only other Random() sites (:161, :220) are BATTLE_TYPE_DOUBLE-gated. Each count is measured twice: the ROM's own sRandCount delta AND an independent replay of gRngValue's LCG; the probe refuses to write if they ever disagree.",
+  "arms": [
+    {
+      "arm": "encore-a",
+      "card": "tools/battle-lab/issue140-getmovetarget-encore-off.json",
+      "seed": 305419897,
+      "note": "Arm A seed 1: player WOBBUFFET (Speed IV/EV 0) ENCOREs the Foe CROBAT's POUND on turn 1; turns 2-3 the opponent's HandleAction_UseMove takes the Encore-match branch (battle_util.c:112-118).",
+      "runs": 2,
+      "receiptSha256": "7514b06e793a277ec4ab24642240553d0dcd108237e34a757515a12f5d5bbe7a",
+      "receiptSha256Rerun": "7514b06e793a277ec4ab24642240553d0dcd108237e34a757515a12f5d5bbe7a",
+      "byteIdenticalAcrossRuns": true,
+      "framebufferSha256": "d4af875a4c2c956dfeed13dc28bca02e5416228b604d6fcd2b4c0742c3d853df",
+      "totalRandomCalls": 30,
+      "actionPrologues": [
+        {
+          "frame": 49,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 960307641,
+          "rngAfter": 960307641,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 193,
+          "attacker": 0,
+          "target": 1,
+          "currentMove": 227,
+          "script": "BattleScript_EffectEncore",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 449897005,
+          "rngAfter": 449897005,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 389,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 1,
+          "lcgReplayDraws": 1,
+          "rngBefore": 2654154342,
+          "rngAfter": 3167892961,
+          "encoreTimer": 2,
+          "encoredMove": 1,
+          "disabledMove": 0
+        },
+        {
+          "frame": 530,
+          "attacker": 0,
+          "target": 1,
+          "currentMove": 227,
+          "script": "BattleScript_EffectEncore",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 1973883093,
+          "rngAfter": 1973883093,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 729,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 2,
+          "lcgReplayDraws": 2,
+          "rngBefore": 3152970951,
+          "rngAfter": 1310762761,
+          "encoreTimer": 1,
+          "encoredMove": 1,
+          "disabledMove": 0
+        },
+        {
+          "frame": 975,
+          "attacker": 0,
+          "target": 1,
+          "currentMove": 227,
+          "script": "BattleScript_EffectEncore",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 3706678397,
+          "rngAfter": 3706678397,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 1269,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 3313512506,
+          "rngAfter": 3313512506,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        }
+      ],
+      "opponentDamage": [
+        {
+          "frame": 179,
+          "move": 1,
+          "damage": 25
+        },
+        {
+          "frame": 516,
+          "move": 1,
+          "damage": 22
+        },
+        {
+          "frame": 882,
+          "move": 1,
+          "damage": 48
+        }
+      ]
+    },
+    {
+      "arm": "encore-b",
+      "card": "tools/battle-lab/issue140-getmovetarget-encore-off.json",
+      "seed": 1234567890,
+      "note": "Arm A seed 2: identical fixture, different battle seed -- shows the geometric draw count is seed-dependent.",
+      "runs": 2,
+      "receiptSha256": "404a981392612ad2bef64334e4c9ae780b8a78be0d04d8d840791ea4b434f2a0",
+      "receiptSha256Rerun": "404a981392612ad2bef64334e4c9ae780b8a78be0d04d8d840791ea4b434f2a0",
+      "byteIdenticalAcrossRuns": true,
+      "framebufferSha256": "6b7d691911a7bd973f085f3035c3206ce73bea13b7a5bdd3fc09cbf5ff3e4cfd",
+      "totalRandomCalls": 29,
+      "actionPrologues": [
+        {
+          "frame": 49,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 2846058321,
+          "rngAfter": 2846058321,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 192,
+          "attacker": 0,
+          "target": 1,
+          "currentMove": 227,
+          "script": "BattleScript_EffectEncore",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 1068624197,
+          "rngAfter": 1068624197,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 389,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 1,
+          "lcgReplayDraws": 1,
+          "rngBefore": 1765462622,
+          "rngAfter": 1289262713,
+          "encoreTimer": 2,
+          "encoredMove": 1,
+          "disabledMove": 0
+        },
+        {
+          "frame": 531,
+          "attacker": 0,
+          "target": 1,
+          "currentMove": 227,
+          "script": "BattleScript_EffectEncore",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 3280921325,
+          "rngAfter": 3280921325,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 729,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 1,
+          "lcgReplayDraws": 1,
+          "rngBefore": 1201021087,
+          "rngAfter": 3537286694,
+          "encoreTimer": 1,
+          "encoredMove": 1,
+          "disabledMove": 0
+        },
+        {
+          "frame": 873,
+          "attacker": 0,
+          "target": 1,
+          "currentMove": 227,
+          "script": "BattleScript_EffectEncore",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 1328795754,
+          "rngAfter": 1328795754,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 1169,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 1548548827,
+          "rngAfter": 1548548827,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        }
+      ],
+      "opponentDamage": [
+        {
+          "frame": 178,
+          "move": 1,
+          "damage": 24
+        },
+        {
+          "frame": 517,
+          "move": 1,
+          "damage": 23
+        },
+        {
+          "frame": 859,
+          "move": 1,
+          "damage": 25
+        },
+        {
+          "frame": 1298,
+          "move": 1,
+          "damage": 24
+        }
+      ]
+    },
+    {
+      "arm": "control-a",
+      "card": "tools/battle-lab/issue140-getmovetarget-control-off.json",
+      "seed": 305419897,
+      "note": "Arm B (control): identical parties, the player uses SPLASH (a no-op MOVE_TARGET_USER status move) every turn, so the opponent never leaves HandleAction_UseMove's ordinary chosen-move path (battle_util.c:135-138).",
+      "runs": 2,
+      "receiptSha256": "70cd58e5ff1fce4f699df3ad95e7cd218f7db624efc582ae97f24e5d8085e12a",
+      "receiptSha256Rerun": "70cd58e5ff1fce4f699df3ad95e7cd218f7db624efc582ae97f24e5d8085e12a",
+      "byteIdenticalAcrossRuns": true,
+      "framebufferSha256": "7e18bd7b1499b4ef436c45f7f0cd38b454dfa34042af0d358b22db1fcb5ed9ab",
+      "totalRandomCalls": 34,
+      "actionPrologues": [
+        {
+          "frame": 29,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 960307641,
+          "rngAfter": 960307641,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 173,
+          "attacker": 0,
+          "target": 0,
+          "currentMove": 150,
+          "script": "BattleScript_EffectSplash",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 449897005,
+          "rngAfter": 449897005,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 369,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 1786900147,
+          "rngAfter": 1786900147,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 513,
+          "attacker": 0,
+          "target": 0,
+          "currentMove": 150,
+          "script": "BattleScript_EffectSplash",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 3152970951,
+          "rngAfter": 3152970951,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 709,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 3706678397,
+          "rngAfter": 3706678397,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 850,
+          "attacker": 0,
+          "target": 0,
+          "currentMove": 150,
+          "script": "BattleScript_EffectSplash",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 1700205873,
+          "rngAfter": 1700205873,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 1049,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 2781866391,
+          "rngAfter": 2781866391,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 1192,
+          "attacker": 0,
+          "target": 0,
+          "currentMove": 150,
+          "script": "BattleScript_EffectSplash",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 887835115,
+          "rngAfter": 887835115,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        }
+      ],
+      "opponentDamage": [
+        {
+          "frame": 159,
+          "move": 1,
+          "damage": 25
+        },
+        {
+          "frame": 499,
+          "move": 1,
+          "damage": 25
+        },
+        {
+          "frame": 836,
+          "move": 1,
+          "damage": 22
+        },
+        {
+          "frame": 1178,
+          "move": 1,
+          "damage": 24
+        }
+      ]
+    },
+    {
+      "arm": "struggle-a",
+      "card": "tools/battle-lab/issue140-getmovetarget-struggle-off.json",
+      "seed": 305419897,
+      "note": "Struggle arm: the player DISABLEs the Foe CROBAT's only move (all four slots POUND). Disable missed on turn 1 (55 accuracy) and landed on turn 2, so turns 3-4 take the noValidMoves->Struggle branch (battle_util.c:99-106). No Encore is active anywhere in this arm, so ROM and port both Struggle here (ISSUES #138 is out of scope).",
+      "runs": 2,
+      "receiptSha256": "79d7eee3befcc5e816f1bce3662630fdaa949573452c3d8bc93e0b482a9a46ac",
+      "receiptSha256Rerun": "79d7eee3befcc5e816f1bce3662630fdaa949573452c3d8bc93e0b482a9a46ac",
+      "byteIdenticalAcrossRuns": true,
+      "framebufferSha256": "a6d12aef054e657d940ae28e095a6a7c0fbeeb199d067e3b83de2a79b9b2a2df",
+      "totalRandomCalls": 30,
+      "actionPrologues": [
+        {
+          "frame": 49,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 960307641,
+          "rngAfter": 960307641,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 193,
+          "attacker": 0,
+          "target": 1,
+          "currentMove": 50,
+          "script": "BattleScript_EffectDisable",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 449897005,
+          "rngAfter": 449897005,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 409,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 1,
+          "script": "BattleScript_EffectHit",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 25136298,
+          "rngAfter": 25136298,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 550,
+          "attacker": 0,
+          "target": 1,
+          "currentMove": 50,
+          "script": "BattleScript_EffectDisable",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 3924658990,
+          "rngAfter": 3924658990,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 769,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 165,
+          "script": "BattleScript_EffectRecoil",
+          "getMoveTargetDraws": 1,
+          "lcgReplayDraws": 1,
+          "rngBefore": 521168923,
+          "rngAfter": 2576805362,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 1
+        },
+        {
+          "frame": 1032,
+          "attacker": 0,
+          "target": 1,
+          "currentMove": 50,
+          "script": "BattleScript_EffectDisable",
+          "getMoveTargetDraws": 0,
+          "lcgReplayDraws": 0,
+          "rngBefore": 4027526319,
+          "rngAfter": 4027526319,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 0
+        },
+        {
+          "frame": 1229,
+          "attacker": 1,
+          "target": 0,
+          "currentMove": 165,
+          "script": "BattleScript_EffectRecoil",
+          "getMoveTargetDraws": 3,
+          "lcgReplayDraws": 3,
+          "rngBefore": 1700205873,
+          "rngAfter": 3313512506,
+          "encoreTimer": 0,
+          "encoredMove": 0,
+          "disabledMove": 1
+        }
+      ],
+      "opponentDamage": [
+        {
+          "frame": 179,
+          "move": 1,
+          "damage": 25
+        },
+        {
+          "frame": 536,
+          "move": 1,
+          "damage": 22
+        },
+        {
+          "frame": 909,
+          "move": 165,
+          "damage": 28
+        }
+      ]
+    }
+  ],
+  "verdict": "CONFIRMED. Every Encore-forced and Struggle-forced opponent action draws >= 1 Random() in HandleAction_UseMove's own frame (1, 2, 1, 1, 3 across the five such actions recorded); every one of the control arm's eight ordinary chosen-move prologues draws exactly 0. The counts are geometric (p = 1/2 with gBattlersCount = 2), visible within a single arm (seed 305419897: 1 then 2) and across seeds (seed 1234567890: 1 then 1; struggle arm: 1 then 3).",
+  "engineDivergence": {
+    "kernel": "src/engine/factoryBattleScriptFullTurnDecision.ts (UNFIXED, at this commit)",
+    "getMoveTargetDrawsOnAllFourBranches": 0,
+    "derivation": "sourceMoveTarget (:1959-1987) is a pure switch over the generated target shape and takes no RNG argument -- its own docstring (:1951-1958) asserts 'every non-user shape resolves ... without consuming RNG', which is correct for DEPENDS/BOTH/FOES_AND_ALLY/OPPONENTS_FIELD/RANDOM in singles and WRONG for MOVE_TARGET_SELECTED. Its three callers -- legalMoveDecisions' forced-Struggle arm (:2013), its ordinary arm (:2022) and lockedMoveDecision's Encore arm (:2184) -- all run at decision-listing time, and buildActionContext (:1489-1523) draws nothing on the action path. The port therefore spends 0 draws where the ROM spends 1, 2, 1, 1 and 3 above.",
+    "modeledElsewhere": "battleScriptSwitchinOpcode.ts:1036-1058 already runs this exact do/while for Cmd_various VARIOUS_GET_MOVE_TARGET; it is simply not wired to the four HandleAction_UseMove branches.",
+    "executableConfirmation": "tests/issue140GetMoveTargetReceipt.test.ts (added with the fix; its mutation-check removes the loop and the arm counts go back to 0)"
+  }
+}

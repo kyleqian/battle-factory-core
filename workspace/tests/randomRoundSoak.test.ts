@@ -366,9 +366,18 @@ describe("random round soak driver (green milestone pin)", () => {
       // used to be spent flinched now execute; the terminal record menu is no
       // longer reached before `stopAtFirstRoundDecision` fires. It still earns
       // all seven wins and both re-runs stay identical.
-      frames: 37_239,
+      //
+      // ISSUES #140 moved them a seventh time: GetMoveTarget's
+      // MOVE_TARGET_SELECTED do/while now runs on HandleAction_UseMove's four
+      // re-target branches (forced Struggle / Encore), so every forced action
+      // in the round shifts the cursor. frames 37_239 -> 37_260, turn 9 -> 3,
+      // renderCalls 2_681 -> 2_671, and the terminal record menu IS reached
+      // before `stopAtFirstRoundDecision` fires again (false -> true). ROM
+      // receipt: tools/probe/receipts/issue140-getmovetarget-off.json. It still
+      // earns all seven wins and both re-runs stay identical.
+      frames: 37_260,
       battle: 7,
-      turn: 9,
+      turn: 3,
       diagnostics: {
         roundPhase: "roundComplete",
         battleIndex: 6,
@@ -376,9 +385,9 @@ describe("random round soak driver (green milestone pin)", () => {
         opponentGenerationCount: 7,
         battleRngSegmentCount: 7,
         terminalOutcome: "roundWon",
-        terminalRecordMenuInputReadyReached: false,
+        terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_681,
+        renderCalls: 2_671,
       },
     });
     expect(second).toEqual(first);
