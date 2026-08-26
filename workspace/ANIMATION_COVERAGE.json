@@ -6349,6 +6349,31 @@
    "goal": "MOVE_DRAGON_CLAW independently proves SoundTask_PlaySE1WithPanning and its complete palette/shake/lunge/FireSpin/claw/cleanup body in both orientations at 137/137 strengthened source component/task/sprite/OAM/global-coordinate/palette/audio and shared-seam framebuffer frames, reproduced twice. MOVE_COSMIC_POWER independently proves its non-attacker blend, BG_COSMIC slide/restore, two granting stars, and distinct centered/attacker-pan sounds at 241/241 complete bilateral source/hardware/raw-RGB/framebuffer rows twice fresh. MOVE_LUSTER_PURGE independently proves six target-panned SoundTask_PlaySE1WithPanning calls and its complete psychic/white BG, circle/particle blend, six visual-RNG hitsplat, target-shake, and restore body at 333/333 complete bilateral rows twice fresh. SKY ATTACK retains both two-turn selector branches, black/white charge blends and shake, plus sky BG/bird/fade/impact strike. RETURN requires every friendship-power branch, repeated Tail Whip sound tasks, dips/lunges/hitsplats/shakes, and branch-specific timing. FLATTER needs spotlight create/remove, hardware palette fades, vertical dips, 38 confetti sprites, and both attacker/target sound events. Each remaining sibling stays unsupported pending independent complete dense framebuffer evidence."
   },
   {
+   "id": "ice-beam-crystals",
+   "components": [
+    "asset:ANIM_TAG_ICE_CRYSTALS",
+    "sprite:gIceBeamInnerCrystalSpriteTemplate",
+    "sprite:gIceBeamOuterCrystalSpriteTemplate",
+    "sprite:gIceCrystalHitLargeSpriteTemplate",
+    "sprite:gIceCrystalHitSmallSpriteTemplate",
+    "subroutine:IceBeamCreateCrystals",
+    "subroutine:IceCrystalEffectShort",
+    "soundTask:SoundTask_LoopSEAdjustPanning",
+    "task:AnimTask_ShakeMon2",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:monbg",
+    "visualCommand:setalpha",
+    "visualCommand:simple_palette_blend",
+    "visualCommand:splitbgprio"
+   ],
+   "representatives": [
+    "MOVE_ICE_BEAM"
+   ],
+   "fulfilled": false,
+   "goal": "Source/asset checkpoint only: the exact main and shared IceCrystalEffectShort ROM intervals, complete generated component graph, lowest legal Level-50 Delcatty carrier, capture-free bilateral parties, and deterministic 0x01c0-byte ICE_CRYSTALS extraction are pinned. Still required before any move/component credit: complete twice-fresh bilateral dense state, chronological raw RGB888, normalized change maps, strict offline verification, measured pointer/task/audio/resource/allocation/OAM/matrix/palette/register/monbg/RNG/display latches through first inactive cleanup. Blizzard, Icy Wind, and Psybeam remain independent exact controls; Ice Beam remains unsupported with no reducer, seam, compositor, partial, staged, exact, or sibling credit."
+  },
+  {
    "id": "loop-se-adjust-panning",
    "components": [
     "soundTask:SoundTask_LoopSEAdjustPanning"
