@@ -17,6 +17,101 @@ backlog.
 
 # Open
 
+## #138 — Action selection auto-confirms an Encore-locked move BEFORE `AreAllMovesUnusable`, inverting the source: an Encored battler whose encored move is Disabled/0-PP/Taunted/Tormented Struggles on the ROM but uses the locked move (then trips `CANCELER_DISABLED`) in the port
+
+**Found 2026-08-26** (turn-machinery audit, `docs/turn-machinery-audit-2026-08-26.md`
+§2 row 2.11 / Finding 1; supervisor-verified at source). Source `battle_main.c:4184`
+`if (AreAllMovesUnusable())` runs FIRST in `HandleTurnActionSelectionState`'s `B_ACTION_USE_MOVE`
+case, and only `:4192 else if (gDisableStructs[gActiveBattler].encoredMove != 0)` auto-confirms the
+encored move. `AreAllMovesUnusable` (`battle_util.c:1125-1140`) uses
+`CheckMoveLimitations(b, 0, MOVE_LIMITATIONS_ALL)` whose Encore bit (`:1116-1117`) masks every slot
+that is not the encored move, so an Encored battler whose encored move is itself unusable
+(Disabled `:1108`, 0 PP, Taunted, Tormented) masks all four slots → `noValidMoves` → Struggle
+(`HandleAction_UseMove`, `battle_util.c:100-106`, `HITMARKER_NO_PPDEDUCT`, "…has no moves left!").
+Port `src/engine/factoryBattleScriptFullTurnDecision.ts:1998-1999` (`legalMoveDecisions` consults
+`lockedMoveDecision` first — its Encore branch at `:2176-2180` returns the locked move) and `:2152`
+(`battlerUsesForcedStruggle` returns `false` outright when a lock exists). The port's own
+`CheckMoveLimitations` (`battleScriptActionAdmission.ts:2530-2600`, Encore bit `:2586-2588`) is
+faithful — it is never consulted on this path.
+
+**Consequence:** ROM = Struggle (typeless recoil to the user, target damaged); port = the locked
+move, which `CANCELER_DISABLED` (`battle_util.c:2122-2133` → `BattleScript_MoveUsedIsDisabled`)
+fails with zero damage to either side. Different HP on both battlers, message, and PP ledger.
+Reachable with one real rental: DEWGONG `[BLIZZARD, DOUBLE_EDGE, ENCORE, DISABLE]` (Encore 7 /
+Disable 9 / Taunt 2 / Torment 5 catalog carriers); also Encore + PP exhaustion in long battles.
+
+**Receipt recipe** (`mechanicLab` `overrides.parties`, Battle Scene OFF; frame 0 is turn 1's
+action menu; A pulses past every prompt): player slot 0 = Dewgong (Speed IV/EV 0, moves second);
+opponent slot 0 = a max-Speed mon with the same `MOVE_TARGET_SELECTED` attack `M` (e.g. TACKLE) in
+all four slots. Turn 1: opponent `M`, Dewgong ENCORE → `encoredMove = M`. Turn 2: opponent locked
+to `M`, Dewgong DISABLE → `disabledMove = M`. Turn 3: ROM prints "…has no moves left!" and
+Struggles (recoil on the opponent's own active); port: "…'s M is disabled!", no damage. Fix shape:
+evaluate `battlerUsesForcedStruggle`'s limitation mask BEFORE honouring the Encore lock (source
+order), keep the STATUS2_MULTIPLETURNS/RECHARGE lock ahead of both (source checks those before the
+`B_ACTION_USE_MOVE` case), pin with a Tier-1 test, and note that #140's draw applies to the
+Struggle branch too.
+
+## #139 — The `CheckFocusPunch_ClearVarsBeforeTurnStarts` pre-pass ("…is tightening its focus!" before ANY action) has no port site
+
+**Found 2026-08-26** (turn-machinery audit §3 row 3.20 / Finding 2; supervisor-verified that
+`grep -rn focusPunchBattlerId src/` is empty). Source `battle_main.c:4906-4923`: after turn order
+is fixed and before `RunTurnActionsFunctions`, the engine walks `gBattleStruct->focusPunchBattlerId`
+in battler-index order and, for each battler with `gChosenMoveByBattler == MOVE_FOCUS_PUNCH` that
+is not asleep, not Truant-loafing and not `noValidMoves`, runs
+`BattleScriptExecute(BattleScript_FocusPunchSetUp)` (`printstring STRINGID_EMPTYSTRING3` /
+`waitmessage 1` / `playanimation B_ANIM_FOCUS_PUNCH_SETUP` / `printstring
+STRINGID_PKMNTIGHTENINGFOCUS` / `waitmessage B_WAIT_TIME_LONG` / `end2`). The same function's
+`TryClearRageAndFuryCutter` half is separately verdicted (Rage: 0 carriers). Port:
+`factoryBattleScriptFullTurnDecision.ts:3013-3030` goes straight from turn order to action 1;
+`battleScriptStatbuffchangeOpcode.ts:257-268` only registers the animation id.
+
+**Consequence:** message/event ORDER only (no RNG): the ROM shows the extra message box before
+either battler's action, even when the Focus Punch user is slower; every later message in the
+turn shifts by one box in the Scene-OFF captures. 11 of 882 rental entries carry Focus Punch.
+
+**Receipt recipe:** player slot 0 = a Focus Punch carrier (Speed 0), opponent = max-Speed mon with
+one harmless `MOVE_TARGET_SELECTED` attack ×4; turn 1 select Focus Punch and capture from the action
+menu through the first message box (ROM: "tightening its focus" first, then the opponent's faster
+move); control = the same fixture with another move selected. Fix shape: emit the pre-pass as its
+own end2 script event between turn-order fixing and action 1, in battler-index order.
+
+## #140 — `HandleAction_UseMove`'s four re-target branches skip `GetMoveTarget`'s `MOVE_TARGET_SELECTED` draw loop (forced Struggle, Encore, overwritten slot): ≥1 `Random()` per such action on the ROM, 0 in the port — RNG-affecting
+
+**Found 2026-08-26** (turn-machinery audit §4 rows 4.10/4.12/4.13/4.14 / Finding 3;
+supervisor-verified at source and port). Source `battle_util.c:3850-3853` (`GetMoveTarget`,
+`MOVE_TARGET_SELECTED` arm): `do { targetBattler = Random() % gBattlersCount; } while
+(targetBattler == gBattlerAttacker || side == GetBattlerSide(targetBattler) || gAbsentBattlerFlags
+& gBitTable[targetBattler]);` — in singles exactly one of two outcomes exits, so the loop draws a
+geometric number of `Random()`s (≥1, mean 2); only an active Follow Me on the opposing side
+short-circuits it (`:3843-3846`). `HandleAction_UseMove` calls `GetMoveTarget(…, NO_TARGET_OVERRIDE)`
+on `:105` (forced Struggle — `noValidMoves`), `:117` (Encore match), `:128` (Encore whose slot was
+overwritten) and `:133` (slot overwritten by Mimic/Transform); the ordinary chosen-move path `:135-138`
+does not call it (the target was set at selection without a draw). Port
+`factoryBattleScriptFullTurnDecision.ts:1959-1987` `sourceMoveTarget` is pure — its docstring
+(`:1951-1958`) claims "every non-user shape resolves … without consuming RNG", which is right for
+DEPENDS/BOTH/FOES_AND_ALLY/OPPONENTS_FIELD/RANDOM and WRONG for `MOVE_TARGET_SELECTED`;
+`buildActionContext` (`:1489-1523`) draws nothing. The port already models this exact do/while for
+`VARIOUS_GET_MOVE_TARGET` at `battleScriptSwitchinOpcode.ts:1020-1032` — it is simply not wired to
+the four `HandleAction_UseMove` branches.
+
+**Consequence (most severe of the three):** the turn's RNG cursor shifts by ≥1 on every forced
+Struggle / Encored action — every later accuracy, damage, crit and effect roll in the battle comes
+from a different LCG point. Forced Struggle is common in long battles (ISSUES #123 counted 456
+Struggle actions in one census); Encore has 7 rental carriers; Mimic 2, Transform 1.
+
+**Receipt recipe (A/B draw count, Encore arm):** `mechanicLab` `overrides.parties`, Battle Scene
+OFF, frame 0 = turn-1 action menu, A pulses past prompts. Arm A: player slot 0 = an Encore carrier
+(Speed 0, moves second); opponent slot 0 = max-Speed mon with the same `MOVE_TARGET_SELECTED`
+attack `M` in all four slots. Turn 1: opponent `M`, player ENCORE. Turn 2: the opponent's action
+takes `:112-118` → `GetMoveTarget`. Arm B (control): identical but the player uses a no-op status
+move on turn 1. Expected: arm A's turn-2 `Random()` count exceeds arm B's by ≥1 (geometric, p=½
+across seeds); the port shows 0 difference. Struggle arm (optional): #138's turn-3 position without
+Encore (opponent's four slots all `M`, player DISABLEs `M`) — both ROM and port Struggle there, so
+the only difference is the draw count. Fix shape: on the four branches, run the modeled
+`VARIOUS_GET_MOVE_TARGET` loop against the battle RNG (respecting Follow Me) instead of
+`sourceMoveTarget`; correct the docstring; pin the ROM's per-arm draw counts; re-pin moved
+curated-seed trajectories with attribution (a Struggle-bearing soak pin WILL move).
+
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 
 `docs/issue121-ai-mon-to-switch-into-probe.md` closes the reachability
