@@ -5,6 +5,8 @@ import controlFixture from "../tools/battle-lab/issue138-encore-disable-control-
 import {
   battlerUsesForcedStruggle,
   createFactoryFullTurnBattleState,
+  createFactoryFullTurnBattleStateFromRulesContext,
+  submitFactoryFullTurnDecision,
   type FactoryFullTurnConfig,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import type { BattleScriptRulesContext } from "../src/engine/battleScriptRulesContext.ts";
@@ -114,6 +116,44 @@ function turnThreeContext(arm: TurnThreeArm): BattleScriptRulesContext {
   }) as BattleScriptRulesContext;
 }
 
+
+/**
+ * Drives the kernel through the receipt's turn 3 from the ROM's own turn-3
+ * entry state: the slower DEWGONG picks ENCORE (slot 2) while the faster
+ * JOLTEON's action is whatever action selection resolves for it.
+ */
+function runReceiptTurnThree(arm: TurnThreeArm) {
+  const initial = createFactoryFullTurnBattleStateFromRulesContext({
+    requestId: 1,
+    rngSeed: 305419897,
+    rulesContext: turnThreeContext(arm),
+  });
+  const afterPlayer = submitFactoryFullTurnDecision(initial, {
+    requestId: 1,
+    side: "player",
+    decision: { kind: "use-move", moveSlot: 2, targetBattler: 1 },
+  });
+  if (afterPlayer.kind !== "decision-required") {
+    throw new Error("expected the trainer command to still be required");
+  }
+  if (afterPlayer.nextRequest.side === "player") {
+    // The trainer's action was auto-confirmed by the Encore lock
+    // (`battle_main.c:4192`), so the turn already resolved and the next
+    // request belongs to the following turn's player command.
+    return { trainerAutoConfirmed: true, trainerDecisions: null, resolved: afterPlayer };
+  }
+  if (afterPlayer.nextRequest.kind !== "command") {
+    throw new Error("expected a command request, not a forced switch");
+  }
+  const trainerDecisions = afterPlayer.nextRequest.legalDecisions;
+  const resolved = submitFactoryFullTurnDecision(afterPlayer.state, {
+    requestId: afterPlayer.nextRequest.requestId,
+    side: "trainer",
+    decision: trainerDecisions[0]!,
+  });
+  return { trainerAutoConfirmed: false, trainerDecisions, resolved };
+}
+
 describe("ISSUES #138 -- Encore vs AreAllMovesUnusable ordering (live ROM receipt)", () => {
   it("keeps the receipt's two arms and their fixtures joined", () => {
     expect(receipt.issue).toBe(138);
@@ -192,6 +232,37 @@ describe("ISSUES #138 -- Encore vs AreAllMovesUnusable ordering (live ROM receip
     expect(receipt.arms.control.summary.turn3Hp).toEqual([
       { frame: 2050, turn: 3, battler: 0, from: 139, to: 111 },
     ]);
+  });
+
+
+  it("struggle arm: the kernel's own turn 3 spends no PP and recoils the attacker, as the ROM does", () => {
+    const { trainerAutoConfirmed, trainerDecisions, resolved } = runReceiptTurnThree(STRUGGLE_ARM);
+    // AreAllMovesUnusable wins over the Encore auto-confirm, so the trainer's
+    // command is still collected -- and collapses to the single
+    // banked-position Struggle command.
+    expect(trainerAutoConfirmed).toBe(false);
+    expect(trainerDecisions).toHaveLength(1);
+    const after = resolved.state.rules.rulesContext;
+    // HITMARKER_NO_PPDEDUCT: the ROM's opponent PP ledger is untouched.
+    expect(after.battlers[1].pp).toEqual(
+      receipt.arms.struggle.summary.finalActives.opponent.pp,
+    );
+    expect(after.battlers[1].pp).toEqual([34, 34, 35, 35]);
+    // Struggle recoils its user and damages the target; DEWGONG's own ENCORE
+    // deals no damage, so both deltas belong to the Struggle action.
+    expect(after.battlers[1].hp).toBeLessThan(STRUGGLE_ARM.trainerHp);
+    expect(after.battlers[0].hp).toBeLessThan(STRUGGLE_ARM.playerHp);
+  });
+
+  it("control arm: the kernel's own turn 3 spends TACKLE's PP and takes no recoil, as the ROM does", () => {
+    const { trainerAutoConfirmed, resolved } = runReceiptTurnThree(CONTROL_ARM);
+    // No slot is masked, so `battle_main.c:4192` auto-confirms the encored
+    // move without exposing a trainer command at all.
+    expect(trainerAutoConfirmed).toBe(true);
+    const after = resolved.state.rules.rulesContext;
+    expect(after.battlers[1].pp).toEqual([33, 34, 35, 35]);
+    expect(after.battlers[1].hp).toBe(CONTROL_ARM.trainerHp);
+    expect(after.battlers[0].hp).toBeLessThan(CONTROL_ARM.playerHp);
   });
 
   it("records the pre-fix kernel's divergent turn-3 action", () => {
