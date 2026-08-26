@@ -1,0 +1,961 @@
+{
+  "schema": "issue131-endturn-order-off-semantic-receipt/v1",
+  "issue": "#131",
+  "oracleProfile": "battle-scene-off",
+  "runner": "tools/run-mgba-probe.py",
+  "probe": "tools/probe/probe-issue131-endturn-order-off.py",
+  "seed": 305419897,
+  "source": {
+    "endturnOrder": "src/battle_util.c:1199-1218 DoFieldEndTurnEffects case ENDTURN_ORDER -- identity-fill gBattlerByTurnOrder, then for i<j if (GetWhoStrikesFirst(order[i], order[j], FALSE)) SwapTurnOrder(i, j)",
+    "getWhoStrikesFirst": "src/battle_main.c:4595-4753 -- effective speed (stat stages, Macho Brace, paralysis /4, Swift Swim/Chlorophyll under WEATHER_HAS_EFFECT, Quick Claw vs gRandomTurnNumber), then chosen-move priority (ignoreChosenMoves == FALSE), then the speed-tie Random() & 1 at :4728 / :4745",
+    "actionOrder": "src/battle_main.c:4817-4850 SetActionsAndBattlersTurnOrder -- switch/item actions are ordered first with NO speed comparison (:4820-4832)",
+    "consumers": "data/battle_scripts_1.s:3700-3717 BattleScript_DamagingWeatherContinues (copyarraywithindex gBattlerAttacker, gBattlerByTurnOrder, ...) and src/battle_util.c:1469-1471 DoBattlerEndTurnEffects",
+    "passEnd": "src/battle_main.c:4001-4013 -- BattleTurnPassed's clean exit resets gChosenActionByBattler[] to B_ACTION_NONE and draws gRandomTurnNumber = Random()"
+  },
+  "method": {
+    "battlerByTurnOrderWatch": "gBattlerByTurnOrder (0x202407e) read every controller trace frame; gBattleMainFunc sampled BEFORE each advance so a frame's Random() draws are attributed to the main-func that ran in it",
+    "endTurnWindow": "frames whose pre-advance gBattleMainFunc == BattleTurnPassed|1, closed on the gChosenActionByBattler[] -> 0xFF flip (battle_main.c:4001-4004)",
+    "randomCounter": "sRandCount at 0x020249C0"
+  },
+  "freshRunCountPerArm": 2,
+  "byteIdenticalAcrossFreshRuns": true,
+  "probeOutputSha256": {
+    "order": "a2e7b10a598af035c8735544f96d3975a80a0be5ab88f8be7ac0b2464a611ac8",
+    "tie": "45e1737e26555f9ba52e1f341f6c8a5a0923844dbc1f6a0fc59c83038cdc2dc0",
+    "tieControl": "3b4bb96d9df5f25ea38bf130af5285ad4c1c28d035a1e9b46a29f0f1be38825c"
+  },
+  "arms": {
+    "order": {
+      "fixture": "tools/battle-lab/issue131-endturn-order-switch-off.json",
+      "parties": {
+        "player": [
+          {
+            "species": 27,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 8,
+            "moves": [
+              201,
+              91,
+              317,
+              28
+            ]
+          },
+          {
+            "species": 218,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 40,
+            "moves": [
+              52,
+              157,
+              281,
+              34
+            ]
+          },
+          {
+            "species": 194,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 6,
+            "moves": [
+              281,
+              91,
+              352,
+              240
+            ]
+          }
+        ],
+        "opponent": [
+          {
+            "species": 84,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              31,
+              31,
+              31,
+              31
+            ]
+          },
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          },
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          }
+        ]
+      },
+      "initial": {
+        "battlerByTurnOrder": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "actives": {
+          "player": {
+            "partyIndex": 0,
+            "species": 27,
+            "speed": 60,
+            "statStagesSpeed": 6,
+            "hp": 125,
+            "maxHp": 125,
+            "status1": 0,
+            "item": 0
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 84,
+            "speed": 95,
+            "statStagesSpeed": 6,
+            "hp": 110,
+            "maxHp": 110,
+            "status1": 0,
+            "item": 0
+          }
+        },
+        "weather": 0
+      },
+      "orderEvents": [
+        {
+          "frame": 1239,
+          "from": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "to": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "inBattleTurnPassed": false
+        },
+        {
+          "frame": 2129,
+          "from": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "to": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "inBattleTurnPassed": true
+        }
+      ],
+      "messageEvents": [
+        {
+          "frame": 2,
+          "text": "ROCK TOMB"
+        },
+        {
+          "frame": 3,
+          "text": "10/10"
+        },
+        {
+          "frame": 4,
+          "text": "TYPE/<FC><06><01>ROCK"
+        },
+        {
+          "frame": 30,
+          "text": "Foe DODUO used\nFURY ATTACK!"
+        },
+        {
+          "frame": 286,
+          "text": "Hit 2 time<5C>s<5D>!"
+        },
+        {
+          "frame": 379,
+          "text": "SANDSHREW used\nSANDSTORM!"
+        },
+        {
+          "frame": 443,
+          "text": "A sandstorm brewed!"
+        },
+        {
+          "frame": 546,
+          "text": "The sandstorm rages."
+        },
+        {
+          "frame": 637,
+          "text": "Foe DODUO is buffeted\nby the sandstorm!"
+        },
+        {
+          "frame": 802,
+          "text": "What will\nSANDSHREW do?"
+        },
+        {
+          "frame": 1211,
+          "text": "<FC><02><02>SANDSHREW<FC><01><0B><B5>"
+        },
+        {
+          "frame": 1213,
+          "text": "<FC><02><02>DODUO<FC><01><0B><B5>"
+        },
+        {
+          "frame": 1243,
+          "text": "SANDSHREW, come back!"
+        },
+        {
+          "frame": 1313,
+          "text": "Go! SLUGMA!"
+        },
+        {
+          "frame": 1391,
+          "text": "<FC><02><02>SLUGMA<FC><01><0B><B5>"
+        },
+        {
+          "frame": 1453,
+          "text": "Foe DODUO used\nFURY ATTACK!"
+        },
+        {
+          "frame": 1611,
+          "text": "A critical hit!"
+        },
+        {
+          "frame": 1826,
+          "text": "A critical hit!"
+        },
+        {
+          "frame": 2037,
+          "text": "Hit 3 time<5C>s<5D>!"
+        },
+        {
+          "frame": 2130,
+          "text": "The sandstorm rages."
+        },
+        {
+          "frame": 2221,
+          "text": "Foe DODUO is buffeted\nby the sandstorm!"
+        },
+        {
+          "frame": 2378,
+          "text": "SLUGMA is buffeted\nby the sandstorm!"
+        },
+        {
+          "frame": 2536,
+          "text": "What will\nSLUGMA do?"
+        }
+      ],
+      "battleTurnPassedWindows": [
+        {
+          "firstFrame": 545,
+          "lastFrame": 800,
+          "randomCalls": 1,
+          "battlerByTurnOrderBefore": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "battlerByTurnOrderAfterEndturnOrder": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "battlerByTurnOrderAtExit": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "closedByChosenActionReset": true
+        },
+        {
+          "firstFrame": 2129,
+          "lastFrame": 2533,
+          "randomCalls": 1,
+          "battlerByTurnOrderBefore": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "battlerByTurnOrderAfterEndturnOrder": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "battlerByTurnOrderAtExit": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "closedByChosenActionReset": true
+        }
+      ],
+      "battleTurnPassedRandomCalls": 2,
+      "totalRandomCalls": 36,
+      "final": {
+        "battlerByTurnOrder": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "actives": {
+          "player": {
+            "partyIndex": 1,
+            "species": 218,
+            "speed": 36,
+            "statStagesSpeed": 6,
+            "hp": 10,
+            "maxHp": 115,
+            "status1": 0,
+            "item": 0
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 84,
+            "speed": 95,
+            "statStagesSpeed": 6,
+            "hp": 98,
+            "maxHp": 110,
+            "status1": 0,
+            "item": 0
+          }
+        },
+        "weather": 8
+      },
+      "framebufferSha256": "514c5b296b0a9fb9c8101513c6f6b09641240901bf7ce4420701e5ca71694b87"
+    },
+    "tie": {
+      "fixture": "tools/battle-lab/issue131-endturn-order-tie-off.json",
+      "parties": {
+        "player": [
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          },
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          },
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          }
+        ],
+        "opponent": [
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          },
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          },
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          }
+        ]
+      },
+      "initial": {
+        "battlerByTurnOrder": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "actives": {
+          "player": {
+            "partyIndex": 0,
+            "species": 19,
+            "speed": 92,
+            "statStagesSpeed": 6,
+            "hp": 105,
+            "maxHp": 105,
+            "status1": 0,
+            "item": 0
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "speed": 92,
+            "statStagesSpeed": 6,
+            "hp": 105,
+            "maxHp": 105,
+            "status1": 0,
+            "item": 0
+          }
+        },
+        "weather": 0
+      },
+      "orderEvents": [
+        {
+          "frame": 25,
+          "from": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "to": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "inBattleTurnPassed": false
+        },
+        {
+          "frame": 340,
+          "from": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "to": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "inBattleTurnPassed": true
+        }
+      ],
+      "messageEvents": [
+        {
+          "frame": 2,
+          "text": "SPLASH"
+        },
+        {
+          "frame": 3,
+          "text": "TYPE/<FC><06><01>NORMAL"
+        },
+        {
+          "frame": 29,
+          "text": "RATTATA used\nSPLASH!"
+        },
+        {
+          "frame": 87,
+          "text": "But nothing happened!"
+        },
+        {
+          "frame": 183,
+          "text": "Foe RATTATA used\nSPLASH!"
+        },
+        {
+          "frame": 245,
+          "text": "But nothing happened!"
+        },
+        {
+          "frame": 344,
+          "text": "What will\nRATTATA do?"
+        }
+      ],
+      "battleTurnPassedWindows": [
+        {
+          "firstFrame": 340,
+          "lastFrame": 340,
+          "randomCalls": 2,
+          "battlerByTurnOrderBefore": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "battlerByTurnOrderAfterEndturnOrder": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "battlerByTurnOrderAtExit": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "closedByChosenActionReset": true
+        }
+      ],
+      "battleTurnPassedRandomCalls": 2,
+      "totalRandomCalls": 12,
+      "final": {
+        "battlerByTurnOrder": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "actives": {
+          "player": {
+            "partyIndex": 0,
+            "species": 19,
+            "speed": 92,
+            "statStagesSpeed": 6,
+            "hp": 105,
+            "maxHp": 105,
+            "status1": 0,
+            "item": 0
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "speed": 92,
+            "statStagesSpeed": 6,
+            "hp": 105,
+            "maxHp": 105,
+            "status1": 0,
+            "item": 0
+          }
+        },
+        "weather": 0
+      },
+      "framebufferSha256": "3721a808f20931d5f5b035e066cb28fdb989f87cc07fc5443086fb6d5d188012"
+    },
+    "tieControl": {
+      "fixture": "tools/battle-lab/issue131-endturn-order-tie-control-off.json",
+      "parties": {
+        "player": [
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          },
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          },
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          }
+        ],
+        "opponent": [
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          },
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          },
+          {
+            "species": 19,
+            "item": 0,
+            "abilitySlot": 0,
+            "ability": 50,
+            "moves": [
+              150,
+              150,
+              150,
+              150
+            ]
+          }
+        ]
+      },
+      "initial": {
+        "battlerByTurnOrder": [
+          0,
+          1,
+          0,
+          0
+        ],
+        "actives": {
+          "player": {
+            "partyIndex": 0,
+            "species": 19,
+            "speed": 92,
+            "statStagesSpeed": 6,
+            "hp": 105,
+            "maxHp": 105,
+            "status1": 0,
+            "item": 0
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "speed": 91,
+            "statStagesSpeed": 6,
+            "hp": 105,
+            "maxHp": 105,
+            "status1": 0,
+            "item": 0
+          }
+        },
+        "weather": 0
+      },
+      "orderEvents": [],
+      "messageEvents": [
+        {
+          "frame": 2,
+          "text": "SPLASH"
+        },
+        {
+          "frame": 3,
+          "text": "TYPE/<FC><06><01>NORMAL"
+        },
+        {
+          "frame": 29,
+          "text": "RATTATA used\nSPLASH!"
+        },
+        {
+          "frame": 87,
+          "text": "But nothing happened!"
+        },
+        {
+          "frame": 183,
+          "text": "Foe RATTATA used\nSPLASH!"
+        },
+        {
+          "frame": 245,
+          "text": "But nothing happened!"
+        },
+        {
+          "frame": 344,
+          "text": "What will\nRATTATA do?"
+        }
+      ],
+      "battleTurnPassedWindows": [
+        {
+          "firstFrame": 340,
+          "lastFrame": 340,
+          "randomCalls": 1,
+          "battlerByTurnOrderBefore": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "battlerByTurnOrderAfterEndturnOrder": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "battlerByTurnOrderAtExit": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "closedByChosenActionReset": true
+        }
+      ],
+      "battleTurnPassedRandomCalls": 1,
+      "totalRandomCalls": 10,
+      "final": {
+        "battlerByTurnOrder": [
+          0,
+          1,
+          0,
+          0
+        ],
+        "actives": {
+          "player": {
+            "partyIndex": 0,
+            "species": 19,
+            "speed": 92,
+            "statStagesSpeed": 6,
+            "hp": 105,
+            "maxHp": 105,
+            "status1": 0,
+            "item": 0
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 19,
+            "speed": 91,
+            "statStagesSpeed": 6,
+            "hp": 105,
+            "maxHp": 105,
+            "status1": 0,
+            "item": 0
+          }
+        },
+        "weather": 0
+      },
+      "framebufferSha256": "3721a808f20931d5f5b035e066cb28fdb989f87cc07fc5443086fb6d5d188012"
+    }
+  },
+  "assertions": [
+    {
+      "id": "order-recompute-happens-inside-BattleTurnPassed",
+      "claim": "On the switch turn gBattlerByTurnOrder is [0,1] at action time (SetActionsAndBattlersTurnOrder put the player's switch first with no speed comparison) and flips to [1,0] inside BattleTurnPassed, before any field case runs.",
+      "evidence": {
+        "actionOrderEvent": {
+          "frame": 1239,
+          "from": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "to": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "inBattleTurnPassed": false
+        },
+        "endturnOrderEvent": {
+          "frame": 2129,
+          "from": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "to": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "inBattleTurnPassed": true
+        },
+        "window": {
+          "firstFrame": 2129,
+          "lastFrame": 2533,
+          "randomCalls": 1,
+          "battlerByTurnOrderBefore": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "battlerByTurnOrderAfterEndturnOrder": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "battlerByTurnOrderAtExit": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "closedByChosenActionReset": true
+        }
+      }
+    },
+    {
+      "id": "order-message-order-follows-speed-not-action-order",
+      "claim": "End of turn 2 prints the faster foe's sandstorm damage FIRST, even though the player acted first that turn.",
+      "evidence": [
+        {
+          "frame": 2221,
+          "text": "Foe DODUO is buffeted\nby the sandstorm!"
+        },
+        {
+          "frame": 2378,
+          "text": "SLUGMA is buffeted\nby the sandstorm!"
+        }
+      ],
+      "activeSpeeds": {
+        "playerSlugma": 36,
+        "opponentDoduo": 95
+      }
+    },
+    {
+      "id": "turn1-endturn-order-keeps-speed-order",
+      "claim": "Turn 1 (no switch) needs no swap: the array is already [1,0] and ENDTURN_ORDER leaves it there; only the foe (Ground-immune player lead) is buffeted.",
+      "evidence": {
+        "firstFrame": 545,
+        "lastFrame": 800,
+        "randomCalls": 1,
+        "battlerByTurnOrderBefore": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "battlerByTurnOrderAfterEndturnOrder": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "battlerByTurnOrderAtExit": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "closedByChosenActionReset": true
+      }
+    },
+    {
+      "id": "tie-costs-exactly-one-extra-endturn-draw",
+      "claim": "With gBattleMons[].speed exactly equal on both sides the end-turn pass draws Random() one more time than the otherwise-identical control whose opponent has speed IV 29 (speed 91 vs 92).",
+      "evidence": {
+        "tieSpeeds": [
+          92,
+          92
+        ],
+        "controlSpeeds": [
+          92,
+          91
+        ],
+        "tieEndTurnRandomCalls": 2,
+        "controlEndTurnRandomCalls": 1,
+        "tieTotalRandomCalls": 12,
+        "controlTotalRandomCalls": 10
+      }
+    },
+    {
+      "id": "tie-draw-can-swap-the-endturn-order",
+      "claim": "The tie arm's ENDTURN_ORDER draw came up odd, so the array swapped [0,1] -> [1,0] inside BattleTurnPassed; the control never swaps.",
+      "evidence": {
+        "tie": [
+          {
+            "frame": 25,
+            "from": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "to": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "inBattleTurnPassed": false
+          },
+          {
+            "frame": 340,
+            "from": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "to": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "inBattleTurnPassed": true
+          }
+        ],
+        "control": []
+      }
+    }
+  ]
+}
