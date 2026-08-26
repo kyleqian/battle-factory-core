@@ -3,6 +3,7 @@ import hitFixture from "../tools/battle-lab/gate6-ohko-hit-off.json" with { type
 import missFixture from "../tools/battle-lab/gate6-ohko-miss-off.json" with { type: "json" };
 import sturdyFixture from "../tools/battle-lab/gate6-ohko-sturdy-off.json" with { type: "json" };
 import receipt from "../tools/probe/receipts/gate6-ohko-off.json" with { type: "json" };
+import issue129Receipt from "../tools/probe/receipts/issue129-kingsrock-ko-off.json" with { type: "json" };
 import { gate6Context, runGate6ScriptToTerminal } from "./gate6StatusInteractionHelpers.ts";
 
 const FISSURE = 90;
@@ -161,18 +162,25 @@ describe("Gate-6 OHKO (FISSURE) Battle Scene OFF receipt", () => {
       "Foe METAPOD\nfainted!\n",
     ]);
     expect(arm.scriptsVisited).toEqual([]);
-    // 1 Cmd_tryKO accuracy draw + 1 Cmd_seteffectwithchance draw. The second
-    // one is NOT King's Rock: battle_script_commands.c:2917 evaluates
-    // `Random() % 100 < percentChance` before it looks at MOVE_EFFECT_BYTE, so
-    // the opcode costs a draw even at secondaryEffectChance 0. The receipt's
-    // no-item control run reproduces both frames and the final cursor exactly.
+    // This arm's ledger is a TRUNCATED-WINDOW measurement: 1 Cmd_tryKO accuracy
+    // draw + 1 Cmd_seteffectwithchance draw (battle_script_commands.c:2917
+    // evaluates `Random() % 100 < percentChance` before it looks at
+    // MOVE_EFFECT_BYTE, so the opcode costs a draw even at secondaryEffectChance
+    // 0). The fixture's 934 frames stall at 443 on the faint message's 0xFB
+    // prompt, so Cmd_moveend -- and with it King's Rock's third draw -- never
+    // ran inside the window. See issue129Receipt for the full resolution.
     expect(arm.fissureRandomCalls).toBe(2);
     expect(arm.rngLedger.map((entry) => entry.frame)).toEqual([67, 359]);
     expect(receipt.drawCountsPerFissureResolution.hitBeforeTheKO).toBe(1);
-    expect(receipt.kingsRockControl.fissureRandomCalls).toBe(2);
-    expect(receipt.kingsRockControl.rngLedgerFrames).toEqual([67, 359]);
-    expect(receipt.kingsRockControl.rngAfterFinalDraw)
-      .toBe(arm.rngLedger[arm.rngLedger.length - 1]!.rngAfter);
+    expect(receipt.drawCountsPerFissureResolution.hit).toBe(3);
+    expect(receipt.windowTruncation).toMatchObject({ frames: 934, stallFrame: 443 });
+    expect(receipt.kingsRockControl.status).toContain("SUPERSEDED");
+    // The #129 arms run past the KO into the opponent's send-out, so only the
+    // leading three entries belong to the FISSURE resolution.
+    expect(issue129Receipt.arms.ohkoKingsRock.rngLedger.slice(0, 3).map((e) => e.frame))
+      .toEqual([67, 359, 642]);
+    expect(issue129Receipt.arms.ohkoNoItemControl.rngLedger.slice(0, 3).map((e) => e.frame))
+      .toEqual([67, 359, 869]);
   });
 
   it("records one accuracy draw and BattleScript_KOFail's miss string on the miss arm", () => {
@@ -283,23 +291,23 @@ describe("Gate-6 OHKO (FISSURE) Battle Scene OFF receipt", () => {
     expect(sturdy.rng.ledger).toHaveLength(receipt.arms.sturdy.fissureRandomCalls);
   });
 
-  // DIVERGENCE (documented, not fixed -- see receipt.engineDivergence): on an
-  // OHKO hit the engine spends a third Random() on KING'S ROCK's flinch chance
-  // (battleScriptMoveEndOpcode.ts:885 mirroring battle_util.c:3770's
-  // `if (gBattleMoveDamage)` guard) where the stock ROM spends none, because
-  // the ROM reaches MOVEEND_KINGSROCK_SHELLBELL (battle_script_commands.c:4336)
-  // only after `tryfaintmon BS_TARGET` has already cleared gBattleMoveDamage.
-  // The receipt's no-item control run proves the ROM's second draw belongs to
-  // Cmd_seteffectwithchance instead. Cursor drift only: FISSURE is not
-  // FLAG_KINGS_ROCK_AFFECTED, so no flinch is produced either way.
-  it.fails("DIVERGENT: the engine spends an extra King's Rock draw on an OHKO hit that the ROM does not", () => {
+  // NOT a divergence (ISSUES #129, 2026-08-25): the engine's third draw at
+  // MOVEEND_KINGSROCK_SHELLBELL (battleScriptMoveEndOpcode.ts:883-905 mirroring
+  // battle_util.c:3768-3780) is what the stock ROM does. gBattleMoveDamage is
+  // still 125 and gSpecialStatuses[target].physicalDmg is still 125 when
+  // Cmd_moveend reaches state 12 on the OHKO path, so the draw fires and only
+  // the trailing `&& gBattleMons[gBattlerTarget].hp` -- evaluated AFTER it --
+  // is false. FISSURE is not FLAG_KINGS_ROCK_AFFECTED, so no flinch results.
+  it("matches the ROM's THREE-draw OHKO hit, King's Rock's moveend draw included", () => {
     const hit = runGate6ScriptToTerminal(
       "BattleScript_EffectOHKO",
       fissureContext(METAPOD_TARGET),
       HIT_RNG,
     );
-    expect(hit.rng.ledger.map((entry) => entry.reason))
-      .toEqual(["tryko", "seteffectwithchance"]);
-    expect(hit.rng.ledger).toHaveLength(receipt.arms.hit.fissureRandomCalls);
+    const reasons = hit.rng.ledger.map((entry) => entry.reason);
+    expect(reasons).toHaveLength(receipt.drawCountsPerFissureResolution.hit);
+    expect(reasons.slice(0, 2)).toEqual(["tryko", "seteffectwithchance"]);
+    expect(reasons[2]).toContain("King's Rock");
+    expect(issue129Receipt.arms.ohkoKingsRock.rngLedger[2]!.moveendState).toBe(17);
   });
 });
