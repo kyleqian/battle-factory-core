@@ -566,7 +566,7 @@ function registersAt(age: number, profile: Readonly<IceBeamAnimationProfile>): I
   };
 }
 
-function paletteSource(name: IceBeamPaletteProgram["name"], age: number): IceBeamPaletteProgram["source"] {
+function paletteSource(name: IceBeamPaletteProgram["name"]): IceBeamPaletteProgram["source"] {
   if (name === "opening-bg") return { offset: 27, wait: 1, args: [...OPENING_ARGS] };
   if (name === "target-fade-in") return { offset: 310, wait: 1, args: [...INNER_ARGS] };
   if (name === "target-fade-out") return { offset: 234, wait: 1, args: [...RESTORE_TARGET_ARGS] };
@@ -594,7 +594,7 @@ function paletteProgramsAt(age: number): readonly IceBeamPaletteProgram[] {
         : name === "target-fade-out"
           ? Math.max(0, 7 - 2 * Math.floor(local / 7))
           : Math.max(0, 7 - 2 * Math.floor((local + 1) / 2));
-    return { name, selector, slot, delay, active, source: active ? paletteSource(name, age) : null,
+    return { name, selector, slot, delay, active, source: active ? paletteSource(name) : null,
       initialBlendY, targetBlendY, color, coefficient, spriteActive: active };
   });
 }
