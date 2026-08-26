@@ -74,6 +74,12 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     defense: changes.defense ?? 0,
     spAttack: changes.spAttack ?? 0,
     spDefense: changes.spDefense ?? 0,
+    // ENDTURN_ORDER (battle_util.c:1199-1218) re-sorts the end-turn traversal
+    // by CURRENT effective speed and draws Random() & 1 on an exact tie
+    // (battle_main.c:4728). None of these fixtures is about a tie, so the two
+    // sides get distinct default speeds -- side 0 faster, which keeps the
+    // traversal at [0, 1] and the ledger tie-draw-free, exactly as before.
+    speed: changes.speed ?? (changes.side === 1 ? 50 : 100),
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 0,
     partyIndex: changes.partyIndex ?? 0,

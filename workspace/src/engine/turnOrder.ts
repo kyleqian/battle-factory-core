@@ -66,6 +66,26 @@ export function effectiveSpeed(
   return speed;
 }
 
+/**
+ * The exact condition under which GetWhoStrikesFirst reads its `Random() & 1`
+ * (battle_main.c:4728 and :4745). `&&` short-circuits on `speedBattler1 ==
+ * speedBattler2`, so a comparison whose effective speeds differ - or whose
+ * priority brackets differ - draws nothing at all. Every caller that has to
+ * account for the draw in an RNG ledger asks this FIRST and only then draws.
+ */
+export function isSpeedTie(
+  battler1: TurnOrderBattler,
+  battler2: TurnOrderBattler,
+  weather: WeatherState = {},
+  randomTurnNumber = 0xffff,
+): boolean {
+  const bothPriorityZero = battler1.movePriority === 0 && battler2.movePriority === 0;
+  const priorityEqual = battler1.movePriority === battler2.movePriority;
+  if (!bothPriorityZero && !priorityEqual) return false;
+  return effectiveSpeed(battler1, weather, randomTurnNumber)
+    === effectiveSpeed(battler2, weather, randomTurnNumber);
+}
+
 /** 0 = battler1 strikes first (no swap); 1 or 2 = battler2 strikes first (swap) - see SetActionsAndBattlersTurnOrder's `!= 0` check. */
 export type StrikesFirstResult = 0 | 1 | 2;
 
@@ -118,11 +138,9 @@ export function sortBattlersByTurnOrder(
     for (let j = i + 1; j < order.length; j++) {
       const b1 = battlers.get(order[i]!)!;
       const b2 = battlers.get(order[j]!)!;
-      const priorityBracketsTie =
-        (b1.movePriority === 0 && b2.movePriority === 0) || b1.movePriority === b2.movePriority;
-      const isSpeedTie = priorityBracketsTie
-        && effectiveSpeed(b1, weather, randomTurnNumber) === effectiveSpeed(b2, weather, randomTurnNumber);
-      const roll = isSpeedTie ? (speedTieRngRolls[rollIndex++] ?? 0) : 0;
+      const roll = isSpeedTie(b1, b2, weather, randomTurnNumber)
+        ? (speedTieRngRolls[rollIndex++] ?? 0)
+        : 0;
       const result = getWhoStrikesFirst(b1, b2, roll, weather, randomTurnNumber);
       if (result !== 0) {
         const tmp = order[i]!;
