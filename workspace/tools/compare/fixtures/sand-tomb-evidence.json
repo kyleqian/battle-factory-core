@@ -1,0 +1,70 @@
+{
+  "schema": "sand-tomb-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SAND_TOMB",
+  "moveId": 328,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferCompared": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "firstInactiveCleanupRetained": true,
+    "denseRows": { "player-back": 124, "opponent-front": 124 },
+    "rawRgbRows": { "player-back": 124, "opponent-front": 124 },
+    "normalizedChangeMaps": true,
+    "reducerRows": 0,
+    "typedSeamRows": 0,
+    "productionFramebufferRows": 0
+  },
+  "source": {
+    "audit": "tools/compare/sandTombSourceAudit.ts",
+    "auditSha256": "684cbc33516ac062b9004d0d69eccf09812429e459ae9045eca6360cdfb75194",
+    "probe": "tools/compare/sandTombProbe.py",
+    "probeSha256": "0e17f5b368d60df219df249fd5e6b142a662ad1e443bf6e138b187aaac2ea7c3",
+    "evidenceVerifier": "tools/compare/sandTombEvidence.ts",
+    "evidenceVerifierSha256": "964d3683ede3b91e43eecbac5056911538f5dbc872b500eff1386edb4fe034e1"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-sand-tomb-player-dugtrio-opponent-onix.json",
+      "scenarioSha256": "134cdd4d6484a8e7cefa0e5140c222895e562f3113a4c6d65eaef39b3480b1ba",
+      "denseState": "tools/compare/evidence/sand-tomb-player-dense-state.json.gz",
+      "denseStateSha256": "6d90b097bfed8e60d528a7aa0c0b6d80f4c6a5fc00f5f14646093206eac39a2a",
+      "probeJsonSha256": "04db9d3f3cb40683a3f5f674d190005270baaea28f52a43f20ea2c24e3047782",
+      "repeatProbeJsonSha256": "04db9d3f3cb40683a3f5f674d190005270baaea28f52a43f20ea2c24e3047782",
+      "rawRgbArchive": "tools/compare/evidence/sand-tomb-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "c5e2dc3814748b64d8cf1f67b4d3a3a8555c8ae03e018282a7ad809dcbb4552c",
+      "rawRgbSequenceSha256": "5c5a743557b14d503d7fddc5629526407361b52a75fee6314079a58096992dad",
+      "repeatRawRgbSequenceSha256": "5c5a743557b14d503d7fddc5629526407361b52a75fee6314079a58096992dad",
+      "changeMap": "tools/compare/evidence/sand-tomb-changemap-player.json",
+      "changeMapSha256": "66c45974dcaca67064a5b26eb7c60ed6b7a2cbe56f0bc0e8ce8e76a6fa3b3e6d",
+      "sourceWindow": { "startFrame": 77, "endFrame": 200, "frameCount": 124, "sourceFrameCount": 124 }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-sand-tomb-opponent-dugtrio-player-onix.json",
+      "scenarioSha256": "7eeb1e24db0e4312969696665b7498ddbff7c38f9001b38d093788b24fad71fa",
+      "denseState": "tools/compare/evidence/sand-tomb-opponent-dense-state.json.gz",
+      "denseStateSha256": "eff2b9acbd9b6e4aa4990dc65003a52b70a0614838631f6efec5323a9e20ce1f",
+      "probeJsonSha256": "34c5ff4a526c7424f3738e5408d2304cf9202b3d2607f12e465ae0a948b8588b",
+      "repeatProbeJsonSha256": "34c5ff4a526c7424f3738e5408d2304cf9202b3d2607f12e465ae0a948b8588b",
+      "rawRgbArchive": "tools/compare/evidence/sand-tomb-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "f95ed12ecdb325f6233146a5228798c8f1a1c160e3b6e2dbdc90c1c90e5b13d4",
+      "rawRgbSequenceSha256": "c30934ab140bf58abd106cdff4c3bad4a5115bcfbffe97791a1ce30f41db86bb",
+      "repeatRawRgbSequenceSha256": "c30934ab140bf58abd106cdff4c3bad4a5115bcfbffe97791a1ce30f41db86bb",
+      "changeMap": "tools/compare/evidence/sand-tomb-changemap-opponent.json",
+      "changeMapSha256": "75d2a1e4e90a5d4e14ca800906a5e097407fe61fe2e37ac9cf4cee8b968e624f",
+      "sourceWindow": { "startFrame": 81, "endFrame": 204, "frameCount": 124, "sourceFrameCount": 124 }
+    }
+  }
+}

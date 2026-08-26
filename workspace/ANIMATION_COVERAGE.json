@@ -7050,11 +7050,21 @@
     "tools/battle-lab/mechanic-sand-tomb-player-dugtrio-opponent-onix.json",
     "tools/battle-lab/mechanic-sand-tomb-opponent-dugtrio-player-onix.json",
     "tools/compare/sandTombSourceAudit.ts",
+    "tools/compare/sandTombProbe.py",
+    "tools/compare/sandTombEvidence.ts",
+    "tools/compare/fixtures/sand-tomb-evidence.json",
+    "tools/compare/evidence/sand-tomb-player-dense-state.json.gz",
+    "tools/compare/evidence/sand-tomb-opponent-dense-state.json.gz",
+    "tools/compare/evidence/sand-tomb-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/sand-tomb-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/sand-tomb-changemap-player.json",
+    "tools/compare/evidence/sand-tomb-changemap-opponent.json",
     "tools/compare/extractSandTombAssets.ts",
     "src/animation/assets/sand-tomb-mud-sand.json",
-    "tests/animation/sandTombSourceCheckpoint.test.ts"
+    "tests/animation/sandTombSourceCheckpoint.test.ts",
+    "tests/animation/sandTombEvidenceCheckpoint.test.ts"
    ],
-   "goal": "UNFULFILLED source/asset/staging checkpoint only: complete Move_SAND_TOMB plus SandTombSwirlingDirt ROM/source intervals, all five generated components, sole legal Level-50 set-372 Dugtrio carrier, bilateral capture-free legal parties, callback/task/audio/resource/cleanup branches, and the shared MUD_SAND source asset are pinned. Sand Tomb remains unsupported with no exact, partial, staged, framebuffer, reducer, seam, renderer, or sibling credit."
+   "goal": "UNFULFILLED bilateral dense evidence checkpoint only: complete 124-row player-back plus 124-row opponent-front source/state/raw-RGB windows through first inactive cleanup reproduce twice fresh byte-identically and pin all 18 vortex lifecycles/allocation/painter order, ShakeMon, both simple-palette programs, target-panned audio, resources/tags, display latches, immutable gameplay/RNG state, and animation RNG. Sand Tomb remains unsupported with no exact, partial, staged, framebuffer, reducer, seam, renderer, or sibling credit."
   },
   {
    "id": "eruption-warm-rock",

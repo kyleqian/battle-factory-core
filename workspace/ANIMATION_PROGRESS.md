@@ -1,3 +1,11 @@
+# MOVE_SAND_TOMB bilateral dense evidence checkpoint — unsupported (2026-08-26 worker)
+
+- **State:** Level 50 remains **213/276 exact, 0 partial / 0 staged, 63 unsupported**. MOVE_SAND_TOMB remains unsupported and `sand-tomb-vortex` remains explicitly unfulfilled; no reducer, typed seam, compositor, framebuffer, move, component, or sibling credit is granted.
+- **Evidence:** Retained complete consecutive Battle Scene ON source/state and chronological raw RGB888 windows through first inactive cleanup: player-back frames **77..200, 124/124 rows** and opponent-front **81..204, 124/124 rows**. Both legal orientations reproduce twice fresh byte-identically: dense JSON `04db9d3f…` / `34c5ff4a…`, raw RGB sequences `5c5a7435…` / `c30934ab…`; normalized maps are `66c45974…` / `75d2a1e4…`.
+- **Verified:** Strict hermetic replay pins both source-pointer parities, every cursor/wait/arg row, all **18** `gSwirlingDirtSpriteTemplate` allocations/callback lifecycles/painter positions, the age **4..87 (84-row)** `AnimTask_ShakeMon_Step`, both age **4..25 / 100..121** simple-palette programs, side-correct target-panned `SE_M_SAND_TOMB`, MUD_SAND tag **10074** ages **1..122**, OAM/matrix/palette preceding-row display latches **123/123** bilaterally, immutable parties/engine/semantic state, zero gameplay-RNG transitions, **123** animation-RNG transitions, raw per-row framebuffer hashes, and tag/task/sprite cleanup at inactive age 123.
+- **Next:** Keep Sand Tomb unsupported. A separate step must add a source-relative reducer, typed seam, and ordinary compositor, then prove complete twice-fresh bilateral production framebuffer equality before any acceptance or track credit.
+- **Notes:** No production source, battleScene/core, gameplay/status/damage/RNG/controller/turn/round/facility ownership, boundary/barrier, latch ledger, coverage count/status, or sibling status changed.
+
 # MOVE_SAND_TOMB source/asset/legal-staging checkpoint — unsupported (2026-08-26 worker)
 
 - **State:** Level 50 remains **213/276 exact, 0 partial / 0 staged, 63 unsupported**. MOVE_SAND_TOMB remains unsupported; `sand-tomb-vortex` is an explicitly unfulfilled source/asset/staging track with no move, framebuffer, component, or sibling credit.
