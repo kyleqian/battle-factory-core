@@ -39,7 +39,6 @@ const SOURCE_CREATE_WAIT = 22;
 const SOURCE_HORIZONTAL_WAIT = 80;
 const SOURCE_HORIZONTAL_START = 24;
 const SOURCE_HORIZONTAL_FINAL_ZERO = 105;
-const SOURCE_CLOSING_START = 106;
 const OAM_HFLIP = 0x8000;
 const OAM_PRIORITY = 2;
 const DEFAULT_OAM_CENTER_OFFSET = 16;
@@ -165,7 +164,7 @@ interface MutableRock {
   readonly birthAge: number;
   readonly tileOffset: 0 | 16 | 32 | 48;
   readonly targetY: number;
-  readonly destroyAge: number;
+  destroyAge: number;
   state: 0 | 1 | 2;
   x: number;
   y: number;
@@ -268,6 +267,7 @@ function stepRock(rock: MutableRock, age: number): void {
       }
       rock.state = 1;
       // Deliberate source fall-through from case 0 into case 1.
+      // falls through
     case 1:
       rock.y += 8;
       if (rock.y >= rock.targetY) {
