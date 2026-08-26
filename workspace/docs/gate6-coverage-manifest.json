@@ -463,12 +463,12 @@
     "hooks": {
       "abilities": {
         "total": 78,
-        "oracleReceipted": 27,
+        "oracleReceipted": 32,
         "zeroFactoryWidened": 4
       },
       "holdEffects": {
         "total": 67,
-        "oracleReceipted": 4,
+        "oracleReceipted": 6,
         "zeroFactoryWidened": 24
       }
     },
@@ -94025,9 +94025,26 @@
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R11",
               "kind": "oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/gate6-first-turn-decay-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-gate6-first-turn-decay-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/gate6-first-turn-decay-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tests/gate6IsFirstTurnDecayReceipt.test.ts",
+              "locator": "Speed Boost suppressed on the switch-in turn, firing from the next turn on",
+              "kind": "battle-scene-off-family-receipt"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "R11 remains the direct Speed Boost receipt; the isFirstTurn-decay pack is extra stock-ROM evidence that the ABILITYEFFECT_ENDTURN arm is gated OFF on NINJASK's switch-in turn (isFirstTurn := 2, no SPEED BOOST message in that end-of-turn window) and then fires on every following turn as the gate is `!= 2`, not `== 0`."
         },
         {
           "id": "ability:ABILITY_BATTLE_ARMOR",
@@ -94068,7 +94085,7 @@
         {
           "id": "ability:ABILITY_STURDY",
           "label": "ABILITY_STURDY",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 5,
           "factoryCarrierCount": 42,
           "legalCarrierCount": 17,
@@ -94078,7 +94095,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 5,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "gate6-ohko-off"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -94097,14 +94116,39 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "tools/battle-lab/gate6-ohko-sturdy-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/gate6-ohko-hit-off.json",
+              "kind": "paired-control-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/gate6-ohko-miss-off.json",
+              "kind": "paired-control-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-gate6-ohko-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/gate6-ohko-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tests/gate6OhkoReceipt.test.ts",
+              "locator": "STURDY arm alongside the hit/miss control arms",
+              "kind": "battle-scene-off-family-receipt"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "Dedicated Battle Scene OFF Sturdy receipt: FISSURE into a STURDY FORRETRESS reaches BattleScript_SturdyPreventsOHKO with gLastUsedAbility = 5 and ZERO Random() draws — Cmd_tryKO's ability branch precedes the accuracy roll — printing “Foe FORRETRESS was protected by STURDY!” with HP pinned at 150, against hit/miss control arms that each spend exactly one draw."
         },
         {
           "id": "ability:ABILITY_DAMP",
           "label": "ABILITY_DAMP",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 6,
           "factoryCarrierCount": 16,
           "legalCarrierCount": 8,
@@ -94114,7 +94158,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 5,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "gate6-damp-explosion-off"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -94133,9 +94179,34 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "tools/battle-lab/gate6-damp-explosion-attacker-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/gate6-damp-explosion-target-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/gate6-damp-explosion-control-off.json",
+              "kind": "paired-control-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-gate6-damp-explosion-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/gate6-damp-explosion-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tests/gate6DampExplosionReceipt.test.ts",
+              "locator": "attacker-held and target-held Damp arms plus the no-Damp control",
+              "kind": "battle-scene-off-family-receipt"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "Dedicated Battle Scene OFF Damp receipt: attacker-held and target-held Damp both send EXPLOSION to BattleScript_DampStopsExplosion with both active HP values preserved, zero action RNG calls, gBattlerTarget retargeted to the Damp holder, and ability 6 recorded into BATTLE_HISTORY->abilities, against a no-Damp control that spends three action draws and zeroes the attacker."
         },
         {
           "id": "ability:ABILITY_LIMBER",
@@ -94902,9 +94973,30 @@
               "path": "docs/gate6-interaction-matrix-scout.md",
               "locator": "R13",
               "kind": "oracle-receipt"
+            },
+            {
+              "path": "tools/battle-lab/issue128-ability-history-intimidate-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/issue128-ability-history-control-off.json",
+              "kind": "paired-control-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-issue128-ability-history-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/issue128-ability-history-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tests/issue128AbilityHistoryReceipt.test.ts",
+              "locator": "Intimidate arm records ability 22 on the player's slot",
+              "kind": "battle-scene-off-family-receipt"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "R12/R12b/R13 remain the direct Intimidate receipts; the 2026-08-25 ability-history pack is extra stock-ROM evidence that an Intimidate holder on battler 1 records ability 22 into BATTLE_HISTORY->abilities[0] (the PLAYER's slot, not the holder's), against a control lead that records nothing."
         },
         {
           "id": "ability:ABILITY_SHADOW_TAG",
@@ -95625,7 +95717,7 @@
         {
           "id": "ability:ABILITY_TRACE",
           "label": "ABILITY_TRACE",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 36,
           "factoryCarrierCount": 16,
           "legalCarrierCount": 5,
@@ -95636,7 +95728,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 2,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "issue128-ability-history-off"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -95655,9 +95749,34 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "tools/battle-lab/issue128-ability-history-trace-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/issue128-ability-history-intimidate-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/issue128-ability-history-control-off.json",
+              "kind": "paired-control-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-issue128-ability-history-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/issue128-ability-history-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tests/issue128AbilityHistoryReceipt.test.ts",
+              "locator": "TRACE arm records the copied ability, plus the Intimidate and control arms",
+              "kind": "battle-scene-off-family-receipt"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "Dedicated Battle Scene OFF Trace receipt: GARDEVOIR's TRACE fires on the stock ROM, copies the player GOLDUCK's ABILITY_DAMP, and the COPIED ability (6) — not the holder's — lands in BATTLE_HISTORY->abilities[0], which short-circuits 8 `get_ability AI_TARGET` guesses and collapses the AI's turn-2 window from the control's 14 draws to 6."
         },
         {
           "id": "ability:ABILITY_HUGE_POWER",
@@ -95812,7 +95931,7 @@
         {
           "id": "ability:ABILITY_WATER_VEIL",
           "label": "ABILITY_WATER_VEIL",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 41,
           "factoryCarrierCount": 9,
           "legalCarrierCount": 4,
@@ -95823,7 +95942,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 11,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "gate6-water-veil-off"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -95842,9 +95963,30 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "tools/battle-lab/gate6-water-veil-prevents-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/gate6-water-veil-control-off.json",
+              "kind": "paired-control-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-gate6-water-veil-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/gate6-water-veil-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tests/gate6WaterVeilReceipt.test.ts",
+              "locator": "Water Veil burn-prevention arm and control",
+              "kind": "battle-scene-off-family-receipt"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "Dedicated Battle Scene OFF Water Veil receipt: WILL-O-WISP into a WATER VEIL WAILORD routes through BattleScript_WaterVeilPrevents -> BattleScript_BRNPrevention, the stock ROM prints “Foe WAILORD’s WATER VEIL prevents burns!”, and the target's status1 stays 0 while the paired control burns normally."
         },
         {
           "id": "ability:ABILITY_MAGNET_PULL",
@@ -97173,7 +97315,7 @@
         {
           "id": "ability:ABILITY_ARENA_TRAP",
           "label": "ABILITY_ARENA_TRAP",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 71,
           "factoryCarrierCount": 6,
           "legalCarrierCount": 3,
@@ -97183,7 +97325,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 4,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "gate6-arena-trap-off"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -97202,9 +97346,30 @@
             {
               "path": "src/data/gen/battle-frontier-mons.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "tools/battle-lab/gate6-arena-trap-trapped-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/gate6-arena-trap-control-off.json",
+              "kind": "paired-control-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-gate6-arena-trap-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/gate6-arena-trap-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tests/gate6ArenaTrapReceipt.test.ts",
+              "locator": "trapped party-menu refusal and Levitate control",
+              "kind": "battle-scene-off-family-receipt"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "Dedicated Battle Scene OFF Arena Trap receipt, and the refusal is a PARTY-MENU refusal, not a battle script: HandleTurnActionSelectionState opens the menu with gPartyMenu.action = PARTY_ACTION_ABILITY_PREVENTS and committing SWITCH prints “Foe DUGTRIO’s ARENA TRAP prevents switching!” into gStringVar4 with zero Random() draws — Cmd_jumpifcantswitch has no ability branch and no gNoEscapeStringIds string is ever produced (that table is the B_ACTION_RUN path), while the LEVITATE control switches freely."
         },
         {
           "id": "ability:ABILITY_VITAL_SPIRIT",
@@ -97691,7 +97856,7 @@
         {
           "id": "hold-effect:HOLD_EFFECT_RESTORE_PP",
           "label": "HOLD_EFFECT_RESTORE_PP",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 7,
           "factoryCarrierCount": 2,
           "legalCarrierCount": 1,
@@ -97701,7 +97866,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 2,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "gate6-leppa-berry-off"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -97720,9 +97887,26 @@
             {
               "path": "src/data/gen/battle-frontier-held-items.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "tools/battle-lab/gate6-leppa-berry-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-gate6-leppa-berry-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/gate6-leppa-berry-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tests/gate6LeppaBerryReceipt.test.ts",
+              "locator": "PP walk to zero, one-shot restore, and item clear",
+              "kind": "battle-scene-off-family-receipt"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "Dedicated Battle Scene OFF Leppa Berry receipt: emptying HORN DRILL's slot-0 PP fires the berry at that turn's end-of-turn item poll, writing 5 PP (0 + holdEffectParam 10, capped at the move's max) to BOTH the battler copy and the persistent party record before the STRINGID_PKMNSITEMRESTOREDPP message, then clearing the held item — one-shot, with no second restore over the next four turns."
         },
         {
           "id": "hold-effect:HOLD_EFFECT_CURE_CONFUSION",
@@ -98557,7 +98741,7 @@
         {
           "id": "hold-effect:HOLD_EFFECT_FLINCH",
           "label": "HOLD_EFFECT_FLINCH",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 30,
           "factoryCarrierCount": 27,
           "legalCarrierCount": 1,
@@ -98567,7 +98751,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 2,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "issue129-kingsrock-ko-off"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -98586,9 +98772,38 @@
             {
               "path": "src/data/gen/battle-frontier-held-items.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "tools/battle-lab/issue129-kingsrock-ohko-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/issue129-kingsrock-eq-ko-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/issue129-kingsrock-eq-survive-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/issue129-noitem-ohko-off.json",
+              "kind": "paired-control-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-issue129-kingsrock-ko-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/issue129-kingsrock-ko-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tests/issue129KingsRockKoReceipt.test.ts",
+              "locator": "King's Rock moveend draw on OHKO KO, non-OHKO KO, and non-KO hit versus the no-item control",
+              "kind": "battle-scene-off-family-receipt"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "Dedicated Battle Scene OFF King's Rock receipt: the holder's MOVEEND_KINGSROCK_SHELLBELL Random() draw is observed on an OHKO KO, on a non-OHKO KO, and on a non-KO hit, and is ABSENT in the same fixture with the item removed — so a faint does not suppress state 12."
         },
         {
           "id": "hold-effect:HOLD_EFFECT_BUG_POWER",
@@ -99739,9 +99954,22 @@
             {
               "path": "src/data/gen/battle-frontier-held-items.json",
               "kind": "factory-carrier-join"
+            },
+            {
+              "path": "tools/battle-lab/issue129-kingsrock-ohko-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/receipts/issue129-kingsrock-ko-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tests/issue129KingsRockKoReceipt.test.ts",
+              "locator": "shellBellDmg survives the faint into moveend state 12",
+              "kind": "battle-scene-off-family-receipt"
             }
           ],
-          "notes": "Engine references and source-hook presence are census facts, not semantic acceptance."
+          "notes": "No direct Shell Bell receipt is claimed: the King's Rock pack observes gSpecialStatuses[target].shellBellDmg still recorded at moveend state 12 on a KO, but the attacker was at full HP so NO heal was staged live on the stock ROM — the heal itself remains kernel-pinned only until a live heal arm is receipted."
         },
         {
           "id": "hold-effect:HOLD_EFFECT_LUCKY_PUNCH",
