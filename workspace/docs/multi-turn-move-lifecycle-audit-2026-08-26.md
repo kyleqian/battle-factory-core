@@ -197,3 +197,36 @@ escalation is a pure shift.
 | F4 | **there is no reset on "chose a different move"** — the step brief's `TryClearRageAndFuryCutter` does **not exist in Emerald** (`grep -rn "TryClearRageAndFuryCutter" $REF/src $REF/include` → zero hits; it is a pokeemerald-expansion symbol). Emerald resets `furyCutterCounter` in exactly four places: `Cmd_furycuttercalc`'s miss branch (`:8584`), `CancelMultiTurnMoves` (`battle_util.c:887`), and `ClearFuryCutterDestinyBondGrudge` (`battle_util.c:3815-3819`) called from `HandleAction_UseItem` (`:317`) and the failed-run branch of `HandleAction_Run` (`:518`) | as cited | port has the matching set: `battleScriptFuryCutterOpcode.ts:45`, `battleScriptMultiTurnCancellation.ts:76`, plus the switch-out/faint clear at `battleScriptHitChainOpcode.ts:4558-4559` and the switch-in clear at `battleScriptSwitchinOpcode.ts:578`; **no** port site resets it on a different move either | SAME (both sides let the counter survive an intervening different move; the two `ClearFuryCutterDestinyBondGrudge` call sites are UNREACHABLE-IN-SINGLES-FRONTIER — bag items are disabled and running from a trainer battle is impossible, `battle_util.c:487-540`) |
 | F5 | the switch-out / switch-in clears (`gDisableStructs` wipe) | audit A's slice — `docs/switch-lifecycle-audit-2026-08-26.md` | `battleScriptHitChainOpcode.ts:4550-4570`, `battleScriptSwitchinOpcode.ts:578` | cross-ref only, not re-audited here |
 | F6 | `CheckMoveLimitations`'s Torment branch calls `CancelMultiTurnMoves` during action selection (so Torment can break a Rollout/Thrash/Uproar lock before the move is even chosen) | `battle_util.c:999-1001` | choose-move ladder — `docs/turn-machinery-audit-2026-08-26.md` §4's slice | cross-ref only, not re-audited here |
+
+## §4. WRAP / BIND / FIRE SPIN / CLAMP / WHIRLPOOL / SAND TOMB
+
+**Cells.** `status2 & STATUS2_WRAPPED` (bits 13-15, a 3-bit countdown,
+`include/constants/battle.h:140-141`), `gBattleStruct->wrappedMove[battler*2]`
+(a 2-byte little-endian move id), `gBattleStruct->wrappedBy[battler]`. **No
+`gLockedMoves`, no `STATUS2_MULTIPLETURNS`** — the *trapped* mon is the one
+carrying state, and the trapper is free to do anything next turn. This is why
+`CancelMultiTurnMoves` does **not** clear `STATUS2_WRAPPED`
+(`battle_util.c:877-888` lists four status2 bits; `STATUS2_WRAPPED` is not one).
+
+**The turn-count constant, cited exactly.** The step brief's `(Random() % 4) + 2`
+is **wrong for Emerald**. The source is
+`gBattleMons[gEffectBattler].status2 |= STATUS2_WRAPPED_TURN((Random() & 3) + 3); // 3-6 turns`
+— `battle_script_commands.c:2618`. One draw, on the applying hit only, and
+**skipped entirely** if the target is already wrapped (`:2612-2615`).
+
+| # | step | source | port site | verdict |
+| --- | --- | --- | --- | --- |
+| W1 | already-wrapped target → no re-roll, no re-stamp, plain `gBattlescriptCurrInstr++` | `battle_script_commands.c:2612-2615` | `battleScriptHitChainOpcode.ts:3775-3781` (`advance`, documented at `:3757`) | SAME |
+| W2 | duration draw `STATUS2_WRAPPED_TURN((Random() & 3) + 3)` — 3-6 turns, exactly one `Random()` | `battle_script_commands.c:2618` | `battleScriptHitChainOpcode.ts:3783-3791` (`(randomValue & 3) + 3`, `turns << 13`; ledger label `"SetMoveEffect Wrap duration ((Random() & 3) + 3)"`) | SAME |
+| W3 | `wrappedMove` stamped as two bytes, `wrappedBy = gBattlerAttacker` | `battle_script_commands.c:2620-2622` | `battleScriptHitChainOpcode.ts:3792-3793` (single `wrappedMove` halfword + `wrappedBy`; the 2-byte split is a C storage detail, `battleScriptRulesContext.ts:409` documents the collapse) | SAME-ORDER-EQUIVALENT |
+| W4 | `MULTISTRING_CHOOSER` from the `gTrappingMoves` scan, which breaks at `>= NUM_TRAPPING_MOVES - 1` (5) **without comparing index 5** | `battle_script_commands.c:2627-2633`; table `battle_message.c:1256-1265` (BIND, WRAP, FIRE_SPIN, CLAMP, WHIRLPOOL, SAND_TOMB, `0xFFFF` "never read"); strings `battle_message.c:1038-1046` | `battleScriptHitChainOpcode.ts:3795-3796` (`indexOf`, `-1 → length - 1 = 5`) + table at `:294` | SAME-ORDER-EQUIVALENT (source yields `min(index, 5)`; the only move that can reach index 5 is SAND_TOMB, which the source's early break also maps to 5. Identical for all six reachable moves.) |
+| W5 | `ENDTURN_WRAP` guard is `(status2 & STATUS2_WRAPPED) && hp != 0` | `battle_util.c:1593` | `battleEndTurnOrchestration.ts:824` (both terms) | SAME |
+| W6 | decrement `status2 -= STATUS2_WRAPPED_TURN(1)` runs **before** the branch | `battle_util.c:1595` | `battleEndTurnOrchestration.ts:828` (`status2 - (1 << 13)`) | SAME-ORDER |
+| W7 | still wrapped → `gBattleMoveDamage = maxHP / 16` (floored, min 1) and `BattleScript_WrapTurnDmg` (`playanimation B_ANIM_TURN_TRAP`, `STRINGID_PKMNHURTBY`, then `BattleScript_DoTurnDmg`) — **zero `Random()`** | `battle_util.c:1596-1610`; script `data/battle_scripts_1.s:3829-3833` | `battleEndTurnOrchestration.ts:829-833` (`floorDivAtLeastOne(maxHP, 16)`, `WRAP_TURN_DMG_LABEL`) | SAME |
+| W8 | counter hit zero → the **"was freed"** branch: no damage, `BattleScript_WrapEnds` prints `STRINGID_PKMNFREEDFROM` and `end2` | `battle_util.c:1611-1619`; script `:3835-3838` | `battleEndTurnOrchestration.ts:834` (`WRAP_ENDS_LABEL`) | SAME |
+| W9 | both branches buffer the move name into `gBattleTextBuff1` from `wrappedMove` before executing | `battle_util.c:1601-1605` / `:1613-1617` | the port's tick script path supplies the same buffer (`battleScriptIngrainLeechSeedWrapOpcode.ts:554` `battleTextBuff1Move`) | SAME |
+| W10 | escape prevention read #1 — action selection: a battler with `STATUS2_WRAPPED` cannot pick Run/Switch | `battle_main.c:4072`, `:4242` | `docs/turn-machinery-audit-2026-08-26.md`'s action-menu slice | UNVERIFIED — the port cite for the *action-menu* escape gate (as opposed to the opcode gate in W11) was not located inside this row's budget; what is missing is the `battleMenu.ts`/`factoryBattleScriptFullTurnDecision.ts` line that reads `STATUS2_WRAPPED` during action selection |
+| W11 | escape prevention read #2 — `Cmd_jumpifcantswitch`: unless `SWITCH_IGNORE_ESCAPE_PREVENTION` is set, `(STATUS2_WRAPPED \| STATUS2_ESCAPE_PREVENTION) \|\| STATUS3_ROOTED` takes the fail jump | `battle_script_commands.c:4700-4713` | `battleScriptJumpifcantswitchOpcode.ts:137` (same mask, same `SWITCH_IGNORE_ESCAPE_PREVENTION` gate) | SAME |
+| W12 | escape prevention read #3 — `HandleAction_Run` | `battle_util.c:526` | none needed | UNREACHABLE-IN-SINGLES-FRONTIER (running from a trainer battle is impossible; `battle_util.c:487-540`) |
+| W13 | Rapid Spin frees the *attacker*: `Cmd_rapidspinfree` clears `STATUS2_WRAPPED`, re-points `gBattlerTarget` at `wrappedBy`, buffers `wrappedMove`, and runs `BattleScript_WrapFree` | `battle_script_commands.c:8821-8837` | `battleScriptIngrainLeechSeedWrapOpcode.ts:536-556` (`~STATUS2_WRAPPED_MASK`, `wrappedBy: 0`, `target: attackerState.wrappedBy`, `battleTextBuff1Move`) | SAME-ORDER |
+| W14 | the trapper leaving frees its victims (`wrappedBy == leaver`) | `battle_main.c:3199-3200`, `:3281-3282` | `battleScriptHitChainOpcode.ts:4594-4605` | cross-ref only — `docs/switch-lifecycle-audit-2026-08-26.md` §6 / `docs/faint-replacement-audit-2026-08-26.md`, declared out of scope here |
