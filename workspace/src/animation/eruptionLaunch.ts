@@ -333,6 +333,32 @@ function advanceRocks(wave: MutableWave, age: number): void {
   wave.taskData[6] = activeRocks(wave).length;
 }
 
+/** The source's case-0 setup continues into this same logical task step. */
+function runInitialEruptStep(wave: MutableWave, profile: Readonly<EruptionLaunchProfile>): void {
+  const task = wave.taskData;
+  task[1]! += 1;
+  if (task[1]! > 1) {
+    task[1] = 0;
+    task[2]! += 1;
+    wave.battler.x2 = task[2]! & 1 ? 3 : -3;
+  }
+  if (profile.side === "opponent") {
+    task[3]! += 1;
+    if (task[3]! > 4) {
+      task[3] = 0;
+      wave.battler.y += 1;
+    }
+  }
+  if (!updateErupt(wave)) {
+    setBattlerYOffsetFromYScale(wave);
+    wave.battler.x2 = 0;
+    task[1] = 0;
+    task[2] = 0;
+    task[3] = 0;
+    task[0] = 2;
+  }
+}
+
 function runTaskStep(wave: MutableWave, profile: Readonly<EruptionLaunchProfile>, age: number): void {
   const task = wave.taskData;
   switch (task[0]) {
@@ -343,29 +369,10 @@ function runTaskStep(wave: MutableWave, profile: Readonly<EruptionLaunchProfile>
       task[1] = 0;
       task[2] = 0;
       task[3] = 0;
-      // falls through
+      runInitialEruptStep(wave, profile);
+      break;
     case 1:
-      task[1]! += 1;
-      if (task[1]! > 1) {
-        task[1] = 0;
-        task[2]! += 1;
-        wave.battler.x2 = task[2]! & 1 ? 3 : -3;
-      }
-      if (profile.side === "opponent") {
-        task[3]! += 1;
-        if (task[3]! > 4) {
-          task[3] = 0;
-          wave.battler.y += 1;
-        }
-      }
-      if (!updateErupt(wave)) {
-        setBattlerYOffsetFromYScale(wave);
-        wave.battler.x2 = 0;
-        task[1] = 0;
-        task[2] = 0;
-        task[3] = 0;
-        task[0] = 2;
-      }
+      runInitialEruptStep(wave, profile);
       break;
     case 2:
       task[1]! += 1;
