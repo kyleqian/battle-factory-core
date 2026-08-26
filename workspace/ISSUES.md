@@ -75,42 +75,19 @@ menu through the first message box (ROM: "tightening its focus" first, then the 
 move); control = the same fixture with another move selected. Fix shape: emit the pre-pass as its
 own end2 script event between turn-order fixing and action 1, in battler-index order.
 
-## #140 — `HandleAction_UseMove`'s four re-target branches skip `GetMoveTarget`'s `MOVE_TARGET_SELECTED` draw loop (forced Struggle, Encore, overwritten slot): ≥1 `Random()` per such action on the ROM, 0 in the port — RNG-affecting
+## #140 — [FIXED 2026-08-26 except one branch] `HandleAction_UseMove:133` (chosen slot overwritten by Mimic/Transform) still skips `GetMoveTarget`'s `MOVE_TARGET_SELECTED` draw loop
 
-**Found 2026-08-26** (turn-machinery audit §4 rows 4.10/4.12/4.13/4.14 / Finding 3;
-supervisor-verified at source and port). Source `battle_util.c:3850-3853` (`GetMoveTarget`,
-`MOVE_TARGET_SELECTED` arm): `do { targetBattler = Random() % gBattlersCount; } while
-(targetBattler == gBattlerAttacker || side == GetBattlerSide(targetBattler) || gAbsentBattlerFlags
-& gBitTable[targetBattler]);` — in singles exactly one of two outcomes exits, so the loop draws a
-geometric number of `Random()`s (≥1, mean 2); only an active Follow Me on the opposing side
-short-circuits it (`:3843-3846`). `HandleAction_UseMove` calls `GetMoveTarget(…, NO_TARGET_OVERRIDE)`
-on `:105` (forced Struggle — `noValidMoves`), `:117` (Encore match), `:128` (Encore whose slot was
-overwritten) and `:133` (slot overwritten by Mimic/Transform); the ordinary chosen-move path `:135-138`
-does not call it (the target was set at selection without a draw). Port
-`factoryBattleScriptFullTurnDecision.ts:1959-1987` `sourceMoveTarget` is pure — its docstring
-(`:1951-1958`) claims "every non-user shape resolves … without consuming RNG", which is right for
-DEPENDS/BOTH/FOES_AND_ALLY/OPPONENTS_FIELD/RANDOM and WRONG for `MOVE_TARGET_SELECTED`;
-`buildActionContext` (`:1489-1523`) draws nothing. The port already models this exact do/while for
-`VARIOUS_GET_MOVE_TARGET` at `battleScriptSwitchinOpcode.ts:1020-1032` — it is simply not wired to
-the four `HandleAction_UseMove` branches.
-
-**Consequence (most severe of the three):** the turn's RNG cursor shifts by ≥1 on every forced
-Struggle / Encored action — every later accuracy, damage, crit and effect roll in the battle comes
-from a different LCG point. Forced Struggle is common in long battles (ISSUES #123 counted 456
-Struggle actions in one census); Encore has 7 rental carriers; Mimic 2, Transform 1.
-
-**Receipt recipe (A/B draw count, Encore arm):** `mechanicLab` `overrides.parties`, Battle Scene
-OFF, frame 0 = turn-1 action menu, A pulses past prompts. Arm A: player slot 0 = an Encore carrier
-(Speed 0, moves second); opponent slot 0 = max-Speed mon with the same `MOVE_TARGET_SELECTED`
-attack `M` in all four slots. Turn 1: opponent `M`, player ENCORE. Turn 2: the opponent's action
-takes `:112-118` → `GetMoveTarget`. Arm B (control): identical but the player uses a no-op status
-move on turn 1. Expected: arm A's turn-2 `Random()` count exceeds arm B's by ≥1 (geometric, p=½
-across seeds); the port shows 0 difference. Struggle arm (optional): #138's turn-3 position without
-Encore (opponent's four slots all `M`, player DISABLEs `M`) — both ROM and port Struggle there, so
-the only difference is the draw count. Fix shape: on the four branches, run the modeled
-`VARIOUS_GET_MOVE_TARGET` loop against the battle RNG (respecting Follow Me) instead of
-`sourceMoveTarget`; correct the docstring; pin the ROM's per-arm draw counts; re-pin moved
-curated-seed trajectories with attribution (a Struggle-bearing soak pin WILL move).
+**Remainder of #140** (the forced-Struggle `:105`, Encore-match `:117` and overwritten-Encore
+`:128` branches were fixed with a stock-ROM receipt on 2026-08-26: `9c886479`/`3361e0c4`/`a3a5642e`,
+`tools/probe/receipts/issue140-getmovetarget-off.json` — Encore/Struggle-forced actions draw
+1/2/1/1/3 `Random()`s on the ROM, ordinary prologues 0; port now runs the modeled do/while via
+`drawBattleScriptSelectedMoveTarget`, Follow Me short-circuit honoured). The fourth source branch,
+`battle_util.c:133` — `gBattleMons[].moves[gCurrMovePos] != gChosenMoveByBattler[]` after Mimic or
+Transform overwrote the chosen slot — needs the selection-time bank `gChosenMoveByBattler`, which
+`factoryBattleScriptFullTurnDecision.ts`'s action reducer does not model (`actionMoveId` reads the
+live slot); named in `drawActionMoveTarget`'s docstring, not silently folded. Carriers: Mimic 2,
+Transform 1 rental entries. Port it by banking the chosen move id at selection and comparing at
+action time (same draw loop), with a Tier-1 pin; a receipt needs a Mimic/Transform fixture.
 
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 
