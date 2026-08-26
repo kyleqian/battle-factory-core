@@ -979,6 +979,7 @@ import {
   sceneOnToxicView,
   sceneOnEarthquakeView,
   sceneOnEruptionView,
+  sceneOnIceBeamView,
   sceneOnFissureView,
   sceneOnHardenView,
   sceneOnIronDefenseView,
@@ -1067,6 +1068,7 @@ import {
   type SceneOnGuillotineConfig,
   type SceneOnFissureConfig,
   type SceneOnEruptionConfig,
+  type SceneOnIceBeamConfig,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
   type SceneOnThunderWavePresentationState,
@@ -14540,6 +14542,151 @@ export function renderSceneOnMovePresentation(
       fb,
       playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "ERUPTION!",
+      99,
+    );
+    return;
+  }
+  if (state.config.move === "ICE_BEAM") {
+    const iceBeamState = state as SceneOnMovePresentationState<SceneOnIceBeamConfig>;
+    const view = sceneOnIceBeamView(iceBeamState);
+    // BuildOamBuffer, affine DMA, and palette DMA all expose the preceding
+    // source row. Age zero/one retain the pre-animation palette, which is
+    // the same clamped predecessor used here.
+    const displayed = sceneOnIceBeamView({
+      ...iceBeamState,
+      age: Math.max(0, iceBeamState.age - 1),
+    });
+    const attackerIsPlayer = view.attacker.geometry.side === "player";
+    if (attackerIsPlayer === (view.target.geometry.side === "player")) {
+      throw new Error("ICE_BEAM presentation requires battlers on opposite sides");
+    }
+    const battlerArt = (battler: typeof view.attacker): {
+      readonly tileset: Tileset;
+      readonly palette: RgbColor[];
+    } => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[
+          battler.species
+        ];
+        if (!source) throw new Error(`ICE_BEAM missing player-back art for ${battler.species}`);
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[
+        battler.species
+      ];
+      if (!source) throw new Error(`ICE_BEAM missing opponent-front art for ${battler.species}`);
+      return { tileset: subTileset(source.tileset, 0, 8), palette: source.palette };
+    };
+    const attackerArt = battlerArt(view.attacker);
+    const targetArt = battlerArt(view.target);
+    const program = (name: "opening-bg" | "target-fade-in" | "target-fade-out" | "closing-bg") =>
+      displayed.palette.programs.find((entry) => entry.name === name)!;
+    const fieldCoefficient = displayed.age < 183
+      ? program("opening-bg").coefficient
+      : program("closing-bg").coefficient;
+    const targetCoefficient = displayed.age < 145
+      ? program("target-fade-in").coefficient
+      : program("target-fade-out").coefficient;
+    const iceBluePacked = mgbaColorFromBgr555(20 << 5 | 31 << 10);
+    const iceBlue = {
+      r: iceBluePacked & 0xff,
+      g: iceBluePacked >>> 8 & 0xff,
+      b: iceBluePacked >>> 16 & 0xff,
+    };
+    const fieldPalettes = blendPaletteBanksToward(
+      battleBg.palette,
+      { r: 0, g: 0, b: 0 },
+      fieldCoefficient,
+    );
+    const targetPalette = blendPaletteToward(
+      targetArt.palette,
+      iceBlue,
+      targetCoefficient,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, fieldPalettes);
+
+    const targetX2 = displayed.targetMonbg.targetX2;
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetArt.tileset,
+      targetPalette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerArt.tileset,
+      attackerArt.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    // monbg copies the target to BG1/BG2 and removes its live OBJ. The copy
+    // is the eligible target-2 layer sampled by semi-transparent crystals.
+    if (view.registers.monbgEnabled) drawTarget();
+    const nonObjTarget2 = fb.slice();
+
+    const attackerSlot = view.attacker.geometry.side === "player" ? 6 : 8;
+    const targetSlot = iceBeamState.config.animationProfile.targetSpriteSlot
+      ?? (view.target.geometry.side === "player" ? 6 : 8);
+    const drawBySlot = new Map<number, () => void>([
+      [attackerSlot, drawAttacker],
+    ]);
+    if (!view.registers.monbgEnabled) drawBySlot.set(targetSlot, drawTarget);
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "palette" || sprite.invisible) continue;
+      const tileset = sprite.cellTileOffset === 4
+        ? battleAnimIceCrystalLarge
+        : battleAnimIceCrystalSmall;
+      // Outer beam crystals are affine-off and merely share matrix slot zero
+      // with the first live inner crystal in the reducer's complete register
+      // table. Their own OAM never selects that matrix.
+      const matrix = sprite.template === "gIceBeamOuterCrystalSpriteTemplate"
+        ? [256, 0, 0, 256] as const
+        : sprite.matrix;
+      drawBySlot.set(sprite.slot, () => drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        tileset,
+        battleAnimIceCrystals.palette,
+        sprite.x + sprite.x2,
+        sprite.y + sprite.y2,
+        matrix[0],
+        matrix[1],
+        matrix[2],
+        matrix[3],
+        12,
+        8,
+        false,
+      ));
+    }
+    for (const slot of displayed.order.fullPainterOrder) drawBySlot.get(slot)?.();
+
+    const profile = iceBeamState.config.fieldProfile;
+    const playerBattler = attackerIsPlayer ? view.attacker : view.target;
+    const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentBattler.species,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerBattler.species,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      attackerIsPlayer
+        ? `${view.attacker.species} used`
+        : `Foe ${view.attacker.species} used`,
+      "ICE BEAM!",
       99,
     );
     return;

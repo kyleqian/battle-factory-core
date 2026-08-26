@@ -114,7 +114,6 @@ function seamRows(
     const view = sceneOnIceBeamView({ ...state, age });
     const expected = iceBeamTimeline(config.animationProfile).frames[age]!;
     if (view.age !== age || view.attacker !== config.attacker || view.target !== config.target
-      || view.deferredCompositor !== true || view.compositor !== "deferred"
       || !same(view.source, expected.source) || !same(view.sprites, expected.sprites)
       || !same(view.tasks, expected.tasks)) fail(orientation, age, "typed Scene-ON seam changed reducer state");
   }

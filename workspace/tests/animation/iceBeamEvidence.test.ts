@@ -10,8 +10,8 @@ const sha = (path: string): string => createHash("sha256").update(readFileSync(p
 describe("MOVE_ICE_BEAM complete bilateral evidence checkpoint", () => {
   it("pins twice-fresh dense state, chronological RGB, normalized maps, and first inactive cleanup", () => {
     expect(fixture).toMatchObject({
-      schema: "ice-beam-bilateral-evidence/v1", status: "unsupported-evidence-checkpoint", coverageCredit: false,
-      acceptance: { sourceRows: 406, rawRgbRows: 406, freshRunsPerOrientation: 2, firstInactiveCleanupAge: 202, productionFramebufferRows: 0 },
+      schema: "ice-beam-bilateral-evidence/v1", status: "exact-production-presentation", coverageCredit: true,
+      acceptance: { sourceRows: 406, rawRgbRows: 406, freshRunsPerOrientation: 2, firstInactiveCleanupAge: 202, productionFramebufferRows: 406, residualPixels: 0 },
     });
     for (const key of ["audit", "assetExtractor", "asset", "probe", "changeMapBuilder", "verifier"] as const) {
       expect(sha(fixture.source[key])).toBe(fixture.source[`${key}Sha256`]);
@@ -44,7 +44,7 @@ describe("MOVE_ICE_BEAM complete bilateral evidence checkpoint", () => {
       cleanup: { age: 202, active: false, resources: false, visualTasks: 0, soundTasks: 0 },
     });
     expect(fixture.latchVerdict).toContain("AnimTask_ShakeMon2(2,0,25,1)");
-    expect(fixture.remainder).toContain("remains unsupported");
-    expect(fixture.remainder).toContain("No reducer");
+    expect(fixture.remainder).toContain("alone is exact");
+    expect(fixture.remainder).toContain("no sibling credit");
   });
 });

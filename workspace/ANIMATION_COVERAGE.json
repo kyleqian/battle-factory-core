@@ -2,6 +2,38 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_ICE_BEAM",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 bilateral Scene-ON windows retain 203 player-back plus 203 opponent-front rows through first inactive age 202; two fresh probes per orientation reproduce the retained source-state and chronological raw-RGB hashes byte-for-byte",
+    "the pure source-relative reducer and typed seam cover the complete Move_ICE_BEAM, IceBeamCreateCrystals, and IceCrystalEffectShort body: 24 outer beam crystals, 13 affine inner crystals, 3 large plus 4 small impact crystals, four palette programs, target monbg ShakeMon2, split priority, alpha, looped panning audio, allocation/painter order, resources, and cleanup",
+    "the generic production compositor consumes live visual species, sides, geometry, field chrome, ordinary RAM+1 OAM/matrix/palette transfer, target monbg display shake, source OAM affine-mode selection, target blue and field black palette programs, ICE_CRYSTALS cells, source painter order, and OBJ alpha without a retained pair gate, recording/framebuffer lookup, coordinate fitting, or absolute tick",
+    "actual core.ts to renderSceneOnMovePresentation framebuffer equality passes all 203/203 player-back plus 203/203 opponent-front rows twice, 406/406 total with zero residual pixels through cleanup; fresh post-implementation comparisons independently pass the same 406 rows per fresh pair",
+    "the semantic Delcatty mechanicLab override follows already-live Nincada visual/name buffers, which the typed config carries explicitly without specializing the renderer; unrelated Surskit-to-Grovyle species and altered geometry render through the same production path",
+    "gameplay state, damage, freeze, RNG, controller, turn, round, and facility state remain unowned; Blizzard, Icy Wind, and Psybeam remain independent exact controls and receive no sibling credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-ice-beam-player-delcatty-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-ice-beam-opponent-delcatty-player-shuckle.json",
+    "tools/compare/fixtures/ice-beam-evidence.json",
+    "tools/compare/evidence/ice-beam-player-dense-state.json.gz",
+    "tools/compare/evidence/ice-beam-opponent-dense-state.json.gz",
+    "tools/compare/evidence/ice-beam-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/ice-beam-opponent-raw-rgb.tar.gz",
+    "tools/compare/iceBeamSourceAudit.ts",
+    "tools/compare/iceBeamEvidence.ts",
+    "tools/compare/iceBeamReducerAudit.ts",
+    "tools/compare/iceBeamFramebuffer.ts",
+    "src/animation/iceBeam.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/iceBeamSourceCheckpoint.test.ts",
+    "tests/animation/iceBeamEvidence.test.ts",
+    "tests/animation/iceBeamReducer.test.ts",
+    "tests/animation/iceBeamFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_ERUPTION",
    "status": "exact",
    "covered": [
@@ -6370,7 +6402,7 @@
    "representatives": [
     "MOVE_ICE_BEAM"
    ],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/battle-lab/mechanic-ice-beam-player-delcatty-opponent-shuckle.json",
     "tools/battle-lab/mechanic-ice-beam-opponent-delcatty-player-shuckle.json",
@@ -6391,7 +6423,7 @@
     "tools/compare/iceBeamReducerAudit.ts",
     "tests/animation/iceBeamReducer.test.ts"
    ],
-   "goal": "Complete non-promoting reducer/seam checkpoint: the exact main and shared IceCrystalEffectShort ROM intervals, complete generated component graph, lowest legal Level-50 Delcatty carrier, deterministic 0x01c0-byte ICE_CRYSTALS extraction, twice-fresh 203-row bilateral dense state/raw RGB888/normalized-map windows, and a pure source-relative reducer plus typed deferred Scene-ON seam are pinned. The strict verifier measures all 406 retained rows for pointer/owner/cursor/args, sprite callbacks/Q8.8/affine/cell/flicker state, lowest-free allocation/source painter order, task/audio/panning, palette programs, monbg/register intent, tags/resources, animation RNG and immutable gameplay pass-through, cleanup, and generic live battler/geometry seam behavior; it quotes the move-specific target-monbg ShakeMon2 RAM+1 latch. Still required before any move/component credit: a production compositor and complete twice-fresh bilateral actual-core framebuffer equality. Blizzard, Icy Wind, and Psybeam remain independent exact controls; Ice Beam remains unsupported with no partial, staged, exact, component fulfillment, or sibling credit."
+   "goal": "MOVE_ICE_BEAM independently proves its complete 406-row bilateral source/reducer/seam/raw-RGB and generic production framebuffer body twice fresh with zero residual pixels: all outer/inner/impact ICE_CRYSTALS sprites, affine-off versus affine OAM selection, source painter order, four palette programs, target monbg ShakeMon2 display, split priority, alpha, distinct 4/4/0/10 looped sound schedule, resources, and cleanup. Blizzard, Icy Wind, and Psybeam remain independent exact controls and receive no sibling credit."
   },
   {
    "id": "loop-se-adjust-panning",

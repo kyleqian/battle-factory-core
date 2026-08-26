@@ -1,10 +1,10 @@
 {
   "schema": "ice-beam-bilateral-evidence/v1",
-  "status": "unsupported-evidence-checkpoint",
-  "coverageCredit": false,
-  "acceptance": {"sourceRows":406,"rawRgbRows":406,"freshRunsPerOrientation":2,"firstInactiveCleanupAge":202,"productionFramebufferRows":0},
+  "status": "exact-production-presentation",
+  "coverageCredit": true,
+  "acceptance": {"sourceRows":406,"rawRgbRows":406,"freshRunsPerOrientation":2,"firstInactiveCleanupAge":202,"productionFramebufferRows":406,"residualPixels":0},
   "source": {
-    "audit":"tools/compare/iceBeamSourceAudit.ts","auditSha256":"f7cae2b1d787cd7963ac52f0d445182d8d0e75e469f854b3324154081fe32305",
+    "audit":"tools/compare/iceBeamSourceAudit.ts","auditSha256":"fef172a4b8e6e017f6745efd5571dc6ca8c487c40eaa2cf901aa29a0eea75593",
     "assetExtractor":"tools/compare/extractIceBeamCrystalAssets.ts","assetExtractorSha256":"036f8f6fd99afa609acc466e70568e085a1e90bc68c007ce67353a8e4a8a81da",
     "asset":"src/assets/gen/battle-anim-ice-crystals.json","assetSha256":"380407a692c356413ffb638f8b6ce87198b636164978c782695228819edb7862",
     "probe":"tools/compare/iceBeamProbe.py","probeSha256":"e0b0d3ec94244259c4c559922dcf0c9380e1e31131bc82dbc7862577ed6dcfe4",
@@ -28,5 +28,5 @@
     }
   },
   "latchVerdict": "Complete bilateral evidence independently measures ordinary whole OAM and affine-matrix predecessor transfer on 202/202 comparable rows. Hardware palette equals preceding faded on 201/202 rows, with only pre-animation age 1 differing. Ice Beam's monbg AnimTask_ShakeMon2(2,0,25,1) source x2 begins at age 38, BG1/BG2 display motion at age 39, source settles at age 86, and display settles at age 87: RAM+1 for this move-specific monbg schedule.",
-  "remainder": "MOVE_ICE_BEAM remains unsupported. No reducer, typed seam, production compositor, framebuffer comparison, exact/partial/staged credit, component fulfillment, or sibling credit is claimed."
+  "remainder": "MOVE_ICE_BEAM alone is exact through the generic production compositor. Blizzard, Icy Wind, and Psybeam retain independent acceptance; no sibling credit is claimed."
 }

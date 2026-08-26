@@ -2991,11 +2991,7 @@ export interface SceneOnEruptionConfig {
   readonly animationProfile: Readonly<EruptionAnimationProfile>;
 }
 
-/**
- * Narrow Scene-ON seam for the source-relative Ice Beam reducer.  The
- * reducer state is intentionally exposed for a future compositor; this seam
- * carries no framebuffer draw path and does not infer species or coordinates.
- */
+/** Narrow Scene-ON seam for the source-relative Ice Beam reducer/compositor. */
 export interface SceneOnIceBeamConfig {
   readonly move: "ICE_BEAM";
   readonly attacker: SceneOnPresentationBattler;
@@ -4511,9 +4507,6 @@ export interface SceneOnEruptionView extends EruptionFrame {
 export interface SceneOnIceBeamView extends IceBeamFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
-  /** Scene-ON hardware state is ready for a compositor, but remains deferred. */
-  readonly deferredCompositor: true;
-  readonly compositor: "deferred";
 }
 
 export interface SceneOnFissureView extends FissureState {
@@ -9031,8 +9024,6 @@ export function sceneOnIceBeamView(
     ...iceBeamAtAge(state.age, state.config.animationProfile),
     attacker: state.config.attacker,
     target: state.config.target,
-    deferredCompositor: true,
-    compositor: "deferred",
   };
 }
 

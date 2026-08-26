@@ -88,7 +88,7 @@ if (address("Move_ICE_BEAM") !== 0x082d06c0 || address("IceBeamCreateCrystals") 
 }
 
 console.log(JSON.stringify({
-  move: "MOVE_ICE_BEAM", moveId: 58, status: "unsupported-source-asset-checkpoint",
+  move: "MOVE_ICE_BEAM", moveId: 58, status: "exact-source-asset-contract",
   sourceBounds: {
     main: { start: "0x082d06c0", endExclusive: "0x082d07f7", bytes: 311, sha256: romRange(0x082d06c0, 0x082d07f7) },
     effect: { start: "0x082d7720", endExclusive: "0x082d77a4", bytes: 132, sha256: romRange(0x082d7720, 0x082d77a4) },
@@ -105,5 +105,5 @@ console.log(JSON.stringify({
   shake: { battler: "ANIM_TARGET", x: 2, y: 0, count: 25, delay: 1 },
   carrier: { setId: 267, label: "FRONTIER_MON_DELCATTY_2", species: "SPECIES_DELCATTY", moves: carriers[0].moves },
   controls: { ice: ["MOVE_BLIZZARD", "MOVE_ICY_WIND"], soundTask: "MOVE_PSYBEAM", siblingCredit: false },
-  ownership: { reducer: false, seam: false, renderer: false, framebuffer: false, exact: false, partial: false, staged: false },
+  ownership: { reducer: true, seam: true, renderer: true, framebuffer: true, exact: true, partial: false, staged: false },
 }, null, 2));

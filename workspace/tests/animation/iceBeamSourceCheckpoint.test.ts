@@ -13,7 +13,7 @@ describe("MOVE_ICE_BEAM bounded source/asset checkpoint", () => {
   it("pins both source intervals, the complete component graph, lowest Level-50 carrier, and distinct controls", () => {
     const audit = JSON.parse(execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/iceBeamSourceAudit.ts"], { cwd: root, encoding: "utf8" }));
     expect(audit).toMatchObject({
-      move: "MOVE_ICE_BEAM", moveId: 58, status: "unsupported-source-asset-checkpoint",
+      move: "MOVE_ICE_BEAM", moveId: 58, status: "exact-source-asset-contract",
       sourceBounds: {
         main: { start: "0x082d06c0", endExclusive: "0x082d07f7", bytes: 311, sha256: "1c5b2c5be7eb05ac6e51b5e5ecf8a822d234de534659d184f8749c16b8b9e080" },
         effect: { start: "0x082d7720", endExclusive: "0x082d77a4", bytes: 132, sha256: "3da0ca21634d29ab068ed61238f9bb3129e4403019d36dbdcf4a7f722f3e5772" },
@@ -24,7 +24,7 @@ describe("MOVE_ICE_BEAM bounded source/asset checkpoint", () => {
       shake: { battler: "ANIM_TARGET", x: 2, y: 0, count: 25, delay: 1 },
       carrier: { setId: 267, label: "FRONTIER_MON_DELCATTY_2", species: "SPECIES_DELCATTY", moves: ["MOVE_FAKE_TEARS", "MOVE_SING", "MOVE_THUNDERBOLT", "MOVE_ICE_BEAM"] },
       controls: { ice: ["MOVE_BLIZZARD", "MOVE_ICY_WIND"], soundTask: "MOVE_PSYBEAM", siblingCredit: false },
-      ownership: { reducer: false, seam: false, renderer: false, framebuffer: false, exact: false, partial: false, staged: false },
+      ownership: { reducer: true, seam: true, renderer: true, framebuffer: true, exact: true, partial: false, staged: false },
     });
     expect(audit.components).toEqual([
       "asset:ANIM_TAG_ICE_CRYSTALS", "soundTask:SoundTask_LoopSEAdjustPanning",
@@ -69,14 +69,14 @@ describe("MOVE_ICE_BEAM bounded source/asset checkpoint", () => {
     expect(defender[0].species).toBe(213);
   });
 
-  it("keeps Ice Beam unsupported and the named sibling controls independently exact", () => {
+  it("promotes only Ice Beam and keeps the named sibling controls independently exact", () => {
     const coverage = JSON.parse(readFileSync(join(root, "ANIMATION_COVERAGE.json"), "utf8"));
-    expect(coverage.entries.some((entry: any) => entry.move === "MOVE_ICE_BEAM")).toBe(false);
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ICE_BEAM")?.status).toBe("exact");
     for (const move of ["MOVE_BLIZZARD", "MOVE_ICY_WIND", "MOVE_PSYBEAM"]) {
       expect(coverage.entries.find((entry: any) => entry.move === move)?.status).toBe("exact");
     }
     expect(coverage.componentTracks.find((track: any) => track.id === "ice-beam-crystals")).toMatchObject({
-      representatives: ["MOVE_ICE_BEAM"], fulfilled: false,
+      representatives: ["MOVE_ICE_BEAM"], fulfilled: true,
     });
   });
 });

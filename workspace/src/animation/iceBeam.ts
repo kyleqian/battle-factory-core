@@ -5,8 +5,8 @@
  * cursor, the four crystal templates, the two palette-blend sentinels, the
  * looped SE task, target-monbg ShakeMon2, allocator/order state, and resource
  * lifetimes.  It never resolves damage, advances gameplay RNG, or draws a
- * framebuffer.  The Scene-ON adapter may consume this state later, once a
- * separately audited compositor exists.
+ * framebuffer. The Scene-ON production compositor consumes this state while
+ * keeping all battle outcomes and gameplay RNG caller-owned.
  */
 
 import { advanceRngValue } from "../engine/rng.ts";

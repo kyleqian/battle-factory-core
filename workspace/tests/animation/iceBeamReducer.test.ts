@@ -76,7 +76,7 @@ describe("MOVE_ICE_BEAM source-relative reducer and typed Scene-ON seam", () => 
     }
   });
 
-  it("keeps the seam generic and deferred for unrelated live battlers and geometry", () => {
+  it("keeps the seam generic for unrelated live battlers and geometry", () => {
     const gameplay = { battleOutcome: 0, weather: "clear" } as const;
     const firstProfile = iceBeamProfileFor("player-back", {
       gameplayRng: 17,
@@ -94,8 +94,6 @@ describe("MOVE_ICE_BEAM source-relative reducer and typed Scene-ON seam", () => 
       age: 109,
       attacker: { species: "SURSKIT", geometry: { side: "player" } },
       target: { species: "ONIX", geometry: { side: "opponent" } },
-      deferredCompositor: true,
-      compositor: "deferred",
       gameplay: { rng: 17, immutableState: gameplay, changed: false },
     });
 
@@ -120,8 +118,6 @@ describe("MOVE_ICE_BEAM source-relative reducer and typed Scene-ON seam", () => 
     expect(secondView).toMatchObject({
       attacker: { species: "BALTOY", geometry: { side: "opponent" } },
       target: { species: "DROWZEE", geometry: { side: "player" } },
-      deferredCompositor: true,
-      compositor: "deferred",
     });
     expect(secondView.sprites.find((sprite) => sprite.kind === "impact")?.x)
       .not.toBe(firstView.sprites.find((sprite) => sprite.kind === "impact")?.x);
@@ -129,14 +125,14 @@ describe("MOVE_ICE_BEAM source-relative reducer and typed Scene-ON seam", () => 
     expect(() => sceneOnIceBeamView({ ...first, age: 203 })).toThrow("age out of range");
   });
 
-  it("batch-checks the independent ice/audio controls without promotion", () => {
+  it("batch-checks the independently exact ice/audio controls", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
     for (const move of ["MOVE_BLIZZARD", "MOVE_ICY_WIND", "MOVE_PSYBEAM"]) {
       expect(coverage.entries.find((entry: any) => entry.move === move)?.status).toBe("exact");
     }
-    expect(coverage.entries.some((entry: any) => entry.move === "MOVE_ICE_BEAM")).toBe(false);
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ICE_BEAM")?.status).toBe("exact");
     expect(coverage.componentTracks.find((track: any) => track.id === "ice-beam-crystals")).toMatchObject({
-      fulfilled: false,
+      fulfilled: true,
       representatives: ["MOVE_ICE_BEAM"],
     });
   });
