@@ -1478,3 +1478,18 @@ current app stage should be rejected before replay.
 - **Fix shape:** type the mapped array as `readonly BattleScriptRulesBattler[]`
   first and narrow to the tuple type in one place, so literal excess
   properties fail `npm run typecheck`.
+
+## Bare `npx vitest run <file>` dies with a raw V8 out-of-memory dump — only `npm test` carries `--max-old-space-size=8192`
+
+- **Hit:** 2026-08-26, THREE workers in one session (registry join ~2 min,
+  Shell Bell ~2 min, one more noted in passing). AGENTS.md documents the
+  8 GB heap for bare `tsc` but not for bare `vitest`.
+- **What happens:** `npx vitest run tests/<file>.test.ts` loads the same
+  ~46 MB generated-JSON graph and crashes with a node heap stack trace
+  before printing a single test line; the failure looks like a broken test
+  file, not a memory limit.
+- **Workaround:** always `npm test -- tests/<file>.test.ts` (the script
+  sets `NODE_OPTIONS`), or export `NODE_OPTIONS=--max-old-space-size=8192`.
+- **Fix shape:** one line in AGENTS.md's Tests section next to the `tsc`
+  warning ("same for bare `vitest`: use `npm test -- <files>`"), and/or a
+  `.npmrc`/`vitest.config` `node-options` so bare invocations inherit it.
