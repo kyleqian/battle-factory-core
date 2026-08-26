@@ -110,3 +110,45 @@ HITMARKER_CHARGING` (bit 27) and `gHitMarker & HITMARKER_IGNORE_BIDE` (bit 5).
 | B13 | `STATUS2_MULTIPLETURNS` is **not** cleared by `CANCELER_BIDE` — the direct clear is commented out and the release is done by the release scripts' `setmoveeffect MOVE_EFFECT_CHARGING` + `clearstatusfromeffect BS_ATTACKER`, because `sStatusFlagsForMoveEffects[MOVE_EFFECT_CHARGING] == STATUS2_MULTIPLETURNS` | `battle_util.c:2230-2231` (commented); `data/battle_scripts_1.s:3294-3295` and `:3318-3319`; table at `battle_script_commands.c:619`; opcode at `:2951-2963` | script stream is the mechanical extraction (`src/data/gen/battle-script-program.json`); opcode at `battleScriptSemiInvulnerableOpcode.ts:103-116` (5 concrete `Cmd_clearstatusfromeffect` starts) with the `MOVE_EFFECT_CHARGING → STATUS2_MULTIPLETURNS` binding at `:46` and `battleScriptHitChainOpcode.ts:3807-3814` | SAME-ORDER |
 | B14 | PP is deducted on turn 1 only, purely because `CANCELER_BIDE` redirects past `ppreduce` (Bide's script has **no** `jumpifstatus2 MULTIPLETURNS` guard, unlike Uproar/Rollout/Rampage) | `data/battle_scripts_1.s:573-581` vs `:2077-2078`; `Cmd_ppreduce` gate `battle_script_commands.c:1230` | `battleScriptActionAdmission.ts:3581-3594` returns a `handoff` script effect (not `preserve`), so the interpreter jumps and never reaches the `ppreduce` instruction | SAME-ORDER |
 | B15 | `HITMARKER_CHARGING` set on turn 1 (`orword`), read only by `Cmd_moveend`'s "charging" gate, cleared by the switch-in hitmarker mask | `data/battle_scripts_1.s:579`; read `battle_script_commands.c:8235`; cleared `battle_util.c:655`, `:668` | `battleScriptOrwordOpcode.ts:45` (`HITMARKER_IGNORE_BIDE` neighbour) + `battleScriptSourceConstants.ts` hitmarker block; the `Cmd_moveend` read is `docs/battle-script-move-end-vertical-audit.md`'s slice | UNVERIFIED — the `Cmd_moveend:8235` `HITMARKER_CHARGING` consumer was not diffed against its port site inside this step's 5-minute-per-row budget; what is missing is the port cite for the `MOVEEND` charging branch |
+
+## §2. UPROAR
+
+**Cells.** `status2 & STATUS2_UPROAR` (bits 4-6, a 3-bit countdown,
+`include/constants/battle.h:132-133`), `status2 & STATUS2_MULTIPLETURNS`,
+`gLockedMoves[]`. No `gDisableStructs` cell.
+
+**Turn-by-turn.**
+
+* **Turn 1** — `BattleScript_EffectUproar` (`data/battle_scripts_1.s:2072-2081`):
+  `attackcanceler`, `accuracycheck`, **`setmoveeffect MOVE_EFFECT_UPROAR |
+  MOVE_EFFECT_AFFECTS_USER` (before `attackstring`)**, `attackstring`,
+  `jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_UproarHit`,
+  `ppreduce`, `nop`, `goto BattleScript_HitFromCritCalc`. The uproar cells are
+  written by the queued move effect at the end of the hit chain, not by a
+  dedicated `Cmd_setuproar` — **there is no `Cmd_setuproar` in Emerald**
+  (`grep -n "Cmd_setuproar" $REF/src/*.c` → no hits).
+* **The one `Random()`** is `STATUS2_UPROAR_TURN((Random() & 3) + 2)` — 2-5
+  turns — drawn exactly once, on the first turn only
+  (`battle_script_commands.c:2573`).
+* **Turns 2-5** — the lock re-selects the move; the script's own
+  `jumpifstatus2 MULTIPLETURNS` skips `ppreduce`; `attackcanceler` does **not**
+  fire an uproar phase (there is none).
+* **Every end of turn**, `ENDTURN_UPROAR` (`battle_util.c:1625-1673`) runs the
+  wake scan first, then — only on a pass where nobody woke — the decrement.
+
+| # | step | source | port site | verdict |
+| --- | --- | --- | --- | --- |
+| U1 | `MOVE_EFFECT_UPROAR` no-ops if the battler is already in uproar | `battle_script_commands.c:2569` | `battleScriptHitChainOpcode.ts:2990-2992` (`passThrough()`) | SAME |
+| U2 | sets `STATUS2_MULTIPLETURNS`, `gLockedMoves[effectBattler] = gCurrentMove`, then `STATUS2_UPROAR_TURN((Random() & 3) + 2)` — **one** draw | `battle_script_commands.c:2571-2573` | `battleScriptHitChainOpcode.ts:2993-3007` — the port draws the RNG **first**, then writes `lockedMoves` and the combined `status2` | SAME-ORDER-EQUIVALENT (no RNG consumer sits between the two source writes and the draw, so the single draw lands at the same ledger position; only the C statement order differs) |
+| U3 | PP deducted turn 1 only, via the script's explicit `jumpifstatus2 MULTIPLETURNS` guard around `ppreduce` | `data/battle_scripts_1.s:2077-2078` | mechanical script extraction (`src/data/gen/battle-script-program.json`); `Cmd_ppreduce` gate ported at the `HITMARKER_NO_PPDEDUCT \| HITMARKER_NO_ATTACKSTRING` check | SAME |
+| U4 | `ENDTURN_UPROAR` guard: only runs when `status2 & STATUS2_UPROAR` (no `hp != 0` guard, unlike Curse/Wrap) | `battle_util.c:1626` | `battleEndTurnOrchestration.ts:911-914` (`status2 & STATUS2_UPROAR` only) | SAME |
+| U5 | wake scan runs **before** the decrement, iterating `gBattlerAttacker = 0..gBattlersCount`, waking the **first** eligible sleeper (`STATUS1_SLEEP` and ability != Soundproof), clearing `STATUS1_SLEEP` + `STATUS2_NIGHTMARE`, then `break` | `battle_util.c:1628-1642` | `battleEndTurnOrchestration.ts:918-946` — one `for i` pass that wakes **every** eligible sleeper before falling through to the decrement | SAME-ORDER-EQUIVALENT (source returns `effect = 2` and does **not** advance `turnEffectsTracker` at `:1671-1672`, so the case re-enters and wakes the next sleeper; the already-woken battler no longer matches. Same wake set, same ascending battler order, same script sequence, decrement still last) |
+| U6 | `gBattleCommunication[MULTISTRING_CHOOSER] = 1` before `BattleScript_MonWokeUpInUproar` | `battle_util.c:1635` | no port write | DIVERGENT-BENIGN — `BattleScript_MonWokeUpInUproar` (`data/battle_scripts_1.s:3730-3734`) is `printstring STRINGID_PKMNWOKEUPINUPROAR` / `waitmessage` / `updatestatusicon` / `end2`: it never reads `MULTISTRING_CHOOSER`, and the next reader (`gUproarOverTurnStringIds` at `:1655`/`:1659`/`:1664`) always rewrites it. Dead write. |
+| U7 | on a no-wake pass: `gBattlerAttacker = gActiveBattler` restored, then `status2 -= STATUS2_UPROAR_TURN(1)` | `battle_util.c:1650-1651` | `battleEndTurnOrchestration.ts:948-950` (`status2 - (1 << 4)`) | SAME-ORDER |
+| U8 | `WasUnableToUseMove(active)` checked **after** the decrement → `CancelMultiTurnMoves` + `B_MSG_UPROAR_ENDS` | `battle_util.c:1652-1656`; predicate `battle_util.c:889-903` (9 `gProtectStructs` flags) | `battleEndTurnOrchestration.ts:951-952` + `battleScriptRulesContext.ts:1364-1378` (same 9 flags, same order) | SAME-ORDER |
+| U9 | still ticking → `B_MSG_UPROAR_CONTINUES` **and** `status2 \|= STATUS2_MULTIPLETURNS` (a re-arm, since nothing cleared it) | `battle_util.c:1657-1661` | `battleEndTurnOrchestration.ts:953-963` (`continues` → re-OR `STATUS2_MULTIPLETURNS`) | SAME |
+| U10 | expired → `B_MSG_UPROAR_ENDS` **then** `CancelMultiTurnMoves` | `battle_util.c:1662-1666` | `battleEndTurnOrchestration.ts:964-965` (`else` → `cancelBattleScriptMultiTurnMoves`) then `:966-969` sets `multistringChooser` | SAME-ORDER-EQUIVALENT (source assigns the chooser then cancels; the port cancels then assigns. `CancelMultiTurnMoves` touches no `gBattleCommunication` cell, so the two orders are observationally identical) |
+| U11 | "calmed down": `BattleScript_PrintUproarOverTurns` prints `gUproarOverTurnStringIds[chooser]`, `B_MSG_UPROAR_CONTINUES = 0 → STRINGID_PKMNMAKINGUPROAR`, `B_MSG_UPROAR_ENDS = 1 → STRINGID_PKMNCALMEDDOWN` | `data/battle_scripts_1.s:3785-3788`; table `battle_message.c:975-979`; ids `include/constants/battle_string_ids.h:479-481` | `battleEndTurnOrchestration.ts:966-969` (`multistringChooser: continues ? 0 : 1`, label `BattleScript_PrintUproarOverTurns`) + `battleScriptHitChainOpcode.ts:437-440` (the 2-entry table) | SAME |
+| U12 | sleep-blocking read #1 — `CANCELER_ASLEEP` calls `UproarWakeUpCheck(attacker)` **first**, before the Early Bird decrement, and on a hit clears `STATUS1_SLEEP` + `STATUS2_NIGHTMARE` and prints `B_MSG_WOKE_UP_UPROAR` with `effect = 2` | `battle_util.c:2016-2026`; helper `battle_script_commands.c:6801-6826` | `battleScriptActionAdmission.ts:1341` (`uproarSource` scan) + the `uproarScan` receipt at `:208-239`, including the `B_MSG_WOKE_UP_UPROAR` overwrite note at `:224` | SAME-ORDER |
+| U13 | sleep-blocking read #2 — `SetMoveEffect`'s `STATUS1_SLEEP` case: Soundproof short-circuits the scan, then `status1 != 0` → uproar-active → Vital Spirit → Insomnia, and only then `CancelMultiTurnMoves(gEffectBattler)` + `statusChanged = TRUE` | `battle_script_commands.c:2273-2298` | `battleScriptHitChainOpcode.ts:3366-3392` (identical short-circuit order; `finishStatusWrite` applies the shared cancel before writing `status1`) | SAME-ORDER |
+| U14 | sleep-blocking read #3 — `ENDTURN_YAWN`'s `!UproarWakeUpCheck(gActiveBattler)` term | `battle_util.c:1759` | `battleEndTurnOrchestration.ts:1031-1041` + `runYawnTick` at `:1049` | SAME (cell semantics only; the Yawn case's own ordering belongs to `docs/end-turn-ordering-audit-2026-08-25.md`) |
