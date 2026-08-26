@@ -213,6 +213,10 @@ function decodeBattler(reader: Reader): FactoryAiScoredBattlerView {
   const hasFocusEnergy = optionalBool(reader);
   const isLeechSeeded = optionalBool(reader);
   const hasYawn = optionalBool(reader);
+  // AI_CV_Protect's three AI_USER status routes (ISSUES #137).
+  const isToxicPoisoned = optionalBool(reader);
+  const isCursed = optionalBool(reader);
+  const hasPerishSong = optionalBool(reader);
   const protectPresent = reader.u8();
   if (protectPresent !== 0 && protectPresent !== 1) {
     throw new Error("factory-wasm factoryAiLiveViewEngine: invalid protect-uses presence");
@@ -247,6 +251,9 @@ function decodeBattler(reader: Reader): FactoryAiScoredBattlerView {
   if (hasFocusEnergy !== undefined) result.hasFocusEnergy = hasFocusEnergy;
   if (isLeechSeeded !== undefined) result.isLeechSeeded = isLeechSeeded;
   if (hasYawn !== undefined) result.hasYawn = hasYawn;
+  if (isToxicPoisoned !== undefined) result.isToxicPoisoned = isToxicPoisoned;
+  if (isCursed !== undefined) result.isCursed = isCursed;
+  if (hasPerishSong !== undefined) result.hasPerishSong = hasPerishSong;
   if (protectUses !== undefined) result.protectUses = protectUses;
   return result as FactoryAiScoredBattlerView;
 }
