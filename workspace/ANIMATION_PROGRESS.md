@@ -1,3 +1,11 @@
+# MOVE_ERUPTION HorizontalShake component banked — move unsupported (2026-08-25 worker)
+
+- **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION and `eruption-warm-rock` remain unsupported/unfulfilled; the shake task alone grants no move, framebuffer, or sibling credit.
+- **Did:** Added a pure typed source-relative reducer for only Eruption's paired `AnimTask_HorizontalShake` calls: platform `(5,8,60)` then all-visible-battlers `(4,8,60)`, captured live args `(4,8,60,70,1)`, task slots 0/1, full data/state/callback cadence, source/display OAM lag, ordinary bilateral geometry, cleanup, and RNG/resource pass-through. Launch/falling rocks, palette, audio, seam, and compositor remain separate.
+- **Verified:** Strict Battle Scene ON audit checks every **476 player-back + 494 opponent-front row**: task lifetimes **239..438 / 257..456** (200 rows each), first cleanup **439 / 457**, 400 task-data rows per side, 404 source/OAM geometry rows per side, OAM predecessor transfer **475/475 + 493/493**, and all RNG/resource rows through final Warm Rock free **475 / 493**. Source tokens and focused Tier-1 audit are green.
+- **Next:** Keep Eruption unsupported until audio, typed seam, compositor, and complete bilateral framebuffer acceptance are independently proven.
+- **Notes:** No `battleScene.ts`/`core.ts`, launch/falling/palette/asset, latch, coverage counts, boundary/barrier, gameplay/RNG/controller, canonical-recording production import, absolute-tick/species/evidence gate, or RGB/framebuffer lookup changed.
+
 # MOVE_ERUPTION falling-rock sprite component banked — move unsupported (2026-08-25 worker)
 
 - **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION and `eruption-warm-rock` remain unsupported/unfulfilled; falling-rock work adds no move, framebuffer, or sibling credit.
