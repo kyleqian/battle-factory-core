@@ -363,7 +363,6 @@ function frameAtAge(
 ): EruptionFrame {
   const sprites = ownedSprites(launch, falling, palette);
   const tasks = tasksAtAge(age, profile, launch, shake, audio);
-  const launchSprites = launch.sprites.length;
   const fallingSprites = falling.sprites.length;
   const paletteSprites = palette.sprite ? 1 : 0;
   const waitTask = waitAndPlayTask(age, profile);

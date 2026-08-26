@@ -7,7 +7,6 @@ import {
   type EruptionFallingRockProfile,
 } from "../../src/animation/eruptionFallingRock.ts";
 import {
-  ERUPTION_HORIZONTAL_SHAKE_CAPTURED_ARGS,
   type EruptionHorizontalShakeProfile,
 } from "../../src/animation/eruptionHorizontalShake.ts";
 import { type EruptionLaunchProfile } from "../../src/animation/eruptionLaunch.ts";
@@ -136,7 +135,7 @@ function horizontalProfile(side: EruptionOrientation, rows: Json[], falling: Eru
   const first = rows[creationAge + 1]!;
   const playerSprite = (side === "player-back" ? preCreate.battlerSprites.attacker : preCreate.battlerSprites.target) as Json;
   const opponentSprite = (side === "player-back" ? preCreate.battlerSprites.target : preCreate.battlerSprites.attacker) as Json;
-  const battlers = [playerSprite, opponentSprite].map((sprite: Json, battlerId) => ({
+  const makeBattler = (sprite: Json, battlerId: 0 | 1) => ({
     battlerId,
     side: battlerId === 0 ? "player" as const : "opponent" as const,
     spriteSlot: sprite.slot,
@@ -144,7 +143,8 @@ function horizontalProfile(side: EruptionOrientation, rows: Json[], falling: Eru
     y: sprite.y,
     initialX2: sprite.x2,
     initialY2: sprite.y2,
-  })) as EruptionHorizontalShakeProfile["battlers"];
+  });
+  const battlers = [makeBattler(playerSprite, 0), makeBattler(opponentSprite, 1)] as const;
   return {
     orientation: side,
     taskCreationAge: creationAge,
