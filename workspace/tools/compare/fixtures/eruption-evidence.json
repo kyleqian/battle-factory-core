@@ -1,0 +1,71 @@
+{
+  "schema": "eruption-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_ERUPTION",
+  "moveId": 284,
+  "status": "unsupported-dense-evidence-checkpoint",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "productionAnimationChanged": false,
+    "reducerAdded": true,
+    "paletteComponentBanked": true,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferLookupAdded": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "firstInactiveCleanupRetained": true,
+    "sourceRowsRetained": true,
+    "rawRgbRowsRetained": true,
+    "normalizedChangeMaps": true,
+    "productionFramebufferRows": 0
+  },
+  "source": {
+    "audit": "tools/compare/eruptionSourceAudit.ts",
+    "auditSha256": "829217aa63c3e35ba107069075e86ed5b84e9988b135f17de67069fee9105bda",
+    "probe": "tools/compare/eruptionProbe.py",
+    "probeSha256": "89637c9821a8c44011c0e610cc4fc93b1a4d10dbf37f528d5201117e7a041a62",
+    "evidenceVerifier": "tools/compare/eruptionEvidence.ts",
+    "evidenceVerifierSha256": "95a7fe31b663688a3cabcbb290082e4377dddba4276180b41362a81c171ca9fb",
+    "paletteComponentAudit": "tools/compare/eruptionPaletteAudit.ts",
+    "paletteComponentAuditSha256": "66bc38d0729057fc64232153836b409a5462d2e1ee0c8f57055897ace350a2cd"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-eruption-player-camerupt-opponent-onix.json",
+      "scenarioSha256": "da71011d81e10f7438becd59d36cb168760416336a5c8f50ccebb70623406ef1",
+      "denseState": "tools/compare/evidence/eruption-player-dense-state.json.gz",
+      "denseStateSha256": "5dea4d0c07e5d8dbd2bf97a5bce6259ffb988d18ae18aca0ddb42db35c0ee257",
+      "probeJsonSha256": "26e74a5634c46bb7b7308473c47ec8c4c8eea3fc1772bd37094f289f071aaa4c",
+      "repeatProbeJsonSha256": "26e74a5634c46bb7b7308473c47ec8c4c8eea3fc1772bd37094f289f071aaa4c",
+      "rawRgbArchive": "tools/compare/evidence/eruption-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "557de8235155e0406563a64c315ddb403817f3514c7d4086825c5a3206a18fb9",
+      "rawRgbSequenceSha256": "e4e02a5457211346284e0a2d038d8985530a2c9fe342b33b9221d7ce0a7b9609",
+      "repeatRawRgbSequenceSha256": "e4e02a5457211346284e0a2d038d8985530a2c9fe342b33b9221d7ce0a7b9609",
+      "changeMap": "tools/compare/evidence/eruption-changemap-player.json",
+      "changeMapSha256": "a9fa4c7c9ee025c397c335d7400904c39407eabb9f5d7051db056ea9b60cdedc",
+      "sourceWindow": { "startFrame": 234, "endFrame": 709, "frameCount": 476 }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-eruption-opponent-camerupt-player-onix.json",
+      "scenarioSha256": "44c708d8dbf3c0862457ea24e36194abb3657a5e2a0c5c67ad446f08d6d28cc1",
+      "denseState": "tools/compare/evidence/eruption-opponent-dense-state.json.gz",
+      "denseStateSha256": "a880521eff6458442bb43456ae76cf258168dcd3330f6bf807f714b3f266a4fb",
+      "probeJsonSha256": "a7bd16093e2b15ab8cfa57603b1fa8890be38d1ff423e96da9be405ec7ebe2b5",
+      "repeatProbeJsonSha256": "a7bd16093e2b15ab8cfa57603b1fa8890be38d1ff423e96da9be405ec7ebe2b5",
+      "rawRgbArchive": "tools/compare/evidence/eruption-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "ff794b823f3b96026c21a7fd67e096561f4e35ef51847213c70c9561619ecb19",
+      "rawRgbSequenceSha256": "205d43c417aedc6b84c898e76bdb6883148587ed02fdfc7e9ab1e84aee515a04",
+      "repeatRawRgbSequenceSha256": "205d43c417aedc6b84c898e76bdb6883148587ed02fdfc7e9ab1e84aee515a04",
+      "changeMap": "tools/compare/evidence/eruption-changemap-opponent.json",
+      "changeMapSha256": "eb0d1739628ebc31f807291267348319d974db50479efacf90f5df84c7a1c61f",
+      "sourceWindow": { "startFrame": 221, "endFrame": 714, "frameCount": 494 }
+    }
+  }
+}
