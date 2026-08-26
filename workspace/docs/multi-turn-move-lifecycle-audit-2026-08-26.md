@@ -230,3 +230,78 @@ is **wrong for Emerald**. The source is
 | W12 | escape prevention read #3 — `HandleAction_Run` | `battle_util.c:526` | none needed | UNREACHABLE-IN-SINGLES-FRONTIER (running from a trainer battle is impossible; `battle_util.c:487-540`) |
 | W13 | Rapid Spin frees the *attacker*: `Cmd_rapidspinfree` clears `STATUS2_WRAPPED`, re-points `gBattlerTarget` at `wrappedBy`, buffers `wrappedMove`, and runs `BattleScript_WrapFree` | `battle_script_commands.c:8821-8837` | `battleScriptIngrainLeechSeedWrapOpcode.ts:536-556` (`~STATUS2_WRAPPED_MASK`, `wrappedBy: 0`, `target: attackerState.wrappedBy`, `battleTextBuff1Move`) | SAME-ORDER |
 | W14 | the trapper leaving frees its victims (`wrappedBy == leaver`) | `battle_main.c:3199-3200`, `:3281-3282` | `battleScriptHitChainOpcode.ts:4594-4605` | cross-ref only — `docs/switch-lifecycle-audit-2026-08-26.md` §6 / `docs/faint-replacement-audit-2026-08-26.md`, declared out of scope here |
+
+## §5. THRASH / OUTRAGE / PETAL DANCE, RECHARGE, and the two-turn charge moves
+
+### §5a. Rampage (THRASH / OUTRAGE / PETAL DANCE)
+
+**Cells.** `status2 & STATUS2_LOCK_CONFUSE` (bits 10-11, `include/constants/battle.h:137-138`),
+`status2 & STATUS2_MULTIPLETURNS`, `gLockedMoves[]`, and — on expiry —
+`status2 & STATUS2_CONFUSION` (bits 0-2).
+
+**The two draws, cited exactly.** They are different constants and the brief
+conflates them:
+
+* **lock-in length** — `STATUS2_LOCK_CONFUSE_TURN((Random() & 1) + 2)` → **2-3
+  turns** (`battle_script_commands.c:2860`), drawn once when
+  `MOVE_EFFECT_THRASH` first applies.
+* **fatigue confusion length** — `STATUS2_CONFUSION_TURN(((Random()) % 4) + 2)`
+  → **2-5 turns** (`battle_script_commands.c:2541`), drawn at end-of-turn on
+  the pass that retires the lock, via `SetMoveEffect(TRUE, 0)`.
+
+**Turn-by-turn.** Turn 1: `BattleScript_EffectRampage`
+(`data/battle_scripts_1.s:583-591`) — `attackcanceler`, `accuracycheck`,
+`attackstring`, `jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS,
+BattleScript_EffectRampage2`, **`ppreduce`**, `confuseifrepeatingattackends`,
+`goto BattleScript_HitFromCritCalc`. Turns 2-3: the lock re-selects the move,
+the `jumpifstatus2` skips `ppreduce`, and
+`Cmd_confuseifrepeatingattackends` no-ops because `STATUS2_LOCK_CONFUSE` is
+already set. End of every turn: `ENDTURN_THRASH` decrements.
+
+| # | step | source | port site | verdict |
+| --- | --- | --- | --- | --- |
+| T1 | `Cmd_confuseifrepeatingattackends` queues `MOVE_EFFECT_THRASH \| MOVE_EFFECT_AFFECTS_USER` **only if not already locked** | `battle_script_commands.c:7131-7137` | `battleScriptConfuseifrepeatingattackendsOpcode.ts:38-43` (`alreadyLocked` guard, `MOVE_EFFECT_THRASH = 53`) | SAME |
+| T2 | `MOVE_EFFECT_THRASH` no-ops when `STATUS2_LOCK_CONFUSE` is set; otherwise sets `STATUS2_MULTIPLETURNS`, `gLockedMoves`, then `STATUS2_LOCK_CONFUSE_TURN((Random() & 1) + 2)` | `battle_script_commands.c:2851-2861` | `battleScriptHitChainOpcode.ts:3861ff` (`sStatusFlagsForMoveEffects[MOVE_EFFECT_THRASH]` note) | SAME (the `seteffectwithchance` re-run that draws this a second time is **ISSUES #141** — explicitly not re-litigated here) |
+| T3 | `ENDTURN_THRASH` decrements `status2 -= STATUS2_LOCK_CONFUSE_TURN(1)` **before** any branch, with no `hp != 0` guard on the case | `battle_util.c:1675-1677` | `battleEndTurnOrchestration.ts:980-984` | SAME-ORDER |
+| T4 | `WasUnableToUseMove` → `CancelMultiTurnMoves` and **no** fatigue confusion (a sleep / flinch / paralysis-freeze / confusion-self-hit / Disable / Taunt / Imprison / infatuation immobility that turn kills the rampage cleanly) | `battle_util.c:1678-1679` | `battleEndTurnOrchestration.ts:986-989` | SAME |
+| T5 | otherwise, fatigue fires only when **both** `!(status2 & STATUS2_LOCK_CONFUSE)` (just emptied) **and** `(status2 & STATUS2_MULTIPLETURNS)`; then `MULTIPLETURNS` is cleared | `battle_util.c:1680-1683` | `battleEndTurnOrchestration.ts:991-999` (`stillLocked \|\| !hasMultipleTurns` → plain advance) | SAME-ORDER |
+| T6 | fatigue is skipped if the mon is already confused | `battle_util.c:1684` | `battleEndTurnOrchestration.ts:1000-1003` | SAME |
+| T7 | `SetMoveEffect(TRUE, 0)`'s own `hp == 0` short-circuit means a mon that fainted this turn never gets fatigue-confused | `battle_script_commands.c:2261-2264` | `battleEndTurnOrchestration.ts:1004-1006` (explicit `clearedBattler.hp === 0` guard, i.e. the `SetMoveEffect` preamble hoisted into the case) | SAME-ORDER-EQUIVALENT |
+| T8 | fatigue draw + message order: `SetMoveEffect` sets `STATUS2_CONFUSION_TURN((Random() % 4) + 2)` **first**, then `ENDTURN_THRASH` re-reads `status2 & STATUS2_CONFUSION` and only then runs `BattleScript_ThrashConfuses` (`chosenstatus2animation` → `STRINGID_PKMNFATIGUECONFUSION` → `waitmessage` → `end2`) | `battle_script_commands.c:2541`; `battle_util.c:1686-1690`; script `data/battle_scripts_1.s:3790-3794` | `battleEndTurnOrchestration.ts:1008-1018` (`applyConfusionStatus2Mutation` draws, then `runTickScript(..., THRASH_CONFUSES_LABEL)`; the draw is attributed to the label's entry instruction) | SAME-ORDER |
+| T9 | `SetMoveEffect`'s `BattleScriptPush(gBattlescriptCurrInstr + 1)` on the confusion path (`:2543`) pushes a garbage return address that `BattleScriptExecute(BattleScript_ThrashConfuses)` immediately makes unreachable | `battle_script_commands.c:2543-2544` vs `battle_util.c:1689` | no port equivalent (the port applies the status2 mutation without the script handoff) | DIVERGENT-BENIGN — `BattleScript_ThrashConfuses` ends in `end2`, never `return`, so the stale entry is never popped, and `gBattleResources->battleScriptsStack->size` is reset to 0 at `battle_main.c:4934` before every turn's action run. The leaked entry cannot be observed. |
+| T10 | a **miss** during the rampage does **not** end it — `BattleScript_EffectRampage`'s `accuracycheck` fail target is `BattleScript_PrintMoveMissed`, which contains no cancel; only `WasUnableToUseMove` (T4), Torment (`battle_util.c:1001`), a canceler phase's `CancelMultiTurnMoves`, or the counter expiring ends it | `data/battle_scripts_1.s:585`; cancel sites `battle_util.c:2089/2103/2115/2127/2138/2149/2213` | port canceler phases at `battleScriptActionAdmission.ts:1836/1972/2099/2224/2333/2838` (`cancelMultiTurnMoves` receipts) | SAME |
+| T11 | a **sleep** applied mid-rampage cancels it immediately, through `SetMoveEffect`'s `STATUS1_SLEEP` success path calling `CancelMultiTurnMoves(gEffectBattler)`; freeze does the same | `battle_script_commands.c:2296`, `:2392` | `battleScriptHitChainOpcode.ts:3366-3392` (`finishStatusWrite` applies the shared cancel) | SAME |
+| T12 | a **faint** mid-rampage | audits A/B's slice | — | cross-ref only, declared out of scope |
+
+### §5b. RECHARGE (Hyper Beam)
+
+**There is no `Cmd_setrecharge` in Emerald** (`grep -rn "Cmd_setrecharge" $REF/src`
+→ zero hits). The cells are written by `SetMoveEffect`'s `MOVE_EFFECT_RECHARGE`
+case, which is queued by `BattleScript_EffectRecharge`'s `setmoveeffect`.
+
+| # | step | source | port site | verdict |
+| --- | --- | --- | --- | --- |
+| C1 | `MOVE_EFFECT_RECHARGE` sets `STATUS2_RECHARGE`, `rechargeTimer = 2`, `gLockedMoves[effectBattler] = gCurrentMove` — **no `STATUS2_MULTIPLETURNS`**, so `CancelMultiTurnMoves` cannot clear a recharge | `battle_script_commands.c:2728-2733`; cancel mask `battle_util.c:879-882` | `battleScriptHitChainOpcode.ts:3080-3090` (`STATUS2_RECHARGE`, `rechargeTimer: 2`, `lockedMoves`) | SAME |
+| C2 | the recharge turn is still a `B_ACTION_USE_MOVE` whose `gCurrentMove` comes from `gLockedMoves` (the lock at `battle_util.c:107-110` tests `MULTIPLETURNS \|\| RECHARGE`) | `battle_util.c:107-110` | `factoryBattleScriptFullTurnDecision.ts:2364-2392` (`actionMoveId`) + `:2348` (`lockedMoves[battler]`) | SAME |
+| C3 | `CANCELER_RECHARGE` fires at phase 4 — **before** FLINCH, DISABLED, CONFUSED, PARALYZED, IN_LOVE and BIDE, and after FLAGS/ASLEEP/FROZEN/TRUANT | `battle_util.c:1985-1999` (enum), `:2098` (case) | `battleScriptActionAdmission.ts:1811` (`trackerAfter = CANCELER_RECHARGE`) + the phase table in `battleScriptAttackCanceler.ts:370` | SAME-ORDER |
+| C4 | the taken branch's write order: clear `STATUS2_RECHARGE` → `rechargeTimer = 0` → `CancelMultiTurnMoves` → `BattleScript_MoveUsedMustRecharge` → `HITMARKER_UNABLE_TO_USE_MOVE` → `effect = 1` | `battle_util.c:2101-2106` | `battleScriptActionAdmission.ts:1896-1925` (same order; `helperResult` is the shared cancel) | SAME-ORDER |
+| C5 | the **second** retirement path: `TurnValuesCleanUp(FALSE)`'s `if (rechargeTimer) { rechargeTimer--; if (== 0) status2 &= ~STATUS2_RECHARGE; }` — this is what retires a recharge for a battler that never reached `CANCELER_RECHARGE` because an earlier phase stopped the chain | `battle_main.c:4878-4883` | `battleEndTurnOrchestration.ts:2374-2382`, wired through `finishTurnValuesCleanUp` at `:2424-2434` (called at `:2442` and `:2607`) | SAME-ORDER (this closes `docs/end-turn-ordering-audit-2026-08-25.md`'s finding 5 / F8 — the decrement now exists in a sibling helper of `finishTurnValuesCleanUp`, in source statement order) |
+| C6 | `gLockedMoves[]` is **never cleared** when a recharge ends — it is only overwritten by the next lock-setting effect | `battle_main.c:3058` is the only zeroing (battle start) | port matches: `lockedMoves` is only ever written by `setbide` / rollout / uproar / thrash / recharge / charging, and initialised at `factoryBattleScriptFullTurnDecision.ts:616` | SAME |
+
+### §5c. Two-turn charge moves (RAZOR WIND / SKY ATTACK / SOLAR BEAM / SKULL BASH / DIG / FLY / DIVE)
+
+Scoped, per the brief, to `STATUS2_MULTIPLETURNS` + `gLockedMoves` +
+`gBattleStruct` only.
+
+| # | step | source | port site | verdict |
+| --- | --- | --- | --- | --- |
+| X1 | turn 1 = `BattleScriptFirstChargingTurn` (`attackcanceler`, `printstring STRINGID_EMPTYSTRING3`, **`ppreduce`**, `attackanimation`, `waitanimation`, `orword gHitMarker, HITMARKER_CHARGING`, `setmoveeffect MOVE_EFFECT_CHARGING \| MOVE_EFFECT_AFFECTS_USER`, `seteffectprimary`, `copybyte cMULTISTRING_CHOOSER, sTWOTURN_STRINGID`, `printfromtable gFirstTurnOfTwoStringIds`, `waitmessage`, `return`) | `data/battle_scripts_1.s:795-807` | mechanical script extraction | SAME |
+| X2 | `MOVE_EFFECT_CHARGING` sets `STATUS2_MULTIPLETURNS`, `gLockedMoves[effectBattler] = gCurrentMove`, **and `gProtectStructs[effectBattler].chargingTurn = 1`** (the third cell, easy to miss) | `battle_script_commands.c:2605-2610` | `battleScriptHitChainOpcode.ts:3074` (`MOVE_EFFECT_CHARGING` case) + `:3807-3814` | SAME |
+| X3 | turn-2 entry is chosen by the effect script's own `jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS` **plus** a second `jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING` guard | `data/battle_scripts_1.s:779-780` (Razor Wind), `:1065-1066` (Sky Attack), `:1812-1813` (Skull Bash), `:1908-1909` (Solar Beam), `:1974-1975` (Semi-Invulnerable) | mechanical script extraction | SAME |
+| X4 | turn 2 releases the lock with `setmoveeffect MOVE_EFFECT_CHARGING` + `clearstatusfromeffect BS_ATTACKER` (same `sStatusFlagsForMoveEffects` trick as Bide's release) and suppresses PP with `orword gHitMarker, HITMARKER_NO_PPDEDUCT` | `data/battle_scripts_1.s:787-790` and `:1997-2001` | `battleScriptSemiInvulnerableOpcode.ts:103-116` (`Cmd_clearstatusfromeffect`, 5 concrete starts) + `battleScriptOrwordOpcode.ts` | SAME-ORDER — **this is the two-turn PP rule: turn 1 deducts, turn 2 is explicitly `NO_PPDEDUCT`**, the mirror of Bide/Rollout/Uproar's `jumpifstatus2`-skip |
+| X5 | Sun's Solar Beam one-turn path skips the charge entirely: `orword HITMARKER_CHARGING`, `setmoveeffect MOVE_EFFECT_CHARGING \| MOVE_EFFECT_AFFECTS_USER`, `seteffectprimary`, `ppreduce`, `goto BattleScript_TwoTurnMovesSecondTurn` — so the lock is set **and** cleared inside one action | `data/battle_scripts_1.s:1913-1918` | mechanical script extraction | SAME |
+| X6 | `Cmd_setsemiinvulnerablebit` sets `STATUS3_ON_AIR` / `UNDERGROUND` / `UNDERWATER` by `gCurrentMove`, and is reached **after** `BattleScriptFirstChargingTurn` returns | `battle_script_commands.c:9009-9026`; script `data/battle_scripts_1.s:1993-1994` | `battleScriptSemiInvulnerableOpcode.ts:193-195` | SAME (per-bit switch body declared NOT read) |
+| X7 | `CancelMultiTurnMoves` clears `STATUS3_SEMI_INVULNERABLE`, so any canceler phase that fires drops a Fly/Dig/Dive mon back onto the field | `battle_util.c:884` | `battleScriptMultiTurnCancellation.ts:60-63` (`~BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE`) | SAME |
+| X8 | `Cmd_twoturnmoveschargestringid` — the brief's symbol — **does not exist in Emerald**; the charge string is `setbyte sTWOTURN_STRINGID` per branch + `copybyte cMULTISTRING_CHOOSER, sTWOTURN_STRINGID` + `printfromtable gFirstTurnOfTwoStringIds` | `data/battle_scripts_1.s:781/1979/1983/1987/1991`, `:804-805` | mechanical script extraction | SAME (brief-symbol correction, not a divergence) |
+| X9 | `Cmd_jumpifnotfirstturn` is **not** part of the two-turn machinery — its only user in the whole script file is Fake Out (`data/battle_scripts_1.s:2050`); it reads `gDisableStructs[].isFirstTurn`, which `TurnValuesCleanUp(FALSE)` decrements | `battle_script_commands.c:6786-6794`; `battle_main.c:4875-4876` | `battleScriptJumpifnotfirstturnOpcode.ts:56-62`; decrement `battleEndTurnOrchestration.ts:2375-2377` | SAME (brief-scope correction) |
+| X10 | Power Herb | does not exist in Gen 3 | — | UNREACHABLE-IN-SINGLES (no such item in Emerald's item table; the "Power-Herb-less second turn" the brief names is simply *the* second turn) |
