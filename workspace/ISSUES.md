@@ -51,33 +51,6 @@ per frame and slot 2's HP after its entry: the ROM damages it; the port does not
 move both clears to the single exit that every non-Spikes `return` shares (the shape of
 the source's one `if` body), pin with a Tier-1 test that drives the two-switch sequence.
 
-## #135 — Pursuit's ×2 switch-interception multiplier is dropped: `stageVoluntarySwitchRules` stages `dmgMultiplier: 1` and enters past `setbyte sDMG_MULTIPLIER, 2`
-
-**Found 2026-08-26** (switch-lifecycle audit, `docs/switch-lifecycle-audit-2026-08-26.md`
-D1; supervisor-verified). Source `data/battle_scripts_1.s:3088-3096` `BattleScript_ActionSwitch`
-runs `setbyte sDMG_MULTIPLIER, 2` before `BattleScript_PursuitSwitchDmgLoop`;
-`BattleScript_PursuitDmgOnSwitchOut`'s `damagecalc` consumes it
-(`battle_script_commands.c` `Cmd_damagecalc`: `gBattleMoveDamage * gCritMultiplier * gBattleScripting.dmgMultiplier`),
-and nothing between resets it (`HandleAction_Switch` writes no multiplier; `MoveValuesCleanUp`
-is not in that script). Port `src/engine/factoryBattleScriptFullTurnDecision.ts:1793`
-`dmgMultiplier: 1` in `stageVoluntarySwitchRules`, and `:1726` starts execution at
-`BattleScript_PursuitSwitchDmgLoop`, so the `setbyte` never runs; the consumer
-(`battleScriptHitChainOpcode.ts:1613`) is faithful, so the interception hit is exactly the
-un-doubled Pursuit. The interception branch is fully reachable (`:1628-1637`, no barrier).
-
-**Consequence:** every Pursuit interception of a voluntary switch deals half the ROM's
-damage (80 BP → 40 BP), which changes the departing mon's party HP and whether it faints on
-the way out (and therefore whether `BattleScript_SpikesOnAttackerFainted`/`getexp` runs).
-
-**Receipt recipe (stock ROM, `mechanicLab` `overrides.parties`, Battle Scene OFF):**
-opponent lead = a fast Level-50 set whose four slots are all `MOVE_PURSUIT`; player slot 0
-= a bulky lead at full HP (neutral to Dark), slots 1-2 legal. Turn 1: the player opens the
-party menu and switches 0→1; the ROM intercepts. Read `gBattleMoveDamage` at `damagecalc`
-and the departed mon's `gPlayerParty[0].hp` after the switch. Then fix: stage
-`dmgMultiplier: 2` (or execute the skipped `setbyte`) and pin the ROM's damage with a
-Tier-1 test driving the kernel through the identical fixture; the existing self-authored
-Pursuit pins in `tests/factoryBattleScriptFullTurnDecision.test.ts` (~`:707-735`) will move.
-
 ## #136 — `switchindataupdate` does not reset `protectUses` (and `rolloutTimerStartValue`): the incoming mon inherits the outgoing mon's DisableStruct counters
 
 **Found 2026-08-26** (switch-lifecycle audit D2 + N3; supervisor-verified). Source
