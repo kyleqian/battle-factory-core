@@ -18,7 +18,7 @@ describe("MOVE_ERUPTION authoritative source and legal bilateral Scene-ON stagin
       assets: { tag: "ANIM_TAG_WARM_ROCK", gfx: "gBattleAnimSpriteGfx_WarmRock", palette: "gBattleAnimSpritePal_WarmRock", bytes: 2688 },
       audio: { explosion: { id: 178, pan: "SOUND_PAN_ATTACKER", waits: 2, delay: 60 }, rockThrow: { id: 131, pan: "SOUND_PAN_TARGET", interval: 16, count: 12 } },
       carrier: { setId: 346, label: "FRONTIER_MON_CAMERUPT_2", species: "SPECIES_CAMERUPT", moves: ["MOVE_EARTHQUAKE", "MOVE_ERUPTION", "MOVE_BODY_SLAM", "MOVE_SCARY_FACE"] },
-      ownership: { gameplayState: false, damage: false, weather: false, rng: false, controller: false, reducer: false, renderer: false },
+      ownership: { gameplayState: false, damage: false, weather: false, rng: false, controller: false, reducer: "simple-palette-component-only", renderer: false },
     });
     expect(audit.sourceText.commandRows.filter((row: string) => row.startsWith("createsprite gEruptionFallingRockSpriteTemplate"))).toHaveLength(6);
     expect(audit.sourceText.commandRows.filter((row: string) => row.startsWith("createvisualtask AnimTask_EruptionLaunchRocks"))).toHaveLength(2);

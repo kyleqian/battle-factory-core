@@ -7,7 +7,8 @@
   "coverageCredit": false,
   "evidenceScope": {
     "productionAnimationChanged": false,
-    "reducerAdded": false,
+    "reducerAdded": true,
+    "paletteComponentBanked": true,
     "typedSeamAdded": false,
     "compositorAdded": false,
     "framebufferLookupAdded": false,
@@ -27,11 +28,13 @@
   },
   "source": {
     "audit": "tools/compare/eruptionSourceAudit.ts",
-    "auditSha256": "017f3b0cfaf93bfadb89aaa38a73075a94f18ed165a5b7c974d60d99e3fce866",
+    "auditSha256": "829217aa63c3e35ba107069075e86ed5b84e9988b135f17de67069fee9105bda",
     "probe": "tools/compare/eruptionProbe.py",
     "probeSha256": "89637c9821a8c44011c0e610cc4fc93b1a4d10dbf37f528d5201117e7a041a62",
     "evidenceVerifier": "tools/compare/eruptionEvidence.ts",
-    "evidenceVerifierSha256": "95a7fe31b663688a3cabcbb290082e4377dddba4276180b41362a81c171ca9fb"
+    "evidenceVerifierSha256": "95a7fe31b663688a3cabcbb290082e4377dddba4276180b41362a81c171ca9fb",
+    "paletteComponentAudit": "tools/compare/eruptionPaletteAudit.ts",
+    "paletteComponentAuditSha256": "66bc38d0729057fc64232153836b409a5462d2e1ee0c8f57055897ace350a2cd"
   },
   "orientations": {
     "player-back": {

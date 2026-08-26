@@ -13,6 +13,7 @@ const scripts = read("reference/pokeemerald/data/battle_anim_scripts.s");
 const fire = read("reference/pokeemerald/src/battle_anim_fire.c");
 const ground = read("reference/pokeemerald/src/battle_anim_ground.c");
 const normal = read("reference/pokeemerald/src/battle_anim_normal.c");
+const palette = read("reference/pokeemerald/src/palette.c");
 const macros = read("reference/pokeemerald/asm/macros/battle_anim_script.inc");
 const animData = read("reference/pokeemerald/src/data/battle_anim.h");
 const graphics = read("reference/pokeemerald/src/graphics.c");
@@ -93,8 +94,14 @@ for (const token of [
 ]) requireToken(macros, token, "Eruption palette macro");
 for (const token of [
   "const struct SpriteTemplate gSimplePaletteBlendSpriteTemplate =", "static void AnimSimplePaletteBlend(struct Sprite *sprite)",
-  "UnpackSelectedBattlePalettes(cmd->selector)",
+  "UnpackSelectedBattlePalettes(cmd->selector)", "BeginNormalPaletteFade(selectedPalettes, cmd->delay, cmd->initialBlendY, cmd->targetBlendY, cmd->color);",
+  "sprite->invisible = TRUE;", "sprite->callback = AnimSimplePaletteBlend_Step;", "if (!gPaletteFade.active)",
 ]) requireToken(normal, token, "Eruption palette source");
+for (const token of [
+  "gPaletteFade.deltaY = 2;", "gPaletteFade_selectedPalettes = selectedPalettes;",
+  "gPaletteFade.objPaletteToggle ^= 1;", "BlendPalette(",
+  "CpuCopy32(gPlttBufferFaded, (void *)PLTT, PLTT_SIZE);", "DmaCopy16Defvars(3, gPlttBufferFaded, (void *)PLTT, PLTT_SIZE);",
+]) requireToken(palette, token, "Eruption palette-fade source");
 for (const token of [
   "{gBattleAnimSpriteGfx_WarmRock, 0x0a80, ANIM_TAG_WARM_ROCK}",
   "{gBattleAnimSpritePal_WarmRock, ANIM_TAG_WARM_ROCK}",
@@ -144,5 +151,5 @@ console.log(JSON.stringify({
   assets: { tag: "ANIM_TAG_WARM_ROCK", gfx: "gBattleAnimSpriteGfx_WarmRock", palette: "gBattleAnimSpritePal_WarmRock", bytes: 0x0a80 },
   audio: { explosion: { id: 178, pan: "SOUND_PAN_ATTACKER", waits: 2, delay: 60 }, rockThrow: { id: 131, pan: "SOUND_PAN_TARGET", interval: 16, count: 12 } },
   carrier: { setId: 346, label: "FRONTIER_MON_CAMERUPT_2", species: "SPECIES_CAMERUPT", moves: carriers[0].moves, item: "BATTLE_FRONTIER_ITEM_LAX_INCENSE", nature: "NATURE_QUIRKY", evs: ["F_EV_SPREAD_SP_ATTACK", "F_EV_SPREAD_ATTACK"] },
-  ownership: { gameplayState: false, damage: false, weather: false, rng: false, controller: false, reducer: false, renderer: false },
+  ownership: { gameplayState: false, damage: false, weather: false, rng: false, controller: false, reducer: "simple-palette-component-only", renderer: false },
 }, null, 2));
