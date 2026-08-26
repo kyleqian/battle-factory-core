@@ -73,6 +73,8 @@ describe("MOVE_ERUPTION composed source-relative reducer", () => {
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_EARTHQUAKE")?.status).toBe("exact");
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_FISSURE")?.status).toBe("exact");
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_LUSTER_PURGE")?.status).toBe("exact");
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_SKY_ATTACK")?.status).toBeUndefined();
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_MAGNITUDE")?.status).toBeUndefined();
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_EXPLOSION")?.status).toBe("exact");
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_SELF_DESTRUCT")?.status).toBe("exact");
     expect(() => sceneOnEruptionView({
