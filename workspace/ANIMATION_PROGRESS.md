@@ -1,3 +1,11 @@
+# MOVE_ERUPTION Warm Rock asset banked — move unsupported (2026-08-25 worker)
+
+- **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION remains unsupported and `eruption-warm-rock` remains unfulfilled; this banks only `asset:ANIM_TAG_WARM_ROCK` with no move or sibling credit.
+- **Did:** Added a deterministic dev-time extractor and self-contained `src/animation/assets/eruption-warm-rock.json`: the complete **32×168, 84-tile / 0x0a80-byte 4bpp** sheet, all 16 palette colors, source/tag/symbol/hash metadata, and exact source-template layouts. The asset records the four 32×32 falling cells at offsets `0/16/32/48` and five 16×16 launch cells at `64/68/72/76/80`, including the launch cells' contiguous native tile-memory order across each 4-tile source-sheet row.
+- **Verified:** Fresh isolated extraction is byte-identical. Focused source/asset tests pin source PNG `c44f8ed1…`, indexed sheet `56f6431c…`, packed 4bpp `e07569d2…`, and palette `9e48c2c5…`; they decode every indexed/RGBA cell and prove the retained player-back and opponent-front OAM observations use the launch/falling offsets, 16×16/32×32 shapes, normal priority, and Warm Rock palette slot. No framebuffer claim is made.
+- **Next:** Keep Eruption unsupported until separate launch/falling state reducers, HorizontalShake, audio, typed seam, compositor, and complete bilateral framebuffer work are proven; the asset alone does not satisfy any of those components.
+- **Notes:** No `battleScene.ts`/`core.ts`, palette reducer, latch, boundary/barrier, gameplay/RNG/controller, canonical-recording import, absolute tick/species/evidence gate, or RGB/framebuffer lookup changed.
+
 # MOVE_ERUPTION simple-palette component banked — move unsupported (2026-08-25 worker)
 
 - **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION remains unsupported and `eruption-warm-rock` remains unfulfilled; only its two `visualCommand:simple_palette_blend` programs and palette-transfer lifecycle are banked.
