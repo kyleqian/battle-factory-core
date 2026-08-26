@@ -187,6 +187,77 @@
 
 ---
 
+
+## 1400 — [ts worker, 2026-08-25 ~16:05] **Ability activation-path audit COMPLETE: 38/38 SOURCE-EXACT after the second pass; the first pass's 3 DIVERGENT rows are REFUTED, and one new real finding replaces them — Trace's `RecordAbilityBattle(0, copiedAbility)` is unported (RNG-stream affecting)**
+
+- **State:** `docs/ability-activation-audit-2026-08-25.md` is finished — all
+  38 L50-carrier no-receipt abilities paired source↔engine at cited
+  `file:line`, both halves opened at HEAD. **SOURCE-EXACT 38, DIVERGENT 0,
+  UNVERIFIED 0**; 12 individual *sites* inside exact rows are
+  UNREACHABLE-IN-FACTORY-L50 with proof (Battle Palace, Battle Arena, Battle
+  Pike, doubles-only AI labels, the roaming AI, overworld, and the Frontier
+  disobedience short-circuit). Docs-only: only this doc and PROGRESS.md
+  changed, so 1398's gates stand (`npm test` 1,140 files / 10,542 passed /
+  223 skipped; `npm run build` green). Full suite deliberately not re-run per
+  the step brief; `npm run build` + `npm run test:smoke` re-run green.
+- **REFUTED (was 1400's headline).** The Magnet Pull / Plus / Minus
+  "`ABILITY_ON_FIELD2` writes a false ability onto battler 0" finding is
+  **wrong**. `AbilityBattleEffects`' record tail (`battle_util.c:3194-3195`)
+  is guarded by `caseID < ABILITYEFFECT_CHECK_OTHER_SIDE`, and that constant
+  is **12** (`include/battle_util.h:24`) — the first pass read it as 15,
+  which is `ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER` (`:27`).
+  `ABILITYEFFECT_FIELD_SPORT` is **14**, so `14 < 12` is false and **no
+  record is written**. All three rows are SOURCE-EXACT; the port's extra
+  `absentBattlerFlags` skip (`factoryAiSwitchPolicy.ts:252`) is
+  singles-unreachable, and `damageCalc.ts:370-376` matches the ungated
+  `default:` scan.
+- **NEW F1 (real, ranked top).** The same tail *does* fire for
+  `ABILITYEFFECT_TRACE` (**11** < 12) and `ABILITYEFFECT_INTIMIDATE1/2`
+  (9/10). Both Trace dispatch sites pass the literal `battler = 0`
+  (`battle_main.c:3882`, `battle_util.c:1960`), so a successful copy runs
+  `RecordAbilityBattle(0, copiedAbility)` — in Factory singles that is the
+  **player's** slot, handing the AI the player's real ability and removing
+  the `Random() & 1` two-ability guess from `Cmd_get_ability` (`:1361` ahead
+  of `:1383`) — an **RNG-stream** divergence. The port writes nothing at
+  battle start (`factoryBattleStart.ts:484-513`) and writes the *tracer's*
+  index post-faint (`battleScriptFaintedActionsOrchestration.ts:454-459`).
+  16 L50 carriers (Porygon/Porygon2/Gardevoir). **F2:**
+  `factoryAiCheckBadMove.ts:720-725,772-776` tests the trapper abilities
+  **before** the history cache, inverting source order — latent today, live
+  the moment F1 is fixed. **Adjacent (out of scope, recorded not filed):**
+  Intimidate shares the tail and its battler-0 record is outright *false*.
+- **F3 RESOLVED.** The coverage baseline's "Trace never on a lead in 114,756
+  samples" is **instrument sampling, not a resolution bug**:
+  `randomRoundSoakCoverage.ts:547,567-583` samples
+  `rulesContext.battlers[i].ability` on the first ticked frame, and
+  `createFactoryBattleStart` has already overwritten the tracer's slot with
+  the copied ability (`factoryBattleStart.ts:494-501`) before that frame
+  exists. `ABILITY_TRACE` is structurally uncountable there.
+- **Also corrected in the doc:** Liquid Ooze — Absorb **adds** the
+  `DMG_CHANGE_SIGN` (`battle_scripts_1.s:348-350`), Leech Seed **skips** it
+  (`:3271-3276`); the first pass's one-line gloss said "skips" for both.
+  Shield Dust's `flags == 0` stat-drop gate **is** implemented
+  (`battleScriptStatBuffs.ts:278`). Rock Head has **no** AI site at all
+  (`rg -i recoil` over `battle_ai_scripts.s` + `battle_ai_script_commands.c`
+  = 0 hits).
+- **Next:** supervisor files **one** ISSUES entry from §Findings F1 (proposed
+  text is in the doc, and should name F2's file:line so both are fixed
+  together; caseIDs 9/10/11 share the tail) and stages the `mechanicLab`
+  recipe there for a stock-ROM receipt before any fix. No further audit work
+  on this doc — it is complete. `docs/soak-coverage-baseline-2026-08-25.md`
+  §6b's `unknown` WHY for Trace should become a sampling note next time that
+  doc is regenerated.
+- **Notes:** throw-site census re-run this session
+  (`python3 tools/probe/premise-census.py --only <file> --premise`; the file
+  is not executable). Five premise-worded throws sit on audited paths
+  (`factoryBattleStart.ts:242,307,320`, `battleScriptHitChainOpcode.ts:3475`,
+  `battleScriptMoveEndOpcode.ts:271`) — all hold, none was reached; they are
+  tabulated in the doc header. Engine comments claiming parity were
+  re-derived, not trusted: `battleScriptStatBuffs.ts:16-19`'s Shield Dust
+  claim turned out to be correct but *narrower* than the first pass read it.
+
+---
+
 ## 1397 — [supervisor wind-down, 2026-08-25 ~02:35] **Mission queue CLOSED + two bonus finds fixed: #122 (check-viability recorder dropped a speed-tie draw), #123 NOT-A-BUG (source-faithful Struggle stalemate), Refresh Rust port folded (cargo 1,036 + wasm parity), fifth varied-RNG gate PINNED (2,000/2,000 baseline), `--first-round` HANG-at-budget mislabel fixed, #126 (Bide ignored end-turn `HITMARKER_IGNORE_BIDE`) found by the first varied full-chain census and fixed; animation folded twice; all five gates green on the final tree**
 
 - **Final gates on THIS tree (`dae00750` = engine tree of the five gates; final tree `94da116c` = animation fold #3 on top (Scene-ON only), full suite + build rerun there` + this docs commit; supervisor's own runs,

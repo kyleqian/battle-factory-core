@@ -5,6 +5,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1403 — [supervisor wind-down, 2026-08-25 ~20:20] **Audit + receipt day: three source-vs-port audits (ability 38/38, held-item 38/38, end-turn ordering 40/47 rows) → #128 FOUND+FIXED (Intimidate/Trace record onto the player's AI-history slot: 8 AI draws), #130-#133 FOUND+FIXED (isFirstTurn decay, ENDTURN_ORDER recompute + tie draw, case-major field loop, end-turn flinch clear), #129 filed then NOT-A-BUG (trace stalled at the faint prompt); activation census (1,216 seeds, 0 CRASH/0 HANG) → every announcing hole receipted (Water Veil, Arena Trap, Leppa) + OHKO/Sturdy pack; 3 of 4 first-pass DIVERGENT audit claims refuted at source; all five gates on the final tree**
+
+- **Final gates on THIS tree (`9302e76b`, supervisor's own runs, all `--parallel`):** vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60**, winning-swap 0:60 **60/60**; fifth gate — winning `--vary-rng --first-round` carry 0 **100/100**, carry 14 **100/100**, carry 28 **100/100**, winning-swap carry 0 **100/100** — **`budget` 0 on all four** (gates ran 18:57-20:08 under load 25-53: the animation Codex supervisor was live all session). Full `npm test` on `9302e76b` **1,150 files / 10,605 passed / 223 skipped**; `npm run build` green. DEFERRED.md: no open entries. The vanilla canary's TRAJECTORY differs from 1398 by design: #128 removed source-required AI draws and #130/#131/#133 change end-turn order/draws; the gate is the count, and each engine change carries a byte-identical stock-ROM receipt.
+- **Orient:** master `2a84050e`, both lane branches folded (0 ahead); oracle freshness FAIL = the standing false positive (only oracle-side commit since 8014's restart is that session's own `3e29880b`, 6 min later); animation Codex supervisor live 15:16-21:16 on the shared services, so no restart. Baseline smoke 444/444 + build green.
+- **Did (12 worker steps, all Opus, ~$95):** (1-2) ability audit ×2 (9+24 min): **38/38 SOURCE-EXACT**; its first pass's 3 DIVERGENT rows (Magnet Pull/Plus/Minus `ABILITY_ON_FIELD2` history write) **refuted by me** — `ABILITYEFFECT_CHECK_OTHER_SIDE` is 12, so the `RecordAbilityBattle` tail never runs for FIELD_SPORT (14); real finding = #128. (3) held-item audit (10.5 min): 31 exact + 1 DIVERGENT **refuted** (`SwitchInClearSetData` is `battle_main.c:3253`, Choice Band IS cleared on switch-in) + 6 UNVERIFIED cure-berry rows **resolved by me** as unreachable in singles (ITEMS2 cures before fainted-actions polls) → 38/38. `docs/ability-activation-audit-2026-08-25.md`, `docs/held-item-activation-audit-2026-08-25.md`. (4) **activation census** `docs/soak-activation-census-2026-08-25.md`: 8 sweeps, 55/71 abilities + 35/40 items ACTIVATED; announcing holes = Water Veil / Arena Trap / Leppa; Damp/Trace already evidenced; Truant/Trace instrument-blind. (5-6) receipt packs `gate6-water-veil`, `gate6-leppa-berry` (`36169f29`/`6d3c2837`), `gate6-arena-trap`, `gate6-ohko` (`6f123019`/`37ed4aff`) — all byte-identical twice, engine pins agree (Arena Trap: the refusal is a PARTY-MENU refusal from `HandleTurnActionSelectionState`, not `Cmd_jumpifcantswitch`). (7) **#128** receipt-then-fix (`bf1a5484`/`fdc21ede`/`c2fd533c`): `abilities[0] = [INTIMIDATE,0,0,0]` on the ROM, 8 `Cmd_get_ability` draws removed vs control; three-site fix + history-before-trapper order; 3 curated trajectory pins re-pinned. (8) **#129** (`9e4f86de`…`c9219630`): the OHKO trace had stalled at the faint prompt before `moveend`; with A pulses the ROM draws King's Rock exactly where the engine does — engine source-exact, 4 arms + Shell Bell KO heal pinned, #129 deleted. (9) **end-turn ordering audit** (26 min, `docs/end-turn-ordering-audit-2026-08-25.md`): 40 SAME-ORDER / 7 DIVERGENT rows (4 root causes) / 0 UNVERIFIED → #130-#133 filed, all supervisor-verified at source. (10) **#130/#132/#133 fixes** (side, 45 min, cap-killed with 12 trajectory pins red but all code + receipts committed): `gate6-first-turn-decay` (Fake Out `But it failed!` on turn 2; Speed Boost gated on the switch-in turn) + `gate6-screen-expiry-order` (foe's Reflect before Light Screen) receipts, `e56b4862`/`8c394142`/`69125042`. (11) **#131 fix** (ts, cap-killed mid-suite; salvaged `7b671ae1`): `issue131-endturn-order-off` receipt (order recomputed inside `BattleTurnPassed`; a speed tie costs exactly one extra draw and can swap), port `03a919c7`. (12) **union re-pin** (side, cap-killed after committing everything but its final suite): master merged, every moved curated pin attributed to one of the four fixes (whole-battle's first divergence = #131's tie draw), manifest regenerated; my own full suite on the union is the verification above.
+- **Sibling folds:** animation-main 4 commits (Eruption dense-latch evidence + `tools/compare` extractor; nothing under the Scene-OFF engine, so the gates above stand for the union) merged `c429f628` while its Codex supervisor was still live (cap 21:16); **at close `animation-main` is 7 commits ahead again — deliberately left unfolded (no time for another union suite before the deadline); fold at the next orient**; post-fold union `npm test` **1,153 files / 10,614 passed / 223 skipped** on `9632271c`; `npm run build` green; rust-main 0 ahead.
+- **Next:** (1) join today's receipts into the Gate-6 manifest's hand-coded `hookReceiptInfo` registry (Water Veil, Arena Trap, Sturdy, Leppa, Damp, Trace, #128, #130-#133 rows still read `engine-referenced-no-oracle-receipt`) — brief drafted; (2) a live ROM arm for Shell Bell's heal on a KO (two-turn fixture; kernel-pinned only today); (3) activation-census instrument filler: attribute `STRINGID_PKMNLOAFING`/`PKMNTRACED`, split "named in an item-manipulation message" from "fired"; (4) more lifecycle/ordering audits — they out-found site-by-site audits today (end-turn 4 real findings vs ability 1); candidates: switch-in hook ordering across both sides, faint-replacement sequencing, multi-turn move state across switches; (5) parked #71/#73/#39/#55; dormant #121; doubles-era #109/#114.
+- **Notes:** PAPERCUTS +3 (`rg` over the `reference/` symlink returns zero hits silently; battle-lab checkpoint is past turn 1's AI decision — window turn 2; traces ending on a faint prompt stall before `moveend`). Opus audit/staging workers early-stopped at 9-16 min of 45-50-min caps until briefs carried explicit pacing (then 24-45 min, complete). Three cap-kills today all salvaged with zero code loss (commit-per-rung discipline).
+
+---
+
 ## 1402 — [ts worker, 2026-08-25 ~18:15] **ISSUES #129 CLOSED as NOT-A-BUG: the stock ROM DOES draw King's Rock's `Random()` at `MOVEEND_KINGSROCK_SHELLBELL` on a KO — #129's premise was a truncated-trace artifact, and the engine was already source-exact**
 
 - **State:** #129 deleted from `ISSUES.md`; no engine change was needed. Green at
@@ -122,72 +133,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   same abilities) — regenerated, all 17 validation checks pass. Executable
   frontier ratchet untouched; no new `unsupported-branch` barrier.
 
----
-
-## 1400 — [ts worker, 2026-08-25 ~16:05] **Ability activation-path audit COMPLETE: 38/38 SOURCE-EXACT after the second pass; the first pass's 3 DIVERGENT rows are REFUTED, and one new real finding replaces them — Trace's `RecordAbilityBattle(0, copiedAbility)` is unported (RNG-stream affecting)**
-
-- **State:** `docs/ability-activation-audit-2026-08-25.md` is finished — all
-  38 L50-carrier no-receipt abilities paired source↔engine at cited
-  `file:line`, both halves opened at HEAD. **SOURCE-EXACT 38, DIVERGENT 0,
-  UNVERIFIED 0**; 12 individual *sites* inside exact rows are
-  UNREACHABLE-IN-FACTORY-L50 with proof (Battle Palace, Battle Arena, Battle
-  Pike, doubles-only AI labels, the roaming AI, overworld, and the Frontier
-  disobedience short-circuit). Docs-only: only this doc and PROGRESS.md
-  changed, so 1398's gates stand (`npm test` 1,140 files / 10,542 passed /
-  223 skipped; `npm run build` green). Full suite deliberately not re-run per
-  the step brief; `npm run build` + `npm run test:smoke` re-run green.
-- **REFUTED (was 1400's headline).** The Magnet Pull / Plus / Minus
-  "`ABILITY_ON_FIELD2` writes a false ability onto battler 0" finding is
-  **wrong**. `AbilityBattleEffects`' record tail (`battle_util.c:3194-3195`)
-  is guarded by `caseID < ABILITYEFFECT_CHECK_OTHER_SIDE`, and that constant
-  is **12** (`include/battle_util.h:24`) — the first pass read it as 15,
-  which is `ABILITYEFFECT_CHECK_FIELD_EXCEPT_BATTLER` (`:27`).
-  `ABILITYEFFECT_FIELD_SPORT` is **14**, so `14 < 12` is false and **no
-  record is written**. All three rows are SOURCE-EXACT; the port's extra
-  `absentBattlerFlags` skip (`factoryAiSwitchPolicy.ts:252`) is
-  singles-unreachable, and `damageCalc.ts:370-376` matches the ungated
-  `default:` scan.
-- **NEW F1 (real, ranked top).** The same tail *does* fire for
-  `ABILITYEFFECT_TRACE` (**11** < 12) and `ABILITYEFFECT_INTIMIDATE1/2`
-  (9/10). Both Trace dispatch sites pass the literal `battler = 0`
-  (`battle_main.c:3882`, `battle_util.c:1960`), so a successful copy runs
-  `RecordAbilityBattle(0, copiedAbility)` — in Factory singles that is the
-  **player's** slot, handing the AI the player's real ability and removing
-  the `Random() & 1` two-ability guess from `Cmd_get_ability` (`:1361` ahead
-  of `:1383`) — an **RNG-stream** divergence. The port writes nothing at
-  battle start (`factoryBattleStart.ts:484-513`) and writes the *tracer's*
-  index post-faint (`battleScriptFaintedActionsOrchestration.ts:454-459`).
-  16 L50 carriers (Porygon/Porygon2/Gardevoir). **F2:**
-  `factoryAiCheckBadMove.ts:720-725,772-776` tests the trapper abilities
-  **before** the history cache, inverting source order — latent today, live
-  the moment F1 is fixed. **Adjacent (out of scope, recorded not filed):**
-  Intimidate shares the tail and its battler-0 record is outright *false*.
-- **F3 RESOLVED.** The coverage baseline's "Trace never on a lead in 114,756
-  samples" is **instrument sampling, not a resolution bug**:
-  `randomRoundSoakCoverage.ts:547,567-583` samples
-  `rulesContext.battlers[i].ability` on the first ticked frame, and
-  `createFactoryBattleStart` has already overwritten the tracer's slot with
-  the copied ability (`factoryBattleStart.ts:494-501`) before that frame
-  exists. `ABILITY_TRACE` is structurally uncountable there.
-- **Also corrected in the doc:** Liquid Ooze — Absorb **adds** the
-  `DMG_CHANGE_SIGN` (`battle_scripts_1.s:348-350`), Leech Seed **skips** it
-  (`:3271-3276`); the first pass's one-line gloss said "skips" for both.
-  Shield Dust's `flags == 0` stat-drop gate **is** implemented
-  (`battleScriptStatBuffs.ts:278`). Rock Head has **no** AI site at all
-  (`rg -i recoil` over `battle_ai_scripts.s` + `battle_ai_script_commands.c`
-  = 0 hits).
-- **Next:** supervisor files **one** ISSUES entry from §Findings F1 (proposed
-  text is in the doc, and should name F2's file:line so both are fixed
-  together; caseIDs 9/10/11 share the tail) and stages the `mechanicLab`
-  recipe there for a stock-ROM receipt before any fix. No further audit work
-  on this doc — it is complete. `docs/soak-coverage-baseline-2026-08-25.md`
-  §6b's `unknown` WHY for Trace should become a sampling note next time that
-  doc is regenerated.
-- **Notes:** throw-site census re-run this session
-  (`python3 tools/probe/premise-census.py --only <file> --premise`; the file
-  is not executable). Five premise-worded throws sit on audited paths
-  (`factoryBattleStart.ts:242,307,320`, `battleScriptHitChainOpcode.ts:3475`,
-  `battleScriptMoveEndOpcode.ts:271`) — all hold, none was reached; they are
-  tabulated in the doc header. Engine comments claiming parity were
-  re-derived, not trusted: `battleScriptStatBuffs.ts:16-19`'s Shield Dust
-  claim turned out to be correct but *narrower* than the first pass read it.
