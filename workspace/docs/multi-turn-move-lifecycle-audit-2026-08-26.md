@@ -523,3 +523,19 @@ does not exist in Gen 3.
 `tests/battleScriptConfuseifrepeatingattackendsOpcode.test.ts`,
 the 14 `tests/battleScriptAttackCanceler*.test.ts` files (Asleep, Bide, Confused, Disabled, Flinch, Frozen, Imprisoned, InLove, Loop, Opcode, Paralyzed, PpJoin, Recharge, Taunted, Thaw, Truant), `tests/battleScriptMultiTurnCancellation.test.ts` (all filenames verified present with `ls tests/`). **No test pins finding 1's sleep-cancel**,
 which is why it survived the 2026-08-25 audit that first named it.
+
+## Supervisor correction (2026-08-26 04:55, after merge)
+
+**Finding 1 (§6 M20 / §7) is REFUTED — the port site exists.** The sleep-gated
+`CancelMultiTurnMoves` from `HandleEndTurn_ContinueBattle` (`battle_main.c:3941-3945`)
+is ported at `src/engine/battleEndTurnOrchestration.ts:2804-2825`
+(`clearEndTurnFlinchAndSleepLocks`: unconditional `STATUS2_FLINCHED` clear, then
+`if ((status1 & BATTLE_SCRIPT_STATUS1_SLEEP) && (status2 & STATUS2_MULTIPLETURNS))
+cancelBattleScriptMultiTurnMoves(next, battler)`), wired at `:2860` inside the
+end-turn orchestration ahead of the `BattleTurnPassed` equivalent — the site landed
+with ISSUES #133 on 2026-08-25 — and pinned by `tests/endTurnFlinchClearIssue133.test.ts`
+(including the negative "sleeping battler with no multi-turn lock" case). The audit's
+`grep "STATUS1_SLEEP"` missed it because the constant is `BATTLE_SCRIPT_STATUS1_SLEEP`
+read through `withBattler`/`cancelBattleScriptMultiTurnMoves`, and `:2509-2518` is the
+wish/perish cursor seam, not the ContinueBattle pass. Verdict for M20: **SAME-ORDER**.
+Corrected counts: 0 DIVERGENT / 4 DIVERGENT-BENIGN; no ISSUES entry filed.
