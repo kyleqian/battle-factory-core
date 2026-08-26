@@ -2617,6 +2617,54 @@ export function resumeBattleEndTurnAfterFaintedActions(
 }
 
 /**
+ * `HandleEndTurn_ContinueBattle`'s per-battler pass (`battle_main.c:3941-3945`),
+ * which runs at the TOP of the end-turn phase -- before `gBattleMainFunc`
+ * becomes `BattleTurnPassed`, so ahead of `TurnValuesCleanUp(TRUE)`:
+ *
+ *     for (i = 0; i < gBattlersCount; i++) {
+ *         gBattleMons[i].status2 &= ~STATUS2_FLINCHED;
+ *         if ((gBattleMons[i].status1 & STATUS1_SLEEP)
+ *             && (gBattleMons[i].status2 & STATUS2_MULTIPLETURNS))
+ *             CancelMultiTurnMoves(i);
+ *     }
+ *
+ * The flinch clear is UNCONDITIONAL and is the only thing that retires a
+ * flinch an earlier canceler phase shadowed. `SetMoveEffect`'s flinch branch
+ * only sets the bit on a battler that has not acted yet
+ * (`battle_script_commands.c:2563-2564`), and `AtkCanceler_UnableToUseMove`
+ * stops at the FIRST firing phase (`battle_util.c:2268`) with
+ * `FLAGS -> ASLEEP -> FROZEN -> TRUANT -> RECHARGE -> FLINCH` as the order
+ * (mirrored by `battleScriptActionAdmission.ts`'s phase chain), so a battler
+ * that is flinched AND loafing/asleep/frozen/recharging in the same turn never
+ * reaches `CANCELER_FLINCH` -- the port's only other clear. Without this pass
+ * a Rock Slide flinch landed on a loafing Truant holder costs it a SECOND
+ * consecutive turn.
+ */
+function clearEndTurnFlinchAndSleepLocks(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  let next = rulesContext;
+  for (let i = 0; i < next.battleTopology.battlersCount; i += 1) {
+    const battler = i as BattleScriptBattlerId;
+    const current = next.battlers[i]!;
+    const status2 = (
+      current.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED
+    ) >>> 0;
+    if (status2 !== current.status2) {
+      next = withBattler(next, battler, { status2 });
+    }
+    const cleared = next.battlers[i]!;
+    if (
+      (cleared.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0
+      && (cleared.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) !== 0
+    ) {
+      next = cancelBattleScriptMultiTurnMoves(next, battler).rulesContext;
+    }
+  }
+  return next;
+}
+
+/**
  * The C-side `BattleTurnPassed` loop equivalent. Call once both of a turn's
  * actions have finished (their own move scripts, and any mid-turn faints'
  * own `HandleFaintedMonActions`, already resolved to a real continuation
@@ -2647,7 +2695,9 @@ export function runBattleEndTurnOrchestration(
   let state = withWishPerishSongCursor(
     Object.freeze({
       ...initialState,
-      rulesContext: enterTurnValuesCleanUp(initialState.rulesContext),
+      rulesContext: enterTurnValuesCleanUp(
+        clearEndTurnFlinchAndSleepLocks(initialState.rulesContext),
+      ),
     }),
     0,
     0,
