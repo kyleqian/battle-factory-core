@@ -770,6 +770,11 @@ import {
   type EruptionFrame,
 } from "./eruption.ts";
 import {
+  iceBeamAtAge,
+  type IceBeamAnimationProfile,
+  type IceBeamFrame,
+} from "./iceBeam.ts";
+import {
   futureSightAttackerEffectAtAge,
   futureSightBgBldyAtAge,
   futureSightBgIsPsychic,
@@ -2986,6 +2991,19 @@ export interface SceneOnEruptionConfig {
   readonly animationProfile: Readonly<EruptionAnimationProfile>;
 }
 
+/**
+ * Narrow Scene-ON seam for the source-relative Ice Beam reducer.  The
+ * reducer state is intentionally exposed for a future compositor; this seam
+ * carries no framebuffer draw path and does not infer species or coordinates.
+ */
+export interface SceneOnIceBeamConfig {
+  readonly move: "ICE_BEAM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<IceBeamAnimationProfile>;
+}
+
 /** Narrow Scene-ON Fissure seam; OHKO resolution and RNG stay external. */
 export interface SceneOnFissureConfig {
   readonly move: "FISSURE";
@@ -3483,6 +3501,7 @@ export type SceneOnMoveConfig =
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnEruptionConfig
+  | SceneOnIceBeamConfig
   | SceneOnFissureConfig
   | SceneOnHardenConfig
   | SceneOnIronDefenseConfig
@@ -3538,6 +3557,8 @@ export type SceneOnSoftBoiledPresentationState =
   SceneOnMovePresentationState<SceneOnSoftBoiledConfig>;
 export type SceneOnEruptionPresentationState =
   SceneOnMovePresentationState<SceneOnEruptionConfig>;
+export type SceneOnIceBeamPresentationState =
+  SceneOnMovePresentationState<SceneOnIceBeamConfig>;
 export type SceneOnDizzyPunchPresentationState =
   SceneOnMovePresentationState<SceneOnDizzyPunchConfig>;
 export type SceneOnRazorLeafPresentationState =
@@ -4485,6 +4506,14 @@ export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
 export interface SceneOnEruptionView extends EruptionFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnIceBeamView extends IceBeamFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  /** Scene-ON hardware state is ready for a compositor, but remains deferred. */
+  readonly deferredCompositor: true;
+  readonly compositor: "deferred";
 }
 
 export interface SceneOnFissureView extends FissureState {
@@ -8988,6 +9017,22 @@ export function sceneOnEruptionView(
     ...eruptionAtAge(state.age, state.config.animationProfile),
     attacker: state.config.attacker,
     target: state.config.target,
+  };
+}
+
+/** `age=0` is Move_ICE_BEAM's active source-script offset-zero display. */
+export function sceneOnIceBeamView(
+  state: SceneOnIceBeamPresentationState,
+): SceneOnIceBeamView {
+  if (state.config.move !== "ICE_BEAM") {
+    throw new Error(`expected ICE_BEAM presentation, got ${state.config.move}`);
+  }
+  return {
+    ...iceBeamAtAge(state.age, state.config.animationProfile),
+    attacker: state.config.attacker,
+    target: state.config.target,
+    deferredCompositor: true,
+    compositor: "deferred",
   };
 }
 
