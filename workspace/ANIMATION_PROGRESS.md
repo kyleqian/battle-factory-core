@@ -1,3 +1,11 @@
+# MOVE_ERUPTION launch task + Warm Rock sprite component banked — move unsupported (2026-08-25 worker)
+
+- **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION and `eruption-warm-rock` remain unsupported/unfulfilled; this banks only `AnimTask_EruptionLaunchRocks` plus `gEruptionLaunchRockSpriteTemplate`, with no framebuffer or sibling credit.
+- **Did:** Added a pure source-relative reducer for both launch-task waves, exact fixed-slot seven-rock allocations, source task data/lifetimes/cursor/wait, Warm Rock tile-cell cycling, Q8.8 launch physics, side geometry, affine/OAM state, animation RNG, resources, visual counts, and cleanup. Geometry, allocator, side, and starting animation RNG remain typed inputs.
+- **Verified:** Strict Scene-ON audit replays all **476 player-back + 494 opponent-front rows**: launch task data/sources/lifetimes, all 14 sprite births/callbacks/data/OAM fields, tile offsets `64/68/72/76/80/64/68`, fixed slots, RNG, resource lifetime, affine matrix predecessor behavior, and OAM predecessor transfer. Waves are player **19..99 / 101..181**, opponent **19..108 / 110..199**, with launch starts **61/143** and **61/152**. Banked palette and independent ShakeMon2 controls remain green.
+- **Next:** Keep Eruption unsupported until falling rocks, HorizontalShake, audio, typed seam, compositor, and complete bilateral framebuffer acceptance are separately proven.
+- **Notes:** No `battleScene.ts`/`core.ts`, palette reducer, Warm Rock asset, latch, boundary/barrier, gameplay/RNG/controller, canonical-recording import, absolute-tick/species/evidence gate, or RGB/framebuffer lookup changed.
+
 # MOVE_ERUPTION Warm Rock asset banked — move unsupported (2026-08-25 worker)
 
 - **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION remains unsupported and `eruption-warm-rock` remains unfulfilled; this banks only `asset:ANIM_TAG_WARM_ROCK` with no move or sibling credit.

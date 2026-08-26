@@ -6935,7 +6935,7 @@
    ],
    "representatives": ["MOVE_ERUPTION"],
    "fulfilled": false,
-    "goal": "UNFULFILLED Eruption component track: complete bilateral 476/494-row Scene-ON evidence remains retained. asset:ANIM_TAG_WARM_ROCK is now banked as a source-derived self-contained 32x168 / 0x0a80-byte indexed 4bpp sheet with its 16-color palette, exact launch/falling OAM cell layouts, and reproducible hashes; the two visualCommand:simple_palette_blend programs remain banked through a pure source-relative palette reducer. Launch/falling state reducers, HorizontalShake, audio, typed seam, compositor, and framebuffer acceptance remain open; Eruption stays unsupported with no sibling credit."
+    "goal": "UNFULFILLED Eruption component track: complete bilateral 476/494-row Scene-ON evidence remains retained. asset:ANIM_TAG_WARM_ROCK is banked as a source-derived self-contained 32x168 / 0x0a80-byte indexed 4bpp sheet with its 16-color palette and exact launch/falling OAM cell layouts; the two visualCommand:simple_palette_blend programs remain banked through a pure source-relative palette reducer; task:AnimTask_EruptionLaunchRocks and sprite:gEruptionLaunchRockSpriteTemplate are now banked through a strict bilateral source/task/sprite/RNG/allocation/resource/OAM reducer audit. Falling-rock state, HorizontalShake, audio, typed seam, compositor, and framebuffer acceptance remain open; Eruption stays unsupported/unfulfilled with no framebuffer or sibling credit."
   }
  ],
  "variantAudits": {
