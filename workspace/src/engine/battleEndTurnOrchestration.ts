@@ -47,6 +47,7 @@ import {
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import {
+  applyBattleScriptMoveEndSubstituteOwnership,
   resolveBattleScriptBattlerHoldEffect,
   resolveBattleScriptBattlerHoldEffectParam,
   resolveBattleScriptMoveBasePp,
@@ -2065,11 +2066,11 @@ function computeBattlerOrder(rulesContext: BattleScriptRulesContext): readonly B
 /**
  * `TurnValuesCleanUp(FALSE)`'s full per-battler `ProtectStruct` memset
  * (`battle_main.c:4857-4874`, doc §1.3/§2.4): every field this engine has a
- * home for, reset to zero for all `battlersCount` battlers.
- * `isFirstTurn`/`rechargeTimer` decrements (`DisableStruct`, a different
- * struct) and the unconditional substitute-status2 sync are `var0`-adjacent
- * source side effects out of this function's scope -- see
- * `docs/counter-retaliation-design.md` §2.4/Out of scope.
+ * home for, reset to zero for all `battlersCount` battlers. The
+ * `DisableStruct` decrements that follow it in the same `var0 == FALSE`
+ * branch live in `decrementDisableStructTurnTimers` below, and the
+ * both-branch substitute sync in `syncSubstituteStatus2`; the three are
+ * sequenced in source order by `finishTurnValuesCleanUp`.
  */
 const PROTECT_STRUCT_CLEAR: Partial<BattleScriptRulesBattlerState> = Object.freeze({
   protected: 0,
@@ -2126,11 +2127,115 @@ function clearFollowMeTimersForTurnValuesCleanUp(
   });
 }
 
+/**
+ * `TurnValuesCleanUp(FALSE)`'s two `gDisableStructs` decrements
+ * (`battle_main.c:4876-4886`), immediately after the `ProtectStruct` memset
+ * and for every battler up to `gBattlersCount`:
+ *
+ *     if (gDisableStructs[i].isFirstTurn)
+ *         gDisableStructs[i].isFirstTurn--;
+ *     if (gDisableStructs[i].rechargeTimer) {
+ *         gDisableStructs[i].rechargeTimer--;
+ *         if (gDisableStructs[i].rechargeTimer == 0)
+ *             gBattleMons[i].status2 &= ~STATUS2_RECHARGE;
+ *     }
+ *
+ * `isFirstTurn` is written 2 by every switch-in
+ * (`battleScriptSwitchinOpcode.ts:550`, source `SwitchInClearSetData`) and
+ * pre-decremented to 1 before turn 1 by `TryDoEventsBeforeFirstTurn`'s own
+ * `TurnValuesCleanUp(FALSE)` (`battle_main.c:3901`, modelled as the literal
+ * `isFirstTurn: 1` at `factoryBattleStart.ts:155`). Its two readers are
+ * `Cmd_jumpifnotfirstturn` -- Fake Out's only gate
+ * (`data/battle_scripts_1.s:2048-2052`, ported in
+ * `battleScriptJumpifnotfirstturnOpcode.ts`) -- and `ABILITYEFFECT_ENDTURN`'s
+ * Speed Boost `isFirstTurn != 2` test (`battle_util.c:2643`, ported at
+ * `:1196` above). Receipt: `tools/probe/receipts/gate6-first-turn-decay-off.json`
+ * (stock ROM, Battle Scene OFF) records [1,1] at turn 1's prompt, [0,0] from
+ * turn 2 -- Fake Out flinches on turn 1 and prints "But it failed!" on turn 2
+ * -- and a NINJASK shifted in on turn 3 reading 2 (no Speed Boost that turn),
+ * 1 at turn 4's prompt (Speed Boost fires, Speed stage 6 -> 7) and 0 at turn
+ * 5's (fires again, 7 -> 8).
+ *
+ * `rechargeTimer` is set to 2 by the recharge move effect
+ * (`battle_script_commands.c:2730`, ported at
+ * `battleScriptHitChainOpcode.ts:3088`). This decrement is NOT a duplicate of
+ * `CANCELER_RECHARGE`'s clear (`battle_util.c:2098-2103`, ported at
+ * `battleScriptActionAdmission.ts:1916-1921`): source runs both, and the
+ * canceler *zeroes* the timer rather than stepping it, so a recharging mon
+ * that reaches its action consumes the recharge there and this branch is a
+ * no-op that turn. Both writes are kept, exactly as source has them; the
+ * end-turn step is what retires the recharge for a battler that never reaches
+ * `CANCELER_RECHARGE` because an earlier canceler phase (`CANCELER_ASLEEP` /
+ * `FROZEN` / `TRUANT`) already stopped the chain.
+ */
+function decrementDisableStructTurnTimers(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  let next = rulesContext;
+  for (let i = 0; i < next.battleTopology.battlersCount; i += 1) {
+    const battler = next.battlers[i]!;
+    const update: { -readonly [K in keyof BattleScriptRulesBattlerState]?: BattleScriptRulesBattlerState[K] } = {};
+    if (battler.isFirstTurn !== 0) {
+      update.isFirstTurn = battler.isFirstTurn - 1;
+    }
+    if (battler.rechargeTimer !== 0) {
+      const rechargeTimer = battler.rechargeTimer - 1;
+      update.rechargeTimer = rechargeTimer;
+      if (rechargeTimer === 0) {
+        update.status2 = (
+          battler.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+        ) >>> 0;
+      }
+    }
+    if (Object.keys(update).length === 0) continue;
+    next = withBattler(next, i as BattleScriptBattlerId, update);
+  }
+  return next;
+}
+
+/**
+ * `TurnValuesCleanUp`'s substitute sync (`battle_main.c:4887-4888`). The
+ * statement sits OUTSIDE the `var0` branch, so both the `TRUE` entry call
+ * (`battle_main.c:3960`) and the `FALSE` tail call (`:3974`) run it for every
+ * battler: `if (gDisableStructs[i].substituteHP == 0) status2 &=
+ * ~STATUS2_SUBSTITUTE`. That is byte-for-byte the loop `MOVEEND_SUBSTITUTE`
+ * runs, so this reuses its already-landed port rather than restating it.
+ */
+function syncSubstituteStatus2(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  return applyBattleScriptMoveEndSubstituteOwnership(rulesContext);
+}
+
+/**
+ * `TurnValuesCleanUp(TRUE)` at `BattleTurnPassed`'s entry (`battle_main.c:3960`):
+ * only the both-branch statements -- the substitute sync and the side-global
+ * Follow Me clear -- plus the `protected`/`endured` pair the `TRUE` branch
+ * owns (audit FINDING 4; no modeled end-turn reader, left to the tail memset).
+ */
+function enterTurnValuesCleanUp(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  return clearFollowMeTimersForTurnValuesCleanUp(
+    syncSubstituteStatus2(rulesContext),
+  );
+}
+
+/**
+ * `TurnValuesCleanUp(FALSE)` in source statement order
+ * (`battle_main.c:4869-4892`): the `ProtectStruct` memset, then the
+ * `isFirstTurn`/`rechargeTimer` decrements, then the both-branch substitute
+ * sync, then the two side-global Follow Me timers.
+ */
 function finishTurnValuesCleanUp(
   rulesContext: BattleScriptRulesContext,
 ): BattleScriptRulesContext {
   return clearFollowMeTimersForTurnValuesCleanUp(
-    clearProtectStructsForNextTurn(rulesContext),
+    syncSubstituteStatus2(
+      decrementDisableStructTurnTimers(
+        clearProtectStructsForNextTurn(rulesContext),
+      ),
+    ),
   );
 }
 
@@ -2509,9 +2614,7 @@ export function runBattleEndTurnOrchestration(
   let state = withWishPerishSongCursor(
     Object.freeze({
       ...initialState,
-      rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
-        initialState.rulesContext,
-      ),
+      rulesContext: enterTurnValuesCleanUp(initialState.rulesContext),
     }),
     0,
     0,
