@@ -265,9 +265,10 @@ const EXPLICIT_STATE_BEHAVIOR_ROWS = [
   ],
 ] as const;
 
-// The 2026-08-25 stock-ROM receipt packs joined into the manifest's hand-coded
-// hook registry: each row's own effect was observed by a committed receipt, so
-// each flips to oracle-receipted-hook and carries the pack's id verbatim.
+// The 2026-08-25/26 stock-ROM receipt packs joined into the manifest's
+// hand-coded hook registry: each row's own effect was observed by a committed
+// receipt, so each flips to oracle-receipted-hook and carries the pack's id
+// verbatim.
 const RECEIPT_PACK_FLIPS = [
   {
     axis: "abilities", label: "ABILITY_WATER_VEIL", receiptId: "gate6-water-veil-off",
@@ -349,6 +350,22 @@ const RECEIPT_PACK_FLIPS = [
     ],
     notes: /MOVEEND_KINGSROCK_SHELLBELL Random\(\) draw.*ABSENT in the same fixture with the item removed/s,
   },
+  {
+    axis: "holdEffects", label: "HOLD_EFFECT_SHELL_BELL", receiptId: "shell-bell-ko-heal-off",
+    evidencePaths: [
+      "tools/battle-lab/issue129-shellbell-ko-heal-off.json",
+      "tools/battle-lab/issue129-shellbell-ko-control-off.json",
+      "tools/battle-lab/issue129-shellbell-nonko-heal-off.json",
+      "tools/probe/probe-shell-bell-ko-heal-off.py",
+      "tools/probe/receipts/shell-bell-ko-heal-off.json",
+      "tests/shellBellHealReceipt.test.ts",
+      // The King's Rock pack's shellBellDmg-survives-the-faint evidence stays.
+      "tools/battle-lab/issue129-kingsrock-ohko-off.json",
+      "tools/probe/receipts/issue129-kingsrock-ko-off.json",
+      "tests/issue129KingsRockKoReceipt.test.ts",
+    ],
+    notes: /\+15 = floor\(125\/8\) on a KO, 0 on the item-0 control, \+5 on a non-KO hit; kernel equal/,
+  },
 ] as const;
 
 // Packs whose ability/item is present but whose own effect was NOT observed
@@ -374,21 +391,14 @@ const RECEIPT_PACK_EVIDENCE_ONLY = [
     ],
     notes: /R11 remains the direct Speed Boost receipt.*gated OFF on NINJASK's switch-in turn/s,
   },
-  {
-    axis: "holdEffects", label: "HOLD_EFFECT_SHELL_BELL",
-    status: "engine-referenced-no-oracle-receipt", receiptIds: [],
-    evidencePaths: [
-      "tools/probe/receipts/issue129-kingsrock-ko-off.json",
-      "tests/issue129KingsRockKoReceipt.test.ts",
-    ],
-    notes: /No direct Shell Bell receipt is claimed.*no heal was staged live/is,
-  },
 ] as const;
 
-// Full hook-row status multisets after the 2026-08-25 pack join. These are the
-// "no other row moved" pins: before the join, abilities read
-// engine-referenced-no-oracle-receipt 38 / oracle-receipted-hook 27 and hold
-// effects read 38 / 4, and every other bucket is unchanged.
+// Full hook-row status multisets after the 2026-08-25 pack join and the
+// 2026-08-26 Shell Bell KO-heal flip. These are the "no other row moved" pins:
+// before the 08-25 join, abilities read engine-referenced-no-oracle-receipt 38
+// / oracle-receipted-hook 27 and hold effects read 38 / 4; the Shell Bell flip
+// then moved hold effects from 36 / 6 to 35 / 7, and every other bucket is
+// unchanged.
 const HOOK_STATUS_MULTISETS = {
   abilities: {
     "engine-referenced-no-oracle-receipt": 33,
@@ -399,8 +409,8 @@ const HOOK_STATUS_MULTISETS = {
     "zero-factory-carrier-widened-scope": 4,
   },
   holdEffects: {
-    "engine-referenced-no-oracle-receipt": 36,
-    "oracle-receipted-hook": 6,
+    "engine-referenced-no-oracle-receipt": 35,
+    "oracle-receipted-hook": 7,
     "sentinel-not-a-hook-member": 1,
     "zero-factory-carrier-widened-scope": 24,
   },
@@ -1368,7 +1378,7 @@ describe("Gate-6 mechanics coverage manifest", () => {
     expect(readFileSync(MARKDOWN_PATH, "utf8")).not.toMatch(/fixture-only-no-committed-receipt/);
   });
 
-  it("credits the 2026-08-25 receipt packs to exactly the hooks whose own effect the ROM observed", () => {
+  it("credits the 2026-08-25/26 receipt packs to exactly the hooks whose own effect the ROM observed", () => {
     const manifest = readManifest();
     const hookSections = record(record(manifest.sections).hooks);
     const rowsByAxis = {
@@ -1381,6 +1391,11 @@ describe("Gate-6 mechanics coverage manifest", () => {
       return row!;
     };
     const markdown = readFileSync(MARKDOWN_PATH, "utf8");
+
+    // Eight hook rows now flip on their own live receipt; two keep an
+    // evidence-only join because the ROM never staged their own effect.
+    expect(RECEIPT_PACK_FLIPS).toHaveLength(8);
+    expect(RECEIPT_PACK_EVIDENCE_ONLY).toHaveLength(2);
 
     for (const flip of RECEIPT_PACK_FLIPS) {
       const row = rowFor(flip.axis, flip.label);
@@ -1406,10 +1421,14 @@ describe("Gate-6 mechanics coverage manifest", () => {
       expect(String(row.notes), `${pack.label} notes`).toMatch(pack.notes);
     }
 
-    // Shell Bell is the explicit non-flip: the King's Rock pack observed
-    // shellBellDmg at moveend state 12 but staged no live heal.
+    // Shell Bell was the explicit non-flip until the 2026-08-26 KO-heal receipt
+    // staged the heal live; the note must now read the witnessed numbers and
+    // must no longer claim the heal is kernel-only.
     const shellBell = rowFor("holdEffects", "HOLD_EFFECT_SHELL_BELL");
-    expect(String(shellBell.notes)).toMatch(/kernel-pinned only/);
+    expect(String(shellBell.notes)).toBe(
+      "Live KO heal witnessed: +15 = floor(125/8) on a KO, 0 on the item-0 control, +5 on a non-KO hit; kernel equal.",
+    );
+    expect(String(shellBell.notes)).not.toMatch(/kernel-pinned only/);
 
     // No other hook row's status moved: pin both full multisets.
     for (const axis of ["abilities", "holdEffects"] as const) {
@@ -1419,6 +1438,6 @@ describe("Gate-6 mechanics coverage manifest", () => {
     }
     const summaryHooks = record(record(manifest.summary).hooks);
     expect(record(summaryHooks.abilities)).toEqual({ total: 78, oracleReceipted: 32, zeroFactoryWidened: 4 });
-    expect(record(summaryHooks.holdEffects)).toEqual({ total: 67, oracleReceipted: 6, zeroFactoryWidened: 24 });
+    expect(record(summaryHooks.holdEffects)).toEqual({ total: 67, oracleReceipted: 7, zeroFactoryWidened: 24 });
   });
 });
