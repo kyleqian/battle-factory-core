@@ -47,6 +47,7 @@ import {
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import {
+  applyBattleScriptMoveEndSubstituteOwnership,
   resolveBattleScriptBattlerHoldEffect,
   resolveBattleScriptBattlerHoldEffectParam,
   resolveBattleScriptMoveBasePp,
@@ -56,7 +57,18 @@ import {
   type BattleScriptRulesContext,
   type BattleScriptSideTimerState,
 } from "./battleScriptRulesContext.ts";
-import { applyConfusionStatus2Mutation, withBattler } from "./battleScriptHitChainOpcode.ts";
+import {
+  applyConfusionStatus2Mutation,
+  HOLD_EFFECT_NAME_BY_ID,
+  withBattler,
+} from "./battleScriptHitChainOpcode.ts";
+import { ABILITY_SYMBOLS } from "./battleScriptSwitchinOpcode.ts";
+import {
+  getWhoStrikesFirst,
+  isSpeedTie,
+  type TurnOrderBattler,
+  type WeatherState,
+} from "./turnOrder.ts";
 import { moveEndLumStatusName } from "./battleScriptMoveEndOpcode.ts";
 import {
   runBattleScriptFaintedActionsOrchestration,
@@ -84,6 +96,13 @@ import {
   BATTLE_SCRIPT_STATUS3_YAWN,
   BATTLE_SCRIPT_STATUS3_YAWN_TURN_1,
 } from "./battleScriptSourceConstants.ts";
+import movesData from "../data/gen/moves.json" with { type: "json" };
+
+/** gBattleMoves' priority column (src/data/battle_moves.h), keyed by move id. */
+const MOVE_PRIORITY_BY_ID = new Map(
+  (movesData.moves as readonly Readonly<{ id: number; priority: number }>[])
+    .map((move) => [move.id, move.priority] as const),
+);
 
 const POISON_TURN_DMG_LABEL = "BattleScript_PoisonTurnDmg";
 const BURN_TURN_DMG_LABEL = "BattleScript_BurnTurnDmg";
@@ -192,6 +211,9 @@ const ABILITY_INSOMNIA = 15;
 const ABILITY_CLOUD_NINE = 13;
 /** battleScriptStatBuffs.ts's own STAT_SPEED/MAX_STAT_STAGE convention. */
 const STAT_SPEED = 3;
+/** include/constants/moves.h MOVE_NONE; include/constants/battle.h B_ACTION_USE_MOVE. */
+const MOVE_NONE = 0;
+const B_ACTION_USE_MOVE = 0;
 const MAX_STAT_STAGE = 12;
 /** include/constants/battle.h -- STAT_ATK/STAT_SPATK. */
 const STAT_ATK = 1;
@@ -1941,6 +1963,63 @@ function runDamagingWeatherFieldCase(
 }
 
 /**
+ * The four side-scoped `DoFieldEndTurnEffects` cases in SOURCE (case-major)
+ * order (`battle_util.c:1220-1315`). Each of `ENDTURN_REFLECT` (`:1221`),
+ * `ENDTURN_LIGHT_SCREEN` (`:1246`), `ENDTURN_MIST` (`:1272`) and
+ * `ENDTURN_SAFEGUARD` (`:1294`) owns its OWN `while
+ * (gBattleStruct->turnSideTracker < 2)` loop, so the traversal is
+ * Reflect(0), Reflect(1), LightScreen(0), LightScreen(1), Mist(0), Mist(1),
+ * Safeguard(0), Safeguard(1) -- NOT `for (side) { all four cases }`.
+ *
+ * The distinction is observable whenever two DIFFERENT screens on the two
+ * sides expire on the same turn: the stock-ROM receipt
+ * `tools/probe/receipts/gate6-screen-expiry-order-off.json` has the player's
+ * Light Screen (side 0) and the opponent's Reflect (side 1) both hit 0 at the
+ * end of turn 5, and the ROM prints "Foe's REFLECT wore off!" BEFORE "Ally's
+ * LIGHT SCREEN wore off!" -- Reflect's case, side 1, still precedes Light
+ * Screen's case, side 0.
+ *
+ * The source cursor pair is `turnCountersTracker`/`turnSideTracker`: a case
+ * that fires `break`s out with the side cursor already advanced past the side
+ * that fired and does NOT bump `turnCountersTracker`, so `BattleTurnPassed`'s
+ * re-entry resumes at the SAME case on the NEXT side; only a case that ends
+ * with `effect == 0` bumps the case cursor and resets the side cursor. This
+ * port runs each fired case's script inline instead of yielding, so the pair
+ * is modelled by the nesting itself -- inner loop = `turnSideTracker`, outer
+ * loop = `turnCountersTracker` -- with the same visit order.
+ */
+const SIDE_SCOPED_FIELD_CASES: readonly ((
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  side: 0 | 1,
+) => FieldCaseOutcome)[] = Object.freeze([
+  // ENDTURN_REFLECT (battle_util.c:1221-1245)
+  (program, handlers, state, side) => runScreenFieldCase(
+    program, handlers, state, side, SIDE_STATUS_REFLECT,
+    (t) => t.reflectTimer, (nextTimer) => ({ reflectTimer: nextTimer }),
+    (t) => t.reflectBattlerId, SIDE_STATUS_WORE_OFF_LABEL, MOVE_REFLECT,
+  ),
+  // ENDTURN_LIGHT_SCREEN (battle_util.c:1246-1271)
+  (program, handlers, state, side) => runScreenFieldCase(
+    program, handlers, state, side, SIDE_STATUS_LIGHTSCREEN,
+    (t) => t.lightscreenTimer, (nextTimer) => ({ lightscreenTimer: nextTimer }),
+    (t) => t.lightscreenBattlerId, SIDE_STATUS_WORE_OFF_LABEL, MOVE_LIGHT_SCREEN,
+  ),
+  // ENDTURN_MIST (battle_util.c:1272-1293)
+  (program, handlers, state, side) => runMistFieldCase(program, handlers, state, side),
+  // ENDTURN_SAFEGUARD (battle_util.c:1294-1315)
+  (program, handlers, state, side) => runScreenFieldCase(
+    program, handlers, state, side, SIDE_STATUS_SAFEGUARD,
+    (t) => t.safeguardTimer, (nextTimer) => ({ safeguardTimer: nextTimer }),
+    // BattleScript_SafeguardEnds's own STRINGID_PKMNSAFEGUARDEXPIRED never
+    // reads {B_BUFF1} (battle_util.c:1295-1317 has no PREPARE_MOVE_BUFFER
+    // call, unlike the Reflect/Light Screen/Mist cases above) -- unused.
+    (t) => t.safeguardBattlerId, SAFEGUARD_ENDS_LABEL, 0,
+  ),
+]);
+
+/**
  * `DoFieldEndTurnEffects`'s 9 non-ENDTURN_ORDER cases (`battle_util.c:1181
  * -1438`). REFLECT/LIGHT_SCREEN/MIST/SAFEGUARD (F2-F5), RAIN/SUN (F7/F9),
  * WISH (F6), and SANDSTORM/HAIL (F8/F10) are all fully wired
@@ -1955,41 +2034,17 @@ function runDoFieldEndTurnEffects(
   initialState: MachineState,
 ): BattlerLoopResult {
   let state = initialState;
-  for (const side of [0, 1] as const) {
-    const reflect = runScreenFieldCase(
-      program, handlers, state, side, SIDE_STATUS_REFLECT,
-      (t) => t.reflectTimer, (nextTimer) => ({ reflectTimer: nextTimer }),
-      (t) => t.reflectBattlerId, SIDE_STATUS_WORE_OFF_LABEL, MOVE_REFLECT,
-    );
-    if (reflect.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: reflect.state, instruction: reflect.instruction });
-    state = reflect.state;
-    if (reflect.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
-
-    const lightscreen = runScreenFieldCase(
-      program, handlers, state, side, SIDE_STATUS_LIGHTSCREEN,
-      (t) => t.lightscreenTimer, (nextTimer) => ({ lightscreenTimer: nextTimer }),
-      (t) => t.lightscreenBattlerId, SIDE_STATUS_WORE_OFF_LABEL, MOVE_LIGHT_SCREEN,
-    );
-    if (lightscreen.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: lightscreen.state, instruction: lightscreen.instruction });
-    state = lightscreen.state;
-    if (lightscreen.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
-
-    const mist = runMistFieldCase(program, handlers, state, side);
-    if (mist.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: mist.state, instruction: mist.instruction });
-    state = mist.state;
-    if (mist.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
-
-    const safeguard = runScreenFieldCase(
-      program, handlers, state, side, SIDE_STATUS_SAFEGUARD,
-      (t) => t.safeguardTimer, (nextTimer) => ({ safeguardTimer: nextTimer }),
-      // BattleScript_SafeguardEnds's own STRINGID_PKMNSAFEGUARDEXPIRED never
-      // reads {B_BUFF1} (battle_util.c:1295-1317 has no PREPARE_MOVE_BUFFER
-      // call, unlike the Reflect/Light Screen/Mist cases above) -- unused.
-      (t) => t.safeguardBattlerId, SAFEGUARD_ENDS_LABEL, 0,
-    );
-    if (safeguard.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: safeguard.state, instruction: safeguard.instruction });
-    state = safeguard.state;
-    if (safeguard.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
+  for (const runFieldCase of SIDE_SCOPED_FIELD_CASES) {
+    for (const side of [0, 1] as const) {
+      const result = runFieldCase(program, handlers, state, side);
+      if (result.kind === "opcode-barrier") {
+        return Object.freeze({ kind: "opcode-barrier", state: result.state, instruction: result.instruction });
+      }
+      state = result.state;
+      if (result.kind === "fired" && state.rulesContext.battleOutcome !== 0) {
+        return Object.freeze({ kind: "outcome-decided", state });
+      }
+    }
   }
 
   // ENDTURN_WISH follows every side-screen case and precedes all weather
@@ -2048,28 +2103,168 @@ function runDoFieldEndTurnEffects(
   return Object.freeze({ kind: "clean", state });
 }
 
+/** gBattleMoves[moveId].priority; gBattleMoves[MOVE_NONE].priority is 0. */
+export function movePriority(moveId: number): number {
+  if (moveId === MOVE_NONE) return 0;
+  const priority = MOVE_PRIORITY_BY_ID.get(moveId);
+  if (priority === undefined) throw new Error(`move ${moveId} has no source move data row`);
+  return priority;
+}
+
 /**
- * `ENDTURN_ORDER`'s `gBattlerByTurnOrder` recompute, narrowed to what this
- * engine receives from the full-turn seam. That seam has already run
- * SetActionsAndBattlersTurnOrder and stores its positional order in the
- * source-shaped `gBattlerByTurnOrder` field. Standalone contexts default the
- * field to ascending battler id.
+ * `GetWhoStrikesFirst`'s WEATHER_HAS_EFFECT branch (`battle_main.c:4604-4622`).
+ * The shared Frontier precedent suppresses weather for Cloud Nine; Air Lock
+ * has no legal Frontier carrier.
  */
-function computeBattlerOrder(rulesContext: BattleScriptRulesContext): readonly BattleScriptBattlerId[] {
+export function turnOrderWeather(rulesContext: BattleScriptRulesContext): WeatherState {
+  if (!weatherHasEffect(rulesContext)) return {};
+  return {
+    isRaining: (rulesContext.weather & B_WEATHER_RAIN) !== 0,
+    isSunny: (rulesContext.weather & B_WEATHER_SUN) !== 0,
+  };
+}
+
+/**
+ * `GetWhoStrikesFirst`'s per-battler effective-speed inputs
+ * (`battle_main.c:4624-4692`): raw `gBattleMons[].speed`, the Speed stat
+ * stage, the weather-doubling abilities, the hold effect (Macho Brace,
+ * Quick Claw + its param compared against `gRandomTurnNumber`) and
+ * paralysis. Shared verbatim by both `GetWhoStrikesFirst` call sites this
+ * engine has -- `SetActionsAndBattlersTurnOrder`'s action-order comparison
+ * in the full-turn seam and `ENDTURN_ORDER`'s per-turn re-sort below -- so
+ * the two cannot drift apart. Badge boosts are unreachable
+ * (BATTLE_TYPE_FRONTIER, `:4640-4645`).
+ */
+export function turnOrderBattlerInputs(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  moveId: number,
+): TurnOrderBattler {
+  const b = rulesContext.battlers[battler];
+  const holdEffect = resolveBattleScriptBattlerHoldEffect(rulesContext, battler);
+  return {
+    speed: b.speed,
+    speedStage: b.statStages[STAT_SPEED]!,
+    movePriority: movePriority(moveId),
+    ability: ABILITY_SYMBOLS[b.ability] ?? null,
+    holdEffect: HOLD_EFFECT_NAME_BY_ID[holdEffect] ?? null,
+    holdEffectParam: resolveBattleScriptBattlerHoldEffectParam(rulesContext, battler),
+    isParalyzed: (b.status1 & STATUS1_PARALYSIS) !== 0,
+  };
+}
+
+/**
+ * `GetWhoStrikesFirst`'s `ignoreChosenMoves == FALSE` move resolution
+ * (`battle_main.c:4694-4720`). `gChosenActionByBattler` and
+ * `gBattleStruct->chosenMovePositions` are still the turn's own values here:
+ * `BattleTurnPassed` does not reset them until its closing block
+ * (`battle_main.c:4001-4004`), i.e. after every end-turn effect.
+ *
+ * KNOWN GAP: source substitutes MOVE_STRUGGLE when
+ * `gProtectStructs[battler].noValidMoves` is set (`:4700`); this engine has
+ * no `noValidMoves` cell, so a forced-Struggle battler contributes its
+ * unusable slot's own priority instead of Struggle's 0. Reachable only when
+ * every slot of a battler is unusable AND one of them has a non-zero
+ * priority bracket.
+ */
+function endTurnChosenMove(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+): number {
+  if (rulesContext.chosenActionByBattler[battler] !== B_ACTION_USE_MOVE) return MOVE_NONE;
+  return rulesContext.battlers[battler].moves[rulesContext.chosenMovePositions[battler]!] ?? MOVE_NONE;
+}
+
+/**
+ * `ENDTURN_ORDER` (`battle_util.c:1199-1218`), the first thing every
+ * `DoFieldEndTurnEffects` pass does: identity-refill `gBattlerByTurnOrder`,
+ * then bubble-sort it -- `for (i) for (j > i) if (GetWhoStrikesFirst(order[i],
+ * order[j], FALSE)) SwapTurnOrder(i, j)` (`:1203-1213`).
+ *
+ * This is a SECOND, independent turn-order computation, not a copy of
+ * `SetActionsAndBattlersTurnOrder`'s: it runs AFTER every action resolved, so
+ * it reads the CURRENT speed, Speed stage, paralysis, weather and hold
+ * effect. It therefore disagrees with the action order whenever either side
+ * switched (switch actions are ordered first with no speed comparison at all,
+ * `battle_main.c:4820-4832`), whenever paralysis or a Speed stage landed
+ * mid-turn, or whenever weather started under a Swift Swim/Chlorophyll
+ * carrier. On an exact effective-speed tie the comparison also consumes
+ * `Random() & 1` (`battle_main.c:4728`/`:4745`) -- a real draw that lands
+ * here, ahead of every field case.
+ *
+ * ROM receipt (Battle Scene OFF, two fresh byte-identical runs per arm):
+ * `tools/probe/receipts/issue131-endturn-order-off.json` -- the ORDER arm
+ * watches `gBattlerByTurnOrder` flip [0,1] -> [1,0] inside `BattleTurnPassed`
+ * on a switch turn (and the sandstorm messages follow it), and the TIE arm
+ * costs exactly one more end-turn `Random()` than its speed-91-vs-92 control.
+ *
+ * NOT ported: `SwapTurnOrder` also swaps `gActionsByTurnOrder`
+ * (`battle_main.c:4587-4594`), which `ENDTURN_ORDER` never identity-refills.
+ * Nothing reads that array after the turn's last action -- the one reader,
+ * `Cmd_jumpifnopursuitswitchdmg`'s slot rewrite, is consumed between actions
+ * (`factoryBattleScriptFullTurnDecision.ts:2794`) -- so the scramble is
+ * unobservable and deliberately omitted.
+ */
+function computeBattlerOrder(
+  program: BattleScriptProgram,
+  state: MachineState,
+): Readonly<{ order: readonly BattleScriptBattlerId[]; state: MachineState }> {
+  const rulesContext = state.rulesContext;
   const count = rulesContext.battleTopology.battlersCount;
-  return Object.freeze(
-    rulesContext.battlerByTurnOrder.slice(0, count) as BattleScriptBattlerId[],
+  // battle_util.c:1201-1204 -- gBattlerByTurnOrder[i] = i for every battler.
+  const order: BattleScriptBattlerId[] = [];
+  for (let i = 0; i < count; i++) order.push(i as BattleScriptBattlerId);
+
+  const weather = turnOrderWeather(rulesContext);
+  const inputs = order.map((battler) =>
+    turnOrderBattlerInputs(rulesContext, battler, endTurnChosenMove(rulesContext, battler))
   );
+  let rng = state.rng;
+
+  for (let i = 0; i < count - 1; i++) {
+    for (let j = i + 1; j < count; j++) {
+      const b1 = inputs[order[i]!]!;
+      const b2 = inputs[order[j]!]!;
+      let speedTieRngRoll = 0;
+      if (isSpeedTie(b1, b2, weather, rulesContext.randomTurnNumber)) {
+        const entry = resolveBattleScriptLabel(program, DAMAGING_WEATHER_CONTINUES_LABEL);
+        if (!entry) throw new Error(`unknown Battle Script entry label ${DAMAGING_WEATHER_CONTINUES_LABEL}`);
+        const entryInstruction = program.instructions[entry.programCounter];
+        if (!entryInstruction) throw new Error(`Battle Script program has no instruction at ${entry.programCounter}`);
+        // ENDTURN_ORDER is pure C with no script of its own; the ledger entry
+        // is anchored on BattleScript_DamagingWeatherContinues, the only
+        // battle script that reads gBattlerByTurnOrder back out
+        // (copyarraywithindex, battle_scripts_1.s:3705).
+        const drawn = drawBattleScriptRng(
+          rng,
+          entryInstruction,
+          "ENDTURN_ORDER GetWhoStrikesFirst speed tie (Random() & 1)",
+        );
+        rng = drawn.rng;
+        speedTieRngRoll = drawn.randomValue;
+      }
+      if (getWhoStrikesFirst(b1, b2, speedTieRngRoll, weather, rulesContext.randomTurnNumber) !== 0) {
+        const swapped = order[i]!;
+        order[i] = order[j]!;
+        order[j] = swapped;
+      }
+    }
+  }
+
+  return Object.freeze({
+    order: Object.freeze(order),
+    state: rng === state.rng ? state : Object.freeze({ ...state, rng }),
+  });
 }
 
 /**
  * `TurnValuesCleanUp(FALSE)`'s full per-battler `ProtectStruct` memset
  * (`battle_main.c:4857-4874`, doc §1.3/§2.4): every field this engine has a
- * home for, reset to zero for all `battlersCount` battlers.
- * `isFirstTurn`/`rechargeTimer` decrements (`DisableStruct`, a different
- * struct) and the unconditional substitute-status2 sync are `var0`-adjacent
- * source side effects out of this function's scope -- see
- * `docs/counter-retaliation-design.md` §2.4/Out of scope.
+ * home for, reset to zero for all `battlersCount` battlers. The
+ * `DisableStruct` decrements that follow it in the same `var0 == FALSE`
+ * branch live in `decrementDisableStructTurnTimers` below, and the
+ * both-branch substitute sync in `syncSubstituteStatus2`; the three are
+ * sequenced in source order by `finishTurnValuesCleanUp`.
  */
 const PROTECT_STRUCT_CLEAR: Partial<BattleScriptRulesBattlerState> = Object.freeze({
   protected: 0,
@@ -2126,11 +2321,115 @@ function clearFollowMeTimersForTurnValuesCleanUp(
   });
 }
 
+/**
+ * `TurnValuesCleanUp(FALSE)`'s two `gDisableStructs` decrements
+ * (`battle_main.c:4876-4886`), immediately after the `ProtectStruct` memset
+ * and for every battler up to `gBattlersCount`:
+ *
+ *     if (gDisableStructs[i].isFirstTurn)
+ *         gDisableStructs[i].isFirstTurn--;
+ *     if (gDisableStructs[i].rechargeTimer) {
+ *         gDisableStructs[i].rechargeTimer--;
+ *         if (gDisableStructs[i].rechargeTimer == 0)
+ *             gBattleMons[i].status2 &= ~STATUS2_RECHARGE;
+ *     }
+ *
+ * `isFirstTurn` is written 2 by every switch-in
+ * (`battleScriptSwitchinOpcode.ts:550`, source `SwitchInClearSetData`) and
+ * pre-decremented to 1 before turn 1 by `TryDoEventsBeforeFirstTurn`'s own
+ * `TurnValuesCleanUp(FALSE)` (`battle_main.c:3901`, modelled as the literal
+ * `isFirstTurn: 1` at `factoryBattleStart.ts:155`). Its two readers are
+ * `Cmd_jumpifnotfirstturn` -- Fake Out's only gate
+ * (`data/battle_scripts_1.s:2048-2052`, ported in
+ * `battleScriptJumpifnotfirstturnOpcode.ts`) -- and `ABILITYEFFECT_ENDTURN`'s
+ * Speed Boost `isFirstTurn != 2` test (`battle_util.c:2643`, ported at
+ * `:1196` above). Receipt: `tools/probe/receipts/gate6-first-turn-decay-off.json`
+ * (stock ROM, Battle Scene OFF) records [1,1] at turn 1's prompt, [0,0] from
+ * turn 2 -- Fake Out flinches on turn 1 and prints "But it failed!" on turn 2
+ * -- and a NINJASK shifted in on turn 3 reading 2 (no Speed Boost that turn),
+ * 1 at turn 4's prompt (Speed Boost fires, Speed stage 6 -> 7) and 0 at turn
+ * 5's (fires again, 7 -> 8).
+ *
+ * `rechargeTimer` is set to 2 by the recharge move effect
+ * (`battle_script_commands.c:2730`, ported at
+ * `battleScriptHitChainOpcode.ts:3088`). This decrement is NOT a duplicate of
+ * `CANCELER_RECHARGE`'s clear (`battle_util.c:2098-2103`, ported at
+ * `battleScriptActionAdmission.ts:1916-1921`): source runs both, and the
+ * canceler *zeroes* the timer rather than stepping it, so a recharging mon
+ * that reaches its action consumes the recharge there and this branch is a
+ * no-op that turn. Both writes are kept, exactly as source has them; the
+ * end-turn step is what retires the recharge for a battler that never reaches
+ * `CANCELER_RECHARGE` because an earlier canceler phase (`CANCELER_ASLEEP` /
+ * `FROZEN` / `TRUANT`) already stopped the chain.
+ */
+function decrementDisableStructTurnTimers(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  let next = rulesContext;
+  for (let i = 0; i < next.battleTopology.battlersCount; i += 1) {
+    const battler = next.battlers[i]!;
+    const update: { -readonly [K in keyof BattleScriptRulesBattlerState]?: BattleScriptRulesBattlerState[K] } = {};
+    if (battler.isFirstTurn !== 0) {
+      update.isFirstTurn = battler.isFirstTurn - 1;
+    }
+    if (battler.rechargeTimer !== 0) {
+      const rechargeTimer = battler.rechargeTimer - 1;
+      update.rechargeTimer = rechargeTimer;
+      if (rechargeTimer === 0) {
+        update.status2 = (
+          battler.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+        ) >>> 0;
+      }
+    }
+    if (Object.keys(update).length === 0) continue;
+    next = withBattler(next, i as BattleScriptBattlerId, update);
+  }
+  return next;
+}
+
+/**
+ * `TurnValuesCleanUp`'s substitute sync (`battle_main.c:4887-4888`). The
+ * statement sits OUTSIDE the `var0` branch, so both the `TRUE` entry call
+ * (`battle_main.c:3960`) and the `FALSE` tail call (`:3974`) run it for every
+ * battler: `if (gDisableStructs[i].substituteHP == 0) status2 &=
+ * ~STATUS2_SUBSTITUTE`. That is byte-for-byte the loop `MOVEEND_SUBSTITUTE`
+ * runs, so this reuses its already-landed port rather than restating it.
+ */
+function syncSubstituteStatus2(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  return applyBattleScriptMoveEndSubstituteOwnership(rulesContext);
+}
+
+/**
+ * `TurnValuesCleanUp(TRUE)` at `BattleTurnPassed`'s entry (`battle_main.c:3960`):
+ * only the both-branch statements -- the substitute sync and the side-global
+ * Follow Me clear -- plus the `protected`/`endured` pair the `TRUE` branch
+ * owns (audit FINDING 4; no modeled end-turn reader, left to the tail memset).
+ */
+function enterTurnValuesCleanUp(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  return clearFollowMeTimersForTurnValuesCleanUp(
+    syncSubstituteStatus2(rulesContext),
+  );
+}
+
+/**
+ * `TurnValuesCleanUp(FALSE)` in source statement order
+ * (`battle_main.c:4869-4892`): the `ProtectStruct` memset, then the
+ * `isFirstTurn`/`rechargeTimer` decrements, then the both-branch substitute
+ * sync, then the two side-global Follow Me timers.
+ */
 function finishTurnValuesCleanUp(
   rulesContext: BattleScriptRulesContext,
 ): BattleScriptRulesContext {
   return clearFollowMeTimersForTurnValuesCleanUp(
-    clearProtectStructsForNextTurn(rulesContext),
+    syncSubstituteStatus2(
+      decrementDisableStructTurnTimers(
+        clearProtectStructsForNextTurn(rulesContext),
+      ),
+    ),
   );
 }
 
@@ -2479,6 +2778,54 @@ export function resumeBattleEndTurnAfterFaintedActions(
 }
 
 /**
+ * `HandleEndTurn_ContinueBattle`'s per-battler pass (`battle_main.c:3941-3945`),
+ * which runs at the TOP of the end-turn phase -- before `gBattleMainFunc`
+ * becomes `BattleTurnPassed`, so ahead of `TurnValuesCleanUp(TRUE)`:
+ *
+ *     for (i = 0; i < gBattlersCount; i++) {
+ *         gBattleMons[i].status2 &= ~STATUS2_FLINCHED;
+ *         if ((gBattleMons[i].status1 & STATUS1_SLEEP)
+ *             && (gBattleMons[i].status2 & STATUS2_MULTIPLETURNS))
+ *             CancelMultiTurnMoves(i);
+ *     }
+ *
+ * The flinch clear is UNCONDITIONAL and is the only thing that retires a
+ * flinch an earlier canceler phase shadowed. `SetMoveEffect`'s flinch branch
+ * only sets the bit on a battler that has not acted yet
+ * (`battle_script_commands.c:2563-2564`), and `AtkCanceler_UnableToUseMove`
+ * stops at the FIRST firing phase (`battle_util.c:2268`) with
+ * `FLAGS -> ASLEEP -> FROZEN -> TRUANT -> RECHARGE -> FLINCH` as the order
+ * (mirrored by `battleScriptActionAdmission.ts`'s phase chain), so a battler
+ * that is flinched AND loafing/asleep/frozen/recharging in the same turn never
+ * reaches `CANCELER_FLINCH` -- the port's only other clear. Without this pass
+ * a Rock Slide flinch landed on a loafing Truant holder costs it a SECOND
+ * consecutive turn.
+ */
+function clearEndTurnFlinchAndSleepLocks(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  let next = rulesContext;
+  for (let i = 0; i < next.battleTopology.battlersCount; i += 1) {
+    const battler = i as BattleScriptBattlerId;
+    const current = next.battlers[i]!;
+    const status2 = (
+      current.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED
+    ) >>> 0;
+    if (status2 !== current.status2) {
+      next = withBattler(next, battler, { status2 });
+    }
+    const cleared = next.battlers[i]!;
+    if (
+      (cleared.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0
+      && (cleared.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) !== 0
+    ) {
+      next = cancelBattleScriptMultiTurnMoves(next, battler).rulesContext;
+    }
+  }
+  return next;
+}
+
+/**
  * The C-side `BattleTurnPassed` loop equivalent. Call once both of a turn's
  * actions have finished (their own move scripts, and any mid-turn faints'
  * own `HandleFaintedMonActions`, already resolved to a real continuation
@@ -2509,8 +2856,8 @@ export function runBattleEndTurnOrchestration(
   let state = withWishPerishSongCursor(
     Object.freeze({
       ...initialState,
-      rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
-        initialState.rulesContext,
+      rulesContext: enterTurnValuesCleanUp(
+        clearEndTurnFlinchAndSleepLocks(initialState.rulesContext),
       ),
     }),
     0,
@@ -2518,8 +2865,16 @@ export function runBattleEndTurnOrchestration(
   );
 
   if (state.rulesContext.battleOutcome === 0) {
-    const battlerOrder = computeBattlerOrder(state.rulesContext);
-    // ENDTURN_ORDER (doc §1a): gBattlerByTurnOrder is (re)computed once for the whole end-turn pass, ahead of both the field and battler loops -- Cmd_copyarraywithindex's own read (BattleScript_DamagingWeatherLoop) is this field's only consumer.
+    // ENDTURN_ORDER (battle_util.c:1199-1218): gBattlerByTurnOrder is
+    // re-sorted from scratch once per end-turn pass, ahead of both the field
+    // and battler loops, and its speed-tie Random() draw lands here -- before
+    // any field case. Consumers: DoBattlerEndTurnEffects' outer loop
+    // (:1469-1471), ENDTURN_WISH (:1316-1338), HandleWishPerishSongOnTurnEnd
+    // state 1 (:1836) and BattleScript_DamagingWeatherContinues'
+    // copyarraywithindex (battle_scripts_1.s:3705).
+    const ordered = computeBattlerOrder(program, state);
+    state = ordered.state;
+    const battlerOrder = ordered.order;
     state = Object.freeze({
       ...state,
       rulesContext: Object.freeze({

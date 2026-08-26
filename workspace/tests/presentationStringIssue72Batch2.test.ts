@@ -321,7 +321,12 @@ describe("presentation-string ISSUES #72 batch 2 -- ability-blocks-the-move's-ow
       requestId: 2, side: "trainer", decision: { kind: "switch", partyIndex: 1 },
     });
     if (t1t.kind !== "decision-required") throw new Error("expected turn-2 player boundary");
-    expect(t1t.state.rules.rulesContext.battlers[1]!.isFirstTurn).toBe(2);
+    // The switch-in wrote 2, then turn 1's own TurnValuesCleanUp(FALSE)
+    // decremented it (`battle_main.c:4876-4877`), so the turn-2 boundary reads 1
+    // -- the stock-ROM fact in tools/probe/receipts/gate6-first-turn-decay-off.json
+    // (switch-in frame 1289 sets 2; end-of-turn frame 1660 steps it to 1). Still
+    // nonzero, so Cmd_jumpifnotfirstturn keeps Fake Out live on turn 2 below.
+    expect(t1t.state.rules.rulesContext.battlers[1]!.isFirstTurn).toBe(1);
 
     const t2p = submitFactoryFullTurnDecision(t1t.state, {
       requestId: 3, side: "player", decision: AT(0),

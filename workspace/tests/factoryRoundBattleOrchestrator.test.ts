@@ -2085,8 +2085,21 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(declined.round.rules.phase).toBe("roundComplete");
     expect(declined.facilityState.rentsCount).toBe(14);
 
+    // This sub-scenario needs an accepted swap that is LOST before the win
+    // that would pay it, so `performedRentalSwap` is still TRUE at roundLost.
+    // It used seed 6 accepting after battle 0 and losing battle 1; under the
+    // union of the four end-turn source fixes (ISSUES #130 isFirstTurn decay,
+    // #131 ENDTURN_ORDER re-sort + tie draw, #132 case-major field loop, #133
+    // end-turn STATUS2_FLINCHED clear) seed 6 now WINS the whole round -- Fake
+    // Out fails from turn 2 and a shadowed flinch no longer costs a second
+    // turn, so the trajectory that used to lose no longer does.
+    //
+    // Re-scanned seeds 1..60 x accept-after-battle 0..5 for a round that still
+    // loses with the swap still pending: seed 58 reproduces the ORIGINAL shape
+    // exactly -- accept after battle 0, lose battle 1 -- so only the seed
+    // moves and every assertion below keeps its meaning.
     const lostAfterSwap = driveGeneratedRoundToCompletion(
-      6,
+      58,
       undefined,
       (state) => state.round.rules.battleIndex === 0
         ? { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 }
@@ -2243,40 +2256,46 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // does not model inter-challenge frame advances, so these are exact
     // orchestrator-contract cursors, not a claim about a frame-exact ROM
     // cursor between the two challenges.
-    expect(completed.round.rules.rngValue).toBe(514721516);
+    // Re-pinned for the union of the four end-turn fixes: the whole
+    // challenge-1 round is a different (source-faithful) trajectory, so its
+    // terminal cursor moves. Regenerated from the engine.
+    expect(completed.round.rules.rngValue).toBe(3978301197);
     expect(next.initialRentalGeneration?.rentalRank).toBe(1);
+    // Challenge 2 is seeded entirely by challenge 1's terminal cursor, so every
+    // value below moves with it. Regenerated from the union engine; the shape
+    // (two segments, contiguous, rank-1 rentals) is unchanged.
     expect(next.rngSegments).toEqual([
       {
         kind: "initial-rentals",
         battleIndex: 0,
         callStart: 0,
-        callEnd: 204,
-        rngBefore: 514721516,
-        rngAfter: 2855210072,
+        callEnd: 398,
+        rngBefore: 3978301197,
+        rngAfter: 3189376379,
       },
       {
         kind: "opponent-generation",
         battleIndex: 0,
-        callStart: 204,
-        callEnd: 487,
-        rngBefore: 2855210072,
-        rngAfter: 782337733,
+        callStart: 398,
+        callEnd: 627,
+        rngBefore: 3189376379,
+        rngAfter: 1540047030,
       },
     ]);
     expect(next.initialRentalGeneration?.rentals.map((rental) => rental.setId))
-      .toEqual([278, 213, 206, 205, 212, 246]);
+      .toEqual([273, 175, 206, 265, 218, 257]);
     expect(next.opponentGenerations[0]).toMatchObject({
-      trainerId: 99,
+      trainerId: 82,
       generation: {
         opponents: [
-          { setId: 224 },
-          { setId: 243 },
-          { setId: 236 },
+          { setId: 248 },
+          { setId: 221 },
+          { setId: 163 },
         ],
       },
     });
-    expect(next.facilityRngCalls).toBe(487);
-    expect(next.round.rules.rngValue).toBe(782337733);
+    expect(next.facilityRngCalls).toBe(627);
+    expect(next.round.rules.rngValue).toBe(1540047030);
   });
 
   it("owns battle 0 win through decline and battle 1's fresh command on one RNG cursor", () => {
@@ -2364,20 +2383,26 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
         rngAfter: 2423399196,
       },
       {
+        // Battle 0 is 51 draws SHORTER under the four end-turn source fixes
+        // (311 - 51 = 260): Fake Out fails from turn 2 once isFirstTurn decays
+        // and a shadowed flinch no longer costs a second turn, so the battle
+        // ends earlier and consumes fewer AI/damage draws. Every cursor below
+        // is regenerated from the union engine, not hand-adjusted.
         kind: "battle",
         battleIndex: 0,
         callStart: 152,
-        callEnd: 311,
+        callEnd: 260,
         rngBefore: 2423399196,
-        rngAfter: 4032903885,
+        rngAfter: 1545448232,
       },
       {
+        // Generation 1 keeps its 56-draw length; only its base cursor moves.
         kind: "opponent-generation",
         battleIndex: 1,
-        callStart: 311,
-        callEnd: 525,
-        rngBefore: 4032903885,
-        rngAfter: 3788765155,
+        callStart: 260,
+        callEnd: 316,
+        rngBefore: 1545448232,
+        rngAfter: 1474559328,
       },
     ]);
     expect(state.opponentGenerations.map((scheduled) => ({
@@ -2385,8 +2410,11 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       setIds: scheduled.generation.opponents.map((opponent) => opponent.setId),
       draws: scheduled.generation.drawLedger.length,
     }))).toEqual([
+      // Generation 0 precedes any battle, so it is byte-unchanged. Generation 1
+      // rides battle 0's shortened cursor (see the segment table above) and so
+      // draws a different trainer -- 56 draws, not 214.
       { trainerId: 17, setIds: [122, 118, 110], draws: 152 },
-      { trainerId: 90, setIds: [132, 187, 127], draws: 214 },
+      { trainerId: 52, setIds: [135, 166, 148], draws: 56 },
     ]);
     for (let index = 1; index < state.rngSegments.length; index += 1) {
       expect(state.rngSegments[index]!.callStart).toBe(state.rngSegments[index - 1]!.callEnd);
@@ -2400,8 +2428,10 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
         if (index > 0) expect(draw.rngBefore).toBe(drawLedger[index - 1]!.rngAfter);
       });
     }
-    expect(state.battle!.rng).toEqual({ calls: 2, value: 4029920645 });
-    expect(state.facilityRngCalls).toBe(527);
+    // Battle 1's own cursor: two draws off generation 1's moved base (316),
+    // so 318 total. Regenerated from the union engine.
+    expect(state.battle!.rng).toEqual({ calls: 2, value: 858597322 });
+    expect(state.facilityRngCalls).toBe(318);
   });
 
   /**
@@ -2632,8 +2662,10 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.opponentGenerations).toHaveLength(7);
     expect(state.rngSegments.filter((segment) => segment.kind === "battle")).toHaveLength(7);
     // ShouldSwitch's new draws shift later battle/generation streams:
-    // entry-685 cursor 1787 + 226 = 2013.
-    expect(state.facilityRngCalls).toBe(2013);
+    // entry-685 cursor 1787 + 226 = 2013, then + 63 = 2076 for the union of the
+    // four end-turn source fixes (ISSUES #130/#131/#132/#133) -- ENDTURN_ORDER's
+    // per-turn re-sort and its speed-tie Random() net-add draws here.
+    expect(state.facilityRngCalls).toBe(2076);
     expect(firstReplacement).toEqual({
       callsBefore: 2,
       callsAfter: 16,
@@ -2678,33 +2710,51 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.lastBattle?.outcome).toBe("win");
     expect(state.rngSegments.filter((segment) => segment.kind === "battle")).toHaveLength(7);
-    expect(state.facilityRngCalls).toBe(1911);
+    // Union of the four end-turn source fixes: ENDTURN_ORDER's re-sort plus its
+    // tie draw (ISSUES #131) and the isFirstTurn decay / flinch clear (#130,
+    // #133) each shift this curated seed's whole trajectory. Fake Out failing
+    // from turn 2 shortens the round, so the cursor drops 1904 -> 1476 -- the
+    // same value the seed-21 census row below pins. ROM receipts:
+    // tools/probe/receipts/issue131-endturn-order-off.json and
+    // tools/probe/receipts/gate6-first-turn-decay-off.json.
+    expect(state.facilityRngCalls).toBe(1476);
   });
 
   it.each([
-    // Each comment is the entry-685 cursor plus its complete downstream
-    // ShouldSwitch-induced trajectory delta, not merely the direct precheck
-    // draw count: later generation, move, damage, and turn lengths may change.
-    [4, 2415, "roundComplete", 6, "win"], // 1517 + 898
-    [5, 2156, "roundComplete", 6, "win"], // 1688 + 468
-    [6, 791, "roundLost", 1, "loss"],
-    [7, 1337, "roundComplete", 6, "win"], // 1827 - 490
-    [8, 1922, "roundComplete", 6, "win"], // 2089 - 167
-    [11, 2012, "roundComplete", 6, "win"], // 1970 + 42
-    [13, 2415, "roundComplete", 6, "win"], // 2224 + 191
-    [14, 1946, "roundComplete", 6, "win"], // 2325 - 379
-    [15, 1602, "roundComplete", 6, "win"], // 2036 - 434
-    [16, 1878, "roundComplete", 6, "win"], // 1660 + 218
-    [18, 2143, "roundComplete", 6, "win"], // 2478 - 335
-    [19, 1691, "roundComplete", 6, "win"], // 1842 - 151
-    [20, 2326, "roundComplete", 6, "win"], // 2140 + 186
-    [21, 1911, "roundComplete", 6, "win"], // unchanged after divergence reconverges
-    [22, 1389, "roundComplete", 6, "win"], // 1377 + 12
-    [23, 2114, "roundComplete", 6, "win"], // 1436 + 678
-    [24, 1751, "roundComplete", 6, "win"], // 1690 + 61
-    [26, 1680, "roundComplete", 6, "win"], // 1556 + 124
-    [29, 1869, "roundComplete", 6, "win"], // 1543 + 326
-    [30, 1825, "roundComplete", 6, "win"], // 1558 + 267
+    // Re-pinned 2026-08-25 for the UNION of the four end-turn source fixes:
+    // TurnValuesCleanUp(FALSE)'s isFirstTurn/rechargeTimer decay (ISSUES #130),
+    // the case-major field loop (#132), the end-turn STATUS2_FLINCHED clear
+    // (#133), and ENDTURN_ORDER's per-turn gBattlerByTurnOrder re-sort with its
+    // speed-tie Random() (#131). All four change live-AI trajectories: the AI's
+    // `is_first_turn_for` now reads a decaying value (AI_CBM_FakeOut and the
+    // AI_CV first-turn branches), Fake Out stops re-flinching every turn, a
+    // shadowed flinch no longer costs a mon a second turn, and end-turn effects
+    // traverse in re-sorted speed order. ROM receipts:
+    // tools/probe/receipts/gate6-first-turn-decay-off.json and
+    // tools/probe/receipts/issue131-endturn-order-off.json.
+    // Each row is the whole-round facility RNG cursor plus its complete
+    // downstream trajectory (generation, moves, damage, turn lengths), not a
+    // direct draw-count delta. Values regenerated from the union engine.
+    [4, 1809, "roundComplete", 6, "win"],
+    [5, 1658, "roundComplete", 6, "win"],
+    [6, 1675, "roundComplete", 6, "win"],
+    [7, 1269, "roundComplete", 6, "win"],
+    [8, 1922, "roundComplete", 6, "win"],
+    [11, 1745, "roundComplete", 6, "win"],
+    [13, 2221, "roundComplete", 6, "win"],
+    [14, 1921, "roundComplete", 6, "win"],
+    [15, 1551, "roundComplete", 6, "win"], // ISSUES #131 ENDTURN_ORDER tie draws: 1509 + 42
+    [16, 1523, "roundComplete", 6, "win"],
+    [18, 1948, "roundComplete", 6, "win"],
+    [19, 1938, "roundComplete", 6, "win"],
+    [20, 1999, "roundComplete", 6, "win"],
+    [21, 1476, "roundComplete", 6, "win"], // ISSUES #131 ENDTURN_ORDER tie draws: 1449 + 27
+    [22, 1517, "roundComplete", 6, "win"], // ISSUES #131 ENDTURN_ORDER tie draws: 1516 + 1
+    [23, 2330, "roundComplete", 6, "win"],
+    [24, 1473, "roundComplete", 6, "win"],
+    [26, 1672, "roundComplete", 6, "win"],
+    [29, 1832, "roundComplete", 6, "win"], // ISSUES #131 ENDTURN_ORDER tie draws: 1823 + 9
+    [30, 1366, "roundComplete", 6, "win"],
   ])("seed %i pins the post-ShouldSwitch round census", (
     seed,
     calls,
@@ -2727,8 +2777,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       outcome,
       battles: battleIndex + 1,
       calls,
-      playerHp: seed === 6 ? [0, 0, 0] : expect.any(Array),
-      opponentHp: seed === 6 ? [0, 0, 126] : expect.any(Array),
+      playerHp: seed === 6 ? [22, 251, 186] : expect.any(Array),
+      opponentHp: expect.any(Array),
     });
   });
 
@@ -3154,9 +3204,16 @@ describe("Frontier Brain opponent scheduling (Noland rung 2)", () => {
   it("schedules the gold Frontier Brain battle at the pre-generation seam", () => {
     const playerRecords = [record(664), record(678), record(527)] as const;
     const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
+    // Every assertion below is structural (which battleIndex schedules the
+    // gold brain, and its challengeNum/fixedIv), never seed-valued -- but the
+    // seam is only reachable if battle 0 is WON. RNG_SEED (4) now loses battle
+    // 0 under the union of the four end-turn source fixes (ISSUES #130/#131/
+    // #132/#133): Fake Out failing from turn 2 and the end-turn flinch clear
+    // change this trajectory. Re-scanned seeds 1..40 under this exact config
+    // (streak 40, symbols 1) and took the lowest that still wins battle 0.
     let state = createFactoryRoundBattleOrchestrator({
       id: "brain-gold-handoff",
-      rngValue: RNG_SEED,
+      rngValue: 2,
       factoryWinStreak: 40,
       playerTrainerId: PLAYER_TRAINER_ID,
       battleTowerLevel50WinStreak: 0,

@@ -1,0 +1,313 @@
+{
+  "schema": "gate6-arena-trap-off-semantic-receipt/v1",
+  "cardId": "ARENA_TRAP",
+  "oracleProfile": "battle-scene-off",
+  "runner": "tools/run-mgba-probe.py",
+  "probe": "tools/probe/probe-gate6-arena-trap-off.py",
+  "seed": 305419897,
+  "source": {
+    "primaryBlock": "src/battle_main.c:4239-4256 HandleTurnActionSelectionState STATE_WAIT_ACTION_CASE_CHOSEN case B_ACTION_SWITCH -- (i = ABILITY_ON_OPPOSING_FIELD(gActiveBattler, ABILITY_ARENA_TRAP)) && !IS_BATTLER_OF_TYPE(gActiveBattler, TYPE_FLYING) && gBattleMons[gActiveBattler].ability != ABILITY_LEVITATE -> BtlController_EmitChoosePokemon(..., ((i - 1) << 4) | PARTY_ACTION_ABILITY_PREVENTS, PARTY_SIZE, gLastUsedAbility, ...)",
+    "refusalSite": "src/party_menu.c:5839-5843 TrySwitchInPokemon -- if (gPartyMenu.action == PARTY_ACTION_ABILITY_PREVENTS) { SetMonPreventsSwitchingString(); return FALSE; }; src/pokemon.c:6650-6666 SetMonPreventsSwitchingString -> BattleStringExpandPlaceholders(gText_PkmnsXPreventsSwitching, gStringVar4); src/battle_message.c:293 gText_PkmnsXPreventsSwitching = \"{B_BUFF1}'s {B_LAST_ABILITY}\\nprevents switching!\\p\"",
+    "controllerSite": "src/battle_controller_player.c:2666-2689 PlayerHandleChoosePokemon -- gPartyMenu.action := gBattleBufferA[..][1] & 0xF, gBattleStruct->battlerPreventingSwitchout := [1] >> 4, gBattleStruct->abilityPreventingSwitchout := [3]; include/constants/party_menu.h:72 PARTY_ACTION_ABILITY_PREVENTS = 4",
+    "notTheEscapePath": "src/battle_main.c:4338-4346 routes IsRunningFromBattleImpossible() != BATTLE_RUN_SUCCESS to BattleScript_PrintCantEscapeFromBattle (data/battle_scripts_1.s:3080, printselectionstringfromtable gNoEscapeStringIds -> STRINGID_PREVENTSESCAPE); that is the B_ACTION_RUN path only. src/battle_main.c:4042-4062 is IsRunningFromBattleImpossible's own Shadow Tag / Arena Trap scan, which carries the same Flying/Levitate exemption.",
+    "notJumpifcantswitch": "src/battle_script_commands.c:4700-4712 Cmd_jumpifcantswitch tests only SWITCH_IGNORE_ESCAPE_PREVENTION / STATUS2_WRAPPED / STATUS2_ESCAPE_PREVENTION / STATUS3_ROOTED plus party availability -- it has NO ability branch, so the ARENA TRAP gate for a voluntary player switch is not there.",
+    "aiAsymmetry": "src/battle_ai_switch_items.c:443-446 ShouldSwitch's hard precheck: `if (ABILITY_ON_OPPOSING_FIELD(gActiveBattler, ABILITY_ARENA_TRAP)) // Misses the flying type and Levitate check.` -- the AI side has no exemption; the source comment says so."
+  },
+  "buttonScript": "POKeMON -> bench slot 1 -> SWITCH, timing copied verbatim from tools/battle-lab/gate6-r3-off.json's committed player-switch card (DOWN/38, A/118, RIGHT/38, A/38, A), then A / B / UP / A / A to dismiss, leave the party menu and take the forced FIGHT.",
+  "freshRunCountPerArm": 2,
+  "byteIdenticalAcrossFreshRuns": true,
+  "probeOutputSha256": {
+    "trapped": "45f7dd87743de495396897bb978f93a7f543bc81fad5e30de16e888079f0fe9e",
+    "control": "afc1548b7ec920f4373ea79d1ebe4c60b39aa5da214edcb8704990225aacf6ad"
+  },
+  "abilityIds": {
+    "ARENA_TRAP": 71,
+    "LEVITATE": 26,
+    "THICK_FAT": 47,
+    "DAMP": 6
+  },
+  "partyMenuActionIds": {
+    "PARTY_ACTION_CHOOSE_MON": 0,
+    "PARTY_ACTION_ABILITY_PREVENTS": 4
+  },
+  "arms": {
+    "trapped": {
+      "fixture": "tools/battle-lab/gate6-arena-trap-trapped-off.json",
+      "parties": {
+        "playerLead": {
+          "species": 183,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 47,
+          "moves": [
+            113,
+            113,
+            113,
+            113
+          ]
+        },
+        "playerBench1": {
+          "species": 194,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 6,
+          "moves": [
+            240,
+            240,
+            240,
+            240
+          ]
+        },
+        "trapperDugtrio": {
+          "species": 51,
+          "item": 0,
+          "abilitySlot": 1,
+          "ability": 71,
+          "moves": [
+            161,
+            161,
+            161,
+            161
+          ]
+        }
+      },
+      "partyMenuEvents": [
+        {
+          "frame": 64,
+          "action": 4,
+          "slotId": 0
+        },
+        {
+          "frame": 161,
+          "action": 4,
+          "slotId": 1
+        },
+        {
+          "frame": 603,
+          "action": 4,
+          "slotId": 7
+        }
+      ],
+      "menuMessageEvents": [
+        {
+          "frame": 84,
+          "text": "Choose a POK<1B>MON.",
+          "lastUsedAbility": 71
+        },
+        {
+          "frame": 202,
+          "text": "Do what with this <53><54>?",
+          "lastUsedAbility": 71
+        },
+        {
+          "frame": 241,
+          "text": "Foe DUGTRIO’s ARENA TRAP\nprevents switching!\n",
+          "lastUsedAbility": 71
+        },
+        {
+          "frame": 485,
+          "text": "Choose a POK<1B>MON.",
+          "lastUsedAbility": 71
+        }
+      ],
+      "partyIndexEvents": [],
+      "battleMessageEvents": [
+        {
+          "frame": 651,
+          "text": "<FC><02><02>MARILL<FC><01><0B><B5>"
+        },
+        {
+          "frame": 653,
+          "text": "<FC><02><02>DUGTRIO<FC><01><0B><B5>"
+        },
+        {
+          "frame": 678,
+          "text": "What will\nMARILL do?"
+        },
+        {
+          "frame": 764,
+          "text": "LIGHT SCREEN"
+        },
+        {
+          "frame": 766,
+          "text": "TYPE/<FC><06><01>PSYCHC"
+        },
+        {
+          "frame": 815,
+          "text": "Foe DUGTRIO used\nTRI ATTACK!"
+        },
+        {
+          "frame": 982,
+          "text": "MARILL is paralyzed!\nIt may be unable to move!"
+        },
+        {
+          "frame": 1108,
+          "text": "MARILL used\nLIGHT SCREEN!"
+        },
+        {
+          "frame": 1172,
+          "text": "Ally’s LIGHT SCREEN\nraised SP. DEF!"
+        },
+        {
+          "frame": 1283,
+          "text": "What will\nMARILL do?"
+        }
+      ],
+      "playerPartyIndexBefore": 0,
+      "playerPartyIndexAfter": 0,
+      "firstRandomFrame": 814,
+      "randomCallsBeforeFirstRandomFrame": 0,
+      "totalRandomCalls": 20,
+      "finalPartyMenuAction": 4,
+      "finalLastUsedAbility": 71
+    },
+    "control": {
+      "fixture": "tools/battle-lab/gate6-arena-trap-control-off.json",
+      "parties": {
+        "playerLead": {
+          "species": 110,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 26,
+          "moves": [
+            188,
+            188,
+            188,
+            188
+          ]
+        },
+        "playerBench1": {
+          "species": 194,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 6,
+          "moves": [
+            240,
+            240,
+            240,
+            240
+          ]
+        },
+        "trapperDugtrio": {
+          "species": 51,
+          "item": 0,
+          "abilitySlot": 1,
+          "ability": 71,
+          "moves": [
+            161,
+            161,
+            161,
+            161
+          ]
+        }
+      },
+      "partyMenuEvents": [
+        {
+          "frame": 161,
+          "action": 0,
+          "slotId": 1
+        }
+      ],
+      "menuMessageEvents": [
+        {
+          "frame": 84,
+          "text": "Choose a POK<1B>MON.",
+          "lastUsedAbility": 26
+        },
+        {
+          "frame": 202,
+          "text": "Do what with this <53><54>?",
+          "lastUsedAbility": 26
+        }
+      ],
+      "partyIndexEvents": [
+        {
+          "frame": 399,
+          "from": 0,
+          "to": 1,
+          "randomCallsSoFar": 0
+        }
+      ],
+      "battleMessageEvents": [
+        {
+          "frame": 289,
+          "text": "<FC><02><02>WEEZING<FC><01><0B><B5>"
+        },
+        {
+          "frame": 291,
+          "text": "<FC><02><02>DUGTRIO<FC><01><0B><B5>"
+        },
+        {
+          "frame": 321,
+          "text": "WEEZING, that’s enough!\nCome back!"
+        },
+        {
+          "frame": 403,
+          "text": "Go! WOOPER!"
+        },
+        {
+          "frame": 481,
+          "text": "<FC><02><02>WOOPER<FC><01><0B><B5>"
+        },
+        {
+          "frame": 522,
+          "text": "Foe DUGTRIO used\nTRI ATTACK!"
+        },
+        {
+          "frame": 706,
+          "text": "What will\nO used\nTRI ATTACK!"
+        },
+        {
+          "frame": 707,
+          "text": "What will\nWOOPER do?"
+        },
+        {
+          "frame": 764,
+          "text": "RAIN DANCE"
+        },
+        {
+          "frame": 765,
+          "text": "<77>5/<77>5"
+        },
+        {
+          "frame": 766,
+          "text": "TYPE/<FC><06><01>WATER"
+        },
+        {
+          "frame": 815,
+          "text": "Foe DUGTRIO used\nTRI ATTACK!"
+        },
+        {
+          "frame": 991,
+          "text": "WOOPER used\nRAIN DANCE!"
+        },
+        {
+          "frame": 1052,
+          "text": "It started to rain!"
+        },
+        {
+          "frame": 1155,
+          "text": "Rain continues to fall."
+        },
+        {
+          "frame": 1283,
+          "text": "What will\nWOOPER do?"
+        }
+      ],
+      "playerPartyIndexBefore": 0,
+      "playerPartyIndexAfter": 1,
+      "firstRandomFrame": 521,
+      "randomCallsBeforeFirstRandomFrame": 0,
+      "totalRandomCalls": 36,
+      "finalPartyMenuAction": 0,
+      "finalLastUsedAbility": 71
+    }
+  },
+  "assertions": [
+    "Opponent DUGTRIO (set 372, abilitySlot 1 -> ability 71 ARENA TRAP) refuses the player's voluntary switch of a grounded MARILL (set 28, ability 47 THICK_FAT, TYPE_WATER): the party menu opens with gPartyMenu.action = 4 (PARTY_ACTION_ABILITY_PREVENTS), and committing SWITCH on bench slot 1 prints “Foe DUGTRIO’s ARENA TRAP\\nprevents switching!” into gStringVar4 with gLastUsedAbility = 71.",
+    "The refusal is a party-menu refusal, not a battle script: gDisplayedStringBattle never changes during the whole switch attempt (the trapped arm's first battle message is the post-refusal healthbox refresh at frame 651), and no gNoEscapeStringIds / STRINGID_PREVENTSESCAPE string is ever produced -- that table belongs to B_ACTION_RUN.",
+    "gBattlerPartyIndexes[0] stays 0 for the whole trapped arm (partyIndexEvents is empty), and sRandCount does not move at all until the player's forced FIGHT resolves at frame 814 -- the refusal itself draws ZERO Random() calls.",
+    "The LEVITATE control (WEEZING set 597, ability 26, its only slot) takes the exemption at battle_main.c:4253: the party menu opens with gPartyMenu.action = 0 (PARTY_ACTION_CHOOSE_MON), the switch commits at frame 399 with gBattlerPartyIndexes[0] 0 -> 1 after exactly 0 Random() calls, and the ROM prints “WEEZING, that’s enough!\\nCome back!” then “Go! WOOPER!”.",
+    "This is semantic RAM evidence; no framebuffer fitting or runtime oracle dependency is used."
+  ]
+}

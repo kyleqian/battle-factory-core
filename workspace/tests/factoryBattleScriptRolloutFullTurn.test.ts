@@ -388,8 +388,12 @@ describe("factory full-turn Defense Curl / Rollout continuation", () => {
     expect(rules.battlers[1]!.rolloutTimer).toBe(0);
     expect(rules.battlers[0]!.status2).toBe(DEFENSE_CURL_STATUS);
     expect(rules.battlers[1]!.status2).toBe(DEFENSE_CURL_STATUS);
-    // Five speed ties plus ten Rollout hit chains plus five continuing-turn
-    // BattleTurnPassed draws: 5 + (10 * 4) + 5.
-    expect(completed.state.rng.calls).toBe(50);
+    // Both mons are speed 22, so every one of the five turns ties TWICE: once
+    // in SetActionsAndBattlersTurnOrder (battle_main.c:4846) and once in
+    // ENDTURN_ORDER (battle_util.c:1209, ISSUES #131 -- the ROM receipt
+    // tools/probe/receipts/issue131-endturn-order-off.json measures exactly
+    // that two-draw shape). Ten speed ties plus ten Rollout hit chains plus
+    // five continuing-turn BattleTurnPassed draws: 10 + (10 * 4) + 5.
+    expect(completed.state.rng.calls).toBe(55);
   });
 });

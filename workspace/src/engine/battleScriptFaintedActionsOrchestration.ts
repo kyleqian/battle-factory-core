@@ -424,9 +424,14 @@ function runPendingSwitchinEffects(
       haltReason: null,
       rulesContext: Object.freeze({
         ...rules,
+        // `battle_util.c:1959-1960` dispatches state 6's Intimidate with the
+        // LITERAL 0, and `AbilityBattleEffects`' record tail
+        // (`battle_util.c:3194-3195`) forwards that same `battler` to
+        // `RecordAbilityBattle`: the record lands on battler 0, the player's
+        // slot, not on the Intimidate holder.
         aiObservedAbilityIds: Object.freeze(
           rules.aiObservedAbilityIds.map((value, index) =>
-            index === id ? PENDING_ENTRY_ABILITY.intimidate : value
+            index === 0 ? PENDING_ENTRY_ABILITY.intimidate : value
           ),
         ) as BattleScriptRulesContext["aiObservedAbilityIds"],
         scriptingBattler: id,
@@ -456,9 +461,11 @@ function runPendingSwitchinEffects(
       haltReason: null,
       rulesContext: Object.freeze({
         ...rules,
+        // Same literal 0 for state 6's Trace dispatch (`battle_util.c:1960`):
+        // the COPIED ability is recorded onto battler 0, not onto the tracer.
         aiObservedAbilityIds: Object.freeze(
           rules.aiObservedAbilityIds.map((value, index) =>
-            index === id ? copiedAbility : value
+            index === 0 ? copiedAbility : value
           ),
         ) as BattleScriptRulesContext["aiObservedAbilityIds"],
         scriptingBattler: id,

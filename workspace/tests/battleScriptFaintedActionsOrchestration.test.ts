@@ -479,8 +479,34 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
     expect(result.state.rulesContext.battlers[0].statStages[1]).toBe(6);
     expect(result.state.rulesContext.battlers[0].item).toBe(0);
     expect(result.state.rulesContext.battlers[1].status3 & (1 << 19)).toBe(0);
+    // ISSUES #128: state 6 dispatches Intimidate with the LITERAL 0
+    // (`battle_util.c:1959-1960`) and `AbilityBattleEffects`' record tail
+    // (`:3194-3195`) forwards that same `battler` to `RecordAbilityBattle`, so
+    // the record lands on battler 0 -- the player's slot -- even though
+    // battler 1 is the Intimidate holder here.
+    expect(result.state.rulesContext.aiObservedAbilityIds).toEqual([22, 0, 0, 0]);
     expect(result.state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
       .toEqual(["STRINGID_PKMNCUTSATTACKWITH", "STRINGID_PKMNSITEMRESTOREDSTATUS"]);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  it("state 6 records replacement Trace's COPIED ability onto battler 0, not onto the tracer (ISSUES #128)", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, ability: 12 }), // ABILITY_VOLT_ABSORB -- the traced ability.
+        battler({ side: 1, ability: 36, status3: 1 << 20 }), // ABILITY_TRACE, pending.
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const initial = haltedAtOwnEnd(rc);
+    const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("no-fainted-battlers");
+    expect(result.state.rulesContext.battlers[1].ability).toBe(12);
+    expect(result.state.rulesContext.battlers[1].status3 & (1 << 20)).toBe(0);
+    // `battle_util.c:1960` passes the literal 0 for the TRACE dispatch too, so
+    // the COPIED ability is recorded on the player's slot.
+    expect(result.state.rulesContext.aiObservedAbilityIds).toEqual([12, 0, 0, 0]);
     expect(result.state.rng.calls).toBe(initial.rng.calls);
   });
 });

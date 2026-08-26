@@ -892,6 +892,17 @@ export type BattleScriptRulesContext = Readonly<
      */
     actionsByTurnOrder: BattleScriptMoveEndBytes;
     /**
+     * Source u8 gChosenActionByBattler[MAX_BATTLERS_COUNT]
+     * (battle_main.c:159), keyed by BATTLER (not turn-order slot). Written
+     * at action selection and NOT cleared until BattleTurnPassed's closing
+     * block (battle_main.c:4001-4004) -- i.e. it is still live during the
+     * whole end-turn pass, which is why `ENDTURN_ORDER`'s
+     * `GetWhoStrikesFirst(..., ignoreChosenMoves = FALSE)` can read it for
+     * the priority bracket (battle_main.c:4694-4720). The EWRAM/reducer
+     * default is B_ACTION_USE_MOVE (0), matching a plain two-move turn.
+     */
+    chosenActionByBattler: BattleScriptMoveEndBytes;
+    /**
      * Source u8 gCurrentTurnActionNumber (battle_main.c:162) -- the action
      * index of the currently-executing battler's script. Paired with each
      * battler's own turnOrderNum (see BattleScriptRulesBattlerBase) by
@@ -1022,6 +1033,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleTextBuff2Item?: number | null;
   battlerByTurnOrder?: readonly number[];
   actionsByTurnOrder?: readonly number[];
+  chosenActionByBattler?: readonly number[];
   currentTurnActionNumber?: number;
 }>;
 
@@ -2822,6 +2834,11 @@ export function createBattleScriptRulesContext(
       input.actionsByTurnOrder ?? [0, 0, 0, 0],
       0xff,
       "actionsByTurnOrder",
+    ) as BattleScriptMoveEndBytes,
+    chosenActionByBattler: createMoveEndArray(
+      input.chosenActionByBattler ?? [0, 0, 0, 0],
+      0xff,
+      "chosenActionByBattler",
     ) as BattleScriptMoveEndBytes,
     currentTurnActionNumber: requireUnsigned(
       input.currentTurnActionNumber ?? 0,

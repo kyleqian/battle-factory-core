@@ -154,6 +154,12 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     defense: changes.defense ?? 0,
     spAttack: changes.spAttack ?? 0,
     spDefense: changes.spDefense ?? 0,
+    // ENDTURN_ORDER (battle_util.c:1199-1218) re-sorts the end-turn traversal
+    // by CURRENT effective speed and draws Random() & 1 on an exact tie
+    // (battle_main.c:4728). None of these fixtures is about a tie, so the two
+    // sides get distinct default speeds -- side 0 faster, which keeps the
+    // traversal at [0, 1] and the ledger tie-draw-free, exactly as before.
+    speed: changes.speed ?? (changes.side === 1 ? 50 : 100),
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 0,
     partyIndex: changes.partyIndex ?? 0,
@@ -1910,12 +1916,15 @@ describe("HandleWishPerishSongOnTurnEnd state 1", () => {
   it("walks battlerByTurnOrder, formats the current timer, decrements each active holder, skips absent slots, and draws no RNG", () => {
     const rc = context({
       battlers: [
-        battler({ side: 0, status3: STATUS3_PERISH_SONG, perishSongTimer: 3, perishSongTimerStartValue: 3 }),
-        battler({ side: 1, partyIndex: 2, status3: STATUS3_PERISH_SONG, perishSongTimer: 2, perishSongTimerStartValue: 3 }),
+        battler({ side: 0, speed: 50, status3: STATUS3_PERISH_SONG, perishSongTimer: 3, perishSongTimerStartValue: 3 }),
+        battler({ side: 1, speed: 100, partyIndex: 2, status3: STATUS3_PERISH_SONG, perishSongTimer: 2, perishSongTimerStartValue: 3 }),
         battler({ side: 0, status3: STATUS3_PERISH_SONG, perishSongTimer: 3, perishSongTimerStartValue: 3 }),
         battler({ side: 1 }),
       ],
-      battlerByTurnOrder: [1, 0, 2, 3],
+      // The opponent-first traversal is no longer stageable: ENDTURN_ORDER
+      // (battle_util.c:1199-1218) recomputes gBattlerByTurnOrder from CURRENT
+      // effective speed at the top of every pass, so the faster battler 1
+      // leads (ISSUES #131, tools/probe/receipts/issue131-endturn-order-off.json).
     });
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
     const initial = scratchState(rc, 0);
@@ -1991,12 +2000,13 @@ describe("HandleWishPerishSongOnTurnEnd state 1", () => {
   it("when both sides are at zero, turn order feeds the first faint through checkteamslost before the scan resumes", () => {
     const rc = context({
       battlers: [
-        battler({ side: 0, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
-        battler({ side: 1, partyIndex: 2, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
+        battler({ side: 0, speed: 50, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
+        battler({ side: 1, speed: 100, partyIndex: 2, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
         battler({ side: 0 }),
         battler({ side: 1 }),
       ],
-      battlerByTurnOrder: [1, 0, 2, 3],
+      // Same as above: the faster battler 1 leads because ENDTURN_ORDER
+      // re-sorts by speed, not because the array was staged (ISSUES #131).
     });
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
     const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));

@@ -1,0 +1,324 @@
+{
+  "schema": "gate6-water-veil-off-semantic-receipt/v1",
+  "cardId": "WATER_VEIL",
+  "oracleProfile": "battle-scene-off",
+  "runner": "tools/run-mgba-probe.py",
+  "probe": "tools/probe/probe-gate6-water-veil-off.py",
+  "seed": 305419897,
+  "source": {
+    "primaryBlock": "data/battle_scripts_1.s BattleScript_EffectWillOWisp -> jumpifability BS_TARGET, ABILITY_WATER_VEIL, BattleScript_WaterVeilPrevents (before accuracycheck)",
+    "preventionScript": "data/battle_scripts_1.s BattleScript_WaterVeilPrevents -> copybyte gEffectBattler, gBattlerTarget; setbyte cMULTISTRING_CHOOSER, B_MSG_ABILITY_PREVENTS_MOVE_STATUS; call BattleScript_BRNPrevention",
+    "secondaryBlock": "src/battle_script_commands.c SetMoveEffect case STATUS1_BURN — ABILITY_WATER_VEIL guard (loud for primary/certain, silent break otherwise)"
+  },
+  "freshRunCountPerArm": 2,
+  "byteIdenticalAcrossFreshRuns": true,
+  "probeOutputSha256": {
+    "prevents": "7047e48a393ba2f07624894a3ade8286ca3cf2f9ed16c959aa5fee285e37d64c",
+    "control": "0df1d1df2f7e12fa658a4b0b8f18609779107eceead0c80abb3ea613560a4b8f"
+  },
+  "scriptAddresses": {
+    "BattleScript_WaterVeilPrevents": 137207969,
+    "BattleScript_BRNPrevention": 137213393
+  },
+  "arms": {
+    "prevents": {
+      "fixture": "tools/battle-lab/gate6-water-veil-prevents-off.json",
+      "parties": {
+        "willOWispNinetales": {
+          "species": 38,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 18,
+          "moves": [
+            261,
+            261,
+            261,
+            261
+          ]
+        },
+        "targetWailord": {
+          "species": 314,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 41,
+          "moves": [
+            57,
+            57,
+            57,
+            57
+          ]
+        }
+      },
+      "messageEvents": [
+        {
+          "frame": 2,
+          "text": "WILL-O-WISP"
+        },
+        {
+          "frame": 4,
+          "text": "TYPE/<FC><06><01>FIRE"
+        },
+        {
+          "frame": 41,
+          "text": "NINETALES used\nWILL-O-WISP!"
+        },
+        {
+          "frame": 109,
+          "text": "Foe WAILORD’s WATER VEIL\nprevents burns!"
+        },
+        {
+          "frame": 228,
+          "text": "Foe WAILORD used\nSURF!"
+        },
+        {
+          "frame": 447,
+          "text": "It’s super effective!"
+        },
+        {
+          "frame": 548,
+          "text": "What will\nNINETALES do?"
+        }
+      ],
+      "scriptsVisited": [
+        {
+          "frame": 73,
+          "symbol": "BattleScript_WaterVeilPrevents"
+        },
+        {
+          "frame": 76,
+          "symbol": "BattleScript_BRNPrevention"
+        }
+      ],
+      "targetStatus1After": 0,
+      "targetHpAfter": 245,
+      "targetMaxHp": 245,
+      "attackerPpAfter": [
+        14,
+        15,
+        15,
+        15
+      ],
+      "rngLedger": [
+        {
+          "frame": 227,
+          "randomCalls": 1,
+          "rngBefore": 2797792354,
+          "rngAfter": 449897005,
+          "currentMove": 57
+        },
+        {
+          "frame": 252,
+          "randomCalls": 1,
+          "rngBefore": 449897005,
+          "rngAfter": 1806197660,
+          "currentMove": 57
+        },
+        {
+          "frame": 255,
+          "randomCalls": 1,
+          "rngBefore": 1806197660,
+          "rngAfter": 3417592287,
+          "currentMove": 57
+        },
+        {
+          "frame": 534,
+          "randomCalls": 1,
+          "rngBefore": 3417592287,
+          "rngAfter": 2654154342,
+          "currentMove": 57
+        },
+        {
+          "frame": 544,
+          "randomCalls": 1,
+          "rngBefore": 2654154342,
+          "rngAfter": 3167892961,
+          "currentMove": 0
+        },
+        {
+          "frame": 549,
+          "randomCalls": 2,
+          "rngBefore": 3167892961,
+          "rngAfter": 1786900147,
+          "currentMove": 0
+        },
+        {
+          "frame": 551,
+          "randomCalls": 4,
+          "rngBefore": 1786900147,
+          "rngAfter": 3152970951,
+          "currentMove": 57
+        },
+        {
+          "frame": 561,
+          "randomCalls": 1,
+          "rngBefore": 3152970951,
+          "rngAfter": 3924658990,
+          "currentMove": 0
+        }
+      ],
+      "totalRandomCalls": 12,
+      "checkpoints": {
+        "willOWispSpent": {
+          "frame": 69,
+          "targetStatus1": 0
+        }
+      }
+    },
+    "control": {
+      "fixture": "tools/battle-lab/gate6-water-veil-control-off.json",
+      "parties": {
+        "willOWispNinetales": {
+          "species": 38,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 18,
+          "moves": [
+            261,
+            261,
+            261,
+            261
+          ]
+        },
+        "targetWailord": {
+          "species": 314,
+          "item": 0,
+          "abilitySlot": 1,
+          "ability": 12,
+          "moves": [
+            57,
+            57,
+            57,
+            57
+          ]
+        }
+      },
+      "messageEvents": [
+        {
+          "frame": 2,
+          "text": "WILL-O-WISP"
+        },
+        {
+          "frame": 4,
+          "text": "TYPE/<FC><06><01>FIRE"
+        },
+        {
+          "frame": 41,
+          "text": "NINETALES used\nWILL-O-WISP!"
+        },
+        {
+          "frame": 115,
+          "text": "Foe WAILORD was burned!"
+        },
+        {
+          "frame": 222,
+          "text": "Foe WAILORD used\nSURF!"
+        },
+        {
+          "frame": 442,
+          "text": "It’s super effective!"
+        },
+        {
+          "frame": 540,
+          "text": "Foe WAILORD is hurt\nby its burn!"
+        },
+        {
+          "frame": 680,
+          "text": "What will\nNINETALES do?"
+        }
+      ],
+      "scriptsVisited": [],
+      "targetStatus1After": 16,
+      "targetHpAfter": 215,
+      "targetMaxHp": 245,
+      "attackerPpAfter": [
+        14,
+        15,
+        15,
+        15
+      ],
+      "rngLedger": [
+        {
+          "frame": 75,
+          "randomCalls": 1,
+          "rngBefore": 2797792354,
+          "rngAfter": 449897005,
+          "currentMove": 261
+        },
+        {
+          "frame": 221,
+          "randomCalls": 1,
+          "rngBefore": 449897005,
+          "rngAfter": 1806197660,
+          "currentMove": 57
+        },
+        {
+          "frame": 246,
+          "randomCalls": 1,
+          "rngBefore": 1806197660,
+          "rngAfter": 3417592287,
+          "currentMove": 57
+        },
+        {
+          "frame": 249,
+          "randomCalls": 1,
+          "rngBefore": 3417592287,
+          "rngAfter": 2654154342,
+          "currentMove": 57
+        },
+        {
+          "frame": 529,
+          "randomCalls": 1,
+          "rngBefore": 2654154342,
+          "rngAfter": 3167892961,
+          "currentMove": 57
+        },
+        {
+          "frame": 677,
+          "randomCalls": 1,
+          "rngBefore": 3167892961,
+          "rngAfter": 1056038720,
+          "currentMove": 0
+        },
+        {
+          "frame": 681,
+          "randomCalls": 2,
+          "rngBefore": 1056038720,
+          "rngAfter": 25136298,
+          "currentMove": 0
+        },
+        {
+          "frame": 683,
+          "randomCalls": 4,
+          "rngBefore": 25136298,
+          "rngAfter": 3924658990,
+          "currentMove": 57
+        },
+        {
+          "frame": 693,
+          "randomCalls": 1,
+          "rngBefore": 3924658990,
+          "rngAfter": 1310762761,
+          "currentMove": 0
+        }
+      ],
+      "totalRandomCalls": 13,
+      "checkpoints": {
+        "willOWispSpent": {
+          "frame": 69,
+          "targetStatus1": 0
+        },
+        "burnApplied": {
+          "frame": 113,
+          "targetStatus1": 16
+        }
+      }
+    }
+  },
+  "assertions": [
+    "Water Veil (Wailord abilitySlot 0, ability 41) refuses WILL-O-WISP's primary burn: target status1 stays 0, the ROM prints “Foe WAILORD’s WATER VEIL\\nprevents burns!”, and gBattlescriptCurrInstr passes through BattleScript_WaterVeilPrevents then BattleScript_BRNPrevention.",
+    "The refusal draws ZERO Random() calls: the script jumps out before accuracycheck, so the prevention arm's first Random() of the battle belongs to the opponent's SURF.",
+    "The Oblivious control (abilitySlot 1, ability 12) spends one Random() on WILL-O-WISP's 75%% accuracy check, sets status1 = 16 (STATUS1_BURN), prints “Foe WAILORD was burned!”, and takes end-of-turn burn chip (245 -> 215).",
+    "Both arms spend exactly one WILL-O-WISP PP (15 -> 14), so the prevention is a refusal of the effect, not a refusal of the move.",
+    "This is semantic RAM evidence; no framebuffer fitting or runtime oracle dependency is used."
+  ]
+}

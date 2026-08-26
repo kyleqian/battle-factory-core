@@ -1404,3 +1404,56 @@ current app stage should be rejected before replay.
 - **Real fix:** a `--parallel N` seed fan-out in `randomRoundSoak.ts`
   (seeds are independent processes already) so a 0:60 gate is wall-clock
   ~1/8 of today's.
+
+## `rg`/`grep -r` over `reference/pokeemerald/` return ZERO hits silently — it is a symlink
+
+- **Hit:** 2026-08-25 (ts opus audit worker, ~4 min lost; a second worker
+  the same day resolved it only because the brief warned it).
+- **What happens:** `reference/` is a symlink into the vendor checkout.
+  `rg reference/pokeemerald/src` (and `rg` from a cwd above it) does not
+  follow the symlink by default and prints nothing — no error, no hint — so
+  a source inventory looks EMPTY and a worker can conclude "no source sites"
+  for a symbol that has dozens.
+- **Workaround:** `rg ... "$(cd reference/pokeemerald && pwd -P)/src"`, or
+  `rg -L` / `--follow`, or `grep -rn` with the resolved path. Briefs that ask
+  for source sweeps should state this.
+- **Fix shape:** add `--follow` to a repo `.ripgreprc` (and export
+  `RIPGREP_CONFIG_PATH` from the launchers), or note it in AGENTS.md's
+  reference-material section.
+
+## Battle-lab checkpoint lands PAST turn 1's AI decision — a receipt probe cannot observe the first AI decision
+
+- **Hit:** 2026-08-25 (ts opus worker, ISSUES #128 receipt; ~10 min lost to a
+  frame-1 false positive on `gChosenMoveByBattler`).
+- **What happens:** `mechanicLab` checkpoints inside turn 1's
+  `HandleTurnActionSelectionState` run after the AI has already committed and
+  the switch-in hooks (Intimidate/Trace) have fired, so the first AI decision a
+  probe can window is TURN 2's. A probe keyed on `gChosenMoveByBattler` at
+  frame 1 reads the pre-committed value and mis-attributes draws.
+- **Workaround:** window the AI decision on
+  `gBattleMainFunc == HandleTurnActionSelectionState` and read turn 2 (the
+  `probe-issue128-ability-history-off.py` shape).
+- **Fix shape:** a line in `tools/battle-lab/README.md` under mechanicLab
+  ("the checkpoint is past turn 1's AI decision; window turn 2").
+
+## Battle-lab traces that end on a faint message silently never reach `moveend` — a stalled `gBattlescriptCurrInstr` looks like "the ROM skipped the opcode"
+
+- **Hit:** 2026-08-25 (side opus worker authored a false engine-divergence
+  receipt → ISSUES #129 filed → ts opus worker spent ~35 min finding and
+  ~25 min unwinding it).
+- **What happens:** `STRINGID_TARGETFAINTED` (and every `\p`-terminated
+  string) ends in the `0xFB` prompt code, so `BattleScript_FaintTarget`'s
+  `printstring` parks the controller in `CompleteOnInactiveTextPrinter` with
+  `gBattleControllerExecFlags = 1` until a button press. A trace whose input
+  script ends before that press sits on `BattleScript_FaintTarget+12` for
+  the rest of its frames; every later opcode (the whole `Cmd_moveend` state
+  loop, King's Rock / Shell Bell, exp) "never runs" — indistinguishable in
+  the manifest from the ROM taking a different branch.
+- **Workaround:** append low-duty-cycle A pulses past every faint/prompt
+  message and assert the receipt's window actually reached the state you
+  are asserting about (`gBattleScripting.moveendState`, or a known
+  post-moveend frame).
+- **Fix shape:** a trace-stall assertion in the probe helpers
+  (`tools/run-mgba-probe.py` consumers): fail when `gBattlescriptCurrInstr`
+  is unchanged for N frames while `gBattleControllerExecFlags != 0` and the
+  input script has ended.

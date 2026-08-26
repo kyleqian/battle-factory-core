@@ -344,9 +344,31 @@ describe("random round soak driver (green milestone pin)", () => {
       // snapshot, and the typewriter print duration depends on the printed
       // name's own length -- a genuinely different (correct) string, not a
       // driver regression.
-      frames: 40_563,
+      //
+      // ISSUES #131's fix (battleEndTurnOrchestration.ts) then moved them a
+      // fifth time: ENDTURN_ORDER (battle_util.c:1199-1218) re-sorts
+      // gBattlerByTurnOrder by CURRENT effective speed at the top of every
+      // end-turn pass and draws Random() & 1 on an exact tie
+      // (battle_main.c:4728) -- so this seed's end-turn traversal, its RNG
+      // stream, and with them the strong-route policy's own move choices are
+      // a genuine new (correct) trajectory. ROM receipt:
+      // tools/probe/receipts/issue131-endturn-order-off.json. It still earns
+      // all seven wins and both re-runs stay identical.
+      //
+      // The union of the OTHER three end-turn source fixes then moved them a
+      // sixth time: TurnValuesCleanUp(FALSE)'s isFirstTurn/rechargeTimer decay
+      // (ISSUES #130) makes Fake Out fail from turn 2 and gates Speed Boost on
+      // the switch-in turn, the field loop is case-major (#132), and the
+      // per-turn end-turn STATUS2_FLINCHED clear (#133) stops a shadowed
+      // flinch costing a mon a second turn. ROM receipt:
+      // tools/probe/receipts/gate6-first-turn-decay-off.json. The round is
+      // shorter in frames but runs more turns (5 -> 9), because turns that
+      // used to be spent flinched now execute; the terminal record menu is no
+      // longer reached before `stopAtFirstRoundDecision` fires. It still earns
+      // all seven wins and both re-runs stay identical.
+      frames: 37_239,
       battle: 7,
-      turn: 5,
+      turn: 9,
       diagnostics: {
         roundPhase: "roundComplete",
         battleIndex: 6,
@@ -354,9 +376,9 @@ describe("random round soak driver (green milestone pin)", () => {
         opponentGenerationCount: 7,
         battleRngSegmentCount: 7,
         terminalOutcome: "roundWon",
-        terminalRecordMenuInputReadyReached: true,
+        terminalRecordMenuInputReadyReached: false,
         terminalRecordChoice: null,
-        renderCalls: 2_956,
+        renderCalls: 2_681,
       },
     });
     expect(second).toEqual(first);

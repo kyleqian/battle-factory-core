@@ -1,0 +1,434 @@
+{
+  "schema": "gate6-ohko-off-semantic-receipt/v1",
+  "cardId": "OHKO_FISSURE",
+  "oracleProfile": "battle-scene-off",
+  "runner": "tools/run-mgba-probe.py",
+  "probe": "tools/probe/probe-gate6-ohko-off.py",
+  "source": {
+    "scriptBlock": "data/battle_scripts_1.s:762-776 BattleScript_EffectOHKO -- attackcanceler / attackstring / ppreduce / `accuracycheck BattleScript_ButItFailed, NO_ACC_CALC_CHECK_LOCK_ON` / typecalc / jumpifmovehadnoeffect / `tryKO BattleScript_KOFail` / trysetdestinybondtohappen / goto BattleScript_HitFromAtkAnimation. There is NO `jumpifability BS_TARGET, ABILITY_STURDY` in the script: the STURDY guard lives inside Cmd_tryKO. NO_ACC_CALC_CHECK_LOCK_ON makes the script's own accuracycheck draw nothing, and the goto target skips critcalc/damagecalc, so an OHKO hit spends no crit or damage roll.",
+    "commandBlock": "src/battle_script_commands.c:7490-7573 Cmd_tryKO -- (1) target Focus Band: `if (holdEffect == HOLD_EFFECT_FOCUS_BAND && (Random() % 100) < param)`, short-circuited so a non-Focus-Band target costs no draw; (2) `if (gBattleMons[gBattlerTarget].ability == ABILITY_STURDY)` sets MOVE_RESULT_MISSED, gLastUsedAbility = ABILITY_STURDY, gBattlescriptCurrInstr = BattleScript_SturdyPreventsOHKO and RecordAbilityBattle -- this precedes every accuracy draw; (3) otherwise `chance = gBattleMoves[gCurrentMove].accuracy + (attackerLevel - targetLevel)` and `Random() % 100 + 1 < chance && attackerLevel >= targetLevel` -- exactly ONE draw, unless STATUS3_ALWAYS_HITS + gDisableStructs[target].battlerWithSureHit == attacker takes the Lock-On branch, which draws none; (4) on success gBattleMoveDamage = target hp (or hp - 1 under endure/Focus Band) and MOVE_RESULT_ONE_HIT_KO; on failure MOVE_RESULT_MISSED with gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_KO_MISS (attacker level >= target level) or B_MSG_KO_UNAFFECTED.",
+    "strings": "data/battle_scripts_1.s:772-776 BattleScript_KOFail -> `printfromtable gKOFailedStringIds`; src/battle_message.c:1108-1112 gKOFailedStringIds = { [B_MSG_KO_MISS] = STRINGID_ATTACKMISSED, [B_MSG_KO_UNAFFECTED] = STRINGID_PKMNUNAFFECTED }. data/battle_scripts_1.s:4066-4070 BattleScript_SturdyPreventsOHKO -> `printstring STRINGID_PKMNPROTECTEDBY`. The success string is STRINGID_ONEHITKO (include/constants/battle_string_ids.h:218).",
+    "kingsRock": "src/battle_util.c:3768-3806 ITEMEFFECT_KINGSROCK_SHELLBELL is wrapped in `if (gBattleMoveDamage)`, and its HOLD_EFFECT_FLINCH arm evaluates `(Random() % 100) < atkHoldEffectParam` BEFORE testing `gBattleMoves[gCurrentMove].flags & FLAG_KINGS_ROCK_AFFECTED` and before `gBattleMons[gBattlerTarget].hp` (FISSURE lacks the flag, so it could never flinch through one anyway). CORRECTED 2026-08-25 (ISSUES #129): DUGTRIO's KING'S ROCK DOES draw on the HIT arm. gBattleMoveDamage is still 125 and gSpecialStatuses[target].physicalDmg is still 125 when Cmd_moveend reaches state 12 -- nothing on the OHKO path zeroes either -- so the draw happens exactly as battle_util.c orders it. The MISS and STURDY arms still draw nothing, because both leave for BattleScript_MoveEnd with gBattleMoveDamage never set.",
+    "secondaryEffect": "src/battle_script_commands.c:2908-2936 Cmd_seteffectwithchance -- its `else if (Random() % 100 < percentChance && gBattleCommunication[MOVE_EFFECT_BYTE] && ...)` evaluates Random() FIRST, so the opcode costs a draw even for a move with secondaryEffectChance 0 like FISSURE. It sits in BattleScript_HitFromAtkAnimation (data/battle_scripts_1.s:253-266), which only the HIT arm reaches: BattleScript_KOFail and BattleScript_SturdyPreventsOHKO both goto BattleScript_MoveEnd and skip it."
+  },
+  "drawCountsPerFissureResolution": {
+    "hit": 3,
+    "hitBeforeTheKO": 1,
+    "miss": 1,
+    "sturdy": 0,
+    "note": "hit = 1 Cmd_tryKO accuracy draw (frame 67, before the HP write at frame 268) + 1 Cmd_seteffectwithchance draw (frame 359, unconditional even at secondaryEffectChance 0) + 1 ItemBattleEffects King's Rock flinch draw at MOVEEND_KINGSROCK_SHELLBELL. THE THIRD DRAW IS NOT IN THIS RECEIPT'S arms.hit LEDGER: this fixture's 934-frame trace stalls at frame 443 on the 0xFB prompt of 'Foe METAPOD fainted!\\p' with gBattleControllerExecFlags = 1, so moveendall never ran inside the window. See tools/probe/receipts/issue129-kingsrock-ko-off.json, which replays the same parties with A pulses appended and measures the moveend draw at frame 642. miss = the accuracy draw only; BattleScript_KOFail skips seteffectwithchance and never sets gBattleMoveDamage. sturdy = none: the ability branch returns before the accuracy draw."
+  },
+  "levelGate": "Unreachable in Factory version 1: both sides are fixed Level 50, so `attackerLevel - targetLevel` is 0 (chance == the move's own accuracy, 30 for FISSURE) and `attackerLevel >= targetLevel` is always true. B_MSG_KO_UNAFFECTED (STRINGID_PKMNUNAFFECTED) is therefore not reachable from a Level-50 singles Factory battle.",
+  "lockOnBranch": "No fourth arm is possible: no rental set in src/data/gen/battle-frontier-mons.json carries MOVE_LOCK_ON or MOVE_MIND_READER at all (0 of 882 entries), so STATUS3_ALWAYS_HITS can never be staged Factory-legally alongside one of the 24 OHKO-carrying sets.",
+  "freshRunCountPerArm": 2,
+  "byteIdenticalAcrossFreshRuns": true,
+  "probeOutputSha256": {
+    "hit": "74225ff8398b65d3c79c2f659396b9ef88797c68a1f86a6b78d1ecc406edcf2c",
+    "miss": "99ef8b044f56c653029a6ba17e6fb91233362cb2aa423b993c526e492e313085",
+    "sturdy": "410c6bc3ea8bd5ff3e7eb943d50d10c7f38e7fd8ee6300b4373b7bb4c00545a4"
+  },
+  "scriptAddresses": {
+    "BattleScript_SturdyPreventsOHKO": 137213266,
+    "BattleScript_KOFail": 137203720
+  },
+  "moveResultFlagIds": {
+    "MOVE_RESULT_MISSED": 1,
+    "MOVE_RESULT_NOT_VERY_EFFECTIVE": 4,
+    "MOVE_RESULT_ONE_HIT_KO": 16
+  },
+  "abilityIds": {
+    "SAND_VEIL": 8,
+    "STURDY": 5,
+    "SHED_SKIN": 61
+  },
+  "arms": {
+    "hit": {
+      "fixture": "tools/battle-lab/gate6-ohko-hit-off.json",
+      "seed": 305419897,
+      "parties": {
+        "fissureDugtrio": {
+          "species": 51,
+          "item": 187,
+          "abilitySlot": 0,
+          "ability": 8,
+          "moves": [
+            90,
+            90,
+            90,
+            90
+          ]
+        },
+        "target": {
+          "species": 11,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 61,
+          "moves": [
+            106,
+            106,
+            106,
+            106
+          ]
+        }
+      },
+      "targetHpBefore": 125,
+      "targetHpAfter": 0,
+      "targetMaxHp": 125,
+      "attackerHpBefore": 110,
+      "attackerHpAfter": 110,
+      "attackerPpBefore": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "attackerPpAfter": [
+        4,
+        5,
+        5,
+        5
+      ],
+      "messageEvents": [
+        {
+          "frame": 2,
+          "text": "FISSURE"
+        },
+        {
+          "frame": 3,
+          "text": "TYPE/<FC><06><01>GROUND"
+        },
+        {
+          "frame": 41,
+          "text": "DUGTRIO used\nFISSURE!"
+        },
+        {
+          "frame": 272,
+          "text": "It\u2019s a one-hit KO!"
+        },
+        {
+          "frame": 443,
+          "text": "Foe METAPOD\nfainted!\n"
+        }
+      ],
+      "scriptsVisited": [],
+      "opponentHpEvents": [
+        {
+          "frame": 268,
+          "from": 125,
+          "to": 0,
+          "fissureRandomCallsSoFar": 1,
+          "moveResultFlags": 20
+        }
+      ],
+      "rngLedger": [
+        {
+          "frame": 67,
+          "randomCalls": 1,
+          "rngBefore": 419524900,
+          "rngAfter": 3152970951,
+          "currentMove": 90,
+          "opponentHp": 125
+        },
+        {
+          "frame": 359,
+          "randomCalls": 1,
+          "rngBefore": 3152970951,
+          "rngAfter": 3924658990,
+          "currentMove": 90,
+          "opponentHp": 0
+        }
+      ],
+      "fissureRandomCalls": 2,
+      "totalRandomCalls": 2
+    },
+    "miss": {
+      "fixture": "tools/battle-lab/gate6-ohko-miss-off.json",
+      "seed": 2,
+      "parties": {
+        "fissureDugtrio": {
+          "species": 51,
+          "item": 187,
+          "abilitySlot": 0,
+          "ability": 8,
+          "moves": [
+            90,
+            90,
+            90,
+            90
+          ]
+        },
+        "target": {
+          "species": 11,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 61,
+          "moves": [
+            106,
+            106,
+            106,
+            106
+          ]
+        }
+      },
+      "targetHpBefore": 125,
+      "targetHpAfter": 125,
+      "targetMaxHp": 125,
+      "attackerHpBefore": 110,
+      "attackerHpAfter": 110,
+      "attackerPpBefore": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "attackerPpAfter": [
+        4,
+        5,
+        5,
+        5
+      ],
+      "messageEvents": [
+        {
+          "frame": 2,
+          "text": "FISSURE"
+        },
+        {
+          "frame": 3,
+          "text": "TYPE/<FC><06><01>GROUND"
+        },
+        {
+          "frame": 41,
+          "text": "DUGTRIO used\nFISSURE!"
+        },
+        {
+          "frame": 132,
+          "text": "DUGTRIO\u2019s\nattack missed!"
+        },
+        {
+          "frame": 233,
+          "text": "Foe METAPOD used\nHARDEN!"
+        },
+        {
+          "frame": 374,
+          "text": "Foe METAPOD\u2019s DEFENSE\nrose!"
+        },
+        {
+          "frame": 478,
+          "text": "What will\nDUGTRIO do?"
+        }
+      ],
+      "scriptsVisited": [
+        {
+          "frame": 67,
+          "symbol": "BattleScript_KOFail",
+          "lastUsedAbility": 61,
+          "moveResultFlags": 5,
+          "opponentHp": 125,
+          "fissureRandomCallsSoFar": 1
+        }
+      ],
+      "opponentHpEvents": [],
+      "rngLedger": [
+        {
+          "frame": 67,
+          "randomCalls": 1,
+          "rngBefore": 541176199,
+          "rngAfter": 1434065134,
+          "currentMove": 90,
+          "opponentHp": 125
+        },
+        {
+          "frame": 474,
+          "randomCalls": 1,
+          "rngBefore": 1434065134,
+          "rngAfter": 1319731657,
+          "currentMove": 0,
+          "opponentHp": 125
+        },
+        {
+          "frame": 481,
+          "randomCalls": 17,
+          "rngBefore": 1319731657,
+          "rngAfter": 557013016,
+          "currentMove": 0,
+          "opponentHp": 125
+        }
+      ],
+      "fissureRandomCalls": 1,
+      "totalRandomCalls": 19
+    },
+    "sturdy": {
+      "fixture": "tools/battle-lab/gate6-ohko-sturdy-off.json",
+      "seed": 305419897,
+      "parties": {
+        "fissureDugtrio": {
+          "species": 51,
+          "item": 187,
+          "abilitySlot": 0,
+          "ability": 8,
+          "moves": [
+            90,
+            90,
+            90,
+            90
+          ]
+        },
+        "target": {
+          "species": 205,
+          "item": 0,
+          "abilitySlot": 0,
+          "ability": 5,
+          "moves": [
+            192,
+            192,
+            192,
+            192
+          ]
+        }
+      },
+      "targetHpBefore": 150,
+      "targetHpAfter": 150,
+      "targetMaxHp": 150,
+      "attackerHpBefore": 110,
+      "attackerHpAfter": 110,
+      "attackerPpBefore": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "attackerPpAfter": [
+        4,
+        5,
+        5,
+        5
+      ],
+      "messageEvents": [
+        {
+          "frame": 2,
+          "text": "FISSURE"
+        },
+        {
+          "frame": 3,
+          "text": "TYPE/<FC><06><01>GROUND"
+        },
+        {
+          "frame": 41,
+          "text": "DUGTRIO used\nFISSURE!"
+        },
+        {
+          "frame": 100,
+          "text": "Foe FORRETRESS was protected\nby STURDY!"
+        },
+        {
+          "frame": 218,
+          "text": "Foe FORRETRESS used\nZAP CANNON!"
+        },
+        {
+          "frame": 297,
+          "text": "It doesn\u2019t affect\nDUGTRIO<B0>"
+        },
+        {
+          "frame": 402,
+          "text": "What will\nDUGTRIO do?"
+        }
+      ],
+      "scriptsVisited": [
+        {
+          "frame": 67,
+          "symbol": "BattleScript_SturdyPreventsOHKO",
+          "lastUsedAbility": 5,
+          "moveResultFlags": 1,
+          "opponentHp": 150,
+          "fissureRandomCallsSoFar": 0
+        }
+      ],
+      "opponentHpEvents": [],
+      "rngLedger": [
+        {
+          "frame": 217,
+          "randomCalls": 1,
+          "rngBefore": 960307641,
+          "rngAfter": 224664120,
+          "currentMove": 192,
+          "opponentHp": 150
+        },
+        {
+          "frame": 251,
+          "randomCalls": 1,
+          "rngBefore": 224664120,
+          "rngAfter": 3001850443,
+          "currentMove": 192,
+          "opponentHp": 150
+        },
+        {
+          "frame": 254,
+          "randomCalls": 1,
+          "rngBefore": 3001850443,
+          "rngAfter": 2797792354,
+          "currentMove": 192,
+          "opponentHp": 150
+        },
+        {
+          "frame": 388,
+          "randomCalls": 1,
+          "rngBefore": 2797792354,
+          "rngAfter": 449897005,
+          "currentMove": 192,
+          "opponentHp": 150
+        },
+        {
+          "frame": 398,
+          "randomCalls": 1,
+          "rngBefore": 449897005,
+          "rngAfter": 1806197660,
+          "currentMove": 0,
+          "opponentHp": 150
+        },
+        {
+          "frame": 405,
+          "randomCalls": 4,
+          "rngBefore": 1806197660,
+          "rngAfter": 1056038720,
+          "currentMove": 192,
+          "opponentHp": 150
+        },
+        {
+          "frame": 418,
+          "randomCalls": 1,
+          "rngBefore": 1056038720,
+          "rngAfter": 1786900147,
+          "currentMove": 0,
+          "opponentHp": 150
+        }
+      ],
+      "fissureRandomCalls": 0,
+      "totalRandomCalls": 10
+    }
+  },
+  "assertions": [
+    "HIT (seed 305419897, METAPOD set 8): FISSURE draws exactly ONE Random() before the KO (frame 67), METAPOD 125 -> 0 at frame 268 with gMoveResultFlags = 20 (MOVE_RESULT_ONE_HIT_KO | MOVE_RESULT_NOT_VERY_EFFECTIVE -- GROUND is 0.5x on BUG), and the ROM prints \u201cIt\u2019s a one-hit KO!\u201d then \u201cFoe METAPOD\\nfainted!\u201d. A second draw follows at frame 359 (Cmd_seteffectwithchance) and a THIRD lands at MOVEEND_KINGSROCK_SHELLBELL once the faint message is dismissed -- outside this fixture's 934-frame window; see tools/probe/receipts/issue129-kingsrock-ko-off.json.",
+    "MISS (seed 2, same parties): FISSURE draws exactly ONE Random(), gBattlescriptCurrInstr reaches BattleScript_KOFail at frame 67, the ROM prints \u201cDUGTRIO\u2019s\\nattack missed!\u201d (gKOFailedStringIds[B_MSG_KO_MISS] = STRINGID_ATTACKMISSED), METAPOD's HP never moves off 125, and neither Cmd_seteffectwithchance nor KING'S ROCK draws, because BattleScript_KOFail leaves straight for BattleScript_MoveEnd with gBattleMoveDamage never set.",
+    "STURDY (seed 305419897, FORRETRESS set 575, ability 5): FISSURE draws ZERO Random() -- Cmd_tryKO's ability branch fires before the accuracy draw. gBattlescriptCurrInstr reaches BattleScript_SturdyPreventsOHKO at frame 67 with gLastUsedAbility = 5 (STURDY), FORRETRESS's HP stays 150, and the ROM prints \u201cFoe FORRETRESS was protected\\nby STURDY!\u201d (STRINGID_PKMNPROTECTEDBY).",
+    "All three arms spend exactly one FISSURE PP (5 -> 4), so the STURDY refusal is a refusal of the KO, not of the move.",
+    "No crit or damage roll appears in any arm: BattleScript_EffectOHKO gotos BattleScript_HitFromAtkAnimation past critcalc/damagecalc, and gBattleMoveDamage comes straight from Cmd_tryKO.",
+    "This is semantic RAM evidence; no framebuffer fitting or runtime oracle dependency is used.",
+    "KING'S ROCK (item 187, kept from set 564) draws nothing in the MISS and STURDY arms (gBattleMoveDamage is never set on either path) and DOES draw once on the HIT arm at moveend -- ISSUES #129, receipt issue129-kingsrock-ko-off.json. arms.hit.rngLedger below is a truncated-window ledger and is retained verbatim as the raw measurement; it is not the full resolution."
+  ],
+  "kingsRockControl": {
+    "status": "SUPERSEDED -- window-truncated, see tools/probe/receipts/issue129-kingsrock-ko-off.json",
+    "whatWasWrong": "The original control compared a no-item run against the KING'S ROCK run over the same 934-frame trace. Neither run reaches Cmd_moveend (both stall at frame 443 on the faint message's prompt control code), so 'identical draw frames and final gRngValue' proved only that the item costs nothing BEFORE moveend. Re-run with A pulses appended, the item run draws a third time at frame 642 and the no-item run does not.",
+    "correctedBy": "tools/probe/receipts/issue129-kingsrock-ko-off.json arms.ohkoKingsRock vs arms.ohkoNoItemControl"
+  },
+  "engineDivergence": {
+    "status": "RESOLVED -- NOT A DIVERGENCE (2026-08-25, ISSUES #129)",
+    "what": "The engine's third draw at MOVEEND_KINGSROCK_SHELLBELL (src/engine/battleScriptMoveEndOpcode.ts:883-905) matches the stock ROM. The claimed divergence was an artifact of this fixture's truncated trace; no engine change was needed.",
+    "receipt": "tools/probe/receipts/issue129-kingsrock-ko-off.json"
+  },
+  "windowTruncation": {
+    "frames": 934,
+    "stallFrame": 443,
+    "cause": "STRINGID_TARGETFAINTED ends in the 0xFB prompt control code, so the player controller sits in CompleteOnInactiveTextPrinter with gBattleControllerExecFlags = 1 and RunBattleScriptCommands stops executing opcodes. Verified out to 3000 idle frames: gBattlescriptCurrInstr never leaves BattleScript_FaintTarget+12.",
+    "affects": "arms.hit only. The miss and sturdy arms end their turn normally inside the window."
+  }
+}

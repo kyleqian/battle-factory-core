@@ -82,7 +82,6 @@ import {
 } from "./battleScriptActionAdmission.ts";
 import { battleStringReferencesToken, resolveBattleNameWithPrefix, resolveMoveName } from "./battleStringResolver.ts";
 import {
-  HOLD_EFFECT_NAME_BY_ID,
   unsupportedBranch,
   withBattler,
 } from "./battleScriptHitChainOpcode.ts";
@@ -111,11 +110,11 @@ import {
 import {
   resumeBattleEndTurnAfterFaintedActions,
   runBattleEndTurnOrchestration,
-  weatherHasEffect,
+  turnOrderBattlerInputs,
+  turnOrderWeather,
   type BattleEndTurnResult,
 } from "./battleEndTurnOrchestration.ts";
-import { effectiveSpeed, getWhoStrikesFirst, type TurnOrderBattler, type WeatherState } from "./turnOrder.ts";
-import { ABILITY_SYMBOLS } from "./battleScriptSwitchinOpcode.ts";
+import { getWhoStrikesFirst, isSpeedTie } from "./turnOrder.ts";
 import { TYPE_DISPLAY_NAMES } from "./fightSubmenuText.ts";
 import {
   BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
@@ -123,8 +122,6 @@ import {
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   BATTLE_SCRIPT_PARTY_SIZE,
   createBattleScriptRulesContext,
-  resolveBattleScriptBattlerHoldEffect,
-  resolveBattleScriptBattlerHoldEffectParam,
   uniformBattleScriptIvs,
   createBattleScriptStatusRulesHandlers,
   type BattleScriptPartyMemberInput,
@@ -157,7 +154,6 @@ import { resolveSingleBattlePosition } from "./battleScriptBattlerPositions.ts";
 const ADAPTER = "factory-full-turn/v1";
 const B_WAIT_TIME_LONG = 64;
 const B_WAIT_TIME_SHORT = 32;
-const STAT_SPEED = 3;
 /** Real per-script instruction ceiling, matching battleEndTurnOrchestration.ts's own bump for the DoTurnDmg-family scripts' controller round trips. */
 const SCRIPT_BUDGET = 256;
 /** Controller/message waits are resumptions of one source opcode, not new opcodes. */
@@ -205,11 +201,6 @@ const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
 const ZERO_IVS = uniformBattleScriptIvs(0);
 /** GetFactoryMonFixedIV(challenge 0, non-final) => sFixedIVTable[0][0] = 3. */
 const FACTORY_FIRST_CHALLENGE_IVS = uniformBattleScriptIvs(3);
-/** include/constants/battle.h:232-239 -- all active rain/sun variants. */
-const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
-const B_WEATHER_SUN = (1 << 5) | (1 << 6);
-/** include/constants/battle.h:120. */
-const STATUS1_PARALYSIS = 1 << 6;
 /** include/constants/abilities.h: exact identity constants used by the cited source gates below. */
 const ABILITY_SHADOW_TAG = 23;
 const ABILITY_LEVITATE = 26;
@@ -223,6 +214,8 @@ const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const MOVE_PURSUIT = 228;
 /** include/battle.h:27-39 -- the action-kind globals gChosenActionByBattler/gActionsByTurnOrder carry. */
 const B_ACTION_USE_MOVE = 0;
+/** include/constants/battle.h B_ACTION_SWITCH. */
+const B_ACTION_SWITCH = 2;
 const B_ACTION_TRY_FINISH = 11;
 
 /**
@@ -1880,41 +1873,6 @@ export function runStagedVoluntarySwitch(
   return Object.freeze({ atBranch, completed });
 }
 
-function movePriority(moveId: number): number {
-  const row = MOVES_BY_ID.get(moveId);
-  if (!row) throw new Error(`move ${moveId} has no source move data row`);
-  return row.priority;
-}
-
-function turnOrderBattler(rulesContext: BattleScriptRulesContext, battler: BattleScriptBattlerId, moveId: number): TurnOrderBattler {
-  const b = rulesContext.battlers[battler];
-  const holdEffect = resolveBattleScriptBattlerHoldEffect(rulesContext, battler);
-  return {
-    speed: b.speed,
-    speedStage: b.statStages[STAT_SPEED]!,
-    movePriority: movePriority(moveId),
-    ability: ABILITY_SYMBOLS[b.ability] ?? null,
-    holdEffect: HOLD_EFFECT_NAME_BY_ID[holdEffect] ?? null,
-    holdEffectParam: resolveBattleScriptBattlerHoldEffectParam(rulesContext, battler),
-    isParalyzed: (b.status1 & STATUS1_PARALYSIS) !== 0,
-  };
-}
-
-/**
- * GetWhoStrikesFirst's WEATHER_HAS_EFFECT branch. The shared Frontier
- * precedent suppresses weather for Cloud Nine; Air Lock has no legal
- * Frontier carrier. The ROM scan also requires hp != 0
- * (battle_util.c:3140-3148), which is vacuous here: action selection only
- * resumes after fainted-actions installs two live singles actives.
- */
-function turnOrderWeather(rulesContext: BattleScriptRulesContext): WeatherState {
-  if (!weatherHasEffect(rulesContext)) return {};
-  return {
-    isRaining: (rulesContext.weather & B_WEATHER_RAIN) !== 0,
-    isSunny: (rulesContext.weather & B_WEATHER_SUN) !== 0,
-  };
-}
-
 /**
  * Source GetBattlerTurnOrderNum/gCurrentTurnActionNumber (battle_script_
  * commands.c:2210-2219, battle_main.c:162), needed by SetMoveEffect's
@@ -1926,12 +1884,22 @@ function turnOrderWeather(rulesContext: BattleScriptRulesContext): WeatherState 
  * turnOrderNum itself does not change across the turn -- only
  * currentTurnActionNumber does, once per action -- so this is called once
  * per action with the same mover1/mover2 pair.
+ *
+ * `chosenActionByBattler` (gChosenActionByBattler, battle_main.c:159) is
+ * supplied once, at the turn's first call: HandleTurnActionSelectionState
+ * banks each battler's action and nothing clears it until BattleTurnPassed's
+ * closing block (battle_main.c:4001-4004), so it stays readable through the
+ * whole turn INCLUDING the end-turn pass, where ENDTURN_ORDER's
+ * `GetWhoStrikesFirst(..., ignoreChosenMoves = FALSE)` needs it to tell a
+ * move action's priority bracket from a switch's MOVE_NONE. Omitting it
+ * preserves the prior value, which is what the per-action re-calls want.
  */
 function withTurnOrderPositions(
   rulesContext: BattleScriptRulesContext,
   currentTurnActionNumber: number,
   mover1: BattleScriptBattlerId,
   mover2: BattleScriptBattlerId,
+  chosenActionByBattler?: readonly number[],
 ): BattleScriptRulesContext {
   const battlers = rulesContext.battlers.map((battler, index) => {
     if (index === mover1) return Object.freeze({ ...battler, turnOrderNum: 0 });
@@ -1947,6 +1915,9 @@ function withTurnOrderPositions(
       2,
       3,
     ] as const),
+    chosenActionByBattler: chosenActionByBattler === undefined
+      ? rulesContext.chosenActionByBattler
+      : (Object.freeze([...chosenActionByBattler]) as unknown as BattleScriptRulesContext["chosenActionByBattler"]),
     currentTurnActionNumber,
   });
 }
@@ -2992,16 +2963,13 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     // switch.
     playerFirst = playerSwitch;
   } else {
-    const playerTOB = turnOrderBattler(rc0, 0, playerMoveId);
-    const trainerTOB = turnOrderBattler(rc0, 1, trainerMoveId);
+    const playerTOB = turnOrderBattlerInputs(rc0, 0, playerMoveId);
+    const trainerTOB = turnOrderBattlerInputs(rc0, 1, trainerMoveId);
     const weather = turnOrderWeather(rc0);
-    const bothPriorityZero = playerTOB.movePriority === 0 && trainerTOB.movePriority === 0;
-    const priorityEqual = playerTOB.movePriority === trainerTOB.movePriority;
-    const isSpeedTie = (bothPriorityZero || priorityEqual)
-      && effectiveSpeed(playerTOB, weather, rc0.randomTurnNumber)
-        === effectiveSpeed(trainerTOB, weather, rc0.randomTurnNumber);
     // battle_main.c:4728/4745 -- Random() & 1, drawn ONLY on a genuine speed tie.
-    const speedTieRngRoll = isSpeedTie ? ctx.rng.draw("turn order speed tie (Random() & 1)") : 0;
+    const speedTieRngRoll = isSpeedTie(playerTOB, trainerTOB, weather, rc0.randomTurnNumber)
+      ? ctx.rng.draw("turn order speed tie (Random() & 1)")
+      : 0;
     const strikesFirst = getWhoStrikesFirst(
       playerTOB,
       trainerTOB,
@@ -3037,7 +3005,15 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     instructionsExecuted: 0,
     haltReason: null,
     scheduler: createBattleScriptSchedulerState(),
-    rulesContext: withTurnOrderPositions(rc0, 0, mover1, mover2),
+    rulesContext: withTurnOrderPositions(rc0, 0, mover1, mover2, [
+      // HandleTurnActionSelectionState's banked gChosenActionByBattler
+      // (battle_main.c:159): B_ACTION_SWITCH for a party swap, otherwise
+      // B_ACTION_USE_MOVE. Read back by ENDTURN_ORDER's re-sort.
+      playerSwitch ? B_ACTION_SWITCH : B_ACTION_USE_MOVE,
+      trainerSwitch ? B_ACTION_SWITCH : B_ACTION_USE_MOVE,
+      B_ACTION_USE_MOVE,
+      B_ACTION_USE_MOVE,
+    ]),
     rng: createBattleScriptRngState(rngBefore.value),
     events: Object.freeze([]),
   });
