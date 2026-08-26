@@ -33,7 +33,26 @@ Struct offsets used (computed from include/battle.h, cited in the receipt):
   struct BattlePokemon (include/pokemon.h:260-295) -- +0x28 hp, +0x2C maxHP,
     +0x2E item; stride 0x58.
 
-FINDING: see the `finding` block of tools/probe/receipts/issue129-kingsrock-ko-off.json.
+FINDING (ISSUES #129, 2026-08-25): the stock ROM DOES spend this draw on an
+OHKO KO -- and on a non-OHKO KO, and on a plain non-KO hit.  #129's premise
+came from a truncated trace: tools/battle-lab/gate6-ohko-hit-off.json runs 934
+frames and stalls at frame 443, because STRINGID_TARGETFAINTED ends in the
+0xFB prompt control code, so BattleScript_FaintTarget's printstring
+(data/battle_scripts_1.s:2817-2823) leaves the player controller in
+CompleteOnInactiveTextPrinter with gBattleControllerExecFlags = 1 and
+RunBattleScriptCommands (src/battle_util.c) stops executing opcodes --
+gBattlescriptCurrInstr sits on BattleScript_FaintTarget+12, the `return` that
+pops back to `moveendall`, for the rest of the trace (verified to 3000 frames).
+Cmd_moveend therefore never ran in the observed window.  The #129 fixtures
+append A pulses; with them, state 10 is seen at frame 640, state 11 at 641 and
+state 17 at 642, and exactly one Random() lands inside frame 642 -- it
+disappears when the attacker's item is forced to 0.  Nothing on the OHKO path
+zeroes gBattleMoveDamage (Cmd_tryfaintmon src/battle_script_commands.c:2975-3049
+and FaintClearSetData src/battle_main.c:3264-3356 leave it alone; Cmd_getexp's
+`gBattleMoveDamage = 0` at :3349 runs later, from HandleFaintedMonActions), so
+every gate ahead of the draw holds and only the trailing
+`&& gBattleMons[gBattlerTarget].hp` -- evaluated AFTER the draw -- is false.
+Full receipt: tools/probe/receipts/issue129-kingsrock-ko-off.json.
 """
 
 from __future__ import annotations

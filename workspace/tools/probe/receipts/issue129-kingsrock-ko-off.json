@@ -1,0 +1,1072 @@
+{
+  "schema": "issue129-kingsrock-ko-off/v1",
+  "cardId": "KINGSROCK_KO",
+  "oracleProfile": "battle-scene-off",
+  "runner": "tools/run-mgba-probe.py",
+  "probe": "tools/probe/probe-issue129-kingsrock-ko-off.py",
+  "builder": "tools/probe/build-issue129-receipt.py",
+  "arms": {
+    "ohkoKingsRock": {
+      "fixture": "tools/battle-lab/issue129-kingsrock-ohko-off.json",
+      "seed": 305419897,
+      "totalRandomCalls": 20,
+      "rngLedger": [
+        {
+          "frame": 67,
+          "randomCalls": 1,
+          "randCountAfter": 8982,
+          "script": "BattleScript_EffectOHKO+27",
+          "moveendState": 0,
+          "battleMoveDamage": 125,
+          "currentMove": 90
+        },
+        {
+          "frame": 359,
+          "randomCalls": 1,
+          "randCountAfter": 8983,
+          "script": "BattleScript_HitFromAtkAnimation+19",
+          "moveendState": 0,
+          "battleMoveDamage": 125,
+          "currentMove": 90
+        },
+        {
+          "frame": 642,
+          "randomCalls": 1,
+          "randCountAfter": 8984,
+          "script": "BattleScript_MoveEnd+9",
+          "moveendState": 17,
+          "battleMoveDamage": 125,
+          "currentMove": 90
+        },
+        {
+          "frame": 869,
+          "randomCalls": 1,
+          "randCountAfter": 8985,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 0,
+          "currentMove": 0
+        },
+        {
+          "frame": 874,
+          "randomCalls": 2,
+          "randCountAfter": 8987,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 2,
+          "currentMove": 0
+        },
+        {
+          "frame": 875,
+          "randomCalls": 4,
+          "randCountAfter": 8991,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 876,
+          "randomCalls": 1,
+          "randCountAfter": 8992,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 877,
+          "randomCalls": 1,
+          "randCountAfter": 8993,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 878,
+          "randomCalls": 1,
+          "randCountAfter": 8994,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 879,
+          "randomCalls": 1,
+          "randCountAfter": 8995,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 880,
+          "randomCalls": 1,
+          "randCountAfter": 8996,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 881,
+          "randomCalls": 1,
+          "randCountAfter": 8997,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 882,
+          "randomCalls": 1,
+          "randCountAfter": 8998,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 80,
+          "currentMove": 72
+        },
+        {
+          "frame": 883,
+          "randomCalls": 1,
+          "randCountAfter": 8999,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 889,
+          "randomCalls": 1,
+          "randCountAfter": 9000,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 80,
+          "currentMove": 0
+        },
+        {
+          "frame": 969,
+          "randomCalls": 1,
+          "randCountAfter": 9001,
+          "script": "BattleScript_EffectOHKO+27",
+          "moveendState": 0,
+          "battleMoveDamage": 105,
+          "currentMove": 90
+        }
+      ],
+      "moveendStatesFirstSeen": [
+        {
+          "frame": 1,
+          "moveendState": 0,
+          "randCount": 8981,
+          "battleMoveDamage": 40,
+          "moveResultFlags": 0,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 0,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 0,
+          "targetHp": 125,
+          "attackerHp": 110,
+          "script": "0x00000000"
+        },
+        {
+          "frame": 640,
+          "moveendState": 10,
+          "randCount": 8983,
+          "battleMoveDamage": 125,
+          "moveResultFlags": 0,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 125,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 125,
+          "targetHp": 0,
+          "attackerHp": 110,
+          "script": "BattleScript_MoveEnd+6"
+        },
+        {
+          "frame": 641,
+          "moveendState": 11,
+          "randCount": 8983,
+          "battleMoveDamage": 125,
+          "moveResultFlags": 0,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 125,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 125,
+          "targetHp": 0,
+          "attackerHp": 110,
+          "script": "BattleScript_MoveEnd+6"
+        },
+        {
+          "frame": 642,
+          "moveendState": 17,
+          "randCount": 8984,
+          "battleMoveDamage": 125,
+          "moveResultFlags": 0,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 125,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 125,
+          "targetHp": 0,
+          "attackerHp": 110,
+          "script": "BattleScript_MoveEnd+9"
+        }
+      ],
+      "atMoveendState11": {
+        "frame": 641,
+        "moveendState": 11,
+        "randCount": 8983,
+        "battleMoveDamage": 125,
+        "moveResultFlags": 0,
+        "attacker": 0,
+        "target": 1,
+        "attackerItem": 187,
+        "targetPhysicalDmg": 125,
+        "targetSpecialDmg": 0,
+        "targetShellBellDmg": 125,
+        "targetHp": 0,
+        "attackerHp": 110,
+        "script": "BattleScript_MoveEnd+6"
+      },
+      "final": {
+        "battleMoveDamage": 105,
+        "moveResultFlags": 0,
+        "attacker": 0,
+        "target": 1,
+        "attackerItem": 187,
+        "attackerHp": 110,
+        "attackerMaxHp": 110,
+        "targetHp": 0,
+        "targetPhysicalDmg": 105,
+        "targetSpecialDmg": 0,
+        "targetShellBellDmg": 105,
+        "moveendState": 0,
+        "script": "BattleScript_OneHitKOMsg+3",
+        "frame": "final",
+        "randCount": 9001
+      }
+    },
+    "ohkoNoItemControl": {
+      "fixture": "tools/battle-lab/issue129-noitem-ohko-off.json",
+      "seed": 305419897,
+      "totalRandomCalls": 22,
+      "rngLedger": [
+        {
+          "frame": 67,
+          "randomCalls": 1,
+          "randCountAfter": 8982,
+          "script": "BattleScript_EffectOHKO+27",
+          "moveendState": 0,
+          "battleMoveDamage": 125,
+          "currentMove": 90
+        },
+        {
+          "frame": 359,
+          "randomCalls": 1,
+          "randCountAfter": 8983,
+          "script": "BattleScript_HitFromAtkAnimation+19",
+          "moveendState": 0,
+          "battleMoveDamage": 125,
+          "currentMove": 90
+        },
+        {
+          "frame": 869,
+          "randomCalls": 1,
+          "randCountAfter": 8984,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 0,
+          "currentMove": 0
+        },
+        {
+          "frame": 874,
+          "randomCalls": 2,
+          "randCountAfter": 8986,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 2,
+          "currentMove": 0
+        },
+        {
+          "frame": 875,
+          "randomCalls": 4,
+          "randCountAfter": 8990,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 876,
+          "randomCalls": 1,
+          "randCountAfter": 8991,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 877,
+          "randomCalls": 1,
+          "randCountAfter": 8992,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 878,
+          "randomCalls": 1,
+          "randCountAfter": 8993,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 879,
+          "randomCalls": 1,
+          "randCountAfter": 8994,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 880,
+          "randomCalls": 1,
+          "randCountAfter": 8995,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 881,
+          "randomCalls": 1,
+          "randCountAfter": 8996,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 882,
+          "randomCalls": 1,
+          "randCountAfter": 8997,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 80,
+          "currentMove": 72
+        },
+        {
+          "frame": 883,
+          "randomCalls": 1,
+          "randCountAfter": 8998,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 889,
+          "randomCalls": 1,
+          "randCountAfter": 8999,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 80,
+          "currentMove": 0
+        },
+        {
+          "frame": 969,
+          "randomCalls": 1,
+          "randCountAfter": 9000,
+          "script": "BattleScript_KOFail",
+          "moveendState": 0,
+          "battleMoveDamage": 60,
+          "currentMove": 90
+        },
+        {
+          "frame": 1133,
+          "randomCalls": 1,
+          "randCountAfter": 9001,
+          "script": "BattleScript_EffectAbsorb+8",
+          "moveendState": 0,
+          "battleMoveDamage": 0,
+          "currentMove": 72
+        },
+        {
+          "frame": 1164,
+          "randomCalls": 1,
+          "randCountAfter": 9002,
+          "script": "BattleScript_EffectAbsorb+11",
+          "moveendState": 0,
+          "battleMoveDamage": 0,
+          "currentMove": 72
+        },
+        {
+          "frame": 1167,
+          "randomCalls": 1,
+          "randCountAfter": 9003,
+          "script": "BattleScript_EffectAbsorb+14",
+          "moveendState": 0,
+          "battleMoveDamage": 30,
+          "currentMove": 72
+        }
+      ],
+      "moveendStatesFirstSeen": [
+        {
+          "frame": 1,
+          "moveendState": 0,
+          "randCount": 8981,
+          "battleMoveDamage": 40,
+          "moveResultFlags": 0,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 0,
+          "targetPhysicalDmg": 0,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 0,
+          "targetHp": 125,
+          "attackerHp": 110,
+          "script": "0x00000000"
+        },
+        {
+          "frame": 640,
+          "moveendState": 10,
+          "randCount": 8983,
+          "battleMoveDamage": 125,
+          "moveResultFlags": 0,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 0,
+          "targetPhysicalDmg": 125,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 125,
+          "targetHp": 0,
+          "attackerHp": 110,
+          "script": "BattleScript_MoveEnd+6"
+        },
+        {
+          "frame": 641,
+          "moveendState": 11,
+          "randCount": 8983,
+          "battleMoveDamage": 125,
+          "moveResultFlags": 0,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 0,
+          "targetPhysicalDmg": 125,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 125,
+          "targetHp": 0,
+          "attackerHp": 110,
+          "script": "BattleScript_MoveEnd+6"
+        },
+        {
+          "frame": 642,
+          "moveendState": 17,
+          "randCount": 8983,
+          "battleMoveDamage": 125,
+          "moveResultFlags": 0,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 0,
+          "targetPhysicalDmg": 125,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 125,
+          "targetHp": 0,
+          "attackerHp": 110,
+          "script": "BattleScript_MoveEnd+9"
+        }
+      ],
+      "atMoveendState11": {
+        "frame": 641,
+        "moveendState": 11,
+        "randCount": 8983,
+        "battleMoveDamage": 125,
+        "moveResultFlags": 0,
+        "attacker": 0,
+        "target": 1,
+        "attackerItem": 0,
+        "targetPhysicalDmg": 125,
+        "targetSpecialDmg": 0,
+        "targetShellBellDmg": 125,
+        "targetHp": 0,
+        "attackerHp": 110,
+        "script": "BattleScript_MoveEnd+6"
+      },
+      "final": {
+        "battleMoveDamage": 30,
+        "moveResultFlags": 2,
+        "attacker": 1,
+        "target": 0,
+        "attackerItem": 0,
+        "attackerHp": 105,
+        "attackerMaxHp": 105,
+        "targetHp": 110,
+        "targetPhysicalDmg": 0,
+        "targetSpecialDmg": 0,
+        "targetShellBellDmg": 0,
+        "moveendState": 0,
+        "script": "BattleScript_EffectAbsorb+19",
+        "frame": "final",
+        "randCount": 9003
+      }
+    },
+    "earthquakeKoKingsRock": {
+      "fixture": "tools/battle-lab/issue129-kingsrock-eq-ko-off.json",
+      "seed": 305419897,
+      "totalRandomCalls": 25,
+      "rngLedger": [
+        {
+          "frame": 72,
+          "randomCalls": 1,
+          "randCountAfter": 8982,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+7",
+          "moveendState": 0,
+          "battleMoveDamage": 40,
+          "currentMove": 89
+        },
+        {
+          "frame": 73,
+          "randomCalls": 1,
+          "randCountAfter": 8983,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+8",
+          "moveendState": 0,
+          "battleMoveDamage": 40,
+          "currentMove": 89
+        },
+        {
+          "frame": 76,
+          "randomCalls": 1,
+          "randCountAfter": 8984,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+11",
+          "moveendState": 0,
+          "battleMoveDamage": 264,
+          "currentMove": 89
+        },
+        {
+          "frame": 642,
+          "randomCalls": 1,
+          "randCountAfter": 8985,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+51",
+          "moveendState": 17,
+          "battleMoveDamage": 264,
+          "currentMove": 89
+        },
+        {
+          "frame": 870,
+          "randomCalls": 1,
+          "randCountAfter": 8986,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 0,
+          "currentMove": 0
+        },
+        {
+          "frame": 875,
+          "randomCalls": 2,
+          "randCountAfter": 8988,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 2,
+          "currentMove": 0
+        },
+        {
+          "frame": 876,
+          "randomCalls": 4,
+          "randCountAfter": 8992,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 16,
+          "currentMove": 72
+        },
+        {
+          "frame": 877,
+          "randomCalls": 1,
+          "randCountAfter": 8993,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 878,
+          "randomCalls": 1,
+          "randCountAfter": 8994,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 879,
+          "randomCalls": 1,
+          "randCountAfter": 8995,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 16,
+          "currentMove": 72
+        },
+        {
+          "frame": 880,
+          "randomCalls": 1,
+          "randCountAfter": 8996,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 881,
+          "randomCalls": 1,
+          "randCountAfter": 8997,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 882,
+          "randomCalls": 1,
+          "randCountAfter": 8998,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 883,
+          "randomCalls": 1,
+          "randCountAfter": 8999,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 80,
+          "currentMove": 72
+        },
+        {
+          "frame": 884,
+          "randomCalls": 1,
+          "randCountAfter": 9000,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 32,
+          "currentMove": 72
+        },
+        {
+          "frame": 890,
+          "randomCalls": 1,
+          "randCountAfter": 9001,
+          "script": "BattleScript_FaintedMonEnd",
+          "moveendState": 0,
+          "battleMoveDamage": 80,
+          "currentMove": 0
+        },
+        {
+          "frame": 974,
+          "randomCalls": 1,
+          "randCountAfter": 9002,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+7",
+          "moveendState": 0,
+          "battleMoveDamage": 80,
+          "currentMove": 89
+        },
+        {
+          "frame": 975,
+          "randomCalls": 1,
+          "randCountAfter": 9003,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+8",
+          "moveendState": 0,
+          "battleMoveDamage": 80,
+          "currentMove": 89
+        },
+        {
+          "frame": 978,
+          "randomCalls": 1,
+          "randCountAfter": 9004,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+11",
+          "moveendState": 0,
+          "battleMoveDamage": 58,
+          "currentMove": 89
+        },
+        {
+          "frame": 1210,
+          "randomCalls": 1,
+          "randCountAfter": 9005,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+51",
+          "moveendState": 17,
+          "battleMoveDamage": 67,
+          "currentMove": 89
+        },
+        {
+          "frame": 1217,
+          "randomCalls": 1,
+          "randCountAfter": 9006,
+          "script": "BattleScript_EffectAbsorb+8",
+          "moveendState": 0,
+          "battleMoveDamage": 0,
+          "currentMove": 72
+        }
+      ],
+      "moveendStatesFirstSeen": [
+        {
+          "frame": 1,
+          "moveendState": 0,
+          "randCount": 8981,
+          "battleMoveDamage": 40,
+          "moveResultFlags": 0,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 0,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 0,
+          "targetHp": 125,
+          "attackerHp": 110,
+          "script": "0x00000000"
+        },
+        {
+          "frame": 640,
+          "moveendState": 10,
+          "randCount": 8984,
+          "battleMoveDamage": 264,
+          "moveResultFlags": 2,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 125,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 125,
+          "targetHp": 0,
+          "attackerHp": 110,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+48"
+        },
+        {
+          "frame": 641,
+          "moveendState": 11,
+          "randCount": 8984,
+          "battleMoveDamage": 264,
+          "moveResultFlags": 2,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 125,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 125,
+          "targetHp": 0,
+          "attackerHp": 110,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+48"
+        },
+        {
+          "frame": 642,
+          "moveendState": 17,
+          "randCount": 8985,
+          "battleMoveDamage": 264,
+          "moveResultFlags": 2,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 125,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 125,
+          "targetHp": 0,
+          "attackerHp": 110,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+51"
+        }
+      ],
+      "atMoveendState11": {
+        "frame": 641,
+        "moveendState": 11,
+        "randCount": 8984,
+        "battleMoveDamage": 264,
+        "moveResultFlags": 2,
+        "attacker": 0,
+        "target": 1,
+        "attackerItem": 187,
+        "targetPhysicalDmg": 125,
+        "targetSpecialDmg": 0,
+        "targetShellBellDmg": 125,
+        "targetHp": 0,
+        "attackerHp": 110,
+        "script": "BattleScript_DoHitAllWithUndergroundBonus+48"
+      },
+      "final": {
+        "battleMoveDamage": 0,
+        "moveResultFlags": 0,
+        "attacker": 1,
+        "target": 0,
+        "attackerItem": 0,
+        "attackerHp": 47,
+        "attackerMaxHp": 105,
+        "targetHp": 110,
+        "targetPhysicalDmg": 0,
+        "targetSpecialDmg": 0,
+        "targetShellBellDmg": 0,
+        "moveendState": 0,
+        "script": "BattleScript_EffectAbsorb+9",
+        "frame": "final",
+        "randCount": 9006
+      }
+    },
+    "earthquakeSurvivesKingsRock": {
+      "fixture": "tools/battle-lab/issue129-kingsrock-eq-survive-off.json",
+      "seed": 305419897,
+      "totalRandomCalls": 36,
+      "rngLedger": [
+        {
+          "frame": 72,
+          "randomCalls": 1,
+          "randCountAfter": 8982,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+7",
+          "moveendState": 0,
+          "battleMoveDamage": 40,
+          "currentMove": 89
+        },
+        {
+          "frame": 73,
+          "randomCalls": 1,
+          "randCountAfter": 8983,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+8",
+          "moveendState": 0,
+          "battleMoveDamage": 40,
+          "currentMove": 89
+        },
+        {
+          "frame": 76,
+          "randomCalls": 1,
+          "randCountAfter": 8984,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+11",
+          "moveendState": 0,
+          "battleMoveDamage": 49,
+          "currentMove": 89
+        },
+        {
+          "frame": 299,
+          "randomCalls": 1,
+          "randCountAfter": 8985,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+51",
+          "moveendState": 17,
+          "battleMoveDamage": 49,
+          "currentMove": 89
+        },
+        {
+          "frame": 549,
+          "randomCalls": 1,
+          "randCountAfter": 8986,
+          "script": "BattleScript_MoveEnd+9",
+          "moveendState": 0,
+          "battleMoveDamage": 0,
+          "currentMove": 0
+        },
+        {
+          "frame": 556,
+          "randomCalls": 17,
+          "randCountAfter": 9003,
+          "script": "BattleScript_MoveEnd+9",
+          "moveendState": 0,
+          "battleMoveDamage": 40,
+          "currentMove": 0
+        },
+        {
+          "frame": 704,
+          "randomCalls": 1,
+          "randCountAfter": 9004,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+7",
+          "moveendState": 0,
+          "battleMoveDamage": 40,
+          "currentMove": 89
+        },
+        {
+          "frame": 705,
+          "randomCalls": 1,
+          "randCountAfter": 9005,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+8",
+          "moveendState": 0,
+          "battleMoveDamage": 40,
+          "currentMove": 89
+        },
+        {
+          "frame": 708,
+          "randomCalls": 1,
+          "randCountAfter": 9006,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+11",
+          "moveendState": 0,
+          "battleMoveDamage": 28,
+          "currentMove": 89
+        },
+        {
+          "frame": 910,
+          "randomCalls": 1,
+          "randCountAfter": 9007,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+51",
+          "moveendState": 17,
+          "battleMoveDamage": 33,
+          "currentMove": 89
+        },
+        {
+          "frame": 1160,
+          "randomCalls": 1,
+          "randCountAfter": 9008,
+          "script": "BattleScript_MoveEnd+9",
+          "moveendState": 0,
+          "battleMoveDamage": 0,
+          "currentMove": 0
+        },
+        {
+          "frame": 1167,
+          "randomCalls": 9,
+          "randCountAfter": 9017,
+          "script": "BattleScript_MoveEnd+9",
+          "moveendState": 0,
+          "battleMoveDamage": 40,
+          "currentMove": 0
+        }
+      ],
+      "moveendStatesFirstSeen": [
+        {
+          "frame": 1,
+          "moveendState": 0,
+          "randCount": 8981,
+          "battleMoveDamage": 40,
+          "moveResultFlags": 0,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 0,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 0,
+          "targetHp": 125,
+          "attackerHp": 110,
+          "script": "0x00000000"
+        },
+        {
+          "frame": 297,
+          "moveendState": 10,
+          "randCount": 8984,
+          "battleMoveDamage": 49,
+          "moveResultFlags": 4,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 49,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 49,
+          "targetHp": 76,
+          "attackerHp": 110,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+48"
+        },
+        {
+          "frame": 298,
+          "moveendState": 11,
+          "randCount": 8984,
+          "battleMoveDamage": 49,
+          "moveResultFlags": 4,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 49,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 49,
+          "targetHp": 76,
+          "attackerHp": 110,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+48"
+        },
+        {
+          "frame": 299,
+          "moveendState": 17,
+          "randCount": 8985,
+          "battleMoveDamage": 49,
+          "moveResultFlags": 4,
+          "attacker": 0,
+          "target": 1,
+          "attackerItem": 187,
+          "targetPhysicalDmg": 49,
+          "targetSpecialDmg": 0,
+          "targetShellBellDmg": 49,
+          "targetHp": 76,
+          "attackerHp": 110,
+          "script": "BattleScript_DoHitAllWithUndergroundBonus+51"
+        }
+      ],
+      "atMoveendState11": {
+        "frame": 298,
+        "moveendState": 11,
+        "randCount": 8984,
+        "battleMoveDamage": 49,
+        "moveResultFlags": 4,
+        "attacker": 0,
+        "target": 1,
+        "attackerItem": 187,
+        "targetPhysicalDmg": 49,
+        "targetSpecialDmg": 0,
+        "targetShellBellDmg": 49,
+        "targetHp": 76,
+        "attackerHp": 110,
+        "script": "BattleScript_DoHitAllWithUndergroundBonus+48"
+      },
+      "final": {
+        "battleMoveDamage": 40,
+        "moveResultFlags": 0,
+        "attacker": 0,
+        "target": 1,
+        "attackerItem": 187,
+        "attackerHp": 110,
+        "attackerMaxHp": 110,
+        "targetHp": 48,
+        "targetPhysicalDmg": 0,
+        "targetSpecialDmg": 0,
+        "targetShellBellDmg": 0,
+        "moveendState": 0,
+        "script": "BattleScript_EffectEarthquake+2",
+        "frame": "final",
+        "randCount": 9017
+      }
+    }
+  },
+  "probeOutputSha256": {
+    "ohkoKingsRock": "06093e20a498e04342cd06fc4804e7e5f77a77a0fcb00859e471119f7cc42207",
+    "ohkoNoItemControl": "95f5bffc764373602d5ce88802886c18d92a64aff05258e013abdf9eeceaa733",
+    "earthquakeKoKingsRock": "5363198e26df82d5f8f2e6b2603c9081d82912583f992a2d39b465143735fa52",
+    "earthquakeSurvivesKingsRock": "271926f9c3ce404e7fafe06ad66c258990d1ce5a183db92f582a43b24d6d7d76"
+  },
+  "freshRunCountPerArm": 2,
+  "byteIdenticalAcrossFreshRuns": true,
+  "finding": {
+    "verdict": "ISSUES #129's premise is FALSE. The stock ROM DOES spend a King's Rock Random() at MOVEEND_KINGSROCK_SHELLBELL on an OHKO KO. The engine (src/engine/battleScriptMoveEndOpcode.ts:883-905) was already source-exact; nothing needed porting.",
+    "whyTheOldReceiptSaidOtherwise": "tools/battle-lab/gate6-ohko-hit-off.json's trace is 934 frames and stalls at frame 443. STRINGID_TARGETFAINTED ('Foe METAPOD fainted!\\p') ends in the 0xFB prompt control code, so BattleScript_FaintTarget's printstring (data/battle_scripts_1.s:2817-2823) leaves the player controller in CompleteOnInactiveTextPrinter with gBattleControllerExecFlags = 1 until a button is pressed. RunBattleScriptCommands only runs an opcode when gBattleControllerExecFlags == 0, so gBattlescriptCurrInstr sat on BattleScript_FaintTarget+12 (the `return` that pops back to `moveendall`) for the remaining 491 frames -- verified out to 3000 frames with no A press. Cmd_moveend therefore never executed inside the observed window and the receipt recorded 'no King's Rock draw' for a state that never ran.",
+    "measuredFix": "The #129 fixtures are the gate6 hit fixture with 20 two-frame A pulses appended (tools/battle-lab/issue129-*.json). With them, gBattleScripting.moveendState is observed leaving 0: state 10 (MOVEEND_TARGET_VISIBLE) at frame 640, state 11 (MOVEEND_ITEM_EFFECTS_ALL) at 641, and state 17 (MOVEEND_COUNT) at 642 -- states 12..16 all run inside frame 642, and exactly ONE Random() lands in that frame.",
+    "attributionControl": "arms.ohkoNoItemControl is the same fixture with the DUGTRIO's item forced to 0. It draws at frames 67 and 359 only: the frame-642 draw disappears with the item, so it is ItemBattleEffects's `(Random() % 100) < atkHoldEffectParam` (src/battle_util.c:3776) and nothing else. Of MOVEEND_KINGSROCK_SHELLBELL(12), MOVEEND_SUBSTITUTE(13), MOVEEND_UPDATE_LAST_MOVES(14), MOVEEND_MIRROR_MOVE(15), MOVEEND_NEXT_TARGET(16) (include/constants/battle_script_commands.h:402-408), only state 12 calls Random().",
+    "guardStateAtStateEleven": "On the OHKO KO arm, immediately before state 12 runs: gBattleMoveDamage = 125, gSpecialStatuses[target].physicalDmg = 125 (TARGET_TURN_DAMAGED true, include/battle.h:469), gSpecialStatuses[target].shellBellDmg = 125, gMoveResultFlags = 0 (Cmd_resultmessage clears the flags after printing -- observed at frame 271, 20 -> 0), gBattlerAttacker = 0 holding item 187, gBattleMons[target].hp = 0. Every gate ahead of the draw is satisfied; only the trailing `&& gBattleMons[gBattlerTarget].hp` is false, and src/battle_util.c:3773-3780 evaluates it AFTER the draw. Nothing on this path ever zeroes gBattleMoveDamage: Cmd_tryfaintmon (src/battle_script_commands.c:2975-3049) and FaintClearSetData (src/battle_main.c:3264-3356) both leave it alone, and Cmd_getexp's `gBattleMoveDamage = 0` (:3349) runs later, from HandleFaintedMonActions.",
+    "structOffsetsCited": "struct SpecialStatus (include/battle.h:132-147) is 20 bytes: +0 bitfield, +4 shellBellDmg, +8 physicalDmg, +12 specialDmg, +16/+17 battler ids. struct BattleScripting (include/battle.h:489-518): painSplitHp +0 (s32), bideDmg +4 (s32), multihitString[6] +8, dmgMultiplier +14, twoTurnsMoveStringId +15, animArg1 +16, animArg2 +17, tripleKickPower +18 (u16) => moveendState +20. struct BattlePokemon (include/pokemon.h:260-295): hp +0x28, maxHP +0x2C, item +0x2E, stride 0x58."
+  },
+  "scopeVerdict": {
+    "kingsRock": "GENERIC, not OHKO-specific and not KO-specific. All three KING'S ROCK arms spend exactly one moveend draw: FISSURE OHKO KO (frame 642), EARTHQUAKE one-hit KO of a 4x-weak MAGNETON (frame 642), and a non-KO EARTHQUAKE on METAPOD that leaves it at 76/125 (frame 299). The draw follows every hit that set physicalDmg/specialDmg on the target, whatever the outcome.",
+    "shellBell": "NOT suppressed by a KO. gSpecialStatuses[target].shellBellDmg is still 125 when state 12 runs on the OHKO KO arm (arms.ohkoKingsRock.atMoveendState11), so the HOLD_EFFECT_SHELL_BELL branch's shellBellDmg gates (src/battle_util.c:3789-3790) hold on a KO exactly as on a survive. Shell Bell spends no Random() in any case; its only remaining gate is `gBattleMons[gBattlerAttacker].hp != gBattleMons[gBattlerAttacker].maxHP` (:3792), which is orthogonal to the KO. NOT staged live here: an attacker already below max HP needs a two-turn fixture, which this bounded step did not have room for -- see ISSUES #129's trimmed remainder."
+  },
+  "engineVerdict": {
+    "status": "NOT DIVERGENT",
+    "what": "src/engine/battleScriptMoveEndOpcode.ts:883-905 draws once at MOVEEND_KINGSROCK_SHELLBELL whenever battleMoveDamage != 0, the attacker holds a HOLD_EFFECT_FLINCH item, the target took physical/special damage and NO_EFFECT is clear -- the ROM's own draw-before-flag order. That is exactly the three-draw OHKO hit the ROM produces. No engine change was made for #129.",
+    "supersedes": "tools/probe/receipts/gate6-ohko-off.json's engineDivergence block and kingsRockControl block, both of which were window-truncated. That receipt has been corrected in the same commit."
+  },
+  "assertions": [
+    "OHKO KO by a KING'S ROCK holder (FISSURE, seed 305419897): THREE Random() on the resolution -- Cmd_tryKO accuracy (frame 67), Cmd_seteffectwithchance (frame 359), ItemBattleEffects King's Rock flinch chance at MOVEEND_KINGSROCK_SHELLBELL (frame 642).",
+    "The same fixture with the item removed draws only at frames 67 and 359: the frame-642 draw is the item's.",
+    "NON-OHKO KO by a KING'S ROCK holder (EARTHQUAKE vs MAGNETON, 4x weak): draws at frames 72/73/76 (accuracy, crit, damage roll) plus the moveend King's Rock draw at frame 642; gBattleMoveDamage = 264 against a 125 HP target, physicalDmg = 125, targetHp = 0.",
+    "NON-KO hit by the same holder (EARTHQUAKE vs METAPOD, 125 -> 76): same three hit-chain draws plus the moveend King's Rock draw at frame 299. KO and non-KO behave identically at state 12.",
+    "gSpecialStatuses[target].shellBellDmg survives the faint into state 12 on the KO arm (125), so a KO does not suppress Shell Bell.",
+    "Cmd_resultmessage clears gMoveResultFlags: the OHKO arm's flags go 20 -> 0 at frame 271, so `!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)` is TRUE at moveend, not false.",
+    "Each arm was run twice from a fresh emulator and the two probe outputs are byte-identical (probeOutputSha256).",
+    "This is semantic RAM evidence; no framebuffer fitting and no runtime oracle dependency."
+  ]
+}
