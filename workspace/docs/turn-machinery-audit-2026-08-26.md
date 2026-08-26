@@ -263,3 +263,226 @@ callback-stack re-entry — are cross-referenced, not restated).
 | 5.7 | `RunTurnActionsFunctions` (`battle_main.c:4937-4943`): `gBattleOutcome != 0` → force `B_ACTION_FINISHED`; save `gCurrentTurnActionNumber`; dispatch `sTurnActionsFuncsTable[gCurrentActionFuncId]()` | `:2716-2726` — a decided outcome short-circuits to the terminal boundary right after `handleBattleActionFinished` | SAME-ORDER |
 | 5.8 | `if (gCurrentTurnActionNumber >= gBattlersCount)` → `gHitMarker &= ~HITMARKER_PASSIVE_HP_UPDATE`, `gBattleMainFunc = sEndTurnFuncsTable[gBattleOutcome & 0x7F]` (`:4945-4949`) | `:2850` `runEndTurnTail` | cross-reference — `docs/end-turn-ordering-audit-2026-08-25.md` §1 owns everything past this line. `HITMARKER_PASSIVE_HP_UPDATE` is already inside 5.4's mask, so the port clears it a step earlier and the two agree at this point |
 | 5.9 | `else if (savedTurnActionNumber != gCurrentTurnActionNumber)` → `gHitMarker &= ~HITMARKER_NO_ATTACKSTRING` and `~HITMARKER_UNABLE_TO_USE_MOVE` — the **between-actions** clear, deliberately NOT in `HandleAction_ActionFinished`'s own mask (`:4950-4957`) | `:2768-2775` `betweenActionsRules`, applied only when a second action is about to run | SAME-ORDER, including the asymmetry: source's `>=` branch at `:4945` wins after the turn's LAST action, so those two bits survive into the end-turn pass on both sides (where `BattleTurnPassed:3975-3978` clears them — end-turn audit's slice). The port's `second !== null` guard reproduces exactly that |
+
+## §6. Verdict counts
+
+**133 rows, every one carrying a verdict. 0 rows left unwritten.**
+
+| verdict | §1 | §2 | §3 | §4 | §5 | total |
+| --- | --- | --- | --- | --- | --- | --- |
+| SAME | 6 | 3 | 12 | 8 | 2 | **31** |
+| SAME-ORDER | 12 | 8 | 2 | 3 | 3 | **28** |
+| SAME-ORDER-EQUIVALENT | 8 | 12 | 1 | 4 | 0 | **25** |
+| UNREACHABLE-IN-SINGLES (cited) | 4 | 16 | 5 | 8 | 1 | **34** |
+| cross-reference (owned by a sibling audit) | 1 | 2 | 0 | 1 | 2 | **6** |
+| DIVERGENT-BENIGN | 1 | 1 | 0 | 0 | 0 | **2** |
+| **DIVERGENT** | 0 | 1 | 1 | 4 | 0 | **6 rows / 3 root causes** |
+| UNVERIFIED | 0 | 0 | 0 | 0 | 1 | **1** |
+| rows | 32 | 43 | 21 | 28 | 9 | **133** |
+
+The two DIVERGENT-BENIGN rows are §1 row 1.19 (the shared `effect` accumulator costs one extra
+re-entry between the ability and item switch-in scans — no draw, no state, no order change) and
+§2 row 2.8 (the ROM commits the AI's decision before the player's; the port prompts the player
+first — identical RNG sequence, benign only because this adapter's player decision cannot observe
+the AI's).
+
+## DIVERGENT summary
+
+### Finding 1 — Encore's auto-confirm is checked before `AreAllMovesUnusable`, inverting the source (§2 row 2.11)
+
+* **Source:** `reference/pokeemerald/src/battle_main.c:4184` `if (AreAllMovesUnusable())` … **then**
+  `:4192` `else if (gDisableStructs[gActiveBattler].encoredMove != 0)`. `AreAllMovesUnusable`
+  (`battle_util.c:1125-1140`) runs `CheckMoveLimitations(b, 0, MOVE_LIMITATIONS_ALL)`
+  (`:1082-1123`), whose Encore bit masks **every slot that is not the encored move** (`:1116-1117`,
+  ungated by the `check` mask) — so an Encore-locked battler whose encored move is *itself* unusable
+  (Disabled, Taunted, Tormented, or out of PP) masks all four slots, `noValidMoves` is set, and the
+  battler Struggles.
+* **Port:** `src/engine/factoryBattleScriptFullTurnDecision.ts:1998-1999` — `legalMoveDecisions`
+  consults `lockedMoveDecision` **first** and returns immediately; and `:2152`
+  `battlerUsesForcedStruggle` returns `false` outright when a lock exists. The port's own
+  `CheckMoveLimitations` port (`battleScriptActionAdmission.ts:2530-2600`, Encore bit at
+  `:2586-2588`) is faithful — it is simply never consulted on this path.
+* **Observable consequence:** the ROM's action is `MOVE_STRUGGLE` with `HITMARKER_NO_PPDEDUCT`
+  (`battle_util.c:100-106`) — typeless-recoil damage to the *user*, and the message
+  "…has no moves left!". The port's action is the Encore-locked move itself, which then trips
+  `CANCELER_DISABLED` (`battle_util.c:2122-2133` → `BattleScript_MoveUsedIsDisabled`) and wastes the
+  turn with a different message and **zero** damage to either side. Different HP on both battlers,
+  different message, different PP ledger.
+* **Reachable in a genuine Factory battle, not just a synthetic fixture:** `SPECIES_DEWGONG`'s
+  rental set is `[BLIZZARD, DOUBLE_EDGE, ENCORE, DISABLE]` — one entry that carries both halves.
+  Catalog census (this session, 882 entries): Encore 7, Disable 9, Taunt 2, Torment 5.
+* **Fixture that exposes it on the stock ROM** (`mechanicLab`, `overrides.parties`, three complete
+  legal L50 mons per side; frame 0 is turn 1's action menu, so this lands on **turn 3**):
+  * **Player slot 1** — Dewgong, moves `[BLIZZARD, DOUBLE_EDGE, ENCORE, DISABLE]`, Speed EVs 0 and
+    Speed IV 0 so it moves **second**.
+  * **Opponent slot 1** — any mon whose **all four slots hold the same** move `M` (`M` must be a
+    normal `MOVE_TARGET_SELECTED` attack, e.g. `MOVE_TACKLE`), max Speed EVs/IVs so it moves first.
+    Giving all four slots the same move is the lab README's own trick for pinning the AI to one
+    legal choice without injecting a decision.
+  * **Turn 1:** opponent uses `M`; Dewgong (second) uses **Encore** → `encoredMove = M`.
+    **Turn 2:** opponent is Encore-locked to `M`; Dewgong uses **Disable** → `disabledMove = M`.
+    **Turn 3:** every opponent slot is now masked (Disable masks all four, since all four *are* `M`),
+    with `encoreTimer` still non-zero (Encore lasts 3-6 turns and `ENDTURN_ENCORE` only clears on
+    `--encoreTimer == 0 || pp[encoredMovePos] == 0`, `battle_util.c:1727-1731`).
+  * **Expected on the ROM at turn 3:** "…has no moves left!", then Struggle — recoil damage to the
+    opponent's own active. **Expected from the port:** "…'s `M` is disabled!", no damage anywhere.
+  * Append `A` pulses past every prompt.
+
+### Finding 2 — the `CheckFocusPunch_ClearVarsBeforeTurnStarts` pre-pass has no port site (§3 row 3.20)
+
+* **Source:** `reference/pokeemerald/src/battle_main.c:4906-4923`. Before the turn's first action —
+  after turn order is fixed, before `RunTurnActionsFunctions` — the engine walks
+  `gBattleStruct->focusPunchBattlerId` in **battler-index order** and, for any battler whose
+  `gChosenMoveByBattler == MOVE_FOCUS_PUNCH` and that is not asleep, not Truant-loafing and not
+  `noValidMoves`, runs `BattleScriptExecute(BattleScript_FocusPunchSetUp)`
+  (`data/battle_scripts_1.s`: `printstring STRINGID_EMPTYSTRING3` / `waitmessage 1` /
+  `playanimation BS_ATTACKER, B_ANIM_FOCUS_PUNCH_SETUP` / `printstring STRINGID_PKMNTIGHTENINGFOCUS`
+  / `waitmessage B_WAIT_TIME_LONG` / `end2`).
+* **Port:** no site. `grep -rn "focusPunchBattlerId\|FocusPunchSetUp" src/` finds only
+  `battleScriptStatbuffchangeOpcode.ts:257-268`, which registers the *animation id* and documents
+  the script, and never runs it. `factoryBattleScriptFullTurnDecision.ts:3013-3030` goes straight
+  from turn order to action 1.
+* **Observable consequence:** the ROM emits an extra message box —
+  "<PKMN> is tightening its focus!" — **before either battler's action**, i.e. ahead of the faster
+  battler's move message even when the Focus Punch user is slower. The port emits no event there at
+  all, so every subsequent message in the turn is off by one and the frame timeline shifts. Battle
+  Scene OFF suppresses animations, not messages, so this is visible in the OFF profile's captures.
+  It consumes no RNG, so the draw ledger is unaffected — this is a message/event-ordering divergence.
+* **Reachable:** 11 of the 882 rental entries carry `MOVE_FOCUS_PUNCH` (census this session).
+* **Fixture:** `mechanicLab` `overrides.parties`. **Player slot 1** — any of the 11 Focus Punch
+  carriers, Speed EVs/IVs 0. **Opponent slot 1** — max Speed, all four slots the same harmless
+  `MOVE_TARGET_SELECTED` attack. **Turn 1:** select Focus Punch. Capture the frames from the action
+  menu through the first message box: the ROM shows "tightening its focus" *first*, then the
+  opponent's faster move. Control arm: the same fixture with a non-Focus-Punch move selected — the
+  message is absent, which pins that the extra box is the pre-pass and not the move script.
+
+### Finding 3 — `GetMoveTarget`'s `MOVE_TARGET_SELECTED` draw loop is skipped on all four re-target branches (§4 rows 4.10, 4.12, 4.13, 4.14)
+
+* **Source:** `reference/pokeemerald/src/battle_util.c:3850-3853` —
+  `do { targetBattler = Random() % gBattlersCount; } while (targetBattler == gBattlerAttacker || side == GetBattlerSide(targetBattler) || gAbsentBattlerFlags & gBitTable[targetBattler]);`
+  This is the `MOVE_TARGET_SELECTED` arm of `GetMoveTarget` (`:3828-3911`) and it **draws in singles
+  too**: with `gBattlersCount == 2` exactly one of the two outcomes exits, so the loop consumes a
+  geometrically distributed number of `Random()` calls — ≥1 always, expectation 2. Only an active
+  Follow Me on the opposing side short-circuits it (`:3843-3846`).
+  `HandleAction_UseMove` calls `GetMoveTarget(…, NO_TARGET_OVERRIDE)` on four branches:
+  `:105` (forced Struggle — `MOVE_STRUGGLE.target == MOVE_TARGET_SELECTED`,
+  `src/data/battle_moves.h:2148-2156`), `:117` (Encore match), `:128` (Encore whose slot was
+  overwritten), `:133` (slot overwritten by Mimic/Transform).
+* **Port:** `src/engine/factoryBattleScriptFullTurnDecision.ts:1959-1987` `sourceMoveTarget` is
+  **pure** — its own docstring at `:1951-1958` asserts "every non-user shape resolves to the sole
+  opposing active battler *without consuming RNG*", which is right for `DEPENDS`/`BOTH`/
+  `FOES_AND_ALLY`/`OPPONENTS_FIELD`/`RANDOM` and **wrong for `MOVE_TARGET_SELECTED`**.
+  `buildActionContext` (`:1489-1523`) draws nothing. The port already has the correct mechanism
+  elsewhere — `battleScriptSwitchinOpcode.ts:1020-1032` models this exact `do/while` for the
+  `VARIOUS_GET_MOVE_TARGET` opcode, draw for draw — it is simply not wired to
+  `HandleAction_UseMove`'s four branches.
+* **Observable consequence:** the whole turn's RNG cursor shifts. Every draw after the action's
+  prologue — accuracy roll, damage roll (`Random() % 16`), critical hit, secondary-effect chance,
+  and every draw in every later turn of the battle — comes from a different point in the LCG stream.
+  This is the most severe of the three: it is not a message or a single action, it desynchronises
+  the ledger for the rest of the battle.
+* **Reachable:** forced Struggle is the common arm (ISSUES #123 counted 456 Struggle actions in one
+  census), and Encore has 7 rental carriers; Mimic 2, Transform 1.
+* **Fixture (A/B draw-count, the cleanest arm — Encore):** `mechanicLab` `overrides.parties`.
+  * **Arm A:** **Player slot 1** — an Encore carrier, Speed EVs/IVs 0 (moves second).
+    **Opponent slot 1** — all four slots the same `MOVE_TARGET_SELECTED` attack `M`, max Speed.
+    Turn 1: opponent uses `M`, player Encores → `encoredMove = M`. Turn 2: the opponent's action
+    takes `battle_util.c:112-118` and calls `GetMoveTarget`.
+  * **Arm B (control):** identical, except the player uses a no-op status move on turn 1 instead of
+    Encore, so turn 2 takes the ordinary branch at `:135-138` and calls `GetMoveTarget` **not at all**.
+  * **Expected:** arm A's turn-2 `Random()` count exceeds arm B's by ≥1 (mean ≈2, and the
+    distribution over repeated seeds should be geometric with p = ½). The port shows **0** difference
+    between the two arms. Watch the draw count directly with the battle lab's RNG watch, or read it
+    off a downstream damage roll — arm A's turn-2 damage will not match arm B's for the same seed.
+  * Struggle arm, if a Disable fixture is cheaper to stage: build finding 1's turn-3 position but
+    **without** Encore (opponent's four slots all `M`, player Disables `M`). Both ROM and port
+    Struggle there, so the *only* difference is the draw count — an even cleaner isolation of
+    finding 3 from finding 1.
+
+## UNVERIFIED
+
+* **§5 row 5.6** — `HandleAction_ActionFinished` indexes `gLastLandedMoves` / `gLastHitByType` by
+  `gBattlerAttacker` (`battle_util.c:675-676`) while indexing `monToSwitchIntoId` by
+  `gBattlerByTurnOrder[gCurrentTurnActionNumber]` (`:660`); the port
+  (`battleActionFinished.ts:114-131`) uses one battler for both. Missing: tracing each of the six
+  `gBattlerAttacker = ` writers in `battle_script_commands.c` (`:4393`, `:5678`, `:6213`, `:6331`,
+  `:9861`, `:9874`) that is singles-reachable to its script's `end`, to see whether the swap is
+  undone before `HandleAction_ActionFinished` runs. `:9861` (`Cmd_jumpifnopursuitswitchdmg`, ISSUES
+  #135's live path) is the one that matters; it belongs to
+  `docs/switch-lifecycle-audit-2026-08-26.md`'s slice and did not close inside this step's
+  5-minute-per-row cap.
+
+## §7. Method — exact commands
+
+```sh
+# the reference/ symlink: rg over it returns ZERO hits silently, always resolve it first
+REF=$(cd reference/pokeemerald && pwd -P)          # -> /Users/kyle/Developer/pokebench/vendor/pokeemerald
+
+# §1 battle start
+grep -n "^static void TryDoEventsBeforeFirstTurn\|^static void HandleTurnActionSelectionState\|^static void SetActionsAndBattlersTurnOrder\|^u8 GetWhoStrikesFirst\|^static void RunTurnActionsFunctions\|^static void TurnValuesCleanUp\|^static void CheckFocusPunch" $REF/src/battle_main.c
+sed -n '3841,3956p' $REF/src/battle_main.c         # TryDoEventsBeforeFirstTurn
+sed -n '2470,2601p' $REF/src/battle_util.c         # ABILITYEFFECT_ON_SWITCHIN + SWITCH_IN_WEATHER
+sed -n '3003,3090p' $REF/src/battle_util.c         # INTIMIDATE1 / TRACE / INTIMIDATE2
+sed -n '3295,3340p' $REF/src/battle_util.c         # ITEMEFFECT_ON_SWITCH_IN
+grep -rn "isFirstTurn" $REF/src $REF/include       # whole tree, not one file
+grep -n "ABILITYEFFECT_SWITCH_IN_WEATHER" $REF/include/battle_util.h   # = 255, not an ability id
+sed -n '1,14p' $REF/data/maps/BattleFrontier_BattleFactoryBattleRoom/map.json  # WEATHER_NONE / INDOOR
+
+# §2 action selection
+sed -n '4114,4130p' $REF/src/battle_main.c         # the STATE_* enum, values by position
+sed -n '4129,4595p' $REF/src/battle_main.c         # HandleTurnActionSelectionState + helpers
+sed -n '90,115p'   $REF/include/battle_controllers.h   # IS_BATTLE_CONTROLLER_ACTIVE_..._ANYWHERE
+grep -n "define B_FLANK_LEFT\|define BIT_SIDE\|define BIT_FLANK" $REF/include/constants/battle.h
+sed -n '975,1145p' $REF/src/battle_util.c          # TrySetCantSelectMove / CheckMoveLimitations / AreAllMovesUnusable
+sed -n '1540,1665p' $REF/src/battle_controller_opponent.c   # the four Opponent* choose handlers
+grep -n "BATTLE_TYPE_FRONTIER_NO_PYRAMID" $REF/include/constants/battle.h
+
+# §3 turn order
+sed -n '4595,4960p' $REF/src/battle_main.c         # GetWhoStrikesFirst .. RunTurnActionsFunctions
+sed -n '1868,1883p' $REF/src/pokemon.c             # gStatStageRatios, compared row by row
+grep -n "ITEM_QUICK_CLAW" -A 8 $REF/src/data/items.h    # holdEffectParam = 20
+grep -rn "define WEATHER_HAS_EFFECT" $REF/include/
+
+# §4 the prologue
+sed -n '78,340p'   $REF/src/battle_util.c          # HandleAction_UseMove / _Switch / _UseItem
+sed -n '487,540p'  $REF/src/battle_util.c          # HandleAction_Run
+sed -n '3828,3911p' $REF/src/battle_util.c         # GetMoveTarget -- the do/while draw loop at :3850
+grep -n "define MOVE_TARGET_SELECTED\|define NO_TARGET_OVERRIDE" $REF/include/battle.h   # both 0
+grep -n "MOVE_STRUGGLE" -A 12 $REF/src/data/battle_moves.h | grep -E "target|effect"
+grep -rn "dynamicMoveType" $REF/src $REF/include   # all 22 sites, whole tree
+grep -rn "choicedMove" $REF/src                    # proves the Choice lock is NOT in the prologue
+
+# §5 the finish seams
+sed -n '636,684p'  $REF/src/battle_util.c          # TryFinish / NothingIsFainted / ActionFinished
+grep -cn "gBattlerAttacker = " $REF/src/battle_script_commands.c   # 6 writers -> row 5.6
+
+# port
+grep -n "^function \|^export function " src/engine/factoryBattleScriptFullTurnDecision.ts
+cat src/engine/turnOrder.ts src/engine/battleActionFinished.ts
+sed -n '2100,2240p' src/engine/battleEndTurnOrchestration.ts       # the shared turn-order inputs
+grep -rn "GetMoveTarget\|getMoveTarget" src/engine/*.ts
+grep -rn "focusPunchBattlerId\|FocusPunchSetUp" src/
+grep -rn "sortBattlersByTurnOrder" src/ tests/                     # no production caller
+
+# reachability, against the real 882-entry catalog (never assumed -- one census this session
+# was wrong on the first pass and the wrong verdict was committed before being corrected)
+python3 -c "import json; d=json.load(open('src/data/gen/battle-frontier-mons.json'))['entries']; \
+  print({m: len([x for x in d if m in x['moves']]) for m in \
+  ['MOVE_ENCORE','MOVE_DISABLE','MOVE_TAUNT','MOVE_TORMENT','MOVE_FOCUS_PUNCH','MOVE_RAGE', \
+   'MOVE_FOLLOW_ME','MOVE_MIMIC','MOVE_SKETCH','MOVE_TRANSFORM']})"
+# NOTE the schema: entries carry `itemTableId`/`itemName`, NOT a resolved item id -- an item
+# census must join against src/data/gen/battle-frontier-held-items.json.
+```
+
+**Censuses run this session** (882 rental entries): Encore 7 · Disable 9 · Taunt 2 · Torment 5 ·
+Spite 2 · Focus Punch **11** · Rage **0** · Follow Me **7** · Mimic 2 · Sketch 0 · Transform 1 ·
+Quick Claw 80 · Choice Band 12 · Focus Band 80 · Lax Incense 45 · White Herb 25 · Mental Herb 4 ·
+Macho Brace **0** · Enigma Berry **0**. One entry (`SPECIES_DEWGONG`,
+`[BLIZZARD, DOUBLE_EDGE, ENCORE, DISABLE]`) carries both halves of finding 1.
+
+**Tests that pin this machinery today** (listed, not run — docs-only step):
+`tests/turnOrder.test.ts`, `tests/turnOrderParity.test.ts`, `tests/battleDecisionBoundary.test.ts`,
+`tests/factoryBattleStart*.test.ts`, `tests/factoryFullTurnDecision*.test.ts`,
+`tests/battleActionFinished.test.ts`. **No existing test pins the `AreAllMovesUnusable`-before-Encore
+order, the Focus Punch pre-pass, or `GetMoveTarget`'s draw loop on the `HandleAction_UseMove`
+branches** — which is why all three survived to today.
