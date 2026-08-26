@@ -612,7 +612,7 @@ describe("AI_CV_Toxic (data/battle_ai_scripts.s:1353-1371)", () => {
   });
 });
 
-describe("AI_CV_Protect (data/battle_ai_scripts.s:1894-1932)", () => {
+describe("AI_CV_Protect (data/battle_ai_scripts.s:1894-1935)", () => {
   const MOVE_PROTECT = 182;
   const MOVE_LOCK_ON = 199;
 
@@ -620,6 +620,7 @@ describe("AI_CV_Protect (data/battle_ai_scripts.s:1894-1932)", () => {
     attackerPatch: Record<string, unknown> = {},
     targetPatch: Record<string, unknown> = {},
     rngValue = 1,
+    staleFuncResultFallback: 0 | 1 | 2 | 3 | undefined = undefined,
   ) {
     return runCheckViability({
       rng: { value: rngValue, calls: 0 },
@@ -628,6 +629,7 @@ describe("AI_CV_Protect (data/battle_ai_scripts.s:1894-1932)", () => {
       target: { ...NEUTRAL_BATTLER, lastUsedMoveId: MOVE_PROTECT, ...targetPatch },
       drawOrdinalStart: 1,
       reasonPrefix: "protect",
+      ...(staleFuncResultFallback === undefined ? {} : { staleFuncResultFallback }),
     });
   }
 
@@ -655,6 +657,83 @@ describe("AI_CV_Protect (data/battle_ai_scripts.s:1894-1932)", () => {
   it("uses BattleHistory-known target moves for the Restore HP / Defense Curl early branch", () => {
     const result = protectRun({}, { knownMoves: [105 /* Recover */] });
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+  });
+
+  // `get_protect_count AI_USER; if_more_than 1, AI_CV_Protect_ScoreDown2`
+  // (`:1895-1896`, ISSUES #137) -- the handler's FIRST rung, above every
+  // status read.
+  it.each([2, 3, 5])(
+    "ends at -2 with zero draws when protectUses is %i (the if_more_than 1 first rung)",
+    (protectUses) => {
+      const result = protectRun({ protectUses });
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: -2, draws: [] });
+    },
+  );
+
+  it("the first rung is strictly `more_than 1`: protectUses 1 still rolls both sites", () => {
+    const result = protectRun({ protectUses: 1 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map(({ kind }) => kind)).toEqual(["protect-roll-1", "protect-roll-2"]);
+  });
+
+  it("the first rung outranks every user-status route and the target's Lock-On -2", () => {
+    const result = protectRun(
+      { protectUses: 2, isCursed: true },
+      { lastUsedMoveId: MOVE_LOCK_ON },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -2, draws: [] });
+  });
+
+  it("the first rung is writes-never: it branches above get_last_used_bank_move, so funcResult carries through", () => {
+    // The target's last move is EFFECT_HIT, which IS inside the AI_WEATHER_*
+    // range (-> 0), so any route that ran `get_last_used_bank_move;
+    // get_move_effect_from_result` would have replaced the carry.
+    const scoreDown2 = protectRun({ protectUses: 2 }, { lastUsedMoveId: MOVE_SURF }, 1, 3);
+    expect(scoreDown2).toMatchObject({ kind: "scored", funcResultAfter: 3 });
+    const ordinary = protectRun({ protectUses: 1 }, { lastUsedMoveId: MOVE_SURF }, 1, 3);
+    expect(ordinary).toMatchObject({ kind: "scored", funcResultAfter: 0 });
+    const protect3 = protectRun({ isCursed: true }, { lastUsedMoveId: MOVE_SURF }, 1, 3);
+    expect(protect3).toMatchObject({ kind: "scored", funcResultAfter: 0 });
+  });
+
+  // `if_status AI_USER, STATUS1_TOXIC_POISON` / `if_status2 AI_USER,
+  // STATUS2_CURSED` / `if_status3 AI_USER, STATUS3_PERISH_SONG` (`:1897-1899`,
+  // ISSUES #137) -- the three AI_USER routes to AI_CV_Protect3 that sit above
+  // the already-ported infatuation/leech-seed/yawn trio. Live ROM receipt for
+  // the cursed one: tests/factoryAiProtectLiveReceipt.test.ts.
+  it.each([
+    ["isToxicPoisoned", { isToxicPoisoned: true }],
+    ["isCursed", { isCursed: true }],
+    ["hasPerishSong", { hasPerishSong: true }],
+  ] as const)(
+    "the AI USER's own %s takes AI_CV_Protect3: zero draws, no score change",
+    (_label, patch) => {
+      const result = protectRun(patch);
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: 0, draws: [] });
+    },
+  );
+
+  it.each([
+    ["isToxicPoisoned", { isToxicPoisoned: true }],
+    ["isCursed", { isCursed: true }],
+    ["hasPerishSong", { hasPerishSong: true }],
+  ] as const)(
+    "the AI USER's own %s scores -2 only when the target's last move was Lock-On",
+    (_label, patch) => {
+      const result = protectRun(patch, { lastUsedMoveId: MOVE_LOCK_ON });
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: -2, draws: [] });
+    },
+  );
+
+  it("reads those three off the AI USER, not the target: the same bits on the TARGET keep the +2 path", () => {
+    const result = protectRun(
+      {},
+      { isToxicPoisoned: true, isCursed: true, hasPerishSong: true },
+    );
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 1 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws.map(({ kind }) => kind)).toEqual(["protect-roll-1"]);
   });
 });
 

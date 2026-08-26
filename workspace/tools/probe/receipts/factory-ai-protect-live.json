@@ -205,16 +205,16 @@
           ]
         }
       },
-      "engineDecisionDraws": 7,
-      "engineRngAfter": 2023871260,
-      "engineChosenMoveSlot": 0,
+      "engineDecisionDraws": 5,
+      "engineRngAfter": 3726110690,
+      "engineChosenMoveSlot": 3,
       "engineCheckViabilityDeltas": [
-        1,
+        0,
         0,
         0,
         0
       ],
-      "matchesRom": false
+      "matchesRom": true
     },
     {
       "seed": 5,
@@ -408,16 +408,16 @@
           ]
         }
       },
-      "engineDecisionDraws": 7,
-      "engineRngAfter": 4047962493,
-      "engineChosenMoveSlot": 3,
+      "engineDecisionDraws": 5,
+      "engineRngAfter": 856077595,
+      "engineChosenMoveSlot": 2,
       "engineCheckViabilityDeltas": [
         0,
         0,
         0,
         0
       ],
-      "matchesRom": false
+      "matchesRom": true
     },
     {
       "seed": 99,
@@ -611,16 +611,16 @@
           ]
         }
       },
-      "engineDecisionDraws": 7,
-      "engineRngAfter": 1352996645,
-      "engineChosenMoveSlot": 0,
+      "engineDecisionDraws": 5,
+      "engineRngAfter": 1329715331,
+      "engineChosenMoveSlot": 1,
       "engineCheckViabilityDeltas": [
-        1,
+        0,
         0,
         0,
         0
       ],
-      "matchesRom": false
+      "matchesRom": true
     }
   ],
   "engineDivergence": [

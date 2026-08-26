@@ -340,6 +340,17 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_YAWN) !== 0
         ? { hasYawn: true }
         : {}),
+      // AI_CV_Protect reads the AI USER's own toxic/cursed/perish-song state
+      // on its three `AI_CV_Protect3` routes (ISSUES #137).
+      ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_TOXIC_POISON) !== 0
+        ? { isToxicPoisoned: true }
+        : {}),
+      ...((attacker.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CURSED) !== 0
+        ? { isCursed: true }
+        : {}),
+      ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_PERISH_SONG) !== 0
+        ? { hasPerishSong: true }
+        : {}),
       ...(attacker.protectUses !== 0 ? { protectUses: attacker.protectUses } : {}),
     }),
     target: Object.freeze({

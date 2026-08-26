@@ -1240,11 +1240,17 @@ const EFFECT_ID_IN_WEATHER_RANGE: ReadonlyMap<string, AiWeatherValue> = new Map(
 ]);
 
 /**
- * `AI_CV_Protect` (`data/battle_ai_scripts.s:1894-1932`), including both
+ * `AI_CV_Protect` (`data/battle_ai_scripts.s:1894-1935`), including the
+ * `get_protect_count AI_USER; if_more_than 1` first rung, both
  * status/move-history prologues, the source's usual +2 path, both `%256`
- * rolls, and the consecutive-Protect penalty. Both paths execute
+ * rolls, and the consecutive-Protect penalty.
+ *
+ * funcResult: every route EXCEPT the first rung executes
  * `get_last_used_bank_move; get_move_effect_from_result`, so funcResult is
- * always replaced by the target's last-move effect before return.
+ * replaced by the target's last-move effect. The `if_more_than 1` rung
+ * branches straight to `AI_CV_Protect_ScoreDown2`, which is ABOVE that pair
+ * in the script, so on that one path the handler is writes-never and the
+ * running value carries through unchanged (`staleFuncResultFallback`).
  */
 function runCvProtect(input: Readonly<{
   rng: BattleRngState;
@@ -1252,12 +1258,25 @@ function runCvProtect(input: Readonly<{
   target: FactoryAiCheckViabilityBattler;
   drawOrdinalStart: number;
   reasonPrefix: string;
+  staleFuncResultFallback: AiWeatherValue | undefined;
 }>): Readonly<{
   rng: BattleRngState;
   draws: readonly FactoryAiCheckViabilityDraw[];
   scoreDelta: number;
   funcResultAfter: AiWeatherValue | undefined;
 }> {
+  // `get_protect_count AI_USER; if_more_than 1, AI_CV_Protect_ScoreDown2`
+  // (`:1895-1896`): two consecutive successful Protect/Detect/Endure ends the
+  // handler at -2 with ZERO draws, before any status read or funcResult write.
+  if ((input.attacker.protectUses ?? 0) > 1) {
+    return Object.freeze({
+      rng: input.rng,
+      draws: Object.freeze([]),
+      scoreDelta: -2,
+      funcResultAfter: input.staleFuncResultFallback,
+    });
+  }
+
   const lastMoveEffect = MOVES_BY_ID.get(input.target.lastUsedMoveId ?? 0)?.effect ?? "EFFECT_HIT";
   const funcResultAfter = EFFECT_ID_IN_WEATHER_RANGE.get(lastMoveEffect);
   const knownMoves = input.target.knownMoves ?? [];
@@ -1271,7 +1290,13 @@ function runCvProtect(input: Readonly<{
       (userMoves[slot] ?? 0) !== 0
       && MOVES_BY_ID.get(moveId)?.effect === effect
     );
-  const earlyProtect3 = (input.attacker.isInfatuated ?? false)
+  // `:1897-1905`, in source order: the AI USER's own toxic poison, curse,
+  // perish song, infatuation, leech seed and yawn, then the two
+  // target-move-history effects, each jumping to `AI_CV_Protect3`.
+  const earlyProtect3 = (input.attacker.isToxicPoisoned ?? false)
+    || (input.attacker.isCursed ?? false)
+    || (input.attacker.hasPerishSong ?? false)
+    || (input.attacker.isInfatuated ?? false)
     || (input.attacker.isLeechSeeded ?? false)
     || (input.attacker.hasYawn ?? false)
     || targetHistoryHasEffect("EFFECT_RESTORE_HP")
@@ -5590,6 +5615,7 @@ export function runCheckViability(input: Readonly<{
       target: input.target,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
+      staleFuncResultFallback: funcResultCarry,
     });
     return Object.freeze({
       kind: "scored",
