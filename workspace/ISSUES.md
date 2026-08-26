@@ -17,40 +17,6 @@ backlog.
 
 # Open
 
-## #138 — Action selection auto-confirms an Encore-locked move BEFORE `AreAllMovesUnusable`, inverting the source: an Encored battler whose encored move is Disabled/0-PP/Taunted/Tormented Struggles on the ROM but uses the locked move (then trips `CANCELER_DISABLED`) in the port
-
-**Found 2026-08-26** (turn-machinery audit, `docs/turn-machinery-audit-2026-08-26.md`
-§2 row 2.11 / Finding 1; supervisor-verified at source). Source `battle_main.c:4184`
-`if (AreAllMovesUnusable())` runs FIRST in `HandleTurnActionSelectionState`'s `B_ACTION_USE_MOVE`
-case, and only `:4192 else if (gDisableStructs[gActiveBattler].encoredMove != 0)` auto-confirms the
-encored move. `AreAllMovesUnusable` (`battle_util.c:1125-1140`) uses
-`CheckMoveLimitations(b, 0, MOVE_LIMITATIONS_ALL)` whose Encore bit (`:1116-1117`) masks every slot
-that is not the encored move, so an Encored battler whose encored move is itself unusable
-(Disabled `:1108`, 0 PP, Taunted, Tormented) masks all four slots → `noValidMoves` → Struggle
-(`HandleAction_UseMove`, `battle_util.c:100-106`, `HITMARKER_NO_PPDEDUCT`, "…has no moves left!").
-Port `src/engine/factoryBattleScriptFullTurnDecision.ts:1998-1999` (`legalMoveDecisions` consults
-`lockedMoveDecision` first — its Encore branch at `:2176-2180` returns the locked move) and `:2152`
-(`battlerUsesForcedStruggle` returns `false` outright when a lock exists). The port's own
-`CheckMoveLimitations` (`battleScriptActionAdmission.ts:2530-2600`, Encore bit `:2586-2588`) is
-faithful — it is never consulted on this path.
-
-**Consequence:** ROM = Struggle (typeless recoil to the user, target damaged); port = the locked
-move, which `CANCELER_DISABLED` (`battle_util.c:2122-2133` → `BattleScript_MoveUsedIsDisabled`)
-fails with zero damage to either side. Different HP on both battlers, message, and PP ledger.
-Reachable with one real rental: DEWGONG `[BLIZZARD, DOUBLE_EDGE, ENCORE, DISABLE]` (Encore 7 /
-Disable 9 / Taunt 2 / Torment 5 catalog carriers); also Encore + PP exhaustion in long battles.
-
-**Receipt recipe** (`mechanicLab` `overrides.parties`, Battle Scene OFF; frame 0 is turn 1's
-action menu; A pulses past every prompt): player slot 0 = Dewgong (Speed IV/EV 0, moves second);
-opponent slot 0 = a max-Speed mon with the same `MOVE_TARGET_SELECTED` attack `M` (e.g. TACKLE) in
-all four slots. Turn 1: opponent `M`, Dewgong ENCORE → `encoredMove = M`. Turn 2: opponent locked
-to `M`, Dewgong DISABLE → `disabledMove = M`. Turn 3: ROM prints "…has no moves left!" and
-Struggles (recoil on the opponent's own active); port: "…'s M is disabled!", no damage. Fix shape:
-evaluate `battlerUsesForcedStruggle`'s limitation mask BEFORE honouring the Encore lock (source
-order), keep the STATUS2_MULTIPLETURNS/RECHARGE lock ahead of both (source checks those before the
-`B_ACTION_USE_MOVE` case), pin with a Tier-1 test, and note that #140's draw applies to the
-Struggle branch too.
-
 ## #139 — The `CheckFocusPunch_ClearVarsBeforeTurnStarts` pre-pass ("…is tightening its focus!" before ANY action) has no port site
 
 **Found 2026-08-26** (turn-machinery audit §3 row 3.20 / Finding 2; supervisor-verified that
