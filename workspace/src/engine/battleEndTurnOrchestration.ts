@@ -1942,6 +1942,63 @@ function runDamagingWeatherFieldCase(
 }
 
 /**
+ * The four side-scoped `DoFieldEndTurnEffects` cases in SOURCE (case-major)
+ * order (`battle_util.c:1220-1315`). Each of `ENDTURN_REFLECT` (`:1221`),
+ * `ENDTURN_LIGHT_SCREEN` (`:1246`), `ENDTURN_MIST` (`:1272`) and
+ * `ENDTURN_SAFEGUARD` (`:1294`) owns its OWN `while
+ * (gBattleStruct->turnSideTracker < 2)` loop, so the traversal is
+ * Reflect(0), Reflect(1), LightScreen(0), LightScreen(1), Mist(0), Mist(1),
+ * Safeguard(0), Safeguard(1) -- NOT `for (side) { all four cases }`.
+ *
+ * The distinction is observable whenever two DIFFERENT screens on the two
+ * sides expire on the same turn: the stock-ROM receipt
+ * `tools/probe/receipts/gate6-screen-expiry-order-off.json` has the player's
+ * Light Screen (side 0) and the opponent's Reflect (side 1) both hit 0 at the
+ * end of turn 5, and the ROM prints "Foe's REFLECT wore off!" BEFORE "Ally's
+ * LIGHT SCREEN wore off!" -- Reflect's case, side 1, still precedes Light
+ * Screen's case, side 0.
+ *
+ * The source cursor pair is `turnCountersTracker`/`turnSideTracker`: a case
+ * that fires `break`s out with the side cursor already advanced past the side
+ * that fired and does NOT bump `turnCountersTracker`, so `BattleTurnPassed`'s
+ * re-entry resumes at the SAME case on the NEXT side; only a case that ends
+ * with `effect == 0` bumps the case cursor and resets the side cursor. This
+ * port runs each fired case's script inline instead of yielding, so the pair
+ * is modelled by the nesting itself -- inner loop = `turnSideTracker`, outer
+ * loop = `turnCountersTracker` -- with the same visit order.
+ */
+const SIDE_SCOPED_FIELD_CASES: readonly ((
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  side: 0 | 1,
+) => FieldCaseOutcome)[] = Object.freeze([
+  // ENDTURN_REFLECT (battle_util.c:1221-1245)
+  (program, handlers, state, side) => runScreenFieldCase(
+    program, handlers, state, side, SIDE_STATUS_REFLECT,
+    (t) => t.reflectTimer, (nextTimer) => ({ reflectTimer: nextTimer }),
+    (t) => t.reflectBattlerId, SIDE_STATUS_WORE_OFF_LABEL, MOVE_REFLECT,
+  ),
+  // ENDTURN_LIGHT_SCREEN (battle_util.c:1246-1271)
+  (program, handlers, state, side) => runScreenFieldCase(
+    program, handlers, state, side, SIDE_STATUS_LIGHTSCREEN,
+    (t) => t.lightscreenTimer, (nextTimer) => ({ lightscreenTimer: nextTimer }),
+    (t) => t.lightscreenBattlerId, SIDE_STATUS_WORE_OFF_LABEL, MOVE_LIGHT_SCREEN,
+  ),
+  // ENDTURN_MIST (battle_util.c:1272-1293)
+  (program, handlers, state, side) => runMistFieldCase(program, handlers, state, side),
+  // ENDTURN_SAFEGUARD (battle_util.c:1294-1315)
+  (program, handlers, state, side) => runScreenFieldCase(
+    program, handlers, state, side, SIDE_STATUS_SAFEGUARD,
+    (t) => t.safeguardTimer, (nextTimer) => ({ safeguardTimer: nextTimer }),
+    // BattleScript_SafeguardEnds's own STRINGID_PKMNSAFEGUARDEXPIRED never
+    // reads {B_BUFF1} (battle_util.c:1295-1317 has no PREPARE_MOVE_BUFFER
+    // call, unlike the Reflect/Light Screen/Mist cases above) -- unused.
+    (t) => t.safeguardBattlerId, SAFEGUARD_ENDS_LABEL, 0,
+  ),
+]);
+
+/**
  * `DoFieldEndTurnEffects`'s 9 non-ENDTURN_ORDER cases (`battle_util.c:1181
  * -1438`). REFLECT/LIGHT_SCREEN/MIST/SAFEGUARD (F2-F5), RAIN/SUN (F7/F9),
  * WISH (F6), and SANDSTORM/HAIL (F8/F10) are all fully wired
@@ -1956,41 +2013,17 @@ function runDoFieldEndTurnEffects(
   initialState: MachineState,
 ): BattlerLoopResult {
   let state = initialState;
-  for (const side of [0, 1] as const) {
-    const reflect = runScreenFieldCase(
-      program, handlers, state, side, SIDE_STATUS_REFLECT,
-      (t) => t.reflectTimer, (nextTimer) => ({ reflectTimer: nextTimer }),
-      (t) => t.reflectBattlerId, SIDE_STATUS_WORE_OFF_LABEL, MOVE_REFLECT,
-    );
-    if (reflect.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: reflect.state, instruction: reflect.instruction });
-    state = reflect.state;
-    if (reflect.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
-
-    const lightscreen = runScreenFieldCase(
-      program, handlers, state, side, SIDE_STATUS_LIGHTSCREEN,
-      (t) => t.lightscreenTimer, (nextTimer) => ({ lightscreenTimer: nextTimer }),
-      (t) => t.lightscreenBattlerId, SIDE_STATUS_WORE_OFF_LABEL, MOVE_LIGHT_SCREEN,
-    );
-    if (lightscreen.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: lightscreen.state, instruction: lightscreen.instruction });
-    state = lightscreen.state;
-    if (lightscreen.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
-
-    const mist = runMistFieldCase(program, handlers, state, side);
-    if (mist.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: mist.state, instruction: mist.instruction });
-    state = mist.state;
-    if (mist.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
-
-    const safeguard = runScreenFieldCase(
-      program, handlers, state, side, SIDE_STATUS_SAFEGUARD,
-      (t) => t.safeguardTimer, (nextTimer) => ({ safeguardTimer: nextTimer }),
-      // BattleScript_SafeguardEnds's own STRINGID_PKMNSAFEGUARDEXPIRED never
-      // reads {B_BUFF1} (battle_util.c:1295-1317 has no PREPARE_MOVE_BUFFER
-      // call, unlike the Reflect/Light Screen/Mist cases above) -- unused.
-      (t) => t.safeguardBattlerId, SAFEGUARD_ENDS_LABEL, 0,
-    );
-    if (safeguard.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: safeguard.state, instruction: safeguard.instruction });
-    state = safeguard.state;
-    if (safeguard.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
+  for (const runFieldCase of SIDE_SCOPED_FIELD_CASES) {
+    for (const side of [0, 1] as const) {
+      const result = runFieldCase(program, handlers, state, side);
+      if (result.kind === "opcode-barrier") {
+        return Object.freeze({ kind: "opcode-barrier", state: result.state, instruction: result.instruction });
+      }
+      state = result.state;
+      if (result.kind === "fired" && state.rulesContext.battleOutcome !== 0) {
+        return Object.freeze({ kind: "outcome-decided", state });
+      }
+    }
   }
 
   // ENDTURN_WISH follows every side-screen case and precedes all weather
