@@ -93288,19 +93288,19 @@
             "kind": "tier-1-test"
           },
           {
+            "path": "tests/factoryAiCheckViability.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/factoryAiProtectLiveReceipt.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/focusEnergyEvidence.test.ts",
             "kind": "tier-1-test"
           },
           {
             "path": "tests/foresightOracleEvidence.test.ts",
-            "kind": "tier-1-test"
-          },
-          {
-            "path": "tests/psychUpOracleEvidence.test.ts",
-            "kind": "tier-1-test"
-          },
-          {
-            "path": "tests/tauntOracleEvidence.test.ts",
             "kind": "tier-1-test"
           }
         ],
