@@ -1,3 +1,11 @@
+# MOVE_ERUPTION composed Warm Rock reducer + typed seam — move unsupported (2026-08-26 worker)
+
+- **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION and `eruption-warm-rock` remain unsupported/unfulfilled; this step adds no framebuffer, exact, partial, staged, or sibling credit.
+- **Did:** Composed the already-banked launch/falling Warm Rock sprites, paired HorizontalShake tasks, two simple-palette programs, and Eruption-exclusive loopsewithpan audio into one immutable source-relative reducer. Added typed `SceneOnEruptionConfig`/`sceneOnEruptionView` wiring with generic live species/sides/geometry and an explicit deferred compositor branch; no compositor or RGB/framebuffer lookup was added.
+- **Verified:** Dense Battle Scene ON reducer/seam audit retains complete **476 player-back + 494 opponent-front** rows for source cursor/args, tasks, sprites, allocator scan order, source/painter order, palettes, resources, audio, latches, immutable gameplay, gameplay RNG, animation RNG, and cleanup. Checks include the pre-supplied plain OAM/palette RAM+1, affine/OAM and BG3 task edges, paired shake rows, audio separation, and independent Earthquake/Fissure/Luster Purge/Sky Attack/Magnitude/Explosion/Self Destruct controls; production framebuffer remains **0 rows**.
+- **Next:** Keep Eruption unsupported until the compositor and complete twice-fresh bilateral core framebuffer acceptance are independently proven; then update only the move acceptance/coverage bookkeeping.
+- **Notes:** Coverage counts and boundary/barrier lists are unchanged. No gameplay/status/damage/RNG/controller/turn/round/facility ownership, canonical-recording production import, absolute tick, species/evidence-pair gate, coordinate/RGB fitting, or framebuffer lookup was added.
+
 # MOVE_ERUPTION loopsewithpan audio component banked — move unsupported (2026-08-25 worker)
 
 - **State:** Level 50 remains **211/276 exact, 0 partial / 0 staged, 65 unsupported**. MOVE_ERUPTION and `eruption-warm-rock` remain unsupported/unfulfilled; this audio component grants no move, framebuffer, or sibling credit.

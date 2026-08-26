@@ -6,10 +6,11 @@
   "status": "unsupported-dense-evidence-checkpoint",
   "coverageCredit": false,
   "evidenceScope": {
-    "productionAnimationChanged": false,
+    "productionAnimationChanged": true,
     "reducerAdded": true,
+    "composedReducerAdded": true,
     "paletteComponentBanked": true,
-    "typedSeamAdded": false,
+    "typedSeamAdded": true,
     "compositorAdded": false,
     "framebufferLookupAdded": false,
     "coveragePromotion": false,
@@ -22,6 +23,8 @@
     "freshRunsPerOrientation": 2,
     "firstInactiveCleanupRetained": true,
     "sourceRowsRetained": true,
+    "composedReducerRows": { "player-back": 476, "opponent-front": 494 },
+    "typedSeamRows": { "player-back": 476, "opponent-front": 494 },
     "rawRgbRowsRetained": true,
     "normalizedChangeMaps": true,
     "productionFramebufferRows": 0

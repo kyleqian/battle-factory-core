@@ -765,6 +765,11 @@ import {
   type FissureState,
 } from "./fissure.ts";
 import {
+  eruptionAtAge,
+  type EruptionAnimationProfile,
+  type EruptionFrame,
+} from "./eruption.ts";
+import {
   futureSightAttackerEffectAtAge,
   futureSightBgBldyAtAge,
   futureSightBgIsPsychic,
@@ -2970,6 +2975,16 @@ export interface SceneOnEarthquakeConfig {
   readonly initialBattlerX2: Readonly<{ player: number; opponent: number }>;
 }
 
+/** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
+export interface SceneOnEruptionConfig {
+  readonly move: "ERUPTION";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Component inputs are live allocator/geometry facts, never a species gate. */
+  readonly animationProfile: Readonly<EruptionAnimationProfile>;
+}
+
 /** Narrow Scene-ON Fissure seam; OHKO resolution and RNG stay external. */
 export interface SceneOnFissureConfig {
   readonly move: "FISSURE";
@@ -3466,6 +3481,7 @@ export type SceneOnMoveConfig =
   | SceneOnDoubleEdgeConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
+  | SceneOnEruptionConfig
   | SceneOnFissureConfig
   | SceneOnHardenConfig
   | SceneOnIronDefenseConfig
@@ -3519,6 +3535,8 @@ export type SceneOnDynamicPunchPresentationState =
   SceneOnMovePresentationState<SceneOnDynamicPunchConfig>;
 export type SceneOnSoftBoiledPresentationState =
   SceneOnMovePresentationState<SceneOnSoftBoiledConfig>;
+export type SceneOnEruptionPresentationState =
+  SceneOnMovePresentationState<SceneOnEruptionConfig>;
 export type SceneOnDizzyPunchPresentationState =
   SceneOnMovePresentationState<SceneOnDizzyPunchConfig>;
 export type SceneOnRazorLeafPresentationState =
@@ -4461,6 +4479,11 @@ export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
   readonly target: SceneOnPresentationBattler;
   readonly playerBattlerX2: number;
   readonly opponentBattlerX2: number;
+}
+
+export interface SceneOnEruptionView extends EruptionFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnFissureView extends FissureState {
@@ -8950,6 +8973,20 @@ export function sceneOnEarthquakeView(
     opponentBattlerX2: beforeFirstShakeWrite
       ? state.config.initialBattlerX2.opponent
       : animation.shake.battlerX2,
+  };
+}
+
+/** `age=0` is the first retained source row of the composed Eruption body. */
+export function sceneOnEruptionView(
+  state: SceneOnEruptionPresentationState,
+): SceneOnEruptionView {
+  if (state.config.move !== "ERUPTION") {
+    throw new Error(`expected ERUPTION presentation, got ${state.config.move}`);
+  }
+  return {
+    ...eruptionAtAge(state.age, state.config.animationProfile),
+    attacker: state.config.attacker,
+    target: state.config.target,
   };
 }
 

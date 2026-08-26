@@ -165,6 +165,7 @@ import {
 } from "./battleScene.ts";
 import {
   advanceSceneOnMovePresentation,
+  type SceneOnEruptionConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -183,6 +184,19 @@ import { resolveTurn5LatestCompletedCommandHandoff } from "./turn5ResolutionAdap
 import { resolveTurn6LatestCompletedCommandHandoff } from "./turn6ResolutionAdapter.ts";
 import { resolveTurn7LatestCompletedCommandHandoff } from "./turn7ResolutionAdapter.ts";
 import { resolveTurn8LatestCompletedCommandHandoff } from "./turn8ResolutionAdapter.ts";
+
+/** Keep the composed Eruption profile typed through the generic core dispatch. */
+function renderSceneOnPresentationFrame(
+  framebuffer: Uint8Array,
+  presentation: SceneOnMovePresentationState,
+): void {
+  if (presentation.config.move === "ERUPTION") {
+    const eruptionPresentation = presentation as SceneOnMovePresentationState<SceneOnEruptionConfig>;
+    renderSceneOnMovePresentation(framebuffer, eruptionPresentation);
+    return;
+  }
+  renderSceneOnMovePresentation(framebuffer, presentation);
+}
 import { resolveTurn9LatestCompletedCommandHandoff } from "./turn9ResolutionAdapter.ts";
 import { resolveTurn10LatestCompletedCommandHandoff } from "./turn10ResolutionAdapter.ts";
 import { resolveTurn11LatestCompletedCommandHandoff } from "./turn11ResolutionAdapter.ts";
@@ -3342,7 +3356,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   if (state.postwin) return renderPostwinState(state);
   if (state.sceneOnPresentation) {
     const fb = createFramebuffer();
-    renderSceneOnMovePresentation(fb, state.sceneOnPresentation);
+    renderSceneOnPresentationFrame(fb, state.sceneOnPresentation);
     return fb;
   }
   if (state.stagedBattleTurn) {

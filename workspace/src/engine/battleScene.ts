@@ -977,6 +977,7 @@ import {
   sceneOnIronTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
+  sceneOnEruptionView,
   sceneOnFissureView,
   sceneOnHardenView,
   sceneOnIronDefenseView,
@@ -1064,6 +1065,7 @@ import {
   type SceneOnViceGripConfig,
   type SceneOnGuillotineConfig,
   type SceneOnFissureConfig,
+  type SceneOnEruptionConfig,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
   type SceneOnThunderWavePresentationState,
@@ -14386,6 +14388,14 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "ERUPTION") {
+    const eruptionState = state as SceneOnMovePresentationState<SceneOnEruptionConfig>;
+    // The reducer/view seam is intentionally landed before the compositor.
+    // Do not let the generic fallback render Eruption as another move while
+    // its source-derived Warm Rock objects are still compositor-unowned.
+    sceneOnEruptionView(eruptionState);
+    throw new Error("ERUPTION compositor is intentionally deferred");
+  }
   if (state.config.move === "INGRAIN") {
     const ingrainState = state as SceneOnMovePresentationState<SceneOnIngrainConfig>;
     const view = sceneOnIngrainView(ingrainState);
