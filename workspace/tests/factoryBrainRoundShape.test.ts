@@ -261,7 +261,14 @@ function assertBrainRoundOutcome(
 // "pick a different seed" -- taking the lowest seed that still wins six
 // ordinary battles under BOTH symbol counts (scanned 1..40) rather than
 // re-pinning any assertion to a now-arbitrary value.
-const SILVER_SEED = 2;
+//
+// ISSUES #140 (GetMoveTarget's MOVE_TARGET_SELECTED draw loop on
+// HandleAction_UseMove's four re-target branches) moved every seed's
+// trajectory again and seed 2 now loses before the sixth win, so the same
+// rule re-applies: SILVER_SEED 2 -> 6, again the lowest seed in 1..40 that
+// wins six ordinary battles under BOTH symbol counts. ROM receipt:
+// tools/probe/receipts/issue140-getmovetarget-off.json.
+const SILVER_SEED = 6;
 const SILVER_STREAK = 14;
 // Gold: entering factoryWinStreak 35 (challenge index 5), symbols 1 —
 // battleIndex 6's effective streak is 41, the gold threshold.
