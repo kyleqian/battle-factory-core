@@ -1435,3 +1435,25 @@ current app stage should be rejected before replay.
   `probe-issue128-ability-history-off.py` shape).
 - **Fix shape:** a line in `tools/battle-lab/README.md` under mechanicLab
   ("the checkpoint is past turn 1's AI decision; window turn 2").
+
+## Battle-lab traces that end on a faint message silently never reach `moveend` — a stalled `gBattlescriptCurrInstr` looks like "the ROM skipped the opcode"
+
+- **Hit:** 2026-08-25 (side opus worker authored a false engine-divergence
+  receipt → ISSUES #129 filed → ts opus worker spent ~35 min finding and
+  ~25 min unwinding it).
+- **What happens:** `STRINGID_TARGETFAINTED` (and every `\p`-terminated
+  string) ends in the `0xFB` prompt code, so `BattleScript_FaintTarget`'s
+  `printstring` parks the controller in `CompleteOnInactiveTextPrinter` with
+  `gBattleControllerExecFlags = 1` until a button press. A trace whose input
+  script ends before that press sits on `BattleScript_FaintTarget+12` for
+  the rest of its frames; every later opcode (the whole `Cmd_moveend` state
+  loop, King's Rock / Shell Bell, exp) "never runs" — indistinguishable in
+  the manifest from the ROM taking a different branch.
+- **Workaround:** append low-duty-cycle A pulses past every faint/prompt
+  message and assert the receipt's window actually reached the state you
+  are asserting about (`gBattleScripting.moveendState`, or a known
+  post-moveend frame).
+- **Fix shape:** a trace-stall assertion in the probe helpers
+  (`tools/run-mgba-probe.py` consumers): fail when `gBattlescriptCurrInstr`
+  is unchanged for N frames while `gBattleControllerExecFlags != 0` and the
+  input script has ended.
