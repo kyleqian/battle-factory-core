@@ -140,6 +140,10 @@ export interface EruptionFrame {
     readonly paletteSlotByProgram: Readonly<{ readonly opening: number; readonly closing: number }>;
   }>;
   readonly order: Readonly<{
+    /** Complete source sSpriteOrder, including the two live battlers. */
+    readonly fullSourceOrder: readonly number[];
+    /** Complete back-to-front software painter order. */
+    readonly fullPainterOrder: readonly number[];
     /** Source sSpriteOrder, restricted to Eruption-owned live objects. */
     readonly sourceOrder: readonly number[];
     /** Back-to-front software painter order. */
@@ -170,6 +174,12 @@ export interface EruptionTimeline {
   readonly frames: readonly EruptionFrame[];
   readonly endAge: number;
 }
+
+// A presentation config retains one immutable profile for its whole move.
+// Cache only the pure source-derived reducer output so dense framebuffer
+// verification does not replay the same 476/494-row state machine per pixel
+// row. No oracle/framebuffer bytes enter this cache.
+const TIMELINE_CACHE = new WeakMap<Readonly<EruptionAnimationProfile>, EruptionTimeline>();
 
 const SOURCE_BASE = 0x082c_e30b;
 const OPENING_ARGS = [31, 2, 0, 4, 31, 0, 0, 0] as const;
@@ -398,7 +408,12 @@ function frameAtAge(
       fallingScanOrder: falling.sprites.map((sprite) => sprite.slot),
       paletteSlotByProgram: profile.palette.paletteSpriteSlots,
     },
-    order: { sourceOrder, painterOrder: [...sourceOrder].reverse() },
+    order: {
+      fullSourceOrder: [...order],
+      fullPainterOrder: [...order].reverse(),
+      sourceOrder,
+      painterOrder: [...sourceOrder].reverse(),
+    },
     palettePrograms: {
       opening: { active: opening, source: opening ? palette.source : null, coefficient: opening ? palette.fade.coefficient : 0 },
       closing: { active: closing, source: closing ? palette.source : null, coefficient: closing ? palette.fade.coefficient : 0 },
@@ -425,6 +440,8 @@ function frameAtAge(
 
 /** Replay all banked Eruption components through the retained cleanup row. */
 export function eruptionTimeline(profile: Readonly<EruptionAnimationProfile>): EruptionTimeline {
+  const cached = TIMELINE_CACHE.get(profile);
+  if (cached) return cached;
   assertProfile(profile);
   const launch = Array.from({ length: profile.endAge + 1 }, (_, age) => eruptionLaunchAtAge(age, profile.launch));
   const fallingTimeline = Array.from({ length: profile.endAge + 1 }, (_, age) => eruptionFallingRockAtAge(age, profile.falling));
@@ -438,7 +455,9 @@ export function eruptionTimeline(profile: Readonly<EruptionAnimationProfile>): E
     if (age > 0) order = nextOrder(order, sprites, profile);
     frames.push(frameAtAge(age, profile, launch[age]!, fallingTimeline[age]!, shake[age]!, palette[age]!, audio[age]!, order));
   }
-  return { frames, endAge: profile.endAge };
+  const timeline = { frames, endAge: profile.endAge };
+  TIMELINE_CACHE.set(profile, timeline);
+  return timeline;
 }
 
 export function eruptionAtAge(age: number, profile: Readonly<EruptionAnimationProfile>): EruptionFrame {

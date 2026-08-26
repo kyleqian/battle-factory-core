@@ -137,7 +137,7 @@ if (address("Move_ERUPTION") !== start || address("Move_SKILL_SWAP") !== end
   || moveInventory?.id !== 284 || moveInventory?.exampleMons?.join(",") !== "FRONTIER_MON_CAMERUPT_2"
   || carriers.length !== 1 || carriers[0]?.index !== 346 || carriers[0]?.label !== "FRONTIER_MON_CAMERUPT_2"
   || carriers[0]?.species !== "SPECIES_CAMERUPT" || carriers[0]?.moves.join(",") !== "MOVE_EARTHQUAKE,MOVE_ERUPTION,MOVE_BODY_SLAM,MOVE_SCARY_FACE"
-  || track?.fulfilled !== false || JSON.stringify(track?.components) !== JSON.stringify(expectedComponents)) {
+  || track?.fulfilled !== true || JSON.stringify(track?.components) !== JSON.stringify(expectedComponents)) {
   throw new Error("MOVE_ERUPTION authoritative source/staging contract drifted");
 }
 

@@ -47,13 +47,12 @@ describe("MOVE_ERUPTION authoritative source and legal bilateral Scene-ON stagin
     expect(createHash("sha256").update(readFileSync(path)).digest("hex")).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it("keeps Eruption unsupported and its requested non-exclusive Warm Rock track unfulfilled", () => {
+  it("promotes only Eruption and fulfills its requested non-exclusive Warm Rock track", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    // Coverage records only promoted moves; an absent Level-50 move is unsupported.
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ERUPTION")).toBeUndefined();
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ERUPTION")?.status).toBe("exact");
     expect(coverage.componentTracks.find((track: any) => track.id === "eruption-warm-rock")).toMatchObject({
       components: ["asset:ANIM_TAG_WARM_ROCK", "sprite:gEruptionFallingRockSpriteTemplate", "task:AnimTask_EruptionLaunchRocks", "task:AnimTask_HorizontalShake", "visualCommand:simple_palette_blend"],
-      representatives: ["MOVE_ERUPTION"], fulfilled: false,
+      representatives: ["MOVE_ERUPTION"], fulfilled: true,
     });
   });
 });

@@ -37,9 +37,9 @@ describe("MOVE_ERUPTION loopsewithpan audio component", () => {
     });
   });
 
-  it("keeps Eruption unsupported and the component track unfulfilled", () => {
+  it("keeps Eruption exact and the component track fulfilled", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ERUPTION")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: any) => track.id === "eruption-warm-rock")).toMatchObject({ fulfilled: false });
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ERUPTION")?.status).toBe("exact");
+    expect(coverage.componentTracks.find((track: any) => track.id === "eruption-warm-rock")).toMatchObject({ fulfilled: true });
   });
 });

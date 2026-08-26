@@ -146,11 +146,11 @@ describe("MOVE_ERUPTION AnimTask_HorizontalShake component", () => {
     });
   });
 
-  it("keeps Eruption unsupported and the non-exclusive Warm Rock track unfulfilled", () => {
+  it("keeps Eruption exact and the non-exclusive Warm Rock track fulfilled", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ERUPTION")).toBeUndefined();
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ERUPTION")?.status).toBe("exact");
     expect(coverage.componentTracks.find((track: any) => track.id === "eruption-warm-rock")).toMatchObject({
-      fulfilled: false,
+      fulfilled: true,
       components: ["asset:ANIM_TAG_WARM_ROCK", "sprite:gEruptionFallingRockSpriteTemplate", "task:AnimTask_EruptionLaunchRocks", "task:AnimTask_HorizontalShake", "visualCommand:simple_palette_blend"],
     });
   });

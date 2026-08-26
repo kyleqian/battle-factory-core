@@ -6,12 +6,12 @@ import { describe, expect, it } from "vitest";
 const fixture = JSON.parse(readFileSync("tools/compare/fixtures/eruption-evidence.json", "utf8")) as Record<string, any>;
 const sha = (path: string): string => createHash("sha256").update(readFileSync(path)).digest("hex");
 
-describe("MOVE_ERUPTION bilateral dense evidence checkpoint", () => {
-  it("keeps the evidence-only scope and independent controls explicit", () => {
-    expect(fixture).toMatchObject({ schema: "eruption-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_ERUPTION", moveId: 284, status: "unsupported-dense-evidence-checkpoint", coverageCredit: false, evidenceScope: { productionAnimationChanged: true, reducerAdded: true, composedReducerAdded: true, paletteComponentBanked: true, typedSeamAdded: true, compositorAdded: false, framebufferLookupAdded: false, coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false, fullDenseRowsRetained: true, twiceFreshByteIdentical: true }, acceptance: { composedReducerRows: { "player-back": 476, "opponent-front": 494 }, typedSeamRows: { "player-back": 476, "opponent-front": 494 }, productionFramebufferRows: 0 } });
+describe("MOVE_ERUPTION bilateral dense exact evidence", () => {
+  it("pins exact production acceptance and independent controls", () => {
+    expect(fixture).toMatchObject({ schema: "eruption-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_ERUPTION", moveId: 284, status: "exact", coverageCredit: true, evidenceScope: { productionAnimationChanged: true, reducerAdded: true, composedReducerAdded: true, paletteComponentBanked: true, typedSeamAdded: true, compositorAdded: true, framebufferLookupAdded: false, coveragePromotion: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false, fullDenseRowsRetained: true, twiceFreshByteIdentical: true }, acceptance: { composedReducerRows: { "player-back": 476, "opponent-front": 494 }, typedSeamRows: { "player-back": 476, "opponent-front": 494 }, productionFramebufferRows: { "player-back": 476, "opponent-front": 494 }, productionFramebufferResidualPixels: 0 } });
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ERUPTION")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: any) => track.id === "eruption-warm-rock")).toMatchObject({ fulfilled: false, representatives: ["MOVE_ERUPTION"] });
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ERUPTION")?.status).toBe("exact");
+    expect(coverage.componentTracks.find((track: any) => track.id === "eruption-warm-rock")).toMatchObject({ fulfilled: true, representatives: ["MOVE_ERUPTION"] });
     for (const [move, status] of [["MOVE_EARTHQUAKE", "exact"], ["MOVE_FISSURE", "exact"], ["MOVE_LUSTER_PURGE", "exact"], ["MOVE_SKY_ATTACK", undefined], ["MOVE_MAGNITUDE", undefined]] as const) expect(coverage.entries.find((entry: any) => entry.move === move)?.status).toBe(status);
   });
   it("strictly replays every retained bilateral row, transfer fit, lifecycle, and cleanup", () => {

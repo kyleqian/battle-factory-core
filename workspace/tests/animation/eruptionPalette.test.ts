@@ -60,10 +60,10 @@ describe("MOVE_ERUPTION simple-palette component", () => {
     ]);
   });
 
-  it("banks no move credit and leaves an independent exact palette control unchanged", () => {
+  it("banks Eruption credit and leaves an independent exact palette control unchanged", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ERUPTION")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: any) => track.id === "eruption-warm-rock")).toMatchObject({ fulfilled: false });
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ERUPTION")?.status).toBe("exact");
+    expect(coverage.componentTracks.find((track: any) => track.id === "eruption-warm-rock")).toMatchObject({ fulfilled: true });
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_SCARY_FACE")?.status).toBe("exact");
     expect([0, 4, 5, 9, 10, 143, 148, 149, 188, 189].map(scaryFacePaletteBlackCoeffAtAge))
       .toEqual([0, 0, 2, 2, 4, 16, 14, 14, 0, 0]);

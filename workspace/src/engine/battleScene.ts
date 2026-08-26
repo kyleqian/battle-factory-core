@@ -613,6 +613,7 @@ import bellyDrumAsset from "../animation/assets/belly-drum.json" with { type: "j
 import sweetScentAsset from "../animation/assets/sweet-scent.json" with { type: "json" };
 import defenseCurlAsset from "../animation/assets/defense-curl.json" with { type: "json" };
 import ingrainAsset from "../animation/assets/ingrain.json" with { type: "json" };
+import eruptionWarmRockAsset from "../animation/assets/eruption-warm-rock.json" with { type: "json" };
 import meanLookAsset from "../animation/assets/mean-look.json" with { type: "json" };
 import smellingSaltAsset from "../animation/assets/smelling-salt.json" with { type: "json" };
 import recycleAsset from "../animation/assets/recycle.json" with { type: "json" };
@@ -785,7 +786,7 @@ import {
   drawStandardWindowFrame,
   drawStandardWindowText,
 } from "./prebattleRoomRender.ts";
-import { drawMode0Objects, drawMode0Ppu, mgbaDarkenColor, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
+import { drawMode0Objects, drawMode0Ppu, mgbaColorFromBgr555, mgbaDarkenColor, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import { fakeTearsControllerDisplayAtAge } from "./fakeTearsControllerPresentation.ts";
 import { resolveTurn6FeatherDanceWindowContent } from "./turn6FeatherDancePresentationStaging.ts";
@@ -1859,6 +1860,10 @@ const recycleArt = recycleAsset as {
 const ingrainArt = ingrainAsset as {
   roots: { tileset: Tileset; palette: RgbColor[] };
   orbs: { tileset: Tileset; palette: RgbColor[] };
+};
+const eruptionWarmRockArt = eruptionWarmRockAsset as {
+  tileset: Tileset;
+  palette: RgbColor[];
 };
 const waterGunArt = waterGunAsset as {
   smallBubbles: { tileset: Tileset; palette: RgbColor[] };
@@ -14390,11 +14395,154 @@ export function renderSceneOnMovePresentation(
 ): void {
   if (state.config.move === "ERUPTION") {
     const eruptionState = state as SceneOnMovePresentationState<SceneOnEruptionConfig>;
-    // The reducer/view seam is intentionally landed before the compositor.
-    // Do not let the generic fallback render Eruption as another move while
-    // its source-derived Warm Rock objects are still compositor-unowned.
-    sceneOnEruptionView(eruptionState);
-    throw new Error("ERUPTION compositor is intentionally deferred");
+    const view = sceneOnEruptionView(eruptionState);
+    // BuildOamBuffer and palette DMA both expose the preceding software row.
+    // The combined reducer carries the exceptional launch-affine hardware
+    // matrix explicitly, so it is intentionally not shifted by a blanket
+    // second-row rule here.
+    const displayed = sceneOnEruptionView({
+      ...eruptionState,
+      age: Math.max(0, eruptionState.age - 1),
+    });
+    const oamBuilt = sceneOnEruptionView({
+      ...eruptionState,
+      age: Math.max(0, eruptionState.age - 2),
+    });
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.palette.hardware.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    // The extracted field asset locally renumbers the three source BG banks
+    // 2/3/4 to tilemap palette indices 0/1/2.
+    const bgPalettes = [paletteBank(2), paletteBank(3), paletteBank(4)];
+    drawStaticBgShiftedX(fb, view.horizontalShake.platform.displayedX, bgPalettes);
+
+    const attackerSource = view.attacker.geometry.side === "player"
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "player"
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species];
+    if (!attackerSource) throw new Error(`ERUPTION missing ${view.attacker.species} attacker art`);
+    if (!targetSource) throw new Error(`ERUPTION missing ${view.target.species} target art`);
+    const battlerTileset = (
+      source: BattleBackSpriteAsset | OpponentFrontSpriteAsset,
+      side: "player" | "opponent",
+    ): Tileset => side === "player" ? source.tileset : subTileset(source.tileset, 0, 8);
+    const attackerId = eruptionState.config.animationProfile.palette.attackerBattler;
+    const targetId = eruptionState.config.animationProfile.palette.targetBattler;
+    const attackerSlot = eruptionState.config.animationProfile.launch.geometry.attackerSpriteSlot;
+    const targetSlot = eruptionState.config.animationProfile.horizontalShake.battlers
+      .find((battler) => battler.side === view.target.geometry.side)?.spriteSlot;
+    if (targetSlot === undefined) throw new Error("ERUPTION target battler slot missing");
+    const shakeFor = (side: "player" | "opponent") =>
+      view.horizontalShake.battlers.find((battler) => battler.side === side);
+    const drawBattler = (
+      battler: typeof view.attacker,
+      source: BattleBackSpriteAsset | OpponentFrontSpriteAsset,
+      paletteId: number,
+      attacker: boolean,
+    ): void => {
+      const shake = shakeFor(battler.geometry.side);
+      const launchOam = attacker ? displayed.launch.battler : null;
+      if (launchOam) {
+        // The task callback mutates live x/y/x2/y2 after this row's OAM
+        // build. Hardware therefore combines age-1 affine flags with the
+        // age-2 task pose, while the reducer's measured matrix field names
+        // its own (sometimes age-1, sometimes age-2) source row explicitly.
+        const pose = oamBuilt.launch.battler ?? {
+          x: battler.geometry.spriteCorner.x + 32,
+          y: battler.geometry.spriteCorner.y + 32,
+          x2: shake?.hardwareOamX2 ?? 0,
+          y2: shake?.y2 ?? 0,
+        };
+        const hardwareMatrix = view.launch.battler?.hardwareMatrix
+          ?? launchOam.hardwareMatrix;
+        drawSpriteSheetAffineStretch(
+          fb,
+          battlerTileset(source, battler.geometry.side),
+          paletteBank(16 + paletteId),
+          pose.x - 32,
+          pose.y - 32,
+          hardwareMatrix[0],
+          hardwareMatrix[3],
+          pose.y2,
+          { r: 0, g: 0, b: 0 },
+          0,
+          true,
+          pose.x2,
+        );
+        return;
+      }
+      drawSpriteSheet(
+        fb,
+        battlerTileset(source, battler.geometry.side),
+        paletteBank(16 + paletteId),
+        battler.geometry.spriteCorner.x + (shake?.hardwareOamX2 ?? 0),
+        battler.geometry.spriteCorner.y + (shake?.y2 ?? 0),
+      );
+    };
+    const rockPalette = paletteBank(view.palette.resources.warmRockPaletteBank);
+    const rockTileset = (tileOffset: number, widthTiles: number): Tileset => ({
+      columns: widthTiles,
+      rows: widthTiles,
+      tiles: eruptionWarmRockArt.tileset.tiles.slice(
+        tileOffset,
+        tileOffset + widthTiles * widthTiles,
+      ),
+    });
+    const drawBySlot = new Map<number, () => void>([
+      [attackerSlot, () => drawBattler(view.attacker, attackerSource, attackerId, true)],
+      [targetSlot, () => drawBattler(view.target, targetSource, targetId, false)],
+    ]);
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "palette" || sprite.invisible) continue;
+      // Launch sprites are allocated from a task callback after that row's
+      // OAM build, so their membership needs two displays. Script-created
+      // falling rocks run before BuildOamBuffer and keep the ordinary +1.
+      if (sprite.kind === "launch" && eruptionState.age < sprite.birthAge + 2) continue;
+      const width = sprite.kind === "launch" ? 16 : 32;
+      const widthTiles = width / 8;
+      drawBySlot.set(sprite.slot, () => drawSpriteSheet(
+        fb,
+        rockTileset(sprite.tileOffset, widthTiles),
+        rockPalette,
+        sprite.x + sprite.x2 - width / 2,
+        sprite.y + sprite.y2 - width / 2,
+      ));
+    }
+    for (const slot of displayed.order.fullPainterOrder) drawBySlot.get(slot)?.();
+
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = eruptionState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "ERUPTION!",
+      99,
+    );
+    return;
   }
   if (state.config.move === "INGRAIN") {
     const ingrainState = state as SceneOnMovePresentationState<SceneOnIngrainConfig>;

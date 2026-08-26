@@ -2,6 +2,40 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_ERUPTION",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-346 Camerupt parties retain ordinary Battle Scene ON player-back frames 234-709 (476 rows) and opponent-front frames 221-714 (494 rows) through first inactive cleanup; two fresh probes per orientation reproduce the retained dense-state and raw-RGB sequence hashes byte-for-byte",
+    "the pure combined source-relative reducer and typed seam cover ANIM_TAG_WARM_ROCK, gEruptionFallingRockSpriteTemplate, AnimTask_EruptionLaunchRocks including its launch sprite, both literal AnimTask_HorizontalShake(8,60) tasks, both simple_palette_blend programs, exclusive loopsewithpan audio, source cursor/args, allocation and painter order, resources, gameplay/RNG separation, and cleanup",
+    "the generic compositor consumes typed live species/sides/geometry, generic back/front battler art and field chrome, source WARM_ROCK launch/falling cells, hardware OAM/matrix schedules, source painter order, both palette ramps, platform plus all-battler x2 display, audio lifecycle, and cleanup without a carrier/evidence pair gate, recorded RGB/framebuffer lookup, coordinate fitting, or absolute tick",
+    "Eruption's launch-task affine path uses measured hardware flags at source age-1, task-owned pose at age-2, and the reducer's explicit per-row hardware matrix schedule; task-created launch sprites first paint at birth+2, while script-created falling rocks and terminal removal retain ordinary OAM RAM+1",
+    "all retained rows pass source/component/typed-seam/raw-RGB and actual core.ts to renderSceneOnMovePresentation framebuffer equality twice: 476/476 player-back plus 494/494 opponent-front, 970/970 total with zero residual pixels through cleanup",
+    "gameplay state, damage, status, weather, gameplay RNG, controller, turn, round, and facility state remain unowned; Earthquake, Fissure, Luster Purge, Sky Attack, Magnitude, Explosion, and Self Destruct remain independent controls and receive no sibling credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-eruption-player-camerupt-opponent-onix.json",
+    "tools/battle-lab/mechanic-eruption-opponent-camerupt-player-onix.json",
+    "tools/compare/fixtures/eruption-evidence.json",
+    "tools/compare/evidence/eruption-player-dense-state.json.gz",
+    "tools/compare/evidence/eruption-opponent-dense-state.json.gz",
+    "tools/compare/evidence/eruption-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/eruption-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/eruption-changemap-player.json",
+    "tools/compare/evidence/eruption-changemap-opponent.json",
+    "tools/compare/eruptionProbe.py",
+    "tools/compare/eruptionSourceAudit.ts",
+    "tools/compare/eruptionEvidence.ts",
+    "tools/compare/eruptionFramebuffer.ts",
+    "src/animation/assets/eruption-warm-rock.json",
+    "src/animation/eruption.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/eruptionEvidence.test.ts",
+    "tests/animation/eruptionReducer.test.ts",
+    "tests/animation/eruptionFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SCREECH",
    "status": "exact",
    "covered": [
@@ -6396,7 +6430,7 @@
     "MOVE_ERUPTION",
     "MOVE_LUSTER_PURGE"
    ],
-   "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MEGA_PUNCH and MOVE_MEGA_KICK independently prove their complex-palette bodies. MOVE_FISSURE independently proves its target/platform (10,50) shake, two BG-only palette pulses, three stable-OAM dirt groups, BG_FISSURE pipeline, and cleanup at 254/254 complete bilateral source/component/framebuffer rows twice fresh. MOVE_LUSTER_PURGE independently proves its target-only (5,14) HorizontalShake and distinct BlendBattleAnimPalExclude/BlendParticle psychic body at 333/333 complete bilateral rows twice fresh; it inherits no Fissure argument-set behavior. SKY ATTACK, MAGNITUDE, and ERUPTION retain their distinct unsupported bodies. Every named unsupported move remains unsupported pending independent complete dense evidence."
+   "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MEGA_PUNCH and MOVE_MEGA_KICK independently prove their complex-palette bodies. MOVE_FISSURE independently proves its target/platform (10,50) shake, two BG-only palette pulses, three stable-OAM dirt groups, BG_FISSURE pipeline, and cleanup at 254/254 complete bilateral source/component/framebuffer rows twice fresh. MOVE_LUSTER_PURGE independently proves its target-only (5,14) HorizontalShake and distinct BlendBattleAnimPalExclude/BlendParticle psychic body at 333/333 complete bilateral rows twice fresh; it inherits no Fissure argument-set behavior. MOVE_ERUPTION independently proves its platform/all-battler (8,60) schedule inside its complete 476/494-row Warm Rock body. SKY ATTACK and MAGNITUDE retain their distinct unsupported bodies. Every named unsupported move remains unsupported pending independent complete dense evidence."
   },
   {
    "id": "elemental-punch",
@@ -6934,8 +6968,8 @@
     "visualCommand:simple_palette_blend"
    ],
    "representatives": ["MOVE_ERUPTION"],
-   "fulfilled": false,
-    "goal": "UNFULFILLED Eruption component track: complete bilateral 476/494-row Scene-ON evidence remains retained. asset:ANIM_TAG_WARM_ROCK is banked as a source-derived self-contained 32x168 / 0x0a80-byte indexed 4bpp sheet with its 16-color palette and exact launch/falling OAM cell layouts; the launch/falling rocks, paired HorizontalShake tasks, two simple_palette_blend programs, and exclusive loopsewithpan audio are composed through one pure source-relative reducer with complete source cursor/args, task/sprite allocation and painter order, palette/resource/audio, latch, immutable gameplay, gameplay-RNG, animation-RNG, and cleanup checks. The narrow typed Scene-ON config/view accepts live species, sides, geometry, and component profiles without carrier/evidence gates, while the compositor remains deliberately deferred. Eruption stays unsupported/unfulfilled: only the compositor and complete twice-fresh bilateral core framebuffer acceptance remain, with no framebuffer or sibling credit."
+   "fulfilled": true,
+    "goal": "FULFILLED: MOVE_ERUPTION alone independently passes 476/476 player-back plus 494/494 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two production-render passes and two fresh legal probes per orientation. Its source-derived WARM_ROCK art/cells, launch/falling allocation and painter order, measured launch-task OAM/matrix exceptions, paired HorizontalShake(8,60), two palette ramps, loopsewithpan audio, typed live species/sides/geometry, generic front/back battler art, chrome, and cleanup use no pair gate, recording/framebuffer lookup, coordinate fitting, absolute tick, or gameplay ownership. Earthquake, Fissure, Luster Purge, Sky Attack, Magnitude, Explosion, and Self Destruct remain independent controls and receive no sibling credit."
   }
  ],
  "variantAudits": {

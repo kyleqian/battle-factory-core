@@ -87,10 +87,10 @@ describe("MOVE_ERUPTION composed source-relative reducer", () => {
       }),
       age: 0,
     } as never)).toThrow("expected ERUPTION");
-    expect(() => renderSceneOnMovePresentation(new Uint8Array(240 * 160 * 3), {
+    expect(() => renderSceneOnMovePresentation(new Uint8Array(240 * 160 * 4), {
       ...stateForRender(),
       age: 0,
-    })).toThrow("ERUPTION compositor is intentionally deferred");
+    })).not.toThrow();
   });
 });
 
