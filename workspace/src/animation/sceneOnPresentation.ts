@@ -1004,6 +1004,7 @@ export interface SceneOnPresentationBattler {
     | "CHIMECHO"
     | "BALTOY"
     | "HOUNDOUR"
+    | "NINCADA"
     | "NINETALES"
     | "VILEPLUME"
     | "BUTTERFREE"
