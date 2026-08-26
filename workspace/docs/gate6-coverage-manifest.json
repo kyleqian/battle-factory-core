@@ -468,7 +468,7 @@
       },
       "holdEffects": {
         "total": 67,
-        "oracleReceipted": 6,
+        "oracleReceipted": 7,
         "zeroFactoryWidened": 24
       }
     },
@@ -99925,7 +99925,7 @@
         {
           "id": "hold-effect:HOLD_EFFECT_SHELL_BELL",
           "label": "HOLD_EFFECT_SHELL_BELL",
-          "status": "engine-referenced-no-oracle-receipt",
+          "status": "oracle-receipted-hook",
           "universeId": 62,
           "factoryCarrierCount": 43,
           "legalCarrierCount": 1,
@@ -99935,7 +99935,9 @@
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
           "engineReferenceCount": 2,
-          "oracleReceiptCards": [],
+          "oracleReceiptCards": [
+            "shell-bell-ko-heal-off"
+          ],
           "evidence": [
             {
               "path": "src/data/gen/ability-item-hooks.json",
@@ -99956,6 +99958,31 @@
               "kind": "factory-carrier-join"
             },
             {
+              "path": "tools/battle-lab/issue129-shellbell-ko-heal-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/issue129-shellbell-ko-control-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/battle-lab/issue129-shellbell-nonko-heal-off.json",
+              "kind": "parameterized-oracle-request"
+            },
+            {
+              "path": "tools/probe/probe-shell-bell-ko-heal-off.py",
+              "kind": "oracle-probe"
+            },
+            {
+              "path": "tools/probe/receipts/shell-bell-ko-heal-off.json",
+              "kind": "battle-scene-off-oracle-receipt"
+            },
+            {
+              "path": "tests/shellBellHealReceipt.test.ts",
+              "locator": "live KO heal arm, item-0 control arm, and non-KO heal arm",
+              "kind": "battle-scene-off-family-receipt"
+            },
+            {
               "path": "tools/battle-lab/issue129-kingsrock-ohko-off.json",
               "kind": "parameterized-oracle-request"
             },
@@ -99969,7 +99996,7 @@
               "kind": "battle-scene-off-family-receipt"
             }
           ],
-          "notes": "No direct Shell Bell receipt is claimed: the King's Rock pack observes gSpecialStatuses[target].shellBellDmg still recorded at moveend state 12 on a KO, but the attacker was at full HP so NO heal was staged live on the stock ROM — the heal itself remains kernel-pinned only until a live heal arm is receipted."
+          "notes": "Live KO heal witnessed: +15 = floor(125/8) on a KO, 0 on the item-0 control, +5 on a non-KO hit; kernel equal."
         },
         {
           "id": "hold-effect:HOLD_EFFECT_LUCKY_PUNCH",

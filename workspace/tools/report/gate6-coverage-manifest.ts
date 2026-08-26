@@ -2238,13 +2238,19 @@ const RECEIPT_PACK_JOINS: ReadonlyMap<string, ReceiptPackJoin> = new Map<string,
     notes: "Dedicated Battle Scene OFF King's Rock receipt: the holder's MOVEEND_KINGSROCK_SHELLBELL Random() draw is observed on an OHKO KO, on a non-OHKO KO, and on a non-KO hit, and is ABSENT in the same fixture with the item removed — so a faint does not suppress state 12.",
   }],
   ["hold-effect:HOLD_EFFECT_SHELL_BELL", {
-    statusOverride: "engine-referenced-no-oracle-receipt",
+    receiptIds: ["shell-bell-ko-heal-off"],
     evidence: [
+      evidence("tools/battle-lab/issue129-shellbell-ko-heal-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/issue129-shellbell-ko-control-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/issue129-shellbell-nonko-heal-off.json", "parameterized-oracle-request"),
+      evidence("tools/probe/probe-shell-bell-ko-heal-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/shell-bell-ko-heal-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/shellBellHealReceipt.test.ts", "battle-scene-off-family-receipt", "live KO heal arm, item-0 control arm, and non-KO heal arm"),
       evidence("tools/battle-lab/issue129-kingsrock-ohko-off.json", "parameterized-oracle-request"),
       evidence("tools/probe/receipts/issue129-kingsrock-ko-off.json", "battle-scene-off-oracle-receipt"),
       evidence("tests/issue129KingsRockKoReceipt.test.ts", "battle-scene-off-family-receipt", "shellBellDmg survives the faint into moveend state 12"),
     ],
-    notes: "No direct Shell Bell receipt is claimed: the King's Rock pack observes gSpecialStatuses[target].shellBellDmg still recorded at moveend state 12 on a KO, but the attacker was at full HP so NO heal was staged live on the stock ROM — the heal itself remains kernel-pinned only until a live heal arm is receipted.",
+    notes: "Live KO heal witnessed: +15 = floor(125/8) on a KO, 0 on the item-0 control, +5 on a non-KO hit; kernel equal.",
   }],
 ]);
 
