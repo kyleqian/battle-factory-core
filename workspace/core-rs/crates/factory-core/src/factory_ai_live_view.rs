@@ -254,6 +254,11 @@ pub struct FactoryAiScoredBattlerView {
     pub has_focus_energy: Option<bool>,
     pub is_leech_seeded: Option<bool>,
     pub has_yawn: Option<bool>,
+    /// AI_CV_Protect's three AI_USER status routes to `AI_CV_Protect3`
+    /// (`data/battle_ai_scripts.s:1897-1899`, ISSUES #137).
+    pub is_toxic_poisoned: Option<bool>,
+    pub is_cursed: Option<bool>,
+    pub has_perish_song: Option<bool>,
     pub protect_uses: Option<f64>,
 }
 
@@ -394,6 +399,9 @@ pub fn create_factory_ai_view_from_live_rules(
             has_focus_energy: present_if(has_mask(attacker.status2, STATUS2_FOCUS_ENERGY)),
             is_leech_seeded: present_if(has_mask(attacker.status3, STATUS3_LEECHSEED)),
             has_yawn: present_if(has_mask(attacker.status3, STATUS3_YAWN)),
+            is_toxic_poisoned: present_if(has_mask(attacker.status1, STATUS1_TOXIC_POISON)),
+            is_cursed: present_if(has_mask(attacker.status2, STATUS2_CURSED)),
+            has_perish_song: present_if(has_mask(attacker.status3, STATUS3_PERISH_SONG)),
             protect_uses: nonzero_option(attacker.protect_uses),
         },
         target: FactoryAiScoredTargetView {

@@ -5900,6 +5900,10 @@ fn encode_live_view_battler(buf: &mut Vec<u8>, battler: &LiveScoredBattlerView) 
     encode_live_view_optional_bool(buf, battler.has_focus_energy);
     encode_live_view_optional_bool(buf, battler.is_leech_seeded);
     encode_live_view_optional_bool(buf, battler.has_yawn);
+    // AI_CV_Protect's three AI_USER status routes (ISSUES #137).
+    encode_live_view_optional_bool(buf, battler.is_toxic_poisoned);
+    encode_live_view_optional_bool(buf, battler.is_cursed);
+    encode_live_view_optional_bool(buf, battler.has_perish_song);
     match battler.protect_uses {
         None => buf.push(0),
         Some(value) => {
@@ -6111,7 +6115,8 @@ fn encode_live_view_result(
 /// by value byte when present) in source order:
 /// `attacker_future_attack_up,is_infatuated,safeguard_up,is_asleep,
 /// has_curable_status,has_substitute,has_focus_energy,is_leech_seeded,
-/// has_yawn`, and optional `protect_uses` (presence plus f64). The target is
+/// has_yawn,is_toxic_poisoned,is_cursed,has_perish_song`, and optional
+/// `protect_uses` (presence plus f64). The target is
 /// encoded in source property order with species first, the same common stat
 /// fields, `last_used_move_id`, optional `has_any_status,is_asleep`,
 /// unconditional `is_toxic_poisoned,is_leech_seeded,is_cursed`, optional
