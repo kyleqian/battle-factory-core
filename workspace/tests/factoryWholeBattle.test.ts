@@ -210,10 +210,23 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
       cursorCheckpoints.push(state.rng.calls);
     }
 
-    expect(state.boundary).toEqual({ kind: "terminal", outcome: "player-win" });
+    // Re-pinned 2026-08-25 for the union of the four end-turn source fixes.
+    // The first divergence from the old trajectory is ONE extra draw at the end
+    // of turn 1 -- cursorCheckpoints[5] moves 23 -> 24 while [0..4] are
+    // byte-identical -- which is exactly ENDTURN_ORDER's speed-tie Random()
+    // (ISSUES #131; ROM receipt tools/probe/receipts/issue131-endturn-order-off
+    // .json). From there the shared cursor compounds through the isFirstTurn
+    // decay (#130) and the end-turn STATUS2_FLINCHED clear (#133), and this
+    // curated party's engineered win path no longer holds: Azurill still faints
+    // to Granbull, but the run now ends in a trainer win with a second forced
+    // switch. This is a self-authored scenario, not an oracle receipt, and its
+    // point is that every trainer command comes from the live Factory AI on one
+    // uninterrupted cursor -- which the assertions below still pin. Every value
+    // is regenerated from the union engine.
+    expect(state.boundary).toEqual({ kind: "terminal", outcome: "trainer-win" });
     if (state.boundary.kind !== "terminal") throw new Error("expected terminal boundary");
-    expect(forcedSwitches).toBe(1);
-    expect(aiChosenSubmissions).toHaveLength(13);
+    expect(forcedSwitches).toBe(2);
+    expect(aiChosenSubmissions).toHaveLength(8);
     expect(aiChosenSubmissions.every((entry) => entry.side === "trainer")).toBe(true);
     expect(aiDecisionDrawRanges.every(([before, after]) => after > before)).toBe(true);
     for (let decision = 1; decision < aiDecisionDrawRanges.length; decision += 1) {
@@ -221,7 +234,10 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
         .toBeGreaterThanOrEqual(aiDecisionDrawRanges[decision - 1]![1]);
     }
     expect(sawNonterminalOpponentFaint).toBe(true);
+    // The player still KOs Granbull and leaves Hariyama at 14 before falling.
     expect(state.rules.rulesContext.party.opponent.slice(0, 3).map((member) => member.hp))
+      .toEqual([0, 14, 177]);
+    expect(state.rules.rulesContext.party.player.slice(0, 3).map((member) => member.hp))
       .toEqual([0, 0, 0]);
     // Draws A/B, every AI policy ledger, hit chains, forced-switch tail, and
     // continuing-turn boundary draws share one cursor. Repeated entries are
@@ -238,10 +254,9 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
     // player's forced replacement, so the later decisions keep their original
     // 21-draw shape; the battle simply runs one extra turn on the new stream.
     expect(cursorCheckpoints).toEqual([
-      2, 2, 11, 12, 12, 23, 23, 34, 34, 45, 45, 56, 56, 67, 67,
-      // Later trainer decisions each add absorber reluctance +
-      // active-super-effective suppression before the unchanged move policy.
-      88, 88, 109, 109, 131, 131, 153, 153, 169, 169, 183, 183, 199,
+      // [0..4] byte-identical to the pre-union stream; [5] is where
+      // ENDTURN_ORDER's tie draw first lands (23 -> 24).
+      2, 2, 11, 12, 12, 24, 24, 46, 46, 72, 72, 94, 95, 95, 106, 106, 119, 119, 130,
     ]);
 
     const resolution = deriveBattleResolutionFromTerminalBoundary({
@@ -252,10 +267,10 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
       preBattleOpponentParty,
     });
     expect(resolution).toMatchObject({
-      outcome: "win",
-      rngValue: expectedRngValue(199),
+      outcome: "loss",
+      rngValue: expectedRngValue(130),
     });
-    expect(resolution.playerParty.map((member) => member.hp)).toEqual([0, 236, 186]);
-    expect(resolution.opponentParty.map((member) => member.hp)).toEqual([0, 0, 0]);
+    expect(resolution.playerParty.map((member) => member.hp)).toEqual([0, 0, 0]);
+    expect(resolution.opponentParty.map((member) => member.hp)).toEqual([0, 14, 177]);
   });
 });
