@@ -6371,7 +6371,24 @@
     "MOVE_ICE_BEAM"
    ],
    "fulfilled": false,
-   "goal": "Source/asset checkpoint only: the exact main and shared IceCrystalEffectShort ROM intervals, complete generated component graph, lowest legal Level-50 Delcatty carrier, capture-free bilateral parties, and deterministic 0x01c0-byte ICE_CRYSTALS extraction are pinned. Still required before any move/component credit: complete twice-fresh bilateral dense state, chronological raw RGB888, normalized change maps, strict offline verification, measured pointer/task/audio/resource/allocation/OAM/matrix/palette/register/monbg/RNG/display latches through first inactive cleanup. Blizzard, Icy Wind, and Psybeam remain independent exact controls; Ice Beam remains unsupported with no reducer, seam, compositor, partial, staged, exact, or sibling credit."
+   "evidence": [
+    "tools/battle-lab/mechanic-ice-beam-player-delcatty-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-ice-beam-opponent-delcatty-player-shuckle.json",
+    "tools/compare/fixtures/ice-beam-evidence.json",
+    "tools/compare/evidence/ice-beam-player-dense-state.json.gz",
+    "tools/compare/evidence/ice-beam-opponent-dense-state.json.gz",
+    "tools/compare/evidence/ice-beam-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/ice-beam-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/ice-beam-changemap-player.json",
+    "tools/compare/evidence/ice-beam-changemap-opponent.json",
+    "tools/compare/iceBeamSourceAudit.ts",
+    "tools/compare/extractIceBeamCrystalAssets.ts",
+    "tools/compare/iceBeamProbe.py",
+    "tools/compare/iceBeamEvidence.ts",
+    "tests/animation/iceBeamSourceCheckpoint.test.ts",
+    "tests/animation/iceBeamEvidence.test.ts"
+   ],
+   "goal": "Complete non-promoting evidence checkpoint: the exact main and shared IceCrystalEffectShort ROM intervals, complete generated component graph, lowest legal Level-50 Delcatty carrier, deterministic 0x01c0-byte ICE_CRYSTALS extraction, and twice-fresh 203-row bilateral dense state/raw RGB888/normalized-map windows through inactive cleanup are pinned. Strict offline verification measures all requested pointer/task/audio/resource/allocation/OAM/matrix/palette/register/monbg/RNG lifecycles, including the move-specific monbg ShakeMon2 RAM+1 schedule. Still required before any move/component credit: a pure reducer, typed seam, production compositor, and complete twice-fresh bilateral actual-core framebuffer equality. Blizzard, Icy Wind, and Psybeam remain independent exact controls; Ice Beam remains unsupported with no partial, staged, exact, component fulfillment, or sibling credit."
   },
   {
    "id": "loop-se-adjust-panning",

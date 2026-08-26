@@ -1,0 +1,32 @@
+{
+  "schema": "ice-beam-bilateral-evidence/v1",
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "acceptance": {"sourceRows":406,"rawRgbRows":406,"freshRunsPerOrientation":2,"firstInactiveCleanupAge":202,"productionFramebufferRows":0},
+  "source": {
+    "audit":"tools/compare/iceBeamSourceAudit.ts","auditSha256":"f7cae2b1d787cd7963ac52f0d445182d8d0e75e469f854b3324154081fe32305",
+    "assetExtractor":"tools/compare/extractIceBeamCrystalAssets.ts","assetExtractorSha256":"036f8f6fd99afa609acc466e70568e085a1e90bc68c007ce67353a8e4a8a81da",
+    "asset":"src/assets/gen/battle-anim-ice-crystals.json","assetSha256":"380407a692c356413ffb638f8b6ce87198b636164978c782695228819edb7862",
+    "probe":"tools/compare/iceBeamProbe.py","probeSha256":"e0b0d3ec94244259c4c559922dcf0c9380e1e31131bc82dbc7862577ed6dcfe4",
+    "changeMapBuilder":"tools/compare/iceBeamChangeMap.ts","changeMapBuilderSha256":"6d60e4f966a29745e747af27bc9f8c58d4518a443c32831d72868e6398787a51",
+    "verifier":"tools/compare/iceBeamEvidence.ts","verifierSha256":"07d711964b2dbd9cab1774f764e420096f0c9f52d9124ef240c83f4313224202"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario":"tools/battle-lab/mechanic-ice-beam-player-delcatty-opponent-shuckle.json","scenarioSha256":"909dd1e0655ec744b9b9822f78cbfc44cfd0309024eb1892d9b813ad32fcb033",
+      "sourceWindow":{"startFrame":75,"endFrame":277,"frameCount":203},"probeJsonSha256":"d983d1e791996e2e98cc5bb192c9c157d34167ba158c91c046825e9ae679fbcb","repeatProbeJsonSha256":"d983d1e791996e2e98cc5bb192c9c157d34167ba158c91c046825e9ae679fbcb",
+      "denseState":"tools/compare/evidence/ice-beam-player-dense-state.json.gz","denseStateSha256":"af4cd3d069bf96d0cb8a341b89f75627803cf6e31d1f1aabfd365bb6e7f0cefd",
+      "rawRgbArchive":"tools/compare/evidence/ice-beam-player-raw-rgb.tar.gz","rawRgbArchiveSha256":"d65316dc8c6743f439e71feecd3838f328f582e98f0ef55d6b1c65c4d5568fce","rawRgbSha256":"90d2fc612dbda97af3247aa2bd7a4f4a83eec80e14e7b95b9757cb67fbbfd1ed",
+      "changeMap":"tools/compare/evidence/ice-beam-changemap-player.json","changeMapSha256":"e6ce0e1c8af1510407052c381fff963b17b189ebf9f9842e4b096698160864bc"
+    },
+    "opponent-front": {
+      "scenario":"tools/battle-lab/mechanic-ice-beam-opponent-delcatty-player-shuckle.json","scenarioSha256":"ee4a9e13a37680c8bffba9fb597c134cc555632e64a11aba59145a1a0db0bb05",
+      "sourceWindow":{"startFrame":79,"endFrame":281,"frameCount":203},"probeJsonSha256":"62523296a810d66db91e24f25b2ed67d6db8520d27225941a2329d03ce7f5890","repeatProbeJsonSha256":"62523296a810d66db91e24f25b2ed67d6db8520d27225941a2329d03ce7f5890",
+      "denseState":"tools/compare/evidence/ice-beam-opponent-dense-state.json.gz","denseStateSha256":"85a9d6e08715016acfa65a6f08fe0332b4444270efd9d8bd5ee59903fccb232c",
+      "rawRgbArchive":"tools/compare/evidence/ice-beam-opponent-raw-rgb.tar.gz","rawRgbArchiveSha256":"f8aab834a9a49d5a835bc02ee90ca267b9c76b343e9bac590bca4cd31d10602e","rawRgbSha256":"85f203b6cf943ae778c264f17cd99620fce59ebc12acd3e7f135a4be642b47da",
+      "changeMap":"tools/compare/evidence/ice-beam-changemap-opponent.json","changeMapSha256":"f1adc788c23bf90d7b462a745965596128e46348b976d84dfc7695ef7fdf9e03"
+    }
+  },
+  "latchVerdict": "Complete bilateral evidence independently measures ordinary whole OAM and affine-matrix predecessor transfer on 202/202 comparable rows. Hardware palette equals preceding faded on 201/202 rows, with only pre-animation age 1 differing. Ice Beam's monbg AnimTask_ShakeMon2(2,0,25,1) source x2 begins at age 38, BG1/BG2 display motion at age 39, source settles at age 86, and display settles at age 87: RAM+1 for this move-specific monbg schedule.",
+  "remainder": "MOVE_ICE_BEAM remains unsupported. No reducer, typed seam, production compositor, framebuffer comparison, exact/partial/staged credit, component fulfillment, or sibling credit is claimed."
+}
