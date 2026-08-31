@@ -5,6 +5,40 @@ full history regardless.
 
 ---
 
+## R61 — [supervised session, 2026-08-31, unattended] **M58 `Cmd_getsecretpowereffect` leaf + green checkpoint**
+
+- **State:** `rust-main` = R60 checkpoint `135f4997e` plus the verified Sonnet
+  worker `bd5177a27` (fast-forward). The pure `B_SCR_OP_GETSECRETPOWEREFFECT`
+  registration/handler projection is native and wasm32-compilable; no ABI,
+  adapter, recovery module, canonical TS, or npm file was touched. Session
+  still active; `Cmd_trysetperishsong` dispatching next.
+- **Did:** worker (claude-sonnet-5, 60-min cap, one commit) ported exact
+  single-start eager registration (count → opcode id `0xE4` / dispatcher /
+  zero operands, TS error order) and the operandless
+  `gBattleEnvironment`→`moveEffectByte` map (GRASS→POISON, LONG_GRASS→SLEEP,
+  SAND→ACC−1, UNDERWATER→DEF−1, WATER→ATK−1, POND→SPD−1, MOUNTAIN→CONFUSION,
+  CAVE→FLINCH, every other u8→PARALYSIS) with advance-only control and
+  single-field write. Canonical TS supplies **298 behavior** (full 0..=255
+  environment domain + overwrite matrix) and **6 registration** cases; corpus
+  sha256 `4a368aa0860dce4751ea8059af38ca35f6251dd392096558e25c3debd805eb80`.
+- **Next:** dispatch `Cmd_trysetperishsong` (single start at pc 1057;
+  status3/perish timers + Pressure PP scan; brief prepared). If the deadline
+  reserve still holds after that, scout `Cmd_tryinfatuating` (pure, uses the
+  already-ported gender module) before any further dispatch; otherwise wind
+  down at the last green checkpoint.
+- **Notes:** supervisor audit covered all nine environment arms and the
+  MOVE_EFFECT constants against `include/constants/battle.h:247-274`,
+  registration order, single-field mutation, and generator provenance;
+  independent regeneration was byte-identical. Generated Rust is
+  **1,250,835 bytes**, sha256
+  `17513961b106b1f5d959a1140c7c50496abfc3defb33ba29c38d90eb390f9365`;
+  generator is **17,622 bytes**, sha256
+  `ef5e88b5242dd38761d5d35b20a2ba27a793838cf04e287223c8810375dcce44`.
+  Gates in the worker tree and again on `rust-main`: **1,096/1,096**, fmt,
+  strict workspace Clippy, wasm32 release. Artifact is **507,098 bytes**,
+  sha256 `8cefaa0f3708c3a8e61e037509169d0df4556b73822d36691846a3027e3215a0`.
+  No npm gate required; no deferral or barrier added. R58 archived.
+
 ## R60 — [supervised session, 2026-08-31, unattended] **M57 `Cmd_jumpifstat` leaf + green checkpoint**
 
 - **State:** `rust-main` = R59 checkpoint `8730a5470` plus the verified Sonnet
