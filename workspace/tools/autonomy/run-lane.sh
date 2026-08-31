@@ -64,6 +64,15 @@ if (( free_kb < MIN_FREE_GB * 1024 * 1024 )); then
   echo "run-lane: less than ${MIN_FREE_GB} GiB free; refusing to start" >&2
   exit 1
 fi
+if ! git -C "$REPO_ROOT" show-ref --verify --quiet "refs/heads/${LANE}-main"; then
+  echo "run-lane: missing refs/heads/${LANE}-main" >&2
+  exit 1
+fi
+
+# Back up before provider preflight so even an expired model login cannot keep
+# commits from a previously interrupted session stranded only on the VM.
+"${SCRIPT_DIR}/backup-refs.sh"
+
 if [[ "$supervisor_agent" == codex || "$sub_agent" == codex ]]; then
   if ! codex login status >/dev/null 2>&1; then
     echo "run-lane: Codex is not signed in for $(id -un)" >&2
@@ -76,11 +85,6 @@ if [[ "$supervisor_agent" == claude || "$sub_agent" == claude ]]; then
     exit 1
   fi
 fi
-if ! git -C "$REPO_ROOT" show-ref --verify --quiet "refs/heads/${LANE}-main"; then
-  echo "run-lane: missing refs/heads/${LANE}-main" >&2
-  exit 1
-fi
-
 cap_hours="${POKEBENCH_ANIMATION_CAP_HOURS:-5.5}"
 [[ "$LANE" == rust ]] && cap_hours="${POKEBENCH_RUST_CAP_HOURS:-4}"
 if [[ ! "$cap_hours" =~ ^[0-9]+([.][0-9]+)?$ ]] \
@@ -100,10 +104,6 @@ if (( requested_cap_seconds > remaining_seconds )); then
 fi
 started_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 echo "run-lane: starting ${LANE} at ${started_at}, cap ${cap_hours}h, ${supervisor_agent}/${sub_agent}"
-
-# Refuse to begin a new unattended session until the previously committed lane
-# tips (and any surviving disposable worker tips) are safe off-VM.
-"${SCRIPT_DIR}/backup-refs.sh"
 
 status=0
 (
