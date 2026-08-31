@@ -983,6 +983,7 @@ import {
   sceneOnEarthquakeView,
   sceneOnEruptionView,
   sceneOnSandTombView,
+  sceneOnTrickView,
   sceneOnIceBeamView,
   sceneOnFissureView,
   sceneOnHardenView,
@@ -1074,6 +1075,7 @@ import {
   type SceneOnFissureConfig,
   type SceneOnEruptionConfig,
   type SceneOnSandTombConfig,
+  type SceneOnTrickConfig,
   type SceneOnIceBeamConfig,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
@@ -14507,6 +14509,206 @@ export function renderSceneOnMovePresentation(
       fb,
       playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "SAND TOMB!",
+      99,
+    );
+    return;
+  }
+  if (state.config.move === "TRICK") {
+    const trickState = state as SceneOnMovePresentationState<SceneOnTrickConfig>;
+    const view = sceneOnTrickView(trickState);
+    // BuildOamBuffer copies ordinary sprite attributes and the palette from
+    // the preceding software row.  Stretch's affine matrix is the one
+    // exceptional transfer in this body: the task's fresh matrix reaches
+    // hardware two rows after its source write, while its x2/y2 still follow
+    // the ordinary one-row OAM handoff.
+    const displayed = sceneOnTrickView({
+      ...trickState,
+      age: trickState.age - 1,
+    });
+    const affineDisplayed = sceneOnTrickView({
+      ...trickState,
+      age: trickState.age - 2,
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("TRICK presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const battlerArt = (battler: typeof view.attacker): BattlerArt => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species];
+        if (!source) throw new Error(`TRICK missing player-back art for ${battler.species}`);
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!source) throw new Error(`TRICK missing opponent-front art for ${battler.species}`);
+      return source;
+    };
+    const tilesetFor = (source: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? source.tileset : subTileset(source.tileset, 0, 8);
+
+    // `SetBattlerSpriteYOffsetFromYScale` derives the OAM y2 from the
+    // species' source-coordinate bottom offset and the live affine d value.
+    // The extracted 64x64 art retains that source coordinate directly: its
+    // transparent bottom rows are exactly gMon{Back,Front}PicCoords.y_offset.
+    const sourceYDelta = (tileset: Tileset): number => {
+      let lastOpaqueRow = -1;
+      for (let row = 0; row < tileset.rows; row += 1) {
+        for (let column = 0; column < tileset.columns; column += 1) {
+          const tile = tileset.tiles[row * tileset.columns + column];
+          if (!tile) continue;
+          for (let inTileY = 0; inTileY < 8; inTileY += 1) {
+            for (let inTileX = 0; inTileX < 8; inTileX += 1) {
+              if (tile[inTileY * 8 + inTileX] !== 0) lastOpaqueRow = Math.max(lastOpaqueRow, row * 8 + inTileY);
+            }
+          }
+        }
+      }
+      return tileset.rows * 8 - 1 - lastOpaqueRow;
+    };
+    const yOffsetFromMatrix = (tileset: Tileset, d: number): number => {
+      const sourceHeight = 64 - sourceYDelta(tileset) * 2;
+      const scaledHeight = Math.min(128, Math.trunc((sourceHeight << 8) / d));
+      return Math.trunc((sourceHeight - scaledHeight) / 2);
+    };
+
+    const drawBattler = (battler: typeof view.attacker): {
+      readonly subpriority: number;
+      readonly y: number;
+      readonly slot: number;
+      readonly draw: () => void;
+    } => {
+      const source = battlerArt(battler);
+      const tileset = tilesetFor(source, battler.geometry.side);
+      const isAttacker = battler === view.attacker;
+      const config = isAttacker
+        ? trickState.config.animationProfile.attacker
+        : trickState.config.animationProfile.target;
+      const affineTask = affineDisplayed.tasks.find(
+        (task): task is Extract<typeof affineDisplayed.tasks[number], { kind: "stretch" }> =>
+          task.kind === "stretch" && task.battler === (isAttacker ? "attacker" : "target"),
+      );
+      const displayedShake = displayed.tasks.find(
+        (task): task is Extract<typeof displayed.tasks[number], { kind: "shake" }> =>
+          task.kind === "shake" && task.spriteSlot === config.spriteSlot,
+      );
+      const shakeOam = displayedShake?.localAge === 0
+        ? displayedShake
+        : affineDisplayed.tasks.find(
+          (task): task is Extract<typeof affineDisplayed.tasks[number], { kind: "shake" }> =>
+            task.kind === "shake" && task.spriteSlot === config.spriteSlot,
+        );
+      const displayedOam = displayed.tasks.find(
+        (task): task is Extract<typeof displayed.tasks[number], { kind: "stretch" | "shake" }> =>
+          task.spriteSlot === config.spriteSlot,
+      );
+      const oamTask = displayedOam?.kind === "shake" || (!displayedOam && shakeOam)
+        ? shakeOam
+        : displayedOam;
+      const displayedStretch = oamTask?.kind === "stretch" ? oamTask : undefined;
+      const affine = Boolean(displayedStretch || affineTask);
+      // PrepareBattlerSpriteForRotScale changes the center-to-corner vector
+      // before the first affine OAM row, while the subsequent OAM rows carry
+      // the preceding task callback's x2/y2.  The matrix has its own RAM+2
+      // transfer.  Thus the first displayed affine row has the callback's
+      // initial +4/0 anchor; after that, the hardware OAM center is the
+      // affine task from age-2, and no second x2/y2 offset is applied by the
+      // rasterizer.
+      const affineOffset = displayedStretch?.localAge === 0
+        ? { x: 4, y: 0 }
+        : { x: affineTask?.x2 ?? 0, y: affineTask ? yOffsetFromMatrix(tileset, affineTask.sourceMatrix[3]) : 0 };
+      const x2 = affine ? affineOffset.x : oamTask?.x2 ?? 0;
+      const y2 = affine ? affineOffset.y : 0;
+      const matrix = affineTask?.sourceMatrix ?? [256, 0, 0, 256] as const;
+      const y = battler.geometry.spriteCorner.y + y2;
+      return {
+        subpriority: battler.geometry.side === "player" ? 30 : 40,
+        y,
+        slot: config.spriteSlot,
+        draw: () => {
+          if (affine) {
+            drawSpriteSheetAffineStretch(
+              fb,
+              tileset,
+              source.palette,
+              battler.geometry.spriteCorner.x,
+              battler.geometry.spriteCorner.y,
+              matrix[0],
+              matrix[3],
+              y2,
+              { r: 0, g: 0, b: 0 },
+              0,
+              true,
+              x2,
+            );
+          } else {
+            drawSpriteSheet(
+              fb,
+              tileset,
+              source.palette,
+              battler.geometry.spriteCorner.x + x2,
+              battler.geometry.spriteCorner.y + y2,
+            );
+          }
+        },
+      };
+    };
+
+    const objects = [drawBattler(view.attacker), drawBattler(view.target)];
+    for (const sprite of displayed.sprites) {
+      if (sprite.invisible) continue;
+      objects.push({
+        subpriority: sprite.subpriority,
+        y: sprite.y + sprite.y2,
+        slot: sprite.slot,
+        draw: () => drawSpriteSheetAffineRotate(
+          fb,
+          covetArt.itemBag.tileset,
+          covetArt.itemBag.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.affine.matrix[0],
+          sprite.affine.matrix[1],
+          sprite.affine.matrix[2],
+          sprite.affine.matrix[3],
+          undefined,
+          false,
+        ),
+      });
+    }
+    // BuildSpritePriorities orders ascending subpriority and descending OAM
+    // Y; painter order is its reverse.  This is the same source ordering
+    // used by the existing generic Scene-ON compositors, expressed from the
+    // live Trick sprite attributes rather than a retained slot order.
+    objects.sort((left, right) => right.subpriority - left.subpriority || left.y - right.y);
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    for (const object of objects) object.draw();
+
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = trickState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "TRICK!",
       99,
     );
     return;

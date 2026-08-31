@@ -1016,9 +1016,11 @@ export interface SceneOnPresentationBattler {
   readonly species:
     | "ARON"
     | "BAYLEEF"
+    | "BLISSEY"
     | "BARBOACH"
     | "CHIMECHO"
     | "BALTOY"
+    | "FURRET"
     | "HOUNDOUR"
     | "NINCADA"
     | "NINETALES"

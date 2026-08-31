@@ -21,7 +21,7 @@ const battler = (
 });
 
 describe("MOVE_TRICK source-age reducer", () => {
-  it("matches both complete Item Bag/stretch/shake/resource/audio windows without framebuffer credit", () => {
+  it("matches both complete Item Bag/stretch/shake/resource/audio windows", () => {
     for (const orientation of ["player-back", "opponent-front"] as const) {
       expect(verifyTrickReducer(orientation)).toEqual({
         rows: 225,
@@ -63,11 +63,11 @@ describe("MOVE_TRICK source-age reducer", () => {
     });
   });
 
-  it("keeps Trick uncredited and the shared exact controls independent", () => {
+  it("keeps Trick's component credit and the shared exact controls independent", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     const track = coverage.componentTracks.find((entry: any) => entry.id === "trick-item-bags");
-    expect(track).toMatchObject({ representatives: ["MOVE_TRICK"], fulfilled: false });
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_TRICK")).toBeUndefined();
+    expect(track).toMatchObject({ representatives: ["MOVE_TRICK"], fulfilled: true });
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_TRICK")).toMatchObject({ move: "MOVE_TRICK", status: "exact" });
     for (const control of ["MOVE_PRESENT", "MOVE_COVET", "MOVE_EXTREME_SPEED", "MOVE_FAKE_OUT", "MOVE_ASTONISH", "MOVE_SAND_TOMB"]) {
       expect(track.representatives).not.toContain(control);
       expect(coverage.entries.find((entry: any) => entry.move === control)?.status).toBe("exact");
