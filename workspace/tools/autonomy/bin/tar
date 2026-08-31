@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Make Linux GNU tar consume macOS-created evidence archives like bsdtar on
+# macOS: resource-fork members are metadata, never framebuffer input.
+set -euo pipefail
+
+SYSTEM_TAR=/usr/bin/tar
+tar_version="$("$SYSTEM_TAR" --version 2>/dev/null || true)"
+if [[ "$tar_version" == *"GNU tar"* ]]; then
+  exec "$SYSTEM_TAR" \
+    --warning=no-unknown-keyword \
+    --exclude='._*' \
+    --exclude='*/._*' \
+    --exclude='__MACOSX' \
+    --exclude='*/__MACOSX/*' \
+    "$@"
+fi
+exec "$SYSTEM_TAR" "$@"

@@ -232,6 +232,7 @@ fi
 # only the main tree can commit to master). Bootstrap it if missing, then run
 # from it — everything after this cd (tools, docs, worker launches)
 # self-scopes there.
+PRIMARY_WORKSPACE_ROOT="$(pwd)"
 if [[ "$LANE" != "ts" && "$PRINT_CONFIG" != "1" \
       && "$(git rev-parse --abbrev-ref HEAD)" != "${LANE}-main" ]]; then
   LANE_WT="$(pwd)/.worktrees/${LANE}-main"
@@ -254,6 +255,15 @@ if [[ "$LANE" != "ts" && "$PRINT_CONFIG" != "1" \
     echo "$LANE worktree: installing deps (one-time npm install) ..."
     npm install --no-audit --no-fund >"/tmp/emerald-factory-${LANE}-main-setup.log" 2>&1 \
       || { echo "run-supervisor: npm install failed; see /tmp/emerald-factory-${LANE}-main-setup.log" >&2; exit 1; }
+  fi
+  # The WASM artifact is intentionally gitignored, but the full test suite
+  # exercises it whenever POKEBENCH_ENGINE=wasm is configured. Seed every
+  # persistent lane just as run-subagent.sh seeds disposable worker trees.
+  if [[ -f "${PRIMARY_WORKSPACE_ROOT}/artifacts/wasm/factory_wasm.wasm" \
+        && ! -f "${LANE_WT_WS}/artifacts/wasm/factory_wasm.wasm" ]]; then
+    mkdir -p "${LANE_WT_WS}/artifacts/wasm"
+    cp "${PRIMARY_WORKSPACE_ROOT}/artifacts/wasm/factory_wasm.wasm" \
+      "${LANE_WT_WS}/artifacts/wasm/factory_wasm.wasm"
   fi
 fi
 
@@ -552,7 +562,11 @@ fi
 # Headless supervisors and interactive Claude retain the original lightweight
 # shell watchdog. Interactive Codex exits through the foreground wrapper.
 agent_pid=$!
-( sleep "$CAP_SECONDS"
+( sleeper_pid=""
+  trap '[[ -z "$sleeper_pid" ]] || kill "$sleeper_pid" 2>/dev/null; exit 0' TERM INT
+  sleep "$CAP_SECONDS" &
+  sleeper_pid=$!
+  wait "$sleeper_pid" || exit $?
   echo "run-supervisor: ${CAP_HOURS}h cap reached — stopping supervisor"
   kill -TERM "$agent_pid" 2>/dev/null
   sleep 15
