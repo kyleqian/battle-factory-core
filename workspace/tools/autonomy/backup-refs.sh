@@ -16,7 +16,7 @@ git -C "$REPO_ROOT" remote get-url "$REMOTE" >/dev/null
 
 # Animation and Rust intentionally overlap. They share one Git repository and
 # can finish at nearly the same instant, so serialize the multi-ref snapshot.
-STATE_ROOT="${STATE_DIRECTORY:-${REPO_ROOT}/.autonomy-state}"
+STATE_ROOT="${STATE_DIRECTORY:-${REPO_ROOT}/.git/pokebench-autonomy}"
 mkdir -p "$STATE_ROOT"
 if command -v flock >/dev/null 2>&1; then
   exec 8>"${STATE_ROOT}/backup.lock"
