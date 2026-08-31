@@ -561,6 +561,7 @@ import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "j
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
 import metalSoundAsset from "../animation/assets/metal-sound.json" with { type: "json" };
 import screechAsset from "../animation/assets/screech.json" with { type: "json" };
+import safeguardAsset from "../animation/assets/safeguard.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
@@ -904,6 +905,7 @@ import {
   sceneOnSupersonicView,
   sceneOnMetalSoundView,
   sceneOnScreechView,
+  sceneOnSafeguardView,
   sceneOnSmellingSaltView,
   sceneOnRecycleView,
   sceneOnLeerView,
@@ -1060,6 +1062,7 @@ import {
   type SceneOnLusterPurgePresentationState,
   type SceneOnMetalSoundConfig,
   type SceneOnScreechConfig,
+  type SceneOnSafeguardConfig,
   type SceneOnLeerConfig,
   type SceneOnHiJumpKickConfig,
   type SceneOnKarateChopConfig,
@@ -1855,6 +1858,9 @@ const metalSoundArt = metalSoundAsset as {
 };
 const screechArt = screechAsset as {
   purpleRing: { tileset: Tileset; palette: RgbColor[] };
+};
+const safeguardArt = safeguardAsset as {
+  guardRing: { tileset: Tileset; palette: RgbColor[] };
 };
 const smellingSaltArt = smellingSaltAsset as {
   exclamation: { tileset: Tileset; palette: RgbColor[] };
@@ -14920,6 +14926,129 @@ export function renderSceneOnMovePresentation(
       fb,
       playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
       "INGRAIN!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SAFEGUARD") {
+    const safeguardState = state as SceneOnMovePresentationState<SceneOnSafeguardConfig>;
+    const view = sceneOnSafeguardView(safeguardState);
+    // Safeguard's ordinary Guard Ring OAM and the `F_PAL_ATK_SIDE` palette
+    // DMA scan out one source row later.  `monbg` itself is a setup command
+    // and its age-4 copy is visible on that source row, so it stays live.
+    const displayed = sceneOnSafeguardView({
+      ...safeguardState,
+      age: safeguardState.age - 1,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) throw new Error(`SAFEGUARD missing ${view.attacker.species} attacker art`);
+    if (!targetSource) throw new Error(`SAFEGUARD missing ${view.target.species} target art`);
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const attackerPalette = blendPaletteToward(
+      attackerSource.palette,
+      { r: 255, g: 255, b: 255 },
+      displayed.blend.bgY,
+    );
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb,
+      attackerTileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    );
+    const drawTarget = (): void => drawSpriteSheet(
+      fb,
+      targetTileset,
+      targetSource.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const drawRings = (nonObjTarget2: Uint8Array): void => {
+      if (!view.alpha) return;
+      const paintOrder = playerAttacker
+        ? displayed.rings
+        : Array.from(displayed.rings).reverse();
+      for (const ring of paintOrder) {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          safeguardArt.guardRing.tileset,
+          safeguardArt.guardRing.palette,
+          ring.x + ring.x2,
+          ring.y + ring.y2,
+          ring.matrix[0],
+          ring.matrix[1],
+          ring.matrix[2],
+          ring.matrix[3],
+          view.alpha.eva,
+          view.alpha.evb,
+          true,
+        );
+      }
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // `monbg ANIM_ATK_PARTNER` makes the attacker the selected BG target-2
+    // layer.  Its clearing rows restore ordinary attacker OAM while that
+    // copy is still retained, matching the source cleanup overlap.
+    if (view.monBg.active) drawAttacker();
+    const nonObjTarget2 = fb.slice();
+    if (!view.monBg.active) {
+      if (playerAttacker) {
+        drawTarget();
+        drawAttacker();
+      } else {
+        drawAttacker();
+        drawTarget();
+      }
+    } else {
+      drawTarget();
+      if (view.monBg.clearing) drawAttacker();
+    }
+    drawRings(nonObjTarget2);
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const profile = safeguardState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "SAFEGUARD!",
       99,
     );
     return;

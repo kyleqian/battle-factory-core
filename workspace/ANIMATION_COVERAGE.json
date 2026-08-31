@@ -102,6 +102,41 @@
    ]
   },
   {
+   "move": "MOVE_SAFEGUARD",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-180 Bayleef three-mon Battle Scene ON parties retain player-back and opponent-front frames 209-279, 71 consecutive pointer-owned rows each through inactive age 70; both orientations are twice-fresh byte-identical",
+    "the authoritative Move_SAFEGUARD interval is 0x082cb6f7..0x082cb739; the pure source-age reducer and typed Scene-ON seam cover ANIM_TAG_GUARD_RING, gGuardRingSpriteTemplate, the three literal Guard Ring creates and Q8 lifecycle, attacker monbg/clearmonbg, setalpha/blendoff, white BlendColorCycleByTag, resource/palette transfer, audio, and cleanup",
+    "the ordinary shared compositor consumes source Guard Ring art, live species/sides/geometry and allocator/subpriority facts, generic front/back battler art, attacker target-2 monbg copy, current alpha plus predecessor OAM/palette display latches, field chrome, and cleanup without a carrier/evidence-pair gate, recording/RGB/framebuffer lookup, coordinate fitting, absolute tick, or gameplay ownership",
+    "actual core.ts to renderSceneOnMovePresentation framebuffer equality passes all 71/71 player-back plus 71/71 opponent-front component/seam/raw-RGB rows through inactive cleanup with zero residual pixels on two deterministic production-render passes",
+    "Safeguard's own bilateral maps prove ordinary OAM, affine matrices, and palette transfer from the preceding RAM row on 70/70 comparable rows; source rings birth at 7/13/19 and first paint at 8/14/20, while white BlendColorCycle faded/hardware transitions remain independently retained at 36/37 through 60/61",
+    "gameplay state, status protection, damage, battle RNG, controller, turn, round, and facility state remain unowned; MOVE_SWEET_SCENT, MOVE_BARRIER, and MOVE_LIGHT_SCREEN remain independently exact controls and receive no sibling credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-safeguard-player-bayleef-opponent-onix.json",
+    "tools/battle-lab/mechanic-safeguard-opponent-bayleef-player-onix.json",
+    "tools/compare/fixtures/safeguard-evidence.json",
+    "tools/compare/evidence/safeguard-player-dense-state.json.gz",
+    "tools/compare/evidence/safeguard-opponent-dense-state.json.gz",
+    "tools/compare/evidence/safeguard-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/safeguard-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/safeguard-changemap-player.json",
+    "tools/compare/evidence/safeguard-changemap-opponent.json",
+    "tools/compare/safeguardSourceAudit.ts",
+    "tools/compare/safeguardEvidence.ts",
+    "tools/compare/safeguardFramebuffer.ts",
+    "tools/compare/extractSafeguardAssets.ts",
+    "src/animation/assets/safeguard.json",
+    "src/animation/safeguard.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/safeguardSource.test.ts",
+    "tests/animation/safeguardEvidence.test.ts",
+    "tests/animation/safeguard.test.ts",
+    "tests/animation/safeguardFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SCREECH",
    "status": "exact",
    "covered": [
@@ -7132,7 +7167,7 @@
     "representatives": [
       "MOVE_SAFEGUARD"
     ],
-    "fulfilled": false,
+    "fulfilled": true,
     "evidence": [
       "tools/battle-lab/mechanic-safeguard-player-bayleef-opponent-onix.json",
       "tools/battle-lab/mechanic-safeguard-opponent-bayleef-player-onix.json",
@@ -7150,11 +7185,14 @@
       "src/animation/assets/safeguard.json",
       "src/animation/safeguard.ts",
       "src/animation/sceneOnPresentation.ts",
+      "src/engine/battleScene.ts",
       "tests/animation/safeguardSource.test.ts",
       "tests/animation/safeguardEvidence.test.ts",
-      "tests/animation/safeguard.test.ts"
+      "tests/animation/safeguard.test.ts",
+      "tools/compare/safeguardFramebuffer.ts",
+      "tests/animation/safeguardFramebuffer.test.ts"
     ],
-    "goal": "UNFULFILLED evidence/reducer/seam checkpoint only: MOVE_SAFEGUARD alone has complete twice-fresh legal 71-row player-back plus 71-row opponent-front Battle Scene ON receipts through first inactive cleanup, source Guard Ring extraction, a pure source-age reducer, and a narrow typed seam. Its own maps prove ordinary software-to-hardware OAM/matrix/palette RAM+1 on 70/70 rows bilaterally; script-created rings are source ages 7/13/19 and first visible RGB ages 8/14/20, while BlendColorCycle faded/hardware transitions are independently retained at 36/37 through 60/61. Do not grant move/component/control credit until a generic live compositor reaches actual core.ts -> renderSceneOnMovePresentation zero-residual equality for every retained row twice. MOVE_SWEET_SCENT, MOVE_BARRIER, and MOVE_LIGHT_SCREEN remain independent exact controls only."
+    "goal": "FULFILLED: MOVE_SAFEGUARD alone independently passes complete twice-fresh legal 71/71 player-back plus 71/71 opponent-front source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two production-render passes. Source Guard Ring art, the three Q8 rings, attacker monbg copy/cleanup, setalpha/blendoff, white BlendColorCycleByTag palette transfer, typed live species/sides/geometry and allocator/subpriority facts, generic front/back art, chrome, and cleanup use no pair gate, recording/RGB/framebuffer lookup, coordinate fitting, absolute tick, or gameplay ownership. MOVE_SWEET_SCENT, MOVE_BARRIER, and MOVE_LIGHT_SCREEN remain independent controls and receive no sibling credit."
   },
   {
     "id": "helping-hand-clap",

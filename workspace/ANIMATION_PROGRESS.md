@@ -1,3 +1,10 @@
+# MOVE_SAFEGUARD Guard Ring exact production presentation (2026-08-31 worker)
+
+- **State:** Level 50 advances **214→215/276 exact**, remains **0 partial / 0 staged**, and drops **62→61 unsupported**. MOVE_SAFEGUARD alone promotes and `guard-ring-safeguard` is fulfilled; MOVE_SWEET_SCENT, MOVE_BARRIER, and MOVE_LIGHT_SCREEN remain independent exact controls with no sibling credit.
+- **Did:** Added the narrow live Scene-ON compositor only through `renderSceneOnMovePresentation`: source Guard Ring art and three Q8 rings, attacker target-2 monbg/clear overlap, live `setalpha`/`blendoff`, preceding white `BlendColorCycleByTag` palette transfer, generic front/back art, live sides/species/geometry/allocator facts, chrome, and cleanup. Added a strict retained framebuffer comparator and a live-species/geometry control; no battle status, damage, RNG, controller, turn, round, facility, boundary, or barrier ownership changed.
+- **Verified:** Complete legal three-mon Battle Scene ON receipts remain twice-fresh byte-identical in both orientations, **71 rows / frames 209..279** through inactive age 70. Actual `core.ts → renderSceneOnMovePresentation` equality is **71/71 player-back + 71/71 opponent-front = 142/142**, zero residual pixels, on two deterministic production passes. Safeguard's own maps prove OAM/matrix/palette RAM+1 **70/70** bilaterally, source births 7/13/19 / first paint 8/14/20, and white faded/hardware palette transitions 36/37 through 60/61.
+- **Next:** Choose another bounded unsupported move independently; shared Guard Ring/monbg/palette components do not promote siblings.
+
 # MOVE_SWIFT source/staging checkpoint — unsupported (2026-08-31 worker)
 
 - **State:** Level 50 remains **214/276 exact, 0 partial / 0 staged, 62 unsupported**. MOVE_SWIFT and the non-exclusive `swift-stars-source-staging` track remain unsupported/unfulfilled; no component or sibling credit changes.
@@ -19,14 +26,6 @@
 - **Evidence:** Two fresh Battle Scene ON runs reproduce byte-identically in each orientation: **225 rows**, player-back frames **66..290** and opponent-front **70..294**, through inactive age 224. Retained archives include pointer/task/sprite/software+hardware OAM/matrix/faded+hardware palette/tag/register/audio/party/engine/RNG/raw-RGB rows. Own maps prove bags 7..198 (birth/waves/subpriority/affine/blink), paired Stretch 25..44, paired ShakeMon 173..191, Sketch + six Double Team + Attract, ITEM_BAG 1..223, SPEED_DUST 4..223 with zero own sprites, OAM/palette RAM+1, and fresh Stretch matrix RAM+2. `ANIMATION_LATCHES.md` is unchanged: no new or contradictory mechanism.
 - **Checks:** Source/evidence/reducer direct audits pass; focused source/evidence/reducer/control/boundary/frontier suite is **16 files / 58 tests green**; `npm run animation:coverage` remains 214/276; `npm run typecheck` passes.
 - **Next:** Keep MOVE_TRICK uncredited until a generic compositor using live species/sides/geometry, existing chrome, and actual Item Bag art reaches `core.ts → renderSceneOnMovePresentation` zero residual for all **225+225** rows twice. Do not use an evidence pair, RGB/framebuffer lookup, coordinate fitting, absolute tick, or gameplay ownership.
-
-# MOVE_SAFEGUARD Guard Ring evidence/reducer/seam checkpoint — unsupported (2026-08-31 worker)
-
-- **State:** Level 50 remains **214/276 exact, 0 partial / 0 staged, 62 unsupported**. MOVE_SAFEGUARD and the non-exclusive `guard-ring-safeguard` track remain unsupported/unfulfilled; MOVE_SWEET_SCENT, MOVE_BARRIER, and MOVE_LIGHT_SCREEN receive no sibling credit.
-- **Did:** Pinned `Move_SAFEGUARD`'s authoritative **0x082cb6f7..<0x082cb739** interval and set-180 Bayleef carrier; reproducibly extracted `ANIM_TAG_GUARD_RING`; implemented the pure three-ring/monbg/setalpha/blend-color-cycle reducer and narrow typed Scene-ON seam. No battle status protection, RNG, controller, turn, round, facility, or production framebuffer ownership was added.
-- **Evidence:** Complete legal transient-free Battle Scene ON three-mon parties reproduce twice fresh byte-identically in both orientations: **71 rows, frames 209..279**, through inactive age 70. The retained state has pointer parities 0/1, full task/sprite/OAM/matrix/palette/tag/register/audio/party/engine/RNG/raw-RGB rows and normalized maps. Safeguard itself proves ordinary OAM/matrix/palette RAM+1 **70/70** bilaterally; Guard Rings source-birth at 7/13/19 and first paint at 8/14/20; white BlendColorCycle faded/hardware steps are 36/37 through 60/61. `ANIMATION_LATCHES.md` is unchanged: no new or contradictory mechanism.
-- **Next:** Keep Safeguard unfulfilled until a generic compositor using live species/sides/geometry/field chrome and Guard Ring art reaches actual `core.ts → renderSceneOnMovePresentation` zero residual on all **71+71** retained rows, twice, without a pair gate, framebuffer/RGB lookup, coordinate fitting, or absolute tick.
-- **Notes:** Source/reducer/evidence tests and typecheck pass. No coverage entries/counts, boundary/barrier lists, or control statuses changed.
 
 # MOVE_HELPING_HAND legal Scene-ON boundary + source/reducer checkpoint (2026-08-31 worker)
 

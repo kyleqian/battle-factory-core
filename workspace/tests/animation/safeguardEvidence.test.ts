@@ -6,8 +6,8 @@ import { createScratchDir } from "../../tools/lib/scratch.ts";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
 
-describe("MOVE_SAFEGUARD bilateral Scene-ON evidence checkpoint", () => {
-  it("retains two complete fresh legal three-mon windows without move credit", () => {
+describe("MOVE_SAFEGUARD bilateral Scene-ON exact evidence", () => {
+  it("retains two complete fresh legal three-mon windows with production credit", () => {
     const receipt = JSON.parse(readFileSync(
       "tools/compare/fixtures/safeguard-evidence.json", "utf8",
     ));
@@ -15,8 +15,26 @@ describe("MOVE_SAFEGUARD bilateral Scene-ON evidence checkpoint", () => {
       schema: "safeguard-bilateral-evidence/v1",
       oracleProfile: "battle-scene-on",
       move: "MOVE_SAFEGUARD",
-      status: "checkpoint",
-      coverageCredit: false,
+      status: "exact",
+      coverageCredit: true,
+      evidenceScope: {
+        productionAnimationChanged: true,
+        reducerAdded: true,
+        typedSeamAdded: true,
+        compositorAdded: true,
+        framebufferLookupAdded: false,
+        coveragePromotion: true,
+        boundaryOrBarrierChanged: false,
+        gameplayStateOwned: false,
+        fullDenseRowsRetained: true,
+        twiceFreshByteIdentical: true,
+      },
+      acceptance: {
+        sourceRows: { "player-back": 71, "opponent-front": 71 },
+        typedSeamRows: { "player-back": 71, "opponent-front": 71 },
+        productionFramebufferRows: { "player-back": 71, "opponent-front": 71 },
+        productionFramebufferResidualPixels: 0,
+      },
       repeatability: { runsPerOrientation: 2, allMatched: true },
     });
     for (const side of ["player-back", "opponent-front"] as const) {

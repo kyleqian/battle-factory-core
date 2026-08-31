@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        unsupported: 62,
+        unsupported: 61,
         staged: 0,
         partial: 0,
-        exact: 214,
+        exact: 215,
       },
       {
         tier: "openOnly",

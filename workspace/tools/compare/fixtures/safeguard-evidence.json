@@ -2,8 +2,26 @@
   "schema": "safeguard-bilateral-evidence/v1",
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_SAFEGUARD",
-  "status": "checkpoint",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
+  "evidenceScope": {
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "framebufferLookupAdded": false,
+    "coveragePromotion": true,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "acceptance": {
+    "sourceRows": { "player-back": 71, "opponent-front": 71 },
+    "typedSeamRows": { "player-back": 71, "opponent-front": 71 },
+    "productionFramebufferRows": { "player-back": 71, "opponent-front": 71 },
+    "productionFramebufferResidualPixels": 0
+  },
   "repeatability": {
     "runsPerOrientation": 2,
     "allMatched": true

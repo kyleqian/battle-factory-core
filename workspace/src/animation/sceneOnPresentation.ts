@@ -1015,6 +1015,7 @@ export interface SceneOnBattlerGeometry {
 export interface SceneOnPresentationBattler {
   readonly species:
     | "ARON"
+    | "BAYLEEF"
     | "BARBOACH"
     | "CHIMECHO"
     | "BALTOY"

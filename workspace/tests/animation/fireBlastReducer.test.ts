@@ -121,7 +121,7 @@ describe("MOVE_FIRE_BLAST pure reducer and typed presentation seam", () => {
     }
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: any) => entry.status === "exact"))
-      .toHaveLength(214);
+      .toHaveLength(215);
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_FIRE_BLAST"))
       .toMatchObject({ status: "exact" });
     for (const move of ["MOVE_DRAGON_BREATH", "MOVE_FLAMETHROWER",
