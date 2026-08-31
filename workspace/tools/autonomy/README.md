@@ -16,7 +16,7 @@ to continue unless the ROM and oracle framebuffer hashes match the laptop.
 - Every run pushes committed `master`, `animation-main`, and `rust-main` to
   `autonomy/<run-id>/...`. It never pushes or force-updates the canonical
   branches.
-- Raw Codex JSONL remains in each worktree's `.codex-logs/`; journald holds the
+- Raw Codex and Claude JSONL remains in each worktree's `.codex-logs/`; journald holds the
   service output and `/var/lib/pokebench-autonomy/runs.log` holds a compact run
   ledger. Pull logs separately with `rsync`; do not commit them.
 - `AUTONOMY_END_EPOCH` stops new work after the chosen seven-day window. A
@@ -51,6 +51,21 @@ codex login status
 The user completes the browser/device-code step. Do not copy `~/.codex` from
 the laptop.
 
+Claude Code is pinned alongside Codex. Authenticate it with the Claude.ai
+subscription on the VM, also without an API key:
+
+```sh
+ssh pokebench@SERVER_IP
+claude auth login
+claude auth status --text
+```
+
+For SSH login, open the printed URL locally and paste the browser's login code
+back into the terminal. Linux stores that credential mode `0600` under
+`~/.claude/`. Provider pairs are configured per lane in
+`/etc/pokebench-autonomy.env`; supported pairs include `codex/codex`,
+`claude/claude`, `claude/codex`, and `codex/claude`.
+
 For GitHub, generate a dedicated key on the VM and grant it write access only
 to this repository as a deploy key:
 
@@ -84,7 +99,7 @@ sudo workspace/tools/autonomy/bootstrap-ubuntu.sh \
   pokebench /srv/pokebench/pokeemerald-factory-core
 ```
 
-The bootstrap pins Node/Codex/Rust, pret/pokeemerald, agbcc, mGBA 0.10.5, and
+The bootstrap pins Node/Codex/Claude Code/Rust, pret/pokeemerald, agbcc, mGBA 0.10.5, and
 the Ubuntu `libmgba-py` binding. `versions.env` is the complete receipt.
 
 After ChatGPT and GitHub authentication, run the full canary:
