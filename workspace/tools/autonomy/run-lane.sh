@@ -10,6 +10,7 @@ if [[ ! "$LANE" =~ ^(animation|rust)$ ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="${SCRIPT_DIR}/bin:${PATH}"
 REPO_ROOT="${POKEBENCH_REPO_ROOT:-$(cd "${SCRIPT_DIR}/../../.." && pwd)}"
 WORKSPACE_ROOT="${REPO_ROOT}/workspace"
 STATE_ROOT="${STATE_DIRECTORY:-${REPO_ROOT}/.autonomy-state}"

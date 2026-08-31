@@ -9,6 +9,15 @@ done
 
 jq empty "${SCRIPT_DIR}/oracle-smoke-trace.json"
 
+# Evidence archives created on macOS contain AppleDouble resource-fork
+# members. The runner-local tar shim must hide them on GNU tar just as the
+# native macOS tar does.
+archive="${SCRIPT_DIR}/../../tools/compare/evidence/belly-drum-player-raw-rgb.tar.gz"
+if "${SCRIPT_DIR}/bin/tar" -tzf "$archive" | grep -qE '(^|/)\._'; then
+  echo "autonomy tests: portable tar exposed AppleDouble members" >&2
+  exit 1
+fi
+
 invalid_output="$(mktemp)"
 status=0
 "${SCRIPT_DIR}/run-lane.sh" invalid >"$invalid_output" 2>&1 || status=$?

@@ -196,6 +196,13 @@ prepare_repository() {
     runuser -u "$RUNNER_USER" -- ln -s ../../../vendor/pokeemerald "${WORKSPACE_ROOT}/reference/pokeemerald"
   fi
   runuser -u "$RUNNER_USER" -- npm --prefix "$WORKSPACE_ROOT" ci --no-audit --no-fund
+  # Linked worktrees share repository config. Derive the unattended commit
+  # identity from the checked-out history so fresh lane merges can commit.
+  local git_user_name git_user_email
+  git_user_name="$(runuser -u "$RUNNER_USER" -- git -C "$REPO_ROOT" log -1 --format=%an)"
+  git_user_email="$(runuser -u "$RUNNER_USER" -- git -C "$REPO_ROOT" log -1 --format=%ae)"
+  runuser -u "$RUNNER_USER" -- git -C "$REPO_ROOT" config user.name "$git_user_name"
+  runuser -u "$RUNNER_USER" -- git -C "$REPO_ROOT" config user.email "$git_user_email"
 }
 
 install -d -o "$RUNNER_USER" -g "$RUNNER_USER" "$VENDOR_ROOT"
