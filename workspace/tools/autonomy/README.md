@@ -11,17 +11,33 @@ to continue unless the ROM and oracle framebuffer hashes match the laptop.
 - Animation is a single-writer branch. Its timer starts at 00:00, 06:00,
   12:00, and 18:00 UTC with a 5.5-hour cap. A per-lane `flock` makes overlap
   impossible even if a prior run is slow to wind down.
-- Rust uses its own branch, worktree, ledger, oracle profile, and lock. It runs
-  for up to four hours daily at 03:00 UTC, overlapping Animation when useful.
+- Rust uses its own branch, worktree, ledger, oracle profile, and lock. Claude
+  runs it for up to four hours at 03:00 and 15:00 UTC, overlapping the Codex
+  Animation lane. During this unattended window Rust is restricted to
+  `core-rs/` so it never launches a second full TypeScript gate.
 - Every run pushes committed `master`, `animation-main`, and `rust-main` to
-  `autonomy/<run-id>/...`. It never pushes or force-updates the canonical
-  branches.
+  `autonomy/<run-id>/...`. Concurrent backups are serialized. If a local stash
+  exists, its current object is also preserved under a content-addressed
+  `autonomy/<run-id>/recovery/stash-*` ref. The runner never pushes or
+  force-updates the canonical branches.
 - Raw Codex and Claude JSONL remains in each worktree's `.codex-logs/`; journald holds the
   service output and `/var/lib/pokebench-autonomy/runs.log` holds a compact run
   ledger. Pull logs separately with `rsync`; do not commit them.
 - `AUTONOMY_END_EPOCH` stops new work after the chosen seven-day window. A
   powered-off Hetzner server still bills, so delete the VM manually after the
   Git refs and logs have been recovered.
+
+An `OPEN:` entry in a lane's deferred ledger remains a hard boundary: agents
+must not guess at or remove it. The unattended policy nevertheless lets later
+runs continue independent reversible work. If the deferral blocks every safe
+step, the run leaves a clean checkpoint and exits; the next scheduled run may
+try again after other lane progress changes the available evidence.
+
+Usage exhaustion is scoped to one invocation. Codex or Claude exits nonzero,
+the runner backs up all committed progress, and systemd records that run as a
+failure. There is no immediate retry and no cross-provider fallback; the timer
+remains active and tries the configured provider again at its next calendar
+time in case account usage has reset.
 
 The VM needs no GPU. Model inference remains in OpenAI's cloud. Dedicated CPU,
 RAM, and disk are for concurrent TypeScript/Rust builds, mGBA, and worktrees.
