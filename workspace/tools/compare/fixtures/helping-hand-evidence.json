@@ -1,0 +1,32 @@
+{
+  "schema": "helping-hand-singles-boundary/v1",
+  "move": "MOVE_HELPING_HAND",
+  "status": "unsupported",
+  "coverageCredit": false,
+  "repeatability": {"runsPerOrientation": 2, "allMatched": true},
+  "boundary": {
+    "profile": "battle-scene-on",
+    "mechanicLab": "v1 Level-50 singles",
+    "successRequires": "BATTLE_TYPE_DOUBLE",
+    "failureBefore": "attackanimation",
+    "rootScriptObserved": false,
+    "presentationAllocated": false
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-helping-hand-player-volbeat-opponent-onix.json",
+      "scenarioSha256": "893201abd064b4b0cc2a4e303f2a5fed0dca4d73691d3263a91af62a9391fbf8",
+      "probeSha256": "355fe9d22888ed0fbc7b69cf87ad08874c9d0bb1bbcd5cd4a75953bd6a4a9321",
+      "window": {"startFrame": 39, "endFrame": 188, "rows": 150},
+      "pp": {"first": [20,20,20,20], "last": [19,20,20,20]}
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-helping-hand-opponent-volbeat-player-onix.json",
+      "scenarioSha256": "48d40f699f3773de828e4da8c9df9b91cdfa474b817dbc81e4a0830394f8c778",
+      "probeSha256": "ebed1652fad47c7e33045c2d58debb88fa1fabcb579337fa136d2c36d222d202",
+      "window": {"startFrame": 39, "endFrame": 193, "rows": 155},
+      "pp": {"first": [20,20,20,20], "last": [19,20,20,20]}
+    }
+  },
+  "remaining": "MechanicLab v1 cannot stage a doubles success, so no complete Move_HELPING_HAND pointer/task/sprite/OAM/matrix/palette/raw-RGB window exists. Do not apply latches or wire a Scene-ON compositor until legal doubles staging supplies two fresh complete success windows in both orientations."
+}

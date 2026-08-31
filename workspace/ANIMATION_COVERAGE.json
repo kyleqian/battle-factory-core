@@ -7117,6 +7117,32 @@
    "representatives": ["MOVE_ERUPTION"],
    "fulfilled": true,
     "goal": "FULFILLED: MOVE_ERUPTION alone independently passes 476/476 player-back plus 494/494 opponent-front complete source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two production-render passes and two fresh legal probes per orientation. Its source-derived WARM_ROCK art/cells, launch/falling allocation and painter order, measured launch-task OAM/matrix exceptions, paired HorizontalShake(8,60), two palette ramps, loopsewithpan audio, typed live species/sides/geometry, generic front/back battler art, chrome, and cleanup use no pair gate, recording/framebuffer lookup, coordinate fitting, absolute tick, or gameplay ownership. Earthquake, Fissure, Luster Purge, Sky Attack, Magnitude, Explosion, and Self Destruct remain independent controls and receive no sibling credit."
+  },
+  {
+   "id": "helping-hand-clap",
+   "components": [
+    "asset:ANIM_TAG_TAG_HAND",
+    "sprite:gHelpingHandClapSpriteTemplate",
+    "task:AnimTask_BlendMonInAndOut",
+    "task:AnimTask_HelpingHandAttackerMovement",
+    "task:AnimTask_ShakeMon2"
+   ],
+   "representatives": ["MOVE_HELPING_HAND"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/battle-lab/mechanic-helping-hand-player-volbeat-opponent-onix.json",
+    "tools/battle-lab/mechanic-helping-hand-opponent-volbeat-player-onix.json",
+    "tools/compare/helpingHandProbe.py",
+    "tools/compare/fixtures/helping-hand-evidence.json",
+    "tools/compare/helpingHandSourceAudit.ts",
+    "tools/compare/extractHelpingHandAssets.ts",
+    "src/animation/assets/helping-hand-tag-hand.json",
+    "src/animation/helpingHand.ts",
+    "tests/animation/helpingHandSourceCheckpoint.test.ts",
+    "tests/animation/helpingHandEvidence.test.ts",
+    "tests/animation/helpingHandReducer.test.ts"
+   ],
+   "goal": "UNFULFILLED boundary checkpoint only: the pure success-body callback reducers and full TAG_HAND extraction are source-audited, while complete legal Scene-ON Volbeat/Onix singles stages reproduce twice fresh in both orientations and prove CMD_trysethelpinghand fails before attackanimation (PP is spent, but the root pointer, clap sprites, movement task, partner shakes, blend, palette writes, OAM/matrix/palette latches, and framebuffer body are absent). MechanicLab v1 is singles-only; do not promote MOVE_HELPING_HAND or infer the supplied latch expectations. A future legal doubles staging path must retain the complete dense success window through inactive cleanup and then independently fit every move-owned latch before a seam/compositor or acceptance claim. MOVE_ENCORE and MOVE_SMELLING_SALT remain exact controls only."
   }
  ],
  "variantAudits": {
