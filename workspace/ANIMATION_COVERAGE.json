@@ -7215,6 +7215,37 @@
       "tests/animation/trickReducer.test.ts"
     ],
     "goal": "UNFULFILLED evidence/reducer/seam checkpoint only: MOVE_TRICK alone has complete legal transient-free Battle Scene ON Furret/Chansey three-mon parties in both item-swappable orientations. Two fresh runs retain and reproduce byte-identically 225 consecutive rows per orientation through inactive age 224, including pointer/task/sprite/software+hardware OAM/matrix/faded+hardware palette/tag/register/audio/party/engine/RNG/raw-RGB rows and normalized maps. The pure source-age reducer and typed seam independently fit both ITEM_BAG births (age 7), 60x20 wave paths/subpriorities/affine stages/blink teardown through age 198, paired StretchTargetUp/StretchAttackerUp ages 25..44, paired ShakeMon ages 173..191, literal Sketch + six Double Team + Attract cadence, ordinary OAM/palette RAM+1, fresh Stretch matrix RAM+2, and resource free at age 224. ANIM_TAG_SPEED_DUST is loaded ages 4..223 but has zero own sprite rows. Do not grant move/component/control credit until a generic live compositor reaches actual core.ts -> renderSceneOnMovePresentation zero-residual equality for every retained row twice, with no pair gate, recording/RGB/framebuffer lookup, coordinate fitting, absolute tick, or gameplay ownership. MOVE_PRESENT, MOVE_COVET, MOVE_EXTREME_SPEED, MOVE_FAKE_OUT, MOVE_ASTONISH, and MOVE_SAND_TOMB remain independent exact controls only."
+  },
+  {
+    "id": "rock-blast-first-body",
+    "components": [
+      "asset:ANIM_TAG_IMPACT",
+      "asset:ANIM_TAG_ROCKS",
+      "sprite:gHorizontalLungeSpriteTemplate",
+      "sprite:gRockBlastRockSpriteTemplate",
+      "sprite:gRockFragmentSpriteTemplate",
+      "task:AnimTask_ShakeMon",
+      "visualCommand:create_basic_hitsplat_sprite"
+    ],
+    "representatives": ["MOVE_ROCK_BLAST"],
+    "fulfilled": false,
+    "evidence": [
+      "tools/battle-lab/mechanic-rock-blast-player-rhyhorn-opponent-shuckle.json",
+      "tools/battle-lab/mechanic-rock-blast-opponent-rhyhorn-player-shuckle.json",
+      "tools/compare/rockBlastSourceAudit.ts",
+      "tools/compare/rockBlastProbe.py",
+      "tools/compare/rockBlastEvidence.ts",
+      "tools/compare/fixtures/rock-blast-evidence.json",
+      "tools/compare/evidence/rock-blast-player-dense-state.json.gz",
+      "tools/compare/evidence/rock-blast-opponent-dense-state.json.gz",
+      "tools/compare/evidence/rock-blast-player-raw-rgb.tar.gz",
+      "tools/compare/evidence/rock-blast-opponent-raw-rgb.tar.gz",
+      "tools/compare/evidence/rock-blast-changemap-player.json",
+      "tools/compare/evidence/rock-blast-changemap-opponent.json",
+      "tests/animation/rockBlastSourceCheckpoint.test.ts",
+      "tests/animation/rockBlastEvidenceCheckpoint.test.ts"
+    ],
+    "goal": "UNFULFILLED source/evidence checkpoint only: MOVE_ROCK_BLAST alone has complete legal transient-free Battle Scene ON Rhyhorn/Shuckle three-mon parties in both orientations. Two fresh runs retain and reproduce byte-identically 90 consecutive rows per orientation through the first inactive cleanup (player-back frames 84..173; opponent-front 88..177), including pointer/task/sprite/software+hardware OAM/matrix/faded+hardware palette/tag/register/audio/party/engine/RNG/raw-RGB rows and normalized maps. The receipt deliberately owns one first pointer body only: EFFECT_MULTI_HIT repeats and battle outcome are excluded. Ordinary OAM/matrix/palette predecessor latches hold 89/89 bilaterally; the source has ANIM_TAG_ROCKS, ANIM_TAG_IMPACT, lunge, Rock Blast rock, fragments, hitsplat, and ShakeMon. Existing ROCKS source identity is audited, but BasicRock cells 0/1/5 remain undecoded and no production art, reducer, typed seam, compositor, or framebuffer comparison is added. Do not promote MOVE_ROCK_BLAST or any component/control until a generic live core.ts to renderSceneOnMovePresentation path reaches zero residual on every retained row twice without an evidence pair, recording/RGB/framebuffer lookup, absolute tick, coordinate fitting, or gameplay ownership. MOVE_ROCK_THROW, MOVE_ROCK_TOMB, and MOVE_ANCIENT_POWER remain independent exact controls only."
   }
  ],
  "variantAudits": {
