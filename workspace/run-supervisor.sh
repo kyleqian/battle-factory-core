@@ -92,7 +92,9 @@ remains supported.
 Exit 6 means the lane's deferred file (DEFERRED.md for ts,
 ANIMATION_DEFERRED.md for animation, RUST_DEFERRED.md for rust) has an
 unresolved question that must be resolved before another supervisor session
-can start in that lane.
+can start in that lane. Set POKEBENCH_UNATTENDED_DEFERRED_POLICY=continue for
+an unattended schedule that preserves open questions while continuing only
+independent safe work.
 EOF
 }
 
@@ -226,6 +228,11 @@ if [[ ! "$LANE" =~ ^(ts|animation|rust)$ ]]; then
   echo "run-supervisor: unsupported lane '$LANE' (expected ts, animation, or rust)" >&2
   exit 2
 fi
+RUST_CORE_ONLY="${POKEBENCH_RUST_CORE_ONLY:-0}"
+if [[ "$LANE" == "rust" && ! "$RUST_CORE_ONLY" =~ ^(0|1)$ ]]; then
+  echo "run-supervisor: POKEBENCH_RUST_CORE_ONLY must be 0 or 1 (got '$RUST_CORE_ONLY')" >&2
+  exit 2
+fi
 
 # Side-lane supervisors (animation, rust) live in a persistent worktree on
 # their own branch (single-writer: only that session commits to <lane>-main;
@@ -270,12 +277,24 @@ fi
 DEFERRED_FILE="DEFERRED.md"
 [[ "$LANE" == "animation" ]] && DEFERRED_FILE="ANIMATION_DEFERRED.md"
 [[ "$LANE" == "rust" ]] && DEFERRED_FILE="RUST_DEFERRED.md"
-if [[ "$PRINT_CONFIG" != "1" && -f "$DEFERRED_FILE" ]] \
-    && grep -qE '^## D[0-9]+ .*OPEN:' "$DEFERRED_FILE"; then
-  echo "run-supervisor: refusing to start — $DEFERRED_FILE has unresolved user-level decisions:" >&2
-  grep -E '^## D[0-9]+ .*OPEN:' "$DEFERRED_FILE" >&2
-  echo "Resolve and remove those entries before launching another long supervisor session." >&2
-  exit 6
+DEFERRED_POLICY="${POKEBENCH_UNATTENDED_DEFERRED_POLICY:-block}"
+if [[ ! "$DEFERRED_POLICY" =~ ^(block|continue)$ ]]; then
+  echo "run-supervisor: POKEBENCH_UNATTENDED_DEFERRED_POLICY must be block or continue (got '$DEFERRED_POLICY')" >&2
+  exit 2
+fi
+OPEN_DEFERRED=0
+if [[ -f "$DEFERRED_FILE" ]] && grep -qE '^## D[0-9]+ .*OPEN:' "$DEFERRED_FILE"; then
+  OPEN_DEFERRED=1
+fi
+if [[ "$PRINT_CONFIG" != "1" && "$OPEN_DEFERRED" == "1" ]]; then
+  if [[ "$DEFERRED_POLICY" == "block" ]]; then
+    echo "run-supervisor: refusing to start — $DEFERRED_FILE has unresolved user-level decisions:" >&2
+    grep -E '^## D[0-9]+ .*OPEN:' "$DEFERRED_FILE" >&2
+    echo "Resolve and remove those entries before launching another long supervisor session." >&2
+    exit 6
+  fi
+  echo "run-supervisor: $DEFERRED_FILE has unresolved decisions; continuing unrelated safe work under unattended policy"
+  grep -E '^## D[0-9]+ .*OPEN:' "$DEFERRED_FILE"
 fi
 case "$PROVIDER" in
   claude)
@@ -332,15 +351,12 @@ elif [[ "$WORKER_PROVIDER" != "$PROVIDER" ]]; then
 fi
 
 CODEX_LOG_ROOT="${POKEBENCH_CODEX_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.codex-logs}}"
+export POKEBENCH_AGENT_LOG_DIR="$CODEX_LOG_ROOT"
 if [[ -z "$SUPERVISOR_LOG" ]]; then
   if [[ "$PROVIDER" == "codex" ]]; then
     SUPERVISOR_LOG="$CODEX_LOG_ROOT/supervisor/headless-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
-  elif [[ "$LANE" == "animation" ]]; then
-    SUPERVISOR_LOG="/tmp/emerald-factory-animation-supervisor.jsonl"
-  elif [[ "$LANE" == "rust" ]]; then
-    SUPERVISOR_LOG="/tmp/emerald-factory-rust-supervisor.jsonl"
   else
-    SUPERVISOR_LOG="/tmp/emerald-factory-supervisor.jsonl"
+    SUPERVISOR_LOG="$CODEX_LOG_ROOT/supervisor/claude-headless-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
   fi
 fi
 
@@ -410,6 +426,10 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
   echo "sub_agent=$WORKER_PROVIDER"
   echo "worker_launch_mode=$WORKER_LAUNCH_MODE"
   echo "worker_routing=$WORKER_ROUTING"
+  echo "deferred_policy=$DEFERRED_POLICY"
+  if [[ "$LANE" == "rust" ]]; then
+    echo "rust_core_only=$RUST_CORE_ONLY"
+  fi
   if [[ "$WORKER_PROVIDER" == "codex" ]]; then
     echo "worker_model=${WORKER_MODEL:-gpt-5.6-sol}"
     echo "worker_effort=${WORKER_REASONING_EFFORT:-high}"
@@ -474,7 +494,10 @@ DEADLINE_EPOCH=$(( $(date +%s) + CAP_SECONDS ))
 DEADLINE_HUMAN="$(date -r "$DEADLINE_EPOCH" '+%Y-%m-%d %H:%M' 2>/dev/null \
   || date -d "@$DEADLINE_EPOCH" '+%Y-%m-%d %H:%M')"
 
-CONTINUITY_NOTE="Run autonomously through the full session cap while useful in-scope work remains. Do not ask the user questions mid-session, send decision notifications, or end a turn awaiting a reply. Exercise your best evidence-backed judgment for reversible on-scope choices. If a material choice genuinely cannot be made safely, record it in DEFERRED.md, continue independent safe work, and summarize it only at wind-down."
+CONTINUITY_NOTE="Run autonomously through the full session cap while useful in-scope work remains. Do not ask the user questions mid-session, send decision notifications, or end a turn awaiting a reply. Exercise your best evidence-backed judgment for reversible on-scope choices. If a material choice genuinely cannot be made safely, record it in ${DEFERRED_FILE}, continue independent safe work, and summarize it only at wind-down."
+if [[ "$OPEN_DEFERRED" == "1" && "$DEFERRED_POLICY" == "continue" ]]; then
+  CONTINUITY_NOTE+=" ${DEFERRED_FILE} already contains at least one open user-level decision. Do not guess at, remove, or silently resolve an open entry. Work around it on independent reversible steps; if it blocks every remaining safe step, leave a clean checkpoint and wind down normally."
+fi
 
 if [[ "$WORKER_PROVIDER" == "codex" ]]; then
   if [[ "$MAX_MODE" == "1" ]]; then
@@ -497,8 +520,12 @@ if [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
 fi
 
 if [[ "$LANE" == "rust" ]]; then
+  RUST_SCOPE_NOTE=""
+  if [[ "$RUST_CORE_ONLY" == "1" ]]; then
+    RUST_SCOPE_NOTE="This unattended overlap window is core-only: edit core-rs/, RUST_PROGRESS.md, and RUST_DEFERRED.md only. Do not edit the TypeScript adapter, src/, tests/, package files, or other TypeScript surfaces, and do not run the full npm test/build gates. If the next ledger item requires adapter work, record or preserve that dependency in RUST_DEFERRED.md and select another independent core-rs leaf."
+  fi
   DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE}"
-  PROMPT="You are the RUST-REWRITE supervisor for this repo. Read RUST_SUPERVISOR.md, AGENTS.md, and RUST_PROGRESS.md before dispatching anything. You are in the persistent rust-main worktree and you are that branch's only writer: begin by merging master in (git merge --no-edit master), rerun cargo test and the wasm32 release build (see core-rs/README.md for the explicit toolchain PATH — cargo is not on the login PATH) as your baseline, then drive one bounded port step at a time via ./tools/run-subagent.sh --lane rust from this tree — one worker at a time, rust lane only, verify each result yourself, merge each verified worker branch into rust-main from this tree, and never write master or another lane's docs (PROGRESS.md/ISSUES.md/ROADMAP.md/DEFERRED.md/ANIMATION_*). Your territory is core-rs/ plus only the adapter files RUST_SUPERVISOR.md milestone M2 allows; the TypeScript engine stays canonical — never edit src/ or tests/ outside that allowance, and rerun npm test and npm run build before any fold that touches them. Your ledger is RUST_PROGRESS.md; your deferral file is RUST_DEFERRED.md. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with rust-main committed and green so the main supervisor's fold stays boring. ${CONTINUITY_NOTE}"
+  PROMPT="You are the RUST-REWRITE supervisor for this repo. Read RUST_SUPERVISOR.md, AGENTS.md, and RUST_PROGRESS.md before dispatching anything. You are in the persistent rust-main worktree and you are that branch's only writer: begin by merging master in (git merge --no-edit master), rerun cargo test and the wasm32 release build (see core-rs/README.md for the explicit toolchain PATH — cargo is not on the login PATH) as your baseline, then drive one bounded port step at a time via ./tools/run-subagent.sh --lane rust from this tree — one worker at a time, rust lane only, verify each result yourself, merge each verified worker branch into rust-main from this tree, and never write master or another lane's docs (PROGRESS.md/ISSUES.md/ROADMAP.md/DEFERRED.md/ANIMATION_*). Your territory is core-rs/ plus only the adapter files RUST_SUPERVISOR.md milestone M2 allows; the TypeScript engine stays canonical — never edit src/ or tests/ outside that allowance, and rerun npm test and npm run build before any fold that touches them. ${RUST_SCOPE_NOTE} Your ledger is RUST_PROGRESS.md; your deferral file is RUST_DEFERRED.md. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with rust-main committed and green so the main supervisor's fold stays boring. ${CONTINUITY_NOTE}"
 elif [[ "$LANE" == "animation" ]]; then
   DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE}"
   PROMPT="You are the ANIMATION supervisor for this run. Read ANIMATION_SUPERVISOR.md, AGENTS.md, and ANIMATION_PROGRESS.md before dispatching anything. You are in the persistent animation-main worktree and you are that branch's only writer: begin by merging master in (git merge --no-edit master), rerun npm test and npm run build as your baseline, then drive one bounded animation coverage step at a time via ./tools/run-subagent.sh --lane animation from this tree — one worker at a time, animation lane only, verify each result yourself, merge each verified worker branch into animation-main from this tree, and never write master or the main program's docs (PROGRESS.md/ISSUES.md/ROADMAP.md/DEFERRED.md). Your ledger is ANIMATION_PROGRESS.md; your deferral file is ANIMATION_DEFERRED.md. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with animation-main committed and green so the main supervisor's fold stays boring. ${CONTINUITY_NOTE}"

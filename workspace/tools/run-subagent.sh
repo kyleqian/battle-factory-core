@@ -323,7 +323,8 @@ if [[ "$PROVIDER" != "codex" ]]; then
 fi
 if [[ -z "$AGENT_LOG" ]]; then
   if [[ "$PROVIDER" == "claude" ]]; then
-    AGENT_LOG="/tmp/emerald-factory-subagent-$(date +%Y%m%d-%H%M%S).jsonl"
+    CLAUDE_LOG_ROOT="${POKEBENCH_CLAUDE_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.codex-logs}}"
+    AGENT_LOG="$CLAUDE_LOG_ROOT/workers/claude-worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
   elif [[ "$PROVIDER" == "deepseek" ]]; then
     OPENCODE_LOG_ROOT="${POKEBENCH_OPENCODE_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.opencode-logs}}"
     AGENT_LOG="$OPENCODE_LOG_ROOT/workers/worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"

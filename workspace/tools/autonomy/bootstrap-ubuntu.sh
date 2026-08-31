@@ -88,6 +88,23 @@ install_node() {
   ln -sfn "${install_root}/bin/codex" /usr/local/bin/codex
 }
 
+install_claude_code() {
+  local runner_home installer
+  runner_home="$(getent passwd "$RUNNER_USER" | cut -d: -f6)"
+  installer="$(mktemp)"
+  curl --fail --location --silent --show-error \
+    https://claude.ai/install.sh --output "$installer"
+  chmod 0755 "$installer"
+  runuser -u "$RUNNER_USER" -- env HOME="$runner_home" \
+    bash "$installer" "$POKEBENCH_CLAUDE_CODE_VERSION"
+  if [[ "$(runuser -u "$RUNNER_USER" -- env HOME="$runner_home" \
+      "${runner_home}/.local/bin/claude" --version)" \
+      != "${POKEBENCH_CLAUDE_CODE_VERSION} (Claude Code)" ]]; then
+    echo "bootstrap-ubuntu: Claude Code version verification failed" >&2
+    exit 1
+  fi
+}
+
 install_swap_guard() {
   local swap_file=/swapfile
   if ! swapon --noheadings --show=NAME | grep -Fxq "$swap_file"; then
@@ -216,6 +233,7 @@ install -d -o "$RUNNER_USER" -g "$RUNNER_USER" "$VENDOR_ROOT"
 cd "$POKEBENCH_ROOT"
 install_swap_guard
 install_node
+install_claude_code
 install_mgba
 install_libmgba_python
 build_reference_rom
@@ -225,6 +243,6 @@ prepare_repository
 runner_home="$(getent passwd "$RUNNER_USER" | cut -d: -f6)"
 runuser -u "$RUNNER_USER" -- env \
   HOME="$runner_home" \
-  PATH="${runner_home}/.cargo/bin:/usr/local/bin:/usr/bin:/bin" \
+  PATH="${runner_home}/.local/bin:${runner_home}/.cargo/bin:/usr/local/bin:/usr/bin:/bin" \
   "${SCRIPT_DIR}/verify-runner.sh" --skip-baselines
 echo "bootstrap-ubuntu: reproducible dependencies and oracle smoke checks passed"

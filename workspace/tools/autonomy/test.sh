@@ -33,10 +33,15 @@ git init --quiet --bare "${fixture_root}/remote.git"
 git init --quiet -b master "${fixture_root}/repo"
 git -C "${fixture_root}/repo" config user.name 'Autonomy Test'
 git -C "${fixture_root}/repo" config user.email autonomy-test@example.invalid
-git -C "${fixture_root}/repo" commit --quiet --allow-empty -m initial
+printf 'committed\n' >"${fixture_root}/repo/checkpoint.txt"
+git -C "${fixture_root}/repo" add checkpoint.txt
+git -C "${fixture_root}/repo" commit --quiet -m initial
 git -C "${fixture_root}/repo" branch animation-main
 git -C "${fixture_root}/repo" branch rust-main
 git -C "${fixture_root}/repo" remote add origin "${fixture_root}/remote.git"
+printf 'interrupted but recoverable\n' >>"${fixture_root}/repo/checkpoint.txt"
+git -C "${fixture_root}/repo" stash push --quiet -m 'autonomy test recovery'
+stash_oid="$(git -C "${fixture_root}/repo" rev-parse refs/stash)"
 POKEBENCH_REPO_ROOT="${fixture_root}/repo" \
 POKEBENCH_BACKUP_NAMESPACE=autonomy/test \
   "${SCRIPT_DIR}/backup-refs.sh" >/dev/null
@@ -44,5 +49,16 @@ for branch in master animation-main rust-main; do
   git -C "${fixture_root}/remote.git" show-ref --verify --quiet \
     "refs/heads/autonomy/test/${branch}"
 done
+git -C "${fixture_root}/remote.git" show-ref --verify --quiet \
+  "refs/heads/autonomy/test/recovery/stash-${stash_oid:0:12}"
+
+grep -q '^POKEBENCH_RUST_SUPERVISOR_AGENT=claude$' \
+  "${SCRIPT_DIR}/autonomy.env.example"
+grep -q '^POKEBENCH_UNATTENDED_DEFERRED_POLICY=continue$' \
+  "${SCRIPT_DIR}/autonomy.env.example"
+grep -q '^OnCalendar=.*03,15:00:00 UTC$' \
+  "${SCRIPT_DIR}/systemd/pokebench-rust.timer"
+grep -q '^Restart=no$' \
+  "${SCRIPT_DIR}/systemd/pokebench-supervisor@.service"
 
 echo "autonomy tests passed"

@@ -5,12 +5,13 @@ Wants=network-online.target
 
 [Service]
 Type=exec
+Restart=no
 User=pokebench
 Group=pokebench
 WorkingDirectory=/srv/pokebench/pokeemerald-factory-core
 EnvironmentFile=/etc/pokebench-autonomy.env
 Environment=HOME=/home/pokebench
-Environment=PATH=/home/pokebench/.cargo/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PATH=/home/pokebench/.local/bin:/home/pokebench/.cargo/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=/srv/pokebench/pokeemerald-factory-core/workspace/tools/autonomy/run-lane.sh %i
 KillMode=control-group
 TimeoutStartSec=6h
