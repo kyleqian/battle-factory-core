@@ -1,0 +1,93 @@
+{
+  "schema": "trick-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_TRICK",
+  "moveId": 271,
+  "status": "checkpoint",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "productionAnimationChanged": false,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": false,
+    "framebufferCompared": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "firstInactiveCleanupRetained": true,
+    "denseRows": {
+      "player-back": 225,
+      "opponent-front": 225
+    },
+    "rawRgbRows": {
+      "player-back": 225,
+      "opponent-front": 225
+    },
+    "normalizedChangeMaps": true,
+    "reducerRows": {
+      "player-back": 225,
+      "opponent-front": 225
+    },
+    "typedSeamRows": {
+      "player-back": 225,
+      "opponent-front": 225
+    },
+    "productionFramebufferRows": 0,
+    "productionFramebufferResidualPixels": null
+  },
+  "source": {
+    "audit": "tools/compare/trickSourceAudit.ts",
+    "auditSha256": "3b816e5ff3cc570dfb86f0a3dfc01abc30f0f5b71f4800c83aeac44484d33e5a",
+    "probe": "tools/compare/trickProbe.py",
+    "probeSha256": "8c5cf2b627083ca1a2cf6e33c862f087988ea30f5d248bd1060adb47fc720ea6",
+    "evidenceVerifier": "tools/compare/trickEvidence.ts",
+    "evidenceVerifierSha256": "3d2eb289577a9a0caeeb9aaf3840a87f5f341201cb844ce5181aeab951101614"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/compare/fixtures/trick-player-furret-opponent-chansey.json",
+      "scenarioSha256": "68be8bbe035a0b93c4a27276d06ddbeafea4d5294035d4d47aff16ef7c417da3",
+      "denseState": "tools/compare/evidence/trick-player-dense-state.json.gz",
+      "denseStateSha256": "f714579d00dcdb2adaee57dda5962efec4a3f50d38fd25968c43c847e8c02539",
+      "probeJsonSha256": "617a34a9b562b35a474c6bd7aa3075edc2e5b69d00d038eb3adce2196eb534c3",
+      "repeatProbeJsonSha256": "617a34a9b562b35a474c6bd7aa3075edc2e5b69d00d038eb3adce2196eb534c3",
+      "rawRgbArchive": "tools/compare/evidence/trick-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "2fa5f4ad85db517568fc9c69986724ce4635fb4bedec4d74eea434576cab9dca",
+      "rawRgbSequenceSha256": "cba7bb5f19b26ec8837ec423b8d8a69e4b6dbe16477610f21cd7a125fa72832c",
+      "repeatRawRgbSequenceSha256": "cba7bb5f19b26ec8837ec423b8d8a69e4b6dbe16477610f21cd7a125fa72832c",
+      "changeMap": "tools/compare/evidence/trick-changemap-player.json",
+      "changeMapSha256": "75d911e42cd05fad656f6dbd18e4dc778a6437024c68ad13c17831fa4860604b",
+      "sourceWindow": {
+        "startFrame": 66,
+        "endFrame": 290,
+        "frameCount": 225,
+        "sourceFrameCount": 225
+      }
+    },
+    "opponent-front": {
+      "scenario": "tools/compare/fixtures/trick-opponent-furret-player-chansey.json",
+      "scenarioSha256": "2ed181c0d80dac39990380ea2e2ea7f2b8bc5853a28cbcf49d37cb5b6eb1eb49",
+      "denseState": "tools/compare/evidence/trick-opponent-dense-state.json.gz",
+      "denseStateSha256": "5cd6250d9ffaf8744e2e44f5fa2bb2d64827cf92dbdcdd10635d1d40e44d9b79",
+      "probeJsonSha256": "aff5bbd3eb7339192e180c7a8ec31de813568362299eea9e7573975db55af286",
+      "repeatProbeJsonSha256": "aff5bbd3eb7339192e180c7a8ec31de813568362299eea9e7573975db55af286",
+      "rawRgbArchive": "tools/compare/evidence/trick-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "d5e1e1db5e2260f4429fdaa46133d609860a221c26e8c887a46938cc5dd7c4cf",
+      "rawRgbSequenceSha256": "bf0b4214d6c320efbc9618d5e576d7ee15e46e54225da3e24d84d810a8d06b69",
+      "repeatRawRgbSequenceSha256": "bf0b4214d6c320efbc9618d5e576d7ee15e46e54225da3e24d84d810a8d06b69",
+      "changeMap": "tools/compare/evidence/trick-changemap-opponent.json",
+      "changeMapSha256": "e31cc539cab6bab3d03ce51c5c4f6887d667ecb978502d0b7088896d95a42b3f",
+      "sourceWindow": {
+        "startFrame": 70,
+        "endFrame": 294,
+        "frameCount": 225,
+        "sourceFrameCount": 225
+      }
+    }
+  }
+}

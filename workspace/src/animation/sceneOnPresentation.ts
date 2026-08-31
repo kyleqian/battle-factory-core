@@ -780,6 +780,11 @@ import {
   type SandTombFrame,
 } from "./sandTomb.ts";
 import {
+  trickAtAge,
+  type TrickAnimationProfile,
+  type TrickFrame,
+} from "./trick.ts";
+import {
   iceBeamAtAge,
   type IceBeamAnimationProfile,
   type IceBeamFrame,
@@ -3022,6 +3027,16 @@ export interface SceneOnSandTombConfig {
   readonly animationProfile: Readonly<SandTombAnimationProfile>;
 }
 
+/** Narrow Scene-ON seam for the source-relative Trick Item Bag body. */
+export interface SceneOnTrickConfig {
+  readonly move: "TRICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live allocator/task slots only; species and item resolution remain external. */
+  readonly animationProfile: Readonly<TrickAnimationProfile>;
+}
+
 /** Narrow Scene-ON seam for the source-relative Ice Beam reducer/compositor. */
 export interface SceneOnIceBeamConfig {
   readonly move: "ICE_BEAM";
@@ -3530,6 +3545,7 @@ export type SceneOnMoveConfig =
   | SceneOnEarthquakeConfig
   | SceneOnEruptionConfig
   | SceneOnSandTombConfig
+  | SceneOnTrickConfig
   | SceneOnIceBeamConfig
   | SceneOnFissureConfig
   | SceneOnHardenConfig
@@ -3588,6 +3604,8 @@ export type SceneOnEruptionPresentationState =
   SceneOnMovePresentationState<SceneOnEruptionConfig>;
 export type SceneOnSandTombPresentationState =
   SceneOnMovePresentationState<SceneOnSandTombConfig>;
+export type SceneOnTrickPresentationState =
+  SceneOnMovePresentationState<SceneOnTrickConfig>;
 export type SceneOnIceBeamPresentationState =
   SceneOnMovePresentationState<SceneOnIceBeamConfig>;
 export type SceneOnDizzyPunchPresentationState =
@@ -4545,6 +4563,11 @@ export interface SceneOnEruptionView extends EruptionFrame {
 }
 
 export interface SceneOnSandTombView extends SandTombFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnTrickView extends TrickFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -9085,6 +9108,20 @@ export function sceneOnSandTombView(
   }
   return {
     ...sandTombAtAge(state.age, state.config.animationProfile),
+    attacker: state.config.attacker,
+    target: state.config.target,
+  };
+}
+
+/** `age=0` is Move_TRICK's pointer-owned ITEM_BAG loadspritegfx row. */
+export function sceneOnTrickView(
+  state: SceneOnTrickPresentationState,
+): SceneOnTrickView {
+  if (state.config.move !== "TRICK") {
+    throw new Error(`expected TRICK presentation, got ${state.config.move}`);
+  }
+  return {
+    ...trickAtAge(state.age, state.config.animationProfile),
     attacker: state.config.attacker,
     target: state.config.target,
   };

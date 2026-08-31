@@ -7181,6 +7181,40 @@
     "tests/animation/helpingHandReducer.test.ts"
    ],
    "goal": "UNFULFILLED boundary checkpoint only: the pure success-body callback reducers and full TAG_HAND extraction are source-audited, while complete legal Scene-ON Volbeat/Onix singles stages reproduce twice fresh in both orientations and prove CMD_trysethelpinghand fails before attackanimation (PP is spent, but the root pointer, clap sprites, movement task, partner shakes, blend, palette writes, OAM/matrix/palette latches, and framebuffer body are absent). MechanicLab v1 is singles-only; do not promote MOVE_HELPING_HAND or infer the supplied latch expectations. A future legal doubles staging path must retain the complete dense success window through inactive cleanup and then independently fit every move-owned latch before a seam/compositor or acceptance claim. MOVE_ENCORE and MOVE_SMELLING_SALT remain exact controls only."
+  },
+  {
+    "id": "trick-item-bags",
+    "components": [
+      "asset:ANIM_TAG_ITEM_BAG",
+      "asset:ANIM_TAG_SPEED_DUST",
+      "task:AnimTask_ShakeMon",
+      "task:AnimTask_StretchAttackerUp",
+      "task:AnimTask_StretchTargetUp",
+      "visualCommand:create_trick_bag_sprite"
+    ],
+    "representatives": ["MOVE_TRICK"],
+    "fulfilled": false,
+    "evidence": [
+      "tools/compare/fixtures/trick-player-furret-opponent-chansey.json",
+      "tools/compare/fixtures/trick-opponent-furret-player-chansey.json",
+      "tools/compare/trickSourceAudit.ts",
+      "tools/compare/trickProbe.py",
+      "tools/compare/trickEvidence.ts",
+      "tools/compare/trickReducer.ts",
+      "tools/compare/fixtures/trick-evidence.json",
+      "tools/compare/evidence/trick-player-dense-state.json.gz",
+      "tools/compare/evidence/trick-opponent-dense-state.json.gz",
+      "tools/compare/evidence/trick-player-raw-rgb.tar.gz",
+      "tools/compare/evidence/trick-opponent-raw-rgb.tar.gz",
+      "tools/compare/evidence/trick-changemap-player.json",
+      "tools/compare/evidence/trick-changemap-opponent.json",
+      "src/animation/trick.ts",
+      "src/animation/sceneOnPresentation.ts",
+      "tests/animation/trickSourceCheckpoint.test.ts",
+      "tests/animation/trickEvidenceCheckpoint.test.ts",
+      "tests/animation/trickReducer.test.ts"
+    ],
+    "goal": "UNFULFILLED evidence/reducer/seam checkpoint only: MOVE_TRICK alone has complete legal transient-free Battle Scene ON Furret/Chansey three-mon parties in both item-swappable orientations. Two fresh runs retain and reproduce byte-identically 225 consecutive rows per orientation through inactive age 224, including pointer/task/sprite/software+hardware OAM/matrix/faded+hardware palette/tag/register/audio/party/engine/RNG/raw-RGB rows and normalized maps. The pure source-age reducer and typed seam independently fit both ITEM_BAG births (age 7), 60x20 wave paths/subpriorities/affine stages/blink teardown through age 198, paired StretchTargetUp/StretchAttackerUp ages 25..44, paired ShakeMon ages 173..191, literal Sketch + six Double Team + Attract cadence, ordinary OAM/palette RAM+1, fresh Stretch matrix RAM+2, and resource free at age 224. ANIM_TAG_SPEED_DUST is loaded ages 4..223 but has zero own sprite rows. Do not grant move/component/control credit until a generic live compositor reaches actual core.ts -> renderSceneOnMovePresentation zero-residual equality for every retained row twice, with no pair gate, recording/RGB/framebuffer lookup, coordinate fitting, absolute tick, or gameplay ownership. MOVE_PRESENT, MOVE_COVET, MOVE_EXTREME_SPEED, MOVE_FAKE_OUT, MOVE_ASTONISH, and MOVE_SAND_TOMB remain independent exact controls only."
   }
  ],
  "variantAudits": {
