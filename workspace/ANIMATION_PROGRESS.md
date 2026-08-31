@@ -1,3 +1,9 @@
+# MOVE_SWIFT source/staging checkpoint — unsupported (2026-08-31 worker)
+
+- **State:** Level 50 remains **214/276 exact, 0 partial / 0 staged, 62 unsupported**. MOVE_SWIFT and the non-exclusive `swift-stars-source-staging` track remain unsupported/unfulfilled; no component or sibling credit changes.
+- **Did:** Pinned `Move_SWIFT [0x082c97a9, 0x082c9862)`, all eight generated components, five `SE_M_SWIFT` / star calls, callback-side and singles-partner branches, resource cleanup, and lowest Level-50 carrier **128 FRONTIER_MON_STARYU**. Added transient-free, complete legal Staryu/Onix three-mon Scene-ON stages for both orientations, direct source/identity audit, and hermetic staging tests only; no mGBA dense evidence, reducer, seam, compositor, production art, `core.ts`, or `battleScene.ts` changed.
+- **Next:** Keep Swift uncredited until a complete dense bilateral Scene-ON body through inactive cleanup is retained, then an actual shared-production `core.ts → renderSceneOnMovePresentation` framebuffer gate reaches zero residual for every retained row twice without pair/RGB/framebuffer lookup, absolute-tick fitting, coordinate fitting, or gameplay ownership. MOVE_ANCIENT_POWER, MOVE_METEOR_MASH, and MOVE_MAGICAL_LEAF remain independent exact controls.
+
 # MOVE_ROCK_BLAST first-body source/evidence checkpoint — unsupported (2026-08-31 worker)
 
 - **State:** Level 50 remains **214/276 exact, 0 partial / 0 staged, 62 unsupported**. MOVE_ROCK_BLAST and the non-exclusive `rock-blast-first-body` track remain unsupported/unfulfilled; ROCK_THROW, ROCK_TOMB, and ANCIENT_POWER retain independent exact status with no credit change.

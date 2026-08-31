@@ -7217,7 +7217,31 @@
     "goal": "UNFULFILLED evidence/reducer/seam checkpoint only: MOVE_TRICK alone has complete legal transient-free Battle Scene ON Furret/Chansey three-mon parties in both item-swappable orientations. Two fresh runs retain and reproduce byte-identically 225 consecutive rows per orientation through inactive age 224, including pointer/task/sprite/software+hardware OAM/matrix/faded+hardware palette/tag/register/audio/party/engine/RNG/raw-RGB rows and normalized maps. The pure source-age reducer and typed seam independently fit both ITEM_BAG births (age 7), 60x20 wave paths/subpriorities/affine stages/blink teardown through age 198, paired StretchTargetUp/StretchAttackerUp ages 25..44, paired ShakeMon ages 173..191, literal Sketch + six Double Team + Attract cadence, ordinary OAM/palette RAM+1, fresh Stretch matrix RAM+2, and resource free at age 224. ANIM_TAG_SPEED_DUST is loaded ages 4..223 but has zero own sprite rows. Do not grant move/component/control credit until a generic live compositor reaches actual core.ts -> renderSceneOnMovePresentation zero-residual equality for every retained row twice, with no pair gate, recording/RGB/framebuffer lookup, coordinate fitting, absolute tick, or gameplay ownership. MOVE_PRESENT, MOVE_COVET, MOVE_EXTREME_SPEED, MOVE_FAKE_OUT, MOVE_ASTONISH, and MOVE_SAND_TOMB remain independent exact controls only."
   },
   {
-    "id": "rock-blast-first-body",
+    "id": "swift-stars-source-staging",
+    "components": [
+      "asset:ANIM_TAG_IMPACT",
+      "asset:ANIM_TAG_YELLOW_STAR",
+      "task:AnimTask_ShakeMon2",
+      "visualCommand:blendoff",
+      "visualCommand:clearmonbg",
+      "visualCommand:create_swift_star_sprite",
+      "visualCommand:monbg",
+      "visualCommand:setalpha"
+    ],
+    "representatives": [
+      "MOVE_SWIFT"
+    ],
+    "fulfilled": false,
+    "evidence": [
+      "tools/battle-lab/mechanic-swift-player-staryu-opponent-onix.json",
+      "tools/battle-lab/mechanic-swift-opponent-staryu-player-onix.json",
+      "tools/compare/swiftSourceAudit.ts",
+      "tests/animation/swiftSourceCheckpoint.test.ts"
+    ],
+    "goal": "UNFULFILLED source/staging checkpoint only: MOVE_SWIFT alone has complete legal transient-free Battle Scene ON Staryu/Onix three-mon parties in both orientations, no captures, no dense receipt, and no source-derived reducer, seam, compositor, or production art. The audit pins its five YELLOW_STAR launches, loaded-but-not-root-instantiated IMPACT tag, target/defender-partner ShakeMon2 selectors, monbg/setalpha cleanup, side callbacks, audio, and source identity; exact controls remain independent. Do not promote MOVE_SWIFT or any component/sibling. The next gate is one complete dense bilateral Scene-ON window through inactive cleanup, followed by an actual shared-production core.ts -> renderSceneOnMovePresentation framebuffer gate at zero residual for every retained row twice, without recording/RGB/framebuffer lookup, absolute tick, coordinate fitting, or gameplay ownership."
+  },
+    {
+      "id": "rock-blast-first-body",
     "components": [
       "asset:ANIM_TAG_IMPACT",
       "asset:ANIM_TAG_ROCKS",
