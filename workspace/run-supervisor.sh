@@ -228,11 +228,6 @@ if [[ ! "$LANE" =~ ^(ts|animation|rust)$ ]]; then
   echo "run-supervisor: unsupported lane '$LANE' (expected ts, animation, or rust)" >&2
   exit 2
 fi
-RUST_CORE_ONLY="${POKEBENCH_RUST_CORE_ONLY:-0}"
-if [[ "$LANE" == "rust" && ! "$RUST_CORE_ONLY" =~ ^(0|1)$ ]]; then
-  echo "run-supervisor: POKEBENCH_RUST_CORE_ONLY must be 0 or 1 (got '$RUST_CORE_ONLY')" >&2
-  exit 2
-fi
 REQUIRE_LANE_UNATTENDED_INSTRUCTIONS="${POKEBENCH_REQUIRE_LANE_UNATTENDED_INSTRUCTIONS:-0}"
 if [[ ! "$REQUIRE_LANE_UNATTENDED_INSTRUCTIONS" =~ ^(0|1)$ ]]; then
   echo "run-supervisor: POKEBENCH_REQUIRE_LANE_UNATTENDED_INSTRUCTIONS must be 0 or 1 (got '$REQUIRE_LANE_UNATTENDED_INSTRUCTIONS')" >&2
@@ -444,9 +439,6 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
   echo "worker_routing=$WORKER_ROUTING"
   echo "deferred_policy=$DEFERRED_POLICY"
   echo "require_lane_unattended_instructions=$REQUIRE_LANE_UNATTENDED_INSTRUCTIONS"
-  if [[ "$LANE" == "rust" ]]; then
-    echo "rust_core_only=$RUST_CORE_ONLY"
-  fi
   if [[ "$WORKER_PROVIDER" == "codex" ]]; then
     echo "worker_model=${WORKER_MODEL:-gpt-5.6-sol}"
     echo "worker_effort=${WORKER_REASONING_EFFORT:-high}"
@@ -537,12 +529,8 @@ if [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
 fi
 
 if [[ "$LANE" == "rust" ]]; then
-  RUST_SCOPE_NOTE=""
-  if [[ "$RUST_CORE_ONLY" == "1" ]]; then
-    RUST_SCOPE_NOTE="This unattended overlap window is core-only: edit core-rs/, RUST_PROGRESS.md, and RUST_DEFERRED.md only. Do not edit the TypeScript adapter, src/, tests/, package files, or other TypeScript surfaces, and do not run the full npm test/build gates. If the next ledger item requires adapter work, record or preserve that dependency in RUST_DEFERRED.md and select another independent core-rs leaf."
-  fi
   DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE}"
-  PROMPT="You are the RUST-REWRITE supervisor for this repo. Read RUST_SUPERVISOR.md, AGENTS.md, and RUST_PROGRESS.md before dispatching anything. ${LANE_UNATTENDED_NOTE} You are in the persistent rust-main worktree and you are that branch's only writer: begin by merging master in (git merge --no-edit master), rerun cargo test and the wasm32 release build (see core-rs/README.md for the explicit toolchain PATH — cargo is not on the login PATH) as your baseline, then drive one bounded port step at a time via ./tools/run-subagent.sh --lane rust from this tree — one worker at a time, rust lane only, verify each result yourself, merge each verified worker branch into rust-main from this tree, and never write master or another lane's docs (PROGRESS.md/ISSUES.md/ROADMAP.md/DEFERRED.md/ANIMATION_*). Your territory is core-rs/ plus only the adapter files RUST_SUPERVISOR.md milestone M2 allows; the TypeScript engine stays canonical — never edit src/ or tests/ outside that allowance, and rerun npm test and npm run build before any fold that touches them. ${RUST_SCOPE_NOTE} Your ledger is RUST_PROGRESS.md; your deferral file is RUST_DEFERRED.md. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with rust-main committed and green so the main supervisor's fold stays boring. ${CONTINUITY_NOTE}"
+  PROMPT="You are the RUST-REWRITE supervisor for this repo. Read RUST_SUPERVISOR.md, AGENTS.md, and RUST_PROGRESS.md before dispatching anything. ${LANE_UNATTENDED_NOTE} You are in the persistent rust-main worktree and you are that branch's only writer: begin by merging master in (git merge --no-edit master), rerun cargo test and the wasm32 release build (see core-rs/README.md for the explicit toolchain PATH — cargo is not on the login PATH) as your baseline, then drive one bounded port step at a time via ./tools/run-subagent.sh --lane rust from this tree — one worker at a time, rust lane only, verify each result yourself, merge each verified worker branch into rust-main from this tree, and never write master or another lane's docs (PROGRESS.md/ISSUES.md/ROADMAP.md/DEFERRED.md/ANIMATION_*). Your territory is core-rs/ plus only the adapter files RUST_SUPERVISOR.md milestone M2 allows; the TypeScript engine stays canonical — never edit src/ or tests/ outside that allowance, and rerun npm test and npm run build before any fold that touches them. Your ledger is RUST_PROGRESS.md; your deferral file is RUST_DEFERRED.md. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with rust-main committed and green so the main supervisor's fold stays boring. ${CONTINUITY_NOTE}"
 elif [[ "$LANE" == "animation" ]]; then
   DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE}"
   PROMPT="You are the ANIMATION supervisor for this run. Read ANIMATION_SUPERVISOR.md, AGENTS.md, and ANIMATION_PROGRESS.md before dispatching anything. ${LANE_UNATTENDED_NOTE} You are in the persistent animation-main worktree and you are that branch's only writer: begin by merging master in (git merge --no-edit master), rerun npm test and npm run build as your baseline, then drive one bounded animation coverage step at a time via ./tools/run-subagent.sh --lane animation from this tree — one worker at a time, animation lane only, verify each result yourself, merge each verified worker branch into animation-main from this tree, and never write master or the main program's docs (PROGRESS.md/ISSUES.md/ROADMAP.md/DEFERRED.md). Your ledger is ANIMATION_PROGRESS.md; your deferral file is ANIMATION_DEFERRED.md. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with animation-main committed and green so the main supervisor's fold stays boring. ${CONTINUITY_NOTE}"
