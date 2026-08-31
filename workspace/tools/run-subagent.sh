@@ -641,6 +641,7 @@ elif [[ "$PROVIDER" == "codex" ]]; then
       "$CAP_SECONDS" \
       "run-subagent: ${CAP_MINUTES}min cap reached — stopping Codex worker process group" -- \
       codex exec --json \
+        --ignore-user-config \
         --model "$MODEL" \
         -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
         --dangerously-bypass-approvals-and-sandbox "$PROMPT" </dev/null
@@ -722,6 +723,18 @@ if [[ -f "$AGENT_LOG" ]]; then
     if [[ -s "$PROVIDER_STDERR_LOG" ]]; then
       echo "Codex stderr log: $PROVIDER_STDERR_LOG"
     fi
+  fi
+fi
+
+# In an unattended campaign, preserve a successful implementation worker's
+# committed feature branch before handing it back for supervisor verification.
+# The backup helper writes only the isolated campaign namespace; interactive
+# workers without POKEBENCH_BACKUP_NAMESPACE never push anything.
+if [[ "$IS_WORKTREE" == "1" && "$READ_ONLY" != "1" && "$status" == "0" \
+      && -n "${POKEBENCH_BACKUP_NAMESPACE:-}" ]]; then
+  if ! tools/autonomy/backup-refs.sh; then
+    echo "run-subagent: failed to back up committed worker branch $WT_BRANCH" >&2
+    status=1
   fi
 fi
 

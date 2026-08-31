@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export PATH="${SCRIPT_DIR}/bin:${PATH}"
 REPO_ROOT="${POKEBENCH_REPO_ROOT:-$(cd "${SCRIPT_DIR}/../../.." && pwd)}"
 WORKSPACE_ROOT="${REPO_ROOT}/workspace"
-STATE_ROOT="${STATE_DIRECTORY:-${REPO_ROOT}/.autonomy-state}"
+STATE_ROOT="${STATE_DIRECTORY:-${REPO_ROOT}/.git/pokebench-autonomy}"
 LOCK_ROOT="${RUNTIME_DIRECTORY:-${STATE_ROOT}/run}"
 END_EPOCH="${AUTONOMY_END_EPOCH:-}"
 MIN_FREE_GB="${POKEBENCH_MIN_FREE_GB:-30}"
@@ -83,8 +83,27 @@ fi
 
 cap_hours="${POKEBENCH_ANIMATION_CAP_HOURS:-5.5}"
 [[ "$LANE" == rust ]] && cap_hours="${POKEBENCH_RUST_CAP_HOURS:-4}"
+if [[ ! "$cap_hours" =~ ^[0-9]+([.][0-9]+)?$ ]] \
+    || [[ "$(awk "BEGIN { print ($cap_hours > 0) ? 1 : 0 }")" != 1 ]]; then
+  echo "run-lane: configured cap must be a positive number (got '$cap_hours')" >&2
+  exit 2
+fi
+requested_cap_seconds="$(awk "BEGIN { printf \"%d\", $cap_hours * 3600 }")"
+remaining_seconds=$(( END_EPOCH - now - 60 ))
+if (( remaining_seconds <= 0 )); then
+  echo "run-lane: less than one minute remains in the autonomy window; skipping ${LANE}"
+  exit 0
+fi
+if (( requested_cap_seconds > remaining_seconds )); then
+  cap_hours="$(awk "BEGIN { printf \"%.6f\", $remaining_seconds / 3600 }")"
+  echo "run-lane: clamped ${LANE} to ${cap_hours}h so it winds down before the autonomy window closes"
+fi
 started_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 echo "run-lane: starting ${LANE} at ${started_at}, cap ${cap_hours}h, ${supervisor_agent}/${sub_agent}"
+
+# Refuse to begin a new unattended session until the previously committed lane
+# tips (and any surviving disposable worker tips) are safe off-VM.
+"${SCRIPT_DIR}/backup-refs.sh"
 
 status=0
 (
