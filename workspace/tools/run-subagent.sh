@@ -538,7 +538,14 @@ else
   SESSION_OPENING="Follow AGENTS.md. You are one bounded worker session with a hard ${CAP_MINUTES}-minute cap — you can be stopped at any moment, so commit after every green step.${DEADLINE_CLAUSE_WORKER}"
   WORKTREE_OWNERSHIP="Work only inside this worktree and commit only to this branch. Do NOT edit PROGRESS.md or ISSUES.md (reading them is fine): shared docs for this lane belong to the supervisor, who folds them in when merging your branch — report your results fully in your final message instead."
   MAIN_OWNERSHIP="Keep the top entry of PROGRESS.md current as you go."
-  WORKTREE_FINISH_REQUIREMENT="Before finishing: npm test and npm run build green, work committed on ${WT_BRANCH}."
+  if [[ "$LANE" == "rust" ]]; then
+    # A core-rs-only worker has no reason to launch the memory-heavy TS gate.
+    # The Rust supervisor prompt separately requires npm test/build before a
+    # fold that actually touches its narrowly allowed adapter surface.
+    WORKTREE_FINISH_REQUIREMENT="Before finishing: cargo test and cargo build -p factory-wasm --target wasm32-unknown-unknown --release green, work committed on ${WT_BRANCH}."
+  else
+    WORKTREE_FINISH_REQUIREMENT="Before finishing: npm test and npm run build green, work committed on ${WT_BRANCH}."
+  fi
   MAIN_FINISH_REQUIREMENT="Before finishing: npm test and npm run build green, work committed, PROGRESS.md updated."
 fi
 
