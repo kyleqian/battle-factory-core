@@ -5,6 +5,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R57 — [supervised session, 2026-08-31] **Master sync + green Rust baseline; status3 worker cap-safe rejection**
+
+- **State:** `rust-main` fast-forwarded from `f58353f83` to current master
+  `e36a11c6c`; the persistent tree is clean and no worker commit was folded.
+  Native Rust and wasm32 release are green after the merge.
+- **Did:** ran the required post-merge baseline: **1,068/1,068** native tests
+  passed and `factory-wasm` release built for `wasm32-unknown-unknown`.
+  Dispatched one Terra/max Rust worker for the bounded pure
+  `Cmd_jumpifstatus3condition` leaf. The five-minute emergency cap expired
+  during its first focused compile; it produced no commit, so the supervisor
+  correctly rejected the unverified draft rather than folding partial work.
+- **Next:** merge current master at the next orient, then rebrief the same
+  stable `B_SCR_OP_JUMPIFSTATUS3CONDITION` leaf with a normal cap. Recreate
+  the module, deterministic canonical-TS generator/corpus, and focused tests
+  from the clean verified base; do not trust or fold the abandoned draft.
+- **Notes:** wasm artifact is **507,105 bytes**, sha256
+  `b3bbf9fbdfaafad9cb3d406be3407ee0345273c0a2c56847d471e2c24ae54274`.
+  This host only has toolchain `1.97.1-x86_64-unknown-linux-gnu`, without the
+  `rustfmt` and `clippy` components, so `cargo fmt --check` and strict Clippy
+  were unavailable; the README's prepended Apple toolchain directory does
+  not exist here and cargo falls through to that host toolchain. No Rust
+  deferral, ABI/adapter widening, canonical-TS edit, or barrier was added.
+  No npm gate was required because no post-baseline worker fold touched the
+  adapter or canonical TypeScript. PAPERCUT: unattended Linux Rust image
+  lacks required rustfmt/clippy components while README names an absent Apple
+  toolchain path, ~2 min.
+
 ## R56 — [supervised session, 2026-08-25] **M55 Helping Hand leaf + final wind-down**
 
 - **State:** `rust-main` = session-start master `33592cba` plus five verified
