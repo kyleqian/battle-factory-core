@@ -549,6 +549,7 @@ if [[ "$HEADLESS" == "1" ]]; then
       > >(tee -a "$SUPERVISOR_LOG" | node tools/stream-pretty.mjs) &
   else
     POKEBENCH_ROLE=supervisor codex exec --json \
+      --ignore-user-config \
       --model "$MODEL" \
       -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
       --dangerously-bypass-approvals-and-sandbox "$PROMPT" \

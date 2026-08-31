@@ -641,6 +641,7 @@ elif [[ "$PROVIDER" == "codex" ]]; then
       "$CAP_SECONDS" \
       "run-subagent: ${CAP_MINUTES}min cap reached — stopping Codex worker process group" -- \
       codex exec --json \
+        --ignore-user-config \
         --model "$MODEL" \
         -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
         --dangerously-bypass-approvals-and-sandbox "$PROMPT" </dev/null
