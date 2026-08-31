@@ -10,10 +10,10 @@ const completeKeys = ["abilitySlot", "evs", "friendship", "gender", "item", "ivs
 const statKeys = ["attack", "defense", "hp", "spAttack", "spDefense", "speed"];
 const audit = () => JSON.parse(execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/sandTombSourceAudit.ts"], { encoding: "utf8" }));
 
-describe("MOVE_SAND_TOMB source/asset/staging checkpoint", () => {
+describe("MOVE_SAND_TOMB source/asset/staging contract", () => {
   it("pins the complete ROM/source interval, component graph, carriers, callbacks, audio, resources, and cleanup", () => {
     expect(audit()).toMatchObject({
-      move: "MOVE_SAND_TOMB", moveId: 328, status: "unsupported-source-staging-checkpoint",
+      move: "MOVE_SAND_TOMB", moveId: 328, status: "exact-source-contract",
       source: {
         root: { start: "0x082d516a", endExclusive: "0x082d51b7", bytes: 77, sha256: "23701555772a9a43b70a26589187a029954e9859d26f7e66ca9fac11a0f04b68" },
         subroutine: { start: "0x082d51b7", endExclusive: "0x082d5242", bytes: 139, sha256: "8346bc94ab13ba070c56e3c60863dca3a566750cb435fab353a658e8a0325ee0" },
@@ -23,7 +23,7 @@ describe("MOVE_SAND_TOMB source/asset/staging checkpoint", () => {
       components: ["asset:ANIM_TAG_MUD_SAND", "sprite:gSwirlingDirtSpriteTemplate", "subroutine:SandTombSwirlingDirt", "task:AnimTask_ShakeMon", "visualCommand:simple_palette_blend"],
       lifecycle: { sprites: 18, palettePrograms: 2, shake: ["ANIM_TARGET", 0, 2, 43, 1], audio: { id: 230, pan: "SOUND_PAN_TARGET" } },
       asset: { shared: true, sandTombExclusiveArt: false, cell: "tile 0, 8x8", sourceBytes: 160 },
-      ownership: { reducer: false, seam: false, renderer: false, framebuffer: false, gameplayState: false, rng: false, controller: false },
+      ownership: { reducer: true, seam: true, renderer: true, framebuffer: true, gameplayState: false, rng: false, controller: false },
     });
     const result = audit();
     expect(result.lifecycle.spriteArgs).toHaveLength(6);
@@ -79,11 +79,11 @@ describe("MOVE_SAND_TOMB source/asset/staging checkpoint", () => {
     expect(new Set(defender.map((mon: any) => mon.species)).size).toBe(3);
   });
 
-  it("keeps Sand Tomb unsupported and the component track unfulfilled without sibling credit", () => {
+  it("promotes only Sand Tomb and fulfills its track without sibling credit", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_SAND_TOMB")).toBeUndefined();
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_SAND_TOMB")?.status).toBe("exact");
     expect(coverage.queue).not.toContain("MOVE_SAND_TOMB");
-    expect(coverage.componentTracks.find((track: any) => track.id === "sand-tomb-vortex")).toMatchObject({ representatives: ["MOVE_SAND_TOMB"], fulfilled: false });
+    expect(coverage.componentTracks.find((track: any) => track.id === "sand-tomb-vortex")).toMatchObject({ representatives: ["MOVE_SAND_TOMB"], fulfilled: true });
     for (const sibling of ["MOVE_SAND_ATTACK", "MOVE_FISSURE", "MOVE_DIG", "MOVE_MUD_SLAP", "MOVE_ROLLOUT", "MOVE_MUD_SPORT"]) {
       expect(coverage.componentTracks.find((track: any) => track.id === "sand-tomb-vortex")?.representatives).not.toContain(sibling);
     }

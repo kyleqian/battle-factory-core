@@ -614,6 +614,7 @@ import sweetScentAsset from "../animation/assets/sweet-scent.json" with { type: 
 import defenseCurlAsset from "../animation/assets/defense-curl.json" with { type: "json" };
 import ingrainAsset from "../animation/assets/ingrain.json" with { type: "json" };
 import eruptionWarmRockAsset from "../animation/assets/eruption-warm-rock.json" with { type: "json" };
+import sandTombMudSandAsset from "../animation/assets/sand-tomb-mud-sand.json" with { type: "json" };
 import meanLookAsset from "../animation/assets/mean-look.json" with { type: "json" };
 import smellingSaltAsset from "../animation/assets/smelling-salt.json" with { type: "json" };
 import recycleAsset from "../animation/assets/recycle.json" with { type: "json" };
@@ -979,6 +980,7 @@ import {
   sceneOnToxicView,
   sceneOnEarthquakeView,
   sceneOnEruptionView,
+  sceneOnSandTombView,
   sceneOnIceBeamView,
   sceneOnFissureView,
   sceneOnHardenView,
@@ -1068,6 +1070,7 @@ import {
   type SceneOnGuillotineConfig,
   type SceneOnFissureConfig,
   type SceneOnEruptionConfig,
+  type SceneOnSandTombConfig,
   type SceneOnIceBeamConfig,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
@@ -1866,6 +1869,11 @@ const ingrainArt = ingrainAsset as {
 const eruptionWarmRockArt = eruptionWarmRockAsset as {
   tileset: Tileset;
   palette: RgbColor[];
+};
+const sandTombMudSandArt = sandTombMudSandAsset as {
+  tileset: Tileset;
+  palette: RgbColor[];
+  sandTombCell: { tileOffset: number; dimensions: { widthPixels: number; heightPixels: number } };
 };
 const waterGunArt = waterGunAsset as {
   smallBubbles: { tileset: Tileset; palette: RgbColor[] };
@@ -14395,6 +14403,108 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "SAND_TOMB") {
+    const sandTombState = state as SceneOnMovePresentationState<SceneOnSandTombConfig>;
+    const view = sceneOnSandTombView(sandTombState);
+    // BuildOamBuffer and palette DMA both expose ordinary preceding software
+    // state for this body.  ShakeMon is a direct task write but its visual
+    // target still follows that same measured one-display transfer.
+    const displayed = sceneOnSandTombView({
+      ...sandTombState,
+      age: Math.max(0, sandTombState.age - 1),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SAND_TOMB presentation requires battlers on opposite sides");
+    }
+    const battlerArt = (battler: typeof view.attacker): {
+      readonly tileset: Tileset;
+      readonly palette: RgbColor[];
+    } => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species];
+        if (!source) throw new Error(`SAND_TOMB missing player-back art for ${battler.species}`);
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!source) throw new Error(`SAND_TOMB missing opponent-front art for ${battler.species}`);
+      return { tileset: source.tileset, palette: source.palette };
+    };
+    const attackerArt = battlerArt(view.attacker);
+    const targetArt = battlerArt(view.target);
+    const dirtColor = mgbaColorFromBgr555(displayed.palette.targetColorBgr555);
+    const targetPalette = blendPaletteToward(targetArt.palette, {
+      r: dirtColor & 0xff,
+      g: dirtColor >>> 8 & 0xff,
+      b: dirtColor >>> 16 & 0xff,
+    }, displayed.palette.coefficient);
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const attackerSlot = sandTombState.config.animationProfile.attackerSpriteSlot;
+    const targetSlot = sandTombState.config.animationProfile.target.spriteSlot;
+    const drawBySlot = new Map<number, () => void>([
+      [attackerSlot, () => drawSpriteSheet(
+        fb,
+        attackerArt.tileset,
+        attackerArt.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      )],
+      [targetSlot, () => drawSpriteSheet(
+        fb,
+        targetArt.tileset,
+        targetPalette,
+        view.target.geometry.spriteCorner.x + displayed.targetOamOffset.x2,
+        view.target.geometry.spriteCorner.y + displayed.targetOamOffset.y2,
+      )],
+    ]);
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind !== "dirt") continue;
+      const cell = {
+        columns: 1,
+        rows: 1,
+        tiles: sandTombMudSandArt.tileset.tiles.slice(
+          sandTombMudSandArt.sandTombCell.tileOffset,
+          sandTombMudSandArt.sandTombCell.tileOffset + 1,
+        ),
+      };
+      drawBySlot.set(sprite.slot, () => drawSpriteSheet(
+        fb,
+        cell,
+        sandTombMudSandArt.palette,
+        sprite.x + sprite.x2 - 4,
+        sprite.y + sprite.y2 - 4,
+      ));
+    }
+    for (const slot of displayed.order.fullPainterOrder) drawBySlot.get(slot)?.();
+
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = sandTombState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SAND TOMB!",
+      99,
+    );
+    return;
+  }
   if (state.config.move === "ERUPTION") {
     const eruptionState = state as SceneOnMovePresentationState<SceneOnEruptionConfig>;
     const view = sceneOnEruptionView(eruptionState);

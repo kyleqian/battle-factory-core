@@ -166,6 +166,7 @@ import {
 import {
   advanceSceneOnMovePresentation,
   type SceneOnEruptionConfig,
+  type SceneOnSandTombConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -185,7 +186,7 @@ import { resolveTurn6LatestCompletedCommandHandoff } from "./turn6ResolutionAdap
 import { resolveTurn7LatestCompletedCommandHandoff } from "./turn7ResolutionAdapter.ts";
 import { resolveTurn8LatestCompletedCommandHandoff } from "./turn8ResolutionAdapter.ts";
 
-/** Keep the composed Eruption profile typed through the generic core dispatch. */
+/** Keep composed Scene-ON profiles typed through the generic core dispatch. */
 function renderSceneOnPresentationFrame(
   framebuffer: Uint8Array,
   presentation: SceneOnMovePresentationState,
@@ -193,6 +194,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "ERUPTION") {
     const eruptionPresentation = presentation as SceneOnMovePresentationState<SceneOnEruptionConfig>;
     renderSceneOnMovePresentation(framebuffer, eruptionPresentation);
+    return;
+  }
+  if (presentation.config.move === "SAND_TOMB") {
+    const sandTombPresentation = presentation as SceneOnMovePresentationState<SceneOnSandTombConfig>;
+    renderSceneOnMovePresentation(framebuffer, sandTombPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

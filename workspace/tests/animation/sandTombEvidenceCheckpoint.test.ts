@@ -6,18 +6,18 @@ import { describe, expect, it } from "vitest";
 const fixture = JSON.parse(readFileSync("tools/compare/fixtures/sand-tomb-evidence.json", "utf8")) as Record<string, any>;
 const sha = (path: string): string => createHash("sha256").update(readFileSync(path)).digest("hex");
 
-describe("MOVE_SAND_TOMB bilateral dense evidence checkpoint", () => {
-  it("keeps the move unsupported and the non-exclusive track unfulfilled", () => {
+describe("MOVE_SAND_TOMB bilateral dense exact evidence", () => {
+  it("pins exact production acceptance and the fulfilled non-exclusive track", () => {
     expect(fixture).toMatchObject({
       schema: "sand-tomb-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_SAND_TOMB", moveId: 328,
-      status: "unsupported", coverageCredit: false,
-      evidenceScope: { productionAnimationChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false, coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false, fullDenseRowsRetained: true, twiceFreshByteIdentical: true },
-      acceptance: { freshRunsPerOrientation: 2, firstInactiveCleanupRetained: true, denseRows: { "player-back": 124, "opponent-front": 124 }, rawRgbRows: { "player-back": 124, "opponent-front": 124 }, normalizedChangeMaps: true, reducerRows: 0, typedSeamRows: 0, productionFramebufferRows: 0 },
+      status: "exact", coverageCredit: true,
+      evidenceScope: { productionAnimationChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, framebufferCompared: true, coveragePromotion: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false, fullDenseRowsRetained: true, twiceFreshByteIdentical: true },
+      acceptance: { freshRunsPerOrientation: 2, firstInactiveCleanupRetained: true, denseRows: { "player-back": 124, "opponent-front": 124 }, rawRgbRows: { "player-back": 124, "opponent-front": 124 }, normalizedChangeMaps: true, reducerRows: { "player-back": 124, "opponent-front": 124 }, typedSeamRows: { "player-back": 124, "opponent-front": 124 }, productionFramebufferRows: { "player-back": 124, "opponent-front": 124 }, productionFramebufferResidualPixels: 0 },
     });
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_SAND_TOMB")).toBeUndefined();
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_SAND_TOMB")?.status).toBe("exact");
     expect(coverage.queue).not.toContain("MOVE_SAND_TOMB");
-    expect(coverage.componentTracks.find((track: any) => track.id === "sand-tomb-vortex")).toMatchObject({ representatives: ["MOVE_SAND_TOMB"], fulfilled: false });
+    expect(coverage.componentTracks.find((track: any) => track.id === "sand-tomb-vortex")).toMatchObject({ representatives: ["MOVE_SAND_TOMB"], fulfilled: true });
   });
 
   it("strictly replays all 248 source/state/RGB rows and every owned lifecycle", () => {

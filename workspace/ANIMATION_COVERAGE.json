@@ -68,6 +68,40 @@
    ]
   },
   {
+   "move": "MOVE_SAND_TOMB",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Dugtrio versus Onix Battle Scene ON windows retain player-back frames 77-200 and opponent-front frames 81-204, 124 consecutive rows each through first inactive cleanup; the retained dense-state and chronological raw-RGB sequence hashes were captured twice fresh per orientation byte-identically",
+    "the pure source-relative reducer and typed Scene-ON seam cover the complete Move_SAND_TOMB and SandTombSwirlingDirt body: 18 gSwirlingDirtSpriteTemplate MUD_SAND allocations, source Q8.8 vortex callbacks, ordinary lowest-free-slot reuse, AnimTask_ShakeMon target state plus software-OAM phase, both simple_palette_blend programs, target-panned SE_M_SAND_TOMB, resource lifecycle, source cursor/order, animation RNG observation, and cleanup",
+    "the ordinary generic compositor consumes live species, sides, geometry, allocator/order facts, generic front/back battler art, field chrome, MUD_SAND tile-0 art, target-only palette blend, source painter order, and the independently measured RAM+1 OAM/matrix/palette transfers without a retained pair gate, recording/RGB/framebuffer lookup, coordinate fitting, or absolute tick",
+    "actual core.ts to renderSceneOnMovePresentation framebuffer equality passes all 124/124 player-back plus 124/124 opponent-front retained rows twice, 248/248 total with zero residual pixels through cleanup",
+    "gameplay state, damage, status, battle RNG, controller, turn, round, and facility state remain unowned; Sand Attack, Fissure, Dig, Mud-Slap, Rollout, and Mud Sport remain independent controls and receive no sibling credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-sand-tomb-player-dugtrio-opponent-onix.json",
+    "tools/battle-lab/mechanic-sand-tomb-opponent-dugtrio-player-onix.json",
+    "tools/compare/fixtures/sand-tomb-evidence.json",
+    "tools/compare/evidence/sand-tomb-player-dense-state.json.gz",
+    "tools/compare/evidence/sand-tomb-opponent-dense-state.json.gz",
+    "tools/compare/evidence/sand-tomb-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/sand-tomb-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/sand-tomb-changemap-player.json",
+    "tools/compare/evidence/sand-tomb-changemap-opponent.json",
+    "tools/compare/sandTombSourceAudit.ts",
+    "tools/compare/sandTombEvidence.ts",
+    "tools/compare/sandTombReducer.ts",
+    "tools/compare/sandTombFramebuffer.ts",
+    "src/animation/assets/sand-tomb-mud-sand.json",
+    "src/animation/sandTomb.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/sandTombSourceCheckpoint.test.ts",
+    "tests/animation/sandTombEvidenceCheckpoint.test.ts",
+    "tests/animation/sandTombReducer.test.ts",
+    "tests/animation/sandTombFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SCREECH",
    "status": "exact",
    "covered": [
@@ -7045,7 +7079,7 @@
     "visualCommand:simple_palette_blend"
    ],
    "representatives": ["MOVE_SAND_TOMB"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/battle-lab/mechanic-sand-tomb-player-dugtrio-opponent-onix.json",
     "tools/battle-lab/mechanic-sand-tomb-opponent-dugtrio-player-onix.json",
@@ -7061,10 +7095,15 @@
     "tools/compare/evidence/sand-tomb-changemap-opponent.json",
     "tools/compare/extractSandTombAssets.ts",
     "src/animation/assets/sand-tomb-mud-sand.json",
+    "src/animation/sandTomb.ts",
+    "tools/compare/sandTombReducer.ts",
+    "tools/compare/sandTombFramebuffer.ts",
     "tests/animation/sandTombSourceCheckpoint.test.ts",
-    "tests/animation/sandTombEvidenceCheckpoint.test.ts"
+    "tests/animation/sandTombEvidenceCheckpoint.test.ts",
+    "tests/animation/sandTombReducer.test.ts",
+    "tests/animation/sandTombFramebuffer.test.ts"
    ],
-   "goal": "UNFULFILLED bilateral dense evidence checkpoint only: complete 124-row player-back plus 124-row opponent-front source/state/raw-RGB windows through first inactive cleanup reproduce twice fresh byte-identically and pin all 18 vortex lifecycles/allocation/painter order, ShakeMon, both simple-palette programs, target-panned audio, resources/tags, display latches, immutable gameplay/RNG state, and animation RNG. Sand Tomb remains unsupported with no exact, partial, staged, framebuffer, reducer, seam, renderer, or sibling credit."
+   "goal": "FULFILLED: MOVE_SAND_TOMB alone independently passes complete 124/124 player-back plus 124/124 opponent-front source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two deterministic production-render passes. Its source-derived MUD_SAND tile-0 art, 18 Q8.8 vortex allocations and painter order, target ShakeMon software-OAM phase, two target palette programs, target-panned audio, ordinary predecessor OAM/matrix/palette transfers, typed live species/sides/geometry, generic battler art/chrome, and cleanup use no pair gate, recording/framebuffer lookup, coordinate fitting, absolute tick, or gameplay ownership. Sand Attack, Fissure, Dig, Mud-Slap, Rollout, and Mud Sport remain independent controls and receive no sibling credit."
   },
   {
    "id": "eruption-warm-rock",

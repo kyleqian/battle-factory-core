@@ -1,3 +1,12 @@
+# MOVE_SAND_TOMB bilateral exact production presentation (2026-08-31 worker + supervisor recovery)
+
+- **State:** Level 50 advances **213→214/276 exact**, remains **0 partial / 0 staged**, and drops **63→62 unsupported**. MOVE_SAND_TOMB alone promotes and `sand-tomb-vortex` is fulfilled; Sand Attack, Fissure, Dig, Mud-Slap, Rollout, and Mud Sport retain independent status with no sibling credit.
+- **Did:** Added the pure source-relative Sand Tomb reducer, narrow typed Scene-ON seam, and generic compositor using live battler art/chrome, MUD_SAND tile-0 art, allocator/order facts, Q8.8 vortex callbacks, target ShakeMon software-OAM phase, target palette ramps, target-panned audio, and ordinary predecessor transfers. No gameplay/controller/facility state is owned.
+- **Verified:** Retained actual `core.ts → renderSceneOnMovePresentation` equality is **124/124 player-back + 124/124 opponent-front = 248/248**, zero residual pixels through inactive age 123, on two deterministic production-render passes. Sand Tomb's own maps independently confirm OAM/matrices/palette **123/123 RAM+1** bilaterally, including `AnimTask_ShakeMon`; retained legal dense/RGB receipts remain twice-fresh byte-identical.
+- **Checks:** Sand Tomb reducer/source/evidence/framebuffer acceptance passes; `npm run animation:coverage` reports **214/276 exact, 0 partial / 0 staged, 62 unsupported**; `npm run animation:audit`, `npm run typecheck`, `git diff --check`, full `npm test` (**1,173 passed files / 10,712 passed tests / 44 files and 223 tests skipped**), and `npm run build` (**730 modules**) pass.
+- **Next:** Select another bounded unsupported move; do not infer acceptance from shared MUD_SAND, ShakeMon, or palette components.
+- **Notes:** The worker reached its cap after focused acceptance; the supervisor updated only the global **213→214 / 63→62** inventory ratchets and independently reran every gate above. No latch contradiction, boundary/barrier change, production recording/framebuffer lookup, absolute tick, pair gate, coordinate/RGB fitting, gameplay/status/damage/RNG/controller/turn/round/facility ownership, or sibling promotion was added.
+
 # Animation supervisor inbound refresh — baseline restored (2026-08-31 supervisor)
 
 - **State:** `master` is merged into `animation-main` at `e6209be2`; coverage remains **213/276 Level-50 exact, 0 partial / 0 staged, 63 unsupported**. No worker was dispatched because the required merged baseline consumed the remaining hard-deadline window.

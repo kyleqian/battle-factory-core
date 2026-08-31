@@ -770,6 +770,11 @@ import {
   type EruptionFrame,
 } from "./eruption.ts";
 import {
+  sandTombAtAge,
+  type SandTombAnimationProfile,
+  type SandTombFrame,
+} from "./sandTomb.ts";
+import {
   iceBeamAtAge,
   type IceBeamAnimationProfile,
   type IceBeamFrame,
@@ -2992,6 +2997,16 @@ export interface SceneOnEruptionConfig {
   readonly animationProfile: Readonly<EruptionAnimationProfile>;
 }
 
+/** Narrow Scene-ON seam for the source-relative Sand Tomb vortex body. */
+export interface SceneOnSandTombConfig {
+  readonly move: "SAND_TOMB";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live allocator, source geometry and initial OAM facts for this animation. */
+  readonly animationProfile: Readonly<SandTombAnimationProfile>;
+}
+
 /** Narrow Scene-ON seam for the source-relative Ice Beam reducer/compositor. */
 export interface SceneOnIceBeamConfig {
   readonly move: "ICE_BEAM";
@@ -3498,6 +3513,7 @@ export type SceneOnMoveConfig =
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnEruptionConfig
+  | SceneOnSandTombConfig
   | SceneOnIceBeamConfig
   | SceneOnFissureConfig
   | SceneOnHardenConfig
@@ -3554,6 +3570,8 @@ export type SceneOnSoftBoiledPresentationState =
   SceneOnMovePresentationState<SceneOnSoftBoiledConfig>;
 export type SceneOnEruptionPresentationState =
   SceneOnMovePresentationState<SceneOnEruptionConfig>;
+export type SceneOnSandTombPresentationState =
+  SceneOnMovePresentationState<SceneOnSandTombConfig>;
 export type SceneOnIceBeamPresentationState =
   SceneOnMovePresentationState<SceneOnIceBeamConfig>;
 export type SceneOnDizzyPunchPresentationState =
@@ -4501,6 +4519,11 @@ export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
 }
 
 export interface SceneOnEruptionView extends EruptionFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSandTombView extends SandTombFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -9009,6 +9032,20 @@ export function sceneOnEruptionView(
   }
   return {
     ...eruptionAtAge(state.age, state.config.animationProfile),
+    attacker: state.config.attacker,
+    target: state.config.target,
+  };
+}
+
+/** `age=0` is the `loadspritegfx ANIM_TAG_MUD_SAND` source row. */
+export function sceneOnSandTombView(
+  state: SceneOnSandTombPresentationState,
+): SceneOnSandTombView {
+  if (state.config.move !== "SAND_TOMB") {
+    throw new Error(`expected SAND_TOMB presentation, got ${state.config.move}`);
+  }
+  return {
+    ...sandTombAtAge(state.age, state.config.animationProfile),
     attacker: state.config.attacker,
     target: state.config.target,
   };

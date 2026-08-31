@@ -25,6 +25,9 @@ const graph = JSON.parse(read("src/data/gen/battle-animation-components.json"));
 const frontier = JSON.parse(read("src/data/gen/battle-frontier-mons.json"));
 const policy = JSON.parse(read("src/data/gen/factory-round-policy.json"));
 const coverage = JSON.parse(read("ANIMATION_COVERAGE.json"));
+const reducer = read("src/animation/sandTomb.ts");
+const seam = read("src/animation/sceneOnPresentation.ts");
+const compositor = read("src/engine/battleScene.ts");
 
 const nm = execFileSync("arm-none-eabi-nm", ["-a", "-S", resolve(root, "reference/pokeemerald/pokeemerald.elf")], {
   encoding: "utf8", maxBuffer: 16 * 1024 * 1024,
@@ -96,6 +99,15 @@ for (const token of [
 ]) requireToken(graphics, token, "Sand Tomb source asset");
 requireToken(constants, "#define ANIM_TAG_MUD_SAND                   (ANIM_SPRITES_START + 74)", "Sand Tomb asset tag");
 requireToken(songs, "#define SE_M_SAND_TOMB              230", "Sand Tomb audio");
+for (const [source, token, owner] of [
+  [reducer, "export function sandTombTimeline", "Sand Tomb pure reducer"],
+  [reducer, "SAND_TOMB_VORTEX_CALLS", "Sand Tomb source call table"],
+  [reducer, "targetOamAtAge", "Sand Tomb OAM/ShakeMon latch reducer"],
+  [seam, "export interface SceneOnSandTombConfig", "Sand Tomb typed Scene-ON seam"],
+  [seam, "export function sceneOnSandTombView", "Sand Tomb Scene-ON view"],
+  [compositor, "state.config.move === \"SAND_TOMB\"", "Sand Tomb ordinary compositor"],
+  [compositor, "sandTombMudSandArt", "Sand Tomb extracted MUD_SAND compositor asset"],
+] as const) requireToken(source, token, owner);
 
 const expectedComponents = ["asset:ANIM_TAG_MUD_SAND", "sprite:gSwirlingDirtSpriteTemplate", "subroutine:SandTombSwirlingDirt", "task:AnimTask_ShakeMon", "visualCommand:simple_palette_blend"];
 const move = inventory.tiers.level50.moves.find((entry: { move: string }) => entry.move === "MOVE_SAND_TOMB");
@@ -113,8 +125,8 @@ if (move?.id !== 328 || move?.frontierMonCount !== 1 || move?.exampleMons?.join(
   || !carrierBlock.includes("BATTLE_FRONTIER_ITEM_SOFT_SAND") || !carrierBlock.includes("F_EV_SPREAD_SPEED | F_EV_SPREAD_ATTACK") || !carrierBlock.includes("NATURE_ADAMANT")
   || !frontierConstants.includes("#define FRONTIER_MON_DUGTRIO_1      372")
   || !factory.includes("{FRONTIER_MON_DUGTRIO_1,  FRONTIER_MON_SLAKING_1},  // 372 - 467")
-  || coverage.entries.some((entry: { move: string }) => entry.move === "MOVE_SAND_TOMB")
-  || coverage.queue.includes("MOVE_SAND_TOMB") || track?.fulfilled !== false
+  || coverage.entries.find((entry: { move: string; status: string }) => entry.move === "MOVE_SAND_TOMB")?.status !== "exact"
+  || coverage.queue.includes("MOVE_SAND_TOMB") || track?.fulfilled !== true
   || JSON.stringify(track?.components) !== JSON.stringify(expectedComponents)) {
   throw new Error("Sand Tomb component/carrier/unsupported coverage contract drifted");
 }
@@ -138,7 +150,7 @@ if (address("Move_SAND_TOMB") !== start || address("SandTombSwirlingDirt") !== s
 }
 
 console.log(JSON.stringify({
-  move: "MOVE_SAND_TOMB", moveId: 328, status: "unsupported-source-staging-checkpoint",
+  move: "MOVE_SAND_TOMB", moveId: 328, status: "exact-source-contract",
   source: { root: interval(start, subroutine), subroutine: interval(subroutine, end), complete: interval(start, end), text: { bytes: Buffer.byteLength(body), sha256: digest(body), commandRows } },
   components: expectedComponents,
   lifecycle: { sprites: 18, spriteArgs: commandRows.filter((row) => row.startsWith("createsprite")), palettePrograms: 2, shake: ["ANIM_TARGET", 0, 2, 43, 1], audio: { id: 230, pan: "SOUND_PAN_TARGET" }, resources: { load: ["ANIM_TAG_MUD_SAND"], cleanup: "Cmd_end frees loaded sheet and palette tags" } },
@@ -146,5 +158,5 @@ console.log(JSON.stringify({
   carrier: { lowestLegal: carriers[0], allLevel50: carriers, legalRange: level50Ranges[3] },
   asset: { tag: "ANIM_TAG_MUD_SAND", shared: true, sandTombExclusiveArt: false, cell: "tile 0, 8x8", sourceBytes: 0xa0 },
   siblings: { mudSand: ["MOVE_SAND_ATTACK", "MOVE_FISSURE", "MOVE_DIG", "MOVE_MUD_SLAP", "MOVE_ROLLOUT", "MOVE_MUD_SPORT"], note: "controls retain independent status; no sibling credit" },
-  ownership: { reducer: false, seam: false, renderer: false, framebuffer: false, gameplayState: false, rng: false, controller: false },
+  ownership: { reducer: true, seam: true, renderer: true, framebuffer: true, gameplayState: false, rng: false, controller: false },
 }, null, 2));
