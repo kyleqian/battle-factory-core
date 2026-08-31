@@ -182,6 +182,11 @@ prepare_repository() {
 }
 
 install -d -o "$RUNNER_USER" -g "$RUNNER_USER" "$VENDOR_ROOT"
+# `runuser` preserves the caller's working directory.  Hetzner bootstrap is
+# commonly launched from /root, which the unprivileged runner cannot traverse;
+# tools such as recursive make then fail when they return from `-C`.  Anchor
+# every runner command in the shared project directory instead.
+cd "$POKEBENCH_ROOT"
 install_node
 install_mgba
 install_libmgba_python
