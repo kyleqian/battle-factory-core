@@ -28,10 +28,12 @@ RAM, and disk are for concurrent TypeScript/Rust builds, mGBA, and worktrees.
 The default target is Hetzner `cpx42` in `hel1`: 8 shared x86 vCPUs, 16 GB
 RAM, and 320 GB disk. At the 2026-08-30 project price of $0.1314/hour, seven
 days are about $22.08 before tax. The service environment caps each Vitest
-suite at two forks: the TypeScript parent peaks near 4.5 GB and each fork near
-1 GB, so two overlapping supervisors remain inside 16 GB. The cheaper 8 GB
-CPX32 is not safe for the requested overlap; the original 32 GB dedicated
-CCX33 is unnecessary because model inference is remote.
+suite at two forks. The full TypeScript compiler reached about 6.4 GB RSS in
+the Linux preflight, so two overlapping supervisors need the 16 GB tier. The
+bootstrap also installs an 8 GB swapfile as an OOM guard; it is not intended
+as normal working memory. The cheaper 8 GB CPX32 is not safe for the requested
+overlap, while the original 32 GB dedicated CCX33 is unnecessary because model
+inference is remote.
 
 Run the network-free wrapper checks locally with
 `workspace/tools/autonomy/test.sh`.

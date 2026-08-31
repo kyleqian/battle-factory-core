@@ -12,6 +12,7 @@ POKEBENCH_ROOT="$(dirname "$REPO_ROOT")"
 VENDOR_ROOT="${POKEBENCH_ROOT}/vendor"
 WORKSPACE_ROOT="${REPO_ROOT}/workspace"
 JOBS="${POKEBENCH_BUILD_JOBS:-8}"
+SWAP_SIZE_GIB="${POKEBENCH_SWAP_SIZE_GIB:-8}"
 
 if [[ "$EUID" -ne 0 ]]; then
   echo "bootstrap-ubuntu: run this script as root" >&2
@@ -85,6 +86,21 @@ install_node() {
   ln -sfn "${install_root}/bin/npx" /usr/local/bin/npx
   npm install --global --no-audit --no-fund "@openai/codex@${POKEBENCH_CODEX_VERSION}"
   ln -sfn "${install_root}/bin/codex" /usr/local/bin/codex
+}
+
+install_swap_guard() {
+  local swap_file=/swapfile
+  if ! swapon --noheadings --show=NAME | grep -Fxq "$swap_file"; then
+    if [[ ! -e "$swap_file" ]]; then
+      fallocate -l "${SWAP_SIZE_GIB}G" "$swap_file"
+      chmod 600 "$swap_file"
+      mkswap "$swap_file" >/dev/null
+    fi
+    swapon "$swap_file"
+  fi
+  if ! grep -Fqx "$swap_file none swap sw 0 0" /etc/fstab; then
+    echo "$swap_file none swap sw 0 0" >> /etc/fstab
+  fi
 }
 
 checkout_exact() {
@@ -188,6 +204,7 @@ install -d -o "$RUNNER_USER" -g "$RUNNER_USER" "$VENDOR_ROOT"
 # tools such as recursive make then fail when they return from `-C`.  Anchor
 # every runner command in the shared project directory instead.
 cd "$POKEBENCH_ROOT"
+install_swap_guard
 install_node
 install_mgba
 install_libmgba_python
