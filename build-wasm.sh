@@ -22,4 +22,8 @@ cp "${SRC}" "${DEST}"
 
 echo "wrote ${DEST}"
 echo "size: $(wc -c < "${DEST}" | tr -d ' ') bytes"
-shasum -a 256 "${DEST}"
+if command -v sha256sum >/dev/null 2>&1; then
+  sha256sum "${DEST}"
+else
+  shasum -a 256 "${DEST}"
+fi
