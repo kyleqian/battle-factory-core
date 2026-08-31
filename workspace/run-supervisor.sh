@@ -332,15 +332,12 @@ elif [[ "$WORKER_PROVIDER" != "$PROVIDER" ]]; then
 fi
 
 CODEX_LOG_ROOT="${POKEBENCH_CODEX_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.codex-logs}}"
+export POKEBENCH_AGENT_LOG_DIR="$CODEX_LOG_ROOT"
 if [[ -z "$SUPERVISOR_LOG" ]]; then
   if [[ "$PROVIDER" == "codex" ]]; then
     SUPERVISOR_LOG="$CODEX_LOG_ROOT/supervisor/headless-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
-  elif [[ "$LANE" == "animation" ]]; then
-    SUPERVISOR_LOG="/tmp/emerald-factory-animation-supervisor.jsonl"
-  elif [[ "$LANE" == "rust" ]]; then
-    SUPERVISOR_LOG="/tmp/emerald-factory-rust-supervisor.jsonl"
   else
-    SUPERVISOR_LOG="/tmp/emerald-factory-supervisor.jsonl"
+    SUPERVISOR_LOG="$CODEX_LOG_ROOT/supervisor/claude-headless-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
   fi
 fi
 
