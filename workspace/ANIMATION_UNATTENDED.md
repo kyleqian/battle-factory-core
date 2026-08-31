@@ -17,10 +17,11 @@ This file is campaign policy for `animation-main` only. It must not be added to
   and at wind-down under `autonomy/20260831-through-20260911/`.
 - The worker launcher backs up every successful committed disposable worker
   branch before supervisor verification.
-- After each verified worker merge and its `ANIMATION_PROGRESS.md` checkpoint
-  commit, run `./tools/autonomy/backup-refs.sh` before dispatching another
-  worker. If that push fails, stop dispatching, retain the local commits, and
-  wind down cleanly so the next scheduled run can retry.
+- After every committed green checkpoint—including a direct supervisor repair
+  or a verified worker merge plus its `ANIMATION_PROGRESS.md` commit—run
+  `./tools/autonomy/backup-refs.sh` before starting more work. If that push
+  fails, stop dispatching, retain the local commits, and wind down cleanly so
+  the next scheduled run can retry.
 - Uncommitted work is not a checkpoint. Commit each green bounded step before
   moving on.
 
