@@ -1,0 +1,95 @@
+{
+  "schema": "swift-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SWIFT",
+  "moveId": 129,
+  "status": "checkpoint",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "sourceAudit": true,
+    "completePointerBody": true,
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferCompared": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "firstInactiveCleanupRetained": true,
+    "denseRows": {
+      "player-back": 78,
+      "opponent-front": 80
+    },
+    "rawRgbRows": {
+      "player-back": 78,
+      "opponent-front": 80
+    },
+    "normalizedChangeMaps": true,
+    "productionFramebufferRows": 0,
+    "productionFramebufferResidualPixels": null
+  },
+  "source": {
+    "audit": "tools/compare/swiftSourceAudit.ts",
+    "auditSha256": "07a8626d1781f90a729fa893f3f737975cbea569c318b6dfcd4e0ba25e17f4ed",
+    "probe": "tools/compare/swiftProbe.py",
+    "probeSha256": "1481d0bd438e94bb22f0ff6833c7972d4550b5821099a17212e85042b540e971",
+    "evidenceVerifier": "tools/compare/swiftEvidence.ts",
+    "evidenceVerifierSha256": "b0a4acdfdc58d43988c6875fbf8fa7780d05c8ac6a7d92a4e594add5aa7369e4"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-swift-player-staryu-opponent-onix.json",
+      "scenarioSha256": "dee91c4e25cc60a7ae58739ee7c9f975e513fbf1abe54cfce3355055f53b0d12",
+      "denseState": "tools/compare/evidence/swift-player-dense-state.json.gz",
+      "denseStateSha256": "6bb6053df8d3ea4efb769515b90083cbc226c6adbe3b2dd33193e0a5c12fee54",
+      "probeJsonSha256": "3480a60c57692a637318b8a57f115e06a94da47a9a590ed13a8db0cf0c9b86a4",
+      "repeatProbeJsonSha256": "3480a60c57692a637318b8a57f115e06a94da47a9a590ed13a8db0cf0c9b86a4",
+      "rawRgbArchive": "tools/compare/evidence/swift-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "84b76bef8f4c1915381a90bca0c8d589c97f8703bd35de3ba9ee15771b9db506",
+      "rawRgbSequenceSha256": "f1168f7c44754ded5f8709afc583594a78c958cd0aaee3bcc589d2966239267b",
+      "repeatRawRgbSequenceSha256": "f1168f7c44754ded5f8709afc583594a78c958cd0aaee3bcc589d2966239267b",
+      "changeMap": "tools/compare/evidence/swift-changemap-player.json",
+      "changeMapSha256": "ce6f900d8309ef3f7027b15158792237961efdf70fc46d51e6628459ef777951",
+      "sourceWindow": {
+        "startFrame": 69,
+        "endFrame": 146,
+        "frameCount": 78,
+        "sourceFrameCount": 78
+      }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-swift-opponent-staryu-player-onix.json",
+      "scenarioSha256": "c144f2835411bd56430b5f13affba0bd8c200076c7bf39c7671f1bfa0285f109",
+      "denseState": "tools/compare/evidence/swift-opponent-dense-state.json.gz",
+      "denseStateSha256": "f10ca3e7b041172d1d0716cfaeaad90aee5d84fbf59a8b761711d0f046d25657",
+      "probeJsonSha256": "69e622dffd0a3690f939b9e0c6c8ac77e39a02d6b89e5c3764b06dbe4177dc69",
+      "repeatProbeJsonSha256": "69e622dffd0a3690f939b9e0c6c8ac77e39a02d6b89e5c3764b06dbe4177dc69",
+      "rawRgbArchive": "tools/compare/evidence/swift-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "19531a6fad61f2dba52c5d786de80a5bdef50ae9d6f2e8af1ac89ff65cde3b08",
+      "rawRgbSequenceSha256": "6d4eea48c872896248ed9769d6e3e23c074a2f21b70e190568f4509491e1d669",
+      "repeatRawRgbSequenceSha256": "6d4eea48c872896248ed9769d6e3e23c074a2f21b70e190568f4509491e1d669",
+      "changeMap": "tools/compare/evidence/swift-changemap-opponent.json",
+      "changeMapSha256": "a68b234f2a4989fdfcede9717e728db635cdc1cd58e114945ee1871ff153ba34",
+      "sourceWindow": {
+        "startFrame": 73,
+        "endFrame": 152,
+        "frameCount": 80,
+        "sourceFrameCount": 80
+      }
+    }
+  },
+  "controls": {
+    "independent": [
+      "MOVE_ANCIENT_POWER",
+      "MOVE_METEOR_MASH",
+      "MOVE_MAGICAL_LEAF"
+    ],
+    "statusesChanged": false
+  }
+}

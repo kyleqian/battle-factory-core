@@ -7310,9 +7310,19 @@
       "tools/battle-lab/mechanic-swift-player-staryu-opponent-onix.json",
       "tools/battle-lab/mechanic-swift-opponent-staryu-player-onix.json",
       "tools/compare/swiftSourceAudit.ts",
-      "tests/animation/swiftSourceCheckpoint.test.ts"
+      "tools/compare/swiftProbe.py",
+      "tools/compare/swiftEvidence.ts",
+      "tools/compare/fixtures/swift-evidence.json",
+      "tools/compare/evidence/swift-player-dense-state.json.gz",
+      "tools/compare/evidence/swift-opponent-dense-state.json.gz",
+      "tools/compare/evidence/swift-player-raw-rgb.tar.gz",
+      "tools/compare/evidence/swift-opponent-raw-rgb.tar.gz",
+      "tools/compare/evidence/swift-changemap-player.json",
+      "tools/compare/evidence/swift-changemap-opponent.json",
+      "tests/animation/swiftSourceCheckpoint.test.ts",
+      "tests/animation/swiftEvidenceCheckpoint.test.ts"
     ],
-    "goal": "UNFULFILLED source/staging checkpoint only: MOVE_SWIFT alone has complete legal transient-free Battle Scene ON Staryu/Onix three-mon parties in both orientations, no captures, no dense receipt, and no source-derived reducer, seam, compositor, or production art. The audit pins its five YELLOW_STAR launches, loaded-but-not-root-instantiated IMPACT tag, target/defender-partner ShakeMon2 selectors, monbg/setalpha cleanup, side callbacks, audio, and source identity; exact controls remain independent. Do not promote MOVE_SWIFT or any component/sibling. The next gate is one complete dense bilateral Scene-ON window through inactive cleanup, followed by an actual shared-production core.ts -> renderSceneOnMovePresentation framebuffer gate at zero residual for every retained row twice, without recording/RGB/framebuffer lookup, absolute tick, coordinate fitting, or gameplay ownership."
+    "goal": "UNFULFILLED dense evidence checkpoint only: MOVE_SWIFT alone has complete legal transient-free Battle Scene ON Staryu/Onix three-mon parties and twice-fresh byte-identical complete source/state/raw-RGB windows through first inactive cleanup in both orientations (78 player-back rows, 80 opponent-front rows), plus normalized change maps and a strict hermetic verifier. The maps pin all five YELLOW_STAR lifecycles, loaded-but-not-root-instantiated IMPACT tag, target/defender-partner ShakeMon2 selectors, target monbg motion, side callbacks, attacker-panned audio, ordinary OAM/matrix/palette display latches, RNG/state stability, and cleanup. No reducer, seam, compositor, production art/wiring, or framebuffer comparator exists. Do not promote MOVE_SWIFT or any component/sibling; MOVE_ANCIENT_POWER, MOVE_METEOR_MASH, and MOVE_MAGICAL_LEAF remain independent exact controls. The bounded remainder is an actual shared-production core.ts -> renderSceneOnMovePresentation framebuffer gate at zero residual for every retained row twice, without an evidence pair, recording/RGB/framebuffer lookup, absolute-tick fitting, coordinate fitting, or gameplay ownership."
   },
     {
       "id": "rock-blast-first-body",
