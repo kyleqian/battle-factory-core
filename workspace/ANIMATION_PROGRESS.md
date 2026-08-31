@@ -1,3 +1,11 @@
+# Animation supervisor inbound-merge checkpoint — baseline prerequisites incomplete (2026-08-31 supervisor)
+
+- **State:** `master` is merged into `animation-main` at `d707fb1a`; animation coverage remains **213/276 Level-50 exact, 0 partial / 0 staged, 63 unsupported**. No animation worker was dispatched because the hard-deadline window was insufficient after baseline verification.
+- **Verified:** `npm install --no-audit --no-fund` is current; `npm run animation:coverage` reports the expected 213/276 inventory; `npm run build` passes (**728 modules**). The worktree has no worker branch/worktree or uncommitted implementation.
+- **Baseline blocker:** Post-merge `npm test` completed **1,140 files / 9,802 tests passed**, but failed **26 files / 40 tests** with two environment/prerequisite classes: newly merged Rust parity tests cannot find gitignored `artifacts/wasm/factory_wasm.wasm`, and multiple retained animation RGB evidence readers report malformed archive shapes. This is not an animation acceptance result; no production or coverage status changed.
+- **Next:** Rebuild the worktree-local WASM prerequisite with `core-rs/build-wasm.sh`, validate/restore the retained evidence archives without changing their receipts, then rerun the full suite. Only after a green baseline, dispatch a bounded Terra/max Sand Tomb reducer/seam/compositor round using the complete 124-row bilateral maps and the measured OAM/matrix/palette RAM+1 latch recorded below.
+- **For the main program:** The inbound master state assumes a worktree-local WASM artifact that is absent after ordinary `npm install`; the new parity tests fail rather than skip when that gitignored prerequisite is missing.
+
 # MOVE_SAND_TOMB bilateral dense evidence checkpoint — unsupported (2026-08-26 worker)
 
 - **State:** Level 50 remains **213/276 exact, 0 partial / 0 staged, 63 unsupported**. MOVE_SAND_TOMB remains unsupported and `sand-tomb-vortex` remains explicitly unfulfilled; no reducer, typed seam, compositor, framebuffer, move, component, or sibling credit is granted.
