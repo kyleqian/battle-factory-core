@@ -5,6 +5,26 @@ full history regardless.
 
 ---
 
+## R58 — [supervised session, 2026-08-31 07:28–07:37 UTC] **Master sync + green baseline only (9-minute window)**
+
+- **State:** `rust-main` = merge of master `e4d7a01f0` (merge commit
+  `72d26538f`, clean, no conflicts). No worker was dispatched: the session
+  started 9 minutes before its hard deadline, below any worker cap.
+- **Did:** post-merge baseline — **1,068/1,068** native tests passed;
+  `factory-wasm` release built for `wasm32-unknown-unknown`, artifact
+  **507,105 bytes**, sha256
+  `b3bbf9fbdfaafad9cb3d406be3407ee0345273c0a2c56847d471e2c24ae54274`
+  (byte-identical to R57).
+- **Next:** unchanged from R57 — merge master at orient, run
+  strict Clippy first (`cargo fmt --check` is green as of this checkpoint,
+  ~45 s; Clippy did not fit inside the window and remains unverified,
+  not failed), then rebrief the bounded pure
+  `Cmd_jumpifstatus3condition` leaf with a normal cap from the clean base.
+- **Notes:** on this Linux image cargo lives at `$HOME/.cargo/bin` (the
+  README's Apple toolchain path is absent — R57 PAPERCUT still open). No
+  Rust deferral, ABI/adapter widening, canonical-TS edit, or barrier was
+  added; no npm gate required (nothing outside RUST_PROGRESS.md changed).
+
 ## R57 — [supervised session, 2026-08-31] **Master sync + green Rust baseline; status3 worker cap-safe rejection**
 
 - **State:** `rust-main` merged from `f58353f83` through current master
