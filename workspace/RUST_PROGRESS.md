@@ -16,9 +16,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `b3bbf9fbdfaafad9cb3d406be3407ee0345273c0a2c56847d471e2c24ae54274`
   (byte-identical to R57).
 - **Next:** unchanged from R57 — merge master at orient, run
-  `cargo fmt --check` + strict Clippy first (neither finished inside this
-  window; `cargo fmt --check` did not return within 30 s, treat as
-  unverified, not failed), then rebrief the bounded pure
+  strict Clippy first (`cargo fmt --check` is green as of this checkpoint,
+  ~45 s; Clippy did not fit inside the window and remains unverified,
+  not failed), then rebrief the bounded pure
   `Cmd_jumpifstatus3condition` leaf with a normal cap from the clean base.
 - **Notes:** on this Linux image cargo lives at `$HOME/.cargo/bin` (the
   README's Apple toolchain path is absent — R57 PAPERCUT still open). No
