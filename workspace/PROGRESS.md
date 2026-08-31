@@ -5,6 +5,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1404 — [supervisor wind-down, 2026-08-26 ~04:10] **Lifecycle-audit day 2: three ordering audits (switch lifecycle 141 rows, faint replacement 116, turn machinery 133) → #134-#140 FOUND, six of the seven FIXED SAME SESSION with stock-ROM receipts (#134 switchineffects clears, #135 Pursuit ×2, #136 protectUses on switch-in, #137 AI_CV_Protect rungs + core-rs lockstep, #138 Encore-before-Struggle, #140 GetMoveTarget draw loop on 3 of 4 branches); Shell Bell live KO-heal arm; Gate-6 registry +8 receipted rows; animation-main folded (11); all five gates green on the final engine tree**
+
+- **Final gates on THIS tree (engine-final `f23ded2e` = `3db45ea3` minus the docs/tooling manifest flip `3a4c0251`, which the soak does not load; supervisor's own runs, all `--parallel` per the pinned commands):** vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60** (carry ≥28 6/60), winning-swap 0:60 **60/60** (carry ≥28 2/60); fifth gate — winning `--vary-rng --first-round` carry 0 **100/100**, carry 14 **100/100**, carry 28 **100/100**, winning-swap carry 0 **100/100** — **`budget` 0 on all four**. Full `npm test` on `3db45ea3` **1,163 files / 10,683 passed / 223 skipped** (03:10-03:15, concurrent with the gates); `npm run build` green; `cargo test` 696/0 in factory-core. DEFERRED.md: no open entries. Gate timing: 03:02-04:03 (61 min, eight sweeps concurrent under `nohup`, load 14-46; the animation Codex supervisor was live 00:24-06:24). The vanilla canary's TRAJECTORY moved by design (#140's forced-Struggle draws, #134/#136 switch-in state); the gate is the count.
+- **Orient:** master `a5970da4`; oracle freshness FAIL = the standing false positive (`3e29880b` committed 6 min after 8014's 2026-08-15 restart; no restart, the animation supervisor shares the services). **animation-main folded (11 commits, Eruption launch/falling-rock/shake/audio reducers + `tools/compare` audits, nothing under the Scene-OFF engine)** → union `npm test` **1,157 files / 10,624 passed / 223 skipped**, build green (`12d32d2f`); rust-main 0 ahead.
+- **Did (N worker steps, all Opus):** (1-2) two parallel read-only lifecycle audits, 25 min each with explicit pacing (both finished every row early): `docs/switch-lifecycle-audit-2026-08-26.md` (141 rows: 103 SAME / 24 SAME-ORDER / 2 DIVERGENT / 3 benign / 8 unreachable / 2 UNVERIFIED) and `docs/faint-replacement-audit-2026-08-26.md` (116 rows: 5 DIVERGENT rows = 1 root cause / 0 UNVERIFIED). Findings, each re-opened by me at both cited sites before filing: **#134** `Cmd_switchineffects`' Intimidate/Trace branches skip the `HITMARKER_FAINTED` + `SIDE_STATUS_SPIKES_DAMAGED` clears (source's ON_SWITCHIN cases `break` without `effect++`, so the clearing body runs; the stale faint bit also blocks `gLastHitBy` updates in `Cmd_moveend`); **#135** Pursuit's ×2 interception multiplier dropped (`stageVoluntarySwitchRules` staged `dmgMultiplier: 1` and entered past `setbyte sDMG_MULTIPLIER, 2`); **#136** `switchindataupdate` omits `protectUses`/`rolloutTimerStartValue` from its reset list (source memsets the whole DisableStruct; the AI's `AI_CV_Protect4` draws on a stale count); **#137** `runCvProtect` lacks the `get_protect_count > 1 → −2/end` rung and the user toxic/cursed/perish routes to `AI_CV_Protect3` (adjacent gap the audit flagged). (3) **#135 receipt-then-fix** (`f3fcaca6`/`87e86f05`, 23 min): PERSIAN all-Pursuit vs SANDSHREW switching — the ROM's `gBattleScripting.dmgMultiplier` (offset +14) goes 1→2 at `BattleScript_ActionSwitch+11`, damage 62→54 after variance, party HP 125→71; un-fixed kernel 27/98; control arm 30/95 both. Fix + 3 pins + `tests/issue135PursuitSwitchReceipt.test.ts`; no trajectory pin moved. (4) **#134 receipt-then-fix + #136 fix** (side, 26 min, `04cf2b8d`/`469fc497`/`438f97d3`): Spikes + Intimidate two-switch fixture — the ROM damages the third entrant (Torkoal 185→155 at 2 layers) where the un-fixed kernel left it untouched; Intimidate/Trace branches now fall through to the opcode's two clears; `protectUses`/`rolloutTimerStartValue` zeroed on switch-in (BP too); DisableStruct enumeration confirms nothing else is missing; full suite 1,158/10,634, no pin moved. (5) **#137 receipt-then-fix** (ts, 66 min incl. lockstep, `c847e462`/`6d25d278`/`d1742366`/`8bb06134`/`0a7d9120`): cursed AI user takes `AI_CV_Protect3` on the ROM (5 decision draws vs the control's 7, 3 seeds × 2 byte-identical runs; engine 7 on both pre-fix); `runCvProtect` gains the `> 1` rung (writes-never funcResult) + toxic/cursed/perish routes; the live TS↔Rust AI parity trio forced a **core-rs lockstep mirror + wasm rebuild** (precedent `0cb8aa26`) — verified by me: wasm-mode parity trio + focused 653/653, then **`cargo test` was RED** (7 native call sites left on the old 4-arg signature + one fixture at `protect_uses 3`) → repaired by me (`cab779fb`, 696/0). **For the rust program:** `factory_ai_check_viability.rs` `run_cv_protect` now takes `stale_func_result_fallback: Option<u8>`, `factory_ai_live_view.rs` carries the attacker's toxic/cursed/perish bools, ABI v1 attacker section gained three optional bools after `has_yawn` — merge master before the next rust step. (6) **Gate-6 registry join** (side, 15 min, `d4fe3bb3`/`6ebea0fe`): 7 hook rows → `oracle-receipted-hook` (Water Veil, Arena Trap, Sturdy, Damp, Trace, Leppa/RESTORE_PP, King's Rock/FLINCH; 76→69 / 31→38), Intimidate/Speed Boost/Shell Bell evidence-only, scout-evidence line generalised to R-ids. (7) **turn-machinery audit** (side, 26 min, `docs/turn-machinery-audit-2026-08-26.md`, 133 rows: 3 DIVERGENT / 1 UNVERIFIED) → **#138** Encore auto-confirm precedes `AreAllMovesUnusable` (ROM Struggles, port fails the disabled locked move), **#139** Focus Punch pre-pass unported (message order), **#140** `GetMoveTarget`'s SELECTED draw loop skipped on the four forced-move branches (RNG-affecting; `sourceMoveTarget`'s docstring was wrong) — all three re-opened by me at source. (8) **Shell Bell live KO-heal arm** (ts, 18 min, `af3ef8bb`/`74a91286`): the 1402 gap closed — ROM heal **+15 = floor(125/8)** at moveend state 12 on a KO (94→109), item-0 control 0 (state 11→17 in one frame), non-KO +5 = floor(44/8); 0 draws; kernel equal on all three; mutation-checked (`/4` fails two arms). (9) **#140 receipt-then-fix** (side, 44 min, `9c886479`/`3361e0c4`/`a3a5642e`, merged `0ba047be`): Wobbuffet Encores Crobat's Pound; the ROM's Encore/Struggle-forced opponent actions draw **1, 2, 1, 1, 3** `Random()`s inside `HandleAction_UseMove` (geometric, p=½), all eight ordinary prologues 0; port now runs the modeled `MOVE_TARGET_SELECTED` do/while (shared `drawBattleScriptSelectedMoveTarget`, Follow Me short-circuit) on the Struggle/Encore/overwritten-Encore branches; the Mimic/Transform `:133` branch stays open as #140's trimmed remainder (needs the `gChosenMoveByBattler` bank). Curated-seed pins moved with attribution (round-orchestrator census calls, soak seed-21 frames 37,239→37,260, SILVER_SEED 2→6, chaining hop-1 seed 6→0); **the vanilla canary trajectory moves by design** (forced-Struggle draws). (10) **#138 receipt-then-fix** (ts, 32 min, `bc00a527`/`8d36862f`/`e21ca61e`): Dewgong Encore→Disable on Jolteon's Tackle — the ROM's turn 3 is `MOVE_STRUGGLE` (`BattleScript_NoMovesLeft`, `HITMARKER_NO_PPDEDUCT`, Dewgong 139→102, Jolteon recoil 140→131, PP unchanged) where the pre-fix kernel auto-confirmed the Disabled Tackle; selection now evaluates `AreAllMovesUnusable` before the Encore auto-confirm (`lockedMoveDecision` returns null when all four slots are masked); no pin moved. (11) **Shell Bell manifest flip** (side, 10 min, `3a4c0251`): HOLD_EFFECT_SHELL_BELL → `oracle-receipted-hook` (68/39). ISSUES: #134-#138 deleted, #140 trimmed, #139 open (message order only).
+- **Sibling folds:** animation-main 11 at orient (above, `12d32d2f`); **at close animation-main is 9 ahead again (Eruption presentation complete + Ice Beam evidence; touches `src/engine/battleScene.ts` +160 / `core.ts` +16, Scene-ON seam only per its ledger) — deliberately left unfolded: its Codex supervisor was still live (cap 06:24) and a `core.ts` fold after the gates would have voided them; the next orient's fold MUST rerun all five gates, not just the suite.** rust-main 0 ahead; **master now carries a core-rs change (#137 lockstep, `d1742366` + `cab779fb`) — the rust supervisor should merge master before its next step.**
+- **Next:** (1) **#139** Focus Punch pre-pass (message order; fixture in ISSUES) and **#140's remainder** (Mimic/Transform `:133` needs the `gChosenMoveByBattler` bank) — both small; (2) the turn-machinery audit's one UNVERIFIED sub-claim (§5 row 5.6 `HandleAction_ActionFinished`'s attacker-vs-turn-order indexing) and audit A's two (Pursuit damage chain past `tryfaintmon`; `hpOnSwitchout` liveness); (3) next unaudited ordering machines: `SetMoveEffect` status application (Shield Dust/Synchronize/Safeguard/Substitute gates), `Cmd_attackcanceler` multi-turn state (Bide/Uproar/Thrash/Rollout across turns), string/message ordering inside a move; (4) Rust lane: absorb the #137 ABI change; (5) parked #71/#73/#39/#55; dormant #121; doubles-era #109/#114.
+- **Notes:** PAPERCUTS +1 bump (battle-lab checkpoint: frame 0 IS the turn-1 action menu) +2 new (the `switchindataupdate` double cast hides unknown battler fields from typecheck; bare `npx vitest` OOMs — 3 workers). Audit C merged `4122d398`. Opus audit workers with the pacing clause finished ALL rows in ~25 min of 50-min caps (no early-stop). Reading committed audit sections mid-run let the supervisor verify findings before the workers exited.
+- **Post-close addendum (04:05-04:45, docs-only — no engine change after the gates):** a fourth ordering audit, **move-effect application** (`Cmd_seteffectwithchance`/`seteffectprimary`/`seteffectsecondary` → `SetMoveEffect`; side lane, Opus, ~20 min; `docs/move-effect-application-audit-2026-08-26.md`, merged `124c60b4`): 2 DIVERGENT / 4 benign, both DIVERGENT rows supervisor-verified at source and port and filed as **#141** — the THRASH lock-in `break`s without advancing the cursor and Thief/Covet-vs-Sticky-Hold uses `BattleScriptPushCursor()`, so the ROM re-runs `seteffectwithchance`, whose `Random() % 100` is the FIRST conjunct of its `else if` and is spent even with the byte already 0; the port `advance`s / `"call"`s (the machine already has `"call-current"`). RNG-affecting (one-draw offset at every rampage start; 9 rental carriers + Sticky Hold targets); left for the next session because a fix would need the gates rerun (61 min) past the deadline. Open at close: **#139, #140-remainder, #141** (all with receipt recipes), dormant #121, doubles-era #109/#114, parked #71/#73/#39/#55.
+- **Post-close addendum 2 (04:29-05:00, docs-only):** a fifth ordering audit, **multi-turn move lifecycle across turns** (Bide/Uproar/Rollout+Fury Cutter/Wrap family/rampage+recharge+two-turn/shared reads; side lane, Opus, ~25 min; `docs/multi-turn-move-lifecycle-audit-2026-08-26.md`, merged `e892a7a3`): its single DIVERGENT (the sleeping-multi-turner `CancelMultiTurnMoves` in `HandleEndTurn_ContinueBattle` "has no port site") was **REFUTED by me** — it is `clearEndTurnFlinchAndSleepLocks` (`battleEndTurnOrchestration.ts:2804-2825`, wired `:2860`, landed with #133 yesterday, pinned by `endTurnFlinchClearIssue133.test.ts`); the audit grepped for `STATUS1_SLEEP` and missed the `BATTLE_SCRIPT_` prefix. Correction appended to the doc; 4 benign rows stand. Two-day tally: 6 audits, 13 first-pass DIVERGENT claims, **4 refuted at source/port by the supervisor, 9 real (#130-#141)** — always re-open both cited lines before filing.
+
+---
+
 ## 1403 — [supervisor wind-down, 2026-08-25 ~20:20] **Audit + receipt day: three source-vs-port audits (ability 38/38, held-item 38/38, end-turn ordering 40/47 rows) → #128 FOUND+FIXED (Intimidate/Trace record onto the player's AI-history slot: 8 AI draws), #130-#133 FOUND+FIXED (isFirstTurn decay, ENDTURN_ORDER recompute + tie draw, case-major field loop, end-turn flinch clear), #129 filed then NOT-A-BUG (trace stalled at the faint prompt); activation census (1,216 seeds, 0 CRASH/0 HANG) → every announcing hole receipted (Water Veil, Arena Trap, Leppa) + OHKO/Sturdy pack; 3 of 4 first-pass DIVERGENT audit claims refuted at source; all five gates on the final tree**
 
 - **Final gates on THIS tree (`9302e76b`, supervisor's own runs, all `--parallel`):** vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60**, winning-swap 0:60 **60/60**; fifth gate — winning `--vary-rng --first-round` carry 0 **100/100**, carry 14 **100/100**, carry 28 **100/100**, winning-swap carry 0 **100/100** — **`budget` 0 on all four** (gates ran 18:57-20:08 under load 25-53: the animation Codex supervisor was live all session). Full `npm test` on `9302e76b` **1,150 files / 10,605 passed / 223 skipped**; `npm run build` green. DEFERRED.md: no open entries. The vanilla canary's TRAJECTORY differs from 1398 by design: #128 removed source-required AI draws and #130/#131/#133 change end-turn order/draws; the gate is the count, and each engine change carries a byte-identical stock-ROM receipt.
@@ -15,121 +28,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** PAPERCUTS +3 (`rg` over the `reference/` symlink returns zero hits silently; battle-lab checkpoint is past turn 1's AI decision — window turn 2; traces ending on a faint prompt stall before `moveend`). Opus audit/staging workers early-stopped at 9-16 min of 45-50-min caps until briefs carried explicit pacing (then 24-45 min, complete). Three cap-kills today all salvaged with zero code loss (commit-per-rung discipline).
 
 ---
-
-## 1402 — [ts worker, 2026-08-25 ~18:15] **ISSUES #129 CLOSED as NOT-A-BUG: the stock ROM DOES draw King's Rock's `Random()` at `MOVEEND_KINGSROCK_SHELLBELL` on a KO — #129's premise was a truncated-trace artifact, and the engine was already source-exact**
-
-- **State:** #129 deleted from `ISSUES.md`; no engine change was needed. Green at
-  HEAD: `npm test` **1,146 files passed / 44 skipped, 10,583 passed / 223 skipped
-  / 0 failed**, `npm run build` green, `npm run typecheck` green.
-- **RUNG 1 — mechanism.** `tools/probe/probe-issue129-kingsrock-ko-off.py` watches
-  `gBattleMoveDamage`, `gSpecialStatuses[target].{physical,special,shellBell}Dmg`,
-  `gMoveResultFlags`, attacker/target + item, `gBattleScripting.moveendState`
-  (`gBattleScripting+20`) and `gBattlescriptCurrInstr` (resolved to
-  `BattleScript_*+n`) every frame. The gate6 hit fixture's 934-frame trace
-  **stalls at frame 443**: `STRINGID_TARGETFAINTED` ends in the `0xFB` prompt
-  code, so `BattleScript_FaintTarget`'s `printstring`
-  (`data/battle_scripts_1.s:2817-2823`) leaves the player controller in
-  `CompleteOnInactiveTextPrinter` with `gBattleControllerExecFlags = 1`, and
-  `gBattlescriptCurrInstr` sits on `BattleScript_FaintTarget+12` (the `return`
-  into `moveendall`) for the rest of the trace — verified out to 3000 idle
-  frames. **`Cmd_moveend` never ran in the old window.** With A pulses appended,
-  state 10 is seen at frame 640, state 11 at 641, state 17 at 642, and **exactly
-  one `Random()` lands inside frame 642**; it disappears when the attacker's item
-  is forced to 0. At state 11 every gate ahead of the draw holds
-  (`gBattleMoveDamage` 125, `physicalDmg` 125, flags 0 — `Cmd_resultmessage`
-  cleared them at frame 271, 20 → 0); only the trailing
-  `&& gBattleMons[gBattlerTarget].hp`, evaluated **after** the draw
-  (`src/battle_util.c:3773-3780`), is false.
-- **RUNG 2 — scope: GENERIC.** Four arms, each run twice fresh, byte-identical
-  (`tools/probe/receipts/issue129-kingsrock-ko-off.json`, built by
-  `tools/probe/build-issue129-receipt.py`): FISSURE OHKO KO **67/359/642**;
-  same fixture no item **67/359**; EARTHQUAKE one-hit KO of a 4×-weak MAGNETON
-  **72/73/76 + 642**; non-KO EARTHQUAKE on METAPOD (125 → 76) **72/73/76 + 299**.
-  King's Rock draws after *any* hit that set physical/special damage. **Shell
-  Bell is not suppressed either** — `shellBellDmg` is still 125 at state 12 on
-  the KO arm; its only remaining gate is `attacker hp != maxHP`.
-- **RUNG 3 — no port.** `battleScriptMoveEndOpcode.ts:883-905` already matches.
-  `tests/gate6OhkoReceipt.test.ts`'s `it.fails` is now a real `it` asserting the
-  ROM's **three**-draw OHKO hit; new `tests/issue129KingsRockKoReceipt.test.ts`
-  (6 tests) pins all four ROM arms and drives the kernel's KO / non-KO King's
-  Rock draw plus the Shell Bell KO heal (−15 = −(125/8), record cleared) and its
-  full-HP control. Mutation-checked: hoisting the source's trailing
-  `targetState.hp !== 0` ahead of the draw fails both suites.
-  `tools/probe/receipts/gate6-ohko-off.json`'s `kingsRockControl` /
-  `engineDivergence` blocks are corrected in place with a `windowTruncation`
-  record; its raw truncated ledger is kept verbatim as the raw measurement.
-- **Next:** supervisor reruns the gates. No trajectory pin moved (no engine
-  change), so nothing needs re-pinning.
-- **Notes:** the one thing NOT staged live is a Shell Bell **heal** on a KO
-  against a ROM arm — that needs an attacker already below max HP, i.e. a
-  two-turn fixture this bounded step had no room for. The source condition is
-  fully determined by the RAM evidence above and pinned in the kernel, so no
-  issue remains open. Generalizable lesson for future receipts: **a battle-lab
-  trace that ends on a faint message has not observed `moveend`** — the faint
-  string's `0xFB` prompt blocks every later opcode until a button press.
-
----
-
-## 1401 — [ts worker, 2026-08-25 ~16:47] **ISSUES #128 CLOSED both halves: stock-ROM receipt first (Intimidate/Trace DO write `BATTLE_HISTORY->abilities[0]`, the PLAYER's slot, costing the AI 8 `Cmd_get_ability` draws), then the three-site fix + the history-before-trapper order**
-
-- **State:** #128 is fully landed and deleted from `ISSUES.md`. Receipt
-  `bf1a5484`, fix `fdc21ede`, trajectory re-pins `c2fd533c`. Green at HEAD:
-  `npm test` **1,143 files / 10,563 passed / 223 skipped / 0 failed**,
-  `npm run build` green, `npm run typecheck` green,
-  `npm test -- tests/factoryAi` 32 files / 1,432 tests green.
-- **RUNG 1 — receipt (stock ROM, tree unchanged).** Three `mechanicLab`
-  `overrides.parties` arms against the same two-ability player lead Golduck
-  (set 418, `ABILITY_DAMP` / `ABILITY_CLOUD_NINE`), all four AI slots one
-  move. `BATTLE_HISTORY->abilities[0..3]` read right after battle start via
-  `gBattleResources` → +24 (`struct BattleResources` member 6) → +64
-  (`struct BattleHistory`: `usedMoves[4]` × 16 bytes), `include/battle.h`:
-  - **INTIMIDATE** (AI Mightyena, set 202): **`[22, 0, 0, 0]`** — holder is
-    battler **1**, record lands on **0**. **PREMISE HELD.**
-  - **CONTROL** (AI Poochyena, single-ability Run Away 50): **`[0, 0, 0, 0]`**.
-  - **TRACE** (AI Gardevoir set 813, `abilitySlot 1`): **`[6, 0, 0, 0]`** —
-    the *copied* Damp, again on slot 0, not on the tracer.
-  Every `Random()` in turn 2's `HandleTurnActionSelectionState` window
-  attributed to its caller by targeted single-step (pass-1 `sRandCount`
-  totals reconcile 1:1 with pass-2 hits in all three arms): control **14**
-  draws = `Cmd_get_ability` **8** + `BattleAI_SetupAIData` 4 +
-  `BattleTurnPassed` 1 + `ChooseMoveOrAction_Singles` 1; intimidate and trace
-  **6** each = `Cmd_get_ability` **0** + the *identical* 6-draw remainder. So
-  a non-zero `abilities[0]` removes exactly 8 `get_ability AI_TARGET` guesses
-  per AI decision. Each arm run **twice** from a fresh oracle,
-  **byte-identical** (`a2194263…` / `c24e3d54…` / `9f520f8f…`).
-  Receipt `tools/probe/receipts/issue128-ability-history-off.json`; probe
-  `tools/probe/probe-issue128-ability-history-off.py`; fixtures from
-  `tools/probe/generate-issue128-ability-history-fixtures.ts`. (The battle-lab
-  checkpoint already sits inside turn 1's selection run — the AI has committed
-  and Intimidate has already fired — so the first fully observable AI decision
-  is turn 2's.)
-- **RUNG 2 — fix (3 sites + order, all mutation-checked).** (1)
-  `factoryBattleStart.ts` Intimidate/Trace loops now call
-  `recordBattleScriptAbilityReveal(rules, 0, …)`. (2)
-  `battleScriptFaintedActionsOrchestration.ts` state 6: both holder-index
-  writes → index 0. (3) `factoryAiCheckBadMove.ts` `nextGetAbilityDraw` +
-  `checkAbilityAiTarget` test `knownAbility` **before** the trapper shortcut
-  (`factoryAiCheckViability.ts` already had it). New
-  `tests/issue128AbilityHistoryReceipt.test.ts` (10 tests) drives all three
-  arms through battle start + the first live AI decision and pins the ROM's
-  8-vs-0 draw delta; the fainted-actions suite gains slot-0 Intimidate and
-  Trace pins. Reverting each item fails 5/7, 2/11 and 1/10 respectively.
-- **Next:** supervisor reruns the gates. **The vanilla soak canary trajectory
-  is EXPECTED to move** — source-required draws are now removed whenever an
-  Intimidate/Trace lead faces a two-ability player mon. Not a regression.
-- **Notes:** no existing test pinned the holder index, so nothing needed
-  re-pinning there; the AI parity suites were green before and after. Three
-  Tier-1 **trajectory** tests did move and were re-pinned in their own commit
-  (`c2fd533c`), all self-authored curated-seed scenarios, none an
-  oracle-verified ROM trajectory: `factoryWholeBattle` (Granbull/Intimidate vs
-  Azurill/two-ability — #128's exact shape: 12 → 13 AI decisions, cursor 196 →
-  199), `factoryBrainRoundShape` (SILVER_SEED 4 → 1, GOLD_SEED 2 → 8; the
-  file's own "pick a different seed" throw is the designed remedy),
-  `factoryRoundChaining` case (b) (seed 0 → 3). Live AI receipts unaffected as
-  predicted: `verify-factory-ai-cbm-preamble-live.ts` 4/4 MATCH and
-  `verify-factory-ai-curse-live.ts` 6/6 PASS (both stage single-ability
-  species). `docs/ability-item-parity-census.md` moved by pure line drift from
-  the new source-cite comments (same four `factoryAiCheckBadMove.ts` sites,
-  same abilities) — regenerated, all 17 validation checks pass. Executable
-  frontier ratchet untouched; no new `unsupported-branch` barrier.
-

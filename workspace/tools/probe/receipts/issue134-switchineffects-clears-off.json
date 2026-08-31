@@ -1,0 +1,571 @@
+{
+  "schema": "issue134-switchineffects-clears-off-receipt/v1",
+  "issue": 134,
+  "oracleProfile": "battle-scene-off",
+  "probe": "tools/probe/probe-issue134-switchineffects-clears-off.py",
+  "builder": "tools/probe/build-issue134-receipt.py",
+  "question": "Does an Intimidate switch-in clear SIDE_STATUS_SPIKES_DAMAGED on the stock ROM, so that the NEXT switch-in on that side still takes Spikes damage? battle_script_commands.c:5268 says yes (battle_util.c:2559-2565's ON_SWITCHIN case sets only STATUS3_INTIMIDATE_POKES and breaks with no effect++, so AbilityBattleEffects returns 0 and Cmd_switchineffects enters its !Ability && !Item body).",
+  "verdict": "CONFIRMED. Both arms clear SIDE_STATUS_SPIKES_DAMAGED inside the switchineffects opcode (BattleScript_DoSwitchOut+32) after the entrant took its Spikes chip, and the third entrant WHISCASH takes 30 = 185/6 (two layers) in both arms. The Intimidate arm is not a special case on the ROM; it is one in the unfixed port.",
+  "constants": {
+    "SIDE_STATUS_SPIKES_DAMAGED": 512,
+    "SIDE_STATUS_SPIKES": 16
+  },
+  "arms": {
+    "intimidate": {
+      "fixture": "tools/battle-lab/issue134-switchineffects-clears-intimidate-off.json",
+      "probeOutputSha256": "c08f1c9949ceb5091af00b84b4689be1e95125f2b7e143d2ecfd9481064711d5",
+      "runs": [
+        {
+          "path": "/tmp/i134-intimidate-a.json",
+          "sha256": "c08f1c9949ceb5091af00b84b4689be1e95125f2b7e143d2ecfd9481064711d5"
+        },
+        {
+          "path": "/tmp/i134-intimidate-b.json",
+          "sha256": "c08f1c9949ceb5091af00b84b4689be1e95125f2b7e143d2ecfd9481064711d5"
+        }
+      ],
+      "rom": {
+        "seed": 305419897,
+        "playerPartySpecies": [
+          129,
+          128,
+          324
+        ],
+        "opponentPartySpecies": [
+          205,
+          213,
+          320
+        ],
+        "entries": [
+          {
+            "entryFrame": 1380,
+            "partyIndex": 1,
+            "species": 128,
+            "maxHp": 150,
+            "hpOnLoad": 150,
+            "hpAfterEntry": 132,
+            "spikesDamage": 18,
+            "spikesLayersAtEntry": 1,
+            "spikesDamagedBitAtWindowEnd": false,
+            "hpTransitions": [
+              {
+                "frame": 1382,
+                "from": 95,
+                "to": 150,
+                "battleScript": "BattleScript_DoSwitchOut+19"
+              },
+              {
+                "frame": 1538,
+                "from": 150,
+                "to": 132,
+                "battleScript": "BattleScript_SpikesOnAttacker+13"
+              }
+            ]
+          },
+          {
+            "entryFrame": 2700,
+            "partyIndex": 2,
+            "species": 324,
+            "maxHp": 185,
+            "hpOnLoad": 185,
+            "hpAfterEntry": 155,
+            "spikesDamage": 30,
+            "spikesLayersAtEntry": 2,
+            "spikesDamagedBitAtWindowEnd": false,
+            "hpTransitions": [
+              {
+                "frame": 2702,
+                "from": 132,
+                "to": 185,
+                "battleScript": "BattleScript_DoSwitchOut+19"
+              },
+              {
+                "frame": 2868,
+                "from": 185,
+                "to": 155,
+                "battleScript": "BattleScript_SpikesOnAttacker+13"
+              }
+            ]
+          }
+        ],
+        "spikesDamagedFrames": [
+          {
+            "frame": 1516,
+            "set": true,
+            "battleScript": "BattleScript_SpikesOnAttacker"
+          },
+          {
+            "frame": 1634,
+            "set": false,
+            "battleScript": "BattleScript_DoSwitchOut+32"
+          },
+          {
+            "frame": 2834,
+            "set": true,
+            "battleScript": "BattleScript_SpikesOnAttacker"
+          },
+          {
+            "frame": 2966,
+            "set": false,
+            "battleScript": "BattleScript_DoSwitchOut+32"
+          }
+        ],
+        "spikesLayerEvents": [
+          {
+            "frame": 184,
+            "from": 0,
+            "to": 1,
+            "battleScript": "BattleScript_EffectSpikes+6"
+          },
+          {
+            "frame": 1884,
+            "from": 1,
+            "to": 2,
+            "battleScript": "BattleScript_EffectSpikes+6"
+          },
+          {
+            "frame": 2976,
+            "from": 2,
+            "to": 3,
+            "battleScript": "BattleScript_EffectSpikes+6"
+          }
+        ],
+        "hitMarkerFaintedEvents": [],
+        "finalSideStatuses0": 16,
+        "finalPlayerParty": [
+          {
+            "species": 129,
+            "hp": 95,
+            "maxHp": 95
+          },
+          {
+            "species": 128,
+            "hp": 132,
+            "maxHp": 150
+          },
+          {
+            "species": 324,
+            "hp": 155,
+            "maxHp": 185
+          }
+        ],
+        "messageEvents": [
+          {
+            "frame": 2,
+            "text": "SPLASH"
+          },
+          {
+            "frame": 3,
+            "text": "TYPE/<FC><06><01>NORMAL"
+          },
+          {
+            "frame": 29,
+            "text": "MAGIKARP used\nSPLASH!"
+          },
+          {
+            "frame": 88,
+            "text": "But nothing happened!"
+          },
+          {
+            "frame": 185,
+            "text": "Foe FORRETRESS used\nSPIKES!"
+          },
+          {
+            "frame": 249,
+            "text": "SPIKES were scattered all around\nthe opponent\u2019s side!"
+          },
+          {
+            "frame": 380,
+            "text": "What will\nMAGIKARP do?"
+          },
+          {
+            "frame": 1269,
+            "text": "<FC><02><02>MAGIKARP<FC><01><0B><B5>"
+          },
+          {
+            "frame": 1271,
+            "text": "<FC><02><02>FORRETRESS<FC><01><0B><B5>"
+          },
+          {
+            "frame": 1301,
+            "text": "MAGIKARP, that\u2019s enough!\nCome back!"
+          },
+          {
+            "frame": 1384,
+            "text": "Go! TAUROS!"
+          },
+          {
+            "frame": 1462,
+            "text": "<FC><02><02>TAUROS<FC><01><0B><B5>"
+          },
+          {
+            "frame": 1540,
+            "text": "TAUROS is hurt\nby SPIKES!"
+          },
+          {
+            "frame": 1761,
+            "text": "TAUROS\u2019s INTIMIDATE\ncuts Foe FORRETRESS\u2019s ATTACK!"
+          },
+          {
+            "frame": 1885,
+            "text": "Foe FORRETRESS used\nSPIKES!"
+          },
+          {
+            "frame": 1949,
+            "text": "SPIKES were scattered all around\nthe opponent\u2019s side!"
+          },
+          {
+            "frame": 2080,
+            "text": "What will\nTAUROS do?"
+          },
+          {
+            "frame": 2591,
+            "text": "<FC><02><02>TAUROS<FC><01><0B><B5>"
+          },
+          {
+            "frame": 2593,
+            "text": "<FC><02><02>FORRETRESS<FC><01><0B><B5>"
+          },
+          {
+            "frame": 2623,
+            "text": "TAUROS, that\u2019s enough!\nCome back!"
+          },
+          {
+            "frame": 2704,
+            "text": "Go! WHISCASH!"
+          },
+          {
+            "frame": 2784,
+            "text": "<FC><02><02>WHISCASH<FC><01><0A><B6>"
+          },
+          {
+            "frame": 2870,
+            "text": "WHISCASH is hurt\nby SPIKES!"
+          },
+          {
+            "frame": 2977,
+            "text": "Foe FORRETRESS used\nSPIKES!"
+          },
+          {
+            "frame": 3041,
+            "text": "SPIKES were scattered all around\nthe opponent\u2019s side!"
+          },
+          {
+            "frame": 3172,
+            "text": "What will\nWHISCASH do?"
+          }
+        ],
+        "framebufferSha256": "94f97f05be62c4a1aa431fef0e29e20c6eda58bd77c522d5ec0d1577b108f199"
+      }
+    },
+    "control": {
+      "fixture": "tools/battle-lab/issue134-switchineffects-clears-control-off.json",
+      "probeOutputSha256": "3ecda25e7f5882080d199ccf18cc4a8da84d85e2dc3e049e0bae0efdfa1b7e5a",
+      "runs": [
+        {
+          "path": "/tmp/i134-control-a.json",
+          "sha256": "3ecda25e7f5882080d199ccf18cc4a8da84d85e2dc3e049e0bae0efdfa1b7e5a"
+        },
+        {
+          "path": "/tmp/i134-control-b.json",
+          "sha256": "3ecda25e7f5882080d199ccf18cc4a8da84d85e2dc3e049e0bae0efdfa1b7e5a"
+        }
+      ],
+      "rom": {
+        "seed": 305419897,
+        "playerPartySpecies": [
+          129,
+          66,
+          324
+        ],
+        "opponentPartySpecies": [
+          205,
+          213,
+          320
+        ],
+        "entries": [
+          {
+            "entryFrame": 1380,
+            "partyIndex": 1,
+            "species": 66,
+            "maxHp": 145,
+            "hpOnLoad": 145,
+            "hpAfterEntry": 127,
+            "spikesDamage": 18,
+            "spikesLayersAtEntry": 1,
+            "spikesDamagedBitAtWindowEnd": false,
+            "hpTransitions": [
+              {
+                "frame": 1382,
+                "from": 95,
+                "to": 145,
+                "battleScript": "BattleScript_DoSwitchOut+19"
+              },
+              {
+                "frame": 1524,
+                "from": 145,
+                "to": 127,
+                "battleScript": "BattleScript_SpikesOnAttacker+13"
+              }
+            ]
+          },
+          {
+            "entryFrame": 2700,
+            "partyIndex": 2,
+            "species": 324,
+            "maxHp": 185,
+            "hpOnLoad": 185,
+            "hpAfterEntry": 155,
+            "spikesDamage": 30,
+            "spikesLayersAtEntry": 2,
+            "spikesDamagedBitAtWindowEnd": false,
+            "hpTransitions": [
+              {
+                "frame": 2702,
+                "from": 127,
+                "to": 185,
+                "battleScript": "BattleScript_DoSwitchOut+19"
+              },
+              {
+                "frame": 2868,
+                "from": 185,
+                "to": 155,
+                "battleScript": "BattleScript_SpikesOnAttacker+13"
+              }
+            ]
+          }
+        ],
+        "spikesDamagedFrames": [
+          {
+            "frame": 1502,
+            "set": true,
+            "battleScript": "BattleScript_SpikesOnAttacker"
+          },
+          {
+            "frame": 1620,
+            "set": false,
+            "battleScript": "BattleScript_DoSwitchOut+32"
+          },
+          {
+            "frame": 2834,
+            "set": true,
+            "battleScript": "BattleScript_SpikesOnAttacker"
+          },
+          {
+            "frame": 2966,
+            "set": false,
+            "battleScript": "BattleScript_DoSwitchOut+32"
+          }
+        ],
+        "spikesLayerEvents": [
+          {
+            "frame": 184,
+            "from": 0,
+            "to": 1,
+            "battleScript": "BattleScript_EffectSpikes+6"
+          },
+          {
+            "frame": 1630,
+            "from": 1,
+            "to": 2,
+            "battleScript": "BattleScript_EffectSpikes+6"
+          },
+          {
+            "frame": 2976,
+            "from": 2,
+            "to": 3,
+            "battleScript": "BattleScript_EffectSpikes+6"
+          }
+        ],
+        "hitMarkerFaintedEvents": [],
+        "finalSideStatuses0": 16,
+        "finalPlayerParty": [
+          {
+            "species": 129,
+            "hp": 95,
+            "maxHp": 95
+          },
+          {
+            "species": 66,
+            "hp": 127,
+            "maxHp": 145
+          },
+          {
+            "species": 324,
+            "hp": 155,
+            "maxHp": 185
+          }
+        ],
+        "messageEvents": [
+          {
+            "frame": 2,
+            "text": "SPLASH"
+          },
+          {
+            "frame": 3,
+            "text": "TYPE/<FC><06><01>NORMAL"
+          },
+          {
+            "frame": 29,
+            "text": "MAGIKARP used\nSPLASH!"
+          },
+          {
+            "frame": 88,
+            "text": "But nothing happened!"
+          },
+          {
+            "frame": 185,
+            "text": "Foe FORRETRESS used\nSPIKES!"
+          },
+          {
+            "frame": 249,
+            "text": "SPIKES were scattered all around\nthe opponent\u2019s side!"
+          },
+          {
+            "frame": 380,
+            "text": "What will\nMAGIKARP do?"
+          },
+          {
+            "frame": 1269,
+            "text": "<FC><02><02>MAGIKARP<FC><01><0B><B5>"
+          },
+          {
+            "frame": 1271,
+            "text": "<FC><02><02>FORRETRESS<FC><01><0B><B5>"
+          },
+          {
+            "frame": 1301,
+            "text": "MAGIKARP, that\u2019s enough!\nCome back!"
+          },
+          {
+            "frame": 1384,
+            "text": "Go! MACHOP!"
+          },
+          {
+            "frame": 1462,
+            "text": "<FC><02><02>MACHOP<FC><01><0A><B6>"
+          },
+          {
+            "frame": 1526,
+            "text": "MACHOP is hurt\nby SPIKES!"
+          },
+          {
+            "frame": 1631,
+            "text": "Foe FORRETRESS used\nSPIKES!"
+          },
+          {
+            "frame": 1695,
+            "text": "SPIKES were scattered all around\nthe opponent\u2019s side!"
+          },
+          {
+            "frame": 1826,
+            "text": "What will\nMACHOP do?"
+          },
+          {
+            "frame": 2591,
+            "text": "<FC><02><02>MACHOP<FC><01><0A><B6>"
+          },
+          {
+            "frame": 2593,
+            "text": "<FC><02><02>FORRETRESS<FC><01><0B><B5>"
+          },
+          {
+            "frame": 2623,
+            "text": "MACHOP, that\u2019s enough!\nCome back!"
+          },
+          {
+            "frame": 2704,
+            "text": "Go! WHISCASH!"
+          },
+          {
+            "frame": 2784,
+            "text": "<FC><02><02>WHISCASH<FC><01><0A><B6>"
+          },
+          {
+            "frame": 2870,
+            "text": "WHISCASH is hurt\nby SPIKES!"
+          },
+          {
+            "frame": 2977,
+            "text": "Foe FORRETRESS used\nSPIKES!"
+          },
+          {
+            "frame": 3041,
+            "text": "SPIKES were scattered all around\nthe opponent\u2019s side!"
+          },
+          {
+            "frame": 3172,
+            "text": "What will\nWHISCASH do?"
+          }
+        ],
+        "framebufferSha256": "94f97f05be62c4a1aa431fef0e29e20c6eda58bd77c522d5ec0d1577b108f199"
+      }
+    }
+  },
+  "engineDivergence": {
+    "measuredOn": "the UNFIXED tree (before the src/engine/battleScriptSwitchinOpcode.ts edit)",
+    "driver": "tests/issue134SwitchineffectsClearsReceipt.test.ts runEntry(), the same two entries",
+    "note": "The kernel is fed the identical per-entry inputs the ROM had (species, maxHP, one/two Spikes layers, SIDE_STATUS_SPIKES on side 0) and carries entry 1's side state into entry 2.",
+    "arms": {
+      "intimidate": {
+        "entry1": {
+          "species": 128,
+          "maxHp": 150,
+          "hp": 132,
+          "spikesDamage": 18,
+          "spikesDamagedBitAfter": true,
+          "rom": {
+            "hp": 132,
+            "spikesDamage": 18,
+            "spikesDamagedBitAfter": false
+          }
+        },
+        "entry2": {
+          "species": 324,
+          "maxHp": 185,
+          "hp": 185,
+          "spikesDamage": 0,
+          "spikesDamagedBitAfter": false,
+          "rom": {
+            "hp": 155,
+            "spikesDamage": 30,
+            "spikesDamagedBitAfter": false
+          }
+        },
+        "verdict": "DIVERGENT -- slot 2 is undamaged in the port and takes 30 on the ROM"
+      },
+      "control": {
+        "entry1": {
+          "species": 66,
+          "maxHp": 145,
+          "hp": 127,
+          "spikesDamage": 18,
+          "spikesDamagedBitAfter": false,
+          "rom": {
+            "hp": 127,
+            "spikesDamage": 18,
+            "spikesDamagedBitAfter": false
+          }
+        },
+        "entry2": {
+          "species": 324,
+          "maxHp": 185,
+          "hp": 155,
+          "spikesDamage": 30,
+          "spikesDamagedBitAfter": false,
+          "rom": {
+            "hp": 155,
+            "spikesDamage": 30,
+            "spikesDamagedBitAfter": false
+          }
+        },
+        "verdict": "MATCHES -- the non-Intimidate entrant already fell through to the opcode tail"
+      }
+    },
+    "hitMarkerHalf": {
+      "note": "Neither receipt arm faints, so the ROM never sets a HITMARKER_FAINTED bit here (hitMarkerFaintedEvents is empty in both arms) and this fixture cannot measure the unconditional clear at battle_script_commands.c:5226. Measured in the kernel instead: with HITMARKER_FAINTED(0) pre-set, the unfixed Intimidate exit leaves the bit SET while a non-Intimidate entrant clears it. Source is unambiguous (the clear is the opcode's first statement) and the audit closed the consumer at Cmd_moveend/gLastHitBy.",
+      "unfixedIntimidateExitLeavesFaintedBitSet": true,
+      "unfixedNonIntimidateExitLeavesFaintedBitSet": false
+    }
+  }
+}

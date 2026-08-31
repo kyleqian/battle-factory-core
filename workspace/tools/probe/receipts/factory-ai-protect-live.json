@@ -1,0 +1,682 @@
+{
+  "schema": "factory-ai-protect-live-receipt/v1",
+  "issue": 137,
+  "source": "data/battle_ai_scripts.s:1894-1935 (AI_CV_Protect)",
+  "probe": "tools/probe/verify-factory-ai-protect-live.ts",
+  "fixtures": [
+    "tools/battle-lab/mechanic-factory-ai-cv-protect-control-off.json",
+    "tools/battle-lab/mechanic-factory-ai-cv-protect-reach-off.json"
+  ],
+  "oracleProfile": "battle-scene-off",
+  "captureStart": {
+    "control": 340,
+    "reach": 600
+  },
+  "arms": [
+    {
+      "seed": 1,
+      "arm": "control",
+      "captureDigest": "ba50d61398acd78a1755b0b8bac480052cab374923e8dca8a369c77e91570a80",
+      "decisionFrame": 367,
+      "romDecisionDraws": 7,
+      "romCvDraws": 2,
+      "romRngBefore": 3693657463,
+      "romRngAfter": 2023871260,
+      "romChosenMoveSlot": 0,
+      "romChosenMoveId": 182,
+      "attackerCursed": false,
+      "attackerProtectUses": 1,
+      "view": {
+        "schema": "factory-ai-scored-view/v1",
+        "mode": "factory-level-50-singles",
+        "active": {
+          "aiBattler": 1,
+          "targetBattler": 0
+        },
+        "factory": {
+          "levelMode": 0,
+          "battleMode": 0,
+          "factoryWinStreak": 28,
+          "trainerOpponentId": 222
+        },
+        "moves": [
+          182,
+          150,
+          150,
+          150
+        ],
+        "attacker": {
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_GHOST"
+          ],
+          "attack": 90,
+          "defense": 150,
+          "spAttack": 80,
+          "spDefense": 150,
+          "speed": 45,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 115,
+          "maxHp": 115,
+          "ability": "ABILITY_PRESSURE",
+          "protectUses": 1
+        },
+        "target": {
+          "species": 94,
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_POISON"
+          ],
+          "attack": 85,
+          "defense": 80,
+          "spAttack": 150,
+          "spDefense": 95,
+          "speed": 130,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 135,
+          "maxHp": 135,
+          "ability": "ABILITY_LEVITATE",
+          "knownAbility": null,
+          "lastUsedMoveId": 150,
+          "knownMoveIds": [
+            150
+          ]
+        }
+      },
+      "engineDecisionDraws": 7,
+      "engineRngAfter": 2023871260,
+      "engineChosenMoveSlot": 0,
+      "engineCheckViabilityDeltas": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "matchesRom": true
+    },
+    {
+      "seed": 1,
+      "arm": "reach",
+      "captureDigest": "d75c902eeb00287a091fbccf7bf16dc8f0fb74e428083bad4ba38e2b3f877e59",
+      "decisionFrame": 619,
+      "romDecisionDraws": 5,
+      "romCvDraws": 0,
+      "romRngBefore": 3693657463,
+      "romRngAfter": 3726110690,
+      "romChosenMoveSlot": 3,
+      "romChosenMoveId": 150,
+      "attackerCursed": true,
+      "attackerProtectUses": 1,
+      "view": {
+        "schema": "factory-ai-scored-view/v1",
+        "mode": "factory-level-50-singles",
+        "active": {
+          "aiBattler": 1,
+          "targetBattler": 0
+        },
+        "factory": {
+          "levelMode": 0,
+          "battleMode": 0,
+          "factoryWinStreak": 28,
+          "trainerOpponentId": 222
+        },
+        "moves": [
+          182,
+          150,
+          150,
+          150
+        ],
+        "attacker": {
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_GHOST"
+          ],
+          "attack": 90,
+          "defense": 150,
+          "spAttack": 80,
+          "spDefense": 150,
+          "speed": 45,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 87,
+          "maxHp": 115,
+          "ability": "ABILITY_PRESSURE",
+          "protectUses": 1,
+          "isCursed": true
+        },
+        "target": {
+          "species": 94,
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_POISON"
+          ],
+          "attack": 85,
+          "defense": 80,
+          "spAttack": 150,
+          "spDefense": 95,
+          "speed": 130,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 68,
+          "maxHp": 135,
+          "ability": "ABILITY_LEVITATE",
+          "knownAbility": null,
+          "lastUsedMoveId": 174,
+          "knownMoveIds": [
+            174
+          ]
+        }
+      },
+      "engineDecisionDraws": 5,
+      "engineRngAfter": 3726110690,
+      "engineChosenMoveSlot": 3,
+      "engineCheckViabilityDeltas": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "matchesRom": true
+    },
+    {
+      "seed": 5,
+      "arm": "control",
+      "captureDigest": "19c6e2e1b3364ad622558b0691f605de60e17e625b2b8a67aa6410e1b4cc7c4a",
+      "decisionFrame": 367,
+      "romDecisionDraws": 7,
+      "romCvDraws": 2,
+      "romRngBefore": 741917220,
+      "romRngAfter": 4047962493,
+      "romChosenMoveSlot": 3,
+      "romChosenMoveId": 150,
+      "attackerCursed": false,
+      "attackerProtectUses": 1,
+      "view": {
+        "schema": "factory-ai-scored-view/v1",
+        "mode": "factory-level-50-singles",
+        "active": {
+          "aiBattler": 1,
+          "targetBattler": 0
+        },
+        "factory": {
+          "levelMode": 0,
+          "battleMode": 0,
+          "factoryWinStreak": 28,
+          "trainerOpponentId": 222
+        },
+        "moves": [
+          182,
+          150,
+          150,
+          150
+        ],
+        "attacker": {
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_GHOST"
+          ],
+          "attack": 90,
+          "defense": 150,
+          "spAttack": 80,
+          "spDefense": 150,
+          "speed": 45,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 115,
+          "maxHp": 115,
+          "ability": "ABILITY_PRESSURE",
+          "protectUses": 1
+        },
+        "target": {
+          "species": 94,
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_POISON"
+          ],
+          "attack": 85,
+          "defense": 80,
+          "spAttack": 150,
+          "spDefense": 95,
+          "speed": 130,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 135,
+          "maxHp": 135,
+          "ability": "ABILITY_LEVITATE",
+          "knownAbility": null,
+          "lastUsedMoveId": 150,
+          "knownMoveIds": [
+            150
+          ]
+        }
+      },
+      "engineDecisionDraws": 7,
+      "engineRngAfter": 4047962493,
+      "engineChosenMoveSlot": 3,
+      "engineCheckViabilityDeltas": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "matchesRom": true
+    },
+    {
+      "seed": 5,
+      "arm": "reach",
+      "captureDigest": "eecad5425545b1b2e588ef171639f7cc506c09703382c06107b8d57fce55c7ea",
+      "decisionFrame": 619,
+      "romDecisionDraws": 5,
+      "romCvDraws": 0,
+      "romRngBefore": 741917220,
+      "romRngAfter": 856077595,
+      "romChosenMoveSlot": 2,
+      "romChosenMoveId": 150,
+      "attackerCursed": true,
+      "attackerProtectUses": 1,
+      "view": {
+        "schema": "factory-ai-scored-view/v1",
+        "mode": "factory-level-50-singles",
+        "active": {
+          "aiBattler": 1,
+          "targetBattler": 0
+        },
+        "factory": {
+          "levelMode": 0,
+          "battleMode": 0,
+          "factoryWinStreak": 28,
+          "trainerOpponentId": 222
+        },
+        "moves": [
+          182,
+          150,
+          150,
+          150
+        ],
+        "attacker": {
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_GHOST"
+          ],
+          "attack": 90,
+          "defense": 150,
+          "spAttack": 80,
+          "spDefense": 150,
+          "speed": 45,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 87,
+          "maxHp": 115,
+          "ability": "ABILITY_PRESSURE",
+          "protectUses": 1,
+          "isCursed": true
+        },
+        "target": {
+          "species": 94,
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_POISON"
+          ],
+          "attack": 85,
+          "defense": 80,
+          "spAttack": 150,
+          "spDefense": 95,
+          "speed": 130,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 68,
+          "maxHp": 135,
+          "ability": "ABILITY_LEVITATE",
+          "knownAbility": null,
+          "lastUsedMoveId": 174,
+          "knownMoveIds": [
+            174
+          ]
+        }
+      },
+      "engineDecisionDraws": 5,
+      "engineRngAfter": 856077595,
+      "engineChosenMoveSlot": 2,
+      "engineCheckViabilityDeltas": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "matchesRom": true
+    },
+    {
+      "seed": 99,
+      "arm": "control",
+      "captureDigest": "08faac6fa84a78b3af80db8b2bc0954f194a19cd184e45ab8e59a78ce8cda8a0",
+      "decisionFrame": 367,
+      "romDecisionDraws": 7,
+      "romCvDraws": 2,
+      "romRngBefore": 4088512940,
+      "romRngAfter": 1352996645,
+      "romChosenMoveSlot": 0,
+      "romChosenMoveId": 182,
+      "attackerCursed": false,
+      "attackerProtectUses": 1,
+      "view": {
+        "schema": "factory-ai-scored-view/v1",
+        "mode": "factory-level-50-singles",
+        "active": {
+          "aiBattler": 1,
+          "targetBattler": 0
+        },
+        "factory": {
+          "levelMode": 0,
+          "battleMode": 0,
+          "factoryWinStreak": 28,
+          "trainerOpponentId": 222
+        },
+        "moves": [
+          182,
+          150,
+          150,
+          150
+        ],
+        "attacker": {
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_GHOST"
+          ],
+          "attack": 90,
+          "defense": 150,
+          "spAttack": 80,
+          "spDefense": 150,
+          "speed": 45,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 115,
+          "maxHp": 115,
+          "ability": "ABILITY_PRESSURE",
+          "protectUses": 1
+        },
+        "target": {
+          "species": 94,
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_POISON"
+          ],
+          "attack": 85,
+          "defense": 80,
+          "spAttack": 150,
+          "spDefense": 95,
+          "speed": 130,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 135,
+          "maxHp": 135,
+          "ability": "ABILITY_LEVITATE",
+          "knownAbility": null,
+          "lastUsedMoveId": 150,
+          "knownMoveIds": [
+            150
+          ]
+        }
+      },
+      "engineDecisionDraws": 7,
+      "engineRngAfter": 1352996645,
+      "engineChosenMoveSlot": 0,
+      "engineCheckViabilityDeltas": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "matchesRom": true
+    },
+    {
+      "seed": 99,
+      "arm": "reach",
+      "captureDigest": "b22de5a3ba880073ba5113170ca1ebe9361566cd0d6fb5659951f5025faff340",
+      "decisionFrame": 619,
+      "romDecisionDraws": 5,
+      "romCvDraws": 0,
+      "romRngBefore": 4088512940,
+      "romRngAfter": 1329715331,
+      "romChosenMoveSlot": 1,
+      "romChosenMoveId": 150,
+      "attackerCursed": true,
+      "attackerProtectUses": 1,
+      "view": {
+        "schema": "factory-ai-scored-view/v1",
+        "mode": "factory-level-50-singles",
+        "active": {
+          "aiBattler": 1,
+          "targetBattler": 0
+        },
+        "factory": {
+          "levelMode": 0,
+          "battleMode": 0,
+          "factoryWinStreak": 28,
+          "trainerOpponentId": 222
+        },
+        "moves": [
+          182,
+          150,
+          150,
+          150
+        ],
+        "attacker": {
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_GHOST"
+          ],
+          "attack": 90,
+          "defense": 150,
+          "spAttack": 80,
+          "spDefense": 150,
+          "speed": 45,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 87,
+          "maxHp": 115,
+          "ability": "ABILITY_PRESSURE",
+          "protectUses": 1,
+          "isCursed": true
+        },
+        "target": {
+          "species": 94,
+          "types": [
+            "TYPE_GHOST",
+            "TYPE_POISON"
+          ],
+          "attack": 85,
+          "defense": 80,
+          "spAttack": 150,
+          "spDefense": 95,
+          "speed": 130,
+          "level": 50,
+          "statStages": {
+            "atk": 6,
+            "def": 6,
+            "spAtk": 6,
+            "spDef": 6,
+            "speed": 6,
+            "acc": 6,
+            "evasion": 6
+          },
+          "isFirstTurn": 1,
+          "hp": 68,
+          "maxHp": 135,
+          "ability": "ABILITY_LEVITATE",
+          "knownAbility": null,
+          "lastUsedMoveId": 174,
+          "knownMoveIds": [
+            174
+          ]
+        }
+      },
+      "engineDecisionDraws": 5,
+      "engineRngAfter": 1329715331,
+      "engineChosenMoveSlot": 1,
+      "engineCheckViabilityDeltas": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "matchesRom": true
+    }
+  ],
+  "engineDivergence": [
+    {
+      "seed": 1,
+      "arm": "control",
+      "romDecisionDraws": 7,
+      "preFixEngineDecisionDraws": 7,
+      "preFixEngineRngAfter": 2023871260,
+      "preFixEngineChosenMoveSlot": 0,
+      "diverges": false
+    },
+    {
+      "seed": 1,
+      "arm": "reach",
+      "romDecisionDraws": 5,
+      "preFixEngineDecisionDraws": 7,
+      "preFixEngineRngAfter": 2023871260,
+      "preFixEngineChosenMoveSlot": 0,
+      "diverges": true
+    },
+    {
+      "seed": 5,
+      "arm": "control",
+      "romDecisionDraws": 7,
+      "preFixEngineDecisionDraws": 7,
+      "preFixEngineRngAfter": 4047962493,
+      "preFixEngineChosenMoveSlot": 3,
+      "diverges": false
+    },
+    {
+      "seed": 5,
+      "arm": "reach",
+      "romDecisionDraws": 5,
+      "preFixEngineDecisionDraws": 7,
+      "preFixEngineRngAfter": 4047962493,
+      "preFixEngineChosenMoveSlot": 3,
+      "diverges": true
+    },
+    {
+      "seed": 99,
+      "arm": "control",
+      "romDecisionDraws": 7,
+      "preFixEngineDecisionDraws": 7,
+      "preFixEngineRngAfter": 1352996645,
+      "preFixEngineChosenMoveSlot": 0,
+      "diverges": false
+    },
+    {
+      "seed": 99,
+      "arm": "reach",
+      "romDecisionDraws": 5,
+      "preFixEngineDecisionDraws": 7,
+      "preFixEngineRngAfter": 1352996645,
+      "preFixEngineChosenMoveSlot": 0,
+      "diverges": true
+    }
+  ]
+}

@@ -1607,6 +1607,7 @@ pub fn run_check_viability(input: RunCheckViabilityInput) -> CheckViabilityResul
             input.attacker,
             input.target,
             input.draw_ordinal_start,
+            func_result_carry,
         );
         return CheckViabilityResult::Scored {
             rng: protect.rng,
@@ -3368,20 +3369,43 @@ fn run_cv_toxic(
     CvDraws { rng: cur_rng, draws, draw_count, score_delta: score }
 }
 
-/// `AI_CV_Protect` (`data/battle_ai_scripts.s:1894-1932`,
-/// `factoryAiCheckViability.ts:1249-1324`), including both status/move-
-/// history prologues, the source's usual +2 path, both `%256` rolls, and
-/// the consecutive-Protect penalty. Both paths execute
-/// `get_last_used_bank_move; get_move_effect_from_result`, so
-/// `funcResult` is always replaced by the target's last-move effect
-/// before return (the `Option<u8>` this returns alongside the score, not
-/// the caller's carry).
+/// `AI_CV_Protect` (`data/battle_ai_scripts.s:1894-1935`,
+/// `factoryAiCheckViability.ts:1249-1345`), including the
+/// `get_protect_count AI_USER; if_more_than 1` first rung, both status/
+/// move-history prologues, the source's usual +2 path, both `%256` rolls,
+/// and the consecutive-Protect penalty.
+///
+/// funcResult: every route EXCEPT the first rung executes
+/// `get_last_used_bank_move; get_move_effect_from_result`, so `funcResult`
+/// is replaced by the target's last-move effect. The `if_more_than 1` rung
+/// branches straight to `AI_CV_Protect_ScoreDown2`, which sits ABOVE that
+/// pair in the script, so on that one path the handler is writes-never and
+/// the caller's running carry passes through unchanged (ISSUES #137).
 fn run_cv_protect(
     rng: BattleRngState,
     attacker: FactoryAiCheckViabilityBattler,
     target: FactoryAiCheckViabilityBattler,
     ordinal_start: u32,
+    stale_func_result_fallback: Option<u8>,
 ) -> (CvDraws, Option<u8>) {
+    let empty = CvDraws {
+        rng,
+        draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+        draw_count: 0,
+        score_delta: 0,
+    };
+
+    // `get_protect_count AI_USER; if_more_than 1, AI_CV_Protect_ScoreDown2`
+    // (`:1895-1896`): two consecutive successful Protect/Detect/Endure ends
+    // the handler at -2 with ZERO draws, before any status read or
+    // funcResult write.
+    if attacker.protect_uses.unwrap_or(0) > 1 {
+        return (
+            CvDraws { score_delta: -2, ..empty },
+            stale_func_result_fallback,
+        );
+    }
+
     let last_move_id = target.last_used_move_id.unwrap_or(0);
     let last_move_effect = gen_tables::MOVES
         .get(last_move_id as usize)
@@ -3406,18 +3430,17 @@ fn run_cv_protect(
             })
     };
 
-    let early_protect3 = attacker.is_infatuated.unwrap_or(false)
+    // `:1897-1905`, in source order: the AI USER's own toxic poison, curse,
+    // perish song, infatuation, leech seed and yawn, then the two
+    // target-move-history effects, each jumping to `AI_CV_Protect3`.
+    let early_protect3 = attacker.is_toxic_poisoned.unwrap_or(false)
+        || attacker.is_cursed.unwrap_or(false)
+        || attacker.has_perish_song.unwrap_or(false)
+        || attacker.is_infatuated.unwrap_or(false)
         || attacker.is_leech_seeded.unwrap_or(false)
         || attacker.has_yawn.unwrap_or(false)
         || target_history_has_effect(EFFECT_RESTORE_HP)
         || target_history_has_effect(EFFECT_DEFENSE_CURL);
-
-    let empty = CvDraws {
-        rng,
-        draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
-        draw_count: 0,
-        score_delta: 0,
-    };
 
     if early_protect3 {
         let score_delta = if last_move_effect == EFFECT_LOCK_ON {
@@ -10195,6 +10218,7 @@ mod tests {
                 overrides,
                 neutral_battler(),
                 1,
+                None,
             );
             assert_eq!(result.draw_count, 0);
             assert_eq!(result.score_delta, 0);
@@ -10213,7 +10237,7 @@ mod tests {
             ..neutral_battler()
         });
         let (result, _) =
-            run_cv_protect(BattleRngState { value: 1, calls: 0 }, attacker, target, 1);
+            run_cv_protect(BattleRngState { value: 1, calls: 0 }, attacker, target, 1, None);
         assert_eq!(result.draw_count, 0);
         assert_eq!(result.score_delta, -2);
     }
@@ -10238,6 +10262,7 @@ mod tests {
             attacker,
             target,
             1,
+            None,
         );
         // Reaches the normal (non-early) path -- at least the first roll.
         assert!(result.draw_count >= 1);
@@ -10253,6 +10278,7 @@ mod tests {
             neutral_battler(),
             neutral_battler(),
             1,
+            None,
         );
         assert_eq!(jumped.0.draw_count, 1);
         let CheckViabilityDraw::ProtectRoll { kind, jumped: j, .. } = jumped.0.draws[0] else {
@@ -10267,16 +10293,20 @@ mod tests {
             neutral_battler(),
             neutral_battler(),
             1,
+            None,
         );
         assert_eq!(not_jumped.0.score_delta, 1); // base 2 - 1 (roll1 did NOT jump, roll>=128)
 
         let attacker_with_uses =
-            battler(FactoryAiCheckViabilityBattler { protect_uses: Some(3), ..neutral_battler() });
+            // protect_uses 1: the Protect4 tail (extra roll) -- values > 1 now take the
+            // `if_more_than 1` first rung (ISSUES #137) and draw nothing.
+            battler(FactoryAiCheckViabilityBattler { protect_uses: Some(1), ..neutral_battler() });
         let (with_uses, _) = run_cv_protect(
             BattleRngState { value: 249_678_687, calls: 0 },
             attacker_with_uses,
             neutral_battler(),
             1,
+            None,
         );
         assert_eq!(with_uses.draw_count, 2);
         let CheckViabilityDraw::ProtectRoll { kind, .. } = with_uses.draws[1] else {
@@ -10293,6 +10323,7 @@ mod tests {
             neutral_battler(),
             neutral_battler(),
             1,
+            None,
         );
         assert_eq!(func_result_after, Some(AI_WEATHER_SUN));
     }

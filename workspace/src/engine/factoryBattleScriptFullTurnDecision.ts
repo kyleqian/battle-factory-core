@@ -142,6 +142,7 @@ import {
   BATTLE_SCRIPT_STATUS3_ROOTED,
 } from "./battleScriptSourceConstants.ts";
 import { isFactoryAiSwitchPrecheckBlocked } from "./factoryAiSwitchPolicy.ts";
+import { drawBattleScriptSelectedMoveTarget } from "./battleScriptSwitchinOpcode.ts";
 import { mapFactoryBattleOutcome } from "./factoryBattleScriptTerminalDecision.ts";
 import { battleCommandSpeciesDisplayName } from "./battleCommandPresentation.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
@@ -368,6 +369,8 @@ type PendingSecondFullTurnAction = Readonly<{
   moveSlot: BattleMoveSlot;
   target: BattleScriptBattlerId;
   forcedStruggle: boolean;
+  /** ISSUES #140: does this action re-derive its target through GetMoveTarget's draw loop? */
+  retargetsAtExecution: boolean;
 }>;
 
 type PendingForcedSwitchScript = Readonly<{
@@ -736,6 +739,7 @@ function pendingSecondActionAt(value: unknown): PendingSecondFullTurnAction {
       moveSlot?: unknown;
       target?: unknown;
       forcedStruggle?: unknown;
+      retargetsAtExecution?: unknown;
     }>
     | null
     | undefined;
@@ -749,6 +753,7 @@ function pendingSecondActionAt(value: unknown): PendingSecondFullTurnAction {
     || !Number.isSafeInteger(record.moveSlot)
     || (record.target !== 0 && record.target !== 1)
     || typeof record.forcedStruggle !== "boolean"
+    || typeof record.retargetsAtExecution !== "boolean"
   ) {
     throw new Error("factory full-turn decision pendingScript.pendingSecondAction must be a valid resolved action");
   }
@@ -759,6 +764,7 @@ function pendingSecondActionAt(value: unknown): PendingSecondFullTurnAction {
     moveSlot: record.moveSlot as BattleMoveSlot,
     target: record.target as BattleScriptBattlerId,
     forcedStruggle: record.forcedStruggle,
+    retargetsAtExecution: record.retargetsAtExecution,
   });
 }
 
@@ -1534,6 +1540,102 @@ type ActionResult =
     legalPartyIndexes: readonly number[];
   }>;
 
+/**
+ * `HandleAction_UseMove`'s execution-time `GetMoveTarget(move, NO_TARGET_OVERRIDE)`
+ * (ISSUES #140). Four of its branches re-derive the target at ACTION time
+ * instead of carrying the one banked at selection -- forced Struggle
+ * (`battle_util.c:105`), the Encore match (`:117`), an Encore whose slot was
+ * overwritten (`:128`) and a chosen slot overwritten between selection and
+ * execution (`:133`) -- and every one of them pays for the
+ * `MOVE_TARGET_SELECTED` do/while's geometric(1/2) draw count. The ordinary
+ * chosen-move path (`:135-138`) calls nothing and stays draw-free, which is
+ * why this is a per-branch helper and not something `buildActionContext` does
+ * for everyone.
+ *
+ * Stock-ROM receipt: `tools/probe/receipts/issue140-getmovetarget-off.json` --
+ * Encore-forced opponent actions spent 1 and 2 draws (seed 305419897), 1 and 1
+ * (seed 1234567890), Struggle-forced actions 1 and 3, while all eight of the
+ * control arm's ordinary prologues spent 0.
+ *
+ * Follow Me short-circuits the loop without a draw (`:113-116`) whenever the
+ * side OPPOSITE the attacker has a live `setforcedtarget` user, which
+ * `battleScriptSetforcedtargetOpcode.ts` does model, so it is honoured here
+ * rather than assumed unreachable. The Lightning Rod redirect that follows the
+ * loop (`:123-131`) is doubles-only -- it flips `targetBattler ^= BIT_FLANK`,
+ * a position that does not exist with two battlers -- and consumes no RNG
+ * either way, so it is left to the doubles work rather than approximated.
+ *
+ * The draw is a C-side one with no opcode of its own, so it is attributed to
+ * the entry instruction of the script the action is about to run, the same
+ * "nearest concrete instruction in hand" convention
+ * `battleEndTurnOrchestration.ts`'s Shed Skin tick and
+ * `battleScriptAttackCancelerOpcode.ts`'s admission draws already use.
+ */
+function drawActionMoveTarget(
+  program: BattleScriptProgram,
+  priorState: MachineState,
+  mover: BattleScriptBattlerId,
+  moveId: number,
+  entryLabel: string,
+): Readonly<{ rng: MachineState["rng"]; target: BattleScriptBattlerId }> {
+  const rules = priorState.rulesContext;
+  const move = MOVES_BY_ID.get(moveId);
+  if (!move) {
+    throw new Error(`move ${moveId} is absent from generated gBattleMoves`);
+  }
+  if (move.target.length !== 1 || move.target[0] !== "MOVE_TARGET_SELECTED") {
+    // Only MOVE_TARGET_SELECTED reaches the draw loop; every other shape this
+    // reducer can execute resolves positionally (battle_util.c:3863-3910).
+    return Object.freeze({ rng: priorState.rng, target: sourceMoveTarget(moveId, mover as BattleSinglesBattler) });
+  }
+  const attackerSide = rules.battlers[mover].side;
+  const opposingSide = attackerSide === 0 ? 1 : 0;
+  const followMe = rules.sideTimers[opposingSide];
+  if (followMe.followmeTimer !== 0 && rules.battlers[followMe.followmeTarget].hp !== 0) {
+    return Object.freeze({ rng: priorState.rng, target: followMe.followmeTarget });
+  }
+  const entry = resolveBattleScriptLabel(program, entryLabel);
+  if (!entry) throw new Error(`unknown Battle Script entry label ${entryLabel}`);
+  const entryInstruction = program.instructions[entry.programCounter];
+  if (!entryInstruction) {
+    throw new Error(`Battle Script program has no instruction at ${entry.programCounter}`);
+  }
+  return drawBattleScriptSelectedMoveTarget(rules, mover, priorState.rng, entryInstruction);
+}
+
+/**
+ * Which `HandleAction_UseMove` branch this battler's action will take, in the
+ * source's own order (`battle_util.c:99-138`), reduced to the one bit
+ * `runMoveAction` needs: does it re-derive the target (and pay
+ * `GetMoveTarget`'s draws) or ride the one banked at selection?
+ *
+ * Evaluated on the PRE-`clearOverwrittenEncoreAtAction` rules context on
+ * purpose: the port hoists that cleanup to turn start for both battlers, so by
+ * action time the `:120-131` "encored move was overwritten" branch has already
+ * erased the evidence that it is the branch being taken -- and it draws
+ * exactly like the `:112-118` match does.
+ *
+ * `forcedStruggle` is the caller's own `battlerUsesForcedStruggle` answer, so
+ * this stays consistent with the branch the reducer actually executes; the
+ * STATUS2_MULTIPLETURNS / STATUS2_RECHARGE lock (`:107-110`) is the one forced
+ * action that calls no `GetMoveTarget` at all, and it falls out as `false`
+ * because `battlerUsesForcedStruggle` already returns false for it and a
+ * locked battler carries no Encore. The fourth branch (`:133`, the chosen slot
+ * overwritten by Mimic/Transform between selection and execution) needs
+ * `gChosenMoveByBattler`, a selection-time bank this reducer does not model --
+ * see `actionMoveId`, which reads the live slot -- so it cannot be detected
+ * here; it is named rather than silently folded in.
+ */
+function actionRetargetsAtExecution(
+  preClearRulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+  forcedStruggle: boolean,
+): boolean {
+  if (forcedStruggle) return true;
+  const source = preClearRulesContext.battlers[battler]!;
+  return source.encoreTimer !== 0 && source.encoredMove !== 0;
+}
+
 /** Runs one battler's chosen move from its LITERAL topology entry (census precedent, `factoryBattleScriptDecision.ts`'s own mechanism). */
 function runMoveAction(
   program: BattleScriptProgram,
@@ -1544,20 +1646,25 @@ function runMoveAction(
   moveSlot: BattleMoveSlot,
   target: BattleScriptBattlerId,
   forcedStruggle = false,
+  retargetsAtExecution = false,
 ): ActionResult {
   const topology = TOPOLOGY_BY_MOVE.get(moveId);
   if (!topology) throw new Error(`move ${moveId} has no source Battle Script entry`);
+  const retarget = retargetsAtExecution
+    ? drawActionMoveTarget(program, priorState, mover, moveId, topology.entryScript)
+    : null;
   const actionContext = buildActionContext(
     priorState.rulesContext,
     mover,
     moveId,
     moveSlot,
-    target,
+    retarget?.target ?? target,
     forcedStruggle,
   );
   const started = startBattleScriptExecute(program, topology.entryScript, {
     ...priorState,
     rulesContext: actionContext,
+    rng: retarget?.rng ?? priorState.rng,
   });
   const run = runScriptToOwnEnd(program, handlers, started);
   if (run.kind === "player-choice") {
@@ -1722,7 +1829,8 @@ function runVoluntarySwitchAction(
   );
   // The skipped ActionSwitch prelude is presentation bookkeeping
   // (hpthresholds2/RETURNMON text) plus the singles counter/setbyte writes
-  // staged above; begin at its first logical branch.
+  // staged above -- `setbyte sDMG_MULTIPLIER, 2` (battle_scripts_1.s:3091) and
+  // `setmultihit 1` (:3092); begin at its first logical branch.
   const started = startBattleScriptExecute(PROGRAM, "BattleScript_PursuitSwitchDmgLoop", {
     ...priorState,
     rulesContext,
@@ -1760,9 +1868,10 @@ function runVoluntarySwitchAction(
 
 /**
  * BattleScript_ActionSwitch's singles prelude (battle_scripts_1.s:3088-3094):
- * staging monToSwitchIntoId where the controller path would have left it and
- * resetting the action-local move values, shared by the reducer's switch
- * action and the staged Tier-1 seam below.
+ * staging monToSwitchIntoId where the controller path would have left it,
+ * resetting the action-local move values, and reproducing the prelude's
+ * `setbyte sDMG_MULTIPLIER, 2` (:3091) that doubles a Pursuit interception.
+ * Shared by the reducer's switch action and the staged Tier-1 seam below.
  */
 function stageVoluntarySwitchRules(
   priorRulesContext: BattleScriptRulesContext,
@@ -1790,10 +1899,19 @@ function stageVoluntarySwitchRules(
     monToSwitchIntoId,
     atkCancelerTracker: 0,
     critMultiplier: 1,
-    dmgMultiplier: 1,
+    // `setbyte sDMG_MULTIPLIER, 2` (battle_scripts_1.s:3091), executed by
+    // BattleScript_ActionSwitch BEFORE the loop this port enters at, is what
+    // doubles a Pursuit interception: BattleScript_PursuitDmgOnSwitchOut's
+    // `damagecalc` multiplies by it (Cmd_damagecalc,
+    // battle_script_commands.c:1296) and nothing on the interception path
+    // resets it in between. Staging it here reproduces that setbyte. It does
+    // not leak: HandleAction_UseMove's reset (battle_util.c:92, ported at
+    // :1516 above) puts the next move action back at 1, exactly as the ROM
+    // does at frame 787 of tools/probe/receipts/issue135-pursuit-switch-off.json.
+    dmgMultiplier: 2,
     moveResultFlags: 0,
     // BattleScript_ActionSwitch's singles prelude writes one before entering
-    // BattleScript_PursuitSwitchDmgLoop (battle_scripts_1.s:3093-3098). The
+    // BattleScript_PursuitSwitchDmgLoop (battle_scripts_1.s:3092-3094). The
     // staged seam preserves the caller's counter so the doubles right-flank
     // barrier stays reachable with a staged `setmultihit 2`.
     multiHitCounter,
@@ -1940,10 +2058,23 @@ function machineBarrierBoundary(instruction: BattleScriptInstruction, instructio
 /**
  * Singles projection of `GetMoveTarget` (`battle_util.c:3828-3910`) for every
  * target shape represented by generated `gBattleMoves[]`. Doubles-only
- * redirection and RANDOM's draw are unreachable with two active battlers:
- * every non-user shape resolves to the sole opposing active battler without
- * consuming RNG. Keeping the generated shape strict prevents a future source
- * expression from silently inheriting the wrong target.
+ * redirection and RANDOM's draw are unreachable with two active battlers, so
+ * every non-user shape resolves to the sole opposing active battler. Keeping
+ * the generated shape strict prevents a future source expression from
+ * silently inheriting the wrong target.
+ *
+ * **This is the SELECTION-TIME answer only, and it is RNG-free only because
+ * selection is** (ISSUES #140). `MOVE_TARGET_SELECTED`'s source arm is NOT
+ * pure: `battle_util.c:119-122` resolves it through a
+ * `do { Random() % gBattlersCount } while (...)` loop that costs >= 1 draw
+ * every time it runs. It just never runs at selection -- the four
+ * `HandleAction_UseMove` branches that re-target at EXECUTION time
+ * (`:105` forced Struggle, `:117` Encore match, `:128` Encore whose slot was
+ * overwritten, `:133` chosen slot overwritten) are the only callers, and they
+ * go through `drawActionMoveTarget` below instead of this function. The
+ * ordinary chosen-move path (`:135-138`) calls `GetMoveTarget` at neither
+ * point, which is what makes this projection's draw-free answer correct for
+ * the target a battler carries from the move menu into its own action.
  */
 function sourceMoveTarget(
   moveId: number,
@@ -2138,7 +2269,38 @@ export function battlerUsesForcedStruggle(
   rulesContext: BattleScriptRulesContext,
   battler: BattleSinglesBattler,
 ): boolean {
-  if (lockedMoveDecision(rulesContext, battler) !== null) return false;
+  // Only the STATUS2_MULTIPLETURNS/RECHARGE lock hides this test: source
+  // settles those at STATE_BEFORE_ACTION_CHOSEN (`battle_main.c:4098-4104`),
+  // before the `B_ACTION_USE_MOVE` case runs `AreAllMovesUnusable` at all. An
+  // Encore lock does NOT (ISSUES #138) -- `:4184` precedes `:4192`.
+  if (battlerStatusMoveLock(rulesContext, battler) !== 0) return false;
+  return battlerHasNoUsableMoveSlot(rulesContext, battler);
+}
+
+/**
+ * `battle_main.c:4098-4104`: the STATUS2_MULTIPLETURNS / STATUS2_RECHARGE
+ * lock is settled one state earlier than every other auto-confirm, so it is
+ * the one condition that keeps `AreAllMovesUnusable` from running.
+ */
+function battlerStatusMoveLock(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): number {
+  return rulesContext.battlers[battler]!.status2 & (
+    BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+    | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+  );
+}
+
+/**
+ * `AreAllMovesUnusable`'s predicate alone (`battle_util.c:1125-1130`), split
+ * out so `lockedMoveDecision` can consult it in source order without
+ * recursing through `battlerUsesForcedStruggle`.
+ */
+function battlerHasNoUsableMoveSlot(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): boolean {
   return (
     checkBattleScriptMoveLimitations(rulesContext, battler) & 0x0f
   ) === 0x0f;
@@ -2157,11 +2319,19 @@ function lockedMoveDecision(
   battler: BattleSinglesBattler,
 ): BattleMoveDecision | null {
   const battlerState = rulesContext.battlers[battler]!;
-  const statusLock = battlerState.status2 & (
-    BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
-    | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
-  );
+  const statusLock = battlerStatusMoveLock(rulesContext, battler);
   if (statusLock === 0) {
+    // ISSUES #138 / `battle_main.c:4183-4197`: `AreAllMovesUnusable()` is
+    // tested BEFORE `else if (gDisableStructs[b].encoredMove != 0)`, and
+    // `CheckMoveLimitations`' own Encore bit (`battle_util.c:1116-1117`)
+    // masks every slot that is not the encored move -- so an Encored battler
+    // whose encored move is itself Disabled / 0-PP / Taunted / Tormented
+    // masks all four slots and takes the `noValidMoves` branch instead of
+    // the auto-confirm. Returning null hands it to `legalMoveDecisions`'
+    // Struggle projection, which is right in both directions: the source's
+    // `AreAllMovesUnusable` arm is reached from the action menu (it does not
+    // suppress B_ACTION_SWITCH the way this auto-confirm does).
+    if (battlerHasNoUsableMoveSlot(rulesContext, battler)) return null;
     if (battlerState.encoreTimer !== 0 && battlerState.encoredMove !== 0) {
       // battle_util.c:95-112: action selection remains tied to the stored
       // position. If that slot was overwritten, HandleAction_UseMove clears
@@ -2797,6 +2967,7 @@ function continueFullTurnAfterAction(
           second.moveSlot,
           second.target,
           second.forcedStruggle,
+          second.retargetsAtExecution,
         );
       if (action2.kind === "barrier") {
         return finishFullTurn(
@@ -2924,6 +3095,13 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     : ctx.decision.moveSlot;
   const playerForcedStruggle = !playerSwitch && battlerUsesForcedStruggle(rc0, 0);
   const trainerForcedStruggle = !trainerSwitch && battlerUsesForcedStruggle(rc0, 1);
+  // ISSUES #140 -- read from rules.rulesContext, BEFORE rc0's hoisted
+  // clearOverwrittenEncoreAtAction, so the :120-131 overwritten-Encore branch
+  // is still visible. See actionRetargetsAtExecution.
+  const playerRetargets = !playerSwitch
+    && actionRetargetsAtExecution(rules.rulesContext, 0, playerForcedStruggle);
+  const trainerRetargets = !trainerSwitch
+    && actionRetargetsAtExecution(rules.rulesContext, 1, trainerForcedStruggle);
   const playerMoveId = playerSwitch
     ? 0
     : actionMoveId(
@@ -3036,6 +3214,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       mover1MoveSlot,
       mover1Target,
       mover1 === 0 ? playerForcedStruggle : trainerForcedStruggle,
+      mover1 === 0 ? playerRetargets : trainerRetargets,
     );
   if (action1.kind === "barrier") {
     return finishFullTurn(
@@ -3065,6 +3244,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
           moveSlot: mover2MoveSlot,
           target: mover2Target,
           forcedStruggle: mover2 === 0 ? playerForcedStruggle : trainerForcedStruggle,
+          retargetsAtExecution: mover2 === 0 ? playerRetargets : trainerRetargets,
         }),
       }),
       Object.freeze({
@@ -3091,6 +3271,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       moveSlot: mover2MoveSlot,
       target: mover2Target,
       forcedStruggle: mover2 === 0 ? playerForcedStruggle : trainerForcedStruggle,
+      retargetsAtExecution: mover2 === 0 ? playerRetargets : trainerRetargets,
     }),
   );
 };

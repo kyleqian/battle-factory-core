@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   FACTORY_RUN_AWAY_NOOP_INVARIANT,
+  battlerUsesForcedStruggle,
   createFactoryFullTurnBattleState,
   reduceFactoryFullTurnDecision,
   runStagedVoluntarySwitch,
@@ -728,6 +729,10 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     expect(rc.hitMarker & HITMARKER_ATTACKSTRING_PRINTED).toBe(0);
     // The switch script completes and the double-power Pursuit hit lands on
     // the OUTGOING mon (party slot 0 synced by datahpupdate).
+    // #135: BattleScript_ActionSwitch's `setbyte sDMG_MULTIPLIER, 2`
+    // (battle_scripts_1.s:3091) is staged before the loop is entered -- ROM
+    // receipt tools/probe/receipts/issue135-pursuit-switch-off.json.
+    expect(rc.dmgMultiplier).toBe(2);
     expect(completed.rulesContext.party.player[0]!.hp).toBeLessThan(300);
   });
 
@@ -745,6 +750,9 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     // The jump landed on BattleScript_DoSwitchOut: no Pursuit block ran.
     expect(program.instructions[atBranch.programCounter]!.source.label)
       .toBe("BattleScript_DoSwitchOut");
+    // #135: same setbyte, jump path -- ROM receipt
+    // tools/probe/receipts/issue135-pursuit-switch-off.json.
+    expect(rc.dmgMultiplier).toBe(2);
     expect(completed.rulesContext.party.player[0]!.hp).toBe(300);
   });
 
@@ -766,6 +774,10 @@ describe("factory full-turn decision -- voluntary-switch action", () => {
     expect(rc.actionsByTurnOrder[1]).toBe(0);
     expect(program.instructions[atBranch.programCounter]!.source.label)
       .toBe("BattleScript_DoSwitchOut");
+    // #135: the prelude's `setbyte sDMG_MULTIPLIER, 2` runs even when the
+    // guard jumps past the hit; HandleAction_UseMove resets it for the next
+    // move action (battle_util.c:92).
+    expect(rc.dmgMultiplier).toBe(2);
     expect(completed.rulesContext.party.player[0]!.hp).toBe(300);
   });
 
@@ -2562,4 +2574,81 @@ describe("factory full-turn decision -- live move-end item transfers", () => {
       })).toBe(true);
     },
   );
+});
+
+describe("ISSUES #138 -- AreAllMovesUnusable is evaluated before the Encore auto-confirm", () => {
+  // battle_main.c:4184 runs AreAllMovesUnusable() first; :4192's encoredMove
+  // auto-confirm is only the else-if. CheckMoveLimitations' Encore bit
+  // (battle_util.c:1116-1117) masks every slot that is not the encored move,
+  // so the encored move's own usability decides between Struggle and the lock.
+  const TACKLE = 33;
+  const ENCORE_TEST_CONFIG = config({
+    player: {
+      species: 87, moveId: 227, attack: 60, defense: 80, spAttack: 70, spDefense: 95, speed: 75, hp: 139,
+    },
+    trainer: {
+      species: 135, moveId: TACKLE, attack: 65, defense: 60, spAttack: 110, spDefense: 95, speed: 150, hp: 140,
+    },
+  });
+
+  function encoredTrainerContext(overrides: {
+    readonly pp?: readonly [number, number, number, number];
+    readonly disabledMove?: number;
+  }): BattleScriptRulesContext {
+    const base = createFactoryFullTurnBattleState(ENCORE_TEST_CONFIG).rules.rulesContext;
+    return Object.freeze({
+      ...base,
+      battlers: Object.freeze(
+        base.battlers.map((battler, index) =>
+          index === 1
+            ? Object.freeze({
+                ...battler,
+                moves: Object.freeze([TACKLE, TACKLE, TACKLE, TACKLE] as const),
+                pp: Object.freeze([...(overrides.pp ?? [34, 34, 35, 35])] as const),
+                disabledMove: overrides.disabledMove ?? 0,
+                encoredMove: TACKLE,
+                encoreTimer: 1,
+                encoredMovePos: 0,
+              })
+            : battler
+        ),
+      ) as unknown as BattleScriptRulesContext["battlers"],
+    }) as BattleScriptRulesContext;
+  }
+
+  it("Encore + Disable on the encored move forces Struggle", () => {
+    expect(
+      battlerUsesForcedStruggle(encoredTrainerContext({ disabledMove: TACKLE }), 1),
+    ).toBe(true);
+  });
+
+  it("Encore + 0 PP on the encored move forces Struggle", () => {
+    expect(
+      battlerUsesForcedStruggle(encoredTrainerContext({ pp: [0, 0, 0, 0] }), 1),
+    ).toBe(true);
+  });
+
+  it("Encore alone still keeps the locked move", () => {
+    expect(battlerUsesForcedStruggle(encoredTrainerContext({}), 1)).toBe(false);
+  });
+
+  it("a STATUS2_MULTIPLETURNS lock still outranks AreAllMovesUnusable", () => {
+    // battle_main.c:4098-4104 settles the multi-turn lock one state earlier,
+    // so the source never reaches AreAllMovesUnusable for that battler.
+    const base = encoredTrainerContext({ disabledMove: TACKLE });
+    const locked = Object.freeze({
+      ...base,
+      battlers: Object.freeze(
+        base.battlers.map((battler, index) =>
+          index === 1
+            ? Object.freeze({
+                ...battler,
+                status2: battler.status2 | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS,
+              })
+            : battler
+        ),
+      ) as unknown as BattleScriptRulesContext["battlers"],
+    }) as BattleScriptRulesContext;
+    expect(battlerUsesForcedStruggle(locked, 1)).toBe(false);
+  });
 });

@@ -302,8 +302,15 @@ describe("factory round chaining (tick() scenario)", () => {
     // costs a second turn, so seed 3's hop-3 round loses. Scanned 0..60 for a
     // seed whose natural outcomes still chain four wins deep and took the
     // first, 6. The carry arithmetic below is unchanged, as before.
+    //
+    // ISSUES #140 (GetMoveTarget's MOVE_TARGET_SELECTED draw loop on
+    // HandleAction_UseMove's four re-target branches) moved every trajectory
+    // again and seed 6's hop-3 round now loses, so the same rule re-applies:
+    // 6 -> 0, again the first seed in 0..60 that chains four wins deep. The
+    // carry arithmetic below is unchanged. ROM receipt:
+    // tools/probe/receipts/issue140-getmovetarget-off.json.
     const carry0 = createInitialFactoryCarry(PLAYER_TRAINER_ID);
-    const round1 = driveGeneratedRoundToCompletion(carry0, 6);
+    const round1 = driveGeneratedRoundToCompletion(carry0, 0);
     expect(round1.round.rules.phase).toBe("roundComplete");
     const chained1 = driveTerminalToNextDraft(stateAtDecidedRound(round1, carry0));
     const carry1 = chained1.factoryCarry;

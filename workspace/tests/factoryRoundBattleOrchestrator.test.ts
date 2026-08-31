@@ -2259,43 +2259,46 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // Re-pinned for the union of the four end-turn fixes: the whole
     // challenge-1 round is a different (source-faithful) trajectory, so its
     // terminal cursor moves. Regenerated from the engine.
-    expect(completed.round.rules.rngValue).toBe(3978301197);
+    // ISSUES #140 (GetMoveTarget's MOVE_TARGET_SELECTED draw loop): challenge
+    // 1's whole round is a different trajectory again, so its terminal cursor
+    // moves 3978301197 -> 1188296587, and every challenge-2 value seeded from
+    // it moves with it. Shape (two contiguous segments, rank-1 rentals)
+    // unchanged. Regenerated from the engine.
+    expect(completed.round.rules.rngValue).toBe(1188296587);
     expect(next.initialRentalGeneration?.rentalRank).toBe(1);
-    // Challenge 2 is seeded entirely by challenge 1's terminal cursor, so every
-    // value below moves with it. Regenerated from the union engine; the shape
-    // (two segments, contiguous, rank-1 rentals) is unchanged.
     expect(next.rngSegments).toEqual([
       {
         kind: "initial-rentals",
         battleIndex: 0,
         callStart: 0,
-        callEnd: 398,
-        rngBefore: 3978301197,
-        rngAfter: 3189376379,
+        callEnd: 329,
+        rngBefore: 1188296587,
+        rngAfter: 1928923178,
       },
       {
         kind: "opponent-generation",
         battleIndex: 0,
-        callStart: 398,
-        callEnd: 627,
-        rngBefore: 3189376379,
-        rngAfter: 1540047030,
+        callStart: 329,
+        callEnd: 573,
+        rngBefore: 1928923178,
+        rngAfter: 1344913182,
       },
     ]);
     expect(next.initialRentalGeneration?.rentals.map((rental) => rental.setId))
-      .toEqual([273, 175, 206, 265, 218, 257]);
+      .toEqual([335, 162, 220, 244, 196, 230]); // #140: [273, 175, 206, 265, 218, 257] -> this
     expect(next.opponentGenerations[0]).toMatchObject({
-      trainerId: 82,
+      // #140: trainerId 82 -> 113, opponents [248, 221, 163] -> [259, 265, 234].
+      trainerId: 113,
       generation: {
         opponents: [
-          { setId: 248 },
-          { setId: 221 },
-          { setId: 163 },
+          { setId: 259 },
+          { setId: 265 },
+          { setId: 234 },
         ],
       },
     });
-    expect(next.facilityRngCalls).toBe(627);
-    expect(next.round.rules.rngValue).toBe(1540047030);
+    expect(next.facilityRngCalls).toBe(573); // #140: 627 -> 573
+    expect(next.round.rules.rngValue).toBe(1344913182); // #140: 1540047030 -> 1344913182
   });
 
   it("owns battle 0 win through decline and battle 1's fresh command on one RNG cursor", () => {
@@ -2665,7 +2668,9 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // entry-685 cursor 1787 + 226 = 2013, then + 63 = 2076 for the union of the
     // four end-turn source fixes (ISSUES #130/#131/#132/#133) -- ENDTURN_ORDER's
     // per-turn re-sort and its speed-tie Random() net-add draws here.
-    expect(state.facilityRngCalls).toBe(2076);
+    // ISSUES #140 (GetMoveTarget's MOVE_TARGET_SELECTED draw loop on the four
+    // HandleAction_UseMove re-target branches): 2076 -> 1738.
+    expect(state.facilityRngCalls).toBe(1738);
     expect(firstReplacement).toEqual({
       callsBefore: 2,
       callsAfter: 16,
@@ -2717,7 +2722,9 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // same value the seed-21 census row below pins. ROM receipts:
     // tools/probe/receipts/issue131-endturn-order-off.json and
     // tools/probe/receipts/gate6-first-turn-decay-off.json.
-    expect(state.facilityRngCalls).toBe(1476);
+    // ISSUES #140 (GetMoveTarget's MOVE_TARGET_SELECTED draw loop): 1476 -> 1559,
+    // the same value the seed-21 census row below pins.
+    expect(state.facilityRngCalls).toBe(1559);
   });
 
   it.each([
@@ -2735,26 +2742,26 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // Each row is the whole-round facility RNG cursor plus its complete
     // downstream trajectory (generation, moves, damage, turn lengths), not a
     // direct draw-count delta. Values regenerated from the union engine.
-    [4, 1809, "roundComplete", 6, "win"],
-    [5, 1658, "roundComplete", 6, "win"],
-    [6, 1675, "roundComplete", 6, "win"],
-    [7, 1269, "roundComplete", 6, "win"],
-    [8, 1922, "roundComplete", 6, "win"],
-    [11, 1745, "roundComplete", 6, "win"],
-    [13, 2221, "roundComplete", 6, "win"],
-    [14, 1921, "roundComplete", 6, "win"],
-    [15, 1551, "roundComplete", 6, "win"], // ISSUES #131 ENDTURN_ORDER tie draws: 1509 + 42
-    [16, 1523, "roundComplete", 6, "win"],
-    [18, 1948, "roundComplete", 6, "win"],
-    [19, 1938, "roundComplete", 6, "win"],
-    [20, 1999, "roundComplete", 6, "win"],
-    [21, 1476, "roundComplete", 6, "win"], // ISSUES #131 ENDTURN_ORDER tie draws: 1449 + 27
-    [22, 1517, "roundComplete", 6, "win"], // ISSUES #131 ENDTURN_ORDER tie draws: 1516 + 1
-    [23, 2330, "roundComplete", 6, "win"],
-    [24, 1473, "roundComplete", 6, "win"],
-    [26, 1672, "roundComplete", 6, "win"],
-    [29, 1832, "roundComplete", 6, "win"], // ISSUES #131 ENDTURN_ORDER tie draws: 1823 + 9
-    [30, 1366, "roundComplete", 6, "win"],
+    [4, 1525, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1809 -> 1525
+    [5, 1694, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1658 -> 1694
+    [6, 1417, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1675 -> 1417
+    [7, 1884, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1269 -> 1884
+    [8, 2058, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1922 -> 2058
+    [11, 1625, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1745 -> 1625
+    [13, 2553, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 2221 -> 2553
+    [14, 1897, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1921 -> 1897
+    [15, 1503, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1551 -> 1503
+    [16, 1315, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1523 -> 1315
+    [18, 1775, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1948 -> 1775
+    [19, 1116, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1938 -> 1116
+    [20, 1644, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1999 -> 1644
+    [21, 1559, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1476 -> 1559
+    [22, 1671, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1517 -> 1671
+    [23, 2191, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 2330 -> 2191
+    [24, 1623, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1473 -> 1623
+    [26, 1669, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1672 -> 1669
+    [29, 1506, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1832 -> 1506
+    [30, 1737, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1366 -> 1737
   ])("seed %i pins the post-ShouldSwitch round census", (
     seed,
     calls,
@@ -2777,7 +2784,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       outcome,
       battles: battleIndex + 1,
       calls,
-      playerHp: seed === 6 ? [22, 251, 186] : expect.any(Array),
+      playerHp: seed === 6 ? [18, 251, 186] : expect.any(Array), // #140: [22, 251, 186] -> [18, 251, 186]
       opponentHp: expect.any(Array),
     });
   });

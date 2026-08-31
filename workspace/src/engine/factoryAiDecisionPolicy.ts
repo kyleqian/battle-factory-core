@@ -1198,6 +1198,11 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           isInfatuated: view.attacker.isInfatuated,
           isLeechSeeded: view.attacker.isLeechSeeded,
           hasYawn: view.attacker.hasYawn,
+          // AI_CV_Protect's three AI_USER status routes to AI_CV_Protect3
+          // (`data/battle_ai_scripts.s:1897-1899`, ISSUES #137).
+          isToxicPoisoned: view.attacker.isToxicPoisoned,
+          isCursed: view.attacker.isCursed,
+          hasPerishSong: view.attacker.hasPerishSong,
           protectUses: view.attacker.protectUses,
           ...(view.attacker.isAsleep === true ? { isAsleep: true } : {}),
           ...(view.attacker.hasSubstitute === true ? { hasSubstitute: true } : {}),

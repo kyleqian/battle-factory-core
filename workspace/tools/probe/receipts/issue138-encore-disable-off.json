@@ -1,0 +1,417 @@
+{
+  "schema": "issue138-encore-disable-off-receipt/v1",
+  "issue": 138,
+  "oracleProfile": "battle-scene-off",
+  "sourceUnderTest": {
+    "selectionOrder": "src/battle_main.c:4183-4197 -- AreAllMovesUnusable() first, encoredMove auto-confirm only in the else-if",
+    "limitations": "src/battle_util.c:1094-1122 CheckMoveLimitations (Disable :1108-1109, Encore :1116-1117); :1125-1140 AreAllMovesUnusable",
+    "execution": "src/battle_util.c:99-106 HandleAction_UseMove noValidMoves branch -> MOVE_STRUGGLE | HITMARKER_NO_PPDEDUCT",
+    "selectionScript": "data/battle_scripts_1.s:3548-3550 BattleScript_NoMovesLeft -> printselectionstring STRINGID_PKMNHASNOMOVESLEFT (168)"
+  },
+  "arms": {
+    "struggle": {
+      "fixture": "tools/battle-lab/issue138-encore-disable-struggle-off.json",
+      "probeSha256": "fee2e50e7871988fd0ae24772864a966415422bb8c283523e82b72298aa6e0d1",
+      "summary": {
+        "turn3NoValidMoves": [
+          {
+            "frame": 1323,
+            "turn": 3,
+            "battler": 1,
+            "from": 0,
+            "to": 1,
+            "script": "BattleScript_MoveEnd+9"
+          },
+          {
+            "frame": 1967,
+            "turn": 3,
+            "battler": 1,
+            "from": 1,
+            "to": 0,
+            "script": "BattleScript_EffectRecoil"
+          }
+        ],
+        "turn3CurrentMove": [
+          {
+            "frame": 1967,
+            "turn": 3,
+            "from": 0,
+            "to": 165,
+            "script": "BattleScript_EffectRecoil"
+          },
+          {
+            "frame": 2321,
+            "turn": 3,
+            "from": 165,
+            "to": 0,
+            "script": "BattleScript_MoveEnd+9"
+          },
+          {
+            "frame": 2322,
+            "turn": 3,
+            "from": 0,
+            "to": 227,
+            "script": "BattleScript_EffectEncore"
+          },
+          {
+            "frame": 2468,
+            "turn": 3,
+            "from": 227,
+            "to": 0,
+            "script": "BattleScript_MoveEnd+9"
+          }
+        ],
+        "turn3PpDeduct": [
+          {
+            "frame": 1967,
+            "turn": 3,
+            "noPpDeduct": true,
+            "currentMove": 165
+          },
+          {
+            "frame": 2002,
+            "turn": 3,
+            "noPpDeduct": false,
+            "currentMove": 165
+          }
+        ],
+        "turn3Hp": [
+          {
+            "frame": 2117,
+            "turn": 3,
+            "battler": 0,
+            "from": 139,
+            "to": 102
+          },
+          {
+            "frame": 2215,
+            "turn": 3,
+            "battler": 1,
+            "from": 140,
+            "to": 131
+          }
+        ],
+        "turn3Pp": [
+          {
+            "frame": 2346,
+            "turn": 3,
+            "battler": 0,
+            "from": [
+              5,
+              15,
+              4,
+              19
+            ],
+            "to": [
+              5,
+              15,
+              3,
+              19
+            ]
+          }
+        ],
+        "turn3Messages": [
+          {
+            "frame": 1320,
+            "text": "What will\nDEWGONG do?",
+            "script": "BattleScript_MoveEnd+9"
+          },
+          {
+            "frame": 1910,
+            "text": "ENCORE",
+            "script": "BattleScript_NoMovesLeft+3"
+          },
+          {
+            "frame": 1911,
+            "text": "19/20",
+            "script": "BattleScript_NoMovesLeft+3"
+          },
+          {
+            "frame": 1912,
+            "text": "TYPE/<FC><06><01>NORMAL",
+            "script": "BattleScript_NoMovesLeft+3"
+          },
+          {
+            "frame": 1975,
+            "text": "Foe JOLTEON used\nSTRUGGLE!",
+            "script": "BattleScript_HitFromAtkString+1"
+          },
+          {
+            "frame": 2118,
+            "text": "A critical hit!",
+            "script": "BattleScript_HitFromAtkAnimation+11"
+          },
+          {
+            "frame": 2216,
+            "text": "Foe JOLTEON is hit\nwith recoil!",
+            "script": "BattleScript_DoRecoil+16"
+          },
+          {
+            "frame": 2325,
+            "text": "DEWGONG used\nENCORE!",
+            "script": "BattleScript_EffectEncore+9"
+          },
+          {
+            "frame": 2381,
+            "text": "But it failed!",
+            "script": "BattleScript_ButItFailed+10"
+          }
+        ],
+        "randomCallsPerTurn": {
+          "1": 6,
+          "2": 8,
+          "3": 6,
+          "4": 0,
+          "5": 1
+        },
+        "finalActives": {
+          "player": {
+            "partyIndex": 0,
+            "species": 87,
+            "speed": 75,
+            "hp": 102,
+            "maxHp": 165,
+            "pp": [
+              5,
+              15,
+              3,
+              19
+            ],
+            "moves": [
+              59,
+              38,
+              227,
+              50
+            ],
+            "status1": 0,
+            "status2": 0
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 135,
+            "speed": 150,
+            "hp": 131,
+            "maxHp": 140,
+            "pp": [
+              34,
+              34,
+              35,
+              35
+            ],
+            "moves": [
+              33,
+              33,
+              33,
+              33
+            ],
+            "status1": 0,
+            "status2": 0
+          }
+        },
+        "framebufferSha256": "96103aa1a1e27932f2d170a2f48e6b3c110f5945d47ea910135c395d0e12c204"
+      }
+    },
+    "control": {
+      "fixture": "tools/battle-lab/issue138-encore-disable-control-off.json",
+      "probeSha256": "7000b4d45db488dc502b8b6b54f0748fa64b22f5341b3c45f2cafeefbd79dfae",
+      "summary": {
+        "turn3NoValidMoves": [],
+        "turn3CurrentMove": [
+          {
+            "frame": 1915,
+            "turn": 3,
+            "from": 0,
+            "to": 33,
+            "script": "BattleScript_EffectHit"
+          },
+          {
+            "frame": 2142,
+            "turn": 3,
+            "from": 33,
+            "to": 0,
+            "script": "BattleScript_MoveEnd+9"
+          },
+          {
+            "frame": 2143,
+            "turn": 3,
+            "from": 0,
+            "to": 227,
+            "script": "BattleScript_EffectEncore"
+          },
+          {
+            "frame": 2289,
+            "turn": 3,
+            "from": 227,
+            "to": 0,
+            "script": "BattleScript_MoveEnd+9"
+          }
+        ],
+        "turn3PpDeduct": [],
+        "turn3Hp": [
+          {
+            "frame": 2050,
+            "turn": 3,
+            "battler": 0,
+            "from": 139,
+            "to": 111
+          }
+        ],
+        "turn3Pp": [
+          {
+            "frame": 1944,
+            "turn": 3,
+            "battler": 1,
+            "from": [
+              34,
+              34,
+              35,
+              35
+            ],
+            "to": [
+              33,
+              34,
+              35,
+              35
+            ]
+          },
+          {
+            "frame": 2167,
+            "turn": 3,
+            "battler": 0,
+            "from": [
+              5,
+              15,
+              3,
+              20
+            ],
+            "to": [
+              5,
+              15,
+              2,
+              20
+            ]
+          }
+        ],
+        "turn3Messages": [
+          {
+            "frame": 1271,
+            "text": "What will\nDEWGONG do?",
+            "script": "BattleScript_MoveEnd+9"
+          },
+          {
+            "frame": 1884,
+            "text": "ENCORE",
+            "script": "BattleScript_MoveEnd+9"
+          },
+          {
+            "frame": 1885,
+            "text": "<77>3/<77>5",
+            "script": "BattleScript_MoveEnd+9"
+          },
+          {
+            "frame": 1886,
+            "text": "TYPE/<FC><06><01>NORMAL",
+            "script": "BattleScript_MoveEnd+9"
+          },
+          {
+            "frame": 1919,
+            "text": "Foe JOLTEON used\nTACKLE!",
+            "script": "BattleScript_HitFromAtkString+1"
+          },
+          {
+            "frame": 2051,
+            "text": "A critical hit!",
+            "script": "BattleScript_HitFromAtkAnimation+11"
+          },
+          {
+            "frame": 2146,
+            "text": "DEWGONG used\nENCORE!",
+            "script": "BattleScript_EffectEncore+9"
+          },
+          {
+            "frame": 2202,
+            "text": "But it failed!",
+            "script": "BattleScript_ButItFailed+10"
+          }
+        ],
+        "randomCallsPerTurn": {
+          "1": 6,
+          "2": 7,
+          "3": 8,
+          "4": 0,
+          "5": 6
+        },
+        "finalActives": {
+          "player": {
+            "partyIndex": 0,
+            "species": 87,
+            "speed": 75,
+            "hp": 111,
+            "maxHp": 165,
+            "pp": [
+              5,
+              15,
+              2,
+              20
+            ],
+            "moves": [
+              59,
+              38,
+              227,
+              50
+            ],
+            "status1": 0,
+            "status2": 0
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 135,
+            "speed": 150,
+            "hp": 140,
+            "maxHp": 140,
+            "pp": [
+              33,
+              34,
+              35,
+              35
+            ],
+            "moves": [
+              33,
+              33,
+              33,
+              33
+            ],
+            "status1": 0,
+            "status2": 0
+          }
+        },
+        "framebufferSha256": "fdca5ec861923b363730e59f492e65c6df4f1fe5852d466637f2610c1ef5dc21"
+      }
+    }
+  },
+  "romVerdict": {
+    "struggle": "turn 3: gProtectStructs[1].noValidMoves := TRUE during selection (gBattlescriptCurrInstr resolves to BattleScript_NoMovesLeft+3), gChosenMoveByBattler[1] stays 0, gCurrentMove := 165 (MOVE_STRUGGLE), HITMARKER_NO_PPDEDUCT set for the action, opponent PP unchanged, 'Foe JOLTEON used STRUGGLE!' then 'Foe JOLTEON is hit with recoil!'",
+    "control": "turn 3: noValidMoves never set, gCurrentMove := 33 (TACKLE), PP slot 0 deducted 34 -> 33, no recoil"
+  },
+  "engineDivergence": {
+    "state": "UNFIXED kernel at receipt time (commit before any engine edit)",
+    "port": "src/engine/factoryBattleScriptFullTurnDecision.ts",
+    "sites": {
+      "legalMoveDecisions:1998-1999": "consults lockedMoveDecision() FIRST and returns [locked] before checkBattleScriptMoveLimitations() is ever evaluated",
+      "lockedMoveDecision:2176-2180": "with no STATUS2 lock, an encoreTimer!=0 && encoredMove!=0 battler returns the encoredMovePos slot unconditionally",
+      "battlerUsesForcedStruggle:2152": "returns false outright whenever lockedMoveDecision() != null, so an Encored battler can never report a forced Struggle"
+    },
+    "turn3Action": "use-move slot 0 (TACKLE, the Encore-locked move) -- NOT Struggle",
+    "consequence": "CANCELER_DISABLED (battle_util.c:2122-2133 -> BattleScript_MoveUsedIsDisabled) fails the action: 0 damage to DEWGONG (139 stays 139), 0 recoil on JOLTEON (140 stays 140), no HITMARKER_NO_PPDEDUCT, and the disabled-move message instead of STRINGID_PKMNHASNOMOVESLEFT + 'used STRUGGLE!'",
+    "romTurn3": "STRUGGLE: DEWGONG 139 -> 102 (crit), JOLTEON 140 -> 131 (recoil), opponent PP [34,34,35,35] unchanged",
+    "verification": "asserted directly by the mutation-check in tests/issue138EncoreDisableReceipt.test.ts (restore the old order -> the receipt test fails)"
+  },
+  "notes": [
+    "Both arms were run TWICE from a fresh oracle and are byte-identical (see probeSha256).",
+    "Fixture: player slot 0 DEWGONG (rental set BLIZZARD/DOUBLE_EDGE/ENCORE/DISABLE, Speed IV/EV 0 -> speed 75), opponent slot 0 JOLTEON (single ability VOLT_ABSORB, speed 150) with TACKLE in all four slots; three complete legal mons per side; every effect produced by real moves.",
+    "Turn indices in the probe come from gBattleMainFunc == BattleTurnPassed rising edges, so an event fired during turn N's end-turn tail can already carry turn N+1; the turn-3 selections/actions above are unambiguous (the ledger's turn-3 window spans the third 'What will DEWGONG do?' through MoveEnd).",
+    "The ROM's 'has no moves left!' string is a printSELECTIONstring; OpponentHandlePrintSelectionString is a no-op, so no message box appears for an AI battler -- the evidence is BattleScript_NoMovesLeft+3 under gBattlescriptCurrInstr plus noValidMoves := 1.",
+    "Struggle-arm turn 3 crit ('A critical hit!') and the control arm's turn-3 crit are seed-fixed at seed 305419897; the receipt test pins the resulting HP deltas, not the crit roll.",
+    "ISSUES #140 (side lane) is expected to change the turn-3 draw counts once GetMoveTarget's MOVE_TARGET_SELECTED loop is wired to HandleAction_UseMove's forced-Struggle/Encore branches: the ROM's randomCallsPerTurn turn 3 is 6 (struggle arm) / 8 (control arm), while the pre-#140 kernel draws none there. Until #140 merges, pin HP/PP/action -- not the raw draw count."
+  ]
+}

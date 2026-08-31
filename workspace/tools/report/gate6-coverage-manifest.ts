@@ -2123,7 +2123,151 @@ type HookReceiptInfo = {
   notes?: string;
 };
 
+// Hand-coded join for committed stock-ROM receipt packs that are not R-numbered
+// scenario cards (those auto-join through receiptIdsFor). `receiptIds` is the
+// receipt JSON's basename without the `-off.json` tail and is appended to
+// whatever R-cards already credit the row. A pack only earns a receipt id when
+// its probe observed the hook's OWN effect — its message, state write, or RNG
+// draw. A pack in which the ability/item merely rides along on a bystander mon
+// is evidence-only and keeps `statusOverride` at the row's current status.
+type ReceiptPackJoin = {
+  receiptIds?: string[];
+  statusOverride?: string;
+  evidence: Evidence[];
+  notes: string;
+};
+const RECEIPT_PACK_JOINS: ReadonlyMap<string, ReceiptPackJoin> = new Map<string, ReceiptPackJoin>([
+  ["ability:ABILITY_WATER_VEIL", {
+    receiptIds: ["gate6-water-veil-off"],
+    evidence: [
+      evidence("tools/battle-lab/gate6-water-veil-prevents-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/gate6-water-veil-control-off.json", "paired-control-oracle-request"),
+      evidence("tools/probe/probe-gate6-water-veil-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/gate6-water-veil-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/gate6WaterVeilReceipt.test.ts", "battle-scene-off-family-receipt", "Water Veil burn-prevention arm and control"),
+    ],
+    notes: "Dedicated Battle Scene OFF Water Veil receipt: WILL-O-WISP into a WATER VEIL WAILORD routes through BattleScript_WaterVeilPrevents -> BattleScript_BRNPrevention, the stock ROM prints “Foe WAILORD’s WATER VEIL prevents burns!”, and the target's status1 stays 0 while the paired control burns normally.",
+  }],
+  ["ability:ABILITY_ARENA_TRAP", {
+    receiptIds: ["gate6-arena-trap-off"],
+    evidence: [
+      evidence("tools/battle-lab/gate6-arena-trap-trapped-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/gate6-arena-trap-control-off.json", "paired-control-oracle-request"),
+      evidence("tools/probe/probe-gate6-arena-trap-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/gate6-arena-trap-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/gate6ArenaTrapReceipt.test.ts", "battle-scene-off-family-receipt", "trapped party-menu refusal and Levitate control"),
+    ],
+    notes: "Dedicated Battle Scene OFF Arena Trap receipt, and the refusal is a PARTY-MENU refusal, not a battle script: HandleTurnActionSelectionState opens the menu with gPartyMenu.action = PARTY_ACTION_ABILITY_PREVENTS and committing SWITCH prints “Foe DUGTRIO’s ARENA TRAP prevents switching!” into gStringVar4 with zero Random() draws — Cmd_jumpifcantswitch has no ability branch and no gNoEscapeStringIds string is ever produced (that table is the B_ACTION_RUN path), while the LEVITATE control switches freely.",
+  }],
+  ["ability:ABILITY_STURDY", {
+    receiptIds: ["gate6-ohko-off"],
+    evidence: [
+      evidence("tools/battle-lab/gate6-ohko-sturdy-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/gate6-ohko-hit-off.json", "paired-control-oracle-request"),
+      evidence("tools/battle-lab/gate6-ohko-miss-off.json", "paired-control-oracle-request"),
+      evidence("tools/probe/probe-gate6-ohko-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/gate6-ohko-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/gate6OhkoReceipt.test.ts", "battle-scene-off-family-receipt", "STURDY arm alongside the hit/miss control arms"),
+    ],
+    notes: "Dedicated Battle Scene OFF Sturdy receipt: FISSURE into a STURDY FORRETRESS reaches BattleScript_SturdyPreventsOHKO with gLastUsedAbility = 5 and ZERO Random() draws — Cmd_tryKO's ability branch precedes the accuracy roll — printing “Foe FORRETRESS was protected by STURDY!” with HP pinned at 150, against hit/miss control arms that each spend exactly one draw.",
+  }],
+  ["ability:ABILITY_DAMP", {
+    receiptIds: ["gate6-damp-explosion-off"],
+    evidence: [
+      evidence("tools/battle-lab/gate6-damp-explosion-attacker-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/gate6-damp-explosion-target-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/gate6-damp-explosion-control-off.json", "paired-control-oracle-request"),
+      evidence("tools/probe/probe-gate6-damp-explosion-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/gate6-damp-explosion-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/gate6DampExplosionReceipt.test.ts", "battle-scene-off-family-receipt", "attacker-held and target-held Damp arms plus the no-Damp control"),
+    ],
+    notes: "Dedicated Battle Scene OFF Damp receipt: attacker-held and target-held Damp both send EXPLOSION to BattleScript_DampStopsExplosion with both active HP values preserved, zero action RNG calls, gBattlerTarget retargeted to the Damp holder, and ability 6 recorded into BATTLE_HISTORY->abilities, against a no-Damp control that spends three action draws and zeroes the attacker.",
+  }],
+  ["ability:ABILITY_TRACE", {
+    receiptIds: ["issue128-ability-history-off"],
+    evidence: [
+      evidence("tools/battle-lab/issue128-ability-history-trace-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/issue128-ability-history-intimidate-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/issue128-ability-history-control-off.json", "paired-control-oracle-request"),
+      evidence("tools/probe/probe-issue128-ability-history-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/issue128-ability-history-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/issue128AbilityHistoryReceipt.test.ts", "battle-scene-off-family-receipt", "TRACE arm records the copied ability, plus the Intimidate and control arms"),
+    ],
+    notes: "Dedicated Battle Scene OFF Trace receipt: GARDEVOIR's TRACE fires on the stock ROM, copies the player GOLDUCK's ABILITY_DAMP, and the COPIED ability (6) — not the holder's — lands in BATTLE_HISTORY->abilities[0], which short-circuits 8 `get_ability AI_TARGET` guesses and collapses the AI's turn-2 window from the control's 14 draws to 6.",
+  }],
+  ["ability:ABILITY_INTIMIDATE", {
+    evidence: [
+      evidence("tools/battle-lab/issue128-ability-history-intimidate-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/issue128-ability-history-control-off.json", "paired-control-oracle-request"),
+      evidence("tools/probe/probe-issue128-ability-history-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/issue128-ability-history-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/issue128AbilityHistoryReceipt.test.ts", "battle-scene-off-family-receipt", "Intimidate arm records ability 22 on the player's slot"),
+    ],
+    notes: "R12/R12b/R13 remain the direct Intimidate receipts; the 2026-08-25 ability-history pack is extra stock-ROM evidence that an Intimidate holder on battler 1 records ability 22 into BATTLE_HISTORY->abilities[0] (the PLAYER's slot, not the holder's), against a control lead that records nothing.",
+  }],
+  ["ability:ABILITY_SPEED_BOOST", {
+    evidence: [
+      evidence("tools/battle-lab/gate6-first-turn-decay-off.json", "parameterized-oracle-request"),
+      evidence("tools/probe/probe-gate6-first-turn-decay-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/gate6-first-turn-decay-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/gate6IsFirstTurnDecayReceipt.test.ts", "battle-scene-off-family-receipt", "Speed Boost suppressed on the switch-in turn, firing from the next turn on"),
+    ],
+    notes: "R11 remains the direct Speed Boost receipt; the isFirstTurn-decay pack is extra stock-ROM evidence that the ABILITYEFFECT_ENDTURN arm is gated OFF on NINJASK's switch-in turn (isFirstTurn := 2, no SPEED BOOST message in that end-of-turn window) and then fires on every following turn as the gate is `!= 2`, not `== 0`.",
+  }],
+  ["hold-effect:HOLD_EFFECT_RESTORE_PP", {
+    receiptIds: ["gate6-leppa-berry-off"],
+    evidence: [
+      evidence("tools/battle-lab/gate6-leppa-berry-off.json", "parameterized-oracle-request"),
+      evidence("tools/probe/probe-gate6-leppa-berry-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/gate6-leppa-berry-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/gate6LeppaBerryReceipt.test.ts", "battle-scene-off-family-receipt", "PP walk to zero, one-shot restore, and item clear"),
+    ],
+    notes: "Dedicated Battle Scene OFF Leppa Berry receipt: emptying HORN DRILL's slot-0 PP fires the berry at that turn's end-of-turn item poll, writing 5 PP (0 + holdEffectParam 10, capped at the move's max) to BOTH the battler copy and the persistent party record before the STRINGID_PKMNSITEMRESTOREDPP message, then clearing the held item — one-shot, with no second restore over the next four turns.",
+  }],
+  ["hold-effect:HOLD_EFFECT_FLINCH", {
+    receiptIds: ["issue129-kingsrock-ko-off"],
+    evidence: [
+      evidence("tools/battle-lab/issue129-kingsrock-ohko-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/issue129-kingsrock-eq-ko-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/issue129-kingsrock-eq-survive-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/issue129-noitem-ohko-off.json", "paired-control-oracle-request"),
+      evidence("tools/probe/probe-issue129-kingsrock-ko-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/issue129-kingsrock-ko-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/issue129KingsRockKoReceipt.test.ts", "battle-scene-off-family-receipt", "King's Rock moveend draw on OHKO KO, non-OHKO KO, and non-KO hit versus the no-item control"),
+    ],
+    notes: "Dedicated Battle Scene OFF King's Rock receipt: the holder's MOVEEND_KINGSROCK_SHELLBELL Random() draw is observed on an OHKO KO, on a non-OHKO KO, and on a non-KO hit, and is ABSENT in the same fixture with the item removed — so a faint does not suppress state 12.",
+  }],
+  ["hold-effect:HOLD_EFFECT_SHELL_BELL", {
+    receiptIds: ["shell-bell-ko-heal-off"],
+    evidence: [
+      evidence("tools/battle-lab/issue129-shellbell-ko-heal-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/issue129-shellbell-ko-control-off.json", "parameterized-oracle-request"),
+      evidence("tools/battle-lab/issue129-shellbell-nonko-heal-off.json", "parameterized-oracle-request"),
+      evidence("tools/probe/probe-shell-bell-ko-heal-off.py", "oracle-probe"),
+      evidence("tools/probe/receipts/shell-bell-ko-heal-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/shellBellHealReceipt.test.ts", "battle-scene-off-family-receipt", "live KO heal arm, item-0 control arm, and non-KO heal arm"),
+      evidence("tools/battle-lab/issue129-kingsrock-ohko-off.json", "parameterized-oracle-request"),
+      evidence("tools/probe/receipts/issue129-kingsrock-ko-off.json", "battle-scene-off-oracle-receipt"),
+      evidence("tests/issue129KingsRockKoReceipt.test.ts", "battle-scene-off-family-receipt", "shellBellDmg survives the faint into moveend state 12"),
+    ],
+    notes: "Live KO heal witnessed: +15 = floor(125/8) on a KO, 0 on the item-0 control, +5 on a non-KO hit; kernel equal.",
+  }],
+]);
+
+function receiptPackJoin(kind: "ability" | "hold-effect", name: string): HookReceiptInfo | null {
+  const pack = RECEIPT_PACK_JOINS.get(`${kind}:${name}`);
+  if (!pack) return null;
+  return {
+    directReceiptIds: [...receiptIdsFor(kind, name), ...(pack.receiptIds ?? [])],
+    ...(pack.statusOverride === undefined ? {} : { statusOverride: pack.statusOverride }),
+    evidence: pack.evidence,
+    notes: pack.notes,
+  };
+}
+
 function hookReceiptInfo(kind: "ability" | "hold-effect", name: string): HookReceiptInfo {
+  const pack = receiptPackJoin(kind, name);
+  if (pack) return pack;
   if (kind !== "ability") return { directReceiptIds: receiptIdsFor(kind, name), evidence: [] };
   if (name === "ABILITY_COLOR_CHANGE") {
     return {
@@ -2238,7 +2382,9 @@ function makeHookRows(kind: "ability" | "hold-effect"): Row[] {
         evidence(ABILITY_ITEM_DOC_PATH, "ability-item-census", `${kind}:${name}`),
         evidence(kind === "ability" ? SPECIES_PATH : ITEM_HOLD_EFFECTS_PATH, "legal-widened-scope"),
         evidence(kind === "ability" ? MONS_PATH : HELD_ITEMS_PATH, "factory-carrier-join"),
-        ...(name === "ABILITY_VOLT_ABSORB" ? [] : receiptIds.map((cardId) => evidence(SCOUT_PATH, "oracle-receipt", cardId))),
+        // Only R-numbered scenario cards are documented in the scout's completed
+        // receipt notes; hand-joined pack ids carry their own evidence lists.
+        ...receiptIds.filter((cardId) => /^R\d+b?$/.test(cardId)).map((cardId) => evidence(SCOUT_PATH, "oracle-receipt", cardId)),
         ...receipt.evidence,
       ]),
       notes: receipt.notes ?? (factoryCarriers === 0 && legalCarriers > 0

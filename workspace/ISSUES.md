@@ -17,6 +17,82 @@ backlog.
 
 # Open
 
+## #141 — Two `SetMoveEffect` exits must RE-RUN `seteffectwithchance` (which then wastes one `Random() % 100`): the THRASH lock-in `break`s without advancing the cursor, and Thief/Covet-vs-Sticky-Hold uses `BattleScriptPushCursor()` — the port `advance`s / `"call"`s instead (RNG-affecting)
+
+**Found 2026-08-26** (move-effect application audit,
+`docs/move-effect-application-audit-2026-08-26.md` §4 rows S13/S21 + Findings 1-2; supervisor-verified
+at source and port). Mechanism, `battle_script_commands.c` `Cmd_seteffectwithchance` (`:2908-2937`):
+`else if (Random() % 100 < percentChance && gBattleCommunication[MOVE_EFFECT_BYTE] && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))`
+— the draw is the FIRST conjunct, so when the opcode executes with the byte already 0 (cleared by
+`SetMoveEffect`'s tail `:2905` and by `:2937`) it still spends one `Random()` and then `gBattlescriptCurrInstr++`.
+The opcode re-executes in exactly two singles-reachable situations, and the port models neither:
+
+1. **THRASH / OUTRAGE / PETAL DANCE lock-in** — `SetMoveEffect` `case MOVE_EFFECT_THRASH` (`:2851-2862`): the
+   not-yet-locked branch writes `STATUS2_MULTIPLETURNS`, `gLockedMoves[]`, `STATUS2_LOCK_CONFUSE_TURN((Random() & 1) + 2)`
+   and `break`s WITHOUT touching `gBattlescriptCurrInstr` (the only family-B case that does so); the tail only
+   clears the byte, `Cmd_seteffectwithchance` does not increment either → the cursor still points at
+   `seteffectwithchance` → re-run → one wasted draw. Entry path (verified): `BattleScript_EffectRampage` →
+   `confuseifrepeatingattackends` (sets `THRASH | AFFECTS_USER`) → `BattleScript_HitFromCritCalc` … `seteffectwithchance`
+   (chance 100). Port `battleScriptHitChainOpcode.ts:3917-3921` (`applyThrashMoveEffect`) returns `{ kind: "advance" }`.
+   ROM draw order on the lock-in turn: chance roll, `(Random() & 1) + 2` duration, **wasted chance roll**; port stops
+   after the duration draw. Carriers: Thrash 2, Outrage 2, Petal Dance 5 rental entries.
+2. **Thief/Covet into Sticky Hold** — `case MOVE_EFFECT_STEAL_ITEM` (`:2767-2775`): `BattleScriptPushCursor()` pushes
+   the CURRENT cursor (`battle_util.c:966-969`), then `BattleScript_NoItemSteal` (`battle_scripts_1.s:4209-4213`,
+   ends in `return`) → the opcode re-runs → one wasted draw. Port `battleScriptHitChainOpcode.ts:3122-3138` uses
+   `{ kind: "call", programCounter }` (returns to the NEXT opcode; `battleScriptMachine.ts:998-1009`) although the
+   machine already offers `"call-current"` (`:1010-1021`). Under `BATTLE_TYPE_FRONTIER` the two "regular battle"
+   arms short-circuit, so the Sticky Hold arm is reached whenever the target holds a non-Enigma/mail item.
+
+The port's own `seteffectwithchance` handler already draws unconditionally before testing the byte
+(`battleScriptHitChainOpcode.ts` `drawBattleScriptRng(…, "seteffectwithchance")` then `rolledSuccess && moveEffectByte !== 0`),
+so the fix is purely the two transition kinds: THRASH → leave the cursor on the opcode (re-run), Sticky Hold →
+`"call-current"`. **Consequence:** every later draw in the battle is offset by one (next turn's damage/crit/
+secondary rolls, `gRandomTurnNumber`) — no message differs. **Receipt recipes** (`mechanicLab` `overrides.parties`,
+Battle Scene OFF, frame 0 = turn-1 action menu, A pulses past prompts): (1) player slot 0 = a Thrash/Outrage/Petal
+Dance carrier, opponent = a bulky mon with one move ×4; window turns 1-3 and count the turn-1 draws attributed to
+`seteffectwithchance` (ROM 2, port 1) — the turn-2 damage roll differs; (2) player slot 0 = LINOONE with COVET,
+opponent = GULPIN/SWALOT with `abilitySlot` = Sticky Hold holding a plain item, one move ×4; window turn 2+ and compare
+the draw count / next damage roll. Fix both sites in one step, pin each with the receipt's draw counts, re-pin moved
+curated-seed trajectories with attribution, and rerun all five gates (the vanilla canary trajectory will move).
+
+## #139 — The `CheckFocusPunch_ClearVarsBeforeTurnStarts` pre-pass ("…is tightening its focus!" before ANY action) has no port site
+
+**Found 2026-08-26** (turn-machinery audit §3 row 3.20 / Finding 2; supervisor-verified that
+`grep -rn focusPunchBattlerId src/` is empty). Source `battle_main.c:4906-4923`: after turn order
+is fixed and before `RunTurnActionsFunctions`, the engine walks `gBattleStruct->focusPunchBattlerId`
+in battler-index order and, for each battler with `gChosenMoveByBattler == MOVE_FOCUS_PUNCH` that
+is not asleep, not Truant-loafing and not `noValidMoves`, runs
+`BattleScriptExecute(BattleScript_FocusPunchSetUp)` (`printstring STRINGID_EMPTYSTRING3` /
+`waitmessage 1` / `playanimation B_ANIM_FOCUS_PUNCH_SETUP` / `printstring
+STRINGID_PKMNTIGHTENINGFOCUS` / `waitmessage B_WAIT_TIME_LONG` / `end2`). The same function's
+`TryClearRageAndFuryCutter` half is separately verdicted (Rage: 0 carriers). Port:
+`factoryBattleScriptFullTurnDecision.ts:3013-3030` goes straight from turn order to action 1;
+`battleScriptStatbuffchangeOpcode.ts:257-268` only registers the animation id.
+
+**Consequence:** message/event ORDER only (no RNG): the ROM shows the extra message box before
+either battler's action, even when the Focus Punch user is slower; every later message in the
+turn shifts by one box in the Scene-OFF captures. 11 of 882 rental entries carry Focus Punch.
+
+**Receipt recipe:** player slot 0 = a Focus Punch carrier (Speed 0), opponent = max-Speed mon with
+one harmless `MOVE_TARGET_SELECTED` attack ×4; turn 1 select Focus Punch and capture from the action
+menu through the first message box (ROM: "tightening its focus" first, then the opponent's faster
+move); control = the same fixture with another move selected. Fix shape: emit the pre-pass as its
+own end2 script event between turn-order fixing and action 1, in battler-index order.
+
+## #140 — [FIXED 2026-08-26 except one branch] `HandleAction_UseMove:133` (chosen slot overwritten by Mimic/Transform) still skips `GetMoveTarget`'s `MOVE_TARGET_SELECTED` draw loop
+
+**Remainder of #140** (the forced-Struggle `:105`, Encore-match `:117` and overwritten-Encore
+`:128` branches were fixed with a stock-ROM receipt on 2026-08-26: `9c886479`/`3361e0c4`/`a3a5642e`,
+`tools/probe/receipts/issue140-getmovetarget-off.json` — Encore/Struggle-forced actions draw
+1/2/1/1/3 `Random()`s on the ROM, ordinary prologues 0; port now runs the modeled do/while via
+`drawBattleScriptSelectedMoveTarget`, Follow Me short-circuit honoured). The fourth source branch,
+`battle_util.c:133` — `gBattleMons[].moves[gCurrMovePos] != gChosenMoveByBattler[]` after Mimic or
+Transform overwrote the chosen slot — needs the selection-time bank `gChosenMoveByBattler`, which
+`factoryBattleScriptFullTurnDecision.ts`'s action reducer does not model (`actionMoveId` reads the
+live slot); named in `drawActionMoveTarget`'s docstring, not silently folded. Carriers: Mimic 2,
+Transform 1 rental entries. Port it by banking the chosen move id at selection and comparing at
+action time (same draw loop), with a Tier-1 pin; a receipt needs a Mimic/Transform fixture.
+
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 
 `docs/issue121-ai-mon-to-switch-into-probe.md` closes the reachability
