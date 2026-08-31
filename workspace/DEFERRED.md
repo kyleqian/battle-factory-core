@@ -13,7 +13,9 @@ that may resolve it.
 Keep entries short and remove them after the user decides (git retains the
 history). Number entries without reuse and use the exact machine-readable
 heading `## D<number> — OPEN: <short title>`; `run-supervisor.sh` refuses to
-start another session while any such heading remains. Each entry should state:
+start another session while any such heading remains by default. A bounded
+unattended schedule may explicitly preserve the entry and continue only
+independent reversible work. Each entry should state:
 
 - the decision needed and why it matters;
 - the evidence checked and why it was insufficient;

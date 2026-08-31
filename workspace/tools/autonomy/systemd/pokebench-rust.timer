@@ -1,8 +1,8 @@
 [Unit]
-Description=Start the lower-priority Rust supervisor daily
+Description=Start the lower-priority Rust supervisor twice per day
 
 [Timer]
-OnCalendar=*-*-* 03:00:00 UTC
+OnCalendar=*-*-* 03,15:00:00 UTC
 Persistent=true
 RandomizedDelaySec=5min
 AccuracySec=1min
