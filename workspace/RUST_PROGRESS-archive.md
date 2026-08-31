@@ -5,6 +5,37 @@ full history regardless.
 
 ---
 
+## R60 — [supervised session, 2026-08-31, unattended] **M57 `Cmd_jumpifstat` leaf + green checkpoint**
+
+- **State:** `rust-main` = R59 checkpoint `8730a5470` plus the verified Sonnet
+  worker `62591d659` (fast-forward). The pure `B_SCR_OP_JUMPIFSTAT`
+  registration/handler projection is native and wasm32-compilable; no ABI,
+  adapter, recovery module, canonical TS, or npm file was touched. Session
+  still active; `Cmd_getsecretpowereffect` dispatching next.
+- **Did:** worker (claude-sonnet-5, 75-min cap, one commit) ported exact
+  18-start eager registration (count → 1/1/1/1/4 shape → six `CMP_*` →
+  seven `STAT_*` → `MIN|MAX_STAT_STAGE` → eager label resolution, TS error
+  order), all six comparators source-completely, the injected-selector
+  `Block { source-context-unavailable }` control variant for a null battler,
+  advance without label lookup, and jump on the pre-resolved label. Canonical
+  TS supplies **1,602 behavior** and **16 registration** cases; corpus sha256
+  `1713232e00bdb6af8d6ce6bce929fa52badfd10dab85511b7daf4b43575a4da9`.
+- **Next:** dispatch `Cmd_getsecretpowereffect` (single start at pc 1835,
+  pure `gBattleEnvironment`→`moveEffectByte` map), then
+  `Cmd_trysetperishsong` (single start at pc 1057; status3/perish timers +
+  Pressure PP scan) if the deadline reserve holds. Briefs are prepared.
+- **Notes:** supervisor audit covered comparator table, decode-before-block
+  ordering, registration order, stat-index addressing, and generator
+  provenance; independent regeneration was byte-identical. Generated Rust is
+  **2,512,225 bytes**, sha256
+  `9f2947617530f559af72c4611957fbe01d904234ad49250d91bcca18500fafd0`;
+  generator is **37,103 bytes**, sha256
+  `d092db5e978488c6011c9cb98473dacd0ddf7b9ff55e9cb69265ad156f4d052a`.
+  Gates in the worker tree and again on `rust-main`: **1,087/1,087**, fmt,
+  strict workspace Clippy, wasm32 release. Artifact is **507,097 bytes**,
+  sha256 `5692c5dc012ccc892fa8d106945e8455976c7965d2e99ec713798062e9ad3fab`.
+  No npm gate required; no deferral or barrier added. R57 archived.
+
 ## R59 — [supervised session, 2026-08-31 08:24– UTC, unattended] **M56 `Cmd_jumpifstatus3condition` leaf + green checkpoint**
 
 - **State:** `rust-main` = master `3f76b234d` (already merged at orient) plus
