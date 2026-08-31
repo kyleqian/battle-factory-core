@@ -1,3 +1,11 @@
+# Animation supervisor inbound refresh — baseline restored (2026-08-31 supervisor)
+
+- **State:** `master` is merged into `animation-main` at `e6209be2`; coverage remains **213/276 Level-50 exact, 0 partial / 0 staged, 63 unsupported**. No worker was dispatched because the required merged baseline consumed the remaining hard-deadline window.
+- **Did:** Updated the three active animation source-staging receipts (Rollout, Fire Blast, Soft-Boiled) for the rebuilt but ROM-identical `pokeemerald.elf` provenance hash `3a8aa584…`; no source interval, ROM hash, animation behavior, coverage status, latch, boundary, or production path changed.
+- **Verified:** The post-merge full suite reached **1,168 passed files / 10,704 passed tests / 44 files and 223 tests skipped**, with only those three provenance-pin tests failing; after the receipt repair their focused suite passes **3/3 files, 12/12 tests**. `npm run build` passes (**728 modules**) and `npm run animation:coverage` remains 213/276. A second complete `npm test` was not started because it could not finish before the hard deadline; all other files passed in the immediately preceding full run.
+- **Next:** Rerun full `npm test` first. If green, dispatch the bounded **Terra/max** Sand Tomb reducer/seam/compositor round described below, using its complete bilateral 124-row maps and independently verifying the ordinary OAM/matrix/palette preceding-row latch from `ANIMATION_LATCHES.md`.
+- **Notes:** No worker branch or worktree exists. No main-program document or gameplay owner changed.
+
 # Animation supervisor inbound-merge checkpoint — baseline prerequisites incomplete (2026-08-31 supervisor)
 
 - **State:** `master` is merged into `animation-main` at `d707fb1a`; animation coverage remains **213/276 Level-50 exact, 0 partial / 0 staged, 63 unsupported**. No animation worker was dispatched because the hard-deadline window was insufficient after baseline verification.

@@ -207,7 +207,7 @@
   },
   "sourceHashes": {
     "reference/pokeemerald/pokeemerald.gba": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
-    "reference/pokeemerald/pokeemerald.elf": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b",
+    "reference/pokeemerald/pokeemerald.elf": "3a8aa584d7985c5a74ab10bb6eebd0c41b7c314ba8e423266727563c37f7727b",
     "reference/pokeemerald/data/battle_anim_scripts.s": "76ad47e87abab7bf16f1606eb2cefb69fa39945d07458348623419f00404552d",
     "reference/pokeemerald/data/battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
     "reference/pokeemerald/src/battle_anim_effects_1.c": "79744f3e50c5749fd2478c83c4954feb8803a9bf923e65ab7d5c8cf32792e82e",
