@@ -112,7 +112,6 @@ fn exact_source_dispatch_body_macro_constants_and_all_program_sites_are_pinned()
     for term in BATTLE_SCRIPT_ORWORD_TERM_EVIDENCE {
         assert_eq!(
             line(&battle_constants, usize::from(term.source_line))
-                .trim()
                 .split_whitespace()
                 .nth(1),
             Some(term.expression),
