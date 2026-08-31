@@ -5,6 +5,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R59 — [supervised session, 2026-08-31 08:24– UTC, unattended] **M56 `Cmd_jumpifstatus3condition` leaf + green checkpoint**
+
+- **State:** `rust-main` = master `3f76b234d` (already merged at orient) plus
+  the verified Sonnet worker `ee7acdbed` (fast-forward). The pure
+  `B_SCR_OP_JUMPIFSTATUS3CONDITION` registration/handler projection is native
+  and wasm32-compilable; no ABI, adapter, recovery module, canonical TS, or
+  npm file was touched. Session still active; next leaf dispatching.
+- **Did:** orient baseline was fully green (**1,068/1,068**, fmt, strict
+  Clippy — the R57/R58 "Clippy unverified" item is closed — and wasm32 at the
+  R58 hash). Worker (claude-sonnet-5, 75-min cap, one commit) ported exact
+  7-start eager registration (count → 1/4/1/4 operand shape → `BS_TARGET`
+  → `TRUE|FALSE` → five named `STATUS3_*` masks, TS error order), the
+  jumpifnostatus3/jumpifstatus3 clear/set semantics, advance without label
+  lookup, late label resolution on jump, and typed
+  undecodable/unresolved-target errors. Canonical TS supplies **577 behavior**
+  and **15 registration** cases; corpus sha256
+  `c88eb6c8bd520541a677bac3cffca42e05780ece2024a8267554e143a0eb58f0`.
+- **Next:** dispatch the pure `Cmd_jumpifstat` leaf (18 starts,
+  `BS_ATTACKER`/`BS_TARGET`, six `CMP_*` comparators, eager label
+  validation, `block`/source-context-unavailable variant) with the same
+  pattern; then `Cmd_getsecretpowereffect` (single start, pure
+  environment→`moveEffectByte` map). Briefs are prepared; both are
+  conflict-free against ISSUES/PROGRESS as of this orient.
+- **Notes:** supervisor audit covered mask values, registration order,
+  handler branch logic, and generator provenance (expected values come from
+  the canonical handler with TS-side immutability asserts); independent
+  regeneration was byte-identical. Generated Rust is **600,257 bytes**,
+  sha256 `4d1c90c33b27e638cdd2fa867136b3ccde489438e7795f59283185d6690c1e8d`;
+  generator is **30,001 bytes**, sha256
+  `a5591512378aff656f380342516bd7548d116979c2620af1e386819884996934`.
+  Gates in the worker tree and again on `rust-main`: **1,077/1,077**, fmt,
+  strict workspace Clippy, wasm32 release. Artifact is **507,176 bytes**,
+  sha256 `d4e52b8cdff75b9a5d2e0bf3e84f2502f4cc55fb9b5ec9d829300702cff024de`
+  (+71 bytes vs R58 with no ABI change; identical hash in both trees, so
+  deterministic). No npm gate required (nothing outside `core-rs/**` and
+  this ledger changed). No deferral or barrier added. R54–R56 archived.
+
 ## R58 — [supervised session, 2026-08-31 07:28–07:37 UTC] **Master sync + green baseline only (9-minute window)**
 
 - **State:** `rust-main` = merge of master `e4d7a01f0` (merge commit
@@ -52,104 +89,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   No npm gate was required because no post-baseline worker fold touched the
   adapter or canonical TypeScript. PAPERCUT: README names an absent Apple
   toolchain path on the unattended Linux image, ~2 min.
-
-## R56 — [supervised session, 2026-08-25] **M55 Helping Hand leaf + final wind-down**
-
-- **State:** `rust-main` = session-start master `33592cba` plus five verified
-  increments through `Cmd_trysethelpinghand` worker `15b28803`. ORWORD,
-  CheckViability tie-receipt retention, Encore, field-ability scan, and Helping
-  Hand are committed and green; no ABI, adapter, recovery module, or canonical
-  TypeScript file was widened.
-- **Did:** ported Helping Hand's singleton `0xd1` registration, instruction-
-  before-attacker ordering, source positional-partner lookup, unconditional
-  target retarget before all guards, exact doubles/absence/corrupt-byte gates,
-  failure-only late label resolution, target-only success write, repetition,
-  and full no-RNG/no-event/no-scheduler preservation. Canonical TypeScript
-  supplies **2,632 behavior** and **10 registration** cases; corpus sha256
-  `28a79ba053c6e925a8357766f7d73f8adb715d82d1979625d7cd02b4e87fa5e0`.
-- **Next:** at the next Rust session, merge current master, recheck active lane
-  work, and select another stable pure leaf. Main owns deletion of ISSUE #124
-  after folding this lane; Rust has no open deferral.
-- **Notes:** Terra/max worker, one commit. Supervisor caught and corrected the
-  worker unit fixture's naive battler-id partner expectation; production code
-  and the canonical corpus already used `position ^ BIT_FLANK`. Two independent
-  regenerations were byte-identical. Generated Rust is **9,314,463 bytes**,
-  sha256 `5aac9cb75d4e039e7b81bd41dc5c5e88cc19a59e4e47d37935a04ddedb119972`;
-  generator is **41,575 bytes**, sha256
-  `c60ebdc8166bad3f26854a170d580334614cccef41ae7129363e1859d46b4156`.
-  Final Rust is green at **1,068/1,068** tests, fmt, strict workspace Clippy,
-  and wasm32 release. Artifact is **506,009 bytes**, sha256
-  `de2fdfdf67692881cb45d64907ad130ab607fc450d7b89bca510716ee6a554d4`.
-  Final npm is green at **1,121 files / 10,457 passed / 223 skipped** and build
-  is green at **712 modules**. Wind-down soaks: vanilla **20/20**, full
-  **60/60**, winning **60/60**, and winning-swap **60/60**, all with zero
-  crashes and zero hangs. Scope stayed inside `core-rs/**` plus the existing M2
-  parity file used by the receipt repair; no barrier or deferral was added.
-
-## R55 — [supervised session, 2026-08-25] **M54 Battle Script field-ability scan + green checkpoint**
-
-- **State:** `rust-main` = merged master `33592cba` plus the four verified
-  session increments through `Cmd_jumpifabilitypresent` worker `70b3417f`.
-  The complete pure two-site registration/topology-scan/control projection is
-  native and wasm32-compilable; no ABI, adapter, or recovery module was
-  changed. The session remains active, committed, and green.
-- **Did:** ported exact two-start eager registration, first opcode binding,
-  Cloud Nine/Air Lock expression mapping, 2/4-slot topology scan, living-only
-  ability match, absent-path advance without label lookup, present-path late
-  label resolution, direct-handler unvalidated-ability error, repeated control,
-  and full narrow-state immutability. Canonical TypeScript supplies **153
-  behavior** and **15 registration** cases; corpus sha256
-  `fc70a470d096700098fbf5fe8454bfdecd38da0b599d30f52339820841aa46bc`.
-- **Next:** port one final stable pure Battle Script leaf if the deadline
-  reserve remains sound; prefer singleton `B_SCR_OP_TRYSETHELPINGHAND`, which
-  has bounded doubles topology, target rebinding, no RNG, and no active issue.
-- **Notes:** Sol/high worker, one commit. Supervisor audited source dispatch,
-  field scan, six-byte macro, both Solar Beam sites, constants, registration
-  predicates, late label boundary, ignored absent slots, and no-write output;
-  regenerated twice byte-identically and passed focused **8/8**, full Rust
-  **1,059/1,059**, fmt, strict workspace Clippy, and wasm32 release. Generated
-  Rust is **808,906 bytes**, sha256
-  `5ca4649b30f3692bce6fee05f884c4f1f75e9d65c6bfa4eebc6bdfe6201ab496`;
-  generator is **26,662 bytes**, sha256
-  `4923f0d7bcb94f7bd3c90533e2176422fe2893998732d1fba5a26a62ca24a2ee`.
-  Artifact is **505,897 bytes**, sha256
-  `6607385fe956f48e1a5f926da9625a40e61ea380bd15212dd8b348eebc6fb060`.
-  Worker npm is green at **1,121 files / 10,457 passed / 223 skipped** and
-  build is green. Scope stayed inside `core-rs/**`; no barrier or deferral was
-  added. PAPERCUT: silent TypeScript typecheck obscured liveness, ~4 min.
-
-## R54 — [supervised session, 2026-08-25] **M53 Battle Script Encore leaf + green checkpoint**
-
-- **State:** `rust-main` = merged master `33592cba` plus verified ORWORD,
-  CheckViability receipt, and `Cmd_trysetencore` workers through `431a40c7`.
-  The complete pure Encore registration/state/RNG/control projection is native
-  and wasm32-compilable; no ABI or adapter surface was widened. The session
-  remains active, committed, and green.
-- **Did:** ported exact two-stage singleton registration and handler validation,
-  target-role ordering, first matching move slot, existing-Encore/PP/missing-
-  slot/Struggle/Encore/Mirror Move gates, failure-only late label lookup,
-  success-only single RNG draw, duration 3..6, exact four-field target write,
-  and advance/jump control. Canonical TypeScript supplies **739 behavior** and
-  **12 registration** cases, including the 500 concrete selector matrix and 32
-  duplicate-slot PP-precedence cases. Corpus sha256
-  `17c24b5dfdeaf7f4d86a690219c6f278fd60ef41c7be38557a7c6e5345b13564`.
-- **Next:** port the stable, conflict-free pure
-  `B_SCR_OP_JUMPIFABILITYPRESENT` leaf. Preserve its two concrete Solar Beam
-  starts, living-battler topology scan, ability operands, eager registration,
-  and late jump-label resolution. Keep scope inside `core-rs/**`.
-- **Notes:** Terra/max worker, one commit. Supervisor rejected an initially
-  incorrect duplicate-slot unit fixture; the implementation and generated
-  differential were correct, and the corrected fixture now proves slot zero
-  wins when the later duplicate has zero PP. Supervisor audited the decomp
-  body, five-byte macro, sole call site, error/write/RNG boundaries, regenerated
-  twice byte-identically, and passed focused **7/7**, full Rust, fmt, required
-  strict library Clippy, and wasm32 release. Generated Rust is **8,066,126
-  bytes**, sha256
-  `53095904ebac7afe0a80a1673266afc82ffd79eff72b6655e323ba886e88e8d8`;
-  generator is **55,572 bytes**, sha256
-  `1de47b8144399f9b95f88cb37ffa395648ca5a880fa795c662f7d1df594a5b05`.
-  Artifact is **505,906 bytes**, sha256
-  `f4250d789d6cdabda3e407847bf1ae12e3552c4ab0a2c412fade7a83aa3a2fad`.
-  Worker npm is green at **1,121 files / 10,457 passed / 223 skipped** and
-  build is green. Scope stayed inside `core-rs/**`; no barrier, deferral, or
-  papercut was added.
