@@ -726,6 +726,18 @@ if [[ -f "$AGENT_LOG" ]]; then
   fi
 fi
 
+# In an unattended campaign, preserve a successful implementation worker's
+# committed feature branch before handing it back for supervisor verification.
+# The backup helper writes only the isolated campaign namespace; interactive
+# workers without POKEBENCH_BACKUP_NAMESPACE never push anything.
+if [[ "$IS_WORKTREE" == "1" && "$READ_ONLY" != "1" && "$status" == "0" \
+      && -n "${POKEBENCH_BACKUP_NAMESPACE:-}" ]]; then
+  if ! tools/autonomy/backup-refs.sh; then
+    echo "run-subagent: failed to back up committed worker branch $WT_BRANCH" >&2
+    status=1
+  fi
+fi
+
 # Worktree handoff: the worktree and branch outlive this launcher on purpose —
 # the supervisor verifies inside it, merges, updates docs, then removes it.
 if [[ "$IS_WORKTREE" == "1" ]]; then

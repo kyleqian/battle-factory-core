@@ -101,6 +101,10 @@ fi
 started_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 echo "run-lane: starting ${LANE} at ${started_at}, cap ${cap_hours}h, ${supervisor_agent}/${sub_agent}"
 
+# Refuse to begin a new unattended session until the previously committed lane
+# tips (and any surviving disposable worker tips) are safe off-VM.
+"${SCRIPT_DIR}/backup-refs.sh"
+
 status=0
 (
   cd "$WORKSPACE_ROOT"

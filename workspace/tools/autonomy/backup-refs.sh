@@ -41,11 +41,16 @@ else
 fi
 
 refs=()
-for branch in master animation-main rust-main; do
+for branch in animation-main rust-main; do
   if git -C "$REPO_ROOT" show-ref --verify --quiet "refs/heads/${branch}"; then
     refs+=("refs/heads/${branch}:refs/heads/${NAMESPACE}/${branch}")
   fi
 done
+while IFS= read -r worker_branch; do
+  [[ -n "$worker_branch" ]] || continue
+  worker_suffix="${worker_branch#worker/}"
+  refs+=("refs/heads/${worker_branch}:refs/heads/${NAMESPACE}/workers/${worker_suffix}")
+done < <(git -C "$REPO_ROOT" for-each-ref --format='%(refname:short)' 'refs/heads/worker/animation-*' 'refs/heads/worker/rust-*')
 if git -C "$REPO_ROOT" show-ref --verify --quiet refs/stash; then
   stash_oid="$(git -C "$REPO_ROOT" rev-parse refs/stash)"
   refs+=("refs/stash:refs/heads/${NAMESPACE}/recovery/stash-${stash_oid:0:12}")
@@ -62,4 +67,4 @@ if [[ -f "$deploy_key" ]]; then
 fi
 
 git -C "$REPO_ROOT" push --porcelain "$REMOTE" "${refs[@]}"
-echo "backup-refs: updated committed lane refs under ${REMOTE}/${NAMESPACE}"
+echo "backup-refs: updated committed lane/worker refs under ${REMOTE}/${NAMESPACE}"

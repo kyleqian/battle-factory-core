@@ -8,18 +8,24 @@ to continue unless the ROM and oracle framebuffer hashes match the laptop.
 
 ## Operating shape
 
-- Animation is a single-writer branch. Its timer starts at 00:00, 06:00,
-  12:00, and 18:00 UTC with a 5.5-hour cap. A per-lane `flock` makes overlap
-  impossible even if a prior run is slow to wind down.
-- Rust uses its own branch, worktree, ledger, oracle profile, and lock. Claude
-  runs it for up to four hours at 03:00 and 15:00 UTC, overlapping the Codex
-  Animation lane. During this unattended window Rust is restricted to
-  `core-rs/` so it never launches a second full TypeScript gate.
-- Every run pushes committed `master`, `animation-main`, and `rust-main` to
-  `autonomy/<run-id>/...`. Concurrent backups are serialized. If a local stash
-  exists, its current object is also preserved under a content-addressed
-  `autonomy/<run-id>/recovery/stash-*` ref. The runner never pushes or
-  force-updates the canonical branches.
+- Animation and Rust are independent single-writer branches with persistent
+  worktrees, ledgers, oracle profiles, and locks. The checked-in timers are
+  conservative examples; a campaign may install a different cadence in
+  `/etc/systemd/system` without making that campaign policy a master-branch
+  requirement.
+- Provider pairs, caps, stop time, and safeguards are installed in
+  `/etc/pokebench-autonomy.env`. Human-readable campaign instructions live
+  only on the affected lane branches as `ANIMATION_UNATTENDED.md` and
+  `RUST_UNATTENDED.md`; `master` contains only the reusable mechanism that
+  loads those files when explicitly required by the installed environment.
+- Each run backs up committed lane tips before launch and again at wind-down.
+  Successful disposable worker branches are backed up immediately after the
+  worker exits, and branch-local campaign instructions require another backup
+  after every verified merge/checkpoint. Concurrent pushes are serialized.
+  The destinations are isolated `autonomy/<run-id>/...` refs; unattended jobs
+  never update `master` or canonical lane refs on GitHub.
+- If a local stash exists, its current object is preserved under a
+  content-addressed `autonomy/<run-id>/recovery/stash-*` ref.
 - Raw Codex and Claude JSONL remains in each worktree's `.codex-logs/`; journald holds the
   service output and `/var/lib/pokebench-autonomy/runs.log` holds a compact run
   ledger. Pull logs separately with `rsync`; do not commit them.
