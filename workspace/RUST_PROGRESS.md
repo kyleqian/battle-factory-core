@@ -7,8 +7,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## R57 — [supervised session, 2026-08-31] **Master sync + green Rust baseline; status3 worker cap-safe rejection**
 
-- **State:** `rust-main` fast-forwarded from `f58353f83` to current master
-  `e36a11c6c`; the persistent tree is clean and no worker commit was folded.
+- **State:** `rust-main` merged from `f58353f83` through current master
+  `ba16b8dde`; the persistent tree is clean and no worker commit was folded.
   Native Rust and wasm32 release are green after the merge.
 - **Did:** ran the required post-merge baseline: **1,068/1,068** native tests
   passed and `factory-wasm` release built for `wasm32-unknown-unknown`.
@@ -22,15 +22,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   from the clean verified base; do not trust or fold the abandoned draft.
 - **Notes:** wasm artifact is **507,105 bytes**, sha256
   `b3bbf9fbdfaafad9cb3d406be3407ee0345273c0a2c56847d471e2c24ae54274`.
-  This host only has toolchain `1.97.1-x86_64-unknown-linux-gnu`, without the
-  `rustfmt` and `clippy` components, so `cargo fmt --check` and strict Clippy
-  were unavailable; the README's prepended Apple toolchain directory does
-  not exist here and cargo falls through to that host toolchain. No Rust
-  deferral, ABI/adapter widening, canonical-TS edit, or barrier was added.
+  Current master added unattended-runner installation for the previously
+  missing `rustfmt`/Clippy components; both installed successfully. Formatting
+  found and mechanically corrected one pre-existing master-fold line wrap in
+  `factory_ai_check_viability.rs`; `cargo fmt --check` is green. Strict Clippy
+  was started after formatting but stopped at the session wind-down deadline,
+  so it is the first verification at the next orient. No Rust deferral,
+  ABI/adapter widening, canonical-TS edit, or barrier was added.
   No npm gate was required because no post-baseline worker fold touched the
-  adapter or canonical TypeScript. PAPERCUT: unattended Linux Rust image
-  lacks required rustfmt/clippy components while README names an absent Apple
-  toolchain path, ~2 min.
+  adapter or canonical TypeScript. PAPERCUT: README names an absent Apple
+  toolchain path on the unattended Linux image, ~2 min.
 
 ## R56 — [supervised session, 2026-08-25] **M55 Helping Hand leaf + final wind-down**
 
