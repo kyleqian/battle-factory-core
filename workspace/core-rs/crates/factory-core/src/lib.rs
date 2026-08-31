@@ -29,6 +29,8 @@ pub mod battle_script_furycutter;
 pub mod battle_script_furycutter_vectors_gen;
 pub mod battle_script_gender;
 pub mod battle_script_gender_vectors_gen;
+pub mod battle_script_getsecretpowereffect;
+pub mod battle_script_getsecretpowereffect_vectors_gen;
 pub mod battle_script_givepaydaymoney;
 pub mod battle_script_givepaydaymoney_vectors_gen;
 pub mod battle_script_incrementgamestat;
