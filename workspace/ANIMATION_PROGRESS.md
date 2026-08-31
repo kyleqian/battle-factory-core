@@ -1,3 +1,11 @@
+# MOVE_SAFEGUARD Guard Ring evidence/reducer/seam checkpoint — unsupported (2026-08-31 worker)
+
+- **State:** Level 50 remains **214/276 exact, 0 partial / 0 staged, 62 unsupported**. MOVE_SAFEGUARD and the non-exclusive `guard-ring-safeguard` track remain unsupported/unfulfilled; MOVE_SWEET_SCENT, MOVE_BARRIER, and MOVE_LIGHT_SCREEN receive no sibling credit.
+- **Did:** Pinned `Move_SAFEGUARD`'s authoritative **0x082cb6f7..<0x082cb739** interval and set-180 Bayleef carrier; reproducibly extracted `ANIM_TAG_GUARD_RING`; implemented the pure three-ring/monbg/setalpha/blend-color-cycle reducer and narrow typed Scene-ON seam. No battle status protection, RNG, controller, turn, round, facility, or production framebuffer ownership was added.
+- **Evidence:** Complete legal transient-free Battle Scene ON three-mon parties reproduce twice fresh byte-identically in both orientations: **71 rows, frames 209..279**, through inactive age 70. The retained state has pointer parities 0/1, full task/sprite/OAM/matrix/palette/tag/register/audio/party/engine/RNG/raw-RGB rows and normalized maps. Safeguard itself proves ordinary OAM/matrix/palette RAM+1 **70/70** bilaterally; Guard Rings source-birth at 7/13/19 and first paint at 8/14/20; white BlendColorCycle faded/hardware steps are 36/37 through 60/61. `ANIMATION_LATCHES.md` is unchanged: no new or contradictory mechanism.
+- **Next:** Keep Safeguard unfulfilled until a generic compositor using live species/sides/geometry/field chrome and Guard Ring art reaches actual `core.ts → renderSceneOnMovePresentation` zero residual on all **71+71** retained rows, twice, without a pair gate, framebuffer/RGB lookup, coordinate fitting, or absolute tick.
+- **Notes:** Source/reducer/evidence tests and typecheck pass. No coverage entries/counts, boundary/barrier lists, or control statuses changed.
+
 # MOVE_HELPING_HAND legal Scene-ON boundary + source/reducer checkpoint (2026-08-31 worker)
 
 - **State:** Level 50 remains **214/276 exact, 0 partial / 0 staged, 62 unsupported**. MOVE_HELPING_HAND and the non-exclusive `helping-hand-clap` track remain unsupported/unfulfilled; MOVE_ENCORE and MOVE_SMELLING_SALT receive no sibling credit.

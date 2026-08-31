@@ -1,0 +1,63 @@
+{
+  "schema": "safeguard-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SAFEGUARD",
+  "status": "checkpoint",
+  "coverageCredit": false,
+  "repeatability": {
+    "runsPerOrientation": 2,
+    "allMatched": true
+  },
+  "source": {
+    "audit": "tools/compare/safeguardSourceAudit.ts",
+    "auditSha256": "97cc4e53b07ac46c7b1dd0392d6c3933f57f7feadced9af19800be3af04e0896",
+    "probe": "tools/compare/safeguardProbe.py",
+    "probeSha256": "26efdc281345bf56a0924e582eee4e35d8dfb56a79954ffa3bdd3f4cef2cc091",
+    "asset": "src/animation/assets/safeguard.json",
+    "assetSha256": "c4c750c233c0db2dde8d27a9be0639fcedfa7a3d4ca855a5db4a613213d1c08f"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-safeguard-player-bayleef-opponent-onix.json",
+      "scenarioSha256": "0c58ab3129d420e8c9c839fed11e8bfd49c3412469af766a1a162f3d84c30e3c",
+      "denseState": "tools/compare/evidence/safeguard-player-dense-state.json.gz",
+      "denseStateSha256": "5c0be17ca977aa20d370175d047f943d3e11961f9d5199deaf2c54fdcc59f256",
+      "probeJsonSha256": "f605b7bda51503c83aa1f0715254765d515249c11ee561b37b6bc15daaf229cc",
+      "repeatProbeJsonSha256": "f605b7bda51503c83aa1f0715254765d515249c11ee561b37b6bc15daaf229cc",
+      "rawRgbArchive": "tools/compare/evidence/safeguard-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "eabeb28c6b5db5d6dc8e167d48d02356e908a192a54eb8c9a03740a929ce855f",
+      "rawRgbSequenceSha256": "cc55af31f0ded46e1c58bfb669732d2849eaa416326fdae4253e3ac8d8ee5726",
+      "repeatRawRgbSequenceSha256": "cc55af31f0ded46e1c58bfb669732d2849eaa416326fdae4253e3ac8d8ee5726",
+      "window": {
+        "startFrame": 209,
+        "endFrame": 279,
+        "frameCount": 71
+      },
+      "changeMap": "tools/compare/evidence/safeguard-changemap-player.json",
+      "changeMapSha256": "9e668e885d76c065a3ba69a94cd16c182837d74a233569fb4f577d1902487a7e"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-safeguard-opponent-bayleef-player-onix.json",
+      "scenarioSha256": "485aaf3ac9fa910d02d424a5a06d91d3e6ac6856d3b82f867707fc9452561ac2",
+      "denseState": "tools/compare/evidence/safeguard-opponent-dense-state.json.gz",
+      "denseStateSha256": "764c3eb4b0d8c9a45bf35a762eb4d13348a6ea5cb03ad0eca473563ac4029bf9",
+      "probeJsonSha256": "3262c02e55289a3c1b1b76c12fef6162002b2cd3479cd6a071519af8cbedce2a",
+      "repeatProbeJsonSha256": "3262c02e55289a3c1b1b76c12fef6162002b2cd3479cd6a071519af8cbedce2a",
+      "rawRgbArchive": "tools/compare/evidence/safeguard-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "a681c441ba894e830b2ee4f268529fba447aa383175c98ebac9218f958a840b8",
+      "rawRgbSequenceSha256": "7e9c828ed70a39be3d09e8ceac6f5c5f5f93f6a1f9b1ee47f5cae8f45943611d",
+      "repeatRawRgbSequenceSha256": "7e9c828ed70a39be3d09e8ceac6f5c5f5f93f6a1f9b1ee47f5cae8f45943611d",
+      "window": {
+        "startFrame": 209,
+        "endFrame": 279,
+        "frameCount": 71
+      },
+      "changeMap": "tools/compare/evidence/safeguard-changemap-opponent.json",
+      "changeMapSha256": "501cb280cc2b7e1e7682c572b472df48a0c8815e3664509ab1b54f6d6e776d3c"
+    }
+  },
+  "controls": {
+    "independent": ["MOVE_SWEET_SCENT", "MOVE_BARRIER", "MOVE_LIGHT_SCREEN"],
+    "statusesChanged": false
+  }
+}

@@ -453,6 +453,11 @@ import {
   type ScreechRingSprite,
 } from "./screech.ts";
 import {
+  safeguardAtAge,
+  type SafeguardAnimationProfile,
+  type SafeguardState,
+} from "./safeguard.ts";
+import {
   smellingSaltAtAge,
   type SmellingSaltState,
 } from "./smellingSalt.ts";
@@ -1960,6 +1965,16 @@ export interface SceneOnScreechConfig {
   >;
 }
 
+/** Safeguard presentation only; side-status ownership remains battle-owned. */
+export interface SceneOnSafeguardConfig {
+  readonly move: "SAFEGUARD";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live allocator/subpriority facts, independent of carrier species. */
+  readonly animationProfile: Readonly<SafeguardAnimationProfile>;
+}
+
 /** Smelling Salt presentation only; damage/status ownership remains external. */
 export interface SceneOnSmellingSaltConfig {
   readonly move: "SMELLING_SALT";
@@ -3388,6 +3403,7 @@ export type SceneOnMoveConfig =
   | SceneOnSupersonicConfig
   | SceneOnMetalSoundConfig
   | SceneOnScreechConfig
+  | SceneOnSafeguardConfig
   | SceneOnSmellingSaltConfig
   | SceneOnRecycleConfig
   | SceneOnLeerConfig
@@ -3764,6 +3780,11 @@ export interface SceneOnScreechView {
     readonly song: "SE_M_SCREECH";
     readonly pan: number;
   }[];
+}
+
+export interface SceneOnSafeguardView extends SafeguardState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnSmellingSaltView extends SmellingSaltState {
@@ -6367,6 +6388,24 @@ export function sceneOnScreechView(
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** Age zero is MOVE_SAFEGUARD's first pointer-owned script row. */
+export function sceneOnSafeguardView(
+  state: SceneOnMovePresentationState<SceneOnSafeguardConfig>,
+): SceneOnSafeguardView {
+  if (state.config.move !== "SAFEGUARD") {
+    throw new Error("expected SAFEGUARD presentation, got " + state.config.move);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...safeguardAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.animationProfile,
     ),
   };
 }
