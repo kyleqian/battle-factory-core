@@ -1047,7 +1047,7 @@ pub static FACTORY_AI_LIVE_DECISION_BRIDGE_CASES: [FactoryAiLiveDecisionCase; 12
         seed: 826366246,
         calls: 12,
         turn_mode: 0,
-        expected_hash: 0xa8e242bce76f09ae,
+        expected_hash: 0xfd9208eef18da5e1,
     },
     FactoryAiLiveDecisionCase {
         label: "mask_seven_stage_type_edges",
