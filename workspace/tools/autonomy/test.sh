@@ -38,6 +38,7 @@ git -C "${fixture_root}/repo" add checkpoint.txt
 git -C "${fixture_root}/repo" commit --quiet -m initial
 git -C "${fixture_root}/repo" branch animation-main
 git -C "${fixture_root}/repo" branch rust-main
+git -C "${fixture_root}/repo" branch worker/animation-test
 git -C "${fixture_root}/repo" remote add origin "${fixture_root}/remote.git"
 printf 'interrupted but recoverable\n' >>"${fixture_root}/repo/checkpoint.txt"
 git -C "${fixture_root}/repo" stash push --quiet -m 'autonomy test recovery'
@@ -45,20 +46,32 @@ stash_oid="$(git -C "${fixture_root}/repo" rev-parse refs/stash)"
 POKEBENCH_REPO_ROOT="${fixture_root}/repo" \
 POKEBENCH_BACKUP_NAMESPACE=autonomy/test \
   "${SCRIPT_DIR}/backup-refs.sh" >/dev/null
-for branch in master animation-main rust-main; do
+for branch in animation-main rust-main; do
   git -C "${fixture_root}/remote.git" show-ref --verify --quiet \
     "refs/heads/autonomy/test/${branch}"
 done
+if git -C "${fixture_root}/remote.git" show-ref --verify --quiet \
+    "refs/heads/autonomy/test/master"; then
+  echo "autonomy tests: unattended backup unexpectedly pushed master" >&2
+  exit 1
+fi
+git -C "${fixture_root}/remote.git" show-ref --verify --quiet \
+  "refs/heads/autonomy/test/workers/animation-test"
 git -C "${fixture_root}/remote.git" show-ref --verify --quiet \
   "refs/heads/autonomy/test/recovery/stash-${stash_oid:0:12}"
 
-grep -q '^POKEBENCH_RUST_SUPERVISOR_AGENT=claude$' \
+grep -q '^POKEBENCH_RUST_SUPERVISOR_AGENT=codex$' \
   "${SCRIPT_DIR}/autonomy.env.example"
-grep -q '^POKEBENCH_UNATTENDED_DEFERRED_POLICY=continue$' \
+grep -q '^POKEBENCH_UNATTENDED_DEFERRED_POLICY=block$' \
   "${SCRIPT_DIR}/autonomy.env.example"
-grep -q '^OnCalendar=.*03,15:00:00 UTC$' \
+grep -q '^POKEBENCH_REQUIRE_LANE_UNATTENDED_INSTRUCTIONS=0$' \
+  "${SCRIPT_DIR}/autonomy.env.example"
+grep -q '^OnCalendar=.*03:00:00 UTC$' \
   "${SCRIPT_DIR}/systemd/pokebench-rust.timer"
 grep -q '^Restart=no$' \
   "${SCRIPT_DIR}/systemd/pokebench-supervisor@.service"
+[[ "$(grep -c '"${SCRIPT_DIR}/backup-refs.sh"' "${SCRIPT_DIR}/run-lane.sh")" == 2 ]]
+grep -q 'POKEBENCH_REQUIRE_LANE_UNATTENDED_INSTRUCTIONS' \
+  "${SCRIPT_DIR}/../../run-supervisor.sh"
 
 echo "autonomy tests passed"
