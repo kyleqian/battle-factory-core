@@ -10236,8 +10236,13 @@ mod tests {
             last_used_move_id: Some(MOVE_LOCK_ON),
             ..neutral_battler()
         });
-        let (result, _) =
-            run_cv_protect(BattleRngState { value: 1, calls: 0 }, attacker, target, 1, None);
+        let (result, _) = run_cv_protect(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            1,
+            None,
+        );
         assert_eq!(result.draw_count, 0);
         assert_eq!(result.score_delta, -2);
     }
