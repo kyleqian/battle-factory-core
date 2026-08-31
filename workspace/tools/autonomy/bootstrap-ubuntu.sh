@@ -52,8 +52,14 @@ apt-get install -y --no-install-recommends \
   gcc-multilib \
   git \
   jq \
+  libavcodec-dev \
+  libavfilter-dev \
+  libavformat-dev \
+  libavutil-dev \
   libelf-dev \
   libpng-dev \
+  libswresample-dev \
+  libswscale-dev \
   ninja-build \
   pkg-config \
   python3 \
@@ -109,9 +115,9 @@ install_mgba() {
     -DBUILD_SHARED=ON -DBUILD_STATIC=OFF \
     -DBUILD_GL=OFF -DBUILD_GLES2=OFF -DBUILD_GLES3=OFF \
     -DBUILD_PYTHON=OFF -DBUILD_UPDATER=OFF \
-    -DUSE_EPOXY=OFF -DUSE_FFMPEG=OFF -DUSE_EDITLINE=OFF \
+    -DUSE_EPOXY=OFF -DUSE_FFMPEG=ON -DUSE_EDITLINE=OFF \
     -DUSE_LIBZIP=OFF -DUSE_LUA=OFF -DUSE_DISCORD_RPC=OFF \
-    -DUSE_SQLITE3=OFF -DUSE_MINIZIP=OFF -DENABLE_SCRIPTING=OFF
+    -DUSE_SQLITE3=OFF -DUSE_MINIZIP=OFF -DENABLE_SCRIPTING=ON
   runuser -u "$RUNNER_USER" -- cmake --build "$build_root" --parallel "$JOBS"
   cmake --install "$build_root"
   ldconfig
