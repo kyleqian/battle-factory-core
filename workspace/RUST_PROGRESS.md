@@ -5,6 +5,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R62 — [supervised session, 2026-08-31, unattended] **M59 `Cmd_trysetperishsong` leaf + green checkpoint**
+
+- **State:** `rust-main` = R61 checkpoint `350b978a0` plus the verified Sonnet
+  worker `91b6bbab6` (fast-forward). The pure `B_SCR_OP_TRYSETPERISHSONG`
+  registration/handler projection is native and wasm32-compilable; no ABI,
+  adapter, recovery module, canonical TS, or npm file was touched. Session
+  still active; `Cmd_tryinfatuating` dispatching as the final leaf.
+- **Did:** worker (claude-sonnet-5, 60-min cap, one commit) ported the
+  single-start registration (opcode `0xB2`, dispatcher, one 4-byte failure
+  operand), pass 1 over `battlersCount` (already-sung or Soundproof →
+  not-affected; else `status3 |= PERISH_SONG`, timer 3, start value 3), pass
+  2 `PressurePPLoseOnUsingPerishSong` (first Perish Song slot, one decrement
+  per other Pressure holder, floor at zero, write-only-if-changed), and the
+  all-not-affected late-label jump vs advance — both carrying the mutated
+  rules. Canonical TS supplies **789 behavior** and **10 registration**
+  cases; corpus sha256
+  `4854061de9011da05d6d8fc26e0d5baec66e7483607ddf464fe36ba91102f5a2`.
+- **Next:** verify/fold the `Cmd_tryinfatuating` worker if it lands green
+  before the 12:24 UTC deadline (brief: reuse `gender.rs`,
+  `species_gender_ratios_gen.rs`, `battle_script_ai_reveal.rs`; Oblivious
+  hardcoded label pc 2996; four-way fail to operand label; success writes
+  `1 << (16 + attacker)`); otherwise reject it unfolded and leave it for the
+  next session. After that the next unported pure leaves are
+  `Cmd_tryswapabilities`, `Cmd_trywish`, `Cmd_rolloutdamagecalculation`.
+- **Notes:** supervisor audit covered both passes against
+  `battle_script_commands.c:8508-8534` / `battle_util.c:799-830`, the
+  snapshot-vs-progressive read equivalence (pass 2 reads only fields pass 1
+  never writes), label handling, and generator provenance; independent
+  regeneration was byte-identical. Generated Rust is **4,636,075 bytes**,
+  sha256 `063e6a1787ea8f26a711687509274d6127ea6486f3f767fbdb2a41904de6470a`;
+  generator is **40,832 bytes**, sha256
+  `a3d348fe6da851ed08c555d0677fccb5d2135af7879c462cffc2208e0b61c297`.
+  Gates in the worker tree and again on `rust-main`: **1,111/1,111**, fmt,
+  strict workspace Clippy, wasm32 release. Artifact is **507,097 bytes**,
+  sha256 `ee336b0928555b33ce10eacf33ba8918ded1596a5adc7198e22215eb95b3a75b`.
+  No npm gate required; no deferral or barrier added. R59 archived.
+
 ## R61 — [supervised session, 2026-08-31, unattended] **M58 `Cmd_getsecretpowereffect` leaf + green checkpoint**
 
 - **State:** `rust-main` = R60 checkpoint `135f4997e` plus the verified Sonnet
@@ -69,40 +106,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   strict workspace Clippy, wasm32 release. Artifact is **507,097 bytes**,
   sha256 `5692c5dc012ccc892fa8d106945e8455976c7965d2e99ec713798062e9ad3fab`.
   No npm gate required; no deferral or barrier added. R57 archived.
-
-## R59 — [supervised session, 2026-08-31 08:24– UTC, unattended] **M56 `Cmd_jumpifstatus3condition` leaf + green checkpoint**
-
-- **State:** `rust-main` = master `3f76b234d` (already merged at orient) plus
-  the verified Sonnet worker `ee7acdbed` (fast-forward). The pure
-  `B_SCR_OP_JUMPIFSTATUS3CONDITION` registration/handler projection is native
-  and wasm32-compilable; no ABI, adapter, recovery module, canonical TS, or
-  npm file was touched. Session still active; next leaf dispatching.
-- **Did:** orient baseline was fully green (**1,068/1,068**, fmt, strict
-  Clippy — the R57/R58 "Clippy unverified" item is closed — and wasm32 at the
-  R58 hash). Worker (claude-sonnet-5, 75-min cap, one commit) ported exact
-  7-start eager registration (count → 1/4/1/4 operand shape → `BS_TARGET`
-  → `TRUE|FALSE` → five named `STATUS3_*` masks, TS error order), the
-  jumpifnostatus3/jumpifstatus3 clear/set semantics, advance without label
-  lookup, late label resolution on jump, and typed
-  undecodable/unresolved-target errors. Canonical TS supplies **577 behavior**
-  and **15 registration** cases; corpus sha256
-  `c88eb6c8bd520541a677bac3cffca42e05780ece2024a8267554e143a0eb58f0`.
-- **Next:** dispatch the pure `Cmd_jumpifstat` leaf (18 starts,
-  `BS_ATTACKER`/`BS_TARGET`, six `CMP_*` comparators, eager label
-  validation, `block`/source-context-unavailable variant) with the same
-  pattern; then `Cmd_getsecretpowereffect` (single start, pure
-  environment→`moveEffectByte` map). Briefs are prepared; both are
-  conflict-free against ISSUES/PROGRESS as of this orient.
-- **Notes:** supervisor audit covered mask values, registration order,
-  handler branch logic, and generator provenance (expected values come from
-  the canonical handler with TS-side immutability asserts); independent
-  regeneration was byte-identical. Generated Rust is **600,257 bytes**,
-  sha256 `4d1c90c33b27e638cdd2fa867136b3ccde489438e7795f59283185d6690c1e8d`;
-  generator is **30,001 bytes**, sha256
-  `a5591512378aff656f380342516bd7548d116979c2620af1e386819884996934`.
-  Gates in the worker tree and again on `rust-main`: **1,077/1,077**, fmt,
-  strict workspace Clippy, wasm32 release. Artifact is **507,176 bytes**,
-  sha256 `d4e52b8cdff75b9a5d2e0bf3e84f2502f4cc55fb9b5ec9d829300702cff024de`
-  (+71 bytes vs R58 with no ABI change; identical hash in both trees, so
-  deterministic). No npm gate required (nothing outside `core-rs/**` and
-  this ledger changed). No deferral or barrier added. R54–R56 archived.

@@ -5,6 +5,43 @@ full history regardless.
 
 ---
 
+## R59 — [supervised session, 2026-08-31 08:24– UTC, unattended] **M56 `Cmd_jumpifstatus3condition` leaf + green checkpoint**
+
+- **State:** `rust-main` = master `3f76b234d` (already merged at orient) plus
+  the verified Sonnet worker `ee7acdbed` (fast-forward). The pure
+  `B_SCR_OP_JUMPIFSTATUS3CONDITION` registration/handler projection is native
+  and wasm32-compilable; no ABI, adapter, recovery module, canonical TS, or
+  npm file was touched. Session still active; next leaf dispatching.
+- **Did:** orient baseline was fully green (**1,068/1,068**, fmt, strict
+  Clippy — the R57/R58 "Clippy unverified" item is closed — and wasm32 at the
+  R58 hash). Worker (claude-sonnet-5, 75-min cap, one commit) ported exact
+  7-start eager registration (count → 1/4/1/4 operand shape → `BS_TARGET`
+  → `TRUE|FALSE` → five named `STATUS3_*` masks, TS error order), the
+  jumpifnostatus3/jumpifstatus3 clear/set semantics, advance without label
+  lookup, late label resolution on jump, and typed
+  undecodable/unresolved-target errors. Canonical TS supplies **577 behavior**
+  and **15 registration** cases; corpus sha256
+  `c88eb6c8bd520541a677bac3cffca42e05780ece2024a8267554e143a0eb58f0`.
+- **Next:** dispatch the pure `Cmd_jumpifstat` leaf (18 starts,
+  `BS_ATTACKER`/`BS_TARGET`, six `CMP_*` comparators, eager label
+  validation, `block`/source-context-unavailable variant) with the same
+  pattern; then `Cmd_getsecretpowereffect` (single start, pure
+  environment→`moveEffectByte` map). Briefs are prepared; both are
+  conflict-free against ISSUES/PROGRESS as of this orient.
+- **Notes:** supervisor audit covered mask values, registration order,
+  handler branch logic, and generator provenance (expected values come from
+  the canonical handler with TS-side immutability asserts); independent
+  regeneration was byte-identical. Generated Rust is **600,257 bytes**,
+  sha256 `4d1c90c33b27e638cdd2fa867136b3ccde489438e7795f59283185d6690c1e8d`;
+  generator is **30,001 bytes**, sha256
+  `a5591512378aff656f380342516bd7548d116979c2620af1e386819884996934`.
+  Gates in the worker tree and again on `rust-main`: **1,077/1,077**, fmt,
+  strict workspace Clippy, wasm32 release. Artifact is **507,176 bytes**,
+  sha256 `d4e52b8cdff75b9a5d2e0bf3e84f2502f4cc55fb9b5ec9d829300702cff024de`
+  (+71 bytes vs R58 with no ABI change; identical hash in both trees, so
+  deterministic). No npm gate required (nothing outside `core-rs/**` and
+  this ledger changed). No deferral or barrier added. R54–R56 archived.
+
 ## R58 — [supervised session, 2026-08-31 07:28–07:37 UTC] **Master sync + green baseline only (9-minute window)**
 
 - **State:** `rust-main` = merge of master `e4d7a01f0` (merge commit
