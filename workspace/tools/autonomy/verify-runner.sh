@@ -7,6 +7,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 WORKSPACE_ROOT="${REPO_ROOT}/workspace"
 VENDOR_ROOT="$(dirname "$REPO_ROOT")/vendor"
 source "${SCRIPT_DIR}/versions.env"
+cd "$WORKSPACE_ROOT"
 
 SKIP_BASELINES=0
 if [[ "${1:-}" == --skip-baselines ]]; then
