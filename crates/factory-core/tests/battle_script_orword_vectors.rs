@@ -34,12 +34,16 @@ fn execute_case(case_index: usize, case: &BattleScriptOrwordVectorCase) {
     let mut controls = [None; 3];
     let mut actual_error = None;
 
-    for application in 0..usize::from(case.applications) {
+    for (application, control_slot) in controls
+        .iter_mut()
+        .enumerate()
+        .take(usize::from(case.applications))
+    {
         let prior = current;
         match apply_battle_script_orword(instruction(case.instruction), &current) {
             Ok(outcome) => {
                 assert_transition_shape(case_index, case, application, prior, outcome);
-                controls[application] = Some(outcome.control);
+                *control_slot = Some(outcome.control);
                 current = outcome.rules;
             }
             Err(error) => {

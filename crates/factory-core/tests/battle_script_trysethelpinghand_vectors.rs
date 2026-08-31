@@ -386,7 +386,7 @@ fn dense_topology_flags_absence_and_corrupt_byte_matrix_covers_all_required_doma
         case.initial.topology.battle_type_flags & BATTLE_SCRIPT_TRYSETHELPINGHAND_BATTLE_TYPE_DOUBLE
             == 0
             && case.controls
-                == &[BattleScriptTrysethelpinghandControl::Jump { program_counter: 1434 }]
+                == [BattleScriptTrysethelpinghandControl::Jump { program_counter: 1434 }]
     }));
 }
 

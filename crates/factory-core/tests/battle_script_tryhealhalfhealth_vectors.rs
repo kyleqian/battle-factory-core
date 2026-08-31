@@ -848,7 +848,7 @@ fn ordered_operand_role_label_and_repeated_branch_boundaries_are_all_present() {
     assert!(skipped.iter().all(|case| {
         case.expected.is_some()
             && case.expected_error.is_none()
-            && case.controls == &[BattleScriptTryhealhalfhealthControl::Advance]
+            && case.controls == [BattleScriptTryhealhalfhealthControl::Advance]
             && case.instruction.resolved_failure_target.is_none()
     }));
     assert_eq!(
