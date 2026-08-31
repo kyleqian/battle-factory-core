@@ -185,6 +185,9 @@ install_rust() {
     bash -c 'curl --proto "=https" --tlsv1.2 --fail --silent --show-error https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain '"$POKEBENCH_RUST_VERSION"
   runuser -u "$RUNNER_USER" -- env HOME="$runner_home" \
     "${runner_home}/.cargo/bin/rustup" target add --toolchain "$POKEBENCH_RUST_VERSION" wasm32-unknown-unknown
+  runuser -u "$RUNNER_USER" -- env HOME="$runner_home" \
+    "${runner_home}/.cargo/bin/rustup" component add \
+      --toolchain "$POKEBENCH_RUST_VERSION" rustfmt clippy
 }
 
 prepare_repository() {

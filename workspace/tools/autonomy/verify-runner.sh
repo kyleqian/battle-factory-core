@@ -39,6 +39,9 @@ fi
 require_equal node-version "v${POKEBENCH_NODE_VERSION}" "$(node --version)"
 require_equal codex-version "codex-cli ${POKEBENCH_CODEX_VERSION}" "$(codex --version)"
 require_equal rust-version "rustc ${POKEBENCH_RUST_VERSION}" "$(rustc --version | awk '{print $1, $2}')"
+rustfmt --version >/dev/null
+cargo clippy --version >/dev/null
+echo "ok rust-components: rustfmt clippy"
 require_equal pokeemerald-commit "$POKEBENCH_POKEEMERALD_COMMIT" "$(git -C "${VENDOR_ROOT}/pokeemerald" rev-parse HEAD)"
 require_equal agbcc-commit "$POKEBENCH_AGBCC_COMMIT" "$(git -C "${VENDOR_ROOT}/agbcc" rev-parse HEAD)"
 require_equal mgba-commit "$POKEBENCH_MGBA_COMMIT" "$(git -C "${VENDOR_ROOT}/mgba-src" rev-parse HEAD)"
