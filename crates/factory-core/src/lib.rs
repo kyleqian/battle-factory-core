@@ -41,6 +41,8 @@ pub mod battle_script_jumpifnodamage;
 pub mod battle_script_jumpifnodamage_vectors_gen;
 pub mod battle_script_jumpifnotfirstturn;
 pub mod battle_script_jumpifnotfirstturn_vectors_gen;
+pub mod battle_script_jumpifstat;
+pub mod battle_script_jumpifstat_vectors_gen;
 pub mod battle_script_jumpifstatus3condition;
 pub mod battle_script_jumpifstatus3condition_vectors_gen;
 pub mod battle_script_negativedamage;
