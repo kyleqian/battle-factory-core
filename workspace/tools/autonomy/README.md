@@ -23,9 +23,10 @@ to continue unless the ROM and oracle framebuffer hashes match the laptop.
 - Raw Codex and Claude JSONL remains in each worktree's `.codex-logs/`; journald holds the
   service output and `/var/lib/pokebench-autonomy/runs.log` holds a compact run
   ledger. Pull logs separately with `rsync`; do not commit them.
-- `AUTONOMY_END_EPOCH` stops new work after the chosen seven-day window. A
-  powered-off Hetzner server still bills, so delete the VM manually after the
-  Git refs and logs have been recovered.
+- `AUTONOMY_END_EPOCH` stops new work after the chosen window and clamps the
+  final run so its watchdog winds down before that boundary. A powered-off
+  Hetzner server still bills, so delete the VM manually after the Git refs and
+  logs have been recovered.
 
 An `OPEN:` entry in a lane's deferred ledger remains a hard boundary: agents
 must not guess at or remove it. The unattended policy nevertheless lets later

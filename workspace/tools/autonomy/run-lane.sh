@@ -83,6 +83,21 @@ fi
 
 cap_hours="${POKEBENCH_ANIMATION_CAP_HOURS:-5.5}"
 [[ "$LANE" == rust ]] && cap_hours="${POKEBENCH_RUST_CAP_HOURS:-4}"
+if [[ ! "$cap_hours" =~ ^[0-9]+([.][0-9]+)?$ ]] \
+    || [[ "$(awk "BEGIN { print ($cap_hours > 0) ? 1 : 0 }")" != 1 ]]; then
+  echo "run-lane: configured cap must be a positive number (got '$cap_hours')" >&2
+  exit 2
+fi
+requested_cap_seconds="$(awk "BEGIN { printf \"%d\", $cap_hours * 3600 }")"
+remaining_seconds=$(( END_EPOCH - now - 60 ))
+if (( remaining_seconds <= 0 )); then
+  echo "run-lane: less than one minute remains in the autonomy window; skipping ${LANE}"
+  exit 0
+fi
+if (( requested_cap_seconds > remaining_seconds )); then
+  cap_hours="$(awk "BEGIN { printf \"%.6f\", $remaining_seconds / 3600 }")"
+  echo "run-lane: clamped ${LANE} to ${cap_hours}h so it winds down before the autonomy window closes"
+fi
 started_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 echo "run-lane: starting ${LANE} at ${started_at}, cap ${cap_hours}h, ${supervisor_agent}/${sub_agent}"
 
