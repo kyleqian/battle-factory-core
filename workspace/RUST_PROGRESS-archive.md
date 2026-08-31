@@ -5,6 +5,34 @@ full history regardless.
 
 ---
 
+## R57 — [supervised session, 2026-08-31] **Master sync + green Rust baseline; status3 worker cap-safe rejection**
+
+- **State:** `rust-main` merged from `f58353f83` through current master
+  `ba16b8dde`; the persistent tree is clean and no worker commit was folded.
+  Native Rust and wasm32 release are green after the merge.
+- **Did:** ran the required post-merge baseline: **1,068/1,068** native tests
+  passed and `factory-wasm` release built for `wasm32-unknown-unknown`.
+  Dispatched one Terra/max Rust worker for the bounded pure
+  `Cmd_jumpifstatus3condition` leaf. The five-minute emergency cap expired
+  during its first focused compile; it produced no commit, so the supervisor
+  correctly rejected the unverified draft rather than folding partial work.
+- **Next:** merge current master at the next orient, then rebrief the same
+  stable `B_SCR_OP_JUMPIFSTATUS3CONDITION` leaf with a normal cap. Recreate
+  the module, deterministic canonical-TS generator/corpus, and focused tests
+  from the clean verified base; do not trust or fold the abandoned draft.
+- **Notes:** wasm artifact is **507,105 bytes**, sha256
+  `b3bbf9fbdfaafad9cb3d406be3407ee0345273c0a2c56847d471e2c24ae54274`.
+  Current master added unattended-runner installation for the previously
+  missing `rustfmt`/Clippy components; both installed successfully. Formatting
+  found and mechanically corrected one pre-existing master-fold line wrap in
+  `factory_ai_check_viability.rs`; `cargo fmt --check` is green. Strict Clippy
+  was started after formatting but stopped at the session wind-down deadline,
+  so it is the first verification at the next orient. No Rust deferral,
+  ABI/adapter widening, canonical-TS edit, or barrier was added.
+  No npm gate was required because no post-baseline worker fold touched the
+  adapter or canonical TypeScript. PAPERCUT: README names an absent Apple
+  toolchain path on the unattended Linux image, ~2 min.
+
 ## R56 — [supervised session, 2026-08-25] **M55 Helping Hand leaf + final wind-down**
 
 - **State:** `rust-main` = session-start master `33592cba` plus five verified
