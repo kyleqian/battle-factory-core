@@ -91,7 +91,7 @@ checkout_exact() {
   fi
   runuser -u "$RUNNER_USER" -- git -C "$destination" fetch --quiet --depth 1 origin "$commit"
   runuser -u "$RUNNER_USER" -- git -C "$destination" checkout --quiet --detach "$commit"
-  if [[ "$(git -C "$destination" rev-parse HEAD)" != "$commit" ]]; then
+  if [[ "$(runuser -u "$RUNNER_USER" -- git -C "$destination" rev-parse HEAD)" != "$commit" ]]; then
     echo "bootstrap-ubuntu: failed to pin ${destination} at ${commit}" >&2
     exit 1
   fi
