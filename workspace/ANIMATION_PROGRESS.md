@@ -1,3 +1,11 @@
+# MOVE_ROCK_BLAST stronger first-body production checkpoint — unsupported (2026-08-31 worker)
+
+- **State:** Level 50 remains **216/276 exact, 0 partial / 0 staged, 60 unsupported**. MOVE_ROCK_BLAST remains unsupported and `rock-blast-first-body` remains unfulfilled; MOVE_ROCK_THROW, MOVE_ROCK_TOMB, and MOVE_ANCIENT_POWER retain independent exact status with no sibling credit.
+- **Did:** Decoded shared `sAnims_BasicRock` cells 0..5 (including missing 0/1/5), added a pure first-body reducer, narrow typed Scene-ON seam, and generic compositor using live sides/species/geometry/allocator facts, shared ROCKS/IMPACT art, battler art/chrome, lunge, affine projectile, fragments, opaque hitsplat, and the move-owned ShakeMon scanout. No evidence/species gate, recording/RGB/framebuffer lookup, absolute tick, coordinate fitting, gameplay, damage, RNG, turn, outcome, boundary, or barrier ownership was added.
+- **Verified:** The retained legal Rhyhorn/Shuckle evidence remains twice-fresh byte-identical at **90 rows / frames 84..173 player-back** and **90 rows / frames 88..177 opponent-front** through first inactive cleanup. Actual `core.ts → renderSceneOnMovePresentation` equality is **90/90 + 90/90 = 180/180**, zero residual pixels, on two deterministic production passes; an altered live species/geometry/allocator control also traverses the same path.
+- **Boundary:** This exact window is deliberately only one pointer-owned visual body. Natural `EFFECT_MULTI_HIT` repeats and battle outcome are not retained or owned, so neither the move nor track receives acceptance despite the zero-residual first-body result.
+- **Checks:** Source/evidence/reducer/framebuffer/control/boundary/frontier tests, coverage/audit, typecheck, full test suite, build, and `git diff --check` are required before handoff.
+
 # MOVE_TRICK Item Bag exact production presentation (2026-08-31 worker)
 
 - **State:** Level 50 advances **215→216/276 exact**, remains **0 partial / 0 staged**, and drops **61→60 unsupported**. MOVE_TRICK alone promotes and `trick-item-bags` is fulfilled; MOVE_PRESENT, MOVE_COVET, MOVE_EXTREME_SPEED, MOVE_FAKE_OUT, MOVE_ASTONISH, and MOVE_SAND_TOMB remain independent exact controls with no sibling credit.

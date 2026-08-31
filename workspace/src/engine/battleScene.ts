@@ -984,6 +984,7 @@ import {
   sceneOnEruptionView,
   sceneOnSandTombView,
   sceneOnTrickView,
+  sceneOnRockBlastView,
   sceneOnIceBeamView,
   sceneOnFissureView,
   sceneOnHardenView,
@@ -1076,6 +1077,7 @@ import {
   type SceneOnEruptionConfig,
   type SceneOnSandTombConfig,
   type SceneOnTrickConfig,
+  type SceneOnRockBlastConfig,
   type SceneOnIceBeamConfig,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
@@ -1244,6 +1246,7 @@ import {
   speciesFrontIdleRestOffsetOrZero,
 } from "../animation/speciesIdleAnim.ts";
 import { shakeMonOffsetAtTick } from "../animation/shakeMon.ts";
+import { rockBlastDisplayedTargetOffsetAtAge } from "../animation/rockBlast.ts";
 import {
   rockTombSettledRocksForPainter,
   rockTombTargetDisplayX2,
@@ -14709,6 +14712,159 @@ export function renderSceneOnMovePresentation(
       fb,
       playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "TRICK!",
+      99,
+    );
+    return;
+  }
+  if (state.config.move === "ROCK_BLAST") {
+    const rockBlastState = state as SceneOnMovePresentationState<SceneOnRockBlastConfig>;
+    const view = sceneOnRockBlastView(rockBlastState);
+    // This move's complete bilateral maps independently prove that ordinary
+    // OAM, affine matrices, and OBJ palettes all scan out from the preceding
+    // source row, including the Rock Blast projectile, four fragments,
+    // hitsplat, lunge-written attacker x2, and ShakeMon-written target x2.
+    const displayed = sceneOnRockBlastView({
+      ...rockBlastState,
+      age: rockBlastState.age - 1,
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("ROCK_BLAST presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const battlerArt = (battler: typeof view.attacker): BattlerArt => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species];
+        if (!source) throw new Error(`ROCK_BLAST missing player-back art for ${battler.species}`);
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!source) throw new Error(`ROCK_BLAST missing opponent-front art for ${battler.species}`);
+      return source;
+    };
+    const tilesetFor = (source: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? source.tileset : subTileset(source.tileset, 0, 8);
+    const attackerArt = battlerArt(view.attacker);
+    const targetArt = battlerArt(view.target);
+    const displayedTargetOffset = rockBlastDisplayedTargetOffsetAtAge(view.age);
+    const basicRockCell = (cell: number): Tileset =>
+      subTileset(battleAnimRocks.tileset, cell * 4, 4);
+
+    type DrawObject = Readonly<{
+      subpriority: number;
+      y: number;
+      creationOrder: number;
+      draw: () => void;
+    }>;
+    const objects: DrawObject[] = [
+      {
+        subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+        y: view.attacker.geometry.animationCenter.y + displayed.attackerOffset.y2,
+        creationOrder: -2,
+        draw: () => drawSpriteSheet(
+          fb,
+          tilesetFor(attackerArt, view.attacker.geometry.side),
+          attackerArt.palette,
+          view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+          view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+        ),
+      },
+      {
+        subpriority: view.target.geometry.side === "player" ? 30 : 40,
+        y: view.target.geometry.animationCenter.y + displayedTargetOffset.y2,
+        creationOrder: -1,
+        draw: () => drawSpriteSheet(
+          fb,
+          tilesetFor(targetArt, view.target.geometry.side),
+          targetArt.palette,
+          view.target.geometry.spriteCorner.x + displayedTargetOffset.x2,
+          view.target.geometry.spriteCorner.y + displayedTargetOffset.y2,
+        ),
+      },
+    ];
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "rock") {
+        objects.push({
+          subpriority: sprite.subpriority,
+          y: sprite.y + sprite.y2,
+          creationOrder: sprite.sourceCreationOrder,
+          draw: () => drawSpriteSheetAffineRotate(
+            fb,
+            basicRockCell(sprite.basicRockCell),
+            battleAnimRocks.palette,
+            sprite.x + sprite.x2,
+            sprite.y + sprite.y2,
+            sprite.matrix[0], sprite.matrix[1], sprite.matrix[2], sprite.matrix[3],
+            undefined,
+            false,
+          ),
+        });
+      } else if (sprite.kind === "hitsplat") {
+        objects.push({
+          subpriority: sprite.subpriority,
+          y: sprite.y,
+          creationOrder: sprite.sourceCreationOrder,
+          // Rock Blast never installs a BLDCNT target-2 mask. The ObjBlend
+          // template consequently scans out as its opaque first target.
+          draw: () => drawSpriteSheetAffineRotate(
+            fb,
+            battleAnimHitsplat.tileset,
+            battleAnimHitsplat.palette,
+            sprite.x,
+            sprite.y,
+            sprite.matrix, 0, 0, sprite.matrix,
+            undefined,
+            false,
+          ),
+        });
+      } else {
+        objects.push({
+          subpriority: sprite.subpriority,
+          y: sprite.y + sprite.y2,
+          creationOrder: sprite.sourceCreationOrder,
+          draw: () => drawSpriteSheet(
+            fb,
+            basicRockCell(sprite.basicRockCell),
+            battleAnimRocks.palette,
+            sprite.x + sprite.x2 - 16,
+            sprite.y + sprite.y2 - 16,
+          ),
+        });
+      }
+    }
+    // Reverse BuildSpritePriorities: high subpriority paints first, then low
+    // OAM y, and later creation paints first for stable equal-y ties.
+    objects.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y
+      || right.creationOrder - left.creationOrder);
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    for (const object of objects) object.draw();
+
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = rockBlastState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "ROCK BLAST!",
       99,
     );
     return;

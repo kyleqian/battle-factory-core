@@ -7333,6 +7333,8 @@
       "tools/compare/rockBlastSourceAudit.ts",
       "tools/compare/rockBlastProbe.py",
       "tools/compare/rockBlastEvidence.ts",
+      "tools/compare/rockBlastReducer.ts",
+      "tools/compare/rockBlastFramebuffer.ts",
       "tools/compare/fixtures/rock-blast-evidence.json",
       "tools/compare/evidence/rock-blast-player-dense-state.json.gz",
       "tools/compare/evidence/rock-blast-opponent-dense-state.json.gz",
@@ -7341,9 +7343,11 @@
       "tools/compare/evidence/rock-blast-changemap-player.json",
       "tools/compare/evidence/rock-blast-changemap-opponent.json",
       "tests/animation/rockBlastSourceCheckpoint.test.ts",
-      "tests/animation/rockBlastEvidenceCheckpoint.test.ts"
+      "tests/animation/rockBlastEvidenceCheckpoint.test.ts",
+      "tests/animation/rockBlastReducer.test.ts",
+      "tests/animation/rockBlastFramebuffer.test.ts"
     ],
-    "goal": "UNFULFILLED source/evidence checkpoint only: MOVE_ROCK_BLAST alone has complete legal transient-free Battle Scene ON Rhyhorn/Shuckle three-mon parties in both orientations. Two fresh runs retain and reproduce byte-identically 90 consecutive rows per orientation through the first inactive cleanup (player-back frames 84..173; opponent-front 88..177), including pointer/task/sprite/software+hardware OAM/matrix/faded+hardware palette/tag/register/audio/party/engine/RNG/raw-RGB rows and normalized maps. The receipt deliberately owns one first pointer body only: EFFECT_MULTI_HIT repeats and battle outcome are excluded. Ordinary OAM/matrix/palette predecessor latches hold 89/89 bilaterally; the source has ANIM_TAG_ROCKS, ANIM_TAG_IMPACT, lunge, Rock Blast rock, fragments, hitsplat, and ShakeMon. Existing ROCKS source identity is audited, but BasicRock cells 0/1/5 remain undecoded and no production art, reducer, typed seam, compositor, or framebuffer comparison is added. Do not promote MOVE_ROCK_BLAST or any component/control until a generic live core.ts to renderSceneOnMovePresentation path reaches zero residual on every retained row twice without an evidence pair, recording/RGB/framebuffer lookup, absolute tick, coordinate fitting, or gameplay ownership. MOVE_ROCK_THROW, MOVE_ROCK_TOMB, and MOVE_ANCIENT_POWER remain independent exact controls only."
+    "goal": "UNFULFILLED stronger first-body production checkpoint only: MOVE_ROCK_BLAST has a source-derived reducer, decoded shared BasicRock cells 0..5 (including formerly missing 0/1/5), narrow typed Scene-ON seam, and generic production compositor using live sides/species/geometry/allocator facts plus shared ROCKS/IMPACT identities, battler art, chrome, horizontal lunge, fragments, hitsplat, and its measured ShakeMon transfer. Actual core.ts -> renderSceneOnMovePresentation equality is 90/90 player-back plus 90/90 opponent-front with zero residual pixels on two deterministic passes, through the first inactive cleanup; the retained legal Rhyhorn/Shuckle evidence remains twice-fresh byte-identical. This is deliberately only one pointer-owned body: natural EFFECT_MULTI_HIT repeats and the battle outcome are not retained or owned, so MOVE_ROCK_BLAST remains unsupported and this track remains unfulfilled despite exact 180-row first-body production output. No evidence/species pair gate, recording/RGB/framebuffer lookup, absolute tick, coordinate fitting, gameplay ownership, or control promotion exists. MOVE_ROCK_THROW, MOVE_ROCK_TOMB, and MOVE_ANCIENT_POWER remain independent exact controls only."
   }
  ],
  "variantAudits": {

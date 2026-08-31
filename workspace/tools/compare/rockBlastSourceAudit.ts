@@ -157,9 +157,10 @@ if (
   || legalCarriers.length !== 2
   || JSON.stringify(legalCarriers.map((entry: { index: number }) => entry.index)) !== JSON.stringify([133, 256])
   || existingRocksAsset.source !== "graphics/battle_anims/sprites/rocks.png (src/graphics.c:203-204, ANIM_TAG_ROCKS)"
-  || JSON.stringify(existingRocksAsset.otherRockFramesNeedsOnly) !== JSON.stringify({
-    note: "frames 0,1,5 belong to other rock-move templates in the same file (ROCK_TOMB/ROCK_BLAST family) - out of scope for ROCK_SLIDE/DOUBLE_TEAM, not decoded this session",
-    frames: [0, 1, 5],
+  || JSON.stringify(existingRocksAsset.basicRockAnims) !== JSON.stringify({
+    source: "src/battle_anim_rock.c:145-190 (sAnims_BasicRock)",
+    cells: [0, 1, 2, 3, 4, 5],
+    tileRowOffsets: [0, 4, 8, 12, 16, 20],
   })
   || status("MOVE_ROCK_BLAST") !== undefined
   || rockBlastTrack?.fulfilled !== false
@@ -187,8 +188,8 @@ console.log(JSON.stringify({
     ownership: "Evidence captures one first pointer-owned Move_ROCK_BLAST body through its first inactive cleanup; later hit bodies and battle outcome are excluded.",
   },
   artIdentity: {
-    rocks: "existing battle-anim-rocks.json is the same ANIM_TAG_ROCKS source asset, but its BasicRock cells 0/1/5 remain explicitly undecoded; no production art is reused by this checkpoint",
-    impact: "ANIM_TAG_IMPACT is source-identified only; no production compositor is added",
+    rocks: "battle-anim-rocks.json is the shared ANIM_TAG_ROCKS source asset; sAnims_BasicRock cells 0..5 map to tile rows 0,4,8,12,16,20, decoding the formerly missing cells 0/1/5",
+    impact: "ANIM_TAG_IMPACT retains its existing source-derived production identity",
   },
   checkpoint: { coverageEntry: null, derivedStatus: "unsupported", track: "rock-blast-first-body", fulfilled: false },
   controls: {

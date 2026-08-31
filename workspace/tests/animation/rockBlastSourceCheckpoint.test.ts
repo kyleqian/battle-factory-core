@@ -30,8 +30,8 @@ describe("MOVE_ROCK_BLAST source/staging checkpoint", () => {
         ownership: "Evidence captures one first pointer-owned Move_ROCK_BLAST body through its first inactive cleanup; later hit bodies and battle outcome are excluded.",
       },
       artIdentity: {
-        rocks: "existing battle-anim-rocks.json is the same ANIM_TAG_ROCKS source asset, but its BasicRock cells 0/1/5 remain explicitly undecoded; no production art is reused by this checkpoint",
-        impact: "ANIM_TAG_IMPACT is source-identified only; no production compositor is added",
+        rocks: "battle-anim-rocks.json is the shared ANIM_TAG_ROCKS source asset; sAnims_BasicRock cells 0..5 map to tile rows 0,4,8,12,16,20, decoding the formerly missing cells 0/1/5",
+        impact: "ANIM_TAG_IMPACT retains its existing source-derived production identity",
       },
       checkpoint: { coverageEntry: null, derivedStatus: "unsupported", track: "rock-blast-first-body", fulfilled: false },
       controls: {

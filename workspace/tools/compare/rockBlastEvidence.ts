@@ -289,20 +289,22 @@ function bank(args: readonly string[]): void {
     schema: "rock-blast-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_ROCK_BLAST", moveId: 350,
     status: "checkpoint", coverageCredit: false,
     evidenceScope: {
-      sourceAudit: true, completeFirstPointerBodyOnly: true, productionAnimationChanged: false,
-      reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false,
+      sourceAudit: true, completeFirstPointerBodyOnly: true, productionAnimationChanged: true,
+      reducerAdded: true, typedSeamAdded: true, compositorAdded: true, framebufferCompared: true,
       coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false,
       fullDenseRowsRetained: true, twiceFreshByteIdentical: true,
     },
     acceptance: {
       freshRunsPerOrientation: 2, firstInactiveCleanupRetained: true,
       denseRows: { "player-back": 90, "opponent-front": 90 }, rawRgbRows: { "player-back": 90, "opponent-front": 90 },
-      normalizedChangeMaps: true, productionFramebufferRows: 0, productionFramebufferResidualPixels: null,
+      normalizedChangeMaps: true, productionFramebufferRows: 180, productionFramebufferResidualPixels: 0,
     },
     source: {
       audit: "tools/compare/rockBlastSourceAudit.ts", auditSha256: sha(readFileSync(resolve(root, "tools/compare/rockBlastSourceAudit.ts"))),
       probe: "tools/compare/rockBlastProbe.py", probeSha256: sha(readFileSync(resolve(root, "tools/compare/rockBlastProbe.py"))),
       evidenceVerifier: "tools/compare/rockBlastEvidence.ts", evidenceVerifierSha256: sha(readFileSync(resolve(root, "tools/compare/rockBlastEvidence.ts"))),
+      reducer: "tools/compare/rockBlastReducer.ts", reducerSha256: sha(readFileSync(resolve(root, "tools/compare/rockBlastReducer.ts"))),
+      framebuffer: "tools/compare/rockBlastFramebuffer.ts", framebufferSha256: sha(readFileSync(resolve(root, "tools/compare/rockBlastFramebuffer.ts"))),
     },
     orientations: { "player-back": player, "opponent-front": opponent },
     controls: { independent: ["MOVE_ROCK_THROW", "MOVE_ROCK_TOMB", "MOVE_ANCIENT_POWER"], statusesChanged: false },
@@ -316,14 +318,17 @@ export function verifyRockBlastEvidence(): Json {
   invariant(receipt.schema === "rock-blast-bilateral-evidence/v1" && receipt.oracleProfile === "battle-scene-on"
     && receipt.move === "MOVE_ROCK_BLAST" && receipt.moveId === 350 && receipt.status === "checkpoint" && receipt.coverageCredit === false,
   "Rock Blast receipt identity/credit drift");
-  invariant(receipt.evidenceScope.completeFirstPointerBodyOnly && !receipt.evidenceScope.productionAnimationChanged
-    && !receipt.evidenceScope.reducerAdded && !receipt.evidenceScope.typedSeamAdded && !receipt.evidenceScope.compositorAdded
-    && !receipt.evidenceScope.framebufferCompared && receipt.acceptance.productionFramebufferRows === 0,
-  "Rock Blast checkpoint must not imply reducer/seam/compositor/framebuffer acceptance");
+  invariant(receipt.evidenceScope.completeFirstPointerBodyOnly && receipt.evidenceScope.productionAnimationChanged
+    && receipt.evidenceScope.reducerAdded && receipt.evidenceScope.typedSeamAdded && receipt.evidenceScope.compositorAdded
+    && receipt.evidenceScope.framebufferCompared && !receipt.evidenceScope.coveragePromotion
+    && receipt.acceptance.productionFramebufferRows === 180 && receipt.acceptance.productionFramebufferResidualPixels === 0,
+  "Rock Blast stronger unsupported production checkpoint drift");
   for (const [path, expected] of [
     [receipt.source.audit, receipt.source.auditSha256],
     [receipt.source.probe, receipt.source.probeSha256],
     [receipt.source.evidenceVerifier, receipt.source.evidenceVerifierSha256],
+    [receipt.source.reducer, receipt.source.reducerSha256],
+    [receipt.source.framebuffer, receipt.source.framebufferSha256],
   ] as const) invariant(sha(readFileSync(resolve(root, path))) === expected, `${path}: source receipt drift`);
   const result: Json = {};
   for (const side of sides) {

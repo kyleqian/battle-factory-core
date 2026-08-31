@@ -8,11 +8,11 @@
   "evidenceScope": {
     "sourceAudit": true,
     "completeFirstPointerBodyOnly": true,
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
-    "framebufferCompared": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "framebufferCompared": true,
     "coveragePromotion": false,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false,
@@ -31,16 +31,20 @@
       "opponent-front": 90
     },
     "normalizedChangeMaps": true,
-    "productionFramebufferRows": 0,
-    "productionFramebufferResidualPixels": null
+    "productionFramebufferRows": 180,
+    "productionFramebufferResidualPixels": 0
   },
   "source": {
     "audit": "tools/compare/rockBlastSourceAudit.ts",
-    "auditSha256": "b536ea1773576a4f065be508ca2dc66fd7dde9e15e5ddb1495730301f83de8e6",
+    "auditSha256": "22d10bb64f4e43dc47695fdf6166417028958971f711d2206ca094373e0deda8",
     "probe": "tools/compare/rockBlastProbe.py",
     "probeSha256": "bd1d211c43af371f27afb26767e1d6474d9b1fa336a6310dd2a3d9bf7690ca16",
     "evidenceVerifier": "tools/compare/rockBlastEvidence.ts",
-    "evidenceVerifierSha256": "5e3bea51370a767fea7011194209e5bbc5359f290d6aacad28d110e0b2887640"
+    "evidenceVerifierSha256": "cf95f2bee06043eacd798b83d617b6284e9034cbb37e8a8cad4b462dea7c3f79",
+    "reducer": "tools/compare/rockBlastReducer.ts",
+    "reducerSha256": "318a9563bd64da67406ff5d5d6eece2614de3ec95d180ce24984a45c39205d35",
+    "framebuffer": "tools/compare/rockBlastFramebuffer.ts",
+    "framebufferSha256": "380fa875333131a8ad34c01a9478d89406a8f16220cf64753a1811d113034ec8"
   },
   "orientations": {
     "player-back": {

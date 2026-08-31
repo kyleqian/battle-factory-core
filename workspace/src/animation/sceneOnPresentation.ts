@@ -785,6 +785,11 @@ import {
   type TrickFrame,
 } from "./trick.ts";
 import {
+  rockBlastAtAge,
+  type RockBlastAnimationProfile,
+  type RockBlastFrame,
+} from "./rockBlast.ts";
+import {
   iceBeamAtAge,
   type IceBeamAnimationProfile,
   type IceBeamFrame,
@@ -3040,6 +3045,16 @@ export interface SceneOnTrickConfig {
   readonly animationProfile: Readonly<TrickAnimationProfile>;
 }
 
+/** One pointer-owned Rock Blast visual body; multi-hit resolution is external. */
+export interface SceneOnRockBlastConfig {
+  readonly move: "ROCK_BLAST";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live geometry and allocator facts only; never a retained-pair selector. */
+  readonly animationProfile: Readonly<RockBlastAnimationProfile>;
+}
+
 /** Narrow Scene-ON seam for the source-relative Ice Beam reducer/compositor. */
 export interface SceneOnIceBeamConfig {
   readonly move: "ICE_BEAM";
@@ -3549,6 +3564,7 @@ export type SceneOnMoveConfig =
   | SceneOnEruptionConfig
   | SceneOnSandTombConfig
   | SceneOnTrickConfig
+  | SceneOnRockBlastConfig
   | SceneOnIceBeamConfig
   | SceneOnFissureConfig
   | SceneOnHardenConfig
@@ -3609,6 +3625,8 @@ export type SceneOnSandTombPresentationState =
   SceneOnMovePresentationState<SceneOnSandTombConfig>;
 export type SceneOnTrickPresentationState =
   SceneOnMovePresentationState<SceneOnTrickConfig>;
+export type SceneOnRockBlastPresentationState =
+  SceneOnMovePresentationState<SceneOnRockBlastConfig>;
 export type SceneOnIceBeamPresentationState =
   SceneOnMovePresentationState<SceneOnIceBeamConfig>;
 export type SceneOnDizzyPunchPresentationState =
@@ -4571,6 +4589,11 @@ export interface SceneOnSandTombView extends SandTombFrame {
 }
 
 export interface SceneOnTrickView extends TrickFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRockBlastView extends RockBlastFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -9125,6 +9148,20 @@ export function sceneOnTrickView(
   }
   return {
     ...trickAtAge(state.age, state.config.animationProfile),
+    attacker: state.config.attacker,
+    target: state.config.target,
+  };
+}
+
+/** `age=0` is Move_ROCK_BLAST's pointer-owned ROCKS load row. */
+export function sceneOnRockBlastView(
+  state: SceneOnRockBlastPresentationState,
+): SceneOnRockBlastView {
+  if (state.config.move !== "ROCK_BLAST") {
+    throw new Error(`expected ROCK_BLAST presentation, got ${state.config.move}`);
+  }
+  return {
+    ...rockBlastAtAge(state.age, state.config.animationProfile),
     attacker: state.config.attacker,
     target: state.config.target,
   };
