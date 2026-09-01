@@ -46,10 +46,10 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
     expect(second).toMatchObject({ x: 86, y: 90, x2: 4, y2: -1, frame: 1, hFlip: true, vFlip: false });
     const third = razorWindAtAge(18, "unleash", "player", geometry, profile).sprites[2];
     expect(third).toMatchObject({ x: 86, y: 110, x2: 3, y2: -3, frame: 0 });
-    expect(razorWindAtAge(33, "unleash", "player", geometry, profile).sprites[0]).toMatchObject({
+    expect(razorWindAtAge(32, "unleash", "player", geometry, profile).sprites[0]).toMatchObject({
       callback: "DestroyAnimSprite", x2: 89, y2: -64,
     });
-    expect(razorWindAtAge(34, "unleash", "player", geometry, profile).sprites.some((sprite) => sprite.index === 0)).toBe(false);
+    expect(razorWindAtAge(33, "unleash", "player", geometry, profile).sprites.some((sprite) => sprite.index === 0)).toBe(false);
     const opponent = razorWindAtAge(10, "unleash", "opponent", {
       ...geometry,
       attackerPositionCenter: { x: 176, y: 40 },
@@ -66,9 +66,9 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
     expect(at10.registers).toEqual({ monbg: true, alpha: [12, 8] });
     expect(razorWindAtAge(55, "unleash", "player", geometry, profile).registers.alpha).toEqual([12, 8]);
     expect(razorWindAtAge(56, "unleash", "player", geometry, profile).registers.alpha).toBeNull();
-    expect(razorWindAtAge(37, "unleash", "player", geometry, profile).targetOffset).toEqual({ x2: 2, y2: 0 });
+    expect(razorWindAtAge(37, "unleash", "player", geometry, profile).targetOffset).toEqual({ x2: -2, y2: 0 });
     expect(razorWindAtAge(38, "unleash", "player", geometry, profile).targetOffset).toEqual({ x2: -2, y2: 0 });
-    expect(razorWindAtAge(59, "unleash", "player", geometry, profile).cleanup).toMatchObject({ clearmonbg: true, blendoff: true });
+    expect(razorWindAtAge(56, "unleash", "player", geometry, profile).cleanup).toMatchObject({ clearmonbg: true, blendoff: true });
   });
 
   it("uses live geometry, slots, matrices, and order through the typed seam", () => {
@@ -116,5 +116,43 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
     expect(setupFramebuffer.some((value) => value !== 0)).toBe(true);
     expect(unleashFramebuffer.some((value) => value !== 0)).toBe(true);
     expect(unleashFramebuffer).not.toEqual(setupFramebuffer);
+
+    const reversed = createSceneOnMovePresentation({
+      ...stage.config,
+      attacker: {
+        species: "WINGULL",
+        geometry: {
+          side: "opponent", spriteCorner: { x: 141, y: 12 },
+          animationCenter: { x: 173, y: 44 }, battlePositionCenter: { x: 173, y: 39 },
+        },
+      },
+      target: {
+        species: "ABSOL",
+        geometry: {
+          side: "player", spriteCorner: { x: 38, y: 55 },
+          animationCenter: { x: 70, y: 87 }, battlePositionCenter: { x: 70, y: 79 },
+        },
+      },
+      attackerPictureCenter: { x: 173, y: 47 },
+      targetPictureCenter: { x: 70, y: 91 },
+      animationProfile: {
+        tornadoSpriteSlots: [12, 13, 14], tornadoMatrixIds: [20, 21, 22],
+        crescentSpriteSlots: [14, 12, 13], crescentMatrixIds: [25, 26, 27],
+        spriteOrderSeed: [14, 12, 13], effectPriority: 1, effectSubpriority: 37,
+      },
+    });
+    const reversedView = sceneOnRazorWindView({ ...reversed, age: 10 });
+    expect(reversedView).toMatchObject({
+      attacker: { species: "WINGULL", geometry: { side: "opponent" } },
+      target: { species: "ABSOL", geometry: { side: "player" } },
+      sprites: [
+        { slot: 12, matrixId: 20 }, { slot: 13, matrixId: 21 },
+        { slot: 14, matrixId: 22 },
+      ],
+    });
+    expect(renderSceneOnMovePresentation(
+      new Uint8Array(240 * 160 * 4),
+      { ...reversed, age: 10 },
+    )).toBeUndefined();
   });
 });

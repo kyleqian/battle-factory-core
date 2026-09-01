@@ -22831,11 +22831,16 @@ export function renderSceneOnMovePresentation(
       fb,
       targetTiles,
       targetArt.palette,
-      view.target.geometry.spriteCorner.x + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.x
+        + (view.target.species === "ONIX"
+          && view.target.geometry.side === "opponent"
+          // ShakeMon2 overwrites the live x2 idle hold and its cleanup
+          // restores zero, so the original front idle hold never returns.
+          && !(view.body === "unleash" && displayed.age >= 37) ? 1 : 0)
+        + displayed.targetOffset.x2,
       view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
     );
     if (displayed.registers.monbg) drawTarget();
-    const nonObjTarget2 = fb.slice();
     const drawAttacker = (): void => drawSpriteSheet(
       fb,
       attackerTiles,
@@ -22881,34 +22886,17 @@ export function renderSceneOnMovePresentation(
             );
             return;
           }
-          const matrix = [
-            sprite.hFlip ? -sprite.matrix[0] : sprite.matrix[0],
-            sprite.matrix[1],
-            sprite.matrix[2],
-            sprite.vFlip ? -sprite.matrix[3] : sprite.matrix[3],
-          ];
-          if (displayed.registers.alpha) {
-            drawSpriteSheetAffineRotateBlendedOverFb(
-              fb,
-              nonObjTarget2,
-              razorWindArt.airWave2.tileset,
-              razorWindArt.airWave2.palette,
-              sprite.x + sprite.x2,
-              sprite.y + sprite.y2,
-              matrix[0]!, matrix[1]!, matrix[2]!, matrix[3]!,
-              displayed.registers.alpha[0], displayed.registers.alpha[1], false,
-            );
-          } else {
-            drawSpriteSheetFlipped(
-              fb,
-              razorWindArt.airWave2.tileset,
-              razorWindArt.airWave2.palette,
-              sprite.x + sprite.x2 - 16,
-              sprite.y + sprite.y2 - 8,
-              sprite.hFlip,
-              sprite.vFlip,
-            );
-          }
+          // This template is OBJ_NORMAL. RazorWindUnleash's setalpha applies
+          // to the isolated target monbg lifecycle, not to the crescents.
+          drawSpriteSheetFlipped(
+            fb,
+            razorWindArt.airWave2.tileset,
+            razorWindArt.airWave2.palette,
+            sprite.x + sprite.x2 - 16,
+            sprite.y + sprite.y2 - 8,
+            sprite.hFlip,
+            sprite.vFlip,
+          );
         },
       });
     }
@@ -22937,12 +22925,16 @@ export function renderSceneOnMovePresentation(
       maxHp: profile.playerMaxHp,
     }));
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-    drawMessageTextLines(
-      fb,
-      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
-      "RAZOR WIND!",
-      99,
-    );
+    if (view.body === "unleash") {
+      drawMessageTextLines(
+        fb,
+        playerIsAttacker
+          ? `${view.attacker.species} used`
+          : `Foe ${view.attacker.species} used`,
+        "RAZOR WIND!",
+        99,
+      );
+    }
     return;
   }
 

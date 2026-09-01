@@ -12,28 +12,30 @@ const inspectRazorWindFramebuffer = (): any[] => JSON.parse(execFileSync(
 describe("MOVE_RAZOR_WIND actual-core residual diagnostic", () => {
   it("reproduces and classifies every retained setup and unleash row", () => {
     const result = inspectRazorWindFramebuffer();
+    expect(inspectRazorWindFramebuffer()).toEqual(result);
     expect(result.map(({ orientation, totalRows, zeroRows, residualPixels,
-      peakResidualPixels, bodies }) => ({ orientation, totalRows, zeroRows,
-      residualPixels, peakResidualPixels, bodies }))).toEqual([
+      peakResidualPixels, componentExactRows, bodies, failures }) => ({ orientation,
+      totalRows, zeroRows, residualPixels, peakResidualPixels, componentExactRows,
+      bodies, failures }))).toEqual([
       {
-        orientation: "player-back", totalRows: 119, zeroRows: 24,
-        residualPixels: 161321, peakResidualPixels: 3275,
+        orientation: "player-back", totalRows: 119, zeroRows: 119,
+        residualPixels: 0, peakResidualPixels: 0, componentExactRows: 119,
         bodies: {
-          setup: { rows: 46, zeroRows: expect.any(Number), residualPixels: expect.any(Number),
-            peakResidualPixels: expect.any(Number), componentExactRows: expect.any(Number) },
-          unleash: { rows: 73, zeroRows: expect.any(Number), residualPixels: expect.any(Number),
-            peakResidualPixels: expect.any(Number), componentExactRows: expect.any(Number) },
-        },
+          setup: { rows: 46, zeroRows: 46, residualPixels: 0,
+            peakResidualPixels: 0, componentExactRows: 46 },
+          unleash: { rows: 73, zeroRows: 73, residualPixels: 0,
+            peakResidualPixels: 0, componentExactRows: 73 },
+        }, failures: [],
       },
       {
-        orientation: "opponent-front", totalRows: 119, zeroRows: 35,
-        residualPixels: 72138, peakResidualPixels: 2586,
+        orientation: "opponent-front", totalRows: 119, zeroRows: 119,
+        residualPixels: 0, peakResidualPixels: 0, componentExactRows: 119,
         bodies: {
-          setup: { rows: 46, zeroRows: expect.any(Number), residualPixels: expect.any(Number),
-            peakResidualPixels: expect.any(Number), componentExactRows: expect.any(Number) },
-          unleash: { rows: 73, zeroRows: expect.any(Number), residualPixels: expect.any(Number),
-            peakResidualPixels: expect.any(Number), componentExactRows: expect.any(Number) },
-        },
+          setup: { rows: 46, zeroRows: 46, residualPixels: 0,
+            peakResidualPixels: 0, componentExactRows: 46 },
+          unleash: { rows: 73, zeroRows: 73, residualPixels: 0,
+            peakResidualPixels: 0, componentExactRows: 73 },
+        }, failures: [],
       },
     ]);
     for (const orientation of result) {

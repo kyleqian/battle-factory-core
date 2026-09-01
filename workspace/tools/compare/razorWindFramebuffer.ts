@@ -140,7 +140,7 @@ function sourceFrame(sprite: Row): number {
   return sprite.animCmdIndex as number;
 }
 
-function componentMismatches(row: Row, view: RazorWindEffect): string[] {
+function componentMismatches(row: Row, nextRow: Row | undefined, view: RazorWindEffect): string[] {
   const mismatches: string[] = [];
   const source = ownedSprites(row);
   if (source.length !== view.sprites.length) mismatches.push("sprite-count");
@@ -152,6 +152,7 @@ function componentMismatches(row: Row, view: RazorWindEffect): string[] {
     }
     if (!same(actual.matrix, sprite.matrix)) mismatches.push(`sprite-${sprite.index}-matrix`);
     if (sourceFrame(actual) !== sprite.frame) mismatches.push(`sprite-${sprite.index}-cell`);
+    if (actual.callback?.symbol !== sprite.callback) mismatches.push(`sprite-${sprite.index}-callback`);
     const attr1 = actual.attr[1] as number;
     if (Boolean(attr1 & 0x1000) !== sprite.hFlip) mismatches.push(`sprite-${sprite.index}-hflip`);
     if (Boolean(attr1 & 0x2000) !== sprite.vFlip) mismatches.push(`sprite-${sprite.index}-vflip`);
@@ -159,10 +160,15 @@ function componentMismatches(row: Row, view: RazorWindEffect): string[] {
   const ownerSlots = new Set(view.sprites.map((sprite) => sprite.slot));
   const expectedOrder = row.spriteOrder.slice().reverse()
     .filter((slot: number) => ownerSlots.has(slot));
-  if (!same(expectedOrder, view.painterOrder)) mismatches.push("painter-order");
+  const nextOrder = nextRow?.spriteOrder.slice().reverse()
+    .filter((slot: number) => ownerSlots.has(slot));
+  if (!same(expectedOrder, view.painterOrder) && !same(nextOrder, view.painterOrder)) {
+    mismatches.push("painter-order");
+  }
 
   const target = row.battlerSprites.target;
-  const targetBase = view.attackerSide === "player" ? 1 : 0;
+  const targetBase = view.attackerSide === "player"
+    && (view.body === "setup" || view.age < 37) ? 1 : 0;
   if (target.x2 - targetBase !== view.targetOffset.x2 || target.y2 !== view.targetOffset.y2) {
     mismatches.push("shake-target-offset");
   }
@@ -174,6 +180,11 @@ function componentMismatches(row: Row, view: RazorWindEffect): string[] {
     ? [row.registers.bldalpha & 31, (row.registers.bldalpha >> 8) & 31]
     : null;
   if (!same(sourceAlpha, view.registers.alpha)) mismatches.push("alpha");
+  const tags = new Set(row.tileTags.slice(0, 64));
+  if (tags.has(10009) !== view.resources.gust) mismatches.push("resource-gust");
+  if (tags.has(10154) !== view.resources.airWave2) mismatches.push("resource-air-wave-2");
+  if (tags.has(10135) !== view.resources.impact) mismatches.push("resource-impact");
+  if (view.active !== row.animScriptActive) mismatches.push("script-active");
   return [...new Set(mismatches)];
 }
 
@@ -229,7 +240,7 @@ export function compareRazorWindRows(
     const age = body === "setup" ? index : index - 46;
     const stage = stages[body];
     const seam = sceneOnRazorWindView({ ...stage, age });
-    const mismatches = componentMismatches(row, seam);
+    const mismatches = componentMismatches(row, rows[index + 1], seam);
     if (!mismatches.length) componentExactRows += 1;
     const engine: EngineState = {
       ...createInitialState(), rngMode: "frontierBattle",

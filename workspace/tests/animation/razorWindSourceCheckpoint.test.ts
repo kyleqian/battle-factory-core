@@ -48,10 +48,11 @@ describe("MOVE_RAZOR_WIND source/legal staging checkpoint", () => {
     }
   });
 
-  it("keeps Razor Wind unsupported and denies sibling inference", () => {
+  it("promotes Razor Wind alone and denies sibling inference", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8"));
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_RAZOR_WIND")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: any) => track.id === "razor-wind-two-turn-air-wave")).toMatchObject({ components, representatives: ["MOVE_RAZOR_WIND"], fulfilled: false });
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_RAZOR_WIND"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: any) => track.id === "razor-wind-two-turn-air-wave")).toMatchObject({ components, representatives: ["MOVE_RAZOR_WIND"], fulfilled: true });
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_AEROBLAST")).toBeUndefined();
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_SONIC_BOOM").status).toBe("exact");
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_STEEL_WING").status).toBe("exact");

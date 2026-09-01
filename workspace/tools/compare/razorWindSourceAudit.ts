@@ -96,13 +96,14 @@ const ranges = policy.rentalSelection.ranges.level50 as Array<{ start: number; e
 const carriers = frontier.entries.filter((entry: any) => ranges.some((range) => entry.index >= range.start && entry.index <= range.end)
   && entry.moves.includes("MOVE_RAZOR_WIND"));
 const track = coverage.componentTracks.find((entry: any) => entry.id === "razor-wind-two-turn-air-wave");
+const accepted = coverage.entries.find((entry: any) => entry.move === "MOVE_RAZOR_WIND");
 if (move?.id !== 13 || move?.frontierMonCount !== 2 || JSON.stringify(move.exampleMons) !== JSON.stringify(["FRONTIER_MON_NUZLEAF", "FRONTIER_MON_ABSOL_1"])
   || outsideAeroblast?.frontierMonCount !== 0 || !sameSet(graphMove?.componentIds, components)
   || JSON.stringify(graphMove?.blocks) !== JSON.stringify(["Move_RAZOR_WIND", "RazorWindSetUp", "RazorWindUnleash", "RazorWindEnd"])
   || carriers.length !== 2 || carriers[0]?.index !== 130 || carriers[0]?.label !== "FRONTIER_MON_NUZLEAF"
   || carriers[1]?.index !== 247 || carriers[1]?.label !== "FRONTIER_MON_ABSOL_1"
-  || !track || track.fulfilled !== false || JSON.stringify(track.components) !== JSON.stringify(components)
-  || coverage.entries.some((entry: any) => entry.move === "MOVE_RAZOR_WIND")) throw new Error("Razor Wind inventory/coverage boundary drifted");
+  || !track || track.fulfilled !== true || JSON.stringify(track.components) !== JSON.stringify(components)
+  || accepted?.status !== "exact") throw new Error("Razor Wind inventory/coverage boundary drifted");
 
 const nm = execFileSync("arm-none-eabi-nm", ["-a", "-S", resolve(root, "reference/pokeemerald/pokeemerald.elf")], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
 const address = (symbol: string): number => {

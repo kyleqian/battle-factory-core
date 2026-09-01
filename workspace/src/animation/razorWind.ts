@@ -58,7 +58,7 @@ export interface RazorWindSprite {
   readonly hFlip: boolean;
   readonly vFlip: boolean;
   readonly subpriority: number;
-  readonly callback: "TranslateSpriteInCircle" | "StartAnimLinearTranslation" | "DestroyAnimSprite";
+  readonly callback: "TranslateSpriteInCircle" | "AnimTranslateLinear_WithFollowup" | "DestroyAnimSprite";
 }
 
 export interface RazorWindEffect {
@@ -157,7 +157,9 @@ function tornadoAtAge(
   const sprites: RazorWindSprite[] = [];
   for (let index = 0 as 0 | 1 | 2; index < 3; index = (index + 1) as 0 | 1 | 2) {
     const initialAngle = index * 85;
-    const phase = initialAngle + 7 * (local + 1);
+    // The terminal callback swaps to DestroyAnimSprite after the affine
+    // scale step, without running one more circle-position callback.
+    const phase = initialAngle + 7 * Math.min(local + 1, 39);
     const scale = Math.floor(65536 / (16 + 4 * (local + 1)));
     sprites.push({
       kind: "tornado", index, slot: profile.tornadoSpriteSlots[index],
@@ -166,7 +168,7 @@ function tornadoAtAge(
       x2: signedSine(phase, 16), y2: signedSine(phase + 64, 16),
       matrix: [scale, 0, 0, 256], frame: 0, hFlip: false, vFlip: false,
       subpriority: profile.effectSubpriority ?? (side === "player" ? 28 : 38),
-      callback: "TranslateSpriteInCircle",
+      callback: local === 39 ? "DestroyAnimSprite" : "TranslateSpriteInCircle",
     });
   }
   return sprites;
@@ -189,7 +191,7 @@ function crescentAtAge(
   for (let index = 0 as 0 | 1 | 2; index < 3; index = (index + 1) as 0 | 1 | 2) {
     const spawnAge = 10 + index * 4;
     const local = age - spawnAge;
-    if (local < 0 || local > 23) continue;
+    if (local < 0 || local > 22) continue;
     const args = CRESCENT_ARGS[index];
     const startX = geometry.attackerPictureCenter.x + sign * 14;
     const startY = geometry.attackerPictureCenter.y + sign * args.startY;
@@ -210,7 +212,7 @@ function crescentAtAge(
       matrix: [256, 0, 0, 256], frame,
       hFlip: frame === 1 || frame === 3, vFlip: frame === 2 || frame === 3,
       subpriority: profile.effectSubpriority ?? (side === "player" ? 28 : 38),
-      callback: local === 23 ? "DestroyAnimSprite" : "StartAnimLinearTranslation",
+      callback: local === 22 ? "DestroyAnimSprite" : "AnimTranslateLinear_WithFollowup",
     });
   }
   return sprites;
@@ -235,7 +237,7 @@ function commonState(
   body: RazorWindBody,
   side: RazorWindSide,
   sprites: readonly RazorWindSprite[],
-  profile: Readonly<RazorWindAnimationProfile>,
+  painterOrder: readonly number[],
 ): RazorWindEffect {
   const lastAge = body === "setup"
     ? RAZOR_WIND_SETUP_LAST_AGE : RAZOR_WIND_UNLEASH_LAST_AGE;
@@ -243,7 +245,7 @@ function commonState(
   const taskActive = body === "unleash" && age >= 37 && age <= 54;
   return {
     body, age, active: age >= 0 && age < lastAge, attackerSide: side,
-    sprites, painterOrder: orderedSprites(sprites, profile),
+    sprites, painterOrder,
     resources: {
       gust: body === "setup" && age >= 1 && age <= 44,
       airWave2: body === "unleash" && age >= 1 && age <= 71,
@@ -251,19 +253,21 @@ function commonState(
       freed: body === "unleash" ? age >= 72 : age >= 45,
     },
     registers: {
-      monbg: body === "unleash" && age >= 7 && age <= 58,
+      monbg: body === "unleash" && age >= 7 && age <= 55,
       alpha: body === "unleash" && age >= 10 && age <= 55 ? [12, 8] : null,
     },
     targetOffset: taskActive
-      ? shakeMon2OffsetAtTick(2, 0, 10, 1, age - 37)
+      // createvisualtask immediately invokes the callback once after setup;
+      // the first retained source row therefore observes sequence tick 1.
+      ? shakeMon2OffsetAtTick(2, 0, 10, 1, age - 36)
       : { x2: 0, y2: 0 },
     shakeTask: taskActive ? {
       active: true, target: "ANIM_TARGET", localAge: age - 37,
       callback: "AnimTask_ShakeMon2_Step",
     } : null,
     cleanup: {
-      clearmonbg: body === "unleash" && age >= 59,
-      blendoff: body === "unleash" && age >= 59,
+      clearmonbg: body === "unleash" && age >= 56,
+      blendoff: body === "unleash" && age >= 56,
       firstInactive,
     },
   };
@@ -283,5 +287,11 @@ export function razorWindAtAge(
   const sprites = body === "setup"
     ? tornadoAtAge(age, attackerSide, geometry, profile)
     : crescentAtAge(age, attackerSide, geometry, profile);
-  return commonState(age, body, attackerSide, sprites, profile);
+  return commonState(
+    age,
+    body,
+    attackerSide,
+    sprites,
+    orderedSprites(sprites, profile),
+  );
 }

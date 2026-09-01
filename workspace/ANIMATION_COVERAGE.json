@@ -2,6 +2,42 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_RAZOR_WIND",
+   "status": "exact",
+   "covered": [
+    "both natural two-turn bodies are retained through first inactive cleanup in both ordinary Battle Scene ON orientations: 46 setup plus 73 unleash rows per orientation, with twice-fresh byte-identical dense-state and chronological raw-RGB receipts",
+    "the pure source-relative reducer and narrow typed seam reproduce all 238 retained callback/state rows: tornado affine/circle/terminal callback, three Q8.8 crescent paths/cells/flips/destruction callbacks, persistent painter transfer order, ShakeMon2 immediate callback cadence, monbg/alpha/cleanup, resources, and first inactive cleanup",
+    "ordinary OAM and matrices are RAM+1 on 45/45 setup and 72/72 unleash transitions per orientation; palette is RAM+1 on 45/45 setup and 71/72 unleash transitions with the independently retained age-7 monbg same-row exception",
+    "the generic actual core.ts to renderSceneOnMovePresentation compositor consumes live species, sides, battler and picture geometry, allocator slots and matrices, persistent order, field chrome, ordinary OBJ crescent mode, Onix front-idle overwrite by ShakeMon2, and source cleanup without a carrier gate, recording/framebuffer lookup, absolute tick, or coordinate/RGB fit",
+    "two deterministic direct comparisons each pass 119/119 player-back plus 119/119 opponent-front component/seam/raw-RGB/actual-core framebuffer rows with zero residual pixels; the materially altered WINGULL/ABSOL reversed-side geometry/slot/matrix/order control traverses the same production path",
+    "MOVE_RAZOR_WIND alone and razor-wind-two-turn-air-wave alone are accepted; MOVE_AEROBLAST and the Sonic Boom, Steel Wing, Screech, and Sweet Scent controls receive no inferred credit, and gameplay damage, two-turn choice, RNG, turn order, round, and facility state remain unowned"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-razor-wind-player-nuzleaf-opponent-onix.json",
+    "tools/battle-lab/mechanic-razor-wind-opponent-nuzleaf-player-onix.json",
+    "tools/compare/razorWindSourceAudit.ts",
+    "tools/compare/razorWindProbe.py",
+    "tools/compare/razorWindEvidence.ts",
+    "tools/compare/razorWindFramebuffer.ts",
+    "tools/compare/fixtures/razor-wind-evidence.json",
+    "tools/compare/evidence/razor-wind-player-dense-state.json.gz",
+    "tools/compare/evidence/razor-wind-opponent-dense-state.json.gz",
+    "tools/compare/evidence/razor-wind-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/razor-wind-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/razor-wind-changemap-player.json",
+    "tools/compare/evidence/razor-wind-changemap-opponent.json",
+    "src/animation/assets/razor-wind.json",
+    "src/animation/razorWind.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/razorWindSourceCheckpoint.test.ts",
+    "tests/animation/razorWindEvidenceCheckpoint.test.ts",
+    "tests/animation/razorWind.test.ts",
+    "tests/animation/razorWindFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_HIDDEN_POWER",
    "status": "exact",
    "covered": [
@@ -7764,7 +7800,7 @@
    "visualCommand:blendoff"
   ],
   "representatives": ["MOVE_RAZOR_WIND"],
-  "fulfilled": false,
+  "fulfilled": true,
   "evidence": [
    "tools/battle-lab/mechanic-razor-wind-player-nuzleaf-opponent-onix.json",
    "tools/battle-lab/mechanic-razor-wind-opponent-nuzleaf-player-onix.json",
@@ -7779,9 +7815,17 @@
    "tools/compare/evidence/razor-wind-changemap-player.json",
    "tools/compare/evidence/razor-wind-changemap-opponent.json",
    "tests/animation/razorWindSourceCheckpoint.test.ts",
-   "tests/animation/razorWindEvidenceCheckpoint.test.ts"
+   "tests/animation/razorWindEvidenceCheckpoint.test.ts",
+   "tools/compare/razorWindFramebuffer.ts",
+   "src/animation/assets/razor-wind.json",
+   "src/animation/razorWind.ts",
+   "src/animation/sceneOnPresentation.ts",
+   "src/engine/battleScene.ts",
+   "src/engine/core.ts",
+   "tests/animation/razorWind.test.ts",
+   "tests/animation/razorWindFramebuffer.test.ts"
   ],
-  "goal": "UNFULFILLED: bank complete bilateral Scene-ON source/OAM/matrix/palette/resource/audio/gameplay+animation-RNG/state and normalized change-map evidence through each first inactive cleanup, twice fresh per orientation. MOVE_RAZOR_WIND remains unsupported until a source-relative reducer, typed seam, generic actual-core compositor, materially altered live control, and two-run zero-residual production framebuffer acceptance all land. AIR_WAVE_2/crescent, GUST/IMPACT/ShakeMon2 controls, and outside-Factory MOVE_AEROBLAST receive no inferred credit."
+  "goal": "FULFILLED by MOVE_RAZOR_WIND only: both natural setup and unleash bodies pass all 119/119 player-back plus 119/119 opponent-front source-component/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows with zero residual pixels on two deterministic passes. The generic compositor consumes live species/sides/geometry/allocator/matrices/order and the source-derived callback, ordinary-OBJ, monbg/alpha, ShakeMon2 overwrite, transfer, resource, and cleanup mechanisms without a carrier gate, recording/framebuffer lookup, absolute tick, coordinate/RGB fit, or gameplay ownership. MOVE_AEROBLAST and the Sonic Boom, Steel Wing, Screech, and Sweet Scent controls receive no inferred credit."
   }
  ],
  "variantAudits": {
