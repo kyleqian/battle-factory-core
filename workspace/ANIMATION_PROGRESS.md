@@ -1,3 +1,10 @@
+# MOVE_STOCKPILE exact bilateral production presentation (2026-09-01 worker)
+
+- **State:** Level 50 advances **221→222/276 exact**, with **0 partial / 0 staged** and **55→54 unsupported**. MOVE_STOCKPILE alone promotes and `stockpile-gray-orb-absorption` alone is fulfilled; Swallow and Spit Up remain independent controls.
+- **Did:** Added the pure source-relative reducer, narrow typed Scene-ON seam, and generic actual-core compositor for all six assigned components. It consumes live species, attacker side, battler/picture geometry, field/chrome, subpriority, lowest-free sprite/matrix pools, persistent order, picture offset, and entry-shadow state without gameplay Stockpile/stat/RNG/outcome ownership, a Pelipper/Delcatty gate, recording/framebuffer lookup, absolute tick, or fitted coordinate/RGB data.
+- **Verified:** Both complete banked windows pass **99/99 player-back + 99/99 opponent-front = 198/198** source-component, typed-seam, raw-RGB, and `core.ts → renderSceneOnMovePresentation` framebuffer rows with zero residual pixels on **two deterministic passes**. The reducer independently matches all 16 birth+1 affine orbs, whole OAM/palette RAM+1 on 98/98 comparable rows per side, live attacker RAM+2 deformation on 76/76, palette programs, allocator/matrix reuse, persistent painter order, resources, cursor/waits, and cleanup. An altered live ARON/GROVYLE reversed-side geometry/allocator/order/matrix control traverses the same production path.
+- **Checks:** Focused Stockpile source/evidence/reducer/framebuffer/control tests, coverage/audit, animation boundary and executable-frontier ratchets, full `npm test`, `npm run build`, and diff-check pass. No boundary list or unsupported-branch barrier widened.
+
 # Animation supervisor verification — Stockpile evidence merged (2026-09-01 supervisor)
 
 - **State:** Level 50 remains **221/276 exact, 0 partial / 0 staged, 55 unsupported**. MOVE_STOCKPILE and `stockpile-gray-orb-absorption` remain honestly unsupported/unfulfilled; no sibling or component credit was inferred.

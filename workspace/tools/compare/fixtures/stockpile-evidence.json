@@ -3,17 +3,18 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_STOCKPILE",
   "moveId": 254,
-  "status": "unsupported",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "evidenceScope": {
     "sourceAudit": true,
     "completePointerBody": true,
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
-    "framebufferCompared": false,
-    "coveragePromotion": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "framebufferCompared": true,
+    "framebufferLookupAdded": false,
+    "coveragePromotion": true,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false,
     "fullDenseRowsRetained": true,
@@ -40,8 +41,8 @@
     "firstInactiveCleanupRetained": true,
     "denseRows": {"player-back": 99, "opponent-front": 99},
     "rawRgbRows": {"player-back": 99, "opponent-front": 99},
-    "productionFramebufferRows": 0,
-    "productionFramebufferResidualPixels": null,
+    "productionFramebufferRows": {"player-back": 99, "opponent-front": 99},
+    "productionFramebufferResidualPixels": 0,
     "completeOrbLifecyclesPerOrientation": 16,
     "latches": {
       "wholeOamRamPlus1": "98/98 per orientation",
@@ -88,5 +89,5 @@
     "retainedPalette": {"MOVE_SAFEGUARD": "exact", "MOVE_CONFUSE_RAY": "exact", "MOVE_SOFT_BOILED": "exact"},
     "inferredCreditGranted": false
   },
-  "remainingObligation": "Implement a pure source-relative Stockpile reducer, narrow typed live Scene-ON seam, generic actual-core compositor, and materially altered live species/side/geometry/allocator/order control; then prove twice-run zero-residual framebuffer equality for every retained row before any move or component promotion."
+  "acceptanceVerdict": "MOVE_STOCKPILE alone is exact: the source-relative reducer, typed live seam, generic actual-core compositor, altered ARON/GROVYLE species/side/geometry/allocator/order/matrix control, and two deterministic 198/198 zero-residual framebuffer passes fulfill stockpile-gray-orb-absorption without sibling credit or gameplay ownership."
 }

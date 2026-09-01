@@ -66,16 +66,28 @@ describe("MOVE_STOCKPILE bounded bilateral evidence checkpoint", () => {
     });
   });
 
-  it("records no move/component acceptance and preserves named sibling controls", () => {
+  it("records Stockpile-only production acceptance and preserves named sibling controls", () => {
     const status = (move: string): string => coverage.entries.find((entry) => entry.move === move)?.status ?? "unsupported";
-    expect(fixture.status).toBe("unsupported");
-    expect(fixture.coverageCredit).toBe(false);
-    expect(fixture.evidenceScope.productionAnimationChanged).toBe(false);
-    expect(fixture.acceptance.productionFramebufferRows).toBe(0);
-    expect(coverage.componentTracks.find((track) => track.id === "stockpile-gray-orb-absorption")).toMatchObject({
-      representatives: ["MOVE_STOCKPILE"], fulfilled: false,
+    expect(fixture.status).toBe("exact");
+    expect(fixture.coverageCredit).toBe(true);
+    expect(fixture.evidenceScope).toMatchObject({
+      productionAnimationChanged: true,
+      reducerAdded: true,
+      typedSeamAdded: true,
+      compositorAdded: true,
+      framebufferCompared: true,
+      framebufferLookupAdded: false,
+      coveragePromotion: true,
+      gameplayStateOwned: false,
     });
-    expect(status("MOVE_STOCKPILE")).toBe("unsupported");
+    expect(fixture.acceptance.productionFramebufferRows).toEqual({
+      "player-back": 99, "opponent-front": 99,
+    });
+    expect(fixture.acceptance.productionFramebufferResidualPixels).toBe(0);
+    expect(coverage.componentTracks.find((track) => track.id === "stockpile-gray-orb-absorption")).toMatchObject({
+      representatives: ["MOVE_STOCKPILE"], fulfilled: true,
+    });
+    expect(status("MOVE_STOCKPILE")).toBe("exact");
     expect(status("MOVE_SWALLOW")).toBe("exact");
     expect(status("MOVE_SPIT_UP")).toBe("unsupported");
     expect([status("MOVE_SAFEGUARD"), status("MOVE_CONFUSE_RAY"), status("MOVE_SOFT_BOILED")]).toEqual(["exact", "exact", "exact"]);

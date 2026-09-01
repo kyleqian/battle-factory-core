@@ -159,6 +159,11 @@ import {
   type SwallowStockpileCount,
 } from "./swallow.ts";
 import {
+  stockpileAtAge,
+  type StockpileAnimationProfile,
+  type StockpileState,
+} from "./stockpile.ts";
+import {
   metallicShineAtAge,
   type MetallicShineState,
 } from "./metallicShine.ts";
@@ -2457,6 +2462,20 @@ export interface SceneOnSwallowConfig {
   readonly attackerPictureYOffset: number;
 }
 
+/** Stockpile presentation only; stat stages and Stockpile state stay external. */
+export interface SceneOnStockpileConfig {
+  readonly move: "STOCKPILE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live X_2/Y_PIC_OFFSET anchor used by the absorption-orb macro. */
+  readonly attackerPictureCenter: Readonly<{ x: number; y: number }>;
+  readonly attackerPictureYOffset: number;
+  readonly animationProfile: Readonly<StockpileAnimationProfile>;
+  /** Whether the pointer-entry hardware row retains an elevated front shadow. */
+  readonly attackerShadowAtEntry: boolean;
+}
+
 export interface SceneOnSwaggerConfig {
   readonly move: "SWAGGER";
   readonly attacker: SceneOnPresentationBattler;
@@ -3568,6 +3587,7 @@ export type SceneOnMoveConfig =
   | SceneOnEndureConfig
   | SceneOnReversalConfig
   | SceneOnSwallowConfig
+  | SceneOnStockpileConfig
   | SceneOnSwaggerConfig
   | SceneOnBulkUpConfig
   | SceneOnTauntConfig
@@ -4227,6 +4247,12 @@ export interface SceneOnSwallowView extends SwallowState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly stockpileCount: SwallowStockpileCount;
+}
+
+export interface SceneOnStockpileView extends StockpileState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly attackerShadowAtEntry: boolean;
 }
 
 export interface SceneOnSwaggerView extends SwaggerState {
@@ -7631,6 +7657,27 @@ export function sceneOnSwallowView(
       state.config.attacker.geometry.battlePositionCenter,
       state.config.attackerPictureOffset,
       state.config.attackerPictureYOffset,
+    ),
+  };
+}
+
+/** `age=0` is Move_STOCKPILE's first retained pointer-owned row. */
+export function sceneOnStockpileView(
+  state: SceneOnMovePresentationState<SceneOnStockpileConfig>,
+): SceneOnStockpileView {
+  if (state.config.move !== "STOCKPILE") {
+    throw new Error(`expected STOCKPILE presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    attackerShadowAtEntry: state.config.attackerShadowAtEntry,
+    ...stockpileAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerPictureCenter,
+      state.config.attackerPictureYOffset,
+      state.config.animationProfile,
     ),
   };
 }

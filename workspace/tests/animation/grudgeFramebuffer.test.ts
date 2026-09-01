@@ -45,7 +45,7 @@ describe("MOVE_GRUDGE actual-core production framebuffer", () => {
 
   it("promotes Grudge alone and fulfills only its dedicated component track", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(221);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(222);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_GRUDGE")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "grudge-purple-flames")).toMatchObject({ fulfilled: true });
   });

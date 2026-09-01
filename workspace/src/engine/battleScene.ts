@@ -564,6 +564,7 @@ import supersonicAsset from "../animation/assets/supersonic.json" with { type: "
 import metalSoundAsset from "../animation/assets/metal-sound.json" with { type: "json" };
 import screechAsset from "../animation/assets/screech.json" with { type: "json" };
 import safeguardAsset from "../animation/assets/safeguard.json" with { type: "json" };
+import stockpileAsset from "../animation/assets/stockpile-gray-orb.json" with { type: "json" };
 import purpleFlameAsset from "../animation/assets/purple-flame.json" with { type: "json" };
 import hiddenPowerRedOrbAsset from "../animation/assets/hidden-power-red-orb.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
@@ -911,6 +912,7 @@ import {
   sceneOnMetalSoundView,
   sceneOnScreechView,
   sceneOnSafeguardView,
+  sceneOnStockpileView,
   sceneOnGrudgeView,
   sceneOnHiddenPowerView,
   sceneOnSmellingSaltView,
@@ -1074,6 +1076,7 @@ import {
   type SceneOnMetalSoundConfig,
   type SceneOnScreechConfig,
   type SceneOnSafeguardConfig,
+  type SceneOnStockpileConfig,
   type SceneOnGrudgeConfig,
   type SceneOnHiddenPowerConfig,
   type SceneOnLeerConfig,
@@ -1879,6 +1882,10 @@ const screechArt = screechAsset as {
 };
 const safeguardArt = safeguardAsset as {
   guardRing: { tileset: Tileset; palette: RgbColor[] };
+};
+const stockpileArt = stockpileAsset as {
+  tileset: Tileset;
+  palette: RgbColor[];
 };
 const smellingSaltArt = smellingSaltAsset as {
   exclamation: { tileset: Tileset; palette: RgbColor[] };
@@ -20958,6 +20965,137 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "VIGOROTH used" : "Foe VIGOROTH used",
       "REVERSAL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "STOCKPILE") {
+    const stockpileState = state as SceneOnMovePresentationState<SceneOnStockpileConfig>;
+    const view = sceneOnStockpileView(stockpileState);
+    // The live battler task writes after OAM build (RAM+2); script-created
+    // orbs and palette RAM use the ordinary predecessor scanout (RAM+1).
+    const displayedBattler = sceneOnStockpileView({
+      ...stockpileState,
+      age: stockpileState.age - 2,
+    });
+    const displayedEffects = sceneOnStockpileView({
+      ...stockpileState,
+      age: stockpileState.age - 1,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) throw new Error(`STOCKPILE missing ${view.attacker.species} attacker art`);
+    if (!targetSource) throw new Error(`STOCKPILE missing ${view.target.species} target art`);
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8)
+      : targetSource.tileset;
+    const attackerIdle = playerAttacker
+      ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const attackerPalette = blendPaletteToward(
+      attackerSource.palette,
+      { r: 255, g: 255, b: 255 },
+      displayedEffects.attackerPaletteY,
+    );
+    const drawAttacker = (): void => drawSpriteSheetAffineRotate(
+      fb,
+      attackerTileset,
+      attackerPalette,
+      view.attacker.geometry.animationCenter.x + attackerIdle.x2,
+      view.attacker.geometry.animationCenter.y + attackerIdle.y2 + displayedBattler.attackerY2,
+      displayedBattler.attackerMatrix[0],
+      0,
+      0,
+      displayedBattler.attackerMatrix[3],
+      undefined,
+      true,
+    );
+    const drawTarget = (): void => drawSpriteSheet(
+      fb,
+      targetTileset,
+      targetSource.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const orbByIndex = new Map(displayedEffects.orbs.map((orb) => [orb.index, orb]));
+    const drawOrbs = (): void => {
+      for (const index of displayedEffects.orbPainterOrder) {
+        const orb = orbByIndex.get(index);
+        if (!orb) continue;
+        drawSpriteSheetAffineRotate(
+          fb,
+          subTileset(stockpileArt.tileset, 0, 1),
+          stockpileArt.palette,
+          orb.x + orb.x2,
+          orb.y + orb.y2,
+          orb.matrix[0],
+          0,
+          0,
+          orb.matrix[3],
+          undefined,
+          true,
+        );
+      }
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (!playerAttacker && view.attackerShadowAtEntry && stockpileState.age === 0) {
+      const shadowX = view.attacker.geometry.animationCenter.x - battleEnemyShadow.width / 2;
+      const shadowY = view.attacker.geometry.battlePositionCenter.y + 29 - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(
+          fb,
+          shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width),
+          battleEnemyShadow.color,
+        );
+      }
+    }
+    if (playerAttacker) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    drawOrbs();
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const profile = stockpileState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "STOCKPILE!",
       99,
     );
     return;
