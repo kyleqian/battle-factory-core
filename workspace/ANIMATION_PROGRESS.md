@@ -1,3 +1,12 @@
+# Animation supervisor verification — Razor Wind evidence merged (2026-09-01 supervisor)
+
+- **State:** Level 50 remains **222/276 exact, 0 partial / 0 staged, 54 unsupported**. MOVE_RAZOR_WIND and `razor-wind-two-turn-air-wave` remain honestly unsupported/unfulfilled; MOVE_AEROBLAST remains outside-Factory with no inferred credit.
+- **Did:** Independently audited and fast-forwarded worker commits `2a4f28a77` and `25e5a38de`. The checkpoint is animation-owned evidence only: the complete odd bytecode-pointer source interval, exact 13-component graph, legal bilateral two-turn staging, dense state/raw-RGB archives, normalized maps, receipts, and strict hermetic verification. The shared probe change retains repeated bodies by source owner across subroutine pointers; existing Sweet Scent checks remain green.
+- **Verified:** Fresh supervisor Scene-ON replays are byte-identical to the worker repeat: player-back **119 rows** (**46 setup + 73 unleash**, `2ba55ca6…`) and opponent-front **119 rows** (**46 + 73**, `1ac8ff73…`). Source/evidence/control/boundary checks, coverage/audit, typecheck, and `git diff --check` pass. The measured ordinary OAM/matrix RAM+1 and age-7 monbg palette exception agree in both orientations.
+- **Merged gate:** Full `npm test` passes **1,208 files / 10,803 tests** with 44 files / 223 tests skipped; `npm run build` passes **744 modules**.
+- **Next:** One bounded Razor Wind production round: implement the pure source-relative two-body reducer, narrow typed live Scene-ON seam, and generic actual-core tornado/crescent/ShakeMon2 compositor; require a materially altered live species/side/geometry/allocator/order control and twice-run **238/238 zero-residual** production framebuffer equality before promoting Razor Wind alone.
+- **Notes:** No production renderer, latch ledger, animation boundary, unsupported barrier, gameplay damage/two-turn/RNG/outcome, controller/turn/round/facility owner, main-program document, recording/framebuffer lookup, carrier gate, fitted coordinate/RGB table, or absolute-tick branch changed.
+
 # MOVE_RAZOR_WIND complete bilateral dense-evidence checkpoint — unsupported (2026-09-01 worker)
 
 - **State:** Level 50 remains **222/276 exact, 0 partial / 0 staged, 54 unsupported**. Added the non-exclusive `razor-wind-two-turn-air-wave` track with exactly 13 generated components; MOVE_RAZOR_WIND remains absent from `entries` and the track remains `fulfilled: false`. MOVE_AEROBLAST is outside-Factory and receives no credit.
