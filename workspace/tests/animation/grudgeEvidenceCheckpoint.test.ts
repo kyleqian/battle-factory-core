@@ -74,7 +74,7 @@ describe("MOVE_GRUDGE complete bilateral exact evidence", () => {
     execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/extractPurpleFlameAssets.ts", "--out", out]);
     expect(readFileSync(out)).toEqual(readFileSync("src/animation/assets/purple-flame.json"));
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(220);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(221);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_GRUDGE")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "grudge-purple-flames")).toMatchObject({
       representatives: ["MOVE_GRUDGE"], fulfilled: true,
