@@ -6936,9 +6936,19 @@
     "tools/battle-lab/mechanic-water-spout-player-wailmer-opponent-shuckle.json",
     "tools/battle-lab/mechanic-water-spout-opponent-wailmer-player-shuckle.json",
     "tools/compare/waterSpoutSourceAudit.ts",
-    "tests/animation/waterSpoutSourceCheckpoint.test.ts"
+    "tools/compare/waterSpoutProbe.py",
+    "tools/compare/waterSpoutEvidence.ts",
+    "tools/compare/fixtures/water-spout-evidence.json",
+    "tools/compare/evidence/water-spout-player-dense-state.json.gz",
+    "tools/compare/evidence/water-spout-opponent-dense-state.json.gz",
+    "tools/compare/evidence/water-spout-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/water-spout-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/water-spout-changemap-player.json",
+    "tools/compare/evidence/water-spout-changemap-opponent.json",
+    "tests/animation/waterSpoutSourceCheckpoint.test.ts",
+    "tests/animation/waterSpoutEvidence.test.ts"
    ],
-   "goal": "UNFULFILLED source/staging checkpoint only: MOVE_WATER_SPOUT's complete 14-command root, unique Level-50 Wailmer carrier, eight-component graph, HP-quarter tier, launch deformation/orbs, randomized rain/affine impacts, bilateral side bounds, target/partner shakes, audio, resources, and cleanup are source-audited. Complete legal transient-free full-HP Wailmer/Shuckle Scene-ON stages exist in both orientations. No dense state/raw-RGB evidence, reducer, typed seam, compositor, framebuffer acceptance, move credit, component credit, or sibling credit is implied. Full-HP proves only tier 3; source/oracle evidence must independently resolve lower live-HP tiers before promotion if they change visible acceptance."
+   "goal": "UNFULFILLED full-HP dense-evidence checkpoint only: MOVE_WATER_SPOUT's complete 14-command root, unique Level-50 Wailmer carrier, eight-component graph, HP-quarter tier, launch deformation/orbs, randomized rain/affine impacts, bilateral side bounds, target/partner shakes, audio, resources, and cleanup are source-audited. Complete legal transient-free full-HP Wailmer/Shuckle Scene-ON bodies retain 278/278 consecutive rows per orientation through inactive cleanup, twice fresh byte-identical, with full state/raw RGB and normalized maps. No reducer, typed seam, compositor, framebuffer acceptance, move credit, component credit, or sibling credit is implied. Full HP proves only tier 3; source/oracle evidence must independently resolve lower live-HP tiers before promotion if they change visible acceptance."
   },
   {
    "id": "splitbgprio-foes-sonic-ring",

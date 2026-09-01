@@ -1,0 +1,82 @@
+{
+  "schema": "water-spout-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_WATER_SPOUT",
+  "moveId": 323,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "fullHpPowerTier": 3,
+  "scope": {
+    "completePointerBody": true,
+    "fullDenseRowsRetained": true,
+    "rawRgbRetained": true,
+    "twiceFreshByteIdentical": true,
+    "normalizedMaps": true,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferCompared": false,
+    "coveragePromotion": false
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "firstInactiveCleanupRetained": true,
+    "denseRows": {
+      "player-back": 278,
+      "opponent-front": 278
+    },
+    "rawRgbRows": {
+      "player-back": 278,
+      "opponent-front": 278
+    }
+  },
+  "source": {
+    "audit": "tools/compare/waterSpoutSourceAudit.ts",
+    "auditSha256": "98ab3d83a7aaec1872a36b276d2c1ef1fa34bd6a06bed809bae211e9a6b291b3",
+    "probe": "tools/compare/waterSpoutProbe.py",
+    "probeSha256": "cee756aecb7e580a8a1e197f2d0b9aba04e27ab80242a7873629876e61930eb4"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-water-spout-player-wailmer-opponent-shuckle.json",
+      "scenarioSha256": "6aa1c41291bb64a96db0754ddcc6fdc863e688814676e6fe35003e903dd4790d",
+      "denseState": "tools/compare/evidence/water-spout-player-dense-state.json.gz",
+      "denseStateSha256": "7b2c5fef2a176f700492be1ec32688ac4b5a3d2d659c51cbfb6310674126188c",
+      "probeJsonSha256": "cc00322d80bd2197f6e530555f25485adccbab7fec5af29bde2097ecdd8a96f8",
+      "repeatProbeJsonSha256": "cc00322d80bd2197f6e530555f25485adccbab7fec5af29bde2097ecdd8a96f8",
+      "rawRgbArchive": "tools/compare/evidence/water-spout-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "cf0865719a1fccfcc1a885c0c6b41d922774526edd04b5a9230f956ea720cf56",
+      "rawRgbSequenceSha256": "46d771da3a25d55448682111bac724b87437cbef692490ab320c5198128b19ea",
+      "repeatRawRgbSequenceSha256": "46d771da3a25d55448682111bac724b87437cbef692490ab320c5198128b19ea",
+      "changeMap": "tools/compare/evidence/water-spout-changemap-player.json",
+      "changeMapSha256": "e25bb6af708c43b4f22858f85df3b1be364419afc05733fe8ff8eb4428c9b948",
+      "sourceWindow": {
+        "startFrame": 79,
+        "endFrame": 356,
+        "frameCount": 278,
+        "sourceFrameCount": 278
+      }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-water-spout-opponent-wailmer-player-shuckle.json",
+      "scenarioSha256": "38552839ede4de1a75255c6ec30acef085f7df824e90e03c7b2fde7d3291a5b9",
+      "denseState": "tools/compare/evidence/water-spout-opponent-dense-state.json.gz",
+      "denseStateSha256": "9482a6afeefd2c32715aa64fb3bd280cc2ba0aadf63de6576d11a0be1ad08c1e",
+      "probeJsonSha256": "8fd88e1f38c42acae3429474e3fee8125f599931cee5b8daf7caf7e375705d33",
+      "repeatProbeJsonSha256": "8fd88e1f38c42acae3429474e3fee8125f599931cee5b8daf7caf7e375705d33",
+      "rawRgbArchive": "tools/compare/evidence/water-spout-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "dad63bbf22ba435df8df85936a54bab3775fc6565dcdf4960f076c1a1f75e5eb",
+      "rawRgbSequenceSha256": "d22ffad4d4037c4da618d60438e84646f9f10d945e11f9e09b5f46f815bac0e6",
+      "repeatRawRgbSequenceSha256": "d22ffad4d4037c4da618d60438e84646f9f10d945e11f9e09b5f46f815bac0e6",
+      "changeMap": "tools/compare/evidence/water-spout-changemap-opponent.json",
+      "changeMapSha256": "54ce271ea37ac21245a3122fe532e0b4b170fb1f7ea3e06fd90c4c4a8ae97576",
+      "sourceWindow": {
+        "startFrame": 83,
+        "endFrame": 360,
+        "frameCount": 278,
+        "sourceFrameCount": 278
+      }
+    }
+  },
+  "remaining": "Implement a source-relative tiered reducer, typed live presentation seam, art/compositor, actual-core zero-residual framebuffer gate twice, altered species/geometry control, and independently stage/prove any visibly required lower-HP tier without transient injection."
+}
