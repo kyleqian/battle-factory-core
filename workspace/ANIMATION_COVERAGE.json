@@ -7519,6 +7519,39 @@
       "tests/animation/rockBlastFramebuffer.test.ts"
     ],
     "goal": "FULFILLED by MOVE_ROCK_BLAST only: one natural stock EFFECT_MULTI_HIT visual execution is retained per orientation as three player-back and two opponent-front 90-row pointer bodies through every first-inactive cleanup, twice-fresh byte-identically. One source-derived body reducer is reused through a typed multi-body seam with body-relative ages and live species/sides/geometry/allocator/resource/audio/field-HP/move-text facts. Actual core.ts -> renderSceneOnMovePresentation equality is 270/270 player-back plus 180/180 opponent-front with zero residual pixels on two deterministic passes, plus an altered live multi-body control. The 92-frame inter-body gameplay gaps and observed body counts remain stage facts only; no hit-count, damage, accuracy, outcome, RNG, controller, turn, round, or facility logic is owned. No evidence-pair gate, recording/RGB/framebuffer lookup, absolute tick, coordinate/RGB fitting, or sibling promotion exists. MOVE_ROCK_THROW, MOVE_ROCK_TOMB, and MOVE_ANCIENT_POWER remain independent exact controls only."
+  },
+  {
+    "id": "grudge-purple-flames",
+    "components": [
+      "asset:ANIM_TAG_PURPLE_FLAME",
+      "task:AnimTask_GrudgeFlames",
+      "visualCommand:clearmonbg",
+      "visualCommand:fadetobg",
+      "visualCommand:monbg",
+      "visualCommand:restorebg",
+      "visualCommand:splitbgprio_all",
+      "visualCommand:waitbgfadein"
+    ],
+    "representatives": ["MOVE_GRUDGE"],
+    "fulfilled": false,
+    "evidence": [
+      "tools/battle-lab/mechanic-grudge-player-haunter-opponent-onix.json",
+      "tools/battle-lab/mechanic-grudge-opponent-haunter-player-onix.json",
+      "tools/compare/grudgeSourceAudit.ts",
+      "tools/compare/grudgeProbe.py",
+      "tools/compare/grudgeEvidence.ts",
+      "tools/compare/fixtures/grudge-evidence.json",
+      "tools/compare/evidence/grudge-player-dense-state.json.gz",
+      "tools/compare/evidence/grudge-opponent-dense-state.json.gz",
+      "tools/compare/evidence/grudge-player-raw-rgb.tar.gz",
+      "tools/compare/evidence/grudge-opponent-raw-rgb.tar.gz",
+      "tools/compare/evidence/grudge-changemap-player.txt",
+      "tools/compare/evidence/grudge-changemap-opponent.txt",
+      "tools/compare/extractPurpleFlameAssets.ts",
+      "src/animation/assets/purple-flame.json",
+      "tests/animation/grudgeEvidenceCheckpoint.test.ts"
+    ],
+    "goal": "UNFULFILLED: MOVE_GRUDGE has complete 209-row player-back plus 209-row opponent-front dense Scene-ON state/raw-RGB windows through first inactive cleanup, reproduced byte-identically twice fresh. Source graph, legal Haunter staging, all six flame lifecycles, five task stages, ghost fades, monbg, blend registers, resources, audio, RNG domains, and move-owned OAM/matrix/palette latches are pinned. Exact promotion still requires a source-relative reducer, narrow typed live seam, generic production compositor, altered species/geometry/allocator/order control, and 418/418 zero-residual actual core framebuffer rows twice. No move or component credit is granted by this checkpoint."
   }
  ],
  "variantAudits": {

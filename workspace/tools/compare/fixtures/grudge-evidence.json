@@ -1,0 +1,72 @@
+{
+  "schema": "grudge-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_GRUDGE",
+  "moveId": 288,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "components": [
+    "asset:ANIM_TAG_PURPLE_FLAME",
+    "task:AnimTask_GrudgeFlames",
+    "visualCommand:clearmonbg",
+    "visualCommand:fadetobg",
+    "visualCommand:monbg",
+    "visualCommand:restorebg",
+    "visualCommand:splitbgprio_all",
+    "visualCommand:waitbgfadein"
+  ],
+  "source": {
+    "audit": "tools/compare/grudgeSourceAudit.ts",
+    "auditSha256": "0afdf7d654bff3ae7a1669c06cdd0cdcd221cc2a942be6745e4d8f1f143a1add",
+    "probe": "tools/compare/grudgeProbe.py",
+    "probeSha256": "7c39dc416cd824b3675bc324d9f60a090af464e1aae0ec922eafaaf13d515885",
+    "assetExtractor": "tools/compare/extractPurpleFlameAssets.ts",
+    "assetExtractorSha256": "0da04a835add0d6954396082bf2b804c4ac920bdba728348deddfecb35160003"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-grudge-player-haunter-opponent-onix.json",
+      "scenarioSha256": "8355776218eb913ba1f400041e47c172fa6df0b292f137cb2411d7d827babbc0",
+      "denseState": "tools/compare/evidence/grudge-player-dense-state.json.gz",
+      "denseStateSha256": "301a93d5de0d8dd07d929b65d1b6971ec26d85ffa3dc426bb976d6c9dc1505d9",
+      "probeJsonSha256": "c02ba14bbcc5d6d44c7bef71dc02270dbf7a87cb4f31b139f272137066d836e6",
+      "repeatProbeJsonSha256": "c02ba14bbcc5d6d44c7bef71dc02270dbf7a87cb4f31b139f272137066d836e6",
+      "rawRgbArchive": "tools/compare/evidence/grudge-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "0c519a7cdfa9e7cf651c372725d693fff43b8b27710b7337f2fce05feded1e4d",
+      "rawRgbSequenceSha256": "d55e58b78e744e1136f5313491b9aad71403ffcc99bbb7c671bf35a11eddef02",
+      "changeMap": "tools/compare/evidence/grudge-changemap-player.txt",
+      "changeMapSha256": "e7ce2fbb4f94054e40c9e98d58ae344847bf9cac8560a02da8c514cceaebc695",
+      "sourceWindow": { "startFrame": 66, "endFrame": 274, "frameCount": 209 }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-grudge-opponent-haunter-player-onix.json",
+      "scenarioSha256": "251ab88d0d1611a1708a5b52ce3e3f8cd22e12dc3ba9e33bd9220e17e27c3433",
+      "denseState": "tools/compare/evidence/grudge-opponent-dense-state.json.gz",
+      "denseStateSha256": "651e9ebb0cb77ead85758c229e5f6c31ba46ed4100f9d1ed45c20514a1ff7cbb",
+      "probeJsonSha256": "f99631d704fce7fec42936af7d7294912726567de0d6147e11feb90da5196a0a",
+      "repeatProbeJsonSha256": "f99631d704fce7fec42936af7d7294912726567de0d6147e11feb90da5196a0a",
+      "rawRgbArchive": "tools/compare/evidence/grudge-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "0ff1e76b1ccebd4d92024dd128c4d879c69dc819db23364ccafc20415c1eae8f",
+      "rawRgbSequenceSha256": "267dccb5c245f02940af82fa4c7c4bdd100e391ca0a029f649d28856cb01b3e0",
+      "changeMap": "tools/compare/evidence/grudge-changemap-opponent.txt",
+      "changeMapSha256": "06c1323c5ab1baed0f0c9239da65d54297aa8bd7406324e316051045b63629c4",
+      "sourceWindow": { "startFrame": 70, "endFrame": 278, "frameCount": 209 }
+    }
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "sourceRows": 418,
+    "rawRgbRows": 418,
+    "firstInactiveCleanupAge": 208,
+    "flameCreates": 6,
+    "flameCreateAge": 46,
+    "flameDestroyAge": 132,
+    "oamLatch": "208/208 preceding-software rows per orientation",
+    "matrixLatch": "208/208 preceding-software rows per orientation",
+    "paletteLatch": "207/208 preceding-faded rows per orientation; age 4 monbg is same-row",
+    "gameplayRngTransitions": 0,
+    "animationRngTransitions": 205,
+    "productionFramebufferRows": 0,
+    "remainingBlocker": "source-relative reducer, typed Scene-ON seam, and generic compositor are not implemented"
+  }
+}
