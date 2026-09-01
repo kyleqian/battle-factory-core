@@ -1,3 +1,12 @@
+# Animation supervisor verification — Stockpile exact merged (2026-09-01 supervisor)
+
+- **State:** Level 50 is now **222/276 exact, 0 partial / 0 staged, 54 unsupported**. MOVE_STOCKPILE alone promoted and `stockpile-gray-orb-absorption` alone became fulfilled; MOVE_SWALLOW and MOVE_SPIT_UP remain independent controls with no inferred credit.
+- **Did:** Independently audited and fast-forwarded worker commit `20476ed54`. The pure source-relative reducer and narrow typed Scene-ON seam cover all six assigned components; the actual-core compositor consumes live species, attacker side, battler/picture geometry, field/chrome, subpriority, lowest-free sprite/matrix pools, persistent order, picture offset, and entry-shadow state without a Pelipper/Delcatty gate or gameplay ownership.
+- **Verified:** Two independent direct comparator runs each pass **99/99 player-back + 99/99 opponent-front = 198/198** component/seam/raw-RGB/actual-core framebuffer rows with zero residual pixels. The altered ARON/GROVYLE reversed-side control changes species, geometry, sprite slots, matrix IDs, and persistent order through the same production path. Focused Stockpile/evidence/Swallow/boundary/frontier/inventory checks pass **6 files / 26 tests**; coverage/audit, typecheck, and diff-check pass.
+- **Merged gate:** Full `npm test` passes **1,206 files / 10,797 tests** with 44 files / 223 tests skipped; `npm run build` passes **744 modules**.
+- **Next:** At the next animation campaign session, select the highest-ranked remaining unsupported Level-50 move and define one bounded component track before evidence work; keep Helping Hand deferred behind the singles-only Battle Lab boundary.
+- **Notes:** The narrow Stockpile birth+1 affine-orb exception is now exact without changing the general latch class. No animation boundary, unsupported barrier, gameplay Stockpile/stat/damage/RNG/outcome, controller/turn/round/facility owner, main-program document, recording/framebuffer lookup, fitted coordinate/RGB table, or absolute battle-tick branch changed.
+
 # MOVE_STOCKPILE exact bilateral production presentation (2026-09-01 worker)
 
 - **State:** Level 50 advances **221→222/276 exact**, with **0 partial / 0 staged** and **55→54 unsupported**. MOVE_STOCKPILE alone promotes and `stockpile-gray-orb-absorption` alone is fulfilled; Swallow and Spit Up remain independent controls.
