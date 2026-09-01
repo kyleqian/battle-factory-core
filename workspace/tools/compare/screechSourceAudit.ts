@@ -125,7 +125,7 @@ if (
   || status("MOVE_SCREECH") !== "exact"
   || status("MOVE_SUPERSONIC") !== "exact"
   || status("MOVE_METAL_SOUND") !== "exact"
-  || coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length !== 217
+  || coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length !== 218
 ) {
   throw new Error("MOVE_SCREECH source/carrier/component/control contract changed");
 }
