@@ -173,9 +173,9 @@ function tornadoAtAge(
 }
 
 const CRESCENT_ARGS = [
-  { x: 8, y: 0, seek: 2 },
-  { x: -8, y: 16, seek: 1 },
-  { x: 12, y: -16, seek: 0 },
+  { startY: 8, targetX: 0, targetY: 0, seek: 2 },
+  { startY: -8, targetX: 16, targetY: 14, seek: 1 },
+  { startY: 12, targetX: -16, targetY: -14, seek: 0 },
 ] as const;
 
 function crescentAtAge(
@@ -192,9 +192,9 @@ function crescentAtAge(
     if (local < 0 || local > 23) continue;
     const args = CRESCENT_ARGS[index];
     const startX = geometry.attackerPictureCenter.x + sign * 14;
-    const startY = geometry.attackerPictureCenter.y + sign * 8;
-    const targetX = geometry.targetPictureCenter.x + sign * args.x;
-    const targetY = geometry.targetPictureCenter.y + sign * args.y;
+    const startY = geometry.attackerPictureCenter.y + sign * args.startY;
+    const targetX = geometry.targetPictureCenter.x + sign * args.targetX;
+    const targetY = geometry.targetPictureCenter.y + sign * args.targetY;
     const callbacks = Math.min(local + 1, 22);
     const frame = ((args.seek + Math.floor((local + 1) / 3)) & 3) as 0 | 1 | 2 | 3;
     sprites.push({
