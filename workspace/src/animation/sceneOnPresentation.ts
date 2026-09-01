@@ -775,6 +775,10 @@ import {
   type EruptionFrame,
 } from "./eruption.ts";
 import {
+  waterSpoutComponentPlan,
+  type WaterSpoutLiveInputs,
+} from "./waterSpout.ts";
+import {
   sandTombAtAge,
   type SandTombAnimationProfile,
   type SandTombFrame,
@@ -3032,6 +3036,19 @@ export interface SceneOnEruptionConfig {
   readonly animationProfile: Readonly<EruptionAnimationProfile>;
 }
 
+/**
+ * Narrow Scene-ON seam for Water Spout's live, HP-tiered component plan.
+ * The caller owns HP and allocator facts; this presentation config neither
+ * changes HP nor consults a retained carrier/evidence pair.
+ */
+export interface SceneOnWaterSpoutConfig {
+  readonly move: "WATER_SPOUT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<WaterSpoutLiveInputs>;
+}
+
 /** Narrow Scene-ON seam for the source-relative Sand Tomb vortex body. */
 export interface SceneOnSandTombConfig {
   readonly move: "SAND_TOMB";
@@ -3584,6 +3601,7 @@ export type SceneOnMoveConfig =
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnEruptionConfig
+  | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
   | SceneOnTrickConfig
   | SceneOnRockBlastConfig
@@ -3644,6 +3662,8 @@ export type SceneOnSoftBoiledPresentationState =
   SceneOnMovePresentationState<SceneOnSoftBoiledConfig>;
 export type SceneOnEruptionPresentationState =
   SceneOnMovePresentationState<SceneOnEruptionConfig>;
+export type SceneOnWaterSpoutPresentationState =
+  SceneOnMovePresentationState<SceneOnWaterSpoutConfig>;
 export type SceneOnSandTombPresentationState =
   SceneOnMovePresentationState<SceneOnSandTombConfig>;
 export type SceneOnTrickPresentationState =
@@ -9161,6 +9181,25 @@ export function sceneOnEruptionView(
     ...eruptionAtAge(state.age, state.config.animationProfile),
     attacker: state.config.attacker,
     target: state.config.target,
+  };
+}
+
+/** `age=0` is the Water Spout root's first retained source row. */
+export function sceneOnWaterSpoutView(
+  state: SceneOnWaterSpoutPresentationState,
+) {
+  if (state.config.move !== "WATER_SPOUT") {
+    throw new Error(`expected WATER_SPOUT presentation, got ${state.config.move}`);
+  }
+  if (state.config.animationInputs.attackerSide
+    !== state.config.attacker.geometry.side) {
+    throw new Error("WATER_SPOUT live attacker side disagrees with scene geometry");
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...waterSpoutComponentPlan(state.config.animationInputs),
   };
 }
 

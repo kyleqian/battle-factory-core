@@ -1,3 +1,11 @@
+# MOVE_WATER_SPOUT typed live Scene-ON seam checkpoint — unsupported (2026-09-01 worker)
+
+- **State:** Level 50 remains **218/276 exact, 0 partial / 0 staged, 58 unsupported**. MOVE_WATER_SPOUT remains unsupported and `water-spout-launch-rain` remains unfulfilled; no move, framebuffer, component, or sibling credit is added.
+- **Did:** Threaded the source-derived four-tier Water Spout component plan through a narrow `SceneOnWaterSpoutConfig`/`sceneOnWaterSpoutView` seam and the generic core presentation dispatch. The immutable live inputs carry attacker HP/max HP, side, effect center, subpriority, launch task/sprite allocator slots, and animation RNG; the view rejects side/geometry disagreement and retains attacker/target species and geometry without a Wailmer/Shuckle or evidence-pair gate.
+- **Verified:** Focused Water Spout source/evidence/reducer and animation-boundary tests pass **16/16**. An altered live SURSKIT/ARON geometry/allocator control selects tier 1 and traverses the same typed seam; typecheck is green. The banked full-HP bilateral evidence remains **278+278 rows twice fresh**, but production framebuffer acceptance remains **0/556 rows** because the age-by-age launch/rain/impact/shake/register/audio compositor is not yet implemented.
+- **Next:** Keep Water Spout unsupported. Build the full source-relative age reducer and generic compositor, then compare all 278+278 retained full-HP rows twice. Independently stage/evidence all visible lower-HP tiers before promotion.
+- **Notes:** No latch/boundary/barrier widening, absolute battle tick, recording/RGB/framebuffer lookup, coordinate fitting, carrier gate, gameplay/damage/status/RNG/controller/turn/round/facility ownership, or sibling status changed.
+
 # MOVE_WATER_SPOUT tier-aware source component/art checkpoint — unsupported (2026-09-01 worker)
 
 - **State:** Level 50 remains **218/276 exact, 0 partial / 0 staged, 58 unsupported**. MOVE_WATER_SPOUT remains unsupported and `water-spout-launch-rain` remains unfulfilled; this checkpoint adds no move or sibling credit.

@@ -12,6 +12,13 @@ import {
   waterSpoutRainAttemptCount,
   waterSpoutRainAttempts,
 } from "../../src/animation/waterSpout.ts";
+import {
+  advanceSceneOnMovePresentation,
+  createSceneOnMovePresentation,
+  sceneOnWaterSpoutView,
+  type SceneOnDragonRageFieldProfile,
+  type SceneOnPresentationBattler,
+} from "../../src/animation/sceneOnPresentation.ts";
 import { createScratchDir } from "../../tools/lib/scratch.ts";
 
 type Json = Record<string, any>;
@@ -82,5 +89,74 @@ describe("MOVE_WATER_SPOUT source-relative component reducer checkpoint", () => 
     expect(asset.palette).toHaveLength(16);
     expect(waterGun.source.waterImpact).toContain("ANIM_TAG_WATER_IMPACT");
     expect(waterGun.waterImpact.tileset).toMatchObject({ columns: 4, rows: 4 });
+  });
+
+  it("threads live HP, side, geometry, allocator slots, and animation RNG through the typed Scene-ON seam", () => {
+    const battler = (
+      side: "player" | "opponent",
+      species: SceneOnPresentationBattler["species"],
+    ): SceneOnPresentationBattler => ({
+      species,
+      geometry: {
+        side,
+        spriteCorner: side === "player" ? { x: 30, y: 44 } : { x: 150, y: 12 },
+        animationCenter: side === "player" ? { x: 63, y: 83 } : { x: 181, y: 45 },
+        battlePositionCenter: side === "player" ? { x: 64, y: 80 } : { x: 180, y: 40 },
+      },
+    });
+    const fieldProfile: SceneOnDragonRageFieldProfile = {
+      playerHp: 37, playerMaxHp: 149, opponentHp: 121, opponentMaxHp: 121,
+      playerGender: "female", opponentGender: "male",
+    };
+    const state = createSceneOnMovePresentation({
+      move: "WATER_SPOUT" as const,
+      attacker: battler("player", "SURSKIT"),
+      target: battler("opponent", "ARON"),
+      fieldProfile,
+      animationInputs: {
+        attackerSide: "player" as const,
+        attackerHp: 37,
+        attackerMaxHp: 149,
+        attackerEffectCenter: { x: 63, y: 83 },
+        attackerSubpriority: 30,
+        launchTaskSlot: 4,
+        launchSpriteSlots: Array.from({ length: 20 }, (_, index) => 10 + index),
+        animationRng: 0x12345678,
+      },
+    });
+    const view = sceneOnWaterSpoutView({ ...advanceSceneOnMovePresentation(state), age: 19 });
+    expect(view).toMatchObject({
+      age: 19,
+      tier: 1,
+      animationRng: 0x12345678,
+      attacker: { species: "SURSKIT", geometry: { side: "player" } },
+      target: { species: "ARON", geometry: { side: "opponent" } },
+      resources: { glowyBlueOrb: 10268, waterImpact: 10148 },
+    });
+    expect(view.launch).toHaveLength(7);
+    expect(view.launch[0]).toMatchObject({ slot: 10, x: 63, y: 83, subpriority: 29 });
+    expect(view.rain).toHaveLength(10);
+  });
+
+  it("rejects a live Water Spout side that disagrees with battler geometry", () => {
+    const point = { x: 0, y: 0 };
+    const makeBattler = (side: "player" | "opponent"): SceneOnPresentationBattler => ({
+      species: side === "player" ? "SURSKIT" : "ARON",
+      geometry: { side, spriteCorner: point, animationCenter: point, battlePositionCenter: point },
+    });
+    const state = createSceneOnMovePresentation({
+      move: "WATER_SPOUT" as const,
+      attacker: makeBattler("player"),
+      target: makeBattler("opponent"),
+      fieldProfile: { playerHp: 1, playerMaxHp: 1, opponentHp: 1, opponentMaxHp: 1 },
+      animationInputs: {
+        attackerSide: "opponent" as const,
+        attackerHp: 1, attackerMaxHp: 1, attackerEffectCenter: point,
+        attackerSubpriority: 30, launchTaskSlot: 0,
+        launchSpriteSlots: Array.from({ length: 20 }, (_, index) => index),
+        animationRng: 0,
+      },
+    });
+    expect(() => sceneOnWaterSpoutView(state)).toThrow("live attacker side disagrees");
   });
 });

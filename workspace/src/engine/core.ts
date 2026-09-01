@@ -166,6 +166,7 @@ import {
 import {
   advanceSceneOnMovePresentation,
   type SceneOnEruptionConfig,
+  type SceneOnWaterSpoutConfig,
   type SceneOnRockBlastConfig,
   type SceneOnSwiftConfig,
   type SceneOnSandTombConfig,
@@ -196,6 +197,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "ERUPTION") {
     const eruptionPresentation = presentation as SceneOnMovePresentationState<SceneOnEruptionConfig>;
     renderSceneOnMovePresentation(framebuffer, eruptionPresentation);
+    return;
+  }
+  if (presentation.config.move === "WATER_SPOUT") {
+    const waterSpoutPresentation = presentation as SceneOnMovePresentationState<SceneOnWaterSpoutConfig>;
+    renderSceneOnMovePresentation(framebuffer, waterSpoutPresentation);
     return;
   }
   if (presentation.config.move === "SAND_TOMB") {

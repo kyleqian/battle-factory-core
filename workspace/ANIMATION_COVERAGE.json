@@ -6945,10 +6945,15 @@
     "tools/compare/evidence/water-spout-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/water-spout-changemap-player.json",
     "tools/compare/evidence/water-spout-changemap-opponent.json",
+    "src/animation/assets/water-spout-glowy-blue-orb.json",
+    "src/animation/waterSpout.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/core.ts",
     "tests/animation/waterSpoutSourceCheckpoint.test.ts",
-    "tests/animation/waterSpoutEvidence.test.ts"
+    "tests/animation/waterSpoutEvidence.test.ts",
+    "tests/animation/waterSpoutReducer.test.ts"
    ],
-   "goal": "UNFULFILLED full-HP dense-evidence checkpoint only: MOVE_WATER_SPOUT's complete 14-command root, unique Level-50 Wailmer carrier, eight-component graph, HP-quarter tier, launch deformation/orbs, randomized rain/affine impacts, bilateral side bounds, target/partner shakes, audio, resources, and cleanup are source-audited. Complete legal transient-free full-HP Wailmer/Shuckle Scene-ON bodies retain 278/278 consecutive rows per orientation through inactive cleanup, twice fresh byte-identical, with full state/raw RGB and normalized maps. No reducer, typed seam, compositor, framebuffer acceptance, move credit, component credit, or sibling credit is implied. Full HP proves only tier 3; source/oracle evidence must independently resolve lower live-HP tiers before promotion if they change visible acceptance."
+   "goal": "UNFULFILLED typed-live-seam checkpoint only: MOVE_WATER_SPOUT's complete 14-command root, unique Level-50 Wailmer carrier, eight-component graph, HP-quarter tier, launch deformation/orbs, randomized rain/affine impacts, bilateral side bounds, target/partner shakes, audio, resources, and cleanup are source-audited. Complete legal transient-free full-HP Wailmer/Shuckle Scene-ON bodies retain 278/278 consecutive rows per orientation through inactive cleanup, twice fresh byte-identical, with full state/raw RGB and normalized maps. The four-tier source component plan and glowy-orb art now traverse a typed live Scene-ON seam carrying HP, side, geometry, allocator slots, and animation RNG, including an altered-species control. No complete age reducer, compositor, framebuffer acceptance, move credit, component credit, or sibling credit is implied. Full HP proves only tier 3; source/oracle evidence must independently resolve lower live-HP tiers before promotion if they change visible acceptance."
   },
   {
    "id": "splitbgprio-foes-sonic-ring",
