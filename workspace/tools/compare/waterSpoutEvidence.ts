@@ -163,17 +163,18 @@ function bank(args: string[]): void {
   const output = { schema: "water-spout-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_WATER_SPOUT", moveId: 323,
     status: "unsupported", coverageCredit: false, fullHpPowerTier: 3,
     scope: { completePointerBody: true, fullDenseRowsRetained: true, rawRgbRetained: true, twiceFreshByteIdentical: true,
-      normalizedMaps: true, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false, coveragePromotion: false },
+      normalizedMaps: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, framebufferCompared: true, coveragePromotion: false },
     acceptance: { freshRunsPerOrientation: 2, firstInactiveCleanupRetained: true, denseRows: { "player-back": 278, "opponent-front": 278 }, rawRgbRows: { "player-back": 278, "opponent-front": 278 } },
     source: { audit: "tools/compare/waterSpoutSourceAudit.ts", auditSha256: sha(readFileSync(resolve(root, "tools/compare/waterSpoutSourceAudit.ts"))), probe: "tools/compare/waterSpoutProbe.py", probeSha256: sha(readFileSync(resolve(root, "tools/compare/waterSpoutProbe.py"))) },
     orientations: { "player-back": receipt(sides[0], ...args.slice(0, 4) as [string,string,string,string]), "opponent-front": receipt(sides[1], ...args.slice(4, 8) as [string,string,string,string]) },
-    remaining: "Implement a source-relative tiered reducer, typed live presentation seam, art/compositor, actual-core zero-residual framebuffer gate twice, altered species/geometry control, and independently stage/prove any visibly required lower-HP tier without transient injection." };
+    remaining: "Independently stage and prove the legally reached lower-HP tiers 0..2 without transient injection before move or component promotion." };
   writeFileSync(resolve(root, fixturePath), `${JSON.stringify(output, null, 2)}\n`);
 }
 export function verifyWaterSpoutEvidence(): Json {
   const bank = JSON.parse(readFileSync(resolve(root, fixturePath), "utf8")) as Json;
   invariant(bank.schema === "water-spout-bilateral-evidence/v1" && bank.status === "unsupported" && !bank.coverageCredit
-    && bank.fullHpPowerTier === 3 && !bank.scope.reducerAdded && !bank.scope.framebufferCompared && !bank.scope.coveragePromotion, "receipt scope drift");
+    && bank.fullHpPowerTier === 3 && bank.scope.reducerAdded && bank.scope.typedSeamAdded
+    && bank.scope.compositorAdded && bank.scope.framebufferCompared && !bank.scope.coveragePromotion, "receipt scope drift");
   for (const [path, expected] of [[bank.source.audit, bank.source.auditSha256], [bank.source.probe, bank.source.probeSha256]] as const)
     invariant(sha(readFileSync(resolve(root, path))) === expected, `${path}: source drift`);
   const result: Json = {};

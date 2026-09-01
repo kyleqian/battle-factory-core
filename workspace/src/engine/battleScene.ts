@@ -494,6 +494,7 @@ import {
 import { icyWindEffectOamOrderAtAge } from "../animation/icyWind.ts";
 import { blizzardEffectOamOrderAtAge } from "../animation/blizzard.ts";
 import { healBellNotesInPainterOrder } from "../animation/healBell.ts";
+import { waterSpoutLaunchMatrixSourceAge } from "../animation/waterSpout.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import swiftYellowStarAsset from "../animation/assets/swift-yellow-star.json" with { type: "json" };
@@ -564,6 +565,7 @@ import metalSoundAsset from "../animation/assets/metal-sound.json" with { type: 
 import screechAsset from "../animation/assets/screech.json" with { type: "json" };
 import safeguardAsset from "../animation/assets/safeguard.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
+import waterSpoutOrbAsset from "../animation/assets/water-spout-glowy-blue-orb.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
 import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "json" };
@@ -983,6 +985,7 @@ import {
   sceneOnToxicView,
   sceneOnEarthquakeView,
   sceneOnEruptionView,
+  sceneOnWaterSpoutView,
   sceneOnSandTombView,
   sceneOnTrickView,
   sceneOnRockBlastView,
@@ -1077,6 +1080,7 @@ import {
   type SceneOnGuillotineConfig,
   type SceneOnFissureConfig,
   type SceneOnEruptionConfig,
+  type SceneOnWaterSpoutConfig,
   type SceneOnSandTombConfig,
   type SceneOnTrickConfig,
   type SceneOnRockBlastConfig,
@@ -1894,6 +1898,10 @@ const waterGunArt = waterGunAsset as {
   waterImpact: { tileset: Tileset; palette: RgbColor[] };
   horseaBack: { tileset: Tileset; palette: RgbColor[] };
   horseaFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const waterSpoutOrbArt = waterSpoutOrbAsset as {
+  tileset: Tileset;
+  palette: RgbColor[];
 };
 const acidArt = acidAsset as {
   poisonBubble: { tileset: Tileset; palette: RgbColor[] };
@@ -14418,6 +14426,125 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "WATER_SPOUT") {
+    const waterSpoutState = state as SceneOnMovePresentationState<SceneOnWaterSpoutConfig>;
+    const view = sceneOnWaterSpoutView(waterSpoutState);
+    const displayAge = Math.max(0, waterSpoutState.age - 1);
+    const displayed = sceneOnWaterSpoutView({ ...waterSpoutState, age: displayAge });
+    const taskOamDisplayed = sceneOnWaterSpoutView({
+      ...waterSpoutState,
+      age: Math.max(0, waterSpoutState.age - 2),
+    });
+    const affine = sceneOnWaterSpoutView({
+      ...waterSpoutState,
+      age: waterSpoutLaunchMatrixSourceAge(waterSpoutState.age),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("WATER_SPOUT presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const source = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!source) throw new Error(`WATER_SPOUT missing ${battler.species} battler art`);
+      return source;
+    };
+    const tilesFor = (source: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? source.tileset : subTileset(source.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const drawTarget = (): void => {
+      // HorizontalShake is created/runs in the visual-task pass after this
+      // row's OAM build, so its direct x2 write reaches scanout two rows on.
+      const ox = view.target.geometry.spriteCorner.x + taskOamDisplayed.targetX2;
+      const oy = view.target.geometry.spriteCorner.y;
+      drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side), targetArt.palette, ox, oy);
+    };
+    // monbg copies the target into a background layer before OBJ painting.
+    if (displayed.monbgEnabled) drawTarget();
+
+    const attackerSlot = view.attacker.geometry.side === "player" ? 6 : 8;
+    const targetSlot = view.target.geometry.side === "player" ? 6 : 8;
+    const entries: Array<{ slot: number; subpriority: number; y: number; order: number; draw: () => void }> = [];
+    entries.push({
+      slot: attackerSlot,
+      subpriority: waterSpoutState.config.animationInputs.attackerSubpriority,
+      y: taskOamDisplayed.launchBattler.y,
+      order: -2,
+      draw: () => {
+        if (taskOamDisplayed.launchBattler.affine) {
+          drawSpriteSheetAffineStretch(
+            fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerArt.palette,
+            taskOamDisplayed.launchBattler.x - 32, taskOamDisplayed.launchBattler.y - 32,
+            affine.launchBattler.matrix[0], affine.launchBattler.matrix[3], taskOamDisplayed.launchBattler.y2,
+            { r: 0, g: 0, b: 0 }, 0, true, taskOamDisplayed.launchBattler.x2,
+          );
+        } else {
+          drawSpriteSheet(
+            fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerArt.palette,
+            view.attacker.geometry.spriteCorner.x + taskOamDisplayed.launchBattler.x2,
+            view.attacker.geometry.spriteCorner.y + taskOamDisplayed.launchBattler.y2,
+          );
+        }
+      },
+    });
+    if (!displayed.monbgEnabled) entries.push({
+      slot: targetSlot,
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      y: view.target.geometry.animationCenter.y,
+      order: -1,
+      draw: drawTarget,
+    });
+    for (const sprite of displayed.sprites) {
+      if (sprite.invisible) continue;
+      // Launch and rain sprites are task-created after BuildOamBuffer; their
+      // first RAM row cannot enter software OAM until the following source
+      // row. Impacts are created during AnimateSprites before OAM build.
+      if (sprite.kind !== "impact" && waterSpoutState.age < sprite.birthAge + 2) continue;
+      entries.push({
+        slot: sprite.slot,
+        subpriority: sprite.subpriority,
+        y: sprite.y,
+        order: -displayed.painterOrder.indexOf(sprite.slot),
+        draw: sprite.kind === "impact"
+          ? () => drawSpriteSheetAffineRotate(
+            fb, waterGunArt.waterImpact.tileset, waterGunArt.waterImpact.palette,
+            sprite.x, sprite.y, sprite.matrix[0], sprite.matrix[1], sprite.matrix[2], sprite.matrix[3],
+            undefined, false,
+          )
+          : () => drawSpriteSheet(
+            fb, waterSpoutOrbArt.tileset, waterSpoutOrbArt.palette,
+            sprite.x - 4, sprite.y - 4,
+          ),
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = waterSpoutState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "WATER SPOUT!", 99,
+    );
+    return;
+  }
   if (state.config.move === "SAND_TOMB") {
     const sandTombState = state as SceneOnMovePresentationState<SceneOnSandTombConfig>;
     const view = sceneOnSandTombView(sandTombState);

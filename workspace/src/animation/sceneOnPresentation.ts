@@ -776,6 +776,7 @@ import {
 } from "./eruption.ts";
 import {
   waterSpoutComponentPlan,
+  waterSpoutAtAge,
   type WaterSpoutLiveInputs,
 } from "./waterSpout.ts";
 import {
@@ -9196,7 +9197,8 @@ export function sceneOnWaterSpoutView(
     throw new Error("WATER_SPOUT live attacker side disagrees with scene geometry");
   }
   return {
-    age: state.age,
+    ...waterSpoutAtAge(state.age, state.config.animationInputs),
+    launchBattler: waterSpoutAtAge(state.age, state.config.animationInputs).attacker,
     attacker: state.config.attacker,
     target: state.config.target,
     ...waterSpoutComponentPlan(state.config.animationInputs),

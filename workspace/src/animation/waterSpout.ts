@@ -23,7 +23,356 @@ export interface WaterSpoutLiveInputs {
   readonly attackerSubpriority: number;
   readonly launchTaskSlot: number;
   readonly launchSpriteSlots: readonly number[];
+  /** Free affine slots in the allocator's source scan order. */
+  readonly impactAffineSlots?: readonly number[];
+  /** Effective source height used by SetBattlerSpriteYOffsetFromYScale. */
+  readonly attackerSourceHeight?: number;
   readonly animationRng: number;
+  /** Persistent source `sSpriteOrder`, immediately before component allocation. */
+  readonly spriteOrderSeed?: readonly number[];
+}
+
+export interface WaterSpoutSpriteState {
+  readonly kind: "launch" | "rain" | "impact";
+  readonly slot: number;
+  readonly sourceCreationOrder: number;
+  readonly birthAge: number;
+  readonly x: number;
+  readonly y: number;
+  readonly subpriority: number;
+  readonly invisible: boolean;
+  readonly matrixNum: number;
+  readonly matrix: readonly [number, number, number, number];
+}
+
+export interface WaterSpoutFrame {
+  readonly age: number;
+  readonly active: boolean;
+  readonly source: Readonly<{ readonly offset: number; readonly wait: number }>;
+  readonly launchTaskActive: boolean;
+  readonly rainTaskActive: boolean;
+  readonly launchDestroyAge: number;
+  readonly rainStartAge: number;
+  readonly attacker: Readonly<{
+    readonly x: number; readonly y: number; readonly x2: number; readonly y2: number;
+    readonly matrix: readonly [number, number, number, number]; readonly affine: boolean;
+  }>;
+  readonly targetX2: number;
+  readonly monbgEnabled: boolean;
+  readonly blendEnabled: boolean;
+  readonly sprites: readonly WaterSpoutSpriteState[];
+  readonly painterOrder: readonly number[];
+  readonly resourcesRetained: boolean;
+  readonly audio: readonly Readonly<{ age: number; song: "HEADBUTT" | "DIVE" | "SURF"; pan: "attacker" | "target" }>[];
+}
+
+type MutableLaunchOrb = {
+  kind: "launch"; slot: number; order: number; birthAge: number; x: number; y: number;
+  fixedX: number; fixedY: number; velocityX: number; velocityY: number;
+  data0: number; index: number; alive: boolean;
+};
+type MutableRainOrb = {
+  kind: "rain"; slot: number; order: number; birthAge: number; x: number; y: number;
+  impactY: number; alive: boolean;
+};
+type MutableImpact = {
+  kind: "impact"; slot: number; order: number; birthAge: number; x: number; y: number;
+  invisible: boolean; blinkDelay: number; blinkCount: number; alive: boolean;
+  matrixNum: number; matrixScale: number;
+};
+type MutableSprite = MutableLaunchOrb | MutableRainOrb | MutableImpact;
+
+type MutableLaunchTask = {
+  state: number; d2: number; d3: number; d4: number; liveOrbs: number;
+  waveLeft: number; xScale: number; yScale: number; dx: number; dy: number;
+  endX: number; endY: number; x: number; y: number; x2: number; y2: number;
+  active: boolean;
+};
+
+const WATER_SPOUT_END_AGE = 277;
+const WATER_SPOUT_LAUNCH_AFFINE_LAG2 = new Set([
+  ...Array.from({ length: 32 }, (_, index) => index + 11),
+  ...Array.from({ length: 8 }, (_, index) => index + 48),
+  ...Array.from({ length: 8 }, (_, index) => index + 76),
+]);
+const WATER_SPOUT_TIMELINE_CACHE = new WeakMap<Readonly<WaterSpoutLiveInputs>, readonly WaterSpoutFrame[]>();
+
+function matrixFromScale(xScale: number, yScale: number): readonly [number, number, number, number] {
+  // SetOamMatrix writes the task's fixed-point values directly.  These are
+  // the hardware matrix coefficients, not sprite-space scale factors that
+  // need to be inverted by the presentation reducer.
+  return [xScale, 0, 0, yScale];
+}
+
+function prepareLaunchWave(task: MutableLaunchTask, endX: number, endY: number, duration: number): void {
+  task.waveLeft = duration;
+  task.endX = endX;
+  task.endY = endY;
+  task.dx = Math.trunc((endX - task.xScale) / duration);
+  task.dy = Math.trunc((endY - task.yScale) / duration);
+}
+
+function updateLaunchWave(task: MutableLaunchTask, sourceHeight: number): boolean {
+  if (task.waveLeft === 0) return false;
+  task.waveLeft -= 1;
+  if (task.waveLeft !== 0) {
+    task.xScale += task.dx;
+    task.yScale += task.dy;
+  } else {
+    task.xScale = task.endX;
+    task.yScale = task.endY;
+  }
+  if (task.waveLeft !== 0) {
+    const scaled = Math.min(128, Math.trunc((sourceHeight << 8) / task.yScale));
+    task.y2 = Math.trunc((sourceHeight - scaled) / 2);
+  } else task.y2 = 0;
+  return task.waveLeft !== 0;
+}
+
+function freeSlot(inputs: Readonly<WaterSpoutLiveInputs>, sprites: readonly MutableSprite[]): number {
+  const occupied = new Set(sprites.filter((sprite) => sprite.alive).map((sprite) => sprite.slot));
+  const slot = inputs.launchSpriteSlots.find((candidate) => !occupied.has(candidate));
+  if (slot === undefined) throw new Error("Water Spout sprite allocator exhausted");
+  return slot;
+}
+
+function freeMatrix(inputs: Readonly<WaterSpoutLiveInputs>, sprites: readonly MutableSprite[]): number {
+  const candidates = inputs.impactAffineSlots ?? [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+  const occupied = new Set(sprites.filter((sprite): sprite is MutableImpact => sprite.alive && sprite.kind === "impact").map((sprite) => sprite.matrixNum));
+  const slot = candidates.find((candidate) => !occupied.has(candidate));
+  if (slot === undefined) throw new Error("Water Spout affine allocator exhausted");
+  return slot;
+}
+
+function sourceCursor(age: number, launchDestroyAge: number, rainStartAge: number): { offset: number; wait: number } {
+  if (age === 0) return { offset: 0, wait: 0 };
+  if (age < 4) return { offset: 3, wait: age === 1 ? 1 : 0 };
+  if (age < 7) return { offset: 6, wait: age === 4 ? 1 : 0 };
+  if (age < 10) return { offset: 8, wait: age === 7 ? 1 : 0 };
+  if (age <= 55) return { offset: 24, wait: Math.max(0, 54 - age) };
+  if (age <= launchDestroyAge) return { offset: 28, wait: 1 };
+  if (age < rainStartAge) return { offset: 31, wait: Math.max(0, rainStartAge - age - 2) };
+  return { offset: 45, wait: 1 };
+}
+
+function launchTaskStep(
+  task: MutableLaunchTask,
+  inputs: Readonly<WaterSpoutLiveInputs>,
+  sprites: MutableSprite[],
+  order: { value: number },
+): void {
+  const sourceHeight = inputs.attackerSourceHeight ?? 40;
+  const updateOpening = (): void => {
+    task.d3 += 1;
+    if (task.d3 > 1) {
+      task.d3 = 0;
+      task.d4 += 1;
+      if (task.d4 & 1) { task.x2 = 3; task.y += 1; } else task.x2 = -3;
+    }
+    if (!updateLaunchWave(task, sourceHeight)) {
+      const scaled = Math.min(128, Math.trunc((sourceHeight << 8) / task.yScale));
+      task.y2 = Math.trunc((sourceHeight - scaled) / 2);
+      task.x2 = 0; task.d3 = 0; task.d4 = 0; task.state = 2;
+    }
+  };
+  const updateLaunchShake = (): void => {
+    task.d3 += 1;
+    if (task.d3 > 1) {
+      task.d3 = 0; task.d4 += 1;
+      if (task.d4 & 1) task.y2 += 2; else task.y2 -= 2;
+      if (task.d4 === 10) {
+        prepareLaunchWave(task, 0x100, 0x100, 8);
+        task.d3 = 0; task.d4 = 0; task.state = 6;
+      }
+    }
+  };
+  switch (task.state) {
+    case 0:
+      prepareLaunchWave(task, 0xe0, 0x200, 32); task.state = 1; updateOpening();
+      break;
+    case 1: updateOpening(); break;
+    case 2:
+      task.d3 += 1;
+      if (task.d3 > 4) { prepareLaunchWave(task, 0x180, 0xe0, 8); task.d3 = 0; task.state = 3; }
+      break;
+    case 3:
+      if (!updateLaunchWave(task, sourceHeight)) { task.d3 = 0; task.d4 = 0; task.state = 4; }
+      break;
+    case 4: {
+      const seeds = waterSpoutLaunchOrbSeeds(inputs);
+      for (const seed of seeds) {
+        sprites.push({ kind: "launch", slot: seed.slot, order: order.value++, birthAge: 55, x: seed.x, y: seed.y,
+          fixedX: seed.data[2], fixedY: seed.data[3], velocityX: seed.data[4], velocityY: seed.data[5],
+          data0: seed.data[0], index: seed.index, alive: true });
+      }
+      task.liveOrbs = seeds.length; task.state = 5;
+      // Source falls through to case 5 on the creation callback.
+      updateLaunchShake();
+      break;
+    }
+    case 5: updateLaunchShake(); break;
+    case 6:
+      task.y -= 1;
+      if (!updateLaunchWave(task, sourceHeight)) {
+        task.xScale = 0x100; task.yScale = 0x100;
+        task.y = inputs.attackerEffectCenter.y - (inputs.attackerSide === "player" ? 8 : 0);
+        task.x2 = 0; task.y2 = 0; task.d4 = 0; task.state = 7;
+      }
+      break;
+    case 7:
+      if (task.liveOrbs === 0) task.active = false;
+      break;
+  }
+}
+
+function shakeX2(age: number, creationAge: number): number {
+  const local = age - creationAge;
+  if (local < 1 || local >= 160) return 0;
+  const callback = Math.floor((local + 1) / 2);
+  if (callback <= 12) return callback & 1 ? 9 : -9;
+  const decayCallback = callback - 12;
+  const magnitude = 17 - Math.floor((decayCallback - 1) / 4);
+  if (magnitude <= 0) return 0;
+  const timer = (decayCallback - 1) % 4;
+  return timer & 1 ? -Math.floor(magnitude / 2) : Math.ceil(magnitude / 2);
+}
+
+/** Complete source-callback reducer for Water Spout's retained full-HP body. */
+export function waterSpoutTimeline(inputs: Readonly<WaterSpoutLiveInputs>): readonly WaterSpoutFrame[] {
+  const cached = WATER_SPOUT_TIMELINE_CACHE.get(inputs);
+  if (cached) return cached;
+  const tier = waterSpoutPowerTier(inputs.attackerHp, inputs.attackerMaxHp);
+  if (inputs.launchSpriteSlots.length < waterSpoutLaunchOrbCount(tier)) throw new Error("Water Spout allocator profile too small");
+  const task: MutableLaunchTask = {
+    state: 0, d2: 0, d3: 0, d4: 0, liveOrbs: 0, waveLeft: 0,
+    xScale: 0x100, yScale: 0x100, dx: 0, dy: 0, endX: 0x100, endY: 0x100,
+    x: inputs.attackerEffectCenter.x,
+    y: inputs.attackerEffectCenter.y - (inputs.attackerSide === "player" ? 8 : 0),
+    x2: 0, y2: 0, active: false,
+  };
+  const sprites: MutableSprite[] = [];
+  const frames: WaterSpoutFrame[] = [];
+  const order = { value: 0 };
+  let launchDestroyAge = -1;
+  let rainStartAge = Number.POSITIVE_INFINITY;
+  let shakeCreationAge = Number.POSITIVE_INFINITY;
+  const attempts = waterSpoutRainAttempts(inputs.attackerSide, tier);
+  let nextRain = 0;
+  let spriteOrder = inputs.spriteOrderSeed?.slice()
+    ?? Array.from({ length: 64 }, (_, slot) => slot);
+  if (spriteOrder.length !== 64 || new Set(spriteOrder).size !== 64) throw new Error("Water Spout sprite order seed must permute all 64 slots");
+
+  for (let age = 0; age <= WATER_SPOUT_END_AGE; age += 1) {
+    if (age === 10) task.active = true;
+
+    // AnimateSprites scans slots before the visual-task pass. A hit created
+    // into a later slot therefore receives its first affine/callback update
+    // on the creation row; one created into an earlier slot waits a row.
+    for (let slot = 0; slot < 64; slot += 1) {
+      const sprite = sprites.find((candidate) => candidate.alive && candidate.slot === slot);
+      if (!sprite) continue;
+      if (sprite.kind === "launch") {
+        if (age <= 55) continue;
+        if (sprite.data0 === 0) {
+          sprite.velocityX += (sprite.index % 6) * 3;
+          sprite.velocityY += (sprite.index % 3) * 3;
+          sprite.data0 = 1;
+        }
+        sprite.fixedX += sprite.velocityX; sprite.fixedY += sprite.velocityY;
+        sprite.x = sprite.fixedX >> 4; sprite.y = sprite.fixedY >> 4;
+        if (sprite.x < -8 || sprite.x > 248 || sprite.y < -8 || sprite.y > 120) {
+          sprite.alive = false; task.liveOrbs -= 1;
+        }
+      } else if (sprite.kind === "rain") {
+        sprite.y += 8;
+        if (sprite.y >= sprite.impactY) {
+          const impactSlot = freeSlot(inputs, sprites);
+          const matrixNum = freeMatrix(inputs, sprites);
+          sprites.push({ kind: "impact", slot: impactSlot, order: order.value++, birthAge: age, x: sprite.x, y: sprite.y,
+            invisible: false, blinkDelay: 0, blinkCount: 0, alive: true, matrixNum, matrixScale: 256 });
+          sprite.alive = false;
+          if (!Number.isFinite(shakeCreationAge)) shakeCreationAge = age;
+        }
+      } else {
+        sprite.matrixScale = 512;
+        sprite.blinkDelay += 1;
+        if (sprite.blinkDelay > 1) {
+          sprite.blinkDelay = 0; sprite.invisible = !sprite.invisible; sprite.blinkCount += 1;
+          if (sprite.blinkCount === 12) sprite.alive = false;
+        }
+      }
+    }
+
+    if (task.active) {
+      launchTaskStep(task, inputs, sprites, order);
+      if (!task.active) { launchDestroyAge = age; rainStartAge = age + 19; }
+    }
+    if (age >= rainStartAge && nextRain < attempts.length && age === rainStartAge + 4 + nextRain * 3) {
+      const attempt = attempts[nextRain]!;
+      sprites.push({ kind: "rain", slot: freeSlot(inputs, sprites), order: order.value++, birthAge: age, x: attempt.x, y: 0,
+        impactY: attempt.impactY, alive: true });
+      nextRain += 1;
+    }
+
+    const launchMatrix = matrixFromScale(task.xScale, task.yScale);
+    const liveSprites = sprites.filter((sprite) => sprite.alive).map((sprite): WaterSpoutSpriteState => ({
+      kind: sprite.kind, slot: sprite.slot, sourceCreationOrder: sprite.order, birthAge: sprite.birthAge, x: sprite.x, y: sprite.y,
+      subpriority: sprite.kind === "launch" ? inputs.attackerSubpriority - 1 : sprite.kind === "impact" ? 1 : 0,
+      invisible: sprite.kind === "impact" ? sprite.invisible : false,
+      matrixNum: sprite.kind === "impact" ? sprite.matrixNum : 0,
+      matrix: sprite.kind === "impact" ? [sprite.matrixScale, 0, 0, sprite.matrixScale] : [256, 0, 0, 256],
+    })).sort((left, right) => left.slot - right.slot);
+    const keys = new Map(liveSprites.map((sprite) => [sprite.slot, sprite]));
+    for (let index = 1; index < spriteOrder.length; index += 1) {
+      let cursor = index;
+      while (cursor > 0) {
+        const prior = keys.get(spriteOrder[cursor - 1]!);
+        const next = keys.get(spriteOrder[cursor]!);
+        const priorSub = prior?.subpriority ?? 0xff;
+        const nextSub = next?.subpriority ?? 0xff;
+        const swap = priorSub > nextSub
+          || (priorSub === nextSub && (prior?.y ?? 160) < (next?.y ?? 160));
+        if (!swap) break;
+        [spriteOrder[cursor - 1], spriteOrder[cursor]] = [spriteOrder[cursor]!, spriteOrder[cursor - 1]!];
+        cursor -= 1;
+      }
+    }
+    const painterOrder = spriteOrder.filter((slot) => keys.has(slot)).reverse();
+    frames.push({
+      age, active: age < WATER_SPOUT_END_AGE,
+      source: sourceCursor(age, launchDestroyAge < 0 ? age : launchDestroyAge, rainStartAge),
+      launchTaskActive: task.active,
+      rainTaskActive: age >= rainStartAge && (nextRain < attempts.length || liveSprites.some((sprite) => sprite.kind === "rain" || sprite.kind === "impact")),
+      launchDestroyAge, rainStartAge,
+      attacker: { x: task.x, y: task.y, x2: task.x2, y2: task.y2, matrix: launchMatrix, affine: task.active && task.state < 7 },
+      targetX2: shakeX2(age, shakeCreationAge),
+      monbgEnabled: age >= 7 && age < rainStartAge,
+      blendEnabled: age >= 10 && age < rainStartAge,
+      sprites: liveSprites,
+      painterOrder,
+      resourcesRetained: age >= 1 && age < WATER_SPOUT_END_AGE,
+      audio: [
+        ...(age === 10 ? [{ age, song: "HEADBUTT" as const, pan: "attacker" as const }] : []),
+        ...(age === 56 ? [{ age, song: "DIVE" as const, pan: "attacker" as const }] : []),
+        ...(age === rainStartAge ? [{ age, song: "SURF" as const, pan: "target" as const }] : []),
+      ],
+    });
+  }
+  // Fill cursor-derived lifecycle fields that were unknown before the launch
+  // task reached its source-owned terminal condition.
+  const complete = frames.map((frame) => ({ ...frame, launchDestroyAge, rainStartAge,
+    source: sourceCursor(frame.age, launchDestroyAge, rainStartAge) }));
+  WATER_SPOUT_TIMELINE_CACHE.set(inputs, complete);
+  return complete;
+}
+
+export function waterSpoutAtAge(age: number, inputs: Readonly<WaterSpoutLiveInputs>): WaterSpoutFrame {
+  if (!Number.isInteger(age) || age < 0 || age > WATER_SPOUT_END_AGE) throw new Error("Water Spout age out of range");
+  return waterSpoutTimeline(inputs)[age]!;
+}
+
+export function waterSpoutLaunchMatrixSourceAge(displayAge: number): number {
+  return Math.max(0, displayAge - (WATER_SPOUT_LAUNCH_AFFINE_LAG2.has(displayAge) ? 2 : 1));
 }
 
 export interface WaterSpoutLaunchOrbSeed {

@@ -12,10 +12,10 @@
     "rawRgbRetained": true,
     "twiceFreshByteIdentical": true,
     "normalizedMaps": true,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
-    "framebufferCompared": false,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "framebufferCompared": true,
     "coveragePromotion": false
   },
   "acceptance": {
@@ -78,5 +78,5 @@
       }
     }
   },
-  "remaining": "Implement a source-relative tiered reducer, typed live presentation seam, art/compositor, actual-core zero-residual framebuffer gate twice, altered species/geometry control, and independently stage/prove any visibly required lower-HP tier without transient injection."
+  "remaining": "Independently stage and prove the legally reached lower-HP tiers 0..2 without transient injection before move or component promotion."
 }

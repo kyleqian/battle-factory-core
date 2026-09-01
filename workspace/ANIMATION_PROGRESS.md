@@ -1,3 +1,11 @@
+# MOVE_WATER_SPOUT full-HP tier-3 exact production checkpoint — unsupported (2026-09-01 worker)
+
+- **State:** Level 50 remains **218/276 exact, 0 partial / 0 staged, 58 unsupported**. MOVE_WATER_SPOUT and `water-spout-launch-rain` remain uncredited because lower-HP tiers 0..2 still require later legal evidence; WATER_GUN, HYDRO_PUMP, and CRABHAMMER remain independent exact controls with no sibling credit.
+- **Did:** Added the complete source-relative full-HP reducer and generic compositor through the typed live Scene-ON/core seam: launch deformation/orbs, randomized rain, allocator-reused affine WATER_IMPACT, persistent source `sSpriteOrder`, two-row post-OAM task writes, target HorizontalShake, monbg/register cleanup, resources/audio, generic battler art/geometry, field chrome, and first inactive cleanup. No carrier/evidence gate, production recording lookup, absolute tick, pixel fitting, or gameplay ownership was added.
+- **Verified:** Retained twice-fresh player-back **278/278** plus opponent-front **278/278** rows pass source/component/typed-seam/raw-RGB and actual core framebuffer equality at **556/556**, **0 residual pixels**, on two deterministic passes. An altered live SURSKIT→ARON geometry/allocator/order control traverses the same core path.
+- **Latch:** Water Spout independently measures visual-task writes after OAM build: launch battler pose/affine flags and HorizontalShake x2 scan out from RAM+2, while ordinary sprite callbacks/impact OAM use the existing predecessor transfer. Persistent `sSpriteOrder` uses the source priority/subpriority/wrapped-y stable insertion pass.
+- **Next:** Legally stage tiers 0..2 and independently prove every evidence-required visible variant before promoting the move or component track.
+
 # MOVE_WATER_SPOUT typed live Scene-ON seam checkpoint — unsupported (2026-09-01 worker)
 
 - **State:** Level 50 remains **218/276 exact, 0 partial / 0 staged, 58 unsupported**. MOVE_WATER_SPOUT remains unsupported and `water-spout-launch-rain` remains unfulfilled; no move, framebuffer, component, or sibling credit is added.

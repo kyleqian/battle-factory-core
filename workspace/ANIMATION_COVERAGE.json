@@ -6938,6 +6938,7 @@
     "tools/compare/waterSpoutSourceAudit.ts",
     "tools/compare/waterSpoutProbe.py",
     "tools/compare/waterSpoutEvidence.ts",
+    "tools/compare/waterSpoutFramebuffer.ts",
     "tools/compare/fixtures/water-spout-evidence.json",
     "tools/compare/evidence/water-spout-player-dense-state.json.gz",
     "tools/compare/evidence/water-spout-opponent-dense-state.json.gz",
@@ -6951,9 +6952,10 @@
     "src/engine/core.ts",
     "tests/animation/waterSpoutSourceCheckpoint.test.ts",
     "tests/animation/waterSpoutEvidence.test.ts",
-    "tests/animation/waterSpoutReducer.test.ts"
+    "tests/animation/waterSpoutReducer.test.ts",
+    "tests/animation/waterSpoutFramebuffer.test.ts"
    ],
-   "goal": "UNFULFILLED typed-live-seam checkpoint only: MOVE_WATER_SPOUT's complete 14-command root, unique Level-50 Wailmer carrier, eight-component graph, HP-quarter tier, launch deformation/orbs, randomized rain/affine impacts, bilateral side bounds, target/partner shakes, audio, resources, and cleanup are source-audited. Complete legal transient-free full-HP Wailmer/Shuckle Scene-ON bodies retain 278/278 consecutive rows per orientation through inactive cleanup, twice fresh byte-identical, with full state/raw RGB and normalized maps. The four-tier source component plan and glowy-orb art now traverse a typed live Scene-ON seam carrying HP, side, geometry, allocator slots, and animation RNG, including an altered-species control. No complete age reducer, compositor, framebuffer acceptance, move credit, component credit, or sibling credit is implied. Full HP proves only tier 3; source/oracle evidence must independently resolve lower live-HP tiers before promotion if they change visible acceptance."
+   "goal": "UNFULFILLED full-HP tier-3 exact-production checkpoint: MOVE_WATER_SPOUT's complete source-relative reducer and generic typed live compositor cover launch deformation/orbs, randomized rain, affine WATER_IMPACT, target HorizontalShake, persistent OAM painter order, registers/monbg, audio/resources/chrome, and cleanup. Complete bilateral Scene-ON bodies pass actual core framebuffer equality at 278/278 rows per orientation, zero residual pixels, twice, plus altered live species/geometry/allocator/order control. No move/component/sibling credit is implied: legal lower-HP tiers 0..2 remain independently unevidenced and required before promotion."
   },
   {
    "id": "splitbgprio-foes-sonic-ring",
