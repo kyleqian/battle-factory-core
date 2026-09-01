@@ -1,3 +1,12 @@
+# Animation supervisor verification — Stockpile evidence merged (2026-09-01 supervisor)
+
+- **State:** Level 50 remains **221/276 exact, 0 partial / 0 staged, 55 unsupported**. MOVE_STOCKPILE and `stockpile-gray-orb-absorption` remain honestly unsupported/unfulfilled; no sibling or component credit was inferred.
+- **Did:** Audited the evidence commits `936513150` and `203533b59`, caught that both staged requests contained an invalid top-level `description`, and withheld their merge until correction commits `3803841d8`, `f3b4c2a72`, and `b7544c545` removed it, pinned the new request hashes, and added a hermetic test against the local `battle_lab.validate_request`. The cumulative checkpoint is animation-owned evidence only; no production, gameplay, or main-program document changed.
+- **Verified:** A fresh supervisor Scene-ON replay through the pinned mGBA environment validates both corrected requests and reproduces player-back **99 rows** (`f55004eb…` dense / `b743b02d…` raw RGB) and opponent-front **99 rows** (`b9365d17…` / `8b89999c…`) exactly. Focused source/evidence/control/boundary checks pass **5 files / 15 tests**. The narrow new `ANIMATION_LATCHES.md` exception is independently supported: all 16 Stockpile orbs transfer at birth+1; opponent-front's first orb has **69 pixels** centered at `(125,87)`, while its player-back counterpart is offscreen at `(123,145)`; live attacker deformation remains RAM+2.
+- **Merged gate:** Full `npm test` passes **1,205 files / 10,794 tests** with 44 files / 223 tests skipped; `npm run build` passes **742 modules**; `git diff --check` is clean.
+- **Next:** One bounded Stockpile production round: add the pure source-relative reducer, narrow typed live Scene-ON seam, and generic actual-core compositor from the retained maps; require a materially altered live species/side/geometry/allocator/order control and twice-run **198/198 zero-residual** production framebuffer equality before promoting Stockpile alone.
+- **Notes:** No animation boundary, unsupported barrier, gameplay stockpile/stat/RNG/outcome, controller/turn/round/facility owner, main-program document, recording/framebuffer lookup, carrier gate, fitted coordinate/RGB table, or absolute-tick branch changed.
+
 # MOVE_STOCKPILE complete bilateral dense-evidence checkpoint — unsupported (2026-09-01 worker)
 
 - **State:** Level 50 remains **221/276 exact, 0 partial / 0 staged, 55 unsupported**. MOVE_STOCKPILE remains unsupported and `stockpile-gray-orb-absorption` remains unfulfilled; no component or sibling credit is inferred.
