@@ -785,6 +785,7 @@ import {
   type TrickFrame,
 } from "./trick.ts";
 import {
+  ROCK_BLAST_FIRST_INACTIVE_AGE,
   rockBlastAtAge,
   type RockBlastAnimationProfile,
   type RockBlastFrame,
@@ -3051,14 +3052,20 @@ export interface SceneOnTrickConfig {
   readonly animationProfile: Readonly<TrickAnimationProfile>;
 }
 
-/** One pointer-owned Rock Blast visual body; multi-hit resolution is external. */
+/** One naturally scheduled pointer-owned Rock Blast visual body. */
+export interface SceneOnRockBlastBodyConfig {
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly moveTextVisible: boolean;
+  /** Live geometry, allocator, and immutable stage facts; never a retained-pair selector. */
+  readonly animationProfile: Readonly<RockBlastAnimationProfile>;
+}
+
+/** Natural visual bodies only; multi-hit resolution remains external. */
 export interface SceneOnRockBlastConfig {
   readonly move: "ROCK_BLAST";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
-  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
-  /** Live geometry and allocator facts only; never a retained-pair selector. */
-  readonly animationProfile: Readonly<RockBlastAnimationProfile>;
+  readonly bodies: readonly [SceneOnRockBlastBodyConfig, ...SceneOnRockBlastBodyConfig[]];
 }
 
 /** Narrow Scene-ON seam for Move_SWIFT's source-relative visual body. */
@@ -4614,6 +4621,10 @@ export interface SceneOnTrickView extends TrickFrame {
 export interface SceneOnRockBlastView extends RockBlastFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly bodyIndex: number;
+  readonly bodyAge: number;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly moveTextVisible: boolean;
 }
 
 export interface SceneOnSwiftView extends SwiftFrame {
@@ -5310,6 +5321,11 @@ export function createSceneOnMovePresentation<
       || config.resolutionProfile.endHp < 0
     ) {
       throw new Error("FIRE_PUNCH resolution profile requires startHp >= endHp >= 0");
+    }
+  } else if (config.move === "ROCK_BLAST") {
+    if (config.bodies.some(({ fieldProfile }) =>
+      fieldProfile.playerHp < 0 || fieldProfile.opponentHp < 0)) {
+      throw new Error("ROCK_BLAST body field profiles require nonnegative HP");
     }
   } else if (
     config.move !== "FLY"
@@ -9183,10 +9199,21 @@ export function sceneOnRockBlastView(
   if (state.config.move !== "ROCK_BLAST") {
     throw new Error(`expected ROCK_BLAST presentation, got ${state.config.move}`);
   }
+  const bodyLength = ROCK_BLAST_FIRST_INACTIVE_AGE + 1;
+  const bodyIndex = Math.min(
+    state.config.bodies.length - 1,
+    Math.max(0, Math.floor(state.age / bodyLength)),
+  );
+  const bodyAge = state.age - bodyIndex * bodyLength;
+  const body = state.config.bodies[bodyIndex]!;
   return {
-    ...rockBlastAtAge(state.age, state.config.animationProfile),
+    ...rockBlastAtAge(bodyAge, body.animationProfile),
     attacker: state.config.attacker,
     target: state.config.target,
+    bodyIndex,
+    bodyAge,
+    fieldProfile: body.fieldProfile,
+    moveTextVisible: body.moveTextVisible,
   };
 }
 

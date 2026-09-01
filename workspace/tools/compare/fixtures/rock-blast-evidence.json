@@ -3,17 +3,17 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_ROCK_BLAST",
   "moveId": 350,
-  "status": "checkpoint",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "evidenceScope": {
     "sourceAudit": true,
-    "completeFirstPointerBodyOnly": true,
+    "completeNaturalMultiHitVisualExecution": true,
     "productionAnimationChanged": true,
     "reducerAdded": true,
     "typedSeamAdded": true,
     "compositorAdded": true,
     "framebufferCompared": true,
-    "coveragePromotion": false,
+    "coveragePromotion": true,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false,
     "fullDenseRowsRetained": true,
@@ -22,69 +22,73 @@
   "acceptance": {
     "freshRunsPerOrientation": 2,
     "firstInactiveCleanupRetained": true,
+    "naturalBodies": {
+      "player-back": 3,
+      "opponent-front": 2
+    },
     "denseRows": {
-      "player-back": 90,
-      "opponent-front": 90
+      "player-back": 270,
+      "opponent-front": 180
     },
     "rawRgbRows": {
-      "player-back": 90,
-      "opponent-front": 90
+      "player-back": 270,
+      "opponent-front": 180
     },
     "normalizedChangeMaps": true,
-    "productionFramebufferRows": 180,
+    "productionFramebufferRows": 450,
     "productionFramebufferResidualPixels": 0
   },
   "source": {
     "audit": "tools/compare/rockBlastSourceAudit.ts",
-    "auditSha256": "22d10bb64f4e43dc47695fdf6166417028958971f711d2206ca094373e0deda8",
+    "auditSha256": "33a84e9ac78f8d3782356c6847d7efa12179c561f891cac48e340f11ac660660",
     "probe": "tools/compare/rockBlastProbe.py",
-    "probeSha256": "bd1d211c43af371f27afb26767e1d6474d9b1fa336a6310dd2a3d9bf7690ca16",
+    "probeSha256": "b6027360c399e0194a344fce2afdbe912237a44e03a6194d9d5c5a5dd0d997ab",
     "evidenceVerifier": "tools/compare/rockBlastEvidence.ts",
-    "evidenceVerifierSha256": "cf95f2bee06043eacd798b83d617b6284e9034cbb37e8a8cad4b462dea7c3f79",
+    "evidenceVerifierSha256": "ef02f90988c33b6b0bded22b018ead249b0b2624c81756468855940206f22693",
     "reducer": "tools/compare/rockBlastReducer.ts",
-    "reducerSha256": "318a9563bd64da67406ff5d5d6eece2614de3ec95d180ce24984a45c39205d35",
+    "reducerSha256": "11e6b59c37a2ac512a038b6a1b2a45a690b9967a11a0fd58c84ae17ed2c0467a",
     "framebuffer": "tools/compare/rockBlastFramebuffer.ts",
-    "framebufferSha256": "380fa875333131a8ad34c01a9478d89406a8f16220cf64753a1811d113034ec8"
+    "framebufferSha256": "88aa5cf8aa716794332c7b485b5c046aef25cfcdd97bcc588552ee94a4bbbe17"
   },
   "orientations": {
     "player-back": {
       "scenario": "tools/battle-lab/mechanic-rock-blast-player-rhyhorn-opponent-shuckle.json",
       "scenarioSha256": "295264567c21aa1a18c5cbc5b5645d3f0aa887b0aca5e24e3ea98d440963e7ac",
       "denseState": "tools/compare/evidence/rock-blast-player-dense-state.json.gz",
-      "denseStateSha256": "655088b125c70935ddb18c825e93ba5e7191b99efa2585f6415ec77beff167b5",
-      "probeJsonSha256": "58de90d25a6e789a043e888d10f07df75ad9b19e664e0b10d83ab32ab77b3f1a",
-      "repeatProbeJsonSha256": "58de90d25a6e789a043e888d10f07df75ad9b19e664e0b10d83ab32ab77b3f1a",
+      "denseStateSha256": "813545cb5235dfd6e5425594fa06f126fa9fe18951329888171be5994b2fd686",
+      "probeJsonSha256": "fc6b55865733db684147a0f70a8cefe1a525b43a1952e28c61dcf9bdb9b6c654",
+      "repeatProbeJsonSha256": "fc6b55865733db684147a0f70a8cefe1a525b43a1952e28c61dcf9bdb9b6c654",
       "rawRgbArchive": "tools/compare/evidence/rock-blast-player-raw-rgb.tar.gz",
-      "rawRgbArchiveSha256": "74fc4d62eb4b654304f59b3b8e968c4ace8fb2998f606f2c84ad2fc5faa95779",
-      "rawRgbSequenceSha256": "3ec26484c71f10f26d918aac51225a1a5bac752da429a9494b1061240597a38d",
-      "repeatRawRgbSequenceSha256": "3ec26484c71f10f26d918aac51225a1a5bac752da429a9494b1061240597a38d",
+      "rawRgbArchiveSha256": "ee065e8a9ef0ace2fc2abf5a2dfa4bb0f0b44d40e854e427385f6bc9f50f6c2c",
+      "rawRgbSequenceSha256": "768d8bb5f10a0460f38cfcfaf849b6aaec932992efe20f0013a0e69a8df0637e",
+      "repeatRawRgbSequenceSha256": "768d8bb5f10a0460f38cfcfaf849b6aaec932992efe20f0013a0e69a8df0637e",
       "changeMap": "tools/compare/evidence/rock-blast-changemap-player.json",
-      "changeMapSha256": "b8a8b491918568712def6b8a5b7f68a2ea3f334bee46f01fc0bccb7b4f6249a9",
+      "changeMapSha256": "7669c2bad28d27011becceb91113cfff1c921bc46754ea93014a615d391d1cc6",
       "sourceWindow": {
         "startFrame": 84,
-        "endFrame": 173,
-        "frameCount": 90,
-        "sourceFrameCount": 90
+        "endFrame": 537,
+        "frameCount": 270,
+        "sourceFrameCount": 270
       }
     },
     "opponent-front": {
       "scenario": "tools/battle-lab/mechanic-rock-blast-opponent-rhyhorn-player-shuckle.json",
       "scenarioSha256": "4f337aed1048f54b312799fbad015a04260f14fd9791ddcf19cb3d5a74ab0b8d",
       "denseState": "tools/compare/evidence/rock-blast-opponent-dense-state.json.gz",
-      "denseStateSha256": "28869217dee30c7826e6493c47f32a7c1939220fde11e846d7fe93310df6d02c",
-      "probeJsonSha256": "00d5fecf7b7e37b55acf4f350ece79e936156de1e580ed157850ccf0e1109e6d",
-      "repeatProbeJsonSha256": "00d5fecf7b7e37b55acf4f350ece79e936156de1e580ed157850ccf0e1109e6d",
+      "denseStateSha256": "de9715c49aee95893d666ea2c72865f4cf46d83451d6aee70bb6a63ebd70faf2",
+      "probeJsonSha256": "010940a8f999cfeafca35cb8ba46f069aef8215ab68a1165a0c2832ce04ee6f6",
+      "repeatProbeJsonSha256": "010940a8f999cfeafca35cb8ba46f069aef8215ab68a1165a0c2832ce04ee6f6",
       "rawRgbArchive": "tools/compare/evidence/rock-blast-opponent-raw-rgb.tar.gz",
-      "rawRgbArchiveSha256": "e89fedb4ca67429d0b944e13c869ecf40803451f6ae0619b80dd91826c388a7f",
-      "rawRgbSequenceSha256": "68caf65efba752ba1de58a5718189ae447919c2b0f209465c283c36c7c6bc1e1",
-      "repeatRawRgbSequenceSha256": "68caf65efba752ba1de58a5718189ae447919c2b0f209465c283c36c7c6bc1e1",
+      "rawRgbArchiveSha256": "1bdc7ccfda9f1023b68fa48982b7d4d8e87b52db0b41938528cac0a440b701c7",
+      "rawRgbSequenceSha256": "83973308d3d2492a8c3e62bebe8061d901f5914c196d5d7cf102da3198fd001d",
+      "repeatRawRgbSequenceSha256": "83973308d3d2492a8c3e62bebe8061d901f5914c196d5d7cf102da3198fd001d",
       "changeMap": "tools/compare/evidence/rock-blast-changemap-opponent.json",
-      "changeMapSha256": "5a4531449fc12521cc0e76d99a53a36261dacf3c953f4f8ee163f15b3b235a78",
+      "changeMapSha256": "90a40fb93f0bd22aad415b464075998c5eef73f484d7c85cc2e279ccea29eea1",
       "sourceWindow": {
         "startFrame": 88,
-        "endFrame": 177,
-        "frameCount": 90,
-        "sourceFrameCount": 90
+        "endFrame": 359,
+        "frameCount": 180,
+        "sourceFrameCount": 180
       }
     }
   },

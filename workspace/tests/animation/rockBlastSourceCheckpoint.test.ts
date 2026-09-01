@@ -27,17 +27,17 @@ describe("MOVE_ROCK_BLAST source/staging checkpoint", () => {
       ],
       multiHit: {
         effect: "EFFECT_MULTI_HIT",
-        ownership: "Evidence captures one first pointer-owned Move_ROCK_BLAST body through its first inactive cleanup; later hit bodies and battle outcome are excluded.",
+        ownership: "Evidence captures every naturally scheduled pointer-owned Move_ROCK_BLAST body through its first inactive cleanup; observed body counts are stage facts and battle outcome remains excluded.",
       },
       artIdentity: {
         rocks: "battle-anim-rocks.json is the shared ANIM_TAG_ROCKS source asset; sAnims_BasicRock cells 0..5 map to tile rows 0,4,8,12,16,20, decoding the formerly missing cells 0/1/5",
         impact: "ANIM_TAG_IMPACT retains its existing source-derived production identity",
       },
-      checkpoint: { coverageEntry: null, derivedStatus: "unsupported", track: "rock-blast-first-body", fulfilled: false },
+      checkpoint: { coverageEntry: "MOVE_ROCK_BLAST", derivedStatus: "exact", track: "rock-blast-first-body", fulfilled: true },
       controls: {
         moves: ["MOVE_ROCK_THROW", "MOVE_ROCK_TOMB", "MOVE_ANCIENT_POWER"],
         statuses: ["exact", "exact", "exact"],
-        independence: "Rock Blast receives no credit; exact controls retain independent acceptance.",
+        independence: "Rock Blast receives only its own credit; exact controls retain independent acceptance.",
       },
     });
   });

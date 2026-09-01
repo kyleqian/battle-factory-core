@@ -14847,7 +14847,7 @@ export function renderSceneOnMovePresentation(
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;
-    const profile = rockBlastState.config.fieldProfile;
+    const profile = view.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species,
       level: 50,
@@ -14865,12 +14865,14 @@ export function renderSceneOnMovePresentation(
       maxHp: profile.playerMaxHp,
     }));
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-    drawMessageTextLines(
-      fb,
-      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
-      "ROCK BLAST!",
-      99,
-    );
+    if (view.moveTextVisible) {
+      drawMessageTextLines(
+        fb,
+        playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+        "ROCK BLAST!",
+        99,
+      );
+    }
     return;
   }
   if (state.config.move === "SWIFT") {

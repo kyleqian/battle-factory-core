@@ -140,14 +140,17 @@ function audioStarts(rows: readonly Json[]): Json[] {
   });
 }
 
-function changeMap(side: Side, probe: Json, rgb: readonly Buffer[]): Json {
-  const rows = probe.frames as Json[];
-  invariant(probe.schema === "rock-blast-dense-evidence/v1" && probe.profile === "battle-scene-on" && probe.move === 350,
-    `${side}: probe identity drift`);
+function singleBodyChangeMap(
+  side: Side,
+  probe: Json,
+  rows: readonly Json[],
+  rgb: readonly Buffer[],
+  bodyIndex: number,
+): Json {
+  const bodyWindow = probe.bodyWindows[bodyIndex];
   invariant(
     rows.length === 90
-      && probe.sourceWindow.frameCount === 90
-      && probe.sourceWindow.sourceFrameCount === 90
+      && bodyWindow.frameCount === 90
       && rows[0]?.scriptOwner === "Move_ROCK_BLAST"
       && rows[0]?.scriptOffset === 0
       && rows[0]?.animScriptActive === true
@@ -158,7 +161,7 @@ function changeMap(side: Side, probe: Json, rgb: readonly Buffer[]): Json {
         && row.scriptOwner === "Move_ROCK_BLAST"
         && row.scriptPtr >= SOURCE_START && row.scriptPtr < SOURCE_END
         && (row.scriptPtrParity === 0 || row.scriptPtrParity === 1)),
-    `${side}: incomplete/non-owned first Rock Blast body`,
+    `${side} body ${bodyIndex}: incomplete/non-owned Rock Blast body`,
   );
   invariant(rows.every((row) => row.sprites.length <= 64 && row.tasks.length <= 16
     && row.softwareOam.length === 128 && row.hardwareOam.length === 128
@@ -166,9 +169,9 @@ function changeMap(side: Side, probe: Json, rgb: readonly Buffer[]): Json {
     && row.fadedPalette.length === 512 && row.hardwarePalette.length === 512
     && row.paletteTags.length === 16 && row.tileTags.length === 128
     && row.parties.player.length === 3 && row.parties.opponent.length === 3),
-  `${side}: dense state shape drift`);
+    `${side} body ${bodyIndex}: dense state shape drift`);
   invariant(rgb.length === rows.length && rgb.every((frame, age) => frame.length === 240 * 160 * 3
-    && sha(frame) === rows[age]!.sha256), `${side}: raw RGB receipt drift`);
+    && sha(frame) === rows[age]!.sha256), `${side} body ${bodyIndex}: raw RGB receipt drift`);
 
   const lives = Object.fromEntries(OWNED_TEMPLATES.map((symbol) => [symbol, spriteLives(rows, symbol)]));
   const shakeAges = rows.flatMap((row, age) => row.tasks.some(
@@ -181,9 +184,10 @@ function changeMap(side: Side, probe: Json, rgb: readonly Buffer[]): Json {
   };
   const audio = audioStarts(rows);
   const map = {
-    schema: "rock-blast-normalized-change-map/v1",
+    schema: "rock-blast-body-change-map/v1",
     side,
-    sourceWindow: probe.sourceWindow,
+    bodyIndex,
+    sourceWindow: bodyWindow,
     pointer: probe.sourcePointerContract,
     sourceRows: rows.map((row, age) => ({
       age, frame: row.frame, pointer: row.scriptPtr, pointerParity: row.scriptPtrParity,
@@ -248,9 +252,39 @@ function changeMap(side: Side, probe: Json, rgb: readonly Buffer[]): Json {
       && map.cleanup.age === 89 && !map.cleanup.active && map.cleanup.visualTasks === 0 && map.cleanup.soundTasks === 0
       && map.cleanup.ownedSprites === 0 && !map.cleanup.rocksTagged && !map.cleanup.impactTagged
       && map.cleanup.currentMove === 350 && map.cleanup.battleOutcome === 0,
-    `${side}: Rock Blast lifecycle/latch/cleanup contract drifted`,
+    `${side} body ${bodyIndex}: Rock Blast lifecycle/latch/cleanup contract drifted`,
   );
   return map;
+}
+
+function changeMap(side: Side, probe: Json, rgb: readonly Buffer[]): Json {
+  const rows = probe.frames as Json[];
+  const expectedBodies = side === "player-back" ? 3 : 2;
+  invariant(probe.schema === "rock-blast-dense-evidence/v1" && probe.profile === "battle-scene-on" && probe.move === 350,
+    `${side}: probe identity drift`);
+  invariant(probe.bodyWindows?.length === expectedBodies
+    && probe.stageFacts?.observedBodyCount === expectedBodies
+    && rows.length === expectedBodies * 90
+    && rgb.length === rows.length,
+  `${side}: incomplete natural multi-hit visual execution`);
+  const bodies = probe.bodyWindows.map((_: Json, bodyIndex: number) => {
+    const start = bodyIndex * 90;
+    return singleBodyChangeMap(side, probe, rows.slice(start, start + 90), rgb.slice(start, start + 90), bodyIndex);
+  });
+  invariant(probe.stageFacts.interBodyGaps.length === expectedBodies - 1
+    && probe.stageFacts.interBodyGaps.every((gap: Json) => gap.frameCount === 92
+      && !same(gap.hpBefore, gap.hpAfter)
+      && gap.gameplayRngBefore !== gap.gameplayRngAfter
+      && gap.animationRngBefore !== gap.animationRngAfter),
+  `${side}: inter-body stage facts drift`);
+  return {
+    schema: "rock-blast-normalized-change-map/v2",
+    side,
+    sourceWindow: probe.sourceWindow,
+    bodyWindows: probe.bodyWindows,
+    stageFacts: probe.stageFacts,
+    bodies,
+  };
 }
 
 function receiptFor(side: SidePaths, firstJson: string, firstRgb: string, repeatJson: string, repeatRgb: string): Json {
@@ -287,17 +321,18 @@ function bank(args: readonly string[]): void {
   const opponent = receiptFor(sides[1]!, args[4]!, args[5]!, args[6]!, args[7]!);
   const output = {
     schema: "rock-blast-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_ROCK_BLAST", moveId: 350,
-    status: "checkpoint", coverageCredit: false,
+    status: "exact", coverageCredit: true,
     evidenceScope: {
-      sourceAudit: true, completeFirstPointerBodyOnly: true, productionAnimationChanged: true,
+      sourceAudit: true, completeNaturalMultiHitVisualExecution: true, productionAnimationChanged: true,
       reducerAdded: true, typedSeamAdded: true, compositorAdded: true, framebufferCompared: true,
-      coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false,
+      coveragePromotion: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false,
       fullDenseRowsRetained: true, twiceFreshByteIdentical: true,
     },
     acceptance: {
       freshRunsPerOrientation: 2, firstInactiveCleanupRetained: true,
-      denseRows: { "player-back": 90, "opponent-front": 90 }, rawRgbRows: { "player-back": 90, "opponent-front": 90 },
-      normalizedChangeMaps: true, productionFramebufferRows: 180, productionFramebufferResidualPixels: 0,
+      naturalBodies: { "player-back": 3, "opponent-front": 2 },
+      denseRows: { "player-back": 270, "opponent-front": 180 }, rawRgbRows: { "player-back": 270, "opponent-front": 180 },
+      normalizedChangeMaps: true, productionFramebufferRows: 450, productionFramebufferResidualPixels: 0,
     },
     source: {
       audit: "tools/compare/rockBlastSourceAudit.ts", auditSha256: sha(readFileSync(resolve(root, "tools/compare/rockBlastSourceAudit.ts"))),
@@ -316,13 +351,13 @@ function bank(args: readonly string[]): void {
 export function verifyRockBlastEvidence(): Json {
   const receipt = JSON.parse(readFileSync(resolve(root, fixturePath), "utf8")) as Json;
   invariant(receipt.schema === "rock-blast-bilateral-evidence/v1" && receipt.oracleProfile === "battle-scene-on"
-    && receipt.move === "MOVE_ROCK_BLAST" && receipt.moveId === 350 && receipt.status === "checkpoint" && receipt.coverageCredit === false,
+    && receipt.move === "MOVE_ROCK_BLAST" && receipt.moveId === 350 && receipt.status === "exact" && receipt.coverageCredit === true,
   "Rock Blast receipt identity/credit drift");
-  invariant(receipt.evidenceScope.completeFirstPointerBodyOnly && receipt.evidenceScope.productionAnimationChanged
+  invariant(receipt.evidenceScope.completeNaturalMultiHitVisualExecution && receipt.evidenceScope.productionAnimationChanged
     && receipt.evidenceScope.reducerAdded && receipt.evidenceScope.typedSeamAdded && receipt.evidenceScope.compositorAdded
-    && receipt.evidenceScope.framebufferCompared && !receipt.evidenceScope.coveragePromotion
-    && receipt.acceptance.productionFramebufferRows === 180 && receipt.acceptance.productionFramebufferResidualPixels === 0,
-  "Rock Blast stronger unsupported production checkpoint drift");
+    && receipt.evidenceScope.framebufferCompared && receipt.evidenceScope.coveragePromotion
+    && receipt.acceptance.productionFramebufferRows === 450 && receipt.acceptance.productionFramebufferResidualPixels === 0,
+  "Rock Blast exact production acceptance drift");
   for (const [path, expected] of [
     [receipt.source.audit, receipt.source.auditSha256],
     [receipt.source.probe, receipt.source.probeSha256],

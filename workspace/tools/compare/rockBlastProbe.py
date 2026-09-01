@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Capture one complete pointer-owned Scene-ON MOVE_ROCK_BLAST body.
+"""Capture one complete natural Scene-ON MOVE_ROCK_BLAST visual execution.
 
 Rock Blast's battle effect can schedule two to five hits.  This wrapper stops
-at the *first* source-owned body when its animation pointer becomes inactive;
-later multi-hit bodies and battle-result presentation are intentionally out of
-scope.  It stages only complete legal mechanicLab parties and injects no
-transient battle or animation state.
+at the first inactive row after the *last* naturally scheduled source-owned
+body.  It observes the stock hit count without injecting or reproducing its
+gameplay decision.  It stages only complete legal mechanicLab parties and
+injects no transient battle or animation state.
 """
 from __future__ import annotations
 
@@ -18,6 +18,8 @@ os.environ.update({
     "POKEBENCH_ANIM_PROBE_MOVE_NAME": "Move_ROCK_BLAST",
     "POKEBENCH_ANIM_PROBE_END_NAME": "Move_OVERHEAT",
     "POKEBENCH_ANIM_PROBE_SCHEMA": "rock-blast-dense-evidence/v1",
+    "POKEBENCH_ANIM_PROBE_REPEATED_BODIES": "1",
+    "POKEBENCH_ANIM_PROBE_EXTRA_FRAMES": "400",
     "POKEBENCH_ANIM_PROBE_SYMBOLS": ",".join((
         "gHorizontalLungeSpriteTemplate",
         "gRockBlastRockSpriteTemplate",

@@ -1,20 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { verifyRockBlastEvidence } from "../../tools/compare/rockBlastEvidence.ts";
 
-describe("MOVE_ROCK_BLAST retained bilateral evidence checkpoint", () => {
-  it("keeps both complete first-body 90-row Scene-ON windows, normalized maps, and twice-fresh raw receipts", () => {
+describe("MOVE_ROCK_BLAST retained bilateral natural multi-hit evidence", () => {
+  it("keeps every complete 90-row Scene-ON body, normalized maps, and twice-fresh raw receipts", () => {
     expect(verifyRockBlastEvidence()).toEqual({
       "player-back": {
-        rows: 90,
-        dense: "58de90d25a6e789a043e888d10f07df75ad9b19e664e0b10d83ab32ab77b3f1a",
-        rawRgb: "3ec26484c71f10f26d918aac51225a1a5bac752da429a9494b1061240597a38d",
-        changeMap: "b8a8b491918568712def6b8a5b7f68a2ea3f334bee46f01fc0bccb7b4f6249a9",
+        rows: 270,
+        dense: "fc6b55865733db684147a0f70a8cefe1a525b43a1952e28c61dcf9bdb9b6c654",
+        rawRgb: "768d8bb5f10a0460f38cfcfaf849b6aaec932992efe20f0013a0e69a8df0637e",
+        changeMap: "7669c2bad28d27011becceb91113cfff1c921bc46754ea93014a615d391d1cc6",
       },
       "opponent-front": {
-        rows: 90,
-        dense: "00d5fecf7b7e37b55acf4f350ece79e936156de1e580ed157850ccf0e1109e6d",
-        rawRgb: "68caf65efba752ba1de58a5718189ae447919c2b0f209465c283c36c7c6bc1e1",
-        changeMap: "5a4531449fc12521cc0e76d99a53a36261dacf3c953f4f8ee163f15b3b235a78",
+        rows: 180,
+        dense: "010940a8f999cfeafca35cb8ba46f069aef8215ab68a1165a0c2832ce04ee6f6",
+        rawRgb: "83973308d3d2492a8c3e62bebe8061d901f5914c196d5d7cf102da3198fd001d",
+        changeMap: "90a40fb93f0bd22aad415b464075998c5eef73f484d7c85cc2e279ccea29eea1",
       },
     });
   });

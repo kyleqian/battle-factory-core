@@ -12,6 +12,7 @@ import {
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import {
+  readRockBlastBodies,
   readRockBlastRows,
   rockBlastProfileFor,
   type RockBlastEvidenceOrientation,
@@ -57,19 +58,26 @@ export function rockBlastConfigFor(
   const playerAttacker = orientation === "player-back";
   const playerMon = first.parties.player[first.battlers.player.partyIndex];
   const opponentMon = first.parties.opponent[first.battlers.opponent.partyIndex];
+  const bodies = readRockBlastBodies(orientation);
   return {
     move: "ROCK_BLAST",
     attacker: battler("RHYHORN", playerAttacker ? "player" : "opponent", first.battlerSprites.attacker),
     target: battler("SHUCKLE", playerAttacker ? "opponent" : "player", first.battlerSprites.target),
-    fieldProfile: {
-      playerHp: first.battlers.player.hp,
-      playerMaxHp: first.battlers.player.maxHp,
-      opponentHp: first.battlers.opponent.hp,
-      opponentMaxHp: first.battlers.opponent.maxHp,
-      playerGender: playerMon.gender === "genderless" ? undefined : playerMon.gender,
-      opponentGender: opponentMon.gender === "genderless" ? undefined : opponentMon.gender,
-    },
-    animationProfile: rockBlastProfileFor(orientation, rows),
+    bodies: bodies.map((bodyRows, bodyIndex) => {
+      const bodyFirst = bodyRows[0]!;
+      return {
+        moveTextVisible: bodyIndex === 0,
+        fieldProfile: {
+          playerHp: bodyFirst.battlers.player.hp,
+          playerMaxHp: bodyFirst.battlers.player.maxHp,
+          opponentHp: bodyFirst.battlers.opponent.hp,
+          opponentMaxHp: bodyFirst.battlers.opponent.maxHp,
+          playerGender: playerMon.gender === "genderless" ? undefined : playerMon.gender,
+          opponentGender: opponentMon.gender === "genderless" ? undefined : opponentMon.gender,
+        },
+        animationProfile: rockBlastProfileFor(orientation, bodyRows),
+      };
+    }) as unknown as SceneOnRockBlastConfig["bodies"],
   };
 }
 

@@ -27,6 +27,8 @@ EXTRA_SYMBOLS = tuple(filter(None, os.environ.get(
     "POKEBENCH_ANIM_PROBE_SYMBOLS",
     "SweetScentEffect,gSweetScentPetalSpriteTemplate,AnimSweetScentPetal,AnimSweetScentPetal_Step,AnimTask_BlendColorCycleByTag,AnimTask_BlendColorCycleByTagLoop",
 ).split(",")))
+REPEATED_BODIES = os.environ.get("POKEBENCH_ANIM_PROBE_REPEATED_BODIES") == "1"
+EXTRA_FRAMES = int(os.environ.get("POKEBENCH_ANIM_PROBE_EXTRA_FRAMES", "0"))
 
 
 def main() -> None:
@@ -140,7 +142,7 @@ def main() -> None:
             if snapshot["engine"].get("currentMove") != MOVE or not u8(active) or script != start:
                 return
             started = True
-        elif not u8(active):
+        elif not REPEATED_BODIES and not u8(active):
             done = True
         if started and not (done and rows and not rows[-1]["animScriptActive"]):
             rows.append(row(frame, snapshot))
@@ -153,6 +155,50 @@ def main() -> None:
                 break
         if done:
             break
+    body_windows: list[dict] = []
+    stage_facts: dict = {}
+    if REPEATED_BODIES:
+        for _ in range(EXTRA_FRAMES):
+            oracle.advance([]); frame += 1; take()
+        body_starts = [index for index, item in enumerate(rows)
+                       if item["animScriptActive"] and item["scriptPtr"] == start
+                       and (index == 0 or not rows[index - 1]["animScriptActive"])]
+        if not body_starts:
+            raise RuntimeError(f"no {MOVE_NAME} source body observed")
+        retained_indices: list[int] = []
+        for body_index, body_start in enumerate(body_starts):
+            body_end = next((index for index in range(body_start + 1, len(rows))
+                             if not rows[index]["animScriptActive"]), None)
+            if body_end is None:
+                raise RuntimeError(f"body {body_index} inactive {MOVE_NAME} cleanup not observed")
+            retained_indices.extend(range(body_start, body_end + 1))
+            body_windows.append({
+                "bodyIndex": body_index,
+                "startFrame": rows[body_start]["frame"],
+                "endFrame": rows[body_end]["frame"],
+                "frameCount": body_end - body_start + 1,
+            })
+        gaps = []
+        for left, right in zip(body_windows, body_windows[1:]):
+            before = next(item for item in rows if item["frame"] == left["endFrame"])
+            after = next(item for item in rows if item["frame"] == right["startFrame"])
+            gaps.append({
+                "afterFrame": left["endFrame"], "beforeFrame": right["startFrame"],
+                "frameCount": right["startFrame"] - left["endFrame"] - 1,
+                "hpBefore": [before["battlers"]["player"]["hp"], before["battlers"]["opponent"]["hp"]],
+                "hpAfter": [after["battlers"]["player"]["hp"], after["battlers"]["opponent"]["hp"]],
+                "gameplayRngBefore": before["immutableState"]["rngValue"],
+                "gameplayRngAfter": after["immutableState"]["rngValue"],
+                "animationRngBefore": before["animationRng"],
+                "animationRngAfter": after["animationRng"],
+            })
+        stage_facts = {"observedBodyCount": len(body_windows), "interBodyGaps": gaps}
+        rows = [rows[index] for index in retained_indices]
+        retained = {item["frame"] for item in rows}
+        for rgb_path in RGB.glob("*.rgb"):
+            if int(rgb_path.stem) not in retained:
+                rgb_path.unlink()
+        done = True
     if not rows or not done or rows[-1]["animScriptActive"]:
         raise RuntimeError(f"complete {MOVE_NAME} source window not observed: rows={len(rows)}, frame={frame}, ptr={hex(u32(pointer))}")
     topology = {
@@ -164,6 +210,7 @@ def main() -> None:
         "schema": SCHEMA, "profile": "battle-scene-on", "move": MOVE, "setup": setup,
         "sourceWindow": {"startFrame": rows[0]["frame"], "endFrame": rows[-1]["frame"], "frameCount": len(rows),
                          "sourceFrameCount": sum(row["scriptOwner"] == MOVE_NAME for row in rows)},
+        "bodyWindows": body_windows, "stageFacts": stage_facts,
         "sourcePointerContract": {"start": start, "endExclusive": end, "observedAddresses": sorted({row["scriptPtr"] for row in rows}),
                                   "observedParities": sorted({row["scriptPtrParity"] for row in rows if row["scriptOwner"] == MOVE_NAME})},
         "sourceSymbols": {name: names[name] for name in (MOVE_NAME, END_NAME, *EXTRA_SYMBOLS) if name in names},
