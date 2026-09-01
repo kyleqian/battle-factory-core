@@ -166,7 +166,7 @@ def main() -> None:
         for _ in range(EXTRA_FRAMES):
             oracle.advance([]); frame += 1; take()
         body_starts = [index for index, item in enumerate(rows)
-                       if item["animScriptActive"] and item["scriptPtr"] == start
+                       if item["animScriptActive"] and item["scriptOwner"] == MOVE_NAME
                        and (index == 0 or not rows[index - 1]["animScriptActive"])]
         if not body_starts:
             raise RuntimeError(f"no {MOVE_NAME} source body observed")

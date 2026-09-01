@@ -7745,6 +7745,43 @@
       "tests/animation/stockpileFramebuffer.test.ts"
     ],
     "goal": "FULFILLED by MOVE_STOCKPILE only: the pure source-relative reducer, typed live seam, generic actual-core compositor, altered ARON/GROVYLE species/side/geometry/allocator/order/matrix control, and twice-run 198/198 zero-residual framebuffer equality cover all six assigned components. The complete bilateral source/OAM/matrix/palette/resource/audio/cleanup evidence retains Stockpile's measured orb RAM+1 and attacker-deformation RAM+2 contracts without a carrier gate, recording/framebuffer lookup, coordinate/RGB fit, absolute tick, or gameplay ownership. MOVE_SWALLOW, MOVE_SPIT_UP, MOVE_SAFEGUARD, MOVE_CONFUSE_RAY, and MOVE_SOFT_BOILED retain independent statuses and receive no inferred credit."
+  },
+  {
+  "id": "razor-wind-two-turn-air-wave",
+  "components": [
+   "asset:ANIM_TAG_AIR_WAVE_2",
+   "asset:ANIM_TAG_GUST",
+   "asset:ANIM_TAG_IMPACT",
+   "sprite:gAirWaveCrescentSpriteTemplate",
+   "sprite:gRazorWindTornadoSpriteTemplate",
+   "subroutine:RazorWindEnd",
+   "subroutine:RazorWindSetUp",
+   "subroutine:RazorWindUnleash",
+   "task:AnimTask_ShakeMon2",
+   "visualCommand:monbg",
+   "visualCommand:setalpha",
+   "visualCommand:clearmonbg",
+   "visualCommand:blendoff"
+  ],
+  "representatives": ["MOVE_RAZOR_WIND"],
+  "fulfilled": false,
+  "evidence": [
+   "tools/battle-lab/mechanic-razor-wind-player-nuzleaf-opponent-onix.json",
+   "tools/battle-lab/mechanic-razor-wind-opponent-nuzleaf-player-onix.json",
+   "tools/compare/razorWindSourceAudit.ts",
+   "tools/compare/razorWindProbe.py",
+   "tools/compare/razorWindEvidence.ts",
+   "tools/compare/fixtures/razor-wind-evidence.json",
+   "tools/compare/evidence/razor-wind-player-dense-state.json.gz",
+   "tools/compare/evidence/razor-wind-opponent-dense-state.json.gz",
+   "tools/compare/evidence/razor-wind-player-raw-rgb.tar.gz",
+   "tools/compare/evidence/razor-wind-opponent-raw-rgb.tar.gz",
+   "tools/compare/evidence/razor-wind-changemap-player.json",
+   "tools/compare/evidence/razor-wind-changemap-opponent.json",
+   "tests/animation/razorWindSourceCheckpoint.test.ts",
+   "tests/animation/razorWindEvidenceCheckpoint.test.ts"
+  ],
+  "goal": "UNFULFILLED: bank complete bilateral Scene-ON source/OAM/matrix/palette/resource/audio/gameplay+animation-RNG/state and normalized change-map evidence through each first inactive cleanup, twice fresh per orientation. MOVE_RAZOR_WIND remains unsupported until a source-relative reducer, typed seam, generic actual-core compositor, materially altered live control, and two-run zero-residual production framebuffer acceptance all land. AIR_WAVE_2/crescent, GUST/IMPACT/ShakeMon2 controls, and outside-Factory MOVE_AEROBLAST receive no inferred credit."
   }
  ],
  "variantAudits": {
