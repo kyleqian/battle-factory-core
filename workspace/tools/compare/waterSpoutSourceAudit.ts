@@ -86,7 +86,7 @@ if (
   || !registry.includes("{gBattleAnimSpriteGfx_WaterImpact, 0x0200, ANIM_TAG_WATER_IMPACT}")
   || !constants.includes("#define ANIM_TAG_GLOWY_BLUE_ORB             (ANIM_SPRITES_START + 268)")
   || !constants.includes("#define ANIM_TAG_WATER_IMPACT               (ANIM_SPRITES_START + 148)")
-  || coverageEntry !== undefined || track?.fulfilled !== false || JSON.stringify(track?.components) !== JSON.stringify(components)
+  || coverageEntry?.status !== "exact" || track?.fulfilled !== true || JSON.stringify(track?.components) !== JSON.stringify(components)
 ) throw new Error("MOVE_WATER_SPOUT source/carrier/graph/callback/coverage contract changed");
 
 console.log(JSON.stringify({
@@ -96,11 +96,11 @@ console.log(JSON.stringify({
   carrier: { firstLevel50: "set 275 FRONTIER_MON_WAILMER_2 / SPECIES_WAILMER / MOVE_WATER_SPOUT", remainingLevel50: [275] },
   components,
   liveFacts: {
-    powerTier: "GetWaterSpoutPowerForAnim returns 0..3 from the live attacker's current HP quarter; the legal full-HP stages prove tier 3 only",
+    powerTier: "GetWaterSpoutPowerForAnim returns 0..3 from live HP; legal Toxic staging independently proves tiers 0..2 and full HP proves tier 3",
     launch: "tier controls increment=4-tier for the 0..<20 launch-orb loop; attacker affine deformation and geometry are live",
     rain: "tier controls 5*tier+5 rain attempts; side selects x/y bounds, ISO_RANDOMIZE2 controls x layout, impacts use affine animation 3",
     shake: "first rain impact creates HorizontalShake(target,0,12) and a defender-partner task that aborts in singles",
   },
   audio: ["SE_M_HEADBUTT / SOUND_PAN_ATTACKER", "SE_M_DIVE / SOUND_PAN_ATTACKER after 44 frames", "SE_M_SURF / SOUND_PAN_TARGET"],
-  checkpoint: { coverageEntry: "absent/unsupported", track: "water-spout-launch-rain", fulfilled: false },
+  checkpoint: { coverageEntry: "exact", track: "water-spout-launch-rain", fulfilled: true },
 }, null, 2));

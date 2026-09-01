@@ -144,6 +144,11 @@ def main() -> None:
             started = True
         elif not REPEATED_BODIES and not u8(active):
             done = True
+        if REPEATED_BODIES and started:
+            in_selected_body = bool(u8(active)) and start <= script < end
+            first_inactive_cleanup = bool(rows and rows[-1]["animScriptActive"] and not u8(active))
+            if not in_selected_body and not first_inactive_cleanup:
+                return
         if started and not (done and rows and not rows[-1]["animScriptActive"]):
             rows.append(row(frame, snapshot))
 

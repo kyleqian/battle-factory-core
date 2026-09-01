@@ -12,6 +12,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { readWaterSpoutTierRows } from "./waterSpoutTierEvidence.ts";
 
 type Json = Record<string, any>;
 export type WaterSpoutOrientation = "player-back" | "opponent-front";
@@ -47,12 +48,16 @@ function battler(species: "NOSEPASS" | "SHUCKLE", side: "player" | "opponent", s
   };
 }
 
+function healthboxStatus(status: Json): "none" | "sleep" | "poison" | "burn" | "freeze" | "paralysis" {
+  return status.kind === "toxic" ? "poison" : status.kind;
+}
+
 export function waterSpoutConfigFor(
   orientation: WaterSpoutOrientation,
   rows = readWaterSpoutRows(orientation),
 ): SceneOnWaterSpoutConfig {
   const first = rows[0]!;
-  const launch = rows[55]!.sprites.filter((sprite: Json) => sprite.template?.symbol === "gSmallWaterOrbSpriteTemplate");
+  const freeSpriteSlots = first.spriteFlags.flatMap((flags: number, slot: number) => (flags & 1) === 0 ? [slot] : []);
   const playerAttacker = orientation === "player-back";
   const attackerSide = playerAttacker ? "player" : "opponent";
   const playerMon = first.parties.player[first.battlers.player.partyIndex];
@@ -72,6 +77,8 @@ export function waterSpoutConfigFor(
       opponentHp: first.battlers.opponent.hp, opponentMaxHp: first.battlers.opponent.maxHp,
       playerGender: playerMon.gender === "genderless" ? "none" : playerMon.gender,
       opponentGender: opponentMon.gender === "genderless" ? "none" : opponentMon.gender,
+      playerStatus: healthboxStatus(first.battlers.player.status),
+      opponentStatus: healthboxStatus(first.battlers.opponent.status),
     },
     animationInputs: {
       attackerSide,
@@ -80,7 +87,10 @@ export function waterSpoutConfigFor(
       attackerEffectCenter: playerAttacker ? { x: 72, y: 100 } : { x: 176, y: 52 },
       attackerSubpriority: first.battlerSprites.attacker.subpriority,
       launchTaskSlot: 0,
-      launchSpriteSlots: launch.map((sprite: Json) => sprite.slot),
+      // CreateSprite scans every free source slot.  Full HP happened to need
+      // only the first 20; lower tiers reuse those slots while impacts can
+      // overlap the smaller launch allocation and legitimately scan farther.
+      launchSpriteSlots: freeSpriteSlots,
       impactAffineSlots,
       attackerSourceHeight: 40,
       animationRng: rows[55]!.animationRng,
@@ -89,7 +99,7 @@ export function waterSpoutConfigFor(
   };
 }
 
-function compareRows(orientation: WaterSpoutOrientation, rows: Json[], rgbRoot: string) {
+export function compareWaterSpoutRows(orientation: WaterSpoutOrientation, rows: Json[], rgbRoot: string) {
   const stage = createSceneOnMovePresentation(waterSpoutConfigFor(orientation, rows));
   let matched = 0; let residualPixels = 0;
   const failures: string[] = [];
@@ -118,7 +128,19 @@ export function inspectWaterSpoutFramebuffer() {
     if (sha256(readFileSync(archivePath)) !== receipt.rawRgbArchiveSha256) throw new Error(`${orientation}: raw archive hash drifted`);
     const scratch = createScratchDir(`pokebench-water-spout-${orientation}-`);
     execFileSync("tar", ["-xzf", archivePath, "-C", scratch]);
-    return { orientation, rows: rows.length, ...compareRows(orientation, rows, scratch) };
+    return { orientation, rows: rows.length, ...compareWaterSpoutRows(orientation, rows, scratch) };
+  });
+}
+
+export function inspectWaterSpoutTierFramebuffer() {
+  return (["player-back", "opponent-front"] as const).flatMap((orientation) => {
+    const side = orientation === "player-back" ? "player" : "opponent";
+    const archive = resolve(root, `tools/compare/evidence/water-spout-lower-${side}-raw-rgb.tar.gz`);
+    const scratch = createScratchDir(`pokebench-water-spout-lower-${side}-`);
+    execFileSync("tar", ["-xzf", archive, "-C", scratch]);
+    const tiers = readWaterSpoutTierRows(orientation);
+    return ([2, 1, 0] as const).map((tier) => ({ orientation, tier, rows: tiers[tier].length,
+      ...compareWaterSpoutRows(orientation, tiers[tier], scratch) }));
   });
 }
 
@@ -126,5 +148,8 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.
   for (const result of inspectWaterSpoutFramebuffer()) {
     console.log(`${result.orientation}: ${result.matched}/${result.rows}, residual=${result.residualPixels}`);
     if (result.failures.length) console.log(result.failures.slice(0, 80).join(","));
+  }
+  for (const result of inspectWaterSpoutTierFramebuffer()) {
+    console.log(`${result.orientation} tier ${result.tier}: ${result.matched}/${result.rows}, residual=${result.residualPixels}`);
   }
 }

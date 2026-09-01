@@ -1585,6 +1585,8 @@ export interface SceneOnDragonRageFieldProfile {
   readonly opponentMaxHp: number;
   readonly playerGender?: "male" | "female";
   readonly opponentGender?: "male" | "female";
+  readonly playerStatus?: "none" | "sleep" | "poison" | "burn" | "freeze" | "paralysis";
+  readonly opponentStatus?: "none" | "sleep" | "poison" | "burn" | "freeze" | "paralysis";
 }
 
 export interface SceneOnDragonRageConfig {

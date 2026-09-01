@@ -89,7 +89,7 @@ type MutableLaunchTask = {
   active: boolean;
 };
 
-const WATER_SPOUT_END_AGE = 277;
+const WATER_SPOUT_MAX_END_AGE = 277;
 const WATER_SPOUT_LAUNCH_AFFINE_LAG2 = new Set([
   ...Array.from({ length: 32 }, (_, index) => index + 11),
   ...Array.from({ length: 8 }, (_, index) => index + 48),
@@ -225,13 +225,28 @@ function launchTaskStep(
   }
 }
 
-function shakeX2(age: number, creationAge: number): number {
+function waterSpoutMovePower(hp: number, maxHp: number): number {
+  return Math.max(1, Math.trunc(hp * 150 / maxHp));
+}
+
+function shakeInitialOffset(hp: number, maxHp: number): number {
+  // AnimTask_HorizontalShake receives intensity 0, so the source derives its
+  // offset from gAnimMovePower.  Water Spout's scaledamagebyhealthratio has
+  // already replaced that power with floor(150 * HP / maxHP).
+  return Math.trunc(waterSpoutMovePower(hp, maxHp) / 10) + 3;
+}
+
+function shakeDuration(initialOffset: number): number {
+  return 2 * WATER_SPOUT_HORIZONTAL_SHAKE.duration + 8 * (initialOffset - 1);
+}
+
+function shakeX2(age: number, creationAge: number, duration: number, initialOffset: number): number {
   const local = age - creationAge;
-  if (local < 1 || local >= 160) return 0;
+  if (local < 1 || local >= duration) return 0;
   const callback = Math.floor((local + 1) / 2);
-  if (callback <= 12) return callback & 1 ? 9 : -9;
+  if (callback <= 12) return callback & 1 ? Math.ceil(initialOffset / 2) : -Math.floor(initialOffset / 2);
   const decayCallback = callback - 12;
-  const magnitude = 17 - Math.floor((decayCallback - 1) / 4);
+  const magnitude = initialOffset - 1 - Math.floor((decayCallback - 1) / 4);
   if (magnitude <= 0) return 0;
   const timer = (decayCallback - 1) % 4;
   return timer & 1 ? -Math.floor(magnitude / 2) : Math.ceil(magnitude / 2);
@@ -262,7 +277,9 @@ export function waterSpoutTimeline(inputs: Readonly<WaterSpoutLiveInputs>): read
     ?? Array.from({ length: 64 }, (_, slot) => slot);
   if (spriteOrder.length !== 64 || new Set(spriteOrder).size !== 64) throw new Error("Water Spout sprite order seed must permute all 64 slots");
 
-  for (let age = 0; age <= WATER_SPOUT_END_AGE; age += 1) {
+  const targetShakeInitialOffset = shakeInitialOffset(inputs.attackerHp, inputs.attackerMaxHp);
+  const targetShakeDuration = shakeDuration(targetShakeInitialOffset);
+  for (let age = 0; age <= WATER_SPOUT_MAX_END_AGE; age += 1) {
     if (age === 10) task.active = true;
 
     // AnimateSprites scans slots before the visual-task pass. A hit created
@@ -339,18 +356,18 @@ export function waterSpoutTimeline(inputs: Readonly<WaterSpoutLiveInputs>): read
     }
     const painterOrder = spriteOrder.filter((slot) => keys.has(slot)).reverse();
     frames.push({
-      age, active: age < WATER_SPOUT_END_AGE,
+      age, active: true,
       source: sourceCursor(age, launchDestroyAge < 0 ? age : launchDestroyAge, rainStartAge),
       launchTaskActive: task.active,
       rainTaskActive: age >= rainStartAge && (nextRain < attempts.length || liveSprites.some((sprite) => sprite.kind === "rain" || sprite.kind === "impact")),
       launchDestroyAge, rainStartAge,
       attacker: { x: task.x, y: task.y, x2: task.x2, y2: task.y2, matrix: launchMatrix, affine: task.active && task.state < 7 },
-      targetX2: shakeX2(age, shakeCreationAge),
+      targetX2: shakeX2(age, shakeCreationAge, targetShakeDuration, targetShakeInitialOffset),
       monbgEnabled: age >= 7 && age < rainStartAge,
       blendEnabled: age >= 10 && age < rainStartAge,
       sprites: liveSprites,
       painterOrder,
-      resourcesRetained: age >= 1 && age < WATER_SPOUT_END_AGE,
+      resourcesRetained: age >= 1,
       audio: [
         ...(age === 10 ? [{ age, song: "HEADBUTT" as const, pan: "attacker" as const }] : []),
         ...(age === 56 ? [{ age, song: "DIVE" as const, pan: "attacker" as const }] : []),
@@ -360,15 +377,27 @@ export function waterSpoutTimeline(inputs: Readonly<WaterSpoutLiveInputs>): read
   }
   // Fill cursor-derived lifecycle fields that were unknown before the launch
   // task reached its source-owned terminal condition.
-  const complete = frames.map((frame) => ({ ...frame, launchDestroyAge, rainStartAge,
-    source: sourceCursor(frame.age, launchDestroyAge, rainStartAge) }));
+  // `end` is held by the longer of SE_M_SURF (98 displayed rows from its
+  // source-relative start) and the HP-power-derived HorizontalShake task.
+  // The latter remains live for duration rows and yields one pointer cleanup
+  // row before the first inactive display.
+  const endAge = Math.max(rainStartAge + 98, shakeCreationAge + targetShakeDuration + 1);
+  const complete = frames.slice(0, endAge + 1).map((frame) => ({
+    ...frame,
+    active: frame.age < endAge,
+    resourcesRetained: frame.age >= 1 && frame.age < endAge,
+    launchDestroyAge,
+    rainStartAge,
+    source: sourceCursor(frame.age, launchDestroyAge, rainStartAge),
+  }));
   WATER_SPOUT_TIMELINE_CACHE.set(inputs, complete);
   return complete;
 }
 
 export function waterSpoutAtAge(age: number, inputs: Readonly<WaterSpoutLiveInputs>): WaterSpoutFrame {
-  if (!Number.isInteger(age) || age < 0 || age > WATER_SPOUT_END_AGE) throw new Error("Water Spout age out of range");
-  return waterSpoutTimeline(inputs)[age]!;
+  const timeline = waterSpoutTimeline(inputs);
+  if (!Number.isInteger(age) || age < 0 || age >= timeline.length) throw new Error("Water Spout age out of range");
+  return timeline[age]!;
 }
 
 export function waterSpoutLaunchMatrixSourceAge(displayAge: number): number {

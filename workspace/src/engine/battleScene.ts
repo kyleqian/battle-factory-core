@@ -14531,11 +14531,11 @@ export function renderSceneOnMovePresentation(
     const profile = waterSpoutState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
-      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none",
     }));
     drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
       name: player.species, level: 50, gender: profile.playerGender ?? "male",
-      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none",
       currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
     }));
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);

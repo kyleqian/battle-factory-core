@@ -32,7 +32,7 @@
   },
   "source": {
     "audit": "tools/compare/waterSpoutSourceAudit.ts",
-    "auditSha256": "98ab3d83a7aaec1872a36b276d2c1ef1fa34bd6a06bed809bae211e9a6b291b3",
+    "auditSha256": "34daef6c4c254a484dd5f04cd747767d163b60b2cd03143ca6113524d8d4706e",
     "probe": "tools/compare/waterSpoutProbe.py",
     "probeSha256": "cee756aecb7e580a8a1e197f2d0b9aba04e27ab80242a7873629876e61930eb4"
   },

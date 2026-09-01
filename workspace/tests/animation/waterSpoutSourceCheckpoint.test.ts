@@ -7,14 +7,14 @@ const completeKeys = ["abilitySlot", "evs", "friendship", "gender", "item", "ivs
 const statKeys = ["attack", "defense", "hp", "spAttack", "spDefense", "speed"];
 
 describe("MOVE_WATER_SPOUT source and legal-staging checkpoint", () => {
-  it("pins the complete root, exact generated graph, lowest carrier, callbacks, and unsupported boundary", () => {
+  it("pins the complete root, exact generated graph, lowest carrier, callbacks, and exact boundary", () => {
     const result = audit();
     expect(result).toMatchObject({
       move: "MOVE_WATER_SPOUT", moveId: 323,
       sourceBounds: { start: "0x082cef63", endExclusive: "0x082cef91", bytes: "0x2e" },
       sourceText: { bytes: 449, commandRows: 14 },
       carrier: { firstLevel50: "set 275 FRONTIER_MON_WAILMER_2 / SPECIES_WAILMER / MOVE_WATER_SPOUT", remainingLevel50: [275] },
-      checkpoint: { coverageEntry: "absent/unsupported", track: "water-spout-launch-rain", fulfilled: false },
+      checkpoint: { coverageEntry: "exact", track: "water-spout-launch-rain", fulfilled: true },
     });
     expect(result.components).toEqual([
       "asset:ANIM_TAG_GLOWY_BLUE_ORB", "asset:ANIM_TAG_WATER_IMPACT",

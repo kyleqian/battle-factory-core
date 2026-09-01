@@ -1,3 +1,12 @@
+# MOVE_WATER_SPOUT all legal HP tiers exact (2026-09-01 worker)
+
+- **State:** Level 50 advances to **219/276 exact, 0 partial / 0 staged, 57 unsupported**. MOVE_WATER_SPOUT is exact and `water-spout-launch-rain` is fulfilled; WATER_GUN, HYDRO_PUMP, CRABHAMMER, and every other water sibling retain independent acceptance.
+- **Legal staging:** Complete HP-invested Wailmer/Shuckle parties use only real battle actions: Shuckle's legal TM06 Toxic produces escalating stock-ROM damage, leaving Wailmer at **89/137 (tier 2), 57/137 (tier 1), and 17/137 (tier 0)** before successive Water Spouts. No transient HP/status/stage/outcome injection, gameplay shortcut, or outcome change is used.
+- **Evidence:** Every visibly distinct tier is bilateral and twice fresh through first inactive cleanup: tier 3 **278+278**, tier 2 **229+230**, tier 1 **204+206**, tier 0 **204+201** dense/raw-RGB rows. Both complete repeated-body probes and all selected RGB sequences are byte-identical; the six lower-tier bodies total **1,274 rows per run**.
+- **Production:** The live reducer now derives `AnimTask_HorizontalShake` intensity and lifetime from source `gAnimMovePower = max(1, floor(150*HP/maxHP))`; the typed field profile carries live healthbox status, and the allocator view exposes every free source slot. The actual reducer → typed seam → core compositor matches **1,274/1,274 lower-tier + 556/556 tier-3 = 1,830/1,830 rows**, **zero residual pixels** (and therefore **3,660 retained run-rows** across the byte-identical pairs). The existing altered SURSKIT/ARON geometry/allocator/order control remains independent and green.
+- **Boundary:** No recording/framebuffer lookup, carrier gate, absolute tick, coordinate/RGB fit, gameplay damage/status/RNG/turn/round/facility ownership, unsupported barrier, or animation import-boundary widening was added. The repeated-body probe now retains only selected pointer bodies plus their first inactive cleanup, avoiding unbounded inter-body dense-state memory.
+- **Checks:** Focused, coverage/audit, full-suite, and build results are recorded in the worker commit/final report.
+
 # MOVE_WATER_SPOUT full-HP tier-3 exact production checkpoint — unsupported (2026-09-01 worker)
 
 - **State:** Level 50 remains **218/276 exact, 0 partial / 0 staged, 58 unsupported**. MOVE_WATER_SPOUT and `water-spout-launch-rain` remain uncredited because lower-HP tiers 0..2 still require later legal evidence; WATER_GUN, HYDRO_PUMP, and CRABHAMMER remain independent exact controls with no sibling credit.

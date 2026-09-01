@@ -2,6 +2,41 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_WATER_SPOUT",
+   "status": "exact",
+   "covered": [
+    "all four stock GetWaterSpoutPowerForAnim HP tiers are independently retained through first inactive cleanup in both orientations: tier 3 is 278+278 rows, tier 2 is 229+230, tier 1 is 204+206, and tier 0 is 204+201; every dense state and raw-RGB sequence reproduces byte-identically twice fresh",
+    "tiers 2, 1, and 0 are legally staged without transient injection: HP-invested Wailmer begins at 137/137 while Shuckle uses legal TM06 Toxic, and escalating stock-ROM toxic damage leaves Wailmer at 89/137, 57/137, and 17/137 before the accepted bodies",
+    "the live HP reducer selects launch-orb counts 5/7/10/20 and rain-attempt counts 5/10/15/20; Water Spout's scaled move power independently drives AnimTask_HorizontalShake intensity and lifetime through gAnimMovePower rather than an HP-tier table",
+    "the generic typed presentation seam carries live HP, status, battler geometry, allocator order, source height, and animation RNG without changing damage, status, gameplay RNG, turn order, round, or facility state",
+    "actual core.ts to renderSceneOnMovePresentation framebuffer equality passes all 1,274 retained lower-tier bilateral rows plus 556 full-HP rows with zero residual pixels, twice; the established altered SURSKIT/ARON species, geometry, allocator, and painter-order control remains green",
+    "WATER_GUN, HYDRO_PUMP, CRABHAMMER, and the other water-impact users retain independent move acceptance; this promotion fulfills only MOVE_WATER_SPOUT and its dedicated launch/rain component track"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-water-spout-player-wailmer-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-water-spout-opponent-wailmer-player-shuckle.json",
+    "tools/battle-lab/mechanic-water-spout-tiers-player-wailmer-opponent-shuckle-toxic.json",
+    "tools/battle-lab/mechanic-water-spout-tiers-opponent-wailmer-player-shuckle-toxic.json",
+    "tools/compare/fixtures/water-spout-evidence.json",
+    "tools/compare/fixtures/water-spout-lower-tiers.json",
+    "tools/compare/evidence/water-spout-lower-player-dense-state.json.gz",
+    "tools/compare/evidence/water-spout-lower-opponent-dense-state.json.gz",
+    "tools/compare/evidence/water-spout-lower-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/water-spout-lower-opponent-raw-rgb.tar.gz",
+    "tools/compare/waterSpoutEvidence.ts",
+    "tools/compare/waterSpoutTierEvidence.ts",
+    "tools/compare/waterSpoutFramebuffer.ts",
+    "src/animation/waterSpout.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/waterSpoutEvidence.test.ts",
+    "tests/animation/waterSpoutTierEvidence.test.ts",
+    "tests/animation/waterSpoutReducer.test.ts",
+    "tests/animation/waterSpoutFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_ROCK_BLAST",
    "status": "exact",
    "covered": [
@@ -6931,7 +6966,7 @@
     "visualCommand:setalpha"
    ],
    "representatives": ["MOVE_WATER_SPOUT"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/battle-lab/mechanic-water-spout-player-wailmer-opponent-shuckle.json",
     "tools/battle-lab/mechanic-water-spout-opponent-wailmer-player-shuckle.json",
@@ -6939,7 +6974,9 @@
     "tools/compare/waterSpoutProbe.py",
     "tools/compare/waterSpoutEvidence.ts",
     "tools/compare/waterSpoutFramebuffer.ts",
+    "tools/compare/waterSpoutTierEvidence.ts",
     "tools/compare/fixtures/water-spout-evidence.json",
+    "tools/compare/fixtures/water-spout-lower-tiers.json",
     "tools/compare/evidence/water-spout-player-dense-state.json.gz",
     "tools/compare/evidence/water-spout-opponent-dense-state.json.gz",
     "tools/compare/evidence/water-spout-player-raw-rgb.tar.gz",
@@ -6955,7 +6992,7 @@
     "tests/animation/waterSpoutReducer.test.ts",
     "tests/animation/waterSpoutFramebuffer.test.ts"
    ],
-   "goal": "UNFULFILLED full-HP tier-3 exact-production checkpoint: MOVE_WATER_SPOUT's complete source-relative reducer and generic typed live compositor cover launch deformation/orbs, randomized rain, affine WATER_IMPACT, target HorizontalShake, persistent OAM painter order, registers/monbg, audio/resources/chrome, and cleanup. Complete bilateral Scene-ON bodies pass actual core framebuffer equality at 278/278 rows per orientation, zero residual pixels, twice, plus altered live species/geometry/allocator/order control. No move/component/sibling credit is implied: legal lower-HP tiers 0..2 remain independently unevidenced and required before promotion."
+   "goal": "FULFILLED: MOVE_WATER_SPOUT independently proves all four live HP tiers, including legally staged tier-2 229/230-row, tier-1 204/206-row, tier-0 204/201-row, and full-HP tier-3 278/278-row bilateral bodies twice fresh. The source-relative reducer and generic typed compositor cover launch deformation/orbs, randomized rain, affine WATER_IMPACT, HP-scaled HorizontalShake intensity/lifetime, persistent OAM painter order, live poison chrome, registers/monbg, audio/resources, and cleanup with 1,830/1,830 zero-residual production rows per pass. No sibling move receives inferred credit."
   },
   {
    "id": "splitbgprio-foes-sonic-ring",

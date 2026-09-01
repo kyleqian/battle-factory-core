@@ -1,0 +1,52 @@
+{
+  "schema": "water-spout-lower-tier-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_WATER_SPOUT",
+  "legalStaging": "Shuckle uses TM06 Toxic; escalating stock-ROM toxic damage leaves HP-invested Wailmer at 89/137, 57/137, and 17/137 before successive Water Spouts.",
+  "freshRunsPerOrientation": 2,
+  "tiers": [
+    2,
+    1,
+    0
+  ],
+  "source": {
+    "probe": "tools/compare/waterSpoutProbe.py",
+    "repeatedBodyProbe": "tools/compare/sweetScentProbe.py"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-water-spout-tiers-player-wailmer-opponent-shuckle-toxic.json",
+      "scenarioSha256": "ae0a30d8fd16d85359bd5f2e02bfdfc92fc5f74f4d987768c0837be8e8fa50b8",
+      "denseState": "tools/compare/evidence/water-spout-lower-player-dense-state.json.gz",
+      "denseStateSha256": "5b73ffdd82374ff14a277d00800abc9463999cffb7c3d1f2c3360af589c0f553",
+      "probeJsonSha256": "abd2b4d09d5a5aa6b45850ee778cfcf17733e4d3d5878088eb541bffe0fb0bac",
+      "repeatProbeJsonSha256": "abd2b4d09d5a5aa6b45850ee778cfcf17733e4d3d5878088eb541bffe0fb0bac",
+      "rawRgbArchive": "tools/compare/evidence/water-spout-lower-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "937a7f69a427b17fbb56a17d7ea87ec683cba1260864ed398d6e3317b32b9ae2",
+      "rawRgbSequenceSha256": "0e22068466f2417eb8ce1f1bde2c687617593391208efef20259c2153093101e",
+      "repeatRawRgbSequenceSha256": "0e22068466f2417eb8ce1f1bde2c687617593391208efef20259c2153093101e",
+      "rows": {
+        "0": 204,
+        "1": 204,
+        "2": 229
+      }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-water-spout-tiers-opponent-wailmer-player-shuckle-toxic.json",
+      "scenarioSha256": "d2dde8918697fe8bda9346eb0e680371805c2b55fa6f1fb838032052ed1fa2be",
+      "denseState": "tools/compare/evidence/water-spout-lower-opponent-dense-state.json.gz",
+      "denseStateSha256": "6c67007bd26543d1fa8bc8a2021a700ddb2a9891913e6219f649ee4f4e3b62f0",
+      "probeJsonSha256": "4b78e06b8629c0b0a75e1f07008ba8745fe5845869cdeaf7f44f4ba2e95e65c0",
+      "repeatProbeJsonSha256": "4b78e06b8629c0b0a75e1f07008ba8745fe5845869cdeaf7f44f4ba2e95e65c0",
+      "rawRgbArchive": "tools/compare/evidence/water-spout-lower-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "1ec2f0764a00cee7e1a088789a7b507d3e38f4a6c228a3c1c0fe525dcaa34250",
+      "rawRgbSequenceSha256": "528661e490a8b6ee59be4d412864809b74aacb0bda578edd0b92b2945edeb920",
+      "repeatRawRgbSequenceSha256": "528661e490a8b6ee59be4d412864809b74aacb0bda578edd0b92b2945edeb920",
+      "rows": {
+        "0": 201,
+        "1": 206,
+        "2": 230
+      }
+    }
+  }
+}
