@@ -61,7 +61,7 @@ describe("MOVE_DEFENSE_CURL production framebuffer", () => {
   it("promotes Defense Curl alone and preserves palette-command controls", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(216);
+      .toHaveLength(217);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_DEFENSE_CURL"))
       .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) =>
