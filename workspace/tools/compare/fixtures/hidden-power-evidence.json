@@ -1,0 +1,76 @@
+{
+  "schema": "hidden-power-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_HIDDEN_POWER",
+  "moveId": 237,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "source": {
+    "start": "0x082ca7bc",
+    "endExclusive": "0x082ca8a5",
+    "bytes": 233,
+    "sha256": "68b6a189a36cacd319614b20e5b265c08b4308f4e1063b94aaf2a3812aa0b76d",
+    "components": [
+      "asset:ANIM_TAG_RED_ORB",
+      "sprite:gHiddenPowerOrbScatterSpriteTemplate",
+      "sprite:gHiddenPowerOrbSpriteTemplate",
+      "task:AnimTask_BlendMonInAndOut",
+      "task:AnimTask_ScaleMonAndRestore",
+      "visualCommand:setarg"
+    ],
+    "probe": "tools/compare/hiddenPowerProbe.py",
+    "probeSha256": "1cd6a174b35872efbcfe2e0201db44e9209f6cfac7760009ce2ecb8bd5e9a7e8",
+    "audit": "tools/compare/hiddenPowerSourceAudit.ts",
+    "auditSha256": "b8177fb6c62f402ba2644cd5655944061f1f546824b2fea176e7a39e10cfc699",
+    "changeMapBuilder": "tools/compare/hiddenPowerChangeMap.ts",
+    "changeMapBuilderSha256": "f1e7c7f59a2bf83b70fdd524d08959793993e514e780c073f40e3bcfc8c1fe98",
+    "assetExtractor": "tools/compare/extractHiddenPowerAssets.ts",
+    "assetExtractorSha256": "7525b5c49a33374b0f8cfcf5e2bc8274dd401a5a37bdb23aabf633ee3b44608f",
+    "asset": "src/animation/assets/hidden-power-red-orb.json",
+    "assetSha256": "0598b07a66858f22a75a4040f89b84369f8164c74a22ee6ba3fc84ba915a268e"
+  },
+  "repeatability": {
+    "runsPerOrientation": 2,
+    "denseStateByteIdentical": true,
+    "rawRgbSequenceByteIdentical": true
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-hidden-power-player-unown-opponent-onix.json",
+      "scenarioSha256": "6d9cde26050f3786e3be8782a98636a555d2f3035e8f1a4cbda1845bc97d6550",
+      "denseState": "tools/compare/evidence/hidden-power-player-dense-state.json.gz",
+      "denseStateSha256": "95b9ab24ccdd533e61bc77106c95c7357fddf6c610158c95cae42c0849f5ce3a",
+      "probeJsonSha256": "2e47592a649a58ff6b3ca69182d4485a09ea1f4192f522f717157db0ebd95786",
+      "repeatProbeJsonSha256": "2e47592a649a58ff6b3ca69182d4485a09ea1f4192f522f717157db0ebd95786",
+      "rawRgbArchive": "tools/compare/evidence/hidden-power-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "f831e1e704583d352074155aa62de7787700591c75a359eafd25778cd9b592b6",
+      "rawRgbSequenceSha256": "5136eb610017dd0c04a2c40f510544762c8199e693c2fcd7fcc4c3952b98f014",
+      "repeatRawRgbSequenceSha256": "5136eb610017dd0c04a2c40f510544762c8199e693c2fcd7fcc4c3952b98f014",
+      "changeMap": "tools/compare/evidence/hidden-power-changemap-player.json",
+      "changeMapSha256": "90e06872b6b56627b0d7af0b80096a1bff8c9d30c7f7f9ec5fe7938bc9c224c9",
+      "window": {"startFrame": 77, "endFrame": 256, "frameCount": 180, "sourceFrameCount": 180}
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-hidden-power-opponent-unown-player-onix.json",
+      "scenarioSha256": "e22676bde662040075943c47eba3f98555a63b789d32adcaa5d5211952db0a89",
+      "denseState": "tools/compare/evidence/hidden-power-opponent-dense-state.json.gz",
+      "denseStateSha256": "93d79d49830bef36ba7229d5706de770ee16bd3171e3c73fa34e56a7982f6130",
+      "probeJsonSha256": "4bfd6e49a3e2bc59b3f118f5cf3039230d82f88bf1643a2ec2e1947d88d9c0e0",
+      "repeatProbeJsonSha256": "4bfd6e49a3e2bc59b3f118f5cf3039230d82f88bf1643a2ec2e1947d88d9c0e0",
+      "rawRgbArchive": "tools/compare/evidence/hidden-power-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "e94f7afe3aa405b628c215474e5f617b88600d5627dd678aec1319a411b2d73e",
+      "rawRgbSequenceSha256": "e69c6d958e34333c6c573c185cec215a2ce4d4e27a5542afc33928efc52be95d",
+      "repeatRawRgbSequenceSha256": "e69c6d958e34333c6c573c185cec215a2ce4d4e27a5542afc33928efc52be95d",
+      "changeMap": "tools/compare/evidence/hidden-power-changemap-opponent.json",
+      "changeMapSha256": "66a8923bf6ca43becb061f40fa0f176e1e940762719096ebf77ea26d1e8311ee",
+      "window": {"startFrame": 81, "endFrame": 260, "frameCount": 180, "sourceFrameCount": 180}
+    }
+  },
+  "acceptance": {
+    "productionFramebufferRows": "0/360",
+    "residualPixels": null,
+    "actualCoreRenderPasses": 0,
+    "alteredLiveControl": false,
+    "firstInactiveCleanupIncluded": true
+  }
+}

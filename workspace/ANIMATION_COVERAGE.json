@@ -7595,6 +7595,38 @@
       "tests/animation/grudgeFramebuffer.test.ts"
     ],
     "goal": "FULFILLED by MOVE_GRUDGE only: complete 209-row player-back plus 209-row opponent-front dense Scene-ON bodies pass source/component/reducer/typed-seam/raw-RGB and actual core.ts -> renderSceneOnMovePresentation equality with zero residual pixels on two deterministic passes. Six source-relative flame lifecycles, task stages, ghost fades, monbg, asymmetric blend registers, resource/audio timing, animation RNG, ordinary RAM+1 OAM/matrix/palette transfers, persistent allocator order, generic live battler art/geometry, and altered ARON/GROVYLE allocation/order control are covered without a carrier/evidence gate, recording/framebuffer lookup, coordinate/RGB fit, absolute tick, or gameplay ownership. No sibling move receives inferred credit."
+  },
+  {
+    "id": "hidden-power-red-orbs",
+    "components": [
+      "asset:ANIM_TAG_RED_ORB",
+      "sprite:gHiddenPowerOrbScatterSpriteTemplate",
+      "sprite:gHiddenPowerOrbSpriteTemplate",
+      "task:AnimTask_BlendMonInAndOut",
+      "task:AnimTask_ScaleMonAndRestore",
+      "visualCommand:setarg"
+    ],
+    "representatives": ["MOVE_HIDDEN_POWER"],
+    "fulfilled": false,
+    "evidence": [
+      "tools/battle-lab/mechanic-hidden-power-player-unown-opponent-onix.json",
+      "tools/battle-lab/mechanic-hidden-power-opponent-unown-player-onix.json",
+      "tools/compare/hiddenPowerSourceAudit.ts",
+      "tools/compare/hiddenPowerProbe.py",
+      "tools/compare/hiddenPowerEvidence.ts",
+      "tools/compare/hiddenPowerChangeMap.ts",
+      "tools/compare/extractHiddenPowerAssets.ts",
+      "tools/compare/fixtures/hidden-power-evidence.json",
+      "tools/compare/evidence/hidden-power-player-dense-state.json.gz",
+      "tools/compare/evidence/hidden-power-opponent-dense-state.json.gz",
+      "tools/compare/evidence/hidden-power-player-raw-rgb.tar.gz",
+      "tools/compare/evidence/hidden-power-opponent-raw-rgb.tar.gz",
+      "tools/compare/evidence/hidden-power-changemap-player.json",
+      "tools/compare/evidence/hidden-power-changemap-opponent.json",
+      "src/animation/assets/hidden-power-red-orb.json",
+      "tests/animation/hiddenPowerEvidenceCheckpoint.test.ts"
+    ],
+    "goal": "UNFULFILLED: MOVE_HIDDEN_POWER has a complete pinned 233-byte source interval and twice-fresh bilateral 180-row dense state/raw-RGB windows through first inactive cleanup, including independent RED_ORB orbit/scatter, ScaleMon RAM+2, BlendMon and ordinary OAM/palette RAM+1 measurements. Exact remains withheld at 0/360 production framebuffer rows: a source-relative reducer, narrow typed live Scene-ON seam, generic actual-core compositor, altered live species/geometry/allocator/order control, and twice-run zero-residual production acceptance remain. The inventory's sole Level-50 carrier is FRONTIER_MON_UNOWN/set 126, but Factory source explicitly rejects Unown, so the evidence uses complete legal three-mon parties with an exact Unown override and does not claim a naturally selectable Factory carrier. MOVE_SUPER_FANG and MOVE_RECYCLE remain independent exact BlendMon controls; MOVE_LEER and MOVE_CONFUSION remain independent exact ScaleMon controls; no sibling receives inferred credit."
   }
  ],
  "variantAudits": {
