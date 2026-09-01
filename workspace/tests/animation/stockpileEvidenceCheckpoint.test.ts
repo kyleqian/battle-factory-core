@@ -1,5 +1,6 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import coverage from "../../ANIMATION_COVERAGE.json";
 import fixture from "../../tools/compare/fixtures/stockpile-evidence.json";
@@ -7,7 +8,47 @@ import { verifyStockpileEvidence } from "../../tools/compare/stockpileEvidence.t
 
 const root = resolve(import.meta.dirname, "../..");
 
+function pinnedBattleLabOracleDirectory(): string {
+  let candidate = root;
+  while (true) {
+    const oracle = resolve(candidate, "oracle");
+    if (existsSync(resolve(oracle, "battle_lab.py"))) return oracle;
+    const parent = dirname(candidate);
+    if (parent === candidate) throw new Error("could not locate pinned battle_lab.py");
+    candidate = parent;
+  }
+}
+
+function validateStage(scenario: string, withForbiddenDescription = false) {
+  return spawnSync("python3", ["-c", [
+    "import json, sys",
+    "sys.path.insert(0, sys.argv[1])",
+    "from battle_lab import validate_request",
+    "request = json.load(open(sys.argv[2], encoding='utf-8'))",
+    "if sys.argv[3] == 'description': request['description'] = 'forbidden regression'",
+    "validate_request(request, 'battle-scene-on')",
+  ].join("\n"), pinnedBattleLabOracleDirectory(), resolve(root, scenario), withForbiddenDescription ? "description" : ""], {
+    cwd: root,
+    encoding: "utf8",
+  });
+}
+
 describe("MOVE_STOCKPILE bounded bilateral evidence checkpoint", () => {
+  it("validates both checked-in stages against the pinned local Battle Lab contract", () => {
+    const scenarios = [
+      "tools/battle-lab/mechanic-stockpile-player-pelipper-opponent-delcatty.json",
+      "tools/battle-lab/mechanic-stockpile-opponent-pelipper-player-delcatty.json",
+    ];
+    for (const scenario of scenarios) {
+      const result = validateStage(scenario);
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(0);
+    }
+    const forbidden = validateStage(scenarios[0]!, true);
+    expect(forbidden.status).not.toBe(0);
+    expect(`${forbidden.stdout ?? ""}${forbidden.stderr ?? ""}`).toContain("unknown fields: description");
+  });
+
   it("retains complete twice-fresh source/state and chronological raw RGB receipts", () => {
     expect(verifyStockpileEvidence()).toEqual({
       "player-back": {
