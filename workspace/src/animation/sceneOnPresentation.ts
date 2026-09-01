@@ -1053,6 +1053,7 @@ export interface SceneOnPresentationBattler {
     | "KRABBY"
     | "PELIPPER"
     | "NUMEL"
+    | "NOSEPASS"
     | "CRAWDAUNT"
     | "SURSKIT"
     | "STARYU"
