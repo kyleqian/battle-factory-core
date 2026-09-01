@@ -496,6 +496,7 @@ import { blizzardEffectOamOrderAtAge } from "../animation/blizzard.ts";
 import { healBellNotesInPainterOrder } from "../animation/healBell.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
+import swiftYellowStarAsset from "../animation/assets/swift-yellow-star.json" with { type: "json" };
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
 import battleAnimWhiteFeatherAsset from "../assets/gen/battle-anim-white-feather.json" with { type: "json" };
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -985,6 +986,7 @@ import {
   sceneOnSandTombView,
   sceneOnTrickView,
   sceneOnRockBlastView,
+  sceneOnSwiftView,
   sceneOnIceBeamView,
   sceneOnFissureView,
   sceneOnHardenView,
@@ -1078,6 +1080,7 @@ import {
   type SceneOnSandTombConfig,
   type SceneOnTrickConfig,
   type SceneOnRockBlastConfig,
+  type SceneOnSwiftConfig,
   type SceneOnIceBeamConfig,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
@@ -2202,6 +2205,7 @@ const meanLookArt = meanLookAsset as {
 
 export const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
+const swiftYellowStar = swiftYellowStarAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFeatherAsset;
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
 export const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
@@ -14866,6 +14870,86 @@ export function renderSceneOnMovePresentation(
       playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "ROCK BLAST!",
       99,
+    );
+    return;
+  }
+  if (state.config.move === "SWIFT") {
+    const swiftState = state as SceneOnMovePresentationState<SceneOnSwiftConfig>;
+    const view = sceneOnSwiftView(swiftState);
+    // Swift's own bilateral maps prove ordinary OAM/matrix/palette RAM+1;
+    // the target monbg copy follows the same preceding source row.
+    const displayed = sceneOnSwiftView({ ...swiftState, age: swiftState.age - 1 });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SWIFT presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const battlerArt = (battler: typeof view.attacker): BattlerArt => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species];
+        if (!source) throw new Error(`SWIFT missing player-back art for ${battler.species}`);
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!source) throw new Error(`SWIFT missing opponent-front art for ${battler.species}`);
+      return source;
+    };
+    const tilesetFor = (source: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? source.tileset : subTileset(source.tileset, 0, 8);
+    const attackerArt = battlerArt(view.attacker);
+    const targetArt = battlerArt(view.target);
+    type DrawObject = Readonly<{ subpriority: number; y: number; creationOrder: number; draw: () => void }>;
+    const objects: DrawObject[] = [
+      {
+        subpriority: view.target.geometry.side === "player" ? 30 : 40,
+        y: view.target.geometry.animationCenter.y + displayed.targetOffset.y2,
+        creationOrder: -2,
+        draw: () => drawSpriteSheet(
+          fb, tilesetFor(targetArt, view.target.geometry.side), targetArt.palette,
+          view.target.geometry.spriteCorner.x + displayed.targetOffset.x2,
+          view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
+        ),
+      },
+      {
+        subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+        y: view.attacker.geometry.animationCenter.y,
+        creationOrder: -1,
+        draw: () => drawSpriteSheet(
+          fb, tilesetFor(attackerArt, view.attacker.geometry.side), attackerArt.palette,
+          view.attacker.geometry.spriteCorner.x, view.attacker.geometry.spriteCorner.y,
+        ),
+      },
+      ...displayed.stars.map((star): DrawObject => ({
+        subpriority: star.subpriority,
+        y: star.y + star.y2,
+        creationOrder: star.sourceCreationOrder,
+        draw: () => drawSpriteSheet(
+          fb, swiftYellowStar.tileset, swiftYellowStar.palette,
+          star.x + star.x2 - 16, star.y + star.y2 - 16,
+        ),
+      })),
+    ];
+    objects.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || right.creationOrder - left.creationOrder);
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    for (const object of objects) object.draw();
+
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = swiftState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "none",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "none",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SWIFT!", 99,
     );
     return;
   }

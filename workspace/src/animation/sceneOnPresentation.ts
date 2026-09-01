@@ -790,6 +790,11 @@ import {
   type RockBlastFrame,
 } from "./rockBlast.ts";
 import {
+  swiftAtAge,
+  type SwiftAnimationProfile,
+  type SwiftFrame,
+} from "./swift.ts";
+import {
   iceBeamAtAge,
   type IceBeamAnimationProfile,
   type IceBeamFrame,
@@ -1044,6 +1049,7 @@ export interface SceneOnPresentationBattler {
     | "NUMEL"
     | "CRAWDAUNT"
     | "SURSKIT"
+    | "STARYU"
     | "KOFFING"
     | "MAGNETON"
     | "MAGBY"
@@ -3055,6 +3061,15 @@ export interface SceneOnRockBlastConfig {
   readonly animationProfile: Readonly<RockBlastAnimationProfile>;
 }
 
+/** Narrow Scene-ON seam for Move_SWIFT's source-relative visual body. */
+export interface SceneOnSwiftConfig {
+  readonly move: "SWIFT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<SwiftAnimationProfile>;
+}
+
 /** Narrow Scene-ON seam for the source-relative Ice Beam reducer/compositor. */
 export interface SceneOnIceBeamConfig {
   readonly move: "ICE_BEAM";
@@ -3565,6 +3580,7 @@ export type SceneOnMoveConfig =
   | SceneOnSandTombConfig
   | SceneOnTrickConfig
   | SceneOnRockBlastConfig
+  | SceneOnSwiftConfig
   | SceneOnIceBeamConfig
   | SceneOnFissureConfig
   | SceneOnHardenConfig
@@ -3627,6 +3643,8 @@ export type SceneOnTrickPresentationState =
   SceneOnMovePresentationState<SceneOnTrickConfig>;
 export type SceneOnRockBlastPresentationState =
   SceneOnMovePresentationState<SceneOnRockBlastConfig>;
+export type SceneOnSwiftPresentationState =
+  SceneOnMovePresentationState<SceneOnSwiftConfig>;
 export type SceneOnIceBeamPresentationState =
   SceneOnMovePresentationState<SceneOnIceBeamConfig>;
 export type SceneOnDizzyPunchPresentationState =
@@ -4594,6 +4612,11 @@ export interface SceneOnTrickView extends TrickFrame {
 }
 
 export interface SceneOnRockBlastView extends RockBlastFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSwiftView extends SwiftFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -9162,6 +9185,20 @@ export function sceneOnRockBlastView(
   }
   return {
     ...rockBlastAtAge(state.age, state.config.animationProfile),
+    attacker: state.config.attacker,
+    target: state.config.target,
+  };
+}
+
+/** `age=0` is Move_SWIFT's YELLOW_STAR resource-load row. */
+export function sceneOnSwiftView(
+  state: SceneOnSwiftPresentationState,
+): SceneOnSwiftView {
+  if (state.config.move !== "SWIFT") {
+    throw new Error(`expected SWIFT presentation, got ${state.config.move}`);
+  }
+  return {
+    ...swiftAtAge(state.age, state.config.animationProfile),
     attacker: state.config.attacker,
     target: state.config.target,
   };

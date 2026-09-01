@@ -167,6 +167,7 @@ import {
   advanceSceneOnMovePresentation,
   type SceneOnEruptionConfig,
   type SceneOnRockBlastConfig,
+  type SceneOnSwiftConfig,
   type SceneOnSandTombConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
@@ -205,6 +206,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "ROCK_BLAST") {
     const rockBlastPresentation = presentation as SceneOnMovePresentationState<SceneOnRockBlastConfig>;
     renderSceneOnMovePresentation(framebuffer, rockBlastPresentation);
+    return;
+  }
+  if (presentation.config.move === "SWIFT") {
+    const swiftPresentation = presentation as SceneOnMovePresentationState<SceneOnSwiftConfig>;
+    renderSceneOnMovePresentation(framebuffer, swiftPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);
