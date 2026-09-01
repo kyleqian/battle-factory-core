@@ -7826,6 +7826,36 @@
    "tests/animation/razorWindFramebuffer.test.ts"
   ],
   "goal": "FULFILLED by MOVE_RAZOR_WIND only: both natural setup and unleash bodies pass all 119/119 player-back plus 119/119 opponent-front source-component/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows with zero residual pixels on two deterministic passes. The generic compositor consumes live species/sides/geometry/allocator/matrices/order and the source-derived callback, ordinary-OBJ, monbg/alpha, ShakeMon2 overwrite, transfer, resource, and cleanup mechanisms without a carrier gate, recording/framebuffer lookup, absolute tick, coordinate/RGB fit, or gameplay ownership. MOVE_AEROBLAST and the Sonic Boom, Steel Wing, Screech, and Sweet Scent controls receive no inferred credit."
+  },
+  {
+   "id": "horn-drill-bg-horn-shakes",
+   "components": [
+    "asset:ANIM_TAG_HORN_HIT",
+    "asset:ANIM_TAG_IMPACT",
+    "sprite:gBowMonSpriteTemplate",
+    "sprite:gHornHitSpriteTemplate",
+    "subroutine:HornDrillContinue",
+    "subroutine:HornDrillInContest",
+    "task:AnimTask_ShakeMonInPlace",
+    "task:AnimTask_StartSlidingBg",
+    "visualCommand:create_flashing_hitsplat_sprite",
+    "visualCommand:fadetobg",
+    "visualCommand:playse",
+    "visualCommand:restorebg",
+    "visualCommand:setalpha",
+    "visualCommand:setarg",
+    "visualCommand:waitbgfadein",
+    "visualCommand:waitbgfadeout"
+   ],
+   "representatives": ["MOVE_HORN_DRILL"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/battle-lab/mechanic-horn-drill-player-seaking-opponent-onix.json",
+    "tools/battle-lab/mechanic-horn-drill-opponent-seaking-player-onix.json",
+    "tools/compare/hornDrillSourceAudit.ts",
+    "tests/animation/hornDrillSourceCheckpoint.test.ts"
+   ],
+   "goal": "UNFULFILLED: MOVE_HORN_DRILL remains unsupported. The complete source interval, 16-component graph, lowest legal Level-50 carrier, bilateral transient-free party stages, and all dispatched drill BG/scroll, BowMon, horn, dual long ShakeMonInPlace, 11 impact, resource, cleanup, and audio paths are pinned. Promotion still requires two fresh byte-identical complete dense Scene-ON windows per orientation through first inactive cleanup, own latch/change-map measurements, a source-relative reducer, narrow seam, generic actual-core compositor, and twice-run zero-residual framebuffer acceptance. No sibling/component credit is inferred."
   }
  ],
  "variantAudits": {

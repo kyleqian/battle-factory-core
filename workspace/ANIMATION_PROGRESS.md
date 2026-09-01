@@ -1,3 +1,11 @@
+# MOVE_HORN_DRILL source/classification checkpoint — unsupported (2026-09-01 worker)
+
+- **State:** Level 50 remains **223/276 exact, 0 partial / 0 staged, 53 unsupported**. MOVE_HORN_DRILL remains absent from `entries`; the dedicated 16-component `horn-drill-bg-horn-shakes` track is unfulfilled and grants no component or sibling credit.
+- **Source/staging:** Pinned the complete `Move_HORN_DRILL` half-open ROM interval **0x082cc804..0x082cc981** (**381 bytes**, SHA-256 `00717aca…`), source text **2,717 bytes** (`34e06340…`), all three blocks, both drill BG variants, continuous sliding-BG task, three BowMon phases, HORN_HIT sprite, two 40-shake `AnimTask_ShakeMonInPlace` schedules, 11 flashing IMPACT sprites, alpha/restore/setarg cleanup, and 13 audio dispatches. Lowest legal Level-50 carrier is set **333 FRONTIER_MON_SEAKING_2**; all nine carriers are pinned. Complete transient-free three-mon Seaking/Onix mechanic-lab parties constrain all four active choices in both natural orientations.
+- **Checks:** Direct source audit and focused source/staging/boundary/frontier tests pass (**3 files / 12 tests**); coverage remains **223 exact / 53 unsupported**, animation audit and `git diff --check` pass. No production renderer, reducer, typed seam, `core.ts`, `battleScene.ts`, gameplay/RNG/outcome logic, boundary/barrier, or exact-count ratchet changed.
+- **Next:** Retain two fresh byte-identical dense Scene-ON runs per orientation from animation start through first inactive cleanup, including source/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/RNG/immutable-gameplay/raw-RGB rows and normalized change maps. Measure Horn Drill's own BG, ShakeMonInPlace, OAM/matrix/palette, and cleanup transfers before any reducer/seam/compositor work. Status explicitly remains **unsupported**.
+- **Notes:** `ANIMATION_LATCHES.md` is unchanged because this source-only checkpoint measured no display transfers; existing Headbutt, Horn Attack, Drill Peck, and BG-task behavior confers no acceptance.
+
 # Animation supervisor verification — Razor Wind exact acceptance merged (2026-09-01 supervisor)
 
 - **State:** Level 50 advances **222→223/276 exact**, with **0 partial / 0 staged** and **54→53 unsupported**. MOVE_RAZOR_WIND alone promotes and `razor-wind-two-turn-air-wave` alone is fulfilled; no sibling receives inferred credit.
