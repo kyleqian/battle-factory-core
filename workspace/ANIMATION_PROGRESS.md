@@ -1,3 +1,12 @@
+# Animation supervisor verification — Razor Wind exact acceptance merged (2026-09-01 supervisor)
+
+- **State:** Level 50 advances **222→223/276 exact**, with **0 partial / 0 staged** and **54→53 unsupported**. MOVE_RAZOR_WIND alone promotes and `razor-wind-two-turn-air-wave` alone is fulfilled; no sibling receives inferred credit.
+- **Did:** Independently audited and merged the cumulative residual/correction commits `4d7440724` through `81e9e2329`. The source-relative reducer and actual-core compositor now cover the complete retained setup/unleash bodies, and the former carrier gate is replaced by required typed live `targetRestOffset` geometry. The complete production diff has no species/carrier, fixture, recording, hash, framebuffer, coordinate/RGB, or absolute-tick gate.
+- **Verified:** Two independent direct comparator runs each return player-back **119/119** and opponent-front **119/119** framebuffer rows exact, all **238/238** component rows exact, and **zero residual pixels**. The altered WINGULL/HAUNTER control supplies nonzero `{x2:7,y2:-5}` rest geometry, differs before ShakeMon2, then converges during and after it, proving generic overwrite/non-restoration through the live core path. The 45 coverage-ratchet edits are mechanical **222→223 / 54→53** changes only.
+- **Merged gate:** Focused Razor source/evidence/reducer/framebuffer checks pass **4 files / 11 tests**; full `npm test` passes **1,210 files / 10,808 tests** with 44 files / 223 tests skipped; `npm run build` passes **746 modules**.
+- **Next:** Select the highest-ranked remaining unsupported Level-50 move and land one bounded source/evidence checkpoint before attempting production acceptance.
+- **Notes:** `ANIMATION_LATCHES.md`, animation boundaries, unsupported barriers, gameplay/two-turn/RNG/outcome logic, controller/turn/round/facility state, and main-program documents are unchanged. Papercuts: one-move promotion requires 45 dispersed exact-count ratchets, and full test collection remains memory-heavy.
+
 # MOVE_RAZOR_WIND carrier-gate correction receipt (2026-09-01 worker)
 
 - **State:** Exact acceptance remains **119/119 player-back + 119/119 opponent-front** component and framebuffer rows on both deterministic comparator passes; Level 50 remains **223/276 exact** and `razor-wind-two-turn-air-wave` remains fulfilled.
