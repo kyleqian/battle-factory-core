@@ -74,6 +74,7 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
   it("uses live geometry, slots, matrices, and order through the typed seam", () => {
     const stage = createSceneOnMovePresentation({
       move: "RAZOR_WIND",
+      body: "setup",
       attacker: {
         species: "WINGULL",
         geometry: {
@@ -94,7 +95,11 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
       animationProfile: profile,
     });
     const setup = sceneOnRazorWindView({ ...stage, age: 4 });
-    const unleash = sceneOnRazorWindView({ ...stage, age: 56 });
+    const unleashStage = {
+      ...stage,
+      config: { ...stage.config, body: "unleash" as const },
+    };
+    const unleash = sceneOnRazorWindView({ ...unleashStage, age: 10 });
     expect(setup).toMatchObject({ body: "setup", sprites: expect.any(Array), attacker: { species: "WINGULL" } });
     expect(unleash).toMatchObject({ body: "unleash", age: 10, registers: { monbg: true }, target: { species: "ONIX" } });
     const altered = razorWindAtAge(10, "setup", "player", geometry, {
@@ -107,7 +112,7 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
     const setupFramebuffer = new Uint8Array(240 * 160 * 4);
     const unleashFramebuffer = new Uint8Array(240 * 160 * 4);
     renderSceneOnMovePresentation(setupFramebuffer, { ...stage, age: 5 });
-    renderSceneOnMovePresentation(unleashFramebuffer, { ...stage, age: 57 });
+    renderSceneOnMovePresentation(unleashFramebuffer, { ...unleashStage, age: 11 });
     expect(setupFramebuffer.some((value) => value !== 0)).toBe(true);
     expect(unleashFramebuffer.some((value) => value !== 0)).toBe(true);
     expect(unleashFramebuffer).not.toEqual(setupFramebuffer);

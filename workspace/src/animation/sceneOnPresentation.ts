@@ -103,6 +103,7 @@ import {
 import {
   razorWindAtAge,
   type RazorWindAnimationProfile,
+  type RazorWindBody,
   type RazorWindEffect,
 } from "./razorWind.ts";
 import {
@@ -1154,6 +1155,7 @@ export interface SceneOnPresentationBattler {
     | "HITMONCHAN"
     | "HITMONTOP"
     | "NIDORINA"
+    | "NUZLEAF"
     | "SPINDA"
     | "TAUROS"
     | "LINOONE"
@@ -2343,6 +2345,7 @@ export interface SceneOnSonicBoomConfig {
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
+  readonly body: RazorWindBody;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -7397,7 +7400,7 @@ export function sceneOnSonicBoomView(
   };
 }
 
-/** `age=0` is Razor Wind's first source-relative setup/unleash display. */
+/** `age=0` is the selected Razor Wind source body's first display. */
 export function sceneOnRazorWindView(
   state: SceneOnMovePresentationState<SceneOnRazorWindConfig>,
 ): SceneOnRazorWindView {
@@ -7407,12 +7410,10 @@ export function sceneOnRazorWindView(
     );
   }
   const config = state.config;
-  const body = state.age <= 45 ? "setup" : "unleash";
-  const bodyAge = body === "setup" ? state.age : state.age - 46;
   return {
     ...razorWindAtAge(
-      bodyAge,
-      body,
+      state.age,
+      config.body,
       config.attacker.geometry.side,
       {
         attackerPositionCenter: config.attacker.geometry.battlePositionCenter,
