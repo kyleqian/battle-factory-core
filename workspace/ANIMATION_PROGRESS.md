@@ -1,3 +1,12 @@
+# Animation supervisor verification — Hidden Power exact merged (2026-09-01 supervisor)
+
+- **State:** Level 50 is now **221/276 exact, 0 partial / 0 staged, 55 unsupported**. MOVE_HIDDEN_POWER alone promoted and `hidden-power-red-orbs` alone became fulfilled; no sibling credit was inferred.
+- **Did:** Independently audited and fast-forwarded worker commits `48d64f703`, `afea555b4`, `fb1ac6ae2`, and `2d8022ec4`. The reducer and narrow typed Scene-ON seam consume live geometry, allocator/order/matrix, animation RNG, field, and personality facts; production has no retained Unown/Onix pair gate. Source-derived art covers all 28 Unown forms and the stock personality selector chooses the live form.
+- **Verified:** Supervisor-focused checks pass **8 files / 37 tests**; two independent direct comparator runs each pass **180/180 player-back + 180/180 opponent-front = 360/360** actual-core framebuffer rows with zero residual pixels. The altered opponent-side ARON/player-side GROVYLE control changes species, side, geometry, allocator, order, matrices, personality, and RNG while traversing the same production path. Typecheck, animation audit, coverage, and `git diff --check` pass.
+- **Merged gate:** Full `npm test` passes **1,204 files / 10,791 tests** with 44 files / 223 tests skipped; `npm run build` passes **742 modules**.
+- **Next:** Select the next ranked unsupported Level-50 move and define one bounded component track before evidence work; keep Helping Hand deferred behind the singles-only Battle Lab boundary.
+- **Notes:** Hidden Power re-confirms existing ScaleMon RAM+2 and ordinary OAM/palette RAM+1 mechanisms, so `ANIMATION_LATCHES.md` stays unchanged. No animation boundary, unsupported barrier, gameplay type/damage/RNG, controller/turn/round/facility owner, main-program document, recording/framebuffer lookup, coordinate/RGB fit, or absolute-tick branch changed.
+
 # MOVE_HIDDEN_POWER exact production presentation (2026-09-01 worker)
 
 - **State:** Level 50 advances **220→221/276 exact**, remains **0 partial / 0 staged**, and drops **56→55 unsupported**. MOVE_HIDDEN_POWER alone promotes and `hidden-power-red-orbs` is fulfilled; no sibling receives inferred credit.
