@@ -458,6 +458,11 @@ import {
   type SafeguardState,
 } from "./safeguard.ts";
 import {
+  grudgeAtAge,
+  type GrudgeAnimationProfile,
+  type GrudgeState,
+} from "./grudge.ts";
+import {
   smellingSaltAtAge,
   type SmellingSaltState,
 } from "./smellingSalt.ts";
@@ -2003,6 +2008,16 @@ export interface SceneOnSafeguardConfig {
   readonly animationProfile: Readonly<SafeguardAnimationProfile>;
 }
 
+/** Grudge presentation only; PP denial and all battle outcomes remain external. */
+export interface SceneOnGrudgeConfig {
+  readonly move: "GRUDGE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live allocator, OAM ordering, battler geometry, and animation RNG facts. */
+  readonly animationProfile: Readonly<GrudgeAnimationProfile>;
+}
+
 /** Smelling Salt presentation only; damage/status ownership remains external. */
 export interface SceneOnSmellingSaltConfig {
   readonly move: "SMELLING_SALT";
@@ -3480,6 +3495,7 @@ export type SceneOnMoveConfig =
   | SceneOnMetalSoundConfig
   | SceneOnScreechConfig
   | SceneOnSafeguardConfig
+  | SceneOnGrudgeConfig
   | SceneOnSmellingSaltConfig
   | SceneOnRecycleConfig
   | SceneOnLeerConfig
@@ -3871,6 +3887,11 @@ export interface SceneOnScreechView {
 }
 
 export interface SceneOnSafeguardView extends SafeguardState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnGrudgeView extends GrudgeState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -6517,6 +6538,25 @@ export function sceneOnSafeguardView(
     ...safeguardAtAge(
       state.age,
       state.config.attacker.geometry.battlePositionCenter,
+      state.config.animationProfile,
+    ),
+  };
+}
+
+/** Age zero is MOVE_GRUDGE's first pointer-owned script row. */
+export function sceneOnGrudgeView(
+  state: SceneOnMovePresentationState<SceneOnGrudgeConfig>,
+): SceneOnGrudgeView {
+  if (state.config.move !== "GRUDGE") {
+    throw new Error("expected GRUDGE presentation, got " + state.config.move);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...grudgeAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
       state.config.animationProfile,
     ),
   };

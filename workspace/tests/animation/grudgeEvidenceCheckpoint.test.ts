@@ -7,7 +7,7 @@ import { createScratchDir } from "../../tools/lib/scratch.ts";
 
 type Mon = Record<string, unknown> & { species: number; moves: number[] };
 
-describe("MOVE_GRUDGE complete bilateral evidence checkpoint", () => {
+describe("MOVE_GRUDGE complete bilateral exact evidence", () => {
   it("pins the complete source interval, graph, task, asset, audio, and lowest Level-50 carrier", () => {
     const audit = JSON.parse(execFileSync(process.execPath, [
       "--experimental-strip-types", "tools/compare/grudgeSourceAudit.ts",
@@ -69,15 +69,15 @@ describe("MOVE_GRUDGE complete bilateral evidence checkpoint", () => {
     }
   });
 
-  it("re-extracts purple-flame source art byte-for-byte and keeps coverage unsupported", () => {
+  it("re-extracts purple-flame source art byte-for-byte and records exact coverage", () => {
     const out = join(createScratchDir("pokebench-grudge-assets-"), "purple-flame.json");
     execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/extractPurpleFlameAssets.ts", "--out", out]);
     expect(readFileSync(out)).toEqual(readFileSync("src/animation/assets/purple-flame.json"));
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(219);
-    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_GRUDGE")).toBeUndefined();
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(220);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_GRUDGE")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "grudge-purple-flames")).toMatchObject({
-      representatives: ["MOVE_GRUDGE"], fulfilled: false,
+      representatives: ["MOVE_GRUDGE"], fulfilled: true,
     });
   });
 });

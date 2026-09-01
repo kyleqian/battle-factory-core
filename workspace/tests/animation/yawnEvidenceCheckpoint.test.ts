@@ -60,7 +60,7 @@ describe("MOVE_YAWN source/staging and twice-fresh evidence checkpoint", () => {
   });
 
   it("promotes Yawn alone while Howl remains an independent DeepInhale control", () => {
-    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")); expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(219); expect(coverage.entries.find((entry: any) => entry.move === "MOVE_YAWN")).toMatchObject({ status: "exact" }); expect(coverage.entries.find((entry: any) => entry.move === "MOVE_HOWL")).toMatchObject({ status: "exact" });
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")); expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(220); expect(coverage.entries.find((entry: any) => entry.move === "MOVE_YAWN")).toMatchObject({ status: "exact" }); expect(coverage.entries.find((entry: any) => entry.move === "MOVE_HOWL")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: any) => track.id === "pink-cloud-yawn-deep-inhale")).toMatchObject({ components: ["asset:ANIM_TAG_PINK_CLOUD", "sprite:gYawnCloudSpriteTemplate", "task:AnimTask_DeepInhale"], representatives: ["MOVE_YAWN", "MOVE_HOWL"], fulfilled: true });
   });
 });

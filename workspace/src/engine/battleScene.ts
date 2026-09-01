@@ -564,6 +564,7 @@ import supersonicAsset from "../animation/assets/supersonic.json" with { type: "
 import metalSoundAsset from "../animation/assets/metal-sound.json" with { type: "json" };
 import screechAsset from "../animation/assets/screech.json" with { type: "json" };
 import safeguardAsset from "../animation/assets/safeguard.json" with { type: "json" };
+import purpleFlameAsset from "../animation/assets/purple-flame.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
 import waterSpoutOrbAsset from "../animation/assets/water-spout-glowy-blue-orb.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
@@ -909,6 +910,7 @@ import {
   sceneOnMetalSoundView,
   sceneOnScreechView,
   sceneOnSafeguardView,
+  sceneOnGrudgeView,
   sceneOnSmellingSaltView,
   sceneOnRecycleView,
   sceneOnLeerView,
@@ -1070,6 +1072,7 @@ import {
   type SceneOnMetalSoundConfig,
   type SceneOnScreechConfig,
   type SceneOnSafeguardConfig,
+  type SceneOnGrudgeConfig,
   type SceneOnLeerConfig,
   type SceneOnHiJumpKickConfig,
   type SceneOnKarateChopConfig,
@@ -2280,6 +2283,9 @@ const battleAnimGhostBg = battleAnimGhostBgAsset as {
   traceScratchUnfadedPalette: RgbColor[];
   opponentShadow: { tileset: Tileset; palette: RgbColor[] };
   tilemap: Tilemap;
+};
+const purpleFlameArt = purpleFlameAsset as {
+  flame: { tileset: Tileset; palette: RgbColor[] };
 };
 const battleAnimPsychicBg = battleAnimPsychicBgAsset as { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
 const meteorMashArt = meteorMashAsset as {
@@ -15620,6 +15626,126 @@ export function renderSceneOnMovePresentation(
       fb,
       playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
       "SAFEGUARD!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "GRUDGE") {
+    const grudgeState = state as SceneOnMovePresentationState<SceneOnGrudgeConfig>;
+    const view = sceneOnGrudgeView(grudgeState);
+    // Ordinary flame OAM and its animation cell scan out from the preceding
+    // software row. GPU blend/brightness registers are consumed live.
+    const displayed = sceneOnGrudgeView({ ...grudgeState, age: grudgeState.age - 1 });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource) throw new Error(`GRUDGE missing ${view.attacker.species} attacker art`);
+    if (!targetSource) throw new Error(`GRUDGE missing ${view.target.species} target art`);
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8) : targetSource.tileset;
+    const attackerIdle = playerAttacker ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species) : { x2: 0, y2: 0 };
+    const darken = (palette: readonly RgbColor[]): RgbColor[] => palette.map((color) => {
+      const packed = mgbaDarkenColor(color.r | (color.g << 8) | (color.b << 16), view.bldy);
+      return { r: packed & 0xff, g: (packed >>> 8) & 0xff, b: (packed >>> 16) & 0xff };
+    });
+    if (view.background === "ghost") {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimGhostBg.tileset,
+        tilemap: battleAnimGhostBg.tilemap,
+        subpalettes: [darken(battleAnimGhostBg.palette)],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(darken),
+      });
+    }
+    // The opponent shadow's preceding hardware-OAM entry survives the first
+    // pointer row; its callback observes the active script and hides it for
+    // the next display. Species eligibility and placement remain live facts.
+    if (!playerAttacker && grudgeState.age === 0) {
+      drawSourceOpponentEnemyShadow(
+        fb,
+        view.attacker.species,
+        view.attacker.geometry.battlePositionCenter,
+      );
+    }
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb, attackerTileset, attackerSource.palette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    );
+    const drawTarget = (): void => drawSpriteSheet(
+      fb, targetTileset, targetSource.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const byIndex = new Map(displayed.flames.map((flame) => [flame.index, flame]));
+    const drawFlameGroup = (behindAttacker: boolean, backdrop: Uint8Array): void => {
+      if (!view.blend.active) return;
+      for (const index of displayed.flamePainterOrder) {
+        const flame = byIndex.get(index);
+        if (!flame || (flame.priority > grudgeState.config.animationProfile.attackerBgPriority) !== behindAttacker) continue;
+        drawSpriteSheetBlendedOverBackdrop(
+          fb,
+          backdrop,
+          subTileset(purpleFlameArt.flame.tileset, flame.frame * 4, 4),
+          purpleFlameArt.flame.palette,
+          flame.x + flame.x2 - 8,
+          flame.y + flame.y2 - 16,
+          view.blend.eva,
+          view.blend.evb,
+        );
+      }
+    };
+    // Priority base+1 flames sit behind the monbg attacker; base-priority
+    // flames sit in front. A fixed non-OBJ backdrop prevents overlapping
+    // semi-transparent OBJ from blending with each other.
+    const fieldBackdrop = fb.slice();
+    if (view.monBg.active) drawAttacker();
+    const monBgBackdrop = fb.slice();
+    fb.set(fieldBackdrop);
+    drawFlameGroup(true, fieldBackdrop);
+    if (view.monBg.active) drawAttacker();
+    if (view.monBg.active) {
+      drawTarget();
+    } else if (playerAttacker) {
+      drawTarget(); drawAttacker();
+    } else {
+      drawAttacker(); drawTarget();
+    }
+    drawFlameGroup(false, monBgBackdrop);
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const profile = grudgeState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "GRUDGE!",
       99,
     );
     return;

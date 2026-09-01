@@ -2,6 +2,42 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_GRUDGE",
+   "status": "exact",
+   "covered": [
+    "complete legal Haunter/Onix Battle Scene ON bodies retain 209 player-back and 209 opponent-front rows through first inactive cleanup; both dense state and chronological raw-RGB sequences reproduce byte-identically twice fresh",
+    "the pure source-relative reducer ports the complete pointer/wait program, ghost-background fades, attacker monbg transfer, six AnimTask_GrudgeFlames allocations and orbit callbacks, asymmetric alpha task, four-frame PURPLE_FLAME cells, resources, three audio programs, and animation-RNG scheduler pauses without gameplay ownership",
+    "the narrow typed seam consumes live battler species/sides/geometry, flame center and source width, battler priorities, allocator slots, persistent sSpriteOrder seed, field state, and animation RNG; the generic compositor has no Haunter/Onix or retained-evidence gate",
+    "Grudge independently confirms whole OAM and matrices at RAM+1 for 208/208 comparable rows per orientation and palette at RAM+1 for 207/208 with age-4 monbg the sole same-row transfer; priority-changing flames preserve persistent wrapped-Y source order",
+    "actual core.ts to renderSceneOnMovePresentation framebuffer equality passes all 209/209 player-back plus 209/209 opponent-front rows with zero residual pixels on two deterministic passes; an altered ARON/GROVYLE species, reversed-side geometry, allocator, persistent order, width, priority, and RNG control traverses the same production path",
+    "damage, Grudge PP effects, gameplay RNG, status, turn order, round advancement, and facility state remain external; no sibling move receives inferred acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-grudge-player-haunter-opponent-onix.json",
+    "tools/battle-lab/mechanic-grudge-opponent-haunter-player-onix.json",
+    "tools/compare/grudgeSourceAudit.ts",
+    "tools/compare/grudgeProbe.py",
+    "tools/compare/grudgeEvidence.ts",
+    "tools/compare/grudgeFramebuffer.ts",
+    "tools/compare/fixtures/grudge-evidence.json",
+    "tools/compare/evidence/grudge-player-dense-state.json.gz",
+    "tools/compare/evidence/grudge-opponent-dense-state.json.gz",
+    "tools/compare/evidence/grudge-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/grudge-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/grudge-changemap-player.txt",
+    "tools/compare/evidence/grudge-changemap-opponent.txt",
+    "tools/compare/extractPurpleFlameAssets.ts",
+    "src/animation/grudge.ts",
+    "src/animation/assets/purple-flame.json",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/grudgeEvidenceCheckpoint.test.ts",
+    "tests/animation/grudgeReducer.test.ts",
+    "tests/animation/grudgeFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_WATER_SPOUT",
    "status": "exact",
    "covered": [
@@ -7533,13 +7569,14 @@
       "visualCommand:waitbgfadein"
     ],
     "representatives": ["MOVE_GRUDGE"],
-    "fulfilled": false,
+    "fulfilled": true,
     "evidence": [
       "tools/battle-lab/mechanic-grudge-player-haunter-opponent-onix.json",
       "tools/battle-lab/mechanic-grudge-opponent-haunter-player-onix.json",
       "tools/compare/grudgeSourceAudit.ts",
       "tools/compare/grudgeProbe.py",
       "tools/compare/grudgeEvidence.ts",
+      "tools/compare/grudgeFramebuffer.ts",
       "tools/compare/fixtures/grudge-evidence.json",
       "tools/compare/evidence/grudge-player-dense-state.json.gz",
       "tools/compare/evidence/grudge-opponent-dense-state.json.gz",
@@ -7549,9 +7586,15 @@
       "tools/compare/evidence/grudge-changemap-opponent.txt",
       "tools/compare/extractPurpleFlameAssets.ts",
       "src/animation/assets/purple-flame.json",
-      "tests/animation/grudgeEvidenceCheckpoint.test.ts"
+      "src/animation/grudge.ts",
+      "src/animation/sceneOnPresentation.ts",
+      "src/engine/battleScene.ts",
+      "src/engine/core.ts",
+      "tests/animation/grudgeEvidenceCheckpoint.test.ts",
+      "tests/animation/grudgeReducer.test.ts",
+      "tests/animation/grudgeFramebuffer.test.ts"
     ],
-    "goal": "UNFULFILLED: MOVE_GRUDGE has complete 209-row player-back plus 209-row opponent-front dense Scene-ON state/raw-RGB windows through first inactive cleanup, reproduced byte-identically twice fresh. Source graph, legal Haunter staging, all six flame lifecycles, five task stages, ghost fades, monbg, blend registers, resources, audio, RNG domains, and move-owned OAM/matrix/palette latches are pinned. Exact promotion still requires a source-relative reducer, narrow typed live seam, generic production compositor, altered species/geometry/allocator/order control, and 418/418 zero-residual actual core framebuffer rows twice. No move or component credit is granted by this checkpoint."
+    "goal": "FULFILLED by MOVE_GRUDGE only: complete 209-row player-back plus 209-row opponent-front dense Scene-ON bodies pass source/component/reducer/typed-seam/raw-RGB and actual core.ts -> renderSceneOnMovePresentation equality with zero residual pixels on two deterministic passes. Six source-relative flame lifecycles, task stages, ghost fades, monbg, asymmetric blend registers, resource/audio timing, animation RNG, ordinary RAM+1 OAM/matrix/palette transfers, persistent allocator order, generic live battler art/geometry, and altered ARON/GROVYLE allocation/order control are covered without a carrier/evidence gate, recording/framebuffer lookup, coordinate/RGB fit, absolute tick, or gameplay ownership. No sibling move receives inferred credit."
   }
  ],
  "variantAudits": {

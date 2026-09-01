@@ -3,8 +3,8 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_GRUDGE",
   "moveId": 288,
-  "status": "unsupported",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "components": [
     "asset:ANIM_TAG_PURPLE_FLAME",
     "task:AnimTask_GrudgeFlames",
@@ -66,7 +66,7 @@
     "paletteLatch": "207/208 preceding-faded rows per orientation; age 4 monbg is same-row",
     "gameplayRngTransitions": 0,
     "animationRngTransitions": 205,
-    "productionFramebufferRows": 0,
-    "remainingBlocker": "source-relative reducer, typed Scene-ON seam, and generic compositor are not implemented"
+    "productionFramebufferRows": 418,
+    "remainingBlocker": null
   }
 }
