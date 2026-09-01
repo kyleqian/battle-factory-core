@@ -3,6 +3,7 @@ import {
   createSceneOnMovePresentation,
   sceneOnRazorWindView,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { renderSceneOnMovePresentation } from "../../src/engine/battleScene.ts";
 import {
   razorWindAtAge,
   type RazorWindAnimationProfile,
@@ -103,5 +104,12 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
       spriteOrderSeed: [12, 13, 14, 7, 8, 9],
     });
     expect(altered.sprites.map((sprite) => [sprite.slot, sprite.matrixId])).toEqual([[12, 20], [13, 21], [14, 22]]);
+    const setupFramebuffer = new Uint8Array(240 * 160 * 4);
+    const unleashFramebuffer = new Uint8Array(240 * 160 * 4);
+    renderSceneOnMovePresentation(setupFramebuffer, { ...stage, age: 5 });
+    renderSceneOnMovePresentation(unleashFramebuffer, { ...stage, age: 57 });
+    expect(setupFramebuffer.some((value) => value !== 0)).toBe(true);
+    expect(unleashFramebuffer.some((value) => value !== 0)).toBe(true);
+    expect(unleashFramebuffer).not.toEqual(setupFramebuffer);
   });
 });
