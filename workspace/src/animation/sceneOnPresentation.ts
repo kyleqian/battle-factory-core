@@ -463,6 +463,11 @@ import {
   type GrudgeState,
 } from "./grudge.ts";
 import {
+  hiddenPowerAtAge,
+  type HiddenPowerProfile,
+  type HiddenPowerState,
+} from "./hiddenPower.ts";
+import {
   smellingSaltAtAge,
   type SmellingSaltState,
 } from "./smellingSalt.ts";
@@ -1180,6 +1185,7 @@ export interface SceneOnPresentationBattler {
     | "METANG"
     | "MISDREAVUS"
     | "GENGAR"
+    | "UNOWN"
     | "OCTILLERY";
   readonly geometry: SceneOnBattlerGeometry;
 }
@@ -2016,6 +2022,22 @@ export interface SceneOnGrudgeConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** Live allocator, OAM ordering, battler geometry, and animation RNG facts. */
   readonly animationProfile: Readonly<GrudgeAnimationProfile>;
+}
+
+/** Hidden Power presentation only; type, damage, and battle RNG stay external. */
+export interface SceneOnHiddenPowerConfig {
+  readonly move: "HIDDEN_POWER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<
+    Omit<SceneOnDragonRageFieldProfile, "playerGender" | "opponentGender">
+    & {
+      readonly playerGender?: "male" | "female" | "none";
+      readonly opponentGender?: "male" | "female" | "none";
+    }
+  >;
+  /** Live allocator, persistent order, matrix, and animation-RNG facts. */
+  readonly animationProfile: Readonly<HiddenPowerProfile>;
 }
 
 /** Smelling Salt presentation only; damage/status ownership remains external. */
@@ -3496,6 +3518,7 @@ export type SceneOnMoveConfig =
   | SceneOnScreechConfig
   | SceneOnSafeguardConfig
   | SceneOnGrudgeConfig
+  | SceneOnHiddenPowerConfig
   | SceneOnSmellingSaltConfig
   | SceneOnRecycleConfig
   | SceneOnLeerConfig
@@ -3892,6 +3915,11 @@ export interface SceneOnSafeguardView extends SafeguardState {
 }
 
 export interface SceneOnGrudgeView extends GrudgeState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnHiddenPowerView extends HiddenPowerState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -6556,6 +6584,27 @@ export function sceneOnGrudgeView(
     ...grudgeAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.animationProfile,
+    ),
+  };
+}
+
+/** Age zero is MOVE_HIDDEN_POWER's first pointer-owned script row. */
+export function sceneOnHiddenPowerView(
+  state: SceneOnMovePresentationState<SceneOnHiddenPowerConfig>,
+): SceneOnHiddenPowerView {
+  if (state.config.move !== "HIDDEN_POWER") {
+    throw new Error("expected HIDDEN_POWER presentation, got " + state.config.move);
+  }
+  if (state.config.attacker.geometry.side === state.config.target.geometry.side) {
+    throw new Error("HIDDEN_POWER presentation requires opposite battler sides");
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...hiddenPowerAtAge(
+      state.age,
       state.config.attacker.geometry.animationCenter,
       state.config.animationProfile,
     ),
