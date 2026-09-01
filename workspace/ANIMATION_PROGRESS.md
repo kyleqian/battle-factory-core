@@ -1,3 +1,11 @@
+# MOVE_WATER_SPOUT source/legal-staging checkpoint — unsupported (2026-09-01 worker)
+
+- **State:** Level 50 remains **218/276 exact, 0 partial / 0 staged, 58 unsupported**. MOVE_WATER_SPOUT remains unsupported and the new non-exclusive `water-spout-launch-rain` track is unfulfilled; WATER_GUN/HYDRO_PUMP/WATER_IMPACT evidence grants no sibling credit.
+- **Did:** Pinned the complete 14-command `Move_WATER_SPOUT [0x082cef63,0x082cef91)` root and exactly eight generated components, the unique/lowest Level-50 carrier **275 FRONTIER_MON_WAILMER_2**, both source tasks and sprite templates, HP-quarter tier, live side/geometry branches, animation-RNG rain layout, affine impacts, target/partner shake creation, audio, resources, and cleanup. Added complete legal transient-free full-HP Wailmer/Shuckle three-mon Scene-ON stages in player-back and opponent-front orientations.
+- **Boundary:** This first checkpoint contains no mGBA dense state/raw-RGB evidence, reducer, typed seam, compositor, framebuffer comparison, production wiring, latch claim, or coverage promotion. Full HP stages exercise only visual power tier 3; lower HP quarters are not injected and remain an explicit evidence requirement if independently legal staging proves visible variants.
+- **Checks:** Direct source audit and focused source/staging tests pass; coverage remains **218 exact / 58 unsupported**. Full required verification is deferred until the strongest bounded evidence checkpoint is complete.
+- **Next:** Run the legal bilateral Scene-ON stages twice fresh, retain complete consecutive pointer/task/sprite/OAM/matrix/palette/register/audio/party/RNG/raw-RGB windows through first inactive cleanup, normalize maps, and independently fit Water Spout's own latches. Keep the move/track unsupported unless the full bilateral typed-seam and actual-core framebuffer bar is met.
+
 # MOVE_ROCK_BLAST natural multi-hit exact production presentation (2026-09-01 worker)
 
 - **State:** Level 50 advances **217→218/276 exact**, remains **0 partial / 0 staged**, and drops **59→58 unsupported**. MOVE_ROCK_BLAST alone promotes and `rock-blast-first-body` is fulfilled; MOVE_ROCK_THROW, MOVE_ROCK_TOMB, and MOVE_ANCIENT_POWER remain independent exact controls with no inferred credit.

@@ -6919,6 +6919,28 @@
    "goal": "MOVE_WATER_GUN independently proves its complete projectile/hitsplat/three-droplet body and target-BG2 alpha compositor in both orientations at 111/111 component/RAM and framebuffer frames, reproduced twice. ShakeMon2, BIND, and SUPERSONIC remain exact regression controls. No sibling is promoted. SMALL_BUBBLES audit: BUBBLE BEAM needs its 18 large gWaterBubbleProjectile sprites, SwayMon, and WaterBubblesEffectShort; SECRET POWER environment-dispatches to distinct complete scripts (the Factory building route is STRENGTH, pond is BUBBLE BEAM); DIVE needs both two-turn splash/spray setup and strike RisingWaterHitEffect; MIST BALL needs its translating mist ball, target shakes/palette tasks, and full fog BG pipeline; FAKE TEARS uses the tag only for BlendParticle and needs RockMonBackAndForth plus eight thought-bubble/music-note tear sprites; WATER PULSE needs five independently parameterized bubble sprites, three blue rings, target shake, and whole-BG palette blend. WATER_IMPACT audit: HYDRO PUMP needs its paired orb beam stream, sine timer, attacker/target shakes, and repeated hitsplats; CRABHAMMER is independently exact with its palette blend, target slide/return, ShakeMon, and eight ice-crystal bubble pairs; SECRET POWER and DIVE retain the distinct bodies above; WATER SPOUT needs WaterSpoutLaunch and WaterSpoutRain with glowy-blue-orb launch/rain geometry. Every sibling remains unsupported pending its own complete dense evidence."
   },
   {
+   "id": "water-spout-launch-rain",
+   "components": [
+    "asset:ANIM_TAG_GLOWY_BLUE_ORB",
+    "asset:ANIM_TAG_WATER_IMPACT",
+    "task:AnimTask_WaterSpoutLaunch",
+    "task:AnimTask_WaterSpoutRain",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:monbg",
+    "visualCommand:setalpha"
+   ],
+   "representatives": ["MOVE_WATER_SPOUT"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/battle-lab/mechanic-water-spout-player-wailmer-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-water-spout-opponent-wailmer-player-shuckle.json",
+    "tools/compare/waterSpoutSourceAudit.ts",
+    "tests/animation/waterSpoutSourceCheckpoint.test.ts"
+   ],
+   "goal": "UNFULFILLED source/staging checkpoint only: MOVE_WATER_SPOUT's complete 14-command root, unique Level-50 Wailmer carrier, eight-component graph, HP-quarter tier, launch deformation/orbs, randomized rain/affine impacts, bilateral side bounds, target/partner shakes, audio, resources, and cleanup are source-audited. Complete legal transient-free full-HP Wailmer/Shuckle Scene-ON stages exist in both orientations. No dense state/raw-RGB evidence, reducer, typed seam, compositor, framebuffer acceptance, move credit, component credit, or sibling credit is implied. Full-HP proves only tier 3; source/oracle evidence must independently resolve lower live-HP tiers before promotion if they change visible acceptance."
+  },
+  {
    "id": "splitbgprio-foes-sonic-ring",
    "components": [
     "visualCommand:splitbgprio_foes",
