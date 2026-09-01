@@ -5,6 +5,7 @@
 - **Verified:** Complete retained bodies match **180/180 player-back + 180/180 opponent-front = 360/360** source/component/reducer/typed-seam/raw-RGB and actual-core framebuffer rows with **zero residual pixels**, twice. An altered live non-Unown ARON/GROVYLE species, geometry, allocator/order, personality, and RNG control traverses the same typed/core path.
 - **Latch/boundary:** Hidden Power re-confirms ScaleMon affine state at **RAM+2 on 70/70** selected rows, ordinary orb OAM and hardware palette at **RAM+1 on 179/179** comparable rows per orientation, and BlendMon palette display at RAM+1. No new or contradictory mechanism, animation boundary, unsupported barrier, recording/framebuffer lookup, absolute tick, coordinate/RGB fit, gameplay Hidden Power type/damage/RNG, controller, turn, round, or facility ownership was added.
 - **Controls:** MOVE_SUPER_FANG and MOVE_RECYCLE remain independent BlendMonInAndOut controls; MOVE_LEER and MOVE_CONFUSION remain independent ScaleMonAndRestore controls. Their acceptance is batch-checked but not inferred.
+- **Checks:** Focused Hidden Power/control/boundary/frontier acceptance passes **11 files / 50 tests**; coverage reports **221 exact / 55 unsupported**, animation audit and typecheck pass, and the final full `npm test` passes **1,204 files / 10,791 tests** with 44 files / 223 tests skipped. Production build passes **742 modules** and `git diff --check` is clean.
 
 # Animation supervisor verification — Hidden Power evidence merged (2026-09-01 supervisor)
 
