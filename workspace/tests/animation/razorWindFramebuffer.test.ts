@@ -39,11 +39,12 @@ describe("MOVE_RAZOR_WIND actual-core residual diagnostic", () => {
       },
     ]);
     for (const orientation of result) {
-      expect(Object.values(orientation.regions).reduce((sum, count) => sum + count, 0))
+      expect((Object.values(orientation.regions) as number[])
+        .reduce((sum, count) => sum + count, 0))
         .toBe(orientation.residualPixels);
       expect(orientation.bodies.setup.rows).toBe(46);
       expect(orientation.bodies.unleash.rows).toBe(73);
-      expect(orientation.failures.every((row) => row.bounds !== null
+      expect(orientation.failures.every((row: any) => row.bounds !== null
         || row.componentMismatches.length > 0)).toBe(true);
     }
   }, 30_000);

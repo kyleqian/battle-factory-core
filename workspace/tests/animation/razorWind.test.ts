@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   createSceneOnMovePresentation,
   sceneOnRazorWindView,
+  type SceneOnRazorWindConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { renderSceneOnMovePresentation } from "../../src/engine/battleScene.ts";
 import {
@@ -117,7 +118,7 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
     expect(unleashFramebuffer.some((value) => value !== 0)).toBe(true);
     expect(unleashFramebuffer).not.toEqual(setupFramebuffer);
 
-    const reversed = createSceneOnMovePresentation({
+    const reversed = createSceneOnMovePresentation<SceneOnRazorWindConfig>({
       ...stage.config,
       attacker: {
         species: "WINGULL",
@@ -127,7 +128,7 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
         },
       },
       target: {
-        species: "ABSOL",
+        species: "HAUNTER",
         geometry: {
           side: "player", spriteCorner: { x: 38, y: 55 },
           animationCenter: { x: 70, y: 87 }, battlePositionCenter: { x: 70, y: 79 },
@@ -144,7 +145,7 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
     const reversedView = sceneOnRazorWindView({ ...reversed, age: 10 });
     expect(reversedView).toMatchObject({
       attacker: { species: "WINGULL", geometry: { side: "opponent" } },
-      target: { species: "ABSOL", geometry: { side: "player" } },
+      target: { species: "HAUNTER", geometry: { side: "player" } },
       sprites: [
         { slot: 12, matrixId: 20 }, { slot: 13, matrixId: 21 },
         { slot: 14, matrixId: 22 },
