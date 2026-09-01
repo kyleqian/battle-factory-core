@@ -239,16 +239,16 @@ function commonState(
 ): RazorWindEffect {
   const lastAge = body === "setup"
     ? RAZOR_WIND_SETUP_LAST_AGE : RAZOR_WIND_UNLEASH_LAST_AGE;
-  const firstInactive = age > lastAge;
+  const firstInactive = age >= lastAge;
   const taskActive = body === "unleash" && age >= 37 && age <= 54;
   return {
-    body, age, active: age >= 0 && age <= lastAge, attackerSide: side,
+    body, age, active: age >= 0 && age < lastAge, attackerSide: side,
     sprites, painterOrder: orderedSprites(sprites, profile),
     resources: {
-      gust: body === "setup" && age >= 0 && age <= 44,
-      airWave2: body === "unleash" && age >= 0 && age <= 59,
-      impact: body === "unleash" && age >= 0 && age <= 59,
-      freed: body === "unleash" ? age >= 60 : age >= 45,
+      gust: body === "setup" && age >= 1 && age <= 44,
+      airWave2: body === "unleash" && age >= 1 && age <= 71,
+      impact: body === "unleash" && age >= 4 && age <= 71,
+      freed: body === "unleash" ? age >= 72 : age >= 45,
     },
     registers: {
       monbg: body === "unleash" && age >= 7 && age <= 58,
