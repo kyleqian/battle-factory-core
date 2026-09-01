@@ -1,3 +1,11 @@
+# Animation supervisor verification — Horn Drill source checkpoint merged (2026-09-01 supervisor)
+
+- **State:** Level 50 remains **223/276 exact, 0 partial / 0 staged, 53 unsupported**. MOVE_HORN_DRILL remains unsupported; `horn-drill-bg-horn-shakes` is a dedicated unfulfilled track and grants no sibling or component credit.
+- **Did:** Independently audited and fast-forwarded worker commits `b13b1ced9` and `4701a8cac`. The checkpoint pins the complete **381-byte** ROM body and 16-component graph, all drill BG/scroll, BowMon/horn, dual long-shake, 11-impact, resource/cleanup/audio paths, and complete transient-free bilateral Seaking/Onix stages. Only six animation-owned ledger/evidence/test files changed; production rendering, animation latches/boundaries/barriers, and gameplay ownership did not.
+- **Verified:** The direct source audit reproduces ROM SHA-256 `00717aca…`, source SHA-256 `34e06340…`, all nine Level-50 carriers, and lowest carrier set 333. Both mechanic-lab stages validate against the Scene-ON contract and constrain legal active choices. Focused source/staging/boundary/frontier checks pass **3 files / 12 tests**; coverage/audit stay neutral at **223 exact / 53 unsupported**.
+- **Merged gate:** Full `npm test` passes **1,211 files / 10,811 tests** with 44 files / 223 tests skipped; `npm run build` passes **746 modules**; `git diff --check` is clean.
+- **Next:** Capture twice-fresh byte-identical bilateral dense Scene-ON windows through first inactive cleanup, retain raw RGB and normalized state/change maps, and measure this move's own BG, shake, OAM/matrix/palette, tag, register, audio, RNG, cleanup, and immutable-gameplay behavior before any reducer or compositor work.
+
 # MOVE_HORN_DRILL source/classification checkpoint — unsupported (2026-09-01 worker)
 
 - **State:** Level 50 remains **223/276 exact, 0 partial / 0 staged, 53 unsupported**. MOVE_HORN_DRILL remains absent from `entries`; the dedicated 16-component `horn-drill-bg-horn-shakes` track is unfulfilled and grants no component or sibling credit.
