@@ -2,6 +2,44 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_SWIFT",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Battle Scene ON Staryu/Onix stages retain 78 player-back rows and 80 opponent-front rows through first inactive cleanup; twice-fresh dense state and chronological raw-RGB receipts remain byte-identical",
+    "the pure source-relative reducer and narrow typed seam cover all five gSwiftStarSpriteTemplate Q8.8 linear/sine callbacks, source ages 10/17/24/31/38, natural screen-bound cleanup, target AnimTask_ShakeMon2(target,2,0,18,1), singles partner abort, monbg/setalpha/clearmonbg/blendoff, attacker-panned audio, both loaded tags, and cleanup",
+    "the deterministic complete YELLOW_STAR 0x200-byte source asset regenerates byte-for-byte; IMPACT is retained as a loaded-only resource and is never instantiated",
+    "Swift independently confirms ordinary OAM and affine matrices at RAM+1 for 77/77 player and 79/79 opponent rows, hardware palette at RAM+1 for 76/77 and 78/79 rows with source age 7 monbg setup the sole same-row exception, and selected target-monbg shake at display ages 25..59 including neutral return",
+    "actual core.ts to renderSceneOnMovePresentation framebuffer equality passes all 78/78 player-back plus 80/80 opponent-front rows twice with zero residual pixels; altered live SURSKIT/ARON species, geometry, and allocator facts traverse the same deterministic production path",
+    "gameplay state, damage, accuracy, battle RNG, controller, turn, round, and facility state remain unowned; MOVE_ANCIENT_POWER, MOVE_METEOR_MASH, and MOVE_MAGICAL_LEAF retain only their own independent exact acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-swift-player-staryu-opponent-onix.json",
+    "tools/battle-lab/mechanic-swift-opponent-staryu-player-onix.json",
+    "tools/compare/fixtures/swift-evidence.json",
+    "tools/compare/evidence/swift-player-dense-state.json.gz",
+    "tools/compare/evidence/swift-opponent-dense-state.json.gz",
+    "tools/compare/evidence/swift-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/swift-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/swift-changemap-player.json",
+    "tools/compare/evidence/swift-changemap-opponent.json",
+    "tools/compare/swiftSourceAudit.ts",
+    "tools/compare/swiftEvidence.ts",
+    "tools/compare/swiftReducer.ts",
+    "tools/compare/swiftFramebuffer.ts",
+    "tools/compare/extractSwiftAssets.ts",
+    "src/animation/swift.ts",
+    "src/animation/assets/swift-yellow-star.json",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/swiftSourceCheckpoint.test.ts",
+    "tests/animation/swiftEvidenceCheckpoint.test.ts",
+    "tests/animation/swiftReducer.test.ts",
+    "tests/animation/swiftAssets.test.ts",
+    "tests/animation/swiftFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_TRICK",
    "status": "exact",
    "covered": [
@@ -7305,7 +7343,7 @@
     "representatives": [
       "MOVE_SWIFT"
     ],
-    "fulfilled": false,
+    "fulfilled": true,
     "evidence": [
       "tools/battle-lab/mechanic-swift-player-staryu-opponent-onix.json",
       "tools/battle-lab/mechanic-swift-opponent-staryu-player-onix.json",
@@ -7319,10 +7357,21 @@
       "tools/compare/evidence/swift-opponent-raw-rgb.tar.gz",
       "tools/compare/evidence/swift-changemap-player.json",
       "tools/compare/evidence/swift-changemap-opponent.json",
+      "tools/compare/swiftReducer.ts",
+      "tools/compare/swiftFramebuffer.ts",
+      "tools/compare/extractSwiftAssets.ts",
+      "src/animation/swift.ts",
+      "src/animation/assets/swift-yellow-star.json",
+      "src/animation/sceneOnPresentation.ts",
+      "src/engine/battleScene.ts",
+      "src/engine/core.ts",
       "tests/animation/swiftSourceCheckpoint.test.ts",
-      "tests/animation/swiftEvidenceCheckpoint.test.ts"
+      "tests/animation/swiftEvidenceCheckpoint.test.ts",
+      "tests/animation/swiftReducer.test.ts",
+      "tests/animation/swiftAssets.test.ts",
+      "tests/animation/swiftFramebuffer.test.ts"
     ],
-    "goal": "UNFULFILLED dense evidence checkpoint only: MOVE_SWIFT alone has complete legal transient-free Battle Scene ON Staryu/Onix three-mon parties and twice-fresh byte-identical complete source/state/raw-RGB windows through first inactive cleanup in both orientations (78 player-back rows, 80 opponent-front rows), plus normalized change maps and a strict hermetic verifier. The maps pin all five YELLOW_STAR lifecycles, loaded-but-not-root-instantiated IMPACT tag, target/defender-partner ShakeMon2 selectors, target monbg motion, side callbacks, attacker-panned audio, ordinary OAM/matrix/palette display latches, RNG/state stability, and cleanup. No reducer, seam, compositor, production art/wiring, or framebuffer comparator exists. Do not promote MOVE_SWIFT or any component/sibling; MOVE_ANCIENT_POWER, MOVE_METEOR_MASH, and MOVE_MAGICAL_LEAF remain independent exact controls. The bounded remainder is an actual shared-production core.ts -> renderSceneOnMovePresentation framebuffer gate at zero residual for every retained row twice, without an evidence pair, recording/RGB/framebuffer lookup, absolute-tick fitting, coordinate fitting, or gameplay ownership."
+    "goal": "FULFILLED: MOVE_SWIFT alone independently passes all 78 player-back plus 80 opponent-front retained source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through inactive cleanup with zero residual pixels on two deterministic production-render passes. Its source-derived Q8.8 linear/sine stars, target ShakeMon2, monbg/alpha lifecycle, source audio, deterministic YELLOW_STAR art, loaded-only IMPACT, live species/sides/geometry/allocator facts, generic battler art/chrome, ordinary RAM+1 OAM/matrix/palette transfers, and cleanup use no evidence-pair gate, recording/framebuffer lookup, coordinate/RGB fitting, absolute tick, or gameplay ownership. MOVE_ANCIENT_POWER, MOVE_METEOR_MASH, and MOVE_MAGICAL_LEAF retain independent exact controls and receive no sibling credit."
   },
     {
       "id": "rock-blast-first-body",

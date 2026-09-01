@@ -3,17 +3,17 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_SWIFT",
   "moveId": 129,
-  "status": "checkpoint",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "evidenceScope": {
     "sourceAudit": true,
     "completePointerBody": true,
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
-    "framebufferCompared": false,
-    "coveragePromotion": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "framebufferCompared": true,
+    "coveragePromotion": true,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false,
     "fullDenseRowsRetained": true,
@@ -31,16 +31,16 @@
       "opponent-front": 80
     },
     "normalizedChangeMaps": true,
-    "productionFramebufferRows": 0,
-    "productionFramebufferResidualPixels": null
+    "productionFramebufferRows": 158,
+    "productionFramebufferResidualPixels": 0
   },
   "source": {
     "audit": "tools/compare/swiftSourceAudit.ts",
-    "auditSha256": "07a8626d1781f90a729fa893f3f737975cbea569c318b6dfcd4e0ba25e17f4ed",
+    "auditSha256": "5b3a63c59e63b0032ab662e60216a77d4d7378bf0a857e69fa71fb0840283be6",
     "probe": "tools/compare/swiftProbe.py",
     "probeSha256": "1481d0bd438e94bb22f0ff6833c7972d4550b5821099a17212e85042b540e971",
     "evidenceVerifier": "tools/compare/swiftEvidence.ts",
-    "evidenceVerifierSha256": "b0a4acdfdc58d43988c6875fbf8fa7780d05c8ac6a7d92a4e594add5aa7369e4"
+    "evidenceVerifierSha256": "8b3492baf64cb0465970ff817ee9a80ff953199605a4b53344eb334bd6cfa696"
   },
   "orientations": {
     "player-back": {

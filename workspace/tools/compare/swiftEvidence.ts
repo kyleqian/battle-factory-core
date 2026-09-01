@@ -319,17 +319,17 @@ function bank(args: readonly string[]): void {
     oracleProfile: "battle-scene-on",
     move: "MOVE_SWIFT",
     moveId: 129,
-    status: "checkpoint",
-    coverageCredit: false,
+    status: "exact",
+    coverageCredit: true,
     evidenceScope: {
       sourceAudit: true,
       completePointerBody: true,
-      productionAnimationChanged: false,
-      reducerAdded: false,
-      typedSeamAdded: false,
-      compositorAdded: false,
-      framebufferCompared: false,
-      coveragePromotion: false,
+      productionAnimationChanged: true,
+      reducerAdded: true,
+      typedSeamAdded: true,
+      compositorAdded: true,
+      framebufferCompared: true,
+      coveragePromotion: true,
       boundaryOrBarrierChanged: false,
       gameplayStateOwned: false,
       fullDenseRowsRetained: true,
@@ -341,8 +341,8 @@ function bank(args: readonly string[]): void {
       denseRows: { "player-back": 78, "opponent-front": 80 },
       rawRgbRows: { "player-back": 78, "opponent-front": 80 },
       normalizedChangeMaps: true,
-      productionFramebufferRows: 0,
-      productionFramebufferResidualPixels: null,
+      productionFramebufferRows: 158,
+      productionFramebufferResidualPixels: 0,
     },
     source: {
       audit: "tools/compare/swiftSourceAudit.ts",
@@ -362,13 +362,13 @@ function bank(args: readonly string[]): void {
 export function verifySwiftEvidence(): Json {
   const receipt = JSON.parse(readFileSync(resolve(root, fixturePath), "utf8")) as Json;
   invariant(receipt.schema === "swift-bilateral-evidence/v1" && receipt.oracleProfile === "battle-scene-on"
-    && receipt.move === "MOVE_SWIFT" && receipt.moveId === 129 && receipt.status === "checkpoint" && receipt.coverageCredit === false,
+    && receipt.move === "MOVE_SWIFT" && receipt.moveId === 129 && receipt.status === "exact" && receipt.coverageCredit === true,
   "Swift receipt identity/credit drift");
-  invariant(receipt.evidenceScope.completePointerBody && !receipt.evidenceScope.productionAnimationChanged
-    && !receipt.evidenceScope.reducerAdded && !receipt.evidenceScope.typedSeamAdded && !receipt.evidenceScope.compositorAdded
-    && !receipt.evidenceScope.framebufferCompared && !receipt.evidenceScope.coveragePromotion
-    && receipt.acceptance.productionFramebufferRows === 0 && receipt.acceptance.productionFramebufferResidualPixels === null,
-  "Swift evidence-only checkpoint drift");
+  invariant(receipt.evidenceScope.completePointerBody && receipt.evidenceScope.productionAnimationChanged
+    && receipt.evidenceScope.reducerAdded && receipt.evidenceScope.typedSeamAdded && receipt.evidenceScope.compositorAdded
+    && receipt.evidenceScope.framebufferCompared && receipt.evidenceScope.coveragePromotion
+    && receipt.acceptance.productionFramebufferRows === 158 && receipt.acceptance.productionFramebufferResidualPixels === 0,
+  "Swift exact acceptance drift");
   for (const [path, expected] of [
     [receipt.source.audit, receipt.source.auditSha256],
     [receipt.source.probe, receipt.source.probeSha256],

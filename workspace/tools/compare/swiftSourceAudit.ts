@@ -163,8 +163,8 @@ if (
   || JSON.stringify(legalCarriers.map((entry: { index: number }) => entry.index)) !== JSON.stringify([128, 143, 181, 225, 228, 396])
   || impactAsset.source !== "graphics/battle_anims/sprites/impact.png (src/graphics.c:464-465, ANIM_TAG_IMPACT)"
   || existsSync(resolve(root, "src/assets/gen/battle-anim-yellow-star.json"))
-  || status("MOVE_SWIFT") !== undefined
-  || track?.fulfilled !== false
+  || status("MOVE_SWIFT") !== "exact"
+  || track?.fulfilled !== true
   || JSON.stringify(track?.representatives) !== JSON.stringify(["MOVE_SWIFT"])
   || JSON.stringify(track?.components) !== JSON.stringify(components)
   || status("MOVE_ANCIENT_POWER") !== "exact"
@@ -205,13 +205,13 @@ console.log(JSON.stringify({
     explicitUnload: false,
   },
   artIdentity: {
-    yellowStar: "graphics/battle_anims/sprites/yellow_star.png is the exact ANIM_TAG_YELLOW_STAR source asset; no generated Yellow Star asset exists and no production art is added or reused by this checkpoint",
-    impact: "existing src/assets/gen/battle-anim-hitsplat.json is source-identical to graphics/battle_anims/sprites/impact.png / ANIM_TAG_IMPACT, but Swift only loads that tag here and no production art is reused",
+    yellowStar: "src/animation/assets/swift-yellow-star.json regenerates the complete graphics/battle_anims/sprites/yellow_star.png / ANIM_TAG_YELLOW_STAR source asset byte-for-byte",
+    impact: "existing src/assets/gen/battle-anim-hitsplat.json is source-identical to graphics/battle_anims/sprites/impact.png / ANIM_TAG_IMPACT; Swift loads the tag but instantiates no IMPACT sprite",
   },
-  checkpoint: { coverageEntry: null, derivedStatus: "unsupported", track: "swift-stars-source-staging", fulfilled: false },
+  checkpoint: { coverageEntry: "exact", derivedStatus: "exact", track: "swift-stars-source-staging", fulfilled: true },
   controls: {
     moves: ["MOVE_ANCIENT_POWER", "MOVE_METEOR_MASH", "MOVE_MAGICAL_LEAF"],
     statuses: ["exact", "exact", "exact"],
-    independence: "Swift receives no credit; exact controls retain independent acceptance.",
+    independence: "Swift and each exact control retain separate independent acceptance.",
   },
 }, null, 2));
