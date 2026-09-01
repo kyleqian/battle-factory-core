@@ -25,9 +25,9 @@
     "changeMapBuilder": "tools/compare/hiddenPowerChangeMap.ts",
     "changeMapBuilderSha256": "f1e7c7f59a2bf83b70fdd524d08959793993e514e780c073f40e3bcfc8c1fe98",
     "assetExtractor": "tools/compare/extractHiddenPowerAssets.ts",
-    "assetExtractorSha256": "7525b5c49a33374b0f8cfcf5e2bc8274dd401a5a37bdb23aabf633ee3b44608f",
+    "assetExtractorSha256": "6c87575f9dfc09baaa739661e2a16a2891f61701ed97e232eaaa444ec7b5d466",
     "asset": "src/animation/assets/hidden-power-red-orb.json",
-    "assetSha256": "0598b07a66858f22a75a4040f89b84369f8164c74a22ee6ba3fc84ba915a268e"
+    "assetSha256": "bf8d2c80dfbaf196b1b7279e022aeca0e3fd9424ed580dd123fd51437b10d116"
   },
   "repeatability": {
     "runsPerOrientation": 2,

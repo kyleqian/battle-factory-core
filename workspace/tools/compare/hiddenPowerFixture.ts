@@ -56,6 +56,7 @@ export function hiddenPowerConfigFor(
   const spriteOrderSeed = rows[63]!.spriteOrder.filter((slot: number) => allocationSlots.includes(slot));
   const player = first.parties.player[0];
   const opponent = first.parties.opponent[0];
+  const attackerParty = playerAttacker ? player : opponent;
   const center = { x: orbit[0]!.x, y: orbit[0]!.y };
   return {
     move: "HIDDEN_POWER",
@@ -74,6 +75,7 @@ export function hiddenPowerConfigFor(
       orbitMatrixNums: orbit.map((sprite: Row) => sprite.matrixNum),
       scatterMatrixNums: scatter.map((sprite: Row) => sprite.matrixNum),
       uninitializedScatterY: scatter[7]!.y,
+      attackerPersonality: attackerParty.personality,
       animationRngSeed: first.animationRng,
     },
   };

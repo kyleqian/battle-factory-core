@@ -32,6 +32,8 @@ export interface HiddenPowerProfile {
   readonly scatterMatrixNums: readonly number[];
   /** Initial CreateSprite y before the eighth command's deferred callback. */
   readonly uninitializedScatterY: number;
+  /** Live personality used only by the stock Unown battle-pic form selector. */
+  readonly attackerPersonality: number;
   readonly animationRngSeed: number;
 }
 
@@ -65,6 +67,7 @@ export interface HiddenPowerState {
   /** Component owners, back-to-front, after the persistent source sort. */
   readonly painterOrder: readonly number[];
   readonly animationRng: number;
+  readonly unownFormIndex: number;
   readonly audio: readonly Readonly<{
     age: number;
     song: "TAKE_DOWN" | "REVERSAL" | "REFLECT";
@@ -278,6 +281,17 @@ function animationRngAtAge(seed: number, age: number): number {
   return value;
 }
 
+/** Stock `GET_UNOWN_LETTER` packed personality-bit selector. */
+export function hiddenPowerUnownFormIndex(personality: number): number {
+  const value = personality >>> 0;
+  return (
+    ((value & 0x03000000) >>> 18)
+    | ((value & 0x00030000) >>> 12)
+    | ((value & 0x00000300) >>> 6)
+    | (value & 3)
+  ) % 28;
+}
+
 /** Age zero is Move_HIDDEN_POWER's first retained pointer-owned row. */
 export function hiddenPowerAtAge(
   age: number,
@@ -307,6 +321,7 @@ export function hiddenPowerAtAge(
     orbs,
     painterOrder: orderAtAge(age, attackerCenter, profile.uninitializedScatterY, profile),
     animationRng: animationRngAtAge(profile.animationRngSeed, age),
+    unownFormIndex: hiddenPowerUnownFormIndex(profile.attackerPersonality),
     audio: [
       ...(age === 4 ? [{ age, song: "TAKE_DOWN" as const, pan: "attacker" as const }] : []),
       ...(age === 64 ? [{ age, song: "REVERSAL" as const, pan: "attacker" as const }] : []),

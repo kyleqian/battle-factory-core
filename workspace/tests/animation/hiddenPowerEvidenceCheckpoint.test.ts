@@ -7,7 +7,7 @@ import { createScratchDir } from "../../tools/lib/scratch.ts";
 
 type Mon = Record<string, any> & { species: number; moves: number[] };
 
-describe("MOVE_HIDDEN_POWER complete bilateral unsupported checkpoint", () => {
+describe("MOVE_HIDDEN_POWER complete bilateral evidence checkpoint", () => {
   it("pins the complete half-open source interval and exactly six generated components", () => {
     const audit = JSON.parse(execFileSync(process.execPath, [
       "--experimental-strip-types", "tools/compare/hiddenPowerSourceAudit.ts",
@@ -96,10 +96,10 @@ describe("MOVE_HIDDEN_POWER complete bilateral unsupported checkpoint", () => {
     execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/extractHiddenPowerAssets.ts", "--out", output]);
     expect(readFileSync(output)).toEqual(readFileSync("src/animation/assets/hidden-power-red-orb.json"));
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(220);
-    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_HIDDEN_POWER")).toBeUndefined();
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(221);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_HIDDEN_POWER")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "hidden-power-red-orbs")).toMatchObject({
-      representatives: ["MOVE_HIDDEN_POWER"], fulfilled: false,
+      representatives: ["MOVE_HIDDEN_POWER"], fulfilled: true,
     });
     for (const move of ["MOVE_SUPER_FANG", "MOVE_RECYCLE", "MOVE_LEER", "MOVE_CONFUSION"])
       expect(coverage.entries.find((entry: { move: string }) => entry.move === move)).toMatchObject({ status: "exact" });

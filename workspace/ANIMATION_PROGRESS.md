@@ -1,3 +1,11 @@
+# MOVE_HIDDEN_POWER exact production presentation (2026-09-01 worker)
+
+- **State:** Level 50 advances **220→221/276 exact**, remains **0 partial / 0 staged**, and drops **56→55 unsupported**. MOVE_HIDDEN_POWER alone promotes and `hidden-power-red-orbs` is fulfilled; no sibling receives inferred credit.
+- **Production:** Added the complete pure source-relative reducer and narrow typed live Scene-ON seam for ScaleMonAndRestore, six orbit sprites, eight scatter sprites, BlendMonInAndOut, `setarg`, resources/audio, animation RNG, and persistent source order. The generic actual-core compositor consumes live battler species/sides/geometry, allocator/matrices/order, field chrome, palette, and personality. All 28 Unown forms are source-extracted and selected by the stock live-personality formula; there is no Unown/Onix evidence-pair gate.
+- **Verified:** Complete retained bodies match **180/180 player-back + 180/180 opponent-front = 360/360** source/component/reducer/typed-seam/raw-RGB and actual-core framebuffer rows with **zero residual pixels**, twice. An altered live non-Unown ARON/GROVYLE species, geometry, allocator/order, personality, and RNG control traverses the same typed/core path.
+- **Latch/boundary:** Hidden Power re-confirms ScaleMon affine state at **RAM+2 on 70/70** selected rows, ordinary orb OAM and hardware palette at **RAM+1 on 179/179** comparable rows per orientation, and BlendMon palette display at RAM+1. No new or contradictory mechanism, animation boundary, unsupported barrier, recording/framebuffer lookup, absolute tick, coordinate/RGB fit, gameplay Hidden Power type/damage/RNG, controller, turn, round, or facility ownership was added.
+- **Controls:** MOVE_SUPER_FANG and MOVE_RECYCLE remain independent BlendMonInAndOut controls; MOVE_LEER and MOVE_CONFUSION remain independent ScaleMonAndRestore controls. Their acceptance is batch-checked but not inferred.
+
 # Animation supervisor verification — Hidden Power evidence merged (2026-09-01 supervisor)
 
 - **State:** Level 50 remains **220/276 exact, 0 partial / 0 staged, 56 unsupported**. MOVE_HIDDEN_POWER and `hidden-power-red-orbs` remain honestly unsupported/unfulfilled; no sibling credit was inferred.

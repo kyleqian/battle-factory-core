@@ -565,6 +565,7 @@ import metalSoundAsset from "../animation/assets/metal-sound.json" with { type: 
 import screechAsset from "../animation/assets/screech.json" with { type: "json" };
 import safeguardAsset from "../animation/assets/safeguard.json" with { type: "json" };
 import purpleFlameAsset from "../animation/assets/purple-flame.json" with { type: "json" };
+import hiddenPowerRedOrbAsset from "../animation/assets/hidden-power-red-orb.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
 import waterSpoutOrbAsset from "../animation/assets/water-spout-glowy-blue-orb.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
@@ -911,6 +912,7 @@ import {
   sceneOnScreechView,
   sceneOnSafeguardView,
   sceneOnGrudgeView,
+  sceneOnHiddenPowerView,
   sceneOnSmellingSaltView,
   sceneOnRecycleView,
   sceneOnLeerView,
@@ -1073,6 +1075,7 @@ import {
   type SceneOnScreechConfig,
   type SceneOnSafeguardConfig,
   type SceneOnGrudgeConfig,
+  type SceneOnHiddenPowerConfig,
   type SceneOnLeerConfig,
   type SceneOnHiJumpKickConfig,
   type SceneOnKarateChopConfig,
@@ -2286,6 +2289,15 @@ const battleAnimGhostBg = battleAnimGhostBgAsset as {
 };
 const purpleFlameArt = purpleFlameAsset as {
   flame: { tileset: Tileset; palette: RgbColor[] };
+};
+const hiddenPowerRedOrbArt = hiddenPowerRedOrbAsset as {
+  tileset: Tileset;
+  palette: RgbColor[];
+  unownForms: {
+    letters: readonly string[];
+    back: Record<string, Tileset>;
+    front: Record<string, Tileset>;
+  };
 };
 const battleAnimPsychicBg = battleAnimPsychicBgAsset as { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
 const meteorMashArt = meteorMashAsset as {
@@ -15746,6 +15758,141 @@ export function renderSceneOnMovePresentation(
       fb,
       playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
       "GRUDGE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HIDDEN_POWER") {
+    const hiddenState = state as SceneOnMovePresentationState<SceneOnHiddenPowerConfig>;
+    const view = sceneOnHiddenPowerView(hiddenState);
+    // Ordinary OBJ OAM/matrices and BlendMon palette writes scan out from
+    // RAM+1. ScaleMonAndRestore mutates the live battler after OAM build and
+    // therefore uses Hidden Power's independently measured RAM+2 row.
+    const displayed = sceneOnHiddenPowerView({ ...hiddenState, age: hiddenState.age - 1 });
+    const displayedScale = sceneOnHiddenPowerView({ ...hiddenState, age: hiddenState.age - 2 });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const battlerArt = (battler: typeof view.attacker): {
+      readonly tileset: Tileset;
+      readonly palette: RgbColor[];
+    } => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species];
+        if (!source) throw new Error(`HIDDEN_POWER missing player-back art for ${battler.species}`);
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!source) throw new Error(`HIDDEN_POWER missing opponent-front art for ${battler.species}`);
+      return { tileset: subTileset(source.tileset, 0, 8), palette: source.palette };
+    };
+    const baseAttackerArt = battlerArt(view.attacker);
+    const formLetter = hiddenPowerRedOrbArt.unownForms.letters[view.unownFormIndex];
+    const attackerArt = view.attacker.species !== "UNOWN" ? baseAttackerArt : {
+      palette: baseAttackerArt.palette,
+      tileset: (playerAttacker
+        ? hiddenPowerRedOrbArt.unownForms.back[formLetter!]
+        : hiddenPowerRedOrbArt.unownForms.front[formLetter!])!,
+    };
+    const targetArt = battlerArt(view.target);
+    const tintPacked = mgbaColorFromBgr555(displayed.blend.colorBgr555);
+    const attackerPalette = blendPaletteToward(attackerArt.palette, {
+      r: tintPacked & 0xff,
+      g: tintPacked >>> 8 & 0xff,
+      b: tintPacked >>> 16 & 0xff,
+    }, displayed.blend.coefficient);
+    const attackerIdle = playerAttacker ? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species) : { x2: 0, y2: 0 };
+    const drawAttacker = (): void => {
+      if (displayedScale.attackerScale.value !== 256) {
+        drawSpriteSheetAffineStretch(
+          fb,
+          attackerArt.tileset,
+          attackerPalette,
+          view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+          view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+          displayedScale.attackerScale.value,
+          displayedScale.attackerScale.value,
+          0,
+          { r: 0, g: 0, b: 0 },
+          0,
+          true,
+        );
+      } else {
+        drawSpriteSheet(
+          fb, attackerArt.tileset, attackerPalette,
+          view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+          view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+        );
+      }
+    };
+    const drawTarget = (): void => drawSpriteSheet(
+      fb, targetArt.tileset, targetArt.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const byOwner = new Map(displayed.orbs.map((orb) => [orb.owner, orb]));
+    const drawEffects = (accept: (orb: (typeof displayed.orbs)[number]) => boolean): void => {
+      for (const owner of displayed.painterOrder) {
+        const orb = byOwner.get(owner);
+        if (!orb || !orb.initialized || !accept(orb)) continue;
+        drawSpriteSheetAffineRotate(
+          fb,
+          hiddenPowerRedOrbArt.tileset,
+          hiddenPowerRedOrbArt.palette,
+          orb.x + orb.x2,
+          orb.y + orb.y2,
+          orb.matrix[0], orb.matrix[1], orb.matrix[2], orb.matrix[3],
+          undefined,
+          orb.kind === "scatter",
+        );
+      }
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (!playerAttacker && hiddenState.age === 0) {
+      drawSourceOpponentEnemyShadow(
+        fb, view.attacker.species, view.attacker.geometry.battlePositionCenter,
+      );
+    }
+    const behindAttacker = (orb: (typeof displayed.orbs)[number]) =>
+      orb.kind === "orbit" && orb.subpriority > hiddenState.config.animationProfile.attackerSubpriority;
+    const inFrontOfAttacker = (orb: (typeof displayed.orbs)[number]) =>
+      orb.kind === "orbit" && orb.subpriority < hiddenState.config.animationProfile.attackerSubpriority;
+    if (playerAttacker) {
+      drawTarget();
+      drawEffects((orb) => orb.kind === "scatter");
+      drawEffects(behindAttacker);
+      drawAttacker();
+      drawEffects(inFrontOfAttacker);
+    } else {
+      drawEffects(behindAttacker);
+      drawAttacker();
+      drawEffects(inFrontOfAttacker);
+      drawTarget();
+      drawEffects((orb) => orb.kind === "scatter");
+    }
+
+    const opponent = playerAttacker ? view.target : view.attacker;
+    const player = playerAttacker ? view.attacker : view.target;
+    const profile = hiddenState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "none",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "none",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "HIDDEN POWER!",
       99,
     );
     return;

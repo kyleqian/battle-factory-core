@@ -15,6 +15,25 @@ const image = decodeIndexedPng(join(
   "reference/pokeemerald/graphics/battle_anims/sprites/red_orb.png",
 ));
 const sliced = sliceTiles(image);
+const unownLetters = [
+  ..."abcdefghijklmnopqrstuvwxyz",
+  "question_mark",
+  "exclamation_mark",
+] as const;
+const unownPic = (letter: string, file: "back.png" | "anim_front.png") => {
+  const decoded = decodeIndexedPng(join(
+    root, "reference/pokeemerald/graphics/pokemon/unown", letter, file,
+  ));
+  if (decoded.width !== 64 || (decoded.height !== 64 && decoded.height !== 128)) {
+    throw new Error(`unexpected Unown ${letter}/${file} shape`);
+  }
+  const tiles = sliceTiles(decoded);
+  return {
+    columns: 8,
+    rows: 8,
+    tiles: tiles.tiles.slice(0, 64).map((tile) => [...tile.pixels]),
+  };
+};
 
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
@@ -30,5 +49,11 @@ writeFileSync(out, `${JSON.stringify({
     tiles: sliced.tiles.map((tile) => [...tile.pixels]),
   },
   palette: image.palette,
+  unownForms: {
+    source: "graphics/pokemon/unown/{form}/{back.png,anim_front.png}",
+    letters: unownLetters,
+    back: Object.fromEntries(unownLetters.map((letter) => [letter, unownPic(letter, "back.png")])),
+    front: Object.fromEntries(unownLetters.map((letter) => [letter, unownPic(letter, "anim_front.png")])),
+  },
 })}\n`);
 console.log(`wrote ${out}`);

@@ -68,4 +68,11 @@ describe("MOVE_HIDDEN_POWER pure source-relative reducer and typed seam", () => 
     }
     expect(mismatches).toEqual([]);
   });
+
+  it("selects the retained Unown forms from each live party personality", () => {
+    const player = hiddenPowerConfigFor("player-back", hiddenPowerRowsFor("player-back"));
+    const opponent = hiddenPowerConfigFor("opponent-front", hiddenPowerRowsFor("opponent-front"));
+    expect(sceneOnHiddenPowerView(createSceneOnMovePresentation(player)).unownFormIndex).toBe(7);
+    expect(sceneOnHiddenPowerView(createSceneOnMovePresentation(opponent)).unownFormIndex).toBe(4);
+  });
 });

@@ -2,6 +2,44 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_HIDDEN_POWER",
+   "status": "exact",
+   "covered": [
+    "complete retained Scene-ON bodies pass twice-fresh dense-state and chronological raw-RGB verification through first inactive cleanup: 180 player-back rows at frames 77..256 plus 180 opponent-front rows at frames 81..260",
+    "the pure source-relative reducer ports the complete 0x082ca7bc..0x082ca8a5 pointer/wait program, ScaleMonAndRestore, six orbit and eight scatter sprites, BlendMonInAndOut, setarg, resources, audio, persistent sprite order, and animation RNG without gameplay ownership",
+    "the narrow typed seam consumes live attacker and target species, sides, geometry, allocator slots, matrices, persistent order, personality, field chrome, audio, resources, palettes, and animation RNG; all 28 Unown forms are source-extracted and the live party personality selects the displayed form",
+    "Hidden Power independently confirms ScaleMonAndRestore's fresh affine paint at RAM+2 on 70/70 selected rows, whole ordinary orb OAM and hardware palette at RAM+1 on 179/179 comparable rows per orientation, and BlendMonInAndOut palette writes at RAM+1",
+    "actual core.ts through renderSceneOnMovePresentation framebuffer equality passes 180/180 player-back plus 180/180 opponent-front rows with zero residual pixels on two deterministic production passes; an altered live non-Unown ARON/GROVYLE species, geometry, allocator, order, personality, and RNG control traverses the same typed and core path",
+    "Hidden Power type, damage, gameplay RNG, outcome, turn order, round advancement, and facility state remain external; MOVE_SUPER_FANG, MOVE_RECYCLE, MOVE_LEER, and MOVE_CONFUSION retain independent acceptance and receive no inferred credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-hidden-power-player-unown-opponent-onix.json",
+    "tools/battle-lab/mechanic-hidden-power-opponent-unown-player-onix.json",
+    "tools/compare/hiddenPowerSourceAudit.ts",
+    "tools/compare/hiddenPowerProbe.py",
+    "tools/compare/hiddenPowerEvidence.ts",
+    "tools/compare/hiddenPowerChangeMap.ts",
+    "tools/compare/hiddenPowerFixture.ts",
+    "tools/compare/hiddenPowerFramebuffer.ts",
+    "tools/compare/extractHiddenPowerAssets.ts",
+    "tools/compare/fixtures/hidden-power-evidence.json",
+    "tools/compare/evidence/hidden-power-player-dense-state.json.gz",
+    "tools/compare/evidence/hidden-power-opponent-dense-state.json.gz",
+    "tools/compare/evidence/hidden-power-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/hidden-power-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/hidden-power-changemap-player.json",
+    "tools/compare/evidence/hidden-power-changemap-opponent.json",
+    "src/animation/assets/hidden-power-red-orb.json",
+    "src/animation/hiddenPower.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/hiddenPowerEvidenceCheckpoint.test.ts",
+    "tests/animation/hiddenPowerReducer.test.ts",
+    "tests/animation/hiddenPowerFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_GRUDGE",
    "status": "exact",
    "covered": [
@@ -7607,7 +7645,7 @@
       "visualCommand:setarg"
     ],
     "representatives": ["MOVE_HIDDEN_POWER"],
-    "fulfilled": false,
+    "fulfilled": true,
     "evidence": [
       "tools/battle-lab/mechanic-hidden-power-player-unown-opponent-onix.json",
       "tools/battle-lab/mechanic-hidden-power-opponent-unown-player-onix.json",
@@ -7615,6 +7653,8 @@
       "tools/compare/hiddenPowerProbe.py",
       "tools/compare/hiddenPowerEvidence.ts",
       "tools/compare/hiddenPowerChangeMap.ts",
+      "tools/compare/hiddenPowerFixture.ts",
+      "tools/compare/hiddenPowerFramebuffer.ts",
       "tools/compare/extractHiddenPowerAssets.ts",
       "tools/compare/fixtures/hidden-power-evidence.json",
       "tools/compare/evidence/hidden-power-player-dense-state.json.gz",
@@ -7624,9 +7664,15 @@
       "tools/compare/evidence/hidden-power-changemap-player.json",
       "tools/compare/evidence/hidden-power-changemap-opponent.json",
       "src/animation/assets/hidden-power-red-orb.json",
-      "tests/animation/hiddenPowerEvidenceCheckpoint.test.ts"
+      "src/animation/hiddenPower.ts",
+      "src/animation/sceneOnPresentation.ts",
+      "src/engine/battleScene.ts",
+      "src/engine/core.ts",
+      "tests/animation/hiddenPowerEvidenceCheckpoint.test.ts",
+      "tests/animation/hiddenPowerReducer.test.ts",
+      "tests/animation/hiddenPowerFramebuffer.test.ts"
     ],
-    "goal": "UNFULFILLED: MOVE_HIDDEN_POWER has a complete pinned 233-byte source interval and twice-fresh bilateral 180-row dense state/raw-RGB windows through first inactive cleanup, including independent RED_ORB orbit/scatter, ScaleMon RAM+2, BlendMon and ordinary OAM/palette RAM+1 measurements. Exact remains withheld at 0/360 production framebuffer rows: a source-relative reducer, narrow typed live Scene-ON seam, generic actual-core compositor, altered live species/geometry/allocator/order control, and twice-run zero-residual production acceptance remain. The inventory's sole Level-50 carrier is FRONTIER_MON_UNOWN/set 126, but Factory source explicitly rejects Unown, so the evidence uses complete legal three-mon parties with an exact Unown override and does not claim a naturally selectable Factory carrier. MOVE_SUPER_FANG and MOVE_RECYCLE remain independent exact BlendMon controls; MOVE_LEER and MOVE_CONFUSION remain independent exact ScaleMon controls; no sibling receives inferred credit."
+    "goal": "FULFILLED by MOVE_HIDDEN_POWER only: the complete 233-byte source interval and twice-fresh 180-row player-back plus 180-row opponent-front dense Scene-ON bodies pass source/component/reducer/typed-seam/raw-RGB and actual core.ts -> renderSceneOnMovePresentation equality with zero residual pixels on two deterministic passes. ScaleMonAndRestore, six orbit sprites, eight scatter sprites, BlendMonInAndOut, RED_ORB resources, source audio, animation RNG, setarg, ordinary RAM+1 OAM/palette transfers, ScaleMon RAM+2 affine state, persistent allocator order, live personality-selected source Unown forms, and an altered non-Unown ARON/GROVYLE species/geometry/allocator/order control are covered without a carrier/evidence-pair gate, recording/framebuffer lookup, coordinate/RGB fit, absolute tick, or gameplay ownership. MOVE_SUPER_FANG, MOVE_RECYCLE, MOVE_LEER, and MOVE_CONFUSION retain independent exact acceptance and receive no inferred credit."
   }
  ],
  "variantAudits": {
