@@ -101,6 +101,11 @@ import {
   type SonicBoomEffect,
 } from "./sonicBoom.ts";
 import {
+  razorWindAtAge,
+  type RazorWindAnimationProfile,
+  type RazorWindEffect,
+} from "./razorWind.ts";
+import {
   smokescreenEffectAtAge,
   type SmokescreenEffect,
 } from "./smokescreen.ts";
@@ -2335,6 +2340,19 @@ export interface SceneOnSonicBoomConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
+export interface SceneOnRazorWindConfig {
+  readonly move: "RAZOR_WIND";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source X_2/Y_PIC_OFFSET centers, supplied by live battler geometry. */
+  readonly attackerPictureCenter: Readonly<{ x: number; y: number }>;
+  readonly targetPictureCenter: Readonly<{ x: number; y: number }>;
+  /** Allocator and persistent-order state observed at this presentation. */
+  readonly animationProfile: Readonly<RazorWindAnimationProfile>;
+}
+
 export interface SceneOnSmokescreenConfig {
   readonly move: "SMOKESCREEN";
   readonly attacker: SceneOnPresentationBattler;
@@ -3574,6 +3592,7 @@ export type SceneOnMoveConfig =
   | SceneOnSpikeCannonConfig
   | SceneOnPinMissileConfig
   | SceneOnSonicBoomConfig
+  | SceneOnRazorWindConfig
   | SceneOnSmokescreenConfig
   | SceneOnOctazookaConfig
   | SceneOnSpikesConfig
@@ -3735,6 +3754,8 @@ export type SceneOnRockBlastPresentationState =
   SceneOnMovePresentationState<SceneOnRockBlastConfig>;
 export type SceneOnSwiftPresentationState =
   SceneOnMovePresentationState<SceneOnSwiftConfig>;
+export type SceneOnRazorWindPresentationState =
+  SceneOnMovePresentationState<SceneOnRazorWindConfig>;
 export type SceneOnIceBeamPresentationState =
   SceneOnMovePresentationState<SceneOnIceBeamConfig>;
 export type SceneOnDizzyPunchPresentationState =
@@ -4113,6 +4134,11 @@ export interface SceneOnDrillPeckView extends DrillPeckState {
 
 export interface SceneOnWhirlwindView extends WhirlwindState {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRazorWindView extends RazorWindEffect {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7368,6 +7394,35 @@ export function sceneOnSonicBoomView(
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+/** `age=0` is Razor Wind's first source-relative setup/unleash display. */
+export function sceneOnRazorWindView(
+  state: SceneOnMovePresentationState<SceneOnRazorWindConfig>,
+): SceneOnRazorWindView {
+  if (state.config.move !== "RAZOR_WIND") {
+    throw new Error(
+      `expected RAZOR_WIND presentation, got ${state.config.move}`,
+    );
+  }
+  const config = state.config;
+  const body = state.age <= 45 ? "setup" : "unleash";
+  const bodyAge = body === "setup" ? state.age : state.age - 46;
+  return {
+    ...razorWindAtAge(
+      bodyAge,
+      body,
+      config.attacker.geometry.side,
+      {
+        attackerPositionCenter: config.attacker.geometry.battlePositionCenter,
+        attackerPictureCenter: config.attackerPictureCenter,
+        targetPictureCenter: config.targetPictureCenter,
+      },
+      config.animationProfile,
+    ),
+    attacker: config.attacker,
+    target: config.target,
   };
 }
 

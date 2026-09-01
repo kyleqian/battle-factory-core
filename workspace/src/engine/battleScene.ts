@@ -532,6 +532,7 @@ import twineedleAsset from "../animation/assets/twineedle.json" with { type: "js
 import poisonStingAsset from "../animation/assets/poisonSting.json" with { type: "json" };
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
+import razorWindAsset from "../animation/assets/razor-wind.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import hailAsset from "../animation/assets/hail.json" with { type: "json" };
@@ -951,6 +952,7 @@ import {
   sceneOnSpikeCannonView,
   sceneOnPinMissileView,
   sceneOnSonicBoomView,
+  sceneOnRazorWindView,
   sceneOnSmokescreenView,
   sceneOnMudShotView,
   sceneOnHydroPumpView,
@@ -1171,6 +1173,7 @@ import {
   type SceneOnSpikeCannonConfig,
   type SceneOnPinMissileConfig,
   type SceneOnSonicBoomConfig,
+  type SceneOnRazorWindConfig,
   type SceneOnSmokescreenConfig,
   type SceneOnMudShotConfig,
   type SceneOnHydroPumpConfig,
@@ -1715,6 +1718,11 @@ const sonicBoomArt = sonicBoomAsset as {
   enemyShadow: { tileset: Tileset; palette: RgbColor[] };
   magnetonBack: { tileset: Tileset; palette: RgbColor[] };
   magnetonFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const razorWindArt = razorWindAsset as {
+  gust: { tileset: Tileset; palette: RgbColor[] };
+  airWave2: { tileset: Tileset; palette: RgbColor[] };
+  impact: { tileset: Tileset; palette: RgbColor[] };
 };
 const smokescreenArt = smokescreenAsset as {
   blackBall: { tileset: Tileset; palette: RgbColor[] };
@@ -22787,6 +22795,152 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MAGNETON used" : "Foe MAGNETON used",
       "SONICBOOM!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "RAZOR_WIND") {
+    const razorState =
+      state as SceneOnMovePresentationState<SceneOnRazorWindConfig>;
+    const view = sceneOnRazorWindView(razorState);
+    // BuildOamBuffer and the OBJ palette DMA precede the callback writes in
+    // both source bodies. Keep this one source-relative latch for setup,
+    // unleash, affine matrices, and target ShakeMon2.
+    const displayed = sceneOnRazorWindView({
+      ...razorState,
+      age: Math.max(0, razorState.age - 1),
+    });
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const source = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!source) throw new Error(`RAZOR_WIND missing ${battler.species} battler art`);
+      return source;
+    };
+    const tilesFor = (source: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? source.tileset : subTileset(source.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const attackerTiles = tilesFor(attackerArt, view.attacker.geometry.side);
+    const targetTiles = tilesFor(targetArt, view.target.geometry.side);
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const drawTarget = (): void => drawSpriteSheet(
+      fb,
+      targetTiles,
+      targetArt.palette,
+      view.target.geometry.spriteCorner.x + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
+    );
+    if (displayed.registers.monbg) drawTarget();
+    const nonObjTarget2 = fb.slice();
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb,
+      attackerTiles,
+      attackerArt.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    type RazorDrawEntry = {
+      readonly slot: number;
+      readonly subpriority: number;
+      readonly order: number;
+      readonly draw: () => void;
+    };
+    const entries: RazorDrawEntry[] = [{
+      slot: view.attacker.geometry.side === "player" ? 6 : 8,
+      subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      order: -2,
+      draw: drawAttacker,
+    }];
+    if (!displayed.registers.monbg) entries.push({
+      slot: view.target.geometry.side === "player" ? 6 : 8,
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      order: -1,
+      draw: drawTarget,
+    });
+    for (const sprite of displayed.sprites) {
+      const order = displayed.painterOrder.indexOf(sprite.slot);
+      entries.push({
+        slot: sprite.slot,
+        subpriority: sprite.subpriority,
+        order: order < 0 ? -sprite.sourceCreationOrder : -order,
+        draw: () => {
+          if (sprite.kind === "tornado") {
+            drawSpriteSheetAffineRotate(
+              fb,
+              razorWindArt.gust.tileset,
+              razorWindArt.gust.palette,
+              sprite.x + sprite.x2,
+              sprite.y + sprite.y2,
+              sprite.matrix[0], sprite.matrix[1], sprite.matrix[2], sprite.matrix[3],
+              undefined,
+              false,
+            );
+            return;
+          }
+          const matrix = [
+            sprite.hFlip ? -sprite.matrix[0] : sprite.matrix[0],
+            sprite.matrix[1],
+            sprite.matrix[2],
+            sprite.vFlip ? -sprite.matrix[3] : sprite.matrix[3],
+          ];
+          if (displayed.registers.alpha) {
+            drawSpriteSheetAffineRotateBlendedOverFb(
+              fb,
+              nonObjTarget2,
+              razorWindArt.airWave2.tileset,
+              razorWindArt.airWave2.palette,
+              sprite.x + sprite.x2,
+              sprite.y + sprite.y2,
+              matrix[0]!, matrix[1]!, matrix[2]!, matrix[3]!,
+              displayed.registers.alpha[0], displayed.registers.alpha[1], false,
+            );
+          } else {
+            drawSpriteSheetFlipped(
+              fb,
+              razorWindArt.airWave2.tileset,
+              razorWindArt.airWave2.palette,
+              sprite.x + sprite.x2 - 16,
+              sprite.y + sprite.y2 - 8,
+              sprite.hFlip,
+              sprite.vFlip,
+            );
+          }
+        },
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = razorState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "RAZOR WIND!",
       99,
     );
     return;
