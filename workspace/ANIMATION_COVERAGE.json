@@ -7673,6 +7673,37 @@
       "tests/animation/hiddenPowerFramebuffer.test.ts"
     ],
     "goal": "FULFILLED by MOVE_HIDDEN_POWER only: the complete 233-byte source interval and twice-fresh 180-row player-back plus 180-row opponent-front dense Scene-ON bodies pass source/component/reducer/typed-seam/raw-RGB and actual core.ts -> renderSceneOnMovePresentation equality with zero residual pixels on two deterministic passes. ScaleMonAndRestore, six orbit sprites, eight scatter sprites, BlendMonInAndOut, RED_ORB resources, source audio, animation RNG, setarg, ordinary RAM+1 OAM/palette transfers, ScaleMon RAM+2 affine state, persistent allocator order, live personality-selected source Unown forms, and an altered non-Unown ARON/GROVYLE species/geometry/allocator/order control are covered without a carrier/evidence-pair gate, recording/framebuffer lookup, coordinate/RGB fit, absolute tick, or gameplay ownership. MOVE_SUPER_FANG, MOVE_RECYCLE, MOVE_LEER, and MOVE_CONFUSION retain independent exact acceptance and receive no inferred credit."
+  },
+  {
+    "id": "stockpile-gray-orb-absorption",
+    "components": [
+      "asset:ANIM_TAG_GRAY_ORB",
+      "subroutine:StockpileAbsorb",
+      "task:AnimTask_StockpileDeformMon",
+      "visualCommand:blend_color_cycle",
+      "visualCommand:create_stockpile_absorption_orb_sprite",
+      "visualCommand:simple_palette_blend"
+    ],
+    "representatives": ["MOVE_STOCKPILE"],
+    "fulfilled": false,
+    "evidence": [
+      "tools/battle-lab/mechanic-stockpile-player-pelipper-opponent-delcatty.json",
+      "tools/battle-lab/mechanic-stockpile-opponent-pelipper-player-delcatty.json",
+      "tools/compare/stockpileSourceAudit.ts",
+      "tools/compare/stockpileProbe.py",
+      "tools/compare/stockpileEvidence.ts",
+      "tools/compare/extractStockpileAssets.ts",
+      "tools/compare/fixtures/stockpile-evidence.json",
+      "tools/compare/evidence/stockpile-player-dense-state.json.gz",
+      "tools/compare/evidence/stockpile-opponent-dense-state.json.gz",
+      "tools/compare/evidence/stockpile-player-raw-rgb.tar.gz",
+      "tools/compare/evidence/stockpile-opponent-raw-rgb.tar.gz",
+      "tools/compare/evidence/stockpile-changemap-player.json",
+      "tools/compare/evidence/stockpile-changemap-opponent.json",
+      "src/animation/assets/stockpile-gray-orb.json",
+      "tests/animation/stockpileEvidenceCheckpoint.test.ts"
+    ],
+    "goal": "UNFULFILLED evidence checkpoint for MOVE_STOCKPILE only: the complete 183-byte source interval, reproducible GRAY_ORB art, lowest legal Level-50 Pelipper carrier, and twice-fresh 99-row player-back plus 99-row opponent-front dense Scene-ON bodies are pinned through first inactive cleanup. Sixteen orb lifecycles, BlendColorCycle, StockpileDeformMon, SimplePaletteBlend, resource cleanup, animation RNG, ordinary RAM+1 OAM/palette, Stockpile-specific fresh-orb RAM+1 matrix/first-pixel paint, and live-attacker RAM+2 deformation are measured. Exact still requires a pure source-relative reducer, narrow typed live seam, generic actual-core compositor, materially altered live species/side/geometry/allocator/order control, and twice-run 198/198 zero-residual framebuffer equality. MOVE_SWALLOW, MOVE_SPIT_UP, MOVE_SAFEGUARD, MOVE_CONFUSE_RAY, and MOVE_SOFT_BOILED retain independent statuses and receive no inferred credit."
   }
  ],
  "variantAudits": {

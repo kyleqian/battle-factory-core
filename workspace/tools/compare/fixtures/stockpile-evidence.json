@@ -1,0 +1,92 @@
+{
+  "schema": "stockpile-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_STOCKPILE",
+  "moveId": 254,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "sourceAudit": true,
+    "completePointerBody": true,
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferCompared": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "source": {
+    "start": "0x082d4934",
+    "endExclusive": "0x082d49eb",
+    "byteLength": 183,
+    "sha256": "577d34d17b25cd5a812079692caacba5c1719f6fab5b733dd492df3baf81e470",
+    "blocks": ["Move_STOCKPILE", "StockpileAbsorb"],
+    "components": [
+      "asset:ANIM_TAG_GRAY_ORB",
+      "subroutine:StockpileAbsorb",
+      "task:AnimTask_StockpileDeformMon",
+      "visualCommand:blend_color_cycle",
+      "visualCommand:create_stockpile_absorption_orb_sprite",
+      "visualCommand:simple_palette_blend"
+    ],
+    "lowestLevel50Carrier": {"setId": 213, "frontierMon": "FRONTIER_MON_PELIPPER_1", "species": "SPECIES_PELIPPER"}
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "firstInactiveCleanupRetained": true,
+    "denseRows": {"player-back": 99, "opponent-front": 99},
+    "rawRgbRows": {"player-back": 99, "opponent-front": 99},
+    "productionFramebufferRows": 0,
+    "productionFramebufferResidualPixels": null,
+    "completeOrbLifecyclesPerOrientation": 16,
+    "latches": {
+      "wholeOamRamPlus1": "98/98 per orientation",
+      "wholePaletteRamPlus1": "98/98 per orientation",
+      "freshOrbMatrixAndOamRamPlus1": "16/16 per orientation",
+      "liveAttackerAffineRamPlus2": "76/76 per orientation",
+      "opponentFirstVisibleOrbPixel": {"sourceBirthAge": 4, "displayAge": 5, "changedPixels": 69, "bounds": [121, 83, 129, 91]}
+    }
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-stockpile-player-pelipper-opponent-delcatty.json",
+      "scenarioSha256": "595cbb9804160bbcc2f579cf33b8aecfafed4f51a7bb87acb3a7f4118374015e",
+      "sourceWindow": {"startFrame": 207, "endFrame": 305, "frameCount": 99, "sourceFrameCount": 99},
+      "denseState": "tools/compare/evidence/stockpile-player-dense-state.json.gz",
+      "denseStateSha256": "6ee995e7fa295c57cd4ec3168a3136868c4d197e10e9fd95f21589a0fd41ed8d",
+      "probeJsonSha256": "f55004eb823b2dedbd97c0da1b17f0fc821af356165b87e825364daf3c8da559",
+      "repeatProbeJsonSha256": "f55004eb823b2dedbd97c0da1b17f0fc821af356165b87e825364daf3c8da559",
+      "rawRgbArchive": "tools/compare/evidence/stockpile-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "ab2cbc9e3f5213d8baf055a00531de77c7b423c830e3d25b434de6cc4292f76f",
+      "rawRgbSequenceSha256": "b743b02daa7d6f78cff6092371e18e476db2812effa5239765ecc4e7eee786b1",
+      "repeatRawRgbSequenceSha256": "b743b02daa7d6f78cff6092371e18e476db2812effa5239765ecc4e7eee786b1",
+      "changeMap": "tools/compare/evidence/stockpile-changemap-player.json",
+      "changeMapSha256": "af6485b75f687c878cbcdfa9cb42566ea56aecb45abaec4b825bdc872f1ad4d0"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-stockpile-opponent-pelipper-player-delcatty.json",
+      "scenarioSha256": "25254a5dea32b5f47607ed9f4deb357f1b5a226cbd517b9e3bd68b84bbfb87a8",
+      "sourceWindow": {"startFrame": 205, "endFrame": 303, "frameCount": 99, "sourceFrameCount": 99},
+      "denseState": "tools/compare/evidence/stockpile-opponent-dense-state.json.gz",
+      "denseStateSha256": "9ecfaf486f29fe00bf2d579ec8cb813b9d827be59739bf9e0181d1cc8b6fe7d1",
+      "probeJsonSha256": "b9365d176d9b4257bcadcd8803854c1a00725e78ca55c28e779611813c19a736",
+      "repeatProbeJsonSha256": "b9365d176d9b4257bcadcd8803854c1a00725e78ca55c28e779611813c19a736",
+      "rawRgbArchive": "tools/compare/evidence/stockpile-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "f38f094b5820f05f99c4bf80ab4a2180a39ca224eb4a9cc31755bb95a0b94880",
+      "rawRgbSequenceSha256": "8b89999c50091577ee524df03b2ab3a4c706544e73277fdc391dcd839feee589",
+      "repeatRawRgbSequenceSha256": "8b89999c50091577ee524df03b2ab3a4c706544e73277fdc391dcd839feee589",
+      "changeMap": "tools/compare/evidence/stockpile-changemap-opponent.json",
+      "changeMapSha256": "371e7de847fa4547af4d91197d56ea6f4862955158dc4fdb557aa509a5e1a71a"
+    }
+  },
+  "controls": {
+    "deformationFamilyOnly": {"MOVE_SWALLOW": "exact", "MOVE_SPIT_UP": "unsupported"},
+    "retainedPalette": {"MOVE_SAFEGUARD": "exact", "MOVE_CONFUSE_RAY": "exact", "MOVE_SOFT_BOILED": "exact"},
+    "inferredCreditGranted": false
+  },
+  "remainingObligation": "Implement a pure source-relative Stockpile reducer, narrow typed live Scene-ON seam, generic actual-core compositor, and materially altered live species/side/geometry/allocator/order control; then prove twice-run zero-residual framebuffer equality for every retained row before any move or component promotion."
+}
