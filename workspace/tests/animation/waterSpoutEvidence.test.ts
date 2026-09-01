@@ -34,6 +34,6 @@ describe("MOVE_WATER_SPOUT complete bilateral full-HP evidence", () => {
     const receipt = JSON.parse(readFileSync("tools/compare/fixtures/water-spout-evidence.json", "utf8"));
     expect(receipt).toMatchObject({ status: "unsupported", coverageCredit: false, fullHpPowerTier: 3,
       scope: { completePointerBody: true, fullDenseRowsRetained: true, rawRgbRetained: true, twiceFreshByteIdentical: true,
-        reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false, coveragePromotion: false } });
+        reducerAdded: true, typedSeamAdded: true, compositorAdded: true, framebufferCompared: true, coveragePromotion: false } });
   });
 });
