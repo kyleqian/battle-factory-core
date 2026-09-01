@@ -93,6 +93,7 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
       fieldProfile: { playerHp: 100, playerMaxHp: 100, opponentHp: 110, opponentMaxHp: 110 },
       attackerPictureCenter: { x: 72, y: 94 },
       targetPictureCenter: { x: 176, y: 42 },
+      targetRestOffset: { x2: 1, y2: 0 },
       animationProfile: profile,
     });
     const setup = sceneOnRazorWindView({ ...stage, age: 4 });
@@ -136,6 +137,7 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
       },
       attackerPictureCenter: { x: 173, y: 47 },
       targetPictureCenter: { x: 70, y: 91 },
+      targetRestOffset: { x2: 7, y2: -5 },
       animationProfile: {
         tornadoSpriteSlots: [12, 13, 14], tornadoMatrixIds: [20, 21, 22],
         crescentSpriteSlots: [14, 12, 13], crescentMatrixIds: [25, 26, 27],
@@ -146,14 +148,33 @@ describe("MOVE_RAZOR_WIND source-relative reducer", () => {
     expect(reversedView).toMatchObject({
       attacker: { species: "WINGULL", geometry: { side: "opponent" } },
       target: { species: "HAUNTER", geometry: { side: "player" } },
+      targetRestOffset: { x2: 7, y2: -5 },
       sprites: [
         { slot: 12, matrixId: 20 }, { slot: 13, matrixId: 21 },
         { slot: 14, matrixId: 22 },
       ],
     });
-    expect(renderSceneOnMovePresentation(
-      new Uint8Array(240 * 160 * 4),
-      { ...reversed, age: 10 },
-    )).toBeUndefined();
+    const zeroRest = {
+      ...reversed,
+      config: { ...reversed.config, targetRestOffset: { x2: 0, y2: 0 } },
+    };
+    const renderAt = (presentation: typeof reversed, age: number): Uint8Array => {
+      const framebuffer = new Uint8Array(240 * 160 * 4);
+      renderSceneOnMovePresentation(framebuffer, { ...presentation, age });
+      return framebuffer;
+    };
+    // The altered nonzero live idle geometry is visible before ShakeMon2,
+    // then the task overwrites it and cleanup leaves the target at zero.
+    expect(renderAt(reversed, 10)).not.toEqual(renderAt(zeroRest, 10));
+    const reversedUnleash = {
+      ...reversed,
+      config: { ...reversed.config, body: "unleash" as const },
+    };
+    const zeroRestUnleash = {
+      ...zeroRest,
+      config: { ...zeroRest.config, body: "unleash" as const },
+    };
+    expect(renderAt(reversedUnleash, 38)).toEqual(renderAt(zeroRestUnleash, 38));
+    expect(renderAt(reversedUnleash, 57)).toEqual(renderAt(zeroRestUnleash, 57));
   });
 });

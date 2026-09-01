@@ -2352,6 +2352,8 @@ export interface SceneOnRazorWindConfig {
   /** Source X_2/Y_PIC_OFFSET centers, supplied by live battler geometry. */
   readonly attackerPictureCenter: Readonly<{ x: number; y: number }>;
   readonly targetPictureCenter: Readonly<{ x: number; y: number }>;
+  /** Live target x2/y2 before ShakeMon2 overwrites the sprite fields. */
+  readonly targetRestOffset: Readonly<{ x2: number; y2: number }>;
   /** Allocator and persistent-order state observed at this presentation. */
   readonly animationProfile: Readonly<RazorWindAnimationProfile>;
 }
@@ -4144,6 +4146,7 @@ export interface SceneOnWhirlwindView extends WhirlwindState {
 export interface SceneOnRazorWindView extends RazorWindEffect {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly targetRestOffset: Readonly<{ x2: number; y2: number }>;
 }
 
 export interface SceneOnBodySlamView extends BodySlamState {
@@ -7424,6 +7427,7 @@ export function sceneOnRazorWindView(
     ),
     attacker: config.attacker,
     target: config.target,
+    targetRestOffset: config.targetRestOffset,
   };
 }
 

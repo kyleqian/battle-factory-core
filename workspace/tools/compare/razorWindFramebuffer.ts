@@ -119,6 +119,10 @@ export function razorWindConfigFor(
     },
     attackerPictureCenter: playerAttacker ? { x: 72, y: 98 } : { x: 176, y: 48 },
     targetPictureCenter: playerAttacker ? { x: 176, y: 42 } : { x: 72, y: 88 },
+    targetRestOffset: {
+      x2: first.battlerSprites.target.x2,
+      y2: first.battlerSprites.target.y2,
+    },
     animationProfile: {
       tornadoSpriteSlots: setupSprites.map((sprite) => sprite.slot) as [number, number, number],
       tornadoMatrixIds: setupSprites.map((sprite) => sprite.matrixNum) as [number, number, number],
@@ -167,9 +171,10 @@ function componentMismatches(row: Row, nextRow: Row | undefined, view: RazorWind
   }
 
   const target = row.battlerSprites.target;
-  const targetBase = view.attackerSide === "player"
-    && (view.body === "setup" || view.age < 37) ? 1 : 0;
-  if (target.x2 - targetBase !== view.targetOffset.x2 || target.y2 !== view.targetOffset.y2) {
+  const targetRest = view.body === "setup" || view.age < 37
+    ? view.targetRestOffset : { x2: 0, y2: 0 };
+  if (target.x2 - targetRest.x2 !== view.targetOffset.x2
+    || target.y2 - targetRest.y2 !== view.targetOffset.y2) {
     mismatches.push("shake-target-offset");
   }
   const taskActive = row.tasks.some((task: Row) => task.func?.symbol === "AnimTask_ShakeMon2_Step");

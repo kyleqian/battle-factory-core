@@ -22832,13 +22832,15 @@ export function renderSceneOnMovePresentation(
       targetTiles,
       targetArt.palette,
       view.target.geometry.spriteCorner.x
-        + (view.target.species === "ONIX"
-          && view.target.geometry.side === "opponent"
-          // ShakeMon2 overwrites the live x2 idle hold and its cleanup
-          // restores zero, so the original front idle hold never returns.
-          && !(view.body === "unleash" && displayed.age >= 37) ? 1 : 0)
+        // ShakeMon2 overwrites the live idle fields and its cleanup restores
+        // zero, so the pre-task offset never returns after its first write.
+        + (!(view.body === "unleash" && displayed.age >= 37)
+          ? displayed.targetRestOffset.x2 : 0)
         + displayed.targetOffset.x2,
-      view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
+      view.target.geometry.spriteCorner.y
+        + (!(view.body === "unleash" && displayed.age >= 37)
+          ? displayed.targetRestOffset.y2 : 0)
+        + displayed.targetOffset.y2,
     );
     if (displayed.registers.monbg) drawTarget();
     const drawAttacker = (): void => drawSpriteSheet(
