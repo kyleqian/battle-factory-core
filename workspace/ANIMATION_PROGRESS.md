@@ -1,3 +1,12 @@
+# MOVE_RAZOR_WIND production checkpoint — unsupported (2026-09-01 worker)
+
+- **State:** Level 50 remains **222/276 exact, 0 partial / 0 staged, 54 unsupported**. `MOVE_RAZOR_WIND` and `razor-wind-two-turn-air-wave` remain unsupported/unfulfilled; `MOVE_AEROBLAST` remains outside-Factory with no credit.
+- **Did:** Added source-relative `src/animation/razorWind.ts`, generated `src/animation/assets/razor-wind.json`, a typed body-selecting Scene-ON seam, and the live `battleScene.ts` compositor through the existing generic `core.ts → renderSceneOnMovePresentation` route. It consumes live species, sides, battler/picture geometry, field/chrome, subpriority, allocator slots/matrices, persistent order, and source resources; no gameplay or facility state changed.
+- **Verified:** Both natural bodies are covered: **46 setup + 73 unleash rows per orientation**. Setup tornadoes are active ages 4..43 and tear down at 44; unleash crescents create at 10/14/18, tear down at 33/37/41, and `ShakeMon2` runs ages 37..54. OAM/matrices are RAM+1 on **45/45 setup and 72/72 unleash**; palettes are RAM+1 on **45/45 setup and 71/72 unleash**, with the age-7 monbg exception. Evidence raw hashes remain player `578ca8b4…`, opponent `9ebf11d6…`; source SHA `2ce0cd33…`.
+- **Promotion gate:** Two direct actual-core comparator passes are deterministic but fail exactness: each pass gives player-back **24/119 zero rows, 161321 residual pixels** and opponent-front **35/119, 72138**. The required **238/238 zero-residual** gate therefore fails; no promotion.
+- **Checks:** Focused controls/ratchets pass **15 files / 62 tests**; full `npm test` passes **1,209 files / 10,807 tests** with 44 files / 223 tests skipped; `npm run build` passes **746 modules**; coverage, animation audit, typecheck, and diff-check pass. No `ANIMATION_LATCHES.md`, boundary list, or unsupported barrier changed. Commits: `2b578eb4f`, `fda36faac`, `141da45d5`, `af5c49d70`, `db35139fb`.
+- **Remainder:** Keep Razor Wind unsupported. Resolve dense source-relative compositor residuals and rerun the altered-live-control/twice-pass gate; do not infer Razor, Aeroblast, or sibling credit and do not use lookup, absolute-tick, coordinate/RGB-fit, or thinning paths.
+
 # Animation supervisor verification — Razor Wind evidence merged (2026-09-01 supervisor)
 
 - **State:** Level 50 remains **222/276 exact, 0 partial / 0 staged, 54 unsupported**. MOVE_RAZOR_WIND and `razor-wind-two-turn-air-wave` remain honestly unsupported/unfulfilled; MOVE_AEROBLAST remains outside-Factory with no inferred credit.
