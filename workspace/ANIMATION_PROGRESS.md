@@ -1,3 +1,11 @@
+# MOVE_RAZOR_WIND exact bilateral production presentation (2026-09-01 worker)
+
+- **State:** Level 50 advances **222→223/276 exact**, with **0 partial / 0 staged** and **54→53 unsupported**. MOVE_RAZOR_WIND alone promotes and `razor-wind-two-turn-air-wave` alone is fulfilled; MOVE_AEROBLAST and the named sibling controls receive no inferred credit.
+- **Did:** Banked a hermetic actual-core comparator covering all **46 setup + 73 unleash rows per orientation**, with body/age/orientation/bounds/region residuals and pure reducer/typed-seam checks. The source-derived repair corrects the setup blank text window, tornado terminal callback hold, crescent source lifetime/callback and ordinary-OBJ composition, ShakeMon2 immediate tick plus Onix idle overwrite, monbg/alpha cleanup, resources, and persistent transfer order.
+- **Verified:** Two deterministic comparator passes each return player-back **119/119 zero rows, 0 residual pixels, peak 0** and opponent-front **119/119, 0, peak 0**; all **238/238** component rows are exact. A materially altered WINGULL/HAUNTER reversed-side geometry/slot/matrix/order control traverses the same `core.ts → renderSceneOnMovePresentation` path.
+- **Checks:** Focused Razor source/evidence/reducer/framebuffer and Sonic Boom, Steel Wing, Screech, Sweet Scent controls pass; boundary/frontier/inventory ratchets, coverage/audit, typecheck, **1,210-file / 10,808-test** full `npm test`, **746-module** build, and diff-check pass. Commits: `4d7440724`, `09d4f11b8`, `5c2da3295`, `e615b716d`.
+- **Notes:** No `ANIMATION_LATCHES.md`, animation import boundary, unsupported-branch barrier, gameplay damage/two-turn/RNG/outcome, controller/turn/round/facility state, carrier/recording/framebuffer lookup, absolute tick, or fitted coordinate/RGB path changed. Papercut: the required one-move coverage increment touched 45 dispersed exact-count ratchets, and battle-scene test collection remains memory-heavy.
+
 # Animation supervisor verification — Razor Wind production checkpoint merged, still unsupported (2026-09-01 supervisor)
 
 - **State:** Level 50 remains **222/276 exact, 0 partial / 0 staged, 54 unsupported**. MOVE_RAZOR_WIND and `razor-wind-two-turn-air-wave` remain unsupported/unfulfilled; MOVE_AEROBLAST remains outside-Factory with no inferred credit.
