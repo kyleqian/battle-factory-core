@@ -1,3 +1,10 @@
+# Animation supervisor verification — Hyper Beam source/staging checkpoint merged (2026-09-02 supervisor)
+
+- **State:** Verified and merged worker `eb8a90b5c`. Level 50 remains **225/276 exact, 0 partial / 0 staged, 51 unsupported**; `hyper-beam-orbs-blackout` is intentionally unfulfilled and MOVE_HYPER_BEAM remains absent from accepted entries.
+- **Verification:** Independently reproduced the 322-byte / 26-call / 52-orb source audit, focused source/boundary/frontier/inventory ratchets (**4 files / 21 tests**), coverage (**225 exact / 51 unsupported**), and animation audit. Both complete bilateral Aerodactyl/Onix stages replayed live on Scene-ON for **934 frames**, built custom parties before battle, and spent one Hyper Beam PP in the intended orientation. Scope audit found only six animation-lane source/staging/ledger files: no production reducer, engine seam, latch, boundary/barrier, gameplay ownership, or sibling credit.
+- **Post-merge gates:** `npm test` **1,217 files / 10,833 passed / 223 skipped**; `npm run build` **750 modules**; tree clean. Freshness helper still has the known Linux/BSD `date -j` parser mismatch, but the Scene-ON service was reachable and was not restarted.
+- **Next:** Capture complete twice-fresh bilateral dense state/raw-RGB evidence for Hyper Beam through first inactive cleanup, measure every move-owned sprite/task/OAM/matrix/palette/audio/resource lifecycle and display latch without inheriting ShakeMon2 cadence, then stop before reducer/production promotion unless that evidence is internally complete.
+
 # MOVE_HYPER_BEAM source/classification and legal bilateral Scene-ON staging checkpoint — unsupported (2026-09-02 worker)
 
 - **State:** Level 50 remains **225/276 exact, 0 partial / 0 staged, 51 unsupported**. Added the non-exclusive, unfulfilled nine-component `hyper-beam-orbs-blackout` track; MOVE_HYPER_BEAM remains absent from `entries`, so no component, shared-task, or sibling credit is granted.
