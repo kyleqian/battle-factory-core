@@ -1,3 +1,12 @@
+# Animation supervisor verification — Aurora Beam source checkpoint merged (2026-09-02 supervisor)
+
+- **State:** Level 50 remains **224/276 exact, 0 partial / 0 staged, 52 unsupported**. MOVE_AURORA_BEAM remains unsupported; dedicated 10-component `aurora-beam-rainbow-rings-bg` is unfulfilled and grants no move, component, shared-task, or sibling credit.
+- **Did:** Independently audited and fast-forwarded worker commit `b840e4d07`. The source-only checkpoint pins the complete **212-byte** ROM body and two-block 10-component graph, all 40 affine rings, arg-7 release, palette rotation, two ShakeMon2 schedules, BG_AURORA fade/restore, audio/resources/cleanup, three Level-50 carriers, and complete bilateral Seadra/Onix stages. Only the two animation ledgers, source audit/test, and two mechanic-lab stages changed; production rendering and latches did not.
+- **Verified:** The direct audit reproduces ROM SHA-256 `b178f9fa…`, source SHA-256 `e782d921…`, carriers **219/256/266**, lowest set **219 FRONTIER_MON_SEADRA_1**, and excluded below-boundary sets 73/109. Both live Scene-ON oracle traces complete **934 frames** with requested captures at 0 and 934; parties are complete, transient-free, and constrain all four active choices.
+- **Merged gate:** Focused source/staging/boundary/frontier/inventory checks pass **5 files / 22 tests**; coverage/audit stay neutral at **224 exact / 52 unsupported**. Full `npm test` passes **1,214 files / 10,822 tests** with 44 files / 223 tests skipped; `npm run build` passes **748 modules**; `git diff --check` is clean.
+- **Next:** Capture two fresh byte-identical dense Scene-ON runs per natural orientation through first inactive cleanup, retaining raw RGB and normalized move-owned BG/palette/ShakeMon2/ring/affine/OAM/audio/resource/cleanup maps before any reducer or compositor work.
+- **Notes:** `ANIMATION_LATCHES.md`, animation boundaries/barriers, production rendering, gameplay/RNG/damage/outcome/controller/turn/round/facility state, and main-program documents remain unchanged. No animation deferral was opened. Worker papercut: baseline and final full suites spent ~19 minutes in mostly quiet Vitest execution.
+
 # MOVE_AURORA_BEAM source/classification checkpoint — unsupported (2026-09-02 worker)
 
 - **State:** Level 50 remains **224/276 exact, 0 partial / 0 staged, 52 unsupported**. MOVE_AURORA_BEAM remains absent from `entries`; dedicated 10-component `aurora-beam-rainbow-rings-bg` is unfulfilled and grants no move, component, shared sound-task, or sibling credit.
