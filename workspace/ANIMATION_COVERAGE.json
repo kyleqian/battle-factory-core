@@ -6865,7 +6865,7 @@
     "MOVE_PSYWAVE",
     "MOVE_TRI_ATTACK"
    ],
-   "goal": "MOVE_SHADOW_BALL independently proves its complete 5/5/0/5 LoopSEAdjustPanning task schedule and full ghost-BG/projectile/impact/shake/restore body in both orientations at 148/148 task/sprite/OAM/matrix/register/palette/raw-RGB and framebuffer frames, reproduced twice. No sibling is promoted. ICE BEAM needs its BG darken/restore, two outer-crystal beam starters, eleven IceBeamCreateCrystals groups, target blue blend, target ShakeMon2, terminal inner crystals, IceCrystalEffectShort, monbg/splitbgprio/alpha teardown, and its distinct 4/4/0/10 sound schedule. PSYBEAM needs SetPsychicBackground/UnsetPsychicBackground, eleven GoldRing groups, target SwayMon, two-leg target blend_color_cycle, and its distinct 3/4/0/15 sound schedule. AURORA BEAM needs BG_AURORA fade/restore, rotating rainbow-ring palette task, ten four-ring groups, both target ShakeMon2 tasks, script arg-7 lifetime gate, and its distinct 3/6/0/10 sound schedule. HYPER BEAM needs full BG blackout/restore, attacker ShakeMon2 and Y-shake, flashing orb palette, twenty-five HyperBeamOrbs groups, target ShakeMon2, both target palette blends, and its distinct 1/15/0/5 sound schedule. PSYWAVE needs SetPsychicBackground/UnsetPsychicBackground, StartSinAnimTimer, twelve blue-ring sprites, four-leg target blend_color_cycle, and its distinct 2/9/0/10 sound schedule. TRI ATTACK needs the translating triangle, two initial sound/delay legs, BG blackout, eight fire scatters plus patterned shake, three lightning strikes plus inversion/patterned shake, the final ice body, and its distinct 5/6/0/7 sound schedule. Every sibling remains unsupported pending independent complete dense move evidence."
+   "goal": "MOVE_SHADOW_BALL independently proves its complete 5/5/0/5 LoopSEAdjustPanning task schedule and full ghost-BG/projectile/impact/shake/restore body in both orientations at 148/148 task/sprite/OAM/matrix/register/palette/raw-RGB and framebuffer frames, reproduced twice. No sibling is promoted. ICE BEAM needs its BG darken/restore, two outer-crystal beam starters, eleven IceBeamCreateCrystals groups, target blue blend, target ShakeMon2, terminal inner crystals, IceCrystalEffectShort, monbg/splitbgprio/alpha teardown, and its distinct 4/4/0/10 sound schedule. PSYBEAM needs SetPsychicBackground/UnsetPsychicBackground, eleven GoldRing groups, target SwayMon, two-leg target blend_color_cycle, and its distinct 3/4/0/15 sound schedule. AURORA BEAM needs BG_AURORA fade/restore, rotating rainbow-ring palette task, ten four-ring groups, both target ShakeMon2 tasks, script arg-7 lifetime gate, and its distinct 3/6/0/10 sound schedule. HYPER BEAM needs full BG blackout/restore, attacker ShakeMon2 and Y-shake, flashing orb palette, twenty-six HyperBeamOrbs groups, target ShakeMon2, both target palette blends, and its distinct 1/15/0/5 sound schedule. PSYWAVE needs SetPsychicBackground/UnsetPsychicBackground, StartSinAnimTimer, twelve blue-ring sprites, four-leg target blend_color_cycle, and its distinct 2/9/0/10 sound schedule. TRI ATTACK needs the translating triangle, two initial sound/delay legs, BG blackout, eight fire scatters plus patterned shake, three lightning strikes plus inversion/patterned shake, the final ice body, and its distinct 5/6/0/7 sound schedule. Every sibling remains unsupported pending independent complete dense move evidence."
   },
   {
    "id": "adjust-panning-var-confuse-ray",
@@ -7986,6 +7986,29 @@
     "tests/animation/auroraBeam.test.ts"
    ],
    "goal": "FULFILLED by MOVE_AURORA_BEAM only: complete twice-fresh legal player-back 216/216 plus opponent-front 216/216 source/component/reducer/typed-seam/raw-RGB/actual-core rows pass with zero residual pixels on two deterministic comparator passes. The source-derived compositor preserves Aurora's measured predecessor OAM/matrix/palette transfers, BG3/backdrop brightness, opaque BG index zero, and post-BuildOam ShakeMon2 display cadence while consuming typed live species/sides/geometry/allocator/matrices/order. No sibling receives inferred credit."
+  },
+  {
+   "id": "hyper-beam-orbs-blackout",
+   "components": [
+    "asset:ANIM_TAG_ORBS",
+    "soundTask:SoundTask_LoopSEAdjustPanning",
+    "subroutine:HyperBeamOrbs",
+    "task:AnimTask_BlendBattleAnimPal",
+    "task:AnimTask_ShakeMon",
+    "task:AnimTask_ShakeMon2",
+    "visualCommand:create_hyper_beam_orb_sprite",
+    "visualCommand:flash_anim_tag_with_color",
+    "visualCommand:simple_palette_blend"
+   ],
+   "representatives": ["MOVE_HYPER_BEAM"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/battle-lab/mechanic-hyper-beam-player-aerodactyl-opponent-onix.json",
+    "tools/battle-lab/mechanic-hyper-beam-opponent-aerodactyl-player-onix.json",
+    "tools/compare/hyperBeamSourceAudit.ts",
+    "tests/animation/hyperBeamSourceCheckpoint.test.ts"
+   ],
+   "goal": "MOVE_HYPER_BEAM must independently retain its complete legal bilateral Scene-ON body through first inactive cleanup, including its 322-byte pointer-owned script interval, two black F_PAL_BG ramps, attacker ShakeMon2 and Y-shake, red/black ORBS palette flash, all 26 two-orb HyperBeamOrbs groups, target ShakeMon2, both target BlendBattleAnimPal ramps, 1/15/0/5 loop audio, ORBS resource lifecycle, callback destruction, and cleanup. Source/staging alone grants no move, component, shared-task, or sibling credit; require complete twice-fresh dense state/raw-RGB and actual-core framebuffer acceptance before fulfilling this track."
   }
  ],
  "variantAudits": {
