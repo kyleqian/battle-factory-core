@@ -172,6 +172,7 @@ import {
   type SceneOnSandTombConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
+  type SceneOnHyperBeamConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -229,6 +230,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "AURORA_BEAM") {
     const auroraPresentation = presentation as SceneOnMovePresentationState<SceneOnAuroraBeamConfig>;
     renderSceneOnMovePresentation(framebuffer, auroraPresentation);
+    return;
+  }
+  if (presentation.config.move === "HYPER_BEAM") {
+    const hyperBeamPresentation = presentation as SceneOnMovePresentationState<SceneOnHyperBeamConfig>;
+    renderSceneOnMovePresentation(framebuffer, hyperBeamPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

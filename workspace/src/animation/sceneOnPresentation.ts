@@ -119,6 +119,12 @@ import {
   type AuroraBeamState,
 } from "./auroraBeam.ts";
 import {
+  hyperBeamAtAge,
+  type HyperBeamGeometry,
+  type HyperBeamProfile,
+  type HyperBeamState,
+} from "./hyperBeam.ts";
+import {
   smokescreenEffectAtAge,
   type SmokescreenEffect,
 } from "./smokescreen.ts";
@@ -2390,6 +2396,16 @@ export interface SceneOnAuroraBeamConfig {
   readonly animationProfile: Readonly<AuroraBeamProfile>;
 }
 
+/** Narrow presentation-only seam for Hyper Beam's complete source body. */
+export interface SceneOnHyperBeamConfig {
+  readonly move: "HYPER_BEAM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationGeometry: Readonly<HyperBeamGeometry>;
+  readonly animationProfile: Readonly<HyperBeamProfile>;
+}
+
 export interface SceneOnSmokescreenConfig {
   readonly move: "SMOKESCREEN";
   readonly attacker: SceneOnPresentationBattler;
@@ -3632,6 +3648,7 @@ export type SceneOnMoveConfig =
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
+  | SceneOnHyperBeamConfig
   | SceneOnSmokescreenConfig
   | SceneOnOctazookaConfig
   | SceneOnSpikesConfig
@@ -4193,6 +4210,11 @@ export interface SceneOnHornDrillView extends HornDrillState {
 }
 
 export interface SceneOnAuroraBeamView extends AuroraBeamState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnHyperBeamView extends HyperBeamState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7512,6 +7534,21 @@ export function sceneOnAuroraBeamView(
       state.config.animationGeometry,
       state.config.animationProfile,
     ),
+    attacker: state.config.attacker,
+    target: state.config.target,
+  };
+}
+
+/** `age=0` is Move_HYPER_BEAM's retained source-load row. */
+export function sceneOnHyperBeamView(
+  state: SceneOnMovePresentationState<SceneOnHyperBeamConfig>,
+): SceneOnHyperBeamView {
+  if (state.config.move !== "HYPER_BEAM") {
+    throw new Error(`expected HYPER_BEAM presentation, got ${state.config.move}`);
+  }
+  return {
+    ...hyperBeamAtAge(state.age, state.config.attacker.geometry.side,
+      state.config.animationGeometry, state.config.animationProfile),
     attacker: state.config.attacker,
     target: state.config.target,
   };

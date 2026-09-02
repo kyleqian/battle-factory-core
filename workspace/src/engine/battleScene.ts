@@ -535,6 +535,7 @@ import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "j
 import razorWindAsset from "../animation/assets/razor-wind.json" with { type: "json" };
 import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
 import auroraBeamAsset from "../animation/assets/aurora-beam.json" with { type: "json" };
+import hyperBeamAsset from "../animation/assets/hyper-beam.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import hailAsset from "../animation/assets/hail.json" with { type: "json" };
@@ -957,6 +958,7 @@ import {
   sceneOnRazorWindView,
   sceneOnHornDrillView,
   sceneOnAuroraBeamView,
+  sceneOnHyperBeamView,
   sceneOnSmokescreenView,
   sceneOnMudShotView,
   sceneOnHydroPumpView,
@@ -1180,6 +1182,7 @@ import {
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
+  type SceneOnHyperBeamConfig,
   type SceneOnSmokescreenConfig,
   type SceneOnMudShotConfig,
   type SceneOnHydroPumpConfig,
@@ -1737,6 +1740,9 @@ const hornDrillArt = hornDrillAsset as {
 const auroraBeamArt = auroraBeamAsset as {
   background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
   rings: { tileset: Tileset; palette: RgbColor[] };
+};
+const hyperBeamArt = hyperBeamAsset as {
+  orbs: { tileset: Tileset; palette: RgbColor[] };
 };
 const smokescreenArt = smokescreenAsset as {
   blackBall: { tileset: Tileset; palette: RgbColor[] };
@@ -22840,6 +22846,139 @@ export function renderSceneOnMovePresentation(
       "SONICBOOM!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "HYPER_BEAM") {
+    const hyperState = state as SceneOnMovePresentationState<SceneOnHyperBeamConfig>;
+    const view = sceneOnHyperBeamView(hyperState);
+    const displayed = sceneOnHyperBeamView({ ...hyperState,
+      age: Math.max(0, hyperState.age - 1) });
+    const priorCallback = sceneOnHyperBeamView({ ...hyperState,
+      age: Math.max(0, hyperState.age - 2) });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("HYPER_BEAM presentation requires opposite battler sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`HYPER_BEAM missing ${battler.species} battler art`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const black: RgbColor = { r: 0, g: 0, b: 0 };
+    const gray: RgbColor = { r: 206, g: 206, b: 206 };
+    const bgPalettes = blendPaletteBanksToward(
+      battleBg.palette, black, displayed.backgroundBlendY,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, bgPalettes);
+    // Elevated opponent shadows survive in the preceding hardware OAM on
+    // the first source-relative row, then SpriteCB_EnemyShadow hides them.
+    if (hyperState.age === 0 && view.attacker.geometry.side === "opponent") {
+      drawSourceOpponentEnemyShadow(fb, view.attacker.species,
+        view.attacker.geometry.battlePositionCenter);
+    }
+
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const targetPalette = blendPaletteToward(
+      targetArt.palette, gray, displayed.targetPaletteBlendY,
+    );
+    const entries: Array<{
+      subpriority: number; y: number; slot: number; order: number; draw: () => void;
+    }> = [];
+    const attackerTaskStarted = hyperState.age >= 72;
+    const targetTaskStarted = hyperState.age >= 126;
+    // Each initializer writes its positive pose before BuildOamBuffer; later
+    // callbacks mutate the live battler after that build. Combined with the
+    // measured RAM+1 DMA, the first display is tick zero and later displays
+    // consume the reducer callback state from age-2.
+    const attackerDisplayedOffset = hyperState.age === 72
+      ? { x2: 1, y2: 0 }
+      : hyperState.age >= 73 && hyperState.age <= 78
+        ? priorCallback.attackerOffset
+        : hyperState.age === 111
+          ? { x2: 0, y2: 4 }
+          : hyperState.age >= 112 && hyperState.age <= 209
+            ? priorCallback.attackerOffset
+            : displayed.attackerOffset;
+    const targetDisplayedOffset = hyperState.age === 126
+      ? { x2: 4, y2: 0 }
+      : hyperState.age >= 127 && hyperState.age <= 224
+        ? priorCallback.targetOffset
+        : displayed.targetOffset;
+    entries.push({
+      subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      y: view.attacker.geometry.animationCenter.y + attackerDisplayedOffset.y2,
+      slot: view.attacker.geometry.side === "player" ? 6 : 8, order: -2,
+      draw: () => drawSpriteSheet(fb, tilesFor(attackerArt, view.attacker.geometry.side),
+        attackerArt.palette,
+        view.attacker.geometry.spriteCorner.x
+          + (attackerTaskStarted ? 0 : hyperState.config.animationGeometry.attackerRestOffset.x2)
+          + attackerDisplayedOffset.x2,
+        view.attacker.geometry.spriteCorner.y
+          + (attackerTaskStarted ? 0 : hyperState.config.animationGeometry.attackerRestOffset.y2)
+          + attackerDisplayedOffset.y2),
+    });
+    entries.push({
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      y: view.target.geometry.animationCenter.y + targetDisplayedOffset.y2,
+      slot: view.target.geometry.side === "player" ? 6 : 8, order: -1,
+      draw: () => drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+        targetPalette,
+        view.target.geometry.spriteCorner.x
+          + (targetTaskStarted ? 0 : hyperState.config.animationGeometry.targetRestOffset.x2)
+          + targetDisplayedOffset.x2,
+        view.target.geometry.spriteCorner.y
+          + (targetTaskStarted ? 0 : hyperState.config.animationGeometry.targetRestOffset.y2)
+          + targetDisplayedOffset.y2),
+    });
+    const orbTarget = displayed.orbPalette.color === "red"
+      ? { r: 255, g: 0, b: 0 } : black;
+    const orbPalette = blendPaletteToward(
+      hyperBeamArt.orbs.palette, orbTarget, displayed.orbPalette.coefficient,
+    );
+    for (const orb of displayed.orbs) {
+      const tile = hyperBeamArt.orbs.tileset.tiles[orb.animation];
+      if (!tile) throw new Error(`HYPER_BEAM missing orb tile ${orb.animation}`);
+      const tileset: Tileset = { columns: 1, rows: 1, tiles: [tile] };
+      entries.push({
+        subpriority: orb.subpriority, y: orb.y + orb.y2, slot: orb.slot,
+        order: displayed.painterOrder.indexOf(orb.slot),
+        draw: () => drawSpriteSheet(fb, tileset, orbPalette,
+          orb.x + orb.x2 - 4, orb.y + orb.y2 - 4),
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || left.order - right.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = hyperState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    // F_PAL_BG selects field BG palettes but excludes the battle-window
+    // palette; the message and its chrome remain live through the blackout.
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawText(fb, font, charmap,
+      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      LINE1_ORIGIN.x, LINE1_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+    drawText(fb, font, charmap, "HYPER BEAM!", LINE2_ORIGIN.x, LINE2_ORIGIN.y,
+      MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
     return;
   }
 
