@@ -7141,7 +7141,6 @@
     "MOVE_THUNDER_WAVE",
     "MOVE_ZAP_CANNON"
    ],
-   "fulfilled": false,
    "goal": "MOVE_SPARK, MOVE_THUNDERBOLT, and MOVE_THUNDER_WAVE are independently exact with complete bilateral production acceptance. MOVE_ZAP_CANNON remains unsupported after a complete 112-row dense Scene-ON source window in each orientation (player-back 80..191, opponent-front 84..195), so this multi-representative track is not fulfilled and no sibling credit is inferred.",
    "checkpoint": {
     "move": "MOVE_ZAP_CANNON",

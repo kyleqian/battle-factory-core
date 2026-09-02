@@ -48,6 +48,8 @@ describe("MOVE_ZAP_CANNON complete bilateral Scene-ON evidence", () => {
     expect(fixture.acceptanceVerdict).toContain("remains unsupported");
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_ZAP_CANNON")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: Json) => track.id === "spark-2-electricity")).toMatchObject({ representatives: ["MOVE_SPARK", "MOVE_THUNDERBOLT", "MOVE_THUNDER_WAVE", "MOVE_ZAP_CANNON"], fulfilled: false });
+    const track = coverage.componentTracks.find((entry: Json) => entry.id === "spark-2-electricity");
+    expect(track).toMatchObject({ representatives: ["MOVE_SPARK", "MOVE_THUNDERBOLT", "MOVE_THUNDER_WAVE", "MOVE_ZAP_CANNON"] });
+    expect(track.fulfilled ?? false).toBe(false);
   });
 });
