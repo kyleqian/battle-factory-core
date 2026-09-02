@@ -125,6 +125,12 @@ import {
   type HyperBeamState,
 } from "./hyperBeam.ts";
 import {
+  thunderboltAtAge,
+  type ThunderboltGeometry,
+  type ThunderboltProfile,
+  type ThunderboltState,
+} from "./thunderbolt.ts";
+import {
   smokescreenEffectAtAge,
   type SmokescreenEffect,
 } from "./smokescreen.ts";
@@ -2406,6 +2412,16 @@ export interface SceneOnHyperBeamConfig {
   readonly animationProfile: Readonly<HyperBeamProfile>;
 }
 
+/** Narrow presentation-only seam for Thunderbolt's complete source body. */
+export interface SceneOnThunderboltConfig {
+  readonly move: "THUNDERBOLT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationGeometry: Readonly<ThunderboltGeometry>;
+  readonly animationProfile: Readonly<ThunderboltProfile>;
+}
+
 export interface SceneOnSmokescreenConfig {
   readonly move: "SMOKESCREEN";
   readonly attacker: SceneOnPresentationBattler;
@@ -3649,6 +3665,7 @@ export type SceneOnMoveConfig =
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
   | SceneOnHyperBeamConfig
+  | SceneOnThunderboltConfig
   | SceneOnSmokescreenConfig
   | SceneOnOctazookaConfig
   | SceneOnSpikesConfig
@@ -4215,6 +4232,11 @@ export interface SceneOnAuroraBeamView extends AuroraBeamState {
 }
 
 export interface SceneOnHyperBeamView extends HyperBeamState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnThunderboltView extends ThunderboltState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7551,6 +7573,20 @@ export function sceneOnHyperBeamView(
       state.config.animationGeometry, state.config.animationProfile),
     attacker: state.config.attacker,
     target: state.config.target,
+  };
+}
+
+/** `age=0` is Move_THUNDERBOLT's retained SPARK load row. */
+export function sceneOnThunderboltView(
+  state: SceneOnMovePresentationState<SceneOnThunderboltConfig>,
+): SceneOnThunderboltView {
+  if (state.config.move !== "THUNDERBOLT") {
+    throw new Error(`expected THUNDERBOLT presentation, got ${state.config.move}`);
+  }
+  return {
+    ...thunderboltAtAge(state.age, state.config.target.geometry.side,
+      state.config.animationGeometry, state.config.animationProfile),
+    attacker: state.config.attacker, target: state.config.target,
   };
 }
 

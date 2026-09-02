@@ -536,6 +536,7 @@ import razorWindAsset from "../animation/assets/razor-wind.json" with { type: "j
 import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
 import auroraBeamAsset from "../animation/assets/aurora-beam.json" with { type: "json" };
 import hyperBeamAsset from "../animation/assets/hyper-beam.json" with { type: "json" };
+import thunderboltAsset from "../animation/assets/thunderbolt.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import hailAsset from "../animation/assets/hail.json" with { type: "json" };
@@ -959,6 +960,7 @@ import {
   sceneOnHornDrillView,
   sceneOnAuroraBeamView,
   sceneOnHyperBeamView,
+  sceneOnThunderboltView,
   sceneOnSmokescreenView,
   sceneOnMudShotView,
   sceneOnHydroPumpView,
@@ -1183,6 +1185,7 @@ import {
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
   type SceneOnHyperBeamConfig,
+  type SceneOnThunderboltConfig,
   type SceneOnSmokescreenConfig,
   type SceneOnMudShotConfig,
   type SceneOnHydroPumpConfig,
@@ -1743,6 +1746,12 @@ const auroraBeamArt = auroraBeamAsset as {
 };
 const hyperBeamArt = hyperBeamAsset as {
   orbs: { tileset: Tileset; palette: RgbColor[] };
+};
+const thunderboltArt = thunderboltAsset as {
+  bolt: { tileset: Tileset; palette: RgbColor[] };
+  boltWide: { tileset: Tileset; palette: RgbColor[] };
+  orb: { tileset: Tileset; palette: RgbColor[] };
+  spark2: { tileset: Tileset; palette: RgbColor[] };
 };
 const smokescreenArt = smokescreenAsset as {
   blackBall: { tileset: Tileset; palette: RgbColor[] };
@@ -22846,6 +22855,122 @@ export function renderSceneOnMovePresentation(
       "SONICBOOM!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "THUNDERBOLT") {
+    const boltState = state as SceneOnMovePresentationState<SceneOnThunderboltConfig>;
+    const view = sceneOnThunderboltView(boltState);
+    const preceding = sceneOnThunderboltView({ ...boltState,
+      age: Math.max(0, boltState.age - 1) });
+    const twoBack = sceneOnThunderboltView({ ...boltState,
+      age: Math.max(0, boltState.age - 2) });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("THUNDERBOLT presentation requires opposite battler sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`THUNDERBOLT missing ${battler.species} battler art`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const black: RgbColor = { r: 0, g: 0, b: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap,
+      blendPaletteBanksToward(battleBg.palette, black, preceding.backgroundPaletteY));
+    if (boltState.age === 0 && view.attacker.geometry.side === "opponent") {
+      drawSourceOpponentEnemyShadow(fb, view.attacker.species,
+        view.attacker.geometry.battlePositionCenter);
+    }
+    const attackerArt = artFor(view.attacker), targetArt = artFor(view.target);
+    const targetPalette = blendPaletteToward(targetArt.palette, black,
+      preceding.targetPaletteY);
+    const items: Array<{ subpriority: number; y: number; slot: number; order: number;
+      draw: () => void }> = [];
+    items.push({ subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      y: view.attacker.geometry.animationCenter.y, slot: 6, order: -2,
+      draw: () => drawSpriteSheet(fb, tilesFor(attackerArt, view.attacker.geometry.side),
+        attackerArt.palette, view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y) });
+    items.push({ subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      y: view.target.geometry.animationCenter.y, slot: 8, order: -1,
+      draw: () => drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+        targetPalette, view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y) });
+    const precedingKeys = new Set(preceding.sprites.map((sprite) =>
+      `${sprite.kind}:${sprite.index}`));
+    const displayed = [
+      ...twoBack.sprites.filter((sprite) => sprite.kind === "bolt"
+        && precedingKeys.has(`bolt:${sprite.index}`)),
+      ...preceding.sprites.filter((sprite) => sprite.kind === "arc"),
+      ...(boltState.age === 106 ? [] : preceding.sprites
+        .filter((sprite) => sprite.kind === "orb" || sprite.kind === "flash")),
+    ];
+    for (const sprite of displayed) {
+      if (sprite.hidden) continue;
+      let tileset: Tileset;
+      let palette: RgbColor[];
+      let affine = false;
+      if (sprite.kind === "bolt") {
+        const wide = sprite.tile >= 8;
+        const source = wide ? thunderboltArt.boltWide : thunderboltArt.bolt;
+        const offset = wide ? sprite.tile - 8 : sprite.tile;
+        tileset = { columns: source.tileset.columns, rows: 2,
+          tiles: source.tileset.tiles.slice(offset, offset + source.tileset.columns * 2) };
+        palette = thunderboltArt.bolt.palette;
+      } else if (sprite.kind === "orb") {
+        tileset = subTileset(thunderboltArt.orb.tileset, sprite.tile / 4, 4);
+        palette = thunderboltArt.orb.palette; affine = true;
+      } else {
+        tileset = subTileset(thunderboltArt.spark2.tileset, sprite.tile / 2, 2);
+        if (sprite.kind === "arc" && sprite.tile !== 0) {
+          const hFlip = sprite.tile === 4, vFlip = sprite.tile === 8;
+          const source = tileset.tiles;
+          tileset = { ...tileset, tiles: source.map((_tile, tileIndex) => {
+            const dx = tileIndex % 2, dy = Math.floor(tileIndex / 2);
+            const sx = hFlip ? 1 - dx : dx, sy = vFlip ? 1 - dy : dy;
+            const tile = source[sy * 2 + sx]!;
+            return tile.map((_pixel, pixel) => tile[(vFlip ? 7 - Math.floor(pixel / 8)
+              : Math.floor(pixel / 8)) * 8 + (hFlip ? 7 - pixel % 8 : pixel % 8)]!);
+          }) };
+        }
+        palette = thunderboltArt.spark2.palette; affine = sprite.kind === "flash";
+      }
+      items.push({ subpriority: sprite.subpriority, y: sprite.y + sprite.y2,
+        slot: sprite.slot, order: sprite.order,
+        draw: () => affine
+          ? drawSpriteSheetAffineRotate(fb, tileset, palette,
+            sprite.x + sprite.x2, sprite.y + sprite.y2,
+            ...sprite.matrix, undefined, false)
+          : drawSpriteSheet(fb, tileset, palette,
+            sprite.x + sprite.x2 - (sprite.kind === "bolt" ? 4 : tileset.columns * 4),
+            sprite.y + sprite.y2 - (sprite.kind === "bolt" ? 4 : tileset.rows * 4)) });
+    }
+    items.sort((a, b) => b.subpriority - a.subpriority || a.y - b.y
+      || a.order - b.order || b.slot - a.slot);
+    for (const item of items) item.draw();
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = boltState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none" }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawText(fb, font, charmap,
+      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      LINE1_ORIGIN.x, LINE1_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+    drawText(fb, font, charmap, "THUNDERBOLT!", LINE2_ORIGIN.x, LINE2_ORIGIN.y,
+      MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
     return;
   }
 

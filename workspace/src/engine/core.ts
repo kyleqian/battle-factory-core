@@ -173,6 +173,7 @@ import {
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
   type SceneOnHyperBeamConfig,
+  type SceneOnThunderboltConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -235,6 +236,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "HYPER_BEAM") {
     const hyperBeamPresentation = presentation as SceneOnMovePresentationState<SceneOnHyperBeamConfig>;
     renderSceneOnMovePresentation(framebuffer, hyperBeamPresentation);
+    return;
+  }
+  if (presentation.config.move === "THUNDERBOLT") {
+    const thunderboltPresentation = presentation as SceneOnMovePresentationState<SceneOnThunderboltConfig>;
+    renderSceneOnMovePresentation(framebuffer, thunderboltPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

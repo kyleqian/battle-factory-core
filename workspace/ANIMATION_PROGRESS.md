@@ -1,3 +1,10 @@
+# MOVE_THUNDERBOLT exact bilateral production acceptance (2026-09-02 worker)
+
+- **State:** Level 50 advances **226→227/276 exact**, with **0 partial / 0 staged** and **50→49 unsupported**. MOVE_THUNDERBOLT alone promotes; `spark-2-electricity` remains unfulfilled. Spark and Thunder Wave remain independent exact controls; Zap Cannon and Shock Wave remain unsupported.
+- **Did:** Added the pure 577-byte source-relative Thunderbolt reducer, deterministic SPARK narrow/wide + SHOCK_3 + SPARK_2 extraction, narrow typed Scene-ON seam, and actual-core compositor. Live species, sides, geometry, allocator slots/matrices/order, palettes, 15 bolt segments, orb, eight flashes, eight shared arcs, resources/audio, and cleanup remain presentation-only; no gameplay RNG/damage/outcome/controller/turn/round/facility ownership or carrier/evidence/tick gate.
+- **Exact evidence:** Two independent comparator processes each pass player-back **237/237** plus opponent-front **237/237**, **474/474 zero-residual actual-core rows** with peak **0** and component state **474/474**. Altered GOLDUCK/GRAVELER reversed-side geometry changes the framebuffer (`5856318f…` → `fbce53f6…`). Ordinary OAM/palette RAM+1, task-created bolt birth RAM+2 with ordinary removal, ElectricityEffect RAM+1, and the eight age-105 + one age-106 fresh affine allocations are preserved.
+- **Checks:** Source/evidence verifiers, focused Thunderbolt plus Spark/Thunder Wave controls, boundary/frontier ratchets, coverage/audit, typecheck, full suite, build, diff/scope, and twice-run exact comparator are required green at final worker tip; no boundary/barrier list widened.
+
 # Animation supervisor verification — Thunderbolt dense evidence merged (2026-09-02 supervisor)
 
 - **State:** Level 50 remains **226/276 exact**, **0 partial / 0 staged**, and **50 unsupported**. MOVE_THUNDERBOLT remains absent from `entries`; `spark-2-electricity` remains unfulfilled and no sibling receives inferred latch or acceptance credit.

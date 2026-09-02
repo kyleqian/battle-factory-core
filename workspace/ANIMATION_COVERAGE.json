@@ -2,6 +2,40 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_THUNDERBOLT",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 DELCATTY versus SHUCKLE Battle Scene ON windows retain every Move_THUNDERBOLT and shared ElectricityEffect row through first inactive cleanup: player-back frames 79-315 and opponent-front frames 83-319, 237/237 rows per orientation, twice-fresh byte-identical",
+    "the pure source-relative reducer and typed live seam reproduce the complete byte-pinned 438-byte root plus 139-byte shared subroutine: three ElectricBolt tasks and 15 segments, SHOCK_3 orb, eight SPARK_2 flashes, eight ElectricityEffect arcs, target/background palette programs, allocation/order, audio/resources, waits, and cleanup",
+    "the deterministic source asset bundle extracts SPARK narrow/wide bolts, SHOCK_3, and SPARK_2 art; the actual-core compositor consumes live species, sides, target geometry, allocator slots/matrices/order, field chrome, and presentation state without carrier/evidence gates, absolute ticks, or recorded framebuffer lookup",
+    "two independent deterministic production comparator passes each reach player-back 237/237 plus opponent-front 237/237 zero-residual framebuffer rows, 474/474 total with peak zero; an altered GOLDUCK/GRAVELER reversed-side species and geometry control remains material",
+    "ordinary OAM and palette are RAM+1, task-created bolt display is RAM+2 with RAM+1 removal, ElectricityEffect arcs are RAM+1, and nine fresh affine allocations retain the measured eight age-105 source+2 and one age-106 source+1 first-paint exception",
+    "MOVE_THUNDERBOLT alone is promoted; MOVE_SPARK and MOVE_THUNDER_WAVE retain independent exact acceptance, MOVE_ZAP_CANNON and MOVE_SHOCK_WAVE remain unsupported, and spark-2-electricity remains unfulfilled"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-thunderbolt-player-delcatty-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-thunderbolt-opponent-delcatty-player-shuckle.json",
+    "tools/compare/thunderboltSourceAudit.ts",
+    "tools/compare/thunderboltProbe.py",
+    "tools/compare/thunderboltEvidence.ts",
+    "tools/compare/fixtures/thunderbolt-evidence.json",
+    "tools/compare/evidence/thunderbolt-player-dense-state.json.gz",
+    "tools/compare/evidence/thunderbolt-opponent-dense-state.json.gz",
+    "tools/compare/evidence/thunderbolt-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/thunderbolt-opponent-raw-rgb.tar.gz",
+    "tools/compare/extractThunderboltAssets.ts",
+    "tools/compare/thunderboltFramebuffer.ts",
+    "src/animation/assets/thunderbolt.json",
+    "src/animation/thunderbolt.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/thunderboltSourceCheckpoint.test.ts",
+    "tests/animation/thunderboltEvidenceCheckpoint.test.ts",
+    "tests/animation/thunderbolt.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_HYPER_BEAM",
    "status": "exact",
    "covered": [
@@ -9,7 +43,7 @@
     "the pure source-relative reducer and typed live seam reproduce the complete byte-pinned 322-byte body: 26 groups and 52 three-Random2 orb lifecycles, stable allocator and painter order, neutral matrices, blackout/restore, orb flash, attacker and target shakes, target palette ramps, audio/resources, waits, and cleanup",
     "the source-derived ORBS asset bundle and actual-core compositor consume live species, sides, geometry, allocator slots, order, and presentation-only RNG-derived orb fields without evidence-carrier or absolute-frame lookup",
     "two deterministic production comparator passes each reach player-back 280/280 plus opponent-front 280/280 zero-residual framebuffer rows, 560/560 total with peak zero; an altered GOLDUCK/GRAVELER reversed-side species/geometry/allocator/order control remains material",
-    "MOVE_HYPER_BEAM alone and hyper-beam-orbs-blackout alone are accepted; MOVE_AURORA_BEAM and MOVE_PSYBEAM remain independently exact shared-task controls while MOVE_THUNDERBOLT remains distinct and unsupported"
+    "MOVE_HYPER_BEAM alone and hyper-beam-orbs-blackout alone are accepted; MOVE_AURORA_BEAM, MOVE_PSYBEAM, and MOVE_THUNDERBOLT retain independent exact acceptance"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-hyper-beam-player-aerodactyl-opponent-onix.json",
@@ -7107,7 +7141,7 @@
     "MOVE_THUNDER_WAVE",
     "MOVE_ZAP_CANNON"
    ],
-   "goal": "MOVE_SPARK is exact: legal set-187 MINUN fixtures match the complete 115/115 source-component, typed-seam, raw-RGB, and shared-framebuffer body plus 2/2 cleanup tail in both orientations twice fresh. Identity/order/slot/subpriority/OAM flags/flips/matrices, explicit allocator state, hardware transfer, live palettes, five audio intervals, HorizontalLunge, animation-2 impact, source ShakeMon display latch, field/chrome/text, assets, and teardown are pinned. THUNDERBOLT, THUNDER_WAVE, ZAP_CANNON, and THUNDER_SHOCK each retain distinct complete scripts and remain unsupported without their own evidence."
+   "goal": "MOVE_SPARK, MOVE_THUNDERBOLT, and MOVE_THUNDER_WAVE are independently exact with complete bilateral production acceptance. MOVE_ZAP_CANNON remains unsupported, so this multi-representative track is not fulfilled and no sibling credit is inferred."
   },
   {
    "id": "knock-off-lunge-shake",

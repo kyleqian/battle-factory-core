@@ -152,7 +152,7 @@ if (JSON.stringify(graphEntry?.blocks) !== JSON.stringify(["Move_THUNDERBOLT", "
   || allCarriers.length !== 76 || level50Carriers.length !== 68
   || firstCarrier?.index !== 267 || firstCarrier?.label !== "FRONTIER_MON_DELCATTY_2"
   || firstCarrier?.species !== "SPECIES_DELCATTY" || firstCarrier?.itemName !== "BATTLE_FRONTIER_ITEM_QUICK_CLAW"
-  || firstCarrier?.nature !== "NATURE_MODEST" || status !== "unsupported"
+  || firstCarrier?.nature !== "NATURE_MODEST" || status !== "exact"
   || JSON.stringify(track?.components) !== JSON.stringify([
     "asset:ANIM_TAG_SPARK_2", "sprite:gSparkElectricitySpriteTemplate", "sprite:gSparkElectricityFlashingSpriteTemplate",
     "sprite:gElectricitySpriteTemplate", "subroutine:ElectricityEffect", "visualCommand:blend_color_cycle",

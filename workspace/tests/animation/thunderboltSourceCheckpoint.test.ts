@@ -30,7 +30,7 @@ function validateStage(path: string) {
 describe("MOVE_THUNDERBOLT source/classification checkpoint", () => {
   it("byte-pins the exclusive root, shared pointer-owned subroutine, and generated nine-component graph", () => {
     expect(audit()).toMatchObject({
-      move: "MOVE_THUNDERBOLT", moveId: 85, status: "unsupported",
+      move: "MOVE_THUNDERBOLT", moveId: 85, status: "exact",
       pointerOwned: {
         root: {
           symbol: "Move_THUNDERBOLT", start: "0x82ca40a", endExclusive: "0x82ca5c0", byteLength: 438,
@@ -124,8 +124,9 @@ describe("MOVE_THUNDERBOLT source/classification checkpoint", () => {
       { move: "MOVE_SHOCK_WAVE", status: "unsupported", blocks: ["Move_SHOCK_WAVE"] },
     ]);
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries).toHaveLength(226);
-    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_THUNDERBOLT")).toBeUndefined();
+    expect(coverage.entries).toHaveLength(227);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_THUNDERBOLT"))
+      .toMatchObject({ status: "exact" });
     const track = coverage.componentTracks.find((entry: { id: string }) => entry.id === "spark-2-electricity");
     expect(track).toMatchObject({ representatives: ["MOVE_SPARK", "MOVE_THUNDERBOLT", "MOVE_THUNDER_WAVE", "MOVE_ZAP_CANNON"] });
     expect(track).not.toHaveProperty("fulfilled");
