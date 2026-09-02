@@ -167,7 +167,7 @@ if (
   || track?.fulfilled !== true
   || JSON.stringify(track?.components) !== JSON.stringify(expectedComponents)
   || JSON.stringify(track?.representatives) !== JSON.stringify(["MOVE_INGRAIN"])
-  || coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length !== 223
+  || coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length !== 224
 ) {
   throw new Error("MOVE_INGRAIN source/carrier/component/control contract changed");
 }
