@@ -7141,7 +7141,18 @@
     "MOVE_THUNDER_WAVE",
     "MOVE_ZAP_CANNON"
    ],
-   "goal": "MOVE_SPARK, MOVE_THUNDERBOLT, and MOVE_THUNDER_WAVE are independently exact with complete bilateral production acceptance. MOVE_ZAP_CANNON remains unsupported, so this multi-representative track is not fulfilled and no sibling credit is inferred."
+   "fulfilled": false,
+   "goal": "MOVE_SPARK, MOVE_THUNDERBOLT, and MOVE_THUNDER_WAVE are independently exact with complete bilateral production acceptance. MOVE_ZAP_CANNON remains unsupported after a complete 112-row dense Scene-ON source window in each orientation (player-back 80..191, opponent-front 84..195), so this multi-representative track is not fulfilled and no sibling credit is inferred.",
+   "checkpoint": {
+    "move": "MOVE_ZAP_CANNON",
+    "status": "unsupported-evidence",
+    "rows": {"player-back": 112, "opponent-front": 112},
+    "frames": {"player-back": "80..191", "opponent-front": "84..195"},
+    "probeJsonSha256": {"player-back": "ac4bb2d554816344bd6344993fddb2ea8b17673ef1739d63010718690477f401", "opponent-front": "2f9f6331183886c7d924e33d5e17a3c90778c6ef1b72c1172070c93dde8ce9a8"},
+    "rawRgbSequenceSha256": {"player-back": "76476e1dc814b2c4b2d353acd85b733f4d5d6449f5edaaa5e9a7d84a7e58217a", "opponent-front": "2abfaa316c6f7751200f79240be5aac4f2aa35d039c4c55509d6bf26d65f84bc"},
+    "latches": {"hardwareOam": "111/111", "hardwareMatrices": "110/111 (sole exception age 8)", "hardwarePalette": "111/111"},
+    "productionGate": "not started; require twice-run actual-core zero-residual bilateral acceptance before promotion"
+   }
   },
   {
    "id": "knock-off-lunge-shake",
