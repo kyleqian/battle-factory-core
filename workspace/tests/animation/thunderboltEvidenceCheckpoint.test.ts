@@ -21,7 +21,7 @@ function verify(): Json {
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
   }));
-  return verified;
+  return verified!;
 }
 
 function audit(): Json {
@@ -30,7 +30,7 @@ function audit(): Json {
     encoding: "utf8",
     maxBuffer: 16 * 1024 * 1024,
   }));
-  return sourceAudit;
+  return sourceAudit!;
 }
 
 function dense(side: Side): Json {
@@ -78,7 +78,6 @@ describe("MOVE_THUNDERBOLT complete bilateral Scene-ON evidence checkpoint", () 
   });
 
   it("retains complete rows/maps and exact move-owned lifecycle cardinalities", () => {
-    const result = verify();
     const boltEvents = [28, 30, 32, 34, 36, 37, 39, 41, 43, 45, 46, 48, 50, 52, 54];
     const taskShape = [
       [0, "AnimTask_BlendSpriteColor_Step2", 10, 14],
