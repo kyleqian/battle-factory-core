@@ -1,0 +1,69 @@
+{
+  "schema": "tri-attack-sparse-staging/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_TRI_ATTACK",
+  "moveId": 161,
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "sourceAudit": true,
+    "completePointerBody": true,
+    "legalBilateralParties": true,
+    "sourceInitialized": true,
+    "customPartiesBuiltBeforeBattle": true,
+    "sparseLiveReplay": true,
+    "denseWindowCaptured": false,
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferCompared": false,
+    "coveragePromotion": false,
+    "transientOverrides": []
+  },
+  "trace": {
+    "segments": [
+      { "frames": 2, "buttons": ["A"] },
+      { "frames": 30, "buttons": [] },
+      { "frames": 2, "buttons": ["A"] },
+      { "frames": 900, "buttons": [] }
+    ],
+    "captureFrames": [0, 112, 160, 934]
+  },
+  "runs": {
+    "player-back": {
+      "fixture": "tools/battle-lab/mechanic-tri-attack-player-porygon-opponent-shuckle.json",
+      "manifestSha256": "d7b12b2f460c86e5ee4f0d31a542280c5bf0710a616bea777015f66197059a99",
+      "totalFrames": 934,
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": { "side": "player", "partyIndex": 0, "species": 137 },
+      "target": { "side": "opponent", "partyIndex": 0, "species": 213 },
+      "controllerExecFlagsAtMove": 1,
+      "captures": [
+        { "frame": 0, "framebufferSha256": "a2e6535b9aa74f980b1ba7d20656cf3eef8079194d97a06724dacbb0c444a385", "currentMove": 0, "attackerPp": [10, 10, 10, 10], "targetPp": [35, 35, 35, 35], "visibleInProgress": false },
+        { "frame": 112, "framebufferSha256": "6f7ee0a4cca9bc1f7b8c9cc711e834a7110e06ff4392b1327fab7e24b5b3664f", "currentMove": 161, "attackerPp": [9, 10, 10, 10], "targetPp": [35, 35, 35, 35], "visibleInProgress": true },
+        { "frame": 160, "framebufferSha256": "a4dc40bf2f46765a0f71d5895e6122276bfe95ad224f434054d96f4ca0d0924d", "currentMove": 161, "attackerPp": [9, 10, 10, 10], "targetPp": [35, 35, 35, 35], "visibleInProgress": true },
+        { "frame": 934, "framebufferSha256": "7eaae98afcf94ad05eff96184c888c88a6fc9de166674fcc37952e4205233c9a", "currentMove": 0, "attackerPp": [9, 10, 10, 10], "targetPp": [35, 35, 34, 35], "visibleInProgress": false }
+      ],
+      "triAttackPp": { "before": 10, "atFrame112": 9, "atFrame160": 9, "final": 9, "spent": 1 }
+    },
+    "opponent-front": {
+      "fixture": "tools/battle-lab/mechanic-tri-attack-opponent-porygon-player-shuckle.json",
+      "manifestSha256": "214fc7d66d8c7acc9285657bcdd8046567c41ea40e89fc768437059639e52196",
+      "totalFrames": 934,
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": { "side": "opponent", "partyIndex": 0, "species": 137 },
+      "target": { "side": "player", "partyIndex": 0, "species": 213 },
+      "controllerExecFlagsAtMove": 2,
+      "captures": [
+        { "frame": 0, "framebufferSha256": "b5fb9a642bdca75933755ecee930fb4a593f5ec4562e4f6bdb01dd5b1d9acf8c", "currentMove": 0, "attackerPp": [10, 10, 10, 10], "targetPp": [35, 35, 35, 35], "visibleInProgress": false },
+        { "frame": 112, "framebufferSha256": "0600366f8d1d3b280ca5d13b09e342890a5b400660939c5347df16fcbe6cb248", "currentMove": 161, "attackerPp": [9, 10, 10, 10], "targetPp": [35, 35, 35, 35], "visibleInProgress": true },
+        { "frame": 160, "framebufferSha256": "48413c89a938bb7555fe518c6c3f4a031738b626272f849c4a037a640179013f", "currentMove": 161, "attackerPp": [9, 10, 10, 10], "targetPp": [35, 35, 35, 35], "visibleInProgress": true },
+        { "frame": 934, "framebufferSha256": "36fe4541f4cb9937fc1e4036950b2ae47e951373684033a8d65f0da4b0eadaa6", "currentMove": 0, "attackerPp": [9, 10, 10, 10], "targetPp": [34, 35, 35, 35], "visibleInProgress": false }
+      ],
+      "triAttackPp": { "before": 10, "atFrame112": 9, "atFrame160": 9, "final": 9, "spent": 1 }
+    }
+  }
+}
