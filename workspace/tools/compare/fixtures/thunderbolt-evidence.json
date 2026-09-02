@@ -1,0 +1,7357 @@
+{
+  "schema": "thunderbolt-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_THUNDERBOLT",
+  "moveId": 85,
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "sourceAudit": true,
+    "completePointerBody": true,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true,
+    "normalizedMaps": true,
+    "frameChangeMaps": true,
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "assetBundleAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferCompared": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false
+  },
+  "source": {
+    "root": {
+      "start": "0x082ca40a",
+      "endExclusive": "0x082ca5c0",
+      "byteLength": 438,
+      "romSha256": "ca15d4b50d2497386adf8bc20d9c5d18b7cac1548c9e22c598af7f662904016f",
+      "sourceByteLength": 2344,
+      "sourceSha256": "7968c51a5ede726a575865fb70a529998721ef534807c2bd0dde454273cf705a"
+    },
+    "subroutine": {
+      "symbol": "ElectricityEffect",
+      "start": "0x082d7bea",
+      "endExclusive": "0x082d7c75",
+      "byteLength": 139,
+      "romSha256": "f26be8a47153d4d67aff5a54063a070dbdf84b497c94f80531519c9eef614245",
+      "sourceByteLength": 708,
+      "sourceSha256": "0b2bb54bb5f380502bda828532a7a36b44443d36f26aa681bebe156f4157630a"
+    },
+    "audit": "tools/compare/thunderboltSourceAudit.ts",
+    "probe": "tools/compare/thunderboltProbe.py",
+    "verifier": "tools/compare/thunderboltEvidence.ts"
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "firstInactiveCleanupRetained": true,
+    "denseRows": {
+      "player-back": 237,
+      "opponent-front": 237
+    },
+    "rawRgbRows": {
+      "player-back": 237,
+      "opponent-front": 237
+    },
+    "latchVerdict": "MOVE_THUNDERBOLT independently measures RAM+1 buffer transfers, RAM+2 task-created bolt display, RAM+1 ElectricityEffect display, and the nine fresh affine matrix allocations with the age-105 two-frame creation exception; no sibling latch is inherited.",
+    "verdict": "Evidence only: MOVE_THUNDERBOLT remains unsupported and conveys no sibling or move acceptance."
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-thunderbolt-player-delcatty-opponent-shuckle.json",
+      "scenarioSha256": "51043ef4626d6da25656a6814ff6986658e812b6b815473efe849e4d37f98ab7",
+      "denseState": "tools/compare/evidence/thunderbolt-player-dense-state.json.gz",
+      "denseStateSha256": "46ec1153dbd4ca26ae8626a6572decb468d164ba14fbc787103cc76fafe99b1a",
+      "probeJsonSha256": "9803de7041e5e208e211e6b18f341ba9fb278e87b28c07af14e68de4b3670df4",
+      "rawRgbArchive": "tools/compare/evidence/thunderbolt-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "1fe449a58aa859e0d305ab9a1e03c0bf3c1989cf8fcc3dcf57f73b2e90665919",
+      "rawRgbSequenceSha256": "6f361e2f4a70707113d5a824cc8a4f729f835d510c04bd00150792dda40b5312",
+      "changeMap": "tools/compare/evidence/thunderbolt-changemap-player.json",
+      "changeMapSha256": "fea0237569388a185af4a9e07dbba62576f1e7fbec907d870c0c6e19e244ae4a",
+      "changeMapText": "tools/compare/evidence/thunderbolt-changemap-player.txt",
+      "changeMapTextSha256": "fe51acc9bcf6a4c68e2341790e9e0fd512ecafab730532c71c60b80d0ee444c1",
+      "sourceWindow": {
+        "startFrame": 79,
+        "endFrame": 315,
+        "frameCount": 237,
+        "sourceFrameCount": 209
+      },
+      "lifecycle": {
+        "electricBolt": {
+          "taskStarts": [
+            28,
+            37,
+            46
+          ],
+          "taskRows": [
+            {
+              "slot": 0,
+              "start": 28,
+              "end": 37,
+              "initialData": [
+                200,
+                -12,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "terminalData": [
+                200,
+                -12,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                10,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "steps": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ]
+            },
+            {
+              "slot": 1,
+              "start": 37,
+              "end": 46,
+              "initialData": [
+                152,
+                -12,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "terminalData": [
+                152,
+                -12,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                10,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "steps": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ]
+            },
+            {
+              "slot": 0,
+              "start": 46,
+              "end": 55,
+              "initialData": [
+                176,
+                -20,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "terminalData": [
+                176,
+                -20,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                10,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "steps": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ]
+            }
+          ],
+          "creationRows": [
+            28,
+            30,
+            32,
+            34,
+            36,
+            37,
+            39,
+            41,
+            43,
+            45,
+            46,
+            48,
+            50,
+            52,
+            54
+          ],
+          "segmentCount": 15
+        },
+        "orb": [
+          {
+            "slot": 3,
+            "start": 105,
+            "end": 149,
+            "first": {
+              "slot": 3,
+              "template": "gThunderboltOrbSpriteTemplate",
+              "callback": "AnimThunderboltOrb_Step",
+              "raw": "00010080198a0000b857590800000000dc575908e0575908000000006da51008b000310000000000f0f0000005000000000000002c000300030000000000014019020025",
+              "attr": [
+                256,
+                32768,
+                35353
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 5,
+              "subpriority": 37,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                282,
+                0,
+                0,
+                282
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                44,
+                3,
+                3,
+                0,
+                0
+              ]
+            },
+            "last": {
+              "slot": 3,
+              "template": "gThunderboltOrbSpriteTemplate",
+              "callback": "AnimThunderboltOrb_Step",
+              "raw": "2101a080298a0000b857590800000000dc575908e0575908000000006da51008b000310000000000f0f00001030000000000000000000300030000000000054019020025",
+              "attr": [
+                289,
+                32928,
+                35369
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 1,
+              "animDelayCounter": 3,
+              "subpriority": 37,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 0,
+              "matrix": [
+                327,
+                0,
+                0,
+                327
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                0,
+                0
+              ]
+            }
+          }
+        ],
+        "flashing": [
+          {
+            "slot": 4,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 4,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "00010046499900009cc62e08000000008c575908f857590800000000eda61008b000310000002000f8f8000000002b000000000000000300200028002800014449010024",
+              "attr": [
+                256,
+                17920,
+                39241
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 0,
+              "y2": 32,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 3,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                40
+              ]
+            },
+            "last": {
+              "slot": 4,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "2901c846499900009cc62e08000000008c575908f857590800000000eda61008b0003100e0fff9fff8f8000000000000000000000000030020002800e000054449010024",
+              "attr": [
+                297,
+                18120,
+                39241
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": -32,
+              "y2": -7,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 3,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                224
+              ]
+            }
+          },
+          {
+            "slot": 5,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 5,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "000100484d9900009cc62e08000000008c575908f857590800000000eda61008b000310020000000f8f8000000002b000000000000000300200028006800014449010024",
+              "attr": [
+                256,
+                18432,
+                39245
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 32,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 4,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                104
+              ]
+            },
+            "last": {
+              "slot": 5,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "4801a1484d9900009cc62e08000000008c575908f857590800000000eda61008b0003100f9ff1f00f8f80000000000000000000000000300200028002000014449010024",
+              "attr": [
+                328,
+                18593,
+                39245
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": -7,
+              "y2": 31,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 4,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                32
+              ]
+            }
+          },
+          {
+            "slot": 7,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 7,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "0001004a499900009cc62e08000000008c575908f857590800000000eda61008b00031000000e0fff8f8000000002b00000000000000030020002800a800054449010024",
+              "attr": [
+                256,
+                18944,
+                39241
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 0,
+              "y2": -32,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 5,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                168
+              ]
+            },
+            "last": {
+              "slot": 7,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "4601b44a499900009cc62e08000000008c575908f857590800000000eda61008b00031001f000600f8f80000000000000000000000000300200028006000054449010024",
+              "attr": [
+                326,
+                19124,
+                39241
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 31,
+              "y2": 6,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 5,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                96
+              ]
+            }
+          },
+          {
+            "slot": 9,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 9,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "0001004c519900009cc62e08000000008c575908f857590800000000eda61008b0003100e0ff0000f8f8000000002b00000000000000030020002800e800014449010024",
+              "attr": [
+                256,
+                19456,
+                39249
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": -32,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 6,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                232
+              ]
+            },
+            "last": {
+              "slot": 9,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "3a01c24c519900009cc62e08000000008c575908f857590800000000eda61008b00031000600e0fff8f8000000000000000000000000030020002800a000054449010024",
+              "attr": [
+                314,
+                19650,
+                39249
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 6,
+              "y2": -32,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 6,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                160
+              ]
+            }
+          },
+          {
+            "slot": 10,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 10,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "0001004e499900009cc62e08000000008c575908f857590800000000eda61008b00031000b000b00f8f8000000002b000000000000000300100028004800054449010024",
+              "attr": [
+                256,
+                19968,
+                39241
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 11,
+              "y2": 11,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 7,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                72
+              ]
+            },
+            "last": {
+              "slot": 10,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "31019a4e499900009cc62e08000000008c575908f857590800000000eda61008b0003100f2ff0800f8f80000000000000000000000000300100028000000014449010024",
+              "attr": [
+                305,
+                20122,
+                39241
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": -14,
+              "y2": 8,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 7,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                0
+              ]
+            }
+          },
+          {
+            "slot": 11,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 11,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "000100504d9900009cc62e08000000008c575908f857590800000000eda61008b00031000b00f4fff8f8000000002b000000000000000300100028008800014449010024",
+              "attr": [
+                256,
+                20480,
+                39245
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 11,
+              "y2": -12,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                136
+              ]
+            },
+            "last": {
+              "slot": 11,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "3601b0504d9900009cc62e08000000008c575908f857590800000000eda61008b000310008000d00f8f80000000000000000000000000300100028004000014449010024",
+              "attr": [
+                310,
+                20656,
+                39245
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 8,
+              "y2": 13,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                64
+              ]
+            }
+          },
+          {
+            "slot": 12,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 12,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "00010052499900009cc62e08000000008c575908f857590800000000eda61008b0003100f4fff4fff8f8000000002b00000000000000030010002800c800014449010024",
+              "attr": [
+                256,
+                20992,
+                39241
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": -12,
+              "y2": -12,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 9,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                200
+              ]
+            },
+            "last": {
+              "slot": 12,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "34019c52499900009cc62e08000000008c575908f857590800000000eda61008b00031000d00f7fff8f80000000000000000000000000300100028008000054449010024",
+              "attr": [
+                308,
+                21148,
+                39241
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 13,
+              "y2": -9,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 9,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                128
+              ]
+            }
+          },
+          {
+            "slot": 13,
+            "start": 106,
+            "end": 148,
+            "first": {
+              "slot": 13,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "00010054519900009cc62e08000000008c575908f857590800000000eda61008b000310003000f00f8f8000000002a000000000000000300100028003000054449010024",
+              "attr": [
+                256,
+                21504,
+                39249
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": 3,
+              "y2": 15,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 10,
+              "matrix": [
+                142,
+                -212,
+                212,
+                142
+              ],
+              "data": [
+                42,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                48
+              ]
+            },
+            "last": {
+              "slot": 13,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "1a01ae54519900009cc62e08000000008c575908f857590800000000eda61008b0003100f7fff2fff8f8000000000000000000000000030010002800c000054449010024",
+              "attr": [
+                282,
+                21678,
+                39249
+              ],
+              "x": 176,
+              "y": 49,
+              "x2": -9,
+              "y2": -14,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 36,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 10,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                192
+              ]
+            }
+          }
+        ],
+        "electricity": [
+          {
+            "slot": 3,
+            "start": 173,
+            "end": 178,
+            "first": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "2000ad40499900009cc62e0800000000a8c62e081058590800000000b1640a08b500280000000000f8f800000000040000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                32,
+                16557,
+                39241
+              ],
+              "x": 181,
+              "y": 40,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "2000ad40499900009cc62e0800000000a8c62e081058590800000000fd3b0a08b500280000000000f8f800000000000000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                32,
+                16557,
+                39241
+              ],
+              "x": 181,
+              "y": 40,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 4,
+            "start": 177,
+            "end": 182,
+            "first": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "2a00a3504d9900009cc62e0800000000a8c62e081058590800000000b1640a08ab00320000000000f8f800000000040000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                42,
+                20643,
+                39245
+              ],
+              "x": 171,
+              "y": 50,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "2a00a3504d9900009cc62e0800000000a8c62e081058590800000000fd3b0a08ab00320000000000f8f800000000000000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                42,
+                20643,
+                39245
+              ],
+              "x": 171,
+              "y": 50,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 3,
+            "start": 181,
+            "end": 186,
+            "first": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "3400b760519900009cc62e0800000000a8c62e081058590800000000b1640a08bf003c0000000000f8f800000000040000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                52,
+                24759,
+                39249
+              ],
+              "x": 191,
+              "y": 60,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 16,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "3400b760519900009cc62e0800000000a8c62e081058590800000000fd3b0a08bf003c0000000000f8f800000000000000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                52,
+                24759,
+                39249
+              ],
+              "x": 191,
+              "y": 60,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 16,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 4,
+            "start": 185,
+            "end": 190,
+            "first": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "16009940499900009cc62e0800000000a8c62e081058590800000000b1640a08a1001e0000000000f8f800000000040000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                22,
+                16537,
+                39241
+              ],
+              "x": 161,
+              "y": 30,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "16009940499900009cc62e0800000000a8c62e081058590800000000fd3b0a08a1001e0000000000f8f800000000000000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                22,
+                16537,
+                39241
+              ],
+              "x": 161,
+              "y": 30,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 3,
+            "start": 189,
+            "end": 194,
+            "first": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "2000c1504d9900009cc62e0800000000a8c62e081058590800000000b1640a08c900280000000000f8f800000000040000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                32,
+                20673,
+                39245
+              ],
+              "x": 201,
+              "y": 40,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "2000c1504d9900009cc62e0800000000a8c62e081058590800000000fd3b0a08c900280000000000f8f800000000000000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                32,
+                20673,
+                39245
+              ],
+              "x": 201,
+              "y": 40,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 4,
+            "start": 193,
+            "end": 198,
+            "first": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "2800a060519900009cc62e0800000000a8c62e081058590800000000b1640a08a800300000000000f8f800000000040000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                40,
+                24736,
+                39249
+              ],
+              "x": 168,
+              "y": 48,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 16,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "2800a060519900009cc62e0800000000a8c62e081058590800000000fd3b0a08a800300000000000f8f800000000000000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                40,
+                24736,
+                39249
+              ],
+              "x": 168,
+              "y": 48,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 16,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 3,
+            "start": 197,
+            "end": 202,
+            "first": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "1800aa40499900009cc62e0800000000a8c62e081058590800000000b1640a08b200200000000000f8f800000000040000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                24,
+                16554,
+                39241
+              ],
+              "x": 178,
+              "y": 32,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "1800aa40499900009cc62e0800000000a8c62e081058590800000000fd3b0a08b200200000000000f8f800000000000000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                24,
+                16554,
+                39241
+              ],
+              "x": 178,
+              "y": 32,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 4,
+            "start": 201,
+            "end": 206,
+            "first": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "2f0094504d9900009cc62e0800000000a8c62e081058590800000000b1640a089c00370000000000f8f800000000040000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                47,
+                20628,
+                39245
+              ],
+              "x": 156,
+              "y": 55,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "2f0094504d9900009cc62e0800000000a8c62e081058590800000000fd3b0a089c00370000000000f8f800000000000000000000000000000000fd3b0a08014c49010026",
+              "attr": [
+                47,
+                20628,
+                39245
+              ],
+              "x": 156,
+              "y": 55,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 38,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          }
+        ],
+        "tasks": [
+          {
+            "slot": 0,
+            "func": "AnimTask_BlendSpriteColor_Step2",
+            "start": 10,
+            "end": 14,
+            "initialData": [
+              14,
+              0,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0,
+              0,
+              2,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              14,
+              0,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "AnimTask_ElectricBolt_Step",
+            "start": 28,
+            "end": 37,
+            "initialData": [
+              200,
+              -12,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              200,
+              -12,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              10,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 1,
+            "func": "AnimTask_ElectricBolt_Step",
+            "start": 37,
+            "end": 46,
+            "initialData": [
+              152,
+              -12,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              152,
+              -12,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              10,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "AnimTask_ElectricBolt_Step",
+            "start": 46,
+            "end": 55,
+            "initialData": [
+              176,
+              -20,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              176,
+              -20,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              10,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "AnimTask_BlendSpriteColor_Step2",
+            "start": 57,
+            "end": 68,
+            "initialData": [
+              0,
+              2,
+              0,
+              0,
+              13,
+              0,
+              0,
+              0,
+              0,
+              0,
+              2,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              0,
+              2,
+              0,
+              0,
+              13,
+              0,
+              0,
+              0,
+              0,
+              0,
+              13,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "AnimTask_BlendSpriteColor_Step2",
+            "start": 70,
+            "end": 81,
+            "initialData": [
+              0,
+              2,
+              0,
+              13,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              11,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              0,
+              2,
+              0,
+              13,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "Task_WaitAndPlaySE",
+            "start": 173,
+            "end": 191,
+            "initialData": [
+              119,
+              63,
+              18,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              119,
+              63,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "AnimTask_BlendSpriteColor_Step2",
+            "start": 230,
+            "end": 234,
+            "initialData": [
+              14,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              4,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              14,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "latches": {
+        "hardwareOamEqualsPrecedingSoftware": "236/236",
+        "hardwareMatricesEqualsPrecedingSoftware": "235/236",
+        "hardwarePaletteEqualsPrecedingFaded": "236/236",
+        "ordinaryOam": {
+          "bufferToHardware": "RAM+1",
+          "comparableRows": "236/236",
+          "creationExceptions": []
+        },
+        "taskAxes": {
+          "taskStarts": [
+            28,
+            37,
+            46
+          ],
+          "segmentCreationRows": [
+            28,
+            30,
+            32,
+            34,
+            36,
+            37,
+            39,
+            41,
+            43,
+            45,
+            46,
+            48,
+            50,
+            52,
+            54
+          ],
+          "sourceToBuffer": "RAM+1",
+          "bufferToHardware": "RAM+1",
+          "sourceTaskToDisplay": "RAM+2",
+          "segmentCount": 15
+        },
+        "electricityArcs": {
+          "creationRows": [
+            173,
+            177,
+            181,
+            185,
+            189,
+            193,
+            197,
+            201
+          ],
+          "sourceToBuffer": "same-row",
+          "bufferToHardware": "RAM+1",
+          "sourceToDisplay": "RAM+1",
+          "count": 8
+        },
+        "freshAffineMatrices": {
+          "allocations": [
+            {
+              "age": 105,
+              "indices": [
+                0,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ]
+            },
+            {
+              "age": 106,
+              "indices": [
+                10
+              ]
+            }
+          ],
+          "firstEightDisplay": "source+2",
+          "lateMatrixDisplay": "source+1",
+          "hardwareChangeAge": 107,
+          "count": 9
+        },
+        "paletteTransfer": {
+          "fadedToHardware": "RAM+1",
+          "comparableRows": "236/236",
+          "exceptions": []
+        },
+        "softwareOamChanges": [
+          29,
+          31,
+          33,
+          35,
+          37,
+          38,
+          40,
+          42,
+          44,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          53,
+          55,
+          57,
+          59,
+          60,
+          62,
+          64,
+          66,
+          68,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          173,
+          177,
+          179,
+          181,
+          183,
+          185,
+          187,
+          189,
+          191,
+          193,
+          195,
+          197,
+          199,
+          201,
+          203,
+          207,
+          236
+        ],
+        "hardwareOamChanges": [
+          1,
+          30,
+          32,
+          34,
+          36,
+          38,
+          39,
+          41,
+          43,
+          45,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          54,
+          56,
+          58,
+          60,
+          61,
+          63,
+          65,
+          67,
+          69,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          174,
+          178,
+          180,
+          182,
+          184,
+          186,
+          188,
+          190,
+          192,
+          194,
+          196,
+          198,
+          200,
+          202,
+          204,
+          208
+        ],
+        "softwareMatrixChanges": [
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150
+        ],
+        "hardwareMatrixChanges": [
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151
+        ]
+      },
+      "palette": {
+        "fadedChanges": [
+          1,
+          4,
+          7,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          108,
+          116,
+          124,
+          132,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235
+        ],
+        "hardwareChanges": [
+          2,
+          5,
+          8,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          109,
+          117,
+          125,
+          133,
+          231,
+          232,
+          233,
+          234,
+          235,
+          236
+        ],
+        "targetChanges": [
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82
+        ],
+        "bgChanges": [
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          108,
+          116,
+          124,
+          132,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235
+        ],
+        "unfadedChanges": [
+          1,
+          4,
+          7
+        ]
+      },
+      "tags": {
+        "loaded": {
+          "spark": 10001,
+          "shock3": 10282,
+          "spark2": 10011
+        },
+        "edges": {
+          "tile": [
+            [
+              0,
+              [
+                false,
+                false,
+                false
+              ]
+            ],
+            [
+              1,
+              [
+                true,
+                false,
+                false
+              ]
+            ],
+            [
+              4,
+              [
+                true,
+                true,
+                false
+              ]
+            ],
+            [
+              7,
+              [
+                true,
+                true,
+                true
+              ]
+            ],
+            [
+              236,
+              [
+                false,
+                false,
+                false
+              ]
+            ]
+          ],
+          "palette": [
+            [
+              0,
+              [
+                false,
+                false,
+                false
+              ]
+            ],
+            [
+              1,
+              [
+                true,
+                false,
+                false
+              ]
+            ],
+            [
+              4,
+              [
+                true,
+                true,
+                false
+              ]
+            ],
+            [
+              7,
+              [
+                true,
+                true,
+                true
+              ]
+            ],
+            [
+              236,
+              [
+                false,
+                false,
+                false
+              ]
+            ]
+          ]
+        }
+      },
+      "audio": {
+        "SE1": [
+          [
+            0,
+            [
+              "se_ball_open",
+              2147483648
+            ]
+          ],
+          [
+            106,
+            [
+              "se_m_hyper_beam",
+              0
+            ]
+          ],
+          [
+            107,
+            [
+              "se_m_hyper_beam",
+              3
+            ]
+          ],
+          [
+            132,
+            [
+              "se_m_hyper_beam",
+              2147483648
+            ]
+          ],
+          [
+            173,
+            [
+              "se_m_thunderbolt2",
+              0
+            ]
+          ],
+          [
+            174,
+            [
+              "se_m_thunderbolt2",
+              3
+            ]
+          ],
+          [
+            192,
+            [
+              "se_m_thunderbolt2",
+              0
+            ]
+          ],
+          [
+            193,
+            [
+              "se_m_thunderbolt2",
+              3
+            ]
+          ],
+          [
+            227,
+            [
+              "se_m_thunderbolt2",
+              2147483648
+            ]
+          ]
+        ],
+        "SE2": [
+          [
+            0,
+            [
+              "se_select",
+              2147483648
+            ]
+          ],
+          [
+            28,
+            [
+              "se_m_thunderbolt",
+              0
+            ]
+          ],
+          [
+            29,
+            [
+              "se_m_thunderbolt",
+              3
+            ]
+          ],
+          [
+            37,
+            [
+              "se_m_thunderbolt",
+              0
+            ]
+          ],
+          [
+            38,
+            [
+              "se_m_thunderbolt",
+              3
+            ]
+          ],
+          [
+            46,
+            [
+              "se_m_thunderbolt",
+              0
+            ]
+          ],
+          [
+            47,
+            [
+              "se_m_thunderbolt",
+              3
+            ]
+          ],
+          [
+            81,
+            [
+              "se_m_thunderbolt",
+              2147483648
+            ]
+          ]
+        ]
+      },
+      "state": {
+        "partiesStable": true,
+        "partyPresentationEdges": [
+          [
+            0,
+            "e0185c7fac7105d85f4bf1d8202765eb9d4cdbeef2be1dc8d24c0d8b3d3edf87"
+          ]
+        ],
+        "battlersStable": true,
+        "immutableStable": true,
+        "gameplayRngTransitions": [],
+        "animationRng": {
+          "distinct": 236,
+          "edges": [
+            [
+              0,
+              2844915746
+            ],
+            [
+              1,
+              957178605
+            ],
+            [
+              2,
+              254129500
+            ],
+            [
+              3,
+              2440601759
+            ],
+            [
+              4,
+              1262958118
+            ],
+            [
+              5,
+              1194721953
+            ],
+            [
+              6,
+              2958200064
+            ],
+            [
+              7,
+              1209821555
+            ],
+            [
+              8,
+              506220650
+            ],
+            [
+              9,
+              1968892309
+            ],
+            [
+              10,
+              689912548
+            ],
+            [
+              11,
+              1989536647
+            ],
+            [
+              12,
+              2634205934
+            ],
+            [
+              13,
+              370756553
+            ],
+            [
+              14,
+              3293766408
+            ],
+            [
+              15,
+              2024241883
+            ],
+            [
+              16,
+              119564722
+            ],
+            [
+              17,
+              3668811069
+            ],
+            [
+              18,
+              469952876
+            ],
+            [
+              19,
+              3320097647
+            ],
+            [
+              20,
+              3044225206
+            ],
+            [
+              21,
+              1034392049
+            ],
+            [
+              22,
+              1614213648
+            ],
+            [
+              23,
+              4253438275
+            ],
+            [
+              24,
+              3150275578
+            ],
+            [
+              25,
+              3839761893
+            ],
+            [
+              26,
+              1674371316
+            ],
+            [
+              27,
+              3682500695
+            ],
+            [
+              28,
+              1514243966
+            ],
+            [
+              29,
+              782464281
+            ],
+            [
+              30,
+              2476530200
+            ],
+            [
+              31,
+              1791790251
+            ],
+            [
+              32,
+              53894978
+            ],
+            [
+              33,
+              1580796813
+            ],
+            [
+              34,
+              1004355964
+            ],
+            [
+              35,
+              152111679
+            ],
+            [
+              36,
+              4179291974
+            ],
+            [
+              37,
+              461608257
+            ],
+            [
+              38,
+              3217472288
+            ],
+            [
+              39,
+              258067731
+            ],
+            [
+              40,
+              3369237386
+            ],
+            [
+              41,
+              973014581
+            ],
+            [
+              42,
+              2809670404
+            ],
+            [
+              43,
+              878569767
+            ],
+            [
+              44,
+              607160334
+            ],
+            [
+              45,
+              4210201193
+            ],
+            [
+              46,
+              2820322600
+            ],
+            [
+              47,
+              4219581051
+            ],
+            [
+              48,
+              3770472658
+            ],
+            [
+              49,
+              1055174109
+            ],
+            [
+              50,
+              172342668
+            ],
+            [
+              51,
+              3317349647
+            ],
+            [
+              52,
+              515338710
+            ],
+            [
+              53,
+              1515130001
+            ],
+            [
+              54,
+              312666160
+            ],
+            [
+              55,
+              1463540963
+            ],
+            [
+              56,
+              3697055514
+            ],
+            [
+              57,
+              2173870725
+            ],
+            [
+              58,
+              1355946260
+            ],
+            [
+              59,
+              3868272119
+            ],
+            [
+              60,
+              2036911262
+            ],
+            [
+              61,
+              2859961
+            ],
+            [
+              62,
+              4170019896
+            ],
+            [
+              63,
+              150203467
+            ],
+            [
+              64,
+              4007450210
+            ],
+            [
+              65,
+              2938471469
+            ],
+            [
+              66,
+              2836225436
+            ],
+            [
+              67,
+              266257375
+            ],
+            [
+              68,
+              3204560998
+            ],
+            [
+              69,
+              1590622177
+            ],
+            [
+              70,
+              1185708352
+            ],
+            [
+              71,
+              2883682483
+            ],
+            [
+              72,
+              3786192554
+            ],
+            [
+              73,
+              665711317
+            ],
+            [
+              74,
+              3402345252
+            ],
+            [
+              75,
+              3904190151
+            ],
+            [
+              76,
+              818107694
+            ],
+            [
+              77,
+              3602098441
+            ],
+            [
+              78,
+              771102536
+            ],
+            [
+              79,
+              3599776283
+            ],
+            [
+              80,
+              419387378
+            ],
+            [
+              81,
+              3903884925
+            ],
+            [
+              82,
+              3494191532
+            ],
+            [
+              83,
+              1958354607
+            ],
+            [
+              84,
+              2465383158
+            ],
+            [
+              85,
+              3372767025
+            ],
+            [
+              86,
+              67399248
+            ],
+            [
+              87,
+              2975840387
+            ],
+            [
+              88,
+              2823543354
+            ],
+            [
+              89,
+              1202059045
+            ],
+            [
+              90,
+              2660622644
+            ],
+            [
+              91,
+              2460425111
+            ],
+            [
+              92,
+              156836286
+            ],
+            [
+              93,
+              2049942105
+            ],
+            [
+              94,
+              3012927064
+            ],
+            [
+              95,
+              3708001259
+            ],
+            [
+              96,
+              1993170306
+            ],
+            [
+              97,
+              2088422605
+            ],
+            [
+              98,
+              3728607676
+            ],
+            [
+              99,
+              3402222975
+            ],
+            [
+              100,
+              63148422
+            ],
+            [
+              101,
+              3292539521
+            ],
+            [
+              102,
+              3171665760
+            ],
+            [
+              103,
+              2835579987
+            ],
+            [
+              104,
+              1946354122
+            ],
+            [
+              105,
+              4228886389
+            ],
+            [
+              107,
+              2208414532
+            ],
+            [
+              108,
+              1837356135
+            ],
+            [
+              109,
+              981676622
+            ],
+            [
+              110,
+              2575601577
+            ],
+            [
+              111,
+              3337423208
+            ],
+            [
+              112,
+              2587562427
+            ],
+            [
+              113,
+              3694126866
+            ],
+            [
+              114,
+              2730049309
+            ],
+            [
+              115,
+              3884520908
+            ],
+            [
+              116,
+              30068815
+            ],
+            [
+              117,
+              3136103446
+            ],
+            [
+              118,
+              1459319249
+            ],
+            [
+              119,
+              3194193008
+            ],
+            [
+              120,
+              1096410147
+            ],
+            [
+              121,
+              2363174234
+            ],
+            [
+              122,
+              2931825605
+            ],
+            [
+              123,
+              1872771412
+            ],
+            [
+              124,
+              61366583
+            ],
+            [
+              125,
+              64653022
+            ],
+            [
+              126,
+              3872878841
+            ],
+            [
+              127,
+              2277333112
+            ],
+            [
+              128,
+              1633917835
+            ],
+            [
+              129,
+              1766847650
+            ],
+            [
+              130,
+              2329994605
+            ],
+            [
+              131,
+              3338094044
+            ],
+            [
+              132,
+              4072285983
+            ],
+            [
+              133,
+              841513638
+            ],
+            [
+              134,
+              3003067681
+            ],
+            [
+              135,
+              1055696256
+            ],
+            [
+              136,
+              1714411507
+            ],
+            [
+              137,
+              3474808042
+            ],
+            [
+              138,
+              1758215189
+            ],
+            [
+              139,
+              2793560932
+            ],
+            [
+              140,
+              2964439559
+            ],
+            [
+              141,
+              1027088238
+            ],
+            [
+              142,
+              1737311817
+            ],
+            [
+              143,
+              134712200
+            ],
+            [
+              144,
+              719993179
+            ],
+            [
+              145,
+              446072370
+            ],
+            [
+              146,
+              2879831997
+            ],
+            [
+              147,
+              765041132
+            ],
+            [
+              148,
+              802476527
+            ],
+            [
+              149,
+              1131320630
+            ],
+            [
+              150,
+              2236636273
+            ],
+            [
+              151,
+              1875389072
+            ],
+            [
+              152,
+              278028227
+            ],
+            [
+              153,
+              995266682
+            ],
+            [
+              154,
+              579407973
+            ],
+            [
+              155,
+              3396936052
+            ],
+            [
+              156,
+              1904015063
+            ],
+            [
+              157,
+              3870620670
+            ],
+            [
+              158,
+              3293253529
+            ],
+            [
+              159,
+              1544331928
+            ],
+            [
+              160,
+              1685842731
+            ],
+            [
+              161,
+              1487707074
+            ],
+            [
+              162,
+              318754317
+            ],
+            [
+              163,
+              2998997500
+            ],
+            [
+              164,
+              3566719167
+            ],
+            [
+              165,
+              3103290310
+            ],
+            [
+              166,
+              1177812929
+            ],
+            [
+              167,
+              2354516896
+            ],
+            [
+              168,
+              382630803
+            ],
+            [
+              169,
+              2252589066
+            ],
+            [
+              170,
+              327915701
+            ],
+            [
+              171,
+              3958737796
+            ],
+            [
+              172,
+              3022454695
+            ],
+            [
+              173,
+              3098156174
+            ],
+            [
+              174,
+              2566245609
+            ],
+            [
+              175,
+              2857213352
+            ],
+            [
+              176,
+              3238375675
+            ],
+            [
+              177,
+              2289775954
+            ],
+            [
+              178,
+              3055620189
+            ],
+            [
+              179,
+              3825118732
+            ],
+            [
+              180,
+              1438655375
+            ],
+            [
+              181,
+              3711899222
+            ],
+            [
+              182,
+              2301564689
+            ],
+            [
+              183,
+              3929694384
+            ],
+            [
+              184,
+              4235275107
+            ],
+            [
+              185,
+              2834957210
+            ],
+            [
+              186,
+              44619013
+            ],
+            [
+              187,
+              2577963412
+            ],
+            [
+              188,
+              671931511
+            ],
+            [
+              189,
+              3014689054
+            ],
+            [
+              190,
+              3300032057
+            ],
+            [
+              191,
+              998997176
+            ],
+            [
+              192,
+              146049739
+            ],
+            [
+              193,
+              2603307746
+            ],
+            [
+              194,
+              3246360237
+            ],
+            [
+              195,
+              1428385308
+            ],
+            [
+              196,
+              1363855967
+            ],
+            [
+              197,
+              184253670
+            ],
+            [
+              198,
+              1292280417
+            ],
+            [
+              199,
+              156438976
+            ],
+            [
+              200,
+              3259461427
+            ],
+            [
+              201,
+              1891517226
+            ],
+            [
+              202,
+              2515912021
+            ],
+            [
+              203,
+              4035136420
+            ],
+            [
+              204,
+              2378927431
+            ],
+            [
+              205,
+              2963351982
+            ],
+            [
+              206,
+              3118867337
+            ],
+            [
+              207,
+              2328313800
+            ],
+            [
+              208,
+              3908401307
+            ],
+            [
+              209,
+              2653287538
+            ],
+            [
+              210,
+              3905958141
+            ],
+            [
+              211,
+              2957005356
+            ],
+            [
+              212,
+              1584710959
+            ],
+            [
+              213,
+              1025943414
+            ],
+            [
+              214,
+              1270849969
+            ],
+            [
+              215,
+              2747410128
+            ],
+            [
+              216,
+              3059631875
+            ],
+            [
+              217,
+              253331130
+            ],
+            [
+              218,
+              2730977701
+            ],
+            [
+              219,
+              2880872884
+            ],
+            [
+              220,
+              2269123095
+            ],
+            [
+              221,
+              4036302398
+            ],
+            [
+              222,
+              3459628249
+            ],
+            [
+              223,
+              1430382296
+            ],
+            [
+              224,
+              3296033387
+            ],
+            [
+              225,
+              1259608578
+            ],
+            [
+              226,
+              3070758733
+            ],
+            [
+              227,
+              3316013628
+            ],
+            [
+              228,
+              3720025087
+            ],
+            [
+              229,
+              2667156998
+            ],
+            [
+              230,
+              1251939585
+            ],
+            [
+              231,
+              3186139104
+            ],
+            [
+              232,
+              1141027539
+            ],
+            [
+              233,
+              2849295946
+            ],
+            [
+              234,
+              2108867061
+            ],
+            [
+              235,
+              884186052
+            ],
+            [
+              236,
+              1736927975
+            ]
+          ]
+        },
+        "enginePresentationEdges": [
+          [
+            0,
+            2
+          ],
+          [
+            105,
+            0
+          ],
+          [
+            106,
+            2
+          ]
+        ]
+      },
+      "cleanup": {
+        "age": 236,
+        "frame": 315,
+        "active": false,
+        "visualTasks": 0,
+        "soundTasks": 0,
+        "ownedSprites": 0,
+        "ownedTasks": 0
+      },
+      "repeatProbeJsonSha256": "9803de7041e5e208e211e6b18f341ba9fb278e87b28c07af14e68de4b3670df4",
+      "repeatRawRgbSequenceSha256": "6f361e2f4a70707113d5a824cc8a4f729f835d510c04bd00150792dda40b5312"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-thunderbolt-opponent-delcatty-player-shuckle.json",
+      "scenarioSha256": "5b8822af72cf74dbd30e3756f7128b0c35fd2dd49f58b99d71b3f45d66884bf7",
+      "denseState": "tools/compare/evidence/thunderbolt-opponent-dense-state.json.gz",
+      "denseStateSha256": "da1ff68d7d430abd4f37526064e131af33c66555775310fd407c5d9ecfc8cdc3",
+      "probeJsonSha256": "f41d4eed6ae0381c64801fba93ccf934b183f9e1763827ee8caf6900f1de2cbb",
+      "rawRgbArchive": "tools/compare/evidence/thunderbolt-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "fa53ac9b874322f5b2d01c5c4b0185ab336100aa8810c576a336f5e1b672753d",
+      "rawRgbSequenceSha256": "b3df39967165847ad9baabe50678b485a1c9256cb646b19202def68169b4e85e",
+      "changeMap": "tools/compare/evidence/thunderbolt-changemap-opponent.json",
+      "changeMapSha256": "92d8e2292445f09b6c7adcadb6bd185a3abc2949e2dc0aeeef4325123e1f5368",
+      "changeMapText": "tools/compare/evidence/thunderbolt-changemap-opponent.txt",
+      "changeMapTextSha256": "59f864224727f65b139fdabcb838c728cc9c11c5b35f1110eb64ef5f8cd08eec",
+      "sourceWindow": {
+        "startFrame": 83,
+        "endFrame": 319,
+        "frameCount": 237,
+        "sourceFrameCount": 209
+      },
+      "lifecycle": {
+        "electricBolt": {
+          "taskStarts": [
+            28,
+            37,
+            46
+          ],
+          "taskRows": [
+            {
+              "slot": 0,
+              "start": 28,
+              "end": 37,
+              "initialData": [
+                96,
+                28,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "terminalData": [
+                96,
+                28,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                10,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "steps": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ]
+            },
+            {
+              "slot": 1,
+              "start": 37,
+              "end": 46,
+              "initialData": [
+                48,
+                28,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "terminalData": [
+                48,
+                28,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                10,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "steps": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ]
+            },
+            {
+              "slot": 0,
+              "start": 46,
+              "end": 55,
+              "initialData": [
+                72,
+                20,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "terminalData": [
+                72,
+                20,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                10,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "steps": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ]
+            }
+          ],
+          "creationRows": [
+            28,
+            30,
+            32,
+            34,
+            36,
+            37,
+            39,
+            41,
+            43,
+            45,
+            46,
+            48,
+            50,
+            52,
+            54
+          ],
+          "segmentCount": 15
+        },
+        "orb": [
+          {
+            "slot": 3,
+            "start": 105,
+            "end": 149,
+            "first": {
+              "slot": 3,
+              "template": "gThunderboltOrbSpriteTemplate",
+              "callback": "AnimThunderboltOrb_Step",
+              "raw": "00010080198a0000b857590800000000dc575908e0575908000000006da510084800630000000000f0f0000005000000000000002c00030003000000000001401902001b",
+              "attr": [
+                256,
+                32768,
+                35353
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 5,
+              "subpriority": 27,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                282,
+                0,
+                0,
+                282
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                44,
+                3,
+                3,
+                0,
+                0
+              ]
+            },
+            "last": {
+              "slot": 3,
+              "template": "gThunderboltOrbSpriteTemplate",
+              "callback": "AnimThunderboltOrb_Step",
+              "raw": "53013880298a0000b857590800000000dc575908e0575908000000006da510084800630000000000f0f0000103000000000000000000030003000000000005401902001b",
+              "attr": [
+                339,
+                32824,
+                35369
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 1,
+              "animDelayCounter": 3,
+              "subpriority": 27,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 0,
+              "matrix": [
+                327,
+                0,
+                0,
+                327
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                0,
+                0
+              ]
+            }
+          }
+        ],
+        "flashing": [
+          {
+            "slot": 4,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 4,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "00010046499900009cc62e08000000008c575908f857590800000000eda610084800630000002000f8f8000000002b00000000000000030020002800280001444901001a",
+              "attr": [
+                256,
+                17920,
+                39241
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 0,
+              "y2": 32,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 3,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                40
+              ]
+            },
+            "last": {
+              "slot": 4,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "5b016046499900009cc62e08000000008c575908f857590800000000eda6100848006300e0fff9fff8f8000000000000000000000000030020002800e00005444901001a",
+              "attr": [
+                347,
+                18016,
+                39241
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": -32,
+              "y2": -7,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 3,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                224
+              ]
+            }
+          },
+          {
+            "slot": 5,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 5,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "000100484d9900009cc62e08000000008c575908f857590800000000eda610084800630020000000f8f8000000002b00000000000000030020002800680001444901001a",
+              "attr": [
+                256,
+                18432,
+                39245
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 32,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 4,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                104
+              ]
+            },
+            "last": {
+              "slot": 5,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "7a0139484d9900009cc62e08000000008c575908f857590800000000eda6100848006300f9ff1f00f8f8000000000000000000000000030020002800200001444901001a",
+              "attr": [
+                378,
+                18489,
+                39245
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": -7,
+              "y2": 31,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 4,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                32
+              ]
+            }
+          },
+          {
+            "slot": 7,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 7,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "0001004a499900009cc62e08000000008c575908f857590800000000eda61008480063000000e0fff8f8000000002b00000000000000030020002800a80005444901001a",
+              "attr": [
+                256,
+                18944,
+                39241
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 0,
+              "y2": -32,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 5,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                168
+              ]
+            },
+            "last": {
+              "slot": 7,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "78014c4a499900009cc62e08000000008c575908f857590800000000eda61008480063001f000600f8f8000000000000000000000000030020002800600005444901001a",
+              "attr": [
+                376,
+                19020,
+                39241
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 31,
+              "y2": 6,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 5,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                96
+              ]
+            }
+          },
+          {
+            "slot": 9,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 9,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "0001004c519900009cc62e08000000008c575908f857590800000000eda6100848006300e0ff0000f8f8000000002b00000000000000030020002800e80001444901001a",
+              "attr": [
+                256,
+                19456,
+                39249
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": -32,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 6,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                232
+              ]
+            },
+            "last": {
+              "slot": 9,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "6c015a4c519900009cc62e08000000008c575908f857590800000000eda61008480063000600e0fff8f8000000000000000000000000030020002800a00005444901001a",
+              "attr": [
+                364,
+                19546,
+                39249
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 6,
+              "y2": -32,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 6,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                32,
+                40,
+                160
+              ]
+            }
+          },
+          {
+            "slot": 10,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 10,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "0001004e499900009cc62e08000000008c575908f857590800000000eda61008480063000b000b00f8f8000000002b00000000000000030010002800480005444901001a",
+              "attr": [
+                256,
+                19968,
+                39241
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 11,
+              "y2": 11,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 7,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                72
+              ]
+            },
+            "last": {
+              "slot": 10,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "6301324e499900009cc62e08000000008c575908f857590800000000eda6100848006300f2ff0800f8f8000000000000000000000000030010002800000001444901001a",
+              "attr": [
+                355,
+                20018,
+                39241
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": -14,
+              "y2": 8,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 7,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                0
+              ]
+            }
+          },
+          {
+            "slot": 11,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 11,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "000100504d9900009cc62e08000000008c575908f857590800000000eda61008480063000b00f4fff8f8000000002b00000000000000030010002800880001444901001a",
+              "attr": [
+                256,
+                20480,
+                39245
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 11,
+              "y2": -12,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                136
+              ]
+            },
+            "last": {
+              "slot": 11,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "680148504d9900009cc62e08000000008c575908f857590800000000eda610084800630008000d00f8f8000000000000000000000000030010002800400001444901001a",
+              "attr": [
+                360,
+                20552,
+                39245
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 8,
+              "y2": 13,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                64
+              ]
+            }
+          },
+          {
+            "slot": 12,
+            "start": 105,
+            "end": 148,
+            "first": {
+              "slot": 12,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "00010052499900009cc62e08000000008c575908f857590800000000eda6100848006300f4fff4fff8f8000000002b00000000000000030010002800c80001444901001a",
+              "attr": [
+                256,
+                20992,
+                39241
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": -12,
+              "y2": -12,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 9,
+              "matrix": [
+                225,
+                -120,
+                120,
+                225
+              ],
+              "data": [
+                43,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                200
+              ]
+            },
+            "last": {
+              "slot": 12,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "66013452499900009cc62e08000000008c575908f857590800000000eda61008480063000d00f7fff8f8000000000000000000000000030010002800800005444901001a",
+              "attr": [
+                358,
+                21044,
+                39241
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 13,
+              "y2": -9,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 9,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                128
+              ]
+            }
+          },
+          {
+            "slot": 13,
+            "start": 106,
+            "end": 148,
+            "first": {
+              "slot": 13,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "00010054519900009cc62e08000000008c575908f857590800000000eda610084800630003000f00f8f8000000002a00000000000000030010002800300005444901001a",
+              "attr": [
+                256,
+                21504,
+                39249
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": 3,
+              "y2": 15,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 10,
+              "matrix": [
+                142,
+                -212,
+                212,
+                142
+              ],
+              "data": [
+                42,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                48
+              ]
+            },
+            "last": {
+              "slot": 13,
+              "template": "gSparkElectricityFlashingSpriteTemplate",
+              "callback": "AnimSparkElectricityFlashing_Step",
+              "raw": "4c014654519900009cc62e08000000008c575908f857590800000000eda6100848006300f7fff2fff8f8000000000000000000000000030010002800c00005444901001a",
+              "attr": [
+                332,
+                21574,
+                39249
+              ],
+              "x": 72,
+              "y": 99,
+              "x2": -9,
+              "y2": -14,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 26,
+              "flags": 5,
+              "invisible": true,
+              "matrixNum": 10,
+              "matrix": [
+                -236,
+                -97,
+                97,
+                -236
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                3,
+                16,
+                40,
+                192
+              ]
+            }
+          }
+        ],
+        "electricity": [
+          {
+            "slot": 3,
+            "start": 173,
+            "end": 178,
+            "first": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "48003b40499900009cc62e0800000000a8c62e081058590800000000b1640a084300500000000000f8f800000000040000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                72,
+                16443,
+                39241
+              ],
+              "x": 67,
+              "y": 80,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "48003b40499900009cc62e0800000000a8c62e081058590800000000fd3b0a084300500000000000f8f800000000000000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                72,
+                16443,
+                39241
+              ],
+              "x": 67,
+              "y": 80,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 4,
+            "start": 177,
+            "end": 182,
+            "first": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "520045504d9900009cc62e0800000000a8c62e081058590800000000b1640a084d005a0000000000f8f800000000040000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                82,
+                20549,
+                39245
+              ],
+              "x": 77,
+              "y": 90,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "520045504d9900009cc62e0800000000a8c62e081058590800000000fd3b0a084d005a0000000000f8f800000000000000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                82,
+                20549,
+                39245
+              ],
+              "x": 77,
+              "y": 90,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 3,
+            "start": 181,
+            "end": 186,
+            "first": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "5c003160519900009cc62e0800000000a8c62e081058590800000000b1640a083900640000000000f8f800000000040000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                92,
+                24625,
+                39249
+              ],
+              "x": 57,
+              "y": 100,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 16,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "5c003160519900009cc62e0800000000a8c62e081058590800000000fd3b0a083900640000000000f8f800000000000000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                92,
+                24625,
+                39249
+              ],
+              "x": 57,
+              "y": 100,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 16,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 4,
+            "start": 185,
+            "end": 190,
+            "first": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "3e004f40499900009cc62e0800000000a8c62e081058590800000000b1640a085700460000000000f8f800000000040000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                62,
+                16463,
+                39241
+              ],
+              "x": 87,
+              "y": 70,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "3e004f40499900009cc62e0800000000a8c62e081058590800000000fd3b0a085700460000000000f8f800000000000000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                62,
+                16463,
+                39241
+              ],
+              "x": 87,
+              "y": 70,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 3,
+            "start": 189,
+            "end": 194,
+            "first": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "480027504d9900009cc62e0800000000a8c62e081058590800000000b1640a082f00500000000000f8f800000000040000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                72,
+                20519,
+                39245
+              ],
+              "x": 47,
+              "y": 80,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "480027504d9900009cc62e0800000000a8c62e081058590800000000fd3b0a082f00500000000000f8f800000000000000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                72,
+                20519,
+                39245
+              ],
+              "x": 47,
+              "y": 80,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 4,
+            "start": 193,
+            "end": 198,
+            "first": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "50004860519900009cc62e0800000000a8c62e081058590800000000b1640a085000580000000000f8f800000000040000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                80,
+                24648,
+                39249
+              ],
+              "x": 80,
+              "y": 88,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 16,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "50004860519900009cc62e0800000000a8c62e081058590800000000fd3b0a085000580000000000f8f800000000000000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                80,
+                24648,
+                39249
+              ],
+              "x": 80,
+              "y": 88,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 16,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 3,
+            "start": 197,
+            "end": 202,
+            "first": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "40003e40499900009cc62e0800000000a8c62e081058590800000000b1640a084600480000000000f8f800000000040000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                64,
+                16446,
+                39241
+              ],
+              "x": 70,
+              "y": 72,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 3,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "40003e40499900009cc62e0800000000a8c62e081058590800000000fd3b0a084600480000000000f8f800000000000000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                64,
+                16446,
+                39241
+              ],
+              "x": 70,
+              "y": 72,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 0,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          },
+          {
+            "slot": 4,
+            "start": 201,
+            "end": 206,
+            "first": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "WaitAnimForDuration",
+              "raw": "570054504d9900009cc62e0800000000a8c62e081058590800000000b1640a085c005f0000000000f8f800000000040000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                87,
+                20564,
+                39245
+              ],
+              "x": 92,
+              "y": 95,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                4,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            },
+            "last": {
+              "slot": 4,
+              "template": "gElectricitySpriteTemplate",
+              "callback": "DestroyAnimSprite",
+              "raw": "570054504d9900009cc62e0800000000a8c62e081058590800000000fd3b0a085c005f0000000000f8f800000000000000000000000000000000fd3b0a08014c4901001c",
+              "attr": [
+                87,
+                20564,
+                39245
+              ],
+              "x": 92,
+              "y": 95,
+              "x2": 0,
+              "y2": 0,
+              "animNum": 0,
+              "animCmdIndex": 0,
+              "animDelayCounter": 0,
+              "subpriority": 28,
+              "flags": 1,
+              "invisible": false,
+              "matrixNum": 8,
+              "matrix": [
+                256,
+                0,
+                0,
+                256
+              ],
+              "data": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                15357,
+                2058
+              ]
+            }
+          }
+        ],
+        "tasks": [
+          {
+            "slot": 0,
+            "func": "AnimTask_BlendSpriteColor_Step2",
+            "start": 10,
+            "end": 14,
+            "initialData": [
+              14,
+              0,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0,
+              0,
+              2,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              14,
+              0,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "AnimTask_ElectricBolt_Step",
+            "start": 28,
+            "end": 37,
+            "initialData": [
+              96,
+              28,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              96,
+              28,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              10,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 1,
+            "func": "AnimTask_ElectricBolt_Step",
+            "start": 37,
+            "end": 46,
+            "initialData": [
+              48,
+              28,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              48,
+              28,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              10,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "AnimTask_ElectricBolt_Step",
+            "start": 46,
+            "end": 55,
+            "initialData": [
+              72,
+              20,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              72,
+              20,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              10,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "AnimTask_BlendSpriteColor_Step2",
+            "start": 57,
+            "end": 68,
+            "initialData": [
+              0,
+              1,
+              0,
+              0,
+              13,
+              0,
+              0,
+              0,
+              0,
+              0,
+              2,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              0,
+              1,
+              0,
+              0,
+              13,
+              0,
+              0,
+              0,
+              0,
+              0,
+              13,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "AnimTask_BlendSpriteColor_Step2",
+            "start": 70,
+            "end": 81,
+            "initialData": [
+              0,
+              1,
+              0,
+              13,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              11,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              0,
+              1,
+              0,
+              13,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "Task_WaitAndPlaySE",
+            "start": 173,
+            "end": 191,
+            "initialData": [
+              119,
+              -63,
+              18,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              119,
+              -63,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "slot": 0,
+            "func": "AnimTask_BlendSpriteColor_Step2",
+            "start": 230,
+            "end": 234,
+            "initialData": [
+              14,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              4,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "terminalData": [
+              14,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "latches": {
+        "hardwareOamEqualsPrecedingSoftware": "236/236",
+        "hardwareMatricesEqualsPrecedingSoftware": "235/236",
+        "hardwarePaletteEqualsPrecedingFaded": "236/236",
+        "ordinaryOam": {
+          "bufferToHardware": "RAM+1",
+          "comparableRows": "236/236",
+          "creationExceptions": []
+        },
+        "taskAxes": {
+          "taskStarts": [
+            28,
+            37,
+            46
+          ],
+          "segmentCreationRows": [
+            28,
+            30,
+            32,
+            34,
+            36,
+            37,
+            39,
+            41,
+            43,
+            45,
+            46,
+            48,
+            50,
+            52,
+            54
+          ],
+          "sourceToBuffer": "RAM+1",
+          "bufferToHardware": "RAM+1",
+          "sourceTaskToDisplay": "RAM+2",
+          "segmentCount": 15
+        },
+        "electricityArcs": {
+          "creationRows": [
+            173,
+            177,
+            181,
+            185,
+            189,
+            193,
+            197,
+            201
+          ],
+          "sourceToBuffer": "same-row",
+          "bufferToHardware": "RAM+1",
+          "sourceToDisplay": "RAM+1",
+          "count": 8
+        },
+        "freshAffineMatrices": {
+          "allocations": [
+            {
+              "age": 105,
+              "indices": [
+                0,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ]
+            },
+            {
+              "age": 106,
+              "indices": [
+                10
+              ]
+            }
+          ],
+          "firstEightDisplay": "source+2",
+          "lateMatrixDisplay": "source+1",
+          "hardwareChangeAge": 107,
+          "count": 9
+        },
+        "paletteTransfer": {
+          "fadedToHardware": "RAM+1",
+          "comparableRows": "236/236",
+          "exceptions": []
+        },
+        "softwareOamChanges": [
+          29,
+          31,
+          33,
+          35,
+          37,
+          38,
+          40,
+          42,
+          44,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          53,
+          55,
+          57,
+          59,
+          60,
+          62,
+          64,
+          66,
+          68,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          173,
+          177,
+          179,
+          181,
+          183,
+          185,
+          187,
+          189,
+          191,
+          193,
+          195,
+          197,
+          199,
+          201,
+          203,
+          207,
+          236
+        ],
+        "hardwareOamChanges": [
+          1,
+          30,
+          32,
+          34,
+          36,
+          38,
+          39,
+          41,
+          43,
+          45,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          54,
+          56,
+          58,
+          60,
+          61,
+          63,
+          65,
+          67,
+          69,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          174,
+          178,
+          180,
+          182,
+          184,
+          186,
+          188,
+          190,
+          192,
+          194,
+          196,
+          198,
+          200,
+          202,
+          204,
+          208
+        ],
+        "softwareMatrixChanges": [
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150
+        ],
+        "hardwareMatrixChanges": [
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151
+        ]
+      },
+      "palette": {
+        "fadedChanges": [
+          1,
+          4,
+          7,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          108,
+          116,
+          124,
+          132,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235
+        ],
+        "hardwareChanges": [
+          2,
+          5,
+          8,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          109,
+          117,
+          125,
+          133,
+          231,
+          232,
+          233,
+          234,
+          235,
+          236
+        ],
+        "targetChanges": [
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82
+        ],
+        "bgChanges": [
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          108,
+          116,
+          124,
+          132,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235
+        ],
+        "unfadedChanges": [
+          1,
+          4,
+          7
+        ]
+      },
+      "tags": {
+        "loaded": {
+          "spark": 10001,
+          "shock3": 10282,
+          "spark2": 10011
+        },
+        "edges": {
+          "tile": [
+            [
+              0,
+              [
+                false,
+                false,
+                false
+              ]
+            ],
+            [
+              1,
+              [
+                true,
+                false,
+                false
+              ]
+            ],
+            [
+              4,
+              [
+                true,
+                true,
+                false
+              ]
+            ],
+            [
+              7,
+              [
+                true,
+                true,
+                true
+              ]
+            ],
+            [
+              236,
+              [
+                false,
+                false,
+                false
+              ]
+            ]
+          ],
+          "palette": [
+            [
+              0,
+              [
+                false,
+                false,
+                false
+              ]
+            ],
+            [
+              1,
+              [
+                true,
+                false,
+                false
+              ]
+            ],
+            [
+              4,
+              [
+                true,
+                true,
+                false
+              ]
+            ],
+            [
+              7,
+              [
+                true,
+                true,
+                true
+              ]
+            ],
+            [
+              236,
+              [
+                false,
+                false,
+                false
+              ]
+            ]
+          ]
+        }
+      },
+      "audio": {
+        "SE1": [
+          [
+            0,
+            [
+              "se_ball_open",
+              2147483648
+            ]
+          ],
+          [
+            106,
+            [
+              "se_m_hyper_beam",
+              0
+            ]
+          ],
+          [
+            107,
+            [
+              "se_m_hyper_beam",
+              3
+            ]
+          ],
+          [
+            132,
+            [
+              "se_m_hyper_beam",
+              2147483648
+            ]
+          ],
+          [
+            173,
+            [
+              "se_m_thunderbolt2",
+              0
+            ]
+          ],
+          [
+            174,
+            [
+              "se_m_thunderbolt2",
+              3
+            ]
+          ],
+          [
+            192,
+            [
+              "se_m_thunderbolt2",
+              0
+            ]
+          ],
+          [
+            193,
+            [
+              "se_m_thunderbolt2",
+              3
+            ]
+          ],
+          [
+            227,
+            [
+              "se_m_thunderbolt2",
+              2147483648
+            ]
+          ]
+        ],
+        "SE2": [
+          [
+            0,
+            [
+              "se_select",
+              2147483648
+            ]
+          ],
+          [
+            28,
+            [
+              "se_m_thunderbolt",
+              0
+            ]
+          ],
+          [
+            29,
+            [
+              "se_m_thunderbolt",
+              3
+            ]
+          ],
+          [
+            37,
+            [
+              "se_m_thunderbolt",
+              0
+            ]
+          ],
+          [
+            38,
+            [
+              "se_m_thunderbolt",
+              3
+            ]
+          ],
+          [
+            46,
+            [
+              "se_m_thunderbolt",
+              0
+            ]
+          ],
+          [
+            47,
+            [
+              "se_m_thunderbolt",
+              3
+            ]
+          ],
+          [
+            81,
+            [
+              "se_m_thunderbolt",
+              2147483648
+            ]
+          ]
+        ]
+      },
+      "state": {
+        "partiesStable": false,
+        "partyPresentationEdges": [
+          [
+            0,
+            "320652ee5defcb9560daed8ae71855f0207d680c3db966c0808d4cee2bb7289c"
+          ],
+          [
+            105,
+            "19b819bcf14df794cd3e74a1ccbe18e9f4c57a164963f019ecf398e67c98fb76"
+          ],
+          [
+            106,
+            "320652ee5defcb9560daed8ae71855f0207d680c3db966c0808d4cee2bb7289c"
+          ]
+        ],
+        "battlersStable": true,
+        "immutableStable": true,
+        "gameplayRngTransitions": [],
+        "animationRng": {
+          "distinct": 236,
+          "edges": [
+            [
+              0,
+              2958200064
+            ],
+            [
+              1,
+              1209821555
+            ],
+            [
+              2,
+              506220650
+            ],
+            [
+              3,
+              1968892309
+            ],
+            [
+              4,
+              689912548
+            ],
+            [
+              5,
+              1989536647
+            ],
+            [
+              6,
+              2634205934
+            ],
+            [
+              7,
+              370756553
+            ],
+            [
+              8,
+              3293766408
+            ],
+            [
+              9,
+              2024241883
+            ],
+            [
+              10,
+              119564722
+            ],
+            [
+              11,
+              3668811069
+            ],
+            [
+              12,
+              469952876
+            ],
+            [
+              13,
+              3320097647
+            ],
+            [
+              14,
+              3044225206
+            ],
+            [
+              15,
+              1034392049
+            ],
+            [
+              16,
+              1614213648
+            ],
+            [
+              17,
+              4253438275
+            ],
+            [
+              18,
+              3150275578
+            ],
+            [
+              19,
+              3839761893
+            ],
+            [
+              20,
+              1674371316
+            ],
+            [
+              21,
+              3682500695
+            ],
+            [
+              22,
+              1514243966
+            ],
+            [
+              23,
+              782464281
+            ],
+            [
+              24,
+              2476530200
+            ],
+            [
+              25,
+              1791790251
+            ],
+            [
+              26,
+              53894978
+            ],
+            [
+              27,
+              1580796813
+            ],
+            [
+              28,
+              1004355964
+            ],
+            [
+              29,
+              152111679
+            ],
+            [
+              30,
+              4179291974
+            ],
+            [
+              31,
+              461608257
+            ],
+            [
+              32,
+              3217472288
+            ],
+            [
+              33,
+              258067731
+            ],
+            [
+              34,
+              3369237386
+            ],
+            [
+              35,
+              973014581
+            ],
+            [
+              36,
+              2809670404
+            ],
+            [
+              37,
+              878569767
+            ],
+            [
+              38,
+              607160334
+            ],
+            [
+              39,
+              4210201193
+            ],
+            [
+              40,
+              2820322600
+            ],
+            [
+              41,
+              4219581051
+            ],
+            [
+              42,
+              3770472658
+            ],
+            [
+              43,
+              1055174109
+            ],
+            [
+              44,
+              172342668
+            ],
+            [
+              45,
+              3317349647
+            ],
+            [
+              46,
+              515338710
+            ],
+            [
+              47,
+              1515130001
+            ],
+            [
+              48,
+              312666160
+            ],
+            [
+              49,
+              1463540963
+            ],
+            [
+              50,
+              3697055514
+            ],
+            [
+              51,
+              2173870725
+            ],
+            [
+              52,
+              1355946260
+            ],
+            [
+              53,
+              3868272119
+            ],
+            [
+              54,
+              2036911262
+            ],
+            [
+              55,
+              2859961
+            ],
+            [
+              56,
+              4170019896
+            ],
+            [
+              57,
+              150203467
+            ],
+            [
+              58,
+              4007450210
+            ],
+            [
+              59,
+              2938471469
+            ],
+            [
+              60,
+              2836225436
+            ],
+            [
+              61,
+              266257375
+            ],
+            [
+              62,
+              3204560998
+            ],
+            [
+              63,
+              1590622177
+            ],
+            [
+              64,
+              1185708352
+            ],
+            [
+              65,
+              2883682483
+            ],
+            [
+              66,
+              3786192554
+            ],
+            [
+              67,
+              665711317
+            ],
+            [
+              68,
+              3402345252
+            ],
+            [
+              69,
+              3904190151
+            ],
+            [
+              70,
+              818107694
+            ],
+            [
+              71,
+              3602098441
+            ],
+            [
+              72,
+              771102536
+            ],
+            [
+              73,
+              3599776283
+            ],
+            [
+              74,
+              419387378
+            ],
+            [
+              75,
+              3903884925
+            ],
+            [
+              76,
+              3494191532
+            ],
+            [
+              77,
+              1958354607
+            ],
+            [
+              78,
+              2465383158
+            ],
+            [
+              79,
+              3372767025
+            ],
+            [
+              80,
+              67399248
+            ],
+            [
+              81,
+              2975840387
+            ],
+            [
+              82,
+              2823543354
+            ],
+            [
+              83,
+              1202059045
+            ],
+            [
+              84,
+              2660622644
+            ],
+            [
+              85,
+              2460425111
+            ],
+            [
+              86,
+              156836286
+            ],
+            [
+              87,
+              2049942105
+            ],
+            [
+              88,
+              3012927064
+            ],
+            [
+              89,
+              3708001259
+            ],
+            [
+              90,
+              1993170306
+            ],
+            [
+              91,
+              2088422605
+            ],
+            [
+              92,
+              3728607676
+            ],
+            [
+              93,
+              3402222975
+            ],
+            [
+              94,
+              63148422
+            ],
+            [
+              95,
+              3292539521
+            ],
+            [
+              96,
+              3171665760
+            ],
+            [
+              97,
+              2835579987
+            ],
+            [
+              98,
+              1946354122
+            ],
+            [
+              99,
+              4228886389
+            ],
+            [
+              100,
+              2208414532
+            ],
+            [
+              101,
+              1837356135
+            ],
+            [
+              102,
+              981676622
+            ],
+            [
+              103,
+              2575601577
+            ],
+            [
+              104,
+              3337423208
+            ],
+            [
+              105,
+              2587562427
+            ],
+            [
+              107,
+              3694126866
+            ],
+            [
+              108,
+              2730049309
+            ],
+            [
+              109,
+              3884520908
+            ],
+            [
+              110,
+              30068815
+            ],
+            [
+              111,
+              3136103446
+            ],
+            [
+              112,
+              1459319249
+            ],
+            [
+              113,
+              3194193008
+            ],
+            [
+              114,
+              1096410147
+            ],
+            [
+              115,
+              2363174234
+            ],
+            [
+              116,
+              2931825605
+            ],
+            [
+              117,
+              1872771412
+            ],
+            [
+              118,
+              61366583
+            ],
+            [
+              119,
+              64653022
+            ],
+            [
+              120,
+              3872878841
+            ],
+            [
+              121,
+              2277333112
+            ],
+            [
+              122,
+              1633917835
+            ],
+            [
+              123,
+              1766847650
+            ],
+            [
+              124,
+              2329994605
+            ],
+            [
+              125,
+              3338094044
+            ],
+            [
+              126,
+              4072285983
+            ],
+            [
+              127,
+              841513638
+            ],
+            [
+              128,
+              3003067681
+            ],
+            [
+              129,
+              1055696256
+            ],
+            [
+              130,
+              1714411507
+            ],
+            [
+              131,
+              3474808042
+            ],
+            [
+              132,
+              1758215189
+            ],
+            [
+              133,
+              2793560932
+            ],
+            [
+              134,
+              2964439559
+            ],
+            [
+              135,
+              1027088238
+            ],
+            [
+              136,
+              1737311817
+            ],
+            [
+              137,
+              134712200
+            ],
+            [
+              138,
+              719993179
+            ],
+            [
+              139,
+              446072370
+            ],
+            [
+              140,
+              2879831997
+            ],
+            [
+              141,
+              765041132
+            ],
+            [
+              142,
+              802476527
+            ],
+            [
+              143,
+              1131320630
+            ],
+            [
+              144,
+              2236636273
+            ],
+            [
+              145,
+              1875389072
+            ],
+            [
+              146,
+              278028227
+            ],
+            [
+              147,
+              995266682
+            ],
+            [
+              148,
+              579407973
+            ],
+            [
+              149,
+              3396936052
+            ],
+            [
+              150,
+              1904015063
+            ],
+            [
+              151,
+              3870620670
+            ],
+            [
+              152,
+              3293253529
+            ],
+            [
+              153,
+              1544331928
+            ],
+            [
+              154,
+              1685842731
+            ],
+            [
+              155,
+              1487707074
+            ],
+            [
+              156,
+              318754317
+            ],
+            [
+              157,
+              2998997500
+            ],
+            [
+              158,
+              3566719167
+            ],
+            [
+              159,
+              3103290310
+            ],
+            [
+              160,
+              1177812929
+            ],
+            [
+              161,
+              2354516896
+            ],
+            [
+              162,
+              382630803
+            ],
+            [
+              163,
+              2252589066
+            ],
+            [
+              164,
+              327915701
+            ],
+            [
+              165,
+              3958737796
+            ],
+            [
+              166,
+              3022454695
+            ],
+            [
+              167,
+              3098156174
+            ],
+            [
+              168,
+              2566245609
+            ],
+            [
+              169,
+              2857213352
+            ],
+            [
+              170,
+              3238375675
+            ],
+            [
+              171,
+              2289775954
+            ],
+            [
+              172,
+              3055620189
+            ],
+            [
+              173,
+              3825118732
+            ],
+            [
+              174,
+              1438655375
+            ],
+            [
+              175,
+              3711899222
+            ],
+            [
+              176,
+              2301564689
+            ],
+            [
+              177,
+              3929694384
+            ],
+            [
+              178,
+              4235275107
+            ],
+            [
+              179,
+              2834957210
+            ],
+            [
+              180,
+              44619013
+            ],
+            [
+              181,
+              2577963412
+            ],
+            [
+              182,
+              671931511
+            ],
+            [
+              183,
+              3014689054
+            ],
+            [
+              184,
+              3300032057
+            ],
+            [
+              185,
+              998997176
+            ],
+            [
+              186,
+              146049739
+            ],
+            [
+              187,
+              2603307746
+            ],
+            [
+              188,
+              3246360237
+            ],
+            [
+              189,
+              1428385308
+            ],
+            [
+              190,
+              1363855967
+            ],
+            [
+              191,
+              184253670
+            ],
+            [
+              192,
+              1292280417
+            ],
+            [
+              193,
+              156438976
+            ],
+            [
+              194,
+              3259461427
+            ],
+            [
+              195,
+              1891517226
+            ],
+            [
+              196,
+              2515912021
+            ],
+            [
+              197,
+              4035136420
+            ],
+            [
+              198,
+              2378927431
+            ],
+            [
+              199,
+              2963351982
+            ],
+            [
+              200,
+              3118867337
+            ],
+            [
+              201,
+              2328313800
+            ],
+            [
+              202,
+              3908401307
+            ],
+            [
+              203,
+              2653287538
+            ],
+            [
+              204,
+              3905958141
+            ],
+            [
+              205,
+              2957005356
+            ],
+            [
+              206,
+              1584710959
+            ],
+            [
+              207,
+              1025943414
+            ],
+            [
+              208,
+              1270849969
+            ],
+            [
+              209,
+              2747410128
+            ],
+            [
+              210,
+              3059631875
+            ],
+            [
+              211,
+              253331130
+            ],
+            [
+              212,
+              2730977701
+            ],
+            [
+              213,
+              2880872884
+            ],
+            [
+              214,
+              2269123095
+            ],
+            [
+              215,
+              4036302398
+            ],
+            [
+              216,
+              3459628249
+            ],
+            [
+              217,
+              1430382296
+            ],
+            [
+              218,
+              3296033387
+            ],
+            [
+              219,
+              1259608578
+            ],
+            [
+              220,
+              3070758733
+            ],
+            [
+              221,
+              3316013628
+            ],
+            [
+              222,
+              3720025087
+            ],
+            [
+              223,
+              2667156998
+            ],
+            [
+              224,
+              1251939585
+            ],
+            [
+              225,
+              3186139104
+            ],
+            [
+              226,
+              1141027539
+            ],
+            [
+              227,
+              2849295946
+            ],
+            [
+              228,
+              2108867061
+            ],
+            [
+              229,
+              884186052
+            ],
+            [
+              230,
+              1736927975
+            ],
+            [
+              231,
+              2900707022
+            ],
+            [
+              232,
+              2324056617
+            ],
+            [
+              233,
+              2860282344
+            ],
+            [
+              234,
+              2200014907
+            ],
+            [
+              235,
+              2547958674
+            ],
+            [
+              236,
+              3730579869
+            ]
+          ]
+        },
+        "enginePresentationEdges": [
+          [
+            0,
+            2
+          ],
+          [
+            105,
+            1
+          ],
+          [
+            106,
+            2
+          ]
+        ]
+      },
+      "cleanup": {
+        "age": 236,
+        "frame": 319,
+        "active": false,
+        "visualTasks": 0,
+        "soundTasks": 0,
+        "ownedSprites": 0,
+        "ownedTasks": 0
+      },
+      "repeatProbeJsonSha256": "f41d4eed6ae0381c64801fba93ccf934b183f9e1763827ee8caf6900f1de2cbb",
+      "repeatRawRgbSequenceSha256": "b3df39967165847ad9baabe50678b485a1c9256cb646b19202def68169b4e85e"
+    }
+  },
+  "controls": {
+    "inheritedSiblingLatchFacts": false,
+    "generalizedTransferFacts": false,
+    "inferredSiblingCredit": false,
+    "siblingStatuses": {
+      "MOVE_SPARK": "exact",
+      "MOVE_THUNDER_WAVE": "exact",
+      "MOVE_ZAP_CANNON": "unsupported",
+      "MOVE_SHOCK_WAVE": "unsupported"
+    }
+  },
+  "acceptanceVerdict": "Unsupported evidence checkpoint: MOVE_THUNDERBOLT remains unsupported; no sibling or move acceptance is conveyed."
+}
