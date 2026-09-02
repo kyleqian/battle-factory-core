@@ -1,3 +1,10 @@
+# Animation supervisor verification — Hyper Beam bilateral dense evidence merged (2026-09-02 supervisor)
+
+- **State:** Salvaged, independently verified, and merged worker commits `676172d9c`, `6f42ee797`, and `d14413970`; supervisor repair `107d8093a` keeps the new latch rows inside the measured-latches table. Level 50 remains **225/276 exact, 0 partial / 0 staged, 51 unsupported**; MOVE_HYPER_BEAM and `hyper-beam-orbs-blackout` remain unsupported/unfulfilled with no sibling credit.
+- **Verification:** Replayed both hermetic source/evidence audits and **7 files / 27 focused tests**. The retained twice-fresh player-back and opponent-front corpora each cover **280/280** rows through inactive cleanup, with **52** orb lives / **156** animation-RNG draws and complete **279/279** predecessor OAM/matrix/palette transfers. Coverage/audit, typecheck, diff/scope review, Aurora/Psybeam controls, and Thunderbolt distinction are green; no runtime, production, boundary/barrier, or gameplay file changed.
+- **Full gates:** Exact worker tip `npm test` **1,218 files / 10,835 passed / 223 skipped**, build **750 modules**; post-merge `animation-main` repeats the same **1,218 / 10,835 / 223** result and **750-module** build. The worker hit its 60-minute cap during its own first full-suite attempt only after all three commits; supervisor verification replaced that interrupted gate.
+- **Next:** Implement the source-derived Hyper Beam reducer/assets and typed Scene-ON presentation seam, then require complete bilateral actual-core framebuffer equality twice plus altered live species/geometry/order controls before promoting only MOVE_HYPER_BEAM and fulfilling only its track.
+
 # MOVE_HYPER_BEAM complete bilateral dense-evidence checkpoint — unsupported (2026-09-02 worker)
 
 - **State:** Level 50 remains **225/276 exact, 0 partial / 0 staged, 51 unsupported**. MOVE_HYPER_BEAM remains absent from `entries`; `hyper-beam-orbs-blackout` remains unfulfilled and receives no component, shared-task, or sibling credit.
