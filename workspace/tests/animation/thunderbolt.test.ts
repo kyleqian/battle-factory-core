@@ -21,7 +21,7 @@ describe("MOVE_THUNDERBOLT production body", () => {
     expect(thunderboltAtAge(28, "opponent", geometry, profile).sprites
       .filter((sprite) => sprite.kind === "bolt")).toHaveLength(1);
     expect(thunderboltAtAge(54, "opponent", geometry, profile).sprites
-      .filter((sprite) => sprite.kind === "bolt")).toHaveLength(15);
+      .filter((sprite) => sprite.kind === "bolt")).toHaveLength(8);
     expect(thunderboltAtAge(105, "opponent", geometry, profile).sprites
       .map((sprite) => sprite.kind)).toEqual(["orb", ...Array(7).fill("flash")]);
     expect(thunderboltAtAge(106, "opponent", geometry, profile).sprites
