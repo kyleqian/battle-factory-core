@@ -1,3 +1,10 @@
+# MOVE_TRI_ATTACK complete bilateral dense evidence checkpoint — unsupported (2026-09-02 worker)
+
+- **State:** Level 50 remains **228/276 exact**, **0 partial / 0 staged**, and **48 unsupported**. MOVE_TRI_ATTACK remains absent from exact `entries`; `shake-target-in-pattern-scary-face` remains unfulfilled. Scary Face, Glare, and Thunder remain independent exact controls.
+- **Evidence:** Two fresh Scene-ON runs per orientation are byte-identical: player-back **77..360 (284 rows; 248 source rows)**, opponent-front **81..364 (284; 248)**, with the first inactive cleanup row retained. Probe hashes are `c0355ea8…` / `165a37ae…`; dense archives `25e78175…` / `9632055d…`; raw-RGB sequences `fb703918…` / `8aeca5bf…`; normalized maps `458161ea…` / `04ce911b…`; text maps `4ab20deb…` / `1fdeae9e…`.
+- **Measured:** The verifier pins root/subroutine ROM hashes `86d2d043…` / `3da0ca21…`, all triangle/eight-fire/pattern-1-shake/three-lightning/pattern-0-shake/seven-ice source/task/sprite lifecycles, slots/order, software+hardware OAM, affine matrices, faded/unfaded/hardware palettes, tags, registers/BG/VRAM, audio players, animation RNG, immutable gameplay state, RGB rows, and cleanup. Hardware OAM/matrices/faded-palette transfers are independently preceding-row **283/283** in both orientations with no exceptions.
+- **Checks/next:** Source/evidence verifier and focused Tri Attack/source/control/boundary/frontier/inventory checks are green; no production reducer/assets/seam/compositor, gameplay owner, barrier, or coverage promotion changed. Next production action is a source-relative Tri Attack implementation only after supervisor review, with the shake track and Tri Attack still unsupported.
+
 # Animation supervisor verification — Tri Attack source/staging merged (2026-09-02 supervisor)
 
 - **State:** Level 50 remains **228/276 exact**, **0 partial / 0 staged**, and **48 unsupported**. MOVE_TRI_ATTACK remains unsupported and absent from `entries`; `shake-target-in-pattern-scary-face` remains unfulfilled. Scary Face, Glare, and Thunder retain independent exact acceptance.
