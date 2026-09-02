@@ -1,3 +1,12 @@
+# Animation supervisor verification — Hyper Beam exact acceptance merged (2026-09-02 supervisor)
+
+- **State:** Level 50 advances **225→226/276 exact**, with **0 partial / 0 staged** and **51→50 unsupported**. MOVE_HYPER_BEAM alone is exact and `hyper-beam-orbs-blackout` alone is fulfilled; no sibling receives inferred credit.
+- **Did:** Independently audited and fast-forwarded worker commits `7c50b97b0` and `405b995fb`; supervisor formatting repair `27fce9d11` makes the complete range pass `git diff --check`. The source-relative reducer, ORBS asset, typed Scene-ON seam, and generic compositor preserve all 26 groups / 52 orb lives / 156 presentation RNG draws, allocator/order, blackout, shakes, palette/audio/resource lifecycles, and cleanup from live species/sides/geometry without gameplay ownership or carrier/evidence gates.
+- **Verified:** Two independent supervisor comparator runs each pass player-back **280/280** plus opponent-front **280/280** actual-core rows (**560/560 total, zero residual, peak 0**). The altered GOLDUCK/GRAVELER reversed-side geometry/allocator/order control is materially distinct (`d036bc02…` vs `41b709e9…`). Focused source/evidence/production/boundary/frontier/inventory/count-ratchet checks pass **12 files / 41 tests**; coverage/audit and scope review are green.
+- **Merged gate:** Post-merge `npm test` passes **1,219 files / 10,838 tests** with 44 files / 223 tests skipped; `npm run build` passes **752 modules**.
+- **Next:** Select the highest-ranked remaining unsupported Level-50 move and land one bounded source/classification checkpoint before evidence or production work; keep MOVE_HELPING_HAND behind the singles-only Battle Lab boundary.
+- **Notes:** No animation boundary or unsupported barrier widened; no gameplay RNG/damage/outcome/controller/turn/round/facility owner or main-program document changed. Papercut: two worker full suites plus the supervisor full suite spent roughly 30 minutes in quiet Vitest execution.
+
 # MOVE_HYPER_BEAM exact bilateral production acceptance (2026-09-02 worker)
 
 - **State:** Level 50 advances **225→226/276 exact**, with **0 partial / 0 staged** and **51→50 unsupported**. MOVE_HYPER_BEAM alone promotes and `hyper-beam-orbs-blackout` alone is fulfilled; no sibling receives inferred credit.
