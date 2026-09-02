@@ -537,6 +537,7 @@ import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "j
 import auroraBeamAsset from "../animation/assets/aurora-beam.json" with { type: "json" };
 import hyperBeamAsset from "../animation/assets/hyper-beam.json" with { type: "json" };
 import thunderboltAsset from "../animation/assets/thunderbolt.json" with { type: "json" };
+import zapCannonAsset from "../animation/assets/zap-cannon.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import hailAsset from "../animation/assets/hail.json" with { type: "json" };
@@ -961,6 +962,7 @@ import {
   sceneOnAuroraBeamView,
   sceneOnHyperBeamView,
   sceneOnThunderboltView,
+  sceneOnZapCannonView,
   sceneOnSmokescreenView,
   sceneOnMudShotView,
   sceneOnHydroPumpView,
@@ -1186,6 +1188,7 @@ import {
   type SceneOnAuroraBeamConfig,
   type SceneOnHyperBeamConfig,
   type SceneOnThunderboltConfig,
+  type SceneOnZapCannonConfig,
   type SceneOnSmokescreenConfig,
   type SceneOnMudShotConfig,
   type SceneOnHydroPumpConfig,
@@ -1751,6 +1754,10 @@ const thunderboltArt = thunderboltAsset as {
   bolt: { tileset: Tileset; palette: RgbColor[] };
   boltWide: { tileset: Tileset; palette: RgbColor[] };
   orb: { tileset: Tileset; palette: RgbColor[] };
+  spark2: { tileset: Tileset; palette: RgbColor[] };
+};
+const zapCannonArt = zapCannonAsset as {
+  blackBall2: { tileset: Tileset; palette: RgbColor[] };
   spark2: { tileset: Tileset; palette: RgbColor[] };
 };
 const smokescreenArt = smokescreenAsset as {
@@ -22855,6 +22862,106 @@ export function renderSceneOnMovePresentation(
       "SONICBOOM!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "ZAP_CANNON") {
+    const zapState = state as SceneOnMovePresentationState<SceneOnZapCannonConfig>;
+    const view = sceneOnZapCannonView(zapState);
+    const preceding = sceneOnZapCannonView({ ...zapState,
+      age: Math.max(0, zapState.age - 1) });
+    const twoBack = sceneOnZapCannonView({ ...zapState,
+      age: Math.max(0, zapState.age - 2) });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("ZAP_CANNON presentation requires opposite battler sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`ZAP_CANNON missing ${battler.species} battler art`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (zapState.age === 0 && view.attacker.geometry.side === "opponent") {
+      drawSourceOpponentEnemyShadow(fb, view.attacker.species,
+        view.attacker.geometry.battlePositionCenter);
+    }
+    const attackerArt = artFor(view.attacker), targetArt = artFor(view.target);
+    const items: Array<{ subpriority: number; y: number; slot: number; order: number;
+      draw: () => void }> = [];
+    items.push({ subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      y: view.attacker.geometry.animationCenter.y, slot: 6, order: -2,
+      draw: () => drawSpriteSheet(fb, tilesFor(attackerArt, view.attacker.geometry.side),
+        attackerArt.palette, view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y) });
+    // ShakeMon2's initializer writes the first pose before the age-40 OAM
+    // build; subsequent callback poses traverse the ordinary two-row path.
+    const targetX2 = zapState.age === 41 ? 4 : twoBack.targetX2;
+    items.push({ subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      y: view.target.geometry.animationCenter.y, slot: 8, order: -1,
+      draw: () => drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+        targetArt.palette, view.target.geometry.spriteCorner.x + targetX2,
+        view.target.geometry.spriteCorner.y) });
+    // The script allocates the projectile group after that row's OAM build.
+    // Its first source records therefore do not scan out at age 8; ordinary
+    // predecessor transfer applies from age 9 onward and on removal.
+    const displayed = zapState.age === 8 ? [] : preceding.sprites;
+    for (const sprite of displayed) {
+      if (sprite.hidden) continue;
+      if (sprite.kind === "ball") {
+        items.push({ subpriority: sprite.subpriority, y: sprite.y + sprite.y2,
+          slot: sprite.slot, order: sprite.order,
+          draw: () => drawSpriteSheet(fb, zapCannonArt.blackBall2.tileset,
+            zapCannonArt.blackBall2.palette, sprite.x + sprite.x2 - 8,
+            sprite.y + sprite.y2 - 8) });
+        continue;
+      }
+      let tileset = subTileset(zapCannonArt.spark2.tileset, sprite.tile * 2, 2);
+      if (sprite.kind === "arc" && sprite.tile !== 0) {
+        const hFlip = sprite.tile === 1, vFlip = sprite.tile === 2;
+        const source = tileset.tiles;
+        tileset = { ...tileset, tiles: source.map((_tile, tileIndex) => {
+          const dx = tileIndex % 2, dy = Math.floor(tileIndex / 2);
+          const sx = hFlip ? 1 - dx : dx, sy = vFlip ? 1 - dy : dy;
+          const tile = source[sy * 2 + sx]!;
+          return tile.map((_pixel, pixel) => tile[(vFlip ? 7 - Math.floor(pixel / 8)
+            : Math.floor(pixel / 8)) * 8 + (hFlip ? 7 - pixel % 8 : pixel % 8)]!);
+        }) };
+      }
+      items.push({ subpriority: sprite.subpriority, y: sprite.y + sprite.y2,
+        slot: sprite.slot, order: sprite.order,
+        draw: () => sprite.kind === "spark"
+          ? drawSpriteSheetAffineRotate(fb, tileset, zapCannonArt.spark2.palette,
+            sprite.x + sprite.x2, sprite.y + sprite.y2, ...sprite.matrix, undefined, false)
+          : drawSpriteSheet(fb, tileset, zapCannonArt.spark2.palette,
+            sprite.x + sprite.x2 - 8, sprite.y + sprite.y2 - 8) });
+    }
+    items.sort((a, b) => b.subpriority - a.subpriority || a.y - b.y
+      || a.order - b.order || b.slot - a.slot);
+    for (const item of items) item.draw();
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = zapState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none" }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawText(fb, font, charmap,
+      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      LINE1_ORIGIN.x, LINE1_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+    drawText(fb, font, charmap, "ZAP CANNON!", LINE2_ORIGIN.x, LINE2_ORIGIN.y,
+      MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
     return;
   }
 

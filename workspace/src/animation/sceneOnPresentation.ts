@@ -131,6 +131,12 @@ import {
   type ThunderboltState,
 } from "./thunderbolt.ts";
 import {
+  zapCannonAtAge,
+  type ZapCannonGeometry,
+  type ZapCannonProfile,
+  type ZapCannonState,
+} from "./zapCannon.ts";
+import {
   smokescreenEffectAtAge,
   type SmokescreenEffect,
 } from "./smokescreen.ts";
@@ -2422,6 +2428,16 @@ export interface SceneOnThunderboltConfig {
   readonly animationProfile: Readonly<ThunderboltProfile>;
 }
 
+/** Narrow presentation-only seam for Zap Cannon's complete source body. */
+export interface SceneOnZapCannonConfig {
+  readonly move: "ZAP_CANNON";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationGeometry: Readonly<ZapCannonGeometry>;
+  readonly animationProfile: Readonly<ZapCannonProfile>;
+}
+
 export interface SceneOnSmokescreenConfig {
   readonly move: "SMOKESCREEN";
   readonly attacker: SceneOnPresentationBattler;
@@ -3666,6 +3682,7 @@ export type SceneOnMoveConfig =
   | SceneOnAuroraBeamConfig
   | SceneOnHyperBeamConfig
   | SceneOnThunderboltConfig
+  | SceneOnZapCannonConfig
   | SceneOnSmokescreenConfig
   | SceneOnOctazookaConfig
   | SceneOnSpikesConfig
@@ -4237,6 +4254,11 @@ export interface SceneOnHyperBeamView extends HyperBeamState {
 }
 
 export interface SceneOnThunderboltView extends ThunderboltState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnZapCannonView extends ZapCannonState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7587,6 +7609,21 @@ export function sceneOnThunderboltView(
     ...thunderboltAtAge(state.age, state.config.target.geometry.side,
       state.config.animationGeometry, state.config.animationProfile),
     attacker: state.config.attacker, target: state.config.target,
+  };
+}
+
+/** `age=0` is Move_ZAP_CANNON's retained pre-load source row. */
+export function sceneOnZapCannonView(
+  state: SceneOnMovePresentationState<SceneOnZapCannonConfig>,
+): SceneOnZapCannonView {
+  if (state.config.move !== "ZAP_CANNON") {
+    throw new Error(`expected ZAP_CANNON presentation, got ${state.config.move}`);
+  }
+  return {
+    ...zapCannonAtAge(state.age, state.config.target.geometry.side,
+      state.config.animationGeometry, state.config.animationProfile),
+    attacker: state.config.attacker,
+    target: state.config.target,
   };
 }
 
