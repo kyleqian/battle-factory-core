@@ -7909,6 +7909,30 @@
     "tests/animation/hornDrill.test.ts"
    ],
    "goal": "FULFILLED by MOVE_HORN_DRILL only: complete twice-fresh legal player-back 193/193 plus opponent-front 192/192 source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows pass with zero residual pixels on two deterministic comparator passes. The source-derived compositor preserves the measured predecessor transfers and dual ShakeMonInPlace evidence while applying BG3/backdrop-only hardware brightness, post-BuildOam task paint cadence, opaque ObjNormal impacts, and descending-Y/stable overlap order. Typed live species/sides/geometry/allocator/matrices/order and the altered GOLDUCK/GRAVELER control prove routing without carrier/species, fixture/evidence/hash/recording/framebuffer lookup, coordinate/RGB fit, absolute tick, stage gate, or gameplay ownership. No sibling receives inferred credit."
+  },
+  {
+   "id": "aurora-beam-rainbow-rings-bg",
+   "components": [
+    "asset:ANIM_TAG_RAINBOW_RINGS",
+    "soundTask:SoundTask_LoopSEAdjustPanning",
+    "sprite:gAuroraBeamRingSpriteTemplate",
+    "subroutine:AuroraBeamCreateRings",
+    "task:AnimTask_RotateAuroraRingColors",
+    "task:AnimTask_ShakeMon2",
+    "visualCommand:fadetobg",
+    "visualCommand:restorebg",
+    "visualCommand:setarg",
+    "visualCommand:waitbgfadein"
+   ],
+   "representatives": ["MOVE_AURORA_BEAM"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/battle-lab/mechanic-aurora-beam-player-seadra-opponent-onix.json",
+    "tools/battle-lab/mechanic-aurora-beam-opponent-seadra-player-onix.json",
+    "tools/compare/auroraBeamSourceAudit.ts",
+    "tests/animation/auroraBeamSourceCheckpoint.test.ts"
+   ],
+   "goal": "UNFULFILLED source/classification checkpoint only: retain complete bilateral dense Scene-ON Aurora Beam evidence through inactive cleanup, then implement and prove a source-relative reducer, typed seam, generic compositor, altered live control, and twice-run zero-residual production framebuffer. The source checkpoint grants no MOVE_AURORA_BEAM, shared sound-task, component, or sibling credit."
   }
  ],
  "variantAudits": {

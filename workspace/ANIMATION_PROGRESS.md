@@ -1,3 +1,11 @@
+# MOVE_AURORA_BEAM source/classification checkpoint — unsupported (2026-09-02 worker)
+
+- **State:** Level 50 remains **224/276 exact, 0 partial / 0 staged, 52 unsupported**. MOVE_AURORA_BEAM remains absent from `entries`; dedicated 10-component `aurora-beam-rainbow-rings-bg` is unfulfilled and grants no move, component, shared sound-task, or sibling credit.
+- **Source/staging:** Byte-pinned the complete half-open ROM body **0x082d0804..0x082d08d8** (**212 bytes**, SHA-256 `b178f9fa…`) and source text (**1,188 bytes**, `e782d921…`). Its two blocks dispatch 40 affine rainbow rings in ten groups, the arg-7 cell/affine release gate, a 130-frame/three-tick palette rotation, target ShakeMon2 `(1,0,17,1)` then `(2,0,40,1)`, BG_AURORA palette-fade/load/restore, initial and 3/6/0/10 loop audio, resources, and cleanup. Generated Level-50 carriers are sets **219/256/266**; lowest is **219 FRONTIER_MON_SEADRA_1** (sets 73/109 lie below the Level-50 inventory boundary). Complete transient-free Seadra/Onix three-mon parties constrain all four active choices in both natural orientations.
+- **Verified:** Both stages pass the pinned local validator and live Battle Scene ON oracle contract for all **934** requested frames; source audit and focused source/staging/boundary/frontier/inventory checks are green. Coverage stays **224 exact / 52 unsupported** and animation latches/boundaries/barriers are unchanged.
+- **Next:** Retain two fresh byte-identical complete bilateral dense windows through first inactive cleanup, including move-owned BG/palette/ShakeMon2/ring/affine/OAM/audio/resource/cleanup maps, before any reducer, seam, compositor, assets, or exact promotion.
+- **Notes:** No production rendering, gameplay/RNG/damage/outcome/controller/turn/round/facility state, dense evidence, or `ANIMATION_LATCHES.md` changed.
+
 # Animation supervisor verification — Horn Drill exact acceptance merged (2026-09-02 supervisor)
 
 - **State:** Level 50 advances **223→224/276 exact**, with **0 partial / 0 staged** and **53→52 unsupported**. MOVE_HORN_DRILL alone promotes and `horn-drill-bg-horn-shakes` alone is fulfilled; no sibling receives inferred credit.
