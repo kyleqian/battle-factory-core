@@ -70,14 +70,14 @@ describe("MOVE_THUNDER_WAVE source-relative reducer", () => {
     });
   });
 
-  it("source-audits independently exact Thunderbolt and unsupported Zap Cannon", () => {
+  it("source-audits independently exact Thunderbolt and Zap Cannon", () => {
     const output = execFileSync(process.execPath, [
       "--experimental-strip-types",
       "tools/compare/thunderWaveSourceAudit.ts",
     ], { encoding: "utf8" });
     expect(output).toContain('"move":"MOVE_THUNDER_WAVE"');
     expect(output).toContain('"MOVE_THUNDERBOLT":"independently exact:');
-    expect(output).toContain('"MOVE_ZAP_CANNON":"unsupported:');
+    expect(output).toContain('"MOVE_ZAP_CANNON":"independently exact:');
   });
 
   it("exposes only relative age, battler geometry, and field chrome via the seam", () => {

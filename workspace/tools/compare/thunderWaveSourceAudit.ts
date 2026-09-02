@@ -58,6 +58,6 @@ console.log(JSON.stringify({
     MOVE_THUNDERBOLT:
       "independently exact: three differently placed ElectricBolt tasks, SHOCK_3 orb, eight affine SPARK_2 sprites, target palette body, and distinct sounds",
     MOVE_ZAP_CANNON:
-      "unsupported: BLACK_BALL_2 projectile, eight orbiting ZapCannon sparks, ShakeMon2, ElectricityEffect, and distinct pan sequence",
+      "independently exact: BLACK_BALL_2 projectile, eight orbiting ZapCannon sparks, ShakeMon2, ElectricityEffect, and distinct pan sequence",
   },
 }));

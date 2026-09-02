@@ -132,16 +132,16 @@ describe("MOVE_THUNDERBOLT complete bilateral Scene-ON evidence checkpoint", () 
   it("keeps the historical evidence scope distinct from later move-only promotion", () => {
     const source = audit();
     expect(source).toMatchObject({ move: "MOVE_THUNDERBOLT", moveId: 85, status: "exact", pointerOwned: { root: { start: "0x82ca40a", endExclusive: "0x82ca5c0", byteLength: 438 }, subroutine: { symbol: "ElectricityEffect", start: "0x82d7bea", endExclusive: "0x82d7c75", byteLength: 139 }, combined: { byteLength: 577 } }, graph: { components: expect.arrayContaining(["asset:ANIM_TAG_SHOCK_3", "asset:ANIM_TAG_SPARK", "asset:ANIM_TAG_SPARK_2", "sprite:gElectricitySpriteTemplate", "sprite:gSparkElectricityFlashingSpriteTemplate", "sprite:gThunderboltOrbSpriteTemplate", "subroutine:ElectricityEffect", "task:AnimTask_BlendBattleAnimPal", "task:AnimTask_ElectricBolt"]) } });
-    expect(source.siblings).toEqual([{ move: "MOVE_SPARK", status: "exact", blocks: ["Move_SPARK", "ElectricityEffect"] }, { move: "MOVE_THUNDER_WAVE", status: "exact", blocks: ["Move_THUNDER_WAVE"] }, { move: "MOVE_ZAP_CANNON", status: "unsupported", blocks: ["Move_ZAP_CANNON", "ElectricityEffect"] }, { move: "MOVE_SHOCK_WAVE", status: "unsupported", blocks: ["Move_SHOCK_WAVE"] }]);
+    expect(source.siblings).toEqual([{ move: "MOVE_SPARK", status: "exact", blocks: ["Move_SPARK", "ElectricityEffect"] }, { move: "MOVE_THUNDER_WAVE", status: "exact", blocks: ["Move_THUNDER_WAVE"] }, { move: "MOVE_ZAP_CANNON", status: "exact", blocks: ["Move_ZAP_CANNON", "ElectricityEffect"] }, { move: "MOVE_SHOCK_WAVE", status: "unsupported", blocks: ["Move_SHOCK_WAVE"] }]);
     expect(fixture.controls).toMatchObject({ inheritedSiblingLatchFacts: false, generalizedTransferFacts: false, inferredSiblingCredit: false, siblingStatuses: { MOVE_SPARK: "exact", MOVE_THUNDER_WAVE: "exact", MOVE_ZAP_CANNON: "unsupported", MOVE_SHOCK_WAVE: "unsupported" } });
     expect(fixture.evidenceScope).toMatchObject({ sourceAudit: true, completePointerBody: true, fullDenseRowsRetained: true, twiceFreshByteIdentical: true, normalizedMaps: true, frameChangeMaps: true, productionAnimationChanged: false, reducerAdded: false, assetBundleAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false, coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false });
     expect(fixture.acceptance.verdict).toContain("MOVE_THUNDERBOLT remains unsupported");
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(227);
-    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(227);
+    expect(coverage.entries).toHaveLength(228);
+    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(228);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_THUNDERBOLT"))
       .toMatchObject({ status: "exact" });
-    expect(coverage.componentTracks.find((track: Json) => track.id === "spark-2-electricity")).toMatchObject({ representatives: ["MOVE_SPARK", "MOVE_THUNDERBOLT", "MOVE_THUNDER_WAVE", "MOVE_ZAP_CANNON"] });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "spark-2-electricity")).toMatchObject({ representatives: ["MOVE_SPARK", "MOVE_THUNDERBOLT", "MOVE_THUNDER_WAVE", "MOVE_ZAP_CANNON"], fulfilled: true });
     expect(fixture.acceptance.latchVerdict).toContain("no sibling latch is inherited");
   });
 });
