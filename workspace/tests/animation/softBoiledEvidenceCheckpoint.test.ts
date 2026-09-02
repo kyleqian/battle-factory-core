@@ -44,7 +44,7 @@ describe("MOVE_SOFT_BOILED bilateral dense evidence checkpoint", () => {
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_SOFT_BOILED"))
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.filter((entry: any) => entry.status === "exact"))
-      .toHaveLength(226);
+      .toHaveLength(227);
   });
 
   it("pins twice-fresh complete raw state and RGB archives through cleanup", () => {

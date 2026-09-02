@@ -34,14 +34,14 @@ describe("MOVE_HYPER_BEAM complete bilateral Scene-ON evidence", () => {
     });
   });
 
-  it("records exact production scope and keeps Aurora/Psybeam controls exact while Thunderbolt stays distinct", () => {
+  it("records exact production scope and keeps independently accepted controls exact", () => {
     const fixture = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/hyper-beam-evidence.json"), "utf8"));
     expect(fixture.evidenceScope).toMatchObject({ sourceAudit: true, completePointerBody: true, fullDenseRowsRetained: true, twiceFreshByteIdentical: true, normalizedMaps: true, productionAnimationChanged: true, reducerAdded: true, assetBundleAdded: true, typedSeamAdded: true, compositorAdded: true, framebufferCompared: true, coveragePromotion: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8"));
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_HYPER_BEAM")).toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_AURORA_BEAM")).toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_PSYBEAM")).toMatchObject({ status: "exact" });
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_THUNDERBOLT")).toBeUndefined();
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_THUNDERBOLT")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((entry: any) => entry.id === "hyper-beam-orbs-blackout")).toMatchObject({ representatives: ["MOVE_HYPER_BEAM"], fulfilled: true });
     for (const side of ["player-back", "opponent-front"]) {
       const dense = JSON.parse(gunzipSync(readFileSync(resolve(root, fixture.orientations[side].denseState))).toString("utf8"));

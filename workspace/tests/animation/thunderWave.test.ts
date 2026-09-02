@@ -70,13 +70,13 @@ describe("MOVE_THUNDER_WAVE source-relative reducer", () => {
     });
   });
 
-  it("source-audits Thunderbolt and Zap Cannon without promoting them", () => {
+  it("source-audits independently exact Thunderbolt and unsupported Zap Cannon", () => {
     const output = execFileSync(process.execPath, [
       "--experimental-strip-types",
       "tools/compare/thunderWaveSourceAudit.ts",
     ], { encoding: "utf8" });
     expect(output).toContain('"move":"MOVE_THUNDER_WAVE"');
-    expect(output).toContain('"MOVE_THUNDERBOLT":"unsupported:');
+    expect(output).toContain('"MOVE_THUNDERBOLT":"independently exact:');
     expect(output).toContain('"MOVE_ZAP_CANNON":"unsupported:');
   });
 

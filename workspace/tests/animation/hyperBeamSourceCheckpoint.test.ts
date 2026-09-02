@@ -90,14 +90,14 @@ describe("MOVE_HYPER_BEAM source/classification checkpoint", () => {
     expect(target[0]).toMatchObject({ species: 95, level: 50, moves: [33, 33, 33, 33] });
   });
 
-  it("keeps the exact shared controls independent and Thunderbolt unsupported", () => {
+  it("keeps the exact shared controls independently accepted", () => {
     const componentGraph = JSON.parse(readFileSync("src/data/gen/battle-animation-components.json", "utf8"));
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries).toHaveLength(226);
+    expect(coverage.entries).toHaveLength(227);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_HYPER_BEAM")).toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_AURORA_BEAM")).toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_PSYBEAM")).toMatchObject({ status: "exact" });
-    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_THUNDERBOLT")).toBeUndefined();
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_THUNDERBOLT")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((entry: { id: string }) => entry.id === "hyper-beam-orbs-blackout")).toMatchObject({ representatives: ["MOVE_HYPER_BEAM"], fulfilled: true });
     for (const move of ["MOVE_AURORA_BEAM", "MOVE_PSYBEAM"]) {
       expect(componentGraph.moves.find((entry: { move: string }) => entry.move === move)?.componentIds).toContain("soundTask:SoundTask_LoopSEAdjustPanning");
