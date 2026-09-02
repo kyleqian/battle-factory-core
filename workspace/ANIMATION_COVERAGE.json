@@ -2735,7 +2735,7 @@
     "headbuttProbe.py records every currentMove=29 frame through tools/run-mgba-probe.py, and headbuttEvidence.ts proves the dense reducer/component, software callback/task, hardware battler OAM/matrix/palette/register, audio, raw-RGB, shared-framebuffer, and first-clear receipts twice fresh; independent outputs are byte-identical with player digest 28e574bdd25de356a9dea0d6866024c7f8c3ff23911929fbd68c8737861ec858 and opponent digest fcc0a0e8ca5eef91ce7d68f5ca0419f66fe5942f170536e48595619658de1281",
     "source extraction byte-pins ZIGZAGOON front/back and reuses the independently source-generated ANIM_TAG_IMPACT asset; the narrow compositor ports prior-software battler affine/OAM display, the source task-to-OAM latch for both simultaneous shakes, flashing IMPACT visibility, field chrome, both healthboxes, move text, and 48/48 shared-framebuffer equality twice fresh in both orientations",
     "MOVE_HORN_ATTACK remains unsupported because it adds ANIM_TAG_HORN_HIT and gHornHitSpriteTemplate and lacks independent complete dense acceptance",
-    "MOVE_HORN_DRILL remains unsupported because it adds drill BG/scroll, horn sprite, long dual shakes, and repeated impacts and lacks independent complete dense acceptance"
+    "MOVE_HORN_DRILL is independently exact on its own complete bilateral dense corpus; no Horn Drill credit is inferred from HEADBUTT"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-headbutt-player-zigzagoon-opponent-onix.json",
@@ -2751,6 +2751,41 @@
     "src/animation/sceneOnPresentation.ts",
     "src/engine/battleScene.ts",
     "tests/animation/headbutt.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_HORN_DRILL",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-333 SEAKING versus ONIX Battle Scene ON windows retain every Move_HORN_DRILL row through first inactive cleanup: player-back frames 213-405 (193/193) and opponent-front frames 214-405 (192/192), twice-fresh byte-identical",
+    "the pure source-relative reducer and typed live seam cover the complete 381-byte source body, drill BG load/text-map/signed scroll/restore, three BowMon phases, horn, both literal 40-step ShakeMonInPlace tasks, eleven flashing impacts, alpha/resource/audio state, and cleanup while preserving all 385/385 retained component rows",
+    "the actual-core compositor uses mGBA hardware BG3/backdrop-only brightness, predecessor BG/OAM/matrix/palette transfers, post-BuildOam ShakeMonInPlace paint cadence, opaque ObjNormal impacts, and source SortSprites descending-Y/stable overlap order without fixture/recording/framebuffer/hash lookup, coordinate/RGB fit, absolute tick, carrier/species gate, or gameplay ownership",
+    "two independent deterministic production comparator passes each reach player-back 193/193 plus opponent-front 192/192 zero-residual framebuffer rows (385/385 total, peak 0); the altered GOLDUCK/GRAVELER live species/side/geometry/allocator/matrix/order control remains material",
+    "gameplay state, OHKO resolution, damage, battle RNG, controller, turn, round, and facility state remain unowned; HEADBUTT, HORN_ATTACK, Guillotine, Cosmic Power, and other ShakeMonInPlace or sliding-BG users receive no inferred credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-horn-drill-player-seaking-opponent-onix.json",
+    "tools/battle-lab/mechanic-horn-drill-opponent-seaking-player-onix.json",
+    "tools/compare/hornDrillSourceAudit.ts",
+    "tools/compare/hornDrillProbe.py",
+    "tools/compare/hornDrillEvidence.ts",
+    "tools/compare/fixtures/horn-drill-evidence.json",
+    "tools/compare/evidence/horn-drill-player-dense-state.json.gz",
+    "tools/compare/evidence/horn-drill-opponent-dense-state.json.gz",
+    "tools/compare/evidence/horn-drill-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/horn-drill-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/horn-drill-changemap-player.json",
+    "tools/compare/evidence/horn-drill-changemap-opponent.json",
+    "tools/compare/extractHornDrillAssets.ts",
+    "tools/compare/hornDrillFramebuffer.ts",
+    "src/animation/assets/horn-drill.json",
+    "src/animation/hornDrill.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/hornDrillSourceCheckpoint.test.ts",
+    "tests/animation/hornDrillEvidenceCheckpoint.test.ts",
+    "tests/animation/hornDrill.test.ts"
    ]
   },
   {
@@ -7848,7 +7883,7 @@
     "visualCommand:waitbgfadeout"
    ],
    "representatives": ["MOVE_HORN_DRILL"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/battle-lab/mechanic-horn-drill-player-seaking-opponent-onix.json",
     "tools/battle-lab/mechanic-horn-drill-opponent-seaking-player-onix.json",
@@ -7873,7 +7908,7 @@
     "tests/animation/hornDrillEvidenceCheckpoint.test.ts",
     "tests/animation/hornDrill.test.ts"
    ],
-   "goal": "UNFULFILLED production checkpoint: MOVE_HORN_DRILL remains unsupported. The source-relative reducer, deterministic drill/horn assets, narrow typed live seam, generic core.ts compositor, strict actual-core comparator, and altered GOLDUCK/GRAVELER geometry/allocator/matrix/order control are implemented without gameplay ownership or lookup/fitting gates. Every retained source/component row is exact (193/193 player-back and 192/192 opponent-front), but each of two deterministic production passes reaches only 85/193 player and 85/192 opponent zero-residual framebuffer rows (1,829,747 and 1,845,577 residual pixels; peak 26,880), concentrated in palette-fade transition and active drill-BG composition. The required 385/385 zero-residual gate fails, so the track stays unfulfilled and no move, component, or sibling credit is granted."
+   "goal": "FULFILLED by MOVE_HORN_DRILL only: complete twice-fresh legal player-back 193/193 plus opponent-front 192/192 source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows pass with zero residual pixels on two deterministic comparator passes. The source-derived compositor preserves the measured predecessor transfers and dual ShakeMonInPlace evidence while applying BG3/backdrop-only hardware brightness, post-BuildOam task paint cadence, opaque ObjNormal impacts, and descending-Y/stable overlap order. Typed live species/sides/geometry/allocator/matrices/order and the altered GOLDUCK/GRAVELER control prove routing without carrier/species, fixture/evidence/hash/recording/framebuffer lookup, coordinate/RGB fit, absolute tick, stage gate, or gameplay ownership. No sibling receives inferred credit."
   }
  ],
  "variantAudits": {

@@ -15,12 +15,13 @@ describe("MOVE_HORN_DRILL complete bilateral Scene-ON evidence", () => {
     expect(result.orientations["opponent-front"]).toMatchObject({ sourceWindow: { startFrame: 214, endFrame: 405, frameCount: 192 }, probeJsonSha256: "4d2c544174b3ece5121e536793ddeec15dfa9864b7a5fc51cdbf0e77670f5572", repeatProbeJsonSha256: "4d2c544174b3ece5121e536793ddeec15dfa9864b7a5fc51cdbf0e77670f5572", rawRgbSequenceSha256: "f05011338b2a148f7e44dd7bcfa1736fbe9f54a699d03ac2d725ea24a15f56f9", latches: { hardwareOamEqualsPrecedingSoftware: "191/191", hardwareMatricesEqualPrecedingSoftware: "191/191", hardwarePaletteEqualsPrecedingFaded: "191/191", shakeInvocations: [{ role: "attacker", hardwareLag: 1 }, { role: "target", hardwareLag: 1 }] }, lifecycle: { gBowMonSpriteTemplate: 3, gHornHitSpriteTemplate: 1, gFlashingHitSplatSpriteTemplate: 11 }, background: { bgVramTransitions: [26, 172] }, state: { partiesStable: true, battlersStable: true, engineStable: true, immutableStable: true, gameplayRngTransitions: [] }, cleanup: { age: 191, active: false, visualTasks: 0, soundTasks: 0, ownedSprites: 0, ownedTasks: 0 } });
   });
 
-  it("retains complete dense surfaces and keeps coverage unsupported/unfulfilled", () => {
+  it("retains complete dense surfaces while production coverage is independently exact", () => {
     const fixture = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/horn-drill-evidence.json"), "utf8"));
     expect(fixture.evidenceScope).toMatchObject({ completePointerBody: true, fullDenseRowsRetained: true, twiceFreshByteIdentical: true, normalizedMaps: true, productionAnimationChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false, coveragePromotion: false, gameplayStateOwned: false });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8"));
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_HORN_DRILL")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: any) => track.id === "horn-drill-bg-horn-shakes")).toMatchObject({ fulfilled: false, representatives: ["MOVE_HORN_DRILL"] });
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_HORN_DRILL"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: any) => track.id === "horn-drill-bg-horn-shakes")).toMatchObject({ fulfilled: true, representatives: ["MOVE_HORN_DRILL"] });
     for (const side of ["player-back", "opponent-front"]) {
       const dense = JSON.parse(gunzipSync(readFileSync(resolve(root, fixture.orientations[side].denseState))).toString("utf8"));
       expect(dense.frames).toHaveLength(side === "player-back" ? 193 : 192);

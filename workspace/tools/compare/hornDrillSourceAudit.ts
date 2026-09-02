@@ -73,7 +73,7 @@ if ((body.match(/create_flashing_hitsplat_sprite/g) ?? []).length !== 11
   || move?.id !== 32 || move?.effect !== "EFFECT_OHKO" || move?.frontierMonCount !== 9
   || first?.index !== 333 || first?.label !== "FRONTIER_MON_SEAKING_2" || first?.species !== "SPECIES_SEAKING"
   || first?.itemName !== "BATTLE_FRONTIER_ITEM_QUICK_CLAW" || first?.nature !== "NATURE_IMPISH"
-  || status !== undefined || track?.fulfilled !== false
+  || status !== "exact" || track?.fulfilled !== true
   || JSON.stringify(track?.components) !== JSON.stringify(expectedComponents)) {
   throw new Error("MOVE_HORN_DRILL source/carrier/component/status contract changed");
 }
@@ -85,5 +85,5 @@ console.log(JSON.stringify({
   carrier: { lowestLevel50Set: 333, frontierMon: "FRONTIER_MON_SEAKING_2", speciesId: 119, itemId: 183, nature: "NATURE_IMPISH", allLevel50Sets: carriers.map((entry: { index: number }) => entry.index) },
   dispatch: { bowSprites: 3, hornSprites: 1, flashingImpacts: 11, attackerShake: [2, 0, 40, 1], targetShake: [10, 0, 40, 1], drillBg: ["BG_DRILL", "BG_DRILL_CONTESTS"], scroll: [-2304, 768, 1, -1] },
   audio: { headbutt: 1, bang: 1, hornAttackTargetPanned: 11 },
-  status: "unsupported",
+  status: "exact",
 }, null, 2));

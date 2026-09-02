@@ -22845,6 +22845,16 @@ export function renderSceneOnMovePresentation(
       ...hornState,
       age: Math.max(0, hornState.age - 1),
     });
+    // ShakeMonInPlace writes x2 after BuildOamBuffer. Preserve the measured
+    // one-row software-to-hardware OAM transfer on top of that callback
+    // ordering by painting its live offsets from reducer age - 2.
+    const displayedShake = sceneOnHornDrillView({
+      ...hornState,
+      age: Math.max(0, hornState.age - 2),
+    });
+    const shakeX = hornState.age >= 76 && hornState.age <= 152
+      ? displayedShake
+      : displayed;
     if (view.attacker.geometry.side === view.target.geometry.side) {
       throw new Error("HORN_DRILL presentation requires opposite battler sides");
     }
@@ -22858,38 +22868,54 @@ export function renderSceneOnMovePresentation(
     };
     const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
       side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
-    const darken = (palette: readonly RgbColor[]): RgbColor[] => palette.slice();
-    const darkenBanks = (banks: readonly (readonly RgbColor[])[]): RgbColor[][] =>
-      banks.map(darken);
+    // Task_FadeToBg drives BLDCNT=0x00e8: only BG3 + backdrop are selected
+    // for hardware brightness decrease. Battler/effect OBJ and healthboxes
+    // retain their unfaded palettes throughout both transitions.
+    const darkenField = (palette: readonly RgbColor[]): RgbColor[] =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.fadeY,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    const darkenFieldBanks = (
+      banks: readonly (readonly RgbColor[])[],
+    ): RgbColor[][] => banks.map(darkenField);
     if (displayed.background.active) {
       drawScrolledTileBg(
         fb,
         hornDrillArt.drill.tileset,
         hornDrillArt.drill.tilemap,
-        [darken(hornDrillArt.drill.palette)],
+        [darkenField(hornDrillArt.drill.palette)],
         displayed.background.hofs,
         displayed.background.vofs,
       );
     } else {
       drawTileBg(
         fb, battleBg.static.tileset, battleBg.static.tilemap,
-        darkenBanks(battleBg.palette),
+        darkenFieldBanks(battleBg.palette),
       );
     }
     const attackerArt = artFor(view.attacker);
     const targetArt = artFor(view.target);
     const entries: Array<{
-      subpriority: number; slot: number; order: number; draw: () => void;
+      subpriority: number; y: number; slot: number; order: number; draw: () => void;
     }> = [];
     entries.push({
       subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      y: view.target.geometry.animationCenter.y + displayed.targetOffset.y2,
       slot: view.target.geometry.side === "player" ? 6 : 8,
       order: -2,
       draw: () => drawSpriteSheet(
-        fb, tilesFor(targetArt, view.target.geometry.side), darken(targetArt.palette),
+        fb, tilesFor(targetArt, view.target.geometry.side), targetArt.palette,
         view.target.geometry.spriteCorner.x
           + hornState.config.animationGeometry.targetRestOffset.x2
-          + displayed.targetOffset.x2,
+          + shakeX.targetOffset.x2,
         view.target.geometry.spriteCorner.y
           + hornState.config.animationGeometry.targetRestOffset.y2
           + displayed.targetOffset.y2,
@@ -22897,13 +22923,14 @@ export function renderSceneOnMovePresentation(
     });
     entries.push({
       subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      y: view.attacker.geometry.animationCenter.y + displayed.attackerOffset.y2,
       slot: view.attacker.geometry.side === "player" ? 6 : 8,
       order: -3,
       draw: () => drawSpriteSheetAffineRotate(
-        fb, tilesFor(attackerArt, view.attacker.geometry.side), darken(attackerArt.palette),
+        fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerArt.palette,
         view.attacker.geometry.animationCenter.x
           + hornState.config.animationGeometry.attackerRestOffset.x2
-          + displayed.attackerOffset.x2,
+          + shakeX.attackerOffset.x2,
         view.attacker.geometry.animationCenter.y
           + hornState.config.animationGeometry.attackerRestOffset.y2
           + displayed.attackerOffset.y2,
@@ -22914,10 +22941,11 @@ export function renderSceneOnMovePresentation(
     });
     if (displayed.horn) entries.push({
       subpriority: hornState.config.animationProfile.effectSubpriority - 1,
+      y: displayed.horn.y,
       slot: displayed.horn.slot,
       order: displayed.horn.slot,
       draw: () => drawSpriteSheetFlipped(
-        fb, hornDrillArt.horn.tileset, darken(hornDrillArt.horn.palette),
+        fb, hornDrillArt.horn.tileset, hornDrillArt.horn.palette,
         displayed.horn!.x - 16, displayed.horn!.y - 16,
         displayed.horn!.hFlip, displayed.horn!.vFlip,
       ),
@@ -22926,10 +22954,13 @@ export function renderSceneOnMovePresentation(
       if (impact.invisible) continue;
       entries.push({
         subpriority: hornState.config.animationProfile.effectSubpriority,
+        y: impact.y,
         slot: impact.slot,
         order: hornState.config.animationProfile.spriteOrderSeed.indexOf(impact.slot),
+        // gFlashingHitSplatSpriteTemplate is ObjNormal, so these impacts
+        // paint opaquely despite the surrounding script's alpha registers.
         draw: () => drawSpriteSheetAffineRotate(
-          fb, battleAnimHitsplat.tileset, darken(battleAnimHitsplat.palette),
+          fb, battleAnimHitsplat.tileset, battleAnimHitsplat.palette,
           impact.x, impact.y,
           impact.matrix[0], impact.matrix[1], impact.matrix[2], impact.matrix[3],
           undefined, false,
@@ -22937,7 +22968,7 @@ export function renderSceneOnMovePresentation(
       });
     }
     entries.sort((left, right) => right.subpriority - left.subpriority
-      || right.order - left.order || right.slot - left.slot);
+      || left.y - right.y || left.order - right.order || right.slot - left.slot);
     for (const entry of entries) entry.draw();
 
     const playerIsAttacker = view.attacker.geometry.side === "player";
@@ -22957,18 +22988,6 @@ export function renderSceneOnMovePresentation(
       status: profile.playerStatus ?? "none",
       currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
     }));
-    // Task_FadeToBg selects every field/background, battler, and healthbox
-    // palette but leaves the message-window palettes outside that selection.
-    if (view.fadeY > 0) {
-      for (let y = 0; y < 112; y += 1) {
-        for (let x = 0; x < 240; x += 1) {
-          const offset = (y * 240 + x) * 4;
-          fb[offset] = blendComponentToward(fb[offset]!, 0, view.fadeY);
-          fb[offset + 1] = blendComponentToward(fb[offset + 1]!, 0, view.fadeY);
-          fb[offset + 2] = blendComponentToward(fb[offset + 2]!, 0, view.fadeY);
-        }
-      }
-    }
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb,

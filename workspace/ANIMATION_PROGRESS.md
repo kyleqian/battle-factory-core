@@ -1,3 +1,11 @@
+# MOVE_HORN_DRILL exact residual correction (2026-09-02 worker)
+
+- **State:** Level 50 advances **223→224/276 exact**, with **0 partial / 0 staged** and **53→52 unsupported**. MOVE_HORN_DRILL alone promotes and `horn-drill-bg-horn-shakes` alone is fulfilled; no sibling receives inferred credit.
+- **Did:** Classified the retained residual by source age and region, then corrected only source-derived presentation composition: live `BLDCNT=0x00e8` mGBA brightness now selects BG3/backdrop rather than all field OBJ/healthboxes; drill BG continues to consume its measured predecessor text-map/scroll; post-`BuildOamBuffer` ShakeMonInPlace x2 writes compose with the retained one-row OAM DMA predecessor; ObjNormal impacts paint opaque; equal-subpriority overlaps follow descending-Y/stable `SortSprites` order. No reducer component truth, typed live inputs, evidence assets/hashes, gameplay, RNG, outcome, controller, turn, round, or facility ownership changed.
+- **Verified:** Two independent deterministic actual-core comparator passes each return player-back **193/193** plus opponent-front **192/192** zero-residual rows (**385/385 total, peak 0**) while retaining **385/385** component rows. The altered GOLDUCK/GRAVELER species/side/geometry/allocator/matrix/order control remains material (base `652fe91c…`, altered `6793ea45…`).
+- **Scope:** Both measured Horn Drill `ShakeMonInPlace` evidence latches remain attacker `(2,0,40,1)` RAM+1 and target `(10,0,40,1)` RAM+1; the painter note records callback-after-OAM-build composition without changing those hardware-transfer facts. No carrier/species, fixture/evidence/hash/recording/framebuffer lookup, absolute battle tick, coordinate/RGB fit, stage gate, boundary/barrier, or sibling credit was added.
+- **Next:** Supervisor should independently rerun the **385/385** comparator gate and merge this Horn Drill-only promotion. No animation deferral is open.
+
 # Animation supervisor verification — Horn Drill production checkpoint merged, still unsupported (2026-09-02 supervisor)
 
 - **State:** Level 50 remains **223/276 exact, 0 partial / 0 staged, 53 unsupported**. MOVE_HORN_DRILL and `horn-drill-bg-horn-shakes` remain unsupported/unfulfilled; no component or sibling credit is granted.

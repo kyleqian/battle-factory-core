@@ -10,7 +10,7 @@ const inspect = (): any => JSON.parse(execFileSync(process.execPath,
   ["--experimental-strip-types", "tools/compare/hornDrillFramebuffer.ts"],
   { cwd: root, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 }));
 
-describe("MOVE_HORN_DRILL source reducer and production framebuffer checkpoint", () => {
+describe("MOVE_HORN_DRILL exact source reducer and production framebuffer", () => {
   const geometry = {
     attackerCenter: { x: 72, y: 91 }, targetPictureCenter: { x: 176, y: 42 },
     attackerRestOffset: { x2: 0, y2: 0 }, targetRestOffset: { x2: 1, y2: 0 },
@@ -53,10 +53,10 @@ describe("MOVE_HORN_DRILL source reducer and production framebuffer checkpoint",
     expect(first.comparisons.map(({ orientation, totalRows, zeroRows, residualPixels,
       peakResidualPixels, componentExactRows }: any) => ({ orientation, totalRows, zeroRows,
       residualPixels, peakResidualPixels, componentExactRows }))).toEqual([
-      { orientation: "player-back", totalRows: 193, zeroRows: 85,
-        residualPixels: 1829747, peakResidualPixels: 26880, componentExactRows: 193 },
-      { orientation: "opponent-front", totalRows: 192, zeroRows: 85,
-        residualPixels: 1845577, peakResidualPixels: 26880, componentExactRows: 192 },
+      { orientation: "player-back", totalRows: 193, zeroRows: 193,
+        residualPixels: 0, peakResidualPixels: 0, componentExactRows: 193 },
+      { orientation: "opponent-front", totalRows: 192, zeroRows: 192,
+        residualPixels: 0, peakResidualPixels: 0, componentExactRows: 192 },
     ]);
   }, 30_000);
 

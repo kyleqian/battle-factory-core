@@ -37,7 +37,7 @@ describe("MOVE_HORN_DRILL source/classification checkpoint", () => {
       graph: { blocks: ["Move_HORN_DRILL", "HornDrillInContest", "HornDrillContinue"] },
       carrier: { lowestLevel50Set: 333, frontierMon: "FRONTIER_MON_SEAKING_2", speciesId: 119, itemId: 183, nature: "NATURE_IMPISH", allLevel50Sets: [333, 414, 499, 584, 595, 606, 691, 822, 823] },
       dispatch: { bowSprites: 3, hornSprites: 1, flashingImpacts: 11, attackerShake: [2, 0, 40, 1], targetShake: [10, 0, 40, 1], drillBg: ["BG_DRILL", "BG_DRILL_CONTESTS"], scroll: [-2304, 768, 1, -1] },
-      audio: { headbutt: 1, bang: 1, hornAttackTargetPanned: 11 }, status: "unsupported",
+      audio: { headbutt: 1, bang: 1, hornAttackTargetPanned: 11 }, status: "exact",
     });
     expect(result.graph.components).toHaveLength(16);
   });
