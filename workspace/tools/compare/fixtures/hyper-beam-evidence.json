@@ -3,21 +3,21 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_HYPER_BEAM",
   "moveId": 63,
-  "status": "unsupported-evidence",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "evidenceScope": {
     "sourceAudit": true,
     "completePointerBody": true,
     "fullDenseRowsRetained": true,
     "twiceFreshByteIdentical": true,
     "normalizedMaps": true,
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "assetBundleAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
-    "framebufferCompared": false,
-    "coveragePromotion": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "assetBundleAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "framebufferCompared": true,
+    "coveragePromotion": true,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false
   },
@@ -44,9 +44,9 @@
       "player-back": 280,
       "opponent-front": 280
     },
-    "productionFramebufferCompared": false,
+    "productionFramebufferCompared": true,
     "latchVerdict": "MOVE_HYPER_BEAM independently proves whole OAM, affine matrices, and faded palette as the preceding source buffers on 279/279 comparable rows per orientation; plain ORBS OAM/callback/motion, both ShakeMon2 invocations, ShakeMon, both target palette ramps, and palette writes are retained in move-owned maps",
-    "backgroundVerdict": "Both F_PAL_BG simple_palette_blend ramps, ORBS flash, target forward/reverse BlendBattleAnimPal ramps, unchanged BLD registers/BG VRAM, and cleanup are retained without production credit"
+    "backgroundVerdict": "Both F_PAL_BG simple_palette_blend ramps, ORBS flash, target forward/reverse BlendBattleAnimPal ramps, unchanged BLD registers/BG VRAM, and cleanup pass complete bilateral actual-core comparison"
   },
   "orientations": {
     "player-back": {
@@ -6608,5 +6608,5 @@
     "inferredSharedTaskCredit": false,
     "inferredSiblingCredit": false
   },
-  "acceptanceVerdict": "Evidence only: MOVE_HYPER_BEAM and hyper-beam-orbs-blackout remain unsupported/unfulfilled; no reducer, assets, seam, compositor, framebuffer acceptance, promotion, component/shared-task credit, or sibling credit."
+  "acceptanceVerdict": "Exact: MOVE_HYPER_BEAM and hyper-beam-orbs-blackout alone pass complete bilateral actual-core comparison twice; no inferred sibling credit."
 }

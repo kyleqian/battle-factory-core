@@ -26,7 +26,7 @@ function validateStage(path: string) {
 describe("MOVE_HYPER_BEAM source/classification checkpoint", () => {
   it("byte-pins every pointer-owned source block and the complete generated graph", () => {
     expect(audit()).toMatchObject({
-      move: "MOVE_HYPER_BEAM", moveId: 63, status: "unsupported",
+      move: "MOVE_HYPER_BEAM", moveId: 63, status: "exact",
       sourceBounds: {
         start: "0x82d4d70", endExclusive: "0x82d4eb2", byteLength: 322,
         romSha256: "2f6089be2a4da2aaf1f0168a1f38715deb712e214070e2ce8260d1b7123f60ce",
@@ -93,12 +93,12 @@ describe("MOVE_HYPER_BEAM source/classification checkpoint", () => {
   it("keeps the exact shared controls independent and Thunderbolt unsupported", () => {
     const componentGraph = JSON.parse(readFileSync("src/data/gen/battle-animation-components.json", "utf8"));
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries).toHaveLength(225);
-    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_HYPER_BEAM")).toBeUndefined();
+    expect(coverage.entries).toHaveLength(226);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_HYPER_BEAM")).toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_AURORA_BEAM")).toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_PSYBEAM")).toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_THUNDERBOLT")).toBeUndefined();
-    expect(coverage.componentTracks.find((entry: { id: string }) => entry.id === "hyper-beam-orbs-blackout")).toMatchObject({ representatives: ["MOVE_HYPER_BEAM"], fulfilled: false });
+    expect(coverage.componentTracks.find((entry: { id: string }) => entry.id === "hyper-beam-orbs-blackout")).toMatchObject({ representatives: ["MOVE_HYPER_BEAM"], fulfilled: true });
     for (const move of ["MOVE_AURORA_BEAM", "MOVE_PSYBEAM"]) {
       expect(componentGraph.moves.find((entry: { move: string }) => entry.move === move)?.componentIds).toContain("soundTask:SoundTask_LoopSEAdjustPanning");
     }

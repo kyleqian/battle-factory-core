@@ -118,7 +118,7 @@ if (requiredTokens.some((token) => !body.includes(token))
   || JSON.stringify(carriers.map((entry: { index: number }) => entry.index)) !== JSON.stringify([531, 805, 826, 836])
   || first?.index !== 531 || first?.label !== "FRONTIER_MON_AERODACTYL_2" || first?.species !== "SPECIES_AERODACTYL"
   || first?.itemName !== "BATTLE_FRONTIER_ITEM_CHOICE_BAND" || first?.nature !== "NATURE_ADAMANT"
-  || status !== "unsupported" || track?.fulfilled !== false
+  || status !== "exact" || track?.fulfilled !== true
   || JSON.stringify(track?.components) !== JSON.stringify(expectedComponents)) {
   throw new Error("MOVE_HYPER_BEAM source/carrier/component/status contract changed");
 }

@@ -2,6 +2,41 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_HYPER_BEAM",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 AERODACTYL versus ONIX Battle Scene ON windows retain every Move_HYPER_BEAM row through first inactive cleanup: player-back frames 79-358 and opponent-front frames 83-362, 280/280 rows per orientation, twice-fresh byte-identical",
+    "the pure source-relative reducer and typed live seam reproduce the complete byte-pinned 322-byte body: 26 groups and 52 three-Random2 orb lifecycles, stable allocator and painter order, neutral matrices, blackout/restore, orb flash, attacker and target shakes, target palette ramps, audio/resources, waits, and cleanup",
+    "the source-derived ORBS asset bundle and actual-core compositor consume live species, sides, geometry, allocator slots, order, and presentation-only RNG-derived orb fields without evidence-carrier or absolute-frame lookup",
+    "two deterministic production comparator passes each reach player-back 280/280 plus opponent-front 280/280 zero-residual framebuffer rows, 560/560 total with peak zero; an altered GOLDUCK/GRAVELER reversed-side species/geometry/allocator/order control remains material",
+    "MOVE_HYPER_BEAM alone and hyper-beam-orbs-blackout alone are accepted; MOVE_AURORA_BEAM and MOVE_PSYBEAM remain independently exact shared-task controls while MOVE_THUNDERBOLT remains distinct and unsupported"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-hyper-beam-player-aerodactyl-opponent-onix.json",
+    "tools/battle-lab/mechanic-hyper-beam-opponent-aerodactyl-player-onix.json",
+    "tools/compare/hyperBeamSourceAudit.ts",
+    "tools/compare/hyperBeamProbe.py",
+    "tools/compare/hyperBeamEvidence.ts",
+    "tools/compare/fixtures/hyper-beam-evidence.json",
+    "tools/compare/evidence/hyper-beam-player-dense-state.json.gz",
+    "tools/compare/evidence/hyper-beam-opponent-dense-state.json.gz",
+    "tools/compare/evidence/hyper-beam-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/hyper-beam-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/hyper-beam-changemap-player.json",
+    "tools/compare/evidence/hyper-beam-changemap-opponent.json",
+    "tools/compare/extractHyperBeamAssets.ts",
+    "tools/compare/hyperBeamFramebuffer.ts",
+    "src/animation/assets/hyper-beam.json",
+    "src/animation/hyperBeam.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/hyperBeamSourceCheckpoint.test.ts",
+    "tests/animation/hyperBeamEvidenceCheckpoint.test.ts",
+    "tests/animation/hyperBeam.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_AURORA_BEAM",
    "status": "exact",
    "covered": [
@@ -8001,7 +8036,7 @@
     "visualCommand:simple_palette_blend"
    ],
    "representatives": ["MOVE_HYPER_BEAM"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/battle-lab/mechanic-hyper-beam-player-aerodactyl-opponent-onix.json",
     "tools/battle-lab/mechanic-hyper-beam-opponent-aerodactyl-player-onix.json",
@@ -8015,10 +8050,18 @@
     "tools/compare/evidence/hyper-beam-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/hyper-beam-changemap-player.json",
     "tools/compare/evidence/hyper-beam-changemap-opponent.json",
+    "tools/compare/extractHyperBeamAssets.ts",
+    "tools/compare/hyperBeamFramebuffer.ts",
+    "src/animation/assets/hyper-beam.json",
+    "src/animation/hyperBeam.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
     "tests/animation/hyperBeamSourceCheckpoint.test.ts",
-    "tests/animation/hyperBeamEvidenceCheckpoint.test.ts"
+    "tests/animation/hyperBeamEvidenceCheckpoint.test.ts",
+    "tests/animation/hyperBeam.test.ts"
    ],
-   "goal": "MOVE_HYPER_BEAM must independently retain its complete legal bilateral Scene-ON body through first inactive cleanup, including its 322-byte pointer-owned script interval, two black F_PAL_BG ramps, attacker ShakeMon2 and Y-shake, red/black ORBS palette flash, all 26 two-orb HyperBeamOrbs groups, target ShakeMon2, both target BlendBattleAnimPal ramps, 1/15/0/5 loop audio, ORBS resource lifecycle, callback destruction, and cleanup. Source/staging alone grants no move, component, shared-task, or sibling credit; require complete twice-fresh dense state/raw-RGB and actual-core framebuffer acceptance before fulfilling this track."
+   "goal": "FULFILLED by MOVE_HYPER_BEAM only: the complete legal bilateral Scene-ON body through first inactive cleanup passes twice at 560/560 actual-core rows with zero residual pixels. The source-derived reducer, ORBS asset, typed seam, and compositor preserve all nine components, 26 groups, 52 orb lifecycles, 156 presentation-only RNG draws, stable allocation/order, palette and shake schedules, audio/resources, and cleanup from live species/sides/geometry/order. No sibling receives inferred credit."
   }
  ],
  "variantAudits": {
