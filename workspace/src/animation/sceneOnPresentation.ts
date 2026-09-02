@@ -107,6 +107,12 @@ import {
   type RazorWindEffect,
 } from "./razorWind.ts";
 import {
+  hornDrillAtAge,
+  type HornDrillGeometry,
+  type HornDrillProfile,
+  type HornDrillState,
+} from "./hornDrill.ts";
+import {
   smokescreenEffectAtAge,
   type SmokescreenEffect,
 } from "./smokescreen.ts";
@@ -2358,6 +2364,16 @@ export interface SceneOnRazorWindConfig {
   readonly animationProfile: Readonly<RazorWindAnimationProfile>;
 }
 
+/** Narrow live animation-only seam for Horn Drill's single source body. */
+export interface SceneOnHornDrillConfig {
+  readonly move: "HORN_DRILL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationGeometry: Readonly<HornDrillGeometry>;
+  readonly animationProfile: Readonly<HornDrillProfile>;
+}
+
 export interface SceneOnSmokescreenConfig {
   readonly move: "SMOKESCREEN";
   readonly attacker: SceneOnPresentationBattler;
@@ -3598,6 +3614,7 @@ export type SceneOnMoveConfig =
   | SceneOnPinMissileConfig
   | SceneOnSonicBoomConfig
   | SceneOnRazorWindConfig
+  | SceneOnHornDrillConfig
   | SceneOnSmokescreenConfig
   | SceneOnOctazookaConfig
   | SceneOnSpikesConfig
@@ -3761,6 +3778,8 @@ export type SceneOnSwiftPresentationState =
   SceneOnMovePresentationState<SceneOnSwiftConfig>;
 export type SceneOnRazorWindPresentationState =
   SceneOnMovePresentationState<SceneOnRazorWindConfig>;
+export type SceneOnHornDrillPresentationState =
+  SceneOnMovePresentationState<SceneOnHornDrillConfig>;
 export type SceneOnIceBeamPresentationState =
   SceneOnMovePresentationState<SceneOnIceBeamConfig>;
 export type SceneOnDizzyPunchPresentationState =
@@ -4147,6 +4166,11 @@ export interface SceneOnRazorWindView extends RazorWindEffect {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly targetRestOffset: Readonly<{ x2: number; y2: number }>;
+}
+
+export interface SceneOnHornDrillView extends HornDrillState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnBodySlamView extends BodySlamState {
@@ -7428,6 +7452,25 @@ export function sceneOnRazorWindView(
     attacker: config.attacker,
     target: config.target,
     targetRestOffset: config.targetRestOffset,
+  };
+}
+
+/** `age=0` is Move_HORN_DRILL's IMPACT resource-load source row. */
+export function sceneOnHornDrillView(
+  state: SceneOnMovePresentationState<SceneOnHornDrillConfig>,
+): SceneOnHornDrillView {
+  if (state.config.move !== "HORN_DRILL") {
+    throw new Error(`expected HORN_DRILL presentation, got ${state.config.move}`);
+  }
+  return {
+    ...hornDrillAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.animationGeometry,
+      state.config.animationProfile,
+    ),
+    attacker: state.config.attacker,
+    target: state.config.target,
   };
 }
 

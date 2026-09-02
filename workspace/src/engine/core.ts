@@ -170,6 +170,7 @@ import {
   type SceneOnRockBlastConfig,
   type SceneOnSwiftConfig,
   type SceneOnSandTombConfig,
+  type SceneOnHornDrillConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -217,6 +218,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "SWIFT") {
     const swiftPresentation = presentation as SceneOnMovePresentationState<SceneOnSwiftConfig>;
     renderSceneOnMovePresentation(framebuffer, swiftPresentation);
+    return;
+  }
+  if (presentation.config.move === "HORN_DRILL") {
+    const hornDrillPresentation = presentation as SceneOnMovePresentationState<SceneOnHornDrillConfig>;
+    renderSceneOnMovePresentation(framebuffer, hornDrillPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

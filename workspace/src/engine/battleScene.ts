@@ -533,6 +533,7 @@ import poisonStingAsset from "../animation/assets/poisonSting.json" with { type:
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
 import razorWindAsset from "../animation/assets/razor-wind.json" with { type: "json" };
+import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import hailAsset from "../animation/assets/hail.json" with { type: "json" };
@@ -953,6 +954,7 @@ import {
   sceneOnPinMissileView,
   sceneOnSonicBoomView,
   sceneOnRazorWindView,
+  sceneOnHornDrillView,
   sceneOnSmokescreenView,
   sceneOnMudShotView,
   sceneOnHydroPumpView,
@@ -1174,6 +1176,7 @@ import {
   type SceneOnPinMissileConfig,
   type SceneOnSonicBoomConfig,
   type SceneOnRazorWindConfig,
+  type SceneOnHornDrillConfig,
   type SceneOnSmokescreenConfig,
   type SceneOnMudShotConfig,
   type SceneOnHydroPumpConfig,
@@ -1723,6 +1726,10 @@ const razorWindArt = razorWindAsset as {
   gust: { tileset: Tileset; palette: RgbColor[] };
   airWave2: { tileset: Tileset; palette: RgbColor[] };
   impact: { tileset: Tileset; palette: RgbColor[] };
+};
+const hornDrillArt = hornDrillAsset as {
+  drill: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
+  horn: { tileset: Tileset; palette: RgbColor[] };
 };
 const smokescreenArt = smokescreenAsset as {
   blackBall: { tileset: Tileset; palette: RgbColor[] };
@@ -4012,6 +4019,35 @@ export function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, s
       const c = subpalettes[entry.palette]?.[idx];
       if (!c) continue;
       setPixel(fb, screenX, screenY, c);
+    }
+  }
+}
+
+/** Text BG raster with the GBA's wrapping 9-bit scroll coordinates. */
+function drawScrolledTileBg(
+  fb: Uint8Array,
+  tileset: Tileset,
+  tilemap: Tilemap,
+  subpalettes: RgbColor[][],
+  hofs: number,
+  vofs: number,
+): void {
+  const widthPx = tilemap.width * 8;
+  const heightPx = tilemap.height * 8;
+  for (let screenY = 0; screenY < 160; screenY += 1) {
+    const sourceY = ((screenY + vofs) % heightPx + heightPx) % heightPx;
+    for (let screenX = 0; screenX < 240; screenX += 1) {
+      const sourceX = ((screenX + hofs) % widthPx + widthPx) % widthPx;
+      const entry = tilemap.entries[
+        Math.floor(sourceY / 8) * tilemap.width + Math.floor(sourceX / 8)
+      ];
+      if (!entry) continue;
+      const tile = tileset.tiles[entry.tile];
+      if (!tile) continue;
+      const px = entry.hFlip ? 7 - sourceX % 8 : sourceX % 8;
+      const py = entry.vFlip ? 7 - sourceY % 8 : sourceY % 8;
+      const color = subpalettes[entry.palette]?.[tile[py * 8 + px]!];
+      if (color) setPixel(fb, screenX, screenY, color);
     }
   }
 }
@@ -22795,6 +22831,149 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MAGNETON used" : "Foe MAGNETON used",
       "SONICBOOM!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HORN_DRILL") {
+    const hornState = state as SceneOnMovePresentationState<SceneOnHornDrillConfig>;
+    const view = sceneOnHornDrillView(hornState);
+    // Horn Drill's complete OAM, matrices, palette, and BG scroll are all
+    // predecessor transfers in its own bilateral retained maps.
+    const displayed = sceneOnHornDrillView({
+      ...hornState,
+      age: Math.max(0, hornState.age - 1),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("HORN_DRILL presentation requires opposite battler sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`HORN_DRILL missing ${battler.species} battler art`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const darken = (palette: readonly RgbColor[]): RgbColor[] => palette.slice();
+    const darkenBanks = (banks: readonly (readonly RgbColor[])[]): RgbColor[][] =>
+      banks.map(darken);
+    if (displayed.background.active) {
+      drawScrolledTileBg(
+        fb,
+        hornDrillArt.drill.tileset,
+        hornDrillArt.drill.tilemap,
+        [darken(hornDrillArt.drill.palette)],
+        displayed.background.hofs,
+        displayed.background.vofs,
+      );
+    } else {
+      drawTileBg(
+        fb, battleBg.static.tileset, battleBg.static.tilemap,
+        darkenBanks(battleBg.palette),
+      );
+    }
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const entries: Array<{
+      subpriority: number; slot: number; order: number; draw: () => void;
+    }> = [];
+    entries.push({
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      slot: view.target.geometry.side === "player" ? 6 : 8,
+      order: -2,
+      draw: () => drawSpriteSheet(
+        fb, tilesFor(targetArt, view.target.geometry.side), darken(targetArt.palette),
+        view.target.geometry.spriteCorner.x
+          + hornState.config.animationGeometry.targetRestOffset.x2
+          + displayed.targetOffset.x2,
+        view.target.geometry.spriteCorner.y
+          + hornState.config.animationGeometry.targetRestOffset.y2
+          + displayed.targetOffset.y2,
+      ),
+    });
+    entries.push({
+      subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      slot: view.attacker.geometry.side === "player" ? 6 : 8,
+      order: -3,
+      draw: () => drawSpriteSheetAffineRotate(
+        fb, tilesFor(attackerArt, view.attacker.geometry.side), darken(attackerArt.palette),
+        view.attacker.geometry.animationCenter.x
+          + hornState.config.animationGeometry.attackerRestOffset.x2
+          + displayed.attackerOffset.x2,
+        view.attacker.geometry.animationCenter.y
+          + hornState.config.animationGeometry.attackerRestOffset.y2
+          + displayed.attackerOffset.y2,
+        displayed.attackerMatrix[0], displayed.attackerMatrix[1],
+        displayed.attackerMatrix[2], displayed.attackerMatrix[3],
+        undefined, false,
+      ),
+    });
+    if (displayed.horn) entries.push({
+      subpriority: hornState.config.animationProfile.effectSubpriority - 1,
+      slot: displayed.horn.slot,
+      order: displayed.horn.slot,
+      draw: () => drawSpriteSheetFlipped(
+        fb, hornDrillArt.horn.tileset, darken(hornDrillArt.horn.palette),
+        displayed.horn!.x - 16, displayed.horn!.y - 16,
+        displayed.horn!.hFlip, displayed.horn!.vFlip,
+      ),
+    });
+    for (const impact of displayed.impacts) {
+      if (impact.invisible) continue;
+      entries.push({
+        subpriority: hornState.config.animationProfile.effectSubpriority,
+        slot: impact.slot,
+        order: hornState.config.animationProfile.spriteOrderSeed.indexOf(impact.slot),
+        draw: () => drawSpriteSheetAffineRotate(
+          fb, battleAnimHitsplat.tileset, darken(battleAnimHitsplat.palette),
+          impact.x, impact.y,
+          impact.matrix[0], impact.matrix[1], impact.matrix[2], impact.matrix[3],
+          undefined, false,
+        ),
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = hornState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    // Task_FadeToBg selects every field/background, battler, and healthbox
+    // palette but leaves the message-window palettes outside that selection.
+    if (view.fadeY > 0) {
+      for (let y = 0; y < 112; y += 1) {
+        for (let x = 0; x < 240; x += 1) {
+          const offset = (y * 240 + x) * 4;
+          fb[offset] = blendComponentToward(fb[offset]!, 0, view.fadeY);
+          fb[offset + 1] = blendComponentToward(fb[offset + 1]!, 0, view.fadeY);
+          fb[offset + 2] = blendComponentToward(fb[offset + 2]!, 0, view.fadeY);
+        }
+      }
+    }
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "HORN DRILL!",
       99,
     );
     return;

@@ -1,3 +1,11 @@
+# MOVE_HORN_DRILL reusable production checkpoint — unsupported (2026-09-02 worker)
+
+- **State:** Level 50 remains **223/276 exact, 0 partial / 0 staged, 53 unsupported**. MOVE_HORN_DRILL remains absent from `entries`; `horn-drill-bg-horn-shakes` remains unfulfilled and grants no component or sibling credit.
+- **Did:** Added one pure source-relative Horn Drill reducer, deterministic drill-BG/horn source bundle, narrow typed live Scene-ON seam, generic `core.ts -> renderSceneOnMovePresentation` compositor, strict actual-core comparator, and altered GOLDUCK/GRAVELER species/side/geometry/allocator/matrix/order control. No carrier, fixture/hash/framebuffer lookup, absolute tick, coordinate/RGB fit, stage gate, gameplay, RNG, outcome, controller, turn, round, or facility ownership entered production.
+- **Verified:** Reducer/component truth is exact on **193/193 player-back + 192/192 opponent-front** retained rows. Two deterministic actual-core passes agree but fail promotion: player **85/193** zero rows, **1,829,747** residual pixels, peak **26,880**; opponent **85/192**, **1,845,577**, peak **26,880**. Residuals are bounded to palette-fade transition and active drill-BG composition; the altered live control routes and changes the framebuffer.
+- **Next:** Keep Horn Drill unsupported. Correct only source-derived palette-fade selection/cadence and BG text-map/scroll/painter composition, then require two **385/385** zero-residual passes before promoting MOVE_HORN_DRILL alone.
+- **Notes:** `ANIMATION_LATCHES.md`, animation boundaries/barriers, and all gameplay-owned state are unchanged. Checks/commit are recorded in the worker final report.
+
 # Animation supervisor verification — Horn Drill dense evidence merged (2026-09-02 supervisor)
 
 - **State:** Level 50 remains **223/276 exact, 0 partial / 0 staged, 53 unsupported**. MOVE_HORN_DRILL remains unsupported and `horn-drill-bg-horn-shakes` remains unfulfilled; the evidence checkpoint grants no sibling or component credit.

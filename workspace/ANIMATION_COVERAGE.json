@@ -7862,10 +7862,18 @@
     "tools/compare/evidence/horn-drill-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/horn-drill-changemap-player.json",
     "tools/compare/evidence/horn-drill-changemap-opponent.json",
+    "tools/compare/extractHornDrillAssets.ts",
+    "tools/compare/hornDrillFramebuffer.ts",
+    "src/animation/assets/horn-drill.json",
+    "src/animation/hornDrill.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
     "tests/animation/hornDrillSourceCheckpoint.test.ts",
-    "tests/animation/hornDrillEvidenceCheckpoint.test.ts"
+    "tests/animation/hornDrillEvidenceCheckpoint.test.ts",
+    "tests/animation/hornDrill.test.ts"
    ],
-   "goal": "UNFULFILLED: MOVE_HORN_DRILL remains unsupported. Two fresh byte-identical complete dense Scene-ON runs per orientation retain player-back frames 213..405 (193 rows) and opponent-front 214..405 (192 rows), chronological raw RGB, full scheduler/OAM/matrix/palette/tag/order/BG-VRAM/tilemap/scroll/register/audio/RNG/party/battler state, normalized maps, and first inactive cleanup. Horn Drill independently resolves both its (2,0,40,1) attacker and (10,0,40,1) target ShakeMonInPlace invocations at RAM+1 bilaterally; whole OAM/matrices/faded palette are RAM+1, and its own drill BG loads at age 26, scrolls source ages 26..171 with hardware +1, restores at 172, and clears hardware at 173. Promotion still requires a source-relative reducer, narrow seam, generic actual-core compositor, altered live control, and twice-run zero-residual framebuffer acceptance. No sibling/component credit is inferred."
+   "goal": "UNFULFILLED production checkpoint: MOVE_HORN_DRILL remains unsupported. The source-relative reducer, deterministic drill/horn assets, narrow typed live seam, generic core.ts compositor, strict actual-core comparator, and altered GOLDUCK/GRAVELER geometry/allocator/matrix/order control are implemented without gameplay ownership or lookup/fitting gates. Every retained source/component row is exact (193/193 player-back and 192/192 opponent-front), but each of two deterministic production passes reaches only 85/193 player and 85/192 opponent zero-residual framebuffer rows (1,829,747 and 1,845,577 residual pixels; peak 26,880), concentrated in palette-fade transition and active drill-BG composition. The required 385/385 zero-residual gate fails, so the track stays unfulfilled and no move, component, or sibling credit is granted."
   }
  ],
  "variantAudits": {
