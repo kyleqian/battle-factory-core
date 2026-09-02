@@ -63,6 +63,9 @@ def main() -> None:
     def raw(address: int, size: int) -> str:
         return bytes(u8(address + offset) for offset in range(size)).hex()
 
+    def digest(address: int, size: int) -> str:
+        return hashlib.sha256(bytes(u8(address + offset) for offset in range(size))).hexdigest()
+
     def ident(address: int) -> dict:
         return {"address": address, "symbol": by_address.get(address & ~1)}
 
@@ -120,6 +123,9 @@ def main() -> None:
             "battlers": snapshot["battlers"], "parties": snapshot["parties"], "engine": snapshot["engine"],
             "immutableState": {key: snapshot[key] for key in ("rngValue", "battleOutcome", "weather", "weatherTurns", "sideStatuses", "sideConditions")},
             "animationRng": u32(names["gRng2Value"]), "battleBg": {name: s16(names[name]) for name in bg_names},
+            "bgVram": {"allSha256": digest(0x06000000, 0x10000),
+                       "charBlockSha256": [digest(0x06000000 + i * 0x4000, 0x4000) for i in range(4)],
+                       "screenBlockSha256": [digest(0x06000000 + i * 0x800, 0x800) for i in range(32)]},
             "softwareOam": [raw(software_oam + i * 8, 8) for i in range(128)], "hardwareOam": [raw(0x07000000 + i * 8, 8) for i in range(128)],
             "softwareMatrices": [[s16(matrices + i * 8 + o) for o in (0, 2, 4, 6)] for i in range(32)],
             "hardwareMatrices": [[s16(0x07000006 + i * 0x20 + o) for o in (0, 8, 16, 24)] for i in range(32)],
@@ -139,7 +145,7 @@ def main() -> None:
         snapshot = lab.snapshot()
         script = u32(pointer)
         if not started:
-            if snapshot["engine"].get("currentMove") != MOVE or not u8(active) or script != start:
+            if not u8(active) or not start <= script < end:
                 return
             started = True
         elif not REPEATED_BODIES and not u8(active):
@@ -205,7 +211,8 @@ def main() -> None:
                 rgb_path.unlink()
         done = True
     if not rows or not done or rows[-1]["animScriptActive"]:
-        raise RuntimeError(f"complete {MOVE_NAME} source window not observed: rows={len(rows)}, frame={frame}, ptr={hex(u32(pointer))}")
+        final_snapshot = lab.snapshot()
+        raise RuntimeError(f"complete {MOVE_NAME} source window not observed: rows={len(rows)}, frame={frame}, ptr={hex(u32(pointer))}, active={u8(active)}, currentMove={final_snapshot['engine'].get('currentMove')}")
     topology = {
         "tasks": sorted({task["func"]["symbol"] for item in rows for task in item["tasks"] if task["func"]["symbol"]}),
         "templates": sorted({sprite["template"]["symbol"] for item in rows for sprite in item["sprites"] if sprite["template"]["symbol"]}),

@@ -1,3 +1,10 @@
+# MOVE_HORN_DRILL complete bilateral dense-evidence checkpoint — unsupported (2026-09-02 worker)
+
+- **State:** Level 50 remains **223/276 exact, 0 partial / 0 staged, 53 unsupported**. MOVE_HORN_DRILL remains absent from `entries`; `horn-drill-bg-horn-shakes` remains unfulfilled and grants no component or sibling credit.
+- **Evidence:** Two fresh byte-identical Scene-ON runs per orientation retain every pointer-owned row through first inactive cleanup: player-back frames **213..405 (193 rows)**, dense SHA `97c65963…`, raw RGB `0e3eb5a7…`; opponent-front **214..405 (192 rows)**, dense `4d2c5441…`, raw RGB `f0501133…`. The strict hermetic verifier replays full task/sprite/order/OAM/matrix/palette/tag/BG-VRAM+tilemap/scroll/register/audio/RNG/party/battler state and both normalized maps.
+- **Measured:** Three BowMon lives, one horn, 11 impacts, two long shakes, continuous sliding BG, 13 source audio dispatches, resources, and cleanup are pinned. Whole OAM/matrices/faded palette are RAM+1 on **192/192 player** and **191/191 opponent** rows. Both Horn Drill shake invocations—attacker `(2,0,40,1)` and target `(10,0,40,1)`—independently fit RAM+1 bilaterally. Drill BG loads at age 26, source scrolls ages 26..171, hardware follows +1, source restores at 172, and hardware clears at 173; no Cosmic Power schedule was inherited.
+- **Scope/remainder:** Evidence only: no reducer, typed seam, asset/compositor, `core.ts`/`battleScene.ts`, framebuffer comparison, boundary/barrier, gameplay/RNG/outcome/controller/round/facility ownership, or promotion changed. Exact still requires generic production wiring, an altered live control, and twice-run **385/385 zero-residual** framebuffer acceptance.
+
 # Animation supervisor verification — Horn Drill source checkpoint merged (2026-09-01 supervisor)
 
 - **State:** Level 50 remains **223/276 exact, 0 partial / 0 staged, 53 unsupported**. MOVE_HORN_DRILL remains unsupported; `horn-drill-bg-horn-shakes` is a dedicated unfulfilled track and grants no sibling or component credit.
