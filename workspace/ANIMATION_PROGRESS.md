@@ -1,3 +1,12 @@
+# Animation supervisor verification — Thunderbolt source/staging checkpoint merged (2026-09-02 supervisor)
+
+- **State:** Level 50 remains **226/276 exact**, **0 partial / 0 staged**, and **50 unsupported**. MOVE_THUNDERBOLT remains absent from `entries`; `spark-2-electricity` remains unchanged and unfulfilled, with no component, latch, track, or sibling credit.
+- **Merged:** Independently audited and fast-forwarded worker commits `081c2caf4` and `8b6983a62`; supervisor repair `3ee8e5350` correctly distinguishes the exclusive 438-byte `Move_THUNDERBOLT` root from shared 139-byte `ElectricityEffect`. The exact nine-component graph, all **68** Level-50 plus **8** Open-only carriers, and lowest legal set **267 DELCATTY_2** are source/hash pinned.
+- **Verified:** Both complete transient-free DELCATTY/SHUCKLE stages validate and replay live for **934** Scene-ON frames. Frame **112** reports `currentMove: 85` and a visible Thunderbolt; the player stage spends PP `[1,0,0,0]` and opponent stage `[0,0,1,0]`. Focused source/stage, Spark/Thunder Wave control, boundary, and frontier checks pass **5 files / 28 tests**; coverage/audit and diff/scope review are green.
+- **Post-merge gates:** `npm test` passes **1,220 files / 10,844 tests** with 44 files / 223 tests skipped in **581.15s**; `npm run build` completes the full typecheck/Vite path and Vite confirms **752 modules**. No production reducer, asset, seam, compositor, latch row, boundary/barrier, gameplay owner, or main-program document changed.
+- **Next:** Capture twice-fresh complete dense Thunderbolt source-to-first-inactive-cleanup maps in both orientations; measure its own per-mechanism OAM/matrix/palette/task/audio/resource contracts without inheriting Spark or Thunder Wave evidence, and stop before production implementation unless that evidence checkpoint is complete.
+- **Notes:** The freshness helper retained its known Linux/BSD `date -j` false-negative; the v5 Scene-ON service was directly reachable and never restarted. Papercut: worker plus supervisor full suites spent roughly 20 minutes in quiet Vitest execution.
+
 # MOVE_THUNDERBOLT source/classification and legal bilateral Scene-ON staging checkpoint — unsupported (2026-09-02 worker)
 
 - **State:** Level 50 remains **226/276 exact**, **0 partial / 0 staged**, and **50 unsupported**. MOVE_THUNDERBOLT remains absent from `entries`; `spark-2-electricity` is unchanged and unfulfilled, so no track, component, latch, or sibling credit transfers.
