@@ -2,6 +2,41 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_AURORA_BEAM",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-219 SEADRA versus ONIX Battle Scene ON windows retain every Move_AURORA_BEAM row through first inactive cleanup: player-back frames 215-430 and opponent-front frames 216-431, 216/216 rows per orientation, twice-fresh byte-identical",
+    "the pure source-relative reducer and typed live seam cover the complete 212-byte source body, BG_AURORA load/restore and hardware fade cadence, ten four-ring groups, arg-7 affine/cell release, 43 palette rotations, both target ShakeMon2 schedules, audio/resources, and cleanup while preserving all 432/432 retained component rows",
+    "byte-reproducible source extraction retains BG_AURORA text art and RAINBOW_RINGS OBJ art; the generic actual-core compositor consumes live species, sides, geometry, allocator slots/matrices/order, field chrome, measured predecessor OAM/matrix/palette transfer, hardware BG3/backdrop-only brightness, opaque BG index zero, and post-BuildOam ShakeMon2 display cadence",
+    "two independent deterministic production comparator passes each reach player-back 216/216 plus opponent-front 216/216 zero-residual framebuffer rows, 432/432 total with peak zero; an altered GOLDUCK/GRAVELER reversed-side species/geometry/allocator/matrix/order control remains material",
+    "MOVE_AURORA_BEAM alone and aurora-beam-rainbow-rings-bg alone are accepted; no loop-sound sibling or other ShakeMon2/fade/ring user receives inferred credit, and gameplay damage, RNG, outcome, controller, turn, round, and facility state remain unowned"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-aurora-beam-player-seadra-opponent-onix.json",
+    "tools/battle-lab/mechanic-aurora-beam-opponent-seadra-player-onix.json",
+    "tools/compare/auroraBeamSourceAudit.ts",
+    "tools/compare/auroraBeamProbe.py",
+    "tools/compare/auroraBeamEvidence.ts",
+    "tools/compare/fixtures/aurora-beam-evidence.json",
+    "tools/compare/evidence/aurora-beam-player-dense-state.json.gz",
+    "tools/compare/evidence/aurora-beam-opponent-dense-state.json.gz",
+    "tools/compare/evidence/aurora-beam-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/aurora-beam-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/aurora-beam-changemap-player.json",
+    "tools/compare/evidence/aurora-beam-changemap-opponent.json",
+    "tools/compare/extractAuroraBeamAssets.ts",
+    "tools/compare/auroraBeamFramebuffer.ts",
+    "src/animation/assets/aurora-beam.json",
+    "src/animation/auroraBeam.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/auroraBeamSourceCheckpoint.test.ts",
+    "tests/animation/auroraBeamEvidenceCheckpoint.test.ts",
+    "tests/animation/auroraBeam.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_RAZOR_WIND",
    "status": "exact",
    "covered": [
@@ -7925,14 +7960,32 @@
     "visualCommand:waitbgfadein"
    ],
    "representatives": ["MOVE_AURORA_BEAM"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/battle-lab/mechanic-aurora-beam-player-seadra-opponent-onix.json",
     "tools/battle-lab/mechanic-aurora-beam-opponent-seadra-player-onix.json",
     "tools/compare/auroraBeamSourceAudit.ts",
-    "tests/animation/auroraBeamSourceCheckpoint.test.ts"
+    "tools/compare/auroraBeamProbe.py",
+    "tools/compare/auroraBeamEvidence.ts",
+    "tools/compare/fixtures/aurora-beam-evidence.json",
+    "tools/compare/evidence/aurora-beam-player-dense-state.json.gz",
+    "tools/compare/evidence/aurora-beam-opponent-dense-state.json.gz",
+    "tools/compare/evidence/aurora-beam-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/aurora-beam-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/aurora-beam-changemap-player.json",
+    "tools/compare/evidence/aurora-beam-changemap-opponent.json",
+    "tools/compare/extractAuroraBeamAssets.ts",
+    "tools/compare/auroraBeamFramebuffer.ts",
+    "src/animation/assets/aurora-beam.json",
+    "src/animation/auroraBeam.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/auroraBeamSourceCheckpoint.test.ts",
+    "tests/animation/auroraBeamEvidenceCheckpoint.test.ts",
+    "tests/animation/auroraBeam.test.ts"
    ],
-   "goal": "UNFULFILLED source/classification checkpoint only: retain complete bilateral dense Scene-ON Aurora Beam evidence through inactive cleanup, then implement and prove a source-relative reducer, typed seam, generic compositor, altered live control, and twice-run zero-residual production framebuffer. The source checkpoint grants no MOVE_AURORA_BEAM, shared sound-task, component, or sibling credit."
+   "goal": "FULFILLED by MOVE_AURORA_BEAM only: complete twice-fresh legal player-back 216/216 plus opponent-front 216/216 source/component/reducer/typed-seam/raw-RGB/actual-core rows pass with zero residual pixels on two deterministic comparator passes. The source-derived compositor preserves Aurora's measured predecessor OAM/matrix/palette transfers, BG3/backdrop brightness, opaque BG index zero, and post-BuildOam ShakeMon2 display cadence while consuming typed live species/sides/geometry/allocator/matrices/order. No sibling receives inferred credit."
   }
  ],
  "variantAudits": {

@@ -37,12 +37,12 @@ describe("MOVE_AURORA_BEAM complete bilateral Scene-ON evidence", () => {
     });
   });
 
-  it("retains complete hermetic surfaces without granting production or coverage credit", () => {
+  it("retains the evidence-only receipt while production earns independent exact credit", () => {
     const fixture = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/aurora-beam-evidence.json"), "utf8"));
     expect(fixture.evidenceScope).toMatchObject({ completePointerBody: true, fullDenseRowsRetained: true, twiceFreshByteIdentical: true, normalizedMaps: true, productionAnimationChanged: false, reducerAdded: false, assetBundleAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false, coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8"));
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_AURORA_BEAM")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: any) => track.id === "aurora-beam-rainbow-rings-bg")).toMatchObject({ fulfilled: false, representatives: ["MOVE_AURORA_BEAM"] });
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_AURORA_BEAM")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: any) => track.id === "aurora-beam-rainbow-rings-bg")).toMatchObject({ fulfilled: true, representatives: ["MOVE_AURORA_BEAM"] });
     for (const side of ["player-back", "opponent-front"]) {
       const dense = JSON.parse(gunzipSync(readFileSync(resolve(root, fixture.orientations[side].denseState))).toString("utf8"));
       expect(dense.frames).toHaveLength(216);

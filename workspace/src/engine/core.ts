@@ -171,6 +171,7 @@ import {
   type SceneOnSwiftConfig,
   type SceneOnSandTombConfig,
   type SceneOnHornDrillConfig,
+  type SceneOnAuroraBeamConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -223,6 +224,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "HORN_DRILL") {
     const hornDrillPresentation = presentation as SceneOnMovePresentationState<SceneOnHornDrillConfig>;
     renderSceneOnMovePresentation(framebuffer, hornDrillPresentation);
+    return;
+  }
+  if (presentation.config.move === "AURORA_BEAM") {
+    const auroraPresentation = presentation as SceneOnMovePresentationState<SceneOnAuroraBeamConfig>;
+    renderSceneOnMovePresentation(framebuffer, auroraPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

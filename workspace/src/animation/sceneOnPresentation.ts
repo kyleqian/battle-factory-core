@@ -113,6 +113,12 @@ import {
   type HornDrillState,
 } from "./hornDrill.ts";
 import {
+  auroraBeamAtAge,
+  type AuroraBeamGeometry,
+  type AuroraBeamProfile,
+  type AuroraBeamState,
+} from "./auroraBeam.ts";
+import {
   smokescreenEffectAtAge,
   type SmokescreenEffect,
 } from "./smokescreen.ts";
@@ -2374,6 +2380,16 @@ export interface SceneOnHornDrillConfig {
   readonly animationProfile: Readonly<HornDrillProfile>;
 }
 
+/** Narrow live animation-only seam for Aurora Beam's single source body. */
+export interface SceneOnAuroraBeamConfig {
+  readonly move: "AURORA_BEAM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationGeometry: Readonly<AuroraBeamGeometry>;
+  readonly animationProfile: Readonly<AuroraBeamProfile>;
+}
+
 export interface SceneOnSmokescreenConfig {
   readonly move: "SMOKESCREEN";
   readonly attacker: SceneOnPresentationBattler;
@@ -3615,6 +3631,7 @@ export type SceneOnMoveConfig =
   | SceneOnSonicBoomConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
+  | SceneOnAuroraBeamConfig
   | SceneOnSmokescreenConfig
   | SceneOnOctazookaConfig
   | SceneOnSpikesConfig
@@ -3780,6 +3797,8 @@ export type SceneOnRazorWindPresentationState =
   SceneOnMovePresentationState<SceneOnRazorWindConfig>;
 export type SceneOnHornDrillPresentationState =
   SceneOnMovePresentationState<SceneOnHornDrillConfig>;
+export type SceneOnAuroraBeamPresentationState =
+  SceneOnMovePresentationState<SceneOnAuroraBeamConfig>;
 export type SceneOnIceBeamPresentationState =
   SceneOnMovePresentationState<SceneOnIceBeamConfig>;
 export type SceneOnDizzyPunchPresentationState =
@@ -4169,6 +4188,11 @@ export interface SceneOnRazorWindView extends RazorWindEffect {
 }
 
 export interface SceneOnHornDrillView extends HornDrillState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnAuroraBeamView extends AuroraBeamState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7464,6 +7488,25 @@ export function sceneOnHornDrillView(
   }
   return {
     ...hornDrillAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.animationGeometry,
+      state.config.animationProfile,
+    ),
+    attacker: state.config.attacker,
+    target: state.config.target,
+  };
+}
+
+/** `age=0` is Move_AURORA_BEAM's retained RAINBOW_RINGS load row. */
+export function sceneOnAuroraBeamView(
+  state: SceneOnMovePresentationState<SceneOnAuroraBeamConfig>,
+): SceneOnAuroraBeamView {
+  if (state.config.move !== "AURORA_BEAM") {
+    throw new Error(`expected AURORA_BEAM presentation, got ${state.config.move}`);
+  }
+  return {
+    ...auroraBeamAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.animationGeometry,

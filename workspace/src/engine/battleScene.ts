@@ -534,6 +534,7 @@ import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
 import razorWindAsset from "../animation/assets/razor-wind.json" with { type: "json" };
 import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
+import auroraBeamAsset from "../animation/assets/aurora-beam.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import hailAsset from "../animation/assets/hail.json" with { type: "json" };
@@ -955,6 +956,7 @@ import {
   sceneOnSonicBoomView,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
+  sceneOnAuroraBeamView,
   sceneOnSmokescreenView,
   sceneOnMudShotView,
   sceneOnHydroPumpView,
@@ -1177,6 +1179,7 @@ import {
   type SceneOnSonicBoomConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
+  type SceneOnAuroraBeamConfig,
   type SceneOnSmokescreenConfig,
   type SceneOnMudShotConfig,
   type SceneOnHydroPumpConfig,
@@ -1730,6 +1733,10 @@ const razorWindArt = razorWindAsset as {
 const hornDrillArt = hornDrillAsset as {
   drill: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
   horn: { tileset: Tileset; palette: RgbColor[] };
+};
+const auroraBeamArt = auroraBeamAsset as {
+  background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
+  rings: { tileset: Tileset; palette: RgbColor[] };
 };
 const smokescreenArt = smokescreenAsset as {
   blackBall: { tileset: Tileset; palette: RgbColor[] };
@@ -22831,6 +22838,132 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MAGNETON used" : "Foe MAGNETON used",
       "SONICBOOM!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "AURORA_BEAM") {
+    const auroraState = state as SceneOnMovePresentationState<SceneOnAuroraBeamConfig>;
+    const view = sceneOnAuroraBeamView(auroraState);
+    // Aurora's own complete maps pin ordinary OBJ/matrix/palette transfer to
+    // the preceding source row. Fade registers and BG VRAM are hardware-row
+    // state and therefore remain on the current view.
+    const displayed = sceneOnAuroraBeamView({
+      ...auroraState,
+      age: Math.max(0, auroraState.age - 1),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("AURORA_BEAM presentation requires opposite battler sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`AURORA_BEAM missing ${battler.species} battler art`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const darken = (palette: readonly RgbColor[]): RgbColor[] => palette.map((color) => {
+      const packed = mgbaDarkenColor(
+        color.r | color.g << 8 | color.b << 16,
+        view.fadeY,
+      );
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    });
+    const bg = view.background === "aurora" ? auroraBeamArt.background : battleBg.static;
+    const bgPalettes = view.background === "aurora"
+      ? [darken(auroraBeamArt.background.palette)]
+      : battleBg.palette.map(darken);
+    // BG_AURORA's text-map index zero exposes the backdrop. FadeToBg loads
+    // its first visible green into that hardware backdrop entry; unlike OBJ
+    // index zero it is opaque and must seed the whole field before tiles.
+    if (view.background === "aurora") {
+      const backdrop = darken(auroraBeamArt.background.palette)[1]!;
+      fillFramebuffer(fb, backdrop.r, backdrop.g, backdrop.b);
+    }
+    drawTileBg(fb, bg.tileset, bg.tilemap, bgPalettes);
+
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const entries: Array<{
+      subpriority: number; y: number; slot: number; order: number; draw: () => void;
+    }> = [];
+    entries.push({
+      subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      y: view.attacker.geometry.animationCenter.y,
+      slot: view.attacker.geometry.side === "player" ? 6 : 8,
+      order: -2,
+      draw: () => drawSpriteSheet(
+        fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerArt.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      ),
+    });
+    const targetTaskStarted = view.age >= 55;
+    entries.push({
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      y: view.target.geometry.animationCenter.y,
+      slot: view.target.geometry.side === "player" ? 6 : 8,
+      order: -1,
+      draw: () => drawSpriteSheet(
+        fb, tilesFor(targetArt, view.target.geometry.side), targetArt.palette,
+        view.target.geometry.spriteCorner.x
+          + (targetTaskStarted ? 0 : auroraState.config.animationGeometry.targetRestOffset.x2)
+          + view.displayedTargetOffset.x2,
+        view.target.geometry.spriteCorner.y
+          + (targetTaskStarted ? 0 : auroraState.config.animationGeometry.targetRestOffset.y2)
+          + view.displayedTargetOffset.y2,
+      ),
+    });
+    const ringPalette = [...auroraBeamArt.rings.palette];
+    const rotating = ringPalette.slice(1, 9);
+    for (let index = 0; index < 8; index += 1) {
+      ringPalette[index + 1] = rotating[(index + displayed.ringPaletteRotation) % 8]!;
+    }
+    for (const ring of displayed.rings) {
+      const seeded = auroraState.config.animationProfile.spriteOrderSeed.indexOf(ring.slot);
+      const ringTiles = ring.tileFrame === 0
+        ? subTileset(auroraBeamArt.rings.tileset, 0, 2)
+        : subTileset(auroraBeamArt.rings.tileset, 4, 2);
+      entries.push({
+        subpriority: ring.subpriority,
+        y: ring.y,
+        slot: ring.slot,
+        order: seeded < 0 ? ring.sourceCreationAge : seeded,
+        draw: () => drawSpriteSheetAffineRotate(
+          fb, ringTiles, ringPalette, ring.x, ring.y,
+          ring.matrix[0], ring.matrix[1], ring.matrix[2], ring.matrix[3],
+          undefined, true,
+        ),
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || left.order - right.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = auroraState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "AURORA BEAM!",
       99,
     );
     return;

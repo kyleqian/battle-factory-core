@@ -1,3 +1,11 @@
+# MOVE_AURORA_BEAM exact bilateral production acceptance (2026-09-02 worker)
+
+- **State:** Level 50 advances **224→225/276 exact**, with **0 partial / 0 staged** and **52→51 unsupported**. MOVE_AURORA_BEAM alone promotes and `aurora-beam-rainbow-rings-bg` alone is fulfilled; no sibling receives inferred credit.
+- **Did:** Added one pure source-relative Aurora reducer, byte-reproducible BG/ring art, narrow typed live Scene-ON seam, and generic actual-core compositor. The renderer consumes live species/sides/geometry/allocator/matrices/order and the move's own predecessor OAM/matrix/palette, target ShakeMon2 callback-after-OAM, BG3/backdrop brightness, opaque Aurora backdrop, palette rotation, resource, and cleanup facts. No carrier/species, fixture/evidence/hash/framebuffer lookup, absolute tick, coordinate/RGB fit, gameplay, damage, RNG, outcome, controller, turn, round, or facility gate entered production.
+- **Verified:** Reducer/component truth and actual-core framebuffer equality both pass player-back **216/216** plus opponent-front **216/216** rows. Two independent deterministic passes each return **432/432 zero-residual** rows, total residual **0**, peak **0**; the altered GOLDUCK/GRAVELER reversed-side species/geometry/allocator/matrix/order control remains material.
+- **Checks:** Focused Aurora source/evidence/production/boundary/frontier checks pass **5 files / 19 tests**; coverage reports **225 exact / 51 unsupported**; animation audit, typecheck, and `git diff --check` pass. After correcting three mechanical coverage-count ratchets exposed by the first full run, `npm test` passes **1,216 files / 10,827 tests** with 44 files / 223 tests skipped and `npm run build` passes **750 modules**.
+- **Next:** Supervisor should independently rerun the **432/432** comparator gate and merge this Aurora-only promotion. No animation deferral is open.
+
 # Animation supervisor verification — Aurora Beam dense evidence merged (2026-09-02 supervisor)
 
 - **State:** Level 50 remains **224/276 exact, 0 partial / 0 staged, 52 unsupported**. MOVE_AURORA_BEAM and `aurora-beam-rainbow-rings-bg` remain unsupported/unfulfilled; the evidence checkpoint grants no move, component, shared-task, or sibling credit.

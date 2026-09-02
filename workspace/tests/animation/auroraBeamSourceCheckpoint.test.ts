@@ -23,11 +23,11 @@ function validateStage(path: string) {
   ].join("\n"), oracleDirectory(), resolve(root, path)], { cwd: root, encoding: "utf8" });
 }
 
-describe("MOVE_AURORA_BEAM source/classification checkpoint", () => {
+describe("MOVE_AURORA_BEAM source/classification foundation", () => {
   it("byte-pins the exclusive body and complete source component graph", () => {
     const result = audit();
     expect(result).toMatchObject({
-      move: "MOVE_AURORA_BEAM", moveId: 62, status: "unsupported",
+      move: "MOVE_AURORA_BEAM", moveId: 62, status: "exact",
       sourceBounds: {
         start: "0x82d0804", endExclusive: "0x82d08d8", byteLength: 212,
         romSha256: "b178f9fa4e4b8494ed18eeb008374c90becfb6a3093d44825e1c0f3284f1633c",
@@ -73,8 +73,8 @@ describe("MOVE_AURORA_BEAM source/classification checkpoint", () => {
 
   it("keeps coverage and the dedicated track honest", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries).toHaveLength(224);
-    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_AURORA_BEAM")).toBeUndefined();
-    expect(coverage.componentTracks.find((entry: { id: string }) => entry.id === "aurora-beam-rainbow-rings-bg")).toMatchObject({ representatives: ["MOVE_AURORA_BEAM"], fulfilled: false });
+    expect(coverage.entries).toHaveLength(225);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_AURORA_BEAM")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((entry: { id: string }) => entry.id === "aurora-beam-rainbow-rings-bg")).toMatchObject({ representatives: ["MOVE_AURORA_BEAM"], fulfilled: true });
   });
 });

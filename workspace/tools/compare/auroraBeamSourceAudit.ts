@@ -82,7 +82,7 @@ if ((body.match(/call AuroraBeamCreateRings/g) ?? []).length !== 10
   || move?.id !== 62 || move?.effect !== "EFFECT_ATTACK_DOWN_HIT" || move?.frontierMonCount !== 3
   || first?.index !== 219 || first?.label !== "FRONTIER_MON_SEADRA_1" || first?.species !== "SPECIES_SEADRA"
   || first?.itemName !== "BATTLE_FRONTIER_ITEM_MYSTIC_WATER" || first?.nature !== "NATURE_SASSY"
-  || status !== "unsupported" || track?.fulfilled !== false
+  || status !== "exact" || track?.fulfilled !== true
   || JSON.stringify(track?.components) !== JSON.stringify(expectedComponents)) {
   throw new Error("MOVE_AURORA_BEAM source/carrier/component/status contract changed");
 }
