@@ -1,3 +1,9 @@
+# Animation supervisor verification — Tri Attack dense evidence merged (2026-09-02 supervisor)
+
+- **State:** Level 50 remains **228/276 exact**, **0 partial / 0 staged**, and **48 unsupported**. MOVE_TRI_ATTACK and `shake-target-in-pattern-scary-face` intentionally remain unsupported/unfulfilled; no production, gameplay, barrier, or sibling-credit boundary moved.
+- **Verified:** Audited and fast-forwarded worker commits `f5cc36d1d` / `35e5f41dd`. The strict hermetic verifier was independently run twice with byte-identical output SHA `c1438148066b422af3b5d4363561e15c812fc7da6ca87de73972f0ec9d2e292f`; it replayed player-back **77..360** and opponent-front **81..364**, **284 rows / 248 source rows** each, through inactive cleanup. Retained raw-RGB sequence hashes are `fb703918f565c8e7a615d95ca42d2f9e6223bd1aed43dbd22c1230d539c99ded` / `8aeca5bf6d6b15274a22f3699f0942743eaf964a78ecf9faf2e060ecd4202149`; OAM/matrix/palette latches remain **283/283** with no exceptions in both orientations.
+- **Checks:** Independent focused controls passed **16 files / 66 tests**; `npm run animation:coverage` and `npm run animation:audit` passed. After merge, canonical `npm test` passed **1,227 files / 10,865 tests** with **44 files / 223 tests skipped**, and `npm run build` passed (**756 modules**). Next bounded action is a source-relative Tri Attack production implementation from this retained evidence.
+
 # MOVE_TRI_ATTACK complete bilateral dense evidence checkpoint — unsupported (2026-09-02 worker)
 
 - **State:** Level 50 remains **228/276 exact**, **0 partial / 0 staged**, and **48 unsupported**. MOVE_TRI_ATTACK remains absent from exact `entries`; `shake-target-in-pattern-scary-face` remains unfulfilled. Scary Face, Glare, and Thunder remain independent exact controls.
