@@ -15,7 +15,7 @@ const sides = ["player-back", "opponent-front"] as const;
 describe("MOVE_ZAP_CANNON complete bilateral Scene-ON evidence", () => {
   it("pins two fresh byte-identical dense windows, raw RGB, and normalized maps", () => {
     const result = verify();
-    expect(result).toMatchObject({ schema: "zap-cannon-bilateral-evidence/v1", move: "MOVE_ZAP_CANNON", status: "unsupported-evidence", coverageCredit: false, boundary: { moveLedgerEntry: false, trackFulfilled: false, barrierChanged: false } });
+    expect(result).toMatchObject({ schema: "zap-cannon-bilateral-evidence/v1", move: "MOVE_ZAP_CANNON", status: "unsupported-evidence", coverageCredit: false, boundary: { moveLedgerEntry: true, trackFulfilled: true, barrierChanged: false } });
     expect(fixture).toMatchObject({ schema: "zap-cannon-bilateral-evidence/v1", oracleProfile: "battle-scene-on", moveId: 192, status: "unsupported-evidence", coverageCredit: false, acceptance: { freshRunsPerOrientation: 2, firstInactiveCleanupRetained: true, denseRows: { "player-back": 112, "opponent-front": 112 }, rawRgbRows: { "player-back": 112, "opponent-front": 112 } }, evidenceScope: { sourceAudit: true, completePointerBody: true, fullDenseRowsRetained: true, twiceFreshByteIdentical: true, normalizedMaps: true, frameChangeMaps: true, legalBilateralParties: true, productionAnimationChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false, coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false } });
     for (const side of sides) {
       const receipt = fixture.orientations[side]; const observed = result.orientations[side];
@@ -31,7 +31,7 @@ describe("MOVE_ZAP_CANNON complete bilateral Scene-ON evidence", () => {
     }
   });
 
-  it("pins the move-owned topology, latches, palettes, audio, RNG, cleanup, and no promotion", () => {
+  it("pins the move-owned topology, latches, palettes, audio, RNG, cleanup, and independent promotion", () => {
     const result = verify();
     for (const side of sides) {
       const observed = result.orientations[side];
@@ -47,9 +47,10 @@ describe("MOVE_ZAP_CANNON complete bilateral Scene-ON evidence", () => {
     expect(fixture.controls).toEqual({ inheritedSiblingLatchFacts: false, generalizedTransferFacts: false, inferredSiblingCredit: false, siblingStatuses: { MOVE_SPARK: "exact", MOVE_THUNDERBOLT: "exact", MOVE_THUNDER_WAVE: "exact", MOVE_SHOCK_WAVE: "unsupported", MOVE_ZAP_CANNON: "unsupported" } });
     expect(fixture.acceptanceVerdict).toContain("remains unsupported");
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_ZAP_CANNON")).toBeUndefined();
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_ZAP_CANNON"))
+      .toMatchObject({ status: "exact" });
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "spark-2-electricity");
     expect(track).toMatchObject({ representatives: ["MOVE_SPARK", "MOVE_THUNDERBOLT", "MOVE_THUNDER_WAVE", "MOVE_ZAP_CANNON"] });
-    expect(track.fulfilled ?? false).toBe(false);
+    expect(track.fulfilled).toBe(true);
   });
 });

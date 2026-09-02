@@ -2,6 +2,41 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_ZAP_CANNON",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 FORRETRESS versus SHUCKLE Battle Scene ON windows retain every Move_ZAP_CANNON and shared ElectricityEffect row through first inactive cleanup: player-back frames 80-191 and opponent-front frames 84-195, 112/112 rows per orientation, twice-fresh byte-identical",
+    "the pure source-relative reducer and typed live seam reproduce the byte-pinned 229-byte root plus 139-byte shared subroutine: BLACK_BALL_2 projectile, eight orbiting affine SPARK_2 sprites, target ShakeMon2, eight ElectricityEffect arcs, resources, audio, waits, and cleanup",
+    "the deterministic source asset bundle extracts BLACK_BALL_2 and SPARK_2 art; the actual-core compositor consumes live species, sides, geometry, allocator slots/matrices/order, species palettes, field chrome, and presentation state without carrier/evidence gates, absolute ticks, or recorded framebuffer lookup",
+    "two independent production comparator processes are byte-identical and each pass player-back 112/112 plus opponent-front 112/112 actual-core framebuffer and component rows, 224/224 total with zero residual pixels and peak zero",
+    "the altered GOLDUCK/GRAVELER reversed-side control changes species palettes, geometry, allocator slots/order, and matrix allocations while using the same generic seam and changing the framebuffer",
+    "whole hardware OAM and palette retain the independently measured 111/111 predecessor transfer in each orientation; matrices retain 110/111 with the sole age-8 fresh-allocation exception, the projectile group first scans out at age 9, ShakeMon2's initializer pose scans out at age 41, arcs are RAM+1, and cleanup is first inactive age 111",
+    "MOVE_ZAP_CANNON alone is promoted; MOVE_SPARK, MOVE_THUNDERBOLT, and MOVE_THUNDER_WAVE retain independent exact acceptance, MOVE_SHOCK_WAVE remains unsupported, and spark-2-electricity is fulfilled only because all four named representatives are independently exact"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-zap-cannon-player-forretress-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-zap-cannon-opponent-forretress-player-shuckle.json",
+    "tools/compare/zapCannonSourceAudit.ts",
+    "tools/compare/zapCannonProbe.py",
+    "tools/compare/zapCannonEvidence.ts",
+    "tools/compare/fixtures/zap-cannon-evidence.json",
+    "tools/compare/evidence/zap-cannon-player-dense-state.json.gz",
+    "tools/compare/evidence/zap-cannon-opponent-dense-state.json.gz",
+    "tools/compare/evidence/zap-cannon-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/zap-cannon-opponent-raw-rgb.tar.gz",
+    "tools/compare/extractZapCannonAssets.ts",
+    "tools/compare/zapCannonFramebuffer.ts",
+    "src/animation/assets/zap-cannon.json",
+    "src/animation/zapCannon.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/zapCannonSourceCheckpoint.test.ts",
+    "tests/animation/zapCannonEvidenceCheckpoint.test.ts",
+    "tests/animation/zapCannon.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_THUNDERBOLT",
    "status": "exact",
    "covered": [
@@ -10,7 +45,7 @@
     "the deterministic source asset bundle extracts SPARK narrow/wide bolts, SHOCK_3, and SPARK_2 art; the actual-core compositor consumes live species, sides, target geometry, allocator slots/matrices/order, field chrome, and presentation state without carrier/evidence gates, absolute ticks, or recorded framebuffer lookup",
     "two independent deterministic production comparator passes each reach player-back 237/237 plus opponent-front 237/237 zero-residual framebuffer rows, 474/474 total with peak zero; an altered GOLDUCK/GRAVELER reversed-side species and geometry control remains material",
     "ordinary OAM and palette are RAM+1, task-created bolt display is RAM+2 with RAM+1 removal, ElectricityEffect arcs are RAM+1, and nine fresh affine allocations retain the measured eight age-105 source+2 and one age-106 source+1 first-paint exception",
-    "MOVE_THUNDERBOLT alone is promoted; MOVE_SPARK and MOVE_THUNDER_WAVE retain independent exact acceptance, MOVE_ZAP_CANNON and MOVE_SHOCK_WAVE remain unsupported, and spark-2-electricity remains unfulfilled"
+    "MOVE_THUNDERBOLT alone was promoted by this receipt; MOVE_SPARK and MOVE_THUNDER_WAVE retain independent exact acceptance, MOVE_ZAP_CANNON is now independently exact, MOVE_SHOCK_WAVE remains unsupported, and spark-2-electricity is fulfilled only by the four independent representative receipts"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-thunderbolt-player-delcatty-opponent-shuckle.json",
@@ -5552,7 +5587,7 @@
     "the pure source-relative reducer ports byte-ordered SPARK/SPARK_2/SPARK_H loads, F_PAL_BG 0->6 hold and 6->0 cleanup, five staggered 8x16 ElectricBolt segments including their source creation-display latch, target-panned SE_M_THUNDER_WAVE, four looped SE_M_THUNDERBOLT2 restarts, three staggered pairs of flashing ThunderWave bands, task counts, and cleanup without battle-clock, move-number, input-delay, RGB, or pixel exceptions",
     "the narrow shared compositor source-extracts both FLAAFFY orientations plus decoded SPARK/SPARK_H, reuses exact SHUCKLE and field chrome, consumes prior software OAM/palette state, uses typed GetBattlerSpriteCoord target geometry, and matches all 120/120 framebuffer frames in both orientations; fresh v3 outputs reproduce byte-identically with player digest 3d8b1bee1a05da063dcd39bddd53296f0957cb8a13c4491fab42eaf3b1f267ee / raw RGB aaa201bbc68db150c1c9becd9a83a30ff331569f75176f3937ec00b6b521c5a5 and opponent digest 0454b5a2523a3ff924884e867007cbcc6006bbfc324c33f2a211c9ce1e61b424 / raw RGB e97ad2bd2ad2ad6880ef7c5a0dfaa7113f603b21df970d19e5a42e76bc00236e",
     "MOVE_THUNDERBOLT is independently exact after complete bilateral production acceptance of its three differently placed ElectricBolt tasks, SHOCK_3 orb, eight affine SPARK_2 sprites, target palette body, distinct sounds, and shared ElectricityEffect call; no Thunder Wave credit was transferred",
-    "MOVE_ZAP_CANNON remains unsupported after source audit because it adds BLACK_BALL_2 projectile motion, eight orbiting ZapCannon sparks, ShakeMon2, ElectricityEffect, and a distinct pan sequence without independent complete dense evidence; exact MOVE_SPARK remains independently preserved"
+    "MOVE_ZAP_CANNON is now independently exact for its BLACK_BALL_2 projectile motion, eight orbiting ZapCannon sparks, ShakeMon2, ElectricityEffect, and distinct pan sequence; exact MOVE_SPARK remains independently preserved"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-thunder-wave-player-flaaffy-opponent-shuckle.json",
@@ -7141,7 +7176,8 @@
     "MOVE_THUNDER_WAVE",
     "MOVE_ZAP_CANNON"
    ],
-   "goal": "MOVE_SPARK, MOVE_THUNDERBOLT, and MOVE_THUNDER_WAVE are independently exact with complete bilateral production acceptance. MOVE_ZAP_CANNON remains unsupported after a complete 112-row dense Scene-ON source window in each orientation (player-back 80..191, opponent-front 84..195), so this multi-representative track is not fulfilled and no sibling credit is inferred.",
+   "goal": "Fulfilled: MOVE_SPARK, MOVE_THUNDERBOLT, MOVE_THUNDER_WAVE, and MOVE_ZAP_CANNON each retain independent complete bilateral production acceptance. Zap Cannon passes 112/112 rows per orientation (player-back 80..191, opponent-front 84..195) twice with zero residual; no acceptance is inferred for MOVE_SHOCK_WAVE or any unnamed sibling.",
+   "fulfilled": true,
    "checkpoint": {
     "move": "MOVE_ZAP_CANNON",
     "status": "unsupported-evidence",
@@ -7150,7 +7186,7 @@
     "probeJsonSha256": {"player-back": "ac4bb2d554816344bd6344993fddb2ea8b17673ef1739d63010718690477f401", "opponent-front": "2f9f6331183886c7d924e33d5e17a3c90778c6ef1b72c1172070c93dde8ce9a8"},
     "rawRgbSequenceSha256": {"player-back": "76476e1dc814b2c4b2d353acd85b733f4d5d6449f5edaaa5e9a7d84a7e58217a", "opponent-front": "2abfaa316c6f7751200f79240be5aac4f2aa35d039c4c55509d6bf26d65f84bc"},
     "latches": {"hardwareOam": "111/111", "hardwareMatrices": "110/111 (sole exception age 8)", "hardwarePalette": "111/111"},
-    "productionGate": "not started; require twice-run actual-core zero-residual bilateral acceptance before promotion"
+    "productionGate": "passed twice in independent processes: 224/224 actual-core framebuffer and component rows per run, zero residual pixels and peak zero; altered live control changes output"
    }
   },
   {

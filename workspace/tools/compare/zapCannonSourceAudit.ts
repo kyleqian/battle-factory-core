@@ -116,7 +116,7 @@ if (JSON.stringify(graphEntry?.blocks) !== JSON.stringify(["Move_ZAP_CANNON", "E
   || allCarriers.length !== 1 || level50Carriers.length !== 1
   || firstCarrier?.index !== 575 || firstCarrier?.label !== "FRONTIER_MON_FORRETRESS_3"
   || firstCarrier?.species !== "SPECIES_FORRETRESS" || firstCarrier?.itemName !== "BATTLE_FRONTIER_ITEM_FOCUS_BAND"
-  || firstCarrier?.nature !== "NATURE_QUIET" || status !== "unsupported"
+  || firstCarrier?.nature !== "NATURE_QUIET" || status !== "exact" || track?.fulfilled !== true
   || JSON.stringify(track?.components) !== JSON.stringify([
     "asset:ANIM_TAG_SPARK_2", "sprite:gSparkElectricitySpriteTemplate", "sprite:gSparkElectricityFlashingSpriteTemplate",
     "sprite:gElectricitySpriteTemplate", "subroutine:ElectricityEffect", "visualCommand:blend_color_cycle",

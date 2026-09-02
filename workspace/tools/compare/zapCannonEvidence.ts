@@ -209,6 +209,10 @@ if (process.argv.includes("--write")) {
   };
   writeFileSync(fixturePath, `${JSON.stringify(fixture, null, 2)}\n`);
 }
-const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Json; const result: Json = {};
+const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Json;
+const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
+const moveExact = coverage.entries.some((entry: Json) => entry.move === "MOVE_ZAP_CANNON" && entry.status === "exact");
+const trackFulfilled = coverage.componentTracks.some((entry: Json) => entry.id === "spark-2-electricity" && entry.fulfilled === true);
+const result: Json = {};
 for (const side of ["player-back", "opponent-front"] as const) result[side] = verifySide(side, fixture.orientations[side]);
-console.log(JSON.stringify({ schema: fixture.schema, move: fixture.move, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries(Object.entries(result).map(([side, item]: [string, Json]) => [side, { sourceWindow: item.sourceWindow, probeJsonSha256: item.probeJsonSha256, repeatProbeJsonSha256: fixture.orientations[side].repeatProbeJsonSha256, rawRgbSequenceSha256: item.rawRgbSequenceSha256, lifecycle: item.lifecycle, latches: item.latches, palette: item.palette, tags: item.tags, audio: item.audio, state: item.state, cleanup: item.cleanup }])), boundary: { moveLedgerEntry: false, trackFulfilled: false, barrierChanged: false } }, null, 2));
+console.log(JSON.stringify({ schema: fixture.schema, move: fixture.move, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries(Object.entries(result).map(([side, item]: [string, Json]) => [side, { sourceWindow: item.sourceWindow, probeJsonSha256: item.probeJsonSha256, repeatProbeJsonSha256: fixture.orientations[side].repeatProbeJsonSha256, rawRgbSequenceSha256: item.rawRgbSequenceSha256, lifecycle: item.lifecycle, latches: item.latches, palette: item.palette, tags: item.tags, audio: item.audio, state: item.state, cleanup: item.cleanup }])), boundary: { moveLedgerEntry: moveExact, trackFulfilled, barrierChanged: false } }, null, 2));

@@ -26,7 +26,7 @@ function oracleDirectory(): string {
 describe("MOVE_ZAP_CANNON authoritative source and legal staging checkpoint", () => {
   it("pins the exclusive source interval, shared ElectricityEffect, graph, assets, and all controls", () => {
     expect(sourceAudit()).toMatchObject({
-      move: "MOVE_ZAP_CANNON", moveId: 192, status: "unsupported",
+      move: "MOVE_ZAP_CANNON", moveId: 192, status: "exact",
       pointerOwned: {
         root: { symbol: "Move_ZAP_CANNON", start: "0x82d3298", endExclusive: "0x82d337d", byteLength: 229, romSha256: "ff30a37584554d149a66d53722ce184adf1d29d07807e474dd9e34e0bde652de", sourceByteLength: 1111, sourceSha256: "418959fa65972b2bb4d1b5bedfa222bf8096973219b9ef5fd5ebd39558deb587" },
         subroutine: { symbol: "ElectricityEffect", start: "0x82d7bea", endExclusive: "0x82d7c75", byteLength: 139, romSha256: "f26be8a47153d4d67aff5a54063a070dbdf84b497c94f80531519c9eef614245", sourceByteLength: 708, sourceSha256: "0b2bb54bb5f380502bda828532a7a36b44443d36f26aa681bebe156f4157630a" },
@@ -43,7 +43,7 @@ describe("MOVE_ZAP_CANNON authoritative source and legal staging checkpoint", ()
       { move: "MOVE_THUNDERBOLT", status: "exact", blocks: ["Move_THUNDERBOLT", "ElectricityEffect"] },
       { move: "MOVE_THUNDER_WAVE", status: "exact", blocks: ["Move_THUNDER_WAVE"] },
       { move: "MOVE_SHOCK_WAVE", status: "unsupported", blocks: ["Move_SHOCK_WAVE"] },
-      { move: "MOVE_ZAP_CANNON", status: "unsupported", blocks: ["Move_ZAP_CANNON", "ElectricityEffect"] },
+      { move: "MOVE_ZAP_CANNON", status: "exact", blocks: ["Move_ZAP_CANNON", "ElectricityEffect"] },
     ]);
   });
 
