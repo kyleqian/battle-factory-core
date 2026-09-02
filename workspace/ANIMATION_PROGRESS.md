@@ -1,3 +1,12 @@
+# Animation supervisor verification — Horn Drill production checkpoint merged, still unsupported (2026-09-02 supervisor)
+
+- **State:** Level 50 remains **223/276 exact, 0 partial / 0 staged, 53 unsupported**. MOVE_HORN_DRILL and `horn-drill-bg-horn-shakes` remain unsupported/unfulfilled; no component or sibling credit is granted.
+- **Did:** Independently audited and fast-forwarded worker commit `fe6facb87`. The reusable checkpoint adds a pure source-relative reducer, deterministic drill-BG/horn source bundle, narrow typed live Scene-ON seam, generic actual-core compositor, strict residual comparator, and altered GOLDUCK/GRAVELER species/side/geometry/allocator/matrix/order control. The production diff has no carrier/species, fixture/evidence/hash/recording, absolute-tick, coordinate/RGB-fit, gameplay, RNG, outcome, controller, turn, round, or facility gate.
+- **Verified:** Component truth is exact on **193/193 player-back + 192/192 opponent-front** rows. Two deterministic actual-core passes reproduce the honest failed gate: player **85/193** zero rows, **1,829,747** residual pixels, peak **26,880**; opponent **85/192**, **1,845,577**, peak **26,880**. Residuals remain concentrated in palette-fade transition and active drill-BG composition; the altered live control changes the framebuffer.
+- **Merged gate:** Focused source/evidence/reducer/boundary/frontier checks pass **5 files / 18 tests**; coverage/audit remain neutral. Full `npm test` passes **1,213 files / 10,817 tests** with 44 files / 223 tests skipped; `npm run build` passes **748 modules**; `git diff --check` is clean.
+- **Next:** Correct only source-derived palette-fade selection/cadence and drill BG text-map/scroll/painter composition against the retained **385-row** corpus. Preserve component exactness and the altered live control; require two **385/385 zero-residual** passes before promoting Horn Drill alone.
+- **Notes:** `ANIMATION_LATCHES.md`, animation boundaries/barriers, gameplay-owned state, and main-program documents are unchanged. No animation deferral was opened. Worker papercut: full-suite Vitest polling produced long quiet intervals, ~5 minutes of supervision overhead.
+
 # MOVE_HORN_DRILL reusable production checkpoint — unsupported (2026-09-02 worker)
 
 - **State:** Level 50 remains **223/276 exact, 0 partial / 0 staged, 53 unsupported**. MOVE_HORN_DRILL remains absent from `entries`; `horn-drill-bg-horn-shakes` remains unfulfilled and grants no component or sibling credit.
