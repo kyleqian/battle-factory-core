@@ -1,3 +1,11 @@
+# MOVE_HYPER_BEAM complete bilateral dense-evidence checkpoint — unsupported (2026-09-02 worker)
+
+- **State:** Level 50 remains **225/276 exact, 0 partial / 0 staged, 51 unsupported**. MOVE_HYPER_BEAM remains absent from `entries`; `hyper-beam-orbs-blackout` remains unfulfilled and receives no component, shared-task, or sibling credit.
+- **Evidence:** Commits `676172d9c` and `6f42ee797` retain two fresh byte-identical Scene-ON runs per orientation: player-back frames **79..358 (280/280)**, dense `ad28c7d3…`, raw-RGB `3a9599a3…`; opponent-front **83..362 (280/280)**, dense `834a2a81…`, raw-RGB `5de2eeb…`. The hermetic verifier banks full source/task/sprite/allocator/order/OAM/matrix/palette/register/BG-VRAM/audio/tag/immutable-state rows and bilateral normalized change maps through inactive age 279.
+- **Measured:** All **26** source calls create **52** affine-off ORBS lives; every callback advances its phase by +24, all eight animation cells occur, and the source RNG has **253 one-step + 26 seven-step** transitions = **156 Random2 draws**. Both simple palette ramps, ORBS flash, attacker ShakeMon2/ShakeMon, target ShakeMon2, both target BlendBattleAnimPal ramps, 1/15/0/5 LoopSEAdjustPanning, tags, waits, and cleanup are independently pinned. Whole hardware OAM/matrices/faded palette equal preceding source buffers on **279/279** comparable rows in both orientations; no fresh orb affine matrix occurs.
+- **Scope/remainder:** Evidence/latch ledger only; no reducer, assets, seam, compositor, production wiring, framebuffer acceptance, boundary/barrier, gameplay/RNG/outcome/controller/turn/round/facility ownership, or coverage promotion. Aurora/Psybeam remain exact controls; Thunderbolt remains a distinct unsupported control.
+- **Next:** Run the source audit, focused boundary/frontier/inventory and sibling controls, animation coverage/audit, typecheck, full `npm test`, build, and diff checks; then hand off this still-unsupported checkpoint for supervisor merge.
+
 # Animation supervisor verification — Hyper Beam source/staging checkpoint merged (2026-09-02 supervisor)
 
 - **State:** Verified and merged worker `eb8a90b5c`. Level 50 remains **225/276 exact, 0 partial / 0 staged, 51 unsupported**; `hyper-beam-orbs-blackout` is intentionally unfulfilled and MOVE_HYPER_BEAM remains absent from accepted entries.
