@@ -28,7 +28,7 @@ function validateStage(path: string) {
 }
 
 describe("MOVE_THUNDERBOLT source/classification checkpoint", () => {
-  it("byte-pins both exclusive pointer-owned blocks and the generated nine-component graph", () => {
+  it("byte-pins the exclusive root, shared pointer-owned subroutine, and generated nine-component graph", () => {
     expect(audit()).toMatchObject({
       move: "MOVE_THUNDERBOLT", moveId: 85, status: "unsupported",
       pointerOwned: {
