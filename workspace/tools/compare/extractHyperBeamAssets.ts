@@ -19,4 +19,3 @@ writeFileSync(out, `${JSON.stringify({
     tiles: sliced.tiles.map((tile) => [...tile.pixels]) }, palette: image.palette },
 })}\n`);
 console.log(`wrote ${out}`);
-

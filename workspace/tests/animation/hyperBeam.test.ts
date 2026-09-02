@@ -52,4 +52,3 @@ describe("MOVE_HYPER_BEAM production body", () => {
       .not.toBe(result.alteredControl.alteredFramebufferSha256);
   });
 });
-

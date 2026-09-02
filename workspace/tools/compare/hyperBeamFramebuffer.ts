@@ -28,7 +28,6 @@ function findRgb(path: string, filename: string): string {
   }
   throw new Error(`missing Hyper Beam RGB ${filename}`);
 }
-
 export function hyperBeamRowsFor(orientation: HyperBeamOrientation): readonly Row[] {
   const item = fixture.orientations[orientation];
   const compressed = readFileSync(resolve(root, item.denseState));
@@ -217,4 +216,3 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename
   console.log(JSON.stringify({ comparisons: inspectHyperBeamFramebuffer(),
     alteredControl: inspectHyperBeamAlteredControl() }, null, 2));
 }
-

@@ -11,7 +11,6 @@ export interface HyperBeamGeometry {
   readonly attackerRestOffset: Readonly<{ x2: number; y2: number }>;
   readonly targetRestOffset: Readonly<{ x2: number; y2: number }>;
 }
-
 /** The three Random2 results consumed by one orb, reduced to used bits. */
 export interface HyperBeamOrbRandom {
   readonly animation: number;
@@ -215,4 +214,3 @@ export function hyperBeamAtAge(
     cleanup: { firstInactive: age >= 279 },
   };
 }
-
