@@ -2,6 +2,41 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_TRI_ATTACK",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 PORYGON versus SHUCKLE Battle Scene ON windows retain every Move_TRI_ATTACK row through first inactive cleanup: player-back frames 77-360 and opponent-front frames 81-364, 284/284 rows per orientation, twice-fresh byte-identical",
+    "the pure source-relative reducer and typed live seam reproduce the complete triangle, eight flames, two target ShakeTargetInPattern tasks, three lightning sprites, seven ice crystals, palette programs, resources, audio, waits, and cleanup at 568/568 component rows",
+    "the actual-core compositor consumes live species, sides, geometry, allocator slots/matrices/order, field chrome, and presentation state; reverse stable OAM-rank painting closes the equal-Y fire overlap, while the target task preserves its measured post-BuildOamBuffer extra-row latch, pattern-0 creation-row pose, and 8-bit OAM Y wrap",
+    "two independent deterministic production comparator processes each reach player-back 284/284 plus opponent-front 284/284 zero-residual framebuffer and component rows, 568/568 total with peak zero; the altered MAGBY/ONIX reversed-side species, geometry, allocator, matrix, and order control remains material",
+    "MOVE_TRI_ATTACK alone is promoted; MOVE_SCARY_FACE, MOVE_GLARE, and MOVE_THUNDER retain their independent exact acceptance, and shake-target-in-pattern-scary-face is fulfilled only because all four named representatives are independently exact"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-tri-attack-player-porygon-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-tri-attack-opponent-porygon-player-shuckle.json",
+    "tools/compare/triAttackSourceAudit.ts",
+    "tools/compare/triAttackProbe.py",
+    "tools/compare/triAttackEvidence.ts",
+    "tools/compare/fixtures/tri-attack-evidence.json",
+    "tools/compare/evidence/tri-attack-player-dense-state.json.gz",
+    "tools/compare/evidence/tri-attack-opponent-dense-state.json.gz",
+    "tools/compare/evidence/tri-attack-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/tri-attack-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/tri-attack-changemap-player.json",
+    "tools/compare/evidence/tri-attack-changemap-opponent.json",
+    "tools/compare/extractTriAttackAssets.ts",
+    "tools/compare/triAttackFramebuffer.ts",
+    "src/animation/assets/tri-attack.json",
+    "src/animation/triAttack.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/triAttackSourceCheckpoint.test.ts",
+    "tests/animation/triAttackEvidenceCheckpoint.test.ts",
+    "tests/animation/triAttackProductionCheckpoint.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_ZAP_CANNON",
    "status": "exact",
    "covered": [
@@ -6768,10 +6803,11 @@
    "representatives": [
     "MOVE_SCARY_FACE",
     "MOVE_GLARE",
-    "MOVE_THUNDER",
-    "MOVE_TRI_ATTACK"
-   ],
-  "goal": "MOVE_SCARY_FACE, MOVE_GLARE, and MOVE_THUNDER remain independently exact controls. MOVE_TRI_ATTACK remains unsupported and this track remains unfulfilled: its source-relative production reducer now matches 568/568 bilateral component rows, but the deterministic actual-core comparator is only 251/284 zero-residual rows in each orientation (33 fire/lightning plus target-shake overlap/latch rows remain; 24,257 player-back and 16,883 opponent-front residual pixels). The complete twice-fresh dense corpus remains player-back 77..360 and opponent-front 81..364, 284 rows each. No sibling inference or coverage credit is granted before all 568 framebuffer rows are exact."
+   "MOVE_THUNDER",
+   "MOVE_TRI_ATTACK"
+  ],
+  "fulfilled": true,
+  "goal": "Track complete: MOVE_TRI_ATTACK independently matches 284/284 component and actual-core framebuffer rows in each orientation, twice deterministic, with zero residual pixels across the complete player-back 77..360 and opponent-front 81..364 windows. Its source-owned proof retains reverse stable OAM-rank painting at the equal-Y fire overlap, the post-BuildOamBuffer target-shake latch, pattern-0 creation-row pose, and 8-bit OAM Y wrap. MOVE_SCARY_FACE, MOVE_GLARE, and MOVE_THUNDER remain independently exact controls; no shared component promotes any additional move without its own dense acceptance."
   },
   {
    "id": "rock-mon-back-and-forth-magenta-heart",

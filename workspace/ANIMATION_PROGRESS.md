@@ -1,3 +1,9 @@
+# MOVE_TRI_ATTACK exact production closure (2026-09-03 worker)
+
+- **State:** Level 50 is now **229/276 exact**, **0 partial / 0 staged**, and **47 unsupported**. MOVE_TRI_ATTACK alone is promoted and `shake-target-in-pattern-scary-face` is fulfilled; Scary Face, Glare, and Thunder remain unchanged independent exact controls.
+- **Corrected:** Preserved the 568/568 pure component reducer while correcting only move-owned scanout composition: equal-Y effects paint in reverse stable OAM-rank order; target-shake callbacks retain their post-`BuildOamBuffer` extra-row latch; pattern 0's creation-row +3 pose uses its measured earlier software-OAM latch; and source-bugged `0x101` vertical offsets wrap through OAM attr0's eight Y bits.
+- **Acceptance:** Two independent deterministic comparator processes are byte-identical (`8c9aecd6…`) and each pass **284/284 player-back + 284/284 opponent-front** component and actual-core framebuffer rows with **zero residual pixels / peak zero**. The altered live MAGBY/ONIX side/geometry/allocator/matrix/order control remains material. Focused source/evidence/production plus unchanged Scary Face/Glare/Thunder and boundary checks pass; coverage/audit/typecheck pass; full `npm test` passes **1,228 files / 10,868 tests** with **44 files / 223 tests skipped**; `npm run build` passes **758 modules**.
+
 # Animation supervisor verification — Tri Attack production checkpoint merged, remains unsupported (2026-09-03 supervisor)
 
 - **State:** Level 50 remains **228/276 exact**, **0 partial / 0 staged**, and **48 unsupported**. MOVE_TRI_ATTACK remains unsupported and `shake-target-in-pattern-scary-face` remains unfulfilled; Scary Face, Glare, and Thunder retain independent exact acceptance.

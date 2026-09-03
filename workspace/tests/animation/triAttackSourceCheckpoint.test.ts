@@ -104,7 +104,7 @@ describe("MOVE_TRI_ATTACK authoritative source and legal Scene-ON staging checkp
     expect(stage.trace).toEqual({ segments: [{ frames: 2, buttons: ["A"] }, { frames: 30, buttons: [] }, { frames: 2, buttons: ["A"] }, { frames: 900, buttons: [] }], captureFrames: [0, 112, 160, 934] });
   });
 
-  it("pins the two sparse live Scene-ON receipts without promoting Tri Attack", () => {
+  it("pins the two sparse live Scene-ON receipts and the later independent promotion", () => {
     const receipt = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/tri-attack-staging-receipt.json"), "utf8")) as Json;
     expect(receipt).toMatchObject({ schema: "tri-attack-sparse-staging/v1", oracleProfile: "battle-scene-on", move: "MOVE_TRI_ATTACK", moveId: 161, status: "unsupported-evidence", coverageCredit: false, evidenceScope: { sourceInitialized: true, customPartiesBuiltBeforeBattle: true, legalBilateralParties: true, sparseLiveReplay: true, denseWindowCaptured: false, transientOverrides: [] } });
     for (const [side, expected] of [["player-back", { attackerSide: "player", targetSide: "opponent", controllerExecFlagsAtMove: 1 }], ["opponent-front", { attackerSide: "opponent", targetSide: "player", controllerExecFlagsAtMove: 2 }]] as const) {
@@ -120,8 +120,8 @@ describe("MOVE_TRI_ATTACK authoritative source and legal Scene-ON staging checkp
       expect(run.triAttackPp.before - run.triAttackPp.atFrame112).toBe(run.triAttackPp.spent);
     }
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_TRI_ATTACK")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: Json) => track.id === "shake-target-in-pattern-scary-face").fulfilled).not.toBe(true);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_TRI_ATTACK")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "shake-target-in-pattern-scary-face").fulfilled).toBe(true);
     for (const move of ["MOVE_SCARY_FACE", "MOVE_GLARE", "MOVE_THUNDER"]) expect(coverage.entries.find((entry: Json) => entry.move === move)).toMatchObject({ status: "exact" });
   });
 });

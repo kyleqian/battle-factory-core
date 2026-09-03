@@ -23354,6 +23354,19 @@ export function renderSceneOnMovePresentation(
     // faded palettes at one source row before hardware scanout.
     const displayed = sceneOnTriAttackView({ ...triState,
       age: Math.max(0, triState.age - 1) });
+    // The target-shake task callback normally runs after BuildOamBuffer, so
+    // its live battler offset needs one additional retained source row on top
+    // of this move's measured software-to-hardware OAM transfer. Pattern 0's
+    // creation row is the source-owned exception: its initial +3 pose is
+    // already present in that row's software OAM and scans out one row later.
+    const pattern0CreationPoseLatched = view.inverted
+      && displayed.targetOffset.y2 === 0
+      && view.targetOffset.y2 !== 0;
+    const targetScanoutSourceAge = pattern0CreationPoseLatched
+      ? triState.age
+      : Math.max(0, triState.age - 2);
+    const displayedTarget = sceneOnTriAttackView({ ...triState,
+      age: targetScanoutSourceAge });
     if (view.attacker.geometry.side === view.target.geometry.side) {
       throw new Error("TRI_ATTACK presentation requires opposite battler sides");
     }
@@ -23377,6 +23390,15 @@ export function renderSceneOnMovePresentation(
 
     const attackerArt = artFor(view.attacker);
     const targetArt = artFor(view.target);
+    const targetDrawY = view.target.geometry.spriteCorner.y
+      + triState.config.animationGeometry.targetRestOffset.y2
+      + displayedTarget.targetOffset.y2;
+    // OAM attr0 stores only eight Y bits. Tri Attack's source-bugged 0x101
+    // shake therefore wraps to a one-pixel displacement at scanout instead
+    // of moving the live battler outside the software framebuffer.
+    const wrappedTargetDrawY = (targetDrawY & 0xff) >= 160
+      ? (targetDrawY & 0xff) - 256
+      : targetDrawY & 0xff;
     const entries: Array<{ subpriority: number; y: number; slot: number;
       order: number; draw: () => void }> = [];
     entries.push({ subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
@@ -23386,13 +23408,12 @@ export function renderSceneOnMovePresentation(
         invert(attackerArt.palette), view.attacker.geometry.spriteCorner.x,
         view.attacker.geometry.spriteCorner.y) });
     entries.push({ subpriority: view.target.geometry.side === "player" ? 30 : 40,
-      y: view.target.geometry.animationCenter.y + displayed.targetOffset.y2,
+      y: view.target.geometry.animationCenter.y + displayedTarget.targetOffset.y2,
       slot: view.target.geometry.side === "player" ? 6 : 8, order: -1,
       draw: () => drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
         invert(targetArt.palette), view.target.geometry.spriteCorner.x
-          + triState.config.animationGeometry.targetRestOffset.x2 + displayed.targetOffset.x2,
-        view.target.geometry.spriteCorner.y
-          + triState.config.animationGeometry.targetRestOffset.y2 + displayed.targetOffset.y2) });
+          + triState.config.animationGeometry.targetRestOffset.x2 + displayedTarget.targetOffset.x2,
+        wrappedTargetDrawY) });
     for (const sprite of displayed.sprites) {
       if (sprite.invisible) continue;
       const seeded = triState.config.animationProfile.spriteOrderSeed.indexOf(sprite.slot);
@@ -23419,7 +23440,7 @@ export function renderSceneOnMovePresentation(
       });
     }
     entries.sort((left, right) => right.subpriority - left.subpriority
-      || left.y - right.y || left.order - right.order || right.slot - left.slot);
+      || left.y - right.y || right.order - left.order || right.slot - left.slot);
     for (const entry of entries) entry.draw();
 
     const playerIsAttacker = view.attacker.geometry.side === "player";

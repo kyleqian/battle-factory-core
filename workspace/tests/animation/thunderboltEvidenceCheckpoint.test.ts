@@ -137,8 +137,8 @@ describe("MOVE_THUNDERBOLT complete bilateral Scene-ON evidence checkpoint", () 
     expect(fixture.evidenceScope).toMatchObject({ sourceAudit: true, completePointerBody: true, fullDenseRowsRetained: true, twiceFreshByteIdentical: true, normalizedMaps: true, frameChangeMaps: true, productionAnimationChanged: false, reducerAdded: false, assetBundleAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false, coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false });
     expect(fixture.acceptance.verdict).toContain("MOVE_THUNDERBOLT remains unsupported");
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(228);
-    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(228);
+    expect(coverage.entries).toHaveLength(229);
+    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(229);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_THUNDERBOLT"))
       .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: Json) => track.id === "spark-2-electricity")).toMatchObject({ representatives: ["MOVE_SPARK", "MOVE_THUNDERBOLT", "MOVE_THUNDER_WAVE", "MOVE_ZAP_CANNON"], fulfilled: true });

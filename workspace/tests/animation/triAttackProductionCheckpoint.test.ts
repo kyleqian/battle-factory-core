@@ -8,7 +8,7 @@ import {
 
 const root = resolve(import.meta.dirname, "../..");
 
-describe("MOVE_TRI_ATTACK production checkpoint", () => {
+describe("MOVE_TRI_ATTACK exact production presentation", () => {
   it("re-extracts its two source-owned art sheets reproducibly", () => {
     const output = execFileSync(process.execPath, [
       "--experimental-strip-types",
@@ -18,19 +18,19 @@ describe("MOVE_TRI_ATTACK production checkpoint", () => {
     expect(output).toContain("Tri Attack assets match authoritative sources");
   });
 
-  it("matches all bilateral source components while retaining exact residual counts", () => {
+  it("matches every bilateral source component and actual-core framebuffer row", () => {
     const comparisons = inspectTriAttackFramebuffer();
     expect(comparisons.map(({ orientation, totalRows, zeroRows, residualPixels,
       peakResidualPixels, componentExactRows, failures }) => ({
       orientation, totalRows, zeroRows, residualPixels, peakResidualPixels,
       componentExactRows, failureRows: failures.length,
     }))).toEqual([
-      { orientation: "player-back", totalRows: 284, zeroRows: 251,
-        residualPixels: 24257, peakResidualPixels: 909,
-        componentExactRows: 284, failureRows: 33 },
-      { orientation: "opponent-front", totalRows: 284, zeroRows: 251,
-        residualPixels: 16883, peakResidualPixels: 755,
-        componentExactRows: 284, failureRows: 33 },
+      { orientation: "player-back", totalRows: 284, zeroRows: 284,
+        residualPixels: 0, peakResidualPixels: 0,
+        componentExactRows: 284, failureRows: 0 },
+      { orientation: "opponent-front", totalRows: 284, zeroRows: 284,
+        residualPixels: 0, peakResidualPixels: 0,
+        componentExactRows: 284, failureRows: 0 },
     ]);
   });
 

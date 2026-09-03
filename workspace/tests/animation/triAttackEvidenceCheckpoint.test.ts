@@ -10,10 +10,10 @@ const fixturePath = resolve(root, "tools/compare/fixtures/tri-attack-evidence.js
 const runVerifier = () => JSON.parse(execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/triAttackEvidence.ts"], { cwd: root, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 })) as Json;
 
 describe("MOVE_TRI_ATTACK complete bilateral Scene-ON evidence checkpoint", () => {
-  it("replays every retained state/RGB/map row hermetically and stays unsupported", () => {
+  it("replays every retained historical state/RGB/map row after independent promotion", () => {
     const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Json;
     const result = runVerifier();
-    expect(result).toMatchObject({ schema: "tri-attack-bilateral-evidence/v1", move: "MOVE_TRI_ATTACK", status: "unsupported-evidence", coverageCredit: false, boundary: { moveExact: false, trackFulfilled: false, barrierChanged: false } });
+    expect(result).toMatchObject({ schema: "tri-attack-bilateral-evidence/v1", move: "MOVE_TRI_ATTACK", status: "unsupported-evidence", coverageCredit: false, boundary: { moveExact: true, trackFulfilled: true, barrierChanged: false } });
     expect(fixture.source).toMatchObject({ root: { start: "0x82d4595", endExclusive: "0x82d4709", byteLength: 372, romSha256: "86d2d0432dd6648fcb29c176d3f1f275a1a53ec9a7234b3bdd860be600935396", sourceSha256: "ac0223c3d6245ec0d062aebb7c6c611352c610cbad267c1cac05af22ebb602fe" }, subroutine: { symbol: "IceCrystalEffectShort", start: "0x82d7720", endExclusive: "0x82d77a4", byteLength: 132, romSha256: "3da0ca21634d29ab068ed61238f9bb3129e4403019d36dbdcf4a7f722f3e5772", sourceSha256: "96031e55891f2051396b5ac2d28303b96f65724d841e8e8cfce7d8be1a004ef2" }, combined: { byteLength: 504, romSha256: "399c3d7c32b99fc52e6e75b8f9d2be8590dd3a8b0a852e4e59432d397a3fc895" } });
     expect(fixture).toMatchObject({ oracleProfile: "battle-scene-on", moveId: 161, evidenceScope: { sourceAudit: true, completePointerBody: true, fullDenseRowsRetained: true, firstInactiveCleanupRetained: true, twiceFreshByteIdentical: true, legalBilateralParties: true, productionAnimationChanged: false, coveragePromotion: false, gameplayStateOwned: false, transientOverrides: [] }, acceptance: { freshRunsPerOrientation: 2, denseRows: { "player-back": 284, "opponent-front": 284 }, sourceRows: { "player-back": 248, "opponent-front": 248 } }, controls: { inferredSiblingCredit: false, shakeTargetInPatternScaryFace: "unfulfilled" } });
     const expectedWindows = { "player-back": [77, 360], "opponent-front": [81, 364] };
@@ -45,9 +45,9 @@ describe("MOVE_TRI_ATTACK complete bilateral Scene-ON evidence checkpoint", () =
   it("pins the independent exact controls and the unchanged frontier boundary", () => {
     const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Json;
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_TRI_ATTACK")).toBeUndefined();
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_TRI_ATTACK")).toMatchObject({ status: "exact" });
     for (const move of ["MOVE_SCARY_FACE", "MOVE_GLARE", "MOVE_THUNDER"]) expect(coverage.entries.find((entry: Json) => entry.move === move)).toMatchObject({ status: "exact" });
-    expect(coverage.componentTracks.find((track: Json) => track.id === "shake-target-in-pattern-scary-face").fulfilled).not.toBe(true);
+    expect(coverage.componentTracks.find((track: Json) => track.id === "shake-target-in-pattern-scary-face").fulfilled).toBe(true);
     expect(fixture.controls.siblingStatuses).toEqual({ MOVE_SCARY_FACE: "exact", MOVE_GLARE: "exact", MOVE_THUNDER: "exact", MOVE_TRI_ATTACK: "unsupported" });
     expect(fixture.evidenceScope).toMatchObject({ reducerAdded: false, assetBundleAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferAcceptance: false, boundaryOrBarrierChanged: false });
   });

@@ -450,8 +450,8 @@ const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"
   entries: Array<{ move: string; status: string }>;
   componentTracks: Array<{ id: string; representatives: string[]; fulfilled?: boolean }>;
 };
-if (coverage.entries.some((entry) => entry.move === "MOVE_TRI_ATTACK")) throw new Error("Tri Attack must remain absent from exact coverage entries");
+if (!coverage.entries.some((entry) => entry.move === "MOVE_TRI_ATTACK" && entry.status === "exact")) throw new Error("Tri Attack exact coverage entry missing");
 const track = coverage.componentTracks.find((entry) => entry.id === "shake-target-in-pattern-scary-face");
-if (!track || !track.representatives.includes("MOVE_TRI_ATTACK") || track.fulfilled === true) throw new Error("Tri Attack track must remain unfulfilled");
+if (!track || !track.representatives.includes("MOVE_TRI_ATTACK") || track.fulfilled !== true) throw new Error("Tri Attack track must be fulfilled");
 
 console.log(JSON.stringify(sourceAudit, null, 2));
