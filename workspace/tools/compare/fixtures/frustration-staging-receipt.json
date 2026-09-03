@@ -1,0 +1,63 @@
+{
+  "schema": "frustration-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_FRUSTRATION",
+  "moveId": 218,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "sourceAudit": "tools/compare/frustrationSourceAudit.ts",
+  "liveProbe": "tools/compare/frustrationStagingProbe.py",
+  "factoryLegalSelection": {
+    "friendship": 0,
+    "selector": "AnimTask_GetFrustrationPowerLevel",
+    "returnArgIndex": 7,
+    "result": 0,
+    "branch": "Frustration_Strongest",
+    "otherPointerOwnedBranches": [
+      "Frustration_Strong",
+      "Frustration_Medium",
+      "Frustration_Weak"
+    ]
+  },
+  "runs": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-frustration-player-furret-opponent-onix.json",
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "player", "partyIndex": 0, "species": 162, "friendship": 0},
+      "target": {"side": "opponent", "partyIndex": 0, "species": 95},
+      "legalAiMoveSlots": [33, 33, 33, 33],
+      "entry": {"currentMove": 218, "root": "Move_FRUSTRATION", "controllerExecFlags": 1},
+      "branch": {"label": "Frustration_Strongest", "result": 0, "returnArgIndex": 7},
+      "pp": {"before": [20, 20, 20, 20], "after": [19, 20, 20, 20], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true},
+      "transientFreeSetup": true
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-frustration-opponent-furret-player-onix.json",
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "opponent", "partyIndex": 0, "species": 162, "friendship": 0},
+      "target": {"side": "player", "partyIndex": 0, "species": 95},
+      "legalAiMoveSlots": [218, 218, 218, 218],
+      "entry": {"currentMove": 218, "root": "Move_FRUSTRATION", "controllerExecFlags": 2},
+      "branch": {"label": "Frustration_Strongest", "result": 0, "returnArgIndex": 7},
+      "pp": {"before": [20, 20, 20, 20], "after": [20, 20, 19, 20], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true},
+      "transientFreeSetup": true
+    }
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "denseWindowCaptured": false,
+    "latchMeasured": false,
+    "productionChanged": false,
+    "coveragePromotion": false,
+    "transientOverrides": []
+  },
+  "remainder": "Retain a complete dense Frustration-owned Scene-ON window and measure its own task/sprite/palette scanout behavior before any reducer, presentation seam, latch claim, or MOVE_FRUSTRATION coverage promotion."
+}
