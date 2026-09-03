@@ -21,10 +21,10 @@ describe("MOVE_WHIRLPOOL exact Scene-ON evidence", () => {
     ]));
     for (const [path, frameCount, evidence, raw] of [
       ["tools/compare/fixtures/whirlpool-player-wailmer-opponent-onix.json", 133,
-        "2942fa0bf1a07da485bcf391ca4ecea06a41361d648adc27a1e48a3f32018125",
+        "7525e3073f8832c7528f88a847227605d4024cbbc0022178a5e3e5d6531320ce",
         "d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8"],
       ["tools/compare/fixtures/whirlpool-opponent-wailmer-player-onix.json", 133,
-        "7e57488e1a265960fec441a02b5133f0b4a6e38ddde46cd42e21b5a29b0aaba3",
+        "d02b38e48b8b71affa46845e9fd867f93e913697d17ff1f03709814f7e690068",
         "8b42073d713d49286935abd3079c2266464f6f66c492a039903fb70740a26ffa"],
     ] as const) {
       expect(JSON.parse(readFileSync(path, "utf8"))).toMatchObject({
@@ -37,10 +37,10 @@ describe("MOVE_WHIRLPOOL exact Scene-ON evidence", () => {
   it("pins the separate real-play Status_Whirlpool body twice fresh in both orientations", () => {
     for (const [path, startFrame, evidence, raw] of [
       ["tools/compare/fixtures/status-whirlpool-player-wailmer-opponent-onix.json", 663,
-        "e5d210e7908b269ba0722959c4035d4bc39c04378a323cf74698375baa615b84",
+        "f1b3213432dc5269dce74e53d7b94dd92e53e9c718d60bb326fc8e8cb8bc491b",
         "8a809496f28e7cb8e5eb9a37e26f721a9e9b3c14ef67bbf798825d4b527a9e71"],
       ["tools/compare/fixtures/status-whirlpool-opponent-wailmer-player-onix.json", 653,
-        "d6b1d9e43817259be6ad63c9b36e5f4d11112a868785925253716eb97fead93a",
+        "c5e73b98282c51e9a59dcd2e2da4d8cb67c58584d5d8400d7b2eb97733152929",
         "481017b8c09ddf3bbe585e6e2845a02384e27e1b7ed38169834e3eb2ea82463c"],
     ] as const) {
       expect(JSON.parse(readFileSync(path, "utf8"))).toMatchObject({
@@ -48,5 +48,14 @@ describe("MOVE_WHIRLPOOL exact Scene-ON evidence", () => {
         sourceWindow: { startFrame, frameCount: 108 }, evidenceSha256: evidence, rawRgbSha256: raw,
       });
     }
+  });
+
+  it("ratchets the independently accepted Water Orb component track", () => {
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
+    expect(coverage.componentTracks.find((track: { id: string }) =>
+      track.id === "water-orb-hydro-pump-whirlpool")).toMatchObject({
+      representatives: ["MOVE_HYDRO_PUMP", "MOVE_WHIRLPOOL"],
+      fulfilled: true,
+    });
   });
 });
