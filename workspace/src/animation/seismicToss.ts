@@ -138,7 +138,7 @@ export function seismicTossAtAge(age: number, targetSide: SeismicTossSide,
     resources: { impact: age >= 1 && age < 227, rocks: age >= 4 && age < 227 },
     audio: [
       ...(age === 32 ? [{ age, song: "SE_M_SKY_UPPERCUT", pan: "center" as const }] : []),
-      ...SEISMIC_TOSS_WAVE_AGES.filter((birth) => birth === age).map((birth, wave) =>
+      ...SEISMIC_TOSS_WAVE_AGES.filter((birth) => birth === age).map((_birth, wave) =>
         ({ age, song: wave === 1 ? "SE_M_ROCK_THROW" : "SE_M_STRENGTH", pan: targetSide })),
     ],
   };
