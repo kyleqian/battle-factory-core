@@ -1,3 +1,10 @@
+# Animation supervisor verification — Frustration source/staging merged, remains unsupported (2026-09-03 supervisor)
+
+- **State:** Level 50 remains **229/276 exact**, **0 partial / 0 staged**, and **47 unsupported**. MOVE_FRUSTRATION and `anger-mark-grow-breath` remain unsupported/unfulfilled; Swagger, Torment, and Taunt remain independently exact.
+- **Merged:** Audited and fast-forwarded worker commit `145814f42`. The eight-file checkpoint adds a byte-pinned source audit, complete legal bilateral Furret/Onix 3v3 Scene-ON fixtures, mGBA staging probe, compact receipt, and hermetic test. It changes no reducer, asset, compositor, production seam, latch ledger, gameplay owner, barrier, import boundary, or main-program document.
+- **Verified:** Two supervisor source-audit runs are byte-identical (`db24da25…`) and pin the **711-byte** root, all four strength branches, nine direct callback bodies, ten Level-50 carriers, and the Factory friendship-0 construction rule. Fresh wrapper-validated player/opponent probes each enter move **218** and `Frustration_Strongest` with friendship/result **0**, spend one PP, preserve checked benches, build custom parties before battle, and use no transient setup. Focused source/staging plus Swagger/Torment/Taunt/inventory/boundary checks pass **6 files / 34 tests**; coverage/audit/diff checks pass.
+- **Merged gate:** Post-merge `npm test` passes **1,229 files / 10,872 tests** with **44 files / 223 tests skipped**; `npm run build` passes **758 modules**. Next: capture complete twice-fresh Frustration-owned dense Scene-ON strongest-branch windows in both orientations and measure, rather than inherit, every OAM/matrix/palette/live-battler latch through first inactive cleanup.
+
 # MOVE_FRUSTRATION source/classification + legal bilateral Scene-ON staging checkpoint — unsupported (2026-09-03 worker)
 
 - **State:** Level 50 remains **229/276 exact**, **0 partial / 0 staged**, and **47 unsupported**. MOVE_FRUSTRATION remains absent from accepted entries and `anger-mark-grow-breath` remains unfulfilled; MOVE_SWAGGER, MOVE_TORMENT, and MOVE_TAUNT stay independently exact.
