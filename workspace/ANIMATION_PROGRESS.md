@@ -1,3 +1,10 @@
+# Sparkle-3 special-screen receipt-drift checkpoint (2026-09-03 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `sparkle-3-special-screen` remains unfulfilled; MOVE_LIGHT_SCREEN and MOVE_MIRROR_COAT retain their existing independent exact statuses with no sibling credit.
+- **Audit / drift:** `lightScreenSourceAudit.ts` passes all nine assigned source components and confirms Mirror Coat's sole successful-special-damage body. The first fresh Light Screen player-back portable probe aborts before row acceptance: serialized evidence is `a5bcd4b2ced85a3f0dbcb78af4d3b84c7ac8921ce0aa3fa19bd30e4e779b3bfb`, not committed `7c1c3b39e53c00ee0174232a0c05a02ac7f14b6d2aa7478bc2ae372c5d2500a2`; deleting only additive `setup.preCheckpointCaptures: []` recreates the committed digest exactly, while the 115-frame raw-RGB digest remains `b135e9fbf2c70ea860f0ee126959bbb0eaf0c4603566067dd5405c9698a74837`.
+- **Decision:** Per the receipt-drift stop rule, do not alter fixtures/evidence hashes, source reducer/seam/compositor, latches, coverage, or move counts. The remaining Light Screen orientation and the Mirror Coat comparator were deliberately not started, so neither body receives a fresh acceptance claim. Next: a separately scoped receipt-refresh audit must rerun both complete Light Screen and Mirror Coat bilateral bodies twice before any track fulfillment.
+- **Checks:** Focused Light Screen/Mirror Coat/inventory/boundary/frontier controls pass **6 files / 28 tests**; coverage stays **231/276 exact / 45 unsupported**; animation audit, typecheck, diff check, full `npm test` (**1,235 files / 10,890 tests**, 44 files / 223 skipped), and build (**761 modules**) pass.
+
 # Animation supervisor verification — Spore particles reconciled (2026-09-03 supervisor)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only `spore-particles` is newly fulfilled; MOVE_SPORE and MOVE_COTTON_SPORE keep their independent exact acceptances and no Powder sibling receives credit.
