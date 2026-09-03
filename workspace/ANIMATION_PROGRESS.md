@@ -1,3 +1,10 @@
+# Animation supervisor verification — water-orb receipt mismatch checkpoint merged (2026-09-03 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `water-orb-hydro-pump-whirlpool` remains unfulfilled; MOVE_HYDRO_PUMP and MOVE_WHIRLPOOL retain their independent exact statuses with no sibling credit.
+- **Merged:** Independently audited and fast-forwarded worker commit `6f8f590cd`. Its only file change is the honest animation-ledger checkpoint; coverage, production, fixtures/evidence, scenarios, latches, boundaries/barriers, gameplay ownership, and main-program documents are unchanged.
+- **Verified:** The source audit passes. Supervisor runs reproduce Hydro Pump twice at player-back **141/141** and opponent-front **141/141** component plus actual-core framebuffer rows with the retained digests. Whirlpool reproducibly stops after a zero-residual **133/133** player-back main body because fresh serialized state digest `7525e307…` differs from committed `2942fa0b…`; raw RGB remains `d3a4ceb…`. OAM predecessor transfer remains **132/132**, palette **131/132** plus the age-4/frame-82 monbg setup, so no latch contradiction is inferred.
+- **Merged gate:** Post-merge `npm test` passes **1,235 files / 10,888 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**. Next: refresh and explain Whirlpool's complete main/residual serialized receipts in a bounded evidence-only round, rerun all four bilateral windows twice fresh, then fulfill the water-orb track only if every independent source/seam/raw-RGB/framebuffer gate closes.
+
 # Water-orb Hydro Pump/Whirlpool component-track audit — receipt mismatch (2026-09-03 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `water-orb-hydro-pump-whirlpool` remains unfulfilled; no move status, count, or sibling credit changes.
