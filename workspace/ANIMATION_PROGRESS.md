@@ -1,3 +1,10 @@
+# Animation supervisor verification — Whirlpool receipts refreshed and water-orb track reconciled (2026-09-03 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `water-orb-hydro-pump-whirlpool` is now explicitly fulfilled; only its existing independently exact MOVE_HYDRO_PUMP and MOVE_WHIRLPOOL representatives receive credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `218563b2c`. The seven-file checkpoint changes only the four Whirlpool serialized evidence hashes, their direct test/coverage prose, the track ratchet, and this animation ledger; it changes no production, scenario, latch, boundary/barrier, gameplay, RNG, controller, or main-program document.
+- **Verified:** Fresh supervisor runs reproduce all four Whirlpool bodies twice: main player-back/opponent-front **133/133** and natural Status_Whirlpool player-back/opponent-front **108/108** source/component plus actual-core zero-residual framebuffer rows. Raw RGB stays `d3a4ceb…`, `8b42073d…`, `8a809496…`, and `481017b…`; the only serialized-state difference is additive `setup.preCheckpointCaptures: []`. Hydro Pump independently remains **141/141** twice in both orientations. Focused source/evidence/boundary/frontier checks, coverage, audit, and diff checks pass.
+- **Merged gate:** Post-merge `npm test` passes **1,235 files / 10,889 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**. Next: audit `spore-particles` as a bounded metadata reconciliation, preserving MOVE_SPORE and MOVE_COTTON_SPORE's independent complete bilateral receipts and assigning no sibling credit.
+
 # Water-orb receipt refresh + component-track fulfillment (2026-09-03 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `water-orb-hydro-pump-whirlpool` is now fulfilled; MOVE_HYDRO_PUMP and MOVE_WHIRLPOOL retain their independent exact statuses and no other track or move receives credit.
