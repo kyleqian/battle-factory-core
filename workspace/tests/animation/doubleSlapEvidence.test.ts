@@ -38,7 +38,7 @@ describe("MOVE_DOUBLE_SLAP natural multi-hit exact acceptance", () => {
     }
     expect(accepted).toBe(204);
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(230);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(231);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_DOUBLE_SLAP")).toMatchObject({ status: "exact" });
   });
 });

@@ -15,8 +15,8 @@
     "frameChangeMapBuilder": "tools/compare/frame-changemap.py",
     "frameChangeMapBuilderSha256": "e90c7a526f7933a204a4a2fdae556b67209b1baf51a66a7d2c7247231851331d",
     "audit": "tools/compare/seismicTossSourceAudit.ts",
-    "auditSha256": "7485f721325cda874e06e2a8049d41a32f7070d0871ddbc26d022781d7d55726",
-    "auditRunSha256": "8b22abcbe7f60bc8d75a75d4ecc49d12db35301ff295111316bf93b7f3bd7ce2"
+    "auditSha256": "5d73c690187b75ccc23b571a1f478fd050d831d22cd260a6f6523552799fb1b3",
+    "auditRunSha256": "f3093f6503fa5c53639933c3c77fe8b865477d5745c9bbb3d6d84b79736bd9f6"
   },
   "orientations": {
     "player-back": {

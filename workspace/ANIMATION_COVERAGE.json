@@ -141,6 +141,41 @@
    ]
   },
   {
+   "move": "MOVE_SEISMIC_TOSS",
+   "status": "exact",
+   "covered": [
+    "complete bilateral Factory-real level-50 Medium-branch Battle Scene ON windows retain every MOVE_SEISMIC_TOSS row through first inactive cleanup: player-back frames 77-304 and opponent-front frames 81-308, 228/228 rows per orientation, twice-fresh byte-identical",
+    "the pure source-relative reducer and typed live seam reproduce the complete 349-byte root's Medium branch: BG_IN_AIR load/scroll/fade/restore, nine task lives, three IMPACT and twelve ROCKS sprites, target monbg and shakes, resources/audio, waits, allocator/order/matrices, and clean teardown",
+    "the retained stage's internal species id 352 is correctly rendered as Emerald-internal GRUMPIG rather than National-Dex KECLEON; live species art, healthbox, message, geometry, OAM palette-bank selection, and the front sprite's current source frame all flow through the same generic compositor",
+    "two independent deterministic production comparator processes each reach player-back 228/228 plus opponent-front 228/228 component and actual-core framebuffer rows, 456/456 total with zero residual pixels and peak zero; BLDCNT effect mode 0 correctly makes the IMPACT OBJ palette opaque despite its OBJ-mode-1 bit and inert retained 12/8 BLDALPHA",
+    "the altered MACHOKE/GOLEM reversed-side control materially changes species, geometry, palette ordering, allocator slots/order/matrices, and framebuffer through the same path; MOVE_ROCK_THROW, MOVE_ROCK_SLIDE, and MOVE_ANCIENT_POWER retain independent exact acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-seismic-toss-player-kecleon-opponent-onix.json",
+    "tools/battle-lab/mechanic-seismic-toss-opponent-kecleon-player-onix.json",
+    "tools/compare/seismicTossSourceAudit.ts",
+    "tools/compare/seismicTossProbe.py",
+    "tools/compare/seismicTossEvidence.ts",
+    "tools/compare/fixtures/seismic-toss-evidence.json",
+    "tools/compare/evidence/seismic-toss-player-dense-state.json.gz",
+    "tools/compare/evidence/seismic-toss-opponent-dense-state.json.gz",
+    "tools/compare/evidence/seismic-toss-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/seismic-toss-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/seismic-toss-changemap-player.json",
+    "tools/compare/evidence/seismic-toss-changemap-opponent.json",
+    "tools/compare/extractSeismicTossAssets.ts",
+    "tools/compare/seismicTossFramebuffer.ts",
+    "src/animation/assets/seismic-toss.json",
+    "src/animation/seismicToss.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/seismicTossSourceCheckpoint.test.ts",
+    "tests/animation/seismicTossEvidence.test.ts",
+    "tests/animation/seismicTossProduction.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_AURORA_BEAM",
    "status": "exact",
    "covered": [
@@ -8243,16 +8278,32 @@
     "visualCommand:waitbgfadeout"
    ],
    "representatives": ["MOVE_SEISMIC_TOSS"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/battle-lab/mechanic-seismic-toss-player-kecleon-opponent-onix.json",
     "tools/battle-lab/mechanic-seismic-toss-opponent-kecleon-player-onix.json",
     "tools/compare/seismicTossSourceAudit.ts",
     "tools/compare/seismicTossStagingProbe.py",
     "tools/compare/fixtures/seismic-toss-staging-receipt.json",
-    "tests/animation/seismicTossSourceCheckpoint.test.ts"
+    "tests/animation/seismicTossSourceCheckpoint.test.ts",
+    "tools/compare/seismicTossProbe.py",
+    "tools/compare/seismicTossEvidence.ts",
+    "tools/compare/fixtures/seismic-toss-evidence.json",
+    "tools/compare/evidence/seismic-toss-player-dense-state.json.gz",
+    "tools/compare/evidence/seismic-toss-opponent-dense-state.json.gz",
+    "tools/compare/evidence/seismic-toss-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/seismic-toss-opponent-raw-rgb.tar.gz",
+    "tools/compare/extractSeismicTossAssets.ts",
+    "tools/compare/seismicTossFramebuffer.ts",
+    "src/animation/assets/seismic-toss.json",
+    "src/animation/seismicToss.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/seismicTossEvidence.test.ts",
+    "tests/animation/seismicTossProduction.test.ts"
    ],
-   "goal": "UNFULFILLED evidence-only checkpoint: MOVE_SEISMIC_TOSS retains twice-fresh complete 228-row legal bilateral Medium-branch Scene-ON windows, raw RGB archives, normalized/frame change maps, source/task/sprite/OAM/matrix/palette/BG-VRAM/register/audio/resource/RNG/gameplay/PP/cleanup measurements, and a move-owned latch row. MOVE_SEISMIC_TOSS remains unsupported and receives no shared-component or sibling acceptance; no reducer, assets, compositor, presentation seam, framebuffer fitting, core wiring, or exact promotion is present."
+   "goal": "FULFILLED by MOVE_SEISMIC_TOSS only: two independent actual-core comparator processes pass all 456 component and framebuffer rows with zero residual pixels and peak zero. The source-derived Medium-branch reducer, BG_IN_AIR asset, typed seam, and compositor preserve all 23 components, live species/sides/geometry/palettes/allocation/order/matrices, nine tasks, three IMPACT and twelve ROCKS sprites, BG/register/audio/resource lifecycles, move-owned latches, and cleanup. Rock Throw, Rock Slide, and Ancient Power retain independent exact acceptance."
   }
  ],
  "variantAudits": {

@@ -40,7 +40,7 @@ describe("MOVE_SEISMIC_TOSS source/classification and legal Scene-ON staging che
   it("byte-pins the complete pointer-owned graph, every branch, callback body, and source-selected damage rule", () => {
     const audit = sourceAudit();
     expect(audit).toMatchObject({
-      move: "MOVE_SEISMIC_TOSS", moveId: 69, status: "unsupported", coverageCredit: false,
+      move: "MOVE_SEISMIC_TOSS", moveId: 69, status: "exact", coverageCredit: true,
       pointerOwned: {
         root: {
           symbol: "Move_SEISMIC_TOSS", start: "0x82d6b00", endExclusive: "0x82d6c5d", byteLength: 349,
@@ -80,8 +80,8 @@ describe("MOVE_SEISMIC_TOSS source/classification and legal Scene-ON staging che
         ],
       },
       checkpoint: {
-        track: "seismic-toss-air-rock-scatter", trackFulfilled: false, denseWindowCaptured: true,
-        latchMeasured: true, productionChanged: false, exactPromotion: false,
+        track: "seismic-toss-air-rock-scatter", trackFulfilled: true, denseWindowCaptured: true,
+        latchMeasured: true, productionChanged: true, exactPromotion: true,
       },
     });
 
@@ -177,7 +177,7 @@ describe("MOVE_SEISMIC_TOSS source/classification and legal Scene-ON staging che
     expect(audit.controls).toEqual({
       moves: ["MOVE_ROCK_THROW", "MOVE_ROCK_SLIDE", "MOVE_ANCIENT_POWER"],
       statuses: ["exact", "exact", "exact"],
-      independence: "These exact source-identity controls are batch-checked only. MOVE_SEISMIC_TOSS remains unsupported, and neither controls nor this non-exclusive track grant move, component, sibling, or latch credit.",
+      independence: "These exact source-identity controls are batch-checked only. MOVE_SEISMIC_TOSS is independently exact, and its non-exclusive track grants no inferred sibling credit.",
     });
   });
 
@@ -222,7 +222,7 @@ describe("MOVE_SEISMIC_TOSS source/classification and legal Scene-ON staging che
     expect(stage.trace).not.toHaveProperty("captureFrames");
   });
 
-  it("pins the compact live bilateral receipt while withholding every acceptance and latch claim", () => {
+  it("retains the compact pre-production receipt alongside the later exact acceptance", () => {
     const receipt = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/seismic-toss-staging-receipt.json"), "utf8")) as Json;
     expect(receipt).toMatchObject({
       schema: "seismic-toss-compact-staging-receipt/v1", oracleProfile: "battle-scene-on",
@@ -255,10 +255,11 @@ describe("MOVE_SEISMIC_TOSS source/classification and legal Scene-ON staging che
       expect(run.target.maxHp).toBeGreaterThan(run.branch.animationDamage);
     }
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(230);
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SEISMIC_TOSS")).toBeUndefined();
+    expect(coverage.entries).toHaveLength(231);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SEISMIC_TOSS"))
+      .toMatchObject({ status: "exact" });
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "seismic-toss-air-rock-scatter");
-    expect(track).toMatchObject({ representatives: ["MOVE_SEISMIC_TOSS"], fulfilled: false });
+    expect(track).toMatchObject({ representatives: ["MOVE_SEISMIC_TOSS"], fulfilled: true });
     for (const move of ["MOVE_ROCK_THROW", "MOVE_ROCK_SLIDE", "MOVE_ANCIENT_POWER"]) {
       expect(coverage.entries.find((entry: Json) => entry.move === move)).toMatchObject({ status: "exact" });
     }

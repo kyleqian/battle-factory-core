@@ -72,7 +72,10 @@ export function seismicTossConfigFor(side: Orientation,
     y: hits[0]!.y + 8 };
   const targetRockCenter = { x: waves[0]![0]!.x + 12, y: waves[0]![0]!.y - 27 };
   return { move: "SEISMIC_TOSS",
-    attacker: battler("KECLEON", attackerSide, first.battlerSprites.attacker),
+    // The retained stage used internal species id 352. In Emerald's internal
+    // species table that is GRUMPIG (KECLEON is 317); the old National-Dex
+    // interpretation mislabeled the live sprite, healthbox, and message.
+    attacker: battler("GRUMPIG", attackerSide, first.battlerSprites.attacker),
     target: battler("ONIX", targetSide, first.battlerSprites.target),
     fieldProfile: { playerHp: first.battlers.player.hp,
       playerMaxHp: first.battlers.player.maxHp, opponentHp: first.battlers.opponent.hp,
@@ -194,6 +197,12 @@ export function inspectSeismicTossAlteredControl() {
   return { species: [altered.attacker.species, altered.target.species],
     sides: [altered.attacker.geometry.side, altered.target.geometry.side],
     geometry: altered.animationGeometry,
+    basePaletteSha256: sha(Buffer.from(JSON.stringify([
+      base.animationProfile.attackerPalette, base.animationProfile.targetPalette,
+    ]))),
+    alteredPaletteSha256: sha(Buffer.from(JSON.stringify([
+      altered.animationProfile.attackerPalette, altered.animationProfile.targetPalette,
+    ]))),
     allocator: [...alteredView.rocks, ...alteredView.hitsplats].map((item) =>
       [item.slot, item.matrixNum, item.persistentOrder]),
     baseFramebufferSha256: sha(frame(base)), alteredFramebufferSha256: sha(frame(altered)) };

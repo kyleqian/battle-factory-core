@@ -1,3 +1,11 @@
+# MOVE_SEISMIC_TOSS exact bilateral renderer correction (2026-09-03 worker)
+
+- **State:** Level 50 advances **230→231/276 exact**, with **0 partial / 0 staged** and **46→45 unsupported**. MOVE_SEISMIC_TOSS alone promotes and `seismic-toss-air-rock-scatter` alone is fulfilled; Rock Throw, Rock Slide, and Ancient Power retain independent exact acceptance.
+- **Root causes:** The retained stage injected internal species id **352**, which Emerald defines as **GRUMPIG** (KECLEON is internal id **317**); the prior National-Dex interpretation selected the wrong live battler art, healthbox name, and battle message in both orientations. Once corrected, the only remainder was the three IMPACT lives: their OAM entries have OBJ mode 1, but live `BLDCNT` effect mode is 0, so the hardware paints their OBJ palette opaquely and the retained 12/8 `BLDALPHA` is inert.
+- **Acceptance:** The source-relative Medium reducer and all move-owned latches remain **456/456 component-exact**. Two independent actual-core comparator processes are byte-identical (`50979982…`) and each pass player-back **228/228** plus opponent-front **228/228** framebuffer rows (**456/456**, zero residual pixels / peak **0**), improving from **0/456**, player **628,763 / 3,128**, opponent **438,889 / 2,293**.
+- **Altered control:** MACHOKE/GOLEM reverses sides and materially changes species, geometry, palette ordering (`3879af05…→fff7ecbf…`), allocator slots/order/matrices, and framebuffer (`c692fd9f…→e905fdd0…`) through the same path.
+- **Scope:** Presentation/comparator/coverage and count ratchets only; no gameplay damage, PP, RNG, outcome, controller, turn, round, facility state, unsupported barrier, import-boundary exception, sibling promotion, or main-program document changed.
+
 # Animation supervisor verification — Seismic Toss component-exact production checkpoint merged, framebuffer unsupported (2026-09-03 supervisor)
 
 - **State:** Level 50 remains **230/276 exact**, **0 partial / 0 staged**, and **46 unsupported**. MOVE_SEISMIC_TOSS and `seismic-toss-air-rock-scatter` remain unsupported/unfulfilled; no sibling credit changed.

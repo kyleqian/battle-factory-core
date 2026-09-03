@@ -33271,10 +33271,8 @@ export function renderSceneOnMovePresentation(
     if (!attackerSource || !targetSource) {
       throw new Error(`SEISMIC_TOSS missing live battler art ${view.attacker.species}->${view.target.species}`);
     }
-    const attackerTileset = playerAttacker ? attackerSource.tileset
-      : subTileset(attackerSource.tileset, 0, 8);
-    const targetTileset = view.target.geometry.side === "player" ? targetSource.tileset
-      : subTileset(targetSource.tileset, 0, 8);
+    const attackerTileset = attackerSource.tileset;
+    const targetTileset = targetSource.tileset;
     const darken = (palette: readonly RgbColor[]) => palette.map((color) => {
       const packed = mgbaDarkenColor(color.r | color.g << 8 | color.b << 16, view.bldy);
       return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
@@ -33290,7 +33288,6 @@ export function renderSceneOnMovePresentation(
     drawSpriteSheet(fb, targetTileset, [...seismicState.config.animationProfile.targetPalette],
       view.target.geometry.spriteCorner.x + displayed.targetOffset.x2,
       view.target.geometry.spriteCorner.y + displayed.targetOffset.y2);
-    const targetBackdrop = fb.slice();
     drawSpriteSheet(fb, attackerTileset, [...seismicState.config.animationProfile.attackerPalette],
       view.attacker.geometry.spriteCorner.x
         + seismicState.config.animationGeometry.attackerRestOffset.x2,
@@ -33306,9 +33303,13 @@ export function renderSceneOnMovePresentation(
     }
     for (const hit of [...displayed.hitsplats].sort((a, b) =>
       b.persistentOrder - a.persistentOrder)) {
-      drawSpriteSheetAffineRotateBlendedOverFb(fb, targetBackdrop,
+      // The IMPACT OAM entry has OBJ mode 1, but the live scanout has
+      // BLDCNT effect mode 0 while these three sprites are displayed.
+      // Hardware therefore paints the OBJ palette directly; BLDALPHA's
+      // retained 12/8 value is inert without an enabled alpha effect.
+      drawSpriteSheetAffineRotate(fb,
         battleAnimHitsplat.tileset, battleAnimHitsplat.palette,
-        hit.x, hit.y, ...hit.matrix, 12, 8, true);
+        hit.x, hit.y, ...hit.matrix, undefined, true);
     }
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;

@@ -17,16 +17,22 @@ describe("MOVE_SEISMIC_TOSS Medium production body", () => {
       "src/animation/assets/seismic-toss.json")));
   });
 
-  it("matches every component row twice and measures the bounded framebuffer remainder", () => {
+  it("matches every component and framebuffer row twice through the actual core", () => {
     const result = inspect(), repeat = inspect();
     expect(result.comparisons.map((item: any) => [item.totalRows, item.componentExactRows]))
       .toEqual([[228, 228], [228, 228]]);
     expect(result.comparisons.map((item: any) => [item.zeroRows, item.residualPixels,
-      item.peakResidualPixels])).toEqual([[0, 628763, 3128], [0, 438889, 2293]]);
+      item.peakResidualPixels])).toEqual([[228, 0, 0], [228, 0, 0]]);
     expect(repeat).toEqual(result);
+    expect(result.alteredControl.species).toEqual(["MACHOKE", "GOLEM"]);
+    expect(result.alteredControl.sides).toEqual(["opponent", "player"]);
+    expect(result.alteredControl.basePaletteSha256)
+      .not.toBe(result.alteredControl.alteredPaletteSha256);
     expect(result.alteredControl.baseFramebufferSha256)
       .not.toBe(result.alteredControl.alteredFramebufferSha256);
-    expect(new Set(result.alteredControl.allocator.map((row: number[]) => row[0])).size)
-      .toBeGreaterThan(4);
+    for (const column of [0, 1, 2]) {
+      expect(new Set(result.alteredControl.allocator.map((row: number[]) => row[column])).size)
+        .toBeGreaterThan(3);
+    }
   });
 });

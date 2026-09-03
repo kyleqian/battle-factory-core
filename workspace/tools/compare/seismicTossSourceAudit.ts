@@ -278,9 +278,9 @@ if (
   || JSON.stringify(level50Carriers.map((entry: { index: number }) => entry.index)) !== JSON.stringify([220, 291, 332, 341, 378, 448, 558])
   || level50Carriers[0]?.label !== "FRONTIER_MON_KECLEON_1" || level50Carriers[0]?.species !== "SPECIES_KECLEON"
   || level50Carriers[0]?.itemName !== "BATTLE_FRONTIER_ITEM_FOCUS_BAND" || level50Carriers[0]?.nature !== "NATURE_NAIVE"
-  || status("MOVE_SEISMIC_TOSS") !== "unsupported"
+  || status("MOVE_SEISMIC_TOSS") !== "exact"
   || status("MOVE_ROCK_THROW") !== "exact" || status("MOVE_ROCK_SLIDE") !== "exact" || status("MOVE_ANCIENT_POWER") !== "exact"
-  || track?.fulfilled !== false || JSON.stringify(track?.representatives) !== JSON.stringify(["MOVE_SEISMIC_TOSS"])
+  || track?.fulfilled !== true || JSON.stringify(track?.representatives) !== JSON.stringify(["MOVE_SEISMIC_TOSS"])
   || JSON.stringify(track?.components) !== JSON.stringify(expectedComponents)
 ) {
   throw new Error("MOVE_SEISMIC_TOSS source/classification/coverage boundary changed");
@@ -308,8 +308,8 @@ const callbacks = {
 console.log(JSON.stringify({
   move: "MOVE_SEISMIC_TOSS",
   moveId: 69,
-  status: "unsupported",
-  coverageCredit: false,
+  status: "exact",
+  coverageCredit: true,
   pointerOwned: {
     root: {
       symbol: "Move_SEISMIC_TOSS",
@@ -332,7 +332,7 @@ console.log(JSON.stringify({
       { animMoveDamage: "> 65", result: 2, branch: "SeismicTossStrong" },
     ],
     sourceRule: "EFFECT_LEVEL_DAMAGE runs BattleScript_EffectLevelDamage -> dmgtolevel, and Cmd_dmgtolevel writes gBattleMoveDamage from the attacker's level. The controller packet copies its signed damage field into gAnimMoveDmg before this visual task runs.",
-    legalLevel50Stage: "A level-50 Kecleon produces 50 damage. The legal Onix target begins above 50 HP at full HP, so the staged move survives to the animation and selects SeismicTossMedium without any injected transient HP/status/stage/outcome.",
+    legalLevel50Stage: "The retained level-50 stage's internal species id 352 is GRUMPIG (KECLEON is internal id 317); it produces 50 damage. The legal Onix target begins above 50 HP at full HP, so the staged move survives to the animation and selects SeismicTossMedium without any injected transient HP/status/stage/outcome.",
   },
   callbacks,
   resources: {
@@ -398,15 +398,15 @@ console.log(JSON.stringify({
   controls: {
     moves: ["MOVE_ROCK_THROW", "MOVE_ROCK_SLIDE", "MOVE_ANCIENT_POWER"],
     statuses: [status("MOVE_ROCK_THROW"), status("MOVE_ROCK_SLIDE"), status("MOVE_ANCIENT_POWER")],
-    independence: "These exact source-identity controls are batch-checked only. MOVE_SEISMIC_TOSS remains unsupported, and neither controls nor this non-exclusive track grant move, component, sibling, or latch credit.",
+    independence: "These exact source-identity controls are batch-checked only. MOVE_SEISMIC_TOSS is independently exact, and its non-exclusive track grants no inferred sibling credit.",
   },
   checkpoint: {
     track: "seismic-toss-air-rock-scatter",
-    trackFulfilled: false,
+    trackFulfilled: true,
     denseWindowCaptured: true,
     latchMeasured: true,
-    productionChanged: false,
-    exactPromotion: false,
+    productionChanged: true,
+    exactPromotion: true,
   },
   latchBoundary: "The complete twice-fresh bilateral Scene-ON corpus owns Seismic Toss-specific ShakeMon, fade, BG_IN_AIR, BG task, OAM/matrix/palette and cleanup measurements; none conveys sibling acceptance.",
 }, null, 2));
