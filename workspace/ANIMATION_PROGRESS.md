@@ -1,3 +1,10 @@
+# Animation supervisor verification — Leech Seed component track reconciled (2026-09-03 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `seed-projectile-leech-seed` is now explicitly fulfilled from MOVE_LEECH_SEED's existing independent acceptance; no move status/count or sibling credit changed.
+- **Merged:** Independently audited and fast-forwarded worker commit `814328493`. The three-line semantic change adds only `fulfilled: true`, a direct ratchet for that flag, and the animation handoff entry; it changes no production, comparator, fixture/evidence, scenario, latch, gameplay, barrier, import boundary, or main-program document. The worker correctly identified that the supervisor brief's 120/120 and 119/119 latch figures belonged to Smelling Salt, verified that receipt unchanged, and did not transfer those facts to Leech Seed.
+- **Verified:** Both complete main windows remain **141/141** and both natural residual windows **207/207**, totaling **696/696** source-relative reducer, typed-seam, raw-RGB, and actual-core framebuffer rows with zero residual pixels through inactive cleanup. Focused Leech Seed/Absorb/Smelling Salt/inventory/boundary/frontier checks pass **9 files / 38 tests**; coverage/audit/typecheck/diff checks pass.
+- **Merged gate:** Post-merge `npm test` passes **1,235 files / 10,888 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**. Next: audit the next missing component-track flag, `water-orb-hydro-pump-whirlpool`, and set it only after both MOVE_HYDRO_PUMP and MOVE_WHIRLPOOL retain their independent complete bilateral exact receipts.
+
 # Leech Seed component-track ledger reconciliation (2026-09-03 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `seed-projectile-leech-seed` changes from falsely ranked open to fulfilled; no move status or count changes. MOVE_ABSORB remains an independently exact regression control, and outside-Factory MOVE_BULLET_SEED remains unsupported with no sibling credit.
