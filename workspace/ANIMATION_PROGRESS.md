@@ -4,6 +4,7 @@
 - **Merged:** Independently reviewed and fast-forwarded worker commit `30297d453`. The six-file checkpoint normalizes one asserted-empty BattleLab transport field, pins the source-age-4 `Task_UpdateMonBg` current-row palette handoff, adds its latch/track ratchets, and updates animation ledgers only; no production engine, fixture/evidence/scenario, gameplay, boundary/barrier, or main-program document changed.
 - **Verified:** Fresh supervisor runs reproduce both orientations twice: Spore **207/207** (`5b275a53…`/`9730e4ea…`, `7d723ded…`/`59a82fde…`) and Cotton Spore **204/204** (`f3505c58…`/`b46bd803…`, `a719bb8d…`/`629fb753…`) with exact source/component, seam, hardware-state, raw-RGB, and actual-core framebuffer rows. Focused source/evidence/inventory/boundary/frontier checks and coverage/audit/diff checks pass.
 - **Merged gate:** Post-merge `npm test` passes **1,235 files / 10,890 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**. Next: reconcile `sparkle-3-special-screen` only after MOVE_LIGHT_SCREEN and MOVE_MIRROR_COAT independently retain their complete bilateral receipts.
+- **Wind-down:** Three disposable `sparkle-3-special-screen` dispatch attempts (Terra/max twice, then permitted Luna/max escalation) failed before the worker turn with the same Codex service HTTP 404; all untouched worktrees/branches were removed. No product or campaign-state deferral is open. Resume the same bounded track on the next scheduled invocation.
 
 # Spore-particles receipt reconciliation + fulfilled track (2026-09-03 worker)
 
