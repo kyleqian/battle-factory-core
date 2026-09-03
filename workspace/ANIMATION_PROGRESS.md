@@ -1,3 +1,10 @@
+# Animation supervisor verification — Tri Attack exact closure merged (2026-09-03 supervisor)
+
+- **State:** Level 50 is **229/276 exact**, **0 partial / 0 staged**, and **47 unsupported**. MOVE_TRI_ATTACK alone is exact and `shake-target-in-pattern-scary-face` is fulfilled; Scary Face, Glare, and Thunder remain independently exact.
+- **Merged:** Audited and fast-forwarded worker commit `b07998836`. The semantic change is limited to Tri Attack's presentation compositor: reverse stable equal-Y OAM-rank painting, the measured extra target-task scanout latch, the pattern-0 creation-row exception, and 8-bit OAM Y wrapping. The 50+ other test/audit edits are mechanical global coverage ratchets only (`228→229`, `48→47`); no gameplay owner, unsupported barrier, import boundary, sibling credit, or main-program document changed.
+- **Verified:** Two fresh supervisor comparator processes are byte-identical (`8c9aecd6…`) and each pass **284/284 player-back + 284/284 opponent-front** component and actual-core framebuffer rows with **zero residual pixels / peak zero**. The altered MAGBY/ONIX species, reversed sides, geometry, allocator, matrices, and order seed remain material. Focused source/evidence/production plus Scary Face/Glare/Thunder and boundary checks pass **7 files / 31 tests**; coverage/audit/diff checks pass.
+- **Merged gate:** Post-merge `npm test` passes **1,228 files / 10,868 tests** with **44 files / 223 tests skipped**; `npm run build` passes **758 modules**. Next bounded action: select the highest-ranked unsupported Level-50 move/component from fresh coverage without inheriting acceptance from this completed track.
+
 # MOVE_TRI_ATTACK exact production closure (2026-09-03 worker)
 
 - **State:** Level 50 is now **229/276 exact**, **0 partial / 0 staged**, and **47 unsupported**. MOVE_TRI_ATTACK alone is promoted and `shake-target-in-pattern-scary-face` is fulfilled; Scary Face, Glare, and Thunder remain unchanged independent exact controls.
