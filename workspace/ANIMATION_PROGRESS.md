@@ -1,3 +1,10 @@
+# MOVE_SEISMIC_TOSS source/classification + legal bilateral Scene-ON staging checkpoint — unsupported (2026-09-03 worker)
+
+- **State:** Level 50 remains **230/276 exact**, **0 partial / 0 staged**, and **46 unsupported**. MOVE_SEISMIC_TOSS remains absent from accepted entries; the new non-exclusive `seismic-toss-air-rock-scatter` 23-component track is unfulfilled and names only Seismic Toss. Rock Throw, Rock Slide, and Ancient Power were source-identity batch controls only.
+- **Source/classification:** `seismicTossSourceAudit.ts` byte-pins the complete **349-byte** `Move_SEISMIC_TOSS` interval **0x082d6b00..0x082d6c5d**, its Continue/Weak/Medium/Strong/two rock-scatter bodies, 14 direct task/callback bodies, IMPACT/ROCKS/rock-scatter assets, BG_IN_AIR, audio, cleanup, and all seven Level-50 carriers (lowest: KECLEON_1 #220). `EFFECT_LEVEL_DAMAGE` reaches `Cmd_dmgtolevel`, which supplies attacker level to `gAnimMoveDmg`; level 50 selects Medium (33..65, result 1).
+- **Stage/live:** Complete transient-free legal Kecleon/Onix 3v3 Scene-ON fixtures validate in both natural orientations with all opponent choices legal and constrained. Two fresh mGBA-wrapper runs per orientation are byte-identical; each reaches Medium with damage **50**, spends one PP, preserves checked benches, and uses a full-HP **142**-HP Onix target so no transient geometry is injected.
+- **Boundary/remainder:** This is source/staging only: no dense state/raw-RGB capture, latch measurement or `ANIMATION_LATCHES.md` row, reducer/assets/compositor/presentation seam, production wiring, or promotion. A later move-owned bilateral dense window through cleanup must independently measure every Seismic Toss mechanism before any acceptance claim.
+
 # Animation supervisor verification — Frustration exact closure merged (2026-09-03 supervisor)
 
 - **State:** Level 50 is now **230/276 exact**, **0 partial / 0 staged**, and **46 unsupported**. MOVE_FRUSTRATION is exact and `anger-mark-grow-breath` is fulfilled; Swagger, Torment, and Taunt retain independent exact acceptance.

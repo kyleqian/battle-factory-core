@@ -8214,6 +8214,45 @@
     "tests/animation/hyperBeam.test.ts"
    ],
    "goal": "FULFILLED by MOVE_HYPER_BEAM only: the complete legal bilateral Scene-ON body through first inactive cleanup passes twice at 560/560 actual-core rows with zero residual pixels. The source-derived reducer, ORBS asset, typed seam, and compositor preserve all nine components, 26 groups, 52 orb lifecycles, 156 presentation-only RNG draws, stable allocation/order, palette and shake schedules, audio/resources, and cleanup from live species/sides/geometry/order. No sibling receives inferred credit."
+  },
+  {
+   "id": "seismic-toss-air-rock-scatter",
+   "components": [
+    "asset:ANIM_TAG_IMPACT",
+    "asset:ANIM_TAG_ROCKS",
+    "sprite:gRockScatterSpriteTemplate",
+    "subroutine:SeismicTossContinue",
+    "subroutine:SeismicTossMedium",
+    "subroutine:SeismicTossRockScatter1",
+    "subroutine:SeismicTossRockScatter2",
+    "subroutine:SeismicTossStrong",
+    "subroutine:SeismicTossWeak",
+    "task:AnimTask_GetSeismicTossDamageLevel",
+    "task:AnimTask_MoveSeismicTossBg",
+    "task:AnimTask_SeismicTossBgAccelerateDownAtEnd",
+    "task:AnimTask_ShakeMon",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:create_basic_hitsplat_sprite",
+    "visualCommand:fadetobg",
+    "visualCommand:monbg",
+    "visualCommand:restorebg",
+    "visualCommand:setalpha",
+    "visualCommand:setarg",
+    "visualCommand:waitbgfadein",
+    "visualCommand:waitbgfadeout"
+   ],
+   "representatives": ["MOVE_SEISMIC_TOSS"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/battle-lab/mechanic-seismic-toss-player-kecleon-opponent-onix.json",
+    "tools/battle-lab/mechanic-seismic-toss-opponent-kecleon-player-onix.json",
+    "tools/compare/seismicTossSourceAudit.ts",
+    "tools/compare/seismicTossStagingProbe.py",
+    "tools/compare/fixtures/seismic-toss-staging-receipt.json",
+    "tests/animation/seismicTossSourceCheckpoint.test.ts"
+   ],
+   "goal": "UNFULFILLED source/classification plus legal bilateral Scene-ON staging checkpoint only: MOVE_SEISMIC_TOSS remains unsupported and receives no shared-component or sibling acceptance. A later move-owned dense window must independently measure its own task, sprite, palette, BG, and scanout latches through cleanup before any reducer, assets, compositor, presentation seam, or exact promotion."
   }
  ],
  "variantAudits": {

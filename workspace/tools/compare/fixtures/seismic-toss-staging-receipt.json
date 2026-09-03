@@ -1,0 +1,67 @@
+{
+  "schema": "seismic-toss-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SEISMIC_TOSS",
+  "moveId": 69,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "sourceAudit": "tools/compare/seismicTossSourceAudit.ts",
+  "liveProbe": "tools/compare/seismicTossStagingProbe.py",
+  "factoryLegalSelection": {
+    "damageSource": "BattleScript_EffectLevelDamage -> dmgtolevel -> Cmd_dmgtolevel uses attacker level; the controller copies that field to gAnimMoveDmg.",
+    "level": 50,
+    "animationDamage": 50,
+    "selector": "AnimTask_GetSeismicTossDamageLevel",
+    "returnArgIndex": 7,
+    "result": 1,
+    "branch": "SeismicTossMedium",
+    "otherPointerOwnedBranches": [
+      "SeismicTossWeak",
+      "SeismicTossStrong"
+    ],
+    "targetGeometry": "Full-HP legal level-50 Onix has 142 HP, strictly above the 50 level damage, so no transient HP/status/stage/outcome injection is needed to reach the Medium branch."
+  },
+  "runs": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-seismic-toss-player-kecleon-opponent-onix.json",
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "a12593912950b65041714436a52d1ddf9c4a580fb503d6ec59b07637469546ac",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "player", "partyIndex": 0, "species": 352, "level": 50},
+      "target": {"side": "opponent", "partyIndex": 0, "species": 95, "initialHp": 142, "maxHp": 142},
+      "legalAiMoveSlots": [33, 33, 33, 33],
+      "entry": {"currentMove": 69, "root": "Move_SEISMIC_TOSS", "controllerExecFlags": 1},
+      "branch": {"label": "SeismicTossMedium", "result": 1, "returnArgIndex": 7, "animationDamage": 50, "rootObservations": 227},
+      "pp": {"before": [20, 20, 20, 20], "after": [19, 20, 20, 20], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true},
+      "transientFreeSetup": true
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-seismic-toss-opponent-kecleon-player-onix.json",
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "9b9303f1e5dde4c266105ae3cef50c71c21bfd49a12a719120dc1311e7ddf966",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "opponent", "partyIndex": 0, "species": 352, "level": 50},
+      "target": {"side": "player", "partyIndex": 0, "species": 95, "initialHp": 142, "maxHp": 142},
+      "legalAiMoveSlots": [69, 69, 69, 69],
+      "entry": {"currentMove": 69, "root": "Move_SEISMIC_TOSS", "controllerExecFlags": 2},
+      "branch": {"label": "SeismicTossMedium", "result": 1, "returnArgIndex": 7, "animationDamage": 50, "rootObservations": 227},
+      "pp": {"before": [20, 20, 20, 20], "after": [20, 19, 20, 20], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true},
+      "transientFreeSetup": true
+    }
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "denseWindowCaptured": false,
+    "latchMeasured": false,
+    "productionChanged": false,
+    "coveragePromotion": false,
+    "transientOverrides": []
+  },
+  "remainder": "Capture a complete dense Seismic Toss-owned bilateral Scene-ON window through cleanup; independently measure its own task, sprite, palette, BG, and scanout latches before any reducer, asset/compositor or presentation-seam work, latch claim, or MOVE_SEISMIC_TOSS promotion."
+}
