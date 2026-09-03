@@ -80,8 +80,8 @@ describe("MOVE_SEISMIC_TOSS source/classification and legal Scene-ON staging che
         ],
       },
       checkpoint: {
-        track: "seismic-toss-air-rock-scatter", trackFulfilled: false, denseWindowCaptured: false,
-        latchMeasured: false, productionChanged: false, exactPromotion: false,
+        track: "seismic-toss-air-rock-scatter", trackFulfilled: false, denseWindowCaptured: true,
+        latchMeasured: true, productionChanged: false, exactPromotion: false,
       },
     });
 

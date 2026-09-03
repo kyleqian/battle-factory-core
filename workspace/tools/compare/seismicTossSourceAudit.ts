@@ -403,10 +403,10 @@ console.log(JSON.stringify({
   checkpoint: {
     track: "seismic-toss-air-rock-scatter",
     trackFulfilled: false,
-    denseWindowCaptured: false,
-    latchMeasured: false,
+    denseWindowCaptured: true,
+    latchMeasured: true,
     productionChanged: false,
     exactPromotion: false,
   },
-  latchBoundary: "No ANIMATION_LATCHES row is added: shared ShakeMon and fade facts remain hypotheses only until a complete Seismic Toss-owned bilateral dense Scene-ON window measures them.",
+  latchBoundary: "The complete twice-fresh bilateral Scene-ON corpus owns Seismic Toss-specific ShakeMon, fade, BG_IN_AIR, BG task, OAM/matrix/palette and cleanup measurements; none conveys sibling acceptance.",
 }, null, 2));

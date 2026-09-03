@@ -8252,7 +8252,7 @@
     "tools/compare/fixtures/seismic-toss-staging-receipt.json",
     "tests/animation/seismicTossSourceCheckpoint.test.ts"
    ],
-   "goal": "UNFULFILLED source/classification plus legal bilateral Scene-ON staging checkpoint only: MOVE_SEISMIC_TOSS remains unsupported and receives no shared-component or sibling acceptance. A later move-owned dense window must independently measure its own task, sprite, palette, BG, and scanout latches through cleanup before any reducer, assets, compositor, presentation seam, or exact promotion."
+   "goal": "UNFULFILLED evidence-only checkpoint: MOVE_SEISMIC_TOSS retains twice-fresh complete 228-row legal bilateral Medium-branch Scene-ON windows, raw RGB archives, normalized/frame change maps, source/task/sprite/OAM/matrix/palette/BG-VRAM/register/audio/resource/RNG/gameplay/PP/cleanup measurements, and a move-owned latch row. MOVE_SEISMIC_TOSS remains unsupported and receives no shared-component or sibling acceptance; no reducer, assets, compositor, presentation seam, framebuffer fitting, core wiring, or exact promotion is present."
   }
  ],
  "variantAudits": {

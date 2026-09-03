@@ -1,3 +1,10 @@
+# MOVE_SEISMIC_TOSS complete bilateral dense-evidence checkpoint — unsupported (2026-09-03 worker)
+
+- **State:** Level 50 remains **230/276 exact**, **0 partial / 0 staged**, and **46 unsupported**. MOVE_SEISMIC_TOSS and `seismic-toss-air-rock-scatter` remain unsupported/unfulfilled; Rock Throw, Rock Slide, and Ancient Power retain independent acceptance.
+- **Evidence:** Two fresh wrapper-validated Scene-ON runs per orientation are byte-identical. Player-back retains **77..304** and opponent-front **81..308**, **228/228** chronological rows each, with raw RGB888 archives, reproducible normalized maps, and frame change maps through first inactive cleanup.
+- **Measured:** The move-owned verifier pins the 349-byte root/Medium result; all task and sprite lives, slots/order, software/hardware OAM and all matrices, faded/unfaded/hardware palettes, BG VRAM/registers/scrolling, audio, tags/resources, animation RNG, immutable gameplay/party/battler state, one PP, and teardown. Whole OAM/matrices are predecessor **227/227**; palette is predecessor **226/227** with age 7 exceptional; both Seismic Toss BG tasks and each hidden-target ShakeMon scan out RAM+1.
+- **Boundary:** Evidence and Seismic Toss-specific latches only. No reducer, extracted asset, compositor, presentation seam, framebuffer fitter, production wiring, coverage promotion, gameplay ownership, barrier/boundary exception, sibling acceptance, or main-program document changed.
+
 # Animation supervisor verification — Seismic Toss source/staging merged, remains unsupported (2026-09-03 supervisor)
 
 - **State:** Level 50 remains **230/276 exact**, **0 partial / 0 staged**, and **46 unsupported**. MOVE_SEISMIC_TOSS and `seismic-toss-air-rock-scatter` remain unsupported/unfulfilled; Rock Throw, Rock Slide, and Ancient Power retain independent acceptance.
