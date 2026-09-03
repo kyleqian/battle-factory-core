@@ -1,3 +1,11 @@
+# MOVE_FRUSTRATION complete bilateral dense-evidence checkpoint — unsupported (2026-09-03 worker)
+
+- **State:** Level 50 remains **229/276 exact**, **0 partial / 0 staged**, and **47 unsupported**; MOVE_FRUSTRATION and `anger-mark-grow-breath` remain unsupported/unfulfilled, while Swagger, Torment, and Taunt retain independent exact status.
+- **Evidence:** Two fresh wrapper-validated Scene-ON runs per orientation are byte-identical. The banked player-back **76..304** and opponent-front **80..308** windows each retain **229/229** chronological dense rows, raw RGB888 archives, normalized maps, and frame change maps through first inactive cleanup.
+- **Measured:** Source/task/sprite lifecycles, pointers/parities, allocator/order, software/hardware OAM and matrices, faded/unfaded/hardware palettes, tags, BG/BLD registers, audio, animation RNG, immutable state, checked benches, PP, and teardown are hermetically replayed. The new Frustration latch row records ordinary OAM/matrix RAM+1, attacker ShakeMon2 RAM+1, SwayMon RAM+2, hidden target ShakeMon2 with BG RAM+1, palette age-7 setup exception, monbg/alpha, anger/impact lives, audio, and cleanup.
+- **Boundary:** No reducer, asset, compositor, presentation seam, framebuffer fitter, gameplay owner, barrier, coverage promotion, or sibling credit was added. Factory friendship 0 proves only `Frustration_Strongest`; other source-pinned strength branches remain unclaimed.
+- **Next:** Supervisor may use the evidence checkpoint for a later bounded implementation decision; any production work must remain move-local and independently re-verify both orientations and all named controls.
+
 # Animation supervisor verification — Frustration source/staging merged, remains unsupported (2026-09-03 supervisor)
 
 - **State:** Level 50 remains **229/276 exact**, **0 partial / 0 staged**, and **47 unsupported**. MOVE_FRUSTRATION and `anger-mark-grow-breath` remain unsupported/unfulfilled; Swagger, Torment, and Taunt remain independently exact.
