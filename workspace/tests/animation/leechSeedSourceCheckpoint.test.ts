@@ -97,6 +97,7 @@ describe("MOVE_LEECH_SEED source and natural-residual staging checkpoint", () =>
       track.id === "seed-projectile-leech-seed")).toMatchObject({
       components: ["asset:ANIM_TAG_SEED", "visualCommand:createleechseedsprite"],
       representatives: ["MOVE_LEECH_SEED"],
+      fulfilled: true,
     });
   });
 });

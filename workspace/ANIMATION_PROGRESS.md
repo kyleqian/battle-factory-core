@@ -1,3 +1,10 @@
+# Leech Seed component-track ledger reconciliation (2026-09-03 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `seed-projectile-leech-seed` changes from falsely ranked open to fulfilled; no move status or count changes. MOVE_ABSORB remains an independently exact regression control, and outside-Factory MOVE_BULLET_SEED remains unsupported with no sibling credit.
+- **Revalidated:** The checked-in source audit still pins only `asset:ANIM_TAG_SEED` and `visualCommand:createleechseedsprite`. Both complete main windows pass **141/141** and both natural residual windows pass **207/207**, totaling **696/696** source-relative reducer, typed-seam, raw-RGB, and actual-core framebuffer rows with zero residual pixels through clean inactive teardown.
+- **Scope:** Set the existing track's missing `fulfilled: true` metadata and strengthened its precise Leech Seed ratchet. No production, comparator, fixture, evidence, scenario, latch, gameplay, unsupported barrier, import-boundary exception, or acceptance-count change.
+- **Checks:** Focused Leech Seed/Absorb/Smelling Salt/inventory/boundary/frontier controls pass **9 files / 38 tests**; coverage, animation audit, typecheck, and diff check pass. Full `npm test` passes **1,235 files / 10,888 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+
 # Animation supervisor verification — Seismic Toss exact promotion merged (2026-09-03 supervisor)
 
 - **State:** Level 50 advances to **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. MOVE_SEISMIC_TOSS alone is accepted and `seismic-toss-air-rock-scatter` alone is fulfilled; Rock Throw, Rock Slide, and Ancient Power retain independent acceptance.
