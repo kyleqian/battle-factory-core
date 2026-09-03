@@ -628,6 +628,7 @@ import sweetScentAsset from "../animation/assets/sweet-scent.json" with { type: 
 import defenseCurlAsset from "../animation/assets/defense-curl.json" with { type: "json" };
 import ingrainAsset from "../animation/assets/ingrain.json" with { type: "json" };
 import eruptionWarmRockAsset from "../animation/assets/eruption-warm-rock.json" with { type: "json" };
+import seismicTossAsset from "../animation/assets/seismic-toss.json" with { type: "json" };
 import sandTombMudSandAsset from "../animation/assets/sand-tomb-mud-sand.json" with { type: "json" };
 import meanLookAsset from "../animation/assets/mean-look.json" with { type: "json" };
 import smellingSaltAsset from "../animation/assets/smelling-salt.json" with { type: "json" };
@@ -989,6 +990,7 @@ import {
   sceneOnSubstituteView,
   sceneOnSwaggerView,
   sceneOnFrustrationView,
+  sceneOnSeismicTossView,
   sceneOnBulkUpView,
   sceneOnTauntView,
   sceneOnTormentView,
@@ -1093,6 +1095,7 @@ import {
   type SceneOnSafeguardConfig,
   type SceneOnStockpileConfig,
   type SceneOnFrustrationConfig,
+  type SceneOnSeismicTossConfig,
   type SceneOnGrudgeConfig,
   type SceneOnHiddenPowerConfig,
   type SceneOnLeerConfig,
@@ -2293,6 +2296,9 @@ export const battleAnimMudSand = battleAnimMudSandAsset as {
   palette: RgbColor[];
 };
 const fissureArt = fissureAsset as {
+  background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
+};
+const seismicTossArt = seismicTossAsset as {
   background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
 };
 /** S7/S8 turn 14 (docs/turn14-notes.md's worktree-lane addendum): `gFlyBallUpSpriteTemplate`'s "round shadow" ball sprite (`ANIM_TAG_ROUND_SHADOW`, `round_shadow.png`, 64x64) - see `tools/extract/extract-fly-ball.ts`. */
@@ -33247,6 +33253,79 @@ export function renderSceneOnMovePresentation(
       "EXPLOSION!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "SEISMIC_TOSS") {
+    const seismicState = state as SceneOnMovePresentationState<SceneOnSeismicTossConfig>;
+    const view = sceneOnSeismicTossView(seismicState);
+    const displayed = sceneOnSeismicTossView({ ...seismicState,
+      age: Math.max(0, seismicState.age - 1) });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "player"
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species];
+    if (!attackerSource || !targetSource) {
+      throw new Error(`SEISMIC_TOSS missing live battler art ${view.attacker.species}->${view.target.species}`);
+    }
+    const attackerTileset = playerAttacker ? attackerSource.tileset
+      : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "player" ? targetSource.tileset
+      : subTileset(targetSource.tileset, 0, 8);
+    const darken = (palette: readonly RgbColor[]) => palette.map((color) => {
+      const packed = mgbaDarkenColor(color.r | color.g << 8 | color.b << 16, view.bldy);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    });
+    if (view.background === "in-air") {
+      drawScrolledTileBg(fb, seismicTossArt.background.tileset,
+        seismicTossArt.background.tilemap, [darken(seismicTossArt.background.palette)],
+        0, displayed.bg3Y & 0x1ff);
+    } else {
+      drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap,
+        battleBg.palette.map(darken));
+    }
+    drawSpriteSheet(fb, targetTileset, [...seismicState.config.animationProfile.targetPalette],
+      view.target.geometry.spriteCorner.x + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayed.targetOffset.y2);
+    const targetBackdrop = fb.slice();
+    drawSpriteSheet(fb, attackerTileset, [...seismicState.config.animationProfile.attackerPalette],
+      view.attacker.geometry.spriteCorner.x
+        + seismicState.config.animationGeometry.attackerRestOffset.x2,
+      view.attacker.geometry.spriteCorner.y
+        + seismicState.config.animationGeometry.attackerRestOffset.y2);
+    for (const rock of [...displayed.rocks].sort((left, right) =>
+      left.y + left.y2 - (right.y + right.y2)
+        || right.persistentOrder - left.persistentOrder)) {
+      drawSpriteSheetAffineRotate(fb,
+        subTileset(battleAnimRocks.tileset, rock.animation * 4, 4),
+        battleAnimRocks.palette, rock.x + rock.x2, rock.y + rock.y2,
+        ...rock.matrix, undefined, false);
+    }
+    for (const hit of [...displayed.hitsplats].sort((a, b) =>
+      b.persistentOrder - a.persistentOrder)) {
+      drawSpriteSheetAffineRotateBlendedOverFb(fb, targetBackdrop,
+        battleAnimHitsplat.tileset, battleAnimHitsplat.palette,
+        hit.x, hit.y, ...hit.matrix, 12, 8, true);
+    }
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const profile = seismicState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "SEISMIC TOSS!", 99);
     return;
   }
 

@@ -600,6 +600,12 @@ import {
   type FrustrationState,
 } from "./frustration.ts";
 import {
+  seismicTossAtAge,
+  type SeismicTossGeometry,
+  type SeismicTossProfile,
+  type SeismicTossState,
+} from "./seismicToss.ts";
+import {
   bulkUpAtAge,
   type BulkUpState,
 } from "./bulkUp.ts";
@@ -2629,6 +2635,16 @@ export interface SceneOnFrustrationConfig {
   readonly targetInitialX2: number;
 }
 
+/** Level damage remains battle-owned; this seam is the level-50 Medium body. */
+export interface SceneOnSeismicTossConfig {
+  readonly move: "SEISMIC_TOSS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationGeometry: Readonly<SeismicTossGeometry>;
+  readonly animationProfile: Readonly<SeismicTossProfile>;
+}
+
 export interface SceneOnBulkUpConfig {
   readonly move: "BULK_UP";
   readonly attacker: SceneOnPresentationBattler;
@@ -3741,6 +3757,7 @@ export type SceneOnMoveConfig =
   | SceneOnStockpileConfig
   | SceneOnSwaggerConfig
   | SceneOnFrustrationConfig
+  | SceneOnSeismicTossConfig
   | SceneOnBulkUpConfig
   | SceneOnTauntConfig
   | SceneOnTormentConfig
@@ -4460,6 +4477,11 @@ export interface SceneOnSwaggerView extends SwaggerState {
 }
 
 export interface SceneOnFrustrationView extends FrustrationState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSeismicTossView extends SeismicTossState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8052,6 +8074,18 @@ export function sceneOnFrustrationView(
       state.config.targetInitialX2,
     ),
   };
+}
+
+/** `age=0` is Move_SEISMIC_TOSS's retained IMPACT load row. */
+export function sceneOnSeismicTossView(
+  state: SceneOnMovePresentationState<SceneOnSeismicTossConfig>,
+): SceneOnSeismicTossView {
+  if (state.config.move !== "SEISMIC_TOSS") {
+    throw new Error(`expected SEISMIC_TOSS presentation, got ${state.config.move}`);
+  }
+  return { attacker: state.config.attacker, target: state.config.target,
+    ...seismicTossAtAge(state.age, state.config.target.geometry.side,
+      state.config.animationGeometry, state.config.animationProfile) };
 }
 
 /** `age=0` is Move_BULK_UP's first displayed GrowAndShrink task frame. */

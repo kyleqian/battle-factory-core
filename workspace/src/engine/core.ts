@@ -175,6 +175,7 @@ import {
   type SceneOnTriAttackConfig,
   type SceneOnHyperBeamConfig,
   type SceneOnThunderboltConfig,
+  type SceneOnSeismicTossConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -247,6 +248,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "THUNDERBOLT") {
     const thunderboltPresentation = presentation as SceneOnMovePresentationState<SceneOnThunderboltConfig>;
     renderSceneOnMovePresentation(framebuffer, thunderboltPresentation);
+    return;
+  }
+  if (presentation.config.move === "SEISMIC_TOSS") {
+    const seismicPresentation = presentation as SceneOnMovePresentationState<SceneOnSeismicTossConfig>;
+    renderSceneOnMovePresentation(framebuffer, seismicPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);
