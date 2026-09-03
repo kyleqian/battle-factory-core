@@ -6606,7 +6606,8 @@
     "MOVE_SPORE",
     "MOVE_COTTON_SPORE"
    ],
-   "goal": "MOVE_SPORE and MOVE_COTTON_SPORE are independently exact through complete dense both-orientation proofs twice fresh: Spore's 207-frame blended/alpha/SporeDoubleBattle body and Cotton Spore's distinct 204-frame splitbgprio/unblended/no-alpha/no-SporeDoubleBattle body."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_SPORE and MOVE_COTTON_SPORE are independently exact through complete dense both-orientation proofs twice fresh: Spore's 207-frame blended/12:8-alpha/blendoff/SporeDoubleBattle body and Cotton Spore's distinct 204-frame splitbgprio/opaque/no-alpha/no-blendoff/no-SporeDoubleBattle body. Their shared AnimSporeParticle source component does not transfer the distinct Powder AnimMovePowderParticle latch or any acceptance to other moves."
   },
   {
    "id": "sparkle-3-special-screen",

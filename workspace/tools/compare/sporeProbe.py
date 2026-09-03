@@ -60,6 +60,12 @@ def main() -> None:
     )
     lab = BattleLab(oracle, "battle-scene-on")
     setup = lab.prepare(request)
+    # The BattleLab transport receipt grew this empty member after these
+    # move-local contracts were recorded. None of these move bodies requests a
+    # pre-checkpoint capture, so retain the original semantic receipt schema.
+    if setup.get("preCheckpointCaptures") != []:
+        raise RuntimeError(f"{MOVE_NAME} unexpectedly requested pre-checkpoint captures")
+    setup.pop("preCheckpointCaptures")
     nm = subprocess.run(
         ["arm-none-eabi-nm", "-a", str(ref / "pokeemerald.elf")],
         check=True,

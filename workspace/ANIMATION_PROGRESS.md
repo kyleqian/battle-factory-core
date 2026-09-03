@@ -1,3 +1,10 @@
+# Spore-particles receipt reconciliation + fulfilled track (2026-09-03 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only the non-exclusive `spore-particles` track changes to fulfilled; MOVE_SPORE and MOVE_COTTON_SPORE retain their separate exact acceptances.
+- **Verified:** `sporeSourceAudit.ts` and fresh Battle Scene ON `sporePortable.ts` runs pass every complete retained row twice: Spore player-back/opponent-front **207/207** (`5b275a53…`/`9730e4ea…`, `7d723ded…`/`59a82fde…`) and Cotton Spore player-back/opponent-front **204/204** (`f3505c58…`/`b46bd803…`, `a719bb8d…`/`629fb753…`). All source/component, typed seam, software/hardware OAM/matrix, palette/tag/register/audio/immutable-state, raw RGB, and actual-core framebuffer checks are zero-residual.
+- **Reconciled:** The comparator now asserts and removes BattleLab's empty transport-only `setup.preCheckpointCaptures: []`, reproducing the original semantic receipts; it directly pins each body’s own source-age-4 `Task_UpdateMonBg` current-row palette handoff. The existing Powder latch remains untransferred.
+- **Scope:** Added the fulfilled-track ratchet and the measured latch only. No production reducer/seam/compositor, fixture/evidence/scenario, gameplay/RNG/status/damage/controller/turn/round/facility, boundary/barrier, or main-program document changed. Next: supervisor merge after the bounded green gates.
+
 # Animation supervisor verification — Whirlpool receipts refreshed and water-orb track reconciled (2026-09-03 supervisor)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `water-orb-hydro-pump-whirlpool` is now explicitly fulfilled; only its existing independently exact MOVE_HYDRO_PUMP and MOVE_WHIRLPOOL representatives receive credit.

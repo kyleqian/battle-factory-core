@@ -279,6 +279,7 @@ function verify(fixturePath: string, runNumber: number): void {
     fieldProfile: fixture.fieldProfile,
   });
   const failures: string[] = [];
+  const sameRowMonBgPaletteAges: number[] = [];
   const raw = createHash("sha256");
   const powderTemplate = isSleep
     ? "gSleepPowderParticleSpriteTemplate"
@@ -469,9 +470,17 @@ function verify(fixturePath: string, runNumber: number): void {
       })) : [];
     const displayLatchMatch = !isPowder || same(actualHardwarePowder, expectedHardwarePowder);
     const previous = probe.frames[index - 1];
+    const sameRowMonBgPalette = !isPowder
+      && age === 4
+      && oracle.tasks.some((task) => task.func.symbol === "Task_UpdateMonBg")
+      && same(oracle.hardwarePalette, oracle.fadedPalette);
+    if (sameRowMonBgPalette) sameRowMonBgPaletteAges.push(age);
     const hardwareMatch = !previous || (
       same(oracle.hardwareOam, previous.softwareOam)
-      && same(oracle.hardwarePalette, previous.fadedPalette)
+      && (
+        same(oracle.hardwarePalette, previous.fadedPalette)
+        || sameRowMonBgPalette
+      )
       && previous.sprites.every((sprite) =>
         same(oracle.hardwareMatrices[sprite.matrixNum], sprite.matrix)
       )
@@ -493,6 +502,11 @@ function verify(fixturePath: string, runNumber: number): void {
     }
   }
   const rawDigest = raw.digest("hex");
+  if (!same(sameRowMonBgPaletteAges, isPowder ? [] : [4])) {
+    failures.push(
+      `same-row Task_UpdateMonBg palette ages ${sameRowMonBgPaletteAges.join(",")} changed`,
+    );
+  }
   if (rawDigest !== fixture.rawRgbSha256) {
     failures.push(`raw RGB window digest ${rawDigest} changed`);
   }

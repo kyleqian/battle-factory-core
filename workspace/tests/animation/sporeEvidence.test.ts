@@ -73,4 +73,29 @@ describe("MOVE_SPORE complete dense evidence", () => {
       }
     }
   });
+
+  it("fulfills only the independently receipted spore-particles track", () => {
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SPORE"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_COTTON_SPORE"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: { id: string }) => track.id === "spore-particles"))
+      .toEqual({
+        id: "spore-particles",
+        components: [
+          "asset:ANIM_TAG_SPORE",
+          "subroutine:CreateSpore",
+          "subroutine:CreateCottonSpores",
+          "task:AnimTask_SporeDoubleBattle",
+          "visualCommand:create_spore_particle_sprite",
+          "visualCommand:setalpha",
+          "visualCommand:blendoff",
+          "visualCommand:splitbgprio",
+        ],
+        representatives: ["MOVE_SPORE", "MOVE_COTTON_SPORE"],
+        fulfilled: true,
+        goal: "FULFILLED: MOVE_SPORE and MOVE_COTTON_SPORE are independently exact through complete dense both-orientation proofs twice fresh: Spore's 207-frame blended/12:8-alpha/blendoff/SporeDoubleBattle body and Cotton Spore's distinct 204-frame splitbgprio/opaque/no-alpha/no-blendoff/no-SporeDoubleBattle body. Their shared AnimSporeParticle source component does not transfer the distinct Powder AnimMovePowderParticle latch or any acceptance to other moves.",
+      });
+  });
 });
