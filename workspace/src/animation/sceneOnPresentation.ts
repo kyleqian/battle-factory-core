@@ -119,6 +119,12 @@ import {
   type AuroraBeamState,
 } from "./auroraBeam.ts";
 import {
+  triAttackAtAge,
+  type TriAttackGeometry,
+  type TriAttackProfile,
+  type TriAttackState,
+} from "./triAttack.ts";
+import {
   hyperBeamAtAge,
   type HyperBeamGeometry,
   type HyperBeamProfile,
@@ -2408,6 +2414,21 @@ export interface SceneOnAuroraBeamConfig {
   readonly animationProfile: Readonly<AuroraBeamProfile>;
 }
 
+/** Narrow live animation-only seam for Tri Attack's complete source body. */
+export interface SceneOnTriAttackFieldProfile
+  extends Omit<SceneOnDragonRageFieldProfile, "playerGender" | "opponentGender"> {
+  readonly playerGender?: "male" | "female" | "none";
+  readonly opponentGender?: "male" | "female" | "none";
+}
+export interface SceneOnTriAttackConfig {
+  readonly move: "TRI_ATTACK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnTriAttackFieldProfile>;
+  readonly animationGeometry: Readonly<TriAttackGeometry>;
+  readonly animationProfile: Readonly<TriAttackProfile>;
+}
+
 /** Narrow presentation-only seam for Hyper Beam's complete source body. */
 export interface SceneOnHyperBeamConfig {
   readonly move: "HYPER_BEAM";
@@ -3680,6 +3701,7 @@ export type SceneOnMoveConfig =
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
+  | SceneOnTriAttackConfig
   | SceneOnHyperBeamConfig
   | SceneOnThunderboltConfig
   | SceneOnZapCannonConfig
@@ -3850,6 +3872,8 @@ export type SceneOnHornDrillPresentationState =
   SceneOnMovePresentationState<SceneOnHornDrillConfig>;
 export type SceneOnAuroraBeamPresentationState =
   SceneOnMovePresentationState<SceneOnAuroraBeamConfig>;
+export type SceneOnTriAttackPresentationState =
+  SceneOnMovePresentationState<SceneOnTriAttackConfig>;
 export type SceneOnIceBeamPresentationState =
   SceneOnMovePresentationState<SceneOnIceBeamConfig>;
 export type SceneOnDizzyPunchPresentationState =
@@ -4244,6 +4268,11 @@ export interface SceneOnHornDrillView extends HornDrillState {
 }
 
 export interface SceneOnAuroraBeamView extends AuroraBeamState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnTriAttackView extends TriAttackState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7578,6 +7607,21 @@ export function sceneOnAuroraBeamView(
       state.config.animationGeometry,
       state.config.animationProfile,
     ),
+    attacker: state.config.attacker,
+    target: state.config.target,
+  };
+}
+
+/** `age=0` is Move_TRI_ATTACK's retained TRIANGLE resource-load row. */
+export function sceneOnTriAttackView(
+  state: SceneOnMovePresentationState<SceneOnTriAttackConfig>,
+): SceneOnTriAttackView {
+  if (state.config.move !== "TRI_ATTACK") {
+    throw new Error(`expected TRI_ATTACK presentation, got ${state.config.move}`);
+  }
+  return {
+    ...triAttackAtAge(state.age, state.config.attacker.geometry.side,
+      state.config.animationGeometry, state.config.animationProfile),
     attacker: state.config.attacker,
     target: state.config.target,
   };

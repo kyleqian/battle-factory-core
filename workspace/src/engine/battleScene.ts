@@ -535,6 +535,7 @@ import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "j
 import razorWindAsset from "../animation/assets/razor-wind.json" with { type: "json" };
 import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
 import auroraBeamAsset from "../animation/assets/aurora-beam.json" with { type: "json" };
+import triAttackAsset from "../animation/assets/tri-attack.json" with { type: "json" };
 import hyperBeamAsset from "../animation/assets/hyper-beam.json" with { type: "json" };
 import thunderboltAsset from "../animation/assets/thunderbolt.json" with { type: "json" };
 import zapCannonAsset from "../animation/assets/zap-cannon.json" with { type: "json" };
@@ -960,6 +961,7 @@ import {
   sceneOnRazorWindView,
   sceneOnHornDrillView,
   sceneOnAuroraBeamView,
+  sceneOnTriAttackView,
   sceneOnHyperBeamView,
   sceneOnThunderboltView,
   sceneOnZapCannonView,
@@ -1186,6 +1188,7 @@ import {
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
+  type SceneOnTriAttackConfig,
   type SceneOnHyperBeamConfig,
   type SceneOnThunderboltConfig,
   type SceneOnZapCannonConfig,
@@ -1746,6 +1749,10 @@ const hornDrillArt = hornDrillAsset as {
 const auroraBeamArt = auroraBeamAsset as {
   background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
   rings: { tileset: Tileset; palette: RgbColor[] };
+};
+const triAttackArt = triAttackAsset as {
+  triangle: { tileset: Tileset; palette: RgbColor[] };
+  fire: { tileset: Tileset; palette: RgbColor[] };
 };
 const hyperBeamArt = hyperBeamAsset as {
   orbs: { tileset: Tileset; palette: RgbColor[] };
@@ -23337,6 +23344,103 @@ export function renderSceneOnMovePresentation(
       "AURORA BEAM!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "TRI_ATTACK") {
+    const triState = state as SceneOnMovePresentationState<SceneOnTriAttackConfig>;
+    const view = sceneOnTriAttackView(triState);
+    // This move's own complete bilateral maps measure OAM, matrices, and
+    // faded palettes at one source row before hardware scanout.
+    const displayed = sceneOnTriAttackView({ ...triState,
+      age: Math.max(0, triState.age - 1) });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("TRI_ATTACK presentation requires opposite battler sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`TRI_ATTACK missing ${battler.species} battler art`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const invert = (palette: readonly RgbColor[]): RgbColor[] => palette.map((color) =>
+      displayed.inverted
+        ? { r: 255 - color.r, g: 255 - color.g, b: 255 - color.b }
+        : color);
+    const fieldPalette = blendPaletteBanksToward(battleBg.palette,
+      { r: 0, g: 0, b: 0 }, displayed.backgroundBlackCoefficient).map(invert);
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, fieldPalette);
+
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const entries: Array<{ subpriority: number; y: number; slot: number;
+      order: number; draw: () => void }> = [];
+    entries.push({ subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      y: view.attacker.geometry.animationCenter.y,
+      slot: view.attacker.geometry.side === "player" ? 6 : 8, order: -2,
+      draw: () => drawSpriteSheet(fb, tilesFor(attackerArt, view.attacker.geometry.side),
+        invert(attackerArt.palette), view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y) });
+    entries.push({ subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      y: view.target.geometry.animationCenter.y + displayed.targetOffset.y2,
+      slot: view.target.geometry.side === "player" ? 6 : 8, order: -1,
+      draw: () => drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+        invert(targetArt.palette), view.target.geometry.spriteCorner.x
+          + triState.config.animationGeometry.targetRestOffset.x2 + displayed.targetOffset.x2,
+        view.target.geometry.spriteCorner.y
+          + triState.config.animationGeometry.targetRestOffset.y2 + displayed.targetOffset.y2) });
+    for (const sprite of displayed.sprites) {
+      if (sprite.invisible) continue;
+      const seeded = triState.config.animationProfile.spriteOrderSeed.indexOf(sprite.slot);
+      entries.push({ subpriority: sprite.subpriority,
+        y: sprite.y + sprite.y2, slot: sprite.slot,
+        order: seeded < 0 ? sprite.sourceCreationAge : seeded,
+        draw: sprite.kind === "triangle"
+          ? () => drawSpriteSheetAffineRotate(fb, triAttackArt.triangle.tileset,
+            triAttackArt.triangle.palette, sprite.x + sprite.x2, sprite.y + sprite.y2,
+            sprite.matrix[0], sprite.matrix[1], sprite.matrix[2], sprite.matrix[3])
+          : sprite.kind === "fire"
+            ? () => drawSpriteSheet(fb,
+              subTileset(triAttackArt.fire.tileset, sprite.frame * 4, 4),
+              triAttackArt.fire.palette, sprite.x + sprite.x2 - 16, sprite.y + sprite.y2 - 16)
+            : sprite.kind === "lightning"
+              ? () => drawSpriteSheet(fb,
+                subTileset(battleAnimLightning.tileset, sprite.frame * 4, 4),
+                battleAnimLightning.palette, sprite.x - 16, sprite.y - 16)
+              : () => drawSpriteSheetAffineRotate(fb,
+                sprite.frame === 0 ? battleAnimIceCrystalLarge : battleAnimIceCrystalSmall,
+                battleAnimIceCrystals.palette, sprite.x, sprite.y,
+                sprite.matrix[0], sprite.matrix[1], sprite.matrix[2], sprite.matrix[3],
+                undefined, false),
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || left.order - right.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const playerIsAttacker = view.attacker.geometry.side === "player";
+    const player = playerIsAttacker ? view.attacker : view.target;
+    const opponent = playerIsAttacker ? view.target : view.attacker;
+    const profile = triState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      playerIsAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "TRI ATTACK!", 99);
     return;
   }
 

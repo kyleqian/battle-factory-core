@@ -172,6 +172,7 @@ import {
   type SceneOnSandTombConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
+  type SceneOnTriAttackConfig,
   type SceneOnHyperBeamConfig,
   type SceneOnThunderboltConfig,
   type SceneOnMovePresentationState,
@@ -231,6 +232,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "AURORA_BEAM") {
     const auroraPresentation = presentation as SceneOnMovePresentationState<SceneOnAuroraBeamConfig>;
     renderSceneOnMovePresentation(framebuffer, auroraPresentation);
+    return;
+  }
+  if (presentation.config.move === "TRI_ATTACK") {
+    const triAttackPresentation = presentation as SceneOnMovePresentationState<SceneOnTriAttackConfig>;
+    renderSceneOnMovePresentation(framebuffer, triAttackPresentation);
     return;
   }
   if (presentation.config.move === "HYPER_BEAM") {

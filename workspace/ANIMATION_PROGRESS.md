@@ -1,3 +1,9 @@
+# MOVE_TRI_ATTACK source-relative production checkpoint — remains unsupported (2026-09-03 worker)
+
+- **State:** Level 50 remains **228/276 exact**, **0 partial / 0 staged**, and **48 unsupported**. MOVE_TRI_ATTACK remains absent from exact `entries`; `shake-target-in-pattern-scary-face` remains unfulfilled, while Scary Face, Glare, and Thunder remain independently exact controls.
+- **Implemented:** Added reproducible, hash-pinned triangle/fire art extraction, a pure relative-age reducer, narrow typed Scene-ON seam, and generic actual-core compositor using live battlers/sides/geometry, allocator slots/matrices/order seed, field/chrome, palettes, resources, and panning. The reducer independently matches **284/284 player-back + 284/284 opponent-front component rows**, including triangle, eight flames, two source-argument-sensitive shakes, three lightning sprites, seven ice crystals, palettes, and cleanup; the altered-control changes species, sides, geometry, allocator, matrix, and order materially.
+- **Honest remainder:** Complete framebuffer passes are deterministic but not exact: each orientation has **251/284 zero-residual rows**. The remaining 33 scanout/overlap rows total **24,257 pixels** player-back (peak 909) and **16,883** opponent-front (peak 755), bounded to fire/lightning and target-shake overlap phases. No screenshot carrier, absolute tick, coordinate/RGB fit, gameplay owner, sibling credit, barrier, or coverage promotion was added. Next: resolve the move-owned battler/effect OAM scanout ordering/latch from source, then require 568/568 framebuffer rows before promotion.
+
 # Animation supervisor verification — Tri Attack dense evidence merged (2026-09-02 supervisor)
 
 - **State:** Level 50 remains **228/276 exact**, **0 partial / 0 staged**, and **48 unsupported**. MOVE_TRI_ATTACK and `shake-target-in-pattern-scary-face` intentionally remain unsupported/unfulfilled; no production, gameplay, barrier, or sibling-credit boundary moved.
