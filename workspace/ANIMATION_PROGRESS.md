@@ -1,3 +1,11 @@
+# Animation supervisor verification — Frustration exact closure merged (2026-09-03 supervisor)
+
+- **State:** Level 50 is now **230/276 exact**, **0 partial / 0 staged**, and **46 unsupported**. MOVE_FRUSTRATION is exact and `anger-mark-grow-breath` is fulfilled; Swagger, Torment, and Taunt retain independent exact acceptance.
+- **Merged:** Audited and fast-forwarded worker commit `cd473c6a7`, then committed supervisor repair `2ded54933` for nine stale global 229/47 count pins left uncommitted when the worker cap expired. The implementation is a pure source-age strongest-branch reducer plus a narrow typed Scene-ON seam; it does not own damage, friendship, RNG, turn/round progression, facility state, or any main-program document.
+- **Verified:** Two independent supervisor actual-core comparator processes are byte-identical (`0cefbd8e…`) and match both retained orientations **229/229** each (**458/458**) with **zero residual pixels / peak zero**. The altered ARON/GROVYLE control materially changes species, reversed geometry, allocator slots/order, affine matrices, and framebuffer through the same production path. Source, latch, evidence, boundary, and sibling controls remain green; the repaired ratchets pass **6 files / 23 tests** plus three source audits, coverage reports 230 exact / 46 unsupported, and animation audit/typecheck/diff checks pass.
+- **Merged gate:** Post-merge `npm test` passes **1,232 files / 10,879 tests** with **44 files / 223 tests skipped**; `npm run build` passes **759 modules**. Next: begin a fresh bounded source-component checkpoint from the current coverage ranking, retaining move-local dense evidence and exact actual-core acceptance before promotion.
+- **Notes:** The worker exited at its 45-minute cap only after its durable production commit; its nearly complete full suite had **10,870 passes** and nine count-only failures, all reproduced, reviewed, and repaired by the supervisor before the canonical green gate. No authorization, oracle, product, or deferral blocker remains.
+
 # MOVE_FRUSTRATION strongest-branch exact production closure (2026-09-03 worker)
 
 - **State:** Level 50 is now **230/276 exact**, **0 partial / 0 staged**, and **46 unsupported**. MOVE_FRUSTRATION alone is exact and `anger-mark-grow-breath` is fulfilled; Swagger, Torment, and Taunt retain unchanged independent exact acceptance.
