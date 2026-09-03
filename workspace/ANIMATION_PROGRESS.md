@@ -1,3 +1,11 @@
+# Animation supervisor verification — Sparkle-3 receipt mismatch merged (2026-09-03 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `sparkle-3-special-screen` remains unfulfilled; MOVE_LIGHT_SCREEN and MOVE_MIRROR_COAT retain their independent exact statuses with no sibling credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `596db3078`. Its only change is the honest animation-ledger checkpoint; coverage, production, fixtures/evidence, scenarios, latches, boundaries/barriers, gameplay ownership, and main-program documents are unchanged.
+- **Verified:** The source audit passes. A fresh supervisor Light Screen player-back probe reproduces current evidence `a5bcd4b2…`, while deleting only additive `setup.preCheckpointCaptures: []` recreates committed `7c1c3b39…`; the complete 115-frame raw-RGB digest remains `b135e9fb…`. No rendering or latch regression is inferred, and the remaining three bodies deliberately await the separately scoped refresh round.
+- **Merged gate:** Post-merge `npm test` passes **1,235 files / 10,890 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**. Next: assert/normalize the empty transport field, refresh all four Light Screen/Mirror Coat serialized receipts, rerun both complete bilateral bodies twice, and fulfill the track only if every source/component/hardware/raw-RGB/actual-core framebuffer gate closes.
+- **For the main program:** `tools/check-oracle-freshness.sh` uses BSD `date -j/-r` and exits 2 on this Linux host. Manual process/commit comparison found only launcher/autonomy changes after the current oracle processes started; no oracle server, schema, bootstrap, ROM, or probe source changed.
+
 # Sparkle-3 special-screen receipt-drift checkpoint (2026-09-03 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `sparkle-3-special-screen` remains unfulfilled; MOVE_LIGHT_SCREEN and MOVE_MIRROR_COAT retain their existing independent exact statuses with no sibling credit.
