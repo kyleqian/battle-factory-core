@@ -59,7 +59,7 @@ describe("MOVE_TEETER_DANCE production framebuffer", () => {
 
   it("promotes only Teeter Dance and leaves named siblings independent", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(229);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(230);
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "partial"))
       .toEqual([]);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_TEETER_DANCE"))

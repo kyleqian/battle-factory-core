@@ -238,7 +238,7 @@ function verify(): Json {
   const auditBytes = execFileSync(process.execPath, ["--experimental-strip-types", fixture.source.audit], { cwd: root });
   invariant(sha(auditBytes) === fixture.source.auditRunSha256, "source audit output is not byte-identical");
   const audit = JSON.parse(auditBytes.toString("utf8")) as Json;
-  invariant(audit.move === "MOVE_FRUSTRATION" && audit.moveId === 218 && audit.coverageCredit === false && audit.pointerOwned.root.byteLength === 711 &&
+  invariant(audit.move === "MOVE_FRUSTRATION" && audit.moveId === 218 && audit.coverageCredit === true && audit.status === "exact" && audit.pointerOwned.root.byteLength === 711 &&
     audit.branches.selector.friendshipBands.map((band: Json) => [band.friendship, band.result]) .toString() === [["0..30", 0], ["31..100", 1], ["101..200", 2], ["201..255", 3]].toString() &&
     audit.branches.strongest.angerMarks === 2 && audit.branches.strongest.hitSplats === 6 && same(audit.branches.strongest.shakeTasks, [["ANIM_ATTACKER", 1, 0, 15, 1], ["ANIM_TARGET", 4, 0, 30, 1]]),
     "source audit strongest-branch contract drift");

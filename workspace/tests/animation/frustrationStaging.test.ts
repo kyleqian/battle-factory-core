@@ -38,7 +38,7 @@ describe("MOVE_FRUSTRATION authoritative source and legal Scene-ON staging check
   it("pins the root, every pointer-owned strength branch, callbacks, resources, audio, and Factory census", () => {
     const audit = sourceAudit();
     expect(audit).toMatchObject({
-      move: "MOVE_FRUSTRATION", moveId: 218, status: "unsupported", coverageCredit: false,
+      move: "MOVE_FRUSTRATION", moveId: 218, status: "exact", coverageCredit: true,
       pointerOwned: {
         root: { symbol: "Move_FRUSTRATION", start: "0x82cb430", endExclusive: "0x82cb6f7", byteLength: 711, romSha256: "901d9a9d4ee45e9ba47d97a9a452a102dcdab95596499e70fac9b5ca3fc29200", sourcePath: "data/battle_anim_scripts.s", sourceStart: 65707, sourceEndExclusive: 70345, sourceByteLength: 4638, sourceSha256: "319ff215abce58a0cb07d6039321e3bf24ab56f218251e15043e764361fb3419" },
         blocks: {
@@ -82,7 +82,7 @@ describe("MOVE_FRUSTRATION authoritative source and legal Scene-ON staging check
         animationResult: "Factory-legal Frustration carriers enter Frustration_Strongest (result 0) only; the other three source branches remain pointer-owned and pinned but need non-Factory evidence if ever accepted.",
       },
       carrier: { lowestLevel50Set: 304, frontierMon: "FRONTIER_MON_FURRET_2", species: "SPECIES_FURRET", itemTableId: 16, itemName: "BATTLE_FRONTIER_ITEM_CHOICE_BAND", nature: "NATURE_ADAMANT", allLevel50Sets: [304, 307, 308, 310, 323, 324, 342, 351, 354, 693], allInventorySets: [304, 307, 308, 310, 323, 324, 342, 351, 354, 693], excludedOpenOnly: [], excludedOutsideFactory: [] },
-      coverage: { level50Exact: 229, level50Unsupported: 47, trackFulfilled: false, siblingStatuses: { MOVE_SWAGGER: "exact", MOVE_FRUSTRATION: "unsupported", MOVE_TORMENT: "exact", MOVE_TAUNT: "exact" } },
+      coverage: { level50Exact: 230, level50Unsupported: 46, trackFulfilled: true, siblingStatuses: { MOVE_SWAGGER: "exact", MOVE_FRUSTRATION: "exact", MOVE_TORMENT: "exact", MOVE_TAUNT: "exact" } },
     });
 
     const callbackHashes: Record<string, { sourceSha256: string; romSha256: string }> = {
@@ -126,7 +126,7 @@ describe("MOVE_FRUSTRATION authoritative source and legal Scene-ON staging check
     expect(stage.trace).toEqual({ segments: [{ frames: 2, buttons: ["A"] }, { frames: 30, buttons: [] }, { frames: 2, buttons: ["A"] }, { frames: 900, buttons: [] }], captureFrames: [0, 112, 160, 934] });
   });
 
-  it("pins the compact twice-fresh live receipt while retaining the unsupported boundary", () => {
+  it("pins the historical compact receipt while recognizing the later exact promotion", () => {
     const receipt = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/frustration-staging-receipt.json"), "utf8")) as Json;
     expect(receipt).toMatchObject({
       schema: "frustration-compact-staging-receipt/v1", oracleProfile: "battle-scene-on", move: "MOVE_FRUSTRATION", moveId: 218,
@@ -150,11 +150,11 @@ describe("MOVE_FRUSTRATION authoritative source and legal Scene-ON staging check
       });
     }
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(229);
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_FRUSTRATION")).toBeUndefined();
+    expect(coverage.entries).toHaveLength(230);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_FRUSTRATION")).toMatchObject({ status: "exact" });
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "anger-mark-grow-breath");
     expect(track).toMatchObject({ representatives: ["MOVE_SWAGGER", "MOVE_FRUSTRATION", "MOVE_TORMENT", "MOVE_TAUNT"] });
-    expect(track.fulfilled).not.toBe(true);
+    expect(track.fulfilled).toBe(true);
     for (const move of ["MOVE_SWAGGER", "MOVE_TORMENT", "MOVE_TAUNT"]) expect(coverage.entries.find((entry: Json) => entry.move === move)).toMatchObject({ status: "exact" });
   });
 });

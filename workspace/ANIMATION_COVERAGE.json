@@ -5274,7 +5274,7 @@
     "player-back RATTATA complete first move-animation body at oracle frames 76-236: source task/sprite/OAM/matrix/audio state and shared-seam raw-RGB framebuffer match 161/161, reproduced twice fresh",
     "opponent-front RATTATA complete first move-animation body at oracle frames 80-240: the same strengthened component and shared-seam framebuffer surface matches 161/161, reproduced twice fresh",
     "the reducer ports AnimTask_GrowAndShrink's 12/24/12 affine program, side/species Y anchoring and two-display hardware transfer; gBreathPuffSpriteTemplate's four source frames, hFlip, signed fixed-point translation, looping SE_M_SWAGGER panning, terminal callback, and cleanup; both gAngerMarkSpriteTemplate instances' target-side mirroring, affine-normal matrices, allocation/OAM transfer latches, SE_M_SWAGGER2 panning, overlap, and teardown",
-    "HYPER FANG remains 107/107 component and framebuffer exact in both orientations as a fresh sprite/task/shared-seam regression control; TAUNT independently closes its complete source/hardware/typed/framebuffer surface; FRUSTRATION, TORMENT, METRONOME, FAKE TEARS, and every other anger-tag sibling remain unsupported without their own complete dense move acceptance"
+    "HYPER FANG remains 107/107 component and framebuffer exact in both orientations as a fresh sprite/task/shared-seam regression control; FRUSTRATION, TORMENT, and TAUNT now retain independent complete dense acceptance, while METRONOME, FAKE TEARS, and every other anger-tag sibling receive no inferred credit"
    ],
    "evidence": [
     "tools/compare/fixtures/swagger-player-rattata-opponent-onix.json",
@@ -5287,6 +5287,41 @@
     "src/animation/sceneOnPresentation.ts",
     "src/engine/battleScene.ts",
     "tests/animation/swagger.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_FRUSTRATION",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Furret/Onix Battle Scene ON strongest-branch bodies retain player-back frames 76-304 and opponent-front frames 80-308, 229/229 contiguous rows per orientation through first inactive cleanup, twice-fresh byte-identical",
+    "the pure source-relative reducer ports Factory friendship-0 Frustration_Strongest: two ANGER marks, attacker ShakeMon2(1,0,15,1), SwayMon(0,16,6144,8), hidden target-monbg ShakeMon2(4,0,30,1), six IMPACT hitsplats, attacker red blend/restore, alpha, panning/resource lifetimes, and teardown",
+    "all 458 retained component and typed-seam rows are exact in both orientations; whole OAM/matrices retain predecessor 228/228, attacker ShakeMon2 exposes its source initializer pose then predecessor cadence, SwayMon is RAM+2, target BG scroll is RAM+1 without an inferred target OBJ latch, and palette is predecessor 227/228 with only the age-7 same-row setup",
+    "the actual core.ts compositor consumes live species, sides, geometry, allocator slots/matrices/order, palettes, chrome, and source-derived ANGER/IMPACT art; two independent deterministic processes each match all 458 retained framebuffer rows with zero residual pixels and peak zero",
+    "an altered ARON/GROVYLE reversed-side control changes species, geometry, allocator slots/order, affine matrices, and the resulting framebuffer through the same production path; gameplay friendship selection, damage, RNG, turn, round, and facility state remain external",
+    "MOVE_FRUSTRATION alone is promoted by this receipt; MOVE_SWAGGER, MOVE_TORMENT, and MOVE_TAUNT retain their independent exact acceptance and receive no new move-level credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-frustration-player-furret-opponent-onix.json",
+    "tools/battle-lab/mechanic-frustration-opponent-furret-player-onix.json",
+    "tools/compare/frustrationSourceAudit.ts",
+    "tools/compare/frustrationProbe.py",
+    "tools/compare/frustrationEvidence.ts",
+    "tools/compare/frustrationFramebuffer.ts",
+    "tools/compare/fixtures/frustration-evidence.json",
+    "tools/compare/evidence/frustration-player-dense-state.json.gz",
+    "tools/compare/evidence/frustration-opponent-dense-state.json.gz",
+    "tools/compare/evidence/frustration-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/frustration-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/frustration-changemap-player.json",
+    "tools/compare/evidence/frustration-changemap-opponent.json",
+    "src/animation/frustration.ts",
+    "src/animation/assets/swagger.json",
+    "src/animation/assets/dynamicPunch.json",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/frustrationProductionCheckpoint.test.ts",
+    "tests/animation/frustrationFramebuffer.test.ts"
    ]
   },
   {
@@ -6875,9 +6910,10 @@
     "MOVE_SWAGGER",
     "MOVE_FRUSTRATION",
     "MOVE_TORMENT",
-    "MOVE_TAUNT"
+   "MOVE_TAUNT"
    ],
-   "goal": "MOVE_SWAGGER independently proves its complete GrowAndShrink, breath-puff, and paired target anger-mark body in both orientations at 161/161 strengthened source-component and shared-seam framebuffer frames, reproduced twice. MOVE_TAUNT independently proves its complete distinct thought-bubble/finger/two-anger/audio body at 125/125 source-component, typed-seam, software/hardware-OAM, affine matrix, palette/register, raw-RGB, and shared-seam framebuffer frames in both orientations twice. HYPER FANG remains 107/107 in both orientations as a fresh sprite/task regression control. FRUSTRATION uses strength-dependent anger templates/tasks and its own movement paths; TORMENT has distinct finger/affine/target motion; METRONOME only shares audio and needs its finger/metronome palette body; FAKE TEARS needs SMALL_BUBBLES blending, RockMonBackAndForth, looped audio, and eight thought-bubble/music-note tear sprites. The 2026-09-03 Frustration evidence checkpoint now retains twice-fresh complete 229-row strongest-branch windows in both orientations with raw RGB/change maps, source/task/sprite lifecycle, OAM/matrix/palette/register/audio/RNG/state/bench/PP/cleanup measurements, and a Frustration-specific latch row, but remains evidence only: MOVE_FRUSTRATION stays unsupported and this track unfulfilled. No sibling is promoted without independent complete dense acceptance."
+   "fulfilled": true,
+   "goal": "Fulfilled by four independent complete move receipts: MOVE_SWAGGER proves GrowAndShrink, breath-puff, and paired anger marks at 161/161 rows per orientation; MOVE_FRUSTRATION proves its Factory friendship-0 strongest branch, two anger marks, shake/sway, six IMPACT hitsplats, palette/monbg/alpha and cleanup at 229/229; MOVE_TORMENT proves its distinct bubbles/wobble/blend/anger body at 177/177; MOVE_TAUNT proves thought-bubble/finger/anger at 125/125. Each is bilateral, dense, actual-core framebuffer exact, and independently accepted; no Metronome, Fake Tears, strength-branch, or other sibling credit is inferred."
   },
   {
    "id": "contest-target-side-impact-bg",

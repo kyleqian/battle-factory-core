@@ -134,8 +134,8 @@ if (
   || level50Carriers.length !== 10 || openOnlyCarriers.length !== 0 || outsideCarriers.length !== 0
   || level50Carriers[0]?.index !== 304 || level50Carriers[0]?.label !== "FRONTIER_MON_FURRET_2" || level50Carriers[0]?.species !== "SPECIES_FURRET"
   || level50Carriers[0]?.itemName !== "BATTLE_FRONTIER_ITEM_CHOICE_BAND" || level50Carriers[0]?.nature !== "NATURE_ADAMANT"
-  || statuses.MOVE_SWAGGER !== "exact" || statuses.MOVE_FRUSTRATION !== "unsupported" || statuses.MOVE_TORMENT !== "exact" || statuses.MOVE_TAUNT !== "exact"
-  || track?.fulfilled === true || JSON.stringify(track?.components) !== JSON.stringify([
+  || statuses.MOVE_SWAGGER !== "exact" || statuses.MOVE_FRUSTRATION !== "exact" || statuses.MOVE_TORMENT !== "exact" || statuses.MOVE_TAUNT !== "exact"
+  || track?.fulfilled !== true || JSON.stringify(track?.components) !== JSON.stringify([
     "asset:ANIM_TAG_ANGER", "sprite:gAngerMarkSpriteTemplate", "asset:ANIM_TAG_BREATH", "sprite:gBreathPuffSpriteTemplate", "task:AnimTask_GrowAndShrink",
   ])
 ) throw new Error("MOVE_FRUSTRATION graph/census/coverage boundary changed");
@@ -156,7 +156,7 @@ const callbacks = {
 };
 
 console.log(JSON.stringify({
-  move: "MOVE_FRUSTRATION", moveId: 218, status: statuses.MOVE_FRUSTRATION, coverageCredit: false,
+  move: "MOVE_FRUSTRATION", moveId: 218, status: statuses.MOVE_FRUSTRATION, coverageCredit: true,
   pointerOwned: {
     root: { symbol: "Move_FRUSTRATION", start: `0x${rootStart.toString(16)}`, endExclusive: `0x${rootEnd.toString(16)}`, byteLength: rootRom.length, romSha256: sha256(rootRom), ...sourceRange("data/battle_anim_scripts.s", scripts, rootBody) },
     blocks: blockRanges,
@@ -203,6 +203,6 @@ console.log(JSON.stringify({
     excludedOpenOnly: openOnlyCarriers.map((entry: { index: number }) => entry.index), excludedOutsideFactory: outsideCarriers.map((entry: { index: number }) => entry.index),
   },
   coverage: { level50Exact: coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length, level50Unsupported: 276 - coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length, trackFulfilled: track.fulfilled === true, siblingStatuses: statuses },
-  siblingBoundary: "MOVE_SWAGGER, MOVE_TORMENT, and MOVE_TAUNT remain independently exact controls; their completion grants neither a Frustration latch nor Frustration acceptance.",
-  latchMeasurement: "none: this source/staging checkpoint intentionally retains no dense Frustration change map and appends no ANIMATION_LATCHES row.",
+  siblingBoundary: "MOVE_SWAGGER, MOVE_TORMENT, and MOVE_TAUNT remain independently exact controls; Frustration's later production closure grants them no new acceptance.",
+  latchMeasurement: "the later bilateral dense receipt owns the Frustration-specific ANIMATION_LATCHES row; this source audit remains its immutable source/classification foundation.",
 }, null, 2));

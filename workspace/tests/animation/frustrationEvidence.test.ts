@@ -20,7 +20,7 @@ describe("MOVE_FRUSTRATION dense Scene-ON evidence checkpoint", () => {
     expect(second).toEqual(first);
     expect(first).toMatchObject({
       schema: "frustration-bilateral-evidence/v1", status: "unsupported-evidence", coverageCredit: false,
-      move: "MOVE_FRUSTRATION", moveId: 218, sourceAuditRunSha256: "db24da254d65546352f860834894dfa593d34b40743cc4d663540f8d293a29c0",
+      move: "MOVE_FRUSTRATION", moveId: 218, sourceAuditRunSha256: "9c8248b914e3ceb3cde672d9ffe0a0afdf919d53930d4fd3aea543c6ac5be775",
       twiceFresh: true, rowsPerOrientation: 229,
       orientations: {
         "player-back": { rows: 229, sourceWindow: { startFrame: 76, endFrame: 304, frameCount: 229 }, changedRows: 112, lifecycle: { sprites: 8, tasks: 7 }, cleanup: { active: false, ownedSprites: 0, ownedTasks: 0 } },
@@ -33,18 +33,18 @@ describe("MOVE_FRUSTRATION dense Scene-ON evidence checkpoint", () => {
     });
   });
 
-  it("keeps the source/staging boundary and independent sibling controls explicit", () => {
+  it("keeps the historical evidence boundary and later independent production promotion explicit", () => {
     const fixture = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/frustration-evidence.json"), "utf8")) as Json;
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(fixture).toMatchObject({ schema: "frustration-bilateral-evidence/v1", oracleProfile: "battle-scene-on", moveId: 218, coverageCredit: false });
     expect(fixture.evidenceScope).toMatchObject({ freshRunsPerOrientation: 2, completeDenseRowsPerOrientation: 229, rawRgbRowsPerOrientation: 229,
       sourceEntryThroughFirstInactiveCleanup: true, productionAnimationChanged: false, coveragePromotion: false, gameplayStateOwned: false,
       reducerOrAssetsAdded: false, compositorOrPresentationSeamAdded: false, framebufferFitterAdded: false, transientOverrides: [] });
-    expect(coverage.entries).toHaveLength(229);
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_FRUSTRATION")).toBeUndefined();
+    expect(coverage.entries).toHaveLength(230);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_FRUSTRATION")).toMatchObject({ status: "exact" });
     expect(coverage.entries.filter((entry: Json) => ["MOVE_SWAGGER", "MOVE_TORMENT", "MOVE_TAUNT"].includes(entry.move)).every((entry: Json) => entry.status === "exact")).toBe(true);
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "anger-mark-grow-breath");
     expect(track).toMatchObject({ representatives: ["MOVE_SWAGGER", "MOVE_FRUSTRATION", "MOVE_TORMENT", "MOVE_TAUNT"] });
-    expect(track.fulfilled).not.toBe(true);
+    expect(track.fulfilled).toBe(true);
   });
 });

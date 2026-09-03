@@ -1,3 +1,11 @@
+# MOVE_FRUSTRATION strongest-branch exact production closure (2026-09-03 worker)
+
+- **State:** Level 50 is now **230/276 exact**, **0 partial / 0 staged**, and **46 unsupported**. MOVE_FRUSTRATION alone is exact and `anger-mark-grow-breath` is fulfilled; Swagger, Torment, and Taunt retain unchanged independent exact acceptance.
+- **Implemented:** Added a pure source-age `Frustration_Strongest` reducer and narrow typed Scene-ON compositor wiring. It uses live battler species/sides/geometry, allocator slots/order/matrices, palettes, chrome, shared ANGER/IMPACT resources, orientation panning, two anger marks, attacker ShakeMon2/SwayMon, hidden target-monbg ShakeMon2, six hitsplats, red blend/restore, alpha, resource lifetime, and teardown; gameplay friendship, damage, RNG, turn, round, and facility state remain external.
+- **Acceptance:** Both retained legal Furret/Onix orientations match **229/229** component and typed-seam rows. Two independent deterministic actual-core processes each match **458/458** retained framebuffer rows with **zero residual pixels / peak zero**. The altered ARON/GROVYLE control reverses sides and changes species, geometry, allocator slots/order and affine matrices materially through the same production path.
+- **Latches:** Whole OAM/matrices preserve predecessor **228/228**; attacker ShakeMon2 exposes its initializer pose then ordinary predecessor cadence; SwayMon is RAM+2; hidden target shake is BG-scroll RAM+1 without an OBJ inference; palette is predecessor **227/228** with the retained age-7 same-row setup; ordinary sprites/matrices, monbg/alpha, audio/resources, and cleanup remain as measured.
+- **Boundary:** No recapture, absolute-tick/carrier/hash gate, baked screenshots, gameplay ownership, unsupported barrier, import-boundary exception, or sibling credit was added. Factory friendship 0 accepts only the strongest branch; Strong/Medium/Weak remain outside this receipt.
+
 # Animation supervisor verification — Frustration dense evidence merged, remains unsupported (2026-09-03 supervisor)
 
 - **State:** Level 50 remains **229/276 exact**, **0 partial / 0 staged**, and **47 unsupported**. MOVE_FRUSTRATION and `anger-mark-grow-breath` remain unsupported/unfulfilled; Swagger, Torment, and Taunt retain independent exact acceptance.

@@ -595,6 +595,11 @@ import {
   type SwaggerState,
 } from "./swagger.ts";
 import {
+  frustrationAtAge,
+  type FrustrationAllocationProfile,
+  type FrustrationState,
+} from "./frustration.ts";
+import {
   bulkUpAtAge,
   type BulkUpState,
 } from "./bulkUp.ts";
@@ -2609,6 +2614,21 @@ export interface SceneOnSwaggerConfig {
   readonly breathOrigin: Readonly<{ x: number; y: number }>;
 }
 
+/** Friendship and branch selection remain battle-engine inputs; Factory uses 0. */
+export interface SceneOnFrustrationConfig {
+  readonly move: "FRUSTRATION";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<FrustrationAllocationProfile>;
+  /** Live attacker X_2/Y_PIC_OFFSET anchor used by both ANGER creates. */
+  readonly attackerEffectCenter: Readonly<{ x: number; y: number }>;
+  /** Live target X_2/Y_PIC_OFFSET anchor used by all six IMPACT creates. */
+  readonly targetEffectCenter: Readonly<{ x: number; y: number }>;
+  /** Live battler x2 on pointer entry; overwritten when target ShakeMon2 starts. */
+  readonly targetInitialX2: number;
+}
+
 export interface SceneOnBulkUpConfig {
   readonly move: "BULK_UP";
   readonly attacker: SceneOnPresentationBattler;
@@ -3720,6 +3740,7 @@ export type SceneOnMoveConfig =
   | SceneOnSwallowConfig
   | SceneOnStockpileConfig
   | SceneOnSwaggerConfig
+  | SceneOnFrustrationConfig
   | SceneOnBulkUpConfig
   | SceneOnTauntConfig
   | SceneOnTormentConfig
@@ -3886,6 +3907,8 @@ export type SceneOnLeafBladePresentationState =
   SceneOnMovePresentationState<SceneOnLeafBladeConfig>;
 export type SceneOnTauntPresentationState =
   SceneOnMovePresentationState<SceneOnTauntConfig>;
+export type SceneOnFrustrationPresentationState =
+  SceneOnMovePresentationState<SceneOnFrustrationConfig>;
 export type SceneOnScaryFacePresentationState =
   SceneOnMovePresentationState<SceneOnScaryFaceConfig>;
 export type SceneOnGlarePresentationState =
@@ -4432,6 +4455,11 @@ export interface SceneOnStockpileView extends StockpileState {
 
 export interface SceneOnSwaggerView extends SwaggerState {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFrustrationView extends FrustrationState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -5545,6 +5573,7 @@ function assertIntegerPoint(
  */
 export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
+    | SceneOnFrustrationConfig
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
     | SceneOnAbsorbConfig | SceneOnLeechSeedConfig | SceneOnMegaDrainConfig | SceneOnGigaDrainConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
@@ -7999,6 +8028,28 @@ export function sceneOnSwaggerView(
       state.config.breathOrigin,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the retained Move_FRUSTRATION pointer-entry row. */
+export function sceneOnFrustrationView(
+  state: SceneOnMovePresentationState<SceneOnFrustrationConfig>,
+): SceneOnFrustrationView {
+  if (state.config.move !== "FRUSTRATION") {
+    throw new Error(`expected FRUSTRATION presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...frustrationAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerEffectCenter,
+      state.config.target.geometry.side,
+      state.config.targetEffectCenter,
+      state.config.animationProfile,
+      state.config.targetInitialX2,
     ),
   };
 }

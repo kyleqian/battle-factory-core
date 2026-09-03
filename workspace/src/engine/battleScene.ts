@@ -988,6 +988,7 @@ import {
   sceneOnFakeOutView,
   sceneOnSubstituteView,
   sceneOnSwaggerView,
+  sceneOnFrustrationView,
   sceneOnBulkUpView,
   sceneOnTauntView,
   sceneOnTormentView,
@@ -1091,6 +1092,7 @@ import {
   type SceneOnScreechConfig,
   type SceneOnSafeguardConfig,
   type SceneOnStockpileConfig,
+  type SceneOnFrustrationConfig,
   type SceneOnGrudgeConfig,
   type SceneOnHiddenPowerConfig,
   type SceneOnLeerConfig,
@@ -33244,6 +33246,90 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "GLALIE used" : "Foe GLALIE used",
       "EXPLOSION!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FRUSTRATION") {
+    const frustrationState = state as SceneOnMovePresentationState<SceneOnFrustrationConfig>;
+    const view = sceneOnFrustrationView(frustrationState);
+    const ordinaryDisplayed = sceneOnFrustrationView({
+      ...frustrationState, age: frustrationState.age - 1,
+    });
+    // SwayMon writes after BuildOamBuffer; this live task-owned axis is the
+    // independently measured RAM+2 exception for this move.
+    const swayDisplayed = sceneOnFrustrationView({
+      ...frustrationState, age: frustrationState.age - 2,
+    });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const attackerSource = playerAttacker
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.attacker.species]
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.attacker.species];
+    const targetSource = view.target.geometry.side === "opponent"
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[view.target.species]
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[view.target.species];
+    if (!attackerSource || !targetSource) {
+      throw new Error(`FRUSTRATION missing live battler art ${view.attacker.species}->${view.target.species}`);
+    }
+    const attackerTileset = playerAttacker
+      ? attackerSource.tileset : subTileset(attackerSource.tileset, 0, 8);
+    const targetTileset = view.target.geometry.side === "opponent"
+      ? subTileset(targetSource.tileset, 0, 8) : targetSource.tileset;
+    const paletteDisplayed = ordinaryDisplayed.attackerBlendY;
+    const attackerPalette = blendPaletteToward(
+      attackerSource.palette, { r: 248, g: 0, b: 0 }, paletteDisplayed,
+    );
+    const attackerX2 = frustrationState.age === 11
+      // ShakeMon2 writes its initializer pose before its immediate callback;
+      // BuildOam sees that +1 pose once, then the ordinary predecessor rows.
+      ? 1
+      : frustrationState.age >= 12 && frustrationState.age <= 39
+        ? swayDisplayed.attackerX2
+        : frustrationState.age >= 120 && frustrationState.age <= 162
+          ? swayDisplayed.attackerX2 : ordinaryDisplayed.attackerX2;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb, targetTileset, targetSource.palette,
+      view.target.geometry.spriteCorner.x + ordinaryDisplayed.targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const targetBackdrop = fb.slice();
+    drawSpriteSheet(
+      fb, attackerTileset, attackerPalette,
+      view.attacker.geometry.spriteCorner.x + attackerX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    for (const mark of ordinaryDisplayed.angerMarks) {
+      const matrix = Math.trunc(0x10000 / mark.xScale);
+      drawSpriteSheetAffineRotate(
+        fb, swaggerArt.anger.tileset, swaggerArt.anger.palette,
+        mark.x, mark.y, matrix, 0, 0, matrix, undefined, false,
+      );
+    }
+    for (const impact of ordinaryDisplayed.impacts) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb, dynamicPunchArt.hitsplat.tileset, dynamicPunchArt.hitsplat.palette,
+        impact.x - 16, impact.y - 16, 256, 256, 12, 8, false, targetBackdrop,
+      );
+    }
+
+    const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
+    const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
+    const profile = frustrationState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
+      "FRUSTRATION!", 99,
     );
     return;
   }
