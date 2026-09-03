@@ -1,3 +1,10 @@
+# Water-orb Hydro Pump/Whirlpool component-track audit — receipt mismatch (2026-09-03 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `water-orb-hydro-pump-whirlpool` remains unfulfilled; no move status, count, or sibling credit changes.
+- **Audit:** `waterOrbSourceAudit.ts` passes. Hydro Pump independently passes its complete two-orientation **141/141** source/component, typed-seam, raw-RGB, and actual-core framebuffer verifier twice fresh: player `a5b1f983…/360d0d72…`, opponent `1ac9a23b…/ff315fb5…`. Whirlpool main player-back reaches **133/133** semantic and zero-residual framebuffer rows, but both independent fresh verifier paths reproduce serialized evidence `7525e307…`, not its committed `2942fa0b…` receipt; raw RGB remains `d3a4cebcb258d334414d99096b7ded4accc90be1af37da4abf01610866ae96c8`.
+- **Decision:** Do not set `fulfilled` or alter the coverage goal/ratchet. The fresh Whirlpool map still confirms ordinary OAM predecessor transfer **132/132** and palette predecessor transfer **131/132**; the one frame-82 same-row value is the `monbg` palette handoff, not a `gPlttBufferFaded` write. This does not contradict `ANIMATION_LATCHES.md`; it is a serialized-receipt refresh follow-up, not a presentation or latch change.
+- **Checks:** Focused Hydro Pump/Whirlpool/inventory/boundary/frontier controls, coverage, animation audit, typecheck, full `npm test` (**1,235 files / 10,888 passed; 44 files / 223 skipped**), and build (**761 modules**) are green. No production, fixture/evidence, scenario, latch, boundary/barrier, or gameplay ownership changed.
+
 # Animation supervisor verification — Leech Seed component track reconciled (2026-09-03 supervisor)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `seed-projectile-leech-seed` is now explicitly fulfilled from MOVE_LEECH_SEED's existing independent acceptance; no move status/count or sibling credit changed.
