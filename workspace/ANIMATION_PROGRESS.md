@@ -1,3 +1,11 @@
+# Animation supervisor verification — Frustration dense evidence merged, remains unsupported (2026-09-03 supervisor)
+
+- **State:** Level 50 remains **229/276 exact**, **0 partial / 0 staged**, and **47 unsupported**. MOVE_FRUSTRATION and `anger-mark-grow-breath` remain unsupported/unfulfilled; Swagger, Torment, and Taunt retain independent exact acceptance.
+- **Merged:** Independently audited and fast-forwarded worker commit `ab0e64bae`. The evidence-only checkpoint adds bilateral 229-row dense state, raw RGB888 archives, reproducible normalized/frame change maps, a strict hermetic verifier, Frustration-specific latch measurements, and a focused test. It changes no production reducer/assets/compositor/seam, gameplay owner, barrier, import boundary, sibling credit, main-program document, or coverage status.
+- **Verified:** Two supervisor verifier processes are byte-identical (`b27b3849…`) and reproduce player-back **76..304** plus opponent-front **80..308**, **229/229** contiguous rows each, with **8 sprites / 7 tasks**, immutable gameplay state, and first inactive cleanup. The source audit independently reproduces `db24da25…`; whole OAM/matrices are preceding-buffer **228/228**, palettes **227/228** with only age 7 exceptional, and the retained Factory friendship-0 path enters `Frustration_Strongest` only. Focused evidence/source/Swagger/Torment/Taunt/inventory/boundary checks pass **9 files / 45 tests**; coverage/audit/diff checks pass.
+- **Merged gate:** Post-merge `npm test` passes **1,230 files / 10,874 tests** with **44 files / 223 tests skipped**; `npm run build` passes **758 modules**. Next: implement Frustration only in a later bounded production round from the retained bilateral corpus, preserving all controls and requiring exact actual-core framebuffer acceptance before promotion.
+- **Notes:** No further worker was dispatched because another implementation round plus independent full post-merge verification could not be guaranteed within this session's clean wind-down margin.
+
 # MOVE_FRUSTRATION complete bilateral dense-evidence checkpoint — unsupported (2026-09-03 worker)
 
 - **State:** Level 50 remains **229/276 exact**, **0 partial / 0 staged**, and **47 unsupported**; MOVE_FRUSTRATION and `anger-mark-grow-breath` remain unsupported/unfulfilled, while Swagger, Torment, and Taunt retain independent exact status.
