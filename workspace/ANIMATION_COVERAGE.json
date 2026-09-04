@@ -6689,7 +6689,7 @@
     "MOVE_PRESENT"
    ],
    "fulfilled": true,
-   "goal": "FULFILLED: MOVE_MOONLIGHT independently proves its complete 352-frame blackout, fixed moon, alpha fade, five staggered descending GREEN_SPARKLE sprites, MoonlightEndFade palette choreography, shared HealingEffect BLUE_STAR tail, audio, hardware transfer, typed seam, raw RGB, and first inactive cleanup in both legal GLOOM orientations twice fresh. MOVE_PRESENT independently proves all four damage/heal and player/opponent bodies at 201/201 or 252/252 complete source/component/seam/raw-RGB/framebuffer frames twice fresh, including its moving ITEM_BAG, five EXPLOSION damage branch, nine GREEN_SPARKLE healing branch and target HealingEffect2."
+   "goal": "Track complete. MOVE_MOONLIGHT independently proves its complete 352-frame blackout, fixed moon, alpha fade, five staggered descending GREEN_SPARKLE sprites, MoonlightEndFade palette choreography, shared HealingEffect BLUE_STAR tail, audio, hardware transfer, typed seam, raw RGB, and first inactive cleanup in both legal GLOOM orientations twice fresh. MOVE_PRESENT independently proves all four damage/heal and player/opponent bodies at 201/201 or 252/252 complete source/component/seam/raw-RGB/framebuffer frames twice fresh, including its moving ITEM_BAG, five EXPLOSION damage branch, nine GREEN_SPARKLE healing branch and target HealingEffect2."
   },
   {
    "id": "noise-line-roar-effect",
