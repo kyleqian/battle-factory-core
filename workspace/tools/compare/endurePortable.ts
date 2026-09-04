@@ -14,6 +14,7 @@ import {
   type EngineState,
 } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 interface Fixture extends SceneOnEndureConfig {
   readonly schema: string;
@@ -53,6 +54,7 @@ interface Frame {
   readonly soundTaskCount: number;
   readonly tasks: readonly Task[];
   readonly sprites: readonly Sprite[];
+  readonly battlers: unknown;
   readonly softwareOam: readonly string[];
   readonly hardwareOam: readonly string[];
   readonly hardwareMatrices: readonly (readonly number[])[];
@@ -110,9 +112,11 @@ function verify(path: string): void {
   if (proc.stderr) process.stderr.write(proc.stderr);
   if (proc.status !== 0) process.exit(proc.status ?? 1);
 
-  const bytes = readFileSync(output);
-  const probe = JSON.parse(bytes.toString()) as Probe;
-  const evidence = createHash("sha256").update(bytes).digest("hex");
+  const probe = JSON.parse(readFileSync(output, "utf8")) as Probe;
+  // Historic Endure receipts used compact Python JSON before BattleLab began
+  // transporting an asserted-empty capture list. Require and remove precisely
+  // that field for semantic hashing; raw RGB remains independently exact.
+  const evidence = compactSemanticReceiptSha256(probe);
   const rawHash = createHash("sha256");
   for (const frame of probe.frames) {
     const raw = readFileSync(join(rgbDir, `${String(frame.frame).padStart(5, "0")}.rgb`));
@@ -226,13 +230,14 @@ function verify(path: string): void {
         && actual.se1.tracks[0]?.panX === fixture.soundPan
       ));
     const previous = byFrame.get(frame - 1);
-    const transfers = !previous || (
-      same(actual.hardwareOam, previous.softwareOam)
-      && (
-        same(actual.hardwarePalette, previous.fadedPalette)
-        || same(actual.hardwarePalette, actual.fadedPalette)
-      )
+    const oamTransfer = !previous
+      || same(actual.hardwareOam, previous.softwareOam);
+    const matrixTransfer = !previous || previous.sprites.every((sprite) =>
+      same(actual.hardwareMatrices[sprite.matrixNum], sprite.matrix)
     );
+    const paletteTransfer = !previous
+      || same(actual.hardwarePalette, previous.fadedPalette);
+    const battlers = same(actual.battlers, probe.frames[0]?.battlers);
     const receipts = actual.softwareOam.length === 128
       && actual.hardwareOam.length === 128
       && actual.hardwareMatrices.length === 32
@@ -282,14 +287,16 @@ function verify(path: string): void {
     }
     if (diff === 0) framebuffers += 1;
     if (
-      software && source && palette && tags && audio && transfers
-      && receipts && seamShape
+      software && source && palette && tags && audio && oamTransfer
+      && matrixTransfer && paletteTransfer && battlers && receipts && seamShape
     ) components += 1;
     else if (componentMismatches.length < 20) {
       componentMismatches.push(
         `frame ${frame}/age ${age}: software=${software} source=${source} `
         + `palette=${palette} tags=${tags} audio=${audio} `
-        + `transfers=${transfers} receipts=${receipts} seam=${seamShape}`,
+        + `oam=${oamTransfer} matrices=${matrixTransfer} `
+        + `paletteTransfer=${paletteTransfer} battlers=${battlers} `
+        + `receipts=${receipts} seam=${seamShape}`,
       );
     }
     if (diff !== 0 && framebufferMismatches.length < 20) {
