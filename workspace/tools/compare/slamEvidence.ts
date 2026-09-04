@@ -11,6 +11,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { semanticReceiptSha256 } from "./semanticReceipt.ts";
 
 interface Fixture {
   readonly schema: string;
@@ -159,7 +160,7 @@ function verify(fixturePath: string, runNumber: number): void {
   if (probe.schema !== "slam-dense-evidence/v2" || probe.move !== 21) {
     throw new Error(`${fixture.orientation}: unexpected probe contract`);
   }
-  const evidenceDigest = createHash("sha256").update(outputBytes).digest("hex");
+  const evidenceDigest = semanticReceiptSha256(probe);
   if (evidenceDigest !== fixture.evidenceSha256) {
     throw new Error(
       `${fixture.orientation}: evidence digest ${evidenceDigest} `

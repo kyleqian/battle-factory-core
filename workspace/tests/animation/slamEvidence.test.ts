@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { semanticReceiptSha256 } from "../../tools/compare/semanticReceipt.ts";
 
 describe("MOVE_SLAM complete dense evidence", () => {
   it("pins both legal Level-50 Scene-ON receipts and complete parties", () => {
@@ -67,5 +69,50 @@ describe("MOVE_SLAM complete dense evidence", () => {
         }
       }
     }
+  });
+
+  it("normalizes only the asserted-empty normal Python transport receipt", () => {
+    const fresh = {
+      schema: "slam-hit-slide-shake-test",
+      setup: {
+        name: "\u00e9",
+        preCheckpointCaptures: [],
+        nested: { value: 1 },
+      },
+      rows: [0, true, "line\n"],
+    };
+    const semantic = "{\"schema\": \"slam-hit-slide-shake-test\", \"setup\": {\"name\": \"\\u00e9\", \"nested\": {\"value\": 1}}, \"rows\": [0, true, \"line\\n\"]}\n";
+    expect(semanticReceiptSha256(fresh)).toBe(
+      createHash("sha256").update(semantic).digest("hex"),
+    );
+    expect(() => semanticReceiptSha256({
+      ...fresh,
+      setup: { ...fresh.setup, preCheckpointCaptures: [1] },
+    })).toThrow("setup.preCheckpointCaptures must be []");
+  });
+
+  it("ratchets only the independently receipted slam-hit-slide-shake track", () => {
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
+    for (const move of ["MOVE_SLAM", "MOVE_SECRET_POWER"]) {
+      expect(coverage.entries.find((entry: { move: string }) =>
+        entry.move === move)).toMatchObject({ status: "exact" });
+    }
+    expect(coverage.componentTracks.find((track: { id: string }) =>
+      track.id === "slam-hit-slide-shake")).toMatchObject({
+      components: [
+        "asset:ANIM_TAG_SLAM_HIT",
+        "sprite:gSlamHitSpriteTemplate",
+        "sprite:gSlideMonToOffsetSpriteTemplate",
+        "sprite:gSlideMonToOriginalPosSpriteTemplate",
+        "visualCommand:create_basic_hitsplat_sprite",
+        "task:AnimTask_ShakeMonInPlace",
+        "visualCommand:monbg",
+        "visualCommand:setalpha",
+        "visualCommand:blendoff",
+        "visualCommand:clearmonbg",
+      ],
+      representatives: ["MOVE_SLAM", "MOVE_SECRET_POWER"],
+      fulfilled: true,
+    });
   });
 });

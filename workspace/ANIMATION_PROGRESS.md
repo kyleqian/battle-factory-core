@@ -1,3 +1,10 @@
+# Slam/Secret Power receipt reconciliation + fulfilled track (2026-09-04 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `slam-hit-slide-shake` is fulfilled; MOVE_SLAM and MOVE_SECRET_POWER retain their separate exact acceptances with no sibling credit.
+- **Receipt policy:** Four fresh payloads add only asserted-empty `setup.preCheckpointCaptures: []`. Removing precisely that field with normal Python serialization recreates every committed semantic digest; compact serialization does not, and all raw-RGB digests remain unchanged.
+- **Evidence:** Source audits pass. SLAM closes **54/54** player-back/opponent-front twice (`8f520d75…`/`4e3abdaf…`, `66a2b9d7…`/`66d4cdf1…`) and Factory indoor `BATTLE_ENVIRONMENT_BUILDING -> Move_STRENGTH` closes Secret Power **102/102** twice (`9d8f3ad7…`/`af6ff533…`, `8d6902b6…`/`f4c81b0d…`), including their independent latch/hardware/seam/raw-RGB/actual-core framebuffer/cleanup rows with zero residual.
+- **Scope / gates:** Normalized only the two receipt comparators, added the direct track/transport ratchet, fulfilled this track, and added this ledger entry. No reducer/seam/compositor/assets/scenarios/fixtures, latch, move status/count, gameplay state, boundary/barrier, recording allowlist, or main-program document changed. Source audits, portable runs, focused animation/inventory/boundary/frontier controls (**10 files / 42 tests**), coverage, animation audit, typecheck, and diff check pass; final `npm test` is **1,235 files / 10,896 tests** (44 files / 223 tests skipped) and build is **761 modules**.
+
 # Animation supervisor verification — Red-heart Sweet Kiss/Attract track fulfilled (2026-09-04 supervisor)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `red-heart-sweet-kiss` is newly fulfilled; MOVE_SWEET_KISS and MOVE_ATTRACT retain independent exact acceptance and no sibling receives credit.
