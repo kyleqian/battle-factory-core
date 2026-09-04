@@ -1,3 +1,11 @@
+# Animation supervisor verification — Finger-metronome track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `finger-metronome` is newly fulfilled; MOVE_METRONOME and MOVE_FOLLOW_ME retain independent exact acceptance and no sibling receives credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commits `25221eb55` and `f8b044c2a`. Their five animation-owned files use the existing strict compact semantic serializer, add direct hardware/state and two-move track ratchets, set only the track flag, and update the animation ledger. No fixture hash, reducer, asset, seam/compositor, scenario, move status/count, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audits and portable runs reproduce Metronome **127/127** in both orientations twice (`01f259da…`/`24940bca…`, `cdae46f8…`/`06e94878…`) and Follow Me **185/185** in both orientations twice (`5aefcc2e…`/`99d4031b…`, `74485aa1…`/`7518f7d5…`). Each move independently retains predecessor OAM/FINGER-matrix transfer, allocator order, component/seam/raw-RGB/actual-core framebuffer equality, immutable battlers, resources/registers/audio, and first-inactive cleanup. The sole fresh transport field is asserted-empty `setup.preCheckpointCaptures: []`; missing/non-empty values are rejected and no fixture changed. No novel latch mechanism was measured, so `ANIMATION_LATCHES.md` is unchanged.
+- **Merged gate:** Focused controls pass **7 files / 19 tests**; coverage and animation audit pass. Post-merge `npm test` passes **1,239 files / 10,906 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Reconcile the next unfulfilled exact-representative track, `focus-energy-endure-effect`, preserving MOVE_FOCUS_ENERGY and MOVE_ENDURE as independent receipts and stopping on unexplained semantic, RGB, or latch drift.
+
 # Finger-metronome component-track fulfilled (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `finger-metronome` is now fulfilled; MOVE_METRONOME and MOVE_FOLLOW_ME retain their independent exact statuses.
