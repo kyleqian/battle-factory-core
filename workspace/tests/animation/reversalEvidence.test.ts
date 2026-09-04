@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { compactSemanticReceiptSha256 } from "../../tools/compare/semanticReceipt.ts";
 
 const fixture = (name: string) =>
   JSON.parse(readFileSync(`tools/compare/fixtures/${name}`, "utf8"));
@@ -136,6 +138,30 @@ const records = [
 ] as const;
 
 describe("MOVE_REVERSAL legal portable evidence fixtures", () => {
+  it("requires and removes only the asserted-empty compact transport field", () => {
+    const fresh = {
+      schema: "reversal-transport-test",
+      setup: { preCheckpointCaptures: [], name: "\u00e9" },
+      rows: [0, true, "line\n"],
+    };
+    const historic = "{\"schema\":\"reversal-transport-test\",\"setup\":{\"name\":\"\\u00e9\"},\"rows\":[0,true,\"line\\n\"]}\n";
+    expect(compactSemanticReceiptSha256(fresh)).toBe(
+      createHash("sha256").update(historic).digest("hex"),
+    );
+    expect(() => compactSemanticReceiptSha256({
+      ...fresh,
+      setup: { name: "\u00e9" },
+    })).toThrow("setup.preCheckpointCaptures must be []");
+    expect(() => compactSemanticReceiptSha256({
+      ...fresh,
+      setup: { ...fresh.setup, preCheckpointCaptures: [1] },
+    })).toThrow("setup.preCheckpointCaptures must be []");
+    expect(read("tools/compare/reversalPortable.ts"))
+      .toContain("compactSemanticReceiptSha256(probe)");
+    expect(read("tools/compare/reversalEvidence.ts"))
+      .toContain("compactSemanticReceiptSha256(evidence)");
+  });
+
   it("proves all six Frontier set/species identities from pinned Emerald source", () => {
     // The mechanic lab writes Emerald's internal species ID directly.
     // 302 is NINJASK, not SABLEYE; the rejected checkpoint used 302.

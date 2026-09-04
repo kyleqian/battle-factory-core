@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const requiredTemplates = [
@@ -66,7 +67,7 @@ for (let pass = 0; pass < 2; pass += 1) {
         ),
       );
     }
-    const evidenceDigest = createHash("sha256").update(bytes).digest("hex");
+    const evidenceDigest = compactSemanticReceiptSha256(evidence);
     const rawDigest = raw.digest("hex");
     const sourceFrames = evidence.frames.filter(
       (row: { frame: number }) =>

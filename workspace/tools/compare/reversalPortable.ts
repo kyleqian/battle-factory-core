@@ -10,6 +10,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 interface Fixture extends SceneOnReversalConfig {
   readonly scenario: string;
@@ -83,6 +84,10 @@ if (fixturePaths.length !== 2) {
 }
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const fresh = new Map<string, { evidence: string; raw: string }>();
+const reversalSpeciesIds: Readonly<Record<string, number>> = {
+  DELCATTY: 316,
+  VIGOROTH: 365,
+};
 const s16 = (hex: string, byteOffset: number) => {
   const lo = Number.parseInt(hex.slice(byteOffset * 2, byteOffset * 2 + 2), 16);
   const hi = Number.parseInt(hex.slice(byteOffset * 2 + 2, byteOffset * 2 + 4), 16);
@@ -112,7 +117,7 @@ function verify(fixturePath: string): void {
 
   const bytes = readFileSync(output);
   const probe = JSON.parse(bytes.toString()) as Probe;
-  const evidence = createHash("sha256").update(bytes).digest("hex");
+  const evidence = compactSemanticReceiptSha256(probe);
   const rawHash = createHash("sha256");
   for (const frame of probe.frames) {
     rawHash.update(readFileSync(
@@ -136,6 +141,10 @@ function verify(fixturePath: string): void {
 
   const frames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
   const stage = createSceneOnMovePresentation(fixture);
+  const targetSpeciesId = reversalSpeciesIds[fixture.target.species];
+  if (targetSpeciesId === undefined) {
+    throw new Error(`unmapped Reversal target species ${fixture.target.species}`);
+  }
   const mismatches: string[] = [];
   let components = 0;
   let framebuffers = 0;
@@ -178,6 +187,12 @@ function verify(fixturePath: string): void {
       radiusX: orb.radiusX,
       radiusY: orb.radiusY,
     }));
+    const targetSprite = actual.sprites.find((sprite) =>
+      sprite.template.symbol === "gMultiuseSpriteTemplate"
+      && sprite.data[2] === targetSpeciesId
+    );
+    const targetShake = targetSprite !== undefined
+      && s16(targetSprite.raw, 0x24) === expected.targetX2;
     const prior = frames.get(frame - 1);
     const oamTransfer = !prior || same(actual.hardwareOam, prior.softwareOam);
     const paletteTransfer = !prior
@@ -230,11 +245,11 @@ function verify(fixturePath: string): void {
     fbByAge.push(diff);
     if (diff === 0) framebuffers += 1;
     if (
-      software && source && registers && sound && oamTransfer
+      software && targetShake && source && registers && sound && oamTransfer
       && paletteTransfer && matrixTransfer && seamShape && rawReceipt
     ) components += 1;
     else mismatches.push(
-      `frame ${frame}/age ${age}: software=${software} source=${source} `
+      `frame ${frame}/age ${age}: software=${software} targetShake=${targetShake} source=${source} `
       + `registers=${registers} sound=${sound} oam=${oamTransfer} `
       + `palette=${paletteTransfer} matrices=${matrixTransfer} `
       + `seam=${seamShape} raw=${rawReceipt}`,

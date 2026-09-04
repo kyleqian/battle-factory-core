@@ -28,7 +28,7 @@ describe("asset:ANIM_TAG_BLUE_ORB source audit", () => {
     ]) expect(frontierMons).toContain(text);
   });
 
-  it("keeps Swallow unsupported: it shares BLUE_ORB but has turn-dependent healing topology", () => {
+  it("keeps Swallow source-distinct: it shares BLUE_ORB but has turn-dependent healing topology", () => {
     const swallow = block("Move_SWALLOW", "Move_TRANSFORM");
     for (const text of ["loadspritegfx ANIM_TAG_BLUE_ORB", "loadspritegfx ANIM_TAG_BLUE_STAR", "AnimTask_SwallowDeformMon", "AnimTask_ShakeMon2", "SE_M_TAKE_DOWN", "SE_M_SPIT_UP", "call SwallowEffect", "jumpifmoveturn 2, SwallowGood", "jumpifmoveturn 3, SwallowBest", "call HealingEffect"]) expect(swallow).toContain(text);
     expect(block("SwallowEffect", "SwallowGood").match(/createsprite gSwallowBlueOrbSpriteTemplate/g)).toHaveLength(5);
