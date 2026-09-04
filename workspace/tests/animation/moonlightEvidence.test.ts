@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { compactSemanticReceiptSha256 } from "../../tools/compare/semanticReceipt.ts";
 
 describe("MOVE_MOONLIGHT complete dense evidence", () => {
   it("pins complete legal three-mon parties in both Scene-ON orientations", () => {
@@ -43,5 +45,49 @@ describe("MOVE_MOONLIGHT complete dense evidence", () => {
         }
       }
     }
+  });
+
+  it("normalizes only Moonlight/Present's asserted-empty compact transport receipt", () => {
+    const fresh = {
+      schema: "green-sparkle-moonlight-test",
+      setup: {
+        preCheckpointCaptures: [],
+        name: "\u00e9",
+        nested: { value: 1 },
+      },
+      rows: [0, true, "line\n"],
+    };
+    const compact = "{\"schema\":\"green-sparkle-moonlight-test\",\"setup\":{\"name\":\"\\u00e9\",\"nested\":{\"value\":1}},\"rows\":[0,true,\"line\\n\"]}\n";
+    expect(compactSemanticReceiptSha256(fresh)).toBe(
+      createHash("sha256").update(compact).digest("hex"),
+    );
+    expect(() => compactSemanticReceiptSha256({
+      ...fresh,
+      setup: { ...fresh.setup, preCheckpointCaptures: [1] },
+    })).toThrow("setup.preCheckpointCaptures must be []");
+  });
+
+  it("ratchets only the independently receipted green-sparkle Moonlight track", () => {
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
+    for (const move of ["MOVE_MOONLIGHT", "MOVE_PRESENT"]) {
+      expect(coverage.entries.find((entry: { move: string }) =>
+        entry.move === move)).toMatchObject({ status: "exact" });
+    }
+    expect(coverage.componentTracks.find((track: { id: string }) =>
+      track.id === "green-sparkle-moonlight")).toMatchObject({
+      components: [
+        "asset:ANIM_TAG_GREEN_SPARKLE",
+        "sprite:gMoonlightSparkleSpriteTemplate",
+        "visualCommand:create_present_heal_particle_sprite",
+        "task:AnimTask_AlphaFadeIn",
+        "task:AnimTask_MoonlightEndFade",
+        "asset:ANIM_TAG_MOON",
+        "sprite:gMoonSpriteTemplate",
+        "subroutine:HealingEffect",
+        "asset:ANIM_TAG_BLUE_STAR",
+      ],
+      representatives: ["MOVE_MOONLIGHT", "MOVE_PRESENT"],
+      fulfilled: true,
+    });
   });
 });

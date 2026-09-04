@@ -10,6 +10,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 interface Fixture extends SceneOnMoonlightConfig {
   readonly schema: "moonlight-portable-evidence/v1";
@@ -292,7 +293,7 @@ function verifyRun(output: string, rgbDir: string, label: string): string {
     );
   }
   const total = fixture.denseWindow.frameCount;
-  const evidence = sha256(bytes);
+  const evidence = compactSemanticReceiptSha256(probe);
   const rawRgb = rawWindow.digest("hex");
   const last = probe.frames[probe.frames.length - 1]!;
   if (

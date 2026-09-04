@@ -11,6 +11,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 type Fixture = {
   readonly scenario: string;
@@ -344,7 +345,7 @@ function verifyRun(output: string, rgbDir: string, label: string): string {
   }
 
   const total = fixture.denseWindow.frameCount;
-  const evidence = sha256(bytes);
+  const evidence = compactSemanticReceiptSha256(probe);
   const rawRgb = rawWindow.digest("hex");
   const last = probe.frames.at(-1)!;
   const cleaned =
