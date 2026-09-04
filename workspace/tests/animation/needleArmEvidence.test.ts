@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { compactSemanticReceiptSha256 } from "../../tools/compare/semanticReceipt.ts";
 
 describe("MOVE_NEEDLE_ARM complete dense evidence", () => {
   it("pins both legal Level-50 Scene-ON orientation receipts", () => {
@@ -28,5 +30,25 @@ describe("MOVE_NEEDLE_ARM complete dense evidence", () => {
       expect(fixture.attacker.species).toBe("CACNEA");
       expect(fixture.target.species).toBe("ONIX");
     }
+  });
+
+  it("normalizes only the asserted-empty compact transport capture list", () => {
+    const fresh = {
+      schema: "needle-arm-test",
+      setup: {
+        preCheckpointCaptures: [],
+        name: "é",
+        nested: { value: 1 },
+      },
+      rows: [0, true, "line\n"],
+    };
+    const compact = "{\"schema\":\"needle-arm-test\",\"setup\":{\"name\":\"\\u00e9\",\"nested\":{\"value\":1}},\"rows\":[0,true,\"line\\n\"]}\n";
+    expect(compactSemanticReceiptSha256(fresh)).toBe(
+      createHash("sha256").update(compact).digest("hex"),
+    );
+    expect(() => compactSemanticReceiptSha256({
+      ...fresh,
+      setup: { ...fresh.setup, preCheckpointCaptures: [1] },
+    })).toThrow("setup.preCheckpointCaptures must be []");
   });
 });

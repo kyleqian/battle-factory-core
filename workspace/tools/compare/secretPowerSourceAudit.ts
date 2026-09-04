@@ -263,7 +263,7 @@ console.log(JSON.stringify({
     "tests/battleScriptGetSecretPowerEffectOpcode.test.ts",
     "tests/secretPowerOracleEvidence.test.ts",
   ],
-  verdict: "unsupported: Factory reaches one body, Move_STRENGTH; "
-    + "the reducer/evidence checkpoint lacks typed-seam and production-"
-    + "framebuffer acceptance",
+  verdict: "Factory dispatch exact: Factory reaches sole body, Move_STRENGTH; "
+    + "grass-only Move_NEEDLE_ARM is unreachable and receives no Factory "
+    + "GREEN_SPIKE credit",
 }));

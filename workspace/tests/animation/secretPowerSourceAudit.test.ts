@@ -99,6 +99,10 @@ describe("MOVE_SECRET_POWER source/controller evidence checkpoint", () => {
       "tests/battleScriptGetSecretPowerEffectOpcode.test.ts",
       "tests/secretPowerOracleEvidence.test.ts",
     ]);
-    expect(result.verdict).toMatch(/^unsupported:/);
+    expect(result.verdict).toBe(
+      "Factory dispatch exact: Factory reaches sole body, Move_STRENGTH; "
+      + "grass-only Move_NEEDLE_ARM is unreachable and receives no Factory "
+      + "GREEN_SPIKE credit",
+    );
   });
 });
