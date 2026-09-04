@@ -1,3 +1,10 @@
+# Animation supervisor verification — Red-heart Sweet Kiss/Attract track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `red-heart-sweet-kiss` is newly fulfilled; MOVE_SWEET_KISS and MOVE_ATTRACT retain independent exact acceptance and no sibling receives credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `81af29e96`. Its six animation-owned files add the direct track ratchet and extend the existing strict semantic serializer only for legacy compact-Python JSON; non-empty `setup.preCheckpointCaptures` is rejected. No production reducer/seam/compositor/assets/scenarios/fixtures, latch, move status/count, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audits and portable runs reproduce Sweet Kiss **159/159** in both orientations twice (`5117db12…`/`61870ad0…`, `db45d09d…`/`76f32756…`) and Attract **435/435** in both orientations twice (`a5008ce7…`/`e627d99e…`, `234dd9d…`/`daa9c2ed…`) with independent source/component, hardware/audio/register/tag, immutable-state, raw-RGB, seam, and actual-core framebuffer closure. Focused controls pass **7 files / 29 tests**; coverage, animation audit, and diff checks pass.
+- **Merged gate:** Post-merge `npm test` passes **1,235 files / 10,894 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**. Next: audit the next bounded unfulfilled component track, preserving per-move dense acceptance and stopping on any unexplained receipt drift.
+
 # Red-heart Sweet Kiss/Attract receipt reconciliation + fulfilled track (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `red-heart-sweet-kiss` is now fulfilled; MOVE_SWEET_KISS and MOVE_ATTRACT retain their existing independent exact statuses.
