@@ -1,3 +1,11 @@
+# Animation supervisor verification — RockMonBackAndForth/MAGENTA_HEART track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `rock-mon-back-and-forth-magenta-heart` is newly fulfilled; MOVE_CHARM, MOVE_COVET, MOVE_FAKE_TEARS, and MOVE_TICKLE retain independent exact acceptance and no sibling receives shared component credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commits `3c08e8705` and `3943f719c`. Their five animation-owned files set the single track flag, correct stale track wording, add a direct four-move ratchet, strictly normalize only asserted-empty Fake Tears/Tickle `setup.preCheckpointCaptures`, and update this ledger. No fixture/hash, production reducer/asset/seam/compositor/probe/scenario, move status/count, latch ledger, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Supervisor focused controls pass **11 files / 44 tests**. Charm independently reproduces **93/93 + 4/4** teardown frames twice per orientation; Covet reproduces **114/114** twice per orientation; corrected legal Delcatty Fake Tears reproduces **322/322** controller/shared-framebuffer rows including **87/87** source rows twice per orientation; corrected legal Omanyte Tickle reproduces **205/205** twice per orientation. Historical Nincada/Omastar receipts receive no credit, retained semantic hashes survive the narrow transport normalization, and raw RGB remains byte-identical.
+- **Merged gate:** Post-merge `npm test` passes **1,246 files / 10,929 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Resume with `razor-leaf-particle-cutter` or the next ranked unfulfilled exact-representative component track from a clean checkpoint; preserve independent move receipts and stop on unexplained semantic, RGB, sibling-credit, or latch drift.
+
 # RockMonBackAndForth/MAGENTA_HEART component-track fulfilled (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `rock-mon-back-and-forth-magenta-heart` is fulfilled; MOVE_CHARM, MOVE_COVET, MOVE_FAKE_TEARS, and MOVE_TICKLE retain independent exact acceptance and no shared art/task gives sibling credit.
