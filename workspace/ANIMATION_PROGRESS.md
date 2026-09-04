@@ -1,3 +1,11 @@
+# Animation supervisor verification — Brown Orb/Mud Shot track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `brown-orb-mud-shot` is newly fulfilled; MOVE_MUD_SHOT and Factory indoor MOVE_SECRET_POWER→STRENGTH retain independent exact acceptance, and Secret Power receives no BROWN_ORB/Mud Shot component credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `ecbbfaad2`. Its five animation-owned files strictly normalize only asserted-empty `setup.preCheckpointCaptures`, strengthen Mud Shot hardware/state/seam/audio/cleanup checks, add a direct track ratchet, set the single track flag, and update this ledger. No fixture/map/hash, production engine, reducer, asset, scenario, move status/count, gameplay owner, latch ledger, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audits and twice-fresh portable runs reproduce Mud Shot player-back **145/145** (`cef2f455…`/`a9dcc157…`) and opponent-front **144/144** (`85fe40b0…`/`52bd4b4b…`), including every framebuffer row, every comparable predecessor OAM/matrix transfer, and all but the single measured age-4 same-row palette setup. Factory indoor Secret Power independently reproduces its Strength body at **102/102** twice in both orientations (`9d8f3ad7…`/`af6ff533…`, `8d6902b6…`/`f4c81b0d…`). No new durable latch was claimed.
+- **Merged gate:** Focused controls pass **8 files / 21 tests**; coverage and animation audit pass. Post-merge `npm test` passes **1,242 files / 10,914 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Select the next unfulfilled exact-representative track; preserve each move's independent dense acceptance and stop on unexplained semantic, RGB, dispatch, or latch drift.
+
 # Brown-orb Mud Shot component-track fulfilled (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `brown-orb-mud-shot` is newly fulfilled; MOVE_MUD_SHOT and MOVE_SECRET_POWER remain independently exact.
