@@ -1,3 +1,11 @@
+# Animation supervisor verification — AdjustPanningVar/Confuse Ray track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `adjust-panning-var-confuse-ray` is newly fulfilled; MOVE_CONFUSE_RAY retains independent exact acceptance and MOVE_WILL_O_WISP remains audit/control only with no sibling credit or promotion.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `d541b2bed`. Its four animation-owned files strengthen the existing Confuse Ray portable verifier, add a direct single-component track ratchet, set the one track flag, and update this ledger. No fixture/hash, probe/scenario, production engine, reducer, asset, seam/compositor, move status/count, gameplay owner, latch ledger, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audit retains the complete 12-component Confuse Ray graph and the narrow three-component Will-O-Wisp intersection. Twice-fresh portable runs reproduce player-back and opponent-front **270/270** component, hardware, audio, raw-RGB, and actual-core framebuffer rows plus **269/269** predecessor latches, preserving semantic/raw receipts `2a9fde46…`/`17183f79…` and `83d95bef…`/`e97f8c9…`. No new durable latch was claimed.
+- **Merged gate:** Focused controls pass **6 files / 27 tests**; coverage and animation audit pass. Post-merge `npm test` passes **1,242 files / 10,915 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Resume with one unfulfilled exact-representative component track from this clean checkpoint; preserve independent move receipts and stop on unexplained semantic, RGB, sibling-credit, or latch drift.
+
 # Adjust-PanningVar Confuse Ray component-track fulfilled (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `adjust-panning-var-confuse-ray` is fulfilled; MOVE_CONFUSE_RAY remains independently exact and MOVE_WILL_O_WISP remains audit/control only with no sibling credit or promotion.
