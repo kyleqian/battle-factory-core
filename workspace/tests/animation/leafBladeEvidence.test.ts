@@ -4,6 +4,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { compactSemanticReceiptSha256 } from "../../tools/compare/semanticReceipt.ts";
 describe("MOVE_LEAF_BLADE source and asset checkpoint", () => {
   it("pins legal set 453 and its distinct complete source body", () => {
     const output = execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/leafBladeSourceAudit.ts"], { encoding: "utf8" });
@@ -13,6 +14,27 @@ describe("MOVE_LEAF_BLADE source and asset checkpoint", () => {
     const directory = mkdtempSync(join(tmpdir(), "leaf-blade-assets-")); const output = join(directory, "leaf-blade.json");
     execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/extractLeafBladeAssets.ts", "--out", output], { stdio: "pipe" });
     expect(readFileSync(output)).toEqual(readFileSync("src/animation/assets/leaf-blade.json"));
+  });
+  it("requires and removes only the asserted-empty compact transport field", () => {
+    const fresh = {
+      schema: "leaf-blade-transport-test",
+      setup: { preCheckpointCaptures: [], name: "\u00e9" },
+      rows: [0, true, "line\n"],
+    };
+    const historic = "{\"schema\":\"leaf-blade-transport-test\",\"setup\":{\"name\":\"\\u00e9\"},\"rows\":[0,true,\"line\\n\"]}\n";
+    expect(compactSemanticReceiptSha256(fresh)).toBe(
+      createHash("sha256").update(historic).digest("hex"),
+    );
+    expect(() => compactSemanticReceiptSha256({
+      ...fresh,
+      setup: { name: "\u00e9" },
+    })).toThrow("setup.preCheckpointCaptures must be []");
+    expect(() => compactSemanticReceiptSha256({
+      ...fresh,
+      setup: { ...fresh.setup, preCheckpointCaptures: [1] },
+    })).toThrow("setup.preCheckpointCaptures must be []");
+    expect(readFileSync("tools/compare/leafBladePortable.ts", "utf8"))
+      .toContain("compactSemanticReceiptSha256(probe)");
   });
   it("pins bilateral exact receipts, normalized maps, and the sole promotion", () => {
     const cases = [

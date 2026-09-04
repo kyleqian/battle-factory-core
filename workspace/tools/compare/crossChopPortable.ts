@@ -14,6 +14,7 @@ import {
   type EngineState,
 } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 interface Fixture extends SceneOnCrossChopConfig {
   readonly schema: string;
@@ -73,6 +74,7 @@ interface Frame {
   readonly soundTaskCount: number;
   readonly tasks: readonly Task[];
   readonly sprites: readonly Sprite[];
+  readonly battlers: unknown;
   readonly softwareOam: readonly string[];
   readonly hardwareOam: readonly string[];
   readonly hardwareMatrices: readonly (readonly number[])[];
@@ -144,9 +146,11 @@ function verify(fixturePath: string): void {
   if (proc.stderr) process.stderr.write(proc.stderr);
   if (proc.status !== 0) process.exit(proc.status ?? 1);
 
-  const bytes = readFileSync(output);
-  const probe = JSON.parse(bytes.toString()) as Probe;
-  const evidence = createHash("sha256").update(bytes).digest("hex");
+  const probe = JSON.parse(readFileSync(output, "utf8")) as Probe;
+  // The historical compact JSON receipt predates BattleLab's asserted-empty
+  // capture transport member. Require that member from the fresh probe, then
+  // omit precisely it while retaining the established semantic digest.
+  const evidence = compactSemanticReceiptSha256(probe);
   const rawHash = createHash("sha256");
   for (const frame of probe.frames) {
     const raw = readFileSync(
@@ -158,6 +162,21 @@ function verify(fixturePath: string): void {
     }
   }
   const rawDigest = rawHash.digest("hex");
+  const cleanup = probe.frames.at(-1);
+  const firstInactiveCleanup = cleanup !== undefined
+    && cleanup.gAnimScriptActive === 0
+    && cleanup.visualTaskCount === 0
+    && cleanup.soundTaskCount === 0
+    && cleanup.tasks.length === 0
+    && !cleanup.sprites.some((sprite) =>
+      sprite.template.address === probe.templates.gCrossChopHandSpriteTemplate
+      || sprite.template.address === probe.templates.gCrossImpactSpriteTemplate
+    )
+    && !cleanup.paletteTags.includes(10143)
+    && !cleanup.paletteTags.includes(10285)
+    && cleanup.registers.bldcnt === 0
+    && cleanup.registers.bldalpha === 0
+    && cleanup.registers.bldy === 0;
   if (
     fixture.schema !== "cross-chop-portable-evidence/v1"
     || probe.schema !== "cross-chop-dense-evidence/v1"
@@ -169,8 +188,7 @@ function verify(fixturePath: string): void {
     || probe.lifecycleCounts.crossChopHand !== 2
     || probe.lifecycleCounts.crossImpact !== 1
     || probe.frames[0]?.gAnimScriptActive !== 1
-    || probe.frames.at(-1)?.gAnimScriptActive !== 0
-    || probe.frames.at(-1)?.visualTaskCount !== 0
+    || !firstInactiveCleanup
   ) {
     throw new Error(`${fixture.orientation}: immutable dense receipt changed`);
   }
@@ -188,6 +206,7 @@ function verify(fixturePath: string): void {
     fieldProfile: fixture.fieldProfile,
   });
   const byFrame = new Map(probe.frames.map((frame) => [frame.frame, frame]));
+  const immutableBattlers = probe.frames[0]!.battlers;
   const componentMismatches: string[] = [];
   const framebufferMismatches: string[] = [];
   let components = 0;
@@ -260,10 +279,15 @@ function verify(fixturePath: string): void {
       && Boolean(actual.gAnimScriptActive) === expected.active
       && actual.visualTaskCount === expected.visualTaskCount
       && actual.soundTaskCount === expected.soundTaskCount;
-    const registers = expected.alpha
+    const registerShape = same(Object.keys(actual.registers).sort(), [
+      "bg0cnt", "bg1cnt", "bg2cnt", "bg3cnt", "bldalpha", "bldcnt",
+      "bldy", "dispcnt",
+    ]);
+    const registers = registerShape && (expected.alpha
       ? actual.registers.bldcnt === 16192
         && actual.registers.bldalpha === 2060
-      : actual.registers.bldcnt === 0 && actual.registers.bldalpha === 0;
+      : actual.registers.bldcnt === 0 && actual.registers.bldalpha === 0)
+      && actual.registers.bldy === 0;
     const tags =
       actual.paletteTags.includes(10143)
         === expected.assetsLoaded.handsAndFeet
@@ -273,8 +297,11 @@ function verify(fixturePath: string): void {
     const expectedSong = event?.song === "SE_M_MEGA_KICK"
       ? probe.songHeaders.se_m_mega_kick
       : probe.songHeaders.se_m_razor_wind;
-    const audio = actual.se1.tracks.length === 3
+    const audioPlayers = actual.se1.tracks.length === 3
       && actual.se2.tracks.length === 3
+      && actual.se1.tracks.every((track) => typeof track.raw === "string")
+      && actual.se2.tracks.every((track) => typeof track.raw === "string");
+    const audio = audioPlayers
       && ![
         probe.songHeaders.se_m_mega_kick,
         probe.songHeaders.se_m_razor_wind,
@@ -285,13 +312,22 @@ function verify(fixturePath: string): void {
         && actual.se1.tracks[0]?.panX === event.pan
       ));
     const prior = byFrame.get(frame - 1);
-    const transfers = !prior || (
-      same(actual.hardwareOam, prior.softwareOam)
-      && (
-        same(actual.hardwarePalette, prior.fadedPalette)
-        || same(actual.hardwarePalette, actual.fadedPalette)
-      )
+    const oamTransfer = !prior
+      || same(actual.hardwareOam, prior.softwareOam);
+    const matrixTransfer = !prior || prior.sprites.every((sprite) =>
+      same(actual.hardwareMatrices[sprite.matrixNum], sprite.matrix)
     );
+    // Cross Chop's target-monbg setup is the one measured same-row palette
+    // handoff. Every other comparable row must transfer the prior faded bank.
+    const currentPaletteSetup = age === 7
+      && expected.updateMonBgTaskActive
+      && taskNames.includes("Task_UpdateMonBg")
+      && same(actual.hardwarePalette, actual.fadedPalette)
+      && (!prior || !same(actual.hardwarePalette, prior.fadedPalette));
+    const paletteTransfer = !prior
+      || same(actual.hardwarePalette, prior.fadedPalette)
+      || currentPaletteSetup;
+    const battlers = same(actual.battlers, immutableBattlers);
     const receiptShapes = actual.softwareOam.length === 128
       && actual.hardwareOam.length === 128
       && actual.hardwareMatrices.length === 32
@@ -301,6 +337,7 @@ function verify(fixturePath: string): void {
       && actual.hardwarePalette.length === 512
       && actual.sprites.every((sprite) =>
         sprite.matrixNum >= 0 && sprite.matrixNum < 32
+        && sprite.matrix.length === 4
       );
     const seamShape = seam.active === expected.active
       && same(seam.assetsLoaded, expected.assetsLoaded)
@@ -311,7 +348,12 @@ function verify(fixturePath: string): void {
       && same(seam.hands, expected.hands)
       && same(seam.impact, expected.impact)
       && same(seam.paletteBlend, expected.paletteBlend)
-      && same(seam.targetOffset, expected.targetOffset);
+      && same(seam.targetOffset, expected.targetOffset)
+      && seam.clearMonBgTaskActive === expected.clearMonBgTaskActive
+      && seam.updateMonBgTaskActive === expected.updateMonBgTaskActive
+      && seam.soundTaskCount === expected.soundTaskCount
+      && same(seam.soundEvents, expected.soundEvents)
+      && seam.battlerDisplayAge === expected.battlerDisplayAge;
 
     const raw = readFileSync(
       join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`),
@@ -332,14 +374,17 @@ function verify(fixturePath: string): void {
     }
     if (diff === 0) framebuffers += 1;
     if (
-      software && source && registers && tags && audio && transfers
-      && receiptShapes && seamShape
+      software && source && registers && tags && audio && oamTransfer
+      && matrixTransfer && paletteTransfer && battlers && receiptShapes
+      && seamShape
     ) components += 1;
     else if (componentMismatches.length < 20) {
       componentMismatches.push(
         `frame ${frame}/age ${age}: software=${software} source=${source} `
         + `registers=${registers} tags=${tags} audio=${audio} `
-        + `transfers=${transfers} receipts=${receiptShapes} seam=${seamShape}`,
+        + `oam=${oamTransfer} matrices=${matrixTransfer} `
+        + `palette=${paletteTransfer} battlers=${battlers} `
+        + `receipts=${receiptShapes} seam=${seamShape}`,
       );
     }
     if (diff !== 0 && framebufferMismatches.length < 20) {

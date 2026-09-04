@@ -10,6 +10,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 interface Fixture extends SceneOnLeafBladeConfig {
   readonly schema: string;
@@ -34,6 +35,14 @@ interface Sprite {
   readonly matrix: readonly number[];
   readonly data: readonly number[];
 }
+interface AudioPlayer {
+  readonly songHeader: number;
+  readonly tracks: readonly {
+    readonly flags: number;
+    readonly panX: number;
+    readonly raw: string;
+  }[];
+}
 interface Frame {
   readonly frame: number;
   readonly sha256: string;
@@ -55,8 +64,8 @@ interface Frame {
   readonly hardwarePalette: readonly number[];
   readonly paletteTags: readonly number[];
   readonly registers: Record<string, number>;
-  readonly se1: { readonly songHeader: number; readonly tracks: readonly { readonly flags: number; readonly panX: number }[] };
-  readonly se2: { readonly songHeader: number; readonly tracks: readonly unknown[] };
+  readonly se1: AudioPlayer;
+  readonly se2: AudioPlayer;
 }
 interface Probe {
   readonly schema: string;
@@ -72,7 +81,7 @@ const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const fixtures = process.argv.slice(2);
 if (fixtures.length !== 2) throw new Error("usage: leafBladePortable.ts <player fixture> <opponent fixture>");
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
-const fresh = new Map<string, { evidence: string; raw: string }>();
+const fresh = new Map<string, { evidence: string; raw: string; changeMap: string }>();
 const u16 = (raw: string, offset: number): number => Number.parseInt(
   raw.slice(offset * 2 + 2, offset * 2 + 4) + raw.slice(offset * 2, offset * 2 + 2),
   16,
@@ -116,9 +125,11 @@ function verify(path: string): void {
   if (run.stderr) process.stderr.write(run.stderr);
   if (run.status !== 0) process.exit(run.status ?? 1);
 
-  const bytes = readFileSync(output);
-  const probe = JSON.parse(bytes.toString()) as Probe;
-  const evidence = createHash("sha256").update(bytes).digest("hex");
+  const probe = JSON.parse(readFileSync(output, "utf8")) as Probe;
+  // Historic Leaf Blade receipts used compact Python JSON before BattleLab
+  // transported its asserted-empty capture member. Require and omit only that
+  // member here; raw RGB and the normalized map remain byte-for-byte checks.
+  const evidence = compactSemanticReceiptSha256(probe);
   const rawHash = createHash("sha256");
   for (const frame of probe.frames) {
     const rgb = readFileSync(join(rgbDir, `${String(frame.frame).padStart(5, "0")}.rgb`));
@@ -130,6 +141,21 @@ function verify(path: string): void {
   const raw = rawHash.digest("hex");
   const changeMap = normalizedChangeMap(fixture, probe, rgbDir, scratch);
   const changeMapHash = createHash("sha256").update(changeMap).digest("hex");
+  const cleanup = probe.frames.at(-1);
+  const firstInactiveCleanup = cleanup !== undefined
+    && cleanup.gAnimScriptActive === 0
+    && cleanup.visualTaskCount === 0
+    && cleanup.soundTaskCount === 0
+    && cleanup.tasks.length === 0
+    && !cleanup.sprites.some((sprite) =>
+      sprite.template.address === probe.templates.gLeafBladeSpriteTemplate
+      || sprite.template.address === probe.templates.gCrossImpactSpriteTemplate
+    )
+    && !cleanup.paletteTags.includes(10063)
+    && !cleanup.paletteTags.includes(10285)
+    && cleanup.registers.bldcnt === 0
+    && cleanup.registers.bldalpha === 0
+    && cleanup.registers.bldy === 0;
   if (fixture.schema !== "leaf-blade-portable-evidence/v2"
     || probe.schema !== "leaf-blade-dense-evidence/v2"
     || !same(probe.sourceWindow, fixture.sourceWindow)
@@ -138,14 +164,20 @@ function verify(path: string): void {
     || evidence !== fixture.evidenceSha256 || raw !== fixture.rawRgbSha256
     || changeMapHash !== fixture.changeMapSha256
     || changeMap !== readFileSync(resolve(root, fixture.changeMap), "utf8")
-    || probe.frames.length !== fixture.sourceWindow.frameCount) {
+    || probe.frames.length !== fixture.sourceWindow.frameCount
+    || probe.frames[0]?.gAnimScriptActive !== 1
+    || !firstInactiveCleanup) {
     throw new Error(`${fixture.orientation}: immutable dense receipt changed`);
   }
   const priorFresh = fresh.get(fixture.orientation);
-  if (priorFresh && !same(priorFresh, { evidence, raw })) {
+  if (priorFresh && !same(priorFresh, {
+    evidence,
+    raw,
+    changeMap: changeMapHash,
+  })) {
     throw new Error(`${fixture.orientation}: fresh proof diverged`);
   }
-  fresh.set(fixture.orientation, { evidence, raw });
+  fresh.set(fixture.orientation, { evidence, raw, changeMap: changeMapHash });
 
   const stage = createSceneOnMovePresentation<SceneOnLeafBladeConfig>({
     move: "LEAF_BLADE",
@@ -221,27 +253,54 @@ function verify(path: string): void {
       && (leafTask?.data[0] ?? null) === expected.taskState
       && (leafTask?.data[12] ?? 0) === expected.taskChildCount
       && taskNames.includes("AnimTask_ShakeMon2_Step") === expected.shakeTaskActive
+      && taskNames.includes("Task_UpdateMonBg") === expected.updateMonBgTaskActive
+      && taskNames.includes("Task_ClearMonBg") === expected.clearMonBgTaskActive
       && i16(target?.raw ?? "", 0x24) === expected.targetOffset.x2 + targetBaseline;
     const source = actual.scriptOffset === expected.scriptOffset
       && Boolean(actual.gAnimScriptActive) === expected.active
       && actual.visualTaskCount === expected.visualTaskCount
       && actual.soundTaskCount === expected.soundTaskCount;
-    const registers = actual.registers.bldcnt === (expected.alpha ? 0x3f40 : 0)
-      && actual.registers.bldalpha === (expected.alpha ? 0x080c : 0);
+    const registerShape = same(Object.keys(actual.registers).sort(), [
+      "bg0cnt", "bg1cnt", "bg2cnt", "bg3cnt", "bldalpha", "bldcnt",
+      "bldy", "dispcnt",
+    ]);
+    const registers = registerShape
+      && actual.registers.bldcnt === (expected.alpha ? 0x3f40 : 0)
+      && actual.registers.bldalpha === (expected.alpha ? 0x080c : 0)
+      && actual.registers.bldy === 0;
     const tags = actual.paletteTags.includes(10063) === expected.assetsLoaded.leaf
       && actual.paletteTags.includes(10285) === expected.assetsLoaded.crossImpact;
     const event = expected.soundEvents[0];
     const song = event?.song === "SE_M_CUT"
       ? probe.songHeaders.se_m_cut : probe.songHeaders.se_m_leer;
-    const audio = !event || (actual.se1.songHeader === song
-      && actual.se1.tracks[0]?.flags === 131
-      && actual.se1.tracks[0]?.panX === event.pan);
+    const audioPlayers = actual.se1.tracks.length === 3
+      && actual.se2.tracks.length === 3
+      && actual.se1.tracks.every((track) => typeof track.raw === "string")
+      && actual.se2.tracks.every((track) => typeof track.raw === "string");
+    const audio = audioPlayers
+      && ![probe.songHeaders.se_m_cut, probe.songHeaders.se_m_leer]
+        .includes(actual.se2.songHeader)
+      && (!event || (actual.se1.songHeader === song
+        && actual.se1.tracks[0]?.flags === 131
+        && actual.se1.tracks[0]?.panX === event.pan));
     const prior = index === 0 ? null : probe.frames[index - 1]!;
-    const transfers = prior === null || (
-      same(actual.hardwareOam, prior.softwareOam)
-      && (same(actual.hardwarePalette, prior.fadedPalette)
-        || same(actual.hardwarePalette, actual.fadedPalette))
+    const oamTransfer = prior === null
+      || same(actual.hardwareOam, prior.softwareOam);
+    const matrixTransfer = prior === null || prior.sprites.every((sprite) =>
+      same(actual.hardwareMatrices[sprite.matrixNum], sprite.matrix)
     );
+    // The target-monbg setup at age 144 is Leaf Blade's one measured
+    // same-row palette handoff; every other comparable row is predecessor DMA.
+    const currentPaletteSetup = age === 144
+      && expected.updateMonBgTaskActive
+      && taskNames.includes("Task_UpdateMonBg")
+      && same(actual.hardwarePalette, actual.fadedPalette)
+      && (prior === null || !same(actual.hardwarePalette, prior.fadedPalette));
+    const paletteTransfer = prior === null
+      || same(actual.hardwarePalette, prior.fadedPalette)
+      || currentPaletteSetup;
+    const battlers = same(actual.battlers, immutableBattlers);
+    const gameplay = same(actual.immutableState, immutableState);
     const receiptShape = actual.softwareOam.length === 128
       && actual.hardwareOam.length === 128
       && actual.hardwareMatrices.length === 32
@@ -249,11 +308,12 @@ function verify(path: string): void {
       && actual.fadedPalette.length === 512
       && actual.unfadedPalette.length === 512
       && actual.hardwarePalette.length === 512
-      && same(actual.battlers, immutableBattlers)
-      && same(actual.immutableState, immutableState)
       && same(actual.playerSprite, actual.sprites.find((sprite) => sprite.slot === actual.playerSprite.slot))
       && same(actual.opponentSprite, actual.sprites.find((sprite) => sprite.slot === actual.opponentSprite.slot))
-      && actual.se2.tracks.length === 3;
+      && actual.sprites.every((sprite) =>
+        sprite.matrixNum >= 0 && sprite.matrixNum < 32
+        && sprite.matrix.length === 4
+      );
     const seamShape = seam.active === expected.active
       && same(seam.assetsLoaded, expected.assetsLoaded)
       && seam.scriptOffset === expected.scriptOffset
@@ -263,11 +323,18 @@ function verify(path: string): void {
       && same(seam.targetOffset, expected.targetOffset)
       && same(seam.crossImpact, expected.crossImpact)
       && seam.targetMonbg === expected.targetMonbg
-      && same(seam.alpha, expected.alpha);
-    if (software && source && registers && tags && audio && transfers && receiptShape && seamShape) {
+      && same(seam.alpha, expected.alpha)
+      && seam.updateMonBgTaskActive === expected.updateMonBgTaskActive
+      && seam.clearMonBgTaskActive === expected.clearMonBgTaskActive
+      && seam.visualTaskCount === expected.visualTaskCount
+      && seam.soundTaskCount === expected.soundTaskCount
+      && same(seam.soundEvents, expected.soundEvents);
+    if (software && source && registers && tags && audio && oamTransfer
+      && matrixTransfer && paletteTransfer && battlers && gameplay
+      && receiptShape && seamShape) {
       components += 1;
     } else if (failures.length < 30) {
-      failures.push(`${fixture.orientation} age ${age}: component software=${software} source=${source} registers=${registers} tags=${tags} audio=${audio} transfers=${transfers} receipt=${receiptShape} seam=${seamShape}`);
+      failures.push(`${fixture.orientation} age ${age}: component software=${software} source=${source} registers=${registers} tags=${tags} audio=${audio} oam=${oamTransfer} matrices=${matrixTransfer} palette=${paletteTransfer} battlers=${battlers} gameplay=${gameplay} receipt=${receiptShape} seam=${seamShape}`);
     }
 
     const rgb = readFileSync(join(rgbDir, `${String(actual.frame).padStart(5, "0")}.rgb`));

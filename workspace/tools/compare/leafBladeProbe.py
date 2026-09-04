@@ -22,14 +22,12 @@ def main() -> None:
     ref = (ROOT / "reference/pokeemerald").resolve()
     oracle = EmeraldOracle(ref / "pokeemerald.gba", ref / "pokeemerald.map", HARNESS / "oracle" / "bootstrap" / "factory.json")
     lab = BattleLab(oracle, "battle-scene-on"); setup = lab.prepare(request)
-    # The oracle's 2026-07-30 opt-in pre-checkpoint capture API added this
-    # empty transport-only member to every BattleLab setup receipt. Leaf
-    # Blade never requests those captures, so assert that invariant and keep
-    # the move receipt on its original semantic schema. This distinguishes
-    # schema growth from an actual ROM/emulator/state change.
+    # Leaf Blade never requests pre-checkpoint captures. Keep BattleLab's
+    # asserted-empty transport member in the fresh payload so the portable
+    # verifier can require it and narrow only that member for the historic
+    # compact semantic receipt.
     if setup.get("preCheckpointCaptures") != []:
         raise RuntimeError("Leaf Blade unexpectedly requested pre-checkpoint captures")
-    setup.pop("preCheckpointCaptures")
     output = subprocess.run(["arm-none-eabi-nm", "-a", str(ref / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     pairs = [(int(parts[0], 16), parts[2]) for line in output.splitlines() if len(parts := line.split()) == 3 and all(c in "0123456789abcdefABCDEF" for c in parts[0])]
     names = {name: address for address, name in pairs}; by_address = {address: name for address, name in pairs}; sy = oracle.symbols
