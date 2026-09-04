@@ -1,3 +1,10 @@
+# Animation supervisor verification — Slam/Secret Power track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `slam-hit-slide-shake` is newly fulfilled; MOVE_SLAM and MOVE_SECRET_POWER retain separate exact acceptance and no sibling receives credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `ec690ac43`. Its five animation-owned files route the two legacy comparators through the existing normal-Python semantic serializer, add a strict empty-transport/track ratchet, and update animation ledgers only; no fixture hash, production reducer/seam/compositor/asset/scenario, latch, move status/count, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audits and portable runs reproduce SLAM **54/54** in both orientations twice (`8f520d75…`/`4e3abdaf…`, `66a2b9d7…`/`66d4cdf1…`) and Factory indoor Secret Power→Strength **102/102** in both orientations twice (`9d8f3ad7…`/`af6ff533…`, `8d6902b6…`/`f4c81b0d…`) with independent source/component, hardware/latch, seam, raw-RGB, actual-core framebuffer, immutable-state, and cleanup closure. Focused controls pass **10 files / 42 tests**; coverage, animation audit, and diff checks pass.
+- **Merged gate:** Post-merge `npm test` passes **1,235 files / 10,896 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**. Next: audit the next bounded unfulfilled component track, preserving independent dense acceptance and stopping on unexplained receipt drift.
+
 # Slam/Secret Power receipt reconciliation + fulfilled track (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `slam-hit-slide-shake` is fulfilled; MOVE_SLAM and MOVE_SECRET_POWER retain their separate exact acceptances with no sibling credit.
