@@ -6765,6 +6765,7 @@
     "MOVE_METRONOME",
     "MOVE_FOLLOW_ME"
    ],
+   "fulfilled": true,
    "goal": "Track closed. MOVE_METRONOME independently remains exact at 127/127 complete source/software/typed-seam, tagged tile/palette, hardware OAM/matrix/order, register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh through first inactive cleanup. MOVE_FOLLOW_ME independently passes its distinct gFollowMeFingerSpriteTemplate/AnimFollowMeFinger top-center, normal-affine grow, 13-frame delay, sine/subpriority traversal, shared three-wag/shrink terminal callback, audio, cleanup, and production framebuffer at 185/185 twice fresh in both orientations."
   },
   {

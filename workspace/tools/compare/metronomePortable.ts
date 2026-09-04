@@ -22,6 +22,12 @@ import { createScratchDir } from "../lib/scratch.ts";
 import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 type Window = { startFrame: number; endFrame: number; frameCount: number };
+type Sprite = {
+  slot: number;
+  template: { symbol: string | null };
+  matrixNum: number;
+  matrix: number[];
+};
 type Fixture = {
   schema: "metronome-portable-evidence/v1" | "follow-me-portable-evidence/v1";
   orientation: string; scenario: string; probe: string;
@@ -42,7 +48,7 @@ type Frame = {
   softwareOam: string[]; hardwareOam: string[]; hardwareMatrices: number[][];
   fadedPalette: number[]; unfadedPalette: number[]; hardwarePalette: number[];
   paletteTags: number[]; tileTags: number[]; registers: Record<string, number>;
-  tasks: unknown[]; sprites: unknown[]; se1: unknown; se2: unknown;
+  tasks: unknown[]; sprites: Sprite[]; battlers: unknown; se1: unknown; se2: unknown;
   gAnimScriptActive: number; visualTaskCount: number;
 };
 type Probe = {
@@ -105,6 +111,9 @@ function verify(fixturePath: string, runNumber: number): void {
     || evidence !== fixture.evidenceSha256
     || probe.frames.length !== expectedFrameCount || !fields
   ) throw new Error(`${fixture.orientation}: immutable dense receipt changed`);
+  if (!probe.frames.every((frame) => same(frame.battlers, probe.frames[0].battlers))) {
+    throw new Error(`${fixture.orientation}: gameplay battlers changed inside presentation window`);
+  }
 
   const stage = isFollowMe
     ? createSceneOnMovePresentation({
@@ -122,6 +131,10 @@ function verify(fixturePath: string, runNumber: number): void {
       fieldProfile: fixture.fieldProfile,
     });
   const failures: string[] = [];
+  const fingerTemplate = isFollowMe
+    ? "gFollowMeFingerSpriteTemplate"
+    : "gMetronomeFingerSpriteTemplate";
+  const expectedFingerSlot = isFollowMe ? 3 : 4;
   for (const [index, oracle] of probe.frames.entries()) {
     const rgb = readFileSync(
       join(rgbDir, `${String(oracle.frame).padStart(5, "0")}.rgb`),
@@ -162,6 +175,20 @@ function verify(fixturePath: string, runNumber: number): void {
       { ...seam, age: undefined, attacker: undefined, target: undefined },
       component,
     );
+    const previous = probe.frames[index - 1];
+    const currentFingers = oracle.sprites.filter((sprite) =>
+      sprite.template.symbol === fingerTemplate
+    );
+    const previousFingers = previous?.sprites.filter((sprite) =>
+      sprite.template.symbol === fingerTemplate
+    ) ?? [];
+    const hardwareOamTransfer = !previous
+      || same(oracle.hardwareOam, previous.softwareOam);
+    const hardwareMatrixTransfer = !previous || previousFingers.every((sprite) =>
+      same(oracle.hardwareMatrices[sprite.matrixNum], sprite.matrix)
+    );
+    const fingerOrder = currentFingers.length <= 1
+      && currentFingers.every((sprite) => sprite.slot === expectedFingerSlot);
     const engine: EngineState = {
       ...createInitialState(),
       rngMode: "frontierBattle",
@@ -179,10 +206,15 @@ function verify(fixturePath: string, runNumber: number): void {
     const cleanup = index !== expectedFrameCount - 1
       || (!component.active && !oracle.gAnimScriptActive
         && oracle.visualTaskCount === 0);
-    if (!seamMatch || diff !== 0 || !cleanup) {
+    if (
+      !seamMatch || !hardwareOamTransfer || !hardwareMatrixTransfer
+      || !fingerOrder || diff !== 0 || !cleanup
+    ) {
       failures.push(
         `frame ${oracle.frame}/age ${age}: seam=${seamMatch} `
-        + `framebuffer=${diff === 0} diff=${diff} cleanup=${cleanup}`,
+        + `oam=${hardwareOamTransfer} matrices=${hardwareMatrixTransfer} `
+        + `order=${fingerOrder} framebuffer=${diff === 0} diff=${diff} `
+        + `cleanup=${cleanup}`,
       );
     }
   }
