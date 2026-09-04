@@ -15,11 +15,18 @@ const brick = body("Move_BRICK_BREAK:", "Move_YAWN:"); const claw = body("Move_C
 for (const n of ["loadspritegfx ANIM_TAG_TORN_METAL", "choosetwoturnanim BrickBreakNormal, BrickBreakShatteredWall", "createsprite gBrickBreakWallSpriteTemplate", "createsprite gBrickBreakWallShardSpriteTemplate", "createvisualtask AnimTask_WindUpLunge", "playsewithpan SE_M_BRICK_BREAK", "simple_palette_blend", "clearmonbg ANIM_TARGET"]) need(brick, n);
 if ((brick.match(/gBrickBreakWallShardSpriteTemplate/g) ?? []).length !== 4) throw new Error("Brick Break needs four shard creates");
 for (const n of [".tileTag = ANIM_TAG_TORN_METAL", ".callback = AnimBrickBreakWallShard", "sprite->data[6] = -3", "sprite->data[7] = -3", "if (++sprite->data[0] > 40)"]) need(fight, n);
-for (const n of ["loadspritegfx ANIM_TAG_TORN_METAL", "create_claw_slash_sprite", "AnimTask_ShakeMon2", "SE_M_RAZOR_WIND"]) need(claw, n);
-if (claw.includes("gBrickBreakWallShardSpriteTemplate")) throw new Error("Crush Claw must remain a distinct claw-slash body");
+for (const n of ["loadspritegfx ANIM_TAG_BLUE_LIGHT_WALL", "loadspritegfx ANIM_TAG_TORN_METAL", "create_claw_slash_sprite", "AnimTask_ShakeMon2", "SE_M_RAZOR_WIND"]) need(claw, n);
+if ((claw.match(/create_claw_slash_sprite/g) ?? []).length !== 4) throw new Error("Crush Claw needs four claw-slash creates");
+for (const wallTemplate of ["gReflectWallSpriteTemplate", "gReflectSparkleSpriteTemplate", "gBrickBreakWallSpriteTemplate", "gBrickBreakWallShardSpriteTemplate"]) {
+  if (claw.includes(wallTemplate)) throw new Error(`Crush Claw must not instantiate ${wallTemplate}`);
+}
 const l50 = inventory.tiers.level50.moves; const bb = l50.find((x: { move: string }) => x.move === "MOVE_BRICK_BREAK"); const cc = l50.find((x: { move: string }) => x.move === "MOVE_CRUSH_CLAW");
 if (bb.frontierMonCount !== 46 || cc.frontierMonCount !== 11) throw new Error("Level-50 census changed");
 need(constants, "#define FRONTIER_MON_LOMBRE         131"); const lombre = mons.slice(mons.indexOf("[FRONTIER_MON_LOMBRE]"), mons.indexOf("[FRONTIER_MON_POLIWHIRL_1]")); need(lombre, "SPECIES_LOMBRE"); need(lombre, "MOVE_BRICK_BREAK");
 for (const move of ["MOVE_BRICK_BREAK", "MOVE_CRUSH_CLAW"]) { if (!components.moves.find((x: { move: string; componentIds: string[] }) => x.move === move)?.componentIds.includes("asset:ANIM_TAG_TORN_METAL")) throw new Error(`${move} lost TORN_METAL`); }
-if (!coverage.entries.some((x: { move: string; status: string }) => x.move === "MOVE_BRICK_BREAK" && x.status === "exact")) throw new Error("Brick Break must retain exact acceptance");
-console.log("TORN_METAL audit: Brick Break 46 L50 carriers, lowest set 131/FRONTIER_MON_LOMBRE; normal plus four-shard wall bodies exact; Crush Claw 11-carrier claw-slash body remains unsupported");
+for (const move of ["MOVE_BRICK_BREAK", "MOVE_CRUSH_CLAW"]) {
+  if (!coverage.entries.some((x: { move: string; status: string }) => x.move === move && x.status === "exact")) {
+    throw new Error(`${move} must retain exact acceptance`);
+  }
+}
+console.log("TORN_METAL audit: Brick Break 46 L50 carriers, lowest set 131/FRONTIER_MON_LOMBRE; normal plus four-shard wall bodies exact; Crush Claw 11-carrier lunge/ShakeMon2/four-claw body exact, loads BLUE_LIGHT_WALL but instantiates no wall body");

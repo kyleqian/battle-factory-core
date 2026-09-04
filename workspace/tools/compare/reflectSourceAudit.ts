@@ -39,8 +39,8 @@ if (!crush.includes("loadspritegfx ANIM_TAG_BLUE_LIGHT_WALL") || crush.includes(
   || !dark.includes("AnimClawSlash")) throw new Error("Crush Claw audit changed");
 console.log(JSON.stringify({
   move: "MOVE_REFLECT", body: "wall + three SPARKLE_4 sprites + alpha/audio/teardown",
-  siblingsRemainUnsupported: {
-    MOVE_BRICK_BREAK: "loads BLUE_LIGHT_WALL but chooses normal or separate gBrickBreakWall/shard shattered-wall body",
-    MOVE_CRUSH_CLAW: "loads BLUE_LIGHT_WALL yet creates no wall template; its lunge/shake/four claw-slash body is distinct",
+  siblingsRemainIndependent: {
+    MOVE_BRICK_BREAK: "exact independently through normal and separate gBrickBreakWall/shard shattered-wall bodies",
+    MOVE_CRUSH_CLAW: "exact independently through its lunge/ShakeMon2/four claw-slash body; it loads BLUE_LIGHT_WALL yet creates no wall template",
   },
 }, null, 2));

@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 type Fixture = { schema: string; oracleProfile: string; orientation: string; scenario: string; probe: string; sourceWindow: { startFrame: number; endFrame: number; frameCount: number }; evidenceSha256: string; rawRgbSha256: string };
 type Frame = { frame: number; sha256: string; active: number; visualTaskCount: number; sprites: Array<{ slot: number; template: { symbol: string | null }; callback: { symbol: string | null } }>; tasks: Array<{ func: { symbol: string | null } }>; paletteTags: number[]; tileTags: number[]; softwareOam: string[]; hardwareOam: string[]; hardwareMatrices: number[][]; fadedPalette: number[]; unfadedPalette: number[]; hardwarePalette: number[]; registers: { bldcnt: number; bldalpha: number; bldy: number }; se1: { songHeader: number; tracks: Array<{ flags: number; panX: number }> } };
@@ -17,9 +18,12 @@ function run(path: string, pass: number) {
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
   const p = spawnSync("python3", [join(root, "tools/run-mgba-probe.py"), out, "--", join(vendor, "mgba-venv/bin/python"), resolve(root, f.probe), resolve(root, f.scenario), out, rgb], { cwd: root, encoding: "utf8" });
   if (p.stdout) process.stdout.write(p.stdout); if (p.stderr) process.stderr.write(p.stderr); if (p.status) process.exit(p.status);
-  const bytes = readFileSync(out), probe = JSON.parse(bytes.toString()) as Probe, raw = createHash("sha256"), problems: string[] = [];
+  const probe = JSON.parse(readFileSync(out, "utf8")) as Probe, raw = createHash("sha256"), problems: string[] = [];
   for (const row of probe.frames) { const b = readFileSync(join(rgb, `${String(row.frame).padStart(5, "0")}.rgb`)); raw.update(b); if (createHash("sha256").update(b).digest("hex") !== row.sha256) problems.push(`raw ${row.frame}`); }
-  const evidence = createHash("sha256").update(bytes).digest("hex"), rawHash = raw.digest("hex");
+  // Keep the compact historic semantic receipt strict: BattleLab's only
+  // transport drift is setup.preCheckpointCaptures: [], which the helper
+  // requires and then excludes. The raw framebuffer digest is untouched.
+  const evidence = compactSemanticReceiptSha256(probe), rawHash = raw.digest("hex");
   if (f.schema !== "brick-break-portable-evidence/v1" || f.oracleProfile !== "battle-scene-on" || probe.schema !== "brick-break-dense-evidence/v1" || JSON.stringify(f.sourceWindow) !== JSON.stringify(probe.sourceWindow) || evidence !== f.evidenceSha256 || rawHash !== f.rawRgbSha256) problems.push("receipt/window");
   if (probe.lifecycleCounts.wall !== 1 || probe.lifecycleCounts.shard !== 4) problems.push("wall/shard lifecycle counts");
   const first = probe.frames[0]!;

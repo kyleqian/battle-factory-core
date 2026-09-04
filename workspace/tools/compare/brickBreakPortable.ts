@@ -13,6 +13,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 type Fixture = {
   schema: string;
@@ -134,9 +135,11 @@ function verify(path: string, pass: number): void {
   if (proc.stdout) process.stdout.write(proc.stdout);
   if (proc.stderr) process.stderr.write(proc.stderr);
   if (proc.status !== 0) process.exit(proc.status ?? 1);
-  const bytes = readFileSync(out);
-  const probe = JSON.parse(bytes.toString()) as Probe;
-  const evidence = createHash("sha256").update(bytes).digest("hex");
+  const probe = JSON.parse(readFileSync(out, "utf8")) as Probe;
+  // The historic Brick Break probes used compact Python JSON before BattleLab
+  // added its asserted-empty transport-only capture list. Require and remove
+  // only that field while retaining raw RGB over every recorded framebuffer.
+  const evidence = compactSemanticReceiptSha256(probe);
   const rawWindow = createHash("sha256");
   const failures: string[] = [];
   const expectedLifecycles = body === "normal"
