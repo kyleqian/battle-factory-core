@@ -13,6 +13,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 type Fixture = SceneOnFakeTearsConfig & {
   schema: string;
@@ -107,8 +108,7 @@ function verify(fixturePath: string, runNumber: number): void {
   if (run.stdout) process.stdout.write(run.stdout);
   if (run.stderr) process.stderr.write(run.stderr);
   if (run.status !== 0) process.exit(run.status ?? 1);
-  const outputBytes = readFileSync(output);
-  const probe = JSON.parse(outputBytes.toString()) as Probe;
+  const probe = JSON.parse(readFileSync(output, "utf8")) as Probe;
   if (probe.schema !== "fake-tears-blend-particle-dense-evidence/v1") {
     throw new Error(`${fixture.orientation}: unexpected probe schema`);
   }
@@ -371,7 +371,10 @@ function verify(fixturePath: string, runNumber: number): void {
       + auditSummary,
     );
   }
-  const outputDigest = createHash("sha256").update(outputBytes).digest("hex");
+  // BattleLab's newer transport adds only this asserted-empty setup member.
+  // Keep the historic compact-Python receipt hash after rejecting every other
+  // shape; raw RGB remains independently byte-for-byte below.
+  const outputDigest = compactSemanticReceiptSha256(probe);
   const rawDigest = rgbDigest.digest("hex");
   if (
     outputDigest !== fixture.evidenceSha256

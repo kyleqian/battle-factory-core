@@ -1,3 +1,11 @@
+# RockMonBackAndForth/MAGENTA_HEART component-track fulfilled (2026-09-04 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `rock-mon-back-and-forth-magenta-heart` is fulfilled; MOVE_CHARM, MOVE_COVET, MOVE_FAKE_TEARS, and MOVE_TICKLE retain independent exact acceptance and no shared art/task gives sibling credit.
+- **Evidence:** Fresh Battle Scene ON runs close every body twice per orientation: Charm's legal set-187 MINUN/SHUCKLE body is **93/93 + 4/4** clear teardown frames; Covet's legal set-203 LINOONE/SHUCKLE body is **114/114** (including target ShakeMon2, load-only zero-ITEM_BAG-OAM transfer, and Dizzy Punch); corrected set-267 DELCATTY/SHUCKLE Fake Tears is **322/322** controller rows including its **87/87** body (`3b2470bd…` / `4aaf80e8…`; `c9b2f3d8…` / `e7828c48…`); and corrected set-138 OMANYTE/ONIX Tickle is **205/205** (`509f6618…` / `5b6253ce…`; `c4327c31…` / `b06ea14f…`). Nincada-301 and Omastar-139 receipts remain historical only.
+- **Transport / latches:** Fresh Fake Tears and Tickle payloads add only asserted-empty `setup.preCheckpointCaptures: []`; their portable comparators now require exactly that empty list and remove only it through the existing compact semantic receipt helper, reproducing historic semantic hashes while raw RGB stays byte-identical. Rules 1, 2, and 5 remain move-owned; no new latch or `ANIMATION_LATCHES.md` change is warranted.
+- **Scope:** Added the narrow transport guards, a direct four-move legal fixture/window/hash/source-body/fulfilled-flag ratchet, and stale wording corrections for these exact representatives. No fixture/hash, reducer/assets/seam/compositor/probe/scenario, move status/count, gameplay/controller/RNG/facility state, boundary/barrier, or main-program document changed.
+- **Next:** Run the final coverage/audit/typecheck/full-suite/build gates, then hand off this fulfilled track.
+
 # Animation supervisor verification — Sparkle-4 Grow/Grayscale track fulfilled (2026-09-04 supervisor)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `sparkle-4-grow-grayscale` is newly fulfilled; MOVE_DISABLE and MOVE_DETECT retain independent exact acceptance and no sibling receives credit.

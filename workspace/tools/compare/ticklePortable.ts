@@ -14,6 +14,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 type Window = { startFrame: number; endFrame: number; frameCount: number };
 type Fixture = {
@@ -73,9 +74,11 @@ function verify(fixturePath: string, runNumber: number): void {
   if (run.stderr) process.stderr.write(run.stderr);
   if (run.status !== 0) process.exit(run.status ?? 1);
 
-  const bytes = readFileSync(output);
-  const probe = JSON.parse(bytes.toString()) as Probe;
-  const evidence = createHash("sha256").update(bytes).digest("hex");
+  const probe = JSON.parse(readFileSync(output, "utf8")) as Probe;
+  // BattleLab's added empty capture list is transport-only. The helper
+  // requires that exact empty shape, removes no other field, and preserves
+  // the historic compact-Python semantic receipt; raw RGB stays exact below.
+  const evidence = compactSemanticReceiptSha256(probe);
   const raw = createHash("sha256");
   const fields = probe.frames.every((frame) =>
     (frame.scriptOffset === null || typeof frame.scriptOffset === "number")
