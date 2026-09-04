@@ -1,8 +1,10 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { semanticReceiptSha256 } from "../../tools/compare/semanticReceipt.ts";
 
 describe("MOVE_LIGHT_SCREEN exact evidence", () => {
   it("pins both dense source-body windows and receipts", () => {
@@ -87,7 +89,43 @@ describe("MOVE_LIGHT_SCREEN exact evidence", () => {
     );
     expect(audit).toContain("framebufferMatches");
     expect(audit).toContain(
-      "for (let runNumber = 1; runNumber <= 2; runNumber += 1)",
+      "if (configured === undefined) return 2;",
     );
+    expect(audit).toContain(
+      "for (let runNumber = 1; runNumber <= evidenceRunCount(); runNumber += 1)",
+    );
+  });
+
+  it("normalizes only the asserted-empty BattleLab transport receipt", () => {
+    const fresh = {
+      schema: "special-screen-test",
+      setup: {
+        preCheckpointCaptures: [],
+        name: "\u00e9",
+        nested: { value: 1 },
+      },
+      rows: [0, true, "line\n"],
+    };
+    const semantic = "{\"schema\": \"special-screen-test\", \"setup\": {\"name\": \"\\u00e9\", \"nested\": {\"value\": 1}}, \"rows\": [0, true, \"line\\n\"]}\n";
+    expect(semanticReceiptSha256(fresh)).toBe(
+      createHash("sha256").update(semantic).digest("hex"),
+    );
+    expect(() => semanticReceiptSha256({
+      ...fresh,
+      setup: { ...fresh.setup, preCheckpointCaptures: [1] },
+    })).toThrow("setup.preCheckpointCaptures must be []");
+  });
+
+  it("fulfills only the independently receipted special-screen track", () => {
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
+    expect(coverage.entries.find((entry: { move: string }) =>
+      entry.move === "MOVE_LIGHT_SCREEN")).toMatchObject({ status: "exact" });
+    expect(coverage.entries.find((entry: { move: string }) =>
+      entry.move === "MOVE_MIRROR_COAT")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: { id: string }) =>
+      track.id === "sparkle-3-special-screen")).toMatchObject({
+      representatives: ["MOVE_LIGHT_SCREEN", "MOVE_MIRROR_COAT"],
+      fulfilled: true,
+    });
   });
 });

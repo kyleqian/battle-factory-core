@@ -1,3 +1,10 @@
+# Sparkle-3 special-screen semantic receipt refresh + fulfilled track (2026-09-04 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `sparkle-3-special-screen` is fulfilled; MOVE_LIGHT_SCREEN and MOVE_MIRROR_COAT remain independently exact with no sibling credit.
+- **Receipt policy:** Both portable comparators now parse each fresh payload, require `setup.preCheckpointCaptures: []`, remove only that transport-only field, serialize Python-compatible canonical bytes, then hash. Light Screen retains `7c1c3b39…` / `51ffe743…`; Mirror Coat refreshes from transport-inclusive `ebc190bd…` / `5decc451…` to `1ea5591d…` / `3328d443…`; all four raw RGB hashes are unchanged.
+- **Evidence:** Two independent foreground bilateral passes close Light Screen **115+119** and Mirror Coat **75+75** source/component, software/hardware, raw-RGB, and actual-core framebuffer rows each time (**384/384 per pass**, zero residual). Each body received its own change-map/latch check: ordinary wall/SPARKLE OAM and rotation palette writes are RAM+1, with only the two player-back age-0 palette setup loads same-row; `setalpha`/`blendoff` remain direct register schedules.
+- **Checks:** Source audit; focused Light Screen/Mirror Coat/inventory/boundary/frontier controls (**6 files / 30 tests**); coverage; animation audit; typecheck; and diff check pass. Final `npm test`: **1,235 passed files / 10,892 passed tests**, with **44 files / 223 tests skipped**; `npm run build`: **761 modules**.
+
 # Animation supervisor verification — Sparkle-3 receipt mismatch merged (2026-09-03 supervisor)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. `sparkle-3-special-screen` remains unfulfilled; MOVE_LIGHT_SCREEN and MOVE_MIRROR_COAT retain their independent exact statuses with no sibling credit.

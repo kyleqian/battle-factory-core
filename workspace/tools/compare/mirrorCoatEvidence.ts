@@ -10,6 +10,7 @@ import {
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { mirrorCoatScenario } from "./mirrorCoatScenario.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { semanticReceiptSha256 } from "./semanticReceipt.ts";
 
 interface Fixture extends SceneOnMirrorCoatConfig {
   schema: string;
@@ -56,6 +57,13 @@ const same = (left: unknown, right: unknown) =>
   JSON.stringify(left) === JSON.stringify(right);
 const evidenceDigests = new Map<string, string>();
 const rawDigests = new Map<string, string>();
+
+function evidenceRunCount(): number {
+  const configured = process.env.POKEBENCH_EVIDENCE_RUNS;
+  if (configured === undefined) return 2;
+  if (configured === "1") return 1;
+  throw new Error("POKEBENCH_EVIDENCE_RUNS must be 1 when set");
+}
 
 function stableBattle(value: unknown): unknown {
   const battle = value as Record<"player" | "opponent", Record<string, unknown>>;
@@ -118,7 +126,7 @@ function verify(fixturePath: string, runNumber: number): void {
   if (probe.schema !== "mirror-coat-dense-evidence/v1") {
     throw new Error(`${fixture.orientation}: unexpected probe schema`);
   }
-  const evidenceDigest = createHash("sha256").update(bytes).digest("hex");
+  const evidenceDigest = semanticReceiptSha256(probe);
   if (evidenceDigest !== fixture.evidenceSha256) {
     throw new Error(`${fixture.orientation}: evidence ${evidenceDigest}`);
   }
@@ -269,6 +277,6 @@ function verify(fixturePath: string, runNumber: number): void {
   if (failures.length) throw new Error(failures.slice(0, 20).join("\n"));
 }
 
-for (let runNumber = 1; runNumber <= 2; runNumber += 1) {
+for (let runNumber = 1; runNumber <= evidenceRunCount(); runNumber += 1) {
   for (const fixturePath of fixturePaths) verify(fixturePath!, runNumber);
 }

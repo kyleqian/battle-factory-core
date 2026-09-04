@@ -9,6 +9,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { semanticReceiptSha256 } from "./semanticReceipt.ts";
 
 interface Fixture extends SceneOnLightScreenConfig {
   schema: string;
@@ -51,6 +52,13 @@ const same = (left: unknown, right: unknown) =>
   JSON.stringify(left) === JSON.stringify(right);
 const evidenceDigests = new Map<string, string>();
 const rawDigests = new Map<string, string>();
+
+function evidenceRunCount(): number {
+  const configured = process.env.POKEBENCH_EVIDENCE_RUNS;
+  if (configured === undefined) return 2;
+  if (configured === "1") return 1;
+  throw new Error("POKEBENCH_EVIDENCE_RUNS must be 1 when set");
+}
 
 function stableBattle(value: unknown): unknown {
   const battle = value as Record<"player" | "opponent", Record<string, unknown>>;
@@ -107,7 +115,7 @@ function verify(fixturePath: string, runNumber: number): void {
   if (probe.schema !== "light-screen-dense-evidence/v1") {
     throw new Error(`${fixture.orientation}: unexpected probe schema`);
   }
-  const evidenceDigest = createHash("sha256").update(bytes).digest("hex");
+  const evidenceDigest = semanticReceiptSha256(probe);
   if (
     fixture.evidenceSha256
     && evidenceDigest !== fixture.evidenceSha256
@@ -252,7 +260,7 @@ function verify(fixturePath: string, runNumber: number): void {
   }
 }
 
-for (let runNumber = 1; runNumber <= 2; runNumber += 1) {
+for (let runNumber = 1; runNumber <= evidenceRunCount(); runNumber += 1) {
   for (const fixturePath of fixturePaths) {
     verify(fixturePath!, runNumber);
   }
