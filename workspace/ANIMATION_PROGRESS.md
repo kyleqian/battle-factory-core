@@ -1,3 +1,10 @@
+# Red-heart Sweet Kiss/Attract receipt reconciliation + fulfilled track (2026-09-04 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `red-heart-sweet-kiss` is now fulfilled; MOVE_SWEET_KISS and MOVE_ATTRACT retain their existing independent exact statuses.
+- **Source / receipt policy:** Both assigned source audits pass. Fresh BattleLab payloads add only asserted-empty `setup.preCheckpointCaptures: []`; the track-local portable verifiers now use a strict compact-Python semantic serializer that requires and removes just that transport field, reproducing every historic semantic receipt. Raw RGB hashes are unchanged.
+- **Evidence:** Twice-fresh bilateral portable runs close Sweet Kiss at **159/159 + 159/159** (one ANGEL and six RED_HEART bursts) and Attract at **435/435 + 435/435** (one projectile, six bursts, eight rising hearts, SwayMon, HeartsBackground, both blend cycles, hardware/register/audio/tag cleanup, immutable state, and actual-core framebuffer equality), all zero residual.
+- **Checks / scope:** Source audits; 7 focused files / 29 tests; coverage; animation audit; typecheck; diff check; full `npm test` (**1,235 files / 10,894 tests**, 44 files / 223 skipped); and build (**761 modules**) pass. Added only compact receipt normalization, its direct animation ratchet, this fulfilled-track flag, and this ledger entry—no production reducer/seam/compositor/assets/scenarios/fixtures, move status/count, latch, gameplay/RNG/damage/status/controller/round/facility state, boundary/barrier, recording allowlist, or main-program document changed.
+
 # Animation supervisor verification — Sparkle-3 special-screen track fulfilled (2026-09-04 supervisor)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `sparkle-3-special-screen` is newly fulfilled; MOVE_LIGHT_SCREEN and MOVE_MIRROR_COAT retain independent exact acceptance and no sibling receives credit.

@@ -6647,7 +6647,8 @@
     "MOVE_SWEET_KISS",
     "MOVE_ATTRACT"
    ],
-   "goal": "Track complete. MOVE_SWEET_KISS independently proves its complete ANGEL and six-RED_HEART-burst body at 159/159 dense source/seam/framebuffer frames in both orientations twice fresh. MOVE_ATTRACT independently proves its one projectile, six burst, eight rising hearts, SwayMon, HeartsBackground, two target blend cycles, audio/panning, hardware/OAM cadence, tagged lifetimes, and cleanup at 435/435 frames in both orientations twice fresh. RED_HEART reuse does not waive either move's acceptance."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_SWEET_KISS independently proves its complete ANGEL and six-RED_HEART-burst body at 159/159 dense source/seam/raw-RGB/actual-core framebuffer frames in both orientations twice fresh, retaining semantic/raw receipts 5117db12992b65aadfc65a448ea2260dfd5848be19fc3d6e2df733d90604af21/61870ad0f56694de71f2d492c51fbe208216ef88b8550eca8a3a17fca8f73f11 and db45d09de25efa0d267f53c0337017c98094b0d174e8b99babfaa7dabf496821/76f32756df4d9bbdbfee5daf5d5ecf5b72bcdbacc3c4eab909c44cd7a8759876. MOVE_ATTRACT independently proves its one projectile, six burst, eight rising hearts, SwayMon, HeartsBackground, two target blend cycles, audio/panning, hardware/OAM cadence, tagged lifetimes, immutable battle state, and cleanup at 435/435 frames in both orientations twice fresh, retaining a5008ce72fd22417d8ec1be80158fd3a5f93b715165700b875601c476c5717c8/e627d99e69936a320250ab89b946221a179d2ea3a2ed076068a2ff82e9edd9a9 and 234dd9d0da4f02be12a404f3ef36eaa1071bd66d2886eaa75fe3aa25ae48422e/daa9c2ed067fcfa6d56a98d364c5d3e31e0ca7af30bd15ca72c2c93ddb2ef329. Both historic compact Python receipts now assert and omit only BattleLab's empty setup.preCheckpointCaptures transport field. RED_HEART reuse does not waive either move's acceptance."
   },
   {
    "id": "slam-hit-slide-shake",

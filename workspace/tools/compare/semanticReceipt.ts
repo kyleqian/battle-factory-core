@@ -39,7 +39,7 @@ function pythonJsonString(value: string): string {
   return `${serialized}\"`;
 }
 
-function pythonJson(value: JsonValue): string {
+function pythonJson(value: JsonValue, compact = false): string {
   if (value === null) return "null";
   if (typeof value === "boolean") return value ? "true" : "false";
   if (typeof value === "string") return pythonJsonString(value);
@@ -48,18 +48,14 @@ function pythonJson(value: JsonValue): string {
     return String(value);
   }
   if (Array.isArray(value)) {
-    return `[${value.map((item) => pythonJson(item)).join(", ")}]`;
+    return `[${value.map((item) => pythonJson(item, compact)).join(compact ? "," : ", ")}]`;
   }
   return `{${Object.entries(value).map(([key, item]) =>
-    `${pythonJsonString(key)}: ${pythonJson(item)}`).join(", ")}}`;
+    `${pythonJsonString(key)}${compact ? ":" : ": "}${pythonJson(item, compact)}`)
+    .join(compact ? "," : ", ")}}`;
 }
 
-/**
- * Assert and remove only BattleLab's asserted-empty transport capture list
- * before hashing a portable semantic receipt. Raw framebuffer receipts retain
- * their independent byte-for-byte policy.
- */
-export function semanticReceiptSha256(probe: unknown): string {
+function semanticReceiptSha256WithFormat(probe: unknown, compact: boolean): string {
   if (!isJsonObject(probe) || !isJsonObject(probe.setup)) {
     throw new Error("semantic receipt missing setup object");
   }
@@ -70,6 +66,24 @@ export function semanticReceiptSha256(probe: unknown): string {
   }
   const { preCheckpointCaptures: _, ...semanticSetup } = setup;
   const semanticProbe: JsonObject = { ...probe, setup: semanticSetup };
-  const bytes = Buffer.from(`${pythonJson(semanticProbe)}\n`);
+  const bytes = Buffer.from(`${pythonJson(semanticProbe, compact)}\n`);
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+/**
+ * Assert and remove only BattleLab's asserted-empty transport capture list
+ * before hashing a portable semantic receipt. Raw framebuffer receipts retain
+ * their independent byte-for-byte policy.
+ */
+export function semanticReceiptSha256(probe: unknown): string {
+  return semanticReceiptSha256WithFormat(probe, false);
+}
+
+/**
+ * The older Sweet Kiss and Attract probes explicitly used Python's compact
+ * json.dumps separators. Keep that historic byte form after narrowing only
+ * the asserted-empty BattleLab transport capture list.
+ */
+export function compactSemanticReceiptSha256(probe: unknown): string {
+  return semanticReceiptSha256WithFormat(probe, true);
 }

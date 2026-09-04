@@ -12,6 +12,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const fixturePaths = process.argv.slice(2);
@@ -49,7 +50,7 @@ function verify(fixturePath: string, runNumber: number): void {
 
   const bytes = readFileSync(output);
   const probe = JSON.parse(bytes.toString());
-  const evidence = createHash("sha256").update(bytes).digest("hex");
+  const evidence = compactSemanticReceiptSha256(probe);
   if (
     probe.schema !== "attract-dense-evidence/v1"
     || evidence !== fixture.evidenceSha256

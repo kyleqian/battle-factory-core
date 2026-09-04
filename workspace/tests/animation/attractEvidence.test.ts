@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { compactSemanticReceiptSha256 } from "../../tools/compare/semanticReceipt.ts";
 
 describe("MOVE_ATTRACT complete dense evidence", () => {
   it("pins complete legal opposite-gender parties and both receipts", () => {
@@ -32,5 +34,38 @@ describe("MOVE_ATTRACT complete dense evidence", () => {
         scenario.overrides.parties.opponent[0].gender,
       ].sort()).toEqual(["female", "male"]);
     }
+  });
+
+  it("normalizes only the asserted-empty compact transport receipt", () => {
+    const fresh = {
+      schema: "red-heart-test",
+      setup: {
+        name: "\u00e9",
+        preCheckpointCaptures: [],
+        nested: { value: 1 },
+      },
+      rows: [0, true, "line\n"],
+    };
+    const semantic = "{\"schema\":\"red-heart-test\",\"setup\":{\"name\":\"\\u00e9\",\"nested\":{\"value\":1}},\"rows\":[0,true,\"line\\n\"]}\n";
+    expect(compactSemanticReceiptSha256(fresh)).toBe(
+      createHash("sha256").update(semantic).digest("hex"),
+    );
+    expect(() => compactSemanticReceiptSha256({
+      ...fresh,
+      setup: { ...fresh.setup, preCheckpointCaptures: [1] },
+    })).toThrow("setup.preCheckpointCaptures must be []");
+  });
+
+  it("ratchets only the independently receipted red-heart component track", () => {
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
+    expect(coverage.entries.find((entry: { move: string }) =>
+      entry.move === "MOVE_SWEET_KISS")).toMatchObject({ status: "exact" });
+    expect(coverage.entries.find((entry: { move: string }) =>
+      entry.move === "MOVE_ATTRACT")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: { id: string }) =>
+      track.id === "red-heart-sweet-kiss")).toMatchObject({
+      representatives: ["MOVE_SWEET_KISS", "MOVE_ATTRACT"],
+      fulfilled: true,
+    });
   });
 });

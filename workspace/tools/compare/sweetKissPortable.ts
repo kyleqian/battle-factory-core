@@ -19,6 +19,7 @@ import {
   type EngineState,
 } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 type Window = { startFrame: number; endFrame: number; frameCount: number };
 type Fixture = {
@@ -155,7 +156,7 @@ function verify(fixturePath: string, runNumber: number): void {
 
   const bytes = readFileSync(output);
   const probe = JSON.parse(bytes.toString()) as Probe;
-  const evidence = createHash("sha256").update(bytes).digest("hex");
+  const evidence = compactSemanticReceiptSha256(probe);
   const fields = probe.frames.every((frame) =>
     frame.softwareOam.length === 128
     && frame.hardwareOam.length === 128
