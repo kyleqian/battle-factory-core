@@ -1,3 +1,11 @@
+# Animation supervisor verification — Blue-light-wall Reflect track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `blue-light-wall-reflect` is newly fulfilled; MOVE_REFLECT, MOVE_BRICK_BREAK, and MOVE_CRUSH_CLAW retain independent exact acceptance and no sibling receives wall-body credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commits `240c545c2` and `ec68589a2`. Their seven animation-owned files set the single track flag, replace stale Crush Claw wording, add a direct track ratchet, harden the Reflect/Brick Break source audits, strictly normalize only asserted-empty Brick Break `setup.preCheckpointCaptures`, and update this ledger. No fixture/hash, production reducer/asset/seam/compositor/scenario, move status/count, gameplay owner, latch ledger, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Supervisor source audits and focused controls pass **8 files / 27 tests**. Reflect independently reproduces player-back **208/208** and opponent-front **211/211** software/typed and zero-residual actual-core framebuffer rows twice. Brick Break independently reproduces all eight natural body runs: normal **151/151** and shattered-wall **192/192** in both orientations twice, every pinned semantic/raw-RGB digest and framebuffer row exact. Crush Claw independently reproduces **69/69** component and framebuffer rows in both orientations twice (`515abad0…` / `9e2c28d1…`; `639bdc9a…` / `b61b5eb2…`) through its own lunge/ShakeMon2/four-claw body; it loads but instantiates no wall template.
+- **Merged gate:** Post-merge `npm test` passes **1,244 files / 10,921 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Select another unfulfilled exact-representative component track, preserving independent move acceptance and source-body distinctions.
+
 # Blue-light-wall Reflect component-track fulfilled (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `blue-light-wall-reflect` is newly fulfilled; MOVE_REFLECT, MOVE_BRICK_BREAK, and MOVE_CRUSH_CLAW retain their independent exact statuses and no sibling receives wall-body credit.
