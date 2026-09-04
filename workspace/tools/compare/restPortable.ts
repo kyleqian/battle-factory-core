@@ -215,12 +215,27 @@ function verify(fixturePath: string, runNumber: number): void {
     const sourceSprites = oracle.sprites.filter(
       (sprite) => sprite.template.symbol === "gSleepLetterZSpriteTemplate",
     );
-    const hardwareMatch = same(
+    const sourceSpritesMatch = same(
       component.letters.map((letter) =>
         expectedSprite(age, fixture.attacker.geometry.side, letter)
       ),
       sourceSprites.map(observedSprite),
     );
+    // `AnimSleepLetterZ_Step` has already updated gSprites for this source
+    // row; the complete software OAM buffer and its relevant affine matrices
+    // reach hardware on the following VBlank.  Keep this Rest-owned proof
+    // separate from the different Letter-Z/SwayMon schedules in Sleep Talk.
+    const hardwareOamLagMatch = index === 0
+      || same(oracle.hardwareOam, probe.frames[index - 1]!.softwareOam);
+    const priorSourceSprites = index === 0
+      ? []
+      : probe.frames[index - 1]!.sprites.filter(
+          (sprite) => sprite.template.symbol === "gSleepLetterZSpriteTemplate",
+        );
+    const hardwareMatrixLagMatch = priorSourceSprites.every((sprite) => {
+      const matrixNum = (sprite.attr[1]! >>> 9) & 0x1f;
+      return same(oracle.hardwareMatrices[matrixNum], sprite.matrix);
+    });
     const attacker = oracle.battlers[fixture.battleState.attackerSide];
     const battleStateMatch =
       attacker.hp === fixture.battleState.damagedHp
@@ -248,12 +263,14 @@ function verify(fixturePath: string, runNumber: number): void {
         && !oracle.gAnimScriptActive
         && oracle.visualTaskCount === 0);
     if (
-      !seamMatch || !hardwareMatch || !battleStateMatch
+      !seamMatch || !sourceSpritesMatch || !hardwareOamLagMatch
+      || !hardwareMatrixLagMatch || !battleStateMatch
       || diff !== 0 || !cleanup
     ) {
       failures.push(
         `frame ${oracle.frame}/age ${age}: seam=${seamMatch} `
-        + `hardware=${hardwareMatch} battle=${battleStateMatch} `
+        + `source=${sourceSpritesMatch} hardwareOam=${hardwareOamLagMatch} `
+        + `hardwareMatrices=${hardwareMatrixLagMatch} battle=${battleStateMatch} `
         + `framebuffer=${diff === 0} diff=${diff} cleanup=${cleanup}`,
       );
     }

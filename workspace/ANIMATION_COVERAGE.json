@@ -6719,6 +6719,7 @@
     "MOVE_REST",
     "MOVE_SLEEP_TALK"
    ],
+   "fulfilled": true,
    "goal": "Track complete. MOVE_REST independently proves its distinct gSleepLetterZSpriteTemplate body at 110/110 in both orientations twice fresh. MOVE_SLEEP_TALK independently proves all nine gLetterZSpriteTemplate/AnimLetterZ lifecycles, side-specific AnimTask_SwayMon, source affine/OAM/subpriority/slot order, SEAKING front/back and field chrome through complete 186/186 player-back and 189/189 opponent-front source/seam/hardware/raw-RGB/shared-framebuffer windows twice fresh."
   },
   {
