@@ -1,3 +1,10 @@
+# Animation supervisor verification — Noise-line Howl/Roar track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `noise-line-roar-effect` is newly fulfilled; MOVE_HOWL and MOVE_ROAR retain independent exact acceptance and no sibling receives credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `6e269c7a7`. Its five animation-owned files normalize only Roar's asserted-empty `setup.preCheckpointCaptures` transport field with the strict compact serializer, strengthen direct Howl/Roar receipt and track ratchets, and update animation ledgers; Howl's serialized bytes are unchanged. No fixture hash, production reducer/seam/compositor/asset/scenario, latch, move status/count, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audits and twice-fresh portable runs reproduce Howl **102/102** in both orientations (`919211a0…`/`1f19b38e…`, `03aa671c…`/`83ad92a0…`) and Roar **99/99** player-back plus **104/104** opponent-front (`cec50726…`/`0a90faea…`, `d7b5ddc1…`/`727e277d…`) with independent component, hardware/audio, typed-seam, immutable-state, raw-RGB, actual-core framebuffer, and cleanup closure. Focused controls pass **10 files / 57 tests**; coverage, animation audit, and diff checks pass.
+- **Merged gate:** Post-merge `npm test` passes **1,235 files / 10,900 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**. Next: resume at `letter-z-rest`, preserving Rest and Sleep Talk's independent receipts and stopping on unexplained drift.
+
 # Noise-line Roar-effect receipt reconciliation + fulfilled track (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `noise-line-roar-effect` is fulfilled; MOVE_HOWL and MOVE_ROAR retain their independently exact statuses with no sibling credit.
