@@ -1,3 +1,9 @@
+# Adjust-PanningVar Confuse Ray component-track fulfilled (2026-09-04 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `adjust-panning-var-confuse-ray` is fulfilled; MOVE_CONFUSE_RAY remains independently exact and MOVE_WILL_O_WISP remains audit/control only with no sibling credit or promotion.
+- **Evidence:** Fresh Scene-ON source audit retains the 12-component YELLOW_BALL/GHOST-BG body and the three-component Will-O-Wisp intersection. Two fresh portable passes per orientation close player-back and opponent-front **270/270** source/panning, semantic, hardware, audio, raw-RGB, and actual-core framebuffer rows, plus **269/269** predecessor latches. Retained semantic/raw receipts stay `2a9fde46…` / `17183f79…` and `83d95bef…` / `e97f8c9…`; no fixture or hash changed.
+- **Scope / gates:** The portable verifier now asserts the retained source window/state receipt, panning task, full hardware shapes, SE1/SE2 repetition, each raw-RGB frame digest, and chronological raw digest; the direct track ratchet permits only Confuse Ray. No reducer/assets/seam/compositor/scenario, gameplay/state/RNG, latch ledger, boundary/barrier, recording allowlist, move status/count, or main-program document changed. Focused Confuse Ray/source/boundary/inventory/frontier controls, both fresh bilateral comparators, coverage, animation audit, smoke, typecheck, full `npm test` (**1,242 files / 10,915 passed**, **44 files / 223 tests skipped**), and build (**761 modules**) pass.
+
 # Animation supervisor verification — Brown Orb/Mud Shot track fulfilled (2026-09-04 supervisor)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `brown-orb-mud-shot` is newly fulfilled; MOVE_MUD_SHOT and Factory indoor MOVE_SECRET_POWER→STRENGTH retain independent exact acceptance, and Secret Power receives no BROWN_ORB/Mud Shot component credit.

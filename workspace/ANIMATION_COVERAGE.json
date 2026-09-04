@@ -7102,7 +7102,8 @@
    "representatives": [
     "MOVE_CONFUSE_RAY"
    ],
-   "goal": "MOVE_CONFUSE_RAY independently proves its complete 12-component YELLOW_BALL/GHOST-BG/blend body, orientation-specific SoundTask_AdjustPanningVar schedule, palette/OAM/matrix/register latches, and cleanup in both orientations at 270/270 complete source/hardware/raw-RGB/shared-framebuffer frames, reproduced twice fresh. MOVE_WILL_O_WISP remains audit/control only: its ten-component WISP_FIRE/WISP_ORB orb/fire, splitbgprio_foes/all, and ShakeMon2 body shares exactly SoundTask_AdjustPanningVar, monbg, and clearmonbg with Confuse Ray and needs independent complete dense evidence."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_CONFUSE_RAY independently proves its complete 12-component YELLOW_BALL/GHOST-BG/blend body, orientation-specific SoundTask_AdjustPanningVar schedule, semantic state, predecessor OAM/matrix/palette latches, registers/resources/audio, raw RGB, and actual-core framebuffer cleanup in both orientations at 270/270 frames twice fresh. The retained player-back semantic/raw receipts are 2a9fde46e5db7349e3f54bab6721aa94306b5c0bc77b8a2dd0c9e443ebf66492/17183f79551b7ca80f34e8dcbcafa0974d5e90f8751f7cd301c3ffa058ba9e20 and opponent-front receipts are 83d95bef62a0c7a7eead116a517bfe881279fc0aea0168a453c05f7ede14dd3a/e97f8c9d762c7c7d924497af86a453423eb5f6b8297e932ab16b7b7684770760. MOVE_WILL_O_WISP remains audit/control only: its ten-component WISP_FIRE/WISP_ORB orb/fire, splitbgprio_foes/all, and ShakeMon2 body shares exactly SoundTask_AdjustPanningVar, monbg, and clearmonbg with Confuse Ray and needs independent complete dense evidence; it receives no sibling credit or promotion."
   },
   {
    "id": "blend-battle-anim-palette-exclude",

@@ -111,4 +111,17 @@ describe("MOVE_CONFUSE_RAY dense unsupported checkpoint", () => {
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_WILL_O_WISP"))
       .toBeUndefined();
   });
+
+  it("ratchets only the independently receipted AdjustPanningVar component track", () => {
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
+    expect(coverage.componentTracks.find((track: { id: string }) =>
+      track.id === "adjust-panning-var-confuse-ray")).toMatchObject({
+      components: ["task:SoundTask_AdjustPanningVar"],
+      representatives: ["MOVE_CONFUSE_RAY"],
+      fulfilled: true,
+    });
+    expect(coverage.componentTracks.find((track: { id: string }) =>
+      track.id === "adjust-panning-var-confuse-ray").goal)
+      .toContain("MOVE_WILL_O_WISP remains audit/control only");
+  });
 });
