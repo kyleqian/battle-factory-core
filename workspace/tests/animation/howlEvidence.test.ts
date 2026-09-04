@@ -3,22 +3,31 @@ import { describe, expect, it } from "vitest";
 
 describe("MOVE_HOWL complete dense evidence", () => {
   it("pins both legal challenge-0 Scene-ON orientation receipts", () => {
-    for (const path of [
-      "tools/compare/fixtures/howl-player-loudred-opponent-onix.json",
-      "tools/compare/fixtures/howl-opponent-loudred-player-onix.json",
-    ]) {
-      const fixture = JSON.parse(readFileSync(path, "utf8"));
+    const receipts = [
+      {
+        path: "tools/compare/fixtures/howl-player-loudred-opponent-onix.json",
+        evidence: "919211a099b285671b4e2e2afd2ed3cda267b2dc1b1c17a6c1bfbd349863f97a",
+        raw: "1f19b38ed924b20fb4648adc24dea85a2be05460092df83d0d7991fa7a87a269",
+      },
+      {
+        path: "tools/compare/fixtures/howl-opponent-loudred-player-onix.json",
+        evidence: "03aa671ccf17f3978744683b1a5f4066140129d4af6042d1fa05be64df827724",
+        raw: "83ad92a022ee5484e24c8e78b49996c5692443bc76e7aef430b2ae15cedf0eac",
+      },
+    ] as const;
+    for (const receipt of receipts) {
+      const fixture = JSON.parse(readFileSync(receipt.path, "utf8"));
       const scenario = JSON.parse(readFileSync(fixture.scenario, "utf8"));
       expect(fixture.schema).toBe("howl-portable-evidence/v1");
       expect(fixture.sourceWindow.frameCount).toBe(102);
+      expect(fixture.evidenceSha256).toBe(receipt.evidence);
+      expect(fixture.rawRgbSha256).toBe(receipt.raw);
       expect(fixture.battleState).toMatchObject({
         hp: 164,
         maxHp: 177,
         heldItem: 196,
         attackStage: 7,
       });
-      expect(fixture.evidenceSha256).toMatch(/^[0-9a-f]{64}$/);
-      expect(fixture.rawRgbSha256).toMatch(/^[0-9a-f]{64}$/);
       expect(scenario).toMatchObject({
         profile: "battle-scene-on",
         level: 50,

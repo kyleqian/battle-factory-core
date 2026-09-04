@@ -6704,6 +6704,7 @@
     "MOVE_HOWL",
     "MOVE_ROAR"
    ],
+   "fulfilled": true,
    "goal": "Track complete. MOVE_HOWL independently proves its complete NOISE_LINE/RoarEffect, DeepInhale, high-pitch cry, waits and cleanup in both orientations at 102/102 source/task/sprite/OAM/matrix/tag/register/audio/raw-RGB and framebuffer frames, reproduced twice. MOVE_ROAR independently proves its corrected complete 99/99 player-back and 104/104 opponent-front bodies twice fresh through a source-relative reducer, typed seam and production compositor, including ScaleMonAndRestore, SlideOffScreen, double cry/wait, monbg/splitbgprio/8:8 alpha, six shared NOISE_LINE sprites, hardware latches and first inactive cleanup."
   },
   {
