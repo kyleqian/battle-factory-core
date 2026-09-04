@@ -1,3 +1,11 @@
+# Animation supervisor verification — Letter-Z Rest/Sleep Talk track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `letter-z-rest` is newly fulfilled; MOVE_REST and MOVE_SLEEP_TALK retain independent exact acceptance and no sibling receives credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `614caddc8`. Its five animation-owned files strengthen Rest's actual hardware OAM/affine latch verifier, add a direct two-move track ratchet and durable move-owned latch row, set only the track flag, and update the animation ledger. No fixture hash, reducer, asset, seam/compositor, scenario, move status/count, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audits and twice-fresh portable runs reproduce Rest **110/110** in both orientations (`747ad02e…`/`3a9f0a79…`, `2004fa6c…`/`6caad649…`) and Sleep Talk **186/186** player-back plus **189/189** opponent-front (`4badf2d5…`/`24c97994…`, `df68a90c…`/`5e603acf…`) with independent source, OAM/matrix latch, task, audio/resource/register, immutable-state, typed-seam, raw-RGB, actual-core framebuffer, and cleanup closure. No transport normalization or fixture refresh was needed.
+- **Merged gate:** Focused controls pass **9 files / 30 tests**; coverage and animation audit pass. Post-merge `npm test` passes **1,236 files / 10,901 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Resume at `flying-dirt-sandstorm`, preserving Sandstorm and Heat Wave's independent receipts and stopping on unexplained semantic or RGB drift.
+
 # Letter-Z Rest component-track fulfilled (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `letter-z-rest` is newly fulfilled; MOVE_REST and MOVE_SLEEP_TALK keep their independently exact statuses and no sibling receives credit.
