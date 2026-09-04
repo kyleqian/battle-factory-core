@@ -1,3 +1,10 @@
+# Animation supervisor verification — Green-sparkle Moonlight/Present track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `green-sparkle-moonlight` is newly fulfilled; MOVE_MOONLIGHT and MOVE_PRESENT retain independent exact acceptance and no sibling receives credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commits `c75676b6b`, `61015cb3e`, and `6acc0b846`. Their combined five animation-owned files route the two legacy comparators through the existing strict compact-Python semantic serializer, add one direct transport/track ratchet, and update animation ledgers only; no fixture hash, production reducer/seam/compositor/asset/scenario, latch, move status/count, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audits and portable runs reproduce Moonlight **352/352** in both orientations twice (`5486f398…`/`433d0a98…`, `fdf3da2c…`/`83e6ccdf…`); Present damage **201/201** and heal **252/252** in both orientations twice (`a2cc09d1…`/`0507c412…`, `bbb023fe…`/`b2fe7f30…`, `9d752ec6…`/`8e9f36a7…`, `9a76aeeb…`/`2e5b78ad…`). All six bodies close their independent component, typed seam, software/hardware, immutable-state, raw-RGB, actual-core framebuffer, and cleanup checks with zero residual. Focused controls pass **10 files / 339 tests**; coverage, animation audit, and diff checks pass.
+- **Merged gate:** Post-merge `npm test` passes **1,235 files / 10,898 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**. Next: resume at `noise-line-roar-effect`, preserving independent Howl/Roar dense acceptance and stopping on unexplained receipt drift.
+
 # Green-sparkle Moonlight/Present receipt reconciliation + fulfilled track (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `green-sparkle-moonlight` is fulfilled; MOVE_MOONLIGHT and MOVE_PRESENT retain their independently exact acceptance with no sibling credit.
