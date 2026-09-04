@@ -1,3 +1,11 @@
+# Animation supervisor verification — Focus Energy/Endure track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `focus-energy-endure-effect` is newly fulfilled; MOVE_FOCUS_ENERGY and MOVE_ENDURE retain independent exact acceptance, while MOVE_FOCUS_PUNCH remains unsupported.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `e01e226f3`. Its seven animation-owned files add strict compact-transport and hardware/state checks, a direct two-move track ratchet, the single track flag, and the animation-ledger entry. No fixture hash, reducer, asset, seam/compositor, scenario, move status/count, gameplay owner, latch ledger, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audits and twice-fresh portable runs reproduce Focus Energy **122/122** in both orientations (`949eb218…`/`45e75715…`, `67990c21…`/`a0e387e6…`) and Endure **122/122** in both orientations (`5ffe4994…`/`941937cb…`, `3fc347ae…`/`19b16868…`). Each independently retains the complete three-wave/fifteen-sprite body, predecessor OAM/matrix/palette transfer, immutable battlers, resources/registers/audio, typed seam, raw RGB, actual-core framebuffer, and inactive cleanup. The sole fresh transport field is asserted-empty `setup.preCheckpointCaptures: []`; missing/non-empty values are rejected and no fixture changed. No novel latch mechanism was measured.
+- **Merged gate:** Focused controls pass **7 files / 22 tests**; coverage and animation audit pass. Post-merge `npm test` passes **1,240 files / 10,909 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Reconcile the next unfulfilled exact-representative track, `cross-impact-cross-chop`, preserving MOVE_CROSS_CHOP and MOVE_LEAF_BLADE as independent receipts and stopping on unexplained semantic, RGB, or latch drift.
+
 # Focus Energy/Endure component-track fulfilled (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive focus-energy-endure-effect is fulfilled; MOVE_FOCUS_ENERGY and MOVE_ENDURE retain independent exact acceptance, while MOVE_FOCUS_PUNCH remains unsupported.
