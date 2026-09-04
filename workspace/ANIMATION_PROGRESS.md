@@ -1,3 +1,11 @@
+# Animation supervisor verification — Green-spike Needle Arm track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `green-spike-needle-arm` is newly fulfilled; MOVE_NEEDLE_ARM and MOVE_SECRET_POWER retain independent exact acceptance, and Secret Power receives no grass-body/GREEN_SPIKE credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `78af2d158`. Its seven animation-owned files add a direct track receipt ratchet, strict Needle Arm transport handling, correct the stale Secret Power source-audit verdict, set only the track flag, and update the animation ledger. No fixture hash, latch, reducer, asset, seam/compositor, scenario, move status/count, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audits and twice-fresh portable runs reproduce Needle Arm **108/108** in both orientations (`f6f26ca9…`/`bbb4ea84…`, `75a2df84…`/`291b07d7…`) and Factory indoor Secret Power→Strength **102/102** in both orientations (`9d8f3ad7…`/`af6ff533…`, `8d6902b6…`/`f4c81b0d…`) with independent component, hardware, typed-seam, raw-RGB, actual-core framebuffer, and cleanup closure. Needle Arm's fresh receipts add only asserted-empty `setup.preCheckpointCaptures: []`; strict compact serialization omits precisely that field and rejects non-empty lists, with no fixture refresh.
+- **Merged gate:** Focused controls pass **10 files / 32 tests**; coverage and animation audit pass. Post-merge `npm test` passes **1,238 files / 10,904 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Resume at `finger-metronome`, preserving Metronome and Follow Me's independent receipts and stopping on unexplained semantic or RGB drift.
+
 # Green-spike Needle Arm component-track fulfilled (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `green-spike-needle-arm` is fulfilled; MOVE_NEEDLE_ARM and MOVE_SECRET_POWER retain their independent exact statuses, and Secret Power receives no grass-body/GREEN_SPIKE credit.
