@@ -1,3 +1,11 @@
+# Animation unattended wind-down — Codex capacity during finger track (2026-09-04 supervisor)
+
+- **State:** `animation-main` is committed and green at the verified `green-spike-needle-arm` checkpoint. Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**; `finger-metronome` remains unfulfilled and no move status/count changed.
+- **Did:** This session merged and independently verified three bounded component tracks: `letter-z-rest`, `flying-dirt-sandstorm`, and `green-spike-needle-arm`. The latest verified worker commit is `78af2d158`, followed by supervisor checkpoint `a6b16a859`; committed refs were backed up successfully after every green checkpoint.
+- **Interrupted step:** `worker/animation-20260904-083929` confirmed that fresh Metronome and Follow Me payloads differ only by asserted-empty `setup.preCheckpointCaptures: []`, with compact semantic hashes and raw RGB unchanged, and drafted a narrow four-receipt track ratchet. Codex then stopped on model capacity before committing or completing all gates. Per `ANIMATION_UNATTENDED.md`, there was no provider switch or retry; the disposable uncommitted draft, worktree, and branch were removed, and no part of it was merged.
+- **Green gate:** The current committed tree most recently passes `npm test` at **1,238 files / 10,904 tests** with **44 files / 223 tests skipped**, and `npm run build` at **761 modules**. The verified green-spike checkpoint also passes focused **10 files / 32 tests**, coverage, and animation audit.
+- **Next:** On the next scheduled Codex invocation, resume `finger-metronome` from this clean checkpoint. Reconfirm strict empty-capture transport normalization, then rerun Metronome **127/127** and Follow Me **185/185** twice fresh in both orientations before any track fulfillment. No open animation deferral or main-program finding was created.
+
 # Animation supervisor verification — Green-spike Needle Arm track fulfilled (2026-09-04 supervisor)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `green-spike-needle-arm` is newly fulfilled; MOVE_NEEDLE_ARM and MOVE_SECRET_POWER retain independent exact acceptance, and Secret Power receives no grass-body/GREEN_SPIKE credit.
