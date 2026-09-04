@@ -1,3 +1,11 @@
+# Animation supervisor verification — Flying-dirt Sandstorm/Heat Wave track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `flying-dirt-sandstorm` is newly fulfilled; MOVE_SANDSTORM and MOVE_HEAT_WAVE retain independent exact acceptance and no sibling receives credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `d8af5a1fd`. Its three animation-owned files add a direct two-move bilateral receipt/track ratchet, set only the track flag, and update the animation ledger. No fixture hash, latch, reducer, asset, seam/compositor, scenario, move status/count, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audits and twice-fresh portable runs reproduce Sandstorm **168/168** in both orientations (`a06847b1…`/`2968b95f…`, `29e51b99…`/`151561fa…`) and Heat Wave **168/168** in both orientations (`0a9e7a22…`/`a22b496d…`/map `29c4abde…`, `71fc59d1…`/`5050e7a3…`/map `840d4f8b…`) with independent component, hardware/matrix/register, audio, immutable-state, typed-seam, raw-RGB, actual-core framebuffer, normalized-map, and cleanup closure. No transport normalization or fixture refresh was needed.
+- **Merged gate:** Focused controls pass **9 files / 26 tests**; coverage and animation audit pass. Post-merge `npm test` passes **1,237 files / 10,902 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Resume at `green-spike-needle-arm`, preserving Needle Arm and Secret Power's independent receipts and stopping on unexplained semantic or RGB drift.
+
 # Flying-dirt Sandstorm component-track fulfilled (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `flying-dirt-sandstorm` is fulfilled; MOVE_SANDSTORM and MOVE_HEAT_WAVE retain their independently exact statuses and no sibling receives credit.
