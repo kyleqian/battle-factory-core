@@ -1,3 +1,11 @@
+# Brown-orb Mud Shot component-track fulfilled (2026-09-04 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `brown-orb-mud-shot` is newly fulfilled; MOVE_MUD_SHOT and MOVE_SECRET_POWER remain independently exact.
+- **Evidence:** Fresh Scene-ON source audits pass. Mud Shot twice closes player-back **145/145** (`cef2f455…` / `a9dcc157…`) and opponent-front **144/144** (`85fe40b0…` / `52bd4b4b…`) source/component, seam, raw-RGB, and actual-core rows. Factory indoor Secret Power → Strength independently closes **102/102** twice per orientation (`9d8f3ad7…` / `af6ff533…`; `8d6902b6…` / `f4c81b0d…`).
+- **Dispatch + transport + latches:** Factory's `BATTLE_ENVIRONMENT_BUILDING` reaches only `Move_STRENGTH`, not `Move_MUD_SHOT`; Secret Power receives no BROWN_ORB/Mud Shot credit. Fresh Mud Shot bytes differ only by asserted-empty `setup.preCheckpointCaptures: []`; compact semantic hashing requires that exact emptiness, removes only it for the historic digest, and rejects missing/non-empty values. Both orientations measure predecessor OAM/matrices on every comparable row and predecessor palette except Mud Shot's own age-4 same-row setup; no new durable latch is claimed or added.
+- **Scope + gates:** Changed only Mud Shot's portable/evidence checks, one direct track ratchet, this track's fulfilled goal, and this ledger. No production, fixture/scenario/map/probe, Secret Power comparator, asset, boundary/barrier, gameplay/state, or latch-ledger change. Focused **8 files / 21 tests**, both source audits, both twice-fresh comparators, coverage, animation audit, smoke **8 / 448**, typecheck, full `npm test` **1,242 files / 10,914 passed** (**44 files / 223 skipped**), and build (**761 modules**) pass.
+- **Next:** Select the next unfulfilled exact-representative track; do not use this BROWN_ORB receipt as sibling credit.
+
 # Animation supervisor verification — Cross Impact/Cross Chop track fulfilled (2026-09-04 supervisor)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `cross-impact-cross-chop` is newly fulfilled; MOVE_CROSS_CHOP and MOVE_LEAF_BLADE retain independent exact acceptance and neither inherits the shared impact asset as substitute proof.
