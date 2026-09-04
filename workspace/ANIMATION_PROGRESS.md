@@ -1,3 +1,10 @@
+# Animation supervisor verification — Sparkle-3 special-screen track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `sparkle-3-special-screen` is newly fulfilled; MOVE_LIGHT_SCREEN and MOVE_MIRROR_COAT retain independent exact acceptance and no sibling receives credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `416df2fad`. The scoped serializer asserts and strips only empty `setup.preCheckpointCaptures`, refreshes Mirror Coat's semantic receipts, and adds the direct track/latch ratchets; no production reducer, assets, seam, scenario, gameplay owner, boundary/barrier, or main-program document changed.
+- **Verified:** Two fresh supervisor bilateral passes reproduce Light Screen **115/115 + 119/119** (`7c1c3b39…`/`b135e9fb…`, `51ffe743…`/`654a49ba…`) and Mirror Coat **75/75 + 75/75** (`1ea5591d…`/`c8a70485…`, `3328d443…`/`0fcba1ad…`) source/component, hardware-state, raw-RGB, and actual-core framebuffer rows with zero residual. Focused source/evidence/inventory/boundary/frontier checks pass **6 files / 30 tests**; coverage, animation audit, and diff checks pass.
+- **Merged gate:** Post-merge `npm test` passes **1,235 files / 10,892 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**. Next: select the next bounded unfulfilled component track from the current coverage ranking and preserve per-move dense acceptance without sibling inference.
+
 # Sparkle-3 special-screen semantic receipt refresh + fulfilled track (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `sparkle-3-special-screen` is fulfilled; MOVE_LIGHT_SCREEN and MOVE_MIRROR_COAT remain independently exact with no sibling credit.
