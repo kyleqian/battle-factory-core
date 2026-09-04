@@ -1,3 +1,11 @@
+# Animation supervisor verification — Sparkle-4 Grow/Grayscale track fulfilled (2026-09-04 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `sparkle-4-grow-grayscale` is newly fulfilled; MOVE_DISABLE and MOVE_DETECT retain independent exact acceptance and no sibling receives credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commit `b2758be1c`. Its three animation-owned files set the single track flag, add a direct cross-move source/receipt ratchet, and update this ledger. No comparator, fixture/hash, production reducer/asset/seam/compositor/probe/scenario, move status/count, latch ledger, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Supervisor source audit and focused controls pass **8 files / 38 tests**. Disable independently reproduces player-back frames **697-809** and opponent-front **214-326** twice each at **113/113** component, typed seam, hardware, raw receipt/change-map, and zero-residual actual-core framebuffer rows (`8f7eff0e…` / `352068a5…`; `de6c0403…` / `f621f960…`). Detect independently reproduces player-back **110/110** and the deliberate opponent-front **109/109** accepted window twice (`2a1054d2…` / `274b00b5…`; `f8e7f48c…` / `2086c05a…`), preserving its move-owned palette body and `skipProbeFrames:1` / `ageOffset:1` exclusion. No transport or latch drift appeared.
+- **Merged gate:** Post-merge `npm test` passes **1,245 files / 10,924 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Select another unfulfilled exact-representative component track; shared components never replace independent dense move acceptance.
+
 # Sparkle-4 Grow/Grayscale component-track fulfilled (2026-09-04 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `sparkle-4-grow-grayscale` is newly fulfilled; MOVE_DISABLE and MOVE_DETECT retain independent exact acceptance, and shared SPARKLE_4 grants no sibling credit.
