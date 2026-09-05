@@ -7198,6 +7198,7 @@
     "MOVE_FEATHER_DANCE",
     "MOVE_MIST_BALL"
    ],
+   "fulfilled": true,
    "checkpoint": "2026-08-10 MOVE_MIST_BALL is independently exact through its own complete bilateral pointer-bounded Scene-ON evidence, pure 213-age reducer, narrow typed seam, source-derived assets, and production compositor. Player-back 75..287 and opponent-front 79..291 each pass 213/213 required evidence and framebuffer frames twice fresh with unchanged receipts. WHITE_FEATHER remains loaded but unused; SMALL_BUBBLES supplies the projectile and the fog task supplies its own BG1 resources. MOVE_FEATHER_DANCE remains the independent exact sibling control at 400/400 in both orientations.",
    "evidence": [
     "tools/battle-lab/mechanic-mist-ball-player-latias-opponent-registeel.json",
@@ -7217,7 +7218,7 @@
     "tests/animation/mistBall.test.ts",
     "tests/animation/mistBallEvidenceCheckpoint.test.ts"
    ],
-   "goal": "Track complete. MOVE_FEATHER_DANCE exactly proves the falling-feather body plus complete stat-drop continuation in both source-required target-side orientations at 400/400 each. MOVE_MIST_BALL independently proves its distinct SMALL_BUBBLES projectile, two ShakeMon invocations, background/target palette programs, and complete scrolling MistBallFog BG1 pipeline at 213/213 in both orientations twice fresh. WHITE_FEATHER is loaded but unused by Mist Ball; neither move receives acceptance from the other."
+   "goal": "FULFILLED: MOVE_FEATHER_DANCE exactly proves its eight gFallingFeatherSpriteTemplate creates plus complete stat-drop continuation in both source-required target-side orientations at 400/400 each. MOVE_MIST_BALL independently proves its distinct SMALL_BUBBLES projectile, two ShakeMon invocations, background/target palette programs, and complete scrolling MistBallFog BG1 pipeline at 213/213 in both orientations twice fresh. WHITE_FEATHER is loaded but unused by Mist Ball; neither move receives acceptance, a sprite-body claim, or a latch from the other."
   },
   {
    "id": "fast-contact",
