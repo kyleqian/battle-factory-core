@@ -6605,7 +6605,7 @@
     "MOVE_LEECH_SEED"
    ],
    "fulfilled": true,
-   "goal": "FULFILLED: MOVE_LEECH_SEED independently passes all four complete main and natural residual windows at 696/696 source-relative reducer, typed-seam, raw-RGB, and production-framebuffer rows with zero residual pixels. It proves all three projectile-hidden-sprout lifecycles and the naturally role-swapped General_LeechSeedDrain -> Move_ABSORB body through cleanup. MOVE_ABSORB remains an independently exact regression control only; MOVE_BULLET_SEED remains outside-Factory unsupported with no sibling credit."
+   "goal": "FULFILLED: MOVE_LEECH_SEED independently accepts two complete 141-row main bodies and two complete 207-row natural residual bodies (696/696 source-relative reducer, typed seam, raw-RGB, and production-framebuffer rows with zero residual pixels). It proves all three projectile-hidden-sprout lifecycles and its own role-swapped General_LeechSeedDrain -> Move_ABSORB body through cleanup. MOVE_ABSORB remains an independently exact regression control only; outside-Factory MOVE_BULLET_SEED remains unsupported and receives no sibling or latch credit."
   },
   {
    "id": "water-orb-hydro-pump-whirlpool",
