@@ -43,6 +43,18 @@ describe("MOVE_SMELLING_SALT bilateral exact evidence", () => {
       "sprite:gSmellingSaltExclamationSpriteTemplate", "sprite:gSmellingSaltsHandSpriteTemplate",
       "task:AnimTask_ShakeMon2", "task:AnimTask_SmellingSaltsSquish",
     ]);
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
+    expect(coverage.componentTracks.find((track: any) =>
+      track.id === "smelling-salt-hand-squish-effect")).toMatchObject({
+      components: [
+        "asset:ANIM_TAG_SMELLINGSALT_EFFECT",
+        "sprite:gSmellingSaltExclamationSpriteTemplate",
+        "sprite:gSmellingSaltsHandSpriteTemplate",
+        "task:AnimTask_SmellingSaltsSquish",
+      ],
+      representatives: ["MOVE_SMELLING_SALT"],
+      fulfilled: true,
+    });
     const mons = JSON.parse(readFileSync("src/data/gen/battle-frontier-mons.json", "utf8"));
     const carriers = mons.entries.filter((entry: any) => entry.index >= 110 && entry.moves.includes("MOVE_SMELLING_SALT"));
     expect(carriers[0]).toMatchObject({ index: 376, label: "FRONTIER_MON_GRANBULL_1", species: "SPECIES_GRANBULL" });

@@ -6593,7 +6593,7 @@
    ],
    "representatives": ["MOVE_SMELLING_SALT"],
    "fulfilled": true,
-   "goal": "FULFILLED by MOVE_SMELLING_SALT bilateral 242/242 zero-residual shared-production acceptance through first inactive cleanup. Exclusive effect art is source-extracted; reused TAG_HAND bytes are checked without duplicate ownership. MOVE_ENCORE, MOVE_HELPING_HAND, MOVE_FACADE, MOVE_SCREECH, and MOVE_METAL_SOUND remain independent exact controls and receive no sibling credit."
+   "goal": "FULFILLED: MOVE_SMELLING_SALT independently retains its complete bilateral 242/242 zero-residual shared-production acceptance through first inactive cleanup. The track owns only the exclusive ANIM_TAG_SMELLINGSALT_EFFECT asset, both Smelling Salt sprite templates, and AnimTask_SmellingSaltsSquish; reused TAG_HAND and shared AnimTask_ShakeMon2 remain move-owned evidence and transfer no component or latch facts. MOVE_ENCORE, MOVE_HELPING_HAND, MOVE_FACADE, MOVE_SCREECH, and MOVE_METAL_SOUND remain independent exact controls and receive no sibling credit."
   },
   {
    "id": "seed-projectile-leech-seed",
