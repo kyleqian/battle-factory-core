@@ -575,6 +575,7 @@ import stockpileAsset from "../animation/assets/stockpile-gray-orb.json" with { 
 import purpleFlameAsset from "../animation/assets/purple-flame.json" with { type: "json" };
 import hiddenPowerRedOrbAsset from "../animation/assets/hidden-power-red-orb.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
+import diveAsset from "../animation/assets/dive.json" with { type: "json" };
 import waterSpoutOrbAsset from "../animation/assets/water-spout-glowy-blue-orb.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
@@ -990,6 +991,7 @@ import {
   sceneOnSubstituteView,
   sceneOnSwaggerView,
   sceneOnFrustrationView,
+  sceneOnDiveView,
   sceneOnSeismicTossView,
   sceneOnBulkUpView,
   sceneOnTauntView,
@@ -1095,6 +1097,7 @@ import {
   type SceneOnSafeguardConfig,
   type SceneOnStockpileConfig,
   type SceneOnFrustrationConfig,
+  type SceneOnDiveConfig,
   type SceneOnSeismicTossConfig,
   type SceneOnGrudgeConfig,
   type SceneOnHiddenPowerConfig,
@@ -1967,6 +1970,13 @@ const waterGunArt = waterGunAsset as {
   waterImpact: { tileset: Tileset; palette: RgbColor[] };
   horseaBack: { tileset: Tileset; palette: RgbColor[] };
   horseaFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const diveArt = diveAsset as {
+  roundShadow: { tileset: Tileset; palette: RgbColor[] };
+  splash: { tileset: Tileset; palette: RgbColor[] };
+  sweatBead: { tileset: Tileset; palette: RgbColor[] };
+  waterImpact: { tileset: Tileset; palette: RgbColor[] };
+  smallBubbles: { tileset: Tileset; palette: RgbColor[] };
 };
 const waterSpoutOrbArt = waterSpoutOrbAsset as {
   tileset: Tileset;
@@ -33327,6 +33337,119 @@ export function renderSceneOnMovePresentation(
     drawMessageTextLines(fb,
       playerAttacker ? `${playerSpecies} used` : `Foe ${opponentSpecies} used`,
       "SEISMIC TOSS!", 99);
+    return;
+  }
+
+  if (state.config.move === "DIVE") {
+    const diveState = state as SceneOnMovePresentationState<SceneOnDiveConfig>;
+    const view = sceneOnDiveView(diveState);
+    // Dive's ordinary objects use the preceding software OAM/matrix row.
+    // Player-back setup age 68 is the independently measured reused-affine
+    // exception: both complete buffers expose source age 66 instead.
+    const sourceAge = diveState.config.body === "setup"
+      && view.attacker.geometry.side === "player" && diveState.age === 68
+      ? 66 : diveState.age - 1;
+    const displayed = sceneOnDiveView({ ...diveState, age: sourceAge });
+    const playerAttacker = view.attacker.geometry.side === "player";
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const source = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!source) throw new Error(`DIVE missing live battler art ${battler.species}`);
+      return source;
+    };
+    const tilesFor = (source: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? source.tileset : subTileset(source.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker), targetArt = artFor(view.target);
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+
+    const monbgX2 = diveState.age >= 31 ? view.selectedBgOffsetX
+      : diveState.config.animationGeometry.targetRestOffset.x2;
+    if (view.targetMonbg) {
+      drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side), targetArt.palette,
+        view.target.geometry.spriteCorner.x + monbgX2,
+        view.target.geometry.spriteCorner.y + diveState.config.animationGeometry.targetRestOffset.y2);
+    }
+    const nonObjTarget2 = fb.slice();
+    type DrawObject = Readonly<{
+      subpriority: number;
+      y: number;
+      order: number;
+      draw: () => void;
+    }>;
+    const objects: DrawObject[] = [];
+    if (!displayed.attackerInvisible) objects.push({
+      subpriority: diveState.config.animationProfile.attackerSubpriority,
+      y: view.attacker.geometry.animationCenter.y + displayed.attackerOffset.y2,
+      order: -2,
+      draw: () => drawSpriteSheet(fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerArt.palette,
+        view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+        view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2),
+    });
+    if (!displayed.targetInvisible) objects.push({
+      subpriority: diveState.config.animationProfile.targetSubpriority,
+      y: view.target.geometry.animationCenter.y + displayed.targetOffset.y2,
+      order: -1,
+      draw: () => drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side), targetArt.palette,
+        view.target.geometry.spriteCorner.x + displayed.targetOffset.x2,
+        view.target.geometry.spriteCorner.y + displayed.targetOffset.y2),
+    });
+    if (displayed.ball && !displayed.ball.invisible) objects.push({
+      subpriority: displayed.ball.subpriority, y: displayed.ball.y + displayed.ball.y2,
+      order: displayed.ball.persistentOrder,
+      draw: () => drawSpriteSheetAffineRotate(fb, diveArt.roundShadow.tileset,
+        diveArt.roundShadow.palette, displayed.ball!.x + displayed.ball!.x2,
+        displayed.ball!.y + displayed.ball!.y2, ...displayed.ball!.matrix, undefined, true),
+    });
+    if (displayed.splash) objects.push({
+      subpriority: displayed.splash.subpriority, y: displayed.splash.y + displayed.splash.y2,
+      order: displayed.splash.persistentOrder,
+      draw: () => drawSpriteSheetAffineRotate(fb, diveArt.splash.tileset, diveArt.splash.palette,
+        displayed.splash!.x + displayed.splash!.x2, displayed.splash!.y + displayed.splash!.y2,
+        ...displayed.splash!.matrix, undefined, true),
+    });
+    for (const drop of displayed.droplets) objects.push({
+      subpriority: drop.subpriority, y: drop.y + drop.y2, order: drop.persistentOrder,
+      draw: () => (drop.direction ? drawSpriteSheetHFlip : drawSpriteSheet)(
+        fb, diveArt.sweatBead.tileset, diveArt.sweatBead.palette,
+        drop.x + drop.x2 - 4, drop.y + drop.y2 - 4),
+    });
+    for (const impact of displayed.impacts) objects.push({
+      subpriority: impact.subpriority, y: impact.y, order: impact.persistentOrder,
+      draw: () => drawSpriteSheetAffineRotateBlendedOverFb(fb, nonObjTarget2,
+        diveArt.waterImpact.tileset, diveArt.waterImpact.palette, impact.x, impact.y,
+        ...impact.matrix, 12, 8, false),
+    });
+    const bubbleCell: Tileset = { columns: 1, rows: 1,
+      tiles: [diveArt.smallBubbles.tileset.tiles[8]!] };
+    for (const bubble of displayed.bubbles) objects.push({
+      subpriority: bubble.subpriority, y: bubble.y + bubble.y2, order: bubble.persistentOrder,
+      draw: () => drawSpriteSheet(fb, bubbleCell, diveArt.smallBubbles.palette,
+        bubble.x + bubble.x2 - 4, bubble.y + bubble.y2 - 4),
+    });
+    // Reverse BuildSpritePriorities: high subpriority first, lower OAM Y
+    // first, and later persistent entries first for stable equal-Y ties.
+    objects.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || right.order - left.order);
+    for (const object of objects) object.draw();
+
+    const player = playerAttacker ? view.attacker : view.target;
+    const opponent = playerAttacker ? view.target : view.attacker;
+    const profile = view.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    if (diveState.config.body === "attack") drawMessageTextLines(fb,
+      playerAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "DIVE!", 99);
     return;
   }
 
