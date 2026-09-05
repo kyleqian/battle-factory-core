@@ -1,3 +1,10 @@
+# Animation supervisor verification — Water-orb Hydro Pump/Whirlpool track ratchet (2026-09-05 supervisor)
+
+- **State / merge:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. Fast-forwarded Terra/max commit `f36e8b386`; `water-orb-hydro-pump-whirlpool` remains fulfilled only by independently exact MOVE_HYDRO_PUMP and MOVE_WHIRLPOOL. This is a direct ratchet reconciliation, not a move promotion.
+- **Independent acceptance:** Supervisor source audit and focused controls pass **8 files / 30 tests**. Two fresh runs per orientation reproduce Hydro Pump **141+141** and Whirlpool main **133+133** plus natural residual **108+108**; all **764** component/seam/raw-RGB/actual-core framebuffer rows per proof remain zero-residual with the six retained hashes byte-stable.
+- **Review / scope:** The three-file diff changes only the existing track goal, adds one hermetic ratchet over the exact **13-component** boundary plus six complete legal bilateral receipts, and updates this ledger. Hydro Pump and both Whirlpool bodies retain their own measured OAM/matrix/palette/task latches; shared water components grant no sibling or latch credit. No production, comparator, fixture/evidence, scenario, latch ledger, gameplay/RNG/controller/facility state, boundary/barrier/allowlist, or main-program document changed.
+- **Post-merge gates / next:** Final `npm test` passes **1,262 files / 10,989 tests** (**44 files / 223 skipped**); `npm run build` passes **763 modules**. Next assess `spore-particles`, preserving separate Spore/Cotton Spore bodies and excluding the distinct Powder particle latch.
+
 # Water-orb Hydro Pump/Whirlpool direct track ratchet (2026-09-05 worker)
 
 - **State:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. `water-orb-hydro-pump-whirlpool` remains fulfilled at its exact **13-component** boundary; only independently exact MOVE_HYDRO_PUMP and MOVE_WHIRLPOOL receive credit.
