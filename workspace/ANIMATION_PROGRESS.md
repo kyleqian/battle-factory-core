@@ -1,3 +1,10 @@
+# Fast-contact component-track fulfilled (2026-09-05 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `fast-contact` is newly fulfilled; `MOVE_QUICK_ATTACK`, `MOVE_EXTREME_SPEED`, and `MOVE_AERIAL_ACE` retain independently exact acceptance.
+- **Evidence:** Twice-fresh Scene-ON portable checks reproduce Quick Attack **219/219** opponent-front→player-back (`93976d91…`) and **214/214** player-back→opponent-front (`4f2a33ab…`), Extreme Speed **303/303** in both source-selected orientations (fresh probe hashes `b7eb368a…` / `c3e93446…`), and Aerial Ace **236/236** (`8f99e008…`) plus **232/232** (`23d57dfb…`), all with zero RGB residuals.
+- **Ratchet / ownership:** `fastContactTrack.test.ts` pins the six fixture identities, complete windows, and fixture SHA-256s; it audits the three distinct authoritative source bodies and requires each portable comparator’s own dense RGB obligation. Rules 1–5 remain per-mechanism/per-move; no GPU/OAM/affine/painter latch was transferred or inferred from portable RGB comparators, and `ANIMATION_LATCHES.md` is unchanged.
+- **Gates:** Focused Quick Attack/Extreme Speed/Aerial Ace/track/inventory/boundary/frontier controls pass **7 files / 45 tests**; coverage, animation audit, and typecheck pass. Final `npm test` passes **1,252 files / 10,952 tests** (**44 files / 223 skipped**) and `npm run build` passes **761 modules**. No production, reducer, compositor, seam, fixture/evidence, asset, latch-ledger, gameplay, boundary/barrier, or sibling status changed.
+
 # Animation supervisor verification — White-feather track fulfilled (2026-09-05 supervisor)
 
 - **State / merge:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Fast-forwarded Terra/max commit `28c52542c`; scope is only `ANIMATION_COVERAGE.json`, `ANIMATION_PROGRESS.md`, and `tests/animation/whiteFeatherTrack.test.ts`. `white-feather` alone is newly fulfilled.

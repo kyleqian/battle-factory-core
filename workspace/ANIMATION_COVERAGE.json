@@ -7234,7 +7234,8 @@
     "MOVE_EXTREME_SPEED",
     "MOVE_AERIAL_ACE"
    ],
-   "goal": "QUICK ATTACK exactly proves complete opposite-side Scene-ON windows at 219/219 and 214/214. AERIAL ACE independently proves its complete 236/236 and 232/232 windows. EXTREME SPEED independently proves both complete source-selected fade/high-speed/affine/contact/dust/reappearance/restore move-owned windows at 303/303 each."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_QUICK_ATTACK, MOVE_EXTREME_SPEED, and MOVE_AERIAL_ACE each retain independently exact bilateral complete Battle Scene ON contracts. Quick Attack’s opponent-front→player-back and player-back→opponent-front controller windows close at 219/219 and 214/214 through elliptical travel, four blended TraceMon afterimages, its IMPACT, target ShakeMon, teardown, generic hit, and MOVE_NONE cleanup. Extreme Speed’s BG_HIGHSPEED fade/darken/restore, affine/contact, three hitsplats, 24 SPEED_DUST spawns, blink/reappearance, cleanup windows close at 303/303 in both source-selected orientations. Aerial Ace’s CUT slice, ellipse/TraceMon/palette/shake body and controller windows close independently at 236/236 and 232/232. Shared IMPACT, SPEED_DUST, ShakeMon, fadetobg, and restorebg never transfer a source body, GPU/OAM/affine/painter claim, latch, or acceptance across moves."
   },
   {
    "id": "mud-sand-scatter",
