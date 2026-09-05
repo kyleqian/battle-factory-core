@@ -1,3 +1,10 @@
+# Animation supervisor verification — Fast-contact track fulfilled (2026-09-05 supervisor)
+
+- **State / merge:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Fast-forwarded Terra/max commit `3162d5023`; scope is only `ANIMATION_COVERAGE.json`, `ANIMATION_PROGRESS.md`, and `tests/animation/fastContactTrack.test.ts`. `fast-contact` alone is newly fulfilled.
+- **Independent acceptance:** Twice-fresh Scene-ON reruns reproduce QUICK_ATTACK **219/219** and **214/214**, EXTREME_SPEED **303/303** in both orientations, and AERIAL_ACE **236/236** and **232/232**, all with zero RGB residuals and stable reported Quick/Aerial hashes.
+- **Review:** The ratchet pins all six fixtures, windows, hashes, distinct source bodies, the source-derived 24 SPEED_DUST spawns, and each comparator's own obligation. No sibling credit or GPU/OAM/affine/painter latch was transferred; no production, fixture/evidence, asset, latch-ledger, gameplay, boundary/barrier, or main-program file changed. Focused controls pass **7 files / 45 tests**; coverage and audit pass.
+- **Post-merge gates:** `npm test` passes **1,252 files / 10,952 tests** (**44 files / 223 skipped**); `npm run build` passes **761 modules**. Next: reconcile `mud-sand-scatter` only if SAND_ATTACK and MUD_SLAP retain independent bilateral complete evidence for their distinct source bodies.
+
 # Fast-contact component-track fulfilled (2026-09-05 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `fast-contact` is newly fulfilled; `MOVE_QUICK_ATTACK`, `MOVE_EXTREME_SPEED`, and `MOVE_AERIAL_ACE` retain independently exact acceptance.
