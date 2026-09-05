@@ -1,3 +1,11 @@
+# Animation supervisor verification — Explosion sprite / Self Destruct track fulfilled (2026-09-05 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `explosion-sprite-self-destruct` is newly fulfilled; MOVE_SELF_DESTRUCT, MOVE_EXPLOSION, both MOVE_PRESENT outcome branches, and MOVE_DYNAMIC_PUNCH retain independent exact acceptance and no sibling receives shared sprite credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commits `600ddace3` and `16b08aabe`. Their six animation-owned files set the single track flag, add a direct ten-fixture source/body/latch/transport ratchet, strictly normalize only asserted-empty Present `setup.preCheckpointCaptures`, harden Self Destruct's own hardware assertions, and update this ledger. No fixture/hash, production reducer/asset/seam/compositor/scenario, move status/count, latch ledger, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor Scene-ON runs reproduce Self Destruct **113/113**, Explosion **212/212**, and Dynamic Punch **75/75** in both orientations. Present independently reproduces player/opponent damage **201/201** and heal **252/252** through both portable and evidence comparators; every run was repeated twice with stable semantic and raw-RGB receipts. Focused source/evidence/production/boundary controls pass **7 files / 26 tests**; coverage and animation audit pass, with no new or contradictory latch measured.
+- **Merged gate:** Post-merge `npm test` passes **1,248 files / 10,936 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Reconcile `metallic-shine` as the next ranked unfulfilled all-exact representative track, preserving independent HARDEN, STEEL_WING, IRON_TAIL, METAL_CLAW, IRON_DEFENSE, and POISON_TAIL receipts and stopping on unexplained semantic, RGB, branch, sibling-credit, or latch drift.
+
 # Explosion sprite / Self Destruct component-track fulfilled (2026-09-05 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `explosion-sprite-self-destruct` is fulfilled; SELF DESTRUCT, EXPLOSION, PRESENT, and DYNAMIC PUNCH retain independent exact acceptance.
