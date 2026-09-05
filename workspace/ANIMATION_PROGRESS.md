@@ -1,3 +1,11 @@
+# Animation supervisor verification — Metallic-shine track fulfilled (2026-09-05 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `metallic-shine` is newly fulfilled; HARDEN, STEEL WING, IRON TAIL, METAL CLAW, IRON DEFENSE, and POISON TAIL retain independent exact acceptance and no sibling receives shared shine credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commits `fb7a82f1a` and `20b26eb1d`. Their three animation-owned files set the single track flag, replace the stale claim that exact IRON TAIL was unsupported, add a direct twelve-fixture source/body/latch/receipt ratchet, and update this ledger. No fixture/hash, production reducer/asset/seam/compositor/probe/scenario, move status/count, latch ledger, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor Scene-ON runs reproduce HARDEN **101/101**, STEEL WING **197/197**, IRON TAIL **135/135**, METAL CLAW **140/140**, IRON DEFENSE **101/101**, and POISON TAIL **187/187** in both orientations, preserving pinned semantic/raw-RGB receipts and production framebuffers. Focused family/source/evidence/boundary controls pass **13 files / 55 tests**; coverage and animation audit pass. No new or contradictory latch was measured; the move-owned palette RAM+1 evidence remains intact.
+- **Merged gate:** Post-merge `npm test` passes **1,249 files / 10,940 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**.
+- **Next:** Reconcile `elemental-punch` only if FIRE_PUNCH, ICE_PUNCH, and THUNDER_PUNCH each retain their own complete bilateral dense receipts and source/latch distinctions; shared fist art never grants sibling acceptance.
+
 # Metallic-shine component-track fulfilled (2026-09-05 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `metallic-shine` is newly fulfilled; HARDEN, STEEL WING, IRON TAIL, METAL CLAW, IRON DEFENSE, and POISON TAIL retain their own exact acceptance.
