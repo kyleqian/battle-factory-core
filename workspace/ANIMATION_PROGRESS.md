@@ -1,3 +1,10 @@
+# Elemental-punch component-track fulfilled (2026-09-05 worker)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `elemental-punch` is newly fulfilled; FIRE_PUNCH, ICE_PUNCH, and THUNDER_PUNCH retain independent exact acceptance.
+- **Evidence:** Two fresh Battle Scene ON passes retain FIRE_PUNCH at **225/225** and **277/277**, ICE_PUNCH at **462/462** and **1294/1294**, and THUNDER_PUNCH at **104/104** component plus **104/104** framebuffer frames in both orientations. Fixtures, source bodies, status/outcome paths, raw framebuffer contracts, and sibling exclusions are unchanged.
+- **Ratchet / latches:** `elementalPunchTrack.test.ts` locks all six bilateral fixtures/windows/hashes, separate Fire/Ice/Thunder source bodies, portable comparator obligations, source-hardware/display latch rules, the three exact statuses, and only this fulfilled flag. No new or contradictory direct latch was measured, so `ANIMATION_LATCHES.md` is unchanged.
+- **Scope / next:** No reducer, compositor, presentation seam, asset, fixture, evidence, boundary/barrier, gameplay, or shared-program document changed. Focused ratchet/boundary controls, coverage, and animation audit pass; run the final full suite and build before handoff.
+
 # Animation supervisor verification — Metallic-shine track fulfilled (2026-09-05 supervisor)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `metallic-shine` is newly fulfilled; HARDEN, STEEL WING, IRON TAIL, METAL CLAW, IRON DEFENSE, and POISON TAIL retain independent exact acceptance and no sibling receives shared shine credit.
