@@ -6952,7 +6952,8 @@
     "MOVE_PRESENT",
     "MOVE_DYNAMIC_PUNCH"
    ],
-   "goal": "Track complete for the named representatives. MOVE_SELF_DESTRUCT is exact at 113/113, MOVE_EXPLOSION at 212/212, MOVE_DYNAMIC_PUNCH at 75/75, and MOVE_PRESENT at 201/201 damage plus 252/252 healing component, typed-seam, hardware-transfer, and raw-RGB framebuffer frames in both orientations. No sibling is promoted without its own complete dense move acceptance."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_SELF_DESTRUCT, MOVE_EXPLOSION, MOVE_DYNAMIC_PUNCH, and every MOVE_PRESENT orientation/branch retain independent legal, twice-fresh dense Battle Scene ON receipts through first inactive cleanup. Self Destruct closes 113/113 frames per orientation with its own attacker-red palette, plain EXPLOSION OAM/palette one-display transfer, and neutral-first then two-display ShakeMon2 body; Explosion closes 212/212 per orientation with its own plain EXPLOSION OAM/BG-palette transfer, neutral-first then two-display ShakeMon2 body, and red/black/white background program; Dynamic Punch closes 75/75 per orientation with target monbg alpha target-2, its own ShakeMon and ShakeMon2 target-offset transfers, ordinary fist/explosion OAM, opaque explosion order, and cleanup; Present separately closes player/opponent damage 201/201 and heal 252/252 bodies with its moving ITEM_BAG, five damage EXPLOSIONs, or nine GREEN_SPARKLE plus HealingEffect2 stars, including each branch's OAM/matrix/palette/audio/cleanup receipt. Shared gExplosionSpriteTemplate or ANIM_TAG_EXPLOSION never waives a move-owned source body, latch, framebuffer, branch, or acceptance."
   },
   {
    "id": "anger-mark-grow-breath",

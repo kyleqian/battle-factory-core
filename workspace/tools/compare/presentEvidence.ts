@@ -4,6 +4,7 @@ import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createScratchDir } from "../lib/scratch.ts";
+import { compactSemanticReceiptSha256 } from "./semanticReceipt.ts";
 
 type Fixture = {
   readonly scenario: string; readonly probe: string; readonly orientation: string;
@@ -35,7 +36,11 @@ function verify(label: string) {
     const pixels = readFileSync(join(rgb, `${String(frame.frame).padStart(5, "0")}.rgb`)); raw.update(pixels);
     if (sha(pixels) !== frame.sha256 || frame.softwareOam.length !== 128 || frame.hardwareOam.length !== 128 || frame.hardwareMatrices.length !== 32 || frame.fadedPalette.length !== 512 || Object.keys(frame.registers).length < 21 || frame.se1 === undefined || frame.se2 === undefined) throw new Error(`${label}: dense hardware/audio receipt drift at ${frame.frame}`);
   }
-  const evidence = sha(bytes), rgbSha = raw.digest("hex");
+  // presentProbe.py has always emitted compact Python JSON. BattleLab now
+  // appends only setup.preCheckpointCaptures: [], which this helper requires
+  // and removes before reconstructing those historic bytes. Raw RGB remains
+  // independently byte-for-byte pinned below.
+  const evidence = compactSemanticReceiptSha256(probe), rgbSha = raw.digest("hex");
   console.log(`${label}: ${fixture.orientation}/${fixture.branch} ${probe.frames.length}/${fixture.denseWindow.frameCount}; evidence ${evidence}; raw ${rgbSha}`);
   if (fixture.evidenceSha256 && (evidence !== fixture.evidenceSha256 || rgbSha !== fixture.rawRgbSha256)) throw new Error(`${label}: committed digest drift`);
   return `${evidence}/${rgbSha}`;

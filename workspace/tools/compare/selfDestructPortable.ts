@@ -30,6 +30,8 @@ interface Frame {
   playerSprite: { x2: number }; opponentSprite: { x2: number };
   sprites: readonly { x: number; y: number; attr2: number }[];
   fadedPalette: readonly number[]; unfadedPalette: readonly number[];
+  hardwarePalette: readonly number[];
+  hardwareOam: readonly (readonly number[])[];
   se1: { songHeader: number; tracks: readonly { flags: number; panX: number }[] };
 }
 
@@ -95,6 +97,27 @@ for (let frame = fixture.denseWindow.startFrame;
     (index) => oracle.fadedPalette[paletteStart + index]
       === blend(oracle.unfadedPalette[paletteStart + index]!, expected.attackerPaletteY),
   );
+  // SELF DESTRUCT owns its own ordinary script-sprite and palette transfer:
+  // its explosion OAM and attacker blend scan out from the preceding source
+  // row. Do not infer this from EXPLOSION's otherwise similar body.
+  const priorFrame = frames.get(frame - 1);
+  const prior = selfDestructAtAge(
+    age - 1,
+    fixture.attackerSide,
+    fixture.attackerCenter,
+  );
+  const activeHardwareExplosionCount = oracle.hardwareOam.filter((oam) => {
+    const tile = (oam[2] ?? 0) & 1023;
+    return tile >= 305 && tile <= 353 && ((oam[0] ?? 0) & 0x0300) !== 0x0200;
+  }).length;
+  const hardwareOam = age === 0
+    ? activeHardwareExplosionCount === 0
+    : activeHardwareExplosionCount === prior.explosions.length;
+  const hardwarePalette = age === 0
+    ? true
+    : priorFrame !== undefined && Array.from({ length: 16 }, (_, index) => index)
+      .every((index) => oracle.hardwarePalette[paletteStart + index]
+        === priorFrame.fadedPalette[paletteStart + index]);
   const spawn = age >= 0 && age <= 72 && age % 8 === 0;
   const soundShape = !spawn || (
     oracle.se1.songHeader === probe.songHeaders.SE_M_SELF_DESTRUCT
@@ -105,11 +128,14 @@ for (let frame = fixture.denseWindow.startFrame;
   const seamShape = seam.battlerX2 === expected.battlerX2
     && seam.attackerPaletteY === expected.attackerPaletteY
     && seam.explosions.length === expected.explosions.length;
-  if (spriteShape && shakeShape && paletteShape && soundShape && seamShape) {
+  if (
+    spriteShape && shakeShape && paletteShape && hardwareOam
+    && hardwarePalette && soundShape && seamShape
+  ) {
     matches += 1;
   }
   else failures.push(
-    `frame ${frame}/age ${age}: sprites=${spriteShape} shake=${shakeShape} palette=${paletteShape} sound=${soundShape} seam=${seamShape}`,
+    `frame ${frame}/age ${age}: sprites=${spriteShape} shake=${shakeShape} palette=${paletteShape} hardwareOam=${hardwareOam}(${activeHardwareExplosionCount}/${prior.explosions.length}) hardwarePalette=${hardwarePalette} sound=${soundShape} seam=${seamShape}`,
   );
   const engine: EngineState = {
     ...createInitialState(), rngMode: "frontierBattle",

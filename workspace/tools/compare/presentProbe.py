@@ -36,6 +36,11 @@ def main() -> None:
     )
     lab = BattleLab(oracle, "battle-scene-on")
     setup = lab.prepare(request)
+    # This move has no pre-checkpoint presentation body. Keep BattleLab's
+    # asserted-empty transport member in the fresh payload so the portable
+    # verifiers can require it and reconstruct the historic compact bytes.
+    if setup.get("preCheckpointCaptures") != []:
+        raise RuntimeError("PRESENT unexpectedly requested pre-checkpoint captures")
     nm = subprocess.run(
         ["arm-none-eabi-nm", "-a", str(ref / "pokeemerald.elf")],
         check=True, capture_output=True, text=True,
