@@ -29,6 +29,12 @@ EXTRA_SYMBOLS = tuple(filter(None, os.environ.get(
 ).split(",")))
 REPEATED_BODIES = os.environ.get("POKEBENCH_ANIM_PROBE_REPEATED_BODIES") == "1"
 EXTRA_FRAMES = int(os.environ.get("POKEBENCH_ANIM_PROBE_EXTRA_FRAMES", "0"))
+EXTRA_OWNED_RANGE_NAMES = tuple(
+    tuple(pair.split(":"))
+    for pair in filter(None, os.environ.get(
+        "POKEBENCH_ANIM_PROBE_EXTRA_OWNED_RANGES", "",
+    ).split(","))
+)
 
 
 def main() -> None:
@@ -44,6 +50,14 @@ def main() -> None:
     sy = oracle.symbols
     sprites, matrices, tasks = sy["gSprites"], sy["gOamMatrices"], sy["gTasks"]
     start, end = names[MOVE_NAME], names[END_NAME]
+    owned_ranges = ((start, end), *(
+        (names[range_start], names[range_end])
+        for range_start, range_end in EXTRA_OWNED_RANGE_NAMES
+    ))
+    owns = lambda script: any(
+        range_start <= script < range_end
+        for range_start, range_end in owned_ranges
+    )
     active, pointer = names["gAnimScriptActive"], names["sBattleAnimScriptPtr"]
     software_oam, palette_tags, tile_tags = names["gMain"] + 0x38, names["sSpritePaletteTags"], names["sSpriteTileRangeTags"]
     RGB.mkdir(parents=True, exist_ok=True)
@@ -113,7 +127,11 @@ def main() -> None:
         return {
             "frame": frame, "sha256": hashlib.sha256(rgb).hexdigest(), "animScriptActive": bool(u8(active)),
             "scriptPtr": script, "scriptPtrParity": script & 1, "scriptPointerIdentity": ident(script),
-            "scriptOwner": MOVE_NAME if start <= script < end else None, "scriptOffset": script - start if start <= script < end else None,
+            "scriptOwner": MOVE_NAME if owns(script) else None,
+            "scriptOffset": script - next(
+                range_start for range_start, range_end in owned_ranges
+                if range_start <= script < range_end
+            ) if owns(script) else None,
             "scriptWait": s8(names["sAnimFramesToWait"]), "animArgs": [s16(names["gBattleAnimArgs"] + i * 2) for i in range(8)],
             "visualTaskCount": u8(sy["gAnimVisualTaskCount"]), "soundTaskCount": u8(sy["gAnimSoundTaskCount"]),
             "tasks": live_tasks(), "sprites": live_sprites(), "spriteFlags": [u8(sprites + i * 0x44 + 0x3E) for i in range(64)],
@@ -145,13 +163,13 @@ def main() -> None:
         snapshot = lab.snapshot()
         script = u32(pointer)
         if not started:
-            if not u8(active) or not start <= script < end:
+            if not u8(active) or not owns(script):
                 return
             started = True
         elif not REPEATED_BODIES and not u8(active):
             done = True
         if REPEATED_BODIES and started:
-            in_selected_body = bool(u8(active)) and start <= script < end
+            in_selected_body = bool(u8(active)) and owns(script)
             first_inactive_cleanup = bool(rows and rows[-1]["animScriptActive"] and not u8(active))
             if not in_selected_body and not first_inactive_cleanup:
                 return
@@ -225,6 +243,10 @@ def main() -> None:
         "bodyWindows": body_windows, "stageFacts": stage_facts,
         "sourcePointerContract": {"start": start, "endExclusive": end, "observedAddresses": sorted({row["scriptPtr"] for row in rows}),
                                   "observedParities": sorted({row["scriptPtrParity"] for row in rows if row["scriptOwner"] == MOVE_NAME})},
+        "sourcePointerContracts": [
+            {"start": range_start, "endExclusive": range_end}
+            for range_start, range_end in owned_ranges
+        ],
         "sourceSymbols": {name: names[name] for name in (MOVE_NAME, END_NAME, *EXTRA_SYMBOLS) if name in names},
         "topology": topology, "bgSymbols": list(bg_names), "frames": rows,
     }
