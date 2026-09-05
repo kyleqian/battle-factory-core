@@ -4,7 +4,7 @@
 - **Evidence:** Fresh Battle Scene ON runs twice per orientation reproduce Fire **225/225** and **277/277**, Ice **462/462** and **1294/1294**, and Thunder **104/104 component + 104/104 actual-core framebuffer**. Probe outputs are valid JSON and stable per fixture.
 - **Ratchet:** `elementalPunchTrack.test.ts` is schema-aware: Fire/Ice read `geometry.attacker/target`, while Thunder reads top-level battlers and nested `battler.geometry.side`. It pins all six fixture identities/windows/hashes, distinct source bodies, comparator obligations, latch distinctions, exact statuses, and only this track flag.
 - **Latches / scope:** Fire, Ice, and Thunder each retain their own source/hardware/display evidence; plain OAM/script sprites and `AnimTask_ShakeMon` remain RAM+1, while fresh affine matrices remain two-display paint / one-display removal. No new or contradictory latch was measured; `ANIMATION_LATCHES.md` is unchanged. No reducer, asset, fixture/evidence, seam, gameplay, boundary, or sibling status changed.
-- **Gates:** Focused Fire/Ice/Thunder/track/inventory/boundary/frontier controls pass **7 files / 52 tests**; coverage, animation audit, and typecheck pass. Final full `npm test` and build remain to be run before handoff.
+- **Gates:** Focused Fire/Ice/Thunder/track/inventory/boundary/frontier controls pass **7 files / 52 tests**; coverage, animation audit, and typecheck pass. Final `npm test` passes **1,250 files / 10,944 tests** (**44 files / 223 skipped**); `npm run build` passes **761 modules**.
 
 # Animation supervisor verification — Metallic-shine track fulfilled (2026-09-05 supervisor)
 
