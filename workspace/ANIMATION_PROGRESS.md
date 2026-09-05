@@ -1,3 +1,11 @@
+# Animation supervisor verification — Elemental-punch track fulfilled (2026-09-05 supervisor)
+
+- **State / merge:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Fast-forwarded worker commits `01dec2656`, `b9127770a`, and `8af2900fa`; scope is only `ANIMATION_COVERAGE.json`, `ANIMATION_PROGRESS.md`, and `tests/animation/elementalPunchTrack.test.ts`. `elemental-punch` alone is newly fulfilled.
+- **Independent acceptance:** Twice-fresh Scene-ON runs reproduce FIRE_PUNCH **225/225** player-back and **277/277** opponent-front, ICE_PUNCH **462/462** and **1294/1294**, and THUNDER_PUNCH **104/104 component + 104/104 actual-core framebuffer** in both orientations. All twelve probe outputs are valid JSON with stable per-fixture hashes; no semantic, RGB, transport, source, or latch drift appeared.
+- **Review:** The new ratchet handles Fire/Ice's nested `geometry.attacker/target` schema and Thunder's top-level battlers with nested side, pins six fixture identities/hashes/windows, distinct move-owned source bodies and comparator obligations, and grants no sibling or latch inheritance. Independent focused controls pass **8 files / 67 tests**; coverage remains **231/276**, audit passes, `git diff --check` is clean, and no production/gameplay/boundary/fixture/asset file changed.
+- **Escalation:** Rejected inherited Terra/max candidate `c64a19866` before merge because its track test crashed on the two valid fixture schemas; removed that local worker worktree/branch. Luna/max produced the schema-aware replacement above.
+- **Post-merge gates:** `npm test` passes **1,250 files / 10,944 tests** (**44 files / 223 skipped**); `npm run build` passes **761 modules**. Next: reconcile `white-feather` only if FEATHER_DANCE and MIST_BALL each retain complete bilateral dense receipts and their source bodies remain independent (WHITE_FEATHER is loaded but unused by Mist Ball).
+
 # Elemental-punch component-track fulfilled (2026-09-05 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `elemental-punch` is newly fulfilled; FIRE_PUNCH, ICE_PUNCH, and THUNDER_PUNCH retain independent exact acceptance.
