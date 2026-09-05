@@ -84,6 +84,8 @@ export interface DiveState {
   readonly active: boolean;
   readonly scriptActive: boolean;
   readonly attackerInvisible: boolean;
+  /** Source battler OBJ visibility, distinct from the one-row-later monbg scanout. */
+  readonly targetInvisible: boolean;
   readonly targetMonbg: boolean;
   readonly alpha: Readonly<{ eva: 12; evb: 8 }> | null;
   readonly selectedBgOffsetX: number;
@@ -226,17 +228,22 @@ export function diveAtAge(age: number, body: DiveBody, attackerSide: DiveSide,
         matrix: [BALL_MATRIX_X[matrixIndex]!, 0, 0, BALL_MATRIX_Y[matrixIndex]!] };
     }
   }
-  const shake = !setup && age >= 30 && age <= 61
-    ? ((Math.floor((age - 30) / 2) & 1) ? 4 : -4) : 0;
+  const shakeAt = (sourceAge: number): number => sourceAge >= 30 && sourceAge <= 61
+    ? ((Math.floor((sourceAge - 30) / 2) & 1) ? 4 : -4) : 0;
+  const shake = !setup ? shakeAt(age) : 0;
   return { age, body, active: age >= 0 && age <= profile.firstInactiveAge,
     scriptActive: age >= 0 && age < profile.firstInactiveAge,
     attackerInvisible: setup ? age >= 10 : age < 83,
+    targetInvisible: !setup && age >= 13 && age < 83,
     targetMonbg: !setup && age >= 14 && age < 87,
     alpha: !setup && age >= 16 && age < 83 ? { eva: 12, evb: 8 } : null,
-    selectedBgOffsetX: !setup && age >= 31 && age <= 62 ? shake : 0,
+    // Task_UpdateMonBg copies the preceding ShakeMon2 source write into the
+    // selected BG scroll register; keep that hardware latch separate from
+    // the battler sprite's same-row software x2 below.
+    selectedBgOffsetX: !setup ? shakeAt(age - 1) : 0,
     attackerOffset: geometry.attackerRestOffset,
-    targetOffset: !setup && age >= 30 && age <= 61
-      ? { x2: shake, y2: geometry.targetRestOffset.y2 }
+    targetOffset: !setup && age >= 30
+      ? { x2: age <= 61 ? shake : 0, y2: geometry.targetRestOffset.y2 }
       : geometry.targetRestOffset,
     ball, splash, droplets, impacts, bubbles,
     resources: { splash: age >= 1 && age < profile.firstInactiveAge,

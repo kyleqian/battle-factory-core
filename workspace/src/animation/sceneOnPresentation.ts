@@ -206,6 +206,13 @@ import {
   type StockpileState,
 } from "./stockpile.ts";
 import {
+  diveAtAge,
+  type DiveBody,
+  type DiveGeometry,
+  type DiveProfile,
+  type DiveState,
+} from "./dive.ts";
+import {
   metallicShineAtAge,
   type MetallicShineState,
 } from "./metallicShine.ts";
@@ -2635,6 +2642,18 @@ export interface SceneOnFrustrationConfig {
   readonly targetInitialX2: number;
 }
 
+/** Dive's two-turn choice remains battle-owned; this seam renders one selected body. */
+export interface SceneOnDiveConfig {
+  readonly move: "DIVE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly body: DiveBody;
+  readonly animationGeometry: Readonly<DiveGeometry>;
+  /** Allocator identities/order and animation-RNG results resolved by the caller. */
+  readonly animationProfile: Readonly<DiveProfile>;
+}
+
 /** Level damage remains battle-owned; this seam is the level-50 Medium body. */
 export interface SceneOnSeismicTossConfig {
   readonly move: "SEISMIC_TOSS";
@@ -3757,6 +3776,7 @@ export type SceneOnMoveConfig =
   | SceneOnStockpileConfig
   | SceneOnSwaggerConfig
   | SceneOnFrustrationConfig
+  | SceneOnDiveConfig
   | SceneOnSeismicTossConfig
   | SceneOnBulkUpConfig
   | SceneOnTauntConfig
@@ -3926,6 +3946,8 @@ export type SceneOnTauntPresentationState =
   SceneOnMovePresentationState<SceneOnTauntConfig>;
 export type SceneOnFrustrationPresentationState =
   SceneOnMovePresentationState<SceneOnFrustrationConfig>;
+export type SceneOnDivePresentationState =
+  SceneOnMovePresentationState<SceneOnDiveConfig>;
 export type SceneOnScaryFacePresentationState =
   SceneOnMovePresentationState<SceneOnScaryFaceConfig>;
 export type SceneOnGlarePresentationState =
@@ -4479,6 +4501,12 @@ export interface SceneOnSwaggerView extends SwaggerState {
 export interface SceneOnFrustrationView extends FrustrationState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDiveView extends DiveState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
 export interface SceneOnSeismicTossView extends SeismicTossState {
@@ -8072,6 +8100,27 @@ export function sceneOnFrustrationView(
       state.config.targetEffectCenter,
       state.config.animationProfile,
       state.config.targetInitialX2,
+    ),
+  };
+}
+
+/** `age=0` is the retained pointer-entry row for the selected Dive body. */
+export function sceneOnDiveView(
+  state: SceneOnMovePresentationState<SceneOnDiveConfig>,
+): SceneOnDiveView {
+  if (state.config.move !== "DIVE") {
+    throw new Error(`expected DIVE presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    fieldProfile: state.config.fieldProfile,
+    ...diveAtAge(
+      state.age,
+      state.config.body,
+      state.config.attacker.geometry.side,
+      state.config.animationGeometry,
+      state.config.animationProfile,
     ),
   };
 }
