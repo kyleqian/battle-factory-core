@@ -1,3 +1,11 @@
+# Animation supervisor verification — Razor Leaf particle/cutter track fulfilled (2026-09-05 supervisor)
+
+- **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `razor-leaf-particle-cutter` is newly fulfilled; MOVE_RAZOR_LEAF, MOVE_MAGICAL_LEAF, MOVE_LEAF_BLADE, and Factory indoor MOVE_SECRET_POWER→STRENGTH retain independent exact acceptance and no sibling receives leaf/component credit.
+- **Merged:** Independently reviewed and fast-forwarded worker commits `3a6292119` and `eb5983290`. Their three animation-owned files set the single track flag, correct stale Secret Power wording, add a direct four-move fixture/window/hash/source/latch/dispatch ratchet, and update this ledger. No fixture/hash, production reducer/asset/seam/compositor/probe/scenario, move status/count, latch ledger, gameplay owner, boundary/barrier, recording allowlist, or main-program document changed.
+- **Verified:** Fresh supervisor source audits and portable runs reproduce Razor Leaf **139/139**, Magical Leaf **182/182**, Leaf Blade **224/224**, and Secret Power→Strength **102/102** in both orientations at least twice, with every retained semantic/raw-RGB receipt and zero-residual actual-core framebuffer row exact. Focused source/evidence/production/boundary controls pass **9 files / 39 tests**; coverage and animation audit pass.
+- **Merged gate:** Post-merge `npm test` passes **1,247 files / 10,932 tests** with **44 files / 223 tests skipped**; `npm run build` passes **761 modules**. No new or contradictory latch was measured.
+- **Next:** Reconcile `explosion-sprite-self-destruct` as the next ranked unfulfilled all-exact representative track, preserving independent SELF_DESTRUCT, EXPLOSION, PRESENT, and DYNAMIC_PUNCH receipts and stopping on unexplained semantic, RGB, branch, sibling-credit, or latch drift.
+
 # Razor Leaf particle/cutter component-track fulfilled (2026-09-05 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `razor-leaf-particle-cutter` is fulfilled; MOVE_RAZOR_LEAF, MOVE_MAGICAL_LEAF, MOVE_LEAF_BLADE, and Factory indoor MOVE_SECRET_POWER→STRENGTH retain independent exact acceptance.
