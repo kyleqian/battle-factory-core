@@ -132,7 +132,7 @@ describe("blue-light-wall-reflect component-track receipt ratchet", () => {
 
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(231);
+      .toHaveLength(232);
     expect(coverage.entries.filter((entry: { move: string }) => [
       "MOVE_REFLECT", "MOVE_BRICK_BREAK", "MOVE_CRUSH_CLAW",
     ].includes(entry.move))).toEqual([

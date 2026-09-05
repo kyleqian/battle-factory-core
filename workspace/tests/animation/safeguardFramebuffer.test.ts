@@ -59,7 +59,7 @@ describe("MOVE_SAFEGUARD shared production framebuffer", () => {
   it("promotes Safeguard alone and preserves the named independent controls", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(231);
+      .toHaveLength(232);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SAFEGUARD"))
       .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "guard-ring-safeguard"))

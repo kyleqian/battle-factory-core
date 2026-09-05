@@ -74,7 +74,7 @@ describe("MOVE_SCREECH shared production framebuffer", () => {
   it("promotes Screech alone while named shared controls remain independent", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(231);
+      .toHaveLength(232);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SCREECH"))
       .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) =>

@@ -72,14 +72,20 @@ function profileFor(rows: Row[], body: DiveFramebufferBody): DiveProfile {
       ...allocation(rows[age]!, bubble), velocityX: bubble.data[1], velocityY: bubble.data[2],
     })) as [DiveBubbleProfile, DiveBubbleProfile] };
   }) : [];
+  const dropletsProfile = droplets.map((sprite): DiveDropletProfile => ({
+    ...allocation(rows[splashBirth]!, sprite), velocityX: sprite.data[0],
+    velocityY: sprite.data[1] + 32, direction: sprite.data[2],
+  }));
+  const slots = [...new Set([...(body === "setup" ? [ball.slot] : []), splash.slot,
+    ...dropletsProfile.map((sprite) => sprite.slot),
+    ...impacts.flatMap((impact) => [impact.slot, ...impact.bubbles.map((bubble) => bubble.slot)])])];
+  const seedAge = body === "setup" ? 9 : 15;
   return { firstInactiveAge: last, attackerSubpriority: first.battlerSprites.attacker.subpriority,
     targetSubpriority: first.battlerSprites.target.subpriority,
     ball: allocation(rows[body === "setup" ? 10 : splashBirth]!, ball),
     splash: allocation(rows[splashBirth]!, splash),
-    droplets: droplets.map((sprite): DiveDropletProfile => ({
-      ...allocation(rows[splashBirth]!, sprite), velocityX: sprite.data[0],
-      velocityY: sprite.data[1] + 32, direction: sprite.data[2],
-    })), impacts };
+    droplets: dropletsProfile, impacts,
+    spriteOrderSeed: rows[seedAge]!.spriteOrder.filter((slot: number) => slots.includes(slot)) };
 }
 
 export function diveConfigFor(orientation: DiveOrientation, body: DiveFramebufferBody,

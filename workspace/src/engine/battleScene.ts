@@ -33372,6 +33372,10 @@ export function renderSceneOnMovePresentation(
         view.target.geometry.spriteCorner.y + diveState.config.animationGeometry.targetRestOffset.y2);
     }
     const nonObjTarget2 = fb.slice();
+    const hardwareRank = (slot: number, fallback: number): number => {
+      const rank = displayed.hardwareOrder.indexOf(slot);
+      return rank < 0 ? fallback : rank;
+    };
     type DrawObject = Readonly<{
       subpriority: number;
       y: number;
@@ -33397,26 +33401,28 @@ export function renderSceneOnMovePresentation(
     });
     if (displayed.ball && !displayed.ball.invisible) objects.push({
       subpriority: displayed.ball.subpriority, y: displayed.ball.y + displayed.ball.y2,
-      order: displayed.ball.persistentOrder,
+      order: hardwareRank(displayed.ball.slot, displayed.ball.persistentOrder),
       draw: () => drawSpriteSheetAffineRotate(fb, diveArt.roundShadow.tileset,
         diveArt.roundShadow.palette, displayed.ball!.x + displayed.ball!.x2,
         displayed.ball!.y + displayed.ball!.y2, ...displayed.ball!.matrix, undefined, true),
     });
     if (displayed.splash) objects.push({
       subpriority: displayed.splash.subpriority, y: displayed.splash.y + displayed.splash.y2,
-      order: displayed.splash.persistentOrder,
+      order: hardwareRank(displayed.splash.slot, displayed.splash.persistentOrder),
       draw: () => drawSpriteSheetAffineRotate(fb, diveArt.splash.tileset, diveArt.splash.palette,
         displayed.splash!.x + displayed.splash!.x2, displayed.splash!.y + displayed.splash!.y2,
         ...displayed.splash!.matrix, undefined, true),
     });
     for (const drop of displayed.droplets) objects.push({
-      subpriority: drop.subpriority, y: drop.y + drop.y2, order: drop.persistentOrder,
+      subpriority: drop.subpriority, y: drop.y + drop.y2,
+      order: hardwareRank(drop.slot, drop.persistentOrder),
       draw: () => (drop.direction ? drawSpriteSheetHFlip : drawSpriteSheet)(
         fb, diveArt.sweatBead.tileset, diveArt.sweatBead.palette,
         drop.x + drop.x2 - 4, drop.y + drop.y2 - 4),
     });
     for (const impact of displayed.impacts) objects.push({
-      subpriority: impact.subpriority, y: impact.y, order: impact.persistentOrder,
+      subpriority: impact.subpriority, y: impact.y,
+      order: hardwareRank(impact.slot, impact.persistentOrder),
       draw: () => drawSpriteSheetAffineRotateBlendedOverFb(fb, nonObjTarget2,
         diveArt.waterImpact.tileset, diveArt.waterImpact.palette, impact.x, impact.y,
         ...impact.matrix, 12, 8, false),
@@ -33424,7 +33430,8 @@ export function renderSceneOnMovePresentation(
     const bubbleCell: Tileset = { columns: 1, rows: 1,
       tiles: [diveArt.smallBubbles.tileset.tiles[8]!] };
     for (const bubble of displayed.bubbles) objects.push({
-      subpriority: bubble.subpriority, y: bubble.y + bubble.y2, order: bubble.persistentOrder,
+      subpriority: bubble.subpriority, y: bubble.y + bubble.y2,
+      order: hardwareRank(bubble.slot, bubble.persistentOrder),
       draw: () => drawSpriteSheet(fb, bubbleCell, diveArt.smallBubbles.palette,
         bubble.x + bubble.x2 - 4, bubble.y + bubble.y2 - 4),
     });

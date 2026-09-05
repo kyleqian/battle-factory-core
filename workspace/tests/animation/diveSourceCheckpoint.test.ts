@@ -12,7 +12,7 @@ describe("MOVE_DIVE source/legal evidence boundary", () => {
   it("pins both pointer-owned ranges, the full graph, and all legal carriers", () => {
     expect(audit()).toMatchObject({
       schema: "dive-source-audit/v1", move: "MOVE_DIVE", moveId: 291,
-      status: "unsupported-source-contract",
+      status: "exact-source-contract",
       source: {
         root: { start: 0x082d653d, endExclusive: 0x082d65f7, bytes: 186, sha256: "55eafa860b14f2d02231270c9ddfce77a85050d9a4e3231d40469dcc42c9c0c2" },
         risingWater: { start: 0x082cb102, endExclusive: 0x082cb275, bytes: 371, sha256: "9d663164e09ec4665d56b522153dfaf68f6420c6c35eb0c417e2923ffd77822f" },
@@ -23,7 +23,7 @@ describe("MOVE_DIVE source/legal evidence boundary", () => {
         { index: 134, label: "FRONTIER_MON_CLAMPERL" }, { index: 265, label: "FRONTIER_MON_POLITOED_1" },
         { index: 371, label: "FRONTIER_MON_CLOYSTER_2" }, { index: 772, label: "FRONTIER_MON_SUICUNE_2" },
       ],
-      ownership: { reducer: false, seam: false, compositor: false, gameplay: false, coverageCredit: false, trackFulfilled: false },
+      ownership: { reducer: true, seam: true, compositor: true, gameplay: false, coverageCredit: true, trackFulfilled: true },
     });
   });
 
@@ -47,13 +47,12 @@ describe("MOVE_DIVE source/legal evidence boundary", () => {
     }
   });
 
-  it("leaves Dive unsupported and the three-move track unfulfilled", () => {
+  it("requires independent exact acceptance for all three track moves", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8"));
-    expect(coverage.entries.some((entry: any) => entry.move === "MOVE_DIVE")).toBe(false);
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_DIVE").status).toBe("exact");
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_FLY").status).toBe("exact");
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_BOUNCE").status).toBe("exact");
     expect(coverage.componentTracks.find((track: any) => track.id === "two-turn-semi-invulnerable"))
-      .toMatchObject({ representatives: ["MOVE_FLY", "MOVE_BOUNCE", "MOVE_DIVE"] });
-    expect(coverage.componentTracks.find((track: any) => track.id === "two-turn-semi-invulnerable").fulfilled).not.toBe(true);
+      .toMatchObject({ representatives: ["MOVE_FLY", "MOVE_BOUNCE", "MOVE_DIVE"], fulfilled: true });
   });
 });

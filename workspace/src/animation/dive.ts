@@ -1,5 +1,7 @@
 /** Pure, source-relative port of Emerald's two Dive animation bodies. */
 
+import { sortGbaSpriteOrder, type GbaSpriteOrderKey } from "./gbaObjCompositor.ts";
+
 export type DiveBody = "setup" | "attack";
 export type DiveSide = "player" | "opponent";
 
@@ -34,6 +36,8 @@ export interface DiveProfile {
   readonly splash: DiveAllocation;
   readonly droplets: readonly DiveDropletProfile[];
   readonly impacts: readonly DiveImpactProfile[];
+  /** Live `sSpriteOrder` restricted to every slot this body can allocate. */
+  readonly spriteOrderSeed: readonly number[];
 }
 
 export interface DiveGeometry {
@@ -96,6 +100,8 @@ export interface DiveState {
   readonly droplets: readonly DiveDroplet[];
   readonly impacts: readonly DiveImpact[];
   readonly bubbles: readonly DiveBubble[];
+  /** Front-to-back live OAM order, after the source's stable per-row sort. */
+  readonly hardwareOrder: readonly number[];
   readonly resources: Readonly<{ splash: boolean; sweatBead: boolean; roundShadow: boolean;
     waterImpact: boolean; smallBubbles: boolean }>;
   readonly audio: readonly Readonly<{ song: string; pan: DiveSide }>[];
@@ -158,7 +164,7 @@ function overwritten(slot: number, birth: number, age: number,
   return births.some((other) => other.slot === slot && other.birth > birth && other.birth <= age);
 }
 
-export function diveAtAge(age: number, body: DiveBody, attackerSide: DiveSide,
+function diveAtAgeRaw(age: number, body: DiveBody, attackerSide: DiveSide,
   geometry: Readonly<DiveGeometry>, profile: Readonly<DiveProfile>): DiveState {
   const setup = body === "setup";
   const splashBirth = setup ? profile.firstInactiveAge - 50 : 16;
@@ -245,7 +251,7 @@ export function diveAtAge(age: number, body: DiveBody, attackerSide: DiveSide,
     targetOffset: !setup && age >= 30
       ? { x2: age <= 61 ? shake : 0, y2: geometry.targetRestOffset.y2 }
       : geometry.targetRestOffset,
-    ball, splash, droplets, impacts, bubbles,
+    ball, splash, droplets, impacts, bubbles, hardwareOrder: [],
     resources: { splash: age >= 1 && age < profile.firstInactiveAge,
       sweatBead: age >= 4 && age < profile.firstInactiveAge,
       roundShadow: setup && age >= 7 && age < profile.firstInactiveAge,
@@ -258,4 +264,67 @@ export function diveAtAge(age: number, body: DiveBody, attackerSide: DiveSide,
       ...(!setup && age === 30 ? [{ song: "SE_M_WATERFALL", pan: attackerSide === "player" ? "opponent" as const : "player" as const }] : []),
     ],
   };
+}
+
+function spriteTop(sprite: DiveBall | DiveSplash | DiveDroplet | DiveImpact | DiveBubble): number {
+  // SortSprites compares the OBJ top coordinate, not the animation center.
+  // These are the source OAM dimensions for round shadow/Splash, sweat bead,
+  // Water Impact, and Small Bubbles respectively. The affine 64x64 objects
+  // have distinct subpriorities, but retaining their real geometry keeps the
+  // scheduler valid for altered live allocations as well.
+  const halfHeight = sprite.kind === "ball" || sprite.kind === "splash" ? 32
+    : sprite.kind === "impact" ? 16 : 4;
+  const top = (sprite.y + sprite.y2 - halfHeight) & 0xff;
+  return top >= 160 ? top - 256 : top;
+}
+
+function allocatedSlots(body: DiveBody, profile: Readonly<DiveProfile>): number[] {
+  return [...new Set([
+    ...(body === "setup" ? [profile.ball.slot] : []),
+    profile.splash.slot,
+    ...profile.droplets.map((sprite) => sprite.slot),
+    ...profile.impacts.flatMap((impact) => [
+      impact.slot, ...impact.bubbles.map((bubble) => bubble.slot),
+    ]),
+  ])];
+}
+
+/**
+ * Replay Emerald's persistent `sSpriteOrder` rather than using a sprite's
+ * creation-row rank forever. Moving equal-subpriority objects are stably
+ * re-sorted by live OAM Y every row; a later exact-Y tie therefore preserves
+ * the immediately preceding hardware order, including destroyed/reused slots.
+ */
+function hardwareOrderAtAge(age: number, body: DiveBody, attackerSide: DiveSide,
+  geometry: Readonly<DiveGeometry>, profile: Readonly<DiveProfile>): readonly number[] {
+  const slots = allocatedSlots(body, profile);
+  if (profile.spriteOrderSeed.length !== slots.length
+    || new Set(profile.spriteOrderSeed).size !== slots.length
+    || slots.some((slot) => !profile.spriteOrderSeed.includes(slot))) {
+    throw new Error("Dive sprite-order seed must permute every live allocation slot");
+  }
+  const firstAllocationAge = body === "setup" ? 10 : 16;
+  let order = profile.spriteOrderSeed.slice();
+  let currentSlots = new Set<number>();
+  for (let sourceAge = firstAllocationAge; sourceAge <= age; sourceAge += 1) {
+    const frame = diveAtAgeRaw(sourceAge, body, attackerSide, geometry, profile);
+    const sprites = [frame.ball, frame.splash, ...frame.droplets, ...frame.impacts,
+      ...frame.bubbles].filter((sprite): sprite is NonNullable<typeof sprite> => sprite !== null);
+    const bySlot = new Map(sprites.map((sprite) => [sprite.slot, sprite] as const));
+    currentSlots = new Set(bySlot.keys());
+    const keys: GbaSpriteOrderKey[] = order.map((slot) => {
+      const sprite = bySlot.get(slot);
+      return sprite ? { slot, priority: 2, subpriority: sprite.subpriority,
+        y: spriteTop(sprite) }
+        : { slot, priority: 3, subpriority: 255, y: -96 };
+    });
+    order = sortGbaSpriteOrder(order, keys);
+  }
+  return order.filter((slot) => currentSlots.has(slot));
+}
+
+export function diveAtAge(age: number, body: DiveBody, attackerSide: DiveSide,
+  geometry: Readonly<DiveGeometry>, profile: Readonly<DiveProfile>): DiveState {
+  const state = diveAtAgeRaw(age, body, attackerSide, geometry, profile);
+  return { ...state, hardwareOrder: hardwareOrderAtAge(age, body, attackerSide, geometry, profile) };
 }

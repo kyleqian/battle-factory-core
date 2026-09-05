@@ -134,7 +134,7 @@ describe("sparkle-4-grow-grayscale component-track receipt ratchet", () => {
 
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(231);
+      .toHaveLength(232);
     expect(coverage.entries.filter((entry: { move: string }) => ["MOVE_DISABLE", "MOVE_DETECT"].includes(entry.move)))
       .toEqual([
         expect.objectContaining({ move: "MOVE_DETECT", status: "exact" }),

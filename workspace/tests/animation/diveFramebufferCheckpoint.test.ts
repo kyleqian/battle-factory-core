@@ -14,18 +14,12 @@ import {
 const expected = [
   { orientation: "player-back", body: "setup", rows: 118, matched: 118,
     residualPixels: 0, peakResidualPixels: 0, failures: [] },
-  { orientation: "player-back", body: "attack", rows: 93, matched: 89,
-    residualPixels: 61, peakResidualPixels: 19, failures: [
-      "61:19:190,34-196,39", "62:19:191,34-197,39",
-      "63:19:193,34-198,39", "65:4:190,21-191,22",
-    ] },
+  { orientation: "player-back", body: "attack", rows: 93, matched: 93,
+    residualPixels: 0, peakResidualPixels: 0, failures: [] },
   { orientation: "opponent-front", body: "setup", rows: 115, matched: 115,
     residualPixels: 0, peakResidualPixels: 0, failures: [] },
-  { orientation: "opponent-front", body: "attack", rows: 93, matched: 89,
-    residualPixels: 38, peakResidualPixels: 16, failures: [
-      "49:14:63,84-66,89", "50:16:61,84-65,89",
-      "64:7:76,66-78,68", "65:1:79,65-79,65",
-    ] },
+  { orientation: "opponent-front", body: "attack", rows: 93, matched: 93,
+    residualPixels: 0, peakResidualPixels: 0, failures: [] },
 ];
 
 function independentRun(): unknown {
@@ -35,7 +29,7 @@ function independentRun(): unknown {
 }
 
 describe("MOVE_DIVE actual-core production framebuffer checkpoint", () => {
-  it("reproduces the bounded 415/419-row checkpoint in two independent processes", () => {
+  it("reproduces all 419 rows with zero residuals in two independent processes", () => {
     expect(independentRun()).toEqual(expected);
     expect(independentRun()).toEqual(expected);
   }, 30_000);
@@ -60,8 +54,8 @@ describe("MOVE_DIVE actual-core production framebuffer checkpoint", () => {
         ...evidence.animationProfile,
         splash: { ...evidence.animationProfile.splash, slot: 21, matrixNum: 12,
           persistentOrder: 18 },
-        droplets: evidence.animationProfile.droplets.map((drop, index) => ({
-          ...drop, slot: 30 + index, persistentOrder: 40 - index,
+        droplets: evidence.animationProfile.droplets.map((drop, index, drops) => ({
+          ...drop, slot: drops[drops.length - 1 - index]!.slot, persistentOrder: 40 - index,
           velocityX: drop.velocityX + (index % 2 ? 24 : -16),
         })),
       },

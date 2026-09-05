@@ -123,19 +123,19 @@ if (JSON.stringify(graphMove?.componentIds) !== JSON.stringify(components)
     "Move_DIVE", "DiveSetUp", "DiveAttack", "DiveSetUpWaterDroplets",
     "DiveAttackWaterDroplets", "RisingWaterHitEffect",
   ]) || inventoryMove?.frontierMonCount !== 6 || carriers.length !== 6
-  || carriers[0]?.index !== 116 || track?.fulfilled === true
-  || coverage.entries.some((entry: any) => entry.move === "MOVE_DIVE")) {
-  throw new Error("Dive graph/legal/unsupported boundary drifted");
+  || carriers[0]?.index !== 116 || track?.fulfilled !== true
+  || coverage.entries.find((entry: any) => entry.move === "MOVE_DIVE")?.status !== "exact") {
+  throw new Error("Dive graph/legal/exact boundary drifted");
 }
 
 console.log(JSON.stringify({
   schema: "dive-source-audit/v1", move: "MOVE_DIVE", moveId: 291,
-  status: "unsupported-source-contract", labels, components,
+  status: "exact-source-contract", labels, components,
   source: {
     root: { start, endExclusive: end, bytes: end - start, sha256: sha(rom.subarray(start - 0x08000000, end - 0x08000000)), textSha256: sha(rootBody) },
     risingWater: { start: risingStart, endExclusive: risingEnd, bytes: risingEnd - risingStart, sha256: sha(rom.subarray(risingStart - 0x08000000, risingEnd - 0x08000000)), textSha256: sha(risingBody) },
   },
   lifecycle: { diveBall: 1, splashes: 2, sprayDroplets: 20, waterImpacts: 9, driftingBubbles: 18, shakeMon2: 1 },
   carriers: carriers.map(({ index, label, species, moves, itemName, nature, evSpreadStats }: any) => ({ index, label, species, moves, itemName, nature, evSpreadStats })),
-  ownership: { reducer: false, seam: false, compositor: false, gameplay: false, coverageCredit: false, trackFulfilled: false },
+  ownership: { reducer: true, seam: true, compositor: true, gameplay: false, coverageCredit: true, trackFulfilled: true },
 }, null, 2));

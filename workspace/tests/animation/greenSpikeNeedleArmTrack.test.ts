@@ -142,7 +142,7 @@ describe("green-spike-needle-arm component-track receipt ratchet", () => {
     );
 
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(231);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(232);
     expect(coverage.entries.filter((entry: { status: string }) =>
       entry.status === "partial" || entry.status === "staged",
     )).toEqual([]);

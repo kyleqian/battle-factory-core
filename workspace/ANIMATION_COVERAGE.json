@@ -2,6 +2,45 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_DIVE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 CHINCHOU versus ONIX Battle Scene ON evidence retains both disjoint source-selected bodies through first inactive cleanup twice fresh: player-back setup 118/118 plus attack 93/93, and opponent-front setup 115/115 plus attack 93/93",
+    "the pure source-relative reducer and typed Scene-ON seam reproduce the Dive ball, two reused-affine Splashes, twenty spray droplets, nine Water Impact sprites, eighteen Small Bubbles, target ShakeMon2/selected-BG transfer, resources, two audio players, visibility, alpha/monbg, and cleanup from live species, side, geometry, allocator, animation-RNG, and order inputs",
+    "the generic compositor replays Emerald's stable per-row SortSprites rule from the live pre-allocation sSpriteOrder permutation: subpriority and wrapped OAM top Y are re-evaluated every source row, while exact-Y ties preserve the immediately preceding order across destroyed and reused slots instead of freezing each sprite's birth rank",
+    "two independent actual-core comparator processes each pass all 419 retained rows with zero residual pixels: player-back 118/118 setup plus 93/93 attack and opponent-front 115/115 setup plus 93/93 attack; all 419 reducer/state rows, source/hardware OAM and affine latches, palette/register/audio/resource/RNG/cleanup receipts, and raw RGB hashes remain pinned",
+    "the altered ARON/GROVYLE species, geometry, allocation, velocity, and order controls remain material; a separate equal-Y seed permutation changes only stable tie order and rejects an age- or orientation-fitted exception",
+    "MOVE_FLY and MOVE_BOUNCE retain their independent exact acceptances; MOVE_DIVE alone is promoted, completing two-turn-semi-invulnerable without transferring any move body or latch between representatives"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-dive-player-chinchou-opponent-onix.json",
+    "tools/battle-lab/mechanic-dive-opponent-chinchou-player-onix.json",
+    "tools/compare/diveSourceAudit.ts",
+    "tools/compare/diveProbe.py",
+    "tools/compare/diveEvidence.ts",
+    "tools/compare/diveFramebuffer.ts",
+    "tools/compare/extractDiveAssets.ts",
+    "tools/compare/fixtures/dive-evidence.json",
+    "tools/compare/evidence/dive-player-dense-state.json.gz",
+    "tools/compare/evidence/dive-opponent-dense-state.json.gz",
+    "tools/compare/evidence/dive-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/dive-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/dive-changemap-player.json",
+    "tools/compare/evidence/dive-changemap-opponent.json",
+    "src/animation/assets/dive.json",
+    "src/animation/dive.ts",
+    "src/animation/gbaObjCompositor.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/diveSourceCheckpoint.test.ts",
+    "tests/animation/diveEvidenceCheckpoint.test.ts",
+    "tests/animation/diveReducerCheckpoint.test.ts",
+    "tests/animation/diveProductionBoundary.test.ts",
+    "tests/animation/diveFramebufferCheckpoint.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_TRI_ATTACK",
    "status": "exact",
    "covered": [
@@ -7292,7 +7331,8 @@
     "MOVE_BOUNCE",
     "MOVE_DIVE"
    ],
-   "goal": "FLY exactly proves a phase-relative, side-parameterized two-turn charge/strike reducer, source-derived player-back MURKROW art, and a reusable framebuffer/healthbox/controller adapter in both legal orientations. Opponent windows are 151/151 and 248/248; player windows are 147/147 and 244/244, all with zero exclusions. The canonical charge/miss window is also 213/213 after its flattened layered-scene path reused the established opponent terrain cutoff through the generic affine-stretch clip parameter. BOUNCE exactly proves both charge bodies at 24/24, no-status strike/controller windows at 299/299 opponent-front and 197/197 player-back, and the successful-paralysis strike/controller/menu variant at 450/450; its Status_Paralysis electricity asset/spawns and AnimTask_ShakeMon2 framebuffer handoff now live in a reusable move-agnostic visual component. DIVE remains unsupported: its complete disjoint root + RisingWaterHitEffect graph is banked twice fresh at player-back 118+93 and opponent-front 115+93 dense Scene-ON state/raw-RGB/change-map rows through each first inactive cleanup, but no reducer, typed seam, assets/compositor, or actual-core framebuffer equality exists yet."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_FLY independently retains its complete bilateral charge/miss and strike/controller bodies, MOVE_BOUNCE independently retains both bilateral charge bodies plus no-status and successful-paralysis strike/controller variants, and MOVE_DIVE independently retains both disjoint setup/attack bodies at player-back 118+93 and opponent-front 115+93 rows. DIVE's source-relative reducer, typed seam, source-derived assets, stable live sSpriteOrder replay, hardware/palette/BG/audio/RNG/cleanup receipts, and actual-core framebuffer pass all 419 rows twice with zero residual pixels. No body, latch, or acceptance transfers between the three representatives."
   },
   {
    "id": "spark-2-electricity",
@@ -7418,7 +7458,7 @@
     "MOVE_CRABHAMMER",
     "MOVE_WATER_SPOUT"
    ],
-   "goal": "MOVE_WATER_GUN independently proves its complete projectile/hitsplat/three-droplet body and target-BG2 alpha compositor in both orientations at 111/111 component/RAM and framebuffer frames, reproduced twice. ShakeMon2, BIND, and SUPERSONIC remain exact regression controls. No sibling is promoted. SMALL_BUBBLES audit: BUBBLE BEAM needs its 18 large gWaterBubbleProjectile sprites, SwayMon, and WaterBubblesEffectShort; SECRET POWER environment-dispatches to distinct complete scripts (the Factory building route is STRENGTH, pond is BUBBLE BEAM); DIVE needs both two-turn splash/spray setup and strike RisingWaterHitEffect; MIST BALL needs its translating mist ball, target shakes/palette tasks, and full fog BG pipeline; FAKE TEARS uses the tag only for BlendParticle and needs RockMonBackAndForth plus eight thought-bubble/music-note tear sprites; WATER PULSE needs five independently parameterized bubble sprites, three blue rings, target shake, and whole-BG palette blend. WATER_IMPACT audit: HYDRO PUMP needs its paired orb beam stream, sine timer, attacker/target shakes, and repeated hitsplats; CRABHAMMER is independently exact with its palette blend, target slide/return, ShakeMon, and eight ice-crystal bubble pairs; SECRET POWER and DIVE retain the distinct bodies above; WATER SPOUT needs WaterSpoutLaunch and WaterSpoutRain with glowy-blue-orb launch/rain geometry. Every sibling remains unsupported pending its own complete dense evidence."
+   "goal": "MOVE_WATER_GUN independently proves its complete projectile/hitsplat/three-droplet body and target-BG2 alpha compositor in both orientations at 111/111 component/RAM and framebuffer frames, reproduced twice. ShakeMon2, BIND, and SUPERSONIC remain exact regression controls. SMALL_BUBBLES audit: BUBBLE BEAM independently proves its 18 large gWaterBubbleProjectile sprites, SwayMon, and WaterBubblesEffectShort; SECRET POWER environment-dispatches to distinct complete scripts (the Factory building route is STRENGTH, pond is BUBBLE BEAM); DIVE independently proves both two-turn splash/spray setup and strike RisingWaterHitEffect; MIST BALL needs its translating mist ball, target shakes/palette tasks, and full fog BG pipeline; FAKE TEARS uses the tag only for BlendParticle and needs RockMonBackAndForth plus eight thought-bubble/music-note tear sprites; WATER PULSE needs five independently parameterized bubble sprites, three blue rings, target shake, and whole-BG palette blend. WATER_IMPACT audit: HYDRO PUMP needs its paired orb beam stream, sine timer, attacker/target shakes, and repeated hitsplats; CRABHAMMER is independently exact with its palette blend, target slide/return, ShakeMon, and eight ice-crystal bubble pairs; SECRET POWER retains its distinct bodies; WATER SPOUT independently proves WaterSpoutLaunch and WaterSpoutRain with glowy-blue-orb launch/rain geometry. Shared components never promote a remaining sibling without its own complete dense evidence."
   },
   {
    "id": "water-spout-launch-rain",

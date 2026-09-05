@@ -56,14 +56,20 @@ function makeProfile(rows: Row[], body: "setup" | "attack"): DiveProfile {
       ...allocation(rows[age]!, bubble), velocityX: bubble.data[1], velocityY: bubble.data[2],
     })) as [DiveBubbleProfile, DiveBubbleProfile] };
   }) : [];
+  const dropletsProfile = droplets.map((sprite): DiveDropletProfile => ({
+    ...allocation(rows[splashBirth]!, sprite), velocityX: sprite.data[0],
+    velocityY: sprite.data[1] + 32, direction: sprite.data[2],
+  }));
+  const slots = [...new Set([...(body === "setup" ? [ball.slot] : []), splash.slot,
+    ...dropletsProfile.map((sprite) => sprite.slot),
+    ...impacts.flatMap((impact) => [impact.slot, ...impact.bubbles.map((bubble) => bubble.slot)])])];
   return { firstInactiveAge: last, attackerSubpriority: first.battlerSprites.attacker.subpriority,
     targetSubpriority: first.battlerSprites.target.subpriority,
     ball: allocation(rows[body === "setup" ? 10 : splashBirth]!, ball),
     splash: allocation(rows[splashBirth]!, splash),
-    droplets: droplets.map((sprite): DiveDropletProfile => ({
-      ...allocation(rows[splashBirth]!, sprite), velocityX: sprite.data[0],
-      velocityY: sprite.data[1] + 32, direction: sprite.data[2],
-    })), impacts };
+    droplets: dropletsProfile, impacts,
+    spriteOrderSeed: rows[body === "setup" ? 9 : 15]!.spriteOrder
+      .filter((slot: number) => slots.includes(slot)) };
 }
 
 function configFor(orientation: "player-back" | "opponent-front", body: "setup" | "attack",
@@ -182,8 +188,9 @@ describe("MOVE_DIVE typed production boundary and retained state", () => {
       animationGeometry: { ...base.animationGeometry,
         targetPictureOffset: { x: 53, y: 91 }, targetRestOffset: { x2: 7, y2: -3 } },
       animationProfile: { ...base.animationProfile,
-        droplets: base.animationProfile.droplets.map((item, index) => ({ ...item,
-          slot: item.slot + 20, persistentOrder: 50 - index, velocityX: item.velocityX + 17 + index })) },
+        droplets: base.animationProfile.droplets.map((item, index, drops) => ({ ...item,
+          slot: drops[drops.length - 1 - index]!.slot,
+          persistentOrder: 50 - index, velocityX: item.velocityX + 17 + index })) },
     };
     const ordinary = sceneOnDiveView({ ...createSceneOnMovePresentation(base), age: 25 });
     const changed = sceneOnDiveView({ ...createSceneOnMovePresentation(altered), age: 25 });

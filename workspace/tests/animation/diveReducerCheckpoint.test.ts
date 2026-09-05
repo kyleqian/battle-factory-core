@@ -51,15 +51,21 @@ function makeProfile(rows: Row[], body: "setup" | "attack"): DiveProfile {
       ...allocation(rows[age]!, bubble), velocityX: bubble.data[1], velocityY: bubble.data[2],
     })) as [DiveBubbleProfile, DiveBubbleProfile] };
   }) : [];
+  const dropletsProfile = droplets.map((sprite): DiveDropletProfile => ({
+    ...allocation(rows[splashBirth]!, sprite), velocityX: sprite.data[0],
+    velocityY: sprite.data[1] + 32, direction: sprite.data[2],
+  }));
+  const slots = [...new Set([...(body === "setup" ? [ball.slot] : []), splash.slot,
+    ...dropletsProfile.map((sprite) => sprite.slot),
+    ...impacts.flatMap((impact) => [impact.slot, ...impact.bubbles.map((bubble) => bubble.slot)])])];
   return { firstInactiveAge: last,
     attackerSubpriority: first.battlerSprites.attacker.subpriority,
     targetSubpriority: first.battlerSprites.target.subpriority,
     ball: allocation(rows[body === "setup" ? 10 : splashBirth]!, ball),
     splash: allocation(rows[splashBirth]!, splash),
-    droplets: droplets.map((sprite): DiveDropletProfile => ({
-      ...allocation(rows[splashBirth]!, sprite), velocityX: sprite.data[0],
-      velocityY: sprite.data[1] + 32, direction: sprite.data[2],
-    })), impacts };
+    droplets: dropletsProfile, impacts,
+    spriteOrderSeed: rows[body === "setup" ? 9 : 15]!.spriteOrder
+      .filter((slot: number) => slots.includes(slot)) };
 }
 
 function geometry(rows: Row[]): DiveGeometry {
@@ -106,6 +112,9 @@ describe("Dive source-relative reducer checkpoint", () => {
           if (sprite.kind === "ball") expect(sprite.invisible, `age ${age} ball visibility`)
             .toBe(match.invisible);
         }
+        const activeSlots = new Set(actual.map((sprite) => sprite.slot));
+        expect(state.hardwareOrder, `age ${age} stable hardware order`)
+          .toEqual(row.spriteOrder.filter((slot: number) => activeSlots.has(slot)));
         expect(state.scriptActive, `age ${age} script`).toBe(row.animScriptActive);
       }
     });
@@ -113,8 +122,8 @@ describe("Dive source-relative reducer checkpoint", () => {
 
   it("responds to altered geometry, allocation, and random-derived velocities", () => {
     const rows = bodyRows("player-back", "attack"), base = makeProfile(rows, "attack");
-    const altered = { ...base, droplets: base.droplets.map((drop, index) => ({ ...drop,
-      slot: drop.slot + 30, velocityX: drop.velocityX + index + 17 })) };
+    const altered = { ...base, droplets: base.droplets.map((drop, index, drops) => ({ ...drop,
+      slot: drops[drops.length - 1 - index]!.slot, velocityX: drop.velocityX + index + 17 })) };
     const geo = geometry(rows), moved = { ...geo,
       targetPictureOffset: { x: geo.targetPictureOffset.x - 31, y: geo.targetPictureOffset.y + 19 } };
     const ordinary = diveAtAge(25, "attack", "player", geo, base);
@@ -122,5 +131,23 @@ describe("Dive source-relative reducer checkpoint", () => {
     expect(changed.droplets.map((drop) => drop.slot)).not.toEqual(ordinary.droplets.map((drop) => drop.slot));
     expect(changed.droplets.map((drop) => [drop.x, drop.y, drop.x2]))
       .not.toEqual(ordinary.droplets.map((drop) => [drop.x, drop.y, drop.x2]));
+  });
+
+  it("preserves the live seed only for exact-Y ties instead of fitting named ages", () => {
+    const rows = bodyRows("player-back", "attack"), base = makeProfile(rows, "attack");
+    const geo = geometry(rows), first = base.impacts[0]!;
+    const tied = { ...base, impacts: [{ ...first, bubbles: [
+      first.bubbles[0], { ...first.bubbles[1],
+        velocityX: first.bubbles[0].velocityX, velocityY: first.bubbles[0].velocityY },
+    ] }, ...base.impacts.slice(1)] } satisfies DiveProfile;
+    const swappedSeed = tied.spriteOrderSeed.slice();
+    const left = swappedSeed.indexOf(first.bubbles[0].slot);
+    const right = swappedSeed.indexOf(first.bubbles[1].slot);
+    [swappedSeed[left], swappedSeed[right]] = [swappedSeed[right]!, swappedSeed[left]!];
+    const ordinary = diveAtAge(30, "attack", "player", geo, tied).hardwareOrder;
+    const swapped = diveAtAge(30, "attack", "player", geo,
+      { ...tied, spriteOrderSeed: swappedSeed }).hardwareOrder;
+    expect(swapped).not.toEqual(ordinary);
+    expect(new Set(swapped)).toEqual(new Set(ordinary));
   });
 });

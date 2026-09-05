@@ -285,16 +285,16 @@ describe("fast-contact component-track receipt ratchet", () => {
     };
     const moves = new Set(["MOVE_QUICK_ATTACK", "MOVE_EXTREME_SPEED", "MOVE_AERIAL_ACE"]);
 
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(231);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(232);
     expect(coverage.entries.filter((entry) => entry.status === "partial")).toHaveLength(0);
     expect(coverage.entries.filter((entry) => entry.status === "staged")).toHaveLength(0);
     expect(animationCoverageSummary()[0]).toEqual({
       tier: "level50",
       total: 276,
-      exact: 231,
+      exact: 232,
       partial: 0,
       staged: 0,
-      unsupported: 45,
+      unsupported: 44,
     });
     expect(coverage.entries.filter((entry) => moves.has(entry.move)).map((entry) => [
       entry.move,

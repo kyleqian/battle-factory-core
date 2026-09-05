@@ -235,7 +235,7 @@ describe("rock-mon-back-and-forth-magenta-heart component-track receipt ratchet"
   it("fulfills only the independently exact four-move track without moving coverage", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(231);
+      .toHaveLength(232);
     expect(coverage.entries.filter((entry: { move: string }) => [
       "MOVE_CHARM", "MOVE_COVET", "MOVE_FAKE_TEARS", "MOVE_TICKLE",
     ].includes(entry.move))).toEqual([

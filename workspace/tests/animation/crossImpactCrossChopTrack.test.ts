@@ -84,7 +84,7 @@ describe("cross-impact-cross-chop component-track receipt ratchet", () => {
       counts[status] = (counts[status] ?? 0) + 1;
       return counts;
     }, {});
-    expect(level50Counts).toEqual({ exact: 231, unsupported: 45 });
+    expect(level50Counts).toEqual({ exact: 232, unsupported: 44 });
     expect(coverage.entries.filter((entry: { status: string }) =>
       entry.status === "partial" || entry.status === "staged",
     )).toEqual([]);

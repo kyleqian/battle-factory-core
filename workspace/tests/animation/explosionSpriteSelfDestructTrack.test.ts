@@ -207,7 +207,7 @@ describe("explosion-sprite-self-destruct component-track receipt ratchet", () =>
   it("fulfills only the independently exact four-move track without moving coverage", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(231);
+      .toHaveLength(232);
     expect(coverage.entries.filter((entry: { move: string }) => [
       "MOVE_SELF_DESTRUCT", "MOVE_EXPLOSION", "MOVE_PRESENT", "MOVE_DYNAMIC_PUNCH",
     ].includes(entry.move))).toEqual([
