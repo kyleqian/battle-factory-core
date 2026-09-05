@@ -7248,7 +7248,8 @@
     "MOVE_SAND_ATTACK",
     "MOVE_MUD_SLAP"
    ],
-   "goal": "SAND ATTACK remains exact in both orientations at 269/269 each. MUD SLAP independently proves its distinct 16x16 gMudSlapMudSpriteTemplate complete move-owned body in both source-required orientations at 51/51 source OAM plus 51/51 RGB each, reusing the shared signed slide choreography without conflating the two projectile programs."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_SAND_ATTACK retains its own complete bilateral Battle Scene ON controller contract at 269/269 RGB frames each: signed attacker slide, six RNG-resolved five-dirt waves with live stable SortSprites ordering, accuracy-decrease banner, typed result/controller release, and MOVE_NONE cleanup. MOVE_MUD_SLAP independently retains its distinct 16x16 gMudSlapMudSpriteTemplate body at 51/51 source OAM plus 51/51 RGB in both source-required orientations; its generic hit/damage/accuracy/controller tail remains outside this script-body window. ANIM_TAG_MUD_SAND and gSlideMonToOffsetSpriteTemplate/gSlideMonToOriginalPosSpriteTemplate share only source asset/slide choreography: no projectile program, GPU/OAM/affine/painter latch, or acceptance transfers between moves."
   },
   {
    "id": "dragon-fire-projectile",
