@@ -1,3 +1,10 @@
+# Animation supervisor verification — White-feather track fulfilled (2026-09-05 supervisor)
+
+- **State / merge:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Fast-forwarded Terra/max commit `28c52542c`; scope is only `ANIMATION_COVERAGE.json`, `ANIMATION_PROGRESS.md`, and `tests/animation/whiteFeatherTrack.test.ts`. `white-feather` alone is newly fulfilled.
+- **Independent acceptance:** Twice-fresh Scene-ON reruns reproduce FEATHER_DANCE **400/400** in both source-required orientations with stable hashes `7918a9fe…` / `2ed6e2ec…`; MIST_BALL reproduces **213/213** twice per orientation across reducer, seam, tasks/sprites, software+hardware OAM/matrices/palettes/tags/BG1/audio/state, raw RGB, normalized maps, and production framebuffer with all committed hashes unchanged.
+- **Review:** Four fixture identities/hashes/windows are pinned. The authoritative source ratchet assigns all eight `gFallingFeatherSpriteTemplate` creates only to Feather Dance and requires Mist Ball's loaded-but-unused WHITE_FEATHER tag with zero Feather templates; no unsupported FallingFeather hardware-latch claim or sibling credit was introduced. Focused controls pass **7 files / 40 tests**; coverage and audit pass; diff is limited to the three named files.
+- **Post-merge gates:** `npm test` passes **1,251 files / 10,948 tests** (**44 files / 223 skipped**); `npm run build` passes **761 modules**. Next: reconcile `fast-contact` only if QUICK_ATTACK, EXTREME_SPEED, and AERIAL_ACE each retain independent bilateral complete evidence for their distinct source bodies.
+
 # White-feather component-track fulfilled (2026-09-05 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `white-feather` is newly fulfilled; `MOVE_FEATHER_DANCE` and `MOVE_MIST_BALL` retain their independent exact acceptance.
