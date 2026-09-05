@@ -1,3 +1,10 @@
+# Animation supervisor verification — Mud-sand-scatter track fulfilled (2026-09-05 supervisor)
+
+- **State / merge:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Fast-forwarded Terra/max commit `61b6f024e`; scope is only `ANIMATION_COVERAGE.json`, `ANIMATION_PROGRESS.md`, and `tests/animation/mudSandScatterTrack.test.ts`. `mud-sand-scatter` alone is newly fulfilled.
+- **Independent acceptance:** Twice-fresh Scene-ON reruns reproduce SAND_ATTACK **269/269 RGB** in both orientations and MUD_SLAP **51/51 source OAM + 51/51 RGB** in both orientations, all with zero residuals.
+- **Review:** Four fixture hashes/windows and stable probe digests are pinned; the authoritative source/component ratchet proves only MUD_SAND plus the two signed slide templates are shared, while the 8x8 dirt and 16x16 mud projectile programs remain move-owned. No sibling or latch inheritance, production, fixture/evidence, asset, gameplay, boundary/barrier, or main-program change occurred. Focused controls pass **6 files / 28 tests**; coverage and audit pass.
+- **Post-merge gates:** `npm test` passes **1,253 files / 10,956 tests** (**44 files / 223 skipped**); `npm run build` passes **761 modules**. Next: assess `dragon-fire-projectile` as the next ranked unfulfilled track, preserving all seven moves' independent bilateral acceptance.
+
 # Mud-sand-scatter component track fulfilled (2026-09-05 worker)
 
 - **State:** Level 50 remains **231/276 exact**, **0 partial / 0 staged**, and **45 unsupported**. Only non-exclusive `mud-sand-scatter` is newly fulfilled; MOVE_SAND_ATTACK and MOVE_MUD_SLAP retain independently exact acceptance.
