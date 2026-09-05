@@ -7268,7 +7268,8 @@
     "MOVE_EMBER",
     "MOVE_FIRE_SPIN"
    ],
-   "goal": "DRAGON BREATH proves its eleven-spawn gDragonBreathFireSpriteTemplate body at 85/85 in both orientations. DRAGON RAGE independently proves its source-scheduled shake/slide/fire-spit/eight-plume body at 150/150 complete bilateral rows. FLAMETHROWER remains exact at 126/126, BLAZE KICK at 78/78, EMBER at 63/63, FIRE SPIN at 104/104, and FIRE BLAST independently proves its distinct 15-ring/45-cross/F_PAL_BG body at 197/197 in both orientations. Every move remains an independent acceptance unit."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_DRAGON_BREATH retains its eleven-spawn gDragonBreathFireSpriteTemplate body at 85/85 in both orientations. MOVE_DRAGON_RAGE independently retains its source-scheduled shake/slide/fire-spit/eight-plume body at 150/150 complete bilateral rows. MOVE_FLAMETHROWER remains exact at 126/126, MOVE_BLAZE_KICK at 78/78, MOVE_EMBER at 63/63, MOVE_FIRE_SPIN at 104/104, and MOVE_FIRE_BLAST independently retains its distinct 15-ring/45-cross/F_PAL_BG body at 197/197 in both orientations. ANIM_TAG_SMALL_EMBER and the bounded create_dragon_breath_fire_sprite, monbg, and splitbgprio component track never transfer a source body, GPU/OAM/matrix/palette/audio/painter fact, latch, or acceptance across moves."
   },
   {
    "id": "two-turn-semi-invulnerable",
