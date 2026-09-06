@@ -1,3 +1,11 @@
+# Noise-line Howl/Roar standalone track ratchet (2026-09-06 worker)
+
+- **State:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. `noise-line-roar-effect` remains fulfilled only through independently exact MOVE_HOWL and MOVE_ROAR; no move status, coverage count, receipt, fixture, or sibling credit changed.
+- **Direct ratchet / metadata:** Added hermetic `noiseLineRoarEffectTrack` coverage over the exact five-component boundary, both source-audited bodies, all four complete legal bilateral fixtures, and all semantic/raw-RGB receipts: Howl **102+102**, Roar **99+104** (**407** rows per fresh proof). The clarified fulfilled goal explicitly denies shared NOISE_LINE/RoarEffect component or latch transfer.
+- **Fresh Scene-ON evidence:** Fresh source audits pass. Each portable comparator ran twice per orientation with zero residual source/component/hardware/seam/actual-core framebuffer rows: Howl `919211a0…/1f19b38e…` and `03aa671c…/83ad92a0…`; Roar `cec50726…/0a90faea…` and `d7b5ddc1…/727e277d…`.
+- **Latch / scope:** `ANIMATION_LATCHES.md` is unchanged. Rules 1, 2, and 5 prohibit inheriting NOISE_LINE, RoarEffect, DeepInhale, cry, scale, slide, monbg, or alpha timing; no fresh isolated one-axis/change-map evidence supports a row. Roar forced-switch gameplay remains explicitly out of presentation ownership. No production, scenario, probe, comparator, gameplay/RNG/controller/facility state, boundary/barrier/allowlist, or shared-program document changed.
+- **Checks:** Focused direct/evidence/source/boundary controls, `npm run animation:coverage`, `npm run animation:audit`, and `npm run typecheck` pass. Final `npm test` passes **1,268 files / 11,009 tests** (**44 files / 223 tests skipped**); `npm run build` passes **763 modules**. Ready for supervisor merge.
+
 # Animation supervisor verification — Green-sparkle Moonlight/Present standalone ratchet (2026-09-06 supervisor)
 
 - **State / merge:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. Fast-forwarded Terra/max commit `b038df6f7`; `green-sparkle-moonlight` remains fulfilled only by independently exact MOVE_MOONLIGHT and MOVE_PRESENT. No move promotion, coverage-count change, or shared sparkle/healing sibling credit occurred.
