@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -30,13 +31,23 @@ const heatBody = scripts.slice(
   scripts.indexOf("Move_HEAT_WAVE:"),
   scripts.indexOf("Move_HAIL:"),
 );
+const nm = execFileSync("arm-none-eabi-nm", [
+  "-a", resolve(root, "reference/pokeemerald/pokeemerald.elf"),
+], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
+const address = (symbol: string): number => {
+  const match = nm.match(new RegExp(`^([0-9a-fA-F]+)\\s+\\w\\s+${symbol}$`, "m"));
+  if (!match) throw new Error(`missing ${symbol}`);
+  return Number.parseInt(match[1]!, 16);
+};
 const phanpy = mons.slice(
   mons.indexOf("[FRONTIER_MON_PHANPY]"),
   mons.indexOf("[FRONTIER_MON_PHANPY]") + 500,
 );
 
 if (
-  !sandstorm || sandstorm.id !== 201 || sandstorm.frontierMonCount !== 14
+  address("Move_SANDSTORM") !== 0x082d1e7b
+  || address("Move_WHIRLPOOL") !== 0x082d1f03
+  || !sandstorm || sandstorm.id !== 201 || sandstorm.frontierMonCount !== 14
   || sandstorm.exampleMons[0] !== "FRONTIER_MON_PHANPY"
   || !heatWave || heatWave.id !== 257 || heatWave.frontierMonCount !== 1
   || !constants.includes("#define FRONTIER_MON_PHANPY         120")
@@ -62,7 +73,8 @@ if (
 ) throw new Error("Sandstorm/FLYING_DIRT source contract changed");
 
 console.log(
-  "lowest challenge-0 Level-50 carrier set 120/FRONTIER_MON_PHANPY -> "
+  "Move_SANDSTORM 0x082d1e7b..0x082d1f03 (0x88 bytes); lowest "
+  + "challenge-0 Level-50 carrier set 120/FRONTIER_MON_PHANPY -> "
   + "SPECIES_PHANPY 231/move 201/LAX_INCENSE/ATTACK+HP/NAUGHTY; "
   + "7 gFlyingSandCrescentSpriteTemplate lifecycles; "
   + "Heat Wave remains distinct: red particle/background blends, mirrored "
