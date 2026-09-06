@@ -1,3 +1,10 @@
+# Animation supervisor verification — Red-heart Sweet Kiss/Attract direct ratchet (2026-09-06 supervisor)
+
+- **State / merge:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. Fast-forwarded Terra/max commit `70afa0e69`; `red-heart-sweet-kiss` remains fulfilled only by independently exact MOVE_SWEET_KISS and MOVE_ATTRACT. This is a direct track-ratchet reconciliation, not a move promotion or sibling-credit change.
+- **Independent acceptance:** Supervisor-fresh Scene-ON runs reproduce Sweet Kiss player-back/opponent-front **159/159** and Attract player-back/opponent-front **435/435**, twice each. All **1,188** source/component/seam/hardware/raw-RGB/actual-core framebuffer rows per proof are zero-residual and all four retained semantic/raw receipts are byte-stable; focused source/evidence/boundary/frontier controls pass **7 files / 26 tests**.
+- **Review / scope:** The three-file diff clarifies the exact nine-component goal, adds one hermetic bilateral fixture/receipt ratchet, and updates this ledger. Lovely Kiss and every sibling remain excluded, as do Rest/Sleep Talk/Frustration SwayMon timing; the fresh hardware/OAM/matrix/palette evidence did not isolate a new durable scanout latch, so `ANIMATION_LATCHES.md` is unchanged. No production, fixture/evidence, scenario, comparator, gameplay/RNG/controller/facility state, boundary/barrier/allowlist, or main-program document changed.
+- **Post-merge gates / next:** Final `npm test` passes **1,265 files / 10,998 tests** (**44 files / 223 skipped**); `npm run build` passes **763 modules**. Next assess `slam-hit-slide-shake`, preserving separate Slam and indoor-Strength Secret Power bodies and requiring direct move-owned latch evidence.
+
 # Red-heart Sweet Kiss/Attract direct track ratchet (2026-09-06 worker)
 
 - **State:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. `red-heart-sweet-kiss` remains fulfilled only through independently exact MOVE_SWEET_KISS and MOVE_ATTRACT; no move status, count, receipt, or sibling credit changed.
