@@ -28,14 +28,22 @@ type Sprite = {
   x: number; y: number; x2: number; y2: number;
   matrix: number[]; data: number[];
 };
+type Task = {
+  func: { symbol: string | null };
+  data: number[];
+};
+type SoundPlayer = {
+  songHeader: number;
+  tracks: readonly { panX: number }[];
+};
 type Frame = {
   frame: number; sha256: string; scriptOffset: number | null;
-  gAnimScriptActive: number; visualTaskCount: number;
+  gAnimScriptActive: number; visualTaskCount: number; soundTaskCount: number;
   sprites: Sprite[]; playerSprite: Sprite; opponentSprite: Sprite;
   softwareOam: string[]; hardwareOam: string[]; hardwareMatrices: number[][];
   fadedPalette: number[]; unfadedPalette: number[]; hardwarePalette: number[];
-  paletteTags: number[]; tileTags: number[];
-  registers: Record<string, number>; tasks: unknown[]; se1: unknown; se2: unknown;
+  paletteTags: number[]; tileTags: number[]; battlers: unknown;
+  registers: Record<string, number>; tasks: Task[]; se1: SoundPlayer; se2: SoundPlayer;
 };
 type Probe = {
   schema: string; sourceWindow: Fixture["sourceWindow"];
@@ -49,6 +57,8 @@ if (paths.length !== 2) {
 }
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const fresh = new Map<string, { evidence: string; raw: string }>();
+const HORN_ATTACK_HEADER = 0x088ff864;
+const VITAL_THROW2_HEADER = 0x088fe4f0;
 
 function verify(path: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(path), "utf8")) as Fixture;
@@ -128,6 +138,7 @@ function verify(path: string, runNumber: number): void {
     const target = fixture.target.geometry.side === "player"
       ? oracle.playerSprite : oracle.opponentSprite;
     const baseline = fixture.target.geometry.side === "opponent" ? 1 : 0;
+    const targetPan = fixture.target.geometry.side === "opponent" ? 63 : -63;
     const helpers = {
       hitsplat: oracle.sprites.some((sprite) =>
         sprite.template.symbol === "gBasicHitSplatSpriteTemplate"
@@ -146,6 +157,37 @@ function verify(path: string, runNumber: number): void {
       && oracle.paletteTags.includes(10266) === component.greenSpikeLoaded
       && oracle.paletteTags.includes(10135) === component.impactLoaded
       && oracle.paletteTags.includes(10143) === component.handsAndFeetLoaded;
+    const loopTasks = oracle.tasks.filter((task) =>
+      task.func.symbol === "Task_LoopAndPlaySE"
+    );
+    const shakeTasks = oracle.tasks.filter((task) =>
+      task.func.symbol === "AnimTask_ShakeMon2_Step"
+    );
+    const sourceTaskMatch =
+      (age >= 10 && age <= 53
+        ? loopTasks.length === 1
+          && loopTasks[0]!.data[0] === 166
+          && loopTasks[0]!.data[1] === targetPan
+          && loopTasks[0]!.data[2] === 2
+        : loopTasks.length === 0)
+      && (age >= 71 && age <= 105
+        ? shakeTasks.length === 1
+        : shakeTasks.length === 0);
+    const audioMatch = age === 10
+      ? oracle.se1.songHeader === HORN_ATTACK_HEADER
+        && oracle.se1.tracks.some((track) => track.panX === targetPan)
+      : age === 71
+        ? oracle.se1.songHeader === VITAL_THROW2_HEADER
+          && oracle.se1.tracks.some((track) => track.panX === targetPan)
+        : true;
+    const prior = probe.frames[index - 1];
+    const hardwareTransfer = prior === undefined || (
+      same(oracle.hardwareOam, prior.softwareOam)
+      && same(oracle.hardwarePalette, prior.fadedPalette)
+    );
+    const hardwareMatrices = oracle.hardwareMatrices.length === 32
+      && oracle.hardwareMatrices.every((matrix) => matrix.length === 4);
+    const immutableState = same(oracle.battlers, probe.frames[0]!.battlers);
     const engine: EngineState = {
       ...createInitialState(),
       rngMode: "frontierBattle",
@@ -165,11 +207,17 @@ function verify(path: string, runNumber: number): void {
         && oracle.visualTaskCount === 0);
     if (
       createHash("sha256").update(rgb).digest("hex") !== oracle.sha256
-      || !seamMatch || !componentMatch || diff !== 0 || !cleanup
+      || !seamMatch || !componentMatch || !sourceTaskMatch || !audioMatch
+      || !hardwareTransfer || !hardwareMatrices || !immutableState
+      || oracle.soundTaskCount !== (age >= 10 && age <= 53 ? 1 : 0)
+      || diff !== 0 || !cleanup
     ) {
       failures.push(
         `frame ${oracle.frame}/age ${age}: seam=${seamMatch} `
-        + `component=${componentMatch} diff=${diff} cleanup=${cleanup}`,
+        + `component=${componentMatch} sourceTask=${sourceTaskMatch} `
+        + `audio=${audioMatch} hardware=${hardwareTransfer}/${hardwareMatrices} `
+        + `immutable=${immutableState} soundTasks=${oracle.soundTaskCount} `
+        + `diff=${diff} cleanup=${cleanup}`,
       );
     }
   }
@@ -183,7 +231,8 @@ function verify(path: string, runNumber: number): void {
   fresh.set(fixture.orientation, { evidence, raw: rawDigest });
   console.log(
     `${fixture.orientation} run ${runNumber}: `
-    + `${probe.frames.length}/${NEEDLE_ARM_FRAME_COUNT} component/seam/framebuffer exact`,
+    + `${probe.frames.length}/${NEEDLE_ARM_FRAME_COUNT} `
+    + "source/component/seam/hardware/audio/immutable-state/framebuffer exact",
   );
 }
 
