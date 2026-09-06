@@ -1,3 +1,11 @@
+# Slam/Secret Power standalone track ratchet (2026-09-06 worker)
+
+- **State:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. `slam-hit-slide-shake` remains fulfilled only by independently exact MOVE_SLAM and Factory indoor MOVE_SECRET_POWER → Move_STRENGTH; no move status, receipt, sibling credit, or coverage count changed.
+- **Did:** Added hermetic `slamHitSlideShakeTrack` coverage over the exact **10-component** boundary, both source-selected bodies, all four complete legal bilateral fixtures, 54+54 Slam and 102+102 Strength rows (**312** rows per fresh proof), retained semantic/raw-RGB receipts, complete-party staging, no-thinning trace contracts, and the unchanged fulfilled-track goal.
+- **Fresh Scene-ON evidence:** Source audits pass; Slam is **54/54** player-back/opponent-front twice (`8f520d75…`/`4e3abdaf…`, `66a2b9d7…`/`66d4cdf1…`) and Factory Strength is **102/102** twice (`9d8f3ad7…`/`af6ff533…`, `8d6902b6…`/`f4c81b0d…`), all with zero-residual actual-core framebuffers.
+- **Latch / scope:** `ANIMATION_LATCHES.md` is unchanged. This step rechecked Rules 1, 2, and 5 through the existing move-owned source/hardware/framebuffer contracts but took no new isolated one-axis/change-map measurement; generic slide, `ShakeMonInPlace`, `ShakeMon2`, and `ShakeAndSinkMon` timing therefore transfers no new latch. No production, fixture/evidence, scenario, comparator, gameplay/RNG/controller/facility state, boundary/barrier/allowlist, or shared-program document changed.
+- **Next:** Final post-change `npm test` and `npm run build`, then commit the final gate record.
+
 # Animation supervisor verification — Red-heart Sweet Kiss/Attract direct ratchet (2026-09-06 supervisor)
 
 - **State / merge:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. Fast-forwarded Terra/max commit `70afa0e69`; `red-heart-sweet-kiss` remains fulfilled only by independently exact MOVE_SWEET_KISS and MOVE_ATTRACT. This is a direct track-ratchet reconciliation, not a move promotion or sibling-credit change.
