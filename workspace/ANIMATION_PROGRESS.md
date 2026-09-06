@@ -1,3 +1,10 @@
+# Spore-particles direct track ratchet (2026-09-05 worker)
+
+- **State:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. `spore-particles` remains fulfilled only through independently exact MOVE_SPORE and MOVE_COTTON_SPORE; no move status or coverage count changes.
+- **Direct ratchet:** Added the hermetic `sporeParticlesTrack` test over the exact **8-component** boundary, both distinct source bodies/statuses, four complete legal bilateral fixtures, and all receipt/raw-RGB hashes: Spore **207+207** and Cotton Spore **204+204** (**822** rows per fresh proof). The clarified goal explicitly keeps sibling/component/latch transfer out of scope.
+- **Fresh Scene-ON evidence:** Existing portable contracts completed two fresh runs per orientation with zero residual: Spore player `5b275a53…/9730e4ea…`, opponent `7d723ded…/59a82fde…`; Cotton Spore player `f3505c58…/b46bd803…`, opponent `a719bb8d…/629fb753…`. Each run retains source/component, typed seam, hardware state, raw RGB, and actual-core framebuffer checks.
+- **Latch/scope:** Rules 1, 2, and 5 remain per-move only: both `AnimSporeParticle_Step` bodies have only the age-4 `Task_UpdateMonBg` same-row palette handoff; whole OAM/matrices retain predecessor rows and palette otherwise does so on Spore **205/206** and Cotton **202/203** comparable rows in each orientation. `ANIMATION_LATCHES.md`, production, scenarios, evidence/raw RGB, gameplay/RNG/controller/facility state, boundary/barrier/allowlists, and main-program docs remain unchanged. Next genuinely missing track ratchet: `sparkle-3-special-screen`.
+
 # Animation supervisor verification — Water-orb Hydro Pump/Whirlpool track ratchet (2026-09-05 supervisor)
 
 - **State / merge:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. Fast-forwarded Terra/max commit `f36e8b386`; `water-orb-hydro-pump-whirlpool` remains fulfilled only by independently exact MOVE_HYDRO_PUMP and MOVE_WHIRLPOOL. This is a direct ratchet reconciliation, not a move promotion.

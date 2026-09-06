@@ -95,7 +95,7 @@ describe("MOVE_SPORE complete dense evidence", () => {
         ],
         representatives: ["MOVE_SPORE", "MOVE_COTTON_SPORE"],
         fulfilled: true,
-        goal: "FULFILLED: MOVE_SPORE and MOVE_COTTON_SPORE are independently exact through complete dense both-orientation proofs twice fresh: Spore's 207-frame blended/12:8-alpha/blendoff/SporeDoubleBattle body and Cotton Spore's distinct 204-frame splitbgprio/opaque/no-alpha/no-blendoff/no-SporeDoubleBattle body. Their shared AnimSporeParticle source component does not transfer the distinct Powder AnimMovePowderParticle latch or any acceptance to other moves.",
+        goal: "FULFILLED: This exact 8-component boundary is fulfilled only because MOVE_SPORE and MOVE_COTTON_SPORE independently retain source-derived reducers, typed seams, production compositors, complete legal bilateral Battle Scene ON fixtures, and twice-fresh zero-residual receipts. Spore independently owns 207/207 player-back and opponent-front blended 12:8-alpha/blendoff/SporeDoubleBattle bodies; Cotton Spore independently owns 204/204 player-back and opponent-front splitbgprio/opaque/no-alpha/no-blendoff/no-SporeDoubleBattle bodies. Their shared AnimSporeParticle source component remains proven only through those two independent move bodies. No sibling, component, or latch transfer is granted, including neither the distinct Powder AnimMovePowderParticle_Step latch nor acceptance for Sleep Powder, Stun Spore, Poison Powder, or any other sibling.",
       });
   });
 });
