@@ -1,3 +1,10 @@
+# Animation supervisor verification — Spore-particles direct track ratchet (2026-09-06 supervisor)
+
+- **State / merge:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. Recovered interrupted Terra/max worker worktree commit `bd1ab4e28`; `spore-particles` remains fulfilled only by independently exact MOVE_SPORE and MOVE_COTTON_SPORE. This is a direct ratchet reconciliation, not a move promotion or sibling-credit change.
+- **Independent acceptance:** Supervisor-fresh Scene-ON runs reproduce Spore player-back/opponent-front **207/207** and Cotton Spore player-back/opponent-front **204/204**, twice each, with all **822** source/component/seam/hardware/raw-RGB/actual-core framebuffer rows per proof zero-residual. Focused source/evidence/boundary/frontier controls pass **6 files / 25 tests**.
+- **Review / scope:** The four-file diff clarifies the exact eight-component goal, adds one hermetic bilateral fixture/receipt ratchet, updates the existing evidence-test wording, and records the worker handoff. Both moves retain their own age-4 `Task_UpdateMonBg` same-row palette exception and ordinary predecessor OAM/matrix/palette transfers; Powder's distinct `AnimMovePowderParticle_Step` latch and every sibling remain excluded. No production, fixture/evidence, scenario, latch ledger, gameplay/RNG/controller/facility state, boundary/barrier/allowlist, or main-program document changed.
+- **Post-merge gates / next:** Final `npm test` passes **1,263 files / 10,992 tests** (**44 files / 223 skipped**); `npm run build` passes **763 modules**. Next reconcile `sparkle-3-special-screen`, retaining separate Light Screen and Mirror Coat bilateral bodies and their move-owned latch evidence.
+
 # Spore-particles direct track ratchet (2026-09-05 worker)
 
 - **State:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. `spore-particles` remains fulfilled only through independently exact MOVE_SPORE and MOVE_COTTON_SPORE; no move status or coverage count changes.
