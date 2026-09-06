@@ -60,6 +60,8 @@ interface Frame {
   readonly sha256: string;
   readonly battleAnimAttacker: number;
   readonly battleAnimTarget: number;
+  readonly player: unknown;
+  readonly opponent: unknown;
   readonly playerSprite: Sprite;
   readonly opponentSprite: Sprite;
   readonly sprites: readonly Sprite[];
@@ -69,6 +71,7 @@ interface Frame {
   readonly animScriptActive: boolean;
   readonly fadedPalette: readonly number[];
   readonly hardwarePalette: readonly number[];
+  readonly softwareOam: readonly string[];
   readonly hardwareOam: readonly (readonly number[])[];
   readonly hardwareMatrices: readonly (readonly number[])[];
   readonly paletteTags: readonly number[];
@@ -102,6 +105,14 @@ const evidenceDigests = new Map<string, string>();
 const rawDigests = new Map<string, string>();
 const same = (left: unknown, right: unknown) =>
   JSON.stringify(left) === JSON.stringify(right);
+
+function oamWords(raw: string): readonly number[] {
+  return [0, 2, 4].map((offset) => Number.parseInt(
+    raw.slice(offset * 2 + 2, offset * 2 + 4)
+      + raw.slice(offset * 2, offset * 2 + 2),
+    16,
+  ));
+}
 
 function compareFramebuffer(
   app: Uint8ClampedArray,
@@ -180,6 +191,8 @@ function verify(fixturePath: string, runNumber: number): void {
   evidenceDigests.set(fixture.orientation, evidenceDigest);
 
   const frames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
+  const initial = frames.get(fixture.sourceWindow.startFrame);
+  if (!initial) throw new Error(`${fixture.orientation}: missing first source row`);
   const playerToOpponent = fixture.attacker.geometry.side === "player";
   const config: SceneOnSecretPowerConfig = {
     move: "SECRET_POWER",
@@ -250,6 +263,18 @@ function verify(fixturePath: string, runNumber: number): void {
         (oam) => same(oam, [sprite.attr0, sprite.attr1, sprite.attr2]),
       )
     );
+    const hardwareTransfer = !prior || same(
+      actual.hardwareOam,
+      prior.softwareOam.map(oamWords),
+    );
+    const paletteTransfer = !prior || same(
+      actual.hardwarePalette,
+      age === 4 ? actual.fadedPalette : prior.fadedPalette,
+    );
+    const hardwareMatrices = actual.hardwareMatrices.length === 32
+      && actual.hardwareMatrices.every((matrix) => matrix.length === 4);
+    const immutableState = same(actual.player, initial.player)
+      && same(actual.opponent, initial.opponent);
 
     const raw = readFileSync(
       join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`),
@@ -314,6 +339,10 @@ function verify(fixturePath: string, runNumber: number): void {
       && registers
       && audio
       && hardwareBattlers
+      && hardwareTransfer
+      && paletteTransfer
+      && hardwareMatrices
+      && immutableState
       && receiptShapes
       && rgbReceipt
       && actual.visualTaskCount
@@ -331,6 +360,8 @@ function verify(fixturePath: string, runNumber: number): void {
       errors.push(
         `frame ${frame}/age ${age}: semantic=${semantic} `
         + `registers=${registers} audio=${audio} hardware=${hardwareBattlers} `
+        + `transfer=${hardwareTransfer}/${paletteTransfer}/${hardwareMatrices} `
+        + `immutable=${immutableState} `
         + `framebuffer=${framebuffer.count} ${framebuffer.samples.join(";")}`,
       );
     }
