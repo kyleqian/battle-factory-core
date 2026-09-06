@@ -1,3 +1,10 @@
+# Animation supervisor verification — Sparkle-3 special-screen direct ratchet (2026-09-06 supervisor)
+
+- **State / merge:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. Fast-forwarded Terra/max commits `d7fa5da72` and `a8160b1af`; `sparkle-3-special-screen` remains fulfilled only by independently exact MOVE_LIGHT_SCREEN and MOVE_MIRROR_COAT. This is a direct track-ratchet reconciliation, not a move promotion or sibling-credit change.
+- **Independent acceptance:** Supervisor-fresh Scene-ON runs reproduce Light Screen player-back **115/115** and opponent-front **119/119**, plus Mirror Coat player-back/opponent-front **75/75**, twice each. All **384** source/component/seam/hardware/raw-RGB/actual-core framebuffer rows per proof are zero-residual and all four retained hashes are byte-stable; focused source/evidence/boundary/frontier controls pass **6 files / 27 tests**.
+- **Review / scope:** The three-file diff clarifies the exact nine-component goal, adds one hermetic fixture/receipt/counter-staging ratchet, and updates this ledger. Each move retains its own ordinary RAM+1 wall/SPARKLE_3 OAM and ages-16..46 faded-palette rotations, same-row player-back age-0 setup load, and direct register schedules; no latch or sibling fact is transferred. No production, fixture/evidence, scenario, comparator, latch ledger, gameplay/RNG/controller/facility state, boundary/barrier/allowlist, or main-program document changed.
+- **Post-merge gates / next:** Final `npm test` passes **1,264 files / 10,995 tests** (**44 files / 223 skipped**); `npm run build` passes **763 modules**. Next assess `red-heart-sweet-kiss`, preserving independent Sweet Kiss and Attract bilateral evidence and rejecting any shared-heart sibling credit.
+
 # Sparkle-3-special-screen direct track ratchet (2026-09-06 worker)
 
 - **State:** Level 50 remains **232/276 exact**, **0 partial / 0 staged**, and **44 unsupported**. `sparkle-3-special-screen` remains fulfilled solely by independently exact MOVE_LIGHT_SCREEN and MOVE_MIRROR_COAT; this is a direct track-ratchet reconciliation, not a move promotion or sibling-credit change.
