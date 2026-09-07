@@ -1,3 +1,9 @@
+# MOVE_DRAGON_DANCE source / legal staging checkpoint (2026-09-07 worker)
+
+- **State:** Level 50 remains **235/276 exact**, **0 partial / 0 staged**, and **41 unsupported**. MOVE_DRAGON_DANCE remains unsupported; no production reducer/seam/compositor, coverage, component-track, latch, boundary, barrier, gameplay, or sibling credit was added.
+- **Source / classification:** Pinned the complete **`0x082cf3b3..0x082cf422`** half-open root body (**111 ROM bytes**, **875 source bytes**, 22 commands), exact generated seven-component graph, HOLLOW_ORB asset/template and callback/task intervals, six-orb geometry, palette cycling, scanline waver, attacker monbg/split priority, and three TELEPORT audio calls. Derived all **14 Level-50 sets / 10 species** and lowest legal carrier **set 306 FRONTIER_MON_DRAGONAIR_2** directly from generated data.
+- **Staging / remainder:** Added complete transient-free three-Pokémon party-only Scene-ON player-back and opponent-front stages with the lowest carrier and constrained move choice; both pass the pinned lab validator. Dense oracle evidence was deliberately not captured within this bounded checkpoint. Next run a narrow source-pointer probe, discover and retain the complete bilateral first-active-through-first-inactive windows twice, and independently verify state/OAM/matrix/palette/register/audio/RNG/raw-RGB facts before considering any implementation.
+
 # Animation supervisor verification — MOVE_AMNESIA exact production closure (2026-09-07 supervisor)
 
 - **State / merge:** Level 50 advances to **235/276 exact**, **0 partial / 0 staged**, and **41 unsupported**. The Sol/high worker reached its cap before committing; the supervisor audited and recovered its cleanly scoped tree as commit `0c1ae40d5`, then fast-forwarded it into `animation-main`. MOVE_AMNESIA alone is promoted, with no sibling, component-track, or latch credit.
