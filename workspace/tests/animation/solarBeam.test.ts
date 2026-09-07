@@ -24,6 +24,8 @@ describe("MOVE_SOLAR_BEAM source-relative reducer", () => {
     expect(unleash).toMatchObject({ active: true, background: { variant: "opponent", active: true, impact: true }, sound: "SE_M_SOLAR_BEAM" });
     expect(unleash.bigOrbs).toHaveLength(1);
     expect(unleash.smallOrbs).toHaveLength(1);
+    expect(solarBeamAtAge(3, "unleash", "player", "opponent", playerCenter, opponentCenter).background).toMatchObject({ impact: false, bldy: 0 });
+    expect(solarBeamAtAge(151, "unleash", "player", "opponent", playerCenter, opponentCenter).background).toMatchObject({ impact: false, bldy: 0 });
   });
 
   it("ports orb census, cleanup, and target-side ShakeMon2", () => {
@@ -33,9 +35,19 @@ describe("MOVE_SOLAR_BEAM source-relative reducer", () => {
     expect(solarBeamAtAge(SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, "setup", "opponent", "player", opponentCenter, playerCenter)).toMatchObject({ active: false, resources: { orbs: false, freed: true }, targetOnMonBg: false });
     expect(solarBeamAtAge(124, "unleash", "player", "opponent", playerCenter, opponentCenter).bigOrbs).toHaveLength(4);
     expect(solarBeamAtAge(124, "unleash", "player", "opponent", playerCenter, opponentCenter).smallOrbs).toHaveLength(9);
+    expect(solarBeamAtAge(151, "unleash", "player", "opponent", playerCenter, opponentCenter).smallOrbs).toHaveLength(0);
     expect(solarBeamAtAge(22, "unleash", "player", "opponent", playerCenter, opponentCenter).targetOffset.x2).toBe(-2);
     expect(solarBeamAtAge(24, "unleash", "player", "opponent", playerCenter, opponentCenter).targetOffset.x2).toBe(2);
     expect(solarBeamAtAge(SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE, "unleash", "player", "opponent", playerCenter, opponentCenter)).toMatchObject({ active: false, resources: { orbs: false, freed: true } });
+  });
+
+  it("uses Solar's measured palette scanout cadence", () => {
+    const setup = (age: number) => solarBeamAtAge(age, "setup", "player", "opponent", playerCenter, opponentCenter).paletteBlend?.coefficient ?? 0;
+    expect([9, 10, 12, 13, 24, 25, 33, 34, 48, 49, 57, 58, 96, 97].map(setup))
+      .toEqual([0, 2, 2, 4, 10, 11, 11, 9, 1, 0, 0, 2, 1, 0]);
+    const target = (age: number) => solarBeamAtAge(age, "unleash", "player", "opponent", playerCenter, opponentCenter).targetPaletteBlend?.coefficient ?? 0;
+    expect([17, 18, 19, 20, 35, 36, 149, 150].map(target))
+      .toEqual([0, 1, 1, 2, 9, 10, 10, 0]);
   });
 
   it("mirrors source X offsets and remains live-geometry driven", () => {

@@ -182,7 +182,7 @@ function smallOrbs(
     // The task-created first sprite runs its callback on the creation row;
     // later sprites receive the ordinary one-row allocator handoff.
     const life = index === 0 ? 78 : 79;
-    if (local < 0 || local > life) return null;
+    if (local < 0 || local > life || age > 150) return null;
     const callbacks = local + 1;
     const angle = (index * 15) & 0xff;
     return {
@@ -197,27 +197,23 @@ function smallOrbs(
 }
 
 function setupPaletteCoefficient(age: number): number {
-  if (age < 7 || age > 101) return 0;
-  // Four source BlendColorCycle legs, delay 1, target 11.  The source's
-  // alternating BG/OBJ fade advances by one every two display callbacks.
-  const local = age - 7;
-  const leg = Math.floor(local / 24);
-  const inLeg = local % 24;
-  const value = Math.min(11, Math.floor((inLeg + 1) / 2));
-  return leg % 2 === 0 ? value : 11 - value;
+  if (age < 10 || age > 96) return 0;
+  // The two BlendColorCycle passes use delay 1 while the animation engine's
+  // task cadence exposes one coefficient step every three retained rows.
+  // Each pass is 48 rows including its source-held extrema.
+  const local = (age - 10) % 48;
+  if (local < 15) return 2 + Math.floor(local / 3) * 2;
+  if (local < 24) return 11;
+  if (local < 39) return 9 - Math.floor((local - 24) / 3) * 2;
+  return 0;
 }
 
 function targetPalette(age: number): SolarBeamState["targetPaletteBlend"] {
-  if (age < 16 || age > 35) return null;
-  return { coefficient: Math.min(10, Math.floor((age - 15) / 2)), restoring: false };
-}
-
-function fadeCoefficient(age: number): number {
-  if (age < 1) return 0;
-  if (age < 20) return Math.min(16, age - 1);
-  if (age < 151) return 16;
-  if (age < 167) return 16 - (age - 151);
-  return 0;
+  if (age < 18 || age > 149) return null;
+  return {
+    coefficient: Math.min(10, 1 + Math.floor((age - 18) / 2)),
+    restoring: false,
+  };
 }
 
 function commonState(
@@ -233,7 +229,10 @@ function commonState(
     ? SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE
     : SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE;
   const active = age >= 0 && age < firstInactive;
-  const backgroundActive = !setup && age >= 1 && age < 167;
+  // Solar Beam's own BG VRAM maps switch atomically on source ages 4 and
+  // 151. Unlike FadeToBg users that drive BLDY, this body's retained
+  // register map stays at zero throughout both handoffs.
+  const backgroundActive = !setup && age >= 4 && age < 151;
   const targetOffset = !setup && age >= 22 && age <= 150
     ? shakeMon2OffsetAtTick(
       targetSide === "opponent" ? -2 : 2, 0, 65, 1, age - 22,
@@ -256,7 +255,7 @@ function commonState(
       variant: targetSide,
       active: backgroundActive,
       impact: backgroundActive && age < 151,
-      bldy: setup ? 0 : fadeCoefficient(age),
+      bldy: 0,
     },
     paletteBlend: setup && palette > 0 ? { color: "yellow", coefficient: palette } : null,
     targetPaletteBlend: setup ? null : targetPalette(age),

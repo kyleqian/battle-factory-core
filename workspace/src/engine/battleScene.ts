@@ -27358,7 +27358,7 @@ export function renderSceneOnMovePresentation(
         fb,
         view.attacker.geometry.side === "player"
           ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
-        "SOLAR BEAM!", 99,
+        "SOLARBEAM!", 99,
       );
     }
     return;
