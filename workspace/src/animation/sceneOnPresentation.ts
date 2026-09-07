@@ -5998,6 +5998,7 @@ export function sceneOnFlameWheelView(
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
+      state.config.target.geometry.spriteCorner,
     ),
   };
 }

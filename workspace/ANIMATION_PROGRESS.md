@@ -1,3 +1,10 @@
+# MOVE_SOLAR_BEAM setup closure / unleash geometry checkpoint (2026-09-07 worker)
+
+- **State:** Level 50 remains **233/276 exact**, **0 partial / 0 staged**, and **43 unsupported**. MOVE_SOLAR_BEAM remains unsupported and `contest-target-side-impact-bg` remains unfulfilled; no sibling, shared-component, or coverage credit is claimed.
+- **Source-backed correction:** Solar setup's `monbg ANIM_ATK_PARTNER` now paints the live attacker into the OBJ-blend target-2 backdrop. All **108/108 player-back + 108/108 opponent-front setup rows are exact**, twice deterministically. Unleash now derives both species/side `BATTLER_COORD_Y_PIC_OFFSET` anchors from live sprite corners, ports the task's first 6-row then 7-row small-orb births, creation-row double callback, per-callback sine phase/subpriority, and source subpriority/Y/stable painter ordering. Retained big/small source geometry matches every software row.
+- **Residual:** Complete actual-core comparison improves **123→242/536 exact** and **413→294/536 residual**, deterministic digest `c1407610…`. Unleash remains **13/160 exact per orientation**, residual ages **5..151**; first is player age 5/frame 643 (**14 px**, bounds **87,97..93,111**), last is opponent age 151/frame 983 (**618 px**, bounds **43,71..103,111**), maximum player age 85/frame 723 (**1,589 px**, bounds **94,26..204,107**). Exact promotion and altered-live acceptance are not warranted.
+- **Next:** Resolve unleash raster priority/OAM stable ordering where exact source geometry still disagrees at overlap pixels, then isolate the age-151 same-row palette/target/BG handoff. Preserve the now-exact bilateral setup and all four exact sibling controls.
+
 # Animation supervisor verification — MOVE_SOLAR_BEAM retained residual checkpoint (2026-09-07 supervisor)
 
 - **State / merge:** Level 50 remains **233/276 exact**, **0 partial / 0 staged**, and **43 unsupported**. Fast-forwarded Sol/high commits `cd63e33c9`, `69e92a983`, and `8ef671ae7`. MOVE_SOLAR_BEAM remains unsupported and `contest-target-side-impact-bg` remains unfulfilled; no move, sibling, shared-component, or latch acceptance was promoted.

@@ -94,6 +94,16 @@ function sourceOrbOrigin(
   return { x: attackerCenter.x, y: attackerCenter.y + 10 };
 }
 
+/**
+ * `GetBattlerSpriteCoord(..., BATTLER_COORD_Y_PIC_OFFSET)` is the battler
+ * sheet corner plus the side's fixed in-sheet anchor in singles.  Keeping
+ * this derived from the live corner preserves species-specific front/back
+ * `y_offset` values without adding a scenario coordinate.
+ */
+function yPicOffset(side: SolarBeamSide, spriteCornerY: number): number {
+  return spriteCornerY + (side === "player" ? 40 : 32);
+}
+
 function unleashOrigin(
   side: SolarBeamSide,
   attackerCenter: Readonly<SolarBeamPoint>,
@@ -151,6 +161,7 @@ function bigOrbs(
   side: SolarBeamSide,
   attackerCenter: Readonly<SolarBeamPoint>,
   targetCenter: Readonly<SolarBeamPoint>,
+  targetPicOffsetY: number,
 ): readonly SolarBeamOrb[] {
   const start = unleashOrigin(side, attackerCenter);
   const orbs: Array<SolarBeamOrb | null> = Array.from({ length: SOLAR_BEAM_UNLEASH_BIG_ORB_COUNT }, (_, index): SolarBeamOrb | null => {
@@ -161,7 +172,7 @@ function bigOrbs(
     return {
       index, x: start.x, y: start.y,
       x2: linearOffset(targetCenter.x - start.x, callbacks, 20),
-      y2: linearOffset(targetCenter.y - start.y, callbacks, 20),
+      y2: linearOffset(targetPicOffsetY - start.y, callbacks, 20),
       frame: index % 7, matrix: [256, 0, 0, 256] as const,
       subpriority: side === "player" ? 37 : 27,
     };
@@ -174,23 +185,30 @@ function smallOrbs(
   side: SolarBeamSide,
   attackerCenter: Readonly<SolarBeamPoint>,
   targetCenter: Readonly<SolarBeamPoint>,
+  targetPicOffsetY: number,
 ): readonly SolarBeamOrb[] {
   const start = unleashOrigin(side, attackerCenter);
   const orbs: Array<SolarBeamOrb | null> = Array.from({ length: SOLAR_BEAM_UNLEASH_SMALL_ORB_COUNT }, (_, index): SolarBeamOrb | null => {
-    const spawn = 4 + index * 7;
+    // The task's creation row is shared with the first scripted big orb;
+    // its six-row first interval is followed by the source task's regular
+    // seven-row cadence.
+    const spawn = index === 0 ? 4 : 3 + index * 7;
     const local = age - spawn;
     // The task-created first sprite runs its callback on the creation row;
     // later sprites receive the ordinary one-row allocator handoff.
     const life = index === 0 ? 78 : 79;
     if (local < 0 || local > life || age > 150) return null;
-    const callbacks = local + 1;
-    const angle = (index * 15) & 0xff;
+    // The first task-created sprite receives both its explicit initializer
+    // callback and the ordinary sprite pass on age 4. Later births receive
+    // one callback on their creation row.
+    const callbacks = local + (index === 0 ? 2 : 1);
+    const angle = ((callbacks - 1) * 15) & 0xff;
     return {
       index, x: start.x, y: start.y,
       x2: linearOffset(targetCenter.x - start.x, callbacks, 80) + gbaSin(angle, 5),
-      y2: linearOffset(targetCenter.y - start.y, callbacks, 80) + gbaSin(angle + 64, 14),
+      y2: linearOffset(targetPicOffsetY - start.y, callbacks, 80) + gbaSin(angle + 64, 14),
       frame: 7, matrix: [256, 0, 0, 256] as const,
-      subpriority: side === "player" ? 46 : 36,
+      subpriority: (side === "player" ? 40 : 30) + (angle > 0x7f ? 1 : 6),
     };
   });
   return orbs.filter((orb): orb is SolarBeamOrb => orb !== null);
@@ -223,6 +241,7 @@ function commonState(
   targetSide: SolarBeamSide,
   attackerCenter: Readonly<SolarBeamPoint>,
   targetCenter: Readonly<SolarBeamPoint>,
+  targetSpriteCorner: Readonly<SolarBeamPoint>,
 ): SolarBeamState {
   const setup = body === "setup";
   const firstInactive = setup
@@ -260,8 +279,14 @@ function commonState(
     paletteBlend: setup && palette > 0 ? { color: "yellow", coefficient: palette } : null,
     targetPaletteBlend: setup ? null : targetPalette(age),
     absorptionOrbs: setup ? absorptionOrbs(age, attackerSide, attackerCenter) : [],
-    bigOrbs: setup ? [] : bigOrbs(age, attackerSide, attackerCenter, targetCenter),
-    smallOrbs: setup ? [] : smallOrbs(age, attackerSide, attackerCenter, targetCenter),
+    bigOrbs: setup ? [] : bigOrbs(
+      age, attackerSide, attackerCenter, targetCenter,
+      yPicOffset(targetSide, targetSpriteCorner.y),
+    ),
+    smallOrbs: setup ? [] : smallOrbs(
+      age, attackerSide, attackerCenter, targetCenter,
+      yPicOffset(targetSide, targetSpriteCorner.y),
+    ),
     targetOffset,
     sound: setup && age === 7
       ? "SE_M_MEGA_KICK"
@@ -276,8 +301,13 @@ export function solarBeamAtAge(
   targetSide: SolarBeamSide,
   attackerCenter: Readonly<SolarBeamPoint>,
   targetCenter: Readonly<SolarBeamPoint>,
+  targetSpriteCorner: Readonly<SolarBeamPoint> = targetCenter,
 ): SolarBeamState {
   assertPoint(attackerCenter, "attackerCenter");
   assertPoint(targetCenter, "targetCenter");
-  return commonState(age, body, attackerSide, targetSide, attackerCenter, targetCenter);
+  assertPoint(targetSpriteCorner, "targetSpriteCorner");
+  return commonState(
+    age, body, attackerSide, targetSide, attackerCenter, targetCenter,
+    targetSpriteCorner,
+  );
 }

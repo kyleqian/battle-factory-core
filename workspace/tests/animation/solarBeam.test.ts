@@ -58,6 +58,21 @@ describe("MOVE_SOLAR_BEAM source-relative reducer", () => {
     expect(solarBeamAtAge(7, "setup", "player", "opponent", { x: 80, y: 91 }, opponentCenter).absorptionOrbs[0]!.x).toBe(120);
   });
 
+  it("derives unleash Y_PIC_OFFSET and small-orb callback phase from live geometry", () => {
+    const state = solarBeamAtAge(
+      4, "unleash", "player", "opponent", playerCenter, opponentCenter,
+      { x: 144, y: 17 },
+    );
+    expect(state.bigOrbs[0]).toMatchObject({ x: 87, y: 98, x2: 4, y2: -2, frame: 0, subpriority: 37 });
+    expect(state.smallOrbs[0]).toMatchObject({ x: 87, y: 98, x2: 3, y2: 12, frame: 7, subpriority: 46 });
+    const age10 = solarBeamAtAge(
+      10, "unleash", "player", "opponent", playerCenter, opponentCenter,
+      { x: 144, y: 17 },
+    );
+    expect(age10.smallOrbs).toHaveLength(2);
+    expect(age10.smallOrbs[1]).toMatchObject({ index: 1, x2: 1, y2: 14, subpriority: 46 });
+  });
+
   it("exposes a typed live-species Scene-ON seam", () => {
     const stage = createSceneOnMovePresentation({
       move: "SOLAR_BEAM", body: "unleash",

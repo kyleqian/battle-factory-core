@@ -27296,29 +27296,36 @@ export function renderSceneOnMovePresentation(
       fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerPalette,
       view.attacker.geometry.spriteCorner.x, view.attacker.geometry.spriteCorner.y,
     );
-    if (displayed.targetOnMonBg) {
-      drawTarget();
-    }
+    // Setup puts ANIM_ATK_PARTNER on the mon BG, whereas unleash puts the
+    // target there.  The semi-transparent absorption OBJ therefore selects
+    // the already-painted attacker BG as target 2 during setup.
+    if (view.body === "setup") drawAttacker();
     const targetBackdrop = fb.slice();
-    drawAttacker();
-    if (!displayed.targetOnMonBg) drawTarget();
+    if (view.body === "setup") drawTarget();
     const orbPalette = solarBeamArt.orbs.palette;
-    const bigSmall: Array<{ orb: (typeof view.bigOrbs)[number]; small: boolean }> = [
-      ...displayed.bigOrbs.map((orb) => ({ orb, small: false })),
-      ...displayed.smallOrbs.map((orb) => ({ orb, small: true })),
-    ];
-    for (const { orb, small } of bigSmall) {
+    const drawOrb = (orb: (typeof view.bigOrbs)[number]): void => {
       const tile = solarBeamArt.orbs.tileset.tiles[orb.frame];
       if (!tile) throw new Error(`SOLAR_BEAM missing orb frame ${orb.frame}`);
       drawSpriteSheet(
         fb, { columns: 1, rows: 1, tiles: [tile] }, orbPalette,
         orb.x + orb.x2 - 4, orb.y + orb.y2 - 4,
       );
-      if (small) {
-        // Small orbs are OBJ_NORMAL and intentionally remain above the big
-        // orb only through source subpriority; their stable order is creation
-        // order, which this loop preserves.
-      }
+    };
+    if (view.body === "unleash") {
+      type Painter = { subpriority: number; y: number; stable: number; draw: () => void };
+      const battlerSubpriority = (side: "player" | "opponent") => side === "player" ? 30 : 40;
+      const painters: Painter[] = [
+        { subpriority: battlerSubpriority(view.attacker.geometry.side), y: view.attacker.geometry.animationCenter.y, stable: -2, draw: drawAttacker },
+        { subpriority: battlerSubpriority(view.target.geometry.side), y: view.target.geometry.animationCenter.y + targetOffset.y2, stable: -1, draw: drawTarget },
+        ...displayed.bigOrbs.map((orb) => ({ subpriority: orb.subpriority, y: orb.y + orb.y2, stable: orb.index, draw: () => drawOrb(orb) })),
+        ...displayed.smallOrbs.map((orb) => ({ subpriority: orb.subpriority, y: orb.y + orb.y2, stable: orb.index, draw: () => drawOrb(orb) })),
+      ];
+      painters.sort((left, right) =>
+        right.subpriority - left.subpriority
+        || left.y - right.y
+        || right.stable - left.stable,
+      );
+      for (const painter of painters) painter.draw();
     }
     const absorptionTiles = subTileset(solarBeamArt.orbs.tileset, 4, 2);
     for (const orb of displayed.absorptionOrbs) {
