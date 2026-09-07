@@ -5,6 +5,48 @@ full history regardless.
 
 ---
 
+## R66 — [supervised session, 2026-09-07, unattended] **M63 `Cmd_rolloutdamagecalculation` leaf + green checkpoint**
+
+- **State:** `rust-main` = R65 checkpoint `ec2c211b5` plus the verified Sonnet
+  worker `966ca09ba` (fast-forward). The pure
+  `B_SCR_OP_ROLLOUTDAMAGECALCULATION` registration/handler projection —
+  including an in-module port of `CancelMultiTurnMoves`
+  (`battle_util.c:877-888`) applied to the attacker cell on the no-effect
+  branch — is native and wasm32-compilable; no ABI, adapter, recovery module,
+  canonical TS, or npm file was touched. Session still active;
+  `Cmd_trysetrest` dispatching as the final leaf.
+- **Did:** worker (claude-sonnet-5, 50-min cap, one commit, ~20 min) ported
+  the operandless single-start `0xb3` registration (count/opcode-id/
+  dispatcher/zero-operand shape errors), attacker-role-first ordering, the
+  no-effect branch (`moveResultFlags & ((1<<0)|(1<<3)|(1<<5))` → cancel
+  multi-turn state, late-resolved `BattleScript_MoveMissedPause` jump), and
+  the hit ladder: firstHit via `STATUS2_MULTIPLETURNS`, timer 5→0 with the
+  lock held until the last hit, firstHit-only `lockedMoves`/
+  `rolloutTimerStartValues` writes, the zero-timer premise error, and
+  `dynamicBasePower = power * 2^(hits-1)` doubled on post-update
+  `STATUS2_DEFENSE_CURL`. Canonical TS supplies **87 behavior** and **6
+  registration** cases; corpus sha256
+  `8bb284f294f3877e6f5ab27f700592cc344e7f746226b48683b4b866223b8017`.
+- **Next:** verify/fold the `Cmd_trysetrest` worker (brief
+  `/tmp/rust-briefs/trysetrest.txt`, citations re-verified this session) if
+  it lands green before the 19:01 UTC deadline; otherwise reject it unfolded.
+  After that: the `Cmd_chargesport` family, then re-scout remaining pure
+  leaves. No deferral is open.
+- **Notes:** supervisor audit covered the handler against
+  `battle_script_commands.c:8536-8569` and the TS module (post-update
+  Defense Curl read, lazy label resolution, firstHit gating), the
+  `CancelMultiTurnMoves` clear set, and generator provenance; independent
+  regeneration was byte-identical. Generated Rust is **422,366 bytes**,
+  sha256 `996d8e061ece91cb7627be76f4a7d54334f509776f174ea8be999428d78e9ccf`;
+  generator is **31,200 bytes**, sha256
+  `faec7431931cc0801b8e2b979cb297bc6d051c4669f309ab2e0925c29e026ae0`.
+  Worker notes: source `rolloutTimer` is a 4-bit bitfield (`battle.h:87`) so
+  generator noise masks to `0x0f`; `dynamic_base_power` kept `u32` per brief
+  (source stores u16 but the projection is unclamped, max 960). Gates rerun
+  on `rust-main` post-fold: **1,179/1,179** native, fmt, strict workspace
+  Clippy, wasm32 release; artifact **507,121 bytes**, sha256
+  `904e7165150ca188047f91c1a1d7e01abe62f02af92f0d8be267a2765aa37b17`. R63 archived.
+
 ## R65 — [supervised session, 2026-09-07, unattended] **M62 `Cmd_trywish` leaf + green checkpoint (kill-pattern fixed in practice)**
 
 - **State:** `rust-main` = R64 checkpoint `114dfd07d` plus the verified Sonnet
