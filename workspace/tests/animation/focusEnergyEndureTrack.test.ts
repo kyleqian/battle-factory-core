@@ -111,7 +111,7 @@ const topology: Topology = {
   ],
 };
 
-const trackGoal = "FULFILLED: This exact five-component boundary remains fulfilled only because MOVE_FOCUS_ENERGY and MOVE_ENDURE independently retain source-derived reducers, typed seams, production compositors, complete legal bilateral Battle Scene ON fixtures, and twice-fresh zero-residual semantic/raw-RGB/actual-core framebuffer receipts. MOVE_FOCUS_ENERGY independently owns its complete unthinned 122/122 Move_FOCUS_ENERGY 0x082d36cf..Move_BIDE 0x082d370f body from first source-active display through first inactive cleanup in both orientations: legal set-44 TAILLOW parties, ANIM_TAG_FOCUS_ENERGY, three literal EndureEffect calls / fifteen gEndureEnergySpriteTemplate lifecycles, white BlendColorCycle(2,2,0,11), attacker ShakeMon2(1,0,32,1), move-owned in-window offsets, OAM/matrix/palette/register/audio/immutable-state proofs, and receipts 949eb21875d5e28e302eaa93fe43227276b3aed3b041a03b6350aa81f9d80ae4/45e757153f886b06888d366d722e8d712e4bc13dac061ecd18534d8b487049c5 and 67990c21bf1701db9438607a2092418f936c4ab52733ba8b7e11a069b8782cc7/a0e387e67c4c0ff6330bf472d9a9d480d571c9259053f1350f068cffd40c9ad5. MOVE_ENDURE independently owns its distinct complete unthinned 122/122 Move_ENDURE 0x082cd687..Move_CHARM 0x082cd71b body from first source-active display through first inactive cleanup in both orientations: legal set-113 EEVEE parties, its own ANIM_TAG_FOCUS_ENERGY/EndureEffect/fifteen-sprite body, red BlendColorCycle(2,2,0,11), attacker ShakeMon2(1,0,32,1), own in-window offsets, OAM/matrix/palette/register/audio/immutable-state proofs, and receipts 5ffe4994c6309b84567bbc7042861001df3275b1f8b2c330e0fa7dc6b5030024/941937cba7a24982a921510a31582ae4fb2bc927ce18d04b9ddd1a61ecf9ce3a and 3fc347ae124e95c51bf7975169ac6a59c1734f1f5b111776cca088531726c1d2/19b16868e0184521c3514ebc73a47235400bc06a09a7f216a93b8d0e29972ffd. Shared source components are source-audited separately in both bodies: no blend, ShakeMon2, EndureEffect, sprite, affine/OAM, timing, or latch fact transfers between moves. MOVE_FOCUS_PUNCH is not a Focus Energy/Endure effect-track body: its independent FocusPunch fist/four-hitsplat/ShakeMon target-impact-BG body remains unsupported pending its own complete dense acceptance.";
+const trackGoal = "FULFILLED: This exact five-component boundary remains fulfilled only because MOVE_FOCUS_ENERGY and MOVE_ENDURE independently retain source-derived reducers, typed seams, production compositors, complete legal bilateral Battle Scene ON fixtures, and twice-fresh zero-residual semantic/raw-RGB/actual-core framebuffer receipts. MOVE_FOCUS_ENERGY independently owns its complete unthinned 122/122 Move_FOCUS_ENERGY 0x082d36cf..Move_BIDE 0x082d370f body from first source-active display through first inactive cleanup in both orientations: legal set-44 TAILLOW parties, ANIM_TAG_FOCUS_ENERGY, three literal EndureEffect calls / fifteen gEndureEnergySpriteTemplate lifecycles, white BlendColorCycle(2,2,0,11), attacker ShakeMon2(1,0,32,1), move-owned in-window offsets, OAM/matrix/palette/register/audio/immutable-state proofs, and receipts 949eb21875d5e28e302eaa93fe43227276b3aed3b041a03b6350aa81f9d80ae4/45e757153f886b06888d366d722e8d712e4bc13dac061ecd18534d8b487049c5 and 67990c21bf1701db9438607a2092418f936c4ab52733ba8b7e11a069b8782cc7/a0e387e67c4c0ff6330bf472d9a9d480d571c9259053f1350f068cffd40c9ad5. MOVE_ENDURE independently owns its distinct complete unthinned 122/122 Move_ENDURE 0x082cd687..Move_CHARM 0x082cd71b body from first source-active display through first inactive cleanup in both orientations: legal set-113 EEVEE parties, its own ANIM_TAG_FOCUS_ENERGY/EndureEffect/fifteen-sprite body, red BlendColorCycle(2,2,0,11), attacker ShakeMon2(1,0,32,1), own in-window offsets, OAM/matrix/palette/register/audio/immutable-state proofs, and receipts 5ffe4994c6309b84567bbc7042861001df3275b1f8b2c330e0fa7dc6b5030024/941937cba7a24982a921510a31582ae4fb2bc927ce18d04b9ddd1a61ecf9ce3a and 3fc347ae124e95c51bf7975169ac6a59c1734f1f5b111776cca088531726c1d2/19b16868e0184521c3514ebc73a47235400bc06a09a7f216a93b8d0e29972ffd. Shared source components are source-audited separately in both bodies: no blend, ShakeMon2, EndureEffect, sprite, affine/OAM, timing, or latch fact transfers between moves. MOVE_FOCUS_PUNCH is not a Focus Energy/Endure effect-track body: its independently exact FocusPunch fist/four-hitsplat/ShakeMon target-impact-BG body transfers no Focus Energy or Endure component, timing, palette, or latch fact.";
 
 const receipts: readonly Receipt[] = [
   {
@@ -432,16 +432,16 @@ describe("focus-energy-endure standalone fulfilled component-track ratchet", () 
     expect(trackGoal).toContain("no blend, ShakeMon2, EndureEffect, sprite, affine/OAM, timing, or latch fact transfers");
   });
 
-  it("fulfills only the exact five-component track at the unchanged 232/276 acceptance and excludes Focus Punch", () => {
+  it("fulfills only the exact five-component track at the updated 233/276 acceptance and keeps Focus Punch outside it", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     const inventory = JSON.parse(readFileSync("src/data/gen/factory-animation-inventory.json", "utf8"));
     const level50Moves = new Set<string>(inventory.tiers.level50.moves
       .map((entry: { move: string }) => entry.move));
     expect(level50Moves.size).toBe(276);
-    expect(coverage.entries).toHaveLength(232);
+    expect(coverage.entries).toHaveLength(233);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && entry.status === "exact",
-    )).toHaveLength(232);
+    )).toHaveLength(233);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && (entry.status === "partial" || entry.status === "staged"),
     )).toEqual([]);
@@ -452,7 +452,7 @@ describe("focus-energy-endure standalone fulfilled component-track ratchet", () 
       expect.objectContaining({ move: "MOVE_FOCUS_ENERGY", status: "exact" }),
     ]);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_FOCUS_PUNCH"))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.filter((track: { id: string }) =>
       track.id === "focus-energy-endure-effect",
     )).toEqual([{

@@ -183,9 +183,9 @@ describe("anger-mark-grow-breath standalone fulfilled component-track ratchet", 
   it("pins the exact five-component boundary, exact counts/statuses, fulfilled goal, and four independent representatives", () => {
     const coverage = json<Json>("ANIMATION_COVERAGE.json");
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "anger-mark-grow-breath");
-    expect(coverage.entries).toHaveLength(232);
-    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(232);
-    expect(276 - coverage.entries.filter((entry: Json) => entry.status === "exact").length).toBe(44);
+    expect(coverage.entries).toHaveLength(233);
+    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(233);
+    expect(276 - coverage.entries.filter((entry: Json) => entry.status === "exact").length).toBe(43);
     expect(track).toEqual({
       id: "anger-mark-grow-breath",
       components: [...trackComponents],
@@ -315,7 +315,7 @@ describe("anger-mark-grow-breath standalone fulfilled component-track ratchet", 
     }
 
     const evidence = json<Json>("tools/compare/fixtures/frustration-evidence.json");
-    expect(digest("tools/compare/fixtures/frustration-evidence.json")).toBe("2dc0664cdf21c7b4f9a3c3cc0fc22a0d855084ec5d8f3352020dab384a11dfbc");
+    expect(digest("tools/compare/fixtures/frustration-evidence.json")).toBe("8b13acf8811464332fa2c65a172b643ef78b487fcf366d8259072dc01c43d79f");
     for (const expected of frustrationReceipts) {
       const stage = json<Json>(expected.scenario);
       const receipt = evidence.orientations[expected.orientation];

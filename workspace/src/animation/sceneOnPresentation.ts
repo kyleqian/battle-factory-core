@@ -570,6 +570,10 @@ import {
   type MegaKickState,
 } from "./megaKick.ts";
 import {
+  focusPunchAtAge,
+  type FocusPunchState,
+} from "./focusPunch.ts";
+import {
   hiJumpKickAtAge,
   type HiJumpKickState,
 } from "./hiJumpKick.ts";
@@ -1252,7 +1256,9 @@ export interface SceneOnPresentationBattler {
     | "MISDREAVUS"
     | "GENGAR"
     | "UNOWN"
-    | "OCTILLERY";
+    | "OCTILLERY"
+    | "BRELOOM"
+    | "STARMIE";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -2210,6 +2216,21 @@ export interface SceneOnMegaKickConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+/** Field chrome for Focus Punch, including the stock genderless healthbox case. */
+export interface SceneOnFocusPunchFieldProfile
+  extends Omit<SceneOnDragonRageFieldProfile, "playerGender" | "opponentGender"> {
+  readonly playerGender?: "male" | "female" | "none";
+  readonly opponentGender?: "male" | "female" | "none";
+}
+
+/** Narrow Scene-ON seam for Focus Punch's target-side impact-background body. */
+export interface SceneOnFocusPunchConfig {
+  readonly move: "FOCUS_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnFocusPunchFieldProfile>;
 }
 
 /** Narrow Scene-ON seam for the source-isolated Hi Jump Kick body. */
@@ -3729,6 +3750,7 @@ export type SceneOnMoveConfig =
   | SceneOnSuperFangConfig
   | SceneOnMegaPunchConfig
   | SceneOnMegaKickConfig
+  | SceneOnFocusPunchConfig
   | SceneOnHiJumpKickConfig
   | SceneOnRollingKickConfig
   | SceneOnLowKickConfig
@@ -4222,6 +4244,12 @@ export interface SceneOnMegaPunchView extends MegaPunchState {
 }
 
 export interface SceneOnMegaKickView extends MegaKickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFocusPunchView extends FocusPunchState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -7123,6 +7151,25 @@ export function sceneOnMegaKickView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...megaKickAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first pointer-owned `Move_FOCUS_PUNCH` source row. */
+export function sceneOnFocusPunchView(
+  state: SceneOnMovePresentationState<SceneOnFocusPunchConfig>,
+): SceneOnFocusPunchView {
+  if (state.config.move !== "FOCUS_PUNCH") {
+    throw new Error(`expected FOCUS_PUNCH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...focusPunchAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,

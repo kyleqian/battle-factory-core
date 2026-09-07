@@ -338,7 +338,31 @@ describe("MOVE_FOCUS_PUNCH source/classification and legal Scene-ON staging chec
     expect(stage.trace).not.toHaveProperty("captureFrames");
   });
 
-  it("retains only the repeated compact Scene-ON branch/window receipt and no Focus Punch acceptance credit", () => {
+  it("validates the material altered-species/geometry party-only control", () => {
+    const path = "tools/battle-lab/mechanic-focus-punch-player-breloom-opponent-staryu.json";
+    const stage = JSON.parse(readFileSync(resolve(root, path), "utf8")) as Json;
+    const validated = validateStage(path);
+    expect(validated.error).toBeUndefined();
+    expect(validated.status).toBe(0);
+    expect(validated.stderr).toBe("");
+    expect(Object.keys(stage.overrides)).toEqual(["parties"]);
+    expect(stage.overrides).not.toHaveProperty("battlers");
+    expect(stage.overrides.parties.player).toHaveLength(3);
+    expect(stage.overrides.parties.opponent).toHaveLength(3);
+    expect(stage.overrides.parties.player[0]).toMatchObject({
+      species: 307, moves: [264, 264, 264, 264], gender: "male",
+    });
+    expect(stage.overrides.parties.opponent[0]).toMatchObject({
+      species: 120, moves: [113, 113, 113, 113], gender: "genderless",
+    });
+    for (const party of Object.values(stage.overrides.parties) as Json[][]) {
+      for (const mon of party) {
+        expect(Object.keys(mon).sort()).toEqual([...completePartyKeys].sort());
+      }
+    }
+  });
+
+  it("retains the original compact Scene-ON branch/window receipt and records later independent Focus Punch acceptance", () => {
     const receipt = JSON.parse(readFileSync(
       resolve(root, "tools/compare/fixtures/focus-punch-staging-receipt.json"), "utf8",
     )) as Json;
@@ -397,16 +421,26 @@ describe("MOVE_FOCUS_PUNCH source/classification and legal Scene-ON staging chec
     }
 
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(232);
-    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(232);
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_FOCUS_PUNCH")).toBeUndefined();
+    expect(coverage.entries).toHaveLength(233);
+    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(233);
+    const focusPunch = coverage.entries.find((entry: Json) => entry.move === "MOVE_FOCUS_PUNCH");
+    expect(focusPunch).toMatchObject({ status: "exact" });
+    expect(focusPunch.covered.join(" ")).toContain("155/155");
+    expect(focusPunch.covered.join(" ")).toContain("154/154");
+    expect(focusPunch.covered.join(" ")).toContain("STARYU");
+    expect(focusPunch.evidence).toEqual(expect.arrayContaining([
+      "tools/compare/focusPunchPortable.ts",
+      "src/animation/focusPunch.ts",
+      "src/engine/battleScene.ts",
+    ]));
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SOLAR_BEAM")).toBeUndefined();
     for (const move of ["MOVE_HYPER_FANG", "MOVE_MEGA_PUNCH", "MOVE_MEGA_KICK", "MOVE_FOCUS_ENERGY", "MOVE_ENDURE"]) {
       expect(coverage.entries.find((entry: Json) => entry.move === move)).toMatchObject({ status: "exact" });
     }
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "contest-target-side-impact-bg");
     expect(track.fulfilled ?? false).toBe(false);
-    expect(track.goal).toContain("Focus Punch source/staging checkpoint");
+    expect(track.goal).toContain("MOVE_FOCUS_PUNCH independently proves");
+    expect(track.goal).toContain("MOVE_SOLAR_BEAM still lacks");
     expect(JSON.stringify(coverage.entries.find((entry: Json) => entry.move === "MOVE_FOCUS_ENERGY"))).not.toContain("HyperVoiceEffect");
     expect(JSON.stringify(coverage.entries.find((entry: Json) => entry.move === "MOVE_ENDURE"))).not.toContain("HyperVoiceEffect");
   });

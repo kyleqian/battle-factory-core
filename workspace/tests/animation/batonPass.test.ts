@@ -73,7 +73,7 @@ describe("MOVE_BATON_PASS source-relative presentation", () => {
   });
 
   it("keeps Baton Pass exact after the Sleep Powder promotion", () => {
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(232);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(233);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_BATON_PASS"))
       .toMatchObject([{ status: "exact" }]);
   });

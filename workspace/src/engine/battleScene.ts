@@ -936,6 +936,7 @@ import {
   sceneOnSuperFangView,
   sceneOnMegaPunchView,
   sceneOnMegaKickView,
+  sceneOnFocusPunchView,
   sceneOnHiJumpKickView,
   sceneOnRollingKickView,
   sceneOnLowKickView,
@@ -1102,6 +1103,7 @@ import {
   type SceneOnGrudgeConfig,
   type SceneOnHiddenPowerConfig,
   type SceneOnLeerConfig,
+  type SceneOnFocusPunchConfig,
   type SceneOnHiJumpKickConfig,
   type SceneOnKarateChopConfig,
   type SceneOnBatonPassConfig,
@@ -27211,6 +27213,175 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? `${attackerSpecies} used` : `Foe ${attackerSpecies} used`,
       moveName,
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FOCUS_PUNCH") {
+    const focusState = state as SceneOnMovePresentationState<SceneOnFocusPunchConfig>;
+    const view = sceneOnFocusPunchView(focusState);
+    // `BuildOamBuffer` copies the previous callback row to scanout.  This is
+    // measured on Focus Punch's own bilateral fist/hitsplat/matrix rows;
+    // background register writes intentionally stay on the current source row.
+    const displayed = sceneOnFocusPunchView({
+      ...focusState,
+      age: focusState.age - 1,
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("FOCUS_PUNCH presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const source = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!source) {
+        throw new Error(`FOCUS_PUNCH missing live battler art ${battler.species}`);
+      }
+      return source;
+    };
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const darken = (palette: readonly RgbColor[]) => palette.map((color) => {
+      const packed = mgbaDarkenColor(
+        color.r | (color.g << 8) | (color.b << 16),
+        view.background.bldy,
+      );
+      return {
+        r: packed & 0xff,
+        g: (packed >>> 8) & 0xff,
+        b: (packed >>> 16) & 0xff,
+      };
+    });
+    if (view.background.impact) {
+      const palette = darken(hyperFangArt.impact.palette);
+      const base = palette[0]!;
+      fillFramebuffer(fb, base.r, base.g, base.b);
+      drawExtractedTileBg(fb, {
+        tileset: hyperFangArt.impact.tileset,
+        tilemap: view.background.variant === "player"
+          ? hyperFangArt.impact.playerTilemap
+          : hyperFangArt.impact.opponentTilemap,
+        subpalettes: [palette],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(darken),
+      });
+    }
+
+    const targetOffset = view.targetOnMonBg ? displayed.targetOffset : { x2: 0, y2: 0 };
+    drawSpriteSheet(
+      fb,
+      targetArt.tileset,
+      targetArt.palette,
+      view.target.geometry.spriteCorner.x + targetOffset.x2,
+      view.target.geometry.spriteCorner.y + targetOffset.y2,
+    );
+    // `monbg ANIM_DEF_PARTNER` copies this target into the target-2 BG.  It
+    // must be snapshotted before normal OBJ layers; each semi-transparent
+    // basic hitsplat blends against this exact background copy, not the
+    // attacker or a prior OBJ hit.
+    const targetBackdrop = fb.slice();
+    type FocusPunchObject = Readonly<{
+      subpriority: number;
+      y: number;
+      order: number;
+      draw: () => void;
+    }>;
+    const objects: FocusPunchObject[] = [
+      {
+        subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+        y: view.attacker.geometry.animationCenter.y,
+        order: -1,
+        draw: () => drawSpriteSheet(
+          fb,
+          attackerArt.tileset,
+          attackerArt.palette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+        ),
+      },
+    ];
+    if (displayed.fist) {
+      const fist = displayed.fist;
+      objects.push({
+        subpriority: view.target.geometry.side === "opponent" ? 38 : 28,
+        y: fist.y,
+        order: 3,
+        draw: () => drawSpriteSheetAffineRotate(
+          fb,
+          subTileset(battleAnimHandsAndFeet.tileset, 0, 4),
+          battleAnimHandsAndFeet.palette,
+          fist.x + fist.x2,
+          fist.y,
+          fist.matrix.pa,
+          fist.matrix.pb,
+          fist.matrix.pc,
+          fist.matrix.pd,
+        ),
+      });
+    }
+    for (const [index, hitsplat] of displayed.hitsplats.entries()) {
+      objects.push({
+        subpriority: view.target.geometry.side === "opponent" ? 28 : 38,
+        y: hitsplat.y,
+        order: index,
+        draw: () => {
+          if (!view.alpha) return;
+          drawSpriteSheetAffineRotateBlendedOverFb(
+            fb,
+            targetBackdrop,
+            battleAnimHitsplat.tileset,
+            battleAnimHitsplat.palette,
+            hitsplat.x,
+            hitsplat.y,
+            hitsplat.matrix.pa,
+            hitsplat.matrix.pb,
+            hitsplat.matrix.pc,
+            hitsplat.matrix.pd,
+            view.alpha.eva,
+            view.alpha.evb,
+            false,
+          );
+        },
+      });
+    }
+    // `SortSprites` is high subpriority first, then lower OAM Y first.  The
+    // fixed source slots make creation order the remaining stable tie break.
+    objects.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || left.order - right.order);
+    for (const object of objects) object.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = focusState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used`
+        : `Foe ${view.attacker.species} used`,
+      "FOCUS PUNCH!",
       99,
     );
     return;

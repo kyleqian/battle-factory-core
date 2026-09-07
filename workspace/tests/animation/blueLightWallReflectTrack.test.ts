@@ -773,7 +773,7 @@ describe("blue-light-wall-reflect standalone fulfilled component-track ratchet",
     expect(trackGoal).toContain("Crush Claw transfers no lunge, shake, claw, timing, or latch fact");
   });
 
-  it("fulfills only the unchanged exact four-component boundary at 232 Level-50 moves", () => {
+  it("fulfills only the unchanged exact four-component boundary at 233 Level-50 moves", () => {
     const coverage = json<{
       readonly entries: readonly { readonly move: string; readonly status: string; readonly covered: readonly string[] }[];
       readonly componentTracks: readonly {
@@ -789,10 +789,10 @@ describe("blue-light-wall-reflect standalone fulfilled component-track ratchet",
     }>("src/data/gen/factory-animation-inventory.json");
     const level50Moves = new Set(inventory.tiers.level50.moves.map((entry) => entry.move));
     expect(level50Moves.size).toBe(276);
-    expect(coverage.entries).toHaveLength(232);
+    expect(coverage.entries).toHaveLength(233);
     expect(coverage.entries.filter((entry) => (
       level50Moves.has(entry.move) && entry.status === "exact"
-    ))).toHaveLength(232);
+    ))).toHaveLength(233);
     expect(coverage.entries.filter((entry) => (
       level50Moves.has(entry.move) && (entry.status === "partial" || entry.status === "staged")
     ))).toEqual([]);

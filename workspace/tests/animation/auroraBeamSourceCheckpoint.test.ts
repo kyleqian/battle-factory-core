@@ -73,7 +73,7 @@ describe("MOVE_AURORA_BEAM source/classification foundation", () => {
 
   it("keeps coverage and the dedicated track honest", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries).toHaveLength(232);
+    expect(coverage.entries).toHaveLength(233);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_AURORA_BEAM")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((entry: { id: string }) => entry.id === "aurora-beam-rainbow-rings-bg")).toMatchObject({ representatives: ["MOVE_AURORA_BEAM"], fulfilled: true });
   });

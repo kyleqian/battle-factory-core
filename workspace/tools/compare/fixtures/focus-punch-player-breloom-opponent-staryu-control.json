@@ -1,0 +1,43 @@
+{
+  "schema": "focus-punch-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "orientation": "geometry control: player-back Breloom -> opponent-front Staryu",
+  "role": "geometry-control",
+  "scenario": "tools/battle-lab/mechanic-focus-punch-player-breloom-opponent-staryu.json",
+  "probe": "tools/compare/focusPunchProbe.py",
+  "denseWindow": { "startFrame": 534, "endFrame": 688, "frameCount": 155 },
+  "move": "FOCUS_PUNCH",
+  "attacker": {
+    "species": "BRELOOM",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 52 },
+      "animationCenter": { "x": 72, "y": 84 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "STARYU",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 18 },
+      "animationCenter": { "x": 176, "y": 50 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 135,
+    "playerMaxHp": 135,
+    "opponentHp": 105,
+    "opponentMaxHp": 105,
+    "playerGender": "male",
+    "opponentGender": "none"
+  },
+  "expected": {
+    "evidenceSha256": "ab5b787e276ac4e663f1599fbf8ba2f2949d8ffc3259bbca237936b7155de30d",
+    "rawRgbSha256": "d210db823d5cb11c0c6e09f6f07fae32dca0f9a7e998c50eef2972a806a5c13d",
+    "changeMapSha256": "31494f7ad933f788e246f4dc6758b2b8f98a66df1acf9f80e61c8ecc7a9124b4",
+    "semanticRows": 155,
+    "framebufferRows": 155
+  }
+}

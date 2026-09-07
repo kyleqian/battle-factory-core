@@ -1,0 +1,43 @@
+{
+  "schema": "focus-punch-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "orientation": "player-back Breloom -> opponent-front Starmie",
+  "role": "bilateral",
+  "scenario": "tools/battle-lab/mechanic-focus-punch-player-breloom-opponent-starmie.json",
+  "probe": "tools/compare/focusPunchProbe.py",
+  "denseWindow": { "startFrame": 535, "endFrame": 689, "frameCount": 155 },
+  "move": "FOCUS_PUNCH",
+  "attacker": {
+    "species": "BRELOOM",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 52 },
+      "animationCenter": { "x": 72, "y": 84 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "STARMIE",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 14 },
+      "animationCenter": { "x": 176, "y": 46 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 135,
+    "playerMaxHp": 135,
+    "opponentHp": 135,
+    "opponentMaxHp": 135,
+    "playerGender": "male",
+    "opponentGender": "none"
+  },
+  "expected": {
+    "evidenceSha256": "fac3faea3caa3fff3eae5ac08c3e87eba9a331d6e92fc626604c8aefdcf1b981",
+    "rawRgbSha256": "1d06999f584ea7940121af774c33a1dfcb669404b4ef0352e5617387281136b0",
+    "changeMapSha256": "61a67b993faea90eb9123353602109fa98ad56d5187047e5e1b8352f0ed1cd49",
+    "semanticRows": 155,
+    "framebufferRows": 155
+  }
+}
