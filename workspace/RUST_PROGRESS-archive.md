@@ -5,6 +5,43 @@ full history regardless.
 
 ---
 
+## R62 — [supervised session, 2026-08-31, unattended] **M59 `Cmd_trysetperishsong` leaf + green checkpoint**
+
+- **State:** `rust-main` = R61 checkpoint `350b978a0` plus the verified Sonnet
+  worker `91b6bbab6` (fast-forward). The pure `B_SCR_OP_TRYSETPERISHSONG`
+  registration/handler projection is native and wasm32-compilable; no ABI,
+  adapter, recovery module, canonical TS, or npm file was touched. Session
+  still active; `Cmd_tryinfatuating` dispatching as the final leaf.
+- **Did:** worker (claude-sonnet-5, 60-min cap, one commit) ported the
+  single-start registration (opcode `0xB2`, dispatcher, one 4-byte failure
+  operand), pass 1 over `battlersCount` (already-sung or Soundproof →
+  not-affected; else `status3 |= PERISH_SONG`, timer 3, start value 3), pass
+  2 `PressurePPLoseOnUsingPerishSong` (first Perish Song slot, one decrement
+  per other Pressure holder, floor at zero, write-only-if-changed), and the
+  all-not-affected late-label jump vs advance — both carrying the mutated
+  rules. Canonical TS supplies **789 behavior** and **10 registration**
+  cases; corpus sha256
+  `4854061de9011da05d6d8fc26e0d5baec66e7483607ddf464fe36ba91102f5a2`.
+- **Next:** verify/fold the `Cmd_tryinfatuating` worker if it lands green
+  before the 12:24 UTC deadline (brief: reuse `gender.rs`,
+  `species_gender_ratios_gen.rs`, `battle_script_ai_reveal.rs`; Oblivious
+  hardcoded label pc 2996; four-way fail to operand label; success writes
+  `1 << (16 + attacker)`); otherwise reject it unfolded and leave it for the
+  next session. After that the next unported pure leaves are
+  `Cmd_tryswapabilities`, `Cmd_trywish`, `Cmd_rolloutdamagecalculation`.
+- **Notes:** supervisor audit covered both passes against
+  `battle_script_commands.c:8508-8534` / `battle_util.c:799-830`, the
+  snapshot-vs-progressive read equivalence (pass 2 reads only fields pass 1
+  never writes), label handling, and generator provenance; independent
+  regeneration was byte-identical. Generated Rust is **4,636,075 bytes**,
+  sha256 `063e6a1787ea8f26a711687509274d6127ea6486f3f767fbdb2a41904de6470a`;
+  generator is **40,832 bytes**, sha256
+  `a3d348fe6da851ed08c555d0677fccb5d2135af7879c462cffc2208e0b61c297`.
+  Gates in the worker tree and again on `rust-main`: **1,111/1,111**, fmt,
+  strict workspace Clippy, wasm32 release. Artifact is **507,097 bytes**,
+  sha256 `ee336b0928555b33ce10eacf33ba8918ded1596a5adc7198e22215eb95b3a75b`.
+  No npm gate required; no deferral or barrier added. R59 archived.
+
 ## R61 — [supervised session, 2026-08-31, unattended] **M58 `Cmd_getsecretpowereffect` leaf + green checkpoint**
 
 - **State:** `rust-main` = R60 checkpoint `135f4997e` plus the verified Sonnet
