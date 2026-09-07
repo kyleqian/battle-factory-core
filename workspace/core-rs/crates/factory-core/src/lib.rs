@@ -101,6 +101,8 @@ pub mod battle_script_tryhealhalfhealth;
 pub mod battle_script_tryhealhalfhealth_vectors_gen;
 pub mod battle_script_tryinfatuating;
 pub mod battle_script_tryinfatuating_vectors_gen;
+pub mod battle_script_trymemento;
+pub mod battle_script_trymemento_vectors_gen;
 pub mod battle_script_trysetdestinybondtohappen;
 pub mod battle_script_trysetdestinybondtohappen_vectors_gen;
 pub mod battle_script_trysetencore;
