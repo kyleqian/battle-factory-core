@@ -1,0 +1,63 @@
+{
+  "schema": "focus-punch-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_FOCUS_PUNCH",
+  "moveId": 264,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "sourceAudit": {
+    "path": "tools/compare/focusPunchSourceAudit.ts",
+    "outputSha256": "fc7fa149d20a2f7aa527a1fe6539b60c8407807900bd8052756be19ec2851ff9",
+    "root": {
+      "elf": ["0x82d5a07", "0x82d5ace"],
+      "romByteLength": 199,
+      "romSha256": "65b5c33127f2be16a6522f572c9ee49d5b86c1bcb06376a4577aceabd1e36abd",
+      "sourceSha256": "2eab776023f90d7d51fb30549e3a787044bdc84cdaa24df38f7d9b7c170c77ba"
+    },
+    "carrierCensus": {
+      "count": 11,
+      "lowestLegal": { "setId": 480, "name": "FRONTIER_MON_BRELOOM_2" },
+      "setIds": [480, 498, 503, 507, 518, 546, 574, 670, 810, 836, 840]
+    }
+  },
+  "probe": {
+    "path": "tools/compare/focusPunchStagingProbe.py",
+    "probeSha256": "2f25bd3592113b18e5e50a073a0a6db07b89db3e37963f82da380d5a5f7e6df1",
+    "freshRunsPerOrientation": 2,
+    "serial": true,
+    "sampledEveryFrame": true,
+    "retainedFramebuffers": false,
+    "retainedDenseWindow": false
+  },
+  "orientations": {
+    "playerBack": {
+      "scenario": "tools/battle-lab/mechanic-focus-punch-player-breloom-opponent-starmie.json",
+      "scenarioSha256": "98ec7bff44b7358adb4c92947b3efdc8f9664c64648eb8b543822badb19c4135",
+      "repeatOutputSha256": "c830b9578ae49952aff0410172f1592c831a262302a6717bdf208729d2b040fb",
+      "attacker": { "side": "player", "species": 307, "carrierSetId": 480, "ppSpent": 1, "undamaged": true },
+      "target": { "side": "opponent", "species": 121, "hp": [135, 66], "lightScreenTurns": 4 },
+      "branch": { "label": "FocusPunchOnOpponent", "targetBackgroundId": 4, "contestBranchObserved": false, "returnArg": 0 },
+      "window": { "startFrame": 535, "lastActiveFrame": 688, "firstInactiveFrame": 689, "activeFrameCount": 154, "throughFirstInactiveCleanup": true },
+      "benches": { "partyIndices": [1, 2], "unchanged": true, "checksumValid": true }
+    },
+    "opponentFront": {
+      "scenario": "tools/battle-lab/mechanic-focus-punch-opponent-breloom-player-starmie.json",
+      "scenarioSha256": "d34762995783402c5a118044c22030d671339f3a42f93e59c21260a9963c3fe4",
+      "repeatOutputSha256": "a9b3695d459e08455be63639462eccadd61513fabeb627a4a841914fde8020e4",
+      "attacker": { "side": "opponent", "species": 307, "carrierSetId": 480, "ppSpent": 1, "undamaged": true },
+      "target": { "side": "player", "species": 121, "hp": [135, 71], "lightScreenTurns": 4 },
+      "branch": { "label": "FocusPunchOnPlayer", "targetBackgroundId": 5, "contestBranchObserved": false, "returnArg": 1 },
+      "window": { "startFrame": 540, "lastActiveFrame": 692, "firstInactiveFrame": 693, "activeFrameCount": 153, "throughFirstInactiveCleanup": true },
+      "benches": { "partyIndices": [1, 2], "unchanged": true, "checksumValid": true }
+    }
+  },
+  "scope": {
+    "partiesOnly": true,
+    "transientOverrides": [],
+    "latchMeasurement": false,
+    "productionReducerOrSeam": false,
+    "framebufferAcceptance": false,
+    "coveragePromotion": false
+  },
+  "remainingGap": "Focus Punch remains unsupported. Independently port and type the FocusPunch fist affine/callback, four IMPACT hit splats, ShakeMon, target impact-BG fade/restore, monbg/alpha/palette/audio/cleanup through the shared presentation seam; then collect bilateral dense source/component/seam/hardware-change-map and actual-core RGB acceptance through first inactive cleanup twice. Existing Hyper Fang, Mega Punch, Mega Kick, Solar Beam, Focus Energy, and Endure evidence grants no component, latch, or framebuffer credit."
+}
