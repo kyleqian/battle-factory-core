@@ -254,7 +254,7 @@ function commonState(
   const backgroundActive = !setup && age >= 4 && age < 151;
   const targetOffset = !setup && age >= 22 && age <= 150
     ? shakeMon2OffsetAtTick(
-      targetSide === "opponent" ? -2 : 2, 0, 65, 1, age - 22,
+      2, 0, 65, 1, age - 22,
     )
     : { x2: 0, y2: 0 };
   const palette = setupPaletteCoefficient(age);

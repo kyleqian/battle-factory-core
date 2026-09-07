@@ -789,10 +789,10 @@ describe("blue-light-wall-reflect standalone fulfilled component-track ratchet",
     }>("src/data/gen/factory-animation-inventory.json");
     const level50Moves = new Set(inventory.tiers.level50.moves.map((entry) => entry.move));
     expect(level50Moves.size).toBe(276);
-    expect(coverage.entries).toHaveLength(233);
+    expect(coverage.entries).toHaveLength(234);
     expect(coverage.entries.filter((entry) => (
       level50Moves.has(entry.move) && entry.status === "exact"
-    ))).toHaveLength(233);
+    ))).toHaveLength(234);
     expect(coverage.entries.filter((entry) => (
       level50Moves.has(entry.move) && (entry.status === "partial" || entry.status === "staged")
     ))).toEqual([]);

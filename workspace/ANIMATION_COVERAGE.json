@@ -6607,6 +6607,41 @@
     "tests/animation/ingrain.test.ts",
     "tests/animation/ingrainFramebuffer.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_SOLAR_BEAM",
+   "status": "exact",
+   "covered": [
+    "complete legal GLOOM/CHANSEY Battle Scene ON evidence retains both source-selected two-turn bodies through first inactive cleanup twice fresh: setup 108/108 and unleash 160/160 in each orientation, for 536/536 zero-residual actual-core framebuffer rows per deterministic comparator pass",
+    "the pure source-relative reducer and typed Scene-ON seam reproduce 14 affine absorption orbs, 21 big unleash orbs, 15 task-created small orbs, target-side Solar Beam backgrounds, monbg/alpha/palette programs, ShakeMon2, resources, audio, and cleanup from live side/species/geometry/state inputs",
+    "Solar's own retained maps verify setup predecessor OAM/matrices/palette on 107/107 rows and unleash OAM 158/159, matrices 159/159, and palette 157/159; no sibling latch is inherited",
+    "the opponent target-monbg copy consumes the source's side-independent +2 ShakeMon2 amplitude, while the source-age 151 field restore consumes current target membership, settled target offset, and small-orb teardown in the same scanout; these move-owned rules preserve every previously exact setup and control row",
+    "a material VILEPLUME/ONIX altered live species and shifted geometry control traverses setup, shake, palette, background restore, and cleanup ages twice deterministically with a distinct framebuffer sequence; Hyper Fang, Mega Punch, Mega Kick, and Focus Punch retain independently rechecked exact receipts",
+    "no damage, gameplay RNG, move choice, turn order, controller, facility state, boundary/barrier, recording allowlist, absolute tick, framebuffer lookup, coordinate/RGB fitting, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-solar-beam-player-gloom-opponent-chansey.json",
+    "tools/battle-lab/mechanic-solar-beam-opponent-gloom-player-chansey.json",
+    "tools/compare/fixtures/solar-beam-evidence.json",
+    "tools/compare/solarBeamSourceAudit.ts",
+    "tools/compare/solarBeamProbe.py",
+    "tools/compare/solarBeamEvidence.ts",
+    "tools/compare/solarBeamActualCore.ts",
+    "tools/compare/extractSolarBeamAssets.ts",
+    "tools/compare/evidence/solar-beam-player-dense-state.json.gz",
+    "tools/compare/evidence/solar-beam-opponent-dense-state.json.gz",
+    "tools/compare/evidence/solar-beam-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/solar-beam-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/solar-beam-changemap-player.json",
+    "tools/compare/evidence/solar-beam-changemap-opponent.json",
+    "src/animation/assets/solar-beam.json",
+    "src/animation/solarBeam.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/solarBeam.test.ts",
+    "tests/animation/solarBeamActualCore.test.ts",
+    "tests/animation/solarBeamEvidence.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -7055,9 +7090,9 @@
     "MOVE_SOLAR_BEAM",
     "MOVE_FOCUS_PUNCH"
    ],
-   "fulfilled": false,
-   "solarBeamMeasurements": {
-    "status": "setup-exact-unleash-checkpoint",
+  "fulfilled": true,
+  "solarBeamMeasurements": {
+    "status": "exact",
     "setupRows": 108,
     "unleashRows": 160,
     "orbCounts": {
@@ -7074,12 +7109,13 @@
     "sourceRelativeReducer": true,
     "typedSceneOnSeam": true,
     "liveSpeciesGeometryCompositor": true,
-    "actualCoreFramebufferAccepted": false,
-    "alteredLiveControlAccepted": false,
-    "actualCoreRows": "406/536 exact; setup 108/108 each; unleash player 31/160, opponent 159/160",
-    "actualCoreRowsSha256": "901957aea089ea8fb0ea48de80c2c8d8c605c3461d6959e33d8cb4182da0ee90"
-   },
-   "goal": "MOVE_HYPER_FANG remains exact at 107/107 source-component and framebuffer frames in both orientations, reproduced twice. MOVE_MEGA_PUNCH independently proves its complete target-side BG_IMPACT_OPPONENT/BG_IMPACT_PLAYER route, variant-0 MegaPunchKick fist, hitsplat, monbg/alpha, palette blends, ShakeMon2, side-panned audio triggers, restore, and teardown at 160/160 direct semantic, receipt-pinned-probe/raw-RGB, and shared-framebuffer frames twice fresh in both orientations. MOVE_MEGA_KICK independently proves the same target-side impact route with its distinct variant-1 foot, alpha edge, second cue, and complete dual-orientation 160/160 receipt. MOVE_FOCUS_PUNCH independently proves its distinct target-side BG 4/5, HANDS_AND_FEET affine fist, four IMPACT hitsplats, ShakeMon, monbg/alpha/palette/register/audio, resource, ordering, and first-inactive body at 155/155 player-back plus 154/154 opponent-front rows twice fresh, including an altered STARYU geometry/species control. MOVE_SOLAR_BEAM has retained 108-row setup and 160-row unleash evidence plus a source-relative reducer, typed Scene-ON seam, live-species/geometry compositor, source-derived assets, and a twice-deterministic 536-row retained actual-core comparator. Its setup attacker-monbg blend target, absorption affine path, live-corner Y_PIC_OFFSET, big-orb translation, and small-orb callback/OAM timing close 108/108 setup rows in each orientation and 159/160 opponent unleash rows. Total exact improves to 406/536 with 130/536 residual; player target-monbg overlap and age-151 remain open, so Solar stays unsupported with no altered-live acceptance. Contest state was not fabricated. This non-exclusive track remains unfulfilled until Solar Beam itself is exact; no Solar Beam, sibling, or shared-latch credit is inferred."
+    "actualCoreFramebufferAccepted": true,
+    "alteredLiveControlAccepted": true,
+    "actualCoreRows": "536/536 exact twice; setup 108/108 and unleash 160/160 in each orientation",
+    "actualCoreRowsSha256": "b1c852b517beb0f046a28d1b21293e221f4935cf7dab8f4b143bd10356dee972",
+    "alteredLiveControlRowsSha256": "8cce16358e5c9ff2203e0eb930653f672942eb3975e4776e06bf416be82379aa"
+  },
+  "goal": "FULFILLED only after independent recheck of every named representative. MOVE_HYPER_FANG remains exact at 107/107 source-component and framebuffer frames in both orientations, reproduced twice. MOVE_MEGA_PUNCH independently proves its complete target-side BG_IMPACT_OPPONENT/BG_IMPACT_PLAYER route, variant-0 MegaPunchKick fist, hitsplat, monbg/alpha, palette blends, ShakeMon2, side-panned audio triggers, restore, and teardown at 160/160 direct semantic, receipt-pinned-probe/raw-RGB, and shared-framebuffer frames twice fresh in both orientations. MOVE_MEGA_KICK independently proves the same target-side impact route with its distinct variant-1 foot, alpha edge, second cue, and complete dual-orientation 160/160 receipt. MOVE_FOCUS_PUNCH independently proves its distinct target-side BG 4/5, HANDS_AND_FEET affine fist, four IMPACT hitsplats, ShakeMon, monbg/alpha/palette/register/audio, resource, ordering, and first-inactive body at 155/155 player-back plus 154/154 opponent-front rows twice fresh, including an altered STARYU geometry/species control. MOVE_SOLAR_BEAM independently closes its retained 108-row setup and 160-row unleash bodies in both orientations at 536/536 zero-residual actual-core rows twice, plus a material altered VILEPLUME/ONIX live-species/geometry control twice. Solar's target-monbg uses the source's side-independent +2 ShakeMon2 amplitude, and its age-151 BG restore uses current target membership, settled offset, and small-orb teardown. Contest state was not fabricated, and no move or latch inherits sibling credit."
   },
   {
    "id": "music-notes",

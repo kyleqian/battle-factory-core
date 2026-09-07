@@ -1,3 +1,10 @@
+# MOVE_SOLAR_BEAM exact closure (2026-09-07 worker)
+
+- **State:** Level 50 advances to **234/276 exact**, **0 partial / 0 staged**, and **42 unsupported**. MOVE_SOLAR_BEAM is exact and `contest-target-side-impact-bg` is fulfilled only after independently rechecking Hyper Fang, Mega Punch, Mega Kick, and Focus Punch; no sibling or shared-latch acceptance is inferred.
+- **Solar-owned closure:** The source `AnimTask_ShakeMon2(target,2,0,65,1)` uses the same positive X amplitude for both target sides; removing the incorrect opponent sign closes player-back unleash ages **23..150**. At source age **151**, the restored field consumes current target membership/settled offset and current small-orb teardown in the same scanout, rather than the ordinary predecessor body. These relative live-state rules preserve all **216/216** setup rows and close unleash **160/160** per orientation.
+- **Acceptance:** The complete retained actual-core comparator is **536/536** zero-residual rows twice deterministic, digest `b1c852b5…`. A material VILEPLUME/ONIX live-species and shifted-geometry sequence spanning setup, shake, palette, restore, and cleanup is deterministic twice and differs from the base (`8cce1635…` versus `d4ca6678…`). Production uses no fixture/RGB lookup, absolute frame/tick, gameplay mutation, boundary/barrier widening, or recording allowlist.
+- **Verification:** Focused Solar plus all four named controls and the animation boundary pass after the coverage ratchet; final coverage reports **234/276**; animation audit, typecheck, and `git diff --check` pass; final `npm test` passes **1,275 files / 11,095 tests** (**44 files / 223 tests skipped**); and `npm run build` passes **766 modules**.
+
 # Animation supervisor verification — MOVE_SOLAR_BEAM setup closure checkpoint (2026-09-07 supervisor)
 
 - **State / merge:** Level 50 remains **233/276 exact**, **0 partial / 0 staged**, and **43 unsupported**. Fast-forwarded Sol/high commit `04bedbf28`. MOVE_SOLAR_BEAM remains unsupported and `contest-target-side-impact-bg` remains unfulfilled; no move, sibling, shared-component, or latch acceptance was promoted.

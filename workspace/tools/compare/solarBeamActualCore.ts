@@ -201,19 +201,93 @@ function summarize(rows: readonly RowResidual[]) {
   };
 }
 
+function inspectAlteredControl() {
+  const frame: ProbeFrame = {
+    frame: -1,
+    sha256: "",
+    battlers: {
+      player: { hp: 120, maxHp: 135 },
+      opponent: { hp: 160, maxHp: 160 },
+    },
+  };
+  const base = configFor("player-back", frame, "unleash");
+  const altered: SceneOnSolarBeamConfig = {
+    ...base,
+    attacker: {
+      species: "VILEPLUME",
+      geometry: {
+        side: "player",
+        spriteCorner: { x: 37, y: 54 },
+        animationCenter: { x: 69, y: 84 },
+        battlePositionCenter: { x: 69, y: 78 },
+      },
+    },
+    target: {
+      species: "ONIX",
+      geometry: {
+        side: "opponent",
+        spriteCorner: { x: 147, y: 14 },
+        animationCenter: { x: 179, y: 39 },
+        battlePositionCenter: { x: 179, y: 38 },
+      },
+    },
+  };
+  const ages: readonly Readonly<{ body: Body; age: number }>[] = [
+    { body: "setup", age: 7 },
+    { body: "setup", age: 50 },
+    { body: "setup", age: 106 },
+    { body: "unleash", age: 4 },
+    { body: "unleash", age: 23 },
+    { body: "unleash", age: 50 },
+    { body: "unleash", age: 150 },
+    { body: "unleash", age: 151 },
+    { body: "unleash", age: 159 },
+  ];
+  const digest = (config: SceneOnSolarBeamConfig): string => sha256(Buffer.concat(
+    ages.map(({ body, age }) => {
+      const stage = createSceneOnMovePresentation({ ...config, body });
+      const output = new Uint8Array(240 * 160 * 4);
+      renderSceneOnMovePresentation(output, { ...stage, age });
+      return Buffer.from(output);
+    }),
+  ));
+  return {
+    species: [altered.attacker.species, altered.target.species],
+    sides: [altered.attacker.geometry.side, altered.target.geometry.side],
+    geometry: {
+      attacker: altered.attacker.geometry,
+      target: altered.target.geometry,
+    },
+    ages,
+    baseFramebufferSequenceSha256: digest(base),
+    alteredFramebufferSequenceSha256: digest(altered),
+  };
+}
+
 const runs = Array.from({ length: passes }, () => [
   ...compareOrientation("player-back"),
   ...compareOrientation("opponent-front"),
 ]);
 const deterministic = runs.every((rows) => JSON.stringify(rows) === JSON.stringify(runs[0]));
+const controlRuns = Array.from({ length: passes }, inspectAlteredControl);
+const controlDeterministic = controlRuns.every(
+  (control) => JSON.stringify(control) === JSON.stringify(controlRuns[0]),
+);
 const report = {
   schema: "solar-beam-actual-core-residual/v1",
   oracleProfile: "battle-scene-on",
   move: "MOVE_SOLAR_BEAM",
   passes,
   deterministic,
+  alteredControl: {
+    passes,
+    deterministic: controlDeterministic,
+    ...controlRuns[0],
+  },
   rowsSha256: sha256(Buffer.from(JSON.stringify(runs[0]))),
   ...summarize(runs[0]!),
 };
 console.log(JSON.stringify(report));
-if (!deterministic || (requireExact && report.residualRows !== 0)) process.exitCode = 1;
+if (!deterministic || !controlDeterministic
+  || controlRuns[0]!.baseFramebufferSequenceSha256 === controlRuns[0]!.alteredFramebufferSequenceSha256
+  || (requireExact && report.residualRows !== 0)) process.exitCode = 1;

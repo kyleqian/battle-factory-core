@@ -132,8 +132,8 @@ if (move?.id !== 76 || move.frontierMonCount !== 16 || move.speciesCount !== 16
     "Move_SOLAR_BEAM", "SolarBeamSetUp", "SolarBeamUnleash", "SolarBeamAbsorbEffect",
     "SolarBeamEnd", "SetSolarBeamBg", "SolarBeamUnleash1", "UnsetSolarBeamBg",
     "SetSolarBeamBgContest", "SetSolarBeamBgOpponent", "SetSolarBeamBgPlayer", "SetSolarBeamBgContinue",
-  ]) || allCarriers.length !== 16 || carriers.length !== 16 || status !== "unsupported"
-  || !track || track.fulfilled !== false || JSON.stringify(track.representatives) !== JSON.stringify([
+  ]) || allCarriers.length !== 16 || carriers.length !== 16 || status !== "exact"
+  || !track || track.fulfilled !== true || JSON.stringify(track.representatives) !== JSON.stringify([
     "MOVE_HYPER_FANG", "MOVE_MEGA_PUNCH", "MOVE_MEGA_KICK", "MOVE_SOLAR_BEAM", "MOVE_FOCUS_PUNCH",
   ])) throw new Error("MOVE_SOLAR_BEAM inventory/graph/coverage contract changed");
 
@@ -149,5 +149,5 @@ console.log(JSON.stringify({
     setupAbsorptionOrbs: 14, unleashBigOrbs: 21, unleashSmallOrbs: 15, shakeMon2: [2, 0, 65, 1],
     setupAudio: "SE_M_MEGA_KICK", unleashAudio: "SE_M_SOLAR_BEAM", targetBackgrounds: [4, 5, 6],
   },
-  controls: controlRoots, ownership: { reducer: false, seam: false, compositor: false, framebuffer: false, gameplay: false },
+  controls: controlRoots, ownership: { reducer: true, seam: true, compositor: true, framebuffer: true, gameplay: false },
 }, null, 2));

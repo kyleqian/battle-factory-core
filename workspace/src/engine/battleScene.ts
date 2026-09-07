@@ -27286,7 +27286,10 @@ export function renderSceneOnMovePresentation(
     const targetPalette = displayed.targetPaletteBlend
       ? blendPaletteToward(targetArt.palette, green, displayed.targetPaletteBlend.coefficient)
       : targetArt.palette;
-    const targetOffset = displayed.targetOnMonBg ? displayed.targetOffset : { x2: 0, y2: 0 };
+    // The current monbg membership owns the restore boundary. At source age
+    // 151 the target returns to OBJ with its settled offset in the same
+    // scanout; only the live monbg body reads the predecessor ShakeMon2 pose.
+    const targetOffset = view.targetOnMonBg ? displayed.targetOffset : { x2: 0, y2: 0 };
     const drawTarget = (): void => drawSpriteSheet(
       fb, tilesFor(targetArt, view.target.geometry.side), targetPalette,
       view.target.geometry.spriteCorner.x + targetOffset.x2,
@@ -27321,8 +27324,12 @@ export function renderSceneOnMovePresentation(
         ...displayed.smallOrbs
           // After the first task-created orb, each creation happens after
           // that row's BuildOamBuffer. It first enters software OAM on the
-          // following source row and hardware OAM one row after that.
-          .filter((orb) => orb.index === 0 || displayed.age > 3 + orb.index * 7)
+          // following source row and hardware OAM one row after that. The
+          // source-age 151 BG restore is the move-owned handoff exception:
+          // its current OAM teardown reaches the same scanout that restores
+          // the field, so no predecessor-row small orb survives that row.
+          .filter((orb) => view.background.impact
+            && (orb.index === 0 || displayed.age > 3 + orb.index * 7))
           .map((orb) => ({ subpriority: orb.subpriority, y: orb.y + orb.y2, stable: orb.index, draw: () => drawOrb(orb) })),
       ];
       painters.sort((left, right) =>

@@ -23,11 +23,11 @@ function validateStage(path: string) {
   ].join("\n"), oracleDirectory(), resolve(root, path)], { cwd: root, encoding: "utf8" });
 }
 
-describe("MOVE_SOLAR_BEAM source and dense staging checkpoint", () => {
+describe("MOVE_SOLAR_BEAM source and dense acceptance", () => {
   it("pins the two-turn ELF/ROM interval, all 28 generated IDs, carriers, and controls", () => {
     const result = audit();
     expect(result).toMatchObject({
-      move: "MOVE_SOLAR_BEAM", moveId: 76, status: "unsupported",
+      move: "MOVE_SOLAR_BEAM", moveId: 76, status: "exact",
       source: {
         elf: { start: "0x82d08d8", endExclusive: "0x82d0b2d" },
         romByteLength: 597,
@@ -37,6 +37,7 @@ describe("MOVE_SOLAR_BEAM source and dense staging checkpoint", () => {
       },
       dispatch: { setupAbsorptionOrbs: 14, unleashBigOrbs: 21, unleashSmallOrbs: 15, shakeMon2: [2, 0, 65, 1], targetBackgrounds: [4, 5, 6] },
       controls: ["MOVE_HYPER_FANG", "MOVE_MEGA_PUNCH", "MOVE_MEGA_KICK", "MOVE_FOCUS_PUNCH"],
+      ownership: { reducer: true, seam: true, compositor: true, framebuffer: true, gameplay: false },
     });
     expect(result.graph.componentIds).toHaveLength(28);
     expect(result.carrierCensus).toMatchObject({ count: 16, setIds: [272, 348, 360, 438, 445, 493, 532, 536, 590, 608, 611, 620, 682, 714, 729, 771] });
@@ -66,7 +67,7 @@ describe("MOVE_SOLAR_BEAM source and dense staging checkpoint", () => {
     }
   });
 
-  it("retains both 268-row bodies, raw-RGB receipts, normalized maps, and fresh-run identity without promotion", () => {
+  it("retains the original unsupported evidence checkpoint and both complete fresh-run bodies", () => {
     const fixture = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/solar-beam-evidence.json"), "utf8"));
     expect(fixture).toMatchObject({ schema: "solar-beam-bilateral-evidence/v1", move: "MOVE_SOLAR_BEAM", status: "unsupported-evidence", coverageCredit: false });
     expect(fixture.evidenceScope).toMatchObject({ fullDenseRowsRetained: true, normalizedMaps: true, twiceFreshByteIdentical: true, rawRgbRetained: true, productionAnimationChanged: false, actualCoreFramebufferAcceptance: false, alteredLiveGeometryControl: false });
@@ -85,7 +86,7 @@ describe("MOVE_SOLAR_BEAM source and dense staging checkpoint", () => {
   it("verifies the retained component/resource/task/audio/register/OAM/matrix/state maps", () => {
     const output = execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/solarBeamEvidence.ts"], { cwd: root, encoding: "utf8" });
     const result = JSON.parse(output);
-    expect(result).toMatchObject({ schema: "solar-beam-bilateral-evidence/v1", status: "unsupported-evidence", coverageCredit: false, boundary: { moveLedgerEntry: false, trackFulfilled: false, barrierChanged: false } });
+    expect(result).toMatchObject({ schema: "solar-beam-bilateral-evidence/v1", status: "unsupported-evidence", coverageCredit: false, boundary: { moveLedgerEntry: true, trackFulfilled: true, barrierChanged: false } });
     for (const side of ["player-back", "opponent-front"] as const) {
       expect(result.orientations[side]).toMatchObject({ setupRows: 108, unleashRows: 160, orbCounts: { absorption: 14, big: 21, small: 15 } });
       expect(result.orientations[side].latches.hardwareOamEqualsPrecedingSoftware).toBe("107/107");
@@ -93,10 +94,10 @@ describe("MOVE_SOLAR_BEAM source and dense staging checkpoint", () => {
     }
   });
 
-  it("leaves Solar Beam and the non-exclusive target-side track unpromoted", () => {
+  it("promotes only Solar Beam after all target-side track members are independently exact", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8"));
-    expect(coverage.entries).toHaveLength(233);
-    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SOLAR_BEAM")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: { id: string }) => track.id === "contest-target-side-impact-bg")).toMatchObject({ fulfilled: false, representatives: ["MOVE_HYPER_FANG", "MOVE_MEGA_PUNCH", "MOVE_MEGA_KICK", "MOVE_SOLAR_BEAM", "MOVE_FOCUS_PUNCH"] });
+    expect(coverage.entries).toHaveLength(234);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SOLAR_BEAM")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: { id: string }) => track.id === "contest-target-side-impact-bg")).toMatchObject({ fulfilled: true, representatives: ["MOVE_HYPER_FANG", "MOVE_MEGA_PUNCH", "MOVE_MEGA_KICK", "MOVE_SOLAR_BEAM", "MOVE_FOCUS_PUNCH"] });
   });
 });

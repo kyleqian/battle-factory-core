@@ -423,7 +423,7 @@ describe("finger-metronome standalone fulfilled component-track ratchet", () => 
     expect(trackGoal).toContain("not a durable exception");
   });
 
-  it("fulfills only the exact five-component track at the unchanged 233/276 count", () => {
+  it("fulfills only the exact five-component track at the unchanged 234/276 count", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     const inventory = JSON.parse(readFileSync("src/data/gen/factory-animation-inventory.json", "utf8"));
     const level50Moves = new Set<string>(inventory.tiers.level50.moves
@@ -431,7 +431,7 @@ describe("finger-metronome standalone fulfilled component-track ratchet", () => 
     expect(level50Moves.size).toBe(276);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && entry.status === "exact",
-    )).toHaveLength(233);
+    )).toHaveLength(234);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && (entry.status === "partial" || entry.status === "staged"),
     )).toEqual([]);

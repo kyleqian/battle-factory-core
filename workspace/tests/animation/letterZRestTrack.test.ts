@@ -202,17 +202,17 @@ describe("letter-z-rest standalone fulfilled component-track ratchet", () => {
     expect(sleepTalkBody).not.toContain("gSleepLetterZSpriteTemplate");
   });
 
-  it("pins the exact track goal and unchanged 233/276 Level-50 acceptance", () => {
+  it("pins the exact track goal and unchanged 234/276 Level-50 acceptance", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     const inventory = JSON.parse(readFileSync("src/data/gen/factory-animation-inventory.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(233);
+      .toHaveLength(234);
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "partial"))
       .toHaveLength(0);
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "staged"))
       .toHaveLength(0);
     expect(inventory.tiers.level50.moves).toHaveLength(276);
-    expect(inventory.tiers.level50.moves.length - coverage.entries.length).toBe(43);
+    expect(inventory.tiers.level50.moves.length - coverage.entries.length).toBe(42);
     expect(coverage.entries.filter((entry: { move: string }) =>
       ["MOVE_REST", "MOVE_SLEEP_TALK"].includes(entry.move),
     )).toEqual([

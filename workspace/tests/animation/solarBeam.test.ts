@@ -36,8 +36,10 @@ describe("MOVE_SOLAR_BEAM source-relative reducer", () => {
     expect(solarBeamAtAge(124, "unleash", "player", "opponent", playerCenter, opponentCenter).bigOrbs).toHaveLength(4);
     expect(solarBeamAtAge(124, "unleash", "player", "opponent", playerCenter, opponentCenter).smallOrbs).toHaveLength(9);
     expect(solarBeamAtAge(151, "unleash", "player", "opponent", playerCenter, opponentCenter).smallOrbs).toHaveLength(0);
-    expect(solarBeamAtAge(22, "unleash", "player", "opponent", playerCenter, opponentCenter).targetOffset.x2).toBe(-2);
-    expect(solarBeamAtAge(24, "unleash", "player", "opponent", playerCenter, opponentCenter).targetOffset.x2).toBe(2);
+    expect(solarBeamAtAge(22, "unleash", "player", "opponent", playerCenter, opponentCenter).targetOffset.x2).toBe(2);
+    expect(solarBeamAtAge(22, "unleash", "opponent", "player", opponentCenter, playerCenter).targetOffset.x2).toBe(2);
+    expect(solarBeamAtAge(24, "unleash", "player", "opponent", playerCenter, opponentCenter).targetOffset.x2).toBe(-2);
+    expect(solarBeamAtAge(151, "unleash", "player", "opponent", playerCenter, opponentCenter).targetOffset.x2).toBe(0);
     expect(solarBeamAtAge(SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE, "unleash", "player", "opponent", playerCenter, opponentCenter)).toMatchObject({ active: false, resources: { orbs: false, freed: true } });
   });
 

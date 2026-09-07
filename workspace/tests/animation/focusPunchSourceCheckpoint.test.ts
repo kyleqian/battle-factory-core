@@ -421,8 +421,8 @@ describe("MOVE_FOCUS_PUNCH source/classification and legal Scene-ON staging chec
     }
 
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(233);
-    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(233);
+    expect(coverage.entries).toHaveLength(234);
+    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(234);
     const focusPunch = coverage.entries.find((entry: Json) => entry.move === "MOVE_FOCUS_PUNCH");
     expect(focusPunch).toMatchObject({ status: "exact" });
     expect(focusPunch.covered.join(" ")).toContain("155/155");
@@ -433,14 +433,14 @@ describe("MOVE_FOCUS_PUNCH source/classification and legal Scene-ON staging chec
       "src/animation/focusPunch.ts",
       "src/engine/battleScene.ts",
     ]));
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SOLAR_BEAM")).toBeUndefined();
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SOLAR_BEAM")).toMatchObject({ status: "exact" });
     for (const move of ["MOVE_HYPER_FANG", "MOVE_MEGA_PUNCH", "MOVE_MEGA_KICK", "MOVE_FOCUS_ENERGY", "MOVE_ENDURE"]) {
       expect(coverage.entries.find((entry: Json) => entry.move === move)).toMatchObject({ status: "exact" });
     }
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "contest-target-side-impact-bg");
-    expect(track.fulfilled ?? false).toBe(false);
+    expect(track.fulfilled).toBe(true);
     expect(track.goal).toContain("MOVE_FOCUS_PUNCH independently proves");
-    expect(track.goal).toContain("MOVE_SOLAR_BEAM has retained 108-row setup and 160-row unleash evidence plus a source-relative reducer");
+    expect(track.goal).toContain("MOVE_SOLAR_BEAM independently closes its retained 108-row setup and 160-row unleash bodies");
     expect(JSON.stringify(coverage.entries.find((entry: Json) => entry.move === "MOVE_FOCUS_ENERGY"))).not.toContain("HyperVoiceEffect");
     expect(JSON.stringify(coverage.entries.find((entry: Json) => entry.move === "MOVE_ENDURE"))).not.toContain("HyperVoiceEffect");
   });
