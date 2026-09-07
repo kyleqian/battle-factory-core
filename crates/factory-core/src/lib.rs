@@ -115,6 +115,8 @@ pub mod battle_script_trysetspikes;
 pub mod battle_script_trysetspikes_vectors_gen;
 pub mod battle_script_tryswapabilities;
 pub mod battle_script_tryswapabilities_vectors_gen;
+pub mod battle_script_trywish;
+pub mod battle_script_trywish_vectors_gen;
 pub mod battle_script_weightdamage;
 pub mod battle_script_weightdamage_vectors_gen;
 pub mod damage_calc;
