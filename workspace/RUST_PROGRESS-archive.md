@@ -5,6 +5,47 @@ full history regardless.
 
 ---
 
+## R65 — [supervised session, 2026-09-07, unattended] **M62 `Cmd_trywish` leaf + green checkpoint (kill-pattern fixed in practice)**
+
+- **State:** `rust-main` = R64 checkpoint `114dfd07d` plus the verified Sonnet
+  worker `5f534382c` (fast-forward). The pure `B_SCR_OP_TRYWISH`
+  registration/handler projection is native and wasm32-compilable; no ABI,
+  adapter, recovery module, canonical TS, or npm file was touched. Session
+  still active; `Cmd_rolloutdamagecalculation` dispatching next.
+- **Did:** after ten scheduled sessions (2026-09-01 → 09-06) each died to the
+  launch-then-`end_turn` kill pattern on this exact step, this session held
+  its turn open across the whole worker run (blocking TaskOutput waits on a
+  tracked monitor) and the worker (claude-sonnet-5, 50-min cap, one commit,
+  ~20 min) landed it: two-instruction `0xd4` registration; mode 0 (attacker
+  role; pending-wish `wishCounter != 0` jump with rules unchanged, else
+  `wishCounter[attacker]=2`, `wishMonId[attacker]=partyIndex`, advance);
+  mode 1 (target role; both branches carry `battleMoveDamage =
+  -max(1, floor(maxHP/2))` and `battleTextBuff1MonNick = {target,
+  wishMonId[target]}`; full-HP lazy jump else advance). Canonical TS supplies
+  **658 behavior** and **6 registration** cases; corpus sha256
+  `e814a4fe03acf5b32c600b4b954599e1143ce1fb5f945751512ada6f550d1696`.
+- **Next:** dispatch `Cmd_rolloutdamagecalculation` (brief cached at
+  `/tmp/rust-briefs/rollout.txt`, citations re-verified this session), then
+  `Cmd_trysetrest` (`trysetrest.txt`), then the `Cmd_chargesport` family;
+  re-check ISSUES/PROGRESS for TS-lane activity before each. No deferral is
+  open.
+- **Notes:** supervisor audit covered control flow and verbatim error texts
+  against `battle_script_commands.c:9292-9323` and the TS module (including
+  the "a attacker" wording and jump-branch-only lazy label resolution), plus
+  generator provenance; independent regeneration was byte-identical.
+  Generated Rust is **2,843,760 bytes**, sha256
+  `b2a0780c8da93b6f22fef13fa886482be4f37d706619af1e0dcbf3818484c4b0`;
+  generator is **33,632 bytes**, sha256
+  `955f02de334a4603ee756cc14d3f551d6083a40fd9675990e961de832bc10ff9`.
+  Gates rerun on `rust-main` post-fold: **1,162/1,162** native (up from
+  1,145), fmt, strict workspace Clippy, wasm32 release; artifact **507,106
+  bytes**, sha256
+  `99c075becca05d185c36a8a6bc73021db8cc036a2ef1329dad1f14861d6f7bfc`.
+  `backup-refs.sh` pushed `rust-main` and the worker ref; its only rejection
+  was the animation lane's moving worker branch (theirs, non-blocking).
+  Worker fixed one clippy lifetime issue over the salvaged drafts and
+  corrected the drafted handler line range (9292-9323). R62 archived.
+
 ## R64 — [supervised session wind-down, 2026-08-31 08:24–~11:20 UTC, unattended] **M61 `Cmd_tryswapabilities` leaf + session close (six leaves folded)**
 
 - **State:** `rust-main` = master `3f76b234d` plus six verified Sonnet worker
