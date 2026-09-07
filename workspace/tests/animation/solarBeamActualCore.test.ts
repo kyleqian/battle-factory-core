@@ -15,23 +15,23 @@ describe("MOVE_SOLAR_BEAM retained actual-core comparator", () => {
       passes: 2,
       deterministic: true,
       totalRows: 536,
-      exactRows: 123,
-      residualRows: 413,
-      rowsSha256: "7f8a743a0c4ffa3faa86f61beee7e8b9bb2b4ec69668c3d20fc2ae319b596c97",
+      exactRows: 406,
+      residualRows: 130,
+      rowsSha256: "901957aea089ea8fb0ea48de80c2c8d8c605c3461d6959e33d8cb4182da0ee90",
       firstResidual: {
-        orientation: "player-back", body: "setup", age: 17, frame: 211,
-        differentPixels: 8, maxChannelDelta: 111,
-        bounds: { x0: 50, y0: 72, x1: 52, y1: 77 },
+        orientation: "player-back", body: "unleash", age: 23, frame: 661,
+        differentPixels: 1152, maxChannelDelta: 247,
+        bounds: { x0: 148, y0: 26, x1: 204, y1: 71 },
       },
       lastResidual: {
         orientation: "opponent-front", body: "unleash", age: 151, frame: 983,
-        differentPixels: 642, maxChannelDelta: 255,
+        differentPixels: 603, maxChannelDelta: 255,
         bounds: { x0: 43, y0: 71, x1: 103, y1: 111 },
       },
       maximumResidual: {
-        orientation: "player-back", body: "unleash", age: 90, frame: 728,
-        differentPixels: 1590, maxChannelDelta: 255,
-        bounds: { x0: 82, y0: 26, x1: 204, y1: 108 },
+        orientation: "player-back", body: "unleash", age: 146, frame: 784,
+        differentPixels: 1194, maxChannelDelta: 255,
+        bounds: { x0: 148, y0: 26, x1: 204, y1: 71 },
       },
     });
     expect(report.rows).toHaveLength(536);

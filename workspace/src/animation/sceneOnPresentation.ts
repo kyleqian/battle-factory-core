@@ -7214,6 +7214,7 @@ export function sceneOnSolarBeamView(
       state.config.target.geometry.side,
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
+      state.config.target.geometry.spriteCorner,
     ),
   };
 }
