@@ -111,6 +111,8 @@ pub mod battle_script_trysetmagiccoat;
 pub mod battle_script_trysetmagiccoat_vectors_gen;
 pub mod battle_script_trysetperishsong;
 pub mod battle_script_trysetperishsong_vectors_gen;
+pub mod battle_script_trysetrest;
+pub mod battle_script_trysetrest_vectors_gen;
 pub mod battle_script_trysetsnatch;
 pub mod battle_script_trysetsnatch_vectors_gen;
 pub mod battle_script_trysetspikes;
