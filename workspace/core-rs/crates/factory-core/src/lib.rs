@@ -17,6 +17,8 @@ pub mod battle_script_ai_reveal;
 pub mod battle_script_ai_reveal_vectors_gen;
 pub mod battle_script_battler_positions;
 pub mod battle_script_battler_positions_vectors_gen;
+pub mod battle_script_chargesport;
+pub mod battle_script_chargesport_vectors_gen;
 pub mod battle_script_confuseifrepeatingattackends;
 pub mod battle_script_confuseifrepeatingattackends_vectors_gen;
 pub mod battle_script_copyfoestats;
