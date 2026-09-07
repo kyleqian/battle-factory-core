@@ -5,6 +5,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R66 — [supervised session, 2026-09-07, unattended] **M63 `Cmd_rolloutdamagecalculation` leaf + green checkpoint**
+
+- **State:** `rust-main` = R65 checkpoint `ec2c211b5` plus the verified Sonnet
+  worker `966ca09ba` (fast-forward). The pure
+  `B_SCR_OP_ROLLOUTDAMAGECALCULATION` registration/handler projection —
+  including an in-module port of `CancelMultiTurnMoves`
+  (`battle_util.c:877-888`) applied to the attacker cell on the no-effect
+  branch — is native and wasm32-compilable; no ABI, adapter, recovery module,
+  canonical TS, or npm file was touched. Session still active;
+  `Cmd_trysetrest` dispatching as the final leaf.
+- **Did:** worker (claude-sonnet-5, 50-min cap, one commit, ~20 min) ported
+  the operandless single-start `0xb3` registration (count/opcode-id/
+  dispatcher/zero-operand shape errors), attacker-role-first ordering, the
+  no-effect branch (`moveResultFlags & ((1<<0)|(1<<3)|(1<<5))` → cancel
+  multi-turn state, late-resolved `BattleScript_MoveMissedPause` jump), and
+  the hit ladder: firstHit via `STATUS2_MULTIPLETURNS`, timer 5→0 with the
+  lock held until the last hit, firstHit-only `lockedMoves`/
+  `rolloutTimerStartValues` writes, the zero-timer premise error, and
+  `dynamicBasePower = power * 2^(hits-1)` doubled on post-update
+  `STATUS2_DEFENSE_CURL`. Canonical TS supplies **87 behavior** and **6
+  registration** cases; corpus sha256
+  `8bb284f294f3877e6f5ab27f700592cc344e7f746226b48683b4b866223b8017`.
+- **Next:** verify/fold the `Cmd_trysetrest` worker (brief
+  `/tmp/rust-briefs/trysetrest.txt`, citations re-verified this session) if
+  it lands green before the 19:01 UTC deadline; otherwise reject it unfolded.
+  After that: the `Cmd_chargesport` family, then re-scout remaining pure
+  leaves. No deferral is open.
+- **Notes:** supervisor audit covered the handler against
+  `battle_script_commands.c:8536-8569` and the TS module (post-update
+  Defense Curl read, lazy label resolution, firstHit gating), the
+  `CancelMultiTurnMoves` clear set, and generator provenance; independent
+  regeneration was byte-identical. Generated Rust is **422,366 bytes**,
+  sha256 `996d8e061ece91cb7627be76f4a7d54334f509776f174ea8be999428d78e9ccf`;
+  generator is **31,200 bytes**, sha256
+  `faec7431931cc0801b8e2b979cb297bc6d051c4669f309ab2e0925c29e026ae0`.
+  Worker notes: source `rolloutTimer` is a 4-bit bitfield (`battle.h:87`) so
+  generator noise masks to `0x0f`; `dynamic_base_power` kept `u32` per brief
+  (source stores u16 but the projection is unclamped, max 960). Gates rerun
+  on `rust-main` post-fold: **1,179/1,179** native, fmt, strict workspace
+  Clippy, wasm32 release; artifact **507,121 bytes**, sha256
+  `904e7165150ca188047f91c1a1d7e01abe62f02af92f0d8be267a2765aa37b17`. R63 archived.
+
 ## R65 — [supervised session, 2026-09-07, unattended] **M62 `Cmd_trywish` leaf + green checkpoint (kill-pattern fixed in practice)**
 
 - **State:** `rust-main` = R64 checkpoint `114dfd07d` plus the verified Sonnet
@@ -90,40 +132,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   cap expiries (14–35 min each). No npm gate required; no deferral or
   barrier added. R61 archived. PAPERCUT: none new (README Apple-path note
   from R57 still stands).
-
-## R63 — [supervised session, 2026-08-31, unattended] **M60 `Cmd_tryinfatuating` leaf + green checkpoint**
-
-- **State:** `rust-main` = R62 checkpoint `a87441049` plus the verified Sonnet
-  worker `2c3db4311` (fast-forward). The pure `B_SCR_OP_TRYINFATUATING`
-  registration/handler projection is native and wasm32-compilable, reusing
-  the existing `battle_script_gender` and `battle_script_ai_reveal` ports; no
-  ABI, adapter, recovery module, canonical TS, or npm file was touched.
-- **Did:** worker (claude-sonnet-5, 55-min cap, one commit) ported the
-  first-match registration (TS validates only presence), required
-  attacker/target roles, the Oblivious branch (`lastUsedAbility = 12`,
-  ability-reveal record, hardcoded `BattleScript_ObliviousPreventsAttraction`
-  pc 2996), the four-way non-short-circuit fail set (same gender, target
-  already infatuated by any battler, either genderless) to the operand label,
-  and the success write `status2 |= 1 << (16 + attacker)`. Canonical TS
-  supplies **953 behavior** and **3 registration** cases; corpus sha256
-  `74da7fe4ce04d2721a87ca45021bcc5f9639a4506840a939e8f59a4970b05a81`.
-- **Next:** at the next session merge master, re-run the four Rust gates,
-  and continue down the unported pure leaves: `Cmd_tryswapabilities`
-  (Skill Swap, two ability bytes), `Cmd_trywish`, then
-  `Cmd_rolloutdamagecalculation`; re-check ISSUES/PROGRESS for TS-lane
-  activity on each before briefing. No deferral is open.
-- **Notes:** supervisor audit covered branch order against
-  `battle_script_commands.c:7654-7696`, the infatuation bit/mask constants
-  (`battle.h:142-143`), reveal no-op semantics, and generator provenance;
-  independent regeneration was byte-identical. The worker reported the brief's
-  suggested gender-ratio class 225 does not exist in `species-stats.json`
-  (actual: 0/31/63/127/191/254/255) and covered 63 instead. Generated Rust is
-  **3,600,294 bytes**, sha256
-  `8a0c2e9f8deaeec3f2e22057c8d3ab19ca93401c4c0aae554f24659348ae7ee1`;
-  generator is **33,294 bytes**, sha256
-  `9296e023886c2b4d666c00e93d869a5ccfb3f83d3cd34f1a4132322bf57c9cfa`.
-  Gates in the worker tree and again on `rust-main`: **1,128/1,128**, fmt,
-  strict workspace Clippy, wasm32 release. Artifact is **507,097 bytes**,
-  sha256 `d8151da186000a2fa909f4ddc486cc2c2726048a71b8f8bb2ce46750fa8999f0`.
-  No npm gate required; no deferral or barrier added. R60 archived.
 

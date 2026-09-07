@@ -5,6 +5,42 @@ full history regardless.
 
 ---
 
+## R63 — [supervised session, 2026-08-31, unattended] **M60 `Cmd_tryinfatuating` leaf + green checkpoint**
+
+- **State:** `rust-main` = R62 checkpoint `a87441049` plus the verified Sonnet
+  worker `2c3db4311` (fast-forward). The pure `B_SCR_OP_TRYINFATUATING`
+  registration/handler projection is native and wasm32-compilable, reusing
+  the existing `battle_script_gender` and `battle_script_ai_reveal` ports; no
+  ABI, adapter, recovery module, canonical TS, or npm file was touched.
+- **Did:** worker (claude-sonnet-5, 55-min cap, one commit) ported the
+  first-match registration (TS validates only presence), required
+  attacker/target roles, the Oblivious branch (`lastUsedAbility = 12`,
+  ability-reveal record, hardcoded `BattleScript_ObliviousPreventsAttraction`
+  pc 2996), the four-way non-short-circuit fail set (same gender, target
+  already infatuated by any battler, either genderless) to the operand label,
+  and the success write `status2 |= 1 << (16 + attacker)`. Canonical TS
+  supplies **953 behavior** and **3 registration** cases; corpus sha256
+  `74da7fe4ce04d2721a87ca45021bcc5f9639a4506840a939e8f59a4970b05a81`.
+- **Next:** at the next session merge master, re-run the four Rust gates,
+  and continue down the unported pure leaves: `Cmd_tryswapabilities`
+  (Skill Swap, two ability bytes), `Cmd_trywish`, then
+  `Cmd_rolloutdamagecalculation`; re-check ISSUES/PROGRESS for TS-lane
+  activity on each before briefing. No deferral is open.
+- **Notes:** supervisor audit covered branch order against
+  `battle_script_commands.c:7654-7696`, the infatuation bit/mask constants
+  (`battle.h:142-143`), reveal no-op semantics, and generator provenance;
+  independent regeneration was byte-identical. The worker reported the brief's
+  suggested gender-ratio class 225 does not exist in `species-stats.json`
+  (actual: 0/31/63/127/191/254/255) and covered 63 instead. Generated Rust is
+  **3,600,294 bytes**, sha256
+  `8a0c2e9f8deaeec3f2e22057c8d3ab19ca93401c4c0aae554f24659348ae7ee1`;
+  generator is **33,294 bytes**, sha256
+  `9296e023886c2b4d666c00e93d869a5ccfb3f83d3cd34f1a4132322bf57c9cfa`.
+  Gates in the worker tree and again on `rust-main`: **1,128/1,128**, fmt,
+  strict workspace Clippy, wasm32 release. Artifact is **507,097 bytes**,
+  sha256 `d8151da186000a2fa909f4ddc486cc2c2726048a71b8f8bb2ce46750fa8999f0`.
+  No npm gate required; no deferral or barrier added. R60 archived.
+
 ## R62 — [supervised session, 2026-08-31, unattended] **M59 `Cmd_trysetperishsong` leaf + green checkpoint**
 
 - **State:** `rust-main` = R61 checkpoint `350b978a0` plus the verified Sonnet
