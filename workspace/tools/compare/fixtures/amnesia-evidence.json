@@ -1,0 +1,95 @@
+{
+  "schema": "amnesia-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_AMNESIA",
+  "moveId": 133,
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/amnesiaSourceAudit.ts",
+    "auditSha256": "c4d0df9c1948403cf67f097e3d75ca22946f2390929a0898640802e08a4bacdd",
+    "auditRunSha256": "b119dacaa72febbfcd8d44a295fd73b48bc5703ac3baefef161262c6f5fdd8ff",
+    "probe": "tools/compare/amnesiaProbe.py",
+    "probeSha256": "210af3804870182cf2e0208ef1f951954ea6d15633e8d94d5405869dba7512e7",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "frameChangeMap": "tools/compare/frame-changemap.py",
+    "frameChangeMapSha256": "e90c7a526f7933a204a4a2fdae556b67209b1baf51a66a7d2c7247231851331d"
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "completeRowsPerOrientation": 216,
+    "firstSourceActiveAge": 0,
+    "firstInactiveCleanupAge": 215,
+    "rawRgbRowsPerOrientation": 216,
+    "changedRowsPerOrientation": 142
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-amnesia-player-torkoal-opponent-onix.json",
+      "scenarioSha256": "24650663620c0398495e0365accb4f20e791bffa7772e657a69a25bbac0125fb",
+      "sourceWindow": {"startFrame": 205, "endFrame": 420, "frameCount": 216, "sourceFrameCount": 216},
+      "denseState": "tools/compare/evidence/amnesia-player-dense-state.json.gz",
+      "denseStateSha256": "ebfd7a81fe0df07ef7a42dd48c23e73e525740d250d574eb4ff7aeb80995c150",
+      "probeJsonSha256": "f70e23025a776d8f1d59059dcce3498be5786171924d35b22c5ac8d66540fc91",
+      "repeatProbeJsonSha256": "f70e23025a776d8f1d59059dcce3498be5786171924d35b22c5ac8d66540fc91",
+      "rawRgbArchive": "tools/compare/evidence/amnesia-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "1879ffba50dbba1e0ba222051c74281ca9bc58b30883be2596deddd5aeb64bae",
+      "rawRgbSequenceSha256": "d28e1dfc85c1d766e0ec337f58b27718a2799416e642428db8af36aafdb28212",
+      "repeatRawRgbSequenceSha256": "d28e1dfc85c1d766e0ec337f58b27718a2799416e642428db8af36aafdb28212",
+      "changeMap": "tools/compare/evidence/amnesia-changemap-player.txt",
+      "changeMapSha256": "9d3e9a6ccae8cad9aeed3a99932bb01d6cdeef9402be012740a608b709ec7a71",
+      "baselineFrameSha256": "cfad196debf7783c7d9558f1b5c553749259a923a1398e0e0308b6349e81dc93"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-amnesia-opponent-torkoal-player-onix.json",
+      "scenarioSha256": "95776b3f6973ede6d1192385bc31588f83aaf2b78805583aa8bf43f1711c43ee",
+      "sourceWindow": {"startFrame": 205, "endFrame": 420, "frameCount": 216, "sourceFrameCount": 216},
+      "denseState": "tools/compare/evidence/amnesia-opponent-dense-state.json.gz",
+      "denseStateSha256": "e138e4a774b382a447628ca79576c0e01341acbd416d2211cb3d18ce3d987d8d",
+      "probeJsonSha256": "d039cc3c69d30fd25d9fb1b6726dae16887bfe6fb8d05e984aa9415223092449",
+      "repeatProbeJsonSha256": "d039cc3c69d30fd25d9fb1b6726dae16887bfe6fb8d05e984aa9415223092449",
+      "rawRgbArchive": "tools/compare/evidence/amnesia-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "5344e298c0a89e7e4de45cd13ab3182088e03e8d54df4bdfab3ad04dc57a992e",
+      "rawRgbSequenceSha256": "44553996ee9379dc4ccf4a3405bdbbe1a44a7ff8122a49e95d773dae39e517aa",
+      "repeatRawRgbSequenceSha256": "44553996ee9379dc4ccf4a3405bdbbe1a44a7ff8122a49e95d773dae39e517aa",
+      "changeMap": "tools/compare/evidence/amnesia-changemap-opponent.txt",
+      "changeMapSha256": "8116f5349d1acc7ef37b41992683e57ab5ff88e73a18d2fbc8eb734b0146c735",
+      "baselineFrameSha256": "671fd79ed51bb450a86dc052d7acc74a0753a0d42f62e9e0534ecc94690214b6"
+    }
+  },
+  "measured": {
+    "questionMarkLifecycle": {"startAge": 52, "endAge": 174, "rows": 123},
+    "psychicBackgroundTaskLifecycle": {"startAge": 23, "endAge": 194, "rows": 172},
+    "resourceLifecycle": {"loadAge": 1, "lastLoadedAge": 214, "unloadedAge": 215},
+    "bgVramChangeAges": [23, 195],
+    "softwarePaletteChangeAges": {"unfaded": [1, 23, 196], "fadedFirst": 1, "fadedLast": 196},
+    "displayTransfers": {"oam": "215/215 predecessor", "matrices": "215/215 predecessor", "palette": "215/215 predecessor"},
+    "gameplayRngTransitions": 0,
+    "animationRngTransitions": 214,
+    "cleanup": {"age": 215, "active": false, "visualTaskCount": 0, "soundTaskCount": 0, "ownedSprites": 0, "ownedTasks": 0}
+  },
+  "controls": {
+    "hypnosis": "independent exact Gold Ring/target-side psychic-background control; no acceptance transfers",
+    "otherExactPsychicBackground": ["MOVE_CONFUSION", "MOVE_PSYCHIC", "MOVE_DREAM_EATER", "MOVE_PSYBEAM", "MOVE_LUSTER_PURGE"]
+  },
+  "evidenceScope": {
+    "completePointerBody": true,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true,
+    "rawRgbRowsRetained": true,
+    "frameChangeMapsRetained": true,
+    "legalBilateralPartyOnlyStaging": true,
+    "transientOverrides": [],
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "componentTrackCredit": false,
+    "latchPromotion": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "siblingAcceptance": false
+  },
+  "remainder": "MOVE_AMNESIA remains unsupported. Next port only its source-relative reducer, typed Scene-ON seam, extracted question-mark asset/compositor, then require complete twice-fresh bilateral zero-residual production framebuffer acceptance without inheriting Hypnosis."
+}
