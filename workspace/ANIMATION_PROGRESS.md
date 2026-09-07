@@ -1,3 +1,11 @@
+# Animation supervisor verification — MOVE_AMNESIA source / bilateral evidence checkpoint (2026-09-07 supervisor)
+
+- **State / merge:** Level 50 remains **234/276 exact**, **0 partial / 0 staged**, and **42 unsupported**. Fast-forwarded Sol/high commits `0dc4c1792` and `d9efd3eeb`; MOVE_AMNESIA remains unsupported, with no production, coverage, component-track, latch, boundary, barrier, or main-program document change.
+- **Independent evidence:** Supervisor-fresh complete legal party-only Scene-ON probes reproduce all **216 rows per orientation** through first inactive cleanup. Player-back state/raw-RGB digests are `f70e2302…` / `d28e1dfc…`; opponent-front digests are `d039cc3c…` / `44553996…`. The question mark lives ages **52..174**, psychic task **23..194**, resources **1..214**, and age **215** is fully clean; source audit pins the exact 10-component graph and all 13 Level-50 carriers.
+- **Review / scope:** The 14-file diff is evidence-only and retains raw receipts, normalized change maps, source/asset/callback/audio facts, and bilateral staging without adding a reducer, seam, compositor, fixture/RGB production read, absolute-frame branch, gameplay/RNG/controller/facility mutation, or acceptance borrowed from Hypnosis or another psychic-background move.
+- **Gates / next:** Worker-final and post-merge `npm test` each pass **1,276 files / 11,101 tests** (**44 files / 223 skipped**); both builds pass **766 modules**. Supervisor-focused verification passes **4 files / 14 tests** (**1 skipped**); coverage remains **234/276**, and animation audit, typecheck, archive verification, and diff checks pass. Next port only the source-relative reducer, typed Scene-ON seam, extracted question-mark compositor, and require twice-fresh **432/432** zero-residual actual-core proof plus a material altered live control before promotion.
+- **For the main program:** nothing blocking.
+
 # MOVE_AMNESIA independent source / bilateral evidence checkpoint (2026-09-07 worker)
 
 - **State:** Level 50 remains **234/276 exact**, **0 partial / 0 staged**, and **42 unsupported**. MOVE_AMNESIA remains unsupported: no coverage entry, component-track credit, reducer, seam, compositor, production wiring, or latch promotion was added; Hypnosis and the other named psychic-background controls retain only their independent exact acceptance.
