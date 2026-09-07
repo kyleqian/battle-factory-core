@@ -86,7 +86,6 @@ function sideSign(side: SolarBeamSide): 1 | -1 {
 }
 
 function sourceOrbOrigin(
-  side: SolarBeamSide,
   attackerCenter: Readonly<SolarBeamPoint>,
 ): SolarBeamPoint {
   // GetBattlerSpriteCoord(X_2, Y_PIC_OFFSET), followed by the command's
@@ -99,7 +98,7 @@ function unleashOrigin(
   side: SolarBeamSide,
   attackerCenter: Readonly<SolarBeamPoint>,
 ): SolarBeamPoint {
-  const origin = sourceOrbOrigin(side, attackerCenter);
+  const origin = sourceOrbOrigin(attackerCenter);
   return { x: origin.x + sideSign(side) * 15, y: origin.y };
 }
 
@@ -127,7 +126,7 @@ function absorptionOrbs(
   side: SolarBeamSide,
   attackerCenter: Readonly<SolarBeamPoint>,
 ): readonly SolarBeamOrb[] {
-  const origin = sourceOrbOrigin(side, attackerCenter);
+  const origin = sourceOrbOrigin(attackerCenter);
   const sign = sideSign(side);
   return ABSORPTION_OFFSETS.flatMap((offset, index) => {
     const start = 7 + index * 4;
@@ -154,8 +153,7 @@ function bigOrbs(
   targetCenter: Readonly<SolarBeamPoint>,
 ): readonly SolarBeamOrb[] {
   const start = unleashOrigin(side, attackerCenter);
-  const sign = sideSign(side);
-  return Array.from({ length: SOLAR_BEAM_UNLEASH_BIG_ORB_COUNT }, (_, index) => {
+  const orbs: Array<SolarBeamOrb | null> = Array.from({ length: SOLAR_BEAM_UNLEASH_BIG_ORB_COUNT }, (_, index): SolarBeamOrb | null => {
     const spawn = 4 + index * 6;
     const local = age - spawn;
     if (local < 0 || local > 20) return null;
@@ -167,7 +165,8 @@ function bigOrbs(
       frame: index % 7, matrix: [256, 0, 0, 256] as const,
       subpriority: side === "player" ? 37 : 27,
     };
-  }).filter((orb): orb is SolarBeamOrb => orb !== null);
+  });
+  return orbs.filter((orb): orb is SolarBeamOrb => orb !== null);
 }
 
 function smallOrbs(
@@ -177,8 +176,7 @@ function smallOrbs(
   targetCenter: Readonly<SolarBeamPoint>,
 ): readonly SolarBeamOrb[] {
   const start = unleashOrigin(side, attackerCenter);
-  const sign = sideSign(side);
-  return Array.from({ length: SOLAR_BEAM_UNLEASH_SMALL_ORB_COUNT }, (_, index) => {
+  const orbs: Array<SolarBeamOrb | null> = Array.from({ length: SOLAR_BEAM_UNLEASH_SMALL_ORB_COUNT }, (_, index): SolarBeamOrb | null => {
     const spawn = 4 + index * 7;
     const local = age - spawn;
     // The task-created first sprite runs its callback on the creation row;
@@ -194,7 +192,8 @@ function smallOrbs(
       frame: 7, matrix: [256, 0, 0, 256] as const,
       subpriority: side === "player" ? 46 : 36,
     };
-  }).filter((orb): orb is SolarBeamOrb => orb !== null);
+  });
+  return orbs.filter((orb): orb is SolarBeamOrb => orb !== null);
 }
 
 function setupPaletteCoefficient(age: number): number {
