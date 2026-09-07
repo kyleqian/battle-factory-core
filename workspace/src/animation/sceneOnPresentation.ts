@@ -574,6 +574,11 @@ import {
   type FocusPunchState,
 } from "./focusPunch.ts";
 import {
+  solarBeamAtAge,
+  type SolarBeamBody,
+  type SolarBeamState,
+} from "./solarBeam.ts";
+import {
   hiJumpKickAtAge,
   type HiJumpKickState,
 } from "./hiJumpKick.ts";
@@ -2233,6 +2238,15 @@ export interface SceneOnFocusPunchConfig {
   readonly fieldProfile: Readonly<SceneOnFocusPunchFieldProfile>;
 }
 
+/** Narrow Scene-ON seam for Solar Beam's source-isolated two-turn bodies. */
+export interface SceneOnSolarBeamConfig {
+  readonly move: "SOLAR_BEAM";
+  readonly body: SolarBeamBody;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 /** Narrow Scene-ON seam for the source-isolated Hi Jump Kick body. */
 export interface SceneOnHiJumpKickConfig {
   readonly move: "HI_JUMP_KICK";
@@ -3751,6 +3765,7 @@ export type SceneOnMoveConfig =
   | SceneOnMegaPunchConfig
   | SceneOnMegaKickConfig
   | SceneOnFocusPunchConfig
+  | SceneOnSolarBeamConfig
   | SceneOnHiJumpKickConfig
   | SceneOnRollingKickConfig
   | SceneOnLowKickConfig
@@ -4251,6 +4266,11 @@ export interface SceneOnMegaKickView extends MegaKickState {
 
 export interface SceneOnFocusPunchView extends FocusPunchState {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSolarBeamView extends SolarBeamState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -5660,7 +5680,7 @@ export function createSceneOnMovePresentation<
     | SceneOnRecycleConfig
     | SceneOnBiteConfig
     | SceneOnHeadbuttConfig | SceneOnSubmissionConfig | SceneOnDrillPeckConfig
-    | SceneOnBodySlamConfig | SceneOnSlamConfig
+  | SceneOnBodySlamConfig | SceneOnSlamConfig
     | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
     | SceneOnIronDefenseConfig
@@ -7172,6 +7192,27 @@ export function sceneOnFocusPunchView(
     ...focusPunchAtAge(
       state.age,
       state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first display of the selected Solar Beam source body. */
+export function sceneOnSolarBeamView(
+  state: SceneOnMovePresentationState<SceneOnSolarBeamConfig>,
+): SceneOnSolarBeamView {
+  if (state.config.move !== "SOLAR_BEAM") {
+    throw new Error(`expected SOLAR_BEAM presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...solarBeamAtAge(
+      state.age,
+      state.config.body,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
+      state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
     ),
   };

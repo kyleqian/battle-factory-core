@@ -583,6 +583,7 @@ import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import megaPunchAsset from "../animation/assets/megaPunch.json" with { type: "json" };
+import solarBeamAsset from "../animation/assets/solar-beam.json" with { type: "json" };
 import guillotineAsset from "../animation/assets/guillotine.json" with { type: "json" };
 import rollingKickAsset from "../animation/assets/rollingKick.json" with { type: "json" };
 import lowKickAsset from "../animation/assets/lowKick.json" with { type: "json" };
@@ -937,6 +938,7 @@ import {
   sceneOnMegaPunchView,
   sceneOnMegaKickView,
   sceneOnFocusPunchView,
+  sceneOnSolarBeamView,
   sceneOnHiJumpKickView,
   sceneOnRollingKickView,
   sceneOnLowKickView,
@@ -1104,6 +1106,7 @@ import {
   type SceneOnHiddenPowerConfig,
   type SceneOnLeerConfig,
   type SceneOnFocusPunchConfig,
+  type SceneOnSolarBeamConfig,
   type SceneOnHiJumpKickConfig,
   type SceneOnKarateChopConfig,
   type SceneOnBatonPassConfig,
@@ -2017,6 +2020,15 @@ const hyperFangArt = hyperFangAsset as {
 const megaPunchArt = megaPunchAsset as {
   cacturneBack: { tileset: Tileset; palette: RgbColor[] };
   cacturneFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const solarBeamArt = solarBeamAsset as {
+  orbs: { tileset: Tileset; palette: RgbColor[] };
+  background: {
+    tileset: Tileset;
+    palette: RgbColor[];
+    opponentTilemap: Tilemap;
+    playerTilemap: Tilemap;
+  };
 };
 const guillotineArt = guillotineAsset as {
   background: {
@@ -27215,6 +27227,140 @@ export function renderSceneOnMovePresentation(
       moveName,
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "SOLAR_BEAM") {
+    const solarState = state as SceneOnMovePresentationState<SceneOnSolarBeamConfig>;
+    const view = sceneOnSolarBeamView(solarState);
+    // Solar's source callbacks write gSprites/OAM and palette RAM before the
+    // next VBlank.  Keep the move-owned predecessor latch local to this
+    // branch; the BG register handoff is read from the current source row.
+    const displayed = sceneOnSolarBeamView({
+      ...solarState,
+      age: solarState.age - 1,
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SOLAR_BEAM presentation requires opposite battler sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SOLAR_BEAM missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const black: RgbColor = { r: 0, g: 0, b: 0 };
+    const yellow: RgbColor = { r: 248, g: 248, b: 88 };
+    const green: RgbColor = { r: 200, g: 248, b: 0 };
+    const darken = (palette: readonly RgbColor[]) => palette.map((color) => {
+      const packed = mgbaDarkenColor(
+        color.r | (color.g << 8) | (color.b << 16),
+        view.background.bldy,
+      );
+      return { r: packed & 0xff, g: (packed >>> 8) & 0xff, b: (packed >>> 16) & 0xff };
+    });
+    if (view.background.impact) {
+      const palette = darken(solarBeamArt.background.palette);
+      fillFramebuffer(fb, palette[0]!.r, palette[0]!.g, palette[0]!.b);
+      drawExtractedTileBg(fb, {
+        tileset: solarBeamArt.background.tileset,
+        tilemap: view.background.variant === "player"
+          ? solarBeamArt.background.playerTilemap
+          : solarBeamArt.background.opponentTilemap,
+        subpalettes: [palette],
+      });
+    }
+    if (!view.background.impact) {
+      drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap,
+        blendPaletteBanksToward(battleBg.palette, black, view.background.bldy));
+    }
+    const attackerPalette = displayed.paletteBlend
+      ? blendPaletteToward(attackerArt.palette, yellow, displayed.paletteBlend.coefficient)
+      : attackerArt.palette;
+    const targetPalette = displayed.targetPaletteBlend
+      ? blendPaletteToward(targetArt.palette, green, displayed.targetPaletteBlend.coefficient)
+      : targetArt.palette;
+    const targetOffset = displayed.targetOnMonBg ? displayed.targetOffset : { x2: 0, y2: 0 };
+    const drawTarget = (): void => drawSpriteSheet(
+      fb, tilesFor(targetArt, view.target.geometry.side), targetPalette,
+      view.target.geometry.spriteCorner.x + targetOffset.x2,
+      view.target.geometry.spriteCorner.y + targetOffset.y2,
+    );
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerPalette,
+      view.attacker.geometry.spriteCorner.x, view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.targetOnMonBg) {
+      drawTarget();
+    }
+    const targetBackdrop = fb.slice();
+    drawAttacker();
+    if (!displayed.targetOnMonBg) drawTarget();
+    const orbPalette = solarBeamArt.orbs.palette;
+    const bigSmall: Array<{ orb: (typeof view.bigOrbs)[number]; small: boolean }> = [
+      ...displayed.bigOrbs.map((orb) => ({ orb, small: false })),
+      ...displayed.smallOrbs.map((orb) => ({ orb, small: true })),
+    ];
+    for (const { orb, small } of bigSmall) {
+      const tile = solarBeamArt.orbs.tileset.tiles[orb.frame];
+      if (!tile) throw new Error(`SOLAR_BEAM missing orb frame ${orb.frame}`);
+      drawSpriteSheet(
+        fb, { columns: 1, rows: 1, tiles: [tile] }, orbPalette,
+        orb.x + orb.x2 - 4, orb.y + orb.y2 - 4,
+      );
+      if (small) {
+        // Small orbs are OBJ_NORMAL and intentionally remain above the big
+        // orb only through source subpriority; their stable order is creation
+        // order, which this loop preserves.
+      }
+    }
+    const absorptionTiles = subTileset(solarBeamArt.orbs.tileset, 4, 2);
+    for (const orb of displayed.absorptionOrbs) {
+      const draw = () => drawSpriteSheetAffineRotate(
+        fb, absorptionTiles, orbPalette,
+        orb.x + orb.x2, orb.y + orb.y2,
+        orb.matrix[0], orb.matrix[1], orb.matrix[2], orb.matrix[3], undefined, false,
+      );
+      if (displayed.alpha) {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb, targetBackdrop, absorptionTiles, orbPalette,
+          orb.x + orb.x2, orb.y + orb.y2,
+          orb.matrix[0], orb.matrix[1], orb.matrix[2], orb.matrix[3],
+          displayed.alpha.eva, displayed.alpha.evb, false,
+        );
+      } else {
+        draw();
+      }
+    }
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = solarState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    if (view.body === "unleash") {
+      drawMessageTextLines(
+        fb,
+        view.attacker.geometry.side === "player"
+          ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+        "SOLAR BEAM!", 99,
+      );
+    }
     return;
   }
 
