@@ -1,3 +1,10 @@
+# Animation supervisor verification — MOVE_DRAGON_DANCE source / legal staging checkpoint (2026-09-07 supervisor)
+
+- **State / merge:** Level 50 remains **235/276 exact**, **0 partial / 0 staged**, and **41 unsupported**. Fast-forwarded Sol/high commit `48fd8c491`; MOVE_DRAGON_DANCE remains unsupported with no production, coverage, component-track, latch, boundary, barrier, gameplay, or sibling credit.
+- **Independent review:** The five-file diff contains only the animation ledger, deterministic source audit, two complete legal party-only Scene-ON scenarios, and six focused tests. Supervisor reran the audit twice byte-identically: root **`0x082cf3b3..0x082cf422`**, **111 ROM bytes** (`ffc1fe74…`), **875 source bytes** (`5e33b5ec…`), 22 commands, exact seven-component graph, 14 Level-50 sets / 10 species, and lowest carrier set 306 DRAGONAIR_2. Both bilateral scenarios remain transient-free and validator-clean.
+- **Gates / next:** Worker `npm test` passes **1,278 files / 11,109 tests** (**44 files / 223 skipped**) and build passes **768 modules**. Supervisor source/coverage/boundary/frontier verification passes **3 files / 15 tests**; post-merge build again passes **768 modules**; coverage remains **235/276**, and animation audit, typecheck, and diff checks pass. Next add a narrow pointer-isolated probe and retain the complete bilateral first-active-through-first-inactive Dragon Dance windows twice before any reducer, compositor, promotion, or shared credit.
+- **For the main program:** nothing blocking.
+
 # MOVE_DRAGON_DANCE source / legal staging checkpoint (2026-09-07 worker)
 
 - **State:** Level 50 remains **235/276 exact**, **0 partial / 0 staged**, and **41 unsupported**. MOVE_DRAGON_DANCE remains unsupported; no production reducer/seam/compositor, coverage, component-track, latch, boundary, barrier, gameplay, or sibling credit was added.
