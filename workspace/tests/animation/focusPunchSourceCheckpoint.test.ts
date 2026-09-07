@@ -440,7 +440,7 @@ describe("MOVE_FOCUS_PUNCH source/classification and legal Scene-ON staging chec
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "contest-target-side-impact-bg");
     expect(track.fulfilled ?? false).toBe(false);
     expect(track.goal).toContain("MOVE_FOCUS_PUNCH independently proves");
-    expect(track.goal).toContain("MOVE_SOLAR_BEAM still lacks");
+    expect(track.goal).toContain("MOVE_SOLAR_BEAM now has a retained unsupported two-turn source/RGB/change-map checkpoint");
     expect(JSON.stringify(coverage.entries.find((entry: Json) => entry.move === "MOVE_FOCUS_ENERGY"))).not.toContain("HyperVoiceEffect");
     expect(JSON.stringify(coverage.entries.find((entry: Json) => entry.move === "MOVE_ENDURE"))).not.toContain("HyperVoiceEffect");
   });
