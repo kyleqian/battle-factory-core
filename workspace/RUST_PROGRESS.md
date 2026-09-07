@@ -5,6 +5,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R67 — [supervised session, 2026-09-07, unattended] **M64 `Cmd_trysetrest` leaf + green checkpoint**
+
+- **State:** `rust-main` = R66 checkpoint `f46f234a8` plus the verified Sonnet
+  worker `dc692d9d5` (fast-forward). The pure `B_SCR_OP_TRYSETREST`
+  registration/handler projection is native and wasm32-compilable; no ABI,
+  adapter, recovery module, canonical TS, or npm file was touched. Session
+  still active; the `Cmd_chargesport` family dispatching as the final leaf.
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  ~25 min) ported the find-first presence-only registration (`0x81` in the
+  committed program), the attacker-role requirement ("an attacker"), the
+  UNCONDITIONAL target-role collapse + `battleMoveDamage = -maxHP` writes on
+  both branches, the full-HP lazy fail-jump, and the success path:
+  `multistringChooser = (status1 & ~7) != 0 ? 1 : 0`, status1 REPLACED with
+  `STATUS1_SLEEP_TURN(3)` = 3 (cures prior status in the same write), the
+  (side, partyIndex) party-mirror write, and exactly one
+  `set-battler-status-data` event. Canonical TS supplies **109 behavior**
+  and **3 registration** cases; corpus sha256 `59bb3a8e3d36d1e7f0a0558522ab7c1eef5355e6cb833552459433f3d0b00c82`.
+- **Next:** verify/fold the `Cmd_chargesport` worker (brief
+  `/tmp/rust-briefs/chargesport.txt`, citations re-verified before dispatch)
+  if it lands green with margin before the 19:01 UTC deadline; otherwise
+  reject it unfolded. After that: re-scout remaining pure leaves
+  (`jumpifbyte`/`jumpifhalfword`/`jumpifword` still need a barrier-projection
+  decision first). No deferral is open.
+- **Notes:** supervisor audit covered the handler against
+  `battle_script_commands.c:6762-6784` (including the `(u8)(~STATUS1_SLEEP)`
+  chooser subtlety — corpus stays in u8 range; TS is the corpus oracle) and
+  generator provenance; independent regeneration was byte-identical.
+  Generated Rust is **952,476 bytes**, sha256 `7dc50e6865c45244ac488636138a98e794b69fa1f3973c8a354b3ddbab64a364`; generator is
+  **27,270 bytes**, sha256 `4beebc9980de9510af6f9f43769fea424dbcaa0c42565dd08b8aeb9a1df53199`. Gates rerun on `rust-main` post-fold: **1,197/1,197** native, fmt, strict
+  workspace Clippy, wasm32 release; artifact **507,121 bytes**, sha256
+  `017d9b6af8d27a1a89b795a70e4e56c1b6bcd53a9cb1cd6fd1678be9aa0deb5c`.
+  Worker notes: the registration is genuinely presence-only find-first
+  (mirrors tryinfatuating, unlike the cardinality-checked siblings), the
+  error text is "an attacker" (not the siblings' "a attacker"), and the
+  unchecked TS `operands[0]` read is a typed MissingOperand error covered by
+  a unit test only. No npm gate required; no deferral or barrier added. R64
+  archived.
+
 ## R66 — [supervised session, 2026-09-07, unattended] **M63 `Cmd_rolloutdamagecalculation` leaf + green checkpoint**
 
 - **State:** `rust-main` = R65 checkpoint `ec2c211b5` plus the verified Sonnet
@@ -87,49 +125,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   was the animation lane's moving worker branch (theirs, non-blocking).
   Worker fixed one clippy lifetime issue over the salvaged drafts and
   corrected the drafted handler line range (9292-9323). R62 archived.
-
-## R64 — [supervised session wind-down, 2026-08-31 08:24–~11:20 UTC, unattended] **M61 `Cmd_tryswapabilities` leaf + session close (six leaves folded)**
-
-- **State:** `rust-main` = master `3f76b234d` plus six verified Sonnet worker
-  fast-forwards this session — `ee7acdbed` jumpifstatus3condition,
-  `62591d659` jumpifstat, `bd5177a27` getsecretpowereffect, `91b6bbab6`
-  trysetperishsong, `2c3db4311` tryinfatuating, `018b84cc2`
-  tryswapabilities — each followed by its ledger commit and a successful
-  `backup-refs.sh` push. Tree clean, committed, green; no worker worktree or
-  branch left behind. No ABI, adapter, recovery module, canonical TS, or npm
-  file was touched all session, so the main supervisor's fold is
-  `core-rs/**` + `RUST_PROGRESS*.md` only.
-- **Did (this step):** worker (claude-sonnet-5, 40-min cap, one commit,
-  14 min) ported Skill Swap's single-start registration (opcode `0xDA`, one
-  4-byte failure operand), the required attacker/target roles, the four-way
-  fail set (both `ABILITY_NONE`, either Wonder Guard 25,
-  `moveResultFlags & MOVE_RESULT_NO_EFFECT`) to the late-resolved operand
-  label, and the two-byte ability swap on advance. Canonical TS supplies
-  **262 behavior** and **10 registration** cases; corpus sha256
-  `b9550f749d80ecf2f3be66bc51227b6e34512db7253f7ec191dbbf06b47ed801`.
-- **Next:** merge master, re-run the four Rust gates, then continue the pure
-  Battle Script leaf ladder: `Cmd_trywish` (two-mode, 6-byte instruction),
-  `Cmd_rolloutdamagecalculation`, `Cmd_trysetrest`, `Cmd_chargesport`
-  family; re-check ISSUES/PROGRESS for TS-lane activity on each before
-  briefing. Remaining candidates with `unsupported-branch` barriers
-  (`jumpifbyte`/`jumpifhalfword`/`jumpifword`) need a barrier-projection
-  decision first — record it in `RUST_DEFERRED.md` if it cannot be made in
-  session. No deferral is open.
-- **Notes:** supervisor audit covered the fail predicate against
-  `battle_script_commands.c:9392-9410`, `MOVE_RESULT_NO_EFFECT` composition
-  (`battle.h:220/223/225/228` = `0x29`), swap-only mutation, and generator
-  provenance; independent regeneration was byte-identical. Generated Rust is
-  **584,015 bytes**, sha256
-  `93f83c80d8719d7d61e454002098ce2ef1c86827966f41733d0837dd289dd883`;
-  generator is **29,907 bytes**, sha256
-  `3de44a7da23f932577d063e3e509aafd0afaba79ee82d9867c928734dd0b342a`.
-  Final gates on `rust-main`: **1,145/1,145** native (up from 1,068 at
-  orient), `cargo fmt --check`, strict workspace Clippy (per worker tree;
-  content identical after fast-forward), wasm32 release. Artifact is
-  **507,106 bytes**, sha256
-  `72f27adf8d511712d939627b6ab6a19b597a1a475efe7cf6764cecb766080b9c`.
-  Session-wide: six Sonnet workers, six commits, zero rejections, zero
-  cap expiries (14–35 min each). No npm gate required; no deferral or
-  barrier added. R61 archived. PAPERCUT: none new (README Apple-path note
-  from R57 still stands).
 

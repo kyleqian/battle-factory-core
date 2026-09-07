@@ -5,6 +5,51 @@ full history regardless.
 
 ---
 
+## R64 — [supervised session wind-down, 2026-08-31 08:24–~11:20 UTC, unattended] **M61 `Cmd_tryswapabilities` leaf + session close (six leaves folded)**
+
+- **State:** `rust-main` = master `3f76b234d` plus six verified Sonnet worker
+  fast-forwards this session — `ee7acdbed` jumpifstatus3condition,
+  `62591d659` jumpifstat, `bd5177a27` getsecretpowereffect, `91b6bbab6`
+  trysetperishsong, `2c3db4311` tryinfatuating, `018b84cc2`
+  tryswapabilities — each followed by its ledger commit and a successful
+  `backup-refs.sh` push. Tree clean, committed, green; no worker worktree or
+  branch left behind. No ABI, adapter, recovery module, canonical TS, or npm
+  file was touched all session, so the main supervisor's fold is
+  `core-rs/**` + `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 40-min cap, one commit,
+  14 min) ported Skill Swap's single-start registration (opcode `0xDA`, one
+  4-byte failure operand), the required attacker/target roles, the four-way
+  fail set (both `ABILITY_NONE`, either Wonder Guard 25,
+  `moveResultFlags & MOVE_RESULT_NO_EFFECT`) to the late-resolved operand
+  label, and the two-byte ability swap on advance. Canonical TS supplies
+  **262 behavior** and **10 registration** cases; corpus sha256
+  `b9550f749d80ecf2f3be66bc51227b6e34512db7253f7ec191dbbf06b47ed801`.
+- **Next:** merge master, re-run the four Rust gates, then continue the pure
+  Battle Script leaf ladder: `Cmd_trywish` (two-mode, 6-byte instruction),
+  `Cmd_rolloutdamagecalculation`, `Cmd_trysetrest`, `Cmd_chargesport`
+  family; re-check ISSUES/PROGRESS for TS-lane activity on each before
+  briefing. Remaining candidates with `unsupported-branch` barriers
+  (`jumpifbyte`/`jumpifhalfword`/`jumpifword`) need a barrier-projection
+  decision first — record it in `RUST_DEFERRED.md` if it cannot be made in
+  session. No deferral is open.
+- **Notes:** supervisor audit covered the fail predicate against
+  `battle_script_commands.c:9392-9410`, `MOVE_RESULT_NO_EFFECT` composition
+  (`battle.h:220/223/225/228` = `0x29`), swap-only mutation, and generator
+  provenance; independent regeneration was byte-identical. Generated Rust is
+  **584,015 bytes**, sha256
+  `93f83c80d8719d7d61e454002098ce2ef1c86827966f41733d0837dd289dd883`;
+  generator is **29,907 bytes**, sha256
+  `3de44a7da23f932577d063e3e509aafd0afaba79ee82d9867c928734dd0b342a`.
+  Final gates on `rust-main`: **1,145/1,145** native (up from 1,068 at
+  orient), `cargo fmt --check`, strict workspace Clippy (per worker tree;
+  content identical after fast-forward), wasm32 release. Artifact is
+  **507,106 bytes**, sha256
+  `72f27adf8d511712d939627b6ab6a19b597a1a475efe7cf6764cecb766080b9c`.
+  Session-wide: six Sonnet workers, six commits, zero rejections, zero
+  cap expiries (14–35 min each). No npm gate required; no deferral or
+  barrier added. R61 archived. PAPERCUT: none new (README Apple-path note
+  from R57 still stands).
+
 ## R63 — [supervised session, 2026-08-31, unattended] **M60 `Cmd_tryinfatuating` leaf + green checkpoint**
 
 - **State:** `rust-main` = R62 checkpoint `a87441049` plus the verified Sonnet
