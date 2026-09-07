@@ -681,6 +681,8 @@ import confuseRayAsset from "../animation/assets/confuse-ray.json" with { type: 
 import fissureAsset from "../animation/assets/fissure.json" with { type: "json" };
 import { fissureDirtPainterOrder } from "../animation/fissure.ts";
 import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
+import amnesiaAsset from "../animation/assets/amnesia.json" with { type: "json" };
+import { amnesiaBgPaletteRowAtAge } from "../animation/amnesia.ts";
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
@@ -1061,6 +1063,7 @@ import {
   sceneOnStunSporeView,
   sceneOnSleepPowderView,
   sceneOnHypnosisView,
+  sceneOnAmnesiaView,
   sceneOnPsybeamView,
   sceneOnPerishSongView,
   sceneOnNeedleArmView,
@@ -1151,6 +1154,7 @@ import {
   type SceneOnStunSporePresentationState,
   type SceneOnSleepPowderPresentationState,
   type SceneOnHypnosisPresentationState,
+  type SceneOnAmnesiaPresentationState,
   type SceneOnPsybeamPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnFireBlastConfig,
@@ -31092,6 +31096,107 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "HOPPIP used" : "Foe HOPPIP used",
       sleepPowder ? "SLEEP POWDER!" : "STUN SPORE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "AMNESIA") {
+    const amnesiaState = state as SceneOnAmnesiaPresentationState;
+    const view = sceneOnAmnesiaView(amnesiaState);
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("AMNESIA presentation requires battlers on opposite sides");
+    }
+    const artFor = (battler: typeof view.attacker): BattleBackSpriteAsset => {
+      if (battler.geometry.side === "player") {
+        const art = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species];
+        if (!art) throw new Error(`AMNESIA missing player-back art for ${battler.species}`);
+        return art;
+      }
+      const art = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`AMNESIA missing opponent-front art for ${battler.species}`);
+      return { ...art, tileset: subTileset(art.tileset, 0, 8) };
+    };
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.bgBldy,
+        );
+        return { r: packed & 0xff, g: (packed >>> 8) & 0xff, b: (packed >>> 16) & 0xff };
+      });
+    if (view.bgIsPsychic) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimPsychicBg.tileset,
+        tilemap: battleAnimPsychicBg.tilemap,
+        subpalettes: [gpuDarken(amnesiaBgPaletteRowAtAge(
+          battleAnimPsychicBg.palette,
+          view.displayedBgPaletteAge,
+        ))],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+    const drawBattler = (battler: typeof view.attacker, art: BattleBackSpriteAsset) => {
+      const idle = battler.geometry.side === "opponent"
+        ? speciesFrontIdleRestOffsetOrZero(battler.species)
+        : { x2: 0, y2: 0 };
+      drawSpriteSheet(
+        fb, art.tileset, art.palette,
+        battler.geometry.spriteCorner.x + idle.x2,
+        battler.geometry.spriteCorner.y + idle.y2,
+      );
+    };
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    drawBattler(opponent, opponent === view.attacker ? attackerArt : targetArt);
+    drawBattler(player, player === view.attacker ? attackerArt : targetArt);
+    if (view.displayedQuestionMark) {
+      const mark = view.displayedQuestionMark;
+      const frameTiles = subTileset(amnesiaAsset.questionMark.tileset, mark.frame * 4, 4);
+      if (mark.affine) {
+        drawSpriteSheetAffineRotate(
+          fb, frameTiles, amnesiaAsset.questionMark.palette,
+          mark.x, mark.y,
+          mark.matrix[0], mark.matrix[1], mark.matrix[2], mark.matrix[3],
+          undefined, false,
+        );
+      } else {
+        drawSpriteSheet(
+          fb, frameTiles, amnesiaAsset.questionMark.palette,
+          mark.x - 16, mark.y - 16,
+        );
+      }
+    }
+    const profile = amnesiaState.config.fieldProfile;
+    const opponentSpecies = opponent.species;
+    const playerSpecies = player.species;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used`
+        : `Foe ${view.attacker.species} used`,
+      "AMNESIA!",
       99,
     );
     return;

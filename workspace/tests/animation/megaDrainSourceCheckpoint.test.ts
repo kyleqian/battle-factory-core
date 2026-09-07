@@ -144,8 +144,8 @@ describe("MOVE_MEGA_DRAIN source and legal staging checkpoint", () => {
     expect(coverage.entries.find((entry) => entry.move === "MOVE_DREAM_EATER"))
       .toMatchObject({ status: "exact" });
     expect(coverage.queue).not.toContain("MOVE_MEGA_DRAIN");
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(234);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(235);
     const report = execFileSync("npm", ["run", "animation:coverage", "--silent"], { encoding: "utf8" });
-    expect(report).toContain("Level 50: 234/276 exact, 0 partial, 0 staged, 42 unsupported");
+    expect(report).toContain("Level 50: 235/276 exact, 0 partial, 0 staged, 41 unsupported");
   });
 });

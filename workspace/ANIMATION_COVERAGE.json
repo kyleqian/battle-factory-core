@@ -2,6 +2,37 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_AMNESIA",
+   "status": "exact",
+   "covered": [
+    "the exact ten-component Move_AMNESIA graph is source-audited: ANIM_TAG_AMNESIA, gQuestionMarkSpriteTemplate, SetPsychicBackground/UnsetPsychicBackground, AnimTask_SetPsychicBackground, fadetobg/restorebg/setarg/waitbgfadein/waitbgfadeout",
+    "complete legal bilateral party-only Battle Scene ON windows retain every age 0..215 through first inactive cleanup: player-back frames 205..420 and opponent-front frames 205..420, with 216/216 raw/state rows per orientation and byte-identical repeat receipts",
+    "the source-relative reducer and typed seam model question-mark animation and affine callbacks, predecessor OAM/matrix display, side-relative width/height anchoring and y clamp, psychic BG palette rotation and fade ramps, task/resource/audio/animation-RNG state, teardown, and cleanup without gameplay ownership",
+    "two fresh actual-core comparator processes each pass all 432/432 retained framebuffer rows with zero residual pixels; rows digest cac83ed5dec881b743662f86f6142efdb01916dc0919c403dd584b1331db0637 and a RELICANTH altered-species/geometry/picture-size control is deterministic and material",
+    "Hypnosis and every existing exact psychic-background move remain independently accepted; Amnesia grants no sibling, component-track fulfillment, or latch credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-amnesia-player-torkoal-opponent-onix.json",
+    "tools/battle-lab/mechanic-amnesia-opponent-torkoal-player-onix.json",
+    "tools/compare/amnesiaSourceAudit.ts",
+    "tools/compare/amnesiaProbe.py",
+    "tools/compare/amnesiaEvidence.ts",
+    "tools/compare/amnesiaActualCore.ts",
+    "tools/compare/extractAmnesiaAssets.ts",
+    "tools/compare/fixtures/amnesia-evidence.json",
+    "tools/compare/evidence/amnesia-player-dense-state.json.gz",
+    "tools/compare/evidence/amnesia-opponent-dense-state.json.gz",
+    "tools/compare/evidence/amnesia-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/amnesia-opponent-raw-rgb.tar.gz",
+    "src/animation/assets/amnesia.json",
+    "src/animation/amnesia.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/amnesia.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_DIVE",
    "status": "exact",
    "covered": [

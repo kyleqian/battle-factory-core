@@ -537,7 +537,7 @@ describe("blue-orb-reversal-evidence standalone fulfilled component-track ratche
     expect(trackGoal).toContain("Reversal grants Swallow no HANDS_AND_FEET, IMPACT, lunge, fist, hitsplat, palette, shake, random, timing, or acceptance fact");
   });
 
-  it("fulfills only the unchanged exact ten-component boundary at 234/276 and grants no move or sibling credit", () => {
+  it("fulfills only the unchanged exact ten-component boundary at 235/276 and grants no move or sibling credit", () => {
     const coverage = json<{
       readonly entries: readonly { readonly move: string; readonly status: string; readonly covered: readonly string[] }[];
       readonly componentTracks: readonly unknown[];
@@ -547,9 +547,9 @@ describe("blue-orb-reversal-evidence standalone fulfilled component-track ratche
     );
     const level50Moves = new Set(inventory.tiers.level50.moves.map((entry) => entry.move));
     expect(level50Moves.size).toBe(276);
-    expect(coverage.entries).toHaveLength(234);
+    expect(coverage.entries).toHaveLength(235);
     expect(coverage.entries.filter((entry) => level50Moves.has(entry.move) && entry.status === "exact"))
-      .toHaveLength(234);
+      .toHaveLength(235);
     expect(coverage.entries.filter((entry) => level50Moves.has(entry.move)
       && (entry.status === "partial" || entry.status === "staged"))).toEqual([]);
     const reversal = coverage.entries.find((entry) => entry.move === "MOVE_REVERSAL")!;

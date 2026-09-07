@@ -28,10 +28,10 @@ function validateStage(path: string) {
   ].join("\n"), oracleDirectory(), resolve(root, path)], { cwd: root, encoding: "utf8" });
 }
 
-describe("MOVE_AMNESIA independent source and bilateral Scene-ON evidence checkpoint", () => {
+describe("MOVE_AMNESIA independent source and bilateral Scene-ON acceptance", () => {
   it("pins both pointer-owned ROM/source intervals and exactly ten generated components", () => {
     expect(audit()).toMatchObject({
-      move: "MOVE_AMNESIA", moveId: 133, status: "unsupported", coverageCredit: false,
+      move: "MOVE_AMNESIA", moveId: 133, status: "exact", coverageCredit: true,
       pointerOwned: {
         root: { start: "0x082cd055", endExclusive: "0x082cd079", byteLength: 36, romSha256: "dae2bb84a24a842637984bcbcaeed79d207a75e8bbd9d0caced8303ad4f486c4", sourceByteLength: 316, sourceSha256: "46d215b42fda8119c3b5cd9c200ee4275b963d5ca203c14415b11f71883b9ba5" },
         psychicBackground: { start: "0x082d7cd1", endExclusive: "0x082d7ce5", byteLength: 20, romSha256: "1639a9d5f5e5ea2a60a8fc5ca63e4726ba034725d265298942f57cf98170d968", sourceByteLength: 223, sourceSha256: "65d64577e4f4fd01582f21f7b717fad25008a238ac11624c89b01ac092ad3ffa" },
@@ -112,15 +112,15 @@ describe("MOVE_AMNESIA independent source and bilateral Scene-ON evidence checkp
     expect(stage.trace).not.toHaveProperty("captureFrames");
   });
 
-  it("replays every retained state/RGB/change-map row and keeps Amnesia unsupported", () => {
+  it("replays every retained state/RGB/change-map row and promotes only Amnesia", () => {
     const first = verifyAmnesiaEvidence(), second = verifyAmnesiaEvidence();
     expect(second).toEqual(first);
-    expect(first).toMatchObject({ schema: "amnesia-bilateral-evidence/v1", status: "unsupported-evidence", coverageCredit: false, sourceAuditRunSha256: "b119dacaa72febbfcd8d44a295fd73b48bc5703ac3baefef161262c6f5fdd8ff" });
+    expect(first).toMatchObject({ schema: "amnesia-bilateral-evidence/v1", status: "exact", coverageCredit: true, sourceAuditRunSha256: "80abd30fed54afb45f8ffd583aef228f9bad23f718f00e4996daf5c93ee5b017" });
     for (const side of ["player-back", "opponent-front"] as const) expect(first.orientations[side]).toMatchObject({ rows: 216, sourceWindow: { startFrame: 205, endFrame: 420, frameCount: 216, sourceFrameCount: 216 }, changedRows: 142, questionMark: [52, 174], psychicTask: [23, 194], cleanup: { age: 215, active: false } });
-    expect(fixture.evidenceScope).toMatchObject({ productionAnimationChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, componentTrackCredit: false, latchPromotion: false, coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false, siblingAcceptance: false, transientOverrides: [] });
+    expect(fixture.evidenceScope).toMatchObject({ productionAnimationChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, componentTrackCredit: false, latchPromotion: false, coveragePromotion: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false, siblingAcceptance: false, transientOverrides: [] });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(234);
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_AMNESIA")).toBeUndefined();
+    expect(coverage.entries).toHaveLength(235);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_AMNESIA")).toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_HYPNOSIS")).toMatchObject({ status: "exact" });
   });
 });

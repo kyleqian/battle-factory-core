@@ -99,10 +99,10 @@ const expectedCarrierIds = [252, 258, 259, 321, 364, 384, 410, 525, 563, 676, 76
 if (JSON.stringify(carriers.map((entry: Json) => entry.index)) !== JSON.stringify(expectedCarrierIds)) throw new Error("Level-50 Amnesia carrier census drifted");
 const controls = ["MOVE_HYPNOSIS", "MOVE_CONFUSION", "MOVE_PSYCHIC", "MOVE_DREAM_EATER", "MOVE_PSYBEAM", "MOVE_LUSTER_PURGE"];
 if (!controls.every((move) => coverage.entries.find((entry: Json) => entry.move === move)?.status === "exact")) throw new Error("Amnesia psychic-background control drifted");
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_AMNESIA")) throw new Error("Amnesia must remain unsupported");
+if (coverage.entries.find((entry: Json) => entry.move === "MOVE_AMNESIA")?.status !== "exact") throw new Error("Amnesia exact coverage drifted");
 
 console.log(JSON.stringify({
-  move: "MOVE_AMNESIA", moveId: 133, status: "unsupported", coverageCredit: false,
+  move: "MOVE_AMNESIA", moveId: 133, status: "exact", coverageCredit: true,
   pointerOwned: {
     root: { ...interval("Move_AMNESIA", "Move_KINESIS"), sourceByteLength: Buffer.byteLength(rootBody), sourceSha256: sha(rootBody) },
     psychicBackground: { ...interval("SetPsychicBackground", "SetSkyBg"), sourceByteLength: Buffer.byteLength(backgroundBody), sourceSha256: sha(backgroundBody) },
@@ -126,5 +126,5 @@ console.log(JSON.stringify({
     lowest: { index: carriers[0].index, label: carriers[0].label, species: carriers[0].species, moves: carriers[0].moves, itemName: carriers[0].itemName, nature: carriers[0].nature, evSpreadStats: carriers[0].evSpreadStats },
   },
   controls: { exactPsychicBackground: controls, hypnosis: "distinct six-GoldRing target-path body; no Amnesia acceptance transfers", independence: "controls are status-only regression identities and confer no component, latch, or move acceptance" },
-  checkpoint: { denseWindowCaptured: false, productionChanged: false, coveragePromotion: false },
+  checkpoint: { denseWindowCaptured: true, productionChanged: true, coveragePromotion: true },
 }, null, 2));

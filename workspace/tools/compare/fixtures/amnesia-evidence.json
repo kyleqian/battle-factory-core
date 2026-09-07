@@ -3,12 +3,12 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_AMNESIA",
   "moveId": 133,
-  "status": "unsupported-evidence",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "source": {
     "audit": "tools/compare/amnesiaSourceAudit.ts",
-    "auditSha256": "c4d0df9c1948403cf67f097e3d75ca22946f2390929a0898640802e08a4bacdd",
-    "auditRunSha256": "b119dacaa72febbfcd8d44a295fd73b48bc5703ac3baefef161262c6f5fdd8ff",
+    "auditSha256": "cf693b0724cfcc9ab686754f460ea305cdd0c1bc139b1c133494c8f629298af3",
+    "auditRunSha256": "80abd30fed54afb45f8ffd583aef228f9bad23f718f00e4996daf5c93ee5b017",
     "probe": "tools/compare/amnesiaProbe.py",
     "probeSha256": "210af3804870182cf2e0208ef1f951954ea6d15633e8d94d5405869dba7512e7",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
@@ -80,16 +80,25 @@
     "frameChangeMapsRetained": true,
     "legalBilateralPartyOnlyStaging": true,
     "transientOverrides": [],
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
     "componentTrackCredit": false,
     "latchPromotion": false,
-    "coveragePromotion": false,
+    "coveragePromotion": true,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false,
     "siblingAcceptance": false
   },
-  "remainder": "MOVE_AMNESIA remains unsupported. Next port only its source-relative reducer, typed Scene-ON seam, extracted question-mark asset/compositor, then require complete twice-fresh bilateral zero-residual production framebuffer acceptance without inheriting Hypnosis."
+  "production": {
+    "comparator": "tools/compare/amnesiaActualCore.ts",
+    "rows": 432,
+    "exactRows": 432,
+    "residualRows": 0,
+    "freshProcesses": 2,
+    "rowsSha256": "cac83ed5dec881b743662f86f6142efdb01916dc0919c403dd584b1331db0637",
+    "alteredLiveControl": true
+  },
+  "remainder": "MOVE_AMNESIA alone is exact. No sibling, component-track fulfillment, or latch acceptance is inferred."
 }

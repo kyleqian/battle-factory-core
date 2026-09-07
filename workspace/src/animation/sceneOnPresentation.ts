@@ -1086,6 +1086,12 @@ import {
   type HypnosisState,
 } from "./hypnosis.ts";
 import {
+  amnesiaAtAge,
+  amnesiaDisplayedQuestionMarkAtAge,
+  type AmnesiaQuestionMark,
+  type AmnesiaState,
+} from "./amnesia.ts";
+import {
   psybeamAtAge,
   psybeamDisplayedRingsAtAge,
   type PsybeamRing,
@@ -1179,6 +1185,7 @@ export interface SceneOnPresentationBattler {
     | "RATTATA"
     | "SKIPLOOM"
     | "RELICANTH"
+    | "TORKOAL"
     | "LUNATONE"
     | "SHUPPET"
     | "PLUSLE"
@@ -3065,6 +3072,15 @@ export interface SceneOnHypnosisConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnAmnesiaConfig {
+  readonly move: "AMNESIA";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source BATTLER_COORD_ATTR_WIDTH/HEIGHT for the live attacker species. */
+  readonly attackerPictureSize: Readonly<{ width: number; height: number }>;
+}
+
 export interface SceneOnPsybeamConfig {
   readonly move: "PSYBEAM";
   readonly attacker: SceneOnPresentationBattler;
@@ -3849,6 +3865,7 @@ export type SceneOnMoveConfig =
   | SceneOnStunSporeConfig
   | SceneOnSleepPowderConfig
   | SceneOnHypnosisConfig
+  | SceneOnAmnesiaConfig
   | SceneOnPsybeamConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
@@ -4095,6 +4112,8 @@ export type SceneOnSleepPowderPresentationState =
   SceneOnMovePresentationState<SceneOnSleepPowderConfig>;
 export type SceneOnHypnosisPresentationState =
   SceneOnMovePresentationState<SceneOnHypnosisConfig>;
+export type SceneOnAmnesiaPresentationState =
+  SceneOnMovePresentationState<SceneOnAmnesiaConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -8994,6 +9013,42 @@ export function sceneOnHypnosisView(
     // palette-transfer queue; UnsetPsychicBackground's setup pause absorbs
     // two of those display ticks at the second fade boundary.
     displayedBgPaletteAge: state.age - (state.age < 129 ? 6 : 4),
+  };
+}
+
+export interface SceneOnAmnesiaView extends AmnesiaState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly displayedQuestionMark: AmnesiaQuestionMark | null;
+  readonly displayedBgPaletteAge: number;
+}
+
+/** `age=0` is Move_AMNESIA's first active source-script frame. */
+export function sceneOnAmnesiaView(
+  state: SceneOnAmnesiaPresentationState,
+): SceneOnAmnesiaView {
+  if (state.config.move !== "AMNESIA") {
+    throw new Error(`expected AMNESIA presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, attackerPictureSize } = state.config;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...amnesiaAtAge(
+      state.age,
+      attacker.geometry.side,
+      attacker.geometry.animationCenter,
+      attackerPictureSize,
+    ),
+    displayedQuestionMark: amnesiaDisplayedQuestionMarkAtAge(
+      state.age,
+      attacker.geometry.side,
+      attacker.geometry.animationCenter,
+      attackerPictureSize,
+    ),
+    displayedBgPaletteAge: state.age - 6,
   };
 }
 

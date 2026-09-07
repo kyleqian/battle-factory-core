@@ -522,7 +522,7 @@ describe("rock-mon-back-and-forth-magenta-heart standalone fulfilled component-t
     expect(alteredFrame).not.toEqual(canonicalFrame);
 
     const coverage = json<Json>("ANIMATION_COVERAGE.json");
-    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(234);
+    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(235);
     expect(coverage.entries.filter((entry: Json) => [
       "MOVE_CHARM", "MOVE_COVET", "MOVE_FAKE_TEARS", "MOVE_TICKLE",
     ].includes(entry.move))).toEqual([

@@ -91,14 +91,14 @@ function verifySide(side: Side): Json {
 }
 
 export function verifyAmnesiaEvidence(): Json {
-  invariant(fixture.schema === "amnesia-bilateral-evidence/v1" && fixture.status === "unsupported-evidence" && fixture.coverageCredit === false, "evidence identity");
-  invariant(fixture.evidenceScope.productionAnimationChanged === false && fixture.evidenceScope.reducerAdded === false && fixture.evidenceScope.typedSeamAdded === false && fixture.evidenceScope.compositorAdded === false && fixture.evidenceScope.componentTrackCredit === false && fixture.evidenceScope.latchPromotion === false && fixture.evidenceScope.coveragePromotion === false && fixture.evidenceScope.transientOverrides.length === 0, "unsupported-only boundary");
+  invariant(fixture.schema === "amnesia-bilateral-evidence/v1" && fixture.status === "exact" && fixture.coverageCredit === true, "evidence identity");
+  invariant(fixture.evidenceScope.productionAnimationChanged === true && fixture.evidenceScope.reducerAdded === true && fixture.evidenceScope.typedSeamAdded === true && fixture.evidenceScope.compositorAdded === true && fixture.evidenceScope.componentTrackCredit === false && fixture.evidenceScope.latchPromotion === false && fixture.evidenceScope.coveragePromotion === true && fixture.evidenceScope.transientOverrides.length === 0, "production acceptance boundary");
   for (const key of ["audit", "probe", "frameChangeMap"]) invariant(sha(file(fixture.source[key])) === fixture.source[`${key}Sha256`], `source ${key} SHA-256 drift`);
   const auditBytes = execFileSync(process.execPath, ["--experimental-strip-types", fixture.source.audit], { cwd: root });
   invariant(sha(auditBytes) === fixture.source.auditRunSha256, "source audit output drift");
   const audit = JSON.parse(auditBytes.toString("utf8"));
-  invariant(audit.move === "MOVE_AMNESIA" && audit.status === "unsupported" && audit.coverageCredit === false && audit.graph.components.length === 10 && audit.carriers.count === 13, "source boundary");
-  return { schema: fixture.schema, status: fixture.status, coverageCredit: false, sourceAuditRunSha256: sha(auditBytes), orientations: { "player-back": verifySide("player-back"), "opponent-front": verifySide("opponent-front") } };
+  invariant(audit.move === "MOVE_AMNESIA" && audit.status === "exact" && audit.coverageCredit === true && audit.graph.components.length === 10 && audit.carriers.count === 13, "source boundary");
+  return { schema: fixture.schema, status: fixture.status, coverageCredit: true, sourceAuditRunSha256: sha(auditBytes), orientations: { "player-back": verifySide("player-back"), "opponent-front": verifySide("opponent-front") } };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname)) console.log(JSON.stringify(verifyAmnesiaEvidence(), null, 2));
