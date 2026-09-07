@@ -1,3 +1,11 @@
+# Animation supervisor verification — MOVE_SOLAR_BEAM exact closure (2026-09-07 supervisor)
+
+- **State / merge:** Level 50 advances to **234/276 exact**, **0 partial / 0 staged**, and **42 unsupported**. Fast-forwarded Sol/high commit `6737851f2`; MOVE_SOLAR_BEAM is independently exact and `contest-target-side-impact-bg` is fulfilled only after rechecking Hyper Fang, Mega Punch, Mega Kick, and Focus Punch. No sibling acceptance or unrelated shared-component/latch credit was inferred.
+- **Independent acceptance:** Supervisor reran the complete actual-core comparator: **536/536** bilateral setup/unleash rows are zero-residual in two deterministic processes, digest `b1c852b5…`. The material VILEPLUME/ONIX live-species and shifted-geometry control is also deterministic twice and differs from base (`8cce1635…` versus `d4ca6678…`). Focused Solar, four named controls, inventory, boundary, and executable-frontier verification passes **12 files / 55 tests**.
+- **Review / scope:** The source-relative fix gives `ShakeMon2` its source-authored positive X amplitude on either target side and makes the age-151 compositor consume current target-monbg membership/offset plus current small-orb teardown. Production remains live-input driven with no fixture/RGB/frame archive read, absolute tick branch, gameplay/RNG/controller/facility mutation, boundary/barrier widening, recording allowlist, or main-program document change.
+- **Gates / next:** Worker-tree and post-merge `npm test` each pass **1,275 files / 11,095 tests** (**44 files / 223 tests skipped**); both builds pass **766 modules**. Coverage reports **234/276**, and animation audit, typecheck, diff checks, and source/evidence ratchets pass. Next select one bounded unsupported Level-50 move or unfulfilled component track from the fresh coverage ranking and preserve this exact Solar/control baseline.
+- **For the main program:** nothing blocking.
+
 # MOVE_SOLAR_BEAM exact closure (2026-09-07 worker)
 
 - **State:** Level 50 advances to **234/276 exact**, **0 partial / 0 staged**, and **42 unsupported**. MOVE_SOLAR_BEAM is exact and `contest-target-side-impact-bg` is fulfilled only after independently rechecking Hyper Fang, Mega Punch, Mega Kick, and Focus Punch; no sibling or shared-latch acceptance is inferred.
