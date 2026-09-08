@@ -855,6 +855,11 @@ import {
   type MagnitudeLiveInputs,
 } from "./magnitude.ts";
 import {
+  sunnyDayAtAge,
+  type SunnyDayFrame,
+  type SunnyDayLiveInputs,
+} from "./sunnyDay.ts";
+import {
   fissureAtAge,
   type FissureState,
 } from "./fissure.ts";
@@ -3345,6 +3350,15 @@ export interface SceneOnMagnitudeConfig {
   readonly animationInputs: Readonly<MagnitudeLiveInputs>;
 }
 
+/** Narrow Scene-ON seam for the source-relative Sunny Day component reducer. */
+export interface SceneOnSunnyDayConfig {
+  readonly move: "SUNNY_DAY";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Pick<SunnyDayLiveInputs, "raySlots" | "spriteOrder" | "paletteBanks">>;
+}
+
 /** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
 export interface SceneOnEruptionConfig {
   readonly move: "ERUPTION";
@@ -3937,6 +3951,7 @@ export type SceneOnMoveConfig =
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnMagnitudeConfig
+  | SceneOnSunnyDayConfig
   | SceneOnEruptionConfig
   | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
@@ -4147,6 +4162,8 @@ export type SceneOnAmnesiaPresentationState =
   SceneOnMovePresentationState<SceneOnAmnesiaConfig>;
 export type SceneOnDragonDancePresentationState =
   SceneOnMovePresentationState<SceneOnDragonDanceConfig>;
+export type SceneOnSunnyDayPresentationState =
+  SceneOnMovePresentationState<SceneOnSunnyDayConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -5056,6 +5073,11 @@ export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
 }
 
 export interface SceneOnMagnitudeView extends MagnitudeFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSunnyDayView extends SunnyDayFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -9968,6 +9990,39 @@ export function sceneOnMagnitudeView(
     ...magnitudeAtAge(state.age, state.config.animationInputs),
     attacker: state.config.attacker,
     target: state.config.target,
+  };
+}
+
+/** `age=0` is Sunny Day's first active source-script row. */
+export function sceneOnSunnyDayView(
+  state: SceneOnSunnyDayPresentationState,
+): SceneOnSunnyDayView {
+  if (state.config.move !== "SUNNY_DAY") {
+    throw new Error(`expected SUNNY_DAY presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...sunnyDayAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerGeometry: {
+        centerX: attacker.geometry.animationCenter.x,
+        centerY: attacker.geometry.animationCenter.y,
+        cornerX: attacker.geometry.spriteCorner.x,
+        cornerY: attacker.geometry.spriteCorner.y,
+      },
+      targetGeometry: {
+        centerX: target.geometry.animationCenter.x,
+        centerY: target.geometry.animationCenter.y,
+        cornerX: target.geometry.spriteCorner.x,
+        cornerY: target.geometry.spriteCorner.y,
+      },
+    }),
+    attacker,
+    target,
   };
 }
 
