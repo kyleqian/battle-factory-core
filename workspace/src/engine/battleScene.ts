@@ -684,6 +684,7 @@ import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json"
 import amnesiaAsset from "../animation/assets/amnesia.json" with { type: "json" };
 import { amnesiaBgPaletteRowAtAge } from "../animation/amnesia.ts";
 import dragonDanceAsset from "../animation/assets/dragon-dance.json" with { type: "json" };
+import sunnyDayAsset from "../animation/assets/sunny-day.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
@@ -1016,6 +1017,7 @@ import {
   sceneOnToxicView,
   sceneOnEarthquakeView,
   sceneOnMagnitudeView,
+  sceneOnSunnyDayView,
   sceneOnEruptionView,
   sceneOnWaterSpoutView,
   sceneOnSandTombView,
@@ -1160,6 +1162,7 @@ import {
   type SceneOnHypnosisPresentationState,
   type SceneOnAmnesiaPresentationState,
   type SceneOnDragonDancePresentationState,
+  type SceneOnSunnyDayPresentationState,
   type SceneOnPsybeamPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnFireBlastConfig,
@@ -31127,6 +31130,122 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "HOPPIP used" : "Foe HOPPIP used",
       sleepPowder ? "SLEEP POWDER!" : "STUN SPORE!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SUNNY_DAY") {
+    const sunnyState = state as SceneOnSunnyDayPresentationState;
+    const view = sceneOnSunnyDayView(sunnyState);
+    // Sunny Day's own bilateral maps put whole OAM, affine matrices, and
+    // gPlttBufferFaded one display behind software state on all 157
+    // comparable rows. Mon-bg membership and blend registers stay on the
+    // current source row; keeping the two paths separate is necessary at
+    // setup and cleanup.
+    const displayed = sceneOnSunnyDayView({ ...sunnyState, age: sunnyState.age - 1 });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SUNNY_DAY presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SUNNY_DAY missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const white: RgbColor = { r: 255, g: 255, b: 255 };
+    const hardwareCoefficient = (age: number): number => {
+      if (age < 10) return 0;
+      if (age <= 19) return Math.floor((age - 10) / 2) + 1;
+      if (age <= 108) return 6;
+      if (age <= 118) return 5 - Math.floor((age - 109) / 2);
+      return 0;
+    };
+    // Task_UpdateMonBg copies the selected battler palette after the ordinary
+    // palette transfer. Its BG-bank copy therefore trails the already-
+    // predecessor-latched field/OBJ banks by one additional display.
+    const coefficient = hardwareCoefficient(sunnyState.age);
+    const attackerCoefficient = view.monbg.update
+      ? hardwareCoefficient(sunnyState.age - 1)
+      : coefficient;
+    const bgPalette = whiteFadeFieldPaletteRows(battleBg.palette, coefficient);
+    const attackerPalette = blendPaletteToward(attackerArt.palette, white, attackerCoefficient);
+    const targetPalette = blendPaletteToward(targetArt.palette, white, coefficient);
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, bgPalette);
+
+    const drawBattler = (
+      battler: typeof view.attacker,
+      art: BattlerArt,
+      palette: RgbColor[],
+    ): void => {
+      const idle = battler.geometry.side === "opponent"
+        ? speciesFrontIdleRestOffsetOrZero(battler.species)
+        : { x2: 0, y2: 0 };
+      drawSpriteSheet(
+        fb, tilesFor(art, battler.geometry.side), palette,
+        battler.geometry.spriteCorner.x + idle.x2,
+        battler.geometry.spriteCorner.y + idle.y2,
+      );
+    };
+    const drawAttacker = (): void => drawBattler(view.attacker, attackerArt, attackerPalette);
+    const drawTarget = (): void => drawBattler(view.target, targetArt, targetPalette);
+
+    // `monbg ANIM_ATK_PARTNER` makes the live attacker part of the eligible
+    // non-OBJ target-2 stack for every ray. The target remains ordinary OBJ,
+    // so ray blending must sample this snapshot rather than a prior ray or
+    // the target sprite.
+    if (view.monbg.update) drawAttacker();
+    const nonObjTarget2 = fb.slice();
+    drawTarget();
+    if (!view.monbg.update) drawAttacker();
+    const raysBySlot = new Map(displayed.rays.map((ray) => [ray.allocationSlot, ray]));
+    for (const slot of displayed.painterSlots) {
+      const ray = raysBySlot.get(slot);
+      if (!ray) continue;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        sunnyDayAsset.sunlight.tileset,
+        sunnyDayAsset.sunlight.palette,
+        ray.x + ray.x2,
+        ray.y + ray.y2,
+        ray.matrix[0],
+        ray.matrix[1],
+        ray.matrix[2],
+        ray.matrix[3],
+        view.blend.eva,
+        view.blend.evb,
+        false,
+      );
+    }
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = sunnyState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SUNNY DAY!", 99,
     );
     return;
   }
