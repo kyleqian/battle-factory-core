@@ -212,7 +212,7 @@ describe("letter-z-rest standalone fulfilled component-track ratchet", () => {
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "staged"))
       .toHaveLength(0);
     expect(inventory.tiers.level50.moves).toHaveLength(276);
-    expect(inventory.tiers.level50.moves.length - coverage.entries.length).toBe(39);
+    expect(inventory.tiers.level50.moves.length - coverage.entries.length).toBe(38);
     expect(coverage.entries.filter((entry: { move: string }) =>
       ["MOVE_REST", "MOVE_SLEEP_TALK"].includes(entry.move),
     )).toEqual([

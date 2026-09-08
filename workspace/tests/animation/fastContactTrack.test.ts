@@ -291,10 +291,10 @@ describe("fast-contact component-track receipt ratchet", () => {
     expect(animationCoverageSummary()[0]).toEqual({
       tier: "level50",
       total: 276,
-      exact: 237,
+      exact: 238,
       partial: 0,
       staged: 0,
-      unsupported: 39,
+      unsupported: 38,
     });
     expect(coverage.entries.filter((entry) => moves.has(entry.move)).map((entry) => [
       entry.move,

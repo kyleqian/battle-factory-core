@@ -519,7 +519,7 @@ describe("shake-target-in-pattern-scary-face standalone fulfilled component-trac
       expect.objectContaining({ move: "MOVE_THUNDER", status: "exact" }),
       expect.objectContaining({ move: "MOVE_TRI_ATTACK", status: "exact" }),
     ]);
-    expect(276 - coverage.entries.length).toBe(39);
+    expect(276 - coverage.entries.length).toBe(38);
     expect(coverage.componentTracks.filter((track: Json) => track.id === "shake-target-in-pattern-scary-face"))
       .toEqual([{
         id: "shake-target-in-pattern-scary-face", components: [...trackComponents],

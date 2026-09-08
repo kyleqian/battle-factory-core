@@ -418,7 +418,7 @@ describe("green-spike-needle-arm standalone fulfilled component-track ratchet", 
     const inventory = JSON.parse(readFileSync("src/data/gen/factory-animation-inventory.json", "utf8"));
     expect(inventory.tiers.level50.moves).toHaveLength(276);
     expect(coverage.entries).toHaveLength(238);
-    expect(inventory.tiers.level50.moves.length - coverage.entries.length).toBe(39);
+    expect(inventory.tiers.level50.moves.length - coverage.entries.length).toBe(38);
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
       .toHaveLength(238);
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "partial"))
