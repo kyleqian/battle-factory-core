@@ -555,16 +555,16 @@ describe("cross-impact-cross-chop standalone fulfilled component-track ratchet",
     expect(trackGoal).toContain("does not transfer impact, slash, translation, shake, blend, BG, sprite, timing, or latch facts");
   });
 
-  it("fulfills only the unchanged exact ten-component boundary at 238/276 and grants no transfer credit", () => {
+  it("fulfills only the unchanged exact ten-component boundary at 239/276 and grants no transfer credit", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     const inventory = JSON.parse(readFileSync("src/data/gen/factory-animation-inventory.json", "utf8"));
     const level50Moves = new Set<string>(inventory.tiers.level50.moves
       .map((entry: { move: string }) => entry.move));
     expect(level50Moves.size).toBe(276);
-    expect(coverage.entries).toHaveLength(238);
+    expect(coverage.entries).toHaveLength(239);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && entry.status === "exact",
-    )).toHaveLength(238);
+    )).toHaveLength(239);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && (entry.status === "partial" || entry.status === "staged"),
     )).toEqual([]);

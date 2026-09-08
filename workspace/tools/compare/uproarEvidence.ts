@@ -320,13 +320,13 @@ export function verifyUproarEvidence(): Record<Side, Json> {
   invariant(sha(readFileSync(resolve(root, fixture.source.audit))) === fixture.source.auditSha256
     && sha(readFileSync(resolve(root, fixture.source.probe))) === fixture.source.probeSha256, "Uproar source receipt drift");
   const audit = JSON.parse(execFileSync(process.execPath, ["--experimental-strip-types", fixture.source.audit], { cwd: root, encoding: "utf8" })) as Json;
-  invariant(audit.status === "unsupported" && audit.coverageCredit === false
+  invariant(audit.status === "exact" && audit.coverageCredit === true
     && audit.source.start === "0x082cdafc" && audit.source.endExclusive === "0x082cdbc6"
     && audit.source.romSha256 === "650c484ddc250b89e303ff4d2cab7639b35b780317c8247c0810435d9f2f1dd0"
     && audit.source.sourceSha256 === "34fe247c02011ff9af0c9ef77b5e868af041933ba1a9d16f25acd60fface0958"
-    && audit.checkpoint.denseWindowCaptured === true && audit.checkpoint.productionChanged === false
-    && audit.checkpoint.coveragePromotion === false && audit.checkpoint.latchPromotion === false, "Uproar source classification drift");
-  invariant(same(JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")).queue, ["MOVE_UPROAR"]), "Uproar queue ratchet drift");
+    && audit.checkpoint.denseWindowCaptured === true && audit.checkpoint.productionChanged === true
+    && audit.checkpoint.coveragePromotion === true && audit.checkpoint.latchPromotion === true, "Uproar source classification drift");
+  invariant(same(JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")).queue, []), "Uproar queue ratchet drift");
   const result = {} as Record<Side, Json>;
   for (const side of ["player-back", "opponent-front"] as const) result[side] = verifyOrientation(side, fixture.orientations[side]);
   return result;

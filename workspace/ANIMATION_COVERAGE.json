@@ -2,6 +2,38 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_UPROAR",
+   "status": "exact",
+   "covered": [
+    "the complete source-audited 0x082cdafc..0x082cdbc6 body: three distortion/ring/two-note pulses, attacker-panned audio, defender-partner monbg and cleanup",
+    "the exact seven-component boundary is asset:ANIM_TAG_JAGGED_MUSIC_NOTE, asset:ANIM_TAG_THIN_RING, sprite:gJaggedMusicNoteSpriteTemplate, sprite:gUproarRingSpriteTemplate, task:AnimTask_UproarDistortion, visualCommand:monbg, and visualCommand:clearmonbg",
+    "complete legal bilateral Vigoroth/Onix Scene-ON ages 0..72 retain 73/73 rows each through age-72 cleanup; whole OAM is predecessor 72/72 and palette is predecessor 71/72 with only source-age-7 monbg same-row",
+    "Uproar independently resolves the live distortion battler matrix and SetBattlerSpriteYOffsetFromYScale as RAM+2, while every ring's fresh affine program and ordinary ring/note OAM use their own RAM+1 display path",
+    "two independent deterministic processes are byte-identical at verdict digest 86adbf77253b78d086bec897819b79b1450c10ba367bda34bd3a30389a5ba13b and each passes 146/146 component/seam and actual-core framebuffer rows with zero residual pixels",
+    "a material TORKOAL/SURSKIT species, geometry, allocation-slot, and painter-order control changes the live framebuffer; Calm Mind, Milk Drink, Refresh, Aromatherapy, and Soft-Boiled remain independent exact controls with no timing, latch, palette, geometry, painter, component, or acceptance transfer"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-uproar-player-vigoroth-opponent-onix.json",
+    "tools/battle-lab/mechanic-uproar-opponent-vigoroth-player-onix.json",
+    "tools/compare/uproarSourceAudit.ts",
+    "tools/compare/uproarProbe.py",
+    "tools/compare/uproarEvidence.ts",
+    "tools/compare/uproarActualCore.ts",
+    "tools/compare/fixtures/uproar-evidence.json",
+    "tools/compare/evidence/uproar-player-dense-state.json.gz",
+    "tools/compare/evidence/uproar-opponent-dense-state.json.gz",
+    "tools/compare/evidence/uproar-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/uproar-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/uproar-changemap-player.json",
+    "tools/compare/evidence/uproar-changemap-opponent.json",
+    "src/animation/assets/uproar.json",
+    "src/animation/uproar.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/uproar.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SUNNY_DAY",
    "status": "exact",
    "covered": [
@@ -6780,7 +6812,7 @@
    ]
   }
  ],
- "queue": ["MOVE_UPROAR"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "smelling-salt-hand-squish-effect",

@@ -1,4 +1,4 @@
-/** Deterministic authoritative-source/classification audit for unsupported MOVE_UPROAR. */
+/** Deterministic authoritative-source/classification audit for exact MOVE_UPROAR. */
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -165,8 +165,8 @@ if (
   || JSON.stringify(entry?.blocks) !== JSON.stringify(["Move_UPROAR"])
   || JSON.stringify(entry?.componentIds) !== JSON.stringify(components)
   || JSON.stringify(carriers.map((item: Json) => item.index)) !== JSON.stringify(carrierIds)
-  || coverage.entries.some((item: Json) => item.move === "MOVE_UPROAR")
-  || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_UPROAR"])
+  || !coverage.entries.some((item: Json) => item.move === "MOVE_UPROAR" && item.status === "exact")
+  || JSON.stringify(coverage.queue) !== JSON.stringify([])
   || coverage.componentTracks.some((track: Json) => track.moves?.includes("MOVE_UPROAR"))
   || !moveConstants.includes("#define MOVE_UPROAR 253")
   || !songConstants.includes("#define SE_M_UPROAR                 241")
@@ -192,8 +192,8 @@ if (
 console.log(JSON.stringify({
   move: "MOVE_UPROAR",
   moveId: 253,
-  status: "unsupported",
-  coverageCredit: false,
+  status: "exact",
+  coverageCredit: true,
   source: {
     start: `0x${rootStart.toString(16).padStart(8, "0")}`,
     endExclusive: `0x${rootEnd.toString(16).padStart(8, "0")}`,
@@ -241,7 +241,7 @@ console.log(JSON.stringify({
     },
     ring: {
       template: "gUproarRingSpriteTemplate", args: [0, 0, 0, 0, 31, 8],
-      palette: "BlendPalette(OBJ_PLTT_ID(thin-ring)+1, 15, arg5=31, arg4=8)",
+      palette: "BlendPalette(OBJ_PLTT_ID(thin-ring)+1, 15, coefficient arg5=8, packed-red arg4=31)",
       affine: "StartSpriteAffineAnim(sprite, 1) selects gThinRingExpandingAffineAnimCmds2: identity then +0x20/+0x20 for 15 frames",
       cleanup: "AnimSpriteOnMonPos anchors to the attacker then destroys the sprite/matrix after affine completion",
     },
@@ -269,7 +269,7 @@ console.log(JSON.stringify({
     lowestLegalRoute: { challengeNum: 1, level50Range: [162, 266], trainerId: 80, regularTrainerRange: [80, 119] },
   },
   checkpoint: {
-    sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, productionChanged: false,
-    coveragePromotion: false, componentTrackCredit: false, latchPromotion: false, unsupportedNoCreditBoundary: true,
+    sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, productionChanged: true,
+    coveragePromotion: true, componentTrackCredit: false, latchPromotion: true, unsupportedNoCreditBoundary: false,
   },
 }, null, 2));

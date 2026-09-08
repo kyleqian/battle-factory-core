@@ -35,7 +35,7 @@ describe("MOVE_UPROAR authoritative source and legal staging checkpoint", () => 
     const first = auditText();
     expect(auditText()).toBe(first);
     expect(JSON.parse(first)).toMatchObject({
-      move: "MOVE_UPROAR", moveId: 253, status: "unsupported", coverageCredit: false,
+      move: "MOVE_UPROAR", moveId: 253, status: "exact", coverageCredit: true,
       source: {
         start: "0x082cdafc", endExclusive: "0x082cdbc6", byteLength: 202,
         romSha256: "650c484ddc250b89e303ff4d2cab7639b35b780317c8247c0810435d9f2f1dd0",
@@ -171,14 +171,14 @@ describe("MOVE_UPROAR authoritative source and legal staging checkpoint", () => 
     expect(passive.moves).toEqual([33, 33, 33, 33]);
   });
 
-  it("keeps Uproar unsupported with its evidence queue and no component-track, latch, or production credit", () => {
+  it("promotes only Uproar after its independent production and latch gates", () => {
     expect(audit().checkpoint).toEqual({
-      sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, productionChanged: false,
-      coveragePromotion: false, componentTrackCredit: false, latchPromotion: false, unsupportedNoCreditBoundary: true,
+      sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, productionChanged: true,
+      coveragePromotion: true, componentTrackCredit: false, latchPromotion: true, unsupportedNoCreditBoundary: false,
     });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_UPROAR")).toBeUndefined();
-    expect(coverage.queue).toEqual(["MOVE_UPROAR"]);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_UPROAR")).toMatchObject({ status: "exact" });
+    expect(coverage.queue).toEqual([]);
     expect(coverage.componentTracks.filter((track: Json) => track.moves?.includes("MOVE_UPROAR"))).toEqual([]);
   });
 });
