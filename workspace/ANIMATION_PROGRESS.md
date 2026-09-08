@@ -1,3 +1,11 @@
+# Animation supervisor verification — MOVE_DRAGON_DANCE exact production closure (2026-09-08 supervisor)
+
+- **State / merge:** Level 50 advances to **236/276 exact**, **0 partial / 0 staged**, and **40 unsupported**. Fast-forwarded Sol/high through `f8b7a7057`; MOVE_DRAGON_DANCE alone is promoted, with no sibling, component-track, latch, gameplay, boundary, or barrier credit.
+- **Independent acceptance:** Supervisor reran the actual-core comparator twice byte-identically: all **284/284** bilateral rows are zero-residual, digest `d75f6655…`. The altered live ALTARIA species/geometry/picture-size/allocation/order control is deterministic and material (`1f315298…` versus `84f91734…`). Focused Dragon Dance, Swords Dance, Confuse Ray, Acid Armor, Memento, and boundary controls pass **8 files / 27 tests**.
+- **Review / scope:** The source-derived HOLLOW_ORB asset, 142-age reducer, typed seam, and live compositor cover the measured orb, palette, scanline waver/HOFS, attacker monbg/split-priority, predecessor transfer, resource/audio, and cleanup lifetimes. The 96-file diff contains five new Dragon Dance production/acceptance files, direct promotion evidence, and mechanically required 235→236 / 41→40 plus derived fixture-digest ratchets. Production imports no retained fixture/RGB archive and keys on no absolute tick, battle/turn, scenario, fixed species, or canonical coordinate identity.
+- **Gates / next:** Coverage reports **236/276**; evidence, asset regeneration, animation audit, typecheck, and diff checks pass. Post-merge `npm test` passes **1,280 files / 11,115 tests** (**44 files / 223 skipped**), and build passes **770 modules**. Next select one bounded unsupported move/component track from the fresh 40-move ranking and preserve Dragon Dance plus its scanline/monbg controls independently.
+- **For the main program:** nothing blocking.
+
 # MOVE_DRAGON_DANCE exact production closure (2026-09-08 worker)
 
 - **State:** Level 50 advances to **236/276 exact**, **0 partial / 0 staged**, and **40 unsupported**. MOVE_DRAGON_DANCE alone is promoted; no sibling, component-track, latch, gameplay, controller/facility, boundary, or barrier credit changes.
