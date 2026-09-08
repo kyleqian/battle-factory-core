@@ -21,7 +21,7 @@
     "probe": "tools/compare/dragonDanceProbe.py",
     "probeSha256": "6f163a31ff482fbf33e46780a181fb1d424a2f1c4a9f1825556b741c7a3ddf64",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
-    "sharedProbeSha256": "797c904f4c7c13ce280c69c70bc01bdffd4ea1b6987067507046838602c1c4a8"
+    "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd"
   },
   "orientations": {
     "player-back": {
