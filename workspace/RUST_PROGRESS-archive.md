@@ -5,6 +5,53 @@ full history regardless.
 
 ---
 
+## R69 — [supervised session wind-down, 2026-09-07 15:01–~18:10 UTC, unattended] **M66 `Cmd_trymemento` leaf + session close (five leaves folded)**
+
+- **State:** `rust-main` = master `3f76b234d` (already merged at orient) plus
+  five verified Sonnet worker fast-forwards this session — `5f534382c`
+  trywish, `966ca09ba` rolloutdamagecalculation, `dc692d9d5` trysetrest,
+  `9ece713e0` chargesport, `f33b967bf` trymemento — each followed by its
+  ledger commit and a successful `backup-refs.sh` push. Tree clean,
+  committed, green; no worker worktree or branch left behind. No ABI,
+  adapter, recovery module, canonical TS, or npm file was touched all
+  session, so the main supervisor's fold is `core-rs/**` +
+  `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  ~21 min) ported the two-start `0xc9` registration (first-offender shape
+  errors), per-execution shape check, attacker→target role order, the
+  three-conjunct fail predicate (target ATK and SPATK stages both 0 and
+  `missType != B_MSG_PROTECTED`) with lazy failure-label resolution and
+  rules/scheduler unchanged on the jump, and the success path
+  (`battleMoveDamage = attacker.hp`, unique pending-controller append, one
+  `health-bar-update {attacker, 0x7fff}` event; target stages untouched).
+  Canonical TS supplies **80 behavior** and **9 registration** cases;
+  corpus sha256
+  `b56a69bc7549bf021804bc25f684d6184109e6df62ca735ae92b29ddb95bf0ff`.
+- **Next:** merge master, re-run the four Rust gates, then continue the
+  leaf ladder — `/tmp/rust-briefs/tryrecycleitem.txt` is the remaining
+  R57-era cached brief (re-verify citations first), then re-scout unported
+  pure leaves. Remaining `jumpifbyte`/`jumpifhalfword`/`jumpifword`
+  candidates still need a barrier-projection decision first — record it in
+  `RUST_DEFERRED.md` if it cannot be made in session. No deferral is open.
+- **Notes:** supervisor audit covered the handler against
+  `battle_script_commands.c:9072-9091` and the TS module (shape-check-first
+  ordering, conjunct set, laziness), plus generator provenance; independent
+  regeneration was byte-identical. Generated Rust is **333,065 bytes**,
+  sha256 `b922cab147397a3710b943980144c95177601e1a93f31298f4e2e993c93a5dc9`;
+  generator is **31,654 bytes**, sha256
+  `4d00a8d7a8699c75ce33e98d7155f52d0c514aa9bd7bb487d863163233716b8b`.
+  Final gates on `rust-main`: **1,239/1,239** native (up from 1,145 at orient),
+  fmt, strict workspace Clippy, wasm32 release; artifact **507,120 bytes**, sha256
+  `7c67a269204304d73eb8e1727fd379d9471411aeddc88e5ab8dca3296829c2cf`. Session-wide: five Sonnet workers, five
+  commits, zero rejections, zero cap expiries (~20-25 min each). The ten
+  dead sessions of 09-01→09-06 were confirmed as the launch-then-end_turn
+  kill pattern (headless supervisor ended its turn after launching; wrapper
+  cleanup killed even setsid-detached workers); this session held its turn
+  open with blocking waits on harness-tracked tasks for every worker — the
+  durable fix. No npm gate required; no deferral or barrier added. R66
+  archived. PAPERCUT: none new (README Apple-path note from R57 still
+  stands).
+
 ## R68 — [supervised session, 2026-09-07, unattended] **M65 `Cmd_setcharge`+`Cmd_settypebasedhalvers` leaf + green checkpoint**
 
 - **State:** `rust-main` = R67 checkpoint `7995c6be3` plus the verified Sonnet

@@ -6,6 +6,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R72 — [supervised session, 2026-09-08, unattended] **M69 `Cmd_tryimprison` leaf + green checkpoint**
+
+- **State:** `rust-main` = R71 checkpoint `28e289027` plus the verified Sonnet
+  worker `1d34a6ee1` (fast-forward). The pure `B_SCR_OP_TRYIMPRISON`
+  registration/handler projection — including the dedicated Pressure PP loop
+  from `battle_util.c:767-797` — is native and wasm32-compilable; no ABI,
+  adapter, recovery module, canonical TS, or npm file was touched. Session
+  still active; the `Cmd_trysetfutureattack` leaf (M70, brief
+  `/tmp/rust-briefs/trysetfutureattack-m70.txt`, citations verified this
+  session — the lane's first leaf reusing the ported damage_calc kernel)
+  dispatching as the final leaf before wind-down.
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  ~25 min) ported the exactly-1 `0xdb` registration, per-execution shape
+  check, EAGER failure-label resolution (before role/branches — unresolved
+  errors even on success paths), the early IMPRISONED_OTHERS fail jump
+  (skipping Pressure PP loss), the Pressure chain-decrement (one per
+  opposing Pressure holder, first-Imprison position, floor 0; active pp
+  always updated, party mirror + scheduler.activeBattler write + unique
+  pending append + one `set-battler-pp-data` event strictly gated on
+  MOVE_IS_PERMANENT: !TRANSFORMED && !mimicked-bit), and the post-PP
+  overlap scan (MOVE_NONE excluded) choosing Advance + `status3 |=
+  IMPRISONED_OTHERS` vs fail Jump. Canonical TS supplies **52 behavior**
+  and **8 registration** cases; corpus sha256
+  `fa2ed7db8c54beafe6733c53c648e3d9eb64dddedad355ec87aeac9f2c1b89ab`.
+- **Next:** dispatch + verify M70 `Cmd_trysetfutureattack` with a hard
+  reject-unfolded cutoff at ~18:25 UTC; then wind down (deadline 19:01).
+  Remaining rng-free leaf candidates after that: stockpile (223 lines),
+  tryswapitems (262). The `jumpifbyte`/`jumpifhalfword`/`jumpifword`
+  candidates still need a barrier-projection decision first. No deferral
+  is open.
+- **Notes:** supervisor audit covered the handler against
+  `battle_script_commands.c:9412-9451` + `battle_util.c:767-797` (eager
+  resolution order, chain-decrement semantics, permanence gate, overlap on
+  post-PP state) and generator provenance; independent regeneration was
+  byte-identical. Worker self-corrected its guessed program counter (1794,
+  verified against `loadBattleScriptProgram()`) before generating. Generated
+  Rust is **402,810 bytes**, sha256
+  `21ae30417d75436142571cc0370c17e9e9c894d3b3887fb7f9952283537b26f9`;
+  generator is **38,421 bytes**, sha256
+  `a39a63488adeafb21ba8b7d48e7491be39c86db6c30378071923071f6ef74e2d`.
+  Gates rerun on `rust-main` post-fold: **1,292/1,292** native, fmt, strict
+  workspace Clippy, wasm32 release; artifact **507,139 bytes**, sha256
+  `22e277ec0eb26360bcce359bef90d3efb4f336c6846b0013239a35b1a7eeef00`.
+  No npm gate required; no deferral or barrier added. R69 archived.
+
 ## R71 — [supervised session, 2026-09-08, unattended] **M68 `Cmd_removeitem` leaf + green checkpoint**
 
 - **State:** `rust-main` = R70 checkpoint `4345c70c3` plus the verified Sonnet
@@ -97,50 +142,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `2d2f571d64eee47185ae8a64fe84729ffd8ba3731bc2f73993411cc1c3e34429`.
   Baseline at orient matched R69 exactly (1,239 native, artifact
   `7c67a269…`). No npm gate required; no deferral or barrier added. R67
-  archived.
-## R69 — [supervised session wind-down, 2026-09-07 15:01–~18:10 UTC, unattended] **M66 `Cmd_trymemento` leaf + session close (five leaves folded)**
-
-- **State:** `rust-main` = master `3f76b234d` (already merged at orient) plus
-  five verified Sonnet worker fast-forwards this session — `5f534382c`
-  trywish, `966ca09ba` rolloutdamagecalculation, `dc692d9d5` trysetrest,
-  `9ece713e0` chargesport, `f33b967bf` trymemento — each followed by its
-  ledger commit and a successful `backup-refs.sh` push. Tree clean,
-  committed, green; no worker worktree or branch left behind. No ABI,
-  adapter, recovery module, canonical TS, or npm file was touched all
-  session, so the main supervisor's fold is `core-rs/**` +
-  `RUST_PROGRESS*.md` only.
-- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
-  ~21 min) ported the two-start `0xc9` registration (first-offender shape
-  errors), per-execution shape check, attacker→target role order, the
-  three-conjunct fail predicate (target ATK and SPATK stages both 0 and
-  `missType != B_MSG_PROTECTED`) with lazy failure-label resolution and
-  rules/scheduler unchanged on the jump, and the success path
-  (`battleMoveDamage = attacker.hp`, unique pending-controller append, one
-  `health-bar-update {attacker, 0x7fff}` event; target stages untouched).
-  Canonical TS supplies **80 behavior** and **9 registration** cases;
-  corpus sha256
-  `b56a69bc7549bf021804bc25f684d6184109e6df62ca735ae92b29ddb95bf0ff`.
-- **Next:** merge master, re-run the four Rust gates, then continue the
-  leaf ladder — `/tmp/rust-briefs/tryrecycleitem.txt` is the remaining
-  R57-era cached brief (re-verify citations first), then re-scout unported
-  pure leaves. Remaining `jumpifbyte`/`jumpifhalfword`/`jumpifword`
-  candidates still need a barrier-projection decision first — record it in
-  `RUST_DEFERRED.md` if it cannot be made in session. No deferral is open.
-- **Notes:** supervisor audit covered the handler against
-  `battle_script_commands.c:9072-9091` and the TS module (shape-check-first
-  ordering, conjunct set, laziness), plus generator provenance; independent
-  regeneration was byte-identical. Generated Rust is **333,065 bytes**,
-  sha256 `b922cab147397a3710b943980144c95177601e1a93f31298f4e2e993c93a5dc9`;
-  generator is **31,654 bytes**, sha256
-  `4d00a8d7a8699c75ce33e98d7155f52d0c514aa9bd7bb487d863163233716b8b`.
-  Final gates on `rust-main`: **1,239/1,239** native (up from 1,145 at orient),
-  fmt, strict workspace Clippy, wasm32 release; artifact **507,120 bytes**, sha256
-  `7c67a269204304d73eb8e1727fd379d9471411aeddc88e5ab8dca3296829c2cf`. Session-wide: five Sonnet workers, five
-  commits, zero rejections, zero cap expiries (~20-25 min each). The ten
-  dead sessions of 09-01→09-06 were confirmed as the launch-then-end_turn
-  kill pattern (headless supervisor ended its turn after launching; wrapper
-  cleanup killed even setsid-detached workers); this session held its turn
-  open with blocking waits on harness-tracked tasks for every worker — the
-  durable fix. No npm gate required; no deferral or barrier added. R66
-  archived. PAPERCUT: none new (README Apple-path note from R57 still
-  stands).
