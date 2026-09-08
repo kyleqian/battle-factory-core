@@ -28,7 +28,7 @@ function validateStage(path: string) {
 describe("MOVE_MAGNITUDE authoritative source and legal bilateral branch staging", () => {
   it("pins all four pointer-owned source bodies and the exact six-component graph", () => {
     expect(audit()).toMatchObject({
-      move: "MOVE_MAGNITUDE", moveId: 222, status: "unsupported-source-legal-evidence-checkpoint", coverageCredit: false,
+      move: "MOVE_MAGNITUDE", moveId: 222, status: "unsupported-dense-evidence-checkpoint", coverageCredit: false,
       sourceBodies: {
         root: { script: { bytes: 254, sha256: "2bcf242f8c6813fbb556d6b300395693f319e442acbee25b8dff732b29836d02" }, rom: { start: "0x082cd8b0", endExclusive: "0x082cd8c8", bytes: 24, sha256: "b1f5fa9379938bc48972f2e67e4238698cb4583da6828585ca8fb07a0d1e3c94" } },
         regular: { script: { bytes: 243, sha256: "d876b391ecae7e6c3cfc8d54e5bfba5a56fc885de5c94a9a889158335e65c675" }, rom: { start: "0x082cd8c9", endExclusive: "0x082cd8ee", bytes: 37, sha256: "f45a73934bfbfbd89f5dcf11b8905f37bbcfdece5fe769fd4d00c4f2deeab299" } },
@@ -58,7 +58,8 @@ describe("MOVE_MAGNITUDE authoritative source and legal bilateral branch staging
     const stage = JSON.parse(readFileSync(resolve(root, path), "utf8")) as Json;
     const validated = validateStage(path);
     expect(validated.status).toBe(0); expect(validated.stderr).toBe("");
-    expect(stage).toMatchObject({ schemaVersion: 1, mode: "mechanicLab", profile: "battle-scene-on", level: 50, challengeNum: 2, trainerId: 110 });
+    expect(stage).toMatchObject({ schemaVersion: 1, mode: "mechanicLab", profile: "battle-scene-on", level: 50 });
+    expect([0, 1]).toContain(stage.challengeNum); expect([50, 90]).toContain(stage.trainerId);
     expect(Object.keys(stage.overrides)).toEqual(["parties"]); expect(stage.trace).not.toHaveProperty("captureFrames");
     for (const party of Object.values(stage.overrides.parties) as Json[][]) {
       expect(party).toHaveLength(3);
@@ -77,6 +78,6 @@ describe("MOVE_MAGNITUDE authoritative source and legal bilateral branch staging
   it("keeps Magnitude queued and unsupported, without latch or component-track credit", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_MAGNITUDE")?.status).toBeUndefined();
-    expect(audit().checkpoint).toEqual({ legalPartyOnlyStaging: true, branches: ["regular", "intense"], orientations: ["player-back", "opponent-front"], denseWindowCaptured: false, twiceFresh: false, normalizedMaps: false, productionChanged: false, coveragePromotion: false, componentTrackCredit: false, latchPromotion: false });
+    expect(audit().checkpoint).toEqual({ legalPartyOnlyStaging: true, branches: ["regular", "intense"], orientations: ["player-back", "opponent-front"], denseWindowCaptured: true, twiceFresh: true, normalizedMaps: true, productionChanged: false, coveragePromotion: false, componentTrackCredit: false, latchPromotion: false });
   });
 });

@@ -15,6 +15,7 @@ const macros = read("reference/pokeemerald/asm/macros/battle_anim_script.inc");
 const graph = JSON.parse(read("src/data/gen/battle-animation-components.json")) as Json;
 const frontier = JSON.parse(read("src/data/gen/battle-frontier-mons.json")) as Json;
 const coverage = JSON.parse(read("ANIMATION_COVERAGE.json")) as Json;
+const evidence = JSON.parse(read("tools/compare/fixtures/magnitude-dense-evidence.json")) as Json;
 const nm = execFileSync("arm-none-eabi-nm", ["-a", "-S", resolve(root, "reference/pokeemerald/pokeemerald.elf")], {
   encoding: "utf8", maxBuffer: 32 * 1024 * 1024,
 });
@@ -27,6 +28,7 @@ for (const line of nm.split("\n")) {
     symbols.set(parts[2]!, { address: Number.parseInt(parts[0]!, 16), size: 0 });
 }
 const rom = readFileSync(resolve(root, "reference/pokeemerald/pokeemerald.gba"));
+const artifactHash = (path: string): string => hash(readFileSync(resolve(root, path)));
 const address = (name: string): number => symbols.get(name)?.address ?? (() => { throw new Error(`missing symbol ${name}`); })();
 const body = (start: string, end: string): string => {
   const from = scripts.indexOf(`${start}:\n`), to = scripts.indexOf(`${end}:\n`, from + start.length);
@@ -75,14 +77,19 @@ for (const token of [".macro complex_palette_blend", "gComplexPaletteBlendSprite
 if (JSON.stringify(entry?.blocks) !== JSON.stringify(["Move_MAGNITUDE", "MagnitudeRegular", "MagnitudeIntense", "MagnitudeEnd"]) || JSON.stringify(entry?.componentIds) !== JSON.stringify(components)) throw new Error("generated Magnitude graph drifted");
 if (carriers.map((item: Json) => item.index).join(",") !== "166,241") throw new Error("Magnitude carrier census drifted");
 if (coverage.entries.some((item: Json) => item.move === "MOVE_MAGNITUDE" && item.status)) throw new Error("Magnitude must remain unsupported");
+if (evidence.schema !== "magnitude-dense-evidence/v1" || evidence.status !== "unsupported-evidence" || evidence.coverageCredit !== false) throw new Error("Magnitude evidence boundary drifted");
+for (const item of evidence.bodies as Json[]) {
+  if (artifactHash(item.denseState) !== item.denseStateSha256 || artifactHash(item.rawRgbArchive) !== item.rawRgbArchiveSha256 || artifactHash(item.changeMap) !== item.changeMapSha256) throw new Error(`Magnitude evidence artifact drifted: ${item.id}`);
+  if (item.probeJsonSha256 !== item.repeatProbeJsonSha256 || item.rawRgbSequenceSha256 !== item.repeatRawRgbSequenceSha256) throw new Error(`Magnitude fresh-repeat drifted: ${item.id}`);
+}
 const callbacks = Object.fromEntries(["AnimTask_IsPowerOver99", "AnimTask_HorizontalShake", "AnimTask_ShakePlatforms", "AnimTask_ShakeBattlers", "AnimComplexPaletteBlend", "AnimComplexPaletteBlend_Step1", "AnimComplexPaletteBlend_Step2", "gComplexPaletteBlendSpriteTemplate"].map((name) => [name, pin(name)]));
 console.log(JSON.stringify({
-  move: "MOVE_MAGNITUDE", moveId: 222, status: "unsupported-source-legal-evidence-checkpoint", coverageCredit: false,
+  move: "MOVE_MAGNITUDE", moveId: 222, status: "unsupported-dense-evidence-checkpoint", coverageCredit: false,
   sourceBodies, graph: { blocks: entry.blocks, components }, callbacks,
   branch: { selector: "AnimTask_IsPowerOver99", predicate: "gAnimMovePower > 99", regular: "MagnitudeRegular", intense: "MagnitudeIntense", regularPower: "<=99", intensePower: ">99" },
   horizontalShake: { targets: [5, 4], intensity: 0, maxTime: 50, audio: { symbol: "SE_M_STRENGTH", id: 128, pan: "SOUND_PAN_TARGET", interval: 8, count: 10 } },
   complexPalette: { selector: "F_PAL_BG", delay: 3, numBlends: 1, color1: "RGB_BLACK", blendY1: 14, color2: "RGB_WHITE", blendY2: 14, delaysAfterShake: [10, 16], calls: 2 },
   carriers: { count: carriers.length, speciesCount: new Set(carriers.map((item: Json) => item.species)).size, all: carriers.map((item: Json) => ({ index: item.index, label: item.label, species: item.species, moves: item.moves, itemName: item.itemName, nature: item.nature, evSpreadStats: item.evSpreadStats })), lowest: carriers[0] },
   ownership: { gameplayState: false, damage: false, weather: false, rng: false, controller: false, reducer: false, renderer: false },
-  checkpoint: { legalPartyOnlyStaging: true, branches: ["regular", "intense"], orientations: ["player-back", "opponent-front"], denseWindowCaptured: false, twiceFresh: false, normalizedMaps: false, productionChanged: false, coveragePromotion: false, componentTrackCredit: false, latchPromotion: false },
+  checkpoint: { legalPartyOnlyStaging: true, branches: ["regular", "intense"], orientations: ["player-back", "opponent-front"], denseWindowCaptured: true, twiceFresh: true, normalizedMaps: true, productionChanged: false, coveragePromotion: false, componentTrackCredit: false, latchPromotion: false },
 }, null, 2));

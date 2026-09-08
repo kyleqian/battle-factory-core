@@ -1,0 +1,111 @@
+{
+  "schema": "magnitude-dense-evidence/v1",
+  "move": "MOVE_MAGNITUDE",
+  "moveId": 222,
+  "oracleProfile": "battle-scene-on",
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "acceptance": {
+    "freshRunsPerBody": 2,
+    "bodyCount": 4,
+    "denseRows": {
+      "regular-player": 175,
+      "regular-opponent": 175,
+      "intense-player": 207,
+      "intense-opponent": 207
+    },
+    "rawRgbRows": {
+      "regular-player": 175,
+      "regular-opponent": 175,
+      "intense-player": 207,
+      "intense-opponent": 207
+    }
+  },
+  "evidenceScope": {
+    "sourceAudit": true,
+    "completePointerBody": true,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true,
+    "normalizedMaps": true,
+    "frameChangeMaps": true,
+    "legalBilateralParties": true,
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "componentTrackCredit": false,
+    "latchPromotion": false,
+    "gameplayStateOwned": false
+  },
+  "bodies": [
+    {
+      "id": "regular-player",
+      "orientation": "player-back",
+      "branch": "regular",
+      "seed": 1,
+      "sourceWindow": { "startFrame": 411, "endFrame": 585, "frameCount": 175, "sourceFrameCount": 175 },
+      "probeJsonSha256": "f306c0efe225f99dc4fe7eb7fa84e5e0ad4ec7a7ce6fdf253adc54fbcf6e19bf",
+      "repeatProbeJsonSha256": "f306c0efe225f99dc4fe7eb7fa84e5e0ad4ec7a7ce6fdf253adc54fbcf6e19bf",
+      "rawRgbSequenceSha256": "b459ec6fcba7c7df0e3030db38c127a09400d9c015767deb1e52a5075da47743",
+      "repeatRawRgbSequenceSha256": "b459ec6fcba7c7df0e3030db38c127a09400d9c015767deb1e52a5075da47743",
+      "denseState": "tools/compare/evidence/magnitude-regular-player-dense-state.json.gz",
+      "denseStateSha256": "b6423208d624d79489424e09d0affb9d4d1f56feac78479a272b2db82f8570ff",
+      "rawRgbArchive": "tools/compare/evidence/magnitude-regular-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "7b6c21c84b76d64c9612be3b5db519615ca431274e4f21a370fe0fdea53c699c",
+      "changeMap": "tools/compare/evidence/magnitude-changemap-regular-player.txt",
+      "changeMapSha256": "faafdf478e2cd1dbc62a7bab3667a69b3cd2565eef1ff7e4b87c51e09edafcef"
+    },
+    {
+      "id": "regular-opponent",
+      "orientation": "opponent-front",
+      "branch": "regular",
+      "seed": 1,
+      "sourceWindow": { "startFrame": 411, "endFrame": 585, "frameCount": 175, "sourceFrameCount": 175 },
+      "probeJsonSha256": "b75a063c056ff00229953dce42ba0c0fc8d60c8482065f9d7b90cf6453e00cda",
+      "repeatProbeJsonSha256": "b75a063c056ff00229953dce42ba0c0fc8d60c8482065f9d7b90cf6453e00cda",
+      "rawRgbSequenceSha256": "58b1659a06a6914ae68d8055351760210de17e87b2f05787bfb628334bd1a7a8",
+      "repeatRawRgbSequenceSha256": "58b1659a06a6914ae68d8055351760210de17e87b2f05787bfb628334bd1a7a8",
+      "denseState": "tools/compare/evidence/magnitude-regular-opponent-dense-state.json.gz",
+      "denseStateSha256": "7947504e028284c0b98a4ba470393ae45851c6a778871af08f2dd5ec70669f1c",
+      "rawRgbArchive": "tools/compare/evidence/magnitude-regular-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "9d9e06218b05124da84fa2b7277a42874bab69a140a95f80d1c48b6c31a279e2",
+      "changeMap": "tools/compare/evidence/magnitude-changemap-regular-opponent.txt",
+      "changeMapSha256": "90c5465f328bf4284b737d5dbca5b1d9aa5edb4d29bf4090b817909946cb98b3"
+    },
+    {
+      "id": "intense-player",
+      "orientation": "player-back",
+      "branch": "intense",
+      "seed": 3,
+      "sourceWindow": { "startFrame": 191, "endFrame": 397, "frameCount": 207, "sourceFrameCount": 207 },
+      "probeJsonSha256": "00fb03f56dc68d89563875a4a9e5aaa79d0758d1f299a2c00794aad2c39f2f95",
+      "repeatProbeJsonSha256": "00fb03f56dc68d89563875a4a9e5aaa79d0758d1f299a2c00794aad2c39f2f95",
+      "rawRgbSequenceSha256": "00fa1574acf77f75d390789a88ef0ed8ae50d595173509ab16a7ca49b69c5fbb",
+      "repeatRawRgbSequenceSha256": "00fa1574acf77f75d390789a88ef0ed8ae50d595173509ab16a7ca49b69c5fbb",
+      "denseState": "tools/compare/evidence/magnitude-intense-player-dense-state.json.gz",
+      "denseStateSha256": "0b385fc93323144954c0ae4b2bbece7e3e787991ad976ffb974b93d39a3dc6ab",
+      "rawRgbArchive": "tools/compare/evidence/magnitude-intense-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "3016f1007195c99cd05044626131c92db6cc57ba23dada8ecd46824ddc31ffb5",
+      "changeMap": "tools/compare/evidence/magnitude-changemap-intense-player.txt",
+      "changeMapSha256": "87c776c919599fc38b0b62ec7d1f6edb7701cbc9cd91292e41e44de61b68fb01"
+    },
+    {
+      "id": "intense-opponent",
+      "orientation": "opponent-front",
+      "branch": "intense",
+      "seed": 100,
+      "sourceWindow": { "startFrame": 195, "endFrame": 401, "frameCount": 207, "sourceFrameCount": 207 },
+      "probeJsonSha256": "47df05026fdce1f4f9349431fcb15ca01a9fa4a9c8a13d40b7bd5287f553f3bd",
+      "repeatProbeJsonSha256": "47df05026fdce1f4f9349431fcb15ca01a9fa4a9c8a13d40b7bd5287f553f3bd",
+      "rawRgbSequenceSha256": "450a8c1e8f9d6e4c457339907e6ef376d21c00f6c60364d3f91c424c9012df94",
+      "repeatRawRgbSequenceSha256": "450a8c1e8f9d6e4c457339907e6ef376d21c00f6c60364d3f91c424c9012df94",
+      "denseState": "tools/compare/evidence/magnitude-intense-opponent-dense-state.json.gz",
+      "denseStateSha256": "408ded3f19320e851c7608fc2b24c538779215d963c7e90e96c3543dd465382d",
+      "rawRgbArchive": "tools/compare/evidence/magnitude-intense-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "7d0c03521c5eef81709bd5c404d69bd1de39a96519ece7ebddca51ae220e947a",
+      "changeMap": "tools/compare/evidence/magnitude-changemap-intense-opponent.txt",
+      "changeMapSha256": "8050c1862e4bb707155e4aea835bf6a7065921f6d267eefbf2a6c8532bd96e18"
+    }
+  ]
+}
