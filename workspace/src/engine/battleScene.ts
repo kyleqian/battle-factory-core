@@ -685,6 +685,7 @@ import amnesiaAsset from "../animation/assets/amnesia.json" with { type: "json" 
 import { amnesiaBgPaletteRowAtAge } from "../animation/amnesia.ts";
 import dragonDanceAsset from "../animation/assets/dragon-dance.json" with { type: "json" };
 import sunnyDayAsset from "../animation/assets/sunny-day.json" with { type: "json" };
+import uproarAsset from "../animation/assets/uproar.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
@@ -1018,6 +1019,7 @@ import {
   sceneOnEarthquakeView,
   sceneOnMagnitudeView,
   sceneOnSunnyDayView,
+  sceneOnUproarView,
   sceneOnEruptionView,
   sceneOnWaterSpoutView,
   sceneOnSandTombView,
@@ -1163,6 +1165,7 @@ import {
   type SceneOnAmnesiaPresentationState,
   type SceneOnDragonDancePresentationState,
   type SceneOnSunnyDayPresentationState,
+  type SceneOnUproarPresentationState,
   type SceneOnPsybeamPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnFireBlastConfig,
@@ -31246,6 +31249,96 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.side === "player"
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "SUNNY DAY!", 99,
+    );
+    return;
+  }
+
+  if (state.config.move === "UPROAR") {
+    const uproarState = state as SceneOnUproarPresentationState;
+    const view = sceneOnUproarView(uproarState);
+    // Uproar independently measures ordinary OBJ at RAM+1. The task-backed
+    // battler distortion matrix is a separate RAM+2 path; each ring's fresh
+    // affine allocation remains RAM+1 throughout its own transition.
+    const displayed = sceneOnUproarView({ ...uproarState, age: uproarState.age - 1 });
+    const distorted = sceneOnUproarView({ ...uproarState, age: uproarState.age - 2 });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("UPROAR presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`UPROAR missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species) : { x2: 0, y2: 0 };
+    const drawTarget = (): void => drawSpriteSheet(
+      fb, tilesFor(targetArt, view.target.geometry.side), targetArt.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    // The target's monbg membership itself follows the ordinary OAM latch.
+    // It remains the same painted pixels, but below the attacker/effect OBJ.
+    drawTarget();
+    const [pa, pb, pc, pd] = distorted.distortion.matrix;
+    drawSpriteSheetAffineRotate(
+      fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerArt.palette,
+      view.attacker.geometry.animationCenter.x,
+      view.attacker.geometry.animationCenter.y + distorted.distortion.yOffset,
+      pa, pb, pc, pd, undefined, displayed.distortion.active,
+    );
+
+    // AnimUproarRing preserves OBJ palette color 0 and calls BlendPalette on
+    // colors 1..15 with coefficient arg5=8 toward packed-RGB arg4=31 (red).
+    const ringPalette = [
+      uproarAsset.thinRing.palette[0]!,
+      ...blendPaletteToward(
+        uproarAsset.thinRing.palette.slice(1),
+        { r: 255, g: 0, b: 0 },
+        8,
+      ),
+    ];
+    const sprites = new Map(displayed.sprites.map((sprite) => [sprite.slot, sprite]));
+    for (const slot of displayed.painterSlots) {
+      const sprite = sprites.get(slot);
+      if (!sprite) continue;
+      if (sprite.kind === "ring") {
+        const [rpa, rpb, rpc, rpd] = sprite.matrix;
+        drawSpriteSheetAffineRotate(
+          fb, uproarAsset.thinRing.tileset, ringPalette,
+          sprite.x, sprite.y, rpa, rpb, rpc, rpd, undefined, true,
+        );
+      } else {
+        drawSpriteSheet(
+          fb, subTileset(uproarAsset.jaggedMusicNote.tileset, sprite.tileFrame * 4, 4),
+          uproarAsset.jaggedMusicNote.palette, sprite.x - 16, sprite.y - 16,
+        );
+      }
+    }
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = uproarState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, view.attacker.geometry.side === "player" ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "UPROAR!", 99,
     );
     return;
   }

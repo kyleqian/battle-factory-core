@@ -860,6 +860,11 @@ import {
   type SunnyDayLiveInputs,
 } from "./sunnyDay.ts";
 import {
+  uproarAtAge,
+  type UproarFrame,
+  type UproarLiveInputs,
+} from "./uproar.ts";
+import {
   fissureAtAge,
   type FissureState,
 } from "./fissure.ts";
@@ -3359,6 +3364,16 @@ export interface SceneOnSunnyDayConfig {
   readonly animationInputs: Readonly<Pick<SunnyDayLiveInputs, "raySlots" | "spriteOrder" | "paletteBanks">>;
 }
 
+/** Narrow Scene-ON seam for Uproar's move-owned live allocator inputs. */
+export interface SceneOnUproarConfig {
+  readonly move: "UPROAR";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<UproarLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies" | "attackerYDelta">>;
+}
+
 /** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
 export interface SceneOnEruptionConfig {
   readonly move: "ERUPTION";
@@ -3952,6 +3967,7 @@ export type SceneOnMoveConfig =
   | SceneOnEarthquakeConfig
   | SceneOnMagnitudeConfig
   | SceneOnSunnyDayConfig
+  | SceneOnUproarConfig
   | SceneOnEruptionConfig
   | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
@@ -4164,6 +4180,8 @@ export type SceneOnDragonDancePresentationState =
   SceneOnMovePresentationState<SceneOnDragonDanceConfig>;
 export type SceneOnSunnyDayPresentationState =
   SceneOnMovePresentationState<SceneOnSunnyDayConfig>;
+export type SceneOnUproarPresentationState =
+  SceneOnMovePresentationState<SceneOnUproarConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -5078,6 +5096,11 @@ export interface SceneOnMagnitudeView extends MagnitudeFrame {
 }
 
 export interface SceneOnSunnyDayView extends SunnyDayFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnUproarView extends UproarFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -10020,6 +10043,28 @@ export function sceneOnSunnyDayView(
         cornerX: target.geometry.spriteCorner.x,
         cornerY: target.geometry.spriteCorner.y,
       },
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is Uproar's first retained active source-script row. */
+export function sceneOnUproarView(
+  state: SceneOnUproarPresentationState,
+): SceneOnUproarView {
+  if (state.config.move !== "UPROAR") {
+    throw new Error(`expected UPROAR presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...uproarAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerYDelta: attacker.geometry.animationCenter.y - attacker.geometry.battlePositionCenter.y,
     }),
     attacker,
     target,
