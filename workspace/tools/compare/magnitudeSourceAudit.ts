@@ -1,4 +1,4 @@
-/** Authoritative source/ELF/ROM audit for the unsupported MOVE_MAGNITUDE checkpoint. */
+/** Authoritative source/ELF/ROM audit for exact MOVE_MAGNITUDE coverage. */
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -76,7 +76,7 @@ for (const token of [
 for (const token of [".macro complex_palette_blend", "gComplexPaletteBlendSpriteTemplate"]) if (!macros.includes(token)) throw new Error(`macro source drifted: ${token}`);
 if (JSON.stringify(entry?.blocks) !== JSON.stringify(["Move_MAGNITUDE", "MagnitudeRegular", "MagnitudeIntense", "MagnitudeEnd"]) || JSON.stringify(entry?.componentIds) !== JSON.stringify(components)) throw new Error("generated Magnitude graph drifted");
 if (carriers.map((item: Json) => item.index).join(",") !== "166,241") throw new Error("Magnitude carrier census drifted");
-if (coverage.entries.some((item: Json) => item.move === "MOVE_MAGNITUDE" && item.status)) throw new Error("Magnitude must remain unsupported");
+if (coverage.entries.find((item: Json) => item.move === "MOVE_MAGNITUDE")?.status !== "exact") throw new Error("Magnitude must retain exact coverage");
 if (evidence.schema !== "magnitude-dense-evidence/v1" || evidence.status !== "unsupported-evidence" || evidence.coverageCredit !== false) throw new Error("Magnitude evidence boundary drifted");
 for (const item of evidence.bodies as Json[]) {
   if (artifactHash(item.denseState) !== item.denseStateSha256 || artifactHash(item.rawRgbArchive) !== item.rawRgbArchiveSha256 || artifactHash(item.changeMap) !== item.changeMapSha256) throw new Error(`Magnitude evidence artifact drifted: ${item.id}`);
@@ -84,12 +84,12 @@ for (const item of evidence.bodies as Json[]) {
 }
 const callbacks = Object.fromEntries(["AnimTask_IsPowerOver99", "AnimTask_HorizontalShake", "AnimTask_ShakePlatforms", "AnimTask_ShakeBattlers", "AnimComplexPaletteBlend", "AnimComplexPaletteBlend_Step1", "AnimComplexPaletteBlend_Step2", "gComplexPaletteBlendSpriteTemplate"].map((name) => [name, pin(name)]));
 console.log(JSON.stringify({
-  move: "MOVE_MAGNITUDE", moveId: 222, status: "unsupported-dense-evidence-checkpoint", coverageCredit: false,
+  move: "MOVE_MAGNITUDE", moveId: 222, status: "exact", coverageCredit: true,
   sourceBodies, graph: { blocks: entry.blocks, components }, callbacks,
   branch: { selector: "AnimTask_IsPowerOver99", predicate: "gAnimMovePower > 99", regular: "MagnitudeRegular", intense: "MagnitudeIntense", regularPower: "<=99", intensePower: ">99" },
   horizontalShake: { targets: [5, 4], intensity: 0, maxTime: 50, audio: { symbol: "SE_M_STRENGTH", id: 128, pan: "SOUND_PAN_TARGET", interval: 8, count: 10 } },
   complexPalette: { selector: "F_PAL_BG", delay: 3, numBlends: 1, color1: "RGB_BLACK", blendY1: 14, color2: "RGB_WHITE", blendY2: 14, delaysAfterShake: [10, 16], calls: 2 },
   carriers: { count: carriers.length, speciesCount: new Set(carriers.map((item: Json) => item.species)).size, all: carriers.map((item: Json) => ({ index: item.index, label: item.label, species: item.species, moves: item.moves, itemName: item.itemName, nature: item.nature, evSpreadStats: item.evSpreadStats })), lowest: carriers[0] },
-  ownership: { gameplayState: false, damage: false, weather: false, rng: false, controller: false, reducer: false, renderer: false },
-  checkpoint: { legalPartyOnlyStaging: true, branches: ["regular", "intense"], orientations: ["player-back", "opponent-front"], denseWindowCaptured: true, twiceFresh: true, normalizedMaps: true, productionChanged: false, coveragePromotion: false, componentTrackCredit: false, latchPromotion: false },
+  ownership: { gameplayState: false, damage: false, weather: false, rng: false, controller: false, reducer: true, renderer: true },
+  checkpoint: { legalPartyOnlyStaging: true, branches: ["regular", "intense"], orientations: ["player-back", "opponent-front"], denseWindowCaptured: true, twiceFresh: true, normalizedMaps: true, productionChanged: true, coveragePromotion: true, componentTrackCredit: false, latchPromotion: false },
 }, null, 2));

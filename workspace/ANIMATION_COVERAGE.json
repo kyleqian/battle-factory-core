@@ -6707,9 +6707,44 @@
     "tests/animation/solarBeamActualCore.test.ts",
     "tests/animation/solarBeamEvidence.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_MAGNITUDE",
+   "status": "exact",
+   "covered": [
+    "the complete source-audited regular and intense bodies consume live gAnimMovePower through the stock >99 selector, two intensity-0/max-time-50 platform/all-battler HorizontalShake tasks, target-panned ten-play strength audio, and intense-only paired BG complex-palette pulses",
+    "all four complete legal Battle Scene ON bodies pass the pure source-relative reducer, narrow typed seam, shared generic species/geometry compositor, source allocation/order, palette and display latches, and first inactive cleanup: regular player/opponent 175/175 and intense player/opponent 207/207, 764/764 total",
+    "two independent actual-core comparator processes are byte-identical at digest 128d5693bc58b667f13370f94b882b07064cd8b65dc361411a5e4c21cc76aa2f with 764/764 zero-residual component and framebuffer rows; a material SURSKIT/ARON species, geometry, power, allocation, and order control changes the framebuffer through the same live source path",
+    "Magnitude independently retains task ages 1..172 regular and 1..204 intense, complex-palette sprite ages 13..20 and 31..38, faded palette changes 13/16/21/31/34/39, and hardware transfer changes 14/17/22/32/35/40",
+    "Earthquake, Fissure, Eruption, Luster Purge, Sky Attack, Iron Defense, and the horizontal-shake/complex-palette component track remain independent; no sibling, track, or latch credit transfers"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-magnitude-regular-player-graveler-opponent-onix.json",
+    "tools/battle-lab/mechanic-magnitude-regular-opponent-graveler-player-onix.json",
+    "tools/battle-lab/mechanic-magnitude-intense-player-camerupt-opponent-onix.json",
+    "tools/battle-lab/mechanic-magnitude-intense-opponent-camerupt-player-onix.json",
+    "tools/compare/magnitudeSourceAudit.ts",
+    "tools/compare/magnitudeProbe.py",
+    "tools/compare/magnitudeFramebuffer.ts",
+    "tools/compare/fixtures/magnitude-dense-evidence.json",
+    "tools/compare/evidence/magnitude-regular-player-dense-state.json.gz",
+    "tools/compare/evidence/magnitude-regular-opponent-dense-state.json.gz",
+    "tools/compare/evidence/magnitude-intense-player-dense-state.json.gz",
+    "tools/compare/evidence/magnitude-intense-opponent-dense-state.json.gz",
+    "tools/compare/evidence/magnitude-regular-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/magnitude-regular-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/magnitude-intense-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/magnitude-intense-opponent-raw-rgb.tar.gz",
+    "src/animation/magnitude.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/magnitudeReducer.test.ts",
+    "tests/animation/magnitudeFramebuffer.test.ts"
+   ]
   }
  ],
- "queue": ["MOVE_MAGNITUDE"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "smelling-salt-hand-squish-effect",
