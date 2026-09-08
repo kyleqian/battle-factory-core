@@ -101,6 +101,8 @@ pub mod battle_script_trycopyability;
 pub mod battle_script_trycopyability_vectors_gen;
 pub mod battle_script_tryhealhalfhealth;
 pub mod battle_script_tryhealhalfhealth_vectors_gen;
+pub mod battle_script_tryimprison;
+pub mod battle_script_tryimprison_vectors_gen;
 pub mod battle_script_tryinfatuating;
 pub mod battle_script_tryinfatuating_vectors_gen;
 pub mod battle_script_trymemento;
