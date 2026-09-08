@@ -141,7 +141,7 @@ if (
   || JSON.stringify(entry?.componentIds) !== JSON.stringify(components)
   || JSON.stringify(carriers.map((item: Json) => item.index)) !== JSON.stringify(carrierIds)
   || coverage.entries.some((item: Json) => item.move === "MOVE_SUNNY_DAY")
-  || coverage.queue.some((item: Json) => JSON.stringify(item).includes("MOVE_SUNNY_DAY"))
+  || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_SUNNY_DAY"])
   || !generalSun.includes("goto Move_SUNNY_DAY")
   || !moves.includes("#define MOVE_SUNNY_DAY 241")
   || !species.includes("#define SPECIES_BELLOSSOM 182")

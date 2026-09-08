@@ -1,0 +1,82 @@
+{
+  "schema": "sunny-day-bilateral-evidence/v1",
+  "move": "MOVE_SUNNY_DAY",
+  "moveId": 241,
+  "oracleProfile": "battle-scene-on",
+  "profile": "battle-scene-on",
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "sourceRows": 316,
+    "rawRgbRows": 316,
+    "sourceWindows": {
+      "player-back": { "startFrame": 211, "endFrame": 368, "frameCount": 158 },
+      "opponent-front": { "startFrame": 211, "endFrame": 368, "frameCount": 158 }
+    },
+    "firstInactiveCleanupAge": 157
+  },
+  "evidenceScope": {
+    "sourceAudit": true,
+    "completePointerBody": true,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true,
+    "normalizedMaps": true,
+    "frameChangeMaps": true,
+    "legalBilateralParties": true,
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "componentTrackCredit": false,
+    "latchPromotion": false,
+    "gameplayStateOwned": false
+  },
+  "source": {
+    "audit": "tools/compare/sunnyDaySourceAudit.ts",
+    "auditSha256": "cf46b9e9afc70bc3262d9e7874931d4069aa8fe2e04a7424f96cfae40aa34c3d",
+    "probe": "tools/compare/sunnyDayProbe.py",
+    "probeSha256": "4a72af4bd352a715366fa5a963b22ad6fe4c974b926f1225f41564785d8be4b1"
+  },
+  "controls": {
+    "rainDance": "independent exact weather-script control; no Sunny Day credit",
+    "sandstorm": "independent exact weather-script control; no Sunny Day credit",
+    "hail": "independent exact weather-script control; no Sunny Day credit",
+    "petalDance": "audio/source-neighbor only; no Sunny Day credit"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-sunny-day-player-bellossom-opponent-onix.json",
+      "scenarioSha256": "3a5a3833a37afa318e444eca86d104b226367eaf603156fe18cb9dd0cb660337",
+      "orientation": "player-back",
+      "sourceWindow": { "startFrame": 211, "endFrame": 368, "frameCount": 158, "sourceFrameCount": 158 },
+      "denseState": "tools/compare/evidence/sunny-day-player-dense-state.json.gz",
+      "denseStateSha256": "9c9e0a7810fc85d165751d9589141f81567c8d5925c379afa93b36cd27a2b63c",
+      "probeJsonSha256": "bd9f2ef04d4d2a313ec9d8ac43e3dc4e66f1d8ec645a69b52541d5443b0bfb41",
+      "repeatProbeJsonSha256": "bd9f2ef04d4d2a313ec9d8ac43e3dc4e66f1d8ec645a69b52541d5443b0bfb41",
+      "rawRgbArchive": "tools/compare/evidence/sunny-day-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "28afd3b7b3cb14a95fa7300bbf26aaaf5e3f57d0957136ef2bcd357a5c5ad98d",
+      "rawRgbSequenceSha256": "1a1499323ec734b67a2b174c2c28a1cf2a7b7aaac350ac04f98e0f165482b31e",
+      "repeatRawRgbSequenceSha256": "1a1499323ec734b67a2b174c2c28a1cf2a7b7aaac350ac04f98e0f165482b31e",
+      "changeMap": "tools/compare/evidence/sunny-day-changemap-player.json",
+      "changeMapSha256": "f8a55027bc277661d3108996b3686ca535a85d9e802dfc2fb7073cee218649f8"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-sunny-day-opponent-bellossom-player-onix.json",
+      "scenarioSha256": "b33996f0b420da1ed1a34e50f99af6712f9c52a1df0a15d75952f252468c5a2f",
+      "orientation": "opponent-front",
+      "sourceWindow": { "startFrame": 211, "endFrame": 368, "frameCount": 158, "sourceFrameCount": 158 },
+      "denseState": "tools/compare/evidence/sunny-day-opponent-dense-state.json.gz",
+      "denseStateSha256": "a2fd83d7ef588d4be867b9d612a3bffb2059dec6bb1eb7973b8628b0e9cfa501",
+      "probeJsonSha256": "773793fd9eba2f76c88152fb62c3077bdb3be6caa0f44bbe17084dabd7fc1ea1",
+      "repeatProbeJsonSha256": "773793fd9eba2f76c88152fb62c3077bdb3be6caa0f44bbe17084dabd7fc1ea1",
+      "rawRgbArchive": "tools/compare/evidence/sunny-day-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "0b0d47e3014e63c18c14430b66525e3ff4dd052bf17981dc1bb0dfc3114b5b23",
+      "rawRgbSequenceSha256": "6717c94dbd0c52da333d228149436dbba457e5a774f63447caa8ae972a90f291",
+      "repeatRawRgbSequenceSha256": "6717c94dbd0c52da333d228149436dbba457e5a774f63447caa8ae972a90f291",
+      "changeMap": "tools/compare/evidence/sunny-day-changemap-opponent.json",
+      "changeMapSha256": "96ec290b2cf777392984f265c1e813cee7028fac350117257e0ae8415e774ce6"
+    }
+  }
+}

@@ -6744,7 +6744,7 @@
    ]
   }
  ],
- "queue": [],
+ "queue": ["MOVE_SUNNY_DAY"],
  "componentTracks": [
   {
    "id": "smelling-salt-hand-squish-effect",
