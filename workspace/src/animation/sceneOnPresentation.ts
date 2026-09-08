@@ -865,6 +865,11 @@ import {
   type UproarLiveInputs,
 } from "./uproar.ts";
 import {
+  rapidSpinAtAge,
+  type RapidSpinFrame,
+  type RapidSpinLiveInputs,
+} from "./rapidSpin.ts";
+import {
   fissureAtAge,
   type FissureState,
 } from "./fissure.ts";
@@ -3374,6 +3379,17 @@ export interface SceneOnUproarConfig {
     "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies" | "attackerYDelta">>;
 }
 
+/** Narrow Scene-ON seam for Rapid Spin's source-relative component state. */
+export interface SceneOnRapidSpinConfig {
+  readonly move: "RAPID_SPIN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<RapidSpinLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
 export interface SceneOnEruptionConfig {
   readonly move: "ERUPTION";
@@ -3968,6 +3984,7 @@ export type SceneOnMoveConfig =
   | SceneOnMagnitudeConfig
   | SceneOnSunnyDayConfig
   | SceneOnUproarConfig
+  | SceneOnRapidSpinConfig
   | SceneOnEruptionConfig
   | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
@@ -4182,6 +4199,8 @@ export type SceneOnSunnyDayPresentationState =
   SceneOnMovePresentationState<SceneOnSunnyDayConfig>;
 export type SceneOnUproarPresentationState =
   SceneOnMovePresentationState<SceneOnUproarConfig>;
+export type SceneOnRapidSpinPresentationState =
+  SceneOnMovePresentationState<SceneOnRapidSpinConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -5101,6 +5120,11 @@ export interface SceneOnSunnyDayView extends SunnyDayFrame {
 }
 
 export interface SceneOnUproarView extends UproarFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRapidSpinView extends RapidSpinFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -10065,6 +10089,29 @@ export function sceneOnUproarView(
       attackerSpecies: attacker.species,
       targetSpecies: target.species,
       attackerYDelta: attacker.geometry.animationCenter.y - attacker.geometry.battlePositionCenter.y,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is Rapid Spin's first retained pointer-owned source row. */
+export function sceneOnRapidSpinView(
+  state: SceneOnRapidSpinPresentationState,
+): SceneOnRapidSpinView {
+  if (state.config.move !== "RAPID_SPIN") {
+    throw new Error(`expected RAPID_SPIN presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...rapidSpinAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerCenter: attacker.geometry.animationCenter,
+      targetCenter: target.geometry.animationCenter,
     }),
     attacker,
     target,
