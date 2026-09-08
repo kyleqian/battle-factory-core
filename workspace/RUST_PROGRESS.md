@@ -6,6 +6,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R73 — [supervised session, 2026-09-08, unattended] **M70 `Cmd_trysetfutureattack` leaf + green checkpoint (first damage-kernel-reusing leaf)**
+
+- **State:** `rust-main` = R72 checkpoint `80600ca21` plus the verified Sonnet
+  worker `1e4cbf444` (fast-forward). The `B_SCR_OP_TRYSETFUTUREATTACK`
+  registration/handler projection — the lane's first battle-script leaf that
+  calls the ported `damage_calc::calculate_base_damage` kernel and the
+  gen_tables MOVES row — is native and wasm32-compilable; no ABI, adapter,
+  recovery module, canonical TS, or npm file was touched. Session still
+  active; one final leaf (`Cmd_tryswapitems`, 45-min cap, reject-unfolded
+  cutoff ~18:15 UTC) may follow before wind-down.
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  ~33 min) ported the exactly-1 `0xc3` registration (distinct error texts
+  pinned verbatim), the per-execution operand-only check, attacker+target
+  roles, the occupied-`futureSightCounter[target]` LAZY fail jump, and the
+  success path: counter=3 / move / attacker / dmg cell writes,
+  `calculate_future_attack_base_damage` (Huge/Pure Power, type-boost items
+  for Psychic+Steel, Choice Band, Soul Dew ×2, Light Ball, Metal Powder,
+  Thick Club, Hustle, Plus/Minus over alive+present battlers, Guts, Marvel
+  Scale — modifiers pre-applied and NOT forwarded to the kernel, mirroring
+  the TS which passes no holdEffect/species and only ABILITY_GUTS),
+  helpingHand ×15/10 trunc, target-side `SIDE_STATUS_FUTUREATTACK` OR,
+  multistringChooser 353→1/248→0. No scheduler write, no events, no RNG.
+  Canonical TS supplies **48 behavior** and **8 registration** cases; corpus
+  sha256 `ef1b6a8cf22adebb7e4d8dad9faa3f17cd16443e37a2866ec62f58173fd07da8`.
+- **Next:** dispatch + verify M71 `Cmd_tryswapitems` (brief prepared this
+  session; citations verified) with the 18:15 cutoff, then wind down before
+  19:01. After that, remaining rng-free candidates: stockpile family (needs
+  the shared `calculateBattleScriptBaseDamageForCurrentMove` hit-chain
+  helper — sports halvers + dynamicBasePower + type resolution — not yet
+  ported as a shared Rust fn; budget it as a larger leaf), and the
+  `jumpifbyte`/`jumpifhalfword`/`jumpifword` barrier-projection decision.
+  No deferral is open.
+- **Notes:** supervisor audit covered the handler against
+  `battle_script_commands.c:8929-8956` and the kernel-input mapping
+  (double-application avoidance is exactly the TS contract; the TS-generated
+  corpus would fail on any mapping drift) plus generator provenance;
+  independent regeneration was byte-identical. `is_double_battle_spread_move`
+  is always false (TS `&& false`), so battleTypeFlags is deliberately not in
+  this leaf's rules slice. Generated Rust is **228,591 bytes**, sha256
+  `89b9d9b4c9c38a34b685715ea55e5dc4a771a1f37fec6ca3cc1620f6841b07c9`;
+  generator is **34,927 bytes**, sha256
+  `3b77a51f3519fb359573edd5d3a9adcac20c6c2376d1d6595c36a4b3fceb4282`.
+  Gates rerun on `rust-main` post-fold: **1,308/1,308** native, fmt, strict
+  workspace Clippy, wasm32 release; artifact **512,256 bytes**, sha256
+  `8cf919245391dd50536cabd04794dc277f11da0866a7b4d63776ef2d72adf47f` (+5.0 KB
+  from the kernel-reusing leaf). No npm gate required; no deferral or
+  barrier added. R70 archived.
+
 ## R72 — [supervised session, 2026-09-08, unattended] **M69 `Cmd_tryimprison` leaf + green checkpoint**
 
 - **State:** `rust-main` = R71 checkpoint `28e289027` plus the verified Sonnet
@@ -97,48 +145,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   workspace Clippy, wasm32 release; artifact **507,107 bytes**, sha256
   `32f4ca7baa8ad957134873e85f2c18c7ecf9d88e87e6c5cc8e7252f5fdfb9c5d`.
   No npm gate required; no deferral or barrier added. R68 archived.
-
-## R70 — [supervised session, 2026-09-08, unattended] **M67 `Cmd_tryrecycleitem` leaf + green checkpoint**
-
-- **State:** `rust-main` = R69 checkpoint `c62ac5b39` (master merge at orient
-  was a no-op — already up to date) plus the verified Sonnet worker
-  `94869f4fa` (fast-forward). The pure `B_SCR_OP_TRYRECYCLEITEM`
-  registration/handler projection is native and wasm32-compilable; no ABI,
-  adapter, recovery module, canonical TS, or npm file was touched. Session
-  still active; the `Cmd_removeitem` leaf (the usedHeldItems producer this
-  opcode consumes) is being briefed next.
-- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
-  ~16 min) ported the exactly-1 concrete-start `0xea` registration
-  (cardinality error first, then first-offender shape errors), the
-  per-execution shape check, the attacker-role requirement, the two-conjunct
-  fail predicate (`usedHeldItems[attacker] == ITEM_NONE || battlers[attacker]
-  .item != ITEM_NONE`, the De Morgan negation of the C success condition)
-  with lazy failure-label resolution and rules/scheduler unchanged on the
-  jump, and the success path: attacker active item := usedItem, (side,
-  partyIndex) party-mirror write, usedHeldItems cell cleared (others
-  retained), lastUsedItem := usedItem, unique pending-controller append, and
-  exactly one `set-battler-item {attacker, usedItem}` event. Canonical TS
-  supplies **85 behavior** and **8 registration** cases; corpus sha256
-  `fa5eeb58a8553b283a40624fa18dd85d9157ebc0cfdad9dcb518449f2b254328`.
-- **Next:** brief + dispatch the `Cmd_removeitem` leaf (M68; 13 concrete
-  starts, BS_SCRIPTING/BS_ATTACKER selector resolution via
-  `resolveRulesBattlerForBattleScript`, unsupported-selector outcome —
-  citations verified this session). After that, remaining rng-free leaf
-  candidates by TS size: tryimprison (171), trysetfutureattack (182),
-  stockpile (223), tryswapitems (262). The
-  `jumpifbyte`/`jumpifhalfword`/`jumpifword` candidates still need a
-  barrier-projection decision first. No deferral is open.
-- **Notes:** supervisor audit covered the handler against
-  `battle_script_commands.c:9808-9829` (shape-check-first ordering, fail
-  conjuncts, laziness, registration cardinality-then-shape order) and
-  generator provenance; independent regeneration was byte-identical.
-  Generated Rust is **390,032 bytes**, sha256
-  `766ed55ce3cb42a90d0f7748833c91f0f7d213d940bfbd2a9cc8f29647e52a3a`;
-  generator is **30,696 bytes**, sha256
-  `2dbc138155a07f1927c4398c3e2922f56717e67ae384a8d51136e1e12a09a9b8`.
-  Gates rerun on `rust-main` post-fold: **1,254/1,254** native (up from
-  1,239 at orient), fmt, strict workspace Clippy, wasm32 release; artifact
-  **507,121 bytes**, sha256
-  `2d2f571d64eee47185ae8a64fe84729ffd8ba3731bc2f73993411cc1c3e34429`.
-  Baseline at orient matched R69 exactly (1,239 native, artifact
-  `7c67a269…`). No npm gate required; no deferral or barrier added. R67
