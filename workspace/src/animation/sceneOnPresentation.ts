@@ -850,6 +850,11 @@ import {
   type EarthquakeAnimationState,
 } from "./earthquake.ts";
 import {
+  magnitudeAtAge,
+  type MagnitudeFrame,
+  type MagnitudeLiveInputs,
+} from "./magnitude.ts";
+import {
   fissureAtAge,
   type FissureState,
 } from "./fissure.ts";
@@ -1262,6 +1267,7 @@ export interface SceneOnPresentationBattler {
      | "MARSHTOMP"
      | "TENTACOOL"
      | "GRAVELER"
+     | "CAMERUPT"
      | "ROSELIA"
      | "YANMA"
      | "SWABLU"
@@ -3330,6 +3336,15 @@ export interface SceneOnEarthquakeConfig {
   readonly initialBattlerX2: Readonly<{ player: number; opponent: number }>;
 }
 
+/** Narrow Scene-ON seam for live power-selected Magnitude presentation. */
+export interface SceneOnMagnitudeConfig {
+  readonly move: "MAGNITUDE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<MagnitudeLiveInputs>;
+}
+
 /** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
 export interface SceneOnEruptionConfig {
   readonly move: "ERUPTION";
@@ -3921,6 +3936,7 @@ export type SceneOnMoveConfig =
   | SceneOnDoubleEdgeConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
+  | SceneOnMagnitudeConfig
   | SceneOnEruptionConfig
   | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
@@ -5037,6 +5053,11 @@ export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
   readonly target: SceneOnPresentationBattler;
   readonly playerBattlerX2: number;
   readonly opponentBattlerX2: number;
+}
+
+export interface SceneOnMagnitudeView extends MagnitudeFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnEruptionView extends EruptionFrame {
@@ -9929,6 +9950,24 @@ export function sceneOnEarthquakeView(
     opponentBattlerX2: beforeFirstShakeWrite
       ? state.config.initialBattlerX2.opponent
       : animation.shake.battlerX2,
+  };
+}
+
+/** `age=0` is Magnitude's source root row; branch choice consumes live power. */
+export function sceneOnMagnitudeView(
+  state: SceneOnMovePresentationState<SceneOnMagnitudeConfig>,
+): SceneOnMagnitudeView {
+  if (state.config.move !== "MAGNITUDE") {
+    throw new Error(`expected MAGNITUDE presentation, got ${state.config.move}`);
+  }
+  if (state.config.animationInputs.attackerSide !== state.config.attacker.geometry.side
+    || state.config.animationInputs.targetSide !== state.config.target.geometry.side) {
+    throw new Error("MAGNITUDE live sides disagree with scene geometry");
+  }
+  return {
+    ...magnitudeAtAge(state.age, state.config.animationInputs),
+    attacker: state.config.attacker,
+    target: state.config.target,
   };
 }
 

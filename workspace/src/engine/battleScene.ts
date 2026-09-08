@@ -1015,6 +1015,7 @@ import {
   sceneOnIronTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
+  sceneOnMagnitudeView,
   sceneOnEruptionView,
   sceneOnWaterSpoutView,
   sceneOnSandTombView,
@@ -1120,6 +1121,7 @@ import {
   type SceneOnViceGripConfig,
   type SceneOnGuillotineConfig,
   type SceneOnFissureConfig,
+  type SceneOnMagnitudeConfig,
   type SceneOnEruptionConfig,
   type SceneOnWaterSpoutConfig,
   type SceneOnSandTombConfig,
@@ -44934,6 +44936,71 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "DUGTRIO used" : "Foe DUGTRIO used",
       "FISSURE!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MAGNITUDE") {
+    const magnitudeState = state as SceneOnMovePresentationState<SceneOnMagnitudeConfig>;
+    const view = sceneOnMagnitudeView(magnitudeState);
+    // Palette/BG3 DMA exposes age-1, while BuildOamBuffer precedes the shake
+    // callbacks and therefore exposes the battler offsets from age-2.
+    const displayed = sceneOnMagnitudeView({ ...magnitudeState, age: state.age - 1 });
+    const displayedBattlers = sceneOnMagnitudeView({ ...magnitudeState, age: state.age - 2 });
+    const tint = displayed.palette.color === "black"
+      ? { r: 0, g: 0, b: 0 }
+      : { r: 255, g: 255, b: 255 };
+    const bgPalette = displayed.palette.active
+      ? blendPaletteBanksToward(battleBg.palette, tint, displayed.palette.coefficient)
+      : battleBg.palette;
+    drawStaticBgShiftedX(fb, displayed.shake.platformX, bgPalette);
+
+    const battlerArt = (battler: typeof view.attacker): {
+      readonly tileset: Tileset; readonly palette: RgbColor[];
+    } => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species];
+        if (!source) throw new Error(`MAGNITUDE missing player-back art for ${battler.species}`);
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!source) throw new Error(`MAGNITUDE missing opponent-front art for ${battler.species}`);
+      return { tileset: subTileset(source.tileset, 0, 8), palette: source.palette };
+    };
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const playerArt = battlerArt(player), opponentArt = battlerArt(opponent);
+    const drawBySlot = new Map<number, () => void>([
+      [view.allocator.playerSpriteSlot, () => drawSpriteSheet(
+        fb, playerArt.tileset, playerArt.palette,
+        player.geometry.spriteCorner.x + displayedBattlers.playerBattlerX2,
+        player.geometry.spriteCorner.y,
+      )],
+      [view.allocator.opponentSpriteSlot, () => drawSpriteSheet(
+        fb, opponentArt.tileset, opponentArt.palette,
+        opponent.geometry.spriteCorner.x + displayedBattlers.opponentBattlerX2,
+        opponent.geometry.spriteCorner.y,
+      )],
+    ]);
+    for (const slot of view.allocator.painterOrder) drawBySlot.get(slot)?.();
+
+    const profile = magnitudeState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "none",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "none",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    const power = magnitudeState.config.animationInputs.movePower;
+    const magnitude = power <= 10 ? 4 : power <= 30 ? 5 : power <= 50 ? 6
+      : power <= 70 ? 7 : power <= 90 ? 8 : power <= 110 ? 9 : 10;
+    drawMessageTextLines(
+      fb,
+      `MAGNITUDE ${magnitude}!`, "", 99,
     );
     return;
   }
