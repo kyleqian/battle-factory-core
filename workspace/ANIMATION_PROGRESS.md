@@ -1,3 +1,11 @@
+# Animation supervisor verification — MOVE_DRAGON_DANCE bilateral dense-evidence checkpoint (2026-09-08 supervisor)
+
+- **State / merge:** Level 50 remains **235/276 exact**, **0 partial / 0 staged**, and **41 unsupported**. Fast-forwarded Sol/high commit `c8d9f9148`; MOVE_DRAGON_DANCE remains unsupported, with no production, coverage, component-track, sibling, gameplay, boundary, or barrier credit.
+- **Independent evidence:** Supervisor-fresh local-mGBA replays twice per orientation reproduce the complete 142-row windows byte-for-byte. Player-back semantic/raw-RGB digests are `41ed662d…` / `09d4ec58…`; opponent-front digests are `b7d8da9d…` / `a546c2c7…`. All 284 retained rows, maps, source bounds, predecessor latches, scanline/monbg transitions, orb/resource/audio lifetimes, cleanup, and the bounded opponent party-buffer transaction verify hermetically.
+- **Review / scope:** The 16-file diff is animation-owned evidence and staging only. The shared probe additions are opt-in. Production reads no retained evidence, and no reducer, seam, compositor, main-program document, gameplay state, facility state, or logical RNG behavior changed.
+- **Gates / next:** Supervisor-focused verification passes **7 files / 27 tests**; evidence/map regeneration, coverage, and animation audit pass. Post-merge `npm test` passes **1,279 files / 11,112 tests** (**44 files / 223 skipped**), and build passes **768 modules**. Next port only the source-relative reducer, HOLLOW_ORB asset, typed seam, and scanline/monbg compositor; require twice-fresh **284/284** zero-residual actual-core proof plus a material altered live control before promotion.
+- **For the main program:** nothing blocking.
+
 # MOVE_DRAGON_DANCE bilateral dense-evidence checkpoint (2026-09-08 worker)
 
 - **State:** Level 50 remains **235/276 exact**, **0 partial / 0 staged**, and **41 unsupported**. MOVE_DRAGON_DANCE remains unsupported. This step adds no reducer, asset extraction, typed seam, compositor, framebuffer acceptance, component-track fulfillment, sibling credit, gameplay/controller/facility ownership, boundary/barrier widening, recording import, or coverage change.
