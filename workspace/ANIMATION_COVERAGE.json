@@ -2,6 +2,42 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_SUNNY_DAY",
+   "status": "exact",
+   "covered": [
+    "the complete odd-aligned Move_SUNNY_DAY pointer-owned interval 0x082d2707..0x082d275d and SunnyDayLightRay subroutine are source-audited, including four gSunlightRaySpriteTemplate lives, ANIM_TAG_SUNLIGHT, the white 0->6->0 palette program, attacker-partner monbg, 13:3 alpha, Petal Dance pan sweep, waits, resources, and cleanup",
+    "complete legal Bellossom/Onix Battle Scene ON evidence retains player-back and opponent-front ages 0..157 through first inactive cleanup, 158/158 rows per orientation; the reducer and typed seam consume live sides, species, geometry, palette banks, allocator slots/order, and source-relative age",
+    "Sunny Day's own maps independently prove whole hardware OAM and affine matrices equal preceding software on 157/157 comparable rows in each orientation and hardware palette equals preceding faded palette on 157/157; faded changes are ages 1,9..20,108..119 and hardware changes 2,10..21,109..120",
+    "Task_UpdateMonBg lives ages 4..121 and Task_ClearMonBg 119..121; BG VRAM changes 5/121/123, with register changes player 4/7/119/123 and opponent 5/7/119/123. The live monbg palette copy trails the ordinary predecessor-latched field and OBJ palette by one additional display",
+    "two independent actual-core verifier processes are byte-identical at digest 02086f48b3ce6cb4b60c72019ec8b131b04206b5c9cbb71354a5a3f6591d3578 and each pass 316/316 component/seam and zero-residual framebuffer rows; a material TORKOAL/SURSKIT species, geometry, palette-bank, allocator-slot, and painter-order control changes the framebuffer through the same production path",
+    "Rain Dance, Sandstorm, Hail, Petal Dance, General_Sun weather state, and every shared component remain independent: no sibling, component-track, gameplay/weather, damage, RNG, turn, controller, round, facility, boundary, barrier, absolute-tick, recording, or retained-RGB production ownership is granted"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-sunny-day-player-bellossom-opponent-onix.json",
+    "tools/battle-lab/mechanic-sunny-day-opponent-bellossom-player-onix.json",
+    "tools/compare/sunnyDaySourceAudit.ts",
+    "tools/compare/sunnyDayProbe.py",
+    "tools/compare/sunnyDayEvidence.ts",
+    "tools/compare/sunnyDayActualCore.ts",
+    "tools/compare/fixtures/sunny-day-evidence.json",
+    "tools/compare/evidence/sunny-day-player-dense-state.json.gz",
+    "tools/compare/evidence/sunny-day-opponent-dense-state.json.gz",
+    "tools/compare/evidence/sunny-day-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/sunny-day-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/sunny-day-changemap-player.json",
+    "tools/compare/evidence/sunny-day-changemap-opponent.json",
+    "src/animation/assets/sunny-day.json",
+    "src/animation/sunnyDay.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/sunnyDaySourceCheckpoint.test.ts",
+    "tests/animation/sunnyDayEvidence.test.ts",
+    "tests/animation/sunnyDayReducer.test.ts",
+    "tests/animation/sunnyDayActualCore.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_DRAGON_DANCE",
    "status": "exact",
    "covered": [
@@ -6744,7 +6780,7 @@
    ]
   }
  ],
- "queue": ["MOVE_SUNNY_DAY"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "smelling-salt-hand-squish-effect",

@@ -35,7 +35,7 @@ describe("MOVE_SUNNY_DAY source and legal staging checkpoint", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
     expect(JSON.parse(first)).toMatchObject({
-      move: "MOVE_SUNNY_DAY", moveId: 241, status: "unsupported", coverageCredit: false,
+      move: "MOVE_SUNNY_DAY", moveId: 241, status: "exact", coverageCredit: true,
       source: {
         start: "0x082d2707", endExclusive: "0x082d275d", byteLength: 86,
         romSha256: "071e826f54008cdf3600067e74cf318a4dfd513e93bc41b1cf8797723dcf6f36",
@@ -154,15 +154,15 @@ describe("MOVE_SUNNY_DAY source and legal staging checkpoint", () => {
     expect(constrainedOpponent.moves).toEqual([playerAttacker ? 33 : 241, playerAttacker ? 33 : 241, playerAttacker ? 33 : 241, playerAttacker ? 33 : 241]);
   });
 
-  it("keeps Sunny Day explicitly unsupported with no component/latch/coverage credit while weather controls stay independent", () => {
+  it("promotes Sunny Day only after its independent dense production gates while weather controls stay independent", () => {
     expect(audit().checkpoint).toEqual({
-      sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: false, productionChanged: false,
-      coveragePromotion: false, componentTrackCredit: false, latchPromotion: false, unsupportedNoCreditBoundary: true,
+      sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, productionChanged: true,
+      coveragePromotion: true, componentTrackCredit: false, latchPromotion: true, unsupportedNoCreditBoundary: false,
     });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(237);
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SUNNY_DAY")).toBeUndefined();
-    expect(coverage.queue).toEqual(["MOVE_SUNNY_DAY"]);
+    expect(coverage.entries).toHaveLength(238);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SUNNY_DAY")).toMatchObject({ status: "exact" });
+    expect(coverage.queue).toEqual([]);
     for (const move of ["MOVE_RAIN_DANCE", "MOVE_SANDSTORM", "MOVE_HAIL"]) {
       expect(coverage.entries.find((entry: Json) => entry.move === move)).toMatchObject({ status: "exact" });
     }

@@ -140,8 +140,8 @@ if (
   || JSON.stringify(entry?.blocks) !== JSON.stringify(["Move_SUNNY_DAY", "SunnyDayLightRay"])
   || JSON.stringify(entry?.componentIds) !== JSON.stringify(components)
   || JSON.stringify(carriers.map((item: Json) => item.index)) !== JSON.stringify(carrierIds)
-  || coverage.entries.some((item: Json) => item.move === "MOVE_SUNNY_DAY")
-  || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_SUNNY_DAY"])
+  || !coverage.entries.some((item: Json) => item.move === "MOVE_SUNNY_DAY" && item.status === "exact")
+  || JSON.stringify(coverage.queue) !== JSON.stringify([])
   || !generalSun.includes("goto Move_SUNNY_DAY")
   || !moves.includes("#define MOVE_SUNNY_DAY 241")
   || !species.includes("#define SPECIES_BELLOSSOM 182")
@@ -162,8 +162,8 @@ if (
 console.log(JSON.stringify({
   move: "MOVE_SUNNY_DAY",
   moveId: 241,
-  status: "unsupported",
-  coverageCredit: false,
+  status: "exact",
+  coverageCredit: true,
   source: {
     start: `0x${start.toString(16).padStart(8, "0")}`,
     endExclusive: `0x${end.toString(16).padStart(8, "0")}`,
@@ -225,11 +225,11 @@ console.log(JSON.stringify({
   checkpoint: {
     sourceAudit: true,
     legalBilateralPartyOnlyStaging: true,
-    denseWindowCaptured: false,
-    productionChanged: false,
-    coveragePromotion: false,
+    denseWindowCaptured: true,
+    productionChanged: true,
+    coveragePromotion: true,
     componentTrackCredit: false,
-    latchPromotion: false,
-    unsupportedNoCreditBoundary: true,
+    latchPromotion: true,
+    unsupportedNoCreditBoundary: false,
   },
 }, null, 2));

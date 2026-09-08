@@ -174,7 +174,7 @@ describe("noise-line-roar-effect standalone fulfilled component-track ratchet", 
 
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(237);
+      .toHaveLength(238);
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "partial"))
       .toHaveLength(0);
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "staged"))

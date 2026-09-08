@@ -89,10 +89,10 @@ describe("MOVE_THUNDERBOLT complete bilateral Scene-ON evidence checkpoint", () 
       const receipt = fixture.orientations[side];
       const map = JSON.parse(readFileSync(resolve(root, receipt.changeMap), "utf8")) as Json;
       const rows = dense(side).frames as Json[];
-      expect(rows).toHaveLength(237);
+      expect(rows).toHaveLength(238);
       expect(map).toMatchObject({ schema: "thunderbolt-normalized-change-map/v1", side, sourceWindow: receipt.sourceWindow, changeMap: { tool: "tools/compare/frame-changemap.py" } });
-      expect(map.rows).toHaveLength(237);
-      expect(map.changeMap.rows).toHaveLength(237);
+      expect(map.rows).toHaveLength(238);
+      expect(map.changeMap.rows).toHaveLength(238);
       expect(map.rows.every((row: Json, age: number) => row.age === age && row.source.age === age && row.digests.tasks && row.digests.sprites && row.digests.softwareOam && row.digests.hardwareOam && row.digests.softwareMatrices && row.digests.hardwareMatrices && row.digests.fadedPalette && row.digests.hardwarePalette && row.digests.parties && row.digests.battlers && row.digests.engine && row.digests.immutableState)).toBe(true);
       expect(map.changeMap.rows.every((row: Json) => row.source && row.counts && row.tasks && row.sprites && row.spriteFlags.length === 64 && row.spriteOrder.length === 64 && row.registers && row.battleBg && row.bgVram && row.tags && row.audio && row.animationRng !== undefined && row.immutableState && row.digests)).toBe(true);
       expect(rows.every((row: Json) => row.softwareOam.length === 128 && row.hardwareOam.length === 128 && row.softwareMatrices.length === 32 && row.hardwareMatrices.length === 32 && row.fadedPalette.length === 512 && row.unfadedPalette.length === 512 && row.hardwarePalette.length === 512 && row.paletteTags.length === 16 && row.tileTags.length === 128 && row.spriteOrder.length === 64 && row.spriteFlags.length === 64 && row.bgVram.charBlockSha256.length === 4 && row.bgVram.screenBlockSha256.length === 32 && row.parties.player.length === 3 && row.parties.opponent.length === 3 && row.audio.SE1.tracks.length === 4 && row.audio.SE2.tracks.length === 4)).toBe(true);
@@ -137,8 +137,8 @@ describe("MOVE_THUNDERBOLT complete bilateral Scene-ON evidence checkpoint", () 
     expect(fixture.evidenceScope).toMatchObject({ sourceAudit: true, completePointerBody: true, fullDenseRowsRetained: true, twiceFreshByteIdentical: true, normalizedMaps: true, frameChangeMaps: true, productionAnimationChanged: false, reducerAdded: false, assetBundleAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false, coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false });
     expect(fixture.acceptance.verdict).toContain("MOVE_THUNDERBOLT remains unsupported");
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(237);
-    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(237);
+    expect(coverage.entries).toHaveLength(238);
+    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(238);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_THUNDERBOLT"))
       .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: Json) => track.id === "spark-2-electricity")).toMatchObject({ representatives: ["MOVE_SPARK", "MOVE_THUNDERBOLT", "MOVE_THUNDER_WAVE", "MOVE_ZAP_CANNON"], fulfilled: true });
