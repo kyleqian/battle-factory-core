@@ -6780,7 +6780,7 @@
    ]
   }
  ],
- "queue": [],
+ "queue": ["MOVE_UPROAR"],
  "componentTracks": [
   {
    "id": "smelling-salt-hand-squish-effect",

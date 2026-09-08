@@ -171,14 +171,14 @@ describe("MOVE_UPROAR authoritative source and legal staging checkpoint", () => 
     expect(passive.moves).toEqual([33, 33, 33, 33]);
   });
 
-  it("keeps Uproar unsupported with no queue, component-track, latch, or production credit", () => {
+  it("keeps Uproar unsupported with its evidence queue and no component-track, latch, or production credit", () => {
     expect(audit().checkpoint).toEqual({
-      sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: false, productionChanged: false,
+      sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, productionChanged: false,
       coveragePromotion: false, componentTrackCredit: false, latchPromotion: false, unsupportedNoCreditBoundary: true,
     });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_UPROAR")).toBeUndefined();
-    expect(coverage.queue).toEqual([]);
+    expect(coverage.queue).toEqual(["MOVE_UPROAR"]);
     expect(coverage.componentTracks.filter((track: Json) => track.moves?.includes("MOVE_UPROAR"))).toEqual([]);
   });
 });

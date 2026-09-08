@@ -166,7 +166,7 @@ if (
   || JSON.stringify(entry?.componentIds) !== JSON.stringify(components)
   || JSON.stringify(carriers.map((item: Json) => item.index)) !== JSON.stringify(carrierIds)
   || coverage.entries.some((item: Json) => item.move === "MOVE_UPROAR")
-  || JSON.stringify(coverage.queue) !== JSON.stringify([])
+  || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_UPROAR"])
   || coverage.componentTracks.some((track: Json) => track.moves?.includes("MOVE_UPROAR"))
   || !moveConstants.includes("#define MOVE_UPROAR 253")
   || !songConstants.includes("#define SE_M_UPROAR                 241")
@@ -269,7 +269,7 @@ console.log(JSON.stringify({
     lowestLegalRoute: { challengeNum: 1, level50Range: [162, 266], trainerId: 80, regularTrainerRange: [80, 119] },
   },
   checkpoint: {
-    sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: false, productionChanged: false,
+    sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, productionChanged: false,
     coveragePromotion: false, componentTrackCredit: false, latchPromotion: false, unsupportedNoCreditBoundary: true,
   },
 }, null, 2));

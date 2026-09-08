@@ -1,0 +1,77 @@
+{
+  "schema": "uproar-bilateral-evidence/v1",
+  "move": "MOVE_UPROAR",
+  "moveId": 253,
+  "oracleProfile": "battle-scene-on",
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "sourceRows": 146,
+    "rawRgbRows": 146,
+    "firstInactiveCleanupAge": 72
+  },
+  "evidenceScope": {
+    "sourceAudit": true,
+    "completePointerBody": true,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true,
+    "normalizedMaps": true,
+    "legalBilateralParties": true,
+    "sourcePointersAndParity": true,
+    "threeDistortionRingNotePulses": true,
+    "allocatorOrder": true,
+    "monbgBgRegisters": true,
+    "displayTransferFacts": true,
+    "audio": true,
+    "animationRngVersusGameplayRng": true,
+    "partiesBattlersControllerEngineStable": true,
+    "firstInactiveCleanup": true,
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "componentTrackCredit": false,
+    "latchPromotion": false,
+    "gameplayStateOwned": false
+  },
+  "source": {
+    "audit": "tools/compare/uproarSourceAudit.ts",
+    "auditSha256": "524d2042702437b96439eb2b480a0777e5b8cd8df0363556e14546703f4de78d",
+    "probe": "tools/compare/uproarProbe.py",
+    "probeSha256": "5d967bd990a45af52eaf610716da1797d0f1e5cc0c61edbd1fa63507271c3da0"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-uproar-player-vigoroth-opponent-onix.json",
+      "scenarioSha256": "13bb2820389f58e2e23ebd5ad733ca942f5e433105cc8018951cd13bfa4ffabb",
+      "denseState": "tools/compare/evidence/uproar-player-dense-state.json.gz",
+      "denseStateSha256": "b95871e42802f2c05471a114264259c1d15fbce9a91d4d24d51859ce18674482",
+      "rawRgbArchive": "tools/compare/evidence/uproar-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "1fce7a77c3372f18f8e7e9880e2f455b45f46259601f8f3a2d914cd22d617897",
+      "changeMap": "tools/compare/evidence/uproar-changemap-player.json",
+      "changeMapSha256": "b010ef3719017897230f4b4da1a9fd86899b378a4dac1e5cd260f09cde107bce",
+      "sourceWindow": { "startFrame": 75, "endFrame": 147, "frameCount": 73, "sourceFrameCount": 73 },
+      "probeJsonSha256": "999f31f3b283cbad9cce3ef481d4f5190709dd4330fe829d9ebf90aa531d686b",
+      "repeatProbeJsonSha256": "999f31f3b283cbad9cce3ef481d4f5190709dd4330fe829d9ebf90aa531d686b",
+      "rawRgbSequenceSha256": "cc825f6e1a1d9da5e9dff1b84f4407a752324e632723617fb3691e98a0dbc97a",
+      "repeatRawRgbSequenceSha256": "cc825f6e1a1d9da5e9dff1b84f4407a752324e632723617fb3691e98a0dbc97a"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-uproar-opponent-vigoroth-player-onix.json",
+      "scenarioSha256": "1fe28a53e327084dd095ceee615551e8fbda39a40d427f83902a416e259e4ad5",
+      "denseState": "tools/compare/evidence/uproar-opponent-dense-state.json.gz",
+      "denseStateSha256": "3ceec1e65ad924e92c0c1c285b2f571c9a34f92638e4db0d847f556f06ac4114",
+      "rawRgbArchive": "tools/compare/evidence/uproar-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "57fb302b13629e75235fd851e6fccee050350632333353cc0a0a4606a2ed5c80",
+      "changeMap": "tools/compare/evidence/uproar-changemap-opponent.json",
+      "changeMapSha256": "208570a3b8a7542904d48d261261411c6487bdabc35e9c92b43d9a0dd6f40e1a",
+      "sourceWindow": { "startFrame": 79, "endFrame": 151, "frameCount": 73, "sourceFrameCount": 73 },
+      "probeJsonSha256": "4c251c15f95e64f80d7fa068513e8667d2abbb7c14242e3e84c46cceec7412a1",
+      "repeatProbeJsonSha256": "4c251c15f95e64f80d7fa068513e8667d2abbb7c14242e3e84c46cceec7412a1",
+      "rawRgbSequenceSha256": "9085b982ad4c3ccaf87204f86a15e8c818e9b0874a830982e85c5a21587b39d4",
+      "repeatRawRgbSequenceSha256": "9085b982ad4c3ccaf87204f86a15e8c818e9b0874a830982e85c5a21587b39d4"
+    }
+  }
+}
