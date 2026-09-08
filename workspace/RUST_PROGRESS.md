@@ -5,6 +5,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+
+## R70 — [supervised session, 2026-09-08, unattended] **M67 `Cmd_tryrecycleitem` leaf + green checkpoint**
+
+- **State:** `rust-main` = R69 checkpoint `c62ac5b39` (master merge at orient
+  was a no-op — already up to date) plus the verified Sonnet worker
+  `94869f4fa` (fast-forward). The pure `B_SCR_OP_TRYRECYCLEITEM`
+  registration/handler projection is native and wasm32-compilable; no ABI,
+  adapter, recovery module, canonical TS, or npm file was touched. Session
+  still active; the `Cmd_removeitem` leaf (the usedHeldItems producer this
+  opcode consumes) is being briefed next.
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  ~16 min) ported the exactly-1 concrete-start `0xea` registration
+  (cardinality error first, then first-offender shape errors), the
+  per-execution shape check, the attacker-role requirement, the two-conjunct
+  fail predicate (`usedHeldItems[attacker] == ITEM_NONE || battlers[attacker]
+  .item != ITEM_NONE`, the De Morgan negation of the C success condition)
+  with lazy failure-label resolution and rules/scheduler unchanged on the
+  jump, and the success path: attacker active item := usedItem, (side,
+  partyIndex) party-mirror write, usedHeldItems cell cleared (others
+  retained), lastUsedItem := usedItem, unique pending-controller append, and
+  exactly one `set-battler-item {attacker, usedItem}` event. Canonical TS
+  supplies **85 behavior** and **8 registration** cases; corpus sha256
+  `fa5eeb58a8553b283a40624fa18dd85d9157ebc0cfdad9dcb518449f2b254328`.
+- **Next:** brief + dispatch the `Cmd_removeitem` leaf (M68; 13 concrete
+  starts, BS_SCRIPTING/BS_ATTACKER selector resolution via
+  `resolveRulesBattlerForBattleScript`, unsupported-selector outcome —
+  citations verified this session). After that, remaining rng-free leaf
+  candidates by TS size: tryimprison (171), trysetfutureattack (182),
+  stockpile (223), tryswapitems (262). The
+  `jumpifbyte`/`jumpifhalfword`/`jumpifword` candidates still need a
+  barrier-projection decision first. No deferral is open.
+- **Notes:** supervisor audit covered the handler against
+  `battle_script_commands.c:9808-9829` (shape-check-first ordering, fail
+  conjuncts, laziness, registration cardinality-then-shape order) and
+  generator provenance; independent regeneration was byte-identical.
+  Generated Rust is **390,032 bytes**, sha256
+  `766ed55ce3cb42a90d0f7748833c91f0f7d213d940bfbd2a9cc8f29647e52a3a`;
+  generator is **30,696 bytes**, sha256
+  `2dbc138155a07f1927c4398c3e2922f56717e67ae384a8d51136e1e12a09a9b8`.
+  Gates rerun on `rust-main` post-fold: **1,254/1,254** native (up from
+  1,239 at orient), fmt, strict workspace Clippy, wasm32 release; artifact
+  **507,121 bytes**, sha256
+  `2d2f571d64eee47185ae8a64fe84729ffd8ba3731bc2f73993411cc1c3e34429`.
+  Baseline at orient matched R69 exactly (1,239 native, artifact
+  `7c67a269…`). No npm gate required; no deferral or barrier added. R67
+  archived.
 ## R69 — [supervised session wind-down, 2026-09-07 15:01–~18:10 UTC, unattended] **M66 `Cmd_trymemento` leaf + session close (five leaves folded)**
 
 - **State:** `rust-main` = master `3f76b234d` (already merged at orient) plus
@@ -89,42 +135,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   construction (generator snapshots initial state from the raw projection);
   moves 300/346/268/33/354 identities pinned from `src/data/gen/moves.json`.
   No npm gate required; no deferral or barrier added. R65 archived.
-
-## R67 — [supervised session, 2026-09-07, unattended] **M64 `Cmd_trysetrest` leaf + green checkpoint**
-
-- **State:** `rust-main` = R66 checkpoint `f46f234a8` plus the verified Sonnet
-  worker `dc692d9d5` (fast-forward). The pure `B_SCR_OP_TRYSETREST`
-  registration/handler projection is native and wasm32-compilable; no ABI,
-  adapter, recovery module, canonical TS, or npm file was touched. Session
-  still active; the `Cmd_chargesport` family dispatching as the final leaf.
-- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
-  ~25 min) ported the find-first presence-only registration (`0x81` in the
-  committed program), the attacker-role requirement ("an attacker"), the
-  UNCONDITIONAL target-role collapse + `battleMoveDamage = -maxHP` writes on
-  both branches, the full-HP lazy fail-jump, and the success path:
-  `multistringChooser = (status1 & ~7) != 0 ? 1 : 0`, status1 REPLACED with
-  `STATUS1_SLEEP_TURN(3)` = 3 (cures prior status in the same write), the
-  (side, partyIndex) party-mirror write, and exactly one
-  `set-battler-status-data` event. Canonical TS supplies **109 behavior**
-  and **3 registration** cases; corpus sha256 `59bb3a8e3d36d1e7f0a0558522ab7c1eef5355e6cb833552459433f3d0b00c82`.
-- **Next:** verify/fold the `Cmd_chargesport` worker (brief
-  `/tmp/rust-briefs/chargesport.txt`, citations re-verified before dispatch)
-  if it lands green with margin before the 19:01 UTC deadline; otherwise
-  reject it unfolded. After that: re-scout remaining pure leaves
-  (`jumpifbyte`/`jumpifhalfword`/`jumpifword` still need a barrier-projection
-  decision first). No deferral is open.
-- **Notes:** supervisor audit covered the handler against
-  `battle_script_commands.c:6762-6784` (including the `(u8)(~STATUS1_SLEEP)`
-  chooser subtlety — corpus stays in u8 range; TS is the corpus oracle) and
-  generator provenance; independent regeneration was byte-identical.
-  Generated Rust is **952,476 bytes**, sha256 `7dc50e6865c45244ac488636138a98e794b69fa1f3973c8a354b3ddbab64a364`; generator is
-  **27,270 bytes**, sha256 `4beebc9980de9510af6f9f43769fea424dbcaa0c42565dd08b8aeb9a1df53199`. Gates rerun on `rust-main` post-fold: **1,197/1,197** native, fmt, strict
-  workspace Clippy, wasm32 release; artifact **507,121 bytes**, sha256
-  `017d9b6af8d27a1a89b795a70e4e56c1b6bcd53a9cb1cd6fd1678be9aa0deb5c`.
-  Worker notes: the registration is genuinely presence-only find-first
-  (mirrors tryinfatuating, unlike the cardinality-checked siblings), the
-  error text is "an attacker" (not the siblings' "a attacker"), and the
-  unchecked TS `operands[0]` read is a typed MissingOperand error covered by
-  a unit test only. No npm gate required; no deferral or barrier added. R64
-  archived.
-
