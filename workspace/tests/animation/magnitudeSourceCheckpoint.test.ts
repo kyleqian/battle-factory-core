@@ -75,8 +75,9 @@ describe("MOVE_MAGNITUDE authoritative source and legal bilateral branch staging
     expect(stage.seed).toBeGreaterThan(0);
   });
 
-  it("keeps Magnitude queued and unsupported, without latch or component-track credit", () => {
+  it("keeps Magnitude as the sole queued unsupported move, without latch or component-track credit", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
+    expect(coverage.queue).toEqual(["MOVE_MAGNITUDE"]);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_MAGNITUDE")?.status).toBeUndefined();
     expect(audit().checkpoint).toEqual({ legalPartyOnlyStaging: true, branches: ["regular", "intense"], orientations: ["player-back", "opponent-front"], denseWindowCaptured: true, twiceFresh: true, normalizedMaps: true, productionChanged: false, coveragePromotion: false, componentTrackCredit: false, latchPromotion: false });
   });

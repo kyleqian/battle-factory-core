@@ -41,6 +41,7 @@
   "bodies": [
     {
       "id": "regular-player",
+      "scenario": "tools/battle-lab/mechanic-magnitude-regular-player-graveler-opponent-onix.json",
       "orientation": "player-back",
       "branch": "regular",
       "seed": 1,
@@ -58,6 +59,7 @@
     },
     {
       "id": "regular-opponent",
+      "scenario": "tools/battle-lab/mechanic-magnitude-regular-opponent-graveler-player-onix.json",
       "orientation": "opponent-front",
       "branch": "regular",
       "seed": 1,
@@ -75,6 +77,7 @@
     },
     {
       "id": "intense-player",
+      "scenario": "tools/battle-lab/mechanic-magnitude-intense-player-camerupt-opponent-onix.json",
       "orientation": "player-back",
       "branch": "intense",
       "seed": 3,
@@ -92,16 +95,17 @@
     },
     {
       "id": "intense-opponent",
+      "scenario": "tools/battle-lab/mechanic-magnitude-intense-opponent-camerupt-player-onix.json",
       "orientation": "opponent-front",
       "branch": "intense",
       "seed": 100,
       "sourceWindow": { "startFrame": 195, "endFrame": 401, "frameCount": 207, "sourceFrameCount": 207 },
-      "probeJsonSha256": "47df05026fdce1f4f9349431fcb15ca01a9fa4a9c8a13d40b7bd5287f553f3bd",
-      "repeatProbeJsonSha256": "47df05026fdce1f4f9349431fcb15ca01a9fa4a9c8a13d40b7bd5287f553f3bd",
+      "probeJsonSha256": "1ebaef30754c00f1b45654594a1d102d1a2ca03cce69487d6f3b8b85c2b4fa14",
+      "repeatProbeJsonSha256": "1ebaef30754c00f1b45654594a1d102d1a2ca03cce69487d6f3b8b85c2b4fa14",
       "rawRgbSequenceSha256": "450a8c1e8f9d6e4c457339907e6ef376d21c00f6c60364d3f91c424c9012df94",
       "repeatRawRgbSequenceSha256": "450a8c1e8f9d6e4c457339907e6ef376d21c00f6c60364d3f91c424c9012df94",
       "denseState": "tools/compare/evidence/magnitude-intense-opponent-dense-state.json.gz",
-      "denseStateSha256": "408ded3f19320e851c7608fc2b24c538779215d963c7e90e96c3543dd465382d",
+      "denseStateSha256": "9c705868747fafbabaff9516a8dc3375410f3049401008390ab20be4e0ff271f",
       "rawRgbArchive": "tools/compare/evidence/magnitude-intense-opponent-raw-rgb.tar.gz",
       "rawRgbArchiveSha256": "7d0c03521c5eef81709bd5c404d69bd1de39a96519ece7ebddca51ae220e947a",
       "changeMap": "tools/compare/evidence/magnitude-changemap-intense-opponent.txt",

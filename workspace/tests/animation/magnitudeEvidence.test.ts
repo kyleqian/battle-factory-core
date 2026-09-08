@@ -34,6 +34,7 @@ describe("MOVE_MAGNITUDE complete unsupported dense evidence", () => {
     const decoded = gunzipSync(compressed);
     const probe = JSON.parse(decoded.toString("utf8")) as Json;
     const frames = probe.frames as Json[];
+    const stage = JSON.parse(bytes(body.scenario).toString("utf8")) as Json;
     expect(sha(compressed)).toBe(body.denseStateSha256);
     expect(sha(decoded)).toBe(body.probeJsonSha256);
     expect(body.repeatProbeJsonSha256).toBe(body.probeJsonSha256);
@@ -49,6 +50,11 @@ describe("MOVE_MAGNITUDE complete unsupported dense evidence", () => {
     expect(map).toContain(`# magnitude ${body.id} — ${body.sourceWindow.frameCount} frames, 240x160`);
     expect(map).not.toContain("/tmp/");
     expect(frames.every((frame) => frame.scriptOwner === "Move_MAGNITUDE")).toBe(true);
+    for (const side of ["player", "opponent"] as const) {
+      for (const [index, requested] of stage.overrides.parties[side].entries()) {
+        expect(frames[0]!.parties[side][index]).toMatchObject(requested);
+      }
+    }
     expect(new Set(frames.map((frame) => JSON.stringify(frame.immutableState))).size).toBe(1);
     expect(new Set(frames.map((frame) => JSON.stringify(frame.parties))).size).toBe(1);
     expect(new Set(frames.map((frame) => JSON.stringify(frame.battlers))).size).toBe(1);
