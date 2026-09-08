@@ -683,6 +683,7 @@ import { fissureDirtPainterOrder } from "../animation/fissure.ts";
 import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
 import amnesiaAsset from "../animation/assets/amnesia.json" with { type: "json" };
 import { amnesiaBgPaletteRowAtAge } from "../animation/amnesia.ts";
+import dragonDanceAsset from "../animation/assets/dragon-dance.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
@@ -1064,6 +1065,7 @@ import {
   sceneOnSleepPowderView,
   sceneOnHypnosisView,
   sceneOnAmnesiaView,
+  sceneOnDragonDanceView,
   sceneOnPsybeamView,
   sceneOnPerishSongView,
   sceneOnNeedleArmView,
@@ -1155,6 +1157,7 @@ import {
   type SceneOnSleepPowderPresentationState,
   type SceneOnHypnosisPresentationState,
   type SceneOnAmnesiaPresentationState,
+  type SceneOnDragonDancePresentationState,
   type SceneOnPsybeamPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnFireBlastConfig,
@@ -4152,6 +4155,31 @@ function drawAcidArmorMonBg(
       fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
       fb[offset + 1] = blendChannel(color.g, fb[offset + 1]!, eva, evb);
       fb[offset + 2] = blendChannel(color.b, fb[offset + 2]!, eva, evb);
+    }
+  }
+}
+
+/** Opaque monbg copy sampled through a per-scanline horizontal scroll. */
+function drawDragonDanceMonBg(
+  fb: Uint8Array,
+  sprite: { tileset: Tileset; palette: RgbColor[] },
+  corner: Readonly<{ x: number; y: number }>,
+  scanlineHofs: readonly number[],
+  baseHofs: number,
+): void {
+  for (let y = 0; y < 160; y += 1) {
+    const delta = (scanlineHofs[y] ?? baseHofs) - baseHofs;
+    const sy = y - corner.y;
+    if (sy < 0 || sy >= sprite.tileset.rows * 8) continue;
+    for (let x = 0; x < 240; x += 1) {
+      const sx = x - corner.x + delta;
+      if (sx < 0 || sx >= sprite.tileset.columns * 8) continue;
+      const tile = sprite.tileset.tiles[
+        Math.floor(sy / 8) * sprite.tileset.columns + Math.floor(sx / 8)
+      ];
+      const index = tile?.[(sy % 8) * 8 + (sx % 8)] ?? 0;
+      const color = sprite.palette[index];
+      if (index !== 0 && color) setPixel(fb, x, y, color);
     }
   }
 }
@@ -31097,6 +31125,89 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "HOPPIP used" : "Foe HOPPIP used",
       sleepPowder ? "SLEEP POWDER!" : "STUN SPORE!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "DRAGON_DANCE") {
+    const dragonState = state as SceneOnDragonDancePresentationState;
+    const view = sceneOnDragonDanceView(dragonState);
+    const displayed = sceneOnDragonDanceView({ ...dragonState, age: dragonState.age - 1 });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("DRAGON_DANCE presentation requires battlers on opposite sides");
+    }
+    const artFor = (battler: typeof view.attacker): BattleBackSpriteAsset => {
+      if (battler.geometry.side === "player") {
+        const art = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species];
+        if (!art) throw new Error(`DRAGON_DANCE missing player-back art for ${battler.species}`);
+        return art;
+      }
+      const art = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`DRAGON_DANCE missing opponent-front art for ${battler.species}`);
+      return { ...art, tileset: subTileset(art.tileset, 0, 8) };
+    };
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const drawBattler = (battler: typeof view.attacker, art: BattleBackSpriteAsset) => {
+      const idle = battler.geometry.side === "opponent"
+        ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
+      drawSpriteSheet(fb, art.tileset, art.palette,
+        battler.geometry.spriteCorner.x + idle.x2,
+        battler.geometry.spriteCorner.y + idle.y2);
+    };
+    const drawAttacker = () => {
+      if (view.monbgActive) {
+        drawDragonDanceMonBg(
+          fb, attackerArt, view.attacker.geometry.spriteCorner,
+          view.scanlineHofs, view.attacker.geometry.side === "player" ? -40 : -144,
+        );
+      } else drawBattler(view.attacker, attackerArt);
+    };
+    const drawTarget = () => drawBattler(view.target, targetArt);
+    const orbPalette = blendPaletteToward(
+      dragonDanceAsset.hollowOrb.palette,
+      { r: 0, g: 0, b: 156 },
+      view.orbPaletteCoefficient,
+    );
+    const drawOrbs = () => {
+      // Hardware OAM consumes the preceding software sprite state. The live
+      // allocator permutation is already expressed by the typed view order;
+      // paint in reverse so its lower OAM index remains the overlap winner.
+      for (const orb of (dragonState.age >= 22 ? displayed.orbs : []).slice().reverse()) {
+        drawSpriteSheet(
+          fb, dragonDanceAsset.hollowOrb.tileset, orbPalette,
+          orb.x + orb.x2 - 8, orb.y + orb.y2 - 8,
+        );
+      }
+    };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (view.attacker.geometry.side === "player") {
+      drawTarget(); drawAttacker(); drawOrbs();
+    } else {
+      drawAttacker(); drawOrbs(); drawTarget();
+    }
+    const profile = dragonState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "DRAGON DANCE!", 99,
     );
     return;
   }

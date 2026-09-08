@@ -1092,6 +1092,11 @@ import {
   type AmnesiaState,
 } from "./amnesia.ts";
 import {
+  dragonDanceAtAge,
+  type DragonDanceProfile,
+  type DragonDanceState,
+} from "./dragonDance.ts";
+import {
   psybeamAtAge,
   psybeamDisplayedRingsAtAge,
   type PsybeamRing,
@@ -3081,6 +3086,15 @@ export interface SceneOnAmnesiaConfig {
   readonly attackerPictureSize: Readonly<{ width: number; height: number }>;
 }
 
+export interface SceneOnDragonDanceConfig {
+  readonly move: "DRAGON_DANCE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live species geometry plus current allocator/order inputs. */
+  readonly animationProfile: Readonly<DragonDanceProfile>;
+}
+
 export interface SceneOnPsybeamConfig {
   readonly move: "PSYBEAM";
   readonly attacker: SceneOnPresentationBattler;
@@ -3866,6 +3880,7 @@ export type SceneOnMoveConfig =
   | SceneOnSleepPowderConfig
   | SceneOnHypnosisConfig
   | SceneOnAmnesiaConfig
+  | SceneOnDragonDanceConfig
   | SceneOnPsybeamConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
@@ -4114,6 +4129,8 @@ export type SceneOnHypnosisPresentationState =
   SceneOnMovePresentationState<SceneOnHypnosisConfig>;
 export type SceneOnAmnesiaPresentationState =
   SceneOnMovePresentationState<SceneOnAmnesiaConfig>;
+export type SceneOnDragonDancePresentationState =
+  SceneOnMovePresentationState<SceneOnDragonDanceConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -9049,6 +9066,33 @@ export function sceneOnAmnesiaView(
       attackerPictureSize,
     ),
     displayedBgPaletteAge: state.age - 6,
+  };
+}
+
+export interface SceneOnDragonDanceView extends DragonDanceState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_DRAGON_DANCE's first active source-script row. */
+export function sceneOnDragonDanceView(
+  state: SceneOnDragonDancePresentationState,
+): SceneOnDragonDanceView {
+  if (state.config.move !== "DRAGON_DANCE") {
+    throw new Error(`expected DRAGON_DANCE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...dragonDanceAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.animationProfile,
+      state.config.attacker.geometry.battlePositionCenter.y,
+    ),
   };
 }
 
