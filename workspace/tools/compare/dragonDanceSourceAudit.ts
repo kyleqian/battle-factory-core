@@ -75,7 +75,7 @@ if (JSON.stringify(commands) !== JSON.stringify(expectedCommands)
   || JSON.stringify(entry?.blocks) !== JSON.stringify(["Move_DRAGON_DANCE"])
   || JSON.stringify(entry?.componentIds) !== JSON.stringify(components)
   || JSON.stringify(carriers.map((item: Json) => item.index)) !== JSON.stringify(carrierIds)
-  || coverage.entries.some((item: Json) => item.move === "MOVE_DRAGON_DANCE")
+  || !coverage.entries.some((item: Json) => item.move === "MOVE_DRAGON_DANCE" && item.status === "exact")
   || !macros.includes("createsprite gDragonDanceOrbSpriteTemplate, \\anim_battler, \\subpriority_offset, 256 * \\angle")
   || !registry.includes("{gBattleAnimSpriteGfx_HollowOrb, 0x0080, ANIM_TAG_HOLLOW_ORB}")
   || !registry.includes("{gBattleAnimSpritePal_HollowOrb, ANIM_TAG_HOLLOW_ORB}")
@@ -84,7 +84,7 @@ if (JSON.stringify(commands) !== JSON.stringify(expectedCommands)
   || !songs.includes("#define SE_M_TELEPORT               203")) throw new Error("Dragon Dance source/classification contract drifted");
 
 console.log(JSON.stringify({
-  move: "MOVE_DRAGON_DANCE", moveId: 349, status: "unsupported", coverageCredit: false,
+  move: "MOVE_DRAGON_DANCE", moveId: 349, status: "exact", coverageCredit: true,
   source: { start: `0x${start.toString(16).padStart(8, "0")}`, endExclusive: `0x${end.toString(16).padStart(8, "0")}`, byteLength: moveBytes.length, romSha256: sha(moveBytes), sourceByteLength: Buffer.byteLength(body), sourceSha256: sha(body), commandRows: commands.length },
   graph: { blocks: entry.blocks, components }, commands: expectedCommands,
   resources: { tag: "ANIM_TAG_HOLLOW_ORB", tagValue: 10249, tileBytes: 128, gfx: pin("gBattleAnimSpriteGfx_HollowOrb"), palette: pin("gBattleAnimSpritePal_HollowOrb"), template: pin("gDragonDanceOrbSpriteTemplate") },
@@ -97,5 +97,5 @@ console.log(JSON.stringify({
     audio: { sound: "SE_M_TELEPORT", id: 203, calls: 3, pan: "SOUND_PAN_ATTACKER", delays: [0, 30, 30] },
   },
   carriers: { level50Range: { first: 110, last: 849 }, setCount: carriers.length, speciesCount: new Set(carriers.map((item: Json) => item.species)).size, all: carriers.map((item: Json) => ({ index: item.index, label: item.label, species: item.species, moves: item.moves, itemName: item.itemName, nature: item.nature, evSpreadStats: item.evSpreadStats })), lowest: carriers[0] },
-  checkpoint: { legalBilateralPartyOnlyStaging: true, denseWindowCaptured: false, productionChanged: false, coveragePromotion: false, componentTrackCredit: false, latchPromotion: false },
+  checkpoint: { legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, productionChanged: true, coveragePromotion: true, componentTrackCredit: false, latchPromotion: false },
 }, null, 2));

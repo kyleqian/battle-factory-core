@@ -140,12 +140,12 @@ function verifySide(side: Side, config: Json): Json {
 
 export function verifyDragonDanceEvidence(): Json {
   const fixture = JSON.parse(file("tools/compare/fixtures/dragon-dance-evidence.json").toString("utf8")) as Json;
-  invariant(fixture.schema === "dragon-dance-bilateral-evidence/v1" && fixture.status === "unsupported" && !fixture.coverageCredit, "fixture boundary");
+  invariant(fixture.schema === "dragon-dance-bilateral-evidence/v1" && fixture.status === "exact" && fixture.coverageCredit, "fixture boundary");
   for (const side of ["player-back", "opponent-front"] as const) for (const key of ["scenario", "denseState", "rawRgbArchive", "changeMap"]) invariant(sha(file(fixture.orientations[side][key])) === fixture.orientations[side][`${key}Sha256`], `${side}: ${key} digest`);
   for (const key of ["audit", "probe", "sharedProbe"]) invariant(sha(file(fixture.source[key])) === fixture.source[`${key}Sha256`], `source ${key}`);
   const audit = execFileSync(process.execPath, ["--experimental-strip-types", fixture.source.audit], { cwd: root });
   invariant(sha(audit) === fixture.source.auditRunSha256, "audit output");
-  return { schema: fixture.schema, status: fixture.status, coverageCredit: false, orientations: Object.fromEntries((["player-back", "opponent-front"] as const).map((side) => [side, verifySide(side, fixture.orientations[side])])) };
+  return { schema: fixture.schema, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries((["player-back", "opponent-front"] as const).map((side) => [side, verifySide(side, fixture.orientations[side])])) };
 }
 
 if (process.argv.includes("--write-maps")) {

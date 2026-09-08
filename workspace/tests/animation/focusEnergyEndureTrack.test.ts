@@ -432,16 +432,16 @@ describe("focus-energy-endure standalone fulfilled component-track ratchet", () 
     expect(trackGoal).toContain("no blend, ShakeMon2, EndureEffect, sprite, affine/OAM, timing, or latch fact transfers");
   });
 
-  it("fulfills only the exact five-component track at the updated 235/276 acceptance and keeps Focus Punch outside it", () => {
+  it("fulfills only the exact five-component track at the updated 236/276 acceptance and keeps Focus Punch outside it", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     const inventory = JSON.parse(readFileSync("src/data/gen/factory-animation-inventory.json", "utf8"));
     const level50Moves = new Set<string>(inventory.tiers.level50.moves
       .map((entry: { move: string }) => entry.move));
     expect(level50Moves.size).toBe(276);
-    expect(coverage.entries).toHaveLength(235);
+    expect(coverage.entries).toHaveLength(236);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && entry.status === "exact",
-    )).toHaveLength(235);
+    )).toHaveLength(236);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && (entry.status === "partial" || entry.status === "staged"),
     )).toEqual([]);

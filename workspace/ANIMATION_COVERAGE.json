@@ -2,6 +2,40 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_DRAGON_DANCE",
+   "status": "exact",
+   "covered": [
+    "the exact seven-component Move_DRAGON_DANCE graph is source-audited: ANIM_TAG_HOLLOW_ORB, BlendPalInAndOutByTag, DragonDanceWaver, monbg/splitbgprio/clearmonbg, and six dragon-dance orb sprite commands",
+    "complete legal bilateral party-only Battle Scene ON windows retain every age 0..141 through first inactive cleanup: player-back frames 74..215 and opponent-front frames 78..219, with 142/142 raw/state rows per orientation and byte-identical repeat receipts",
+    "the source-relative reducer and typed seam reproduce six live-allocated HOLLOW_ORB sprites, three palette cycles, the two-bank scanline waver and delayed HOFS transfer, attacker monbg/split priority, predecessor OAM/matrix/palette display, resources, three TELEPORT calls, and cleanup from live side/species/geometry/allocation/order inputs without gameplay ownership",
+    "two independent actual-core comparator processes each pass all 284/284 retained framebuffer rows with zero residual pixels; rows digest d75f6655f84394141f0e5fa01e3960add2d525e5d7bee15a09f8a1aedf932a75, and an ALTARIA altered-species/geometry/picture-size/allocation/order control is deterministic and material",
+    "Swords Dance, Confuse Ray, Acid Armor, Memento, and existing scanline/monbg controls remain independently accepted; Dragon Dance grants no sibling, component-track fulfillment, or latch credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-dragon-dance-player-dragonair-opponent-onix.json",
+    "tools/battle-lab/mechanic-dragon-dance-opponent-dragonair-player-onix.json",
+    "tools/compare/dragonDanceSourceAudit.ts",
+    "tools/compare/dragonDanceProbe.py",
+    "tools/compare/dragonDanceEvidence.ts",
+    "tools/compare/dragonDanceActualCore.ts",
+    "tools/compare/extractDragonDanceAssets.ts",
+    "tools/compare/fixtures/dragon-dance-evidence.json",
+    "tools/compare/evidence/dragon-dance-player-dense-state.json.gz",
+    "tools/compare/evidence/dragon-dance-opponent-dense-state.json.gz",
+    "tools/compare/evidence/dragon-dance-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/dragon-dance-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/dragon-dance-changemap-player.json",
+    "tools/compare/evidence/dragon-dance-changemap-opponent.json",
+    "src/animation/assets/dragon-dance.json",
+    "src/animation/dragonDance.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/dragonDance.test.ts",
+    "tests/animation/dragonDanceSourceCheckpoint.test.ts",
+    "tests/animation/dragonDanceEvidenceCheckpoint.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_AMNESIA",
    "status": "exact",
    "covered": [

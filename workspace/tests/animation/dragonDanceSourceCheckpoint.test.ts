@@ -28,10 +28,10 @@ function validateStage(path: string) {
   ].join("\n"), oracleDirectory(), resolve(root, path)], { cwd: root, encoding: "utf8" });
 }
 
-describe("MOVE_DRAGON_DANCE evidence-only source and legal staging checkpoint", () => {
+describe("MOVE_DRAGON_DANCE source and legal staging contract", () => {
   it("pins the complete half-open ROM/source body and exact seven-component generated graph", () => {
     expect(audit()).toMatchObject({
-      move: "MOVE_DRAGON_DANCE", moveId: 349, status: "unsupported", coverageCredit: false,
+      move: "MOVE_DRAGON_DANCE", moveId: 349, status: "exact", coverageCredit: true,
       source: {
         start: "0x082cf3b3", endExclusive: "0x082cf422", byteLength: 111,
         romSha256: "ffc1fe7441a450beeaf621ad3f95b4a70aced93501139ea7867a7d95a941775e",
@@ -105,10 +105,10 @@ describe("MOVE_DRAGON_DANCE evidence-only source and legal staging checkpoint", 
     expect(attacker).toMatchObject({ species: 148, level: 50, nature: 3, moves: [349, 349, 349, 349], item: 134, abilitySlot: 0, friendship: 70, gender: "female", shiny: false });
   });
 
-  it("records only an unsupported evidence checkpoint with no production or coverage credit", () => {
-    expect(audit().checkpoint).toEqual({ legalBilateralPartyOnlyStaging: true, denseWindowCaptured: false, productionChanged: false, coveragePromotion: false, componentTrackCredit: false, latchPromotion: false });
+  it("records move-owned dense, production, and coverage credit without track or latch transfer", () => {
+    expect(audit().checkpoint).toEqual({ legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, productionChanged: true, coveragePromotion: true, componentTrackCredit: false, latchPromotion: false });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(235);
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_DRAGON_DANCE")).toBeUndefined();
+    expect(coverage.entries).toHaveLength(236);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_DRAGON_DANCE")).toMatchObject({ status: "exact" });
   });
 });

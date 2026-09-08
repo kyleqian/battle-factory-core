@@ -60,7 +60,7 @@ describe("MOVE_HIDDEN_POWER actual-core production framebuffer", () => {
 
   it("promotes Hidden Power alone and fulfills only its dedicated track", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(235);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(236);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_HIDDEN_POWER")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "hidden-power-red-orbs")).toMatchObject({ fulfilled: true });
   });

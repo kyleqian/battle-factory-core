@@ -8,12 +8,12 @@ import { verifyDragonDanceEvidence } from "../../tools/compare/dragonDanceEviden
 type Json = Record<string, any>;
 const root = resolve(import.meta.dirname, "../..");
 
-describe("MOVE_DRAGON_DANCE complete bilateral evidence checkpoint", () => {
+describe("MOVE_DRAGON_DANCE complete bilateral exact evidence", () => {
   it("replays every retained semantic, hardware, raw-RGB, and normalized-map row twice", () => {
     const first = verifyDragonDanceEvidence(), second = verifyDragonDanceEvidence();
     expect(second).toEqual(first);
     expect(first).toEqual({
-      schema: "dragon-dance-bilateral-evidence/v1", status: "unsupported", coverageCredit: false,
+      schema: "dragon-dance-bilateral-evidence/v1", status: "exact", coverageCredit: true,
       orientations: {
         "player-back": { rows: 142, probeJsonSha256: "41ed662dae54308b83b86a12f48ad7aebc5b274f9c18565122202a06523a5893", rawRgbSequenceSha256: "09d4ec587c8bf58f93c4392f7c02d7d4e085aefc6a1f02123e2c771d22b04079", changedRows: 91, partyTransitions: [] },
         "opponent-front": { rows: 142, probeJsonSha256: "b7d8da9d115467e3453059c755b3084d39f7465300a3956902ee7f6b0cdd2f98", rawRgbSequenceSha256: "a546c2c7f4d802487fcaa836f68f545165436a2f8dafc5de93082f73e0e19c54", changedRows: 91, partyTransitions: [20, 21] },
@@ -28,7 +28,7 @@ describe("MOVE_DRAGON_DANCE complete bilateral evidence checkpoint", () => {
     }
   });
 
-  it("pins move-owned orb, palette, waver, monbg, audio, cleanup, and non-promotion facts", () => {
+  it("pins move-owned orb, palette, waver, monbg, audio, cleanup, and promotion facts", () => {
     expect(fixture.measured).toEqual({
       rowsPerOrientation: 142, changedRowsPerOrientation: 91, firstInactiveCleanupAge: 141,
       orbLifetimes: [[3,20,101],[4,20,101],[5,20,101],[7,20,101],[9,20,101],[10,21,101]],
@@ -39,8 +39,8 @@ describe("MOVE_DRAGON_DANCE complete bilateral evidence checkpoint", () => {
       audio: { sound: "SE_M_TELEPORT", ages: [10,53,85], calls: 3 }, animationRngTransitions: 138,
       rawState: { battleMonsImmutable: true, outcomeWeatherGameplayRngImmutable: true, playerPartyImmutable: true, opponentPartyTransactionAges: [20,21], opponentPartyRestored: true },
     });
-    expect(fixture.scope).toMatchObject({ fullDenseRowsRetained: true, twiceFreshByteIdentical: true, rawRgbRowsRetained: true, normalizedBilateralChangeMaps: true, productionAnimationChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferAcceptance: false, componentTrackCredit: false, coveragePromotion: false, siblingAcceptance: false, gameplayStateOwned: false, boundaryOrBarrierChanged: false, transientOverrides: [] });
-    expect((coverage as Json).entries.find((entry: Json) => entry.move === "MOVE_DRAGON_DANCE")).toBeUndefined();
+    expect(fixture.scope).toMatchObject({ fullDenseRowsRetained: true, twiceFreshByteIdentical: true, rawRgbRowsRetained: true, normalizedBilateralChangeMaps: true, productionAnimationChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, framebufferAcceptance: true, componentTrackCredit: false, coveragePromotion: true, siblingAcceptance: false, gameplayStateOwned: false, boundaryOrBarrierChanged: false, transientOverrides: [] });
+    expect((coverage as Json).entries.find((entry: Json) => entry.move === "MOVE_DRAGON_DANCE")).toMatchObject({ status: "exact" });
   });
 
   it("keeps every named control independently exact without transferring facts", () => {

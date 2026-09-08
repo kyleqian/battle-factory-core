@@ -183,9 +183,9 @@ describe("anger-mark-grow-breath standalone fulfilled component-track ratchet", 
   it("pins the exact five-component boundary, exact counts/statuses, fulfilled goal, and four independent representatives", () => {
     const coverage = json<Json>("ANIMATION_COVERAGE.json");
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "anger-mark-grow-breath");
-    expect(coverage.entries).toHaveLength(235);
-    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(235);
-    expect(276 - coverage.entries.filter((entry: Json) => entry.status === "exact").length).toBe(41);
+    expect(coverage.entries).toHaveLength(236);
+    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(236);
+    expect(276 - coverage.entries.filter((entry: Json) => entry.status === "exact").length).toBe(40);
     expect(track).toEqual({
       id: "anger-mark-grow-breath",
       components: [...trackComponents],

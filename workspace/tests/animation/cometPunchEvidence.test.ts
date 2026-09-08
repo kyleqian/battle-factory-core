@@ -70,7 +70,7 @@ describe("MOVE_COMET_PUNCH natural multi-hit exact acceptance", () => {
     }
     expect(accepted).toBe(333);
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(235);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(236);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_COMET_PUNCH"))
       .toMatchObject({ status: "exact" });
   });

@@ -1,3 +1,10 @@
+# MOVE_DRAGON_DANCE exact production closure (2026-09-08 worker)
+
+- **State:** Level 50 advances to **236/276 exact**, **0 partial / 0 staged**, and **40 unsupported**. MOVE_DRAGON_DANCE alone is promoted; no sibling, component-track, latch, gameplay, controller/facility, boundary, or barrier credit changes.
+- **Production:** Added the source-derived HOLLOW_ORB asset and 142-age reducer behind a narrow typed Scene-ON seam. The live compositor consumes attacker/target side, species, geometry, picture size, allocation slots/order, field state, and source-relative age for six orbs, three palette cycles, the two-bank scanline waver/HOFS transfer, attacker monbg/split priority, resources, audio, teardown, and first-inactive cleanup. Production imports no retained evidence and has no trace/scenario/species/coordinate identity branch.
+- **Acceptance / control:** Two independent actual-core processes each pass **284/284** retained framebuffer rows (**142 player-back + 142 opponent-front**) with zero residual pixels and rows digest **`d75f6655…`**. A deterministic ALTARIA control changes live species, both geometries, picture size **64x64→56x48**, allocation **`3/4/5/7/9/10→4/6/8/9/11/12`**, and order, producing distinct base/altered digests **`1f315298…` / `84f91734…`**.
+- **Checks:** Focused Dragon Dance plus Swords Dance, Confuse Ray, Acid Armor, Memento, and animation-boundary controls pass **8 files / 27 tests**. Coverage reports **236/276**; animation audit, typecheck, and diff checks pass. Final full-suite/build verification follows in this session.
+
 # Animation supervisor verification — MOVE_DRAGON_DANCE bilateral dense-evidence checkpoint (2026-09-08 supervisor)
 
 - **State / merge:** Level 50 remains **235/276 exact**, **0 partial / 0 staged**, and **41 unsupported**. Fast-forwarded Sol/high commit `c8d9f9148`; MOVE_DRAGON_DANCE remains unsupported, with no production, coverage, component-track, sibling, gameplay, boundary, or barrier credit.
