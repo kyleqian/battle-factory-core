@@ -63,6 +63,8 @@ pub mod battle_script_refresh;
 pub mod battle_script_refresh_vectors_gen;
 pub mod battle_script_remaininghptopower;
 pub mod battle_script_remaininghptopower_vectors_gen;
+pub mod battle_script_removeitem;
+pub mod battle_script_removeitem_vectors_gen;
 pub mod battle_script_rolloutdamagecalculation;
 pub mod battle_script_rolloutdamagecalculation_vectors_gen;
 pub mod battle_script_setalwayshitflag;
