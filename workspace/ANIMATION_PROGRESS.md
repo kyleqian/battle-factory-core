@@ -1,3 +1,10 @@
+# Animation supervisor verification — MOVE_UPROAR source / legal staging checkpoint (2026-09-08 supervisor)
+
+- **State / merge:** Fast-forwarded Terra/max commits `e7a53712c` and `f69a92af2`; Level 50 remains **238/276 exact**, **0 partial / 0 staged**, and **38 unsupported**. MOVE_UPROAR remains unsupported with the manual queue empty. No production, coverage, component-track, sibling, latch, gameplay, controller/facility, boundary, or barrier credit changed.
+- **Independent review:** The five-file diff is source/staging only. Two fresh audit runs are byte-identical at SHA-256 `3ca96c04c7d90d2c6036e72a320db336769b3d8b6a7a3ce461ea0ffaa22a6c8b`: the complete branchless half-open **`0x082cdafc..0x082cdbc6`** body has 202 ROM bytes (`650c484d…`), 1,182 source bytes (`34fe247c…`), 23 commands, exactly seven generated components, and one Level-50 carrier, set 221 `FRONTIER_MON_VIGOROTH_1`. Both complete party-only Vigoroth/Onix Scene-ON orientations validate and stock selection/AI smoke through Uproar without transient-state injection.
+- **Gates / next:** Supervisor-focused source, inventory, graph, and frontier checks pass **3 files / 18 tests**. Post-merge `npm test` passes **1,289 files / 11,154 tests** (**44 files / 223 skipped**), build passes **773 modules**, and typecheck, coverage, animation audit, and diff checks pass. Next capture complete twice-fresh bilateral Uproar source-entry→first-inactive dense state and chronological raw RGB, then independently resolve move-owned OAM/matrix/palette/monbg/audio/resource/cleanup latches before any reducer, compositor, or acceptance work.
+- **For the main program:** nothing blocking.
+
 # MOVE_UPROAR authoritative-source/classification + legal bilateral Scene-ON staging checkpoint — unsupported (2026-09-08 worker)
 
 - **State:** Level 50 remains **238/276 exact**, **0 partial / 0 staged**, and **38 unsupported**. MOVE_UPROAR remains absent from `entries`; `ANIMATION_COVERAGE.json`, its empty queue, component tracks, `ANIMATION_LATCHES.md`, production animation, presentation seam, gameplay state, boundary/barrier rules, and all sibling status are intentionally unchanged.
