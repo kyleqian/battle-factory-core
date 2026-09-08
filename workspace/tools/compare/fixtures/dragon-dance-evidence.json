@@ -1,0 +1,90 @@
+{
+  "schema": "dragon-dance-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_DRAGON_DANCE",
+  "moveId": 349,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "components": [
+    "asset:ANIM_TAG_HOLLOW_ORB",
+    "task:AnimTask_BlendPalInAndOutByTag",
+    "task:AnimTask_DragonDanceWaver",
+    "visualCommand:clearmonbg",
+    "visualCommand:create_dragon_dance_orb_sprite",
+    "visualCommand:monbg",
+    "visualCommand:splitbgprio"
+  ],
+  "source": {
+    "audit": "tools/compare/dragonDanceSourceAudit.ts",
+    "auditSha256": "eeb3ca88aa50d762daa6dfe79d0551be6d59c13054e8b24d6481d2a24333bcfc",
+    "auditRunSha256": "bbee6b7f93d4827b352cc54c7cc51bd6365a94a0d6b805e2cb6022c19844f4ec",
+    "probe": "tools/compare/dragonDanceProbe.py",
+    "probeSha256": "6f163a31ff482fbf33e46780a181fb1d424a2f1c4a9f1825556b741c7a3ddf64",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "sharedProbeSha256": "797c904f4c7c13ce280c69c70bc01bdffd4ea1b6987067507046838602c1c4a8"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-dragon-dance-player-dragonair-opponent-onix.json",
+      "scenarioSha256": "ed1e48d8914ea52e89344e5c3039a3c3782fbbebab8b8237ddbb06f6259272a8",
+      "sourceWindow": {"startFrame": 74, "endFrame": 215, "frameCount": 142, "sourceFrameCount": 142},
+      "denseState": "tools/compare/evidence/dragon-dance-player-dense-state.json.gz",
+      "denseStateSha256": "5485014bee08bd1f2887837a4f2a4fa50696189b93f066d57d2cd7e30efdb68f",
+      "probeJsonSha256": "41ed662dae54308b83b86a12f48ad7aebc5b274f9c18565122202a06523a5893",
+      "repeatProbeJsonSha256": "41ed662dae54308b83b86a12f48ad7aebc5b274f9c18565122202a06523a5893",
+      "rawRgbArchive": "tools/compare/evidence/dragon-dance-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "3df108a9212988417d5bfc9d94688b1c9be2674d99f80e19df3bc18b515cfb57",
+      "rawRgbSequenceSha256": "09d4ec587c8bf58f93c4392f7c02d7d4e085aefc6a1f02123e2c771d22b04079",
+      "repeatRawRgbSequenceSha256": "09d4ec587c8bf58f93c4392f7c02d7d4e085aefc6a1f02123e2c771d22b04079",
+      "changeMap": "tools/compare/evidence/dragon-dance-changemap-player.json",
+      "changeMapSha256": "98531069e939bb40f7fc3ed1c6839312bd2997f8fdce4f340c7ba0b734b2a080"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-dragon-dance-opponent-dragonair-player-onix.json",
+      "scenarioSha256": "e07b4c23d2921ea70ccf9b9d0fb875407eb86db570676ea8b26ba077b1fa3deb",
+      "sourceWindow": {"startFrame": 78, "endFrame": 219, "frameCount": 142, "sourceFrameCount": 142},
+      "denseState": "tools/compare/evidence/dragon-dance-opponent-dense-state.json.gz",
+      "denseStateSha256": "5c49445eb85fc9bbb2a3b7332363b14092a858713a1371ac3be5e0d2d6346bea",
+      "probeJsonSha256": "b7d8da9d115467e3453059c755b3084d39f7465300a3956902ee7f6b0cdd2f98",
+      "repeatProbeJsonSha256": "b7d8da9d115467e3453059c755b3084d39f7465300a3956902ee7f6b0cdd2f98",
+      "rawRgbArchive": "tools/compare/evidence/dragon-dance-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "2ea3b824223a1000e141c33894f991b2d6736dc489bae7bfe8456a0758ec5a13",
+      "rawRgbSequenceSha256": "a546c2c7f4d802487fcaa836f68f545165436a2f8dafc5de93082f73e0e19c54",
+      "repeatRawRgbSequenceSha256": "a546c2c7f4d802487fcaa836f68f545165436a2f8dafc5de93082f73e0e19c54",
+      "changeMap": "tools/compare/evidence/dragon-dance-changemap-opponent.json",
+      "changeMapSha256": "617e7f6ce46ca7f74574e6ce99b834089732932aa0b26434b9608d2b93362dd3"
+    }
+  },
+  "measured": {
+    "rowsPerOrientation": 142,
+    "changedRowsPerOrientation": 91,
+    "firstInactiveCleanupAge": 141,
+    "orbLifetimes": [[3,20,101],[4,20,101],[5,20,101],[7,20,101],[9,20,101],[10,21,101]],
+    "waverTask": [10,84],
+    "paletteTask": [20,103],
+    "monbg": {"update": [4,107], "clear": [105,107], "vramChanges": [5,107,109]},
+    "displayTransfers": {"oam": "141/141 predecessor", "matrices": "141/141 predecessor", "palette": "140/141 predecessor; age 4 same-row monbg"},
+    "scanline": {"stateChanges": [10,84,85], "selectedHofsChanges": [5,11,85,109], "waverTransfer": "source buffer age 10 reaches selected HOFS at age 11 (RAM+1)"},
+    "resources": {"tag": 10249, "loadAge": 1, "lastLoadedAge": 140, "unloadedAge": 141},
+    "audio": {"sound": "SE_M_TELEPORT", "ages": [10,53,85], "calls": 3},
+    "animationRngTransitions": 138,
+    "rawState": {"battleMonsImmutable": true, "outcomeWeatherGameplayRngImmutable": true, "playerPartyImmutable": true, "opponentPartyTransactionAges": [20,21], "opponentPartyRestored": true}
+  },
+  "scope": {
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true,
+    "rawRgbRowsRetained": true,
+    "normalizedBilateralChangeMaps": true,
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferAcceptance": false,
+    "componentTrackCredit": false,
+    "coveragePromotion": false,
+    "siblingAcceptance": false,
+    "gameplayStateOwned": false,
+    "boundaryOrBarrierChanged": false,
+    "transientOverrides": []
+  }
+}

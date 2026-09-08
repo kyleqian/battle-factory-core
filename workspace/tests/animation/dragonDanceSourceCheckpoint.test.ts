@@ -91,7 +91,7 @@ describe("MOVE_DRAGON_DANCE evidence-only source and legal staging checkpoint", 
     const stage = JSON.parse(readFileSync(resolve(root, path), "utf8")) as Json;
     const validated = validateStage(path);
     expect(validated.status).toBe(0); expect(validated.stderr).toBe("");
-    expect(stage).toMatchObject({ schemaVersion: 1, mode: "mechanicLab", profile: "battle-scene-on", level: 50 });
+    expect(stage).toMatchObject({ schemaVersion: 1, mode: "mechanicLab", profile: "battle-scene-on", level: 50, challengeNum: 2, battleNum: 0, trainerId: 110 });
     expect(Object.keys(stage.overrides)).toEqual(["parties"]); expect(stage.trace).not.toHaveProperty("captureFrames");
     for (const party of Object.values(stage.overrides.parties) as Json[][]) {
       expect(party).toHaveLength(3);

@@ -29,6 +29,9 @@ EXTRA_SYMBOLS = tuple(filter(None, os.environ.get(
 ).split(",")))
 REPEATED_BODIES = os.environ.get("POKEBENCH_ANIM_PROBE_REPEATED_BODIES") == "1"
 EXTRA_FRAMES = int(os.environ.get("POKEBENCH_ANIM_PROBE_EXTRA_FRAMES", "0"))
+INCLUDE_SCANLINE = os.environ.get("POKEBENCH_ANIM_PROBE_INCLUDE_SCANLINE") == "1"
+INCLUDE_RESOURCE_ALLOCATORS = os.environ.get("POKEBENCH_ANIM_PROBE_INCLUDE_RESOURCE_ALLOCATORS") == "1"
+INCLUDE_RAW_BATTLE_STATE = os.environ.get("POKEBENCH_ANIM_PROBE_INCLUDE_RAW_BATTLE_STATE") == "1"
 EXTRA_OWNED_RANGE_NAMES = tuple(
     tuple(pair.split(":"))
     for pair in filter(None, os.environ.get(
@@ -60,6 +63,8 @@ def main() -> None:
     )
     active, pointer = names["gAnimScriptActive"], names["sBattleAnimScriptPtr"]
     software_oam, palette_tags, tile_tags = names["gMain"] + 0x38, names["sSpritePaletteTags"], names["sSpriteTileRangeTags"]
+    scanline, scanline_buffers = sy.get("gScanlineEffect"), sy.get("gScanlineEffectRegBuffers")
+    tile_ranges, tile_bitmap = names.get("sSpriteTileRanges"), names.get("sSpriteTileAllocBitmap")
     RGB.mkdir(parents=True, exist_ok=True)
 
     u8 = lambda address: oracle.read_u8(address)
@@ -87,7 +92,7 @@ def main() -> None:
         base = sprites + slot * 0x44
         matrix_num = (u16(base + 2) >> 9) & 31
         matrix = matrices + matrix_num * 8
-        return {
+        result = {
             "slot": slot, "raw": raw(base, 0x44), "template": ident(u32(base + 0x14)), "callback": ident(u32(base + 0x1C)),
             "attr": [u16(base + offset) for offset in (0, 2, 4)], "x": s16(base + 0x20), "y": s16(base + 0x22),
             "x2": s16(base + 0x24), "y2": s16(base + 0x26), "animNum": u8(base + 0x2A),
@@ -96,6 +101,7 @@ def main() -> None:
             "matrixNum": matrix_num, "matrix": [s16(matrix + offset) for offset in (0, 2, 4, 6)],
             "data": [s16(base + 0x2E + index * 2) for index in range(8)],
         }
+        return result
 
     def live_sprites() -> list[dict]:
         return [sprite(slot) for slot in range(64) if u8(sprites + slot * 0x44 + 0x3E) & 1]
@@ -124,7 +130,7 @@ def main() -> None:
         script = u32(pointer)
         attacker, target = u8(names["gBattleAnimAttacker"]), u8(names["gBattleAnimTarget"])
         ids = [u8(names["gBattlerSpriteIds"] + index) for index in range(4)]
-        return {
+        result = {
             "frame": frame, "sha256": hashlib.sha256(rgb).hexdigest(), "animScriptActive": bool(u8(active)),
             "scriptPtr": script, "scriptPtrParity": script & 1, "scriptPointerIdentity": ident(script),
             "scriptOwner": MOVE_NAME if owns(script) else None,
@@ -153,6 +159,39 @@ def main() -> None:
             "paletteTags": [u16(palette_tags + i * 2) for i in range(16)], "tileTags": [u16(tile_tags + i * 2) for i in range(128)],
             "registers": {name: u16(address) for name, address in regs.items()}, "audio": {"SE1": mplay("SE1"), "SE2": mplay("SE2")},
         }
+        if INCLUDE_SCANLINE:
+            if scanline is None or scanline_buffers is None:
+                raise RuntimeError("scanline symbols unavailable")
+            result["scanline"] = {
+                "dmaSrcBuffers": [u32(scanline), u32(scanline + 4)], "dmaDest": u32(scanline + 8),
+                "dmaControl": u32(scanline + 12), "setFirstScanlineReg": u32(scanline + 16),
+                "srcBuffer": u8(scanline + 20), "state": u8(scanline + 21),
+                "unused16": u8(scanline + 22), "unused17": u8(scanline + 23), "waveTaskId": u8(scanline + 24),
+            }
+            result["scanlineBuffers"] = [
+                [s16(scanline_buffers + bank * 0x780 + index * 2) for index in range(320)]
+                for bank in range(2)
+            ]
+        if INCLUDE_RESOURCE_ALLOCATORS:
+            if tile_ranges is None or tile_bitmap is None:
+                raise RuntimeError("sprite resource allocator symbols unavailable")
+            result["resourceAllocators"] = {
+                "paletteTags": result["paletteTags"], "tileTags": result["tileTags"],
+                "tileRanges": [[u16(tile_ranges + index * 4), u16(tile_ranges + index * 4 + 2)] for index in range(64)],
+                "tileBitmap": raw(tile_bitmap, 128), "matrixBitmap": u32(names["gOamMatrixAllocBitmap"]),
+                "reservedPaletteCount": u8(names["gReservedSpritePaletteCount"]),
+                "reservedTileCount": u16(names["gReservedSpriteTileCount"]),
+            }
+        if INCLUDE_RAW_BATTLE_STATE:
+            result["rawBattleState"] = {
+                "playerParty": raw(sy["gPlayerParty"], 6 * 100),
+                "opponentParty": raw(sy["gEnemyParty"], 6 * 100),
+                "battleMons": raw(sy["gBattleMons"], 4 * 0x58),
+                "battleOutcome": u8(sy["gBattleOutcome"]),
+                "battleWeather": u16(sy["gBattleWeather"]),
+                "gameplayRng": u32(sy["gRngValue"]),
+            }
+        return result
 
     rows: list[dict] = []
     started = done = False
@@ -233,8 +272,8 @@ def main() -> None:
         raise RuntimeError(f"complete {MOVE_NAME} source window not observed: rows={len(rows)}, frame={frame}, ptr={hex(u32(pointer))}, active={u8(active)}, currentMove={final_snapshot['engine'].get('currentMove')}")
     topology = {
         "tasks": sorted({task["func"]["symbol"] for item in rows for task in item["tasks"] if task["func"]["symbol"]}),
-        "templates": sorted({sprite["template"]["symbol"] for item in rows for sprite in item["sprites"] if sprite["template"]["symbol"]}),
-        "callbacks": sorted({sprite["callback"]["symbol"] for item in rows for sprite in item["sprites"] if sprite["callback"]["symbol"]}),
+        "templates": sorted({sprite["template"]["symbol"] for item in rows for sprite in item["sprites"] if sprite["template"] and sprite["template"]["symbol"]}),
+        "callbacks": sorted({sprite["callback"]["symbol"] for item in rows for sprite in item["sprites"] if sprite["callback"] and sprite["callback"]["symbol"]}),
     }
     result = {
         "schema": SCHEMA, "profile": "battle-scene-on", "move": MOVE, "setup": setup,
