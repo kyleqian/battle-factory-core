@@ -4166,3 +4166,9 @@
   by the supervisor last round); SPIKE_CANNON/BRICK_BREAK Tier-1 untouched. No
   boundary widening, no new unsupported-branch barrier; the only engine contacts
   are the TAKE_DOWN draw case in `battleScene.ts` and the one/two-frame seam.
+# MOVE_MAGNITUDE source / legal branch staging checkpoint (2026-09-08 worker)
+
+- **State:** MOVE_MAGNITUDE remains unsupported and queued; no reducer, asset, typed seam, compositor, production wiring, coverage, component-track, sibling, latch, gameplay, controller, facility, boundary, or barrier credit changed.
+- **Source:** Pinned the complete `Move_MAGNITUDE`, `MagnitudeRegular`, `MagnitudeIntense`, and `MagnitudeEnd` pointer-owned bodies, exact generated six-component graph, source/ELF/ROM hashes, `gAnimMovePower > 99` branch selector, both `(0,50)` HorizontalShake calls, two intense BG-only complex palette blends, and both Level-50 carriers: set 166 GRAVELER_1 and set 241 CAMERUPT_1.
+- **Staging:** Added four complete transient-free party-only Scene-ON stages: regular/intense carrier branches in player-back and opponent-front orientations. All pass the pinned lab validator; dense first-active-through-first-inactive oracle evidence is not yet retained.
+- **Checks / next:** Focused source/staging tests pass 7/7. Next run the four supplied stages through fresh local mGBA processes, discover branch selection from stock behavior, and retain twice-fresh dense raw-RGB/state rows plus normalized per-branch/per-orientation maps. Coverage remains unchanged.
