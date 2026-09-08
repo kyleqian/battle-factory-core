@@ -79,6 +79,10 @@ def main() -> None:
         value = u8(address)
         return value - 0x100 if value >= 0x80 else value
 
+    def s32(address: int) -> int:
+        value = u32(address)
+        return value - 0x100000000 if value >= 0x80000000 else value
+
     def raw(address: int, size: int) -> str:
         return bytes(u8(address + offset) for offset in range(size)).hex()
 
@@ -139,6 +143,8 @@ def main() -> None:
                 if range_start <= script < range_end
             ) if owns(script) else None,
             "scriptWait": s8(names["sAnimFramesToWait"]), "animArgs": [s16(names["gBattleAnimArgs"] + i * 2) for i in range(8)],
+            "animationMovePower": u16(names["gAnimMovePower"]),
+            "animationMoveDamage": s32(names["gAnimMoveDmg"]) if "gAnimMoveDmg" in names else None,
             "visualTaskCount": u8(sy["gAnimVisualTaskCount"]), "soundTaskCount": u8(sy["gAnimSoundTaskCount"]),
             "tasks": live_tasks(), "sprites": live_sprites(), "spriteFlags": [u8(sprites + i * 0x44 + 0x3E) for i in range(64)],
             "spriteOrder": [u8(names["sSpriteOrder"] + i) for i in range(64)],

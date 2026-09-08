@@ -6812,7 +6812,7 @@
    ]
   }
  ],
- "queue": [],
+ "queue": ["MOVE_RAPID_SPIN"],
  "componentTracks": [
   {
    "id": "smelling-salt-hand-squish-effect",

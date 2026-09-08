@@ -1,0 +1,124 @@
+{
+  "schema": "rapid-spin-bilateral-evidence/v1",
+  "move": "MOVE_RAPID_SPIN",
+  "moveId": 229,
+  "oracleProfile": "battle-scene-on",
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "sourceRows": 262,
+    "rawRgbRows": 262,
+    "firstInactiveCleanupAge": 130
+  },
+  "evidenceScope": {
+    "sourceAudit": true,
+    "completePointerBody": true,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true,
+    "normalizedMaps": true,
+    "legalBilateralParties": true,
+    "sourcePointersAndParity": true,
+    "gAnimMovePower": true,
+    "rapidSpinSprite": true,
+    "impactAffineOam": true,
+    "rapinElevationScanline": true,
+    "targetPowerShake": true,
+    "monbgBgRegisters": true,
+    "displayTransferFacts": true,
+    "audio": true,
+    "allocatorOrder": true,
+    "animationRngVersusGameplayRng": true,
+    "partiesBattlersControllerEngineStable": true,
+    "firstInactiveCleanup": true,
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "componentTrackCredit": false,
+    "latchPromotion": false,
+    "gameplayStateOwned": false
+  },
+  "source": {
+    "audit": "tools/compare/rapidSpinSourceAudit.ts",
+    "auditSha256": "02f0fdbb6f32bc1cbb6abfbc37105bb3731699b7ad5add660cd4a9fcfde86a86",
+    "auditRunSha256": "95113c095d7ae6208919d52db75957d5fd23fd36b3de73ee67aa66454b790316",
+    "probe": "tools/compare/rapidSpinProbe.py",
+    "probeSha256": "b1406d594672947237b642d3cbc8f5031b60a3451125cb6ebc01bda47368020a",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-rapid-spin-player-wartortle-opponent-onix.json",
+      "scenarioSha256": "cb503878382f408dd5c153e3f8c7baef458f30d70f4055bdd89505a7a2ddd8ee",
+      "denseState": "tools/compare/evidence/rapid-spin-player-dense-state.json.gz",
+      "denseStateSha256": "8d4ae50c8e6bb0694ca8dbbeaa5ace4f755a285eadaa67f135d6dc696a1e1511",
+      "rawRgbArchive": "tools/compare/evidence/rapid-spin-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "f85b17b8139e2afd39fcc4820550cbca1aeff302579304b395a17e485b0ab652",
+      "changeMap": "tools/compare/evidence/rapid-spin-changemap-player.json",
+      "changeMapSha256": "4e2fcf51fad077fb8be81a69137a4294790e4e8b8994b4faee67b5a6c4d819c5",
+      "sourceWindow": { "startFrame": 310, "endFrame": 440, "frameCount": 131, "sourceFrameCount": 131 },
+      "probeJsonSha256": "c9d68165bab6f57b7d56cdda5bff0097bdfc87558f6e54db827fc3e99e5fc230",
+      "repeatProbeJsonSha256": "c9d68165bab6f57b7d56cdda5bff0097bdfc87558f6e54db827fc3e99e5fc230",
+      "rawRgbSequenceSha256": "6a22654d0f8eb55fb8ecee2fff81fbd439c6227a5d6f142dc7f1202d1eb82e3c",
+      "repeatRawRgbSequenceSha256": "6a22654d0f8eb55fb8ecee2fff81fbd439c6227a5d6f142dc7f1202d1eb82e3c"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-rapid-spin-opponent-wartortle-player-onix.json",
+      "scenarioSha256": "c1f944ecf908c7b12f66b9035af87a8c6064de878eebfeb3031fdda8772702be",
+      "denseState": "tools/compare/evidence/rapid-spin-opponent-dense-state.json.gz",
+      "denseStateSha256": "9aaf66cb11005d34199b72e614e0743fb4e0d8a8a9f658be4e7d0991175e80d1",
+      "rawRgbArchive": "tools/compare/evidence/rapid-spin-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "b24a47fc0d0f6be9d1a76f4cc8e645b4edf3021cdae2f0389e38b583575c2979",
+      "changeMap": "tools/compare/evidence/rapid-spin-changemap-opponent.json",
+      "changeMapSha256": "b3e97448e8c90b446de5d37c7af5cd6692638aee7d6bd5dc1ff9cf6ce1ecfa3f",
+      "sourceWindow": { "startFrame": 218, "endFrame": 348, "frameCount": 131, "sourceFrameCount": 131 },
+      "probeJsonSha256": "aba21b1504660d781b80aea00c5c9a592b3befb352271e6f1fb5aa8596b0e047",
+      "repeatProbeJsonSha256": "aba21b1504660d781b80aea00c5c9a592b3befb352271e6f1fb5aa8596b0e047",
+      "rawRgbSequenceSha256": "c4d8934889f095a0e4d26a32d4dd2e92240406ce4cf0e11c86fe3d46dee2bb2c",
+      "repeatRawRgbSequenceSha256": "c4d8934889f095a0e4d26a32d4dd2e92240406ce4cf0e11c86fe3d46dee2bb2c"
+    }
+  },
+  "measured": {
+    "sourceOffsets": [0, 3, 6, 8, 46, 83, 86, 105, 108],
+    "sourceParities": [0, 1],
+    "sourcePointerTransitions": [1, 4, 7, 10, 53, 73, 83, 126],
+    "taskLifetimes": {
+      "Task_UpdateMonBg": [7, 128],
+      "Task_ClearMonBg": [126, 128],
+      "RapinSpinMonElevation_Step": [[10, 51], [83, 124]],
+      "AnimTask_ShakeTargetBasedOnMovePowerOrDmg_Step": [53, 71],
+      "Task_LoopAndPlaySE": [[10, 35], [83, 108]]
+    },
+    "spriteLifetimes": {
+      "gRapidSpinSpriteTemplate": [3, 10, 41],
+      "gBasicHitSplatSpriteTemplate": [3, 53, 62]
+    },
+    "resources": {
+      "tagTransitions": [1, 4, 130],
+      "impactTag": 10135,
+      "rapidSpinTag": 10229,
+      "matrixBitmapTransitions": [53, 63]
+    },
+    "displayTransfers": {
+      "oam": "130/130 predecessor",
+      "matrices": "130/130 predecessor",
+      "palette": "130/130 predecessor"
+    },
+    "palette": { "unfadedChanges": [4], "fadedChanges": [4], "hardwareChanges": [5] },
+    "monbg": {
+      "playerSelected": "bg2",
+      "opponentSelected": "bg1",
+      "registerChanges": [8, 11, 126, 130],
+      "vofsChanges": [8, 130],
+      "bgVramChanges": [8, 128, 130]
+    },
+    "scanline": { "stateChanges": [10, 125, 126], "bufferBankChanges": [10, 11, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 47, 48, 49, 51, 52, 83, 84, 85, 86, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 122, 123, 124] },
+    "audio": { "razorWindAges": [10, 83], "doubleSlapAge": 53, "pans": { "player": [-64, 63], "opponent": [63, -63] } },
+    "animationRng": { "distinct": 129, "transitions": 128 },
+    "stateIsolation": { "gameplayRngValues": 1, "partiesStable": true, "battlersStable": true, "engineStable": true, "rawBattleStateStable": true },
+    "cleanup": { "age": 130, "active": false, "visualTasks": 0, "soundTasks": 0, "tasks": 0, "rapidSprites": 0, "impactSprites": 0, "tagsReleased": true, "scanlineState": 0 }
+  }
+}
