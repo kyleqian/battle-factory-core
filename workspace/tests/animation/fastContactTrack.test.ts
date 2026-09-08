@@ -291,7 +291,7 @@ describe("fast-contact component-track receipt ratchet", () => {
     expect(animationCoverageSummary()[0]).toEqual({
       tier: "level50",
       total: 276,
-      exact: 238,
+      exact: 239,
       partial: 0,
       staged: 0,
       unsupported: 37,

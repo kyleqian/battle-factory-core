@@ -554,7 +554,7 @@ describe("sparkle-4-grow-grayscale standalone fulfilled component-track ratchet"
     expect(coverage.entries).toHaveLength(239);
     expect(coverage.entries.filter((entry) => level50Moves.has(entry.move) && entry.status === "exact")).toHaveLength(239);
     expect(coverage.entries.filter((entry) => level50Moves.has(entry.move) && (entry.status === "partial" || entry.status === "staged"))).toEqual([]);
-    expect([...level50Moves].filter((move) => !coverage.entries.some((entry) => entry.move === move))).toHaveLength(38);
+    expect([...level50Moves].filter((move) => !coverage.entries.some((entry) => entry.move === move))).toHaveLength(37);
     expect(coverage.entries.filter((entry) => ["MOVE_DISABLE", "MOVE_DETECT"].includes(entry.move))).toEqual([
       expect.objectContaining({ move: "MOVE_DETECT", status: "exact" }),
       expect.objectContaining({ move: "MOVE_DISABLE", status: "exact" }),

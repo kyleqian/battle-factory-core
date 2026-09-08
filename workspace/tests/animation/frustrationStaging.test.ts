@@ -82,7 +82,7 @@ describe("MOVE_FRUSTRATION authoritative source and legal Scene-ON staging check
         animationResult: "Factory-legal Frustration carriers enter Frustration_Strongest (result 0) only; the other three source branches remain pointer-owned and pinned but need non-Factory evidence if ever accepted.",
       },
       carrier: { lowestLevel50Set: 304, frontierMon: "FRONTIER_MON_FURRET_2", species: "SPECIES_FURRET", itemTableId: 16, itemName: "BATTLE_FRONTIER_ITEM_CHOICE_BAND", nature: "NATURE_ADAMANT", allLevel50Sets: [304, 307, 308, 310, 323, 324, 342, 351, 354, 693], allInventorySets: [304, 307, 308, 310, 323, 324, 342, 351, 354, 693], excludedOpenOnly: [], excludedOutsideFactory: [] },
-      coverage: { level50Exact: 238, level50Unsupported: 38, trackFulfilled: true, siblingStatuses: { MOVE_SWAGGER: "exact", MOVE_FRUSTRATION: "exact", MOVE_TORMENT: "exact", MOVE_TAUNT: "exact" } },
+      coverage: { level50Exact: 239, level50Unsupported: 37, trackFulfilled: true, siblingStatuses: { MOVE_SWAGGER: "exact", MOVE_FRUSTRATION: "exact", MOVE_TORMENT: "exact", MOVE_TAUNT: "exact" } },
     });
 
     const callbackHashes: Record<string, { sourceSha256: string; romSha256: string }> = {
