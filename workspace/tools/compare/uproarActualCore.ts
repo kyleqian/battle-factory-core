@@ -26,13 +26,13 @@ function configFor(orientation: Orientation, rows = rowsFor(orientation)): Scene
   const first = rows[0]!;
   const playerBack = orientation === "player-back";
   const vigoroth = {
-    species: "VIGOROTH",
+    species: "VIGOROTH" as const,
     geometry: playerBack
       ? { side: "player" as const, spriteCorner: { x: 40, y: 58 }, animationCenter: { x: 72, y: 90 }, battlePositionCenter: { x: 72, y: 80 } }
       : { side: "opponent" as const, spriteCorner: { x: 144, y: 8 }, animationCenter: { x: 176, y: 40 }, battlePositionCenter: { x: 176, y: 40 } },
   };
   const onix = {
-    species: "ONIX",
+    species: "ONIX" as const,
     geometry: playerBack
       ? { side: "opponent" as const, spriteCorner: { x: 144, y: 10 }, animationCenter: { x: 176, y: 42 }, battlePositionCenter: { x: 176, y: 40 } }
       : { side: "player" as const, spriteCorner: { x: 40, y: 48 }, animationCenter: { x: 72, y: 80 }, battlePositionCenter: { x: 72, y: 80 } },
