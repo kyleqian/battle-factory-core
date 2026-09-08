@@ -1,3 +1,10 @@
+# Animation supervisor verification — MOVE_SUNNY_DAY source / legal staging checkpoint (2026-09-08 supervisor)
+
+- **State / merge:** Level 50 remains **236/276 exact**, **0 partial / 0 staged**, and **40 unsupported**. Audited the pre-existing backed-up Terra/max commit `5b78cc318` and merged it as `e3c1ba89a`; MOVE_SUNNY_DAY remains unsupported and MOVE_MAGNITUDE remains the sole queued acceptance unit. No production, coverage, component-track, sibling, latch, gameplay, boundary, or barrier credit changed.
+- **Independent review:** The five-file diff contains only the animation ledger, deterministic source audit, and two complete legal party-only Scene-ON fixtures. Two source-audit runs are byte-identical at `6954f4fc…`: the complete odd-aligned **`0x082d2707..0x082d275d`** body has 86 ROM bytes (`071e826f…`), 663 source bytes (`01e605c9…`), 19 commands, nine generated components, 25 Level-50 sets / 23 species, and lowest carrier set 255 BELLOSSOM_1. Both orientations remain validator-clean and transient-free.
+- **Gates / next:** Sunny Day plus Rain Dance, Sandstorm, Hail, and boundary controls pass **5 files / 17 tests**. Post-merge `npm test` passes **1,283 files / 11,133 tests** (**44 files / 223 skipped**), and build passes **770 modules**. Continue the queued Magnitude production closure first; Sunny Day's later bounded remainder is complete twice-fresh bilateral dense evidence before any reducer or promotion.
+- **For the main program:** nothing blocking.
+
 # Animation supervisor verification — MOVE_MAGNITUDE complete dense-evidence checkpoint (2026-09-08 supervisor)
 
 - **State / merge:** Level 50 remains **236/276 exact**, **0 partial / 0 staged**, and **40 unsupported**. Fast-forwarded Luna/max commits `7d2c058e8` and `1e0003cdf`; MOVE_MAGNITUDE is now the sole queued acceptance unit and remains unsupported, with no reducer, seam, compositor, production, component-track, sibling, latch, gameplay, boundary, or barrier credit.
