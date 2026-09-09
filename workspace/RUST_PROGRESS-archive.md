@@ -5,6 +5,54 @@ full history regardless.
 
 ---
 
+## R73 — [supervised session, 2026-09-08, unattended] **M70 `Cmd_trysetfutureattack` leaf + green checkpoint (first damage-kernel-reusing leaf)**
+
+- **State:** `rust-main` = R72 checkpoint `80600ca21` plus the verified Sonnet
+  worker `1e4cbf444` (fast-forward). The `B_SCR_OP_TRYSETFUTUREATTACK`
+  registration/handler projection — the lane's first battle-script leaf that
+  calls the ported `damage_calc::calculate_base_damage` kernel and the
+  gen_tables MOVES row — is native and wasm32-compilable; no ABI, adapter,
+  recovery module, canonical TS, or npm file was touched. Session still
+  active; one final leaf (`Cmd_tryswapitems`, 45-min cap, reject-unfolded
+  cutoff ~18:15 UTC) may follow before wind-down.
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  ~33 min) ported the exactly-1 `0xc3` registration (distinct error texts
+  pinned verbatim), the per-execution operand-only check, attacker+target
+  roles, the occupied-`futureSightCounter[target]` LAZY fail jump, and the
+  success path: counter=3 / move / attacker / dmg cell writes,
+  `calculate_future_attack_base_damage` (Huge/Pure Power, type-boost items
+  for Psychic+Steel, Choice Band, Soul Dew ×2, Light Ball, Metal Powder,
+  Thick Club, Hustle, Plus/Minus over alive+present battlers, Guts, Marvel
+  Scale — modifiers pre-applied and NOT forwarded to the kernel, mirroring
+  the TS which passes no holdEffect/species and only ABILITY_GUTS),
+  helpingHand ×15/10 trunc, target-side `SIDE_STATUS_FUTUREATTACK` OR,
+  multistringChooser 353→1/248→0. No scheduler write, no events, no RNG.
+  Canonical TS supplies **48 behavior** and **8 registration** cases; corpus
+  sha256 `ef1b6a8cf22adebb7e4d8dad9faa3f17cd16443e37a2866ec62f58173fd07da8`.
+- **Next:** dispatch + verify M71 `Cmd_tryswapitems` (brief prepared this
+  session; citations verified) with the 18:15 cutoff, then wind down before
+  19:01. After that, remaining rng-free candidates: stockpile family (needs
+  the shared `calculateBattleScriptBaseDamageForCurrentMove` hit-chain
+  helper — sports halvers + dynamicBasePower + type resolution — not yet
+  ported as a shared Rust fn; budget it as a larger leaf), and the
+  `jumpifbyte`/`jumpifhalfword`/`jumpifword` barrier-projection decision.
+  No deferral is open.
+- **Notes:** supervisor audit covered the handler against
+  `battle_script_commands.c:8929-8956` and the kernel-input mapping
+  (double-application avoidance is exactly the TS contract; the TS-generated
+  corpus would fail on any mapping drift) plus generator provenance;
+  independent regeneration was byte-identical. `is_double_battle_spread_move`
+  is always false (TS `&& false`), so battleTypeFlags is deliberately not in
+  this leaf's rules slice. Generated Rust is **228,591 bytes**, sha256
+  `89b9d9b4c9c38a34b685715ea55e5dc4a771a1f37fec6ca3cc1620f6841b07c9`;
+  generator is **34,927 bytes**, sha256
+  `3b77a51f3519fb359573edd5d3a9adcac20c6c2376d1d6595c36a4b3fceb4282`.
+  Gates rerun on `rust-main` post-fold: **1,308/1,308** native, fmt, strict
+  workspace Clippy, wasm32 release; artifact **512,256 bytes**, sha256
+  `8cf919245391dd50536cabd04794dc277f11da0866a7b4d63776ef2d72adf47f` (+5.0 KB
+  from the kernel-reusing leaf). No npm gate required; no deferral or
+  barrier added. R70 archived.
+
 ## R72 — [supervised session, 2026-09-08, unattended] **M69 `Cmd_tryimprison` leaf + green checkpoint**
 
 - **State:** `rust-main` = R71 checkpoint `28e289027` plus the verified Sonnet
