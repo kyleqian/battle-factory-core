@@ -5,6 +5,63 @@ full history regardless.
 
 ---
 
+## R74 — [supervised session wind-down, 2026-09-08 15:01–~17:55 UTC, unattended] **M71 `Cmd_tryswapitems` leaf + session close (five leaves folded)**
+
+- **State:** `rust-main` = master (merge at orient was a no-op) plus five
+  verified Sonnet worker fast-forwards this session — `94869f4fa`
+  tryrecycleitem, `2ac3156d0` removeitem, `1d34a6ee1` tryimprison,
+  `1e4cbf444` trysetfutureattack, `e39d11dc2` tryswapitems — each followed
+  by its ledger commit and a successful `backup-refs.sh` push. Tree clean,
+  committed, green; no worker worktree or branch left behind. No ABI,
+  adapter, recovery module, canonical TS, or npm file was touched all
+  session, so the main supervisor's fold is `core-rs/**` +
+  `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
+  ~22 min) ported Trick's guard ladder in source order (Trainer Hill;
+  opponent-side in regular battles with the ALLOWED_SPECIAL bypass set;
+  knockedOffMons bits regular-only; both-items-none / Enigma Berry /
+  mail 121..=132), per-branch LAZY label resolution (failure label and
+  BattleScript_StickyHoldActivates resolve independently, each only on its
+  branch), the Sticky Hold jump (lastUsedAbility := 60 +
+  aiObservedAbilityIds identity write, scheduler unchanged, no events), and
+  the success swap with its deliberate asymmetry (attacker ACTIVE item := 0
+  while attacker PARTY slot := target's item; target active+party := old
+  attacker item; changedItems[attacker] holds the restore value for the
+  later MOVEEND_CHANGED_ITEMS case), choicedMove double clear, chooser
+  2/0/1, both text buffs, ordered attacker-then-target pending appends, and
+  two ordered set-battler-item events. Canonical TS supplies **44 behavior**
+  and **8 registration** cases; corpus sha256
+  `0fd8d0364b543840ff250f6d438bebfd2f5d2bb7456e78ae8033cb67373a0cf8`.
+- **Next:** merge master, re-run the four Rust gates, then continue the leaf
+  ladder. Best-scouted candidates: the stockpile family (0x85/0x86/0x87 —
+  needs the shared `calculateBattleScriptBaseDamageForCurrentMove` hit-chain
+  helper: sports halvers + dynamicBasePower + type resolution, not yet a
+  shared Rust fn; budget as a larger leaf or a two-step split), then re-scout
+  remaining pure leaves (rng-free candidates thin out from here). The
+  `jumpifbyte`/`jumpifhalfword`/`jumpifword` candidates still need a
+  barrier-projection decision first — record it in `RUST_DEFERRED.md` if it
+  cannot be made in session. No deferral is open.
+- **Notes:** supervisor audit covered the handler against
+  `battle_script_commands.c:9189-9269` (guard order, the 9244-9245
+  asymmetry, sticky-hold reveal) and generator provenance; independent
+  regeneration was byte-identical. Worker's report swapped the corpus and
+  generated-file sha labels; correct values: generated Rust **324,169
+  bytes**, sha256
+  `b86c21fd2532295073c1113f19ed3f3b5759883f975c0e1c28d5061321fd33d2`;
+  generator **37,447 bytes**, sha256
+  `3c78b47a378619eadbf9a56384ba98cbf51313bed63bc697809b8e96848f8134`.
+  Final gates on `rust-main`: **1,329/1,329** native (up from 1,239 at
+  orient), fmt, strict workspace Clippy, wasm32 release; artifact **512,496
+  bytes**, sha256
+  `8e11dc222677ac6f07e1f5ffc8909b812a9b2778d3e8fc12ded73ebfed78bd1a`.
+  Session-wide: five Sonnet workers, five commits, zero rejections, zero cap
+  expiries (16-33 min each, ~$21 total); the R65-R69 hold-the-turn-open
+  pattern (tracked background launcher + chained blocking waits) worked
+  every time. M70 was the first leaf to reuse `damage_calc` +
+  `gen_tables::MOVES` across module boundaries. No npm gate required; no
+  deferral or barrier added. R71 archived. PAPERCUT: none new (README
+  Apple-path note from R57 still stands).
+
 ## R73 — [supervised session, 2026-09-08, unattended] **M70 `Cmd_trysetfutureattack` leaf + green checkpoint (first damage-kernel-reusing leaf)**
 
 - **State:** `rust-main` = R72 checkpoint `80600ca21` plus the verified Sonnet
