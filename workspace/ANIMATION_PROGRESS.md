@@ -1,3 +1,10 @@
+# Animation supervisor verification — MOVE_PETAL_DANCE evidence checkpoint (2026-09-09 supervisor)
+
+- **State / merge:** Fast-forwarded the complete Luna/max evidence branch plus Terra/max reproducibility repair through `8ae3d830f`. Level 50 remains **242/276 exact**, **0 partial / 0 staged**, and **34 unsupported**; `MOVE_PETAL_DANCE` remains coverage-absent and the sole queue item. No production, sibling/component/latch, gameplay/controller/facility, boundary/barrier, or main-program credit changed.
+- **Independent proof:** The strict retained verifier is byte-identical twice (`0445671a…`). Supervisor-fresh current-wrapper runs established semantic JSON `a890ac2a…` player / `28540144…` opponent and unchanged chronological RGB `362cdd59…` / `c2476580…`; the only stale-field discrepancy was repaired by retaining `AnimTask_TranslateMonElliptical_Step = 0x080d5ab8`. Both 244-row windows, normalized maps, all 13 component lifecycles, transfer facts, stable gameplay/RNG, resource release, and first-inactive age 243 remain exact.
+- **Gates / next:** On merged `animation-main`, full `npm test` passes **1,305 files / 11,192 tests** with **44 files / 223 tests skipped**, and `npm run build` passes **781 modules**. Next add only the source-derived FLOWER asset, pure Petal Dance reducer, and narrow typed seam; require all **488/488** bilateral component rows and a material altered live control, while leaving compositor/framebuffer promotion for a separate checkpoint.
+- **For main:** Nothing blocks the main lane; no main-owned state or docs changed.
+
 # MOVE_PETAL_DANCE complete bilateral dense-evidence checkpoint — unsupported (2026-09-09 worker)
 
 - **State / scope:** Level 50 remains **242/276 exact**, **0 partial / 0 staged**, and **34 unsupported**. `MOVE_PETAL_DANCE` remains coverage-absent and unsupported; the manual queue now contains only `MOVE_PETAL_DANCE`. No reducer, asset extraction, typed seam, compositor, framebuffer acceptance, component-track/sibling/latch credit, gameplay/controller/facility state, boundary, barrier, or main-program document changed.
