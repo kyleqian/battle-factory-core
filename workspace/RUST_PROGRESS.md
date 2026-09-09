@@ -6,6 +6,59 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R78 — [supervised session wind-down, 2026-09-09 15:03–~17:30 UTC, unattended] **M75 `Cmd_damagecalc` leaf + session close (four green folds)**
+
+- **State:** `rust-main` = master (merge at orient was a no-op) plus four
+  verified Sonnet worker fast-forwards this session — `aa57ef2ba` M72 shared
+  base-damage helper, `99c5ec021` M73 stockpile family, `39f0cbca4` M74
+  jumpif compare family, `2a4170f88` M75 damagecalc — each followed by its
+  ledger commit and a successful `backup-refs.sh` push. Tree clean,
+  committed, green; no worker worktree or branch left behind. No ABI,
+  adapter, recovery module, canonical TS, or npm file was touched all
+  session, so the main supervisor's fold is `core-rs/**` +
+  `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
+  ~25 min) ported `B_SCR_OP_DAMAGECALC` (0x05,
+  `battle_script_commands.c:1290-1303`): find-first registration with no
+  shape validation (`install()` semantics), the exact error precedence
+  (missing attacker role → pre-helper "currentMove N has no source-derived
+  gBattleMoves type" → helper errors), helper damage × critMultiplier ×
+  dmgMultiplier, the Charge doubling gated on the RESOLVED dynamic-aware
+  type (TS spec; C reads the static row type — discrepancy documented in
+  the module doc comment), and Helping Hand trunc(×15/10) last. Third
+  consumer of the M72 helper. **24 behavior + 3 registration** cases; corpus
+  sha256 `897f1de90a536e52f5eaf203bbeb892db7817dc006ca7632959d4a39653b9690`
+  (110,501 bytes); generator **27,361 bytes**, sha256
+  `afbbcccca522128a52c3d5f27c1b34bfdac63c644d7bcd9556af140393a16d8b`.
+- **Next:** merge master, re-run the four Rust gates, then continue. Scouted
+  candidates (2026-09-09): `Cmd_critcalc` (`:1253-1286`, first RNG-drawing
+  battle-script leaf — needs a drawBattleScriptRng projection decision) and
+  `Cmd_typecalc` (`:1355-1420`, type-effectiveness table + STAB — larger,
+  rng-free; `apply_type_effectiveness` already lives in damage_calc.rs).
+  The hit-chain trio damagecalc✓/critcalc/typecalc is now the shortest path
+  to a full damage-pipeline slice. No deferral is open.
+- **Notes:** supervisor audit covered the apply order, both Charge gate
+  directions (dynamic-Electric doubles a non-Electric move; dynamic-Normal
+  suppresses a static-Electric move), error-text Display impls, and
+  generator provenance; independent regeneration was byte-identical. Worker
+  deduplicated the committed program to one instruction per opcode name for
+  the registration corpus (registration-equivalent for find-first; kept the
+  generated file at 310,094 bytes, sha256
+  `80c1e402ff5335ab86e2d47ec22cd828e73e37f34632bbef1863bda152408288`
+  truncated in the worker report — full value pinned in the vectors test).
+  Final gates on `rust-main`: **1,401/1,401** native (up from 1,329 at
+  orient, +72 across four leaves), fmt, strict workspace Clippy, wasm32
+  release; artifact **512,504 bytes**, sha256
+  `d71bb10ea1b1014fcab35bb0ad81d2cfa2b2323bbf0085bc46716381fc73a055`.
+  Session-wide: four Sonnet workers, four commits, zero rejections, zero cap
+  expiries (22-33 min each, ~$21 total); the tracked-background-launcher +
+  chained-blocking-waits pattern worked every time. M72 established the
+  reusable non-opcode helper module shape; M74 landed the R76
+  barrier-projection decision. No npm gate required; no deferral or barrier
+  added. R75 archived. PAPERCUT: none new (README Apple-path note from R57
+  still stands).
+
+
 ## R77 — [supervised session, 2026-09-09, unattended] **M74 jumpif compare family leaf + green checkpoint (barrier projection landed)**
 
 - **State:** `rust-main` = R76 checkpoint `b0c81a13f` plus the verified Sonnet
@@ -110,54 +163,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Worker noted the M72 generator's `canonicalBattler` omits `side` (worked
   around loudly in its own generator; not lane friction). No npm gate
   required; no deferral or barrier added. R73 archived. PAPERCUT: none new.
-
-
-## R75 — [supervised session, 2026-09-09, unattended] **M72 shared hit-chain base-damage helper + green checkpoint (first reusable non-opcode battle-script module)**
-
-- **State:** `rust-main` = R74 checkpoint `3975b5f48` (master merge at orient
-  was a no-op) plus the verified Sonnet worker `aa57ef2ba` (fast-forward).
-  `battle_script_base_damage.rs` is the native twin of
-  `calculateBattleScriptBaseDamageForCurrentMove`
-  (`battleScriptHitChainOpcode.ts:1507-1580`) — a pure rules-slice→damage
-  function, pub API designed for the stockpile family and later
-  damagecalc-chain leaves. No ABI, adapter, recovery module, canonical TS, or
-  npm file was touched. Session still active; M73 (stockpile 0x85/0x86/0x87,
-  brief `/tmp/rust-briefs/stockpile-m73.txt`) dispatching next.
-- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
-  ~22 min) ported move-type resolution (0x3f dynamic mask, GET_MOVE_TYPE
-  `battle.h:458-464`), the Mud/Water Sport power halvers over
-  battlers[0..battlersCount) with no hp gate, WEATHER_HAS_EFFECT2 (fainted
-  Cloud Nine still suppresses), gItems hold-effect/param resolution (377-item
-  bound, Enigma Berry per-battler override, generated 70-row sparse catalog),
-  and the exact TS kernel-boundary forwarding contract: raw stats + real
-  species cross, ability ids filtered through the 4-key
-  `ABILITY_NAME_BY_ID` domain {8,14,55,62} (Huge/Pure Power, Plus/Minus,
-  Marvel Scale pinned inert), hold-effect ids filtered through the 26-key
-  `HOLD_EFFECT_NAME_BY_ID` domain (Scope Lens pinned inert), attacker crosses
-  with hp/maxHP and unconditional hold-effect param, defender without.
-  Opposite contract to M70's pre-applied-modifiers mapping — here the kernel
-  applies everything. **57 behavior** cases (26 categories), corpus sha256
-  `5460d65414e0140d30cd1fa6f6ffb74c552227cb6532741c9385cac0136fb249`
-  (72,997 corpus bytes; generated file 200,703 bytes).
-- **Next:** dispatch + verify M73 `Cmd_stockpile`/`Cmd_stockpiletobasedamage`/
-  `Cmd_stockpiletohpheal` (brief prepared; the 0x86 leaf composes this
-  helper), then re-scout remaining rng-free leaves. The
-  `jumpifbyte`/`jumpifhalfword`/`jumpifword` barrier-projection decision is
-  still the known blocker for that family — record in `RUST_DEFERRED.md` if
-  it cannot be made in session. No deferral is open.
-- **Notes:** supervisor audit covered the filter domains, error texts and
-  ordering, sport/weather scan bounds, enigma override, and the full
-  DamageCalcInput mapping against the TS spec; independent regeneration was
-  byte-identical; catalog's 70 rows equal the JSON's 70 nonzero-hold-effect
-  items (misses→0 mirrors the TS Map default). Generator is **30,488 bytes**,
-  sha256 `c9b536b21ffbe4e73006629a60a6d266d48650a61d1621a5decbee583bfcb0b2`;
-  catalog **3,727 bytes**, sha256
-  `e46a3f019c1173319425447de66df7f01d04d04efee2a9be0f8caf5b5510c37c`.
-  Gates rerun on `rust-main` post-fold: **1,355/1,355** native (+26), fmt,
-  strict workspace Clippy, wasm32 release; artifact **510,209 bytes**, sha256
-  `e0402a445d6efb41fab22c98686b3fadb16b0cc2715551f90c9ce84827b391c3`
-  (shrank 2.3 KB from R74 — no new export crosses the ABI). Worker flagged
-  `createBattleScriptRulesContext`'s eager currentMoveEffect resolution
-  (generator splices an invalid move post-construction to reach the helper's
-  own guard). No npm gate required; no deferral or barrier added. R72
-  archived. PAPERCUT: none new.
