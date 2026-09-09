@@ -139,7 +139,7 @@ function alteredControl(): Json {
   const base = rapidSpinConfigFor("player-back");
   const altered: SceneOnRapidSpinConfig = {
     ...base,
-    attacker: { species: "BLASTOISE", geometry: { side: "player", spriteCorner: { x: 36, y: 52 }, animationCenter: { x: 68, y: 84 }, battlePositionCenter: { x: 68, y: 80 } } },
+    attacker: { species: "TORKOAL", geometry: { side: "player", spriteCorner: { x: 36, y: 52 }, animationCenter: { x: 68, y: 84 }, battlePositionCenter: { x: 68, y: 80 } } },
     target: { species: "RELICANTH", geometry: { side: "opponent", spriteCorner: { x: 149, y: 13 }, animationCenter: { x: 181, y: 45 }, battlePositionCenter: { x: 180, y: 40 } } },
     animationInputs: {
       ...base.animationInputs,
@@ -159,7 +159,7 @@ function alteredControl(): Json {
   ));
   const canonical = digest(base), changed = digest(altered);
   if (canonical === changed) throw new Error("altered Rapid Spin control did not change framebuffer");
-  return { species: ["BLASTOISE", "RELICANTH"], geometryChanged: true,
+  return { species: ["TORKOAL", "RELICANTH"], geometryChanged: true,
     allocationOrderChanged: true, powerDamageRngChanged: true, canonical, changed };
 }
 

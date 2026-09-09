@@ -21,7 +21,7 @@ describe("MOVE_RAPID_SPIN live Scene-ON compositor", () => {
           framebufferMatched: 131, residualPixels: 0, failures: [] },
       ],
       alteredLiveControl: {
-        species: ["BLASTOISE", "RELICANTH"], geometryChanged: true,
+        species: ["TORKOAL", "RELICANTH"], geometryChanged: true,
         allocationOrderChanged: true, powerDamageRngChanged: true,
       },
     });
