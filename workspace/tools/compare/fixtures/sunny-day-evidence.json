@@ -35,7 +35,7 @@
   },
   "source": {
     "audit": "tools/compare/sunnyDaySourceAudit.ts",
-    "auditSha256": "ecc964ac67c1087755eb73e63d8ed637ec532c79ad8dc6f67859b96cdec9a9cc",
+    "auditSha256": "d237dfaa061142bd3ec89985c355f12376d97193efc3fb462173d10b0b17d22c",
     "probe": "tools/compare/sunnyDayProbe.py",
     "probeSha256": "4a72af4bd352a715366fa5a963b22ad6fe4c974b926f1225f41564785d8be4b1"
   },

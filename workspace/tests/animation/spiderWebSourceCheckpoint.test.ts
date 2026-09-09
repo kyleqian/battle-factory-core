@@ -62,7 +62,7 @@ describe("MOVE_SPIDER_WEB authoritative source and staging checkpoint", () => {
     expect(graph.moves.find((entry: Json) => entry.move === "MOVE_STRING_SHOT").componentIds).toEqual([
       "asset:ANIM_TAG_STRING", "asset:ANIM_TAG_WEB_THREAD", "subroutine:StringShotThread", "visualCommand:clearmonbg", "visualCommand:create_string_wrap_sprite", "visualCommand:create_web_thread_sprite", "visualCommand:monbg", "visualCommand:simple_palette_blend",
     ]);
-    expect(JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8"))).toMatchObject({ queue: [] });
+    expect(JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8"))).toMatchObject({ queue: ["MOVE_SKY_UPPERCUT"] });
   });
 
   it.each([

@@ -178,7 +178,7 @@ describe("MOVE_UPROAR authoritative source and legal staging checkpoint", () => 
     });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_UPROAR")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual([]);
+    expect(coverage.queue).toEqual(["MOVE_SKY_UPPERCUT"]);
     expect(coverage.componentTracks.filter((track: Json) => track.moves?.includes("MOVE_UPROAR"))).toEqual([]);
   });
 });
