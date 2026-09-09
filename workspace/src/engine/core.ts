@@ -178,6 +178,7 @@ import {
   type SceneOnSeismicTossConfig,
   type SceneOnSpiderWebConfig,
   type SceneOnPetalDanceConfig,
+  type SceneOnSkyUppercutConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -265,6 +266,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "PETAL_DANCE") {
     const petalDancePresentation = presentation as SceneOnMovePresentationState<SceneOnPetalDanceConfig>;
     renderSceneOnMovePresentation(framebuffer, petalDancePresentation);
+    return;
+  }
+  if (presentation.config.move === "SKY_UPPERCUT") {
+    const skyUppercutPresentation = presentation as SceneOnMovePresentationState<SceneOnSkyUppercutConfig>;
+    renderSceneOnMovePresentation(framebuffer, skyUppercutPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

@@ -167,7 +167,7 @@ export function skyUppercutConfigFor(
   };
   return {
     move: "SKY_UPPERCUT",
-    attacker: { species: "GLOOM", geometry: { side: attackerSide,
+    attacker: { species: "HITMONCHAN", geometry: { side: attackerSide,
       spriteCorner: { x: attackerSprite.x - 32, y: attackerSprite.y - 32 },
       animationCenter: { x: attackerSprite.x, y: attackerSprite.y },
       battlePositionCenter: { x: attackerSprite.x, y: attackerSprite.y } } },
@@ -179,7 +179,7 @@ export function skyUppercutConfigFor(
       playerMaxHp: rows[0]!.battlers.player.maxHp,
       opponentHp: rows[0]!.battlers.opponent.hp,
       opponentMaxHp: rows[0]!.battlers.opponent.maxHp,
-      playerGender: "female", opponentGender: "male" },
+      playerGender: "male", opponentGender: "male" },
     animationInputs,
   };
 }

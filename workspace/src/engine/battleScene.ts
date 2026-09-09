@@ -1028,6 +1028,7 @@ import {
   sceneOnForesightView,
   sceneOnSpiderWebView,
   sceneOnPetalDanceView,
+  sceneOnSkyUppercutView,
   sceneOnEruptionView,
   sceneOnWaterSpoutView,
   sceneOnSandTombView,
@@ -1262,6 +1263,7 @@ import {
   type SceneOnMeanLookConfig,
   type SceneOnSpiderWebConfig,
   type SceneOnPetalDanceConfig,
+  type SceneOnSkyUppercutConfig,
   type SceneOnSmellingSaltConfig,
   type SceneOnRecycleConfig,
 } from "../animation/sceneOnPresentation.ts";
@@ -31432,6 +31434,170 @@ export function renderSceneOnMovePresentation(
     drawMessageTextLines(fb,
       view.attacker.geometry.side === "player" ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "FORESIGHT!", 99);
+    return;
+  }
+
+  if (state.config.move === "SKY_UPPERCUT") {
+    const skyState = state as SceneOnMovePresentationState<SceneOnSkyUppercutConfig>;
+    const view = sceneOnSkyUppercutView(skyState);
+    const displayed = sceneOnSkyUppercutView({
+      ...skyState,
+      age: skyState.age <= 0 ? 0 : skyState.age - 1,
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SKY_UPPERCUT presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SKY_UPPERCUT missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const darken = (palette: readonly RgbColor[]): RgbColor[] => palette.map((color) => {
+      const packed = mgbaDarkenColor(
+        color.r | color.g << 8 | color.b << 16,
+        view.registers.bldy,
+      );
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    });
+    if (view.background.scene === "in-air") {
+      drawScrolledTileBg(
+        fb,
+        seismicTossArt.background.tileset,
+        seismicTossArt.background.tilemap,
+        [darken(seismicTossArt.background.palette)],
+        displayed.background.bg3.x & 0x1ff,
+        displayed.background.bg3.y & 0x1ff,
+      );
+    } else {
+      drawTileBg(
+        fb,
+        battleBg.static.tileset,
+        battleBg.static.tilemap,
+        battleBg.palette.map(darken),
+      );
+    }
+
+    const monbgInput = skyState.config.animationInputs.monbg;
+    const targetIsMonBg = view.monbg.displayActive && skyState.age < 149;
+    if (targetIsMonBg) {
+      const verticalDelta = displayed.monbg.sourceOffsets.y - monbgInput.bgY;
+      drawDragonDanceMonBg(
+        fb,
+        { tileset: tilesFor(targetArt, view.target.geometry.side), palette: targetArt.palette },
+        { x: monbgInput.spriteX - 32, y: monbgInput.spriteY - 32 - verticalDelta },
+        Array.from({ length: 160 }, () => displayed.monbg.sourceOffsets.x),
+        monbgInput.bgX,
+      );
+    }
+    const nonObjTarget2 = fb.slice();
+
+    type Entry = Readonly<{
+      slot: number;
+      subpriority: number;
+      y: number;
+      order: number;
+      draw: () => void;
+    }>;
+    const entries: Entry[] = [];
+    const orderOf = (slot: number): number => {
+      const index = displayed.painterSlots.indexOf(slot);
+      return index < 0 ? Number.MAX_SAFE_INTEGER : index;
+    };
+    const addBattler = (
+      battler: typeof view.attacker,
+      art: BattlerArt,
+      offset: Readonly<{ x: number; y: number }>,
+      slot: number,
+    ): void => {
+      entries.push({
+        slot,
+        subpriority: battler.geometry.side === "player" ? 30 : 40,
+        y: battler.geometry.animationCenter.y + offset.y,
+        order: -slot,
+        draw: () => drawSpriteSheet(
+          fb,
+          tilesFor(art, battler.geometry.side),
+          art.palette,
+          battler.geometry.spriteCorner.x + offset.x,
+          battler.geometry.spriteCorner.y + offset.y,
+        ),
+      });
+    };
+    // Task_ClearMonBg switches scanout from the copied BG to the target OBJ
+    // on its final two hardware rows.
+    if (!targetIsMonBg) {
+      addBattler(
+        view.target,
+        targetArt,
+        displayed.battlerOffsets.target,
+        skyState.config.animationInputs.targetSpriteSlot,
+      );
+    }
+    addBattler(
+      view.attacker,
+      attackerArt,
+      displayed.battlerOffsets.attacker,
+      skyState.config.animationInputs.attackerSpriteSlot,
+    );
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind !== "hitsplat" || !sprite.visible
+        || !displayed.painterSlots.includes(sprite.slot)) continue;
+      entries.push({
+        slot: sprite.slot,
+        subpriority: sprite.subpriority,
+        y: sprite.y + sprite.y2,
+        order: orderOf(sprite.slot),
+        draw: () => drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          battleAnimHitsplat.tileset,
+          battleAnimHitsplat.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.matrix[0], sprite.matrix[1], sprite.matrix[2], sprite.matrix[3],
+          displayed.registers.bldalpha & 0xff,
+          displayed.registers.bldalpha >>> 8 & 0xff,
+          false,
+        ),
+      });
+    }
+    // Emerald paints the highest subpriority first. Within an equal
+    // subpriority, the lower hardware OAM rank is painted last and wins.
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = skyState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SKY UPPERCUT!",
+      99,
+    );
     return;
   }
 
