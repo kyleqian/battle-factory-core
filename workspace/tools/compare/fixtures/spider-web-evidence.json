@@ -1,0 +1,71 @@
+{
+  "schema": "spider-web-bilateral-evidence/v1",
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "move": "MOVE_SPIDER_WEB",
+  "moveId": 169,
+  "oracleProfile": "battle-scene-on",
+  "components": [
+    "asset:ANIM_TAG_SPIDER_WEB",
+    "asset:ANIM_TAG_WEB_THREAD",
+    "sprite:gSpiderWebSpriteTemplate",
+    "subroutine:SpiderWebThread",
+    "visualCommand:clearmonbg",
+    "visualCommand:create_web_thread_sprite",
+    "visualCommand:monbg",
+    "visualCommand:simple_palette_blend",
+    "visualCommand:splitbgprio"
+  ],
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "sourceRowsPerOrientation": 207,
+    "firstInactiveCleanupAge": 206,
+    "rawRgb": true,
+    "normalizedBankedMaps": true,
+    "productionFramebuffer": false,
+    "coveragePromotion": false,
+    "componentTrackPromotion": false,
+    "latchPromotion": false
+  },
+  "source": {
+    "audit": "tools/compare/spiderWebSourceAudit.ts",
+    "auditSha256": "2a88e584dc828897fd058b6393ac6364a5ca132b1952ec2760c6afe77b7d386a",
+    "auditRunSha256": "c102d2f3191144adf8dfdac1e836bd1572318023ecd8380b502ff94b03930b59",
+    "probe": "tools/compare/spiderWebProbe.py",
+    "probeSha256": "40a17e1a884cd783b7ddafa144488def58f46120da36652c53d5aecdeb11e3a6",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-spider-web-player-spinarak-opponent-onix.json",
+      "scenarioSha256": "b3ac48eb7a9e0b1c65267f9b57e486f911beb95fdde0456b23c4754213da9ec9",
+      "denseState": "tools/compare/evidence/spider-web-player-dense-state.json.gz",
+      "denseStateSha256": "a345e0c45602c65e079591d7368b198384874a6f31829771c0f4397e84db9e14",
+      "probeJsonSha256": "27855dd1481b5f6aefc4e6bb0a3697fe69f5e99aca1c996ce6f922bfcf0ffcae",
+      "repeatProbeJsonSha256": "27855dd1481b5f6aefc4e6bb0a3697fe69f5e99aca1c996ce6f922bfcf0ffcae",
+      "rawRgbArchive": "tools/compare/evidence/spider-web-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "2125eb3ead0b4688a4d7e8abfbefac85ff04b0d5a063950a9831809f2d4823c8",
+      "rawRgbSequenceSha256": "583722ac6fbd4078383434c6d0910579c5f1d31eda432ebfeb1c7b853698b0d4",
+      "repeatRawRgbSequenceSha256": "583722ac6fbd4078383434c6d0910579c5f1d31eda432ebfeb1c7b853698b0d4",
+      "changeMap": "tools/compare/fixtures/spider-web-changemap-player.json",
+      "changeMapSha256": "5e1a6187d42285cea2400016d25999ea6434c6453dd21e195d4c2f35a12c90fa",
+      "sourceWindow": { "startFrame": 220, "endFrame": 426, "frameCount": 207, "sourceFrameCount": 207 }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-spider-web-opponent-spinarak-player-onix.json",
+      "scenarioSha256": "3b309395c77a951893d67bd3268dd4789b4fd4853c5d8a380bcb4ca63ba155a7",
+      "denseState": "tools/compare/evidence/spider-web-opponent-dense-state.json.gz",
+      "denseStateSha256": "469d55d21f576d9ab93efb4c312c91a21f8468e61bf7cbddefb455508f911cf2",
+      "probeJsonSha256": "b3ece028c49166c5b95c38d18c40c16efaaa6bf24e2ebd67bcca6636f2c87ad3",
+      "repeatProbeJsonSha256": "b3ece028c49166c5b95c38d18c40c16efaaa6bf24e2ebd67bcca6636f2c87ad3",
+      "rawRgbArchive": "tools/compare/evidence/spider-web-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "917e986fae94704144e80acb178a3a4175a0623c38414229306393304a72f2e2",
+      "rawRgbSequenceSha256": "017a177d0a06f9824ca20080279572b6df53f015df4e6565320a6a4b3644f0c1",
+      "repeatRawRgbSequenceSha256": "017a177d0a06f9824ca20080279572b6df53f015df4e6565320a6a4b3644f0c1",
+      "changeMap": "tools/compare/fixtures/spider-web-changemap-opponent.json",
+      "changeMapSha256": "ffaa53416184777f8c84690db1f7db9325f4d1ee41dc79817bab5fd0b4a7f733",
+      "sourceWindow": { "startFrame": 219, "endFrame": 425, "frameCount": 207, "sourceFrameCount": 207 }
+    }
+  }
+}
