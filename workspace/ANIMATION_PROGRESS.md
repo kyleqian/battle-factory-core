@@ -1,3 +1,10 @@
+# Animation supervisor verification — MOVE_SPIDER_WEB reducer/seam checkpoint (2026-09-09 supervisor)
+
+- **State / merge:** Fast-forwarded Terra/max commit `cae61af29`. Level 50 remains **241/276 exact**, **0 partial / 0 staged**, and **35 unsupported**; `MOVE_SPIDER_WEB` remains the sole queue item and its nine-component track remains unfulfilled. No compositor/framebuffer, sibling/latch/coverage, gameplay/controller/facility, boundary/barrier, or main-program credit changed.
+- **Independent proof:** The pure source-age reducer and narrow typed seam reproduce **207/207 player-back + 207/207 opponent-front = 414/414** retained component rows through inactive age 206. The implementation imports no evidence and directly models source cursor/waits, all 14 fixed-point/sine threads, affine web, palette/monbg/task/audio/resource lifecycles, measured bank transfers, allocator/matrix/order inputs, and cleanup. Reproducible pinned-source Spider Web/Web Thread sheets match byte-for-byte; a SURSKIT/RELICANTH live species/geometry/allocation/order control changes state.
+- **Gates / next:** Supervisor-focused assets/source/evidence/reducer/inventory/boundary/frontier tests pass **26/26**; coverage and animation audit are green. Worker same-commit typecheck/build and full `npm test` pass **1,302 files / 11,185 tests** with **44 files / 223 tests skipped**. Next add only the generic live Spider Web compositor and require two independent complete bilateral actual-core **414/414** zero-residual framebuffer passes plus the altered live control before promoting the move and fulfilling its track.
+- **For main:** Nothing blocks the main lane; no main-owned state or docs changed.
+
 # MOVE_SPIDER_WEB reducer + typed Scene-ON seam checkpoint — unsupported (2026-09-09 worker)
 
 - **State / scope:** Level 50 remains **241/276 exact**, **0 partial / 0 staged**, and **35 unsupported**. `MOVE_SPIDER_WEB` remains the sole queue item and the nine-component `spider-web-thread` track remains unfulfilled. No compositor, framebuffer/actual-core acceptance, coverage/latch/sibling credit, gameplay/RNG/controller/facility ownership, or main-owned docs changed.
