@@ -60,7 +60,7 @@
   },
   "source": {
     "audit": "tools/compare/petalDanceSourceAudit.ts",
-    "auditSha256": "6b23c06437bf0cc2a8bd4ddaa02b046c19145cf695fff3eb3a1e2133a645ee16",
+    "auditSha256": "865f5b39bd698107a018863e5a903b8c56b062524f8b0d7317fff4ee3ce73fbd",
     "auditRunSha256": "0dc22f5157d3701cfed03cfa886043bdb6ebadd01cec62f217e4172aef3fae1d",
     "probe": "tools/compare/petalDanceProbe.py",
     "probeSha256": "60c11b54a681e0d50379087f6e87145d62a9f1dad1e186563108680aa176bf31",
