@@ -551,8 +551,8 @@ describe("sparkle-4-grow-grayscale standalone fulfilled component-track ratchet"
     }>("src/data/gen/factory-animation-inventory.json");
     const level50Moves = new Set(inventory.tiers.level50.moves.map((entry) => entry.move));
     expect(level50Moves.size).toBe(276);
-    expect(coverage.entries).toHaveLength(243);
-    expect(coverage.entries.filter((entry) => level50Moves.has(entry.move) && entry.status === "exact")).toHaveLength(243);
+    expect(coverage.entries).toHaveLength(244);
+    expect(coverage.entries.filter((entry) => level50Moves.has(entry.move) && entry.status === "exact")).toHaveLength(244);
     expect(coverage.entries.filter((entry) => level50Moves.has(entry.move) && (entry.status === "partial" || entry.status === "staged"))).toEqual([]);
     expect([...level50Moves].filter((move) => !coverage.entries.some((entry) => entry.move === move))).toHaveLength(33);
     expect(coverage.entries.filter((entry) => ["MOVE_DISABLE", "MOVE_DETECT"].includes(entry.move))).toEqual([

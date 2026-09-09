@@ -6949,9 +6949,47 @@
    "tests/animation/petalDanceReducer.test.ts",
    "tests/animation/petalDanceActualCore.test.ts"
   ]
+ },
+ {
+  "move": "MOVE_SKY_UPPERCUT",
+  "status": "exact",
+  "covered": [
+   "the complete pointer-owned Move_SKY_UPPERCUT body and its exact 17-component boundary are independently accepted, including reused ANIM_TAG_IMPACT and BG_IN_AIR art, both slide templates, five affine hitsplats, AnimTask_MoveSkyUppercutBg, both target shakes, monbg, fades, alpha, audio, resources, waits, and cleanup",
+   "complete legal bilateral HITMONCHAN/ONIX Battle Scene ON ages 0..187 retain 188/188 rows per orientation through first inactive cleanup; the source-derived reducer and typed sceneOnSkyUppercutView seam reproduce all 376/376 component rows from live side, species, geometry, picture origin, allocator, matrix, task, order, monbg, BG3, register, resource, and audio inputs",
+   "whole OAM and matrices independently retain predecessor transfer on 187/187 comparable rows per orientation; hardware palette retains predecessor transfer on 186/187 with only age 4's same-row MonBg setup; Task_UpdateMonBg is 4..149, AnimTask_MoveSkyUppercutBg 26..167, ShakeMon2 91..100, ShakeMonInPlace 109..117, and cleanup age 187",
+   "two independent actual-core processes are byte-identical at digest f89b53c82ef28bb2d536e841f4c7376f3e0ba86366c78ef047aa9fcc15f0a253 and each passes player-back 188/188 plus opponent-front 188/188, 376/376 total component and framebuffer rows with zero residual pixels through cleanup",
+   "a deterministic material IVYSAUR/RELICANTH live species, geometry, picture-origin, allocation, matrix, task, painter-order, monbg, and BG control changes the actual-core framebuffer; no sibling, other move, or latch-ledger credit is inferred"
+  ],
+  "evidence": [
+   "tools/battle-lab/mechanic-sky-uppercut-player-hitmonchan-opponent-onix.json",
+   "tools/battle-lab/mechanic-sky-uppercut-opponent-hitmonchan-player-onix.json",
+   "tools/compare/skyUppercutSourceAudit.ts",
+   "tools/compare/skyUppercutProbe.py",
+   "tools/compare/skyUppercutChangeMap.ts",
+   "tools/compare/skyUppercutEvidence.ts",
+   "tools/compare/verifySkyUppercutReducer.ts",
+   "tools/compare/skyUppercutActualCore.ts",
+   "tools/compare/fixtures/sky-uppercut-evidence.json",
+   "tools/compare/evidence/sky-uppercut-player-dense-state.json.gz",
+   "tools/compare/evidence/sky-uppercut-opponent-dense-state.json.gz",
+   "tools/compare/evidence/sky-uppercut-player-raw-rgb.tar.gz",
+   "tools/compare/evidence/sky-uppercut-opponent-raw-rgb.tar.gz",
+   "tools/compare/evidence/sky-uppercut-changemap-player.json",
+   "tools/compare/evidence/sky-uppercut-changemap-opponent.json",
+   "tools/compare/extractSkyUppercutAssets.ts",
+   "src/animation/assets/sky-uppercut.json",
+   "src/animation/skyUppercut.ts",
+   "src/animation/sceneOnPresentation.ts",
+   "src/engine/battleScene.ts",
+   "src/engine/core.ts",
+   "tests/animation/skyUppercutSourceCheckpoint.test.ts",
+   "tests/animation/skyUppercutEvidence.test.ts",
+   "tests/animation/skyUppercutReducer.test.ts",
+   "tests/animation/skyUppercutActualCore.test.ts"
+  ]
  }
  ],
- "queue": ["MOVE_SKY_UPPERCUT"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "spider-web-thread",
@@ -8846,7 +8884,7 @@
     "visualCommand:waitbgfadeout"
    ],
    "representatives": ["MOVE_SKY_UPPERCUT"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/battle-lab/mechanic-sky-uppercut-player-hitmonchan-opponent-onix.json",
     "tools/battle-lab/mechanic-sky-uppercut-opponent-hitmonchan-player-onix.json",
@@ -8854,6 +8892,8 @@
     "tools/compare/skyUppercutProbe.py",
     "tools/compare/skyUppercutChangeMap.ts",
     "tools/compare/skyUppercutEvidence.ts",
+    "tools/compare/verifySkyUppercutReducer.ts",
+    "tools/compare/skyUppercutActualCore.ts",
     "tools/compare/fixtures/sky-uppercut-evidence.json",
     "tools/compare/evidence/sky-uppercut-player-dense-state.json.gz",
     "tools/compare/evidence/sky-uppercut-opponent-dense-state.json.gz",
@@ -8864,9 +8904,11 @@
     "tools/compare/evidence/sky-uppercut-changemap-player.txt",
     "tools/compare/evidence/sky-uppercut-changemap-opponent.txt",
     "tests/animation/skyUppercutEvidence.test.ts",
-    "tests/animation/skyUppercutSourceCheckpoint.test.ts"
+    "tests/animation/skyUppercutSourceCheckpoint.test.ts",
+    "tests/animation/skyUppercutReducer.test.ts",
+    "tests/animation/skyUppercutActualCore.test.ts"
    ],
-   "goal": "UNFULFILLED: MOVE_SKY_UPPERCUT remains unsupported after a complete source/legal bilateral Scene-ON dense evidence checkpoint. The exact 17-component track is non-exclusive; task:AnimTask_MoveSkyUppercutBg is the sole currently unrepresented component. No reducer, production asset, typed seam, compositor, framebuffer acceptance, exact status, or sibling credit is claimed."
+   "goal": "FULFILLED by MOVE_SKY_UPPERCUT only: all 17 components are independently covered by its complete bilateral 188/188 source-derived reducer, typed seam, and twice-deterministic zero-residual actual-core framebuffer acceptance through cleanup age 187. Shared IMPACT, slide, shake, fade, monbg, and BG facts transfer no acceptance or latch credit to any sibling."
   }
  ],
  "variantAudits": {

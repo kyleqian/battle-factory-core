@@ -18,7 +18,7 @@
   },
   "source": {
     "audit": "tools/compare/skyUppercutSourceAudit.ts",
-    "auditSha256": "c76366b6e2c5b334920714c067006d54356ce7c14777bd3b10082fc261435ea1",
+    "auditSha256": "dbb3e99239cf5e01b707c6a90ae1ed3d5fe11e5340034f5c0e22445c1f521fe9",
     "auditRunSha256": "8013b9dd757536a69879b44d637c9655efab9b8d1feba2e81080f19ef67a8922",
     "probe": "tools/compare/skyUppercutProbe.py",
     "probeSha256": "5b0a69b17528ed2f498fde5f8a9084ab4373e928e1550e5874d2218eafcf51c5",

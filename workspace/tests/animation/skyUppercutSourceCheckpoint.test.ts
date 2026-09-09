@@ -46,10 +46,10 @@ describe("MOVE_SKY_UPPERCUT source and legal staging checkpoint", () => {
     expect(stage.overrides.parties[targetSide][0]).toMatchObject({ species: 95, level: 50, moves: [33, 33, 33, 33] });
   });
 
-  it("keeps Sky Uppercut queued and uncredited", () => {
+  it("observes Sky Uppercut's independent exact promotion", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.queue).toEqual(["MOVE_SKY_UPPERCUT"]); expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_SKY_UPPERCUT")).toBe(false);
+    expect(coverage.queue).toEqual([]); expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SKY_UPPERCUT")).toMatchObject({ status: "exact" });
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "sky-uppercut-impact-slide-bg");
-    expect(track).toMatchObject({ representatives: ["MOVE_SKY_UPPERCUT"], fulfilled: false }); expect(track.components).toHaveLength(17); expect(track.components).toContain("task:AnimTask_MoveSkyUppercutBg");
+    expect(track).toMatchObject({ representatives: ["MOVE_SKY_UPPERCUT"], fulfilled: true }); expect(track.components).toHaveLength(17); expect(track.components).toContain("task:AnimTask_MoveSkyUppercutBg");
   });
 });
