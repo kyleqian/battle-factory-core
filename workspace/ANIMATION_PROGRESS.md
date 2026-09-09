@@ -1,3 +1,10 @@
+# Animation supervisor verification — MOVE_PETAL_DANCE reducer/seam checkpoint (2026-09-09 supervisor)
+
+- **State / merge:** Fast-forwarded Terra/max commit `7727388c2`. Level 50 remains **242/276 exact**, **0 partial / 0 staged**, and **34 unsupported**; `MOVE_PETAL_DANCE` remains coverage-absent and the sole queue item. No compositor/framebuffer, sibling/component/latch/coverage, gameplay/controller/facility, boundary/barrier, or main-program credit changed.
+- **Independent proof:** The source-derived FLOWER bundle regenerates byte-for-byte and reuses the pinned IMPACT asset. The pure source-age reducer and typed seam reproduce **244/244 player-back + 244/244 opponent-front = 488/488** component rows twice (`fd489f79…`), including all 13 flowers, ellipse/shake/slides/hitsplat, monbg/alpha/audio/resources, measured transfer timing, and age-243 cleanup. A live IVYSAUR/RELICANTH geometry/allocation/matrix/order control is deterministic and material; production imports no retained evidence or pixels.
+- **Gates / next:** Supervisor-focused source/evidence/assets/reducer/boundary checks pass **14/14**. On merged `animation-main`, full `npm test` passes **1,307 files / 11,197 tests** with **44 files / 223 tests skipped**, and `npm run build` passes **782 modules**. Next add only the generic live Petal Dance compositor and require two independent complete bilateral actual-core **488/488** zero-residual framebuffer passes plus the altered live control before promoting the move.
+- **For main:** Nothing blocks the main lane; no main-owned state or docs changed.
+
 # MOVE_PETAL_DANCE reducer + typed Scene-ON seam checkpoint — worker (2026-09-09)
 
 - **State / scope:** Level 50 remains **242/276 exact**, **0 partial / 0 staged**, and **34 unsupported**. `MOVE_PETAL_DANCE` remains coverage-absent, unsupported, and the sole queue item. No compositor/framebuffer or actual-core acceptance, coverage/component/sibling/latch credit, gameplay/controller/facility state, boundary/barrier, or main-program document changed.
