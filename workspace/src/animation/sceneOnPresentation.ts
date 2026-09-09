@@ -880,6 +880,11 @@ import {
   type SpiderWebLiveInputs,
 } from "./spiderWeb.ts";
 import {
+  petalDanceAtAge,
+  type PetalDanceLiveInputs,
+  type PetalDanceState,
+} from "./petalDance.ts";
+import {
   fissureAtAge,
   type FissureState,
 } from "./fissure.ts";
@@ -3422,6 +3427,18 @@ export interface SceneOnSpiderWebConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/** Narrow Scene-ON seam for Petal Dance's source-relative sprite/task body. */
+export interface SceneOnPetalDanceConfig {
+  readonly move: "PETAL_DANCE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live allocator, picture-origin, matrix, and monbg facts only. */
+  readonly animationInputs: Readonly<Omit<PetalDanceLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerBattlePositionCenter" | "targetBattlePositionCenter" | "targetSpriteOrigin">>;
+}
+
 /** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
 export interface SceneOnEruptionConfig {
   readonly move: "ERUPTION";
@@ -4019,6 +4036,7 @@ export type SceneOnMoveConfig =
   | SceneOnRapidSpinConfig
   | SceneOnForesightConfig
   | SceneOnSpiderWebConfig
+  | SceneOnPetalDanceConfig
   | SceneOnEruptionConfig
   | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
@@ -4239,6 +4257,8 @@ export type SceneOnForesightPresentationState =
   SceneOnMovePresentationState<SceneOnForesightConfig>;
 export type SceneOnSpiderWebPresentationState =
   SceneOnMovePresentationState<SceneOnSpiderWebConfig>;
+export type SceneOnPetalDancePresentationState =
+  SceneOnMovePresentationState<SceneOnPetalDanceConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -5173,6 +5193,11 @@ export interface SceneOnForesightView extends ForesightFrame {
 }
 
 export interface SceneOnSpiderWebView extends SpiderWebFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnPetalDanceView extends PetalDanceState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -10203,6 +10228,30 @@ export function sceneOnSpiderWebView(
       targetSpecies: target.species,
       attackerCenter: attacker.geometry.animationCenter,
       targetCenter: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is Move_PETAL_DANCE's first source-owned Scene-ON row. */
+export function sceneOnPetalDanceView(
+  state: SceneOnPetalDancePresentationState,
+): SceneOnPetalDanceView {
+  if (state.config.move !== "PETAL_DANCE") {
+    throw new Error(`expected PETAL_DANCE presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...petalDanceAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerBattlePositionCenter: attacker.geometry.battlePositionCenter,
+      targetBattlePositionCenter: target.geometry.battlePositionCenter,
+      targetSpriteOrigin: target.geometry.animationCenter,
     }),
     attacker,
     target,
