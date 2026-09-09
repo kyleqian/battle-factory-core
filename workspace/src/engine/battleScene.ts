@@ -31475,11 +31475,11 @@ export function renderSceneOnMovePresentation(
       if (age < 23) return 4;
       if (age < 27) return 6;
       if (age < 31) return 8;
-      if (age < 182) return 10;
-      if (age < 186) return 8;
-      if (age < 190) return 6;
-      if (age < 194) return 4;
-      if (age < 198) return 2;
+      if (age < 182) return 9;
+      if (age < 186) return 7;
+      if (age < 190) return 5;
+      if (age < 194) return 3;
+      if (age < 198) return 1;
       return 0;
     };
     const fieldPalette = blendPaletteBanksToward(
@@ -31487,11 +31487,10 @@ export function renderSceneOnMovePresentation(
       black,
       paletteBlackCoefficient(displayed.age),
     );
-    const targetMonBgPalette = blendPaletteToward(
-      targetArt.palette,
-      black,
-      paletteBlackCoefficient(displayed.age),
-    );
+    // `monbg` owns a separate BG palette bank.  The field fade targets the
+    // battle background bank, while this copied battler bank remains at the
+    // live picture palette until the clear handoff.
+    const targetMonBgPalette = targetArt.palette;
     const drawOrdinary = (
       battler: typeof view.attacker,
       art: BattlerArt,
@@ -31560,12 +31559,18 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.side === "player" ? 6 : 8,
       spiderWebState.config.animationInputs.attackerSide === "player" ? 30 : 40,
     );
-    for (const thread of view.threads) {
-      if (!thread.visible || !view.painterSlots.includes(thread.slot)) continue;
+    for (const thread of displayed.threads) {
+      const threadIndex = spiderWebState.config.animationInputs.threadSpriteSlots.indexOf(thread.slot);
+      const threadStartAge = 39 + threadIndex * 3;
+      // Creation writes the first thread's OAM after the current transfer;
+      // its source-age zero row first reaches the display on the following
+      // callback row. Existing threads use the predecessor state above.
+      if (playerAttacker && threadIndex >= 0 && displayed.age === threadStartAge) continue;
+      if (!thread.visible || !displayed.painterSlots.includes(thread.slot)) continue;
       entries.push({
         slot: thread.slot,
         subpriority: thread.subpriority,
-        order: -painterOrder(thread.slot),
+        order: playerAttacker ? -painterOrder(thread.slot) : threadIndex,
         draw: () => drawSpriteSheet(
           fb,
           spiderWebArt.webThread.tileset,
@@ -31575,8 +31580,8 @@ export function renderSceneOnMovePresentation(
         ),
       });
     }
-    const web = view.web;
-    if (web?.visible && view.painterSlots.includes(web.slot)) {
+    const web = displayed.web;
+    if (web?.visible && displayed.painterSlots.includes(web.slot)) {
       entries.push({
         slot: web.slot,
         subpriority: web.subpriority,
