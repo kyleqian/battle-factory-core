@@ -176,6 +176,7 @@ import {
   type SceneOnHyperBeamConfig,
   type SceneOnThunderboltConfig,
   type SceneOnSeismicTossConfig,
+  type SceneOnSpiderWebConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -253,6 +254,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "SEISMIC_TOSS") {
     const seismicPresentation = presentation as SceneOnMovePresentationState<SceneOnSeismicTossConfig>;
     renderSceneOnMovePresentation(framebuffer, seismicPresentation);
+    return;
+  }
+  if (presentation.config.move === "SPIDER_WEB") {
+    const spiderWebPresentation = presentation as SceneOnMovePresentationState<SceneOnSpiderWebConfig>;
+    renderSceneOnMovePresentation(framebuffer, spiderWebPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

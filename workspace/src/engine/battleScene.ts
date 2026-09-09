@@ -543,6 +543,7 @@ import smokescreenAsset from "../animation/assets/smokescreen.json" with { type:
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import hailAsset from "../animation/assets/hail.json" with { type: "json" };
 import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
+import spiderWebAsset from "../animation/assets/spider-web.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
 import waterOrbAsset from "../animation/assets/water-orb.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
@@ -1024,6 +1025,7 @@ import {
   sceneOnUproarView,
   sceneOnRapidSpinView,
   sceneOnForesightView,
+  sceneOnSpiderWebView,
   sceneOnEruptionView,
   sceneOnWaterSpoutView,
   sceneOnSandTombView,
@@ -1256,6 +1258,7 @@ import {
   type SceneOnDefenseCurlConfig,
   type SceneOnIngrainConfig,
   type SceneOnMeanLookConfig,
+  type SceneOnSpiderWebConfig,
   type SceneOnSmellingSaltConfig,
   type SceneOnRecycleConfig,
 } from "../animation/sceneOnPresentation.ts";
@@ -1817,6 +1820,10 @@ const hailArt = hailAsset as {
 };
 const spikesArt = spikesAsset as {
   spike: { tileset: Tileset; palette: RgbColor[] };
+};
+const spiderWebArt = spiderWebAsset as {
+  spiderWeb: { tileset: Tileset; palette: RgbColor[] };
+  webThread: { tileset: Tileset; palette: RgbColor[] };
 };
 const mudShotArt = mudShotAsset as {
   brownOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -31419,6 +31426,212 @@ export function renderSceneOnMovePresentation(
     drawMessageTextLines(fb,
       view.attacker.geometry.side === "player" ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "FORESIGHT!", 99);
+    return;
+  }
+
+  if (state.config.move === "SPIDER_WEB") {
+    const spiderWebState = state as SceneOnMovePresentationState<SceneOnSpiderWebConfig>;
+    const view = sceneOnSpiderWebView(spiderWebState);
+    const displayed = sceneOnSpiderWebView({
+      ...spiderWebState,
+      age: spiderWebState.age - 1,
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SPIDER_WEB presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SPIDER_WEB missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const idleFor = (battler: typeof view.attacker): Readonly<{ x2: number; y2: number }> =>
+      battler.geometry.side === "opponent"
+        ? speciesFrontIdleRestOffsetOrZero(battler.species)
+        : { x2: 0, y2: 0 };
+    const attackerIdle = idleFor(view.attacker);
+    const targetIdle = idleFor(view.target);
+    const attackerCorner = {
+      x: view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      y: view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    };
+    const targetCorner = {
+      x: view.target.geometry.spriteCorner.x + targetIdle.x2,
+      y: view.target.geometry.spriteCorner.y + targetIdle.y2,
+    };
+    const black = { r: 0, g: 0, b: 0 };
+    // `simple_palette_blend F_PAL_BG ... 0 -> 9` advances in two 5-bit
+    // levels every four source rows after its two-row delay.  The same
+    // source-relative schedule is used for the return blend.
+    const paletteBlackCoefficient = (age: number): number => {
+      if (age < 15) return 0;
+      if (age < 19) return 2;
+      if (age < 23) return 4;
+      if (age < 27) return 6;
+      if (age < 31) return 8;
+      if (age < 182) return 10;
+      if (age < 186) return 8;
+      if (age < 190) return 6;
+      if (age < 194) return 4;
+      if (age < 198) return 2;
+      return 0;
+    };
+    const fieldPalette = blendPaletteBanksToward(
+      battleBg.palette,
+      black,
+      paletteBlackCoefficient(displayed.age),
+    );
+    const targetMonBgPalette = blendPaletteToward(
+      targetArt.palette,
+      black,
+      paletteBlackCoefficient(displayed.age),
+    );
+    const drawOrdinary = (
+      battler: typeof view.attacker,
+      art: BattlerArt,
+      corner: Readonly<{ x: number; y: number }>,
+      palette: RgbColor[] = art.palette,
+    ): void => drawSpriteSheet(
+      fb,
+      tilesFor(art, battler.geometry.side),
+      palette,
+      corner.x,
+      corner.y,
+    );
+    const monbgInput = spiderWebState.config.animationInputs.monbg;
+    const drawTargetMonBg = (): void => {
+      drawDragonDanceMonBg(
+        fb,
+        { tileset: tilesFor(targetArt, view.target.geometry.side), palette: targetMonBgPalette },
+        { x: monbgInput.spriteX - 32, y: monbgInput.spriteY - 32 },
+        Array.from({ length: 160 }, () => monbgInput.bgX),
+        monbgInput.bgX,
+      );
+    };
+    const playerAttacker = view.attacker.geometry.side === "player";
+    const targetIsDisplayedMonBg = view.monbg.displayActive;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, fieldPalette);
+    if (targetIsDisplayedMonBg) drawTargetMonBg();
+
+    type Entry = {
+      readonly slot: number;
+      readonly subpriority: number;
+      readonly order: number;
+      readonly draw: () => void;
+    };
+    const entries: Entry[] = [];
+    const painterOrder = (slot: number): number => {
+      const index = displayed.painterSlots.indexOf(slot);
+      return index < 0 ? -1 : index;
+    };
+    const addBattler = (
+      battler: typeof view.attacker,
+      art: BattlerArt,
+      corner: Readonly<{ x: number; y: number }>,
+      slot: number,
+      subpriority: number,
+      palette: RgbColor[] = art.palette,
+    ): void => entries.push({
+      slot, subpriority, order: -slot,
+      draw: () => drawOrdinary(battler, art, corner, palette),
+    });
+    // The target OBJ is hidden while its copied BG layer is active.  The
+    // clear task exposes the ordinary target again before the copy is freed;
+    // painting both copies in that handoff row mirrors the hardware stack.
+    if (!targetIsDisplayedMonBg || view.monbg.clearActive || view.age >= 178) {
+      addBattler(
+        view.target,
+        targetArt,
+        targetCorner,
+        view.target.geometry.side === "player" ? 6 : 8,
+        view.target.geometry.side === "player" ? 30 : 40,
+      );
+    }
+    addBattler(
+      view.attacker,
+      attackerArt,
+      attackerCorner,
+      view.attacker.geometry.side === "player" ? 6 : 8,
+      spiderWebState.config.animationInputs.attackerSide === "player" ? 30 : 40,
+    );
+    for (const thread of view.threads) {
+      if (!thread.visible || !view.painterSlots.includes(thread.slot)) continue;
+      entries.push({
+        slot: thread.slot,
+        subpriority: thread.subpriority,
+        order: -painterOrder(thread.slot),
+        draw: () => drawSpriteSheet(
+          fb,
+          spiderWebArt.webThread.tileset,
+          spiderWebArt.webThread.palette,
+          thread.x + thread.x2 - 4,
+          thread.y + thread.y2 - 4,
+        ),
+      });
+    }
+    const web = view.web;
+    if (web?.visible && view.painterSlots.includes(web.slot)) {
+      entries.push({
+        slot: web.slot,
+        subpriority: web.subpriority,
+        order: -painterOrder(web.slot),
+        draw: () => {
+          const backdrop = fb.slice();
+          const eva = view.registers.bldalpha & 0xff;
+          const evb = (view.registers.bldalpha >>> 8) & 0xff;
+          drawSpriteSheetAffineRotateBlendedOverFb(
+            fb,
+            backdrop,
+            spiderWebArt.spiderWeb.tileset,
+            spiderWebArt.spiderWeb.palette,
+            web.x + web.x2,
+            web.y + web.y2,
+            web.matrix[0], web.matrix[1], web.matrix[2], web.matrix[3],
+            eva,
+            evb,
+            true,
+          );
+        },
+      });
+    }
+    // Higher subpriority is behind lower subpriority.  Equal-priority
+    // effects retain the live source order supplied through the seam.
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const player = playerAttacker ? view.attacker : view.target;
+    const opponent = playerAttacker ? view.target : view.attacker;
+    const profile = spiderWebState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SPIDER WEB!",
+      99,
+    );
     return;
   }
 
