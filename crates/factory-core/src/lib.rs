@@ -145,6 +145,8 @@ pub mod battle_script_tryswapitems;
 pub mod battle_script_tryswapitems_vectors_gen;
 pub mod battle_script_trywish;
 pub mod battle_script_trywish_vectors_gen;
+pub mod battle_script_typecalc;
+pub mod battle_script_typecalc_vectors_gen;
 pub mod battle_script_weightdamage;
 pub mod battle_script_weightdamage_vectors_gen;
 pub mod damage_calc;
