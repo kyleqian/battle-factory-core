@@ -369,7 +369,7 @@ describe("flying-dirt-sandstorm standalone fulfilled component-track ratchet", (
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "staged"))
       .toHaveLength(0);
     expect(inventory.tiers.level50.moves).toHaveLength(276);
-    expect(inventory.tiers.level50.moves.length - coverage.entries.length).toBe(37);
+    expect(inventory.tiers.level50.moves.length - coverage.entries.length).toBe(36);
     expect(coverage.entries.filter((entry: { move: string }) =>
       ["MOVE_SANDSTORM", "MOVE_HEAT_WAVE"].includes(entry.move),
     )).toEqual([
