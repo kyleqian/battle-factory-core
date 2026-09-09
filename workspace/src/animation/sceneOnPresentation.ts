@@ -885,6 +885,11 @@ import {
   type PetalDanceState,
 } from "./petalDance.ts";
 import {
+  skyUppercutAtAge,
+  type SkyUppercutLiveInputs,
+  type SkyUppercutState,
+} from "./skyUppercut.ts";
+import {
   fissureAtAge,
   type FissureState,
 } from "./fissure.ts";
@@ -3439,6 +3444,18 @@ export interface SceneOnPetalDanceConfig {
       | "attackerBattlePositionCenter" | "targetBattlePositionCenter" | "targetSpriteOrigin">>;
 }
 
+/** Narrow Scene-ON seam for Sky Uppercut's source-relative callback body. */
+export interface SceneOnSkyUppercutConfig {
+  readonly move: "SKY_UPPERCUT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Live picture origin, allocator slots, matrices, monbg, and BG3 facts only. */
+  readonly animationInputs: Readonly<Omit<SkyUppercutLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
 export interface SceneOnEruptionConfig {
   readonly move: "ERUPTION";
@@ -4037,6 +4054,7 @@ export type SceneOnMoveConfig =
   | SceneOnForesightConfig
   | SceneOnSpiderWebConfig
   | SceneOnPetalDanceConfig
+  | SceneOnSkyUppercutConfig
   | SceneOnEruptionConfig
   | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
@@ -4259,6 +4277,8 @@ export type SceneOnSpiderWebPresentationState =
   SceneOnMovePresentationState<SceneOnSpiderWebConfig>;
 export type SceneOnPetalDancePresentationState =
   SceneOnMovePresentationState<SceneOnPetalDanceConfig>;
+export type SceneOnSkyUppercutPresentationState =
+  SceneOnMovePresentationState<SceneOnSkyUppercutConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -5198,6 +5218,11 @@ export interface SceneOnSpiderWebView extends SpiderWebFrame {
 }
 
 export interface SceneOnPetalDanceView extends PetalDanceState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSkyUppercutView extends SkyUppercutState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -10252,6 +10277,29 @@ export function sceneOnPetalDanceView(
       attackerBattlePositionCenter: attacker.geometry.battlePositionCenter,
       targetBattlePositionCenter: target.geometry.battlePositionCenter,
       targetSpriteOrigin: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is Move_SKY_UPPERCUT's first pointer-owned Scene-ON row. */
+export function sceneOnSkyUppercutView(
+  state: SceneOnSkyUppercutPresentationState,
+): SceneOnSkyUppercutView {
+  if (state.config.move !== "SKY_UPPERCUT") {
+    throw new Error(`expected SKY_UPPERCUT presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...skyUppercutAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerCenter: attacker.geometry.animationCenter,
+      targetCenter: target.geometry.animationCenter,
     }),
     attacker,
     target,
