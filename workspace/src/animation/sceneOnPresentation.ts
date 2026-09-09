@@ -870,6 +870,11 @@ import {
   type RapidSpinLiveInputs,
 } from "./rapidSpin.ts";
 import {
+  foresightAtAge,
+  type ForesightFrame,
+  type ForesightLiveInputs,
+} from "./foresight.ts";
+import {
   fissureAtAge,
   type FissureState,
 } from "./fissure.ts";
@@ -3390,6 +3395,16 @@ export interface SceneOnRapidSpinConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/** Narrow Scene-ON seam for Foresight's source-relative magnifying glass. */
+export interface SceneOnForesightConfig {
+  readonly move: "FORESIGHT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<ForesightLiveInputs,
+    "targetSide" | "targetSpecies" | "attackerSpecies">>;
+}
+
 /** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
 export interface SceneOnEruptionConfig {
   readonly move: "ERUPTION";
@@ -3985,6 +4000,7 @@ export type SceneOnMoveConfig =
   | SceneOnSunnyDayConfig
   | SceneOnUproarConfig
   | SceneOnRapidSpinConfig
+  | SceneOnForesightConfig
   | SceneOnEruptionConfig
   | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
@@ -4201,6 +4217,8 @@ export type SceneOnUproarPresentationState =
   SceneOnMovePresentationState<SceneOnUproarConfig>;
 export type SceneOnRapidSpinPresentationState =
   SceneOnMovePresentationState<SceneOnRapidSpinConfig>;
+export type SceneOnForesightPresentationState =
+  SceneOnMovePresentationState<SceneOnForesightConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -5125,6 +5143,11 @@ export interface SceneOnUproarView extends UproarFrame {
 }
 
 export interface SceneOnRapidSpinView extends RapidSpinFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnForesightView extends ForesightFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -10112,6 +10135,26 @@ export function sceneOnRapidSpinView(
       targetSpecies: target.species,
       attackerCenter: attacker.geometry.animationCenter,
       targetCenter: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is Move_FORESIGHT's first source-script row. */
+export function sceneOnForesightView(
+  state: SceneOnForesightPresentationState,
+): SceneOnForesightView {
+  if (state.config.move !== "FORESIGHT") {
+    throw new Error(`expected FORESIGHT presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...foresightAtAge(state.age, {
+      ...animationInputs,
+      targetSide: target.geometry.side,
+      targetSpecies: target.species,
+      attackerSpecies: attacker.species,
     }),
     attacker,
     target,

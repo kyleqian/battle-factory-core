@@ -687,6 +687,7 @@ import dragonDanceAsset from "../animation/assets/dragon-dance.json" with { type
 import sunnyDayAsset from "../animation/assets/sunny-day.json" with { type: "json" };
 import uproarAsset from "../animation/assets/uproar.json" with { type: "json" };
 import rapidSpinAsset from "../animation/assets/rapid-spin.json" with { type: "json" };
+import foresightAsset from "../animation/assets/foresight.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
@@ -1022,6 +1023,7 @@ import {
   sceneOnSunnyDayView,
   sceneOnUproarView,
   sceneOnRapidSpinView,
+  sceneOnForesightView,
   sceneOnEruptionView,
   sceneOnWaterSpoutView,
   sceneOnSandTombView,
@@ -1169,6 +1171,7 @@ import {
   type SceneOnSunnyDayPresentationState,
   type SceneOnUproarPresentationState,
   type SceneOnRapidSpinPresentationState,
+  type SceneOnForesightPresentationState,
   type SceneOnPsybeamPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnFireBlastConfig,
@@ -31343,6 +31346,79 @@ export function renderSceneOnMovePresentation(
       fb, view.attacker.geometry.side === "player" ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "UPROAR!", 99,
     );
+    return;
+  }
+
+  if (state.config.move === "FORESIGHT") {
+    const foresightState = state as SceneOnForesightPresentationState;
+    const view = sceneOnForesightView(foresightState);
+    const displayed = sceneOnForesightView({ ...foresightState, age: foresightState.age - 1 });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("FORESIGHT presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`FORESIGHT missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const targetPalette = displayed.paletteCoefficient === 0
+      ? targetArt.palette
+      : blendPaletteToward(targetArt.palette, { r: 255, g: 255, b: 255 }, displayed.paletteCoefficient);
+    const drawOrdinary = (battler: typeof view.attacker, art: BattlerArt, palette = art.palette): void => {
+      const idle = battler.geometry.side === "opponent"
+        ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
+      drawSpriteSheet(fb, tilesFor(art, battler.geometry.side), palette,
+        battler.geometry.spriteCorner.x + idle.x2, battler.geometry.spriteCorner.y + idle.y2);
+    };
+    const monbgInput = foresightState.config.animationInputs.monbg;
+    const drawTargetCopy = (): void => {
+      const monbg = view.monbg;
+      const targetCorner = { x: monbgInput.spriteX - 32, y: monbgInput.spriteY - 32 };
+      drawDragonDanceMonBg(fb, {
+        tileset: tilesFor(targetArt, view.target.geometry.side), palette: targetPalette,
+      }, targetCorner, Array.from({ length: 160 }, () => monbg.bgX), monbg.bgX);
+    };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (view.monbg.active) {
+      drawTargetCopy();
+      const targetBackdrop = fb.slice();
+      drawOrdinary(view.attacker, attackerArt);
+      const glass = displayed.glass;
+      if (glass?.visible) {
+        drawSpriteSheetFlippedBlendedOverTarget(
+          fb, targetBackdrop, foresightAsset.magnifyingGlass.tileset,
+          foresightAsset.magnifyingGlass.palette, glass.x - 16 + glass.x2, glass.y - 16 + glass.y2,
+          glass.hFlip, false, view.blendAlpha.eva, view.blendAlpha.evb,
+        );
+      }
+    } else if (view.attacker.geometry.side === "player") {
+      drawOrdinary(view.target, targetArt, targetPalette); drawOrdinary(view.attacker, attackerArt);
+    } else {
+      drawOrdinary(view.attacker, attackerArt); drawOrdinary(view.target, targetArt, targetPalette);
+    }
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = foresightState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      view.attacker.geometry.side === "player" ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "FORESIGHT!", 99);
     return;
   }
 
