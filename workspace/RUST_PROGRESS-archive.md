@@ -5,6 +5,57 @@ full history regardless.
 
 ---
 
+## R76 — [supervised session, 2026-09-09, unattended] **M73 stockpile family leaf + green checkpoint (first shared-helper consumer)**
+
+- **State:** `rust-main` = R75 checkpoint `fb944f2eb` plus the verified Sonnet
+  worker `99c5ec021` (fast-forward). The `B_SCR_OP_STOCKPILE`/
+  `B_SCR_OP_STOCKPILETOBASEDAMAGE`/`B_SCR_OP_STOCKPILETOHPHEAL`
+  (0x85/0x86/0x87) family projection is native and wasm32-compilable — the
+  first leaf that composes the M72 shared `battle_script_base_damage` helper
+  instead of hand-rolling a DamageCalcInput mapping. No ABI, adapter,
+  recovery module, canonical TS, or npm file was touched. Session still
+  active; M74 (jumpif compare family) may follow before wind-down.
+- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
+  ~25 min) ported registration cardinality 1/2/1 (0x86 has TWO concrete
+  starts — EffectSpitUp `battle_scripts_1.s:2100` + SpitUpFailProtect
+  `:2114`), per-execution shape checks, and the three handlers per
+  `battle_script_commands.c:6850-6922`: 0x85 counter cap 3 → MOVE_RESULT_MISSED
+  OR + chooser 1 vs increment + buff-byte + chooser 0; 0x86 counter==0 lazy
+  fail jump (rules unchanged) vs always-zero counter + (missType != 1 only)
+  helper damage × counter then Helping Hand trunc(×15/10) + animTurn — the TS
+  contract of zeroing the counter on the protected path too (C zeroes only in
+  its else-branch) is deliberately mirrored; 0x87 counter==0 jump (chooser 0,
+  counter retained) / full-HP jump (counter zeroed, target := attacker,
+  chooser 1) / success heal max(1, maxHP >> (3-counter)) as negative damage +
+  animTurn + target := attacker. Canonical TS supplies **40 behavior** and
+  **18 registration** cases incl. helper-error propagation and a
+  missType==1-skips-helper pin; corpus sha256
+  `e418402f91cc21b58f7cf602f1eb73a6f38e9307eeafe914e078ab36d3fed0d8`.
+- **Next:** dispatch + verify M74 — the `jumpifbyte`/`jumpifhalfword`/
+  `jumpifword` compare family. Barrier-projection decision (made this
+  session, recorded here): project the TS `unsupported-branch` halt as a
+  first-class `Halt { unsupported-branch fields }` outcome variant mirroring
+  the TS reason object verbatim (programCounter/opcodeId/opcodeName/
+  sourceConstruct/sourceFile/sourceLine) — core-rs-internal, TS-corpus-
+  pinnable, no public surface locked in, reversible. After M74: re-scout;
+  remaining unported opcodes are mostly RNG-consuming, scheduler-heavy, or
+  hit-chain-orchestration (damagecalc/critcalc/typecalc next in reach now
+  that the shared helper exists). No deferral is open.
+- **Notes:** supervisor audit covered all three handler bodies against the C
+  source and TS write-sets (counter-zeroing asymmetry, multiply-before-
+  truncation order, target-role overwrite on exactly two 0x87 branches,
+  lazy per-branch label resolution) plus generator provenance; independent
+  regeneration was byte-identical. Generated Rust is **247,550 bytes**,
+  sha256 `005a60e15c3af9a8fb09844e740c1cf7a6f5ad00a3183d8432c0f2cf17e90e43`;
+  generator **39,731 bytes**, sha256
+  `d0e8fcbf2ff82525be3d066dfaa3fa7a1ddef6661781482cd2625abd75204990`.
+  Gates rerun on `rust-main` post-fold: **1,373/1,373** native (+18), fmt,
+  strict workspace Clippy, wasm32 release; artifact **512,508 bytes**, sha256
+  `e510963fe9a4379645d4e9d93053a5ee8b4de06404dd4ac5b20e05a7e4aba989`.
+  Worker noted the M72 generator's `canonicalBattler` omits `side` (worked
+  around loudly in its own generator; not lane friction). No npm gate
+  required; no deferral or barrier added. R73 archived. PAPERCUT: none new.
+
 ## R75 — [supervised session, 2026-09-09, unattended] **M72 shared hit-chain base-damage helper + green checkpoint (first reusable non-opcode battle-script module)**
 
 - **State:** `rust-main` = R74 checkpoint `3975b5f48` (master merge at orient

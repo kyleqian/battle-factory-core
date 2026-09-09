@@ -6,6 +6,61 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R79 — [supervised session wind-down (final), 2026-09-09 15:03–~18:00 UTC, unattended] **M76 `Cmd_typecalc` leaf + session close (five green folds)**
+
+- **State:** `rust-main` = master (no-op merge at orient) plus five verified
+  Sonnet worker fast-forwards this session — `aa57ef2ba` M72 shared
+  base-damage helper, `99c5ec021` M73 stockpile family, `39f0cbca4` M74
+  jumpif compare family, `2a4170f88` M75 damagecalc, `e9e3649cd` M76
+  typecalc — each followed by its ledger commit and a successful
+  `backup-refs.sh` push. Tree clean, committed, green; no worker worktree or
+  branch left behind. No ABI, adapter, recovery module, canonical TS, or npm
+  file was touched all session, so the main supervisor's fold is
+  `core-rs/**` + `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
+  ~24 min) ported `B_SCR_OP_TYPECALC` (0x06,
+  `battle_script_commands.c:1355-1420`): Struggle-first precedence (before
+  role checks), requireMoveRow-BEFORE-type-resolution (opposite of M75 —
+  both precedences now pinned), STAB via reused `apply_stab`, the
+  Levitate/Ground short-circuit (reveal + MISSED|DOESNT_AFFECT_FOE +
+  landed-cell clears + missType 4), the find-first type loop over reused
+  `gen_tables::TYPE_EFFECTIVENESS_TABLE` with per-entry flag algebra
+  (immune clears SE/NVE; 0.5x/2x toggle gated on power!=0 &&
+  !NO_EFFECT), min-1 floor, dual-type dedup, the Foresight-vs-Ghost skip
+  (Normal/Fighting only), Wonder Guard's miss branch (incl. the
+  preset-both-bits reachability pin — the loop's own toggles cancel a
+  0.5x+2x pair, so both-set only arrives preset), targetNotAffected on
+  final DOESNT_AFFECT_FOE, and identity-write ability reveals via
+  `battle_script_ai_reveal`. **41 behavior + 3 registration** cases; corpus
+  sha256 `881d1ffa7371bcd411ffb8cfb10eb0c49bd5151567538d7086eff9bc952d20d4`
+  (97,873 bytes).
+- **Next:** merge master, re-run the four Rust gates, then continue. The
+  hit-chain damage pipeline now has damagecalc + typecalc native; the
+  remaining trio member `Cmd_critcalc` (`:1253-1286`) is the first
+  RNG-drawing battle-script leaf and needs a drawBattleScriptRng projection
+  decision before dispatch — make it next orient or record it in
+  `RUST_DEFERRED.md`. rng-free leaves are otherwise thin; re-scout with
+  /tmp/rust-briefs/ts-opcodes.txt vs rs-opcodes.txt (session-generated
+  inventory diff). No deferral is open.
+- **Notes:** supervisor audit covered the full apply body against the TS
+  handler (branch order, flag algebra, Foresight predicate, Wonder Guard
+  truth table incl. power==0 and SE-only no-miss, reveal identity, STAB on
+  the Levitate path) and generator provenance; independent regeneration was
+  byte-identical. Generated Rust **261,390 bytes**, sha256
+  `5ec06981598c13b65285bbe3d6ddf0c0f36e788f9d368729951fbd8d120ac2db`;
+  generator **31,076 bytes**, sha256
+  `c6bb13072593096640811eb41f79ffdc2cdbb437ded26ba8d0393d8e58a5b3e7`.
+  Final gates on `rust-main`: **1,425/1,425** native (up from 1,329 at
+  orient, +96 across five leaves), fmt, strict workspace Clippy, wasm32
+  release; artifact **512,575 bytes**, sha256
+  `2275b630095b98c10d08d3ddbab83763c5253575879d8ac0158bd3e212d7956c`.
+  Session-wide: five Sonnet workers, five commits, zero rejections, zero
+  cap expiries (22-33 min each, ~$27 total); tracked-background-launcher +
+  chained blocking waits held every time. No npm gate required; no deferral
+  or barrier added. R76 archived. PAPERCUT: none new (README Apple-path
+  note from R57 still stands).
+
+
 ## R78 — [supervised session wind-down, 2026-09-09 15:03–~17:30 UTC, unattended] **M75 `Cmd_damagecalc` leaf + session close (four green folds)**
 
 - **State:** `rust-main` = master (merge at orient was a no-op) plus four
@@ -111,55 +166,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   No npm gate required; no deferral added; the module's Halt is its own
   outcome, not a shared-frontier barrier-count change. R74 archived.
   PAPERCUT: none new.
-
-
-## R76 — [supervised session, 2026-09-09, unattended] **M73 stockpile family leaf + green checkpoint (first shared-helper consumer)**
-
-- **State:** `rust-main` = R75 checkpoint `fb944f2eb` plus the verified Sonnet
-  worker `99c5ec021` (fast-forward). The `B_SCR_OP_STOCKPILE`/
-  `B_SCR_OP_STOCKPILETOBASEDAMAGE`/`B_SCR_OP_STOCKPILETOHPHEAL`
-  (0x85/0x86/0x87) family projection is native and wasm32-compilable — the
-  first leaf that composes the M72 shared `battle_script_base_damage` helper
-  instead of hand-rolling a DamageCalcInput mapping. No ABI, adapter,
-  recovery module, canonical TS, or npm file was touched. Session still
-  active; M74 (jumpif compare family) may follow before wind-down.
-- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
-  ~25 min) ported registration cardinality 1/2/1 (0x86 has TWO concrete
-  starts — EffectSpitUp `battle_scripts_1.s:2100` + SpitUpFailProtect
-  `:2114`), per-execution shape checks, and the three handlers per
-  `battle_script_commands.c:6850-6922`: 0x85 counter cap 3 → MOVE_RESULT_MISSED
-  OR + chooser 1 vs increment + buff-byte + chooser 0; 0x86 counter==0 lazy
-  fail jump (rules unchanged) vs always-zero counter + (missType != 1 only)
-  helper damage × counter then Helping Hand trunc(×15/10) + animTurn — the TS
-  contract of zeroing the counter on the protected path too (C zeroes only in
-  its else-branch) is deliberately mirrored; 0x87 counter==0 jump (chooser 0,
-  counter retained) / full-HP jump (counter zeroed, target := attacker,
-  chooser 1) / success heal max(1, maxHP >> (3-counter)) as negative damage +
-  animTurn + target := attacker. Canonical TS supplies **40 behavior** and
-  **18 registration** cases incl. helper-error propagation and a
-  missType==1-skips-helper pin; corpus sha256
-  `e418402f91cc21b58f7cf602f1eb73a6f38e9307eeafe914e078ab36d3fed0d8`.
-- **Next:** dispatch + verify M74 — the `jumpifbyte`/`jumpifhalfword`/
-  `jumpifword` compare family. Barrier-projection decision (made this
-  session, recorded here): project the TS `unsupported-branch` halt as a
-  first-class `Halt { unsupported-branch fields }` outcome variant mirroring
-  the TS reason object verbatim (programCounter/opcodeId/opcodeName/
-  sourceConstruct/sourceFile/sourceLine) — core-rs-internal, TS-corpus-
-  pinnable, no public surface locked in, reversible. After M74: re-scout;
-  remaining unported opcodes are mostly RNG-consuming, scheduler-heavy, or
-  hit-chain-orchestration (damagecalc/critcalc/typecalc next in reach now
-  that the shared helper exists). No deferral is open.
-- **Notes:** supervisor audit covered all three handler bodies against the C
-  source and TS write-sets (counter-zeroing asymmetry, multiply-before-
-  truncation order, target-role overwrite on exactly two 0x87 branches,
-  lazy per-branch label resolution) plus generator provenance; independent
-  regeneration was byte-identical. Generated Rust is **247,550 bytes**,
-  sha256 `005a60e15c3af9a8fb09844e740c1cf7a6f5ad00a3183d8432c0f2cf17e90e43`;
-  generator **39,731 bytes**, sha256
-  `d0e8fcbf2ff82525be3d066dfaa3fa7a1ddef6661781482cd2625abd75204990`.
-  Gates rerun on `rust-main` post-fold: **1,373/1,373** native (+18), fmt,
-  strict workspace Clippy, wasm32 release; artifact **512,508 bytes**, sha256
-  `e510963fe9a4379645d4e9d93053a5ee8b4de06404dd4ac5b20e05a7e4aba989`.
-  Worker noted the M72 generator's `canonicalBattler` omits `side` (worked
-  around loudly in its own generator; not lane friction). No npm gate
-  required; no deferral or barrier added. R73 archived. PAPERCUT: none new.
