@@ -63,7 +63,7 @@ describe("MOVE_PETAL_DANCE source/classification and legal Scene-ON staging chec
     const first = auditText();
     expect(auditText()).toBe(first);
     expect(createHash("sha256").update(first).digest("hex")).toBe(
-      "cce74d0eef4fb566d564cb2935cd1209aff9fc45d0c49350db213c65a6cad2f4",
+      "0dc22f5157d3701cfed03cfa886043bdb6ebadd01cec62f217e4172aef3fae1d",
     );
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
@@ -89,7 +89,7 @@ describe("MOVE_PETAL_DANCE source/classification and legal Scene-ON staging chec
         legalBilateralPartyOnlyStaging: true, denseWindowCaptured: false, latchMeasured: false,
         assetsExtracted: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false,
         framebufferAcceptance: false, productionChanged: false, coveragePromotion: false,
-        componentTrackCredit: false, siblingCredit: false, queueItemAdded: false,
+        componentTrackCredit: false, siblingCredit: false, queueItemAdded: true,
       },
     });
     expect(audit.graph.identities.map((entry: Json) => entry.id)).toEqual(components);
@@ -141,7 +141,7 @@ describe("MOVE_PETAL_DANCE source/classification and legal Scene-ON staging chec
     ]);
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_PETAL_DANCE")).toBe(false);
-    expect(coverage.queue).toEqual([]);
+    expect(coverage.queue).toEqual(["MOVE_PETAL_DANCE"]);
     expect(audit.independence).toContain("stays unsupported");
   });
 

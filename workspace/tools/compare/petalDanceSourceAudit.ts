@@ -192,8 +192,8 @@ if (!generated || generated.id !== 80 || generated.rootScript !== "Move_PETAL_DA
   || JSON.stringify(generated.componentIds) !== JSON.stringify(expectedComponents)) {
   throw new Error("Petal Dance generated component graph drifted");
 }
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_PETAL_DANCE") || JSON.stringify(coverage.queue) !== JSON.stringify([])) {
-  throw new Error("Petal Dance source checkpoint must retain unsupported status and an empty manual queue");
+if (coverage.entries.some((entry: Json) => entry.move === "MOVE_PETAL_DANCE") || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_PETAL_DANCE"])) {
+  throw new Error("Petal Dance evidence checkpoint must retain unsupported status and queue only MOVE_PETAL_DANCE");
 }
 
 const carriers = frontier.entries
@@ -319,7 +319,7 @@ const audit = {
     legalBilateralPartyOnlyStaging: true, denseWindowCaptured: false, latchMeasured: false,
     assetsExtracted: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false,
     framebufferAcceptance: false, productionChanged: false, coveragePromotion: false,
-    componentTrackCredit: false, siblingCredit: false, queueItemAdded: false,
+    componentTrackCredit: false, siblingCredit: false, queueItemAdded: true,
   },
   independence: "MOVE_PETAL_DANCE stays unsupported. FLOWER art, IMPACT art, slide, shake, monbg, alpha, or animation-command overlap grants no credit to Aromatherapy, Razor Leaf, Sunny Day, or any other move.",
 };
