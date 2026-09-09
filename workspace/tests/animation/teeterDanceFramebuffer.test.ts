@@ -64,7 +64,7 @@ describe("MOVE_TEETER_DANCE production framebuffer", () => {
       .toEqual([]);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_TEETER_DANCE"))
       .toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual(["MOVE_SPIDER_WEB"]);
+    expect(coverage.queue).toEqual([]);
     expect(coverage.entries.filter((entry: { move: string }) => [
       "MOVE_SING", "MOVE_FAKE_TEARS", "MOVE_GRASS_WHISTLE",
     ].includes(entry.move))).toEqual(expect.arrayContaining([

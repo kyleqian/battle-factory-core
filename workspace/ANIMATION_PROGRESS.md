@@ -1,3 +1,10 @@
+# MOVE_SPIDER_WEB exact compositor closure — worker (2026-09-09)
+
+- **State / promotion:** MOVE_SPIDER_WEB alone is exact; Level 50 is **242/276 exact**, **0 partial / 0 staged**, and **34 unsupported**. The manual queue is empty and the nine-component `spider-web-thread` track is fulfilled by this move only. MOVE_STRING_SHOT and all siblings receive no credit.
+- **Production / acceptance:** Added the generic live Scene-ON compositor and ordinary `battleScene.ts`/`core.ts` wiring. It consumes source-derived Spider Web/Web Thread sheets and live sides/species/geometry, allocation, matrix/task, palette/monbg, and painter-order inputs. It uses source-relative predecessor display and creation-row transfer; no retained RGB/evidence/changemap/canonical-state/tick lookup is imported by production.
+- **Independent proof:** The actual-core comparator passes player-back **207/207** and opponent-front **207/207**, **414/414 total**, with **zero residual pixels**. Two fresh verifier passes are byte-identical; the altered live SURSKIT/RELICANTH species/geometry/allocation/matrix/order control is deterministic and material. The accepted window retains 14 threads, affine web 121..172, palette 12..37 and 179..204, monbg 7..176, OAM/matrix predecessor 206/206, palette predecessor 205/206 with age-7 same-row setup, and age-206 cleanup.
+- **Checks / next:** Focused source/evidence/reducer/actual-core checks and `animation:coverage` are green; remaining final gates are `animation:audit`, full `npm test`, build, diff check, and commit. No new latch was added.
+
 # Animation supervisor verification — MOVE_SPIDER_WEB reducer/seam checkpoint (2026-09-09 supervisor)
 
 - **State / merge:** Fast-forwarded Terra/max commit `cae61af29`. Level 50 remains **241/276 exact**, **0 partial / 0 staged**, and **35 unsupported**; `MOVE_SPIDER_WEB` remains the sole queue item and its nine-component track remains unfulfilled. No compositor/framebuffer, sibling/latch/coverage, gameplay/controller/facility, boundary/barrier, or main-program credit changed.

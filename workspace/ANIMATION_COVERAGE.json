@@ -6875,9 +6875,46 @@
     "tests/animation/magnitudeReducer.test.ts",
     "tests/animation/magnitudeFramebuffer.test.ts"
    ]
-  }
+  },
+ {
+  "move": "MOVE_SPIDER_WEB",
+  "status": "exact",
+  "covered": [
+   "the complete source-audited Move_SPIDER_WEB body and exact nine-component boundary: asset:ANIM_TAG_SPIDER_WEB, asset:ANIM_TAG_WEB_THREAD, sprite:gSpiderWebSpriteTemplate, subroutine:SpiderWebThread, visualCommand:clearmonbg, visualCommand:create_web_thread_sprite, visualCommand:monbg, visualCommand:simple_palette_blend, and visualCommand:splitbgprio",
+   "complete legal bilateral SPINARAK/ONIX Battle Scene ON ages 0..206 retain 207/207 rows per orientation through first inactive cleanup, including 14 threads, affine web 121..172, palette blends 12..37 and 179..204, monbg 7..176, and the measured OAM/matrix/palette predecessor transfers",
+   "the generic live compositor consumes source-derived Spider Web/Web Thread sheets plus live sides/species/geometry, allocation, matrix, task, palette, monbg, and painter-order inputs; it applies source-relative creation transfer and orientation-appropriate thread stacking without retained framebuffer or canonical-state lookup",
+   "two independent actual-core verifier processes are byte-identical and each passes 414/414 component/seam and 414/414 actual-core framebuffer rows with zero residual pixels; player-back and opponent-front each pass 207/207",
+   "a material SURSKIT/RELICANTH species, geometry, allocation, matrix, and order control changes the live framebuffer; MOVE_STRING_SHOT and every sibling remain independent and receive no move, component, latch, or acceptance credit"
+  ],
+  "evidence": [
+   "tools/battle-lab/mechanic-spider-web-player-spinarak-opponent-onix.json",
+   "tools/battle-lab/mechanic-spider-web-opponent-spinarak-player-onix.json",
+   "tools/compare/spiderWebSourceAudit.ts",
+   "tools/compare/spiderWebProbe.py",
+   "tools/compare/spiderWebEvidence.ts",
+   "tools/compare/spiderWebActualCore.ts",
+   "tools/compare/fixtures/spider-web-evidence.json",
+   "tools/compare/evidence/spider-web-player-dense-state.json.gz",
+   "tools/compare/evidence/spider-web-opponent-dense-state.json.gz",
+   "tools/compare/evidence/spider-web-player-raw-rgb.tar.gz",
+   "tools/compare/evidence/spider-web-opponent-raw-rgb.tar.gz",
+   "tools/compare/fixtures/spider-web-changemap-player.json",
+   "tools/compare/fixtures/spider-web-changemap-opponent.json",
+   "tools/compare/extractSpiderWebAssets.ts",
+   "src/animation/assets/spider-web.json",
+   "src/animation/spiderWeb.ts",
+   "src/animation/sceneOnPresentation.ts",
+   "src/engine/battleScene.ts",
+   "src/engine/core.ts",
+   "tests/animation/spiderWebSourceCheckpoint.test.ts",
+   "tests/animation/spiderWebEvidence.test.ts",
+   "tests/animation/spiderWebReducer.test.ts",
+   "tests/animation/spiderWebActualCore.test.ts"
+  ],
+  "goal": "FULFILLED by MOVE_SPIDER_WEB only: the complete bilateral Scene-ON body through first inactive cleanup passes two fresh actual-core processes at 414/414 zero-residual shared-production framebuffer rows. The source-derived reducer, typed seam, live compositor, Spider Web/Web Thread assets, source-relative latches, altered live control, and all nine components are accepted; MOVE_STRING_SHOT and every sibling receive no credit."
+ }
  ],
- "queue": ["MOVE_SPIDER_WEB"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "spider-web-thread",
@@ -6893,8 +6930,8 @@
     "visualCommand:splitbgprio"
    ],
    "representatives": ["MOVE_SPIDER_WEB"],
-   "fulfilled": false,
-   "goal": "UNFULFILLED: MOVE_SPIDER_WEB has a complete authoritative source/classification audit, twice-fresh bilateral Battle Scene ON dense state/raw-RGB/normalized banked evidence, source-derived owned sheets, a pure source-age reducer, and a narrow typed Scene-ON seam through first inactive cleanup. It still has no production compositor or framebuffer/actual-core acceptance, so the nine-component track remains explicitly unfulfilled. MOVE_STRING_SHOT is an outside-Factory source-neighbor control only and receives no move, component, latch, or coverage credit."
+   "fulfilled": true,
+   "goal": "FULFILLED by MOVE_SPIDER_WEB only: all nine source components are covered by the complete bilateral 207/207 reducer, typed seam, and zero-residual shared-production framebuffer acceptance through first inactive cleanup. MOVE_STRING_SHOT is an outside-Factory source-neighbor control only and receives no move, component, latch, or coverage credit."
   },
   {
    "id": "smelling-salt-hand-squish-effect",

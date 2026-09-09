@@ -31536,10 +31536,12 @@ export function renderSceneOnMovePresentation(
       slot: number,
       subpriority: number,
       palette: RgbColor[] = art.palette,
-    ): void => entries.push({
-      slot, subpriority, order: -slot,
-      draw: () => drawOrdinary(battler, art, corner, palette),
-    });
+    ): void => {
+      entries.push({
+        slot, subpriority, order: -slot,
+        draw: () => drawOrdinary(battler, art, corner, palette),
+      });
+    };
     // The target OBJ is hidden while its copied BG layer is active.  The
     // clear task exposes the ordinary target again before the copy is freed;
     // painting both copies in that handoff row mirrors the hardware stack.
@@ -31557,7 +31559,7 @@ export function renderSceneOnMovePresentation(
       attackerArt,
       attackerCorner,
       view.attacker.geometry.side === "player" ? 6 : 8,
-      spiderWebState.config.animationInputs.attackerSide === "player" ? 30 : 40,
+      playerAttacker ? 30 : 40,
     );
     for (const thread of displayed.threads) {
       const threadIndex = spiderWebState.config.animationInputs.threadSpriteSlots.indexOf(thread.slot);

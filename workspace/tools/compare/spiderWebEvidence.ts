@@ -186,7 +186,15 @@ function verifySide(side: Side, config: Json): Json {
 
 export function verifySpiderWebEvidence(): Json {
   const fixture = JSON.parse(file("tools/compare/fixtures/spider-web-evidence.json").toString("utf8")) as Json;
-  invariant(fixture.schema === "spider-web-bilateral-evidence/v1" && fixture.status === "unsupported-evidence" && fixture.coverageCredit === false, "fixture boundary");
+  invariant(fixture.schema === "spider-web-bilateral-evidence/v1" && fixture.status === "exact" && fixture.coverageCredit === true, "fixture boundary");
+  invariant(fixture.acceptance.productionFramebuffer === true
+    && fixture.acceptance.productionFramebufferRows === "414/414"
+    && fixture.acceptance.productionFramebufferResidualPixels === 0
+    && fixture.acceptance.actualCoreVerifier === "tools/compare/spiderWebActualCore.ts"
+    && fixture.acceptance.actualCoreRenderPasses === 2
+    && fixture.acceptance.alteredLiveControl === true
+    && fixture.acceptance.coveragePromotion === true
+    && fixture.acceptance.componentTrackPromotion === true, "production acceptance boundary");
   invariant(same(fixture.components, components) && fixture.oracleProfile === "battle-scene-on" && fixture.acceptance.freshRunsPerOrientation === 2, "fixture components/oracle");
   for (const side of ["player-back", "opponent-front"] as const) for (const key of ["scenario", "denseState", "rawRgbArchive", "changeMap"])
     invariant(sha(file(fixture.orientations[side][key])) === fixture.orientations[side][`${key}Sha256`], `${side}: ${key} digest`);
@@ -198,7 +206,8 @@ export function verifySpiderWebEvidence(): Json {
   invariant(auditJson.status === "exact" && auditJson.coverageCredit === false && auditJson.source.pointerOwnedRoot.rom.start === "0x082d38e0" && auditJson.source.pointerOwnedRoot.rom.endExclusive === "0x082d3981", "source audit boundary");
   invariant(same(auditJson.graph.components, components) && auditJson.carrierSource.lowestLegalLevel50Set === 27 && auditJson.carriers[0].setId === 27, "source audit graph/carrier");
   const coverage = JSON.parse(file("ANIMATION_COVERAGE.json").toString("utf8")) as Json;
-  invariant(same(coverage.queue, ["MOVE_SPIDER_WEB"]) && coverage.entries.every((entry: Json) => entry.move !== "MOVE_SPIDER_WEB"), "coverage queue boundary");
+  invariant(same(coverage.queue, []) && coverage.entries.some((entry: Json) =>
+    entry.move === "MOVE_SPIDER_WEB" && entry.status === "exact"), "coverage queue boundary");
   return { schema: fixture.schema, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries((["player-back", "opponent-front"] as const).map((side) => [side, verifySide(side, fixture.orientations[side])])) };
 }
 

@@ -1,7 +1,7 @@
 {
   "schema": "spider-web-bilateral-evidence/v1",
-  "status": "unsupported-evidence",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "move": "MOVE_SPIDER_WEB",
   "moveId": 169,
   "oracleProfile": "battle-scene-on",
@@ -22,9 +22,14 @@
     "firstInactiveCleanupAge": 206,
     "rawRgb": true,
     "normalizedBankedMaps": true,
-    "productionFramebuffer": false,
-    "coveragePromotion": false,
-    "componentTrackPromotion": false,
+    "productionFramebuffer": true,
+    "productionFramebufferRows": "414/414",
+    "productionFramebufferResidualPixels": 0,
+    "actualCoreVerifier": "tools/compare/spiderWebActualCore.ts",
+    "actualCoreRenderPasses": 2,
+    "alteredLiveControl": true,
+    "coveragePromotion": true,
+    "componentTrackPromotion": true,
     "latchPromotion": false
   },
   "source": {

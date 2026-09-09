@@ -9,10 +9,10 @@ const root = resolve(import.meta.dirname, "../..");
 const fixture = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/spider-web-evidence.json"), "utf8")) as Json;
 
 describe("MOVE_SPIDER_WEB retained bilateral Scene-ON evidence", () => {
-  it("reproduces the strict source/evidence receipt twice without production or coverage credit", () => {
+  it("reproduces the strict source/evidence receipt twice with exact production acceptance", () => {
     const first = verifySpiderWebEvidence();
     expect(first).toEqual(verifySpiderWebEvidence());
-    expect(first).toMatchObject({ schema: "spider-web-bilateral-evidence/v1", status: "unsupported-evidence", coverageCredit: false });
+    expect(first).toMatchObject({ schema: "spider-web-bilateral-evidence/v1", status: "exact", coverageCredit: true });
     expect(first.orientations["player-back"]).toMatchObject({ rows: 207, sourceRows: 207, cleanupAge: 206, latches: { oam: "206/206 predecessor", matrices: "206/206 predecessor", palette: "205/206 predecessor; age 7 same-row" } });
     expect(first.orientations["opponent-front"]).toMatchObject({ rows: 207, sourceRows: 207, cleanupAge: 206 });
   });

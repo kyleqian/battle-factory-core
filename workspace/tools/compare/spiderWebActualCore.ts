@@ -237,29 +237,35 @@ function alteredControl(): Json {
     geometryChanged: true, allocationMatrixOrderChanged: true, canonical, changed };
 }
 
-const passes = Number(process.argv.find((arg) => arg.startsWith("--passes="))?.slice(9) ?? 1);
-const requireExact = process.argv.includes("--require-exact");
-if (!Number.isInteger(passes) || passes < 1 || passes > 2) throw new Error("--passes must be 1 or 2");
-const runs = Array.from({ length: passes }, () => [
-  compareOrientation("player-back"), compareOrientation("opponent-front"),
-]);
-const controls = Array.from({ length: passes }, () => alteredControl());
-const deterministic = runs.every((run) => JSON.stringify(run) === JSON.stringify(runs[0]));
-const controlDeterministic = controls.every((run) => JSON.stringify(run) === JSON.stringify(controls[0]));
-const orientations = runs[0]!;
-const stable = {
-  schema: "spider-web-actual-core-verdict/v1",
-  oracleProfile: "battle-scene-on",
-  move: "MOVE_SPIDER_WEB",
-  passes,
-  deterministic,
-  componentMatched: orientations.reduce((sum, row) => sum + row.componentMatched, 0),
-  framebufferMatched: orientations.reduce((sum, row) => sum + row.framebufferMatched, 0),
-  residualPixels: orientations.reduce((sum, row) => sum + row.residualPixels, 0),
-  orientations,
-  alteredControl: { passes, deterministic: controlDeterministic, ...controls[0] },
-};
-const report = { ...stable, digest: sha(JSON.stringify(stable)) };
-console.log(JSON.stringify(report));
-if (!deterministic || !controlDeterministic
-  || (requireExact && report.residualPixels !== 0)) process.exitCode = 1;
+export function spiderWebActualCoreVerdict(passes = 1): Json {
+  if (!Number.isInteger(passes) || passes < 1 || passes > 2) throw new Error("--passes must be 1 or 2");
+  const runs = Array.from({ length: passes }, () => [
+    compareOrientation("player-back"), compareOrientation("opponent-front"),
+  ]);
+  const controls = Array.from({ length: passes }, () => alteredControl());
+  const deterministic = runs.every((run) => JSON.stringify(run) === JSON.stringify(runs[0]));
+  const controlDeterministic = controls.every((run) => JSON.stringify(run) === JSON.stringify(controls[0]));
+  const orientations = runs[0]!;
+  const stable = {
+    schema: "spider-web-actual-core-verdict/v1",
+    oracleProfile: "battle-scene-on",
+    move: "MOVE_SPIDER_WEB",
+    passes,
+    rows: orientations.reduce((sum, row) => sum + row.rows, 0),
+    deterministic,
+    componentMatched: orientations.reduce((sum, row) => sum + row.componentMatched, 0),
+    framebufferMatched: orientations.reduce((sum, row) => sum + row.framebufferMatched, 0),
+    residualPixels: orientations.reduce((sum, row) => sum + row.residualPixels, 0),
+    orientations,
+    alteredControl: { passes, deterministic: controlDeterministic, ...controls[0] },
+  };
+  return { ...stable, digest: sha(JSON.stringify(stable)) };
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname)) {
+  const passes = Number(process.argv.find((arg) => arg.startsWith("--passes="))?.slice(9) ?? 1);
+  const report = spiderWebActualCoreVerdict(passes);
+  console.log(JSON.stringify(report));
+  if (!report.deterministic || !report.alteredControl.deterministic
+    || (process.argv.includes("--require-exact") && report.residualPixels !== 0)) process.exitCode = 1;
+}
