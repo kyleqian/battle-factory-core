@@ -126,13 +126,9 @@ function sourceAtAge(age: number): ForesightFrame["source"] {
     pointerParity: ((MOVE_POINTER + offset) & 1) as 0 | 1, wait };
 }
 
-function truncDiv(numerator: number, denominator: number): number {
-  return numerator < 0 ? -Math.trunc(-numerator / denominator) : Math.trunc(numerator / denominator);
-}
-
-function linear(age: number, startAge: number, duration: number, from: ForesightPoint, to: ForesightPoint): ForesightPoint {
-  const progress = Math.max(0, Math.min(duration, age - startAge));
-  return { x: truncDiv((to.x - from.x) * progress, duration), y: truncDiv((to.y - from.y) * progress, duration) };
+function q8Offset(value: number, progress: number): number {
+  const product = Math.abs(value) * progress;
+  return value < 0 ? -(product >> 8) : product >> 8;
 }
 
 function glassAtAge(age: number, input: Readonly<ForesightLiveInputs>): ForesightGlass | null {
@@ -147,21 +143,20 @@ function glassAtAge(age: number, input: Readonly<ForesightLiveInputs>): Foresigh
     { x: b.right - 4, y: b.bottom - 4 }, p,
   ];
   let x = p.x, y = p.y, x2 = 0, y2 = 0, remaining = 0, leg = 0, stage = 0;
-  if (age <= 19) { leg = 0; remaining = 19 - age; const d = linear(age, 7, 12, p, destinations[0]!); x2 = d.x; y2 = d.y; stage = 1; }
+  if (age <= 19) { leg = 0; remaining = 19 - age; const progress = age - 7; x2 = q8Offset(512, progress); y2 = q8Offset(596, progress); stage = 1; }
   else if (age <= 24) { leg = 1; remaining = age - 19; x = destinations[0]!.x; y = destinations[0]!.y; stage = 2; }
-  else if (age <= 37) { leg = 1; remaining = 37 - age; x = destinations[0]!.x; y = destinations[0]!.y; const d = linear(age, 25, 12, destinations[0]!, destinations[1]!); x2 = d.x; y2 = d.y; stage = 1; }
+  else if (age <= 37) { leg = 1; remaining = 37 - age; x = destinations[0]!.x; y = destinations[0]!.y; const progress = age - 25; x2 = 0; y2 = q8Offset(-1173, progress); stage = 1; }
   else if (age <= 42) { leg = 2; remaining = age - 37; x = destinations[1]!.x; y = destinations[1]!.y; stage = 2; }
-  else if (age <= 55) { leg = 2; remaining = 55 - age; x = destinations[1]!.x; y = destinations[1]!.y; const d = linear(age, 43, 12, destinations[1]!, destinations[2]!); x2 = d.x; y2 = d.y; stage = 1; }
+  else if (age <= 55) { leg = 2; remaining = 55 - age; x = destinations[1]!.x; y = destinations[1]!.y; const progress = age - 43; x2 = q8Offset(-1025, progress); y2 = q8Offset(1172, progress); stage = 1; }
   else if (age <= 60) { leg = 3; remaining = age - 55; x = destinations[2]!.x; y = destinations[2]!.y; stage = 2; }
-  else if (age <= 73) { leg = 3; remaining = 73 - age; x = destinations[2]!.x; y = destinations[2]!.y; const d = linear(age, 61, 12, destinations[2]!, destinations[3]!); x2 = d.x; y2 = d.y; stage = 1; }
+  else if (age <= 73) { leg = 3; remaining = 73 - age; x = destinations[2]!.x; y = destinations[2]!.y; const progress = age - 61; x2 = 0; y2 = q8Offset(-1345, progress); stage = 1; }
   else if (age <= 78) { leg = 4; remaining = age - 73; x = destinations[3]!.x; y = destinations[3]!.y; stage = 2; }
-  else if (age <= 103) { leg = 4; remaining = 103 - age; x = destinations[3]!.x; y = destinations[3]!.y; const d = linear(age, 79, 24, destinations[3]!, destinations[4]!); x2 = d.x; y2 = d.y; stage = 1; }
+  else if (age <= 103) { leg = 4; remaining = 103 - age; x = destinations[3]!.x; y = destinations[3]!.y; const progress = age - 79; x2 = q8Offset(512, progress); y2 = q8Offset(682, progress); stage = 1; }
   else if (age === 104) { leg = 5; x = destinations[4]!.x; y = destinations[4]!.y; stage = 0; }
-  else if (age <= 111) { leg = 5; remaining = 111 - age; x = destinations[4]!.x; y = destinations[4]!.y; const d = linear(age, 105, 6, destinations[4]!, destinations[5]!); x2 = d.x; y2 = d.y; stage = 1; }
+  else if (age <= 111) { leg = 5; remaining = 111 - age; x = destinations[4]!.x; y = destinations[4]!.y; const progress = age - 105; x2 = q8Offset(-1025, progress); y2 = q8Offset(-1153, progress); stage = 1; }
   else { leg = 5; x = destinations[5]!.x; y = destinations[5]!.y; stage = age === 144 ? 4 : 3; }
   const qx = x2 * 256, qy = y2 * 256;
   const start = leg < 4 ? destinations[Math.max(0, leg - (stage === 1 ? 0 : 1))]! : destinations[leg === 4 ? 3 : 4]!;
-  const duration = leg === 4 ? 24 : leg === 5 ? 6 : 12;
   const data = stage === 2 ? [remaining, 0, 0, 0, 0, 2, leg, input.targetSide === "opponent" ? 1 : 0]
     : stage >= 3 ? [Math.max(0, age - 111), 16 - Math.ceil(Math.max(0, age - 112) / 2), Math.floor(Math.max(0, age - 113) / 2), 6150, 6918, stage, leg, input.targetSide === "opponent" ? 1 : 0]
     : [remaining, start.x * 256, start.y * 256, qx, qy, stage, leg, input.targetSide === "opponent" ? 1 : 0];
@@ -173,7 +168,7 @@ function glassAtAge(age: number, input: Readonly<ForesightLiveInputs>): Foresigh
 
 function blendCoefficient(age: number): number {
   if (age < 114 || age > 160) return 0;
-  return age <= 138 ? Math.min(12, Math.trunc((age - 113) / 2)) : Math.max(1, Math.trunc((161 - age) / 2));
+  return age <= 138 ? Math.min(12, Math.trunc((age - 113) / 2)) : Math.max(1, Math.ceil((161 - age) / 2));
 }
 
 export function foresightAtAge(age: number, input: Readonly<ForesightLiveInputs>): ForesightFrame {
@@ -185,7 +180,7 @@ export function foresightAtAge(age: number, input: Readonly<ForesightLiveInputs>
   const clear = age >= 162 && age <= 164;
   const coefficient = blendCoefficient(age);
   const eva = age < 113 ? 16 : age <= 144 ? Math.max(0, 16 - Math.ceil((age - 112) / 2)) : 0;
-  const evb = age < 113 ? 0 : age <= 144 ? Math.min(16, Math.floor((age - 113) / 2)) : 16;
+  const evb = age < 113 ? 0 : age <= 144 ? Math.min(16, Math.floor((age - 112) / 2)) : 16;
   const mon = input.monbg;
   const monData = [input.targetSpriteSlot, mon.spriteX, mon.spriteY, mon.bgX, mon.bgY,
     mon.inBg2 ? 1 : 0, mon.battlerId, 0];

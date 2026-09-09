@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { verifyForesightEvidence } from "../../tools/compare/foresightEvidence.ts";
 import { createScratchDir } from "../../tools/lib/scratch.ts";
 
-describe("MOVE_FORESIGHT stronger unsupported evidence checkpoint", () => {
+describe("MOVE_FORESIGHT exact source and production acceptance", () => {
   it("pins the complete source interval, eight-component graph, and legal carrier census", () => {
     const audit = JSON.parse(execFileSync(process.execPath, [
       "--experimental-strip-types", "tools/compare/foresightSourceAudit.ts",
@@ -47,11 +47,11 @@ describe("MOVE_FORESIGHT stronger unsupported evidence checkpoint", () => {
       "tools/compare/extractForesightAssets.ts", "--out", output]);
     expect(readFileSync(output)).toEqual(readFileSync("src/animation/assets/foresight.json"));
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(240);
-    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_FORESIGHT")).toBeUndefined();
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(241);
+    expect(coverage.entries.find((entry: { move: string; status: string }) => entry.move === "MOVE_FORESIGHT")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) =>
       track.id === "foresight-magnifying-glass")).toMatchObject({
-      representatives: ["MOVE_FORESIGHT"], fulfilled: false,
+      representatives: ["MOVE_FORESIGHT"], fulfilled: true,
     });
     const statuses = new Map(coverage.entries.map((entry: { move: string; status: string }) => [entry.move, entry.status]));
     for (const move of ["MOVE_SUPER_FANG", "MOVE_FLAME_WHEEL", "MOVE_HIDDEN_POWER",

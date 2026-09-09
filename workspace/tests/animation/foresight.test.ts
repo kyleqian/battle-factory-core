@@ -44,7 +44,7 @@ describe("MOVE_FORESIGHT source-relative reducer and seam", () => {
 
   it("uses live target geometry and allocation inputs", () => {
     const stage = createSceneOnMovePresentation(config({
-      targetBounds: { left: 130, right: 194, top: 20, bottom: 84 },
+      targetBounds: { left: 130, right: 194, top: 20, bottom: 84, rightTop: 21 },
       targetPictureOffset: { x: 162, y: 53 }, glassSpriteSlot: 9, glassPaletteBank: 12, glassTileSlot: 15,
     }));
     const view = sceneOnForesightView({ ...stage, age: 20 });
