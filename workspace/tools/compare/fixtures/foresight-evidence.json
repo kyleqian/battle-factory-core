@@ -1,0 +1,62 @@
+{
+  "schema": "foresight-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_FORESIGHT",
+  "moveId": 193,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "source": {
+    "start": "0x082cd5ed",
+    "endExclusive": "0x082cd62c",
+    "bytes": 63,
+    "romSha256": "2469690030bfc8812942fb5b7e05ffdae282b73a1e5578b96890e55c5f1bf61b",
+    "auditOutputSha256": "ddc810ad7079703d51367d3616c26bfc8ae8a8d5ea32ef3632a01af106bacc3b",
+    "probeSha256": "6aa10717623561653a8a051ef0758a5a9ac9e741b877fdd9c9e48ff796a048e2",
+    "extractorSha256": "1aa267ff07c07c6bc2ee90c95c7dfbd1d917af274e191f59afe93602581ca521",
+    "assetSha256": "c2c08e2cfd140ed0f17306202b37141ff3c7b9dbcf30f86bb9eb8f464801c98b",
+    "components": [
+      "asset:ANIM_TAG_MAGNIFYING_GLASS",
+      "sprite:gForesightMagnifyingGlassSpriteTemplate",
+      "task:AnimTask_BlendMonInAndOut",
+      "visualCommand:blendoff",
+      "visualCommand:clearmonbg",
+      "visualCommand:monbg",
+      "visualCommand:setalpha",
+      "visualCommand:splitbgprio"
+    ]
+  },
+  "repeatability": {"runsPerOrientation": 2, "denseStateByteIdentical": true, "rawRgbSequenceByteIdentical": true},
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-foresight-player-machoke-opponent-onix.json",
+      "scenarioSha256": "09eed64b5152efef075ed8bbeec1cc8ee725a3f8d8675049f280697b954076ae",
+      "denseState": "tools/compare/evidence/foresight-player-dense-state.json.gz",
+      "denseStateSha256": "ee16baa37de03380dc30cb677fdc6bce22e711b816b451da1072cdb3829d279d",
+      "probeJsonSha256": "d05adfa1aa377eee5f7bba57508af5ad68f8cb4d591ac56902d1dc91b809dd07",
+      "repeatProbeJsonSha256": "d05adfa1aa377eee5f7bba57508af5ad68f8cb4d591ac56902d1dc91b809dd07",
+      "rawRgbArchive": "tools/compare/evidence/foresight-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "c97144986e299d469669f4bef8830c0112b3c0f3cde2f47a2bf34586d40ef7de",
+      "rawRgbSequenceSha256": "77961785973480c649b8cd8d6f73e4214889a52501c0732d8a7f4aa74b0509a9",
+      "repeatRawRgbSequenceSha256": "77961785973480c649b8cd8d6f73e4214889a52501c0732d8a7f4aa74b0509a9",
+      "changeMap": "tools/compare/evidence/foresight-changemap-player.json",
+      "changeMapSha256": "21ad51465a34a9437879b220269b00c35ec4076d0b7ef3253fb1ff3c184c73ad",
+      "window": {"startFrame":211,"endFrame":377,"frameCount":167,"sourceFrameCount":167}
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-foresight-opponent-machoke-player-onix.json",
+      "scenarioSha256": "186846e1e1d1a98573c03dbff048f7050531405501eeef50c66b72899cddc11a",
+      "denseState": "tools/compare/evidence/foresight-opponent-dense-state.json.gz",
+      "denseStateSha256": "c5cd69ead457871130c501e78ac46ca734fd5179b5d01ac5415d4a15a6e04440",
+      "probeJsonSha256": "8bb9553a06a5a185da8ad33e625060ee2a4bf43be94293f7cadfb7f74531f213",
+      "repeatProbeJsonSha256": "8bb9553a06a5a185da8ad33e625060ee2a4bf43be94293f7cadfb7f74531f213",
+      "rawRgbArchive": "tools/compare/evidence/foresight-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "66426a51329443bdaf5f9a3c9402b5bc92a17a0a3bfdfa7ff434e0e568dd3df2",
+      "rawRgbSequenceSha256": "bc1f26f3d8d3e02d1b1da67abea452ad61181b0e28f2180c3b92a344ec2c6ac1",
+      "repeatRawRgbSequenceSha256": "bc1f26f3d8d3e02d1b1da67abea452ad61181b0e28f2180c3b92a344ec2c6ac1",
+      "changeMap": "tools/compare/evidence/foresight-changemap-opponent.json",
+      "changeMapSha256": "8437a500076db8d520869f37df44e86197f6d22fb1b2acac2a80380df2fee924",
+      "window": {"startFrame":210,"endFrame":376,"frameCount":167,"sourceFrameCount":167}
+    }
+  },
+  "acceptance": {"productionFramebufferRows":"0/334","actualCoreRenderPasses":0,"alteredLiveControl":false,"firstInactiveCleanupIncluded":true}
+}

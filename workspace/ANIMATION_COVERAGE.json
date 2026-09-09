@@ -6844,7 +6844,7 @@
    ]
   }
  ],
- "queue": [],
+ "queue": ["MOVE_FORESIGHT"],
  "componentTracks": [
   {
    "id": "smelling-salt-hand-squish-effect",
@@ -8607,6 +8607,39 @@
     "tests/animation/hyperBeam.test.ts"
    ],
    "goal": "FULFILLED by MOVE_HYPER_BEAM only: the complete legal bilateral Scene-ON body through first inactive cleanup passes twice at 560/560 actual-core rows with zero residual pixels. The source-derived reducer, ORBS asset, typed seam, and compositor preserve all nine components, 26 groups, 52 orb lifecycles, 156 presentation-only RNG draws, stable allocation/order, palette and shake schedules, audio/resources, and cleanup from live species/sides/geometry/order. No sibling receives inferred credit."
+  },
+  {
+   "id": "foresight-magnifying-glass",
+   "components": [
+    "asset:ANIM_TAG_MAGNIFYING_GLASS",
+    "sprite:gForesightMagnifyingGlassSpriteTemplate",
+    "task:AnimTask_BlendMonInAndOut",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:monbg",
+    "visualCommand:setalpha",
+    "visualCommand:splitbgprio"
+   ],
+   "representatives": ["MOVE_FORESIGHT"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/battle-lab/mechanic-foresight-player-machoke-opponent-onix.json",
+    "tools/battle-lab/mechanic-foresight-opponent-machoke-player-onix.json",
+    "tools/compare/foresightSourceAudit.ts",
+    "tools/compare/foresightProbe.py",
+    "tools/compare/foresightEvidence.ts",
+    "tools/compare/fixtures/foresight-evidence.json",
+    "tools/compare/evidence/foresight-player-dense-state.json.gz",
+    "tools/compare/evidence/foresight-opponent-dense-state.json.gz",
+    "tools/compare/evidence/foresight-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/foresight-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/foresight-changemap-player.json",
+    "tools/compare/evidence/foresight-changemap-opponent.json",
+    "tools/compare/extractForesightAssets.ts",
+    "src/animation/assets/foresight.json",
+    "tests/animation/foresightEvidenceCheckpoint.test.ts"
+   ],
+   "goal": "UNFULFILLED stronger evidence checkpoint only: MOVE_FORESIGHT has a complete authoritative eight-component graph, reproducibly extracted MAGNIFYING_GLASS art, and twice-fresh byte-identical legal bilateral 167-row Scene-ON state/raw-RGB/change maps through first inactive cleanup. Its own maps measure ordinary glass OAM/matrix RAM+1 and palette RAM+1 except the age-4 same-row monbg setup. Production reducer, typed seam, compositor, material altered live control, and 334/334 actual-core framebuffer equality remain open; MOVE_FORESIGHT stays unsupported and no sibling receives credit."
   },
   {
    "id": "seismic-toss-air-rock-scatter",
