@@ -31350,9 +31350,9 @@ export function renderSceneOnMovePresentation(
     const rapidState = state as SceneOnRapidSpinPresentationState;
     const view = sceneOnRapidSpinView(rapidState);
     // Rapid Spin's own bilateral maps put ordinary OBJ, fresh affine
-    // matrices, and palettes on the predecessor display row.  Its scanline
-    // task follows that same transfer, so the sliced attacker BG samples the
-    // preceding source bank while source state remains current at the seam.
+    // matrices, and palettes on the predecessor display row.  Scanline DMA
+    // is the move-owned exception: once enabled, the sliced attacker BG
+    // samples the currently generated source bank on the same row.
     const displayed = sceneOnRapidSpinView({ ...rapidState, age: rapidState.age - 1 });
     // The target shake task writes after BuildOamBuffer, so its live x2 axis
     // takes one additional row beyond the ordinary predecessor OAM copy.
