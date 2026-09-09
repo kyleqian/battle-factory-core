@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { gunzipSync } from "node:zlib";
 import { readFileSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { createScratchDir } from "../lib/scratch.ts";
 
 type Json = Record<string, any>;
@@ -25,14 +25,6 @@ function edges(rows: Json[], select: (row: Json) => unknown): Json[] {
     if (age === 0 || !same(value, previous)) { previous = value; return [{ age, value }]; }
     return [];
   });
-}
-function changes(rows: Json[], select: (row: Json) => unknown): number[] {
-  return rows.flatMap((row, age) => age > 0 && !same(select(row), select(rows[age - 1]!)) ? [age] : []);
-}
-function ranges(ages: number[]): number[][] {
-  const result: number[][] = [];
-  for (const age of ages) { const last = result.at(-1); if (!last || age !== last[1]! + 1) result.push([age, age]); else last[1] = age; }
-  return result;
 }
 function keyedEdges(rows: Json[], field: string): Json {
   return Object.fromEntries(Object.keys(rows[0]![field]).map((key) => [key, edges(rows, (row) => row[field][key])]));
@@ -112,7 +104,7 @@ export function buildSkyUppercutChangeMap(dense: string, archive: string, side?:
   const rgb = rgbFrames(archive, rows);
   const spriteLives = lifecycles(rows, "sprites", SPRITES);
   const taskLives = lifecycles(rows, "tasks", TASKS);
-  const rgbRows = rows.map((row, age) => ({ age, frame: row.frame, rawRgbSha256: row.sha256, ...pixelDiff(rgb[age - 1], rgb[age]) }));
+  const rgbRows: Json[] = rows.map((row, age) => ({ age, frame: row.frame, rawRgbSha256: row.sha256, ...pixelDiff(rgb[age - 1], rgb[age]) }));
   const resource = (tag: number) => ({ tag, tile: edges(rows, (row) => row.tileTags.includes(tag)), palette: edges(rows, (row) => row.paletteTags.includes(tag)) });
   const sourceRows = rows.map((row, age) => ({ age, frame: row.frame, pointer: row.scriptPtr, parity: row.scriptPtrParity,
     offset: row.scriptOffset, wait: row.scriptWait, owner: row.scriptOwner, block: block(row.scriptPtr), active: row.animScriptActive, args: row.animArgs }));

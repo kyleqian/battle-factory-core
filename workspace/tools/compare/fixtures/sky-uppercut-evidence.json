@@ -25,7 +25,7 @@
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "mapBuilder": "tools/compare/skyUppercutChangeMap.ts",
-    "mapBuilderSha256": "7ff193afb94ed3ccbb78fc75e67a9bd290db58e885359095199ed39e66a0e1ff",
+    "mapBuilderSha256": "d6f87cf07a20481b1ce1bcf210eb4f6d242afd096e3ed898de5cbf3c3d76e306",
     "frameChangeMapBuilder": "tools/compare/frame-changemap.py",
     "frameChangeMapBuilderSha256": "e90c7a526f7933a204a4a2fdae556b67209b1baf51a66a7d2c7247231851331d"
   },
