@@ -1,0 +1,82 @@
+{
+  "schema": "sky-uppercut-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SKY_UPPERCUT",
+  "moveId": 327,
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "acceptance": { "freshRunsPerOrientation": 2, "denseRowsPerOrientation": 188, "rawRgbRowsPerOrientation": 188, "firstInactiveCleanupAge": 187 },
+  "evidenceScope": {
+    "sourceAudit": true, "completePointerBody": true, "fullDenseRowsRetained": true, "twiceFreshByteIdentical": true,
+    "normalizedMaps": true, "frameChangeMaps": true, "legalBilateralParties": true, "transientOverrides": [],
+    "sourcePointersAndParity": true, "callbacksTasks": true, "impactAndSlides": true, "shakeTasks": true,
+    "monbgBgRegisters": true, "displayTransferFacts": true, "audio": true, "allocatorOrder": true,
+    "animationRngVersusGameplayRng": true, "partiesBattlersControllerEngineStable": true, "firstInactiveCleanup": true,
+    "productionAnimationChanged": false, "reducerAdded": false, "assetBundleAdded": false, "typedSeamAdded": false,
+    "compositorAdded": false, "framebufferAcceptance": false, "coveragePromotion": false, "componentTrackCredit": false,
+    "latchPromotion": false, "gameplayStateOwned": false, "siblingAcceptance": false
+  },
+  "source": {
+    "audit": "tools/compare/skyUppercutSourceAudit.ts",
+    "auditSha256": "c76366b6e2c5b334920714c067006d54356ce7c14777bd3b10082fc261435ea1",
+    "auditRunSha256": "8013b9dd757536a69879b44d637c9655efab9b8d1feba2e81080f19ef67a8922",
+    "probe": "tools/compare/skyUppercutProbe.py",
+    "probeSha256": "5b0a69b17528ed2f498fde5f8a9084ab4373e928e1550e5874d2218eafcf51c5",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
+    "mapBuilder": "tools/compare/skyUppercutChangeMap.ts",
+    "mapBuilderSha256": "7ff193afb94ed3ccbb78fc75e67a9bd290db58e885359095199ed39e66a0e1ff",
+    "frameChangeMapBuilder": "tools/compare/frame-changemap.py",
+    "frameChangeMapBuilderSha256": "e90c7a526f7933a204a4a2fdae556b67209b1baf51a66a7d2c7247231851331d"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-sky-uppercut-player-hitmonchan-opponent-onix.json",
+      "scenarioSha256": "bea926025986683cf82bf5da5c0e7b62e371acf7f60e73e5a8a13d160dfe8395",
+      "denseState": "tools/compare/evidence/sky-uppercut-player-dense-state.json.gz",
+      "denseStateSha256": "f943df572e5750816ac48e55cae788b43baa53b8fbe960c48eb65f115141e91e",
+      "rawRgbArchive": "tools/compare/evidence/sky-uppercut-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "da26748bf152848fb84c58848dfdd61adf316090f90059961fe1c0d18836d361",
+      "normalizedMap": "tools/compare/evidence/sky-uppercut-changemap-player.json",
+      "normalizedMapSha256": "5e096514d807445a7e8282f63622e98c22d0e1ca658d401407bef1b0ff0fb1c6",
+      "frameChangeMap": "tools/compare/evidence/sky-uppercut-changemap-player.txt",
+      "frameChangeMapSha256": "902eed7aa9ccc7f319e51415826272c6691ce566a2a471c290acc4f10fd2d62f",
+      "sourceWindow": { "startFrame": 82, "endFrame": 269, "frameCount": 188, "sourceFrameCount": 188 },
+      "probeJsonSha256": "a3a9700d5301f3513126903c3ba06d004e0384c72b7decc7b2034200b72f4dc2",
+      "repeatProbeJsonSha256": "a3a9700d5301f3513126903c3ba06d004e0384c72b7decc7b2034200b72f4dc2",
+      "rawRgbSequenceSha256": "09641d0d60590a8b99e5d14c5e0fd1f336099c9476f9c10825bcc6de28d39e20",
+      "repeatRawRgbSequenceSha256": "09641d0d60590a8b99e5d14c5e0fd1f336099c9476f9c10825bcc6de28d39e20"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-sky-uppercut-opponent-hitmonchan-player-onix.json",
+      "scenarioSha256": "f7bbefe474980de3f5761ffd6e2ca31d349b92e86d4a82e0f8cd8e67b4718af9",
+      "denseState": "tools/compare/evidence/sky-uppercut-opponent-dense-state.json.gz",
+      "denseStateSha256": "89e61abf187e807f302a2a79b1e46d973950fd14d427b0761e354e964159e0bc",
+      "rawRgbArchive": "tools/compare/evidence/sky-uppercut-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "5ad412c8268eea9f9359588487f4aa21e726276c48208c13abf39aa2aae86f02",
+      "normalizedMap": "tools/compare/evidence/sky-uppercut-changemap-opponent.json",
+      "normalizedMapSha256": "cf8b60ddbb856bb9627f327ab9c7f7f9973f83ebd9bb25ee9d5920e7e010b7f6",
+      "frameChangeMap": "tools/compare/evidence/sky-uppercut-changemap-opponent.txt",
+      "frameChangeMapSha256": "dd9ad2733cc29ff3a8b194a95b357dff7882ec6d7a37c96734d6e6f173c50d78",
+      "sourceWindow": { "startFrame": 86, "endFrame": 273, "frameCount": 188, "sourceFrameCount": 188 },
+      "probeJsonSha256": "7affd2da1484a17611541093b6123265a2e1df11bd495a70b0a58b91c41565a3",
+      "repeatProbeJsonSha256": "7affd2da1484a17611541093b6123265a2e1df11bd495a70b0a58b91c41565a3",
+      "rawRgbSequenceSha256": "8735dbb452a9fe588bee7880175a1ba2b0a6618501d03a3bcef6a2565b4a904f",
+      "repeatRawRgbSequenceSha256": "8735dbb452a9fe588bee7880175a1ba2b0a6618501d03a3bcef6a2565b4a904f"
+    }
+  },
+  "measured": {
+    "sourceOffsets": [0, 3, 5, 9, 23, 29, 48, 86, 111, 132, 153, 191, 210, 225, 242, 247, 248],
+    "sourceParities": [0, 1], "sourcePointerTransitions": [1, 4, 7, 26, 85, 91, 94, 97, 100, 103, 109, 141, 147, 168, 187],
+    "taskLifetimes": { "Task_UpdateMonBg": [4, 149], "Task_FadeToBg": [7, 43], "AnimTask_MoveSkyUppercutBg": [26, 167], "AnimTask_ShakeMon2_Step": [91, 100], "AnimTask_ShakeMonInPlace_Step": [109, 117], "Task_ClearMonBg": [147, 149], "Task_FadeToBg.restore": [147, 185] },
+    "spriteLifetimes": { "gSlideMonToOffsetSpriteTemplate": [[3, 85, 90], [9, 103, 107]], "gSlideMonToOriginalPosSpriteTemplate": [[3, 141, 146], [4, 147, 154]], "gBasicHitSplatSpriteTemplate": [[4, 91, 100], [3, 94, 103], [5, 97, 106], [7, 100, 109], [4, 103, 112]] },
+    "resources": { "impactTag": 10135, "tagTransitions": [1, 187], "bgVramChanges": [0, 5, 26, 149, 151, 168] },
+    "displayTransfers": { "oam": "187/187 predecessor", "matrices": "187/187 predecessor", "palette": "186/187 predecessor; exception age 4" },
+    "palette": { "fadedChanges": [1, 4, 26, 168], "unfadedChanges": [1, 4, 26, 168], "hardwareChanges": [2, 4, 27, 169] },
+    "monbg": { "playerSelected": "bg1", "opponentSelected": "bg2", "registerChanges": [5, 92, 94, 96, 98, 100, 102, 104, 105, 106, 107, 148, 151], "bgVramChanges": [5, 26, 149, 151, 168] },
+    "audio": { "skyUppercutAge": 26, "vitalThrow2Ages": [91, 94, 97, 100, 103], "pans": { "player": [-64, 63], "opponent": [63, -63] } },
+    "animationRng": { "distinct": 186, "transitions": 186 }, "stateIsolation": { "gameplayRngValues": 1, "partiesStable": true, "battlersStable": true, "engineStable": true, "rawBattleStateStable": true },
+    "cleanup": { "age": 187, "visualTasks": 0, "soundTasks": 0, "ownedTasks": 0, "ownedSprites": 0, "tagsReleased": true, "scanlineState": 0 },
+    "rgb": { "changedRows": 170 }
+  }
+}

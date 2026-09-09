@@ -6951,7 +6951,7 @@
   ]
  }
  ],
- "queue": [],
+ "queue": ["MOVE_SKY_UPPERCUT"],
  "componentTracks": [
   {
    "id": "spider-web-thread",
@@ -8823,6 +8823,50 @@
     "tests/animation/seismicTossProduction.test.ts"
    ],
    "goal": "FULFILLED by MOVE_SEISMIC_TOSS only: two independent actual-core comparator processes pass all 456 component and framebuffer rows with zero residual pixels and peak zero. The source-derived Medium-branch reducer, BG_IN_AIR asset, typed seam, and compositor preserve all 23 components, live species/sides/geometry/palettes/allocation/order/matrices, nine tasks, three IMPACT and twelve ROCKS sprites, BG/register/audio/resource lifecycles, move-owned latches, and cleanup. Rock Throw, Rock Slide, and Ancient Power retain independent exact acceptance."
+  },
+  {
+   "id": "sky-uppercut-impact-slide-bg",
+   "components": [
+    "asset:ANIM_TAG_IMPACT",
+    "sprite:gSlideMonToOffsetSpriteTemplate",
+    "sprite:gSlideMonToOriginalPosSpriteTemplate",
+    "task:AnimTask_MoveSkyUppercutBg",
+    "task:AnimTask_ShakeMon2",
+    "task:AnimTask_ShakeMonInPlace",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:create_basic_hitsplat_sprite",
+    "visualCommand:fadetobg",
+    "visualCommand:monbg",
+    "visualCommand:restorebg",
+    "visualCommand:setalpha",
+    "visualCommand:setarg",
+    "visualCommand:splitbgprio",
+    "visualCommand:waitbgfadein",
+    "visualCommand:waitbgfadeout"
+   ],
+   "representatives": ["MOVE_SKY_UPPERCUT"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/battle-lab/mechanic-sky-uppercut-player-hitmonchan-opponent-onix.json",
+    "tools/battle-lab/mechanic-sky-uppercut-opponent-hitmonchan-player-onix.json",
+    "tools/compare/skyUppercutSourceAudit.ts",
+    "tools/compare/skyUppercutProbe.py",
+    "tools/compare/skyUppercutChangeMap.ts",
+    "tools/compare/skyUppercutEvidence.ts",
+    "tools/compare/fixtures/sky-uppercut-evidence.json",
+    "tools/compare/evidence/sky-uppercut-player-dense-state.json.gz",
+    "tools/compare/evidence/sky-uppercut-opponent-dense-state.json.gz",
+    "tools/compare/evidence/sky-uppercut-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/sky-uppercut-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/sky-uppercut-changemap-player.json",
+    "tools/compare/evidence/sky-uppercut-changemap-opponent.json",
+    "tools/compare/evidence/sky-uppercut-changemap-player.txt",
+    "tools/compare/evidence/sky-uppercut-changemap-opponent.txt",
+    "tests/animation/skyUppercutEvidence.test.ts",
+    "tests/animation/skyUppercutSourceCheckpoint.test.ts"
+   ],
+   "goal": "UNFULFILLED: MOVE_SKY_UPPERCUT remains unsupported after a complete source/legal bilateral Scene-ON dense evidence checkpoint. The exact 17-component track is non-exclusive; task:AnimTask_MoveSkyUppercutBg is the sole currently unrepresented component. No reducer, production asset, typed seam, compositor, framebuffer acceptance, exact status, or sibling credit is claimed."
   }
  ],
  "variantAudits": {
