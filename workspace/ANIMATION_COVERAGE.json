@@ -8215,7 +8215,7 @@
     "task:AnimTask_ShakeMon2"
    ],
    "representatives": ["MOVE_HELPING_HAND"],
-   "fulfilled": true,
+   "fulfilled": false,
    "evidence": [
     "tools/battle-lab/mechanic-helping-hand-player-volbeat-opponent-onix.json",
     "tools/battle-lab/mechanic-helping-hand-opponent-volbeat-player-onix.json",

@@ -592,10 +592,10 @@ describe("razor-leaf-particle-cutter standalone fulfilled component-track ratche
     const exactCount = coverage.entries.filter((entry: Json) =>
       level50Moves.has(entry.move) && entry.status === "exact",
     ).length;
-    expect(exactCount).toBe(240);
+    expect(exactCount).toBe(241);
     expect(coverage.entries.filter((entry: Json) => level50Moves.has(entry.move)
       && (entry.status === "partial" || entry.status === "staged"))).toEqual([]);
-    expect(level50Moves.size - exactCount).toBe(36);
+    expect(level50Moves.size - exactCount).toBe(35);
     expect(coverage.entries.filter((entry: Json) => [
       "MOVE_RAZOR_LEAF", "MOVE_MAGICAL_LEAF", "MOVE_LEAF_BLADE", "MOVE_SECRET_POWER",
     ].includes(entry.move))).toEqual([
