@@ -17,9 +17,9 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 
 type Json = Record<string, any>;
-type Orientation = "player-back" | "opponent-front";
+export type PetalDanceOrientation = "player-back" | "opponent-front";
 
-const paths: Record<Orientation, Readonly<{ dense: string; map: string }>> = {
+const paths: Record<PetalDanceOrientation, Readonly<{ dense: string; map: string }>> = {
   "player-back": {
     dense: "tools/compare/evidence/petal-dance-player-dense-state.json.gz",
     map: "tools/compare/evidence/petal-dance-changemap-player.json",
@@ -118,8 +118,8 @@ function flowersInProgramOrder(rows: Json[]): readonly Json[] {
     .map(({ sprite }) => sprite);
 }
 
-function baseConfig(
-  orientation: Orientation,
+export function petalDanceConfigFor(
+  orientation: PetalDanceOrientation,
   rows: Json[],
   spriteOrder: readonly number[],
 ): SceneOnPetalDanceConfig {
@@ -185,8 +185,12 @@ function baseConfig(
       spriteCorner: { x: targetSprite.x - 32, y: targetSprite.y - 32 },
       animationCenter: { x: targetSprite.x, y: targetSprite.y },
       battlePositionCenter: { x: targetSprite.x, y: targetSprite.y } } },
-    fieldProfile: { playerHp: 100, playerMaxHp: 100, opponentHp: 100,
-      opponentMaxHp: 100, playerGender: "female", opponentGender: "male" },
+    fieldProfile: { playerHp: rows[0]!.battlers.player.hp,
+      playerMaxHp: rows[0]!.battlers.player.maxHp,
+      opponentHp: rows[0]!.battlers.opponent.hp,
+      opponentMaxHp: rows[0]!.battlers.opponent.maxHp,
+      playerGender: attackerSide === "player" ? "female" : "male",
+      opponentGender: attackerSide === "opponent" ? "female" : "male" },
     animationInputs,
   };
 }
@@ -209,7 +213,7 @@ function expectedResources(row: Json): PetalDanceState["resources"] {
   };
 }
 
-function verifyOrientation(orientation: Orientation): Json {
+function verifyOrientation(orientation: PetalDanceOrientation): Json {
   const { dense, map: mapPath } = paths[orientation];
   const archive = JSON.parse(gunzipSync(readFileSync(dense)).toString("utf8")) as Json;
   const rows = archive.frames as Json[];
@@ -220,7 +224,7 @@ function verifyOrientation(orientation: Orientation): Json {
   for (let age = 0; age < rows.length; age += 1) {
     const row = rows[age]!;
     const mapRow = map.rows[age]!;
-    const config = baseConfig(orientation, rows, row.spriteOrder);
+    const config = petalDanceConfigFor(orientation, rows, row.spriteOrder);
     const input: PetalDanceLiveInputs = {
       ...config.animationInputs,
       attackerSide: config.attacker.geometry.side,
@@ -295,7 +299,7 @@ function verifyOrientation(orientation: Orientation): Json {
     reducerRows += 1;
     seamRows += 1;
   }
-  const finalConfig = baseConfig(orientation, rows, rows[243]!.spriteOrder);
+  const finalConfig = petalDanceConfigFor(orientation, rows, rows[243]!.spriteOrder);
   const final = petalDanceAtAge(243, {
     ...finalConfig.animationInputs,
     attackerSide: finalConfig.attacker.geometry.side,
@@ -321,7 +325,7 @@ function verifyOrientation(orientation: Orientation): Json {
   };
 }
 
-export function verifyPetalDanceReducer(): Record<Orientation, Json> {
+export function verifyPetalDanceReducer(): Record<PetalDanceOrientation, Json> {
   return {
     "player-back": verifyOrientation("player-back"),
     "opponent-front": verifyOrientation("opponent-front"),

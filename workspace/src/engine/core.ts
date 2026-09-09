@@ -177,6 +177,7 @@ import {
   type SceneOnThunderboltConfig,
   type SceneOnSeismicTossConfig,
   type SceneOnSpiderWebConfig,
+  type SceneOnPetalDanceConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -259,6 +260,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "SPIDER_WEB") {
     const spiderWebPresentation = presentation as SceneOnMovePresentationState<SceneOnSpiderWebConfig>;
     renderSceneOnMovePresentation(framebuffer, spiderWebPresentation);
+    return;
+  }
+  if (presentation.config.move === "PETAL_DANCE") {
+    const petalDancePresentation = presentation as SceneOnMovePresentationState<SceneOnPetalDanceConfig>;
+    renderSceneOnMovePresentation(framebuffer, petalDancePresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

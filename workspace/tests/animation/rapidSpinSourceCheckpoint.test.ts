@@ -147,7 +147,7 @@ describe("MOVE_RAPID_SPIN source/classification and legal Scene-ON staging check
     });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_RAPID_SPIN")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual(["MOVE_PETAL_DANCE"]);
+    expect(coverage.queue).toEqual([]);
     expect(coverage.componentTracks.filter((track: Json) => track.moves?.includes("MOVE_RAPID_SPIN"))).toEqual([]);
   });
 

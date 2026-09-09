@@ -226,13 +226,15 @@ export function verifyPetalDanceEvidence(): Json {
   invariant(fixture.schema === "petal-dance-bilateral-evidence/v1" && fixture.oracleProfile === "battle-scene-on"
     && fixture.move === "MOVE_PETAL_DANCE" && fixture.moveId === 80 && fixture.status === "unsupported-evidence" && fixture.coverageCredit === false, "fixture boundary");
   const audit = execFileSync(process.execPath, ["--experimental-strip-types", fixture.source.audit], { cwd: root });
-  invariant(sha(audit) === fixture.source.auditRunSha256, "source audit output drift");
+  invariant(sha(audit) === fixture.source.auditRunSha256,
+    `source audit output drift: ${sha(audit)} != ${fixture.source.auditRunSha256}`);
   for (const key of ["audit", "probe", "sharedProbe"] as const) invariant(sha(file(fixture.source[key])) === fixture.source[`${key}Sha256`], `source ${key} drift`);
   const parsedAudit = JSON.parse(audit.toString("utf8")) as Json;
   invariant(parsedAudit.pointerOwned.root.rom.start === "0x082d281c" && parsedAudit.pointerOwned.root.rom.endExclusive === "0x082d2954"
     && parsedAudit.graph.components.length === 13 && parsedAudit.scope.productionChanged === false && parsedAudit.scope.coveragePromotion === false, "source/component boundary");
   const coverage = JSON.parse(file("ANIMATION_COVERAGE.json").toString("utf8")) as Json;
-  invariant(!coverage.entries.some((entry: Json) => entry.move === "MOVE_PETAL_DANCE") && same(coverage.queue, ["MOVE_PETAL_DANCE"]), "unsupported queue boundary");
+  invariant(coverage.entries.some((entry: Json) => entry.move === "MOVE_PETAL_DANCE" && entry.status === "exact")
+    && same(coverage.queue, []), "exact promotion queue boundary");
   invariant(fixture.evidenceScope.productionAnimationChanged === false && fixture.evidenceScope.reducerAdded === false
     && fixture.evidenceScope.typedSeamAdded === false && fixture.evidenceScope.compositorAdded === false
     && fixture.evidenceScope.framebufferAcceptance === false && fixture.evidenceScope.coveragePromotion === false

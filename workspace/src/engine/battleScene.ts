@@ -544,6 +544,7 @@ import octazookaAsset from "../animation/assets/octazooka.json" with { type: "js
 import hailAsset from "../animation/assets/hail.json" with { type: "json" };
 import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import spiderWebAsset from "../animation/assets/spider-web.json" with { type: "json" };
+import petalDanceAsset from "../animation/assets/petal-dance.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
 import waterOrbAsset from "../animation/assets/water-orb.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
@@ -1026,6 +1027,7 @@ import {
   sceneOnRapidSpinView,
   sceneOnForesightView,
   sceneOnSpiderWebView,
+  sceneOnPetalDanceView,
   sceneOnEruptionView,
   sceneOnWaterSpoutView,
   sceneOnSandTombView,
@@ -1259,6 +1261,7 @@ import {
   type SceneOnIngrainConfig,
   type SceneOnMeanLookConfig,
   type SceneOnSpiderWebConfig,
+  type SceneOnPetalDanceConfig,
   type SceneOnSmellingSaltConfig,
   type SceneOnRecycleConfig,
 } from "../animation/sceneOnPresentation.ts";
@@ -1824,6 +1827,9 @@ const spikesArt = spikesAsset as {
 const spiderWebArt = spiderWebAsset as {
   spiderWeb: { tileset: Tileset; palette: RgbColor[] };
   webThread: { tileset: Tileset; palette: RgbColor[] };
+};
+const petalDanceArt = petalDanceAsset as {
+  flower: { tileset: Tileset; palette: RgbColor[] };
 };
 const mudShotArt = mudShotAsset as {
   brownOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -31637,6 +31643,190 @@ export function renderSceneOnMovePresentation(
       fb,
       playerAttacker ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "SPIDER WEB!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "PETAL_DANCE") {
+    const petalState = state as SceneOnMovePresentationState<SceneOnPetalDanceConfig>;
+    const view = sceneOnPetalDanceView(petalState);
+    const displayed = sceneOnPetalDanceView({ ...petalState, age: petalState.age - 1 });
+    // Battler x2/y2 mutations are produced by sprite/task callbacks after
+    // BuildOamBuffer and therefore take one additional row beyond ordinary
+    // effect OAM.  Petal Dance's whole-OAM predecessor transfer remains the
+    // ordinary age-1 rule; this is the callback-to-buffer edge within it.
+    const battlerDisplayed = sceneOnPetalDanceView({ ...petalState, age: petalState.age - 2 });
+    // The two invisible slide sprites write the attacker's offset before
+    // BuildOamBuffer, unlike the visual tasks above.  Their first translated
+    // position therefore uses the ordinary predecessor row.
+    const attackerDisplayed = (petalState.age >= 202 && petalState.age <= 206)
+      || (petalState.age >= 232 && petalState.age <= 239)
+      ? displayed
+      : battlerDisplayed;
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("PETAL_DANCE presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`PETAL_DANCE missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const attackerOffset = {
+      x: attackerDisplayed.battlerOffsets.attacker.x,
+      y: attackerDisplayed.battlerOffsets.attacker.y,
+    };
+    const targetOffset = {
+      x: battlerDisplayed.battlerOffsets.target.x,
+      y: battlerDisplayed.battlerOffsets.target.y,
+    };
+    const monbgInput = petalState.config.animationInputs.monbg;
+    const targetIsMonBg = view.monbg.displayActive;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (targetIsMonBg) {
+      const hardwareBgHofs = view.monbg.layer === "bg1"
+        ? view.monbg.registers.bg1hofs : view.monbg.registers.bg2hofs;
+      const bgHofs = hardwareBgHofs > 255 ? hardwareBgHofs - 512 : hardwareBgHofs;
+      drawDragonDanceMonBg(
+        fb,
+        { tileset: tilesFor(targetArt, view.target.geometry.side), palette: targetArt.palette },
+        { x: monbgInput.spriteX - 32, y: monbgInput.spriteY - 32 },
+        Array.from({ length: 160 }, () => bgHofs),
+        monbgInput.bgX,
+      );
+    }
+    const nonObjBackdrop = fb.slice();
+
+    type Entry = {
+      readonly slot: number;
+      readonly subpriority: number;
+      readonly order: number;
+      readonly draw: () => void;
+    };
+    const entries: Entry[] = [];
+    const orderOf = (slot: number): number => {
+      const index = displayed.painterSlots.indexOf(slot);
+      return index < 0 ? Number.MAX_SAFE_INTEGER : index;
+    };
+    const addBattler = (
+      battler: typeof view.attacker,
+      art: BattlerArt,
+      offset: Readonly<{ x: number; y: number }>,
+      slot: number,
+      subpriority: number,
+    ): void => {
+      entries.push({
+        slot,
+        subpriority,
+        order: -slot,
+        draw: () => drawSpriteSheet(
+          fb,
+          tilesFor(art, battler.geometry.side),
+          art.palette,
+          battler.geometry.spriteCorner.x + offset.x,
+          battler.geometry.spriteCorner.y + offset.y,
+        ),
+      });
+    };
+    if (!targetIsMonBg || view.monbg.clearActive) {
+      addBattler(
+        view.target,
+        targetArt,
+        targetOffset,
+        petalState.config.animationInputs.targetSpriteSlot,
+        view.target.geometry.side === "player" ? 30 : 40,
+      );
+    }
+    addBattler(
+      view.attacker,
+      attackerArt,
+      attackerOffset,
+      petalState.config.animationInputs.attackerSpriteSlot,
+      view.attacker.geometry.side === "player" ? 30 : 40,
+    );
+    for (const flower of displayed.sprites) {
+      if (!flower.visible || !displayed.painterSlots.includes(flower.slot)
+        || (flower.kind !== "flower-big" && flower.kind !== "flower-small")) continue;
+      entries.push({
+        slot: flower.slot,
+        subpriority: flower.subpriority,
+        order: orderOf(flower.slot),
+        draw: flower.kind === "flower-small"
+          ? () => drawSpriteSheetFlipped(
+              fb,
+              { columns: 1, rows: 1, tiles: [petalDanceArt.flower.tileset.tiles[4]!] },
+              petalDanceArt.flower.palette,
+              flower.x + flower.x2 - 4,
+              flower.y + flower.y2 - 4,
+              Boolean(flower.matrixNum & 8),
+              false,
+            )
+          : () => drawSpriteSheet(
+              fb,
+              { columns: 2, rows: 2, tiles: petalDanceArt.flower.tileset.tiles.slice(0, 4) },
+              petalDanceArt.flower.palette,
+              flower.x + flower.x2 - 8,
+              flower.y + flower.y2 - 8,
+            ),
+      });
+    }
+    const impact = displayed.sprites.find((sprite) => sprite.kind === "hitsplat");
+    if (impact?.visible && displayed.painterSlots.includes(impact.slot)) {
+      entries.push({
+        slot: impact.slot,
+        subpriority: impact.subpriority,
+        order: orderOf(impact.slot),
+        draw: () => drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjBackdrop,
+          battleAnimHitsplat.tileset,
+          battleAnimHitsplat.palette,
+          impact.x + impact.x2,
+          impact.y + impact.y2,
+          impact.matrix[0], impact.matrix[1], impact.matrix[2], impact.matrix[3],
+          displayed.registers.bldalpha & 0xff,
+          displayed.registers.bldalpha >>> 8 & 0xff,
+          false,
+        ),
+      });
+    }
+    // Higher subpriority is farther back.  The live sprite-order list is
+    // already the source SortSprites/OAM order; later painters go first so
+    // the lower OAM index wins an overlap.
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = petalState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "PETAL DANCE!",
       99,
     );
     return;

@@ -326,7 +326,7 @@ export function verifyUproarEvidence(): Record<Side, Json> {
     && audit.source.sourceSha256 === "34fe247c02011ff9af0c9ef77b5e868af041933ba1a9d16f25acd60fface0958"
     && audit.checkpoint.denseWindowCaptured === true && audit.checkpoint.productionChanged === true
     && audit.checkpoint.coveragePromotion === true && audit.checkpoint.latchPromotion === true, "Uproar source classification drift");
-  invariant(same(JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")).queue, ["MOVE_PETAL_DANCE"]), "Uproar queue ratchet drift");
+  invariant(same(JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")).queue, []), "Uproar queue ratchet drift");
   const result = {} as Record<Side, Json>;
   for (const side of ["player-back", "opponent-front"] as const) result[side] = verifyOrientation(side, fixture.orientations[side]);
   return result;

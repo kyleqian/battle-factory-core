@@ -114,11 +114,11 @@ describe("MOVE_PETAL_DANCE source-age reducer and typed Scene-ON seam", () => {
     expect(baselineFlowers).not.toHaveProperty("framebuffer");
   });
 
-  it("keeps Petal Dance unsupported and the sole queue item at this reducer checkpoint", () => {
+  it("retains the reducer checkpoint after Petal Dance's independent promotion", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.some((entry: { move: string }) =>
-      entry.move === "MOVE_PETAL_DANCE")).toBe(false);
-    expect(coverage.queue).toEqual(["MOVE_PETAL_DANCE"]);
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(242);
+    expect(coverage.entries.find((entry: { move: string }) =>
+      entry.move === "MOVE_PETAL_DANCE")).toMatchObject({ status: "exact" });
+    expect(coverage.queue).toEqual([]);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(243);
   });
 });

@@ -192,8 +192,8 @@ if (!generated || generated.id !== 80 || generated.rootScript !== "Move_PETAL_DA
   || JSON.stringify(generated.componentIds) !== JSON.stringify(expectedComponents)) {
   throw new Error("Petal Dance generated component graph drifted");
 }
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_PETAL_DANCE") || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_PETAL_DANCE"])) {
-  throw new Error("Petal Dance evidence checkpoint must retain unsupported status and queue only MOVE_PETAL_DANCE");
+if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_PETAL_DANCE" && entry.status === "exact") || coverage.queue.length !== 0) {
+  throw new Error("Petal Dance exact promotion and empty queue drifted");
 }
 
 const carriers = frontier.entries

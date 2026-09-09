@@ -38,7 +38,7 @@
   },
   "source": {
     "audit": "tools/compare/uproarSourceAudit.ts",
-    "auditSha256": "7c6567a314d87906a4f1c82ec9d29c866f560988c02f35c76714918e28d316ae",
+    "auditSha256": "157268ecf9e85b707fec1f06c153c32bec0445a1edf5beecd33924ad8131d090",
     "probe": "tools/compare/uproarProbe.py",
     "probeSha256": "5d967bd990a45af52eaf610716da1797d0f1e5cc0c61edbd1fa63507271c3da0"
   },

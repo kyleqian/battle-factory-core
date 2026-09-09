@@ -119,7 +119,7 @@ describe("MOVE_PETAL_DANCE source/classification and legal Scene-ON staging chec
     ]);
   });
 
-  it("derives the complete Level-50 carrier census and preserves the unsupported boundary", () => {
+  it("derives the complete Level-50 carrier census and observes independent exact promotion", () => {
     const audit = JSON.parse(auditText()) as Json;
     expect(audit.carrierCensus).toMatchObject({
       level50Range: { first: 110, last: 849 },
@@ -140,8 +140,9 @@ describe("MOVE_PETAL_DANCE source/classification and legal Scene-ON staging chec
       { index: 394, label: "FRONTIER_MON_VILEPLUME_1", species: "SPECIES_VILEPLUME", moves: ["MOVE_SLUDGE_BOMB", "MOVE_PETAL_DANCE", "MOVE_MOONLIGHT", "MOVE_AROMATHERAPY"] },
     ]);
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_PETAL_DANCE")).toBe(false);
-    expect(coverage.queue).toEqual(["MOVE_PETAL_DANCE"]);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_PETAL_DANCE"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.queue).toEqual([]);
     expect(audit.independence).toContain("stays unsupported");
   });
 
