@@ -6844,7 +6844,7 @@
    ]
   }
  ],
- "queue": ["MOVE_FORESIGHT"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "smelling-salt-hand-squish-effect",
