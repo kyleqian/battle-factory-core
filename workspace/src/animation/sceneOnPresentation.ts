@@ -875,6 +875,11 @@ import {
   type ForesightLiveInputs,
 } from "./foresight.ts";
 import {
+  spiderWebAtAge,
+  type SpiderWebFrame,
+  type SpiderWebLiveInputs,
+} from "./spiderWeb.ts";
+import {
   fissureAtAge,
   type FissureState,
 } from "./fissure.ts";
@@ -1175,6 +1180,7 @@ export interface SceneOnPresentationBattler {
     | "NUMEL"
     | "NOSEPASS"
     | "CRAWDAUNT"
+    | "SPINARAK"
     | "SURSKIT"
     | "STARYU"
     | "KOFFING"
@@ -3405,6 +3411,17 @@ export interface SceneOnForesightConfig {
     "targetSide" | "targetSpecies" | "attackerSpecies">>;
 }
 
+/** Narrow Scene-ON seam for Spider Web's source-relative visual state. */
+export interface SceneOnSpiderWebConfig {
+  readonly move: "SPIDER_WEB";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<SpiderWebLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
 export interface SceneOnEruptionConfig {
   readonly move: "ERUPTION";
@@ -4001,6 +4018,7 @@ export type SceneOnMoveConfig =
   | SceneOnUproarConfig
   | SceneOnRapidSpinConfig
   | SceneOnForesightConfig
+  | SceneOnSpiderWebConfig
   | SceneOnEruptionConfig
   | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
@@ -4219,6 +4237,8 @@ export type SceneOnRapidSpinPresentationState =
   SceneOnMovePresentationState<SceneOnRapidSpinConfig>;
 export type SceneOnForesightPresentationState =
   SceneOnMovePresentationState<SceneOnForesightConfig>;
+export type SceneOnSpiderWebPresentationState =
+  SceneOnMovePresentationState<SceneOnSpiderWebConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -5148,6 +5168,11 @@ export interface SceneOnRapidSpinView extends RapidSpinFrame {
 }
 
 export interface SceneOnForesightView extends ForesightFrame {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSpiderWebView extends SpiderWebFrame {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -10155,6 +10180,29 @@ export function sceneOnForesightView(
       targetSide: target.geometry.side,
       targetSpecies: target.species,
       attackerSpecies: attacker.species,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is Move_SPIDER_WEB's first source-owned Scene-ON row. */
+export function sceneOnSpiderWebView(
+  state: SceneOnSpiderWebPresentationState,
+): SceneOnSpiderWebView {
+  if (state.config.move !== "SPIDER_WEB") {
+    throw new Error(`expected SPIDER_WEB presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...spiderWebAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerCenter: attacker.geometry.animationCenter,
+      targetCenter: target.geometry.animationCenter,
     }),
     attacker,
     target,
