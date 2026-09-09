@@ -21,7 +21,7 @@ describe("MOVE_POISON_POWDER bounded source/classification checkpoint", () => {
 
   it("does not falsify the Level-50 coverage ratchet", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(241);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(242);
     expect(
       coverage.entries.find(
         (entry: { move: string }) => entry.move === "MOVE_POISON_POWDER",

@@ -71,8 +71,8 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
   });
 
   it("keeps GLARE exact after the Lovely Kiss promotion", () => {
-    expect(coverage.entries).toHaveLength(241);
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(241);
+    expect(coverage.entries).toHaveLength(242);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(242);
     expect(coverage.entries.filter((entry) => entry.status === "partial").map((entry) => entry.move))
       .toEqual([]);
     expect(coverage.entries).toContainEqual(

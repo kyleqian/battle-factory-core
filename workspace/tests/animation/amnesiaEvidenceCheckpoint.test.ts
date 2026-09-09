@@ -119,7 +119,7 @@ describe("MOVE_AMNESIA independent source and bilateral Scene-ON acceptance", ()
     for (const side of ["player-back", "opponent-front"] as const) expect(first.orientations[side]).toMatchObject({ rows: 216, sourceWindow: { startFrame: 205, endFrame: 420, frameCount: 216, sourceFrameCount: 216 }, changedRows: 142, questionMark: [52, 174], psychicTask: [23, 194], cleanup: { age: 215, active: false } });
     expect(fixture.evidenceScope).toMatchObject({ productionAnimationChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, componentTrackCredit: false, latchPromotion: false, coveragePromotion: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false, siblingAcceptance: false, transientOverrides: [] });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(241);
+    expect(coverage.entries).toHaveLength(242);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_AMNESIA")).toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_HYPNOSIS")).toMatchObject({ status: "exact" });
   });

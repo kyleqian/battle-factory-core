@@ -255,7 +255,7 @@ describe("MOVE_SEISMIC_TOSS source/classification and legal Scene-ON staging che
       expect(run.target.maxHp).toBeGreaterThan(run.branch.animationDamage);
     }
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(241);
+    expect(coverage.entries).toHaveLength(242);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SEISMIC_TOSS"))
       .toMatchObject({ status: "exact" });
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "seismic-toss-air-rock-scatter");
