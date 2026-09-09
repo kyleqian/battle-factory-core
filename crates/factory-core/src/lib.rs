@@ -26,6 +26,8 @@ pub mod battle_script_confuseifrepeatingattackends;
 pub mod battle_script_confuseifrepeatingattackends_vectors_gen;
 pub mod battle_script_copyfoestats;
 pub mod battle_script_copyfoestats_vectors_gen;
+pub mod battle_script_damagecalc;
+pub mod battle_script_damagecalc_vectors_gen;
 pub mod battle_script_doubledamageifdamaged;
 pub mod battle_script_doubledamageifdamaged_vectors_gen;
 pub mod battle_script_friendshiptodamage;
