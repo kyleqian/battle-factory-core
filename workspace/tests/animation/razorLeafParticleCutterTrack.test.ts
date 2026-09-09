@@ -592,7 +592,7 @@ describe("razor-leaf-particle-cutter standalone fulfilled component-track ratche
     const exactCount = coverage.entries.filter((entry: Json) =>
       level50Moves.has(entry.move) && entry.status === "exact",
     ).length;
-    expect(exactCount).toBe(239);
+    expect(exactCount).toBe(240);
     expect(coverage.entries.filter((entry: Json) => level50Moves.has(entry.move)
       && (entry.status === "partial" || entry.status === "staged"))).toEqual([]);
     expect(level50Moves.size - exactCount).toBe(37);

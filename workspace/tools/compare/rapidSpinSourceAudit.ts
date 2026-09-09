@@ -1,6 +1,6 @@
 /**
- * Deterministic source/classification audit for the unsupported MOVE_RAPID_SPIN
- * staging checkpoint. This development-only verifier never feeds production.
+ * Deterministic source/classification audit for exact MOVE_RAPID_SPIN.
+ * This development-only verifier never feeds production.
  */
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -310,18 +310,18 @@ const controls = Object.fromEntries(controlMoves.map((move) => {
   return [move, { status: coverageStatus(move), rootScript: entry.rootScript, blocks: entry.blocks, components: entry.componentIds }];
 }));
 
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_RAPID_SPIN")
-  || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_RAPID_SPIN"])
+if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_RAPID_SPIN" && entry.status === "exact")
+  || JSON.stringify(coverage.queue) !== JSON.stringify([])
   || coverage.componentTracks.some((track: Json) => track.moves?.includes("MOVE_RAPID_SPIN"))) {
-  throw new Error("Rapid Spin received premature coverage or component-track credit");
+  throw new Error("Rapid Spin exact coverage or component-track boundary drifted");
 }
 
 console.log(JSON.stringify({
   schema: "rapid-spin-source-audit/v1",
   move: "MOVE_RAPID_SPIN",
   moveId: 229,
-  status: "unsupported-source-staging-checkpoint",
-  coverageCredit: false,
+  status: "exact",
+  coverageCredit: true,
   source: {
     pointerOwnedRoot: {
       symbol: "Move_RAPID_SPIN",
@@ -401,15 +401,15 @@ console.log(JSON.stringify({
     exact: ["MOVE_ROLLOUT", "MOVE_FLAIL", "MOVE_REVERSAL", "MOVE_ENDEAVOR"],
     unsupported: ["MOVE_PURSUIT", "MOVE_SPIT_UP", "MOVE_ICE_BALL"],
     entries: controls,
-    independence: "Exact controls and unsupported siblings are source distinctions only. Rapid Spin remains unsupported and no component, timing, latch, reducer, compositor, or acceptance credit transfers.",
+    independence: "Exact controls and unsupported siblings remain independent. Rapid Spin transfers no component, timing, latch, reducer, compositor, or acceptance credit to them.",
   },
   checkpoint: {
-    sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: false, productionChanged: false,
-    coveragePromotion: false, componentTrackCredit: false, latchPromotion: false, unsupportedNoCreditBoundary: true,
+    sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, productionChanged: true,
+    coveragePromotion: true, componentTrackCredit: false, latchPromotion: true, unsupportedNoCreditBoundary: false,
   },
   scope: {
-    denseStateCaptured: false, reducerAdded: false, assetsExtracted: false, typedSeamAdded: false,
-    compositorAdded: false, framebufferAcceptance: false, productionChanged: false, coveragePromotion: false,
-    queueItemAdded: false, componentTrackFulfilled: false, latchRowAdded: false,
+    denseStateCaptured: true, reducerAdded: true, assetsExtracted: true, typedSeamAdded: true,
+    compositorAdded: true, framebufferAcceptance: true, productionChanged: true, coveragePromotion: true,
+    queueItemAdded: false, componentTrackFulfilled: false, latchRowAdded: true,
   },
 }, null, 2));

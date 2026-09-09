@@ -686,6 +686,7 @@ import { amnesiaBgPaletteRowAtAge } from "../animation/amnesia.ts";
 import dragonDanceAsset from "../animation/assets/dragon-dance.json" with { type: "json" };
 import sunnyDayAsset from "../animation/assets/sunny-day.json" with { type: "json" };
 import uproarAsset from "../animation/assets/uproar.json" with { type: "json" };
+import rapidSpinAsset from "../animation/assets/rapid-spin.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
@@ -1020,6 +1021,7 @@ import {
   sceneOnMagnitudeView,
   sceneOnSunnyDayView,
   sceneOnUproarView,
+  sceneOnRapidSpinView,
   sceneOnEruptionView,
   sceneOnWaterSpoutView,
   sceneOnSandTombView,
@@ -1166,6 +1168,7 @@ import {
   type SceneOnDragonDancePresentationState,
   type SceneOnSunnyDayPresentationState,
   type SceneOnUproarPresentationState,
+  type SceneOnRapidSpinPresentationState,
   type SceneOnPsybeamPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnFireBlastConfig,
@@ -31339,6 +31342,135 @@ export function renderSceneOnMovePresentation(
     drawMessageTextLines(
       fb, view.attacker.geometry.side === "player" ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "UPROAR!", 99,
+    );
+    return;
+  }
+
+  if (state.config.move === "RAPID_SPIN") {
+    const rapidState = state as SceneOnRapidSpinPresentationState;
+    const view = sceneOnRapidSpinView(rapidState);
+    // Rapid Spin's own bilateral maps put ordinary OBJ, fresh affine
+    // matrices, and palettes on the predecessor display row.  Its scanline
+    // task follows that same transfer, so the sliced attacker BG samples the
+    // preceding source bank while source state remains current at the seam.
+    const displayed = sceneOnRapidSpinView({ ...rapidState, age: rapidState.age - 1 });
+    // The target shake task writes after BuildOamBuffer, so its live x2 axis
+    // takes one additional row beyond the ordinary predecessor OAM copy.
+    const taskDisplayed = sceneOnRapidSpinView({ ...rapidState, age: rapidState.age - 2 });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("RAPID_SPIN presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`RAPID_SPIN missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const drawOrdinaryBattler = (
+      battler: typeof view.attacker,
+      art: BattlerArt,
+      offset: Readonly<{ x: number; y: number }> = { x: 0, y: 0 },
+    ): void => {
+      const idle = battler.geometry.side === "opponent"
+        ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
+      drawSpriteSheet(
+        fb, tilesFor(art, battler.geometry.side), art.palette,
+        battler.geometry.spriteCorner.x + idle.x2 + offset.x,
+        battler.geometry.spriteCorner.y + idle.y2 + offset.y,
+      );
+    };
+    const drawAttacker = (): void => {
+      if (displayed.monbg.active) {
+        const monbgInput = rapidState.config.animationInputs.monbg;
+        // Scanline DMA reads the task's currently generated bank on the same
+        // row once enabled (ages 11..125); this is distinct from the ordinary
+        // predecessor OAM/matrix/palette transfer.
+        const scanlineEnabled = rapidState.age >= 11 && rapidState.age <= 125;
+        const scanlineHofs = scanlineEnabled
+          ? view.scanline.banks[view.scanline.srcBuffer]
+          : Array.from({ length: 160 }, () => monbgInput.bgX);
+        drawDragonDanceMonBg(
+          fb,
+          { tileset: tilesFor(attackerArt, view.attacker.geometry.side), palette: attackerArt.palette },
+          { x: monbgInput.spriteX - 32, y: monbgInput.spriteY - 32 },
+          scanlineHofs,
+          monbgInput.bgX,
+        );
+        // Task_ClearMonBg makes the OBJ visible before the copied BG tiles
+        // are released; painting both is harmless at their identical pose
+        // and preserves the source's live membership transition.
+        if (!view.monbg.active) drawOrdinaryBattler(view.attacker, attackerArt);
+      } else drawOrdinaryBattler(view.attacker, attackerArt);
+    };
+    const drawTarget = (): void => {
+      const initial = rapidState.config.animationInputs.targetInitialOffset;
+      drawOrdinaryBattler(view.target, targetArt, {
+        x: taskDisplayed.targetOffset.x - initial.x,
+        y: taskDisplayed.targetOffset.y - initial.y,
+      });
+    };
+
+    const drawSpin = (): void => {
+      const spin = displayed.rapidSpin;
+      if (!spin || !displayed.painterSlots.includes(spin.slot)) return;
+      drawSpriteSheet(
+        fb,
+        subTileset(rapidSpinAsset.rapidSpin.tileset, spin.animationFrame * 2, 2),
+        rapidSpinAsset.rapidSpin.palette,
+        spin.x + spin.x2 - 16,
+        spin.y + spin.y2 - 8,
+      );
+    };
+    const drawImpact = (): void => {
+      const impact = displayed.impact;
+      if (!impact || !displayed.painterSlots.includes(impact.slot)) return;
+      drawSpriteSheetAffineRotate(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        impact.x,
+        impact.y,
+        impact.matrix[0], impact.matrix[1], impact.matrix[2], impact.matrix[3],
+        undefined,
+        false,
+      );
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (view.attacker.geometry.side === "player") {
+      drawTarget(); drawAttacker();
+    } else {
+      drawAttacker(); drawTarget();
+    }
+    drawSpin();
+    drawImpact();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = rapidState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "RAPID SPIN!", 99,
     );
     return;
   }

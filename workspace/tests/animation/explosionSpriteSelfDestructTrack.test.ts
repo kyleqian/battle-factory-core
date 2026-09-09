@@ -622,7 +622,7 @@ describe("explosion-sprite-self-destruct standalone fulfilled component-track ra
     const level50Moves = new Set<string>(inventory.tiers.level50.moves.map((entry: Json) => entry.move));
     expect(level50Moves.size).toBe(276);
     const exactCount = coverage.entries.filter((entry: Json) => level50Moves.has(entry.move) && entry.status === "exact").length;
-    expect(exactCount).toBe(239);
+    expect(exactCount).toBe(240);
     expect(coverage.entries.filter((entry: Json) => level50Moves.has(entry.move)
       && (entry.status === "partial" || entry.status === "staged"))).toEqual([]);
     expect(level50Moves.size - exactCount).toBe(37);

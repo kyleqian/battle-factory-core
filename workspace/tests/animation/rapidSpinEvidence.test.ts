@@ -5,8 +5,8 @@ import { verifyRapidSpinEvidence } from "../../tools/compare/rapidSpinEvidence.t
 
 type Json = Record<string, any>;
 
-describe("MOVE_RAPID_SPIN complete unsupported bilateral dense evidence", () => {
-  it("replays the strict twice-fresh receipt and keeps Rapid Spin unsupported", () => {
+describe("MOVE_RAPID_SPIN complete bilateral dense evidence", () => {
+  it("replays the strict twice-fresh pre-production receipt", () => {
     const first = verifyRapidSpinEvidence();
     const second = verifyRapidSpinEvidence();
     expect(second).toEqual(first);

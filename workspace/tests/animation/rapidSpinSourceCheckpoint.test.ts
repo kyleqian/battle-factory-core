@@ -58,15 +58,15 @@ describe("MOVE_RAPID_SPIN source/classification and legal Scene-ON staging check
     const second = sourceAuditText();
     expect(second).toBe(first);
     expect(createHash("sha256").update(first).digest("hex")).toBe(
-      "95113c095d7ae6208919d52db75957d5fd23fd36b3de73ee67aa66454b790316",
+      "651076e9313aa1f7e8e14fbafdf820fcc31519d7e7563a310d48bd0b232ebfe4",
     );
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
       schema: "rapid-spin-source-audit/v1",
       move: "MOVE_RAPID_SPIN",
       moveId: 229,
-      status: "unsupported-source-staging-checkpoint",
-      coverageCredit: false,
+      status: "exact",
+      coverageCredit: true,
       source: {
         pointerOwnedRoot: {
           symbol: "Move_RAPID_SPIN", nextDispatchLabel: "Move_MOONLIGHT",
@@ -113,7 +113,7 @@ describe("MOVE_RAPID_SPIN source/classification and legal Scene-ON staging check
     ]);
   });
 
-  it("derives the complete Level-50 census and preserves independent controls without Rapid Spin credit", () => {
+  it("derives the complete Level-50 census and preserves independent sibling controls", () => {
     const audit = JSON.parse(sourceAuditText()) as Json;
     expect(audit.carriers).toMatchObject({
       setCount: 1, speciesCount: 1,
@@ -136,18 +136,18 @@ describe("MOVE_RAPID_SPIN source/classification and legal Scene-ON staging check
       },
     });
     expect(audit.checkpoint).toEqual({
-      sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: false,
-      productionChanged: false, coveragePromotion: false, componentTrackCredit: false,
-      latchPromotion: false, unsupportedNoCreditBoundary: true,
+      sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true,
+      productionChanged: true, coveragePromotion: true, componentTrackCredit: false,
+      latchPromotion: true, unsupportedNoCreditBoundary: false,
     });
     expect(audit.scope).toEqual({
-      denseStateCaptured: false, reducerAdded: false, assetsExtracted: false, typedSeamAdded: false,
-      compositorAdded: false, framebufferAcceptance: false, productionChanged: false, coveragePromotion: false,
-      queueItemAdded: false, componentTrackFulfilled: false, latchRowAdded: false,
+      denseStateCaptured: true, reducerAdded: true, assetsExtracted: true, typedSeamAdded: true,
+      compositorAdded: true, framebufferAcceptance: true, productionChanged: true, coveragePromotion: true,
+      queueItemAdded: false, componentTrackFulfilled: false, latchRowAdded: true,
     });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_RAPID_SPIN")).toBeUndefined();
-    expect(coverage.queue).toEqual(["MOVE_RAPID_SPIN"]);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_RAPID_SPIN")).toMatchObject({ status: "exact" });
+    expect(coverage.queue).toEqual([]);
     expect(coverage.componentTracks.filter((track: Json) => track.moves?.includes("MOVE_RAPID_SPIN"))).toEqual([]);
   });
 

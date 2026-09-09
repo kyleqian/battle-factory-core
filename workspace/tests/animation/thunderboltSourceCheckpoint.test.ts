@@ -124,7 +124,7 @@ describe("MOVE_THUNDERBOLT source/classification checkpoint", () => {
       { move: "MOVE_SHOCK_WAVE", status: "unsupported", blocks: ["Move_SHOCK_WAVE"] },
     ]);
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries).toHaveLength(239);
+    expect(coverage.entries).toHaveLength(240);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_THUNDERBOLT"))
       .toMatchObject({ status: "exact" });
     const track = coverage.componentTracks.find((entry: { id: string }) => entry.id === "spark-2-electricity");
