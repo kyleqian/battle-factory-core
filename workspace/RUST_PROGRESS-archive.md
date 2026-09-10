@@ -3,7 +3,52 @@
 Older entries moved out of `RUST_PROGRESS.md` (newest first). Git keeps the
 full history regardless.
 
----## R78 — [supervised session wind-down, 2026-09-09 15:03–~17:30 UTC, unattended] **M75 `Cmd_damagecalc` leaf + session close (four green folds)**
+---
+
+## R82 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M79 fixed-damage cluster folded (third green fold; supervisor-repair commit)**
+
+- **State:** `rust-main` = master + M77 `b3d9cb554` + M78 `0bdd9dccd` + M79
+  `5bb8fab60`, each verified and checkpointed (ledger commit +
+  `backup-refs.sh`). The fixed-damage cluster (0x9F dmgtolevel / 0xA0
+  psywavedamageeffect / 0x94 damagetohalftargethp / 0xD8
+  setdamagetohealthdifference) is native. No ABI, adapter, canonical TS, or
+  npm file touched.
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, ~21 min) wrote
+  the complete module but expired waiting on its own background `cargo
+  test` and committed NOTHING (correct per contract). Supervisor verified
+  the uncommitted work in the worker worktree — full audit of all four
+  apply bodies against TS (`hitChainOpcode.ts:1749-1762/1766-1793/2094-2125`,
+  `rankedBatch1Opcode.ts:205-217`), both registration conventions
+  (hit-chain find-first vs rankedBatch1 exactly-1 + dispatcher + 0-operand),
+  psywave's unbounded rejection loop (%16, accept <=10) under the M77/M78
+  rng projection with ordered Vec<Draw>, healthdiff's taken-branch-only
+  jump resolution — plus double regeneration (byte-identical, sha
+  `e6d98b465e5546c8c0860c8c1a9fd36100f37bb5980e09df1575a3caef22290d`,
+  466,885 B) and all four gates in the worktree, then committed it AS the
+  worker branch commit `5bb8fab60` (supervisor-repair provenance recorded
+  in the commit message). **23 behavior + 9 registration** cases; corpus
+  sha256 `20f30d0f4b56a7f048a61544277c63388bf7f427818e127064dbdc7f528ffc2a`.
+- **Next:** possibly one more small leaf this session if the clock allows;
+  otherwise wind down. Unported candidates re-scouted 2026-09-10: the
+  bicbyte/orbyte/bicword byte-algebra opcodes have heavier catalog-style
+  registration (`battleScriptSetByte.ts` / `battleScriptStatbuffchangeOpcode.ts`
+  / `battleScriptDamagingWeatherOpcode.ts:444` — orbyte requires ALL 11
+  concrete starts); JUMPIFSTATUS/JUMPIFSTATUS2 similar. No deferral is open.
+- **Notes:** worker cap-expiry root cause: it launched `cargo test` as its
+  own background task and ended its turn awaiting it — same end_turn
+  pitfall as the Aug-31 supervisor sessions, now seen worker-side.
+  Follow-up for future briefs: tell workers to run gates in the foreground.
+  Gates rerun on `rust-main` post-fold: **1,479/1,479** native (+11), fmt,
+  strict workspace Clippy, wasm32 release; artifact **512,508 bytes**,
+  sha256 `ccf224e71f7adbde645dbbd30de26fc51500ba36d2b9955ee10f6d894a75cd45`.
+  Generator **34,428 bytes**, sha256
+  `4c3d7282d4b959f4f08fdf3660c6bd240494c0326121fbe50ea86ba683527ec3`.
+  Worker: 21.3 min, $5.20. No npm gate required; no deferral or barrier
+  added. R79 archived. PAPERCUT: worker end_turn-vs-background-gates cost
+  ~15 supervisor minutes.
+
+
+## R78 — [supervised session wind-down, 2026-09-09 15:03–~17:30 UTC, unattended] **M75 `Cmd_damagecalc` leaf + session close (four green folds)**
 
 - **State:** `rust-main` = master (merge at orient was a no-op) plus four
   verified Sonnet worker fast-forwards this session — `aa57ef2ba` M72 shared
@@ -53,7 +98,10 @@ full history regardless.
   reusable non-opcode helper module shape; M74 landed the R76
   barrier-projection decision. No npm gate required; no deferral or barrier
   added. R75 archived. PAPERCUT: none new (README Apple-path note from R57
-  still stands).## R81 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M78 adjust-damage family folded (second green fold this session)**
+  still stands).
+
+
+## R81 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M78 adjust-damage family folded (second green fold this session)**
 
 - **State:** `rust-main` = master + M77 `b3d9cb554` + M78 `0bdd9dccd`
   (both verified Sonnet fast-forwards, each with ledger commit +

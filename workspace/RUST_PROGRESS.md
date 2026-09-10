@@ -6,6 +6,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R85 — [supervised session, 2026-09-10 15:01 UTC–, unattended] **M82 byte-algebra trio folded (first green fold this session)**
+
+- **State:** `rust-main` = master (no-op merge at orient) + `7d3206705` M82
+  byte-algebra trio (verified Sonnet worker fast-forward), ledger commit and
+  `backup-refs.sh` push to follow this entry. Tree clean, committed, green.
+  No ABI, adapter, canonical TS, or npm file touched; the main supervisor's
+  fold remains `core-rs/**` + `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 60-min cap, one commit,
+  ~28 min, foreground gates) ported the byte-algebra trio as one module —
+  0x36 bicbyte / 0x33 orbyte / 0x38 bicword (`battle_script_commands.c`
+  :3889-3894/:3864-3869/:3905-3912): advance-only bit algebra with THREE
+  distinct registration conventions pinned side-by-side — bicbyte eager over
+  all 11 starts (dispatcher check + 24-name pointer-list membership +
+  3-mask table), orbyte eager over all 11 starts but NO dispatcher check and
+  exact-string pointer match (asymmetry pinned by a dedicated test; orbyte
+  slice only, statbuffchange's 31-start requirement is another opcode's
+  registration per the M81 slice precedent), bicword find-first REQUIRED
+  with zero registration validation and every guard a runtime first-class
+  Halt mirroring `unsupportedBranch` verbatim (M74 shape). Documented
+  divergence: bicbyte's runtime byte universe is narrowed to
+  `gMoveResultFlags` (all 11 committed sites); other listed pointers pass
+  registration but Halt at execution (no TS oracle value — pinned by a
+  native unit test only, called out in module + generator doc comments).
+  **41 behavior + 13 registration** cases; corpus sha256
+  `ef7c703a76f8b101625e02c72c324f3f533343fecfeb17fa6d8f509dbe0bb509`
+  (27,877 bytes).
+- **Next:** with the byte-algebra trio native, the remaining scouted leaves
+  are the rng-drawing hit-chain opcodes (accuracycheck, tryKO — unblocked by
+  the M77 drawBattleScriptRng projection precedent). Re-scout with
+  /tmp/rust-briefs/{ts,rs}-opcodes.txt (84 of 215 TS opcode names now
+  ported). No deferral is open.
+- **Notes:** supervisor audit covered all three resolvers and registration
+  ladders against TS (error texts, evaluation order, the dispatcher-check
+  asymmetry, Halt-mirror fields), HITMARKER/MOVE_RESULT bit values against
+  battle.h, and the 11/11/3 call-site censuses (independently re-grepped:
+  masks 3/7/1, values 3/5/3 — byte-identical to the module doc); independent
+  regeneration was byte-identical. Generated Rust **41,635 bytes**, sha256
+  `3c74a0ebbd23e9b569ef1608fcbee6e99f706bb1ee67f5468c83f24304bb3b83`;
+  generator **30,026 bytes**, sha256
+  `b5f2c5d1c14d0bb387b063115b26be3d6629daed03c01bbe0ff45c5672f272ae`.
+  Gates on `rust-main` post-fold: **1,534/1,534** native (+23), fmt, strict
+  workspace Clippy, wasm32 release; artifact **512,528 bytes**, sha256
+  `0dd93b02d94ec3f854546eb03a08ee1af3bab9a38426e1bc4237fef2c4f3e18c`.
+  Worker: 28.4 min, $4.56. Also fixed two glued-entry defects in
+  RUST_PROGRESS-archive.md (R78/R81 headers). No npm gate required; no
+  deferral or barrier added. R82 archived.
+
+
 ## R84 — [supervised session wind-down (final), 2026-09-10 03:01–~06:00 UTC, unattended] **M81 jumpifstatus pair + session close (five green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) plus five verified
@@ -119,46 +167,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   fixed-damage + 5 side-status = 79 opcode names ported of 215 TS names).
   No npm gate required; no deferral or barrier added. R80 archived.
   PAPERCUT: M79 end_turn-vs-background-gates, ~15 supervisor minutes.
-
-
-## R82 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M79 fixed-damage cluster folded (third green fold; supervisor-repair commit)**
-
-- **State:** `rust-main` = master + M77 `b3d9cb554` + M78 `0bdd9dccd` + M79
-  `5bb8fab60`, each verified and checkpointed (ledger commit +
-  `backup-refs.sh`). The fixed-damage cluster (0x9F dmgtolevel / 0xA0
-  psywavedamageeffect / 0x94 damagetohalftargethp / 0xD8
-  setdamagetohealthdifference) is native. No ABI, adapter, canonical TS, or
-  npm file touched.
-- **Did (this step):** worker (claude-sonnet-5, 50-min cap, ~21 min) wrote
-  the complete module but expired waiting on its own background `cargo
-  test` and committed NOTHING (correct per contract). Supervisor verified
-  the uncommitted work in the worker worktree — full audit of all four
-  apply bodies against TS (`hitChainOpcode.ts:1749-1762/1766-1793/2094-2125`,
-  `rankedBatch1Opcode.ts:205-217`), both registration conventions
-  (hit-chain find-first vs rankedBatch1 exactly-1 + dispatcher + 0-operand),
-  psywave's unbounded rejection loop (%16, accept <=10) under the M77/M78
-  rng projection with ordered Vec<Draw>, healthdiff's taken-branch-only
-  jump resolution — plus double regeneration (byte-identical, sha
-  `e6d98b465e5546c8c0860c8c1a9fd36100f37bb5980e09df1575a3caef22290d`,
-  466,885 B) and all four gates in the worktree, then committed it AS the
-  worker branch commit `5bb8fab60` (supervisor-repair provenance recorded
-  in the commit message). **23 behavior + 9 registration** cases; corpus
-  sha256 `20f30d0f4b56a7f048a61544277c63388bf7f427818e127064dbdc7f528ffc2a`.
-- **Next:** possibly one more small leaf this session if the clock allows;
-  otherwise wind down. Unported candidates re-scouted 2026-09-10: the
-  bicbyte/orbyte/bicword byte-algebra opcodes have heavier catalog-style
-  registration (`battleScriptSetByte.ts` / `battleScriptStatbuffchangeOpcode.ts`
-  / `battleScriptDamagingWeatherOpcode.ts:444` — orbyte requires ALL 11
-  concrete starts); JUMPIFSTATUS/JUMPIFSTATUS2 similar. No deferral is open.
-- **Notes:** worker cap-expiry root cause: it launched `cargo test` as its
-  own background task and ended its turn awaiting it — same end_turn
-  pitfall as the Aug-31 supervisor sessions, now seen worker-side.
-  Follow-up for future briefs: tell workers to run gates in the foreground.
-  Gates rerun on `rust-main` post-fold: **1,479/1,479** native (+11), fmt,
-  strict workspace Clippy, wasm32 release; artifact **512,508 bytes**,
-  sha256 `ccf224e71f7adbde645dbbd30de26fc51500ba36d2b9955ee10f6d894a75cd45`.
-  Generator **34,428 bytes**, sha256
-  `4c3d7282d4b959f4f08fdf3660c6bd240494c0326121fbe50ea86ba683527ec3`.
-  Worker: 21.3 min, $5.20. No npm gate required; no deferral or barrier
-  added. R79 archived. PAPERCUT: worker end_turn-vs-background-gates cost
-  ~15 supervisor minutes.
