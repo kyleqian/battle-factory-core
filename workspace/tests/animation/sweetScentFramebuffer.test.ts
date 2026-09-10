@@ -75,7 +75,7 @@ describe("MOVE_SWEET_SCENT production framebuffer", () => {
   it("promotes Sweet Scent alone and fulfills only its one-move track", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(244);
+      .toHaveLength(245);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SWEET_SCENT"))
       .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) =>

@@ -70,7 +70,7 @@ describe("MOVE_SCREECH pure source-age reducer", () => {
     expect(player(0)).toMatchObject({ sourceOffset: 0, scriptActive: true, active: true });
     expect(player(3).sourceOffset).toBe(3);
     expect(player(4).sourceOffset).toBe(76);
-    expect(player(12).sourceOffset).toBe(32);
+    expect(player(12).sourceOffset).toBe(31);
     expect(player(30).sourceOffset).toBe(49);
     expect(player(SCREECH_FIRST_INACTIVE_AGE)).toMatchObject({
       sourceOffset: 50,

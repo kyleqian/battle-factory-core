@@ -625,7 +625,7 @@ describe("explosion-sprite-self-destruct standalone fulfilled component-track ra
     expect(exactCount).toBe(244);
     expect(coverage.entries.filter((entry: Json) => level50Moves.has(entry.move)
       && (entry.status === "partial" || entry.status === "staged"))).toEqual([]);
-    expect(level50Moves.size - exactCount).toBe(32);
+    expect(level50Moves.size - exactCount).toBe(31);
     expect(coverage.entries.filter((entry: Json) => [
       "MOVE_SELF_DESTRUCT", "MOVE_EXPLOSION", "MOVE_PRESENT", "MOVE_DYNAMIC_PUNCH",
     ].includes(entry.move))).toEqual([

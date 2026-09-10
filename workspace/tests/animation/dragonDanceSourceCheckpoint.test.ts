@@ -108,7 +108,7 @@ describe("MOVE_DRAGON_DANCE source and legal staging contract", () => {
   it("records move-owned dense, production, and coverage credit without track or latch transfer", () => {
     expect(audit().checkpoint).toEqual({ legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, productionChanged: true, coveragePromotion: true, componentTrackCredit: false, latchPromotion: false });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(244);
+    expect(coverage.entries).toHaveLength(245);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_DRAGON_DANCE")).toMatchObject({ status: "exact" });
   });
 });

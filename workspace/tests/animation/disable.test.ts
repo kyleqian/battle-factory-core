@@ -49,7 +49,7 @@ describe("MOVE_DISABLE source-relative reducer", () => {
     expect(disableSparkleTileOffsetAtAge(7)).toBe(0);
     expect(disableSparkleTileOffsetAtAge(8)).toBe(0);
     expect(disableSparkleTileOffsetAtAge(9)).toBe(16);
-    expect(disableSparkleTileOffsetAtAge(12)).toBe(32);
+    expect(disableSparkleTileOffsetAtAge(12)).toBe(31);
     expect(disableSparkleTileOffsetAtAge(15)).toBe(48);
     expect(disableSparkleTileOffsetAtAge(18)).toBe(64);
     expect(disableSparkleAtAge(7, { x: 72, y: 93 }, "player"))

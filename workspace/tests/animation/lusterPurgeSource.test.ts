@@ -133,6 +133,6 @@ describe("MOVE_LUSTER_PURGE source and legal staging checkpoint", () => {
     const exact = entries.filter((entry) => entry.status === "exact").length;
     expect(exact).toBe(244);
     const report = execFileSync("npm", ["run", "animation:coverage", "--silent"], { encoding: "utf8" });
-    expect(report).toContain("Level 50: 244/276 exact, 0 partial, 0 staged, 32 unsupported");
+    expect(report).toContain("Level 50: 245/276 exact, 0 partial, 0 staged, 31 unsupported");
   });
 });

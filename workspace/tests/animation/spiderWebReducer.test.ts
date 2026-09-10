@@ -98,7 +98,7 @@ describe("MOVE_SPIDER_WEB source-age reducer and typed Scene-ON seam", () => {
 
   it("promotes Spider Web alone and keeps source-neighbor controls independent", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.queue).toEqual(["MOVE_DESTINY_BOND"]);
+    expect(coverage.queue).toEqual([]);
     const track = coverage.componentTracks.find((entry: { id: string }) =>
       entry.id === "spider-web-thread");
     expect(track).toMatchObject({ fulfilled: true });

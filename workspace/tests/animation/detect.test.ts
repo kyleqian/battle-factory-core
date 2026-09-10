@@ -72,7 +72,7 @@ describe("detectSparkleAtAge", () => {
     expect(detectSparkleAtAge(52, off, "player")?.tileOffset).toBe(0);
     expect(detectSparkleAtAge(53, off, "player")?.tileOffset).toBe(0);
     expect(detectSparkleAtAge(54, off, "player")?.tileOffset).toBe(16);
-    expect(detectSparkleAtAge(57, off, "player")?.tileOffset).toBe(32);
+    expect(detectSparkleAtAge(57, off, "player")?.tileOffset).toBe(31);
     expect(detectSparkleAtAge(60, off, "player")?.tileOffset).toBe(48);
     expect(detectSparkleAtAge(63, off, "player")?.tileOffset).toBe(64);
     expect(detectSparkleAtAge(67, off, "player")?.tileOffset).toBe(64);

@@ -8,7 +8,7 @@ import { verifyDestinyBondEvidence } from "../../tools/compare/destinyBondEviden
 type Json = Record<string, any>;
 const root = resolve(import.meta.dirname, "../..");
 
-describe("MOVE_DESTINY_BOND complete bilateral unsupported evidence", () => {
+describe("MOVE_DESTINY_BOND complete bilateral retained evidence", () => {
   it("replays every retained semantic, hardware, raw-RGB, and normalized-map row twice", () => {
     const first = verifyDestinyBondEvidence();
     expect(verifyDestinyBondEvidence()).toEqual(first);
@@ -47,13 +47,13 @@ describe("MOVE_DESTINY_BOND complete bilateral unsupported evidence", () => {
     });
   });
 
-  it("keeps Destiny Bond absent, queued, unsupported, and its nine-component track unfulfilled", () => {
+  it("records Destiny Bond alone as exact and fulfills its nine-component track", () => {
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(244);
-    expect(data.entries.find((entry: Json) => entry.move === "MOVE_DESTINY_BOND")).toBeUndefined();
-    expect(data.queue).toEqual(["MOVE_DESTINY_BOND"]);
+    expect(data.entries).toHaveLength(245);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_DESTINY_BOND")).toMatchObject({ status: "exact" });
+    expect(data.queue).toEqual([]);
     const track = data.componentTracks.find((entry: Json) => entry.id === "destiny-bond-white-shadow");
-    expect(track).toMatchObject({ representatives: ["MOVE_DESTINY_BOND"], fulfilled: false });
+    expect(track).toMatchObject({ representatives: ["MOVE_DESTINY_BOND"], fulfilled: true });
     expect(track.components).toHaveLength(9);
     for (const path of [
       "tools/compare/fixtures/destiny-bond-evidence.json",
@@ -61,6 +61,8 @@ describe("MOVE_DESTINY_BOND complete bilateral unsupported evidence", () => {
       "src/animation/destinyBond.ts",
       "tools/compare/verifyDestinyBondReducer.ts",
       "tests/animation/destinyBondReducer.test.ts",
+      "tools/compare/destinyBondActualCore.ts",
+      "tests/animation/destinyBondActualCore.test.ts",
     ]) expect(track.evidence).toContain(path);
   });
 });

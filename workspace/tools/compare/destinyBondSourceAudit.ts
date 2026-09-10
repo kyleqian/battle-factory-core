@@ -135,12 +135,13 @@ const level50 = carriers.filter((entry: Json) => entry.index >= 110 && entry.ind
 const outside = carriers.filter((entry: Json) => entry.index < 110);
 const openOnly = carriers.filter((entry: Json) => entry.index > 849);
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "destiny-bond-white-shadow");
+const coverageEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_DESTINY_BOND");
 
 if (JSON.stringify(commandRows(rootBody)) !== JSON.stringify(expectedCommands)) throw new Error("Destiny Bond root command order drifted");
 if (!graphEntry || graphEntry.id !== 194 || graphEntry.rootScript !== "Move_DESTINY_BOND" || JSON.stringify(graphEntry.blocks) !== JSON.stringify(["Move_DESTINY_BOND"]) || JSON.stringify(graphEntry.componentIds) !== JSON.stringify(expectedComponents)) throw new Error("Destiny Bond component graph drifted");
 if (!move || move.power !== 0 || move.accuracy !== 0 || move.pp !== 5 || move.effect !== "EFFECT_DESTINY_BOND" || move.frontierMonCount !== 10 || move.speciesCount !== 6 || JSON.stringify(move.exampleMons) !== JSON.stringify(["FRONTIER_MON_WOBBUFFET_2", "FRONTIER_MON_QWILFISH_2", "FRONTIER_MON_WEEZING_2"])) throw new Error("Destiny Bond inventory drifted");
 if (JSON.stringify(level50.map((entry: Json) => entry.index)) !== JSON.stringify([290, 316, 501, 662, 709, 802, 803, 812, 813, 814]) || outside.length !== 0 || openOnly.length !== 0) throw new Error("Destiny Bond carrier census drifted");
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_DESTINY_BOND") || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_DESTINY_BOND"]) || !track || track.fulfilled !== false || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_DESTINY_BOND"])) throw new Error("Destiny Bond unfulfilled coverage boundary drifted");
+if (coverageEntry?.status !== "exact" || JSON.stringify(coverage.queue) !== JSON.stringify([]) || !track || track.fulfilled !== true || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_DESTINY_BOND"])) throw new Error("Destiny Bond exact coverage boundary drifted");
 
 requireTokens("Destiny Bond white shadow", ghost, [
   "const struct SpriteTemplate gDestinyBondWhiteShadowSpriteTemplate", ".tileTag = ANIM_TAG_WHITE_SHADOW", ".paletteTag = ANIM_TAG_WHITE_SHADOW", ".oam = &gOamData_AffineOff_ObjBlend_64x32", "static void AnimDestinyBondWhiteShadow", "static void AnimDestinyBondWhiteShadow_Step", "void AnimTask_DestinyBondWhiteShadow", "static void AnimTask_DestinyBondWhiteShadow_Step", "SetGpuReg(REG_OFFSET_BLDCNT, (BLDCNT_EFFECT_BLEND | BLDCNT_TGT2_ALL))", "BLDALPHA_BLEND(0, 0x10)", "CreateSprite(&gDestinyBondWhiteShadowSpriteTemplate", "DestroySprite(&gSprites[task->data[i + 13]])",

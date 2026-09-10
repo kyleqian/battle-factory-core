@@ -23,7 +23,7 @@ describe("MOVE_SEISMIC_TOSS dense Scene-ON evidence checkpoint", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(receipt).toMatchObject({ oracleProfile: "battle-scene-on", moveId: 69, coverageCredit: false, branch: { animationDamage: 50, result: 1, label: "SeismicTossMedium" }, acceptance: { freshRunsPerOrientation: 2, denseRowsPerOrientation: 228, rawRgbRowsPerOrientation: 228 } });
     expect(receipt.evidenceScope).toMatchObject({ productionAnimationChanged: false, reducerAdded: false, assetBundleAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false, coveragePromotion: false, gameplayStateOwned: false, siblingAcceptance: false, transientOverrides: [] });
-    expect(coverage.entries).toHaveLength(244);
+    expect(coverage.entries).toHaveLength(245);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SEISMIC_TOSS"))
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.filter((entry: Json) => ["MOVE_ROCK_THROW", "MOVE_ROCK_SLIDE", "MOVE_ANCIENT_POWER"].includes(entry.move)).every((entry: Json) => entry.status === "exact")).toBe(true);

@@ -6987,11 +6987,45 @@
    "tests/animation/skyUppercutReducer.test.ts",
    "tests/animation/skyUppercutActualCore.test.ts"
   ]
+ },
+ {
+  "move": "MOVE_DESTINY_BOND",
+  "status": "exact",
+  "covered": [
+   "the complete Move_DESTINY_BOND body and its nine source components are independently accepted, including WHITE_SHADOW, excluded OBJ palette blending, BG_GHOST fade and restore, attacker ShakeMonInPlace, blend registers, audio, resources, waits, and cleanup",
+   "complete legal bilateral WOBBUFFET/ONIX Battle Scene ON ages 0..187 retain 188/188 rows per orientation; the source-age reducer and typed seam reproduce all 376/376 component rows from live side, species, geometry, allocation, task, matrix, order, palette, background, register, and resource inputs",
+   "Destiny Bond's own maps preserve WHITE_SHADOW source ages 43..137 and hardware ages 44..138, whole OAM/matrix predecessor transfer on 187/187 comparable rows, excluded OBJ and Ghost BG palette RAM+1, the white-shadow task's current-row BLDALPHA, and attacker ShakeMonInPlace's +1 creation then +2 callback/teardown path",
+   "two independent actual-core processes are byte-identical at digest 8a91facaf6e79dc2d2cbbafa3ae0696f1d07fd56a2a92dac9a65c09ae107c4e4 and each passes player-back 188/188 plus opponent-front 188/188, 376/376 total component and framebuffer rows with zero residual pixels through inactive cleanup",
+   "a deterministic material GRUMPIG/RELICANTH live species, geometry, allocation, matrix, task, order, palette, and background control changes the framebuffer; no sibling, component transfer, or additional latch credit is inferred"
+  ],
+  "evidence": [
+   "tools/battle-lab/mechanic-destiny-bond-player-wobbuffet-opponent-onix.json",
+   "tools/battle-lab/mechanic-destiny-bond-opponent-wobbuffet-player-onix.json",
+   "tools/compare/destinyBondSourceAudit.ts",
+   "tools/compare/destinyBondProbe.py",
+   "tools/compare/destinyBondEvidence.ts",
+   "tools/compare/verifyDestinyBondReducer.ts",
+   "tools/compare/destinyBondActualCore.ts",
+   "tools/compare/fixtures/destiny-bond-evidence.json",
+   "tools/compare/evidence/destiny-bond-player-dense-state.json.gz",
+   "tools/compare/evidence/destiny-bond-opponent-dense-state.json.gz",
+   "tools/compare/evidence/destiny-bond-player-raw-rgb.tar.gz",
+   "tools/compare/evidence/destiny-bond-opponent-raw-rgb.tar.gz",
+   "tools/compare/evidence/destiny-bond-changemap-player.json",
+   "tools/compare/evidence/destiny-bond-changemap-opponent.json",
+   "src/animation/assets/destiny-bond.json",
+   "src/animation/destinyBond.ts",
+   "src/animation/sceneOnPresentation.ts",
+   "src/engine/battleScene.ts",
+   "src/engine/core.ts",
+   "tests/animation/destinyBondSourceCheckpoint.test.ts",
+   "tests/animation/destinyBondEvidenceCheckpoint.test.ts",
+   "tests/animation/destinyBondReducer.test.ts",
+   "tests/animation/destinyBondActualCore.test.ts"
+  ]
  }
  ],
- "queue": [
-  "MOVE_DESTINY_BOND"
- ],
+ "queue": [],
  "componentTracks": [
   {
    "id": "spider-web-thread",
@@ -8926,7 +8960,7 @@
     "visualCommand:waitbgfadein"
    ],
    "representatives": ["MOVE_DESTINY_BOND"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/battle-lab/mechanic-destiny-bond-player-wobbuffet-opponent-onix.json",
     "tools/battle-lab/mechanic-destiny-bond-opponent-wobbuffet-player-onix.json",
@@ -8937,6 +8971,7 @@
     "tools/compare/destinyBondEvidence.ts",
     "tools/compare/extractDestinyBondAssets.ts",
     "tools/compare/verifyDestinyBondReducer.ts",
+    "tools/compare/destinyBondActualCore.ts",
     "tools/compare/fixtures/destiny-bond-evidence.json",
     "src/animation/assets/destiny-bond.json",
     "src/animation/destinyBond.ts",
@@ -8949,9 +8984,10 @@
     "tests/animation/destinyBondAssets.test.ts",
     "tests/animation/destinyBondSourceCheckpoint.test.ts",
     "tests/animation/destinyBondEvidenceCheckpoint.test.ts",
-    "tests/animation/destinyBondReducer.test.ts"
+    "tests/animation/destinyBondReducer.test.ts",
+    "tests/animation/destinyBondActualCore.test.ts"
    ],
-   "goal": "UNFULFILLED reducer/seam checkpoint. MOVE_DESTINY_BOND is its sole representative and remains unsupported: source-derived WHITE_SHADOW assets, the pure source-age reducer, and the narrow typed Scene-ON seam replay both retained 188/188 bilateral component rows twice, including cursor, tasks, sprites, source order, registers, resources, audio, transfer facts, RNG ownership, and first-inactive cleanup. No compositor or framebuffer/actual-core acceptance exists, so no move, component, sibling, or latch credit is conferred. The listed exact controls only check source/component identity: Luster Purge (BlendBattleAnimPalExclude), HI_JUMP_KICK/THRASH/HORN_DRILL/SKY_UPPERCUT (distinct ShakeMonInPlace schedules), and Grudge/Aurora Beam (fade/background transfer)."
+   "goal": "FULFILLED by MOVE_DESTINY_BOND only: its source-derived reducer, WHITE_SHADOW/Ghost-BG assets, typed seam, and generic live compositor pass all 376 bilateral component and actual-core framebuffer rows twice with zero residual pixels through inactive cleanup. The material altered live control changes species, geometry, allocation, matrix, task, order, palette, and background inputs. Shared controls and siblings receive no acceptance or latch credit."
   }
  ],
  "variantAudits": {
