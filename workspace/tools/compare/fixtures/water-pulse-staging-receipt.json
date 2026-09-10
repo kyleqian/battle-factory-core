@@ -1,0 +1,64 @@
+{
+  "schema": "water-pulse-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_WATER_PULSE",
+  "moveId": 352,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "auditRunSha256": "9e33953c5ee1804a3b12eb96598c60372c964c0e6bff2997e87688c8ff67dffb",
+    "pointerOwnedRoot": {"start": "0x082d6c7a", "endExclusive": "0x082d6d6f"},
+    "probe": "tools/compare/waterPulseStagingProbe.py",
+    "probeSha256": "7223406c3dedc8ec2a9b2c21400191b9a96b507e0e9f60ea95349a365f0eb696"
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "rawRgbRetained": false,
+    "denseWindowCaptured": false,
+    "semanticFramesRetained": false,
+    "latchMeasured": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSceneOnSeam": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "transientOverrides": [],
+    "battleStateInjected": false,
+    "entryHooksSkipped": false,
+    "noTimingOrLatchTransfer": true
+  },
+  "runs": {
+    "player-back": {
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "8037637ddce64efff3f9e87f93e3d21e59ef7d8950466a11995de8657573bcb2",
+      "scenario": "tools/battle-lab/mechanic-water-pulse-player-lombre-opponent-onix.json",
+      "scenarioSha256": "bac1e3defb5de7b2b8a3777342eb6543077363b4bfd6adff18c183e2a5d3f9c3",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "player", "partyIndex": 0, "species": 296, "level": 50, "moves": [352, 352, 352, 352], "frontierCarrier": {"setId": 131, "name": "FRONTIER_MON_LOMBRE"}},
+      "target": {"side": "opponent", "partyIndex": 0, "species": 95, "initialHp": 142, "finalHp": 0},
+      "root": {"symbol": "Move_WATER_PULSE", "start": "0x82d6c7a", "endExclusive": "0x82d6d6f", "observations": 159, "attackerBattler": 0, "targetBattler": 1},
+      "pp": {"before": [20, 20, 20, 20], "after": [19, 20, 20, 20], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true},
+      "transientFreeSetup": true
+    },
+    "opponent-front": {
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "d22627aff2392f2d3528893c4b590bae6467dcc91ff0c22b3de8122906bff6ac",
+      "scenario": "tools/battle-lab/mechanic-water-pulse-opponent-lombre-player-onix.json",
+      "scenarioSha256": "0e84ada54bf5165a74465ca3f0069f1659942736efb2140efddf1d287f7a4ef1",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "opponent", "partyIndex": 0, "species": 296, "level": 50, "moves": [352, 352, 352, 352], "frontierCarrier": {"setId": 131, "name": "FRONTIER_MON_LOMBRE"}},
+      "target": {"side": "player", "partyIndex": 0, "species": 95, "initialHp": 142, "finalHp": 0},
+      "root": {"symbol": "Move_WATER_PULSE", "start": "0x82d6c7a", "endExclusive": "0x82d6d6f", "observations": 159, "attackerBattler": 1, "targetBattler": 0},
+      "pp": {"before": [20, 20, 20, 20], "after": [19, 20, 20, 20], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true},
+      "transientFreeSetup": true
+    }
+  },
+  "receipt": "Two fresh local-mGBA compact semantic runs per legal orientation reach the source root, spend exactly one PP, apply stock-ROM damage, and preserve checksum-valid benches. This is not a dense animation, raw-RGB, or latch receipt."
+}
