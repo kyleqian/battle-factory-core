@@ -6,6 +6,56 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R81 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M78 adjust-damage family folded (second green fold this session)**
+
+- **State:** `rust-main` = master + M77 `b3d9cb554` + M78 `0bdd9dccd`
+  (both verified Sonnet fast-forwards, each with ledger commit +
+  `backup-refs.sh` push). The adjust-damage family (0x07 adjustnormaldamage /
+  0x08 adjustnormaldamage2 / 0x69 adjustsetdamage) is native: shared core
+  with per-opcode wiring (variance-draw presence, requireMoveRow gating).
+  First multi-draw consumer of the M77 rng projection — 0/1/2 ordered draws
+  cross as `Vec<Draw>`. No ABI, adapter, canonical TS, or npm file touched.
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  ~22 min) ported the family per `battle_script_commands.c:1658-1698`,
+  `:1701-1741`, `:5861-5899` + `ApplyRandomDmgMultiplier` `:1639-1651`:
+  target-role-only precedence, variance draw first (reasons
+  "adjustnormaldamage"/"adjustnormaldamage2"), Focus Band holder ALWAYS
+  draws ("<base>-focus-band"; roll%100 < param sets the bit + native
+  `record_battle_script_item_effect_reveal`), pre-existing focus_banded bit
+  honored, Substitute-gated survival clamp (hp<=damage → hp-1) with
+  endured-over-banded flag priority (FOE_ENDURED 1<<6 / FOE_HUNG_ON 1<<7 +
+  lastUsedItem), and the false-swipe divergence pinned three ways: 0x07
+  clamps on EFFECT_FALSE_SWIPE (101) and errors on unknown move, 0x08 never
+  calls requireMoveRow, 0x69 (no variance draw) calls it unconditionally.
+  Composed `apply_random_damage_multiplier`, `resolve_battler_hold_effect`/
+  `_param` (enigma param array forwarded through the critcalc-style shim),
+  and the reveal helper — nothing duplicated. **34 behavior + 4
+  registration** cases; corpus sha256
+  `02413888d15f9578a2cc3cba2a8add8df97e1c1f9ecf149a5062cf3e32e545ec`.
+- **Next:** M79 scouted — the fixed-damage cluster as one family leaf:
+  `dmgtolevel` (0x9F, `:7926-7930`), `psywavedamageeffect` (0xA0,
+  `:7932-7941`, unbounded rejection-sampling draw loop — Vec<Draw> precedent
+  covers it), `damagetohalftargethp` (0x94, `:7577-7584`, lives in
+  `battleScriptRankedBatch1Opcode.ts:205`), `setdamagetohealthdifference`
+  (0xD8, `:9366-9377`, ptr operand + fail-jump, TS
+  `hitChainOpcode.ts:2098-2125`). Ground truth doc:
+  `docs/fixed-damage-cluster-ground-truth.md`. No deferral is open.
+- **Notes:** supervisor audit covered the shared core against both TS bodies
+  (draw order/chaining, holder-always-draws incl. pre-existing-bit, clamp
+  predicate + flag priority, lastUsedItem pre-mutation read, substitute bit
+  0x0100_0000, per-opcode requireMoveRow wiring) and a two-draw vector's
+  chaining (before₂==after₁, calls 0→2); independent regeneration was
+  byte-identical. Generated Rust **478,116 bytes**, sha256
+  `078338789b21aaf507537ffe76d6fd12f529328ae12ee00ac67f93b9528816d9`;
+  generator **37,037 bytes**, sha256
+  `6bac564d27a4f08fc1ddebac5b31da4f926be80109e6361f9c104da1f3c4fc31`.
+  Gates rerun on `rust-main` post-fold: **1,468/1,468** native (+20), fmt,
+  strict workspace Clippy, wasm32 release; artifact **512,496 bytes**, sha256
+  `55eed0198510d362576397cd838b90e27917c8c740b6f1b711effcb3ebac2718`.
+  Worker: 22.3 min, $4.48, zero rejections. No npm gate required; no
+  deferral or barrier added. R78 archived. PAPERCUT: none new.
+
+
 ## R80 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M77 `Cmd_critcalc` leaf folded — hit-chain trio complete, drawBattleScriptRng projection landed**
 
 - **State:** `rust-main` = master (no-op merge at orient; baseline 1,425 green
@@ -109,56 +159,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   chained blocking waits held every time. No npm gate required; no deferral
   or barrier added. R76 archived. PAPERCUT: none new (README Apple-path
   note from R57 still stands).
-
-
-## R78 — [supervised session wind-down, 2026-09-09 15:03–~17:30 UTC, unattended] **M75 `Cmd_damagecalc` leaf + session close (four green folds)**
-
-- **State:** `rust-main` = master (merge at orient was a no-op) plus four
-  verified Sonnet worker fast-forwards this session — `aa57ef2ba` M72 shared
-  base-damage helper, `99c5ec021` M73 stockpile family, `39f0cbca4` M74
-  jumpif compare family, `2a4170f88` M75 damagecalc — each followed by its
-  ledger commit and a successful `backup-refs.sh` push. Tree clean,
-  committed, green; no worker worktree or branch left behind. No ABI,
-  adapter, recovery module, canonical TS, or npm file was touched all
-  session, so the main supervisor's fold is `core-rs/**` +
-  `RUST_PROGRESS*.md` only.
-- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
-  ~25 min) ported `B_SCR_OP_DAMAGECALC` (0x05,
-  `battle_script_commands.c:1290-1303`): find-first registration with no
-  shape validation (`install()` semantics), the exact error precedence
-  (missing attacker role → pre-helper "currentMove N has no source-derived
-  gBattleMoves type" → helper errors), helper damage × critMultiplier ×
-  dmgMultiplier, the Charge doubling gated on the RESOLVED dynamic-aware
-  type (TS spec; C reads the static row type — discrepancy documented in
-  the module doc comment), and Helping Hand trunc(×15/10) last. Third
-  consumer of the M72 helper. **24 behavior + 3 registration** cases; corpus
-  sha256 `897f1de90a536e52f5eaf203bbeb892db7817dc006ca7632959d4a39653b9690`
-  (110,501 bytes); generator **27,361 bytes**, sha256
-  `afbbcccca522128a52c3d5f27c1b34bfdac63c644d7bcd9556af140393a16d8b`.
-- **Next:** merge master, re-run the four Rust gates, then continue. Scouted
-  candidates (2026-09-09): `Cmd_critcalc` (`:1253-1286`, first RNG-drawing
-  battle-script leaf — needs a drawBattleScriptRng projection decision) and
-  `Cmd_typecalc` (`:1355-1420`, type-effectiveness table + STAB — larger,
-  rng-free; `apply_type_effectiveness` already lives in damage_calc.rs).
-  The hit-chain trio damagecalc✓/critcalc/typecalc is now the shortest path
-  to a full damage-pipeline slice. No deferral is open.
-- **Notes:** supervisor audit covered the apply order, both Charge gate
-  directions (dynamic-Electric doubles a non-Electric move; dynamic-Normal
-  suppresses a static-Electric move), error-text Display impls, and
-  generator provenance; independent regeneration was byte-identical. Worker
-  deduplicated the committed program to one instruction per opcode name for
-  the registration corpus (registration-equivalent for find-first; kept the
-  generated file at 310,094 bytes, sha256
-  `80c1e402ff5335ab86e2d47ec22cd828e73e37f34632bbef1863bda152408288`
-  truncated in the worker report — full value pinned in the vectors test).
-  Final gates on `rust-main`: **1,401/1,401** native (up from 1,329 at
-  orient, +72 across four leaves), fmt, strict workspace Clippy, wasm32
-  release; artifact **512,504 bytes**, sha256
-  `d71bb10ea1b1014fcab35bb0ad81d2cfa2b2323bbf0085bc46716381fc73a055`.
-  Session-wide: four Sonnet workers, four commits, zero rejections, zero cap
-  expiries (22-33 min each, ~$21 total); the tracked-background-launcher +
-  chained-blocking-waits pattern worked every time. M72 established the
-  reusable non-opcode helper module shape; M74 landed the R76
-  barrier-projection decision. No npm gate required; no deferral or barrier
-  added. R75 archived. PAPERCUT: none new (README Apple-path note from R57
-  still stands).
