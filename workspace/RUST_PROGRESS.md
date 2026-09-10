@@ -6,7 +6,64 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
-## R83 — [supervised session wind-down (final), 2026-09-10 03:01–~05:30 UTC, unattended] **M80 side-status family + session close (four green folds)**
+## R84 — [supervised session wind-down (final), 2026-09-10 03:01–~06:00 UTC, unattended] **M81 jumpifstatus pair + session close (five green folds)**
+
+- **State:** `rust-main` = master (no-op merge at orient) plus five verified
+  Sonnet worker fast-forwards this session — `b3d9cb554` M77 critcalc,
+  `0bdd9dccd` M78 adjust-damage family, `5bb8fab60` M79 fixed-damage
+  cluster (supervisor-repair commit), `1fe7c7104` M80 side-status family,
+  `f016e17c0` M81 jumpifstatus/jumpifstatus2 — each followed by its ledger
+  commit and a successful `backup-refs.sh` push. Tree clean, committed,
+  green; no worker worktree or branch left behind. No ABI, adapter,
+  recovery module, canonical TS, or npm file was touched all session, so
+  the main supervisor's fold is `core-rs/**` + `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
+  ~29 min, foreground gates) ported 0x1C/0x1D
+  (`battle_script_commands.c:3081-3091`/`:3093-3103`): the shared
+  jump-if-`(status & mask) && hp != 0` core, the status1 resolver
+  (arbitrary `|`-combos over 6 single bits + STATUS1_ANY 0xff) and the
+  fixed 6-entry status2 map ported DIRECTLY (documented deviation from the
+  M74 catalog suggestion — both resolvers are fully enumerable, so the
+  direct port matches TS over ALL expressions, strictly higher fidelity),
+  selector-Block and unsupported-mask Halt mirrors (jumpifstat/jumpif
+  precedents; Halt-precedes-Block precedence pinned), lazy taken-branch-only
+  label resolution with exact per-opcode unresolved texts, and a FOURTH
+  registration convention pinned: statusPrimary find-first REQUIRED vs
+  statbuffchange OPTIONAL presence (absent → no handler, no error).
+  **29 behavior + 5 registration** cases; corpus sha256
+  `06caac3440ce535656c665b60f0a3f4bb13bf7a73e85e4295721f776a1df4c73`.
+  Worker-noted TS quirk pinned verbatim: jumpifstatus2's unsupportedBranch
+  cites `:3096` (its flags line) vs jumpifstatus's `:3081` (handler line).
+- **Next:** merge master, re-run the four Rust gates, then continue.
+  Scouted candidates (2026-09-10): bicbyte/orbyte/bicword byte-algebra
+  opcodes (orbyte requires ALL 11 concrete starts,
+  `battleScriptStatbuffchangeOpcode.ts`/`battleScriptSetByte.ts`/
+  `battleScriptDamagingWeatherOpcode.ts:444`); with the M77 rng-projection
+  and M81 selector-port precedents, accuracycheck/tryKO-class hit-chain
+  leaves are unblocked too. Re-scout with /tmp/rust-briefs/{ts,rs}-opcodes.txt.
+  No deferral is open.
+- **Notes:** supervisor audit covered both resolvers against the TS
+  originals (incl. empty-string and combo edge equivalence), precedence,
+  the hp conjunct, lazy labels, both registration conventions, and every
+  vector label; independent regeneration was byte-identical. Generated Rust
+  **24,634 bytes**, sha256
+  `304ecbf651a24bae662341e6d527e21fb4ad64c49690ff8726b8ffd89827434c`;
+  generator sha256
+  `8219b7598a710f8588273c81ee3e0ba9dd733799356cf3a68306ed3cc1579bc1`.
+  Final gates on `rust-main`: **1,511/1,511** native (up from 1,425 at
+  orient, +86 across five leaves), fmt, strict workspace Clippy, wasm32
+  release; artifact **512,496 bytes**, sha256
+  `7a87893d92a3e2e697e356335f7900d4288a66a550c4fbb1c2d08a5fc6ad9d8a`.
+  Session-wide: five Sonnet workers (~$23), four clean landings 19-29 min,
+  one cap-expiry (M79, end_turn-vs-background-gates; briefs now mandate
+  FOREGROUND gates — zero recurrences after the fix; supervisor verified +
+  committed that work as a direct repair). 14 opcodes went native this
+  session (81 of 215 TS opcode names ported). No npm gate required; no
+  deferral or barrier added. R81 archived. PAPERCUT: M79 end_turn expiry,
+  ~15 supervisor minutes.
+
+
+## R83 — [supervised session, 2026-09-10, unattended] **M80 side-status family folded (fourth green fold)**
 
 - **State:** `rust-main` = master (no-op merge at orient) plus four verified
   Sonnet worker fast-forwards this session — `b3d9cb554` M77 critcalc,
@@ -105,53 +162,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Worker: 21.3 min, $5.20. No npm gate required; no deferral or barrier
   added. R79 archived. PAPERCUT: worker end_turn-vs-background-gates cost
   ~15 supervisor minutes.
-
-
-## R81 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M78 adjust-damage family folded (second green fold this session)**
-
-- **State:** `rust-main` = master + M77 `b3d9cb554` + M78 `0bdd9dccd`
-  (both verified Sonnet fast-forwards, each with ledger commit +
-  `backup-refs.sh` push). The adjust-damage family (0x07 adjustnormaldamage /
-  0x08 adjustnormaldamage2 / 0x69 adjustsetdamage) is native: shared core
-  with per-opcode wiring (variance-draw presence, requireMoveRow gating).
-  First multi-draw consumer of the M77 rng projection — 0/1/2 ordered draws
-  cross as `Vec<Draw>`. No ABI, adapter, canonical TS, or npm file touched.
-- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
-  ~22 min) ported the family per `battle_script_commands.c:1658-1698`,
-  `:1701-1741`, `:5861-5899` + `ApplyRandomDmgMultiplier` `:1639-1651`:
-  target-role-only precedence, variance draw first (reasons
-  "adjustnormaldamage"/"adjustnormaldamage2"), Focus Band holder ALWAYS
-  draws ("<base>-focus-band"; roll%100 < param sets the bit + native
-  `record_battle_script_item_effect_reveal`), pre-existing focus_banded bit
-  honored, Substitute-gated survival clamp (hp<=damage → hp-1) with
-  endured-over-banded flag priority (FOE_ENDURED 1<<6 / FOE_HUNG_ON 1<<7 +
-  lastUsedItem), and the false-swipe divergence pinned three ways: 0x07
-  clamps on EFFECT_FALSE_SWIPE (101) and errors on unknown move, 0x08 never
-  calls requireMoveRow, 0x69 (no variance draw) calls it unconditionally.
-  Composed `apply_random_damage_multiplier`, `resolve_battler_hold_effect`/
-  `_param` (enigma param array forwarded through the critcalc-style shim),
-  and the reveal helper — nothing duplicated. **34 behavior + 4
-  registration** cases; corpus sha256
-  `02413888d15f9578a2cc3cba2a8add8df97e1c1f9ecf149a5062cf3e32e545ec`.
-- **Next:** M79 scouted — the fixed-damage cluster as one family leaf:
-  `dmgtolevel` (0x9F, `:7926-7930`), `psywavedamageeffect` (0xA0,
-  `:7932-7941`, unbounded rejection-sampling draw loop — Vec<Draw> precedent
-  covers it), `damagetohalftargethp` (0x94, `:7577-7584`, lives in
-  `battleScriptRankedBatch1Opcode.ts:205`), `setdamagetohealthdifference`
-  (0xD8, `:9366-9377`, ptr operand + fail-jump, TS
-  `hitChainOpcode.ts:2098-2125`). Ground truth doc:
-  `docs/fixed-damage-cluster-ground-truth.md`. No deferral is open.
-- **Notes:** supervisor audit covered the shared core against both TS bodies
-  (draw order/chaining, holder-always-draws incl. pre-existing-bit, clamp
-  predicate + flag priority, lastUsedItem pre-mutation read, substitute bit
-  0x0100_0000, per-opcode requireMoveRow wiring) and a two-draw vector's
-  chaining (before₂==after₁, calls 0→2); independent regeneration was
-  byte-identical. Generated Rust **478,116 bytes**, sha256
-  `078338789b21aaf507537ffe76d6fd12f529328ae12ee00ac67f93b9528816d9`;
-  generator **37,037 bytes**, sha256
-  `6bac564d27a4f08fc1ddebac5b31da4f926be80109e6361f9c104da1f3c4fc31`.
-  Gates rerun on `rust-main` post-fold: **1,468/1,468** native (+20), fmt,
-  strict workspace Clippy, wasm32 release; artifact **512,496 bytes**, sha256
-  `55eed0198510d362576397cd838b90e27917c8c740b6f1b711effcb3ebac2718`.
-  Worker: 22.3 min, $4.48, zero rejections. No npm gate required; no
-  deferral or barrier added. R78 archived. PAPERCUT: none new.
