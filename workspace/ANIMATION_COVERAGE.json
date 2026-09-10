@@ -7023,8 +7023,46 @@
    "tests/animation/destinyBondReducer.test.ts",
    "tests/animation/destinyBondActualCore.test.ts"
   ]
+ },
+ {
+  "move": "MOVE_WATER_PULSE",
+  "status": "exact",
+  "covered": [
+   "the complete pointer-owned Move_WATER_PULSE body and its nine source components are independently accepted: SMALL_BUBBLES, BLUE_RING_2, five bubble programs, three affine rings and their emitted pairs, simple whole-BG F_PAL_BG blending, target ShakeMon, monbg setup/clear, audio, resources, waits, and cleanup",
+   "complete legal bilateral LOMBRE/ONIX Battle Scene ON ages 0..159 retain 160/160 rows per orientation through clean inactive age 159; the source-age reducer and typed seam reproduce all 320/320 component rows from live species, side, geometry, allocation, matrix, task, order, palette, background, register, and animation-RNG inputs",
+   "Water Pulse's own maps prove whole OAM and matrices predecessor-latched 159/159, hardware palette predecessor-latched 158/159 with only source age 7 same-row Task_UpdateMonBg setup, SMALL_BUBBLES ages 22..70, BLUE_RING_2 ages 72..111 / 79..118 / 86..125, ring-bubble emission ages 86/93/100/101/108/115, simple palette sprites 10..23 and 136..153, UpdateMonBg 7..157, ClearMonBg 155..157, ShakeMon 101..134, and BG VRAM edges 8/157/159",
+   "two independent actual-core processes each pass player-back 160/160 plus opponent-front 160/160 retained raw-RGB and shared-framebuffer rows with zero residual pixels; a material WOBBUFFET/RELICANTH live species, geometry, allocation, matrix, task, order, palette, and background control changes the framebuffer",
+   "WATER_GUN, BUBBLE_BEAM, SECRET_POWER, DIVE, MIST_BALL, FAKE_TEARS, HYDRO_PUMP, CRABHAMMER, and WATER_SPOUT retain independent exact evidence; shared components confer no sibling timing, latch, source-body, or acceptance credit"
+  ],
+  "evidence": [
+   "tools/battle-lab/mechanic-water-pulse-player-lombre-opponent-onix.json",
+   "tools/battle-lab/mechanic-water-pulse-opponent-lombre-player-onix.json",
+   "tools/compare/waterPulseSourceAudit.ts",
+   "tools/compare/waterPulseProbe.py",
+   "tools/compare/waterPulseEvidence.ts",
+   "tools/compare/verifyWaterPulseReducer.ts",
+   "tools/compare/waterPulseActualCore.ts",
+   "tools/compare/fixtures/water-pulse-evidence.json",
+   "tools/compare/evidence/water-pulse-player-dense-state.json.gz",
+   "tools/compare/evidence/water-pulse-opponent-dense-state.json.gz",
+   "tools/compare/evidence/water-pulse-player-raw-rgb.tar.gz",
+   "tools/compare/evidence/water-pulse-opponent-raw-rgb.tar.gz",
+   "tools/compare/evidence/water-pulse-changemap-player.json",
+   "tools/compare/evidence/water-pulse-changemap-opponent.json",
+   "tools/compare/extractWaterPulseAssets.ts",
+   "src/animation/assets/water-pulse.json",
+   "src/animation/waterPulse.ts",
+   "src/animation/sceneOnPresentation.ts",
+   "src/engine/battleScene.ts",
+   "src/engine/core.ts",
+   "tests/animation/waterPulseAssets.test.ts",
+   "tests/animation/waterPulseSourceCheckpoint.test.ts",
+   "tests/animation/waterPulseEvidence.test.ts",
+   "tests/animation/waterPulseReducer.test.ts",
+   "tests/animation/waterPulseActualCore.test.ts"
+  ]
  }
- ],
+],
  "queue": [],
  "componentTracks": [
   {
@@ -7941,11 +7979,16 @@
     "MOVE_FAKE_TEARS",
     "MOVE_WATER_PULSE",
     "MOVE_HYDRO_PUMP",
-    "MOVE_CRABHAMMER",
-    "MOVE_WATER_SPOUT"
-   ],
-   "goal": "MOVE_WATER_GUN independently proves its complete projectile/hitsplat/three-droplet body and target-BG2 alpha compositor in both orientations at 111/111 component/RAM and framebuffer frames, reproduced twice. ShakeMon2, BIND, and SUPERSONIC remain exact regression controls. SMALL_BUBBLES audit: BUBBLE BEAM independently proves its 18 large gWaterBubbleProjectile sprites, SwayMon, and WaterBubblesEffectShort; SECRET POWER environment-dispatches to distinct complete scripts (the Factory building route is STRENGTH, pond is BUBBLE BEAM); DIVE independently proves both two-turn splash/spray setup and strike RisingWaterHitEffect; MIST BALL needs its translating mist ball, target shakes/palette tasks, and full fog BG pipeline; FAKE TEARS uses the tag only for BlendParticle and needs RockMonBackAndForth plus eight thought-bubble/music-note tear sprites; WATER PULSE needs five independently parameterized bubble sprites, three blue rings, target shake, and whole-BG palette blend. WATER_IMPACT audit: HYDRO PUMP needs its paired orb beam stream, sine timer, attacker/target shakes, and repeated hitsplats; CRABHAMMER is independently exact with its palette blend, target slide/return, ShakeMon, and eight ice-crystal bubble pairs; SECRET POWER retains its distinct bodies; WATER SPOUT independently proves WaterSpoutLaunch and WaterSpoutRain with glowy-blue-orb launch/rain geometry. Shared components never promote a remaining sibling without its own complete dense evidence."
-  },
+   "MOVE_CRABHAMMER",
+   "MOVE_WATER_SPOUT"
+  ],
+  "fulfilled": true,
+  "evidence": [
+   "tests/animation/waterGunSmallBubblesWaterImpactTrack.test.ts",
+   "tests/animation/waterPulseActualCore.test.ts"
+  ],
+  "goal": "FULFILLED only after all ten representatives retain independent exact evidence. WATER_GUN proves its projectile/hitsplat/three-droplet body; BUBBLE_BEAM its 18 projectiles, SwayMon, and short bubbles; SECRET_POWER its Factory-building STRENGTH dispatch; DIVE both two-turn setup and RisingWaterHitEffect strike; MIST_BALL its translating ball, shakes, palette tasks, and fog BG; FAKE_TEARS its BlendParticle, RockMonBackAndForth, and tear sprites; WATER_PULSE its distinct five bubble programs, three affine rings and emitted pairs, target shake, whole-BG palette blend, monbg, and cleanup; HYDRO_PUMP its paired orb stream and hitsplats; CRABHAMMER its palette/slide/shake and crystal pairs; WATER_SPOUT its launch/rain body. Shared SMALL_BUBBLES or WATER_IMPACT components transfer no timing, latch, source-body, or move acceptance."
+ },
   {
    "id": "water-spout-launch-rain",
    "components": [

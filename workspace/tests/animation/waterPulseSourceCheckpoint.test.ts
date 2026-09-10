@@ -42,7 +42,7 @@ describe("MOVE_WATER_PULSE source/classification checkpoint", () => {
     ]);
   });
 
-  it("pins the complete legal Level-50 Water Pulse carrier census and leaves the shared track without credit", () => {
+  it("pins the complete legal Level-50 carrier census and original no-credit source checkpoint", () => {
     const audit = JSON.parse(auditText()) as Json;
     expect(audit.carriers).toMatchObject({
       count: 12,

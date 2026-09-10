@@ -159,13 +159,17 @@ const outside = carriers.filter((entry: Json) => !level50Ranges.some((range) => 
 const rootStart = sym("Move_WATER_PULSE").address;
 const rootEnd = sym("Move_PSYCHO_BOOST").address;
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "water-gun-small-bubbles-water-impact");
+const pulseCoverage = coverage.entries.find((entry: Json) => entry.move === "MOVE_WATER_PULSE");
 
 if (JSON.stringify(commandRows(rootBody)) !== JSON.stringify(expectedCommands)) throw new Error("Water Pulse root command order drifted");
 if (!graphEntry || graphEntry.id !== 352 || graphEntry.rootScript !== "Move_WATER_PULSE"
   || JSON.stringify(graphEntry.blocks) !== JSON.stringify(["Move_WATER_PULSE"])
   || JSON.stringify(graphEntry.componentIds) !== JSON.stringify(expectedComponents)) throw new Error("Water Pulse generated nine-component graph drifted");
 if (JSON.stringify(level50.map((entry: Json) => entry.index)) !== JSON.stringify([131, 147, 155, 176, 182, 204, 213, 228, 242, 259, 309, 756])) throw new Error("Water Pulse Level-50 carrier census drifted");
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_WATER_PULSE") || !track?.representatives.includes("MOVE_WATER_PULSE")) throw new Error("Water Pulse unsupported coverage boundary drifted");
+if (!track?.representatives.includes("MOVE_WATER_PULSE")
+  || (pulseCoverage && (pulseCoverage.status !== "exact" || track.fulfilled !== true))) {
+  throw new Error("Water Pulse coverage boundary drifted");
+}
 
 requireTokens("Water Pulse macro", macros, [".macro simple_palette_blend", "createsprite gSimplePaletteBlendSpriteTemplate"]);
 requireTokens("Water Pulse bubble templates", water, [

@@ -547,9 +547,9 @@ describe("blue-orb-reversal-evidence standalone fulfilled component-track ratche
     );
     const level50Moves = new Set(inventory.tiers.level50.moves.map((entry) => entry.move));
     expect(level50Moves.size).toBe(276);
-    expect(coverage.entries).toHaveLength(245);
+    expect(coverage.entries).toHaveLength(246);
     expect(coverage.entries.filter((entry) => level50Moves.has(entry.move) && entry.status === "exact"))
-      .toHaveLength(245);
+      .toHaveLength(246);
     expect(coverage.entries.filter((entry) => level50Moves.has(entry.move)
       && (entry.status === "partial" || entry.status === "staged"))).toEqual([]);
     const reversal = coverage.entries.find((entry) => entry.move === "MOVE_REVERSAL")!;

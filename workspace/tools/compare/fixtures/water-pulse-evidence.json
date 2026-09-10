@@ -7,7 +7,7 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/waterPulseSourceAudit.ts",
-    "auditSha256": "52d1c76a870cb85e1bde7c4cfa54b83331c6a2dc208c4065bf1499972f5e95e7",
+    "auditSha256": "f1c26fc37b19ef520e278cbc54415bab4a2df8b2c80623d7f12dba509dcff184",
     "auditRunSha256": "9e33953c5ee1804a3b12eb96598c60372c964c0e6bff2997e87688c8ff67dffb",
     "probe": "tools/compare/waterPulseProbe.py",
     "probeSha256": "12f8e4fefe5b11b340011c1ce8ca517281ee2cb9afec710ff87820b5e110d420",

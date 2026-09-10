@@ -58,7 +58,7 @@ describe("MOVE_WATER_PULSE bilateral dense evidence", () => {
     expect(map.rows[72].audio.SE1.songHeaderIdentity.symbol).toBe("se_m_giga_drain");
   });
 
-  it("keeps Water Pulse unsupported and records no new latch or production seam", () => {
+  it("keeps the retained evidence checkpoint immutable while current coverage is exact", () => {
     expect(fixture).toMatchObject({
       oracleProfile: "battle-scene-on",
       move: "MOVE_WATER_PULSE",
@@ -78,8 +78,10 @@ describe("MOVE_WATER_PULSE bilateral dense evidence", () => {
       },
     });
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Json;
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_WATER_PULSE")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: Json) => track.id === "water-gun-small-bubbles-water-impact")?.representatives).toContain("MOVE_WATER_PULSE");
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_WATER_PULSE"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "water-gun-small-bubbles-water-impact"))
+      .toMatchObject({ fulfilled: true, representatives: expect.arrayContaining(["MOVE_WATER_PULSE"]) });
     expect(readFileSync("ANIMATION_LATCHES.md", "utf8")).not.toContain("Water Pulse");
   });
 });
