@@ -5,6 +5,64 @@ full history regardless.
 
 ---
 
+## R83 — [supervised session, 2026-09-10, unattended] **M80 side-status family folded (fourth green fold)**
+
+- **State:** `rust-main` = master (no-op merge at orient) plus four verified
+  Sonnet worker fast-forwards this session — `b3d9cb554` M77 critcalc,
+  `0bdd9dccd` M78 adjust-damage family, `5bb8fab60` M79 fixed-damage cluster
+  (supervisor-repair commit), `1fe7c7104` M80 side-status family — each
+  followed by its ledger commit and a successful `backup-refs.sh` push.
+  Tree clean, committed, green; no worker worktree or branch left behind.
+  No ABI, adapter, recovery module, canonical TS, or npm file was touched
+  all session, so the main supervisor's fold is `core-rs/**` +
+  `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
+  ~19 min, foreground gates per the new brief rule) ported the five-opcode
+  side-status family from `battleScriptSetSideStatusOpcode.ts` (0x7E
+  setreflect / 0x92 setlightscreen / 0x99 setmist / 0xB8 setsafeguard /
+  0xEE removelightscreenreflect): the shared bit-setter shape (fail-if-active
+  → MISSED + chooser 0 only; success → bit + 5-turn timer + battlerId +
+  single-message chooser), Mist's divergences (guard on the RAW mistTimers
+  value not the bit — bit-set-timer-0 succeeds, pinned — FAILED not MISSED,
+  its own choosers), removelightscreenreflect's opposing-side timer-guarded
+  clear with animTurn/animTargetsHit on both branches, the
+  registerSingleInstruction convention (exactly-1 + 0-operands, NO
+  dispatcher check — third registration convention now pinned), and the
+  documented C discrepancy (double-battle message variant unmodeled; TS is
+  spec). **30 behavior + 6 registration** cases; corpus sha256
+  `323e4c45348f7a5d3ea5122a227da640ae01171b8dd0d3ad92c35c790aac6208`
+  (163,574 bytes). Worker self-corrected one brief citation (setsafeguard
+  body ends `:8668`, not `:8669`) — verified correct.
+- **Next:** merge master, re-run the four Rust gates, then continue.
+  Scouted candidates (2026-09-10): bicbyte/orbyte/bicword byte-algebra
+  opcodes (heavier catalog + multi-start registration — orbyte requires ALL
+  11 concrete starts, `battleScriptStatbuffchangeOpcode.ts` /
+  `battleScriptSetByte.ts` / `battleScriptDamagingWeatherOpcode.ts:444`);
+  JUMPIFSTATUS/JUMPIFSTATUS2. With M77's rng projection precedent, the
+  bigger rng-drawing hit-chain leaves (accuracycheck, tryKO) are also now
+  unblocked. Re-scout with /tmp/rust-briefs/{ts,rs}-opcodes.txt. No
+  deferral is open.
+- **Notes:** supervisor audit covered the shared bit-setter (fail branch
+  mutates flags+chooser only), Mist's timer-vs-bit guard, opposing-side
+  algebra, and both registration error texts; independent regeneration was
+  byte-identical. Generated Rust **411,700 bytes**, sha256
+  `0cf9d94f7353bcfb15fa6f2e154c8b5d8517560769dcac131e4a4ad81e48c28d`;
+  generator **26,080 bytes**, sha256
+  `210ed992fe04ae2e86eaba7e2db89aec5450837db38327d73550dca595e3f15d`.
+  Final gates on `rust-main`: **1,492/1,492** native (up from 1,425 at
+  orient, +67 across four leaves), fmt, strict workspace Clippy, wasm32
+  release; artifact **512,497 bytes**, sha256
+  `43d3e2d670482bcb73ee60db4f524b6b14e64dcd64ef0bbfe64baa8125ac3082`.
+  Session-wide: four Sonnet workers (~$18), three clean landings 19-29 min,
+  one cap-expiry (M79: worker ran gates as a background task and ended its
+  turn — end_turn kills pending work; briefs now mandate FOREGROUND gates;
+  supervisor verified + committed the finished work as a direct repair).
+  12 opcodes went native this session (crit trio member + 3 adjust + 4
+  fixed-damage + 5 side-status = 79 opcode names ported of 215 TS names).
+  No npm gate required; no deferral or barrier added. R80 archived.
+  PAPERCUT: M79 end_turn-vs-background-gates, ~15 supervisor minutes.
+
+
 ## R82 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M79 fixed-damage cluster folded (third green fold; supervisor-repair commit)**
 
 - **State:** `rust-main` = master + M77 `b3d9cb554` + M78 `0bdd9dccd` + M79

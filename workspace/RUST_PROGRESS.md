@@ -6,6 +6,61 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R86 — [supervised session, 2026-09-10 15:01 UTC–, unattended] **M83 tryKO folded (second green fold this session)**
+
+- **State:** `rust-main` = master (no-op merge at orient) + `7d3206705` M82
+  byte-algebra trio + `4ecf69eb0` M83 tryKO, each a verified Sonnet worker
+  fast-forward followed by its ledger commit and `backup-refs.sh` push.
+  Tree clean, committed, green. No ABI, adapter, canonical TS, or npm file
+  touched; the main supervisor's fold remains `core-rs/**` +
+  `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 60-min cap, one commit,
+  ~27 min, foreground gates) ported 0x93 tryKO
+  (`battle_script_commands.c:7490-7576`), OHKO's own hit/miss
+  determination — up to TWO ordered rng draws under the M77/M78 projection
+  (Focus Band holder-only roll "tryko-focus-band", consumed even when
+  Sturdy then short-circuits; formula roll "tryko" skipped only on the
+  exact ownedSureHit conjunction), Sturdy's hardcoded-label jump
+  (tryinfatuating precedent) + native ability reveal, the strict-<
+  formula with the level-clause hard override (winning roll still misses
+  as UNAFFECTED when out-leveled; C u16-wrap unobservability documented),
+  the hit trichotomy (endured > focusBanded > plain OHKO, incl. persisted
+  focusBanded and lastUsedItem), both miss-message choosers, lazy fail
+  label, find-first REQUIRED registration, and every error text pinned
+  verbatim (incl. the ungrammatical "a attacker"). Reused native
+  ai_reveal/adjustdamage hold-effect/MOVES projections — no new table
+  formats. **27 behavior + 3 registration** cases; corpus sha256
+  `c949f5acd9149736b56ac90e07e71fb2f18b399abe7cb30cce09b7a97cf429d7`.
+  Worker surfaced that the missing-Sturdy-label case IS TS-differentially
+  realizable via `program.labelEntries` excision (unlike tryinfatuating's
+  Oblivious analogue) and pinned it through the real canonical handler.
+- **Next:** re-scout the remaining unported opcodes (85 of 215 TS names
+  ported; ledger count is authoritative — a quick OPCODE_NAME-const grep
+  undercounts family modules). Largest scouted candidate: accuracycheck
+  (66 call sites; its accuracy calc is already native in damageCalc — the
+  opcode adds protect/semi-invulnerable/always-hit gates + the roll).
+- **Notes:** supervisor audit walked the apply body against TS line by
+  line (draw ordering, pre/post-band state captures, sure-hit conjunction
+  legs, strict-< boundary, trichotomy precedence, injected-label
+  projection, hold-effect error passthrough) and verified
+  battle.h:220/224/226/227, battle_string_ids.h:492-493,
+  battle_message.c:1108-1111, abilities.h:9, hold_effects.h:43;
+  independent regeneration was byte-identical. Generated Rust **150,325
+  bytes**, sha256
+  `763d99eb7861392102d11da5bd685c548755e5c70c9e866e99c99a1366df3278`;
+  generator **37,557 bytes**, sha256
+  `6cd890b0590f2ab44c2bc5a23164127a2c71dbebd35460d75eca9452db273e1c`.
+  Gates on `rust-main` post-fold: **1,560/1,560** native (+26), fmt,
+  strict workspace Clippy, wasm32 release; artifact **512,236 bytes**,
+  sha256
+  `f4ab8601795e93ad172412b96905cce60d4b6b0a53bfd2754592ab9d172b51ac`.
+  Worker: 27.4 min, $5.27. Cosmetic: module doc's TS filename has a
+  doubled suffix ("battleScriptTryKOOpcodeOpcode.ts") — harmless. Case
+  count landed under the brief's ~40-55 band (27) but covers every named
+  branch/boundary; accepted. No npm gate required; no deferral or barrier
+  added. R83 archived.
+
+
 ## R85 — [supervised session, 2026-09-10 15:01 UTC–, unattended] **M82 byte-algebra trio folded (first green fold this session)**
 
 - **State:** `rust-main` = master (no-op merge at orient) + `7d3206705` M82
@@ -109,61 +164,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   session (81 of 215 TS opcode names ported). No npm gate required; no
   deferral or barrier added. R81 archived. PAPERCUT: M79 end_turn expiry,
   ~15 supervisor minutes.
-
-
-## R83 — [supervised session, 2026-09-10, unattended] **M80 side-status family folded (fourth green fold)**
-
-- **State:** `rust-main` = master (no-op merge at orient) plus four verified
-  Sonnet worker fast-forwards this session — `b3d9cb554` M77 critcalc,
-  `0bdd9dccd` M78 adjust-damage family, `5bb8fab60` M79 fixed-damage cluster
-  (supervisor-repair commit), `1fe7c7104` M80 side-status family — each
-  followed by its ledger commit and a successful `backup-refs.sh` push.
-  Tree clean, committed, green; no worker worktree or branch left behind.
-  No ABI, adapter, recovery module, canonical TS, or npm file was touched
-  all session, so the main supervisor's fold is `core-rs/**` +
-  `RUST_PROGRESS*.md` only.
-- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
-  ~19 min, foreground gates per the new brief rule) ported the five-opcode
-  side-status family from `battleScriptSetSideStatusOpcode.ts` (0x7E
-  setreflect / 0x92 setlightscreen / 0x99 setmist / 0xB8 setsafeguard /
-  0xEE removelightscreenreflect): the shared bit-setter shape (fail-if-active
-  → MISSED + chooser 0 only; success → bit + 5-turn timer + battlerId +
-  single-message chooser), Mist's divergences (guard on the RAW mistTimers
-  value not the bit — bit-set-timer-0 succeeds, pinned — FAILED not MISSED,
-  its own choosers), removelightscreenreflect's opposing-side timer-guarded
-  clear with animTurn/animTargetsHit on both branches, the
-  registerSingleInstruction convention (exactly-1 + 0-operands, NO
-  dispatcher check — third registration convention now pinned), and the
-  documented C discrepancy (double-battle message variant unmodeled; TS is
-  spec). **30 behavior + 6 registration** cases; corpus sha256
-  `323e4c45348f7a5d3ea5122a227da640ae01171b8dd0d3ad92c35c790aac6208`
-  (163,574 bytes). Worker self-corrected one brief citation (setsafeguard
-  body ends `:8668`, not `:8669`) — verified correct.
-- **Next:** merge master, re-run the four Rust gates, then continue.
-  Scouted candidates (2026-09-10): bicbyte/orbyte/bicword byte-algebra
-  opcodes (heavier catalog + multi-start registration — orbyte requires ALL
-  11 concrete starts, `battleScriptStatbuffchangeOpcode.ts` /
-  `battleScriptSetByte.ts` / `battleScriptDamagingWeatherOpcode.ts:444`);
-  JUMPIFSTATUS/JUMPIFSTATUS2. With M77's rng projection precedent, the
-  bigger rng-drawing hit-chain leaves (accuracycheck, tryKO) are also now
-  unblocked. Re-scout with /tmp/rust-briefs/{ts,rs}-opcodes.txt. No
-  deferral is open.
-- **Notes:** supervisor audit covered the shared bit-setter (fail branch
-  mutates flags+chooser only), Mist's timer-vs-bit guard, opposing-side
-  algebra, and both registration error texts; independent regeneration was
-  byte-identical. Generated Rust **411,700 bytes**, sha256
-  `0cf9d94f7353bcfb15fa6f2e154c8b5d8517560769dcac131e4a4ad81e48c28d`;
-  generator **26,080 bytes**, sha256
-  `210ed992fe04ae2e86eaba7e2db89aec5450837db38327d73550dca595e3f15d`.
-  Final gates on `rust-main`: **1,492/1,492** native (up from 1,425 at
-  orient, +67 across four leaves), fmt, strict workspace Clippy, wasm32
-  release; artifact **512,497 bytes**, sha256
-  `43d3e2d670482bcb73ee60db4f524b6b14e64dcd64ef0bbfe64baa8125ac3082`.
-  Session-wide: four Sonnet workers (~$18), three clean landings 19-29 min,
-  one cap-expiry (M79: worker ran gates as a background task and ended its
-  turn — end_turn kills pending work; briefs now mandate FOREGROUND gates;
-  supervisor verified + committed the finished work as a direct repair).
-  12 opcodes went native this session (crit trio member + 3 adjust + 4
-  fixed-damage + 5 side-status = 79 opcode names ported of 215 TS names).
-  No npm gate required; no deferral or barrier added. R80 archived.
-  PAPERCUT: M79 end_turn-vs-background-gates, ~15 supervisor minutes.
