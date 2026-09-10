@@ -6989,7 +6989,9 @@
   ]
  }
  ],
- "queue": [],
+ "queue": [
+  "MOVE_DESTINY_BOND"
+ ],
  "componentTracks": [
   {
    "id": "spider-web-thread",
@@ -8909,6 +8911,31 @@
     "tests/animation/skyUppercutActualCore.test.ts"
    ],
    "goal": "FULFILLED by MOVE_SKY_UPPERCUT only: all 17 components are independently covered by its complete bilateral 188/188 source-derived reducer, typed seam, and twice-deterministic zero-residual actual-core framebuffer acceptance through cleanup age 187. Shared IMPACT, slide, shake, fade, monbg, and BG facts transfer no acceptance or latch credit to any sibling."
+  },
+  {
+   "id": "destiny-bond-white-shadow",
+   "components": [
+    "asset:ANIM_TAG_WHITE_SHADOW",
+    "task:AnimTask_BlendBattleAnimPalExclude",
+    "task:AnimTask_DestinyBondWhiteShadow",
+    "task:AnimTask_ShakeMonInPlace",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:fadetobg",
+    "visualCommand:restorebg",
+    "visualCommand:waitbgfadein"
+   ],
+   "representatives": ["MOVE_DESTINY_BOND"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/battle-lab/mechanic-destiny-bond-player-wobbuffet-opponent-onix.json",
+    "tools/battle-lab/mechanic-destiny-bond-opponent-wobbuffet-player-onix.json",
+    "tools/compare/destinyBondSourceAudit.ts",
+    "tools/compare/destinyBondStagingProbe.py",
+    "tools/compare/fixtures/destiny-bond-staging-receipt.json",
+    "tests/animation/destinyBondSourceCheckpoint.test.ts"
+   ],
+   "goal": "UNFULFILLED staging-only track. MOVE_DESTINY_BOND is its sole representative and remains unsupported until its complete legal bilateral Scene-ON root-to-cleanup windows, source-relative reducer, production asset wiring, typed seam, compositor, and twice-fresh actual-core framebuffer acceptance are independently proven. The listed exact controls only check source/component identity: Luster Purge (BlendBattleAnimPalExclude), HI_JUMP_KICK/THRASH/HORN_DRILL/SKY_UPPERCUT (distinct ShakeMonInPlace schedules), and Grudge/Aurora Beam (fade/background transfer). They confer no move, component, sibling, or latch credit."
   }
  ],
  "variantAudits": {

@@ -48,7 +48,7 @@ describe("MOVE_SKY_UPPERCUT source and legal staging checkpoint", () => {
 
   it("observes Sky Uppercut's independent exact promotion", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.queue).toEqual([]); expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SKY_UPPERCUT")).toMatchObject({ status: "exact" });
+    expect(coverage.queue).toEqual(["MOVE_DESTINY_BOND"]); expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SKY_UPPERCUT")).toMatchObject({ status: "exact" });
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "sky-uppercut-impact-slide-bg");
     expect(track).toMatchObject({ representatives: ["MOVE_SKY_UPPERCUT"], fulfilled: true }); expect(track.components).toHaveLength(17); expect(track.components).toContain("task:AnimTask_MoveSkyUppercutBg");
   });

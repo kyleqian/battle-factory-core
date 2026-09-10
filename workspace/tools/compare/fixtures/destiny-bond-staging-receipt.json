@@ -1,0 +1,72 @@
+{
+  "schema": "destiny-bond-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_DESTINY_BOND",
+  "moveId": 194,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/destinyBondSourceAudit.ts",
+    "auditRunSha256": "69ec630511b4ef8915ecc7ac5cc503b8f916340895a23e072c3e7447c2473c9b",
+    "probe": "tools/compare/destinyBondStagingProbe.py",
+    "probeSha256": "f0ee06eef3bfffbf1f3d05dc87c5c2856f03816591b4731c8b0f80070ebdae25",
+    "pointerOwnedRoot": {"start": "0x082cd62c", "endExclusive": "0x082cd687", "romSha256": "7103101a87e4167605c3924a8ab8b251bd48c95b331f85d97d66165848774028"}
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "denseWindowCaptured": false,
+    "latchMeasured": false,
+    "productionChanged": false,
+    "coveragePromotion": false,
+    "transientOverrides": [],
+    "battleStateInjected": false,
+    "entryHooksSkipped": false,
+    "noReducerOrSeamOrCompositor": true
+  },
+  "runs": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-destiny-bond-player-wobbuffet-opponent-onix.json",
+      "scenarioSha256": "13507416078ca3976c639b2a48e1b92aa5e528a55c2250a889e03266f8bcfcec",
+      "freshRuns": 2,
+      "outputSha256": "a4b76fab9f11ac2a1d88b26fcf017928d778930891fa703219186e9931e0b312",
+      "outputsByteIdentical": true,
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "player", "partyIndex": 0, "species": 202, "level": 50, "moves": [194, 194, 194, 194]},
+      "target": {"side": "opponent", "partyIndex": 0, "species": 95, "level": 50, "moves": [33, 33, 33, 33]},
+      "legalAiMoveSlots": [33, 33, 33, 33],
+      "root": {"symbol": "Move_DESTINY_BOND", "start": "0x82cd62c", "endExclusive": "0x82cd687", "observations": 187, "attackerBattler": 0, "targetBattler": 0, "controllerExecFlags": 1, "targetContract": "MOVE_TARGET_USER self-target; White Shadow discovers visible opponents"},
+      "pp": {"before": [5, 5, 5, 5], "after": [4, 5, 5, 5], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true},
+      "transientFreeSetup": true
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-destiny-bond-opponent-wobbuffet-player-onix.json",
+      "scenarioSha256": "f3c2c0f6034a00f3a806b54ab4fd0fd953c7a7405dc32e58b7a1a724fabba969",
+      "freshRuns": 2,
+      "outputSha256": "30b3536bf0c69f306c9095aa991b1ea12f97b4afa33807df6edc83d6058d9800",
+      "outputsByteIdentical": true,
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "opponent", "partyIndex": 0, "species": 202, "level": 50, "moves": [194, 194, 194, 194]},
+      "target": {"side": "player", "partyIndex": 0, "species": 95, "level": 50, "moves": [33, 33, 33, 33]},
+      "legalAiMoveSlots": [194, 194, 194, 194],
+      "root": {"symbol": "Move_DESTINY_BOND", "start": "0x82cd62c", "endExclusive": "0x82cd687", "observations": 187, "attackerBattler": 1, "targetBattler": 1, "controllerExecFlags": 2, "targetContract": "MOVE_TARGET_USER self-target; White Shadow discovers visible opponents"},
+      "pp": {"before": [5, 5, 5, 5], "after": [5, 5, 5, 4], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true},
+      "transientFreeSetup": true
+    }
+  },
+  "controls": {
+    "sourceComponentIdentityOnly": {
+      "MOVE_LUSTER_PURGE": "AnimTask_BlendBattleAnimPalExclude",
+      "MOVE_HI_JUMP_KICK": "ShakeMonInPlace(target,3,0,11,1)",
+      "MOVE_THRASH": "ShakeMonInPlace(target,4,0,7,1) twice; (target,8,0,16,1)",
+      "MOVE_HORN_DRILL": "ShakeMonInPlace(attacker,2,0,40,1); (target,10,0,40,1)",
+      "MOVE_SKY_UPPERCUT": "ShakeMonInPlace(target,0,3,6,1)",
+      "MOVE_GRUDGE": "Fade/background transfer control",
+      "MOVE_AURORA_BEAM": "Fade/background transfer control"
+    },
+    "credit": "None: no control grants Destiny Bond, component, latch, or sibling acceptance."
+  }
+}
