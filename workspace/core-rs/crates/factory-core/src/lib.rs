@@ -34,6 +34,8 @@ pub mod battle_script_damagecalc;
 pub mod battle_script_damagecalc_vectors_gen;
 pub mod battle_script_doubledamageifdamaged;
 pub mod battle_script_doubledamageifdamaged_vectors_gen;
+pub mod battle_script_fixed_damage;
+pub mod battle_script_fixed_damage_vectors_gen;
 pub mod battle_script_friendshiptodamage;
 pub mod battle_script_friendshiptodamage_vectors_gen;
 pub mod battle_script_furycutter;
