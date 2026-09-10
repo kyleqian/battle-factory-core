@@ -17,7 +17,7 @@ const sha256 = (value: Uint8Array | string): string =>
 const scriptsPath = join(root, "reference/pokeemerald/data/battle_anim_scripts.s");
 const scripts = readFileSync(scriptsPath, "utf8");
 const start = scripts.indexOf("Move_DESTINY_BOND:\n");
-const end = scripts.indexOf("\nMove_MEMENTO:", start);
+const end = scripts.indexOf("\nMove_ENDURE:", start);
 if (start < 0 || end < 0) throw new Error("Move_DESTINY_BOND source body missing");
 const body = scripts.slice(start, end);
 for (const token of [
@@ -40,7 +40,7 @@ const ghostBytes = readFileSync(ghostPath);
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
-    script: "data/battle_anim_scripts.s:3176 Move_DESTINY_BOND",
+    script: "data/battle_anim_scripts.s:3176-3195 Move_DESTINY_BOND",
     scriptSha256: sha256(body),
     whiteShadow: "graphics/battle_anims/sprites/white_shadow.png; gDestinyBondWhiteShadowSpriteTemplate; ANIM_TAG_WHITE_SHADOW",
     ghostBackground: "src/assets/gen/battle-anim-ghost-bg.json; source-extracted BG_GHOST",
