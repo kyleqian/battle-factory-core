@@ -36,9 +36,6 @@ function file(path: string): Buffer { return readFileSync(resolve(root, path)); 
 function transitions(rows: Json[], select: (row: Json) => unknown): number[] {
   return rows.flatMap((row, age) => age && !same(select(row), select(rows[age - 1]!)) ? [age] : []);
 }
-function edgeValues(rows: Json[], select: (row: Json) => unknown): [number, unknown][] {
-  return transitions(rows, select).map((age) => [age, select(rows[age]!)]);
-}
 function paletteBanks(palette: number[]): string[] {
   return Array.from({ length: 32 }, (_, bank) => sha(JSON.stringify(palette.slice(bank * 16, bank * 16 + 16))));
 }
