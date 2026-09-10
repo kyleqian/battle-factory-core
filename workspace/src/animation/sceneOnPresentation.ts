@@ -895,6 +895,11 @@ import {
   type DestinyBondState,
 } from "./destinyBond.ts";
 import {
+  waterPulseAtAge,
+  type WaterPulseLiveInputs,
+  type WaterPulseState,
+} from "./waterPulse.ts";
+import {
   fissureAtAge,
   type FissureState,
 } from "./fissure.ts";
@@ -3476,6 +3481,21 @@ export interface SceneOnDestinyBondConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/**
+ * Narrow semantic Scene-ON seam for MOVE_WATER_PULSE.  The caller retains
+ * allocator, monbg, register, and source-origin ownership; this injects only
+ * live battler identity and current picture centers.
+ */
+export interface SceneOnWaterPulseConfig {
+  readonly move: "WATER_PULSE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<WaterPulseLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
 export interface SceneOnEruptionConfig {
   readonly move: "ERUPTION";
@@ -4076,6 +4096,7 @@ export type SceneOnMoveConfig =
   | SceneOnPetalDanceConfig
   | SceneOnSkyUppercutConfig
   | SceneOnDestinyBondConfig
+  | SceneOnWaterPulseConfig
   | SceneOnEruptionConfig
   | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
@@ -4302,6 +4323,8 @@ export type SceneOnSkyUppercutPresentationState =
   SceneOnMovePresentationState<SceneOnSkyUppercutConfig>;
 export type SceneOnDestinyBondPresentationState =
   SceneOnMovePresentationState<SceneOnDestinyBondConfig>;
+export type SceneOnWaterPulsePresentationState =
+  SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -5251,6 +5274,11 @@ export interface SceneOnSkyUppercutView extends SkyUppercutState {
 }
 
 export interface SceneOnDestinyBondView extends DestinyBondState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnWaterPulseView extends WaterPulseState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -10344,6 +10372,29 @@ export function sceneOnDestinyBondView(
   const { attacker, target, animationInputs } = state.config;
   return {
     ...destinyBondAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerCenter: attacker.geometry.animationCenter,
+      targetCenter: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_WATER_PULSE's retained root-load source row. */
+export function sceneOnWaterPulseView(
+  state: SceneOnWaterPulsePresentationState,
+): SceneOnWaterPulseView {
+  if (state.config.move !== "WATER_PULSE") {
+    throw new Error(`expected WATER_PULSE presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...waterPulseAtAge(state.age, {
       ...animationInputs,
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
