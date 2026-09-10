@@ -15,12 +15,14 @@ import {
   type DestinyBondLiveInputs,
 } from "../../src/animation/destinyBond.ts";
 import {
+  type SceneOnDestinyBondConfig,
   sceneOnDestinyBondView,
   type SceneOnDestinyBondPresentationState,
 } from "../../src/animation/sceneOnPresentation.ts";
 
 type Json = Record<string, any>;
-type Side = "player-back" | "opponent-front";
+export type DestinyBondOrientation = "player-back" | "opponent-front";
+type Side = DestinyBondOrientation;
 const root = resolve(new URL("../..", import.meta.url).pathname);
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 function invariant(value: unknown, message: string): asserts value { if (!value) throw new Error(message); }
@@ -86,6 +88,39 @@ function inputsFor(rows: Json[], side: Side): DestinyBondLiveInputs {
     whiteShadowOrderIndex: rows[43]!.spriteOrder.indexOf(whiteAtCreate.slot),
     visibleObjPaletteBanks: [16, 17],
     excludedObjPaletteBanks: Array.from({ length: 14 }, (_, index) => index + 18),
+  };
+}
+
+/** Build the production seam from one orientation's live allocator and geometry facts. */
+export function destinyBondConfigFor(
+  side: DestinyBondOrientation,
+  rows: Json[],
+  spriteOrder: readonly number[],
+): SceneOnDestinyBondConfig {
+  const input = inputsFor(rows, side);
+  const attacker = rows[0]!.battlerSprites.attacker;
+  const target = rows[0]!.sprites.find((entry: Json) =>
+    entry.template?.symbol === "gMultiuseSpriteTemplate" && entry.slot !== attacker.slot);
+  invariant(target, `${side}: opposite battler sprite missing`);
+  const { attackerSide: _attackerSide, targetSide: _targetSide,
+    attackerSpecies: _attackerSpecies, targetSpecies: _targetSpecies,
+    attackerCenter: _attackerCenter, targetCenter: _targetCenter, ...animationInputs } = input;
+  return {
+    move: "DESTINY_BOND",
+    attacker: { species: "WOBBUFFET", geometry: { side: input.attackerSide,
+      spriteCorner: { x: attacker.x - 32, y: attacker.y - 32 },
+      animationCenter: { x: attacker.x, y: attacker.y },
+      battlePositionCenter: { x: attacker.x, y: attacker.y } } },
+    target: { species: "ONIX", geometry: { side: input.targetSide,
+      spriteCorner: { x: target.x - 32, y: target.y - 32 },
+      animationCenter: { x: target.x, y: target.y },
+      battlePositionCenter: { x: target.x, y: target.y } } },
+    fieldProfile: { playerHp: rows[0]!.battlers.player.hp,
+      playerMaxHp: rows[0]!.battlers.player.maxHp,
+      opponentHp: rows[0]!.battlers.opponent.hp,
+      opponentMaxHp: rows[0]!.battlers.opponent.maxHp,
+      playerGender: "male", opponentGender: "male" },
+    animationInputs: { ...animationInputs, spriteOrder },
   };
 }
 

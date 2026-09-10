@@ -545,6 +545,7 @@ import hailAsset from "../animation/assets/hail.json" with { type: "json" };
 import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import spiderWebAsset from "../animation/assets/spider-web.json" with { type: "json" };
 import petalDanceAsset from "../animation/assets/petal-dance.json" with { type: "json" };
+import destinyBondAsset from "../animation/assets/destiny-bond.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
 import waterOrbAsset from "../animation/assets/water-orb.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
@@ -1029,6 +1030,7 @@ import {
   sceneOnSpiderWebView,
   sceneOnPetalDanceView,
   sceneOnSkyUppercutView,
+  sceneOnDestinyBondView,
   sceneOnEruptionView,
   sceneOnWaterSpoutView,
   sceneOnSandTombView,
@@ -1264,6 +1266,7 @@ import {
   type SceneOnSpiderWebConfig,
   type SceneOnPetalDanceConfig,
   type SceneOnSkyUppercutConfig,
+  type SceneOnDestinyBondConfig,
   type SceneOnSmellingSaltConfig,
   type SceneOnRecycleConfig,
 } from "../animation/sceneOnPresentation.ts";
@@ -1832,6 +1835,9 @@ const spiderWebArt = spiderWebAsset as {
 };
 const petalDanceArt = petalDanceAsset as {
   flower: { tileset: Tileset; palette: RgbColor[] };
+};
+const destinyBondArt = destinyBondAsset as {
+  whiteShadow: { tileset: Tileset; palette: RgbColor[] };
 };
 const mudShotArt = mudShotAsset as {
   brownOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -31597,6 +31603,115 @@ export function renderSceneOnMovePresentation(
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "SKY UPPERCUT!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "DESTINY_BOND") {
+    const destinyState = state as SceneOnMovePresentationState<SceneOnDestinyBondConfig>;
+    const view = sceneOnDestinyBondView(destinyState);
+    const displayed = sceneOnDestinyBondView({
+      ...destinyState,
+      age: Math.max(0, destinyState.age - 1),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("DESTINY_BOND presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`DESTINY_BOND missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const darken = (palette: readonly RgbColor[]): RgbColor[] => palette.map((color) => {
+      const packed = mgbaDarkenColor(
+        color.r | color.g << 8 | color.b << 16,
+        view.registers.bldy,
+      );
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    });
+    if (view.background.vram === "ghost") {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimGhostBg.tileset,
+        tilemap: battleAnimGhostBg.tilemap,
+        subpalettes: [darken(battleAnimGhostBg.palette)],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(darken),
+      });
+    }
+
+    const blendTarget = mgbaColorFromBgr555(view.palette.colorBgr555);
+    const tint = { r: blendTarget & 0xff, g: blendTarget >>> 8 & 0xff, b: blendTarget >>> 16 & 0xff };
+    const attackerPalette = blendPaletteToward(
+      attackerArt.palette, tint, view.palette.hardwareCoefficient,
+    );
+    const targetPalette = blendPaletteToward(
+      targetArt.palette, tint, view.palette.hardwareCoefficient,
+    );
+    const shakeAge = destinyState.age === 94
+      ? 93
+      : destinyState.age >= 95 && destinyState.age <= 140
+        ? destinyState.age - 2
+        : 0;
+    const shaken = sceneOnDestinyBondView({ ...destinyState, age: shakeAge });
+    const attackerIdle = view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species) : { x2: 0, y2: 0 };
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species) : { x2: 0, y2: 0 };
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerPalette,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2 + shaken.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    );
+    const drawTarget = (): void => drawSpriteSheet(
+      fb, tilesFor(targetArt, view.target.geometry.side), targetPalette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+
+    const backdrop = fb.slice();
+    const shadow = displayed.sprites[0];
+    if (shadow && displayed.sourceOrder.includes(shadow.slot)) {
+      drawSpriteSheetBlendedOverBackdrop(
+        fb, backdrop, destinyBondArt.whiteShadow.tileset, destinyBondArt.whiteShadow.palette,
+        shadow.x - 32, shadow.y - 16,
+        view.registers.bldalpha & 0xff, view.registers.bldalpha >>> 8 & 0xff,
+      );
+    }
+    if (view.attacker.geometry.side === "player") {
+      drawTarget(); drawAttacker();
+    } else {
+      drawAttacker(); drawTarget();
+    }
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = destinyState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "DESTINY BOND!", 99,
     );
     return;
   }

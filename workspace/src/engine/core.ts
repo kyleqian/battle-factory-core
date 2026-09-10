@@ -179,6 +179,7 @@ import {
   type SceneOnSpiderWebConfig,
   type SceneOnPetalDanceConfig,
   type SceneOnSkyUppercutConfig,
+  type SceneOnDestinyBondConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -271,6 +272,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "SKY_UPPERCUT") {
     const skyUppercutPresentation = presentation as SceneOnMovePresentationState<SceneOnSkyUppercutConfig>;
     renderSceneOnMovePresentation(framebuffer, skyUppercutPresentation);
+    return;
+  }
+  if (presentation.config.move === "DESTINY_BOND") {
+    const destinyBondPresentation = presentation as SceneOnMovePresentationState<SceneOnDestinyBondConfig>;
+    renderSceneOnMovePresentation(framebuffer, destinyBondPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);
