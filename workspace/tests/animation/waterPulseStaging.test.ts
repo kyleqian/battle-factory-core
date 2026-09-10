@@ -89,10 +89,12 @@ describe("MOVE_WATER_PULSE legal Scene-ON source-staging checkpoint", () => {
     }
   });
 
-  it("keeps Water Pulse absent from coverage after the source/staging-only receipt", () => {
+  it("keeps the source/staging receipt immutable while current coverage is exact", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries).toHaveLength(246);
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_WATER_PULSE")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: Json) => track.id === "water-gun-small-bubbles-water-impact")?.representatives).toContain("MOVE_WATER_PULSE");
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_WATER_PULSE"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "water-gun-small-bubbles-water-impact"))
+      .toMatchObject({ fulfilled: true, representatives: expect.arrayContaining(["MOVE_WATER_PULSE"]) });
   });
 });
