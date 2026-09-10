@@ -53,13 +53,13 @@ describe("Move_SLASH source-relative reducer", () => {
     const slice1 = (age: number) => slashAtAge(age, GEOM_PLAYER).slices[0]!;
     expect(slice1(4).tileOffset).toBe(0);
     expect(slice1(7).tileOffset).toBe(16);
-    expect(slice1(11).tileOffset).toBe(31);
+    expect(slice1(11).tileOffset).toBe(32);
     expect(slice1(15).tileOffset).toBe(48);
     // slice2: cmd0 ages 10-12, cmd1 13-16, cmd2 17-20, cmd3 21-25
     const slice2 = (age: number) => slashAtAge(age, GEOM_PLAYER).slices[1]!;
     expect(slice2(10).tileOffset).toBe(0);
     expect(slice2(13).tileOffset).toBe(16);
-    expect(slice2(17).tileOffset).toBe(31);
+    expect(slice2(17).tileOffset).toBe(32);
     expect(slice2(21).tileOffset).toBe(48);
   });
 

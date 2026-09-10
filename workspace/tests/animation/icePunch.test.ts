@@ -242,7 +242,7 @@ describe("ICE_PUNCH source-composed presentation components", () => {
     expect(sceneOnIcePunchView({ ...stage, age: 1152 }).displayedTargetHp)
       .toBe(31);
     expect(sceneOnIcePunchView({ ...stage, age: 1153 }).displayedTargetHp)
-      .toBe(31);
+      .toBe(32);
     expect(sceneOnIcePunchView({ ...stage, age: 1182 }).displayedTargetHp)
       .toBe(61);
     expect(sceneOnIcePunchView({ ...stage, age: 1194 }).actionMenu.visible)
@@ -293,7 +293,7 @@ describe("ICE_PUNCH source-composed presentation components", () => {
     expect(sitrusHealTextVisibleCharsAtAge(203)).toBe(0);
     expect(sitrusHealTextVisibleCharsAtAge(204)).toBe(1);
     expect(sitrusDisplayedHpAtAge(305, 31, 61)).toBe(31);
-    expect(sitrusDisplayedHpAtAge(306, 31, 61)).toBe(31);
+    expect(sitrusDisplayedHpAtAge(306, 31, 61)).toBe(32);
     expect(sitrusDisplayedHpAtAge(999, 31, 61)).toBe(61);
   });
 

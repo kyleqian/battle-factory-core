@@ -40,8 +40,8 @@ describe("Move_LICK source-relative reducer", () => {
     expect(off(23)).toBe(8);
     expect(off(24)).toBe(16);
     expect(off(26)).toBe(24);
-    expect(off(28)).toBe(31);
-    expect(off(30)).toBe(31);
+    expect(off(28)).toBe(32);
+    expect(off(30)).toBe(32);
   });
 
   it("runs AnimLick_Step's invisible flicker ladder (case 0 flips every 2 ticks, case 1 every 4)", () => {
