@@ -6,6 +6,64 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R83 — [supervised session wind-down (final), 2026-09-10 03:01–~05:30 UTC, unattended] **M80 side-status family + session close (four green folds)**
+
+- **State:** `rust-main` = master (no-op merge at orient) plus four verified
+  Sonnet worker fast-forwards this session — `b3d9cb554` M77 critcalc,
+  `0bdd9dccd` M78 adjust-damage family, `5bb8fab60` M79 fixed-damage cluster
+  (supervisor-repair commit), `1fe7c7104` M80 side-status family — each
+  followed by its ledger commit and a successful `backup-refs.sh` push.
+  Tree clean, committed, green; no worker worktree or branch left behind.
+  No ABI, adapter, recovery module, canonical TS, or npm file was touched
+  all session, so the main supervisor's fold is `core-rs/**` +
+  `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
+  ~19 min, foreground gates per the new brief rule) ported the five-opcode
+  side-status family from `battleScriptSetSideStatusOpcode.ts` (0x7E
+  setreflect / 0x92 setlightscreen / 0x99 setmist / 0xB8 setsafeguard /
+  0xEE removelightscreenreflect): the shared bit-setter shape (fail-if-active
+  → MISSED + chooser 0 only; success → bit + 5-turn timer + battlerId +
+  single-message chooser), Mist's divergences (guard on the RAW mistTimers
+  value not the bit — bit-set-timer-0 succeeds, pinned — FAILED not MISSED,
+  its own choosers), removelightscreenreflect's opposing-side timer-guarded
+  clear with animTurn/animTargetsHit on both branches, the
+  registerSingleInstruction convention (exactly-1 + 0-operands, NO
+  dispatcher check — third registration convention now pinned), and the
+  documented C discrepancy (double-battle message variant unmodeled; TS is
+  spec). **30 behavior + 6 registration** cases; corpus sha256
+  `323e4c45348f7a5d3ea5122a227da640ae01171b8dd0d3ad92c35c790aac6208`
+  (163,574 bytes). Worker self-corrected one brief citation (setsafeguard
+  body ends `:8668`, not `:8669`) — verified correct.
+- **Next:** merge master, re-run the four Rust gates, then continue.
+  Scouted candidates (2026-09-10): bicbyte/orbyte/bicword byte-algebra
+  opcodes (heavier catalog + multi-start registration — orbyte requires ALL
+  11 concrete starts, `battleScriptStatbuffchangeOpcode.ts` /
+  `battleScriptSetByte.ts` / `battleScriptDamagingWeatherOpcode.ts:444`);
+  JUMPIFSTATUS/JUMPIFSTATUS2. With M77's rng projection precedent, the
+  bigger rng-drawing hit-chain leaves (accuracycheck, tryKO) are also now
+  unblocked. Re-scout with /tmp/rust-briefs/{ts,rs}-opcodes.txt. No
+  deferral is open.
+- **Notes:** supervisor audit covered the shared bit-setter (fail branch
+  mutates flags+chooser only), Mist's timer-vs-bit guard, opposing-side
+  algebra, and both registration error texts; independent regeneration was
+  byte-identical. Generated Rust **411,700 bytes**, sha256
+  `0cf9d94f7353bcfb15fa6f2e154c8b5d8517560769dcac131e4a4ad81e48c28d`;
+  generator **26,080 bytes**, sha256
+  `210ed992fe04ae2e86eaba7e2db89aec5450837db38327d73550dca595e3f15d`.
+  Final gates on `rust-main`: **1,492/1,492** native (up from 1,425 at
+  orient, +67 across four leaves), fmt, strict workspace Clippy, wasm32
+  release; artifact **512,497 bytes**, sha256
+  `43d3e2d670482bcb73ee60db4f524b6b14e64dcd64ef0bbfe64baa8125ac3082`.
+  Session-wide: four Sonnet workers (~$18), three clean landings 19-29 min,
+  one cap-expiry (M79: worker ran gates as a background task and ended its
+  turn — end_turn kills pending work; briefs now mandate FOREGROUND gates;
+  supervisor verified + committed the finished work as a direct repair).
+  12 opcodes went native this session (crit trio member + 3 adjust + 4
+  fixed-damage + 5 side-status = 79 opcode names ported of 215 TS names).
+  No npm gate required; no deferral or barrier added. R80 archived.
+  PAPERCUT: M79 end_turn-vs-background-gates, ~15 supervisor minutes.
+
+
 ## R82 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M79 fixed-damage cluster folded (third green fold; supervisor-repair commit)**
 
 - **State:** `rust-main` = master + M77 `b3d9cb554` + M78 `0bdd9dccd` + M79
@@ -97,53 +155,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `55eed0198510d362576397cd838b90e27917c8c740b6f1b711effcb3ebac2718`.
   Worker: 22.3 min, $4.48, zero rejections. No npm gate required; no
   deferral or barrier added. R78 archived. PAPERCUT: none new.
-
-
-## R80 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M77 `Cmd_critcalc` leaf folded — hit-chain trio complete, drawBattleScriptRng projection landed**
-
-- **State:** `rust-main` = master (no-op merge at orient; baseline 1,425 green
-  reconfirmed) plus verified Sonnet worker `b3d9cb554` (fast-forward). The
-  hit-chain damage trio is now fully native (damagecalc M75, typecalc M76,
-  critcalc M77), and M77 is the FIRST RNG-drawing battle-script leaf — its
-  projection decision is the precedent for accuracycheck/adjustnormaldamage/
-  tryko-class leaves. No ABI, adapter, recovery module, canonical TS, or npm
-  file touched. Session continuing toward more leaves.
-- **Did (this step):** recorded the projection decision (R80/M77): the TS
-  machine rng `{value, calls, ledger[]}` crosses as `{value: u32, calls:
-  u32}` ONLY; the leaf draws natively (`advance_rng_value` + upper-16
-  extraction, both already pinned in rng.rs); the outcome carries a
-  first-class `BattleScriptCritcalcRngDraw` mirroring the TS ledger tail
-  entry verbatim (call=calls+1, literal reason "critcalc", before, after,
-  random_value, six-field instruction provenance); the ledger array itself
-  stays TS-side; the immune branch draws nothing and passes rng through
-  untouched. Worker (claude-sonnet-5, 45-min cap, one commit, ~29 min)
-  ported `B_SCR_OP_CRITCALC` (0x04, `battle_script_commands.c:1253-1288`):
-  attacker→target→moveRow→hold-effect error precedence, stage/roll COMPOSED
-  from already-pinned `damage_calc` crit helpers + `base_damage`'s
-  `resolve_battler_hold_effect` (item+enigma-only shim), effect-id map
-  43/75/200/209, species gates 113/83, the 4-part immunity gate evaluated
-  BEFORE the draw (zero RNG consumed; five dedicated vectors incl. a
-  nonzero-calls pass-through pin). **30 behavior + 3 registration** cases;
-  corpus sha256
-  `6f79151fb416e38a6857f812310dd7819f81f59031acd0b31209325a4ba52b6e`
-  (166,814 bytes).
-- **Next:** continue with the next bounded leaf. Scouted: `Cmd_adjustnormaldamage`
-  (`install` at `battleScriptHitChainOpcode.ts:4722`; reuses the already-ported
-  `apply_random_damage_multiplier` + the M77 rng projection — natural second
-  RNG-drawing leaf); `bicword` lives in `battleScriptDamagingWeatherOpcode.ts:444`
-  (a different handler family — scout before briefing). Inventory diff:
-  /tmp/rust-briefs/{ts,rs}-opcodes.txt. No deferral is open.
-- **Notes:** supervisor audit covered the full apply body against the TS
-  handler (error precedence, immunity algebra, roll gate, crit write-back,
-  find-first registration with no shape validation, the hold-effect shim
-  reading only item + enigma array) and the LCG arithmetic by hand
-  (0xE → 0x98D8AA69, upper-16 0x98d8); independent regeneration was
-  byte-identical. Generated Rust **361,568 bytes**, sha256
-  `f7147515702fa416b0834b125af03071a817acf9663947b26c770fb7fd645f56`;
-  generator **32,621 bytes**, sha256
-  `542899d9cebeeb123a9059321dab62d90df824b204dccffb8ca00a8f5871b0ab`.
-  Gates rerun on `rust-main` post-fold: **1,448/1,448** native (+23), fmt,
-  strict workspace Clippy, wasm32 release; artifact **512,490 bytes**, sha256
-  `2417e88deab8e2ea7f741e5d93927845097d062aa0882a4bd2c20fcc78c7acf3`.
-  Worker: 28.6 min, $5.22, zero rejections. No npm gate required; no
-  deferral or barrier added. R77 archived. PAPERCUT: none new.
