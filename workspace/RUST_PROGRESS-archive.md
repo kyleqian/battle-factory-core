@@ -4,6 +4,59 @@ Older entries moved out of `RUST_PROGRESS.md` (newest first). Git keeps the
 full history regardless.
 
 ---
+## R77 — [supervised session, 2026-09-09, unattended] **M74 jumpif compare family leaf + green checkpoint (barrier projection landed)**
+
+- **State:** `rust-main` = R76 checkpoint `b0c81a13f` plus the verified Sonnet
+  worker `39f0cbca4` (fast-forward). The 0x29/0x2A/0x2B
+  `Cmd_jumpifbyte`/`Cmd_jumpifhalfword`/`Cmd_jumpifword` family is native and
+  wasm32-compilable, implementing R76's barrier-projection decision: the TS
+  `unsupported-branch` halt crosses as a first-class
+  `BattleScriptJumpifControl::Halt` variant mirroring the TS reason object
+  verbatim (never an error). No ABI, adapter, recovery module, canonical TS,
+  or npm file was touched. Session in wind-down after this fold.
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  ~33 min) ported the shared 6-comparator core (`battle_script_commands.c:
+  3657-3762`, CMP_* per `battle_script_commands.h:326-331`), find-first
+  registration with NO shape/cardinality validation (pinned: an ill-shaped
+  later duplicate does not fail registration), per-execution shape checks
+  (value widths 1/2/4), the three modeled pointer universes (9 byte / 3
+  halfword / 3 word pointers, i64-widened), lazy taken-branch-only jump
+  resolution, and catalog-based value resolution: the generator executes the
+  canonical `resolveBattleScriptSetByteValue` (byte), the moves.json id join
+  + B_WEATHER_SUN (halfword), and the JUMPIFWORD_VALUES map (word) over every
+  distinct value expression the committed program's call sites use — 65/15/37
+  concrete call sites (35/13/20 distinct triples) — emitting Some(value) or
+  None (→ Halt), so the port matches TS exactly over the committed program's
+  operand universe and diverges only on expressions no call site emits
+  (documented in the module doc comment). Canonical TS supplies **106
+  behavior** and **6 registration** cases; corpus sha256
+  `2bae823ca1fcfa4e1b3c028e0cacf75f9462447d136bcd458d3212a0cbf126db`.
+- **Next:** wind down: memory notes + final ledger + backup. Next-session
+  candidates (scouted 2026-09-09): with the shared base-damage helper (M72)
+  and this compare family landed, the damagecalc-chain opcodes
+  (`Cmd_damagecalc` `battle_script_commands.c:1288-1301`, `Cmd_critcalc`
+  :1253-1286 — RNG-consuming, needs the drawBattleScriptRng projection —
+  and `Cmd_typecalc` :1355-1420) are the highest-leverage reachable family;
+  remaining pure leaves otherwise thin. No deferral is open.
+- **Notes:** supervisor audit covered the halt construct-string priority
+  (pointer over value, exact TS formatting), unsigned→i64 widening, the word
+  catalog's bit values against `constants/battle.h` (FRONTIER 0x3E0100,
+  four deliberately-unmodeled comparands BATTLE_TOWER/EREADER_TRAINER/
+  RECORDED/TRAINER_HILL → Halt, matching TS), find-first registration, and
+  generator provenance; independent regeneration was byte-identical.
+  Generated vectors **158,159 bytes**, sha256
+  `e3d13320426e02b5f27b35f68b30e7d925d741474250cdfbc01e138c7326e686`;
+  catalog **3,005 bytes**, sha256
+  `f7e4b427e01957e7b94edcd992cff378f91cbc630cf5bfb6e55db3d94fac8442`;
+  generator **26,541 bytes**, sha256
+  `41c53e3006e521e85076bd043449e53a17017318a43dd4b5804a7aabd4b97394`.
+  Gates rerun on `rust-main` post-fold: **1,387/1,387** native (+14), fmt,
+  strict workspace Clippy, wasm32 release; artifact **512,482 bytes**, sha256
+  `e16eb7911fbba394ee68179957286caec090c47f5d65b22368322c9245b96a7f`.
+  No npm gate required; no deferral added; the module's Halt is its own
+  outcome, not a shared-frontier barrier-count change. R74 archived.
+  PAPERCUT: none new.
+
 
 ## R76 — [supervised session, 2026-09-09, unattended] **M73 stockpile family leaf + green checkpoint (first shared-helper consumer)**
 

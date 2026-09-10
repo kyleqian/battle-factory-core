@@ -6,6 +6,56 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R80 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M77 `Cmd_critcalc` leaf folded — hit-chain trio complete, drawBattleScriptRng projection landed**
+
+- **State:** `rust-main` = master (no-op merge at orient; baseline 1,425 green
+  reconfirmed) plus verified Sonnet worker `b3d9cb554` (fast-forward). The
+  hit-chain damage trio is now fully native (damagecalc M75, typecalc M76,
+  critcalc M77), and M77 is the FIRST RNG-drawing battle-script leaf — its
+  projection decision is the precedent for accuracycheck/adjustnormaldamage/
+  tryko-class leaves. No ABI, adapter, recovery module, canonical TS, or npm
+  file touched. Session continuing toward more leaves.
+- **Did (this step):** recorded the projection decision (R80/M77): the TS
+  machine rng `{value, calls, ledger[]}` crosses as `{value: u32, calls:
+  u32}` ONLY; the leaf draws natively (`advance_rng_value` + upper-16
+  extraction, both already pinned in rng.rs); the outcome carries a
+  first-class `BattleScriptCritcalcRngDraw` mirroring the TS ledger tail
+  entry verbatim (call=calls+1, literal reason "critcalc", before, after,
+  random_value, six-field instruction provenance); the ledger array itself
+  stays TS-side; the immune branch draws nothing and passes rng through
+  untouched. Worker (claude-sonnet-5, 45-min cap, one commit, ~29 min)
+  ported `B_SCR_OP_CRITCALC` (0x04, `battle_script_commands.c:1253-1288`):
+  attacker→target→moveRow→hold-effect error precedence, stage/roll COMPOSED
+  from already-pinned `damage_calc` crit helpers + `base_damage`'s
+  `resolve_battler_hold_effect` (item+enigma-only shim), effect-id map
+  43/75/200/209, species gates 113/83, the 4-part immunity gate evaluated
+  BEFORE the draw (zero RNG consumed; five dedicated vectors incl. a
+  nonzero-calls pass-through pin). **30 behavior + 3 registration** cases;
+  corpus sha256
+  `6f79151fb416e38a6857f812310dd7819f81f59031acd0b31209325a4ba52b6e`
+  (166,814 bytes).
+- **Next:** continue with the next bounded leaf. Scouted: `Cmd_adjustnormaldamage`
+  (`install` at `battleScriptHitChainOpcode.ts:4722`; reuses the already-ported
+  `apply_random_damage_multiplier` + the M77 rng projection — natural second
+  RNG-drawing leaf); `bicword` lives in `battleScriptDamagingWeatherOpcode.ts:444`
+  (a different handler family — scout before briefing). Inventory diff:
+  /tmp/rust-briefs/{ts,rs}-opcodes.txt. No deferral is open.
+- **Notes:** supervisor audit covered the full apply body against the TS
+  handler (error precedence, immunity algebra, roll gate, crit write-back,
+  find-first registration with no shape validation, the hold-effect shim
+  reading only item + enigma array) and the LCG arithmetic by hand
+  (0xE → 0x98D8AA69, upper-16 0x98d8); independent regeneration was
+  byte-identical. Generated Rust **361,568 bytes**, sha256
+  `f7147515702fa416b0834b125af03071a817acf9663947b26c770fb7fd645f56`;
+  generator **32,621 bytes**, sha256
+  `542899d9cebeeb123a9059321dab62d90df824b204dccffb8ca00a8f5871b0ab`.
+  Gates rerun on `rust-main` post-fold: **1,448/1,448** native (+23), fmt,
+  strict workspace Clippy, wasm32 release; artifact **512,490 bytes**, sha256
+  `2417e88deab8e2ea7f741e5d93927845097d062aa0882a4bd2c20fcc78c7acf3`.
+  Worker: 28.6 min, $5.22, zero rejections. No npm gate required; no
+  deferral or barrier added. R77 archived. PAPERCUT: none new.
+
+
 ## R79 — [supervised session wind-down (final), 2026-09-09 15:03–~18:00 UTC, unattended] **M76 `Cmd_typecalc` leaf + session close (five green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) plus five verified
@@ -112,57 +162,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   barrier-projection decision. No npm gate required; no deferral or barrier
   added. R75 archived. PAPERCUT: none new (README Apple-path note from R57
   still stands).
-
-
-## R77 — [supervised session, 2026-09-09, unattended] **M74 jumpif compare family leaf + green checkpoint (barrier projection landed)**
-
-- **State:** `rust-main` = R76 checkpoint `b0c81a13f` plus the verified Sonnet
-  worker `39f0cbca4` (fast-forward). The 0x29/0x2A/0x2B
-  `Cmd_jumpifbyte`/`Cmd_jumpifhalfword`/`Cmd_jumpifword` family is native and
-  wasm32-compilable, implementing R76's barrier-projection decision: the TS
-  `unsupported-branch` halt crosses as a first-class
-  `BattleScriptJumpifControl::Halt` variant mirroring the TS reason object
-  verbatim (never an error). No ABI, adapter, recovery module, canonical TS,
-  or npm file was touched. Session in wind-down after this fold.
-- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
-  ~33 min) ported the shared 6-comparator core (`battle_script_commands.c:
-  3657-3762`, CMP_* per `battle_script_commands.h:326-331`), find-first
-  registration with NO shape/cardinality validation (pinned: an ill-shaped
-  later duplicate does not fail registration), per-execution shape checks
-  (value widths 1/2/4), the three modeled pointer universes (9 byte / 3
-  halfword / 3 word pointers, i64-widened), lazy taken-branch-only jump
-  resolution, and catalog-based value resolution: the generator executes the
-  canonical `resolveBattleScriptSetByteValue` (byte), the moves.json id join
-  + B_WEATHER_SUN (halfword), and the JUMPIFWORD_VALUES map (word) over every
-  distinct value expression the committed program's call sites use — 65/15/37
-  concrete call sites (35/13/20 distinct triples) — emitting Some(value) or
-  None (→ Halt), so the port matches TS exactly over the committed program's
-  operand universe and diverges only on expressions no call site emits
-  (documented in the module doc comment). Canonical TS supplies **106
-  behavior** and **6 registration** cases; corpus sha256
-  `2bae823ca1fcfa4e1b3c028e0cacf75f9462447d136bcd458d3212a0cbf126db`.
-- **Next:** wind down: memory notes + final ledger + backup. Next-session
-  candidates (scouted 2026-09-09): with the shared base-damage helper (M72)
-  and this compare family landed, the damagecalc-chain opcodes
-  (`Cmd_damagecalc` `battle_script_commands.c:1288-1301`, `Cmd_critcalc`
-  :1253-1286 — RNG-consuming, needs the drawBattleScriptRng projection —
-  and `Cmd_typecalc` :1355-1420) are the highest-leverage reachable family;
-  remaining pure leaves otherwise thin. No deferral is open.
-- **Notes:** supervisor audit covered the halt construct-string priority
-  (pointer over value, exact TS formatting), unsigned→i64 widening, the word
-  catalog's bit values against `constants/battle.h` (FRONTIER 0x3E0100,
-  four deliberately-unmodeled comparands BATTLE_TOWER/EREADER_TRAINER/
-  RECORDED/TRAINER_HILL → Halt, matching TS), find-first registration, and
-  generator provenance; independent regeneration was byte-identical.
-  Generated vectors **158,159 bytes**, sha256
-  `e3d13320426e02b5f27b35f68b30e7d925d741474250cdfbc01e138c7326e686`;
-  catalog **3,005 bytes**, sha256
-  `f7e4b427e01957e7b94edcd992cff378f91cbc630cf5bfb6e55db3d94fac8442`;
-  generator **26,541 bytes**, sha256
-  `41c53e3006e521e85076bd043449e53a17017318a43dd4b5804a7aabd4b97394`.
-  Gates rerun on `rust-main` post-fold: **1,387/1,387** native (+14), fmt,
-  strict workspace Clippy, wasm32 release; artifact **512,482 bytes**, sha256
-  `e16eb7911fbba394ee68179957286caec090c47f5d65b22368322c9245b96a7f`.
-  No npm gate required; no deferral added; the module's Halt is its own
-  outcome, not a shared-frontier barrier-count change. R74 archived.
-  PAPERCUT: none new.
