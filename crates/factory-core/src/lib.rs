@@ -22,6 +22,8 @@ pub mod battle_script_base_damage_item_catalog_gen;
 pub mod battle_script_base_damage_vectors_gen;
 pub mod battle_script_battler_positions;
 pub mod battle_script_battler_positions_vectors_gen;
+pub mod battle_script_byte_algebra;
+pub mod battle_script_byte_algebra_vectors_gen;
 pub mod battle_script_chargesport;
 pub mod battle_script_chargesport_vectors_gen;
 pub mod battle_script_confuseifrepeatingattackends;
