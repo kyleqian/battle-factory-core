@@ -81,6 +81,8 @@ pub mod battle_script_removeitem;
 pub mod battle_script_removeitem_vectors_gen;
 pub mod battle_script_rolloutdamagecalculation;
 pub mod battle_script_rolloutdamagecalculation_vectors_gen;
+pub mod battle_script_set_side_status;
+pub mod battle_script_set_side_status_vectors_gen;
 pub mod battle_script_setalwayshitflag;
 pub mod battle_script_setalwayshitflag_vectors_gen;
 pub mod battle_script_setbide;
