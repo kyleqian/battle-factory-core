@@ -8933,9 +8933,19 @@
     "tools/compare/destinyBondSourceAudit.ts",
     "tools/compare/destinyBondStagingProbe.py",
     "tools/compare/fixtures/destiny-bond-staging-receipt.json",
-    "tests/animation/destinyBondSourceCheckpoint.test.ts"
+    "tools/compare/destinyBondProbe.py",
+    "tools/compare/destinyBondEvidence.ts",
+    "tools/compare/fixtures/destiny-bond-evidence.json",
+    "tools/compare/evidence/destiny-bond-player-dense-state.json.gz",
+    "tools/compare/evidence/destiny-bond-opponent-dense-state.json.gz",
+    "tools/compare/evidence/destiny-bond-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/destiny-bond-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/destiny-bond-changemap-player.json",
+    "tools/compare/evidence/destiny-bond-changemap-opponent.json",
+    "tests/animation/destinyBondSourceCheckpoint.test.ts",
+    "tests/animation/destinyBondEvidenceCheckpoint.test.ts"
    ],
-   "goal": "UNFULFILLED staging-only track. MOVE_DESTINY_BOND is its sole representative and remains unsupported until its complete legal bilateral Scene-ON root-to-cleanup windows, source-relative reducer, production asset wiring, typed seam, compositor, and twice-fresh actual-core framebuffer acceptance are independently proven. The listed exact controls only check source/component identity: Luster Purge (BlendBattleAnimPalExclude), HI_JUMP_KICK/THRASH/HORN_DRILL/SKY_UPPERCUT (distinct ShakeMonInPlace schedules), and Grudge/Aurora Beam (fade/background transfer). They confer no move, component, sibling, or latch credit."
+   "goal": "UNFULFILLED evidence-only track. MOVE_DESTINY_BOND is its sole representative and remains unsupported after complete twice-fresh legal bilateral Scene-ON root-to-cleanup semantic/raw-RGB/change-map capture; it still requires a source-relative reducer, production asset wiring, typed seam, compositor, and twice-fresh actual-core framebuffer acceptance. The listed exact controls only check source/component identity: Luster Purge (BlendBattleAnimPalExclude), HI_JUMP_KICK/THRASH/HORN_DRILL/SKY_UPPERCUT (distinct ShakeMonInPlace schedules), and Grudge/Aurora Beam (fade/background transfer). They confer no move, component, sibling, or latch credit."
   }
  ],
  "variantAudits": {

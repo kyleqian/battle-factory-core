@@ -1,0 +1,93 @@
+{
+  "schema": "destiny-bond-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_DESTINY_BOND",
+  "moveId": 194,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "components": [
+    "asset:ANIM_TAG_WHITE_SHADOW",
+    "task:AnimTask_BlendBattleAnimPalExclude",
+    "task:AnimTask_DestinyBondWhiteShadow",
+    "task:AnimTask_ShakeMonInPlace",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:fadetobg",
+    "visualCommand:restorebg",
+    "visualCommand:waitbgfadein"
+  ],
+  "source": {
+    "audit": "tools/compare/destinyBondSourceAudit.ts",
+    "auditSha256": "5266b250305262ac8a434f4fc81032cc157d3abe5404fefb8b4016b40ea8b7db",
+    "auditRunSha256": "69ec630511b4ef8915ecc7ac5cc503b8f916340895a23e072c3e7447c2473c9b",
+    "probe": "tools/compare/destinyBondProbe.py",
+    "probeSha256": "4af60176e208aa4f6f1493dcac9fde0229e984e2dd7bb75b7301892d19f3ca6e",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
+    "stagingReceipt": "tools/compare/fixtures/destiny-bond-staging-receipt.json",
+    "stagingReceiptSha256": "eefe15211ff42809b431d37088eddc6921a25bca82eaa661c76dc3319e84818d",
+    "pointerOwnedRoot": { "start": "0x082cd62c", "endExclusive": "0x082cd687", "observedParities": [0, 1] }
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-destiny-bond-player-wobbuffet-opponent-onix.json",
+      "scenarioSha256": "13507416078ca3976c639b2a48e1b92aa5e528a55c2250a889e03266f8bcfcec",
+      "freshRuns": 2,
+      "sourceWindow": { "startFrame": 219, "endFrame": 406, "frameCount": 188, "sourceFrameCount": 188 },
+      "denseState": "tools/compare/evidence/destiny-bond-player-dense-state.json.gz",
+      "denseStateSha256": "301d7b28ddaa661762372bfd3714eb073b315cb5f19455780e4be8f3893ad9db",
+      "probeJsonSha256": "cf19762a42afe269d489b7388edba4d18c9ec28f699b8d5f1aca7bb04ca31069",
+      "repeatProbeJsonSha256": "cf19762a42afe269d489b7388edba4d18c9ec28f699b8d5f1aca7bb04ca31069",
+      "rawRgbArchive": "tools/compare/evidence/destiny-bond-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "6ff035b4fcebd0f57af42e88b2c8c6e46be0ed42caceb9b52c55f57f2384d545",
+      "rawRgbSequenceSha256": "3ec70811c9210b6f330689181da8368f5f2a8e7c5d04c89c4c71edd14fd6e2a6",
+      "repeatRawRgbSequenceSha256": "3ec70811c9210b6f330689181da8368f5f2a8e7c5d04c89c4c71edd14fd6e2a6",
+      "changeMap": "tools/compare/evidence/destiny-bond-changemap-player.json",
+      "changeMapSha256": "fdcf9515b3564a55840da9f620c85af20e353e93425672e89e58dd0b7350c802"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-destiny-bond-opponent-wobbuffet-player-onix.json",
+      "scenarioSha256": "f3c2c0f6034a00f3a806b54ab4fd0fd953c7a7405dc32e58b7a1a724fabba969",
+      "freshRuns": 2,
+      "sourceWindow": { "startFrame": 218, "endFrame": 405, "frameCount": 188, "sourceFrameCount": 188 },
+      "denseState": "tools/compare/evidence/destiny-bond-opponent-dense-state.json.gz",
+      "denseStateSha256": "ad38cdcc1b6b5b0edbeb151b6332e366b19dbce5011c1fe6866aceabf1b76402",
+      "probeJsonSha256": "731924361b77e6ff626698a5818729dbbac217df2cccc1d9d82917fc8ff87e66",
+      "repeatProbeJsonSha256": "731924361b77e6ff626698a5818729dbbac217df2cccc1d9d82917fc8ff87e66",
+      "rawRgbArchive": "tools/compare/evidence/destiny-bond-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "6cd8384088deead91c233887ad189a3fd728f1440e1bbdeb7ba7c287b0e7e751",
+      "rawRgbSequenceSha256": "711a2c27063f465e0160ebcd27ed99b44957c5fa3a5fde5f0082d8832d25f424",
+      "repeatRawRgbSequenceSha256": "711a2c27063f465e0160ebcd27ed99b44957c5fa3a5fde5f0082d8832d25f424",
+      "changeMap": "tools/compare/evidence/destiny-bond-changemap-opponent.json",
+      "changeMapSha256": "50ba2f46a724498ce12ce8a5b3fc4dc22f5ecb406a5df9ee2793ab4e8b484c17"
+    }
+  },
+  "measured": {
+    "window": "188 chronological frames from root offset 0 through the first inactive frame; 161 RGB-changing transitions in each orientation",
+    "whiteShadow": "source/software sprite slot 3 ages 43..137, task slot 0 ages 43..139; task-created OAM is ordinary RAM+1 at hardware rank 11; affine is disabled and matrix 0 remains neutral",
+    "whiteShadowBlend": "BLDCNT=0x3f40 ages 43..140; BLDALPHA walks EVA/EVB from 0/16 to 4/4 and back to 0/16 on two-frame steps, then blendoff clears at age 141",
+    "paletteBlend": "selector 6 changes visible battler OBJ banks 16 and 17 on source ages 95..117 and 121..143; hardware palette is faded RAM+1; OBJ banks 18..31 remain excluded",
+    "ghostBg": "BG_GHOST VRAM changes at ages 23/163, faded palette bank 2 at 24/164 and hardware at 25/165; fade/restore tasks are ages 4..41 and 144..181, with BLDCNT/BLDY fully restored",
+    "shake": "attacker ShakeMonInPlace(2,0,24,1) task ages 93..137: source x2 starts at 93 and clears 138; software OAM starts 93 then follows callbacks one frame later; hardware starts 94 then follows callbacks/cleanup one additional frame later through 140",
+    "audio": "SE_M_PSYBEAM at age 4, SE_M_CONFUSE_RAY at 43, SE_M_NIGHTMARE at 119; attacker pan is bilateral and the user-target Nightmare pan follows the attacker",
+    "resources": "WHITE_SHADOW runtime tag 10188 loads at age 1, remains allocated through age 186, and both tile/palette tags plus the allocator bitmap are clean at first inactive age 187; the freed tile-range length retains 32-byte bookkeeping; source order inserts slot 3 at index 8 on ages 43..138 and restores at 139",
+    "state": "player and opponent parties, battle mons, outcome, weather, and gameplay RNG are immutable; animation RNG changes on 185 of 187 transitions",
+    "cleanup": "first inactive age 187 has no visual/sound tasks, no white-shadow sprite/resources, and zero blend registers"
+  },
+  "scope": {
+    "legalBilateralPartyOnlySceneOn": true,
+    "twiceFreshSemanticAndRawRgb": true,
+    "chronologicalRawRgb888Retained": true,
+    "normalizedBankedChangeMapsRetained": true,
+    "gameplayStateOwned": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "assetWiringAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferAcceptanceAdded": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "siblingCredit": false
+  }
+}
