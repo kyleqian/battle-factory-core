@@ -180,6 +180,7 @@ import {
   type SceneOnPetalDanceConfig,
   type SceneOnSkyUppercutConfig,
   type SceneOnDestinyBondConfig,
+  type SceneOnWaterPulseConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -277,6 +278,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "DESTINY_BOND") {
     const destinyBondPresentation = presentation as SceneOnMovePresentationState<SceneOnDestinyBondConfig>;
     renderSceneOnMovePresentation(framebuffer, destinyBondPresentation);
+    return;
+  }
+  if (presentation.config.move === "WATER_PULSE") {
+    const waterPulsePresentation = presentation as SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
+    renderSceneOnMovePresentation(framebuffer, waterPulsePresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

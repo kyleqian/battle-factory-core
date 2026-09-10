@@ -100,6 +100,8 @@ export interface WaterPulseSprite {
   readonly y: number;
   readonly x2: number;
   readonly y2: number;
+  /** Source animation-frame selection; every Water Pulse instance starts at frame zero. */
+  readonly frame: 0 | 1;
   readonly data: readonly number[];
   readonly subpriority: number;
   readonly matrixNum: number;
@@ -318,6 +320,9 @@ function smallBubblesAtAge(age: number, input: WaterPulseLiveInputs): WaterPulse
       y: bubble.y,
       x2: (GBA_SINE_TABLE_256[phase]! * bubble.amplitude) >> 8,
       y2: Math.trunc(vertical / 10),
+      // All five source instances use the same SMALL_BUBBLES image frame;
+      // the final template argument configures motion, not AnimNum.
+      frame: 0,
       data: [bubble.phase, bubble.phaseStep, bubble.amplitude, bubble.duration - calls, vertical, phase, 0, 0],
       subpriority: input.attackerSubpriority + 2,
       matrixNum: 0,
@@ -337,6 +342,7 @@ function simplePaletteSpriteAtAge(age: number, input: WaterPulseLiveInputs): Wat
     y: input.targetPictureCenter.y,
     x2: 0,
     y2: 0,
+    frame: 0,
     data: [0, 0, 0, 0, 0, 0, 0, 0],
     subpriority: input.attackerSubpriority - 2,
     matrixNum: 0,
@@ -359,6 +365,7 @@ function ringAtAge(age: number, input: WaterPulseLiveInputs, index: number): Wat
     y: input.attackerRingOrigin.y,
     x2: Math.trunc(elapsed * diffX / 40),
     y2: Math.trunc(elapsed * diffY / 40),
+    frame: 0,
     data: [elapsed + 1, input.targetRingCenter.x, input.targetRingCenter.y, 40, 15, (elapsed + 1) % 15, 0, 0],
     subpriority: input.targetSubpriority - 2,
     matrixNum: input.ringMatrixSlots[index]!,
@@ -400,6 +407,7 @@ function ringBubblesAtAge(age: number, input: WaterPulseLiveInputs): WaterPulseS
         y: ring.y + ring.y2 + (member === 0 ? something : -something),
         x2: (randomY * calls) >> 7,
         y2: (signedX * calls) >> 7,
+        frame: 0,
         data: [20 - calls, randomY, signedX, randomY * calls, signedX * calls, 0, 0, 0],
         subpriority: input.attackerSubpriority - 1,
         matrixNum: input.ringBubbleMatrixSlots[tupleIndex]!,

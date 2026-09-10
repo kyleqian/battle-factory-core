@@ -546,6 +546,7 @@ import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import spiderWebAsset from "../animation/assets/spider-web.json" with { type: "json" };
 import petalDanceAsset from "../animation/assets/petal-dance.json" with { type: "json" };
 import destinyBondAsset from "../animation/assets/destiny-bond.json" with { type: "json" };
+import waterPulseAsset from "../animation/assets/water-pulse.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
 import waterOrbAsset from "../animation/assets/water-orb.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
@@ -1031,6 +1032,7 @@ import {
   sceneOnPetalDanceView,
   sceneOnSkyUppercutView,
   sceneOnDestinyBondView,
+  sceneOnWaterPulseView,
   sceneOnEruptionView,
   sceneOnWaterSpoutView,
   sceneOnSandTombView,
@@ -1267,6 +1269,7 @@ import {
   type SceneOnPetalDanceConfig,
   type SceneOnSkyUppercutConfig,
   type SceneOnDestinyBondConfig,
+  type SceneOnWaterPulseConfig,
   type SceneOnSmellingSaltConfig,
   type SceneOnRecycleConfig,
 } from "../animation/sceneOnPresentation.ts";
@@ -1838,6 +1841,9 @@ const petalDanceArt = petalDanceAsset as {
 };
 const destinyBondArt = destinyBondAsset as {
   whiteShadow: { tileset: Tileset; palette: RgbColor[] };
+};
+const waterPulseArt = waterPulseAsset as {
+  blueRing2: { tileset: Tileset; palette: RgbColor[] };
 };
 const mudShotArt = mudShotAsset as {
   brownOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -31713,6 +31719,106 @@ export function renderSceneOnMovePresentation(
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "DESTINY BOND!", 99,
     );
+    return;
+  }
+
+  if (state.config.move === "WATER_PULSE") {
+    const pulseState = state as SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
+    const view = sceneOnWaterPulseView(pulseState);
+    const displayed = sceneOnWaterPulseView({ ...pulseState, age: Math.max(0, pulseState.age - 1) });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("WATER_PULSE presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`WATER_PULSE missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const tintPacked = mgbaColorFromBgr555(view.palette.colorBgr555);
+    const tint = { r: tintPacked & 0xff, g: tintPacked >>> 8 & 0xff, b: tintPacked >>> 16 & 0xff };
+    // battleBg's locally remapped banks are hardware BG banks 1..3. The
+    // separate battle-window asset is hardware bank 0 and stays unchanged.
+    const fieldPalette = blendPaletteBanksToward(battleBg.palette, tint, view.palette.hardwareCoefficient);
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, fieldPalette);
+
+    const idleFor = (battler: typeof view.attacker): Readonly<{ x2: number; y2: number }> =>
+      battler.geometry.side === "opponent" ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
+    const attackerIdle = idleFor(view.attacker);
+    const targetIdle = idleFor(view.target);
+    const targetCorner = {
+      x: view.target.geometry.spriteCorner.x + targetIdle.x2 + displayed.targetOffset.x
+        - pulseState.config.animationInputs.targetInitialOffset.x,
+      y: view.target.geometry.spriteCorner.y + targetIdle.y2 + displayed.targetOffset.y
+        - pulseState.config.animationInputs.targetInitialOffset.y,
+    };
+    const targetIsMonBg = !displayed.background.targetVisible;
+    if (targetIsMonBg) {
+      drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+        // UpdateMonBg copies the target into a picture palette that is not
+        // selected by the later F_PAL_BG field blend.
+        targetArt.palette,
+        targetCorner.x, targetCorner.y);
+    }
+
+    type Entry = Readonly<{ slot: number; subpriority: number; y: number; order: number; draw: () => void }>;
+    const entries: Entry[] = [];
+    const rankOf = (slot: number): number => {
+      const rank = displayed.order.callerBaseline.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    const addBattler = (battler: typeof view.attacker, art: BattlerArt,
+      corner: Readonly<{ x: number; y: number }>, slot: number, subpriority: number): void => {
+      entries.push({ slot, subpriority, y: corner.y + 32, order: rankOf(slot),
+        draw: () => drawSpriteSheet(fb, tilesFor(art, battler.geometry.side), art.palette, corner.x, corner.y) });
+    };
+    if (!targetIsMonBg) addBattler(view.target, targetArt, targetCorner,
+      pulseState.config.animationInputs.targetSpriteSlot, pulseState.config.animationInputs.targetSubpriority);
+    addBattler(view.attacker, attackerArt, {
+      x: view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      y: view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+    }, pulseState.config.animationInputs.attackerSpriteSlot, pulseState.config.animationInputs.attackerSubpriority);
+
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "simple-palette-blend") continue;
+      const centerX = sprite.x + sprite.x2;
+      const centerY = sprite.y + sprite.y2;
+      const art = sprite.kind === "blue-ring" ? waterPulseArt.blueRing2 : {
+        tileset: { columns: 1, rows: 1, tiles: [waterGunArt.smallBubbles.tileset.tiles[8 + sprite.frame]!] },
+        palette: waterGunArt.smallBubbles.palette,
+      };
+      entries.push({ slot: sprite.slot, subpriority: sprite.subpriority, y: centerY, order: rankOf(sprite.slot),
+        draw: () => sprite.oam.affine
+          ? drawSpriteSheetAffineRotate(fb, art.tileset, art.palette, centerX, centerY,
+            sprite.matrix[0], sprite.matrix[1], sprite.matrix[2], sprite.matrix[3], undefined, sprite.oam.doubleSize)
+          : drawSpriteSheet(fb, art.tileset, art.palette, centerX - 4, centerY - 4) });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = pulseState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      view.attacker.geometry.side === "player" ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "WATER PULSE!", 99);
     return;
   }
 

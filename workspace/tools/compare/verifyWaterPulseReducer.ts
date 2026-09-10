@@ -95,7 +95,7 @@ function inputsFor(rows: Json[], side: Side): WaterPulseLiveInputs {
   return {
     attackerSide: side === "player-back" ? "player" : "opponent",
     targetSide: side === "player-back" ? "opponent" : "player",
-    attackerSpecies: "WOBBUFFET",
+    attackerSpecies: "LOMBRE",
     targetSpecies: "ONIX",
     attackerCenter: { x: attacker.x, y: attacker.y },
     targetCenter: { x: target.x, y: target.y },
@@ -141,7 +141,7 @@ export function waterPulseConfigFor(side: Side, rows: Json[]): SceneOnWaterPulse
     attackerCenter: _attackerCenter, targetCenter: _targetCenter, ...animationInputs } = input;
   return {
     move: "WATER_PULSE",
-    attacker: { species: "WOBBUFFET", geometry: {
+    attacker: { species: "LOMBRE", geometry: {
       side: input.attackerSide, spriteCorner: { x: attacker.x - 32, y: attacker.y - 32 },
       animationCenter: input.attackerCenter, battlePositionCenter: input.attackerCenter,
     } },
