@@ -1,4 +1,4 @@
-/** Authoritative source/classification receipt for the Destiny Bond staging-only checkpoint. */
+/** Authoritative source/classification receipt for the Destiny Bond reducer/seam checkpoint. */
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -195,7 +195,7 @@ console.log(JSON.stringify({
   schema: "destiny-bond-source-audit/v1",
   move: "MOVE_DESTINY_BOND",
   moveId: 194,
-  status: "unsupported-source-staging-checkpoint",
+  status: "unsupported-reducer-seam-checkpoint",
   coverageCredit: false,
   source: {
     pointerOwnedRoot: {
@@ -221,7 +221,7 @@ console.log(JSON.stringify({
     audio: [{ sound: "SE_M_PSYBEAM", id: 189, pan: "SOUND_PAN_ATTACKER" }, { sound: "SE_M_CONFUSE_RAY", id: 196, pan: "SOUND_PAN_ATTACKER" }, { sound: "SE_M_NIGHTMARE", id: 121, pan: "SOUND_PAN_TARGET" }],
   },
   resources: {
-    whiteShadow: { tag: "ANIM_TAG_WHITE_SHADOW", tagValue: 10238, tileBytes: 1024, gfx: romRange("gBattleAnimSpriteGfx_WhiteShadow"), palette: romRange("gBattleAnimSpritePal_WhiteShadow"), source: "graphics/battle_anims/sprites/white_shadow.png" },
+    whiteShadow: { tag: "ANIM_TAG_WHITE_SHADOW", tagValue: 10188, tileBytes: 1024, gfx: romRange("gBattleAnimSpriteGfx_WhiteShadow"), palette: romRange("gBattleAnimSpritePal_WhiteShadow"), source: "graphics/battle_anims/sprites/white_shadow.png" },
     ghostBackground: { id: "BG_GHOST", idValue: 2, image: romRange("gBattleAnimBgImage_Ghost"), palette: romRange("gBattleAnimBgPalette_Ghost"), tilemap: romRange("gBattleAnimBgTilemap_Ghost"), source: "graphics/battle_anims/backgrounds/ghost.png + ghost.bin" },
     release: "Cmd_end frees tracked loadspritegfx sheets and palettes after the root cleanup commands finish",
   },
@@ -237,10 +237,10 @@ console.log(JSON.stringify({
   checkpoint: {
     sourceAudit: true,
     legalBilateralPartyOnlyStaging: true,
-    denseWindowCaptured: false,
-    reducerAdded: false,
-    productionAssetWiring: false,
-    typedSceneOnSeam: false,
+    denseWindowCaptured: true,
+    reducerAdded: true,
+    productionAssetWiring: true,
+    typedSceneOnSeam: true,
     compositorAdded: false,
     framebufferAcceptance: false,
     coveragePromotion: false,

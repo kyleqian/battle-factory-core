@@ -40,13 +40,13 @@ describe("MOVE_DESTINY_BOND source/classification and legal Scene-ON staging che
   it("regenerates the complete pointer-owned root, reachable tasks/callbacks/resources, and exact nine-component graph byte-identically", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
-    expect(sha(first)).toBe("69ec630511b4ef8915ecc7ac5cc503b8f916340895a23e072c3e7447c2473c9b");
+    expect(sha(first)).toBe("e77587b596a4ce2764eb35916016e47e168074d153a548276924d0a0aa692925");
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
       schema: "destiny-bond-source-audit/v1",
       move: "MOVE_DESTINY_BOND",
       moveId: 194,
-      status: "unsupported-source-staging-checkpoint",
+      status: "unsupported-reducer-seam-checkpoint",
       coverageCredit: false,
       source: {
         pointerOwnedRoot: {
@@ -75,12 +75,12 @@ describe("MOVE_DESTINY_BOND source/classification and legal Scene-ON staging che
         audio: [{ sound: "SE_M_PSYBEAM", id: 189 }, { sound: "SE_M_CONFUSE_RAY", id: 196 }, { sound: "SE_M_NIGHTMARE", id: 121 }],
       },
       resources: {
-        whiteShadow: { tag: "ANIM_TAG_WHITE_SHADOW", tagValue: 10238, tileBytes: 1024, source: "graphics/battle_anims/sprites/white_shadow.png" },
+        whiteShadow: { tag: "ANIM_TAG_WHITE_SHADOW", tagValue: 10188, tileBytes: 1024, source: "graphics/battle_anims/sprites/white_shadow.png" },
         ghostBackground: { id: "BG_GHOST", idValue: 2, source: "graphics/battle_anims/backgrounds/ghost.png + ghost.bin" },
       },
       checkpoint: {
-        sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: false, reducerAdded: false, productionAssetWiring: false,
-        typedSceneOnSeam: false, compositorAdded: false, framebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false,
+        sourceAudit: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, reducerAdded: true, productionAssetWiring: true,
+        typedSceneOnSeam: true, compositorAdded: false, framebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false,
         latchPromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false, unsupportedNoCreditBoundary: true,
       },
     });

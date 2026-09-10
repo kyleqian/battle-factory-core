@@ -171,7 +171,7 @@ function verifySide(side: Side, config: Json): Json {
 
 export function verifyDestinyBondEvidence(): Json {
   const fixture = JSON.parse(file("tools/compare/fixtures/destiny-bond-evidence.json").toString("utf8")) as Json;
-  invariant(fixture.schema === "destiny-bond-bilateral-evidence/v1" && fixture.status === "unsupported-evidence-checkpoint" && fixture.coverageCredit === false, "fixture unsupported boundary");
+  invariant(fixture.schema === "destiny-bond-bilateral-evidence/v1" && fixture.status === "unsupported-reducer-seam-checkpoint" && fixture.coverageCredit === false, "fixture unsupported boundary");
   for (const side of ["player-back", "opponent-front"] as const) for (const key of ["scenario", "denseState", "rawRgbArchive", "changeMap"]) invariant(sha(file(fixture.orientations[side][key])) === fixture.orientations[side][`${key}Sha256`], `${side}: ${key} digest`);
   for (const key of ["audit", "probe", "sharedProbe", "stagingReceipt"]) invariant(sha(file(fixture.source[key])) === fixture.source[`${key}Sha256`], `source ${key}`);
   const audit = execFileSync(process.execPath, ["--experimental-strip-types", fixture.source.audit], { cwd: root });

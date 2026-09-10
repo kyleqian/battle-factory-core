@@ -13,7 +13,7 @@ describe("MOVE_DESTINY_BOND complete bilateral unsupported evidence", () => {
     const first = verifyDestinyBondEvidence();
     expect(verifyDestinyBondEvidence()).toEqual(first);
     expect(first).toEqual({
-      schema: "destiny-bond-bilateral-evidence/v1", status: "unsupported-evidence-checkpoint", coverageCredit: false,
+      schema: "destiny-bond-bilateral-evidence/v1", status: "unsupported-reducer-seam-checkpoint", coverageCredit: false,
       orientations: {
         "player-back": { rows: 188, changedRows: 161, probeJsonSha256: "cf19762a42afe269d489b7388edba4d18c9ec28f699b8d5f1aca7bb04ca31069", rawRgbSequenceSha256: "3ec70811c9210b6f330689181da8368f5f2a8e7c5d04c89c4c71edd14fd6e2a6", attackerRank: 9 },
         "opponent-front": { rows: 188, changedRows: 161, probeJsonSha256: "731924361b77e6ff626698a5818729dbbac217df2cccc1d9d82917fc8ff87e66", rawRgbSequenceSha256: "711a2c27063f465e0160ebcd27ed99b44957c5fa3a5fde5f0082d8832d25f424", attackerRank: 10 },
@@ -41,8 +41,8 @@ describe("MOVE_DESTINY_BOND complete bilateral unsupported evidence", () => {
     });
     expect(fixture.scope).toEqual({
       legalBilateralPartyOnlySceneOn: true, twiceFreshSemanticAndRawRgb: true, chronologicalRawRgb888Retained: true,
-      normalizedBankedChangeMapsRetained: true, gameplayStateOwned: false, productionChanged: false, reducerAdded: false,
-      assetWiringAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferAcceptanceAdded: false,
+      normalizedBankedChangeMapsRetained: true, gameplayStateOwned: false, productionChanged: true, reducerAdded: true,
+      assetWiringAdded: true, typedSeamAdded: true, compositorAdded: false, framebufferAcceptanceAdded: false,
       coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false,
     });
   });
@@ -55,6 +55,12 @@ describe("MOVE_DESTINY_BOND complete bilateral unsupported evidence", () => {
     const track = data.componentTracks.find((entry: Json) => entry.id === "destiny-bond-white-shadow");
     expect(track).toMatchObject({ representatives: ["MOVE_DESTINY_BOND"], fulfilled: false });
     expect(track.components).toHaveLength(9);
-    expect(track.evidence).toContain("tools/compare/fixtures/destiny-bond-evidence.json");
+    for (const path of [
+      "tools/compare/fixtures/destiny-bond-evidence.json",
+      "src/animation/assets/destiny-bond.json",
+      "src/animation/destinyBond.ts",
+      "tools/compare/verifyDestinyBondReducer.ts",
+      "tests/animation/destinyBondReducer.test.ts",
+    ]) expect(track.evidence).toContain(path);
   });
 });

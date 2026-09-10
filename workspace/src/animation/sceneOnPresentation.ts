@@ -890,6 +890,11 @@ import {
   type SkyUppercutState,
 } from "./skyUppercut.ts";
 import {
+  destinyBondAtAge,
+  type DestinyBondLiveInputs,
+  type DestinyBondState,
+} from "./destinyBond.ts";
+import {
   fissureAtAge,
   type FissureState,
 } from "./fissure.ts";
@@ -3456,6 +3461,21 @@ export interface SceneOnSkyUppercutConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/**
+ * Narrow state-only Scene-ON seam for MOVE_DESTINY_BOND.  It accepts current
+ * battler geometry/order/allocator facts and returns the reducer view; no
+ * framebuffer or canonical-party selection is carried through this seam.
+ */
+export interface SceneOnDestinyBondConfig {
+  readonly move: "DESTINY_BOND";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<DestinyBondLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
 export interface SceneOnEruptionConfig {
   readonly move: "ERUPTION";
@@ -4055,6 +4075,7 @@ export type SceneOnMoveConfig =
   | SceneOnSpiderWebConfig
   | SceneOnPetalDanceConfig
   | SceneOnSkyUppercutConfig
+  | SceneOnDestinyBondConfig
   | SceneOnEruptionConfig
   | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
@@ -4279,6 +4300,8 @@ export type SceneOnPetalDancePresentationState =
   SceneOnMovePresentationState<SceneOnPetalDanceConfig>;
 export type SceneOnSkyUppercutPresentationState =
   SceneOnMovePresentationState<SceneOnSkyUppercutConfig>;
+export type SceneOnDestinyBondPresentationState =
+  SceneOnMovePresentationState<SceneOnDestinyBondConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -5223,6 +5246,11 @@ export interface SceneOnPetalDanceView extends PetalDanceState {
 }
 
 export interface SceneOnSkyUppercutView extends SkyUppercutState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDestinyBondView extends DestinyBondState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -10293,6 +10321,29 @@ export function sceneOnSkyUppercutView(
   const { attacker, target, animationInputs } = state.config;
   return {
     ...skyUppercutAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerCenter: attacker.geometry.animationCenter,
+      targetCenter: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_DESTINY_BOND's pointer-owned resource-load source row. */
+export function sceneOnDestinyBondView(
+  state: SceneOnDestinyBondPresentationState,
+): SceneOnDestinyBondView {
+  if (state.config.move !== "DESTINY_BOND") {
+    throw new Error(`expected DESTINY_BOND presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...destinyBondAtAge(state.age, {
       ...animationInputs,
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
