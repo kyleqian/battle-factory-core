@@ -6,6 +6,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R82 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M79 fixed-damage cluster folded (third green fold; supervisor-repair commit)**
+
+- **State:** `rust-main` = master + M77 `b3d9cb554` + M78 `0bdd9dccd` + M79
+  `5bb8fab60`, each verified and checkpointed (ledger commit +
+  `backup-refs.sh`). The fixed-damage cluster (0x9F dmgtolevel / 0xA0
+  psywavedamageeffect / 0x94 damagetohalftargethp / 0xD8
+  setdamagetohealthdifference) is native. No ABI, adapter, canonical TS, or
+  npm file touched.
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, ~21 min) wrote
+  the complete module but expired waiting on its own background `cargo
+  test` and committed NOTHING (correct per contract). Supervisor verified
+  the uncommitted work in the worker worktree — full audit of all four
+  apply bodies against TS (`hitChainOpcode.ts:1749-1762/1766-1793/2094-2125`,
+  `rankedBatch1Opcode.ts:205-217`), both registration conventions
+  (hit-chain find-first vs rankedBatch1 exactly-1 + dispatcher + 0-operand),
+  psywave's unbounded rejection loop (%16, accept <=10) under the M77/M78
+  rng projection with ordered Vec<Draw>, healthdiff's taken-branch-only
+  jump resolution — plus double regeneration (byte-identical, sha
+  `e6d98b465e5546c8c0860c8c1a9fd36100f37bb5980e09df1575a3caef22290d`,
+  466,885 B) and all four gates in the worktree, then committed it AS the
+  worker branch commit `5bb8fab60` (supervisor-repair provenance recorded
+  in the commit message). **23 behavior + 9 registration** cases; corpus
+  sha256 `20f30d0f4b56a7f048a61544277c63388bf7f427818e127064dbdc7f528ffc2a`.
+- **Next:** possibly one more small leaf this session if the clock allows;
+  otherwise wind down. Unported candidates re-scouted 2026-09-10: the
+  bicbyte/orbyte/bicword byte-algebra opcodes have heavier catalog-style
+  registration (`battleScriptSetByte.ts` / `battleScriptStatbuffchangeOpcode.ts`
+  / `battleScriptDamagingWeatherOpcode.ts:444` — orbyte requires ALL 11
+  concrete starts); JUMPIFSTATUS/JUMPIFSTATUS2 similar. No deferral is open.
+- **Notes:** worker cap-expiry root cause: it launched `cargo test` as its
+  own background task and ended its turn awaiting it — same end_turn
+  pitfall as the Aug-31 supervisor sessions, now seen worker-side.
+  Follow-up for future briefs: tell workers to run gates in the foreground.
+  Gates rerun on `rust-main` post-fold: **1,479/1,479** native (+11), fmt,
+  strict workspace Clippy, wasm32 release; artifact **512,508 bytes**,
+  sha256 `ccf224e71f7adbde645dbbd30de26fc51500ba36d2b9955ee10f6d894a75cd45`.
+  Generator **34,428 bytes**, sha256
+  `4c3d7282d4b959f4f08fdf3660c6bd240494c0326121fbe50ea86ba683527ec3`.
+  Worker: 21.3 min, $5.20. No npm gate required; no deferral or barrier
+  added. R79 archived. PAPERCUT: worker end_turn-vs-background-gates cost
+  ~15 supervisor minutes.
+
+
 ## R81 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M78 adjust-damage family folded (second green fold this session)**
 
 - **State:** `rust-main` = master + M77 `b3d9cb554` + M78 `0bdd9dccd`
@@ -104,58 +147,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `2417e88deab8e2ea7f741e5d93927845097d062aa0882a4bd2c20fcc78c7acf3`.
   Worker: 28.6 min, $5.22, zero rejections. No npm gate required; no
   deferral or barrier added. R77 archived. PAPERCUT: none new.
-
-
-## R79 — [supervised session wind-down (final), 2026-09-09 15:03–~18:00 UTC, unattended] **M76 `Cmd_typecalc` leaf + session close (five green folds)**
-
-- **State:** `rust-main` = master (no-op merge at orient) plus five verified
-  Sonnet worker fast-forwards this session — `aa57ef2ba` M72 shared
-  base-damage helper, `99c5ec021` M73 stockpile family, `39f0cbca4` M74
-  jumpif compare family, `2a4170f88` M75 damagecalc, `e9e3649cd` M76
-  typecalc — each followed by its ledger commit and a successful
-  `backup-refs.sh` push. Tree clean, committed, green; no worker worktree or
-  branch left behind. No ABI, adapter, recovery module, canonical TS, or npm
-  file was touched all session, so the main supervisor's fold is
-  `core-rs/**` + `RUST_PROGRESS*.md` only.
-- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
-  ~24 min) ported `B_SCR_OP_TYPECALC` (0x06,
-  `battle_script_commands.c:1355-1420`): Struggle-first precedence (before
-  role checks), requireMoveRow-BEFORE-type-resolution (opposite of M75 —
-  both precedences now pinned), STAB via reused `apply_stab`, the
-  Levitate/Ground short-circuit (reveal + MISSED|DOESNT_AFFECT_FOE +
-  landed-cell clears + missType 4), the find-first type loop over reused
-  `gen_tables::TYPE_EFFECTIVENESS_TABLE` with per-entry flag algebra
-  (immune clears SE/NVE; 0.5x/2x toggle gated on power!=0 &&
-  !NO_EFFECT), min-1 floor, dual-type dedup, the Foresight-vs-Ghost skip
-  (Normal/Fighting only), Wonder Guard's miss branch (incl. the
-  preset-both-bits reachability pin — the loop's own toggles cancel a
-  0.5x+2x pair, so both-set only arrives preset), targetNotAffected on
-  final DOESNT_AFFECT_FOE, and identity-write ability reveals via
-  `battle_script_ai_reveal`. **41 behavior + 3 registration** cases; corpus
-  sha256 `881d1ffa7371bcd411ffb8cfb10eb0c49bd5151567538d7086eff9bc952d20d4`
-  (97,873 bytes).
-- **Next:** merge master, re-run the four Rust gates, then continue. The
-  hit-chain damage pipeline now has damagecalc + typecalc native; the
-  remaining trio member `Cmd_critcalc` (`:1253-1286`) is the first
-  RNG-drawing battle-script leaf and needs a drawBattleScriptRng projection
-  decision before dispatch — make it next orient or record it in
-  `RUST_DEFERRED.md`. rng-free leaves are otherwise thin; re-scout with
-  /tmp/rust-briefs/ts-opcodes.txt vs rs-opcodes.txt (session-generated
-  inventory diff). No deferral is open.
-- **Notes:** supervisor audit covered the full apply body against the TS
-  handler (branch order, flag algebra, Foresight predicate, Wonder Guard
-  truth table incl. power==0 and SE-only no-miss, reveal identity, STAB on
-  the Levitate path) and generator provenance; independent regeneration was
-  byte-identical. Generated Rust **261,390 bytes**, sha256
-  `5ec06981598c13b65285bbe3d6ddf0c0f36e788f9d368729951fbd8d120ac2db`;
-  generator **31,076 bytes**, sha256
-  `c6bb13072593096640811eb41f79ffdc2cdbb437ded26ba8d0393d8e58a5b3e7`.
-  Final gates on `rust-main`: **1,425/1,425** native (up from 1,329 at
-  orient, +96 across five leaves), fmt, strict workspace Clippy, wasm32
-  release; artifact **512,575 bytes**, sha256
-  `2275b630095b98c10d08d3ddbab83763c5253575879d8ac0158bd3e212d7956c`.
-  Session-wide: five Sonnet workers, five commits, zero rejections, zero
-  cap expiries (22-33 min each, ~$27 total); tracked-background-launcher +
-  chained blocking waits held every time. No npm gate required; no deferral
-  or barrier added. R76 archived. PAPERCUT: none new (README Apple-path
-  note from R57 still stands).
