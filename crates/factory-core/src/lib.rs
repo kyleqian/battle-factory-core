@@ -127,6 +127,8 @@ pub mod battle_script_tryimprison;
 pub mod battle_script_tryimprison_vectors_gen;
 pub mod battle_script_tryinfatuating;
 pub mod battle_script_tryinfatuating_vectors_gen;
+pub mod battle_script_tryko;
+pub mod battle_script_tryko_vectors_gen;
 pub mod battle_script_trymemento;
 pub mod battle_script_trymemento_vectors_gen;
 pub mod battle_script_tryrecycleitem;
