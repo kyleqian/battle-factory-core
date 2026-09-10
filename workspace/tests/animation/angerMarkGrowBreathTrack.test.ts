@@ -185,7 +185,7 @@ describe("anger-mark-grow-breath standalone fulfilled component-track ratchet", 
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "anger-mark-grow-breath");
     expect(coverage.entries).toHaveLength(246);
     expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(246);
-    expect(276 - coverage.entries.filter((entry: Json) => entry.status === "exact").length).toBe(31);
+    expect(276 - coverage.entries.filter((entry: Json) => entry.status === "exact").length).toBe(30);
     expect(track).toEqual({
       id: "anger-mark-grow-breath",
       components: [...trackComponents],
