@@ -5,6 +5,59 @@ full history regardless.
 
 ---
 
+## R89 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M86 ACCURACYCHECK part 1/3 (bypass paths) folded**
+
+- **State:** `rust-main` = master (no-op merge at orient; origin fetch
+  fails as usual, local master ref is current) + `4397eabfd` M86
+  accuracycheck-bypass fast-forward + this ledger commit. Baseline at
+  orient re-verified 1,596/1,596 + artifact byte-identical to R88. Tree
+  clean, committed, green. Core-only session: no ABI, adapter, canonical
+  TS, or npm file touched.
+- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
+  27.0 min, $5.80, foreground gates) ported the no-roll bypass ladder of
+  0x1 accuracycheck (`battle_script_commands.c:1099-1189`, bypass branch
+  :1103-1113): NO_ACC_CALC_CHECK_LOCK_ON / NO_ACC_CALC operand dispatch
+  (operand checked BEFORE roles; unknown/missing operand -> Halt verbatim
+  incl. "<missing>"), lock-on sure-hit > bare semi-invulnerable jump
+  (ZERO flag/missType/history writes — pinned asymmetry) > protect gate
+  (MISSED + B_MSG_PROTECTED + per-target lastLandedMoves/lastHitByType
+  clear), protect reads gCurrentMove regardless of the literal 0,
+  unknown-move -> not-protected (never an error), find-first registration
+  with NO shape validation (a NEW convention pin vs recent siblings;
+  error "committed Battle Script program does not emit ..." verbatim),
+  lazy taken-only labels, and a typed `FullFormulaPathPending` staging
+  for ACC_CURR_MOVE/MOVE_FUTURE_SIGHT/MOVE_DOOM_DESIRE (native unit
+  tests only, no TS-parity claim). **30 behavior + 3 registration**
+  cases over the 9 committed bypass sites + custom edges; corpus sha256
+  `ec8e2d37ad28ecad421b63421142b7c016c69891912588fab62831cf2db303b3`.
+- **Next:** M87 worker ALREADY DISPATCHED (55-min cap, brief
+  `/tmp/rust-briefs/accuracycheck-m87.txt`): the full-formula path —
+  protect/lock-on (TS diverges from C's lock-on absorb tail; pin TS +
+  document), hitmarker ladder with per-leg carry asymmetry, weather
+  bypasses, native calculate_accuracy/roll_accuracy_hits reuse, ONE
+  "accuracycheck" rng draw, miss tail (CheckWonderGuardAndLevitate +
+  missType chooser), destiny-bond hit tail; absorb/Flash-Fire label
+  block staged behind `AbsorbingTailPending` for M88 (part 3/3).
+- **Notes:** supervisor audit covered the apply body, both jump
+  sub-branches, all error texts (incl. the shared ungrammatical "a
+  attacker"), and every cited line (battle.h:160/163/164/175/220,
+  pokemon.h:209, moves.h:252/357, battle_script_commands.c:57/80/332,
+  battle_script.inc:6-10, 66-site census 55/8/1/1/1); independent
+  regeneration byte-identical. Generated Rust **194,403 bytes**, sha256
+  `8c6f5d44e28871d8e0e283608874c63792000e34bdee56ac85f28b3765a0107a`;
+  generator **30,095 bytes**, sha256
+  `530591975eb7092f527bff4d947b7fab985f5bdf26fd0ee0578db00c0219ab53`.
+  Gates on `rust-main` post-fold: **1,612/1,612** native (+16), fmt,
+  strict workspace Clippy, wasm32 release; artifact **496,730 bytes**,
+  sha256
+  `e352de252853008ab764faf15e55550615033370be755096f9ed60705ba7a884` —
+  NOTE the artifact SHRANK 15,509 B vs R88; worker and supervisor builds
+  from identical source agree byte-for-byte, so this is deterministic
+  codegen/layout drift from the new module, not an environment fault.
+  91 of 215 TS opcode names fully ported (accuracycheck counts only when
+  M88 completes). R86 archived. No npm gate required; no deferral added.
+  No PAPERCUT.
+
 ## R88 — [supervised session wind-down (final), 2026-09-10 15:01–~17:45 UTC, unattended] **M85 semi-invulnerable trio + session close (four green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) plus four verified
