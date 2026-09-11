@@ -5,6 +5,63 @@ full history regardless.
 
 ---
 
+## R88 — [supervised session wind-down (final), 2026-09-10 15:01–~17:45 UTC, unattended] **M85 semi-invulnerable trio + session close (four green folds)**
+
+- **State:** `rust-main` = master (no-op merge at orient) plus four verified
+  Sonnet worker fast-forwards this session — `7d3206705` M82 byte-algebra
+  trio, `4ecf69eb0` M83 tryKO, `3c0e8c0fe` M84 type-curse trio, `0072ffa5d`
+  M85 semi-invulnerable trio — each followed by its ledger commit and a
+  successful `backup-refs.sh` push. Tree clean, committed, green; no worker
+  worktree or branch left behind. No ABI, adapter, canonical TS, or npm
+  file was touched all session, so the main supervisor's fold is
+  `core-rs/**` + `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 40-min brief cap, one
+  commit, ~29 min, foreground gates) ported 0x18 clearstatusfromeffect /
+  0xC5 setsemiinvulnerablebit / 0xC6 clearsemiinvulnerablebit
+  (`battle_script_commands.c:2951-2963/:9009-9026/:9028-9045`): the
+  narrowed `sStatusFlagsForMoveEffects` projection (CHARGING→
+  STATUS2_MULTIPLETURNS only; RAGE and all others → 0, matching the C
+  designated-initializer default), the ≤6 status1/status2 branch split +
+  moveEffectByte reset, selector-unavailable as a first-class Halt (a
+  pinned DEVIATION from the jump family's Block convention, incl. the
+  "<missing>" rendering), registration that pins the literal BS_ATTACKER
+  operand expression (stricter than any sibling), the zero-operand
+  exactly-1/exactly-2 convention WITH dispatcher check (vs
+  registerSingleInstruction's without — pinned), the currentMove switch
+  (Fly/Bounce/Dig/Dive; default → bit-0 no-op pinned), and the SHARED
+  hit-chain role error "Battle Script hit-chain command requires a
+  attacker role" verbatim. **33 behavior + 16 registration** cases; corpus
+  sha256
+  `b8ba30d39c8ce71b25d3af147f8f55adcee07aa90362877dcf66ffefd9a7dc03`.
+- **Next:** merge master, re-run the four Rust gates, then continue.
+  Recommended opener: ACCURACYCHECK (0x1, 66 sites) per R87's scout notes —
+  `calculate_accuracy`/`roll_accuracy_hits` already native
+  (`damage_calc.rs:777-845`); the opcode layer adds the NO_ACC_CALC
+  bypasses, protect/semi-invulnerable/hitmarker ladder (consumer side of
+  THIS step's bits), always-hit/weather bypasses, and the heavy tails
+  (`advancePastAccuracyCheck` absorb/Flash-Fire label jumps,
+  wonder-guard/levitate, `jumpToMissTarget` moveHistory clear) — consider
+  splitting bypass-path-first. 91 of 215 TS opcode names ported. No
+  deferral is open.
+- **Notes:** supervisor audit covered the apply bodies (mask lookup, branch
+  split, byte reset, "<missing>" Halt), all three registration ladders and
+  error texts (incl. TS's ungrammatical "requires all 1 concrete starts"),
+  and battle.h:139/:163/:164/:175/:253 citations; independent regeneration
+  was byte-identical. Generated Rust **43,675 bytes**, sha256
+  `8c80f061e675b78546e8acb7274442eb06dad6211c41a24ae2146fce81fcca96`;
+  generator **31,146 bytes**, sha256
+  `9118a88003cb9b6974639f0f1053657ea53b480deec0badc4d1241eab08c514c`.
+  Final gates on `rust-main`: **1,596/1,596** native (up from 1,511 at
+  orient, +85 across four leaves), fmt, strict workspace Clippy, wasm32
+  release; artifact **512,239 bytes**, sha256
+  `8e49c369c4ed8fd8048014f3ecd1cab72a836f3541c270cb8ae7ed73058b12ad`.
+  Session-wide: four Sonnet workers (~$18.90), four clean landings 26-30
+  min, ZERO cap expiries (the foreground-gates brief rule holds). 10
+  opcodes went native this session (3 byte-algebra + tryKO + 3 type-curse
+  + 3 semi-invulnerable; 91 of 215 TS opcode names). Also fixed two glued
+  archive headers (R85 commit). No npm gate required; no deferral or
+  barrier added. R85 archived. No PAPERCUT.
+
 ## R87 — [supervised session, 2026-09-10 15:01 UTC–, unattended] **M84 type-jump + curse trio folded (third green fold this session)**
 
 - **State:** `rust-main` = master (no-op merge at orient) + `7d3206705` M82
