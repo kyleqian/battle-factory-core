@@ -5,6 +5,51 @@ full history regardless.
 
 ---
 
+## R91 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M88 ACCURACYCHECK part 3/3 (absorb/Flash-Fire tail) folded — opcode complete**
+
+- **State:** `rust-main` = R90 + `a02f4ef78` M88 fold (merge `ad11d5ec4`)
+  + this ledger commit. Gates green post-fold. Tree clean, committed.
+  Core-only; no ABI/adapter/TS/npm files touched. ACCURACYCHECK (0x1) is
+  now COMPLETE — **92 of 215 TS opcode names ported.** M89 ADDBYTE worker
+  (final leaf this session) ALREADY DISPATCHED off this HEAD (brief
+  `/tmp/rust-briefs/addbyte-m89.txt`, 45-min cap).
+- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
+  22.3 min, $6.30, foreground gates) replaced M87's
+  `AbsorbingTailPending` with the real
+  `AbilityBattleEffects(ABILITYEFFECT_ABSORBING)` arms
+  (`battle_util.c:2676-2732`): Volt/Water Absorb — negative heal staging
+  `-max(1, maxHP/4)` SKIPPED at full HP, reveal, HP-drain vs
+  made-move-useless label choice; Flash Fire — chooser from prior boost
+  state, UNCONDITIONAL `flashFireBoosted := 1` (idempotent), reveal,
+  boost label; the shared PPLoss suffix INVERSION (`_PPLoss` when the
+  attacker's notFirstStrike is NOT set) across all six committed labels
+  (`battle_scripts_1.s:4078/4080/4091/4093/4101/4103`), lazily-resolved
+  REQUIRED labels with the verbatim "SetMoveEffect: committed Battle
+  Script program does not define label <label>" shared-helper error, and
+  zero rng draws in the tail. No pending variant remains in the module.
+  **90 behavior + 3 registration** cases; corpus sha256
+  `a614543a0a533fd7f346417dc0e0917a2133ff091fd5c14c97e867b932b3ab01`.
+- **Next:** verify + fold M89 ADDBYTE (0x2F, 9 committed sites — reuses
+  the SETBYTE pointer universe + value catalog projections and the
+  jumpif plain-catalog convention; reachable
+  "accepted a read but rejected the incremented value" error at
+  gBattlerTarget/sBATTLER == 3 is the interesting pin), then wind down:
+  final gates, ledger, backup, clean tree before 07:05 UTC.
+- **Notes:** supervisor audit walked both tail bodies (original-context
+  full-HP read mirrored, single-ability equivalence of the if-chain vs
+  TS's condition shapes, chooser-before-flag-write ordering), the label
+  table, and the census pins; independent regeneration byte-identical.
+  Generated Rust **576,357 bytes**, sha256
+  `a4b531c1c61f5030feef8d69b7dacf6cb739d6ec50d3c55ddbdb40c6a624a620`;
+  generator **51,876 bytes**, sha256
+  `5cd3ecc352a86d5099d55e09348c4a10459c5b38081dce82860b02b6a9639fb9`.
+  Gates on `rust-main` post-fold: **1,638/1,638** native (+5), fmt,
+  strict workspace Clippy, wasm32 release; artifact **512,235 bytes**,
+  sha256
+  `b5fbb0c3fbbac9b8c276cc0ae45ac0cd09cd8de7287589041f5babc364db27ff`.
+  Worker caught its own off-by-3 battle_util.c pin pre-commit. R88
+  archived. No npm gate required; no deferral added. No PAPERCUT.
+
 ## R90 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M87 ACCURACYCHECK part 2/3 (full-formula path) folded**
 
 - **State:** `rust-main` = R89 + `338b86785` M87 full-formula fold (merge
