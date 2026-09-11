@@ -13,6 +13,8 @@
 
 pub mod battle_ai_switch_into;
 pub mod battle_ai_switch_into_vectors_gen;
+pub mod battle_script_accuracycheck;
+pub mod battle_script_accuracycheck_vectors_gen;
 pub mod battle_script_adjustdamage;
 pub mod battle_script_adjustdamage_vectors_gen;
 pub mod battle_script_ai_reveal;
