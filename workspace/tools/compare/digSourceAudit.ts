@@ -287,8 +287,8 @@ const digCoverage = coverage.entries.find((entry: Json) => entry.move === "MOVE_
 const fissureCoverage = coverage.entries.find((entry: Json) => entry.move === "MOVE_FISSURE");
 if (!track || JSON.stringify(track.components) !== JSON.stringify(["asset:ANIM_TAG_MUD_SAND", "sprite:gDirtPlumeSpriteTemplate"])
   || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_FISSURE", "MOVE_DIG"])
-  || digCoverage !== undefined || fissureCoverage?.status !== "exact") {
-  throw new Error("MOVE_DIG unsupported boundary or independent Fissure control drifted");
+  || digCoverage?.status !== "exact" || track.fulfilled !== true || fissureCoverage?.status !== "exact") {
+  throw new Error("MOVE_DIG exact boundary or independent Fissure control drifted");
 }
 
 requireTokens("Dig move script", rootBody, [

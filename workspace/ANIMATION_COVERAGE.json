@@ -3892,7 +3892,7 @@
     "the pure source-relative reducer and narrow presentation seam port InitMementoShadow, attacker and target Memento shadow phases, MementoHandleBg, static monbg/clear, both 320-entry scanline VOFS banks, WIN0H/WIN0V/WININ/WINOUT, BLDCNT/BLDALPHA, battler priority, black BG palettes, alpha ramps, audio-inert visual timing, and complete cleanup without gameplay ownership",
     "the production compositor reuses source-derived WEEZING/ONIX art, healthboxes, field background and battle window; copied mon pixels sample the preceding source row's selected scanline bank while current hardware window/blend registers gate the copy, with BG1 beginning at scanline 1 and BG2 at scanline 0 as independently proved by both change maps",
     "stable player evidence/raw/map digests are 3f423ec8bfa8cf087b15e25b4b8a51fd7b4efb6e45b5c8a219e87bba44f5307f / a9604de7908429270b3e12b7b8ec8baba1a193f0ef68dffe59a0918d6c915bd5 / adb0e7cfb4ef50f3d7f8da10302397cadb0377307ab6cc838237da9c741f81f1; opponent digests are 224db6ea8e553849fabf83d65cb7f480da2fccdc2968a97e00da8bd26ac10349 / c115ea0c6e3e6310bab4725aaae170b64bfe0628a21e59ceacccd4e865d9e506 / f5086737ad3bac6f559dc09e6330adb3c38be1753e3555191b7329703dd125b9",
-    "hardware OAM/matrix transfer remains 177/177 plus 174/174 and preceding faded-palette transfer remains 175/177 plus 172/174 with age-4 same-row and player-age-91/opponent-age-90 static-monbg exceptions; MOVE_DIG remains independently unsupported and inherits no acceptance"
+    "hardware OAM/matrix transfer remains 177/177 plus 174/174 and preceding faded-palette transfer remains 175/177 plus 172/174 with age-4 same-row and player-age-91/opponent-age-90 static-monbg exceptions; MOVE_DIG now has independent exact evidence and inherits no Memento acceptance"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-memento-player-weezing-opponent-onix.json",
@@ -7024,8 +7024,8 @@
    "tests/animation/destinyBondActualCore.test.ts"
   ]
  },
- {
-  "move": "MOVE_WATER_PULSE",
+  {
+   "move": "MOVE_WATER_PULSE",
   "status": "exact",
   "covered": [
    "the complete pointer-owned Move_WATER_PULSE body and its nine source components are independently accepted: SMALL_BUBBLES, BLUE_RING_2, five bubble programs, three affine rings and their emitted pairs, simple whole-BG F_PAL_BG blending, target ShakeMon, monbg setup/clear, audio, resources, waits, and cleanup",
@@ -7059,9 +7059,48 @@
    "tests/animation/waterPulseSourceCheckpoint.test.ts",
    "tests/animation/waterPulseEvidence.test.ts",
    "tests/animation/waterPulseReducer.test.ts",
-   "tests/animation/waterPulseActualCore.test.ts"
-  ]
- }
+    "tests/animation/waterPulseActualCore.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_DIG",
+   "status": "exact",
+   "covered": [
+    "the complete pointer-owned two-turn Move_DIG body and its 17 source components are independently accepted: setup and unleash routing, MUD_SAND dirt plumes, both DIRTMOUND halves, DigDown/DigUp movement, static and ordinary monbg setup/clear, IMPACT hitsplat, target ShakeMon, scanline banks, audio, resources, waits, and cleanup",
+    "complete legal bilateral VIBRAVA/CHANSEY Battle Scene ON evidence retains setup ages 0..194 and unleash ages 0..67: 263/263 rows per orientation and 526/526 total source/component rows through both first-inactive cleanups; the reducer and typed seam derive every row from live side, species, geometry, sprite/task allocation, matrix, painter order, monbg, register, scanline, resource, and audio inputs",
+    "Dig's move-owned maps prove whole hardware OAM and matrices predecessor-latched for setup 194/194 and unleash 67/67; palette is setup 193/194 with the age-7 monbg same-row edge and unleash 67/67; selected scanline-bank display and monbg/register transitions are independently pinned at setup ages 10/167/168 and unleash ages 14/27/28",
+    "Dig's target ShakeMon creation writes the positive amplitude synchronously and scans out at age+1, while its subsequent callback-driven body displacement scans out at age+2; this exact invocation-specific split is derived from live task existence and source-relative age, not an absolute frame branch",
+    "two independent actual-core processes each pass player-back setup 195/195 plus unleash 68/68 and opponent-front setup 195/195 plus unleash 68/68 retained raw-RGB rows with zero residual pixels; a material FLYGON/BLISSEY control changes live species, geometry, origin/elevation, allocation, matrix, task, painter order, monbg, and scanline inputs and changes the framebuffer",
+    "MOVE_FISSURE retains its independent exact proof; MOVE_DIVE receives no Dig credit. No damage, RNG, turn order, round/facility state, canonical recording import, retained RGB/map import into production, absolute-tick lookup, per-frame fitting, animation boundary list, or unsupported-branch barrier changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-dig-player-vibrava-opponent-chansey.json",
+    "tools/battle-lab/mechanic-dig-opponent-vibrava-player-chansey.json",
+    "tools/compare/digSourceAudit.ts",
+    "tools/compare/digProbe.py",
+    "tools/compare/digEvidence.ts",
+    "tools/compare/verifyDigReducer.ts",
+    "tools/compare/digActualCore.ts",
+    "tools/compare/fixtures/dig-evidence.json",
+    "tools/compare/evidence/dig-player-dense-state.json.gz",
+    "tools/compare/evidence/dig-opponent-dense-state.json.gz",
+    "tools/compare/evidence/dig-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/dig-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/dig-changemap-player.json",
+    "tools/compare/evidence/dig-changemap-opponent.json",
+    "tools/compare/extractDigAssets.ts",
+    "src/animation/assets/dig-dirt-mound.json",
+    "src/animation/dig.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/digSourceCheckpoint.test.ts",
+    "tests/animation/digEvidenceCheckpoint.test.ts",
+    "tests/animation/digReducer.test.ts",
+    "tests/animation/digActualCore.test.ts",
+    "tests/animation/dirtPlumeFissureDigTrack.test.ts"
+   ]
+  }
 ],
  "queue": [],
  "componentTracks": [
@@ -7716,7 +7755,13 @@
     "MOVE_FISSURE",
     "MOVE_DIG"
    ],
-   "goal": "MOVE_FISSURE independently proves its complete three-group MUD_SAND dirt, target/platform HorizontalShake, two complex BG-only palette pulses, BG_FISSURE two-screenblock fade/hold/restore, audio, hardware transfer, stable OAM painter order, and cleanup in both orientations at 254/254 source/component/framebuffer rows twice fresh. MOVE_DIG remains independently unsupported: it shares only ANIM_TAG_MUD_SAND plus gDirtPlumeSpriteTemplate and still requires its distinct dirt-mound, DigDown/DigUp movement, static-monbg, hitsplat, ShakeMon, and two-turn bodies."
+   "fulfilled": true,
+   "evidence": [
+    "tests/animation/fissureEvidence.test.ts",
+    "tests/animation/digActualCore.test.ts",
+    "tests/animation/dirtPlumeFissureDigTrack.test.ts"
+   ],
+   "goal": "FULFILLED: MOVE_FISSURE independently proves its complete three-group MUD_SAND dirt, target/platform HorizontalShake, two complex BG-only palette pulses, BG_FISSURE two-screenblock fade/hold/restore, audio, hardware transfer, stable OAM painter order, and cleanup in both orientations at 254/254 source/component/framebuffer rows twice fresh. MOVE_DIG independently proves its distinct 195-row setup and 68-row unleash bodies in both orientations, including MUD_SAND plume reuse, DIRTMOUND halves, DigDown/DigUp, static and ordinary monbg, IMPACT, target ShakeMon, selected scanline banks, resources/audio/order, and inactive cleanup at 526/526 component/framebuffer rows twice with zero residual pixels. Shared dirt-plume source identity transfers no timing, latch, body, or acceptance credit between the moves; MOVE_DIVE receives no credit."
   },
   {
    "id": "horizontal-shake-complex-bg-palette",

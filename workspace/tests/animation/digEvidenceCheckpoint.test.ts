@@ -71,7 +71,7 @@ describe("MOVE_DIG legal bilateral dense evidence checkpoint", () => {
     }
   });
 
-  it("retains every source-owned setup/unleash row twice fresh without credit or sibling transfer", () => {
+  it("retains the pre-promotion evidence receipt and current independent exact boundary", () => {
     const fixture = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/dig-evidence.json"), "utf8")) as Json;
     expect(fixture).toMatchObject({
       schema: "dig-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_DIG", moveId: 91,
@@ -112,10 +112,11 @@ describe("MOVE_DIG legal bilateral dense evidence checkpoint", () => {
       expect(unleash.lifecycle.sprites.filter((item: Json) => item.sprite.template === "gBasicHitSplatSpriteTemplate")).toHaveLength(1);
     }
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_DIG")).toBeUndefined();
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_DIG")).toMatchObject({ status: "exact" });
     expect(coverage.queue).not.toContain("MOVE_DIG");
     expect(coverage.componentTracks.find((track: Json) => track.id === "dirt-plume-fissure-dig")).toMatchObject({
       representatives: ["MOVE_FISSURE", "MOVE_DIG"],
+      fulfilled: true,
     });
   });
 

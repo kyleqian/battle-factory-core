@@ -67,7 +67,7 @@ describe("MOVE_MEMENTO exact Scene-ON presentation", () => {
     });
   });
 
-  it("records exact Memento production acceptance with no inherited Dig acceptance", () => {
+  it("records historical Memento acceptance while Dig keeps independent exact credit", () => {
     const receipt = JSON.parse(readFileSync("tools/compare/fixtures/memento-source-staging-checkpoint.json", "utf8"));
     expect(receipt).toMatchObject({ schema: "memento-source-staging-checkpoint/v3", oracleProfile: "battle-scene-on", move: "MOVE_MEMENTO", status: "exact", components: 8, denseEvidence: true, productionFramebuffer: true });
     expect(receipt.bilateralScenarioSha256).toEqual([
@@ -78,7 +78,7 @@ describe("MOVE_MEMENTO exact Scene-ON presentation", () => {
     expect(receipt.siblingAudit).toEqual({ move: "MOVE_DIG", components: 17, shared: ["visualCommand:clearmonbg_static", "visualCommand:monbg_static"], promoted: false });
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_MEMENTO")?.status).toBe("exact");
-    expect(coverage.entries.some((entry: { move: string }) => entry.move === "MOVE_DIG")).toBe(false);
+    expect(coverage.entries.find((entry: { move: string; status: string }) => entry.move === "MOVE_DIG")?.status).toBe("exact");
   });
 
   it("retains twice-fresh bilateral reducer, seam, and production framebuffer acceptance", () => {
