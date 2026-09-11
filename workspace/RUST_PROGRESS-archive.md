@@ -5,6 +5,66 @@ full history regardless.
 
 ---
 
+## R92 — [supervised session wind-down (final), 2026-09-11 03:05-~05:15 UTC, unattended] **M89 ADDBYTE folded; session close (four green folds)**
+
+- **State:** `rust-main` = master + four verified Sonnet worker folds this
+  session — `4397eabfd` M86 accuracycheck bypass, `338b86785` M87
+  full-formula, `a02f4ef78` M88 absorb tail (ACCURACYCHECK complete),
+  `311c15284` M89 addbyte — each followed by its ledger commit and a
+  successful `backup-refs.sh` push. Tree clean, committed, green; no
+  worker worktree or branch left behind. Core-only all session: no ABI,
+  adapter, canonical TS, or npm file touched, so the main supervisor's
+  fold is `core-rs/**` + `RUST_PROGRESS*.md` only. **93 of 215 TS opcode
+  names ported.**
+- **Did (this step):** worker (claude-sonnet-5, 45-min cap, one commit,
+  17.8 min, $3.15, foreground gates) ported 0x2F addbyte
+  (`battle_script_commands.c:3823-3828`): the SETBYTE 24-pointer
+  byte-lvalue universe (lane encodings: gBattleMoveDamage SIGNED-i32 4
+  lanes, sTRIPLE_KICK_POWER u16 2 lanes, gBattlerTarget read
+  `?? 0xff`/write `< 4`, sBATTLER `< 4`), the `sMULTIHIT_STRING + 4`
+  counter checked BEFORE the universe, a 14-entry value-catalog
+  projection of `SETBYTE_VALUES` (jumpif plain-catalog convention;
+  narrowing documented with the bicbyte beyond-universe precedent —
+  worker caught that `MOVE_EFFECT_SLEEP` resolves in full canonical TS
+  and kept the vector corpus honest), the REACHABLE
+  "Cmd_addbyte: <ptr> accepted a read but rejected the incremented
+  value" throw at gBattlerTarget/sBATTLER == 3, Halt "is not modeled"
+  verbatim, find-first REQUIRED registration
+  (`findInstructionOpcodeId`). **23 behavior + 2 registration** cases
+  over all 9 committed sites; corpus sha256
+  `651dc2cb7484773002be8024fd3c1c78dc475fd1495278b20348b6e0a5b3bc21`.
+- **Next:** merge master, re-run the four Rust gates, then continue.
+  ACCURACYCHECK's 3-leaf split (bypass -> formula+miss-tail ->
+  absorb-tail) landed all green in 27.0/33.5/22.3 min — reuse that
+  staging pattern for the next big opcode. Remaining scouted candidates:
+  the name-diff (`/tmp/rust-briefs/rs-ported-new.txt` vs
+  `ts-all-new.txt`) lists ~120 unported names but includes family-module
+  false positives — re-scout at orient; ATTACKSTRING/PPREDUCE (hit-chain
+  neighbors, ports.prepareMessage/isControllerIdle need port modeling)
+  and the jump/array/byte leftovers (COPYARRAY, JUMPIFARRAYEQUAL/
+  NOTEQUAL, SUBBYTE-analogues if TS registers them) are natural thin
+  follow-ups. No deferral is open.
+- **Notes:** supervisor audit covered the catalog both directions, lane
+  encodings (`| 0` signedness via `as u32`/`as i32` round-trip),
+  wrapping-add ≡ `& 0xff`, the multihit-first ordering, both guard
+  rejections, and every cited line; independent regeneration
+  byte-identical. Generated Rust **37,984 bytes** (gen sha
+  `0a7149194d304bd52c82851e4fa6ae6d5a6aeff43dcb106e8f988729cf3f4d8d`);
+  generator **23,285 bytes**, sha256
+  `6df20150cf829392f7fea78fbb9fa40fe003cffb1f192c6e534cb9ec8c22e810`.
+  Final gates on `rust-main`: **1,658/1,658** native (up from 1,596 at
+  orient, +62 across four leaves), fmt, strict workspace Clippy, wasm32
+  release; artifact **507,121 bytes**, sha256
+  `222565a50c6d8c25a0f9dd26bae5b78a67039f1ff7c4dc7453086c4ecf9a0e8a`
+  (artifact size wobbled 512,239 -> 496,730 -> 512,235 -> 507,121 across
+  folds; every build reproduced identically across trees — deterministic
+  codegen drift, not environment). Session-wide: four Sonnet workers
+  (~$23.47), four clean landings 17.8-33.5 min, ZERO cap expiries (the
+  foreground-gates brief rule holds). ACCURACYCHECK (0x1, 66 sites, the
+  largest scouted leaf) went native via the 3-part split; plus ADDBYTE.
+  R89 archived. No npm gate required; no deferral or barrier added. No
+  PAPERCUT.
+
 ## R91 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M88 ACCURACYCHECK part 3/3 (absorb/Flash-Fire tail) folded — opcode complete**
 
 - **State:** `rust-main` = R90 + `a02f4ef78` M88 fold (merge `ad11d5ec4`)
