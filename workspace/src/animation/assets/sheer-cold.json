@@ -1,0 +1,91 @@
+{
+  "schema": "sheer-cold-source-assets/v1",
+  "source": {
+    "script": "data/battle_anim_scripts.s Move_SHEER_COLD",
+    "scriptSha256": "62e1789559020ad60e57b3141e9f54dabb71427cd585f8f174d82fb0fe7246fe",
+    "task": "src/battle_anim_status_effects.c AnimTask_FrozenIceCube",
+    "runtime": "src/battle_anim.c BG_ICE/monbg/fade/clear lifecycle",
+    "rom": {
+      "gameCode": "AGB-BPEE",
+      "symbol": "Move_SHEER_COLD",
+      "start": "0x082d5242",
+      "endExclusive": "0x082d5267"
+    }
+  },
+  "resources": {
+    "iceCube": {
+      "tag": 10010,
+      "tileBytes": 4608,
+      "graphics": "gBattleAnimSpriteGfx_IceCube",
+      "palette": "gBattleAnimSpritePal_IceCube",
+      "source": "graphics/battle_anims/sprites/ice_cube.4bpp + ice_cube.pal"
+    },
+    "iceBackground": {
+      "id": 15,
+      "symbol": "BG_ICE",
+      "source": "graphics/battle_anims/backgrounds/ice.png + ice.bin"
+    }
+  },
+  "templates": {
+    "frozenIceCube": {
+      "symbol": "sFrozenIceCubeSpriteTemplate",
+      "affine": false,
+      "objMode": "objblend",
+      "callback": "SpriteCallbackDummy",
+      "matrixNum": 0,
+      "subpriority": 4
+    }
+  },
+  "subsprites": [
+    {
+      "x": -16,
+      "y": -16,
+      "shape": "64x64",
+      "tileOffset": 0,
+      "priority": 2
+    },
+    {
+      "x": -16,
+      "y": 48,
+      "shape": "64x32",
+      "tileOffset": 64,
+      "priority": 2
+    },
+    {
+      "x": 48,
+      "y": -16,
+      "shape": "32x64",
+      "tileOffset": 96,
+      "priority": 2
+    },
+    {
+      "x": 48,
+      "y": 48,
+      "shape": "32x32",
+      "tileOffset": 128,
+      "priority": 2
+    }
+  ],
+  "taskStages": {
+    "step1": {
+      "start": 45,
+      "end": 53
+    },
+    "step2": {
+      "start": 54,
+      "end": 99
+    },
+    "step3": {
+      "start": 100,
+      "end": 109
+    },
+    "step4": {
+      "start": 110,
+      "end": 148
+    },
+    "parentSprite": {
+      "start": 45,
+      "end": 146
+    }
+  }
+}

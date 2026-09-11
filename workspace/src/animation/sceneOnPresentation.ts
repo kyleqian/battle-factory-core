@@ -900,6 +900,11 @@ import {
   type AirCutterState,
 } from "./airCutter.ts";
 import {
+  sheerColdAtAge,
+  type SheerColdLiveInputs,
+  type SheerColdState,
+} from "./sheerCold.ts";
+import {
   waterPulseAtAge,
   type WaterPulseLiveInputs,
   type WaterPulseState,
@@ -2520,6 +2525,21 @@ export interface SceneOnAirCutterConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/**
+ * Narrow semantic Scene-ON seam for MOVE_SHEER_COLD. The OHKO result and all
+ * battle state remain controller-owned; this carries only live presentation
+ * geometry/allocation facts into the source-relative reducer.
+ */
+export interface SceneOnSheerColdConfig {
+  readonly move: "SHEER_COLD";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<SheerColdLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "targetAnimationCenter" | "targetBattlePositionCenter">>;
+}
+
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
@@ -4028,6 +4048,7 @@ export type SceneOnMoveConfig =
   | SceneOnPinMissileConfig
   | SceneOnSonicBoomConfig
   | SceneOnAirCutterConfig
+  | SceneOnSheerColdConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
@@ -4368,6 +4389,8 @@ export type SceneOnDestinyBondPresentationState =
   SceneOnMovePresentationState<SceneOnDestinyBondConfig>;
 export type SceneOnAirCutterPresentationState =
   SceneOnMovePresentationState<SceneOnAirCutterConfig>;
+export type SceneOnSheerColdPresentationState =
+  SceneOnMovePresentationState<SceneOnSheerColdConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnDigPresentationState =
@@ -4734,6 +4757,12 @@ export interface SceneOnSonicBoomView extends SonicBoomEffect {
 }
 
 export interface SceneOnAirCutterView extends AirCutterState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSheerColdView extends SheerColdState {
+  readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8074,6 +8103,29 @@ export function sceneOnAirCutterView(
       targetSpecies: target.species,
       attackerCenter: attacker.geometry.battlePositionCenter,
       targetCenter: target.geometry.battlePositionCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_SHEER_COLD's first pointer-owned BG_ICE command row. */
+export function sceneOnSheerColdView(
+  state: SceneOnSheerColdPresentationState,
+): SceneOnSheerColdView {
+  if (state.config.move !== "SHEER_COLD") {
+    throw new Error(`expected SHEER_COLD presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...sheerColdAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      targetAnimationCenter: target.geometry.animationCenter,
+      targetBattlePositionCenter: target.geometry.battlePositionCenter,
     }),
     attacker,
     target,
