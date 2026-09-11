@@ -1,3 +1,9 @@
+# MOVE_SHEER_COLD source/component/carrier checkpoint — worker (2026-09-11)
+
+- **State:** Level 50 remains **248/276 exact**, **0 partial / 0 staged**, and **28 unsupported**. `MOVE_SHEER_COLD` remains coverage-absent/unsupported; its new non-exclusive `ice-cube-frozen-ice-cube` track is unfulfilled, and Ice Punch is a source/art control only.
+- **Did:** Pinned branchless `Move_SHEER_COLD` **0x082d5242..0x082d5267** (37 bytes), its exact eleven-component graph, the complete FrozenIceCube task/callback/template/subsprite and BG_ICE/resource/runtime dependency graph, OHKO `power=1 / accuracy=30 / PP=5`, and all six legal Level-50 carriers (lowest **584 FRONTIER_MON_DEWGONG_3**). `Status_Freeze` is explicitly source-separate and does not make Ice Punch timing or body evidence transferable.
+- **Next:** Build complete party-before-init bilateral Dewgong stages, then retain two fresh compact mGBA receipts per orientation proving the true root, legal choice constraint, PP/outcome, and immutable checksum-valid benches. Keep the move/track unsupported; later dense maps must be independently banked per orientation under Rules 1–5.
+
 # Animation supervisor verification — MOVE_AIR_CUTTER exact closure (2026-09-11 supervisor)
 
 - **State / merge:** Independently reviewed and fast-forwarded Sol/high commits `aa0964a46` through `a404e4777`. `MOVE_AIR_CUTTER` alone advances Level 50 to **248/276 exact**, **0 partial / 0 staged**, and **28 unsupported**; only its singleton `air-cutter-projectile` track is fulfilled. `MOVE_SONIC_BOOM` keeps independent acceptance and receives no timing, latch, body, sibling, or track credit.

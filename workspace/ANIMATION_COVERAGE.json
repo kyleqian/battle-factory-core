@@ -9150,6 +9150,19 @@
     "tests/animation/airCutterActualCore.test.ts"
    ],
    "goal": "FULFILLED by MOVE_AIR_CUTTER only: its source-derived reducer, AIR_WAVE/CUT assets, narrow typed seam, and generic live compositor pass all 224 bilateral component, retained-RGB, and actual-core framebuffer rows twice with zero residual pixels through inactive cleanup. The material altered control changes species, geometry, allocation, matrices, task/resource slots, order, and monbg inputs. Sonic Boom remains an independently exact AIR_WAVE control and receives no Air Cutter timing, latch, body, track, or move credit."
+  },
+  {
+   "id": "ice-cube-frozen-ice-cube",
+   "components": [
+    "asset:ANIM_TAG_ICE_CUBE",
+    "task:AnimTask_FrozenIceCube"
+   ],
+   "representatives": ["MOVE_SHEER_COLD"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/sheerColdSourceAudit.ts"
+   ],
+   "goal": "SOURCE-CLASSIFIED ONLY: this singleton Sheer Cold track contains the ICE_CUBE resource and FrozenIceCube task. MOVE_ICE_PUNCH's independently exact freeze-status presentation is an art/task control only; it grants no Sheer Cold root, OHKO outcome, body, timing, latch, Scene-ON seam, compositor, framebuffer, sibling, move, or track credit. A later move-owned checkpoint must retain complete twice-fresh legal bilateral dense state/raw-RGB/change-map evidence through first inactive cleanup before any reducer or promotion work."
   }
  ],
  "variantAudits": {
