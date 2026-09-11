@@ -115,6 +115,20 @@ describe("MOVE_AIR_CUTTER legal bilateral Scene-ON evidence checkpoint", () => {
         coveragePromotion: false,
         siblingCredit: false,
       },
+      repeatability: {
+        runsPerOrientation: 2,
+        allMatched: true,
+        byOrientation: {
+          "player-back": {
+            probeJsonSha256: "b99ea748b05e15cf5e32bc94bf466908ed685e3c76e9c18b50aef7e888fa1b56",
+            rawRgbSequenceSha256: "6f698a7d2b2a794029d6fb6096269fcabc7617bee87d0d753b0f9ea829792674",
+          },
+          "opponent-front": {
+            probeJsonSha256: "335b8d32eb2505101e15b668e79d4db740031f30a1159bc970472f3a71b26878",
+            rawRgbSequenceSha256: "fb1a290ac1179f876b526c593b14b2ac5fc817b893d642b5932396075ca93e3d",
+          },
+        },
+      },
     });
     const coverage = readJson("ANIMATION_COVERAGE.json");
     const track = coverage.componentTracks.find((item: Json) => item.id === "air-cutter-projectile");

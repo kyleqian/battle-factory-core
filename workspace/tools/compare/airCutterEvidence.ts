@@ -299,6 +299,10 @@ function assertDenseReceipt(orientation: Orientation, receipt: Json, probe: Json
 
 function verifyOrientation(orientation: Orientation): Json {
   const receipt = fixture.orientations[orientation];
+  const repeat = fixture.repeatability.byOrientation[orientation];
+  invariant(repeat.probeJsonSha256 === receipt.probeJsonSha256
+    && repeat.rawRgbSequenceSha256 === receipt.rawRgbSequenceSha256,
+  `${orientation}: fresh-repeat digest does not match retained receipt`);
   invariant(sha(readFileSync(resolve(root, receipt.scenario))) === receipt.scenarioSha256,
     `${orientation}: scenario digest`);
   const denseArchive = readFileSync(resolve(root, receipt.denseState));
