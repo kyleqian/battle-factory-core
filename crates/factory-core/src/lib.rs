@@ -75,6 +75,8 @@ pub mod battle_script_jumpifstatus;
 pub mod battle_script_jumpifstatus3condition;
 pub mod battle_script_jumpifstatus3condition_vectors_gen;
 pub mod battle_script_jumpifstatus_vectors_gen;
+pub mod battle_script_multihit_family;
+pub mod battle_script_multihit_family_vectors_gen;
 pub mod battle_script_negativedamage;
 pub mod battle_script_negativedamage_vectors_gen;
 pub mod battle_script_normalisebuffs;
