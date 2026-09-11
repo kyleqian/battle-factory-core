@@ -67,7 +67,7 @@ describe("MOVE_SAND_TOMB source-relative reducer", () => {
     const expectedStatus: Record<string, string | undefined> = {
       MOVE_SAND_ATTACK: "exact",
       MOVE_FISSURE: "exact",
-      MOVE_DIG: undefined,
+      MOVE_DIG: "exact",
       MOVE_MUD_SLAP: "exact",
       MOVE_ROLLOUT: "exact",
       MOVE_MUD_SPORT: undefined,

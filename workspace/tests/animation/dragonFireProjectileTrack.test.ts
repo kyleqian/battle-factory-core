@@ -625,10 +625,10 @@ describe("dragon-fire-projectile component-track receipt ratchet", () => {
     expect(animationCoverageSummary()[0]).toEqual({
       tier: "level50",
       total: 276,
-      exact: 246,
+      exact: 247,
       partial: 0,
       staged: 0,
-      unsupported: 30,
+      unsupported: 29,
     });
     expect(coverage.entries.filter((entry) => trackMoves.includes(
       entry.move as (typeof trackMoves)[number],

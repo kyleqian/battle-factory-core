@@ -321,10 +321,10 @@ describe("mud-sand-scatter component-track receipt ratchet", () => {
     expect(animationCoverageSummary()[0]).toEqual({
       tier: "level50",
       total: 276,
-      exact: 246,
+      exact: 247,
       partial: 0,
       staged: 0,
-      unsupported: 30,
+      unsupported: 29,
     });
     expect(accepted.map(({ move, status }) => [move, status]).sort(([left], [right]) =>
       left.localeCompare(right))).toEqual([

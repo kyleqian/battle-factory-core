@@ -185,7 +185,7 @@ describe("anger-mark-grow-breath standalone fulfilled component-track ratchet", 
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "anger-mark-grow-breath");
     expect(coverage.entries).toHaveLength(247);
     expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(247);
-    expect(276 - coverage.entries.filter((entry: Json) => entry.status === "exact").length).toBe(30);
+    expect(276 - coverage.entries.filter((entry: Json) => entry.status === "exact").length).toBe(29);
     expect(track).toEqual({
       id: "anger-mark-grow-breath",
       components: [...trackComponents],
@@ -315,7 +315,7 @@ describe("anger-mark-grow-breath standalone fulfilled component-track ratchet", 
     }
 
     const evidence = json<Json>("tools/compare/fixtures/frustration-evidence.json");
-    expect(digest("tools/compare/fixtures/frustration-evidence.json")).toBe("9c69cda431efdcc39cc987d2f58e009422f36fa7ea8663ff9874b8a85046c7e6");
+    expect(digest("tools/compare/fixtures/frustration-evidence.json")).toBe("00683124ac2a9c7ab428812ec5f1f40ead0701710f196840901e8ce7653689aa");
     for (const expected of frustrationReceipts) {
       const stage = json<Json>(expected.scenario);
       const receipt = evidence.orientations[expected.orientation];
