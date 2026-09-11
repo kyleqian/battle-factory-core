@@ -975,6 +975,7 @@ import {
   sceneOnSpikeCannonView,
   sceneOnPinMissileView,
   sceneOnSonicBoomView,
+  sceneOnAirCutterView,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
   sceneOnAuroraBeamView,
@@ -1230,6 +1231,7 @@ import {
   type SceneOnSpikeCannonConfig,
   type SceneOnPinMissileConfig,
   type SceneOnSonicBoomConfig,
+  type SceneOnAirCutterConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
@@ -22978,6 +22980,151 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MAGNETON used" : "Foe MAGNETON used",
       "SONICBOOM!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "AIR_CUTTER") {
+    const cutterState = state as SceneOnMovePresentationState<SceneOnAirCutterConfig>;
+    const view = sceneOnAirCutterView(cutterState);
+    const displayed = sceneOnAirCutterView({
+      ...cutterState,
+      age: Math.max(0, cutterState.age - 1),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("AIR_CUTTER presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`AIR_CUTTER missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const idleFor = (battler: typeof view.attacker): Readonly<{ x2: number; y2: number }> =>
+      battler.geometry.side === "opponent"
+        ? speciesFrontIdleRestOffsetOrZero(battler.species)
+        : { x2: 0, y2: 0 };
+    const attackerIdle = idleFor(view.attacker);
+    const targetIdle = idleFor(view.target);
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (cutterState.age === 0 && view.attacker.geometry.side === "opponent") {
+      drawSourceOpponentEnemyShadow(
+        fb,
+        view.attacker.species,
+        view.attacker.geometry.battlePositionCenter,
+      );
+    }
+
+    // MoveBattlerSpriteToBG keeps the target visually present while hiding
+    // its OBJ. Task_UpdateMonBg mirrors ShakeMon2's preceding source offset
+    // into the selected BG scroll, so a direct copied-sprite raster at the
+    // same displaced corner is the source-relative equivalent here.
+    drawSpriteSheet(
+      fb,
+      tilesFor(targetArt, view.target.geometry.side),
+      targetArt.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2 + displayed.battlers.target.offset.x,
+      view.target.geometry.spriteCorner.y + targetIdle.y2 + displayed.battlers.target.offset.y,
+    );
+    const nonObjTarget2 = fb.slice();
+
+    type Entry = Readonly<{
+      slot: number;
+      subpriority: number;
+      y: number;
+      order: number;
+      draw: () => void;
+    }>;
+    const entries: Entry[] = [];
+    const displayedOrder = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    entries.push({
+      slot: displayed.battlers.attacker.slot,
+      subpriority: displayed.battlers.attacker.subpriority,
+      y: view.attacker.geometry.animationCenter.y,
+      order: -1,
+      draw: () => drawSpriteSheet(
+        fb,
+        tilesFor(attackerArt, view.attacker.geometry.side),
+        attackerArt.palette,
+        view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+        view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+      ),
+    });
+    for (const sprite of displayed.sprites) {
+      // AnimTask_AirCutterProjectile creates each AIR_WAVE after that row's
+      // OAM build. The newborn source record therefore enters software OAM
+      // on the following row and hardware on the row after that.
+      if (sprite.kind === "air-wave"
+        && sprite.callback === "AnimAirWaveProjectile"
+        && sprite.data[0] === 11) continue;
+      const centerX = sprite.x + sprite.x2;
+      const centerY = sprite.y + sprite.y2;
+      entries.push({
+        slot: sprite.slot,
+        subpriority: sprite.subpriority,
+        y: centerY,
+        order: displayedOrder(sprite.slot),
+        draw: () => {
+          const art = sprite.kind === "air-wave"
+            ? sonicBoomArt.airWave
+            : { tileset: cuttingSliceFrameTileset(sprite.frame), palette: battleAnimCuttingSlice.palette };
+          drawSpriteSheetFlippedBlendedOverTarget(
+            fb,
+            nonObjTarget2,
+            art.tileset,
+            art.palette,
+            centerX - art.tileset.columns * 4,
+            centerY - art.tileset.rows * 4,
+            sprite.kind === "air-wave" && view.target.geometry.side === "player",
+            sprite.kind === "air-wave" && view.target.geometry.side === "player",
+            displayed.registers.bldalpha & 0xff,
+            displayed.registers.bldalpha >>> 8 & 0xff,
+          );
+        },
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = cutterState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used`
+        : `Foe ${view.attacker.species} used`,
+      "AIR CUTTER!",
       99,
     );
     return;

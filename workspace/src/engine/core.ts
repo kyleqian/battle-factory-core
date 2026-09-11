@@ -182,6 +182,7 @@ import {
   type SceneOnDestinyBondConfig,
   type SceneOnWaterPulseConfig,
   type SceneOnDigConfig,
+  type SceneOnAirCutterConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -289,6 +290,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "DIG") {
     const digPresentation = presentation as SceneOnMovePresentationState<SceneOnDigConfig>;
     renderSceneOnMovePresentation(framebuffer, digPresentation);
+    return;
+  }
+  if (presentation.config.move === "AIR_CUTTER") {
+    const airCutterPresentation = presentation as SceneOnMovePresentationState<SceneOnAirCutterConfig>;
+    renderSceneOnMovePresentation(framebuffer, airCutterPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

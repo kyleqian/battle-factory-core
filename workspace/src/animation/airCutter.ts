@@ -112,6 +112,8 @@ export interface AirCutterSprite {
   readonly subpriority: number;
   readonly matrixNum: 0;
   readonly matrix: AirCutterMatrix;
+  /** Source `gCuttingSliceAnimCmds` cell; AIR_WAVE is permanently cell 0. */
+  readonly frame: 0 | 1 | 2 | 3;
   readonly data: readonly number[];
   readonly sourceOrder: number;
 }
@@ -258,7 +260,8 @@ function waveAtAge(
   }
   return {
     kind: "air-wave", slot, template: "gAirWaveProjectileSpriteTemplate", callback,
-    x, y, x2, y2, subpriority, matrixNum: 0, matrix: IDENTITY, data, sourceOrder,
+    x, y, x2, y2, subpriority, matrixNum: 0, matrix: IDENTITY, frame: 0,
+    data, sourceOrder,
   };
 }
 
@@ -288,6 +291,7 @@ function sliceAtAge(age: number, input: AirCutterLiveInputs): AirCutterSprite | 
     template: "gAirCutterSliceSpriteTemplate", callback,
     x, y, x2: q8Pixel(xAccum), y2: q8Pixel(yAccum),
     subpriority: input.attackerSprite.subpriority - 2, matrixNum: 0, matrix: IDENTITY,
+    frame: Math.min(3, Math.floor((local + 1) / 5)) as 0 | 1 | 2 | 3,
     data, sourceOrder: 3,
   };
 }

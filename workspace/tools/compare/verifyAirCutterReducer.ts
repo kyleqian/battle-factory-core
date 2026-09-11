@@ -19,7 +19,8 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 
 type Json = Record<string, any>;
-type Orientation = "player-back" | "opponent-front";
+export type AirCutterOrientation = "player-back" | "opponent-front";
+type Orientation = AirCutterOrientation;
 const root = resolve(new URL("../..", import.meta.url).pathname);
 const orientations: readonly Orientation[] = ["player-back", "opponent-front"];
 const fixture = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/air-cutter-evidence.json"), "utf8")) as Json;
@@ -48,7 +49,10 @@ function allocation(row: Json, tag: number) {
   return { paletteBank, tileSlot, tileRange: [range[0]!, range[1]!] as const };
 }
 
-function liveInputs(orientation: Orientation, rows: readonly Json[]): AirCutterLiveInputs {
+export function airCutterInputsFor(
+  orientation: Orientation,
+  rows: readonly Json[],
+): AirCutterLiveInputs {
   const row0 = rows[0]!;
   const projectile = namedTask(rows[17]!, "AirCutterProjectileStep1");
   invariant(projectile, `${orientation}: missing first projectile task`);
@@ -94,18 +98,43 @@ function liveInputs(orientation: Orientation, rows: readonly Json[]): AirCutterL
   };
 }
 
-function config(input: AirCutterLiveInputs): SceneOnAirCutterPresentationState {
+export function airCutterConfigFor(
+  orientation: Orientation,
+  rows: readonly Json[],
+): SceneOnAirCutterPresentationState["config"] {
+  const input = airCutterInputsFor(orientation, rows);
+  const row0 = rows[0]!;
   const { attackerSide, targetSide, attackerSpecies, targetSpecies, attackerCenter, targetCenter, ...animationInputs } = input;
+  const attacker = row0.battlerSprites.attacker;
+  const target = row0.battlerSprites.target;
   return {
-    age: 0,
-    config: {
-      move: "AIR_CUTTER",
-      attacker: { species: attackerSpecies, geometry: { side: attackerSide, spriteCorner: attackerCenter, animationCenter: attackerCenter, battlePositionCenter: attackerCenter } },
-      target: { species: targetSpecies, geometry: { side: targetSide, spriteCorner: targetCenter, animationCenter: targetCenter, battlePositionCenter: targetCenter } },
-      fieldProfile: { kind: "default" },
-      animationInputs,
+    move: "AIR_CUTTER",
+    attacker: { species: attackerSpecies as SceneOnAirCutterPresentationState["config"]["attacker"]["species"], geometry: {
+      side: attackerSide,
+      spriteCorner: { x: attacker.x - 32, y: attacker.y - 32 },
+      animationCenter: { x: attacker.x, y: attacker.y },
+      battlePositionCenter: attackerCenter,
+    } },
+    target: { species: targetSpecies as SceneOnAirCutterPresentationState["config"]["target"]["species"], geometry: {
+      side: targetSide,
+      spriteCorner: { x: target.x - 32, y: target.y - 32 },
+      animationCenter: { x: target.x, y: target.y },
+      battlePositionCenter: targetCenter,
+    } },
+    fieldProfile: {
+      playerHp: row0.battlers.player.hp,
+      playerMaxHp: row0.battlers.player.maxHp,
+      opponentHp: row0.battlers.opponent.hp,
+      opponentMaxHp: row0.battlers.opponent.maxHp,
+      playerGender: orientation === "player-back" ? "male" : "female",
+      opponentGender: orientation === "player-back" ? "female" : "male",
     },
-  } as unknown as SceneOnAirCutterPresentationState;
+    animationInputs,
+  };
+}
+
+function config(orientation: Orientation, rows: readonly Json[]): SceneOnAirCutterPresentationState {
+  return { age: 0, config: airCutterConfigFor(orientation, rows) };
 }
 
 function compareRow(orientation: Orientation, age: number, row: Json, state: ReturnType<typeof airCutterAtAge>): void {
@@ -123,6 +152,8 @@ function compareRow(orientation: Orientation, age: number, row: Json, state: Ret
     invariant(actual.x === sprite.x && actual.y === sprite.y && actual.x2 === sprite.x2 && actual.y2 === sprite.y2,
       `${orientation}/${age}: source callback coordinates slot ${sprite.slot}`);
     invariant(actual.subpriority === sprite.subpriority, `${orientation}/${age}: source subpriority slot ${sprite.slot}`);
+    invariant(actual.frame === sprite.animCmdIndex,
+      `${orientation}/${age}: animation cell slot ${sprite.slot}`);
   }
   invariant(JSON.stringify(state.painterOrder) === JSON.stringify(
     row.spriteOrder.filter((slot: number) => expected.some((sprite) => sprite.slot === slot)),
@@ -167,8 +198,8 @@ function replay(orientation: Orientation): Json {
   const probe = JSON.parse(gunzipSync(readFileSync(resolve(root, receipt.denseState))).toString("utf8")) as Json;
   const rows = probe.frames as Json[];
   invariant(rows.length === 112, `${orientation}: retained row count`);
-  const input = liveInputs(orientation, rows);
-  const state = config(input);
+  const input = airCutterInputsFor(orientation, rows);
+  const state = config(orientation, rows);
   let reducerRows = 0;
   let seamRows = 0;
   for (let pass = 0; pass < 2; pass += 1) {
