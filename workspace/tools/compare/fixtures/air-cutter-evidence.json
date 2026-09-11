@@ -1,0 +1,115 @@
+{
+  "schema": "air-cutter-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_AIR_CUTTER",
+  "moveId": 314,
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "source": {
+    "start": "0x082ced58",
+    "endExclusive": "0x082cedba",
+    "bytes": 98,
+    "components": [
+      "asset:ANIM_TAG_AIR_WAVE",
+      "asset:ANIM_TAG_CUT",
+      "asset:ANIM_TAG_IMPACT",
+      "sprite:gAirCutterSliceSpriteTemplate",
+      "task:AnimTask_AirCutterProjectile",
+      "task:AnimTask_ShakeMon2",
+      "visualCommand:blendoff",
+      "visualCommand:clearmonbg",
+      "visualCommand:monbg",
+      "visualCommand:setalpha"
+    ],
+    "exclusiveTrack": [
+      "asset:ANIM_TAG_AIR_WAVE",
+      "sprite:gAirCutterSliceSpriteTemplate",
+      "task:AnimTask_AirCutterProjectile"
+    ],
+    "sharedControls": [
+      "asset:ANIM_TAG_CUT",
+      "asset:ANIM_TAG_IMPACT",
+      "task:AnimTask_ShakeMon2",
+      "visualCommand:blendoff",
+      "visualCommand:clearmonbg",
+      "visualCommand:monbg",
+      "visualCommand:setalpha"
+    ],
+    "airWaveAssetAlsoUsedBy": ["MOVE_SONIC_BOOM"],
+    "classification": "The singleton track is the Air Cutter-exclusive triple, not a claim that ANIM_TAG_AIR_WAVE is globally unique. Shared controls grant no sibling credit."
+  },
+  "legalLevel50Carriers": [
+    {"setId": 231, "label": "FRONTIER_MON_GOLBAT_1", "species": "SPECIES_GOLBAT"},
+    {"setId": 336, "label": "FRONTIER_MON_GOLBAT_2", "species": "SPECIES_GOLBAT"},
+    {"setId": 386, "label": "FRONTIER_MON_SKARMORY_1", "species": "SPECIES_SKARMORY"},
+    {"setId": 649, "label": "FRONTIER_MON_CROBAT_3", "species": "SPECIES_CROBAT"}
+  ],
+  "staging": {
+    "lowestCarrierSetId": 231,
+    "challengeNum": 1,
+    "trainerId": 100,
+    "contract": "mechanicLab overrides.parties only: three complete legal records per side before battle init; no transient battle state injection; active attacker and target each have an exact four-slot decision constraint."
+  },
+  "oracleFreshness": {
+    "verified": true,
+    "command": "bin/oracle --profile battle-scene-on info",
+    "profile": "battle-scene-on",
+    "timing": "immediately before the first successful bilateral receipt"
+  },
+  "evidenceScope": {
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferCompared": false,
+    "fullDenseRowsRetained": true,
+    "semanticStateRetained": true,
+    "rawRgbReceiptsRetained": true,
+    "perOrientationChangeMaps": true,
+    "twiceFreshByteIdentical": true,
+    "coveragePromotion": false,
+    "siblingCredit": false
+  },
+  "repeatability": {
+    "runsPerOrientation": 2,
+    "allMatched": true,
+    "comparison": "Each orientation's complete dense JSON and ordered raw RGB frames were byte-identical across independent fresh mGBA processes."
+  },
+  "orientations": {
+    "player-back": {
+      "attacker": "player",
+      "scenario": "tools/battle-lab/mechanic-air-cutter-player-golbat-opponent-chansey.json",
+      "scenarioSha256": "a02dbb182c79f035e7342b4df8257086bba7ec6fc02443d90ea6b6be8951f5b3",
+      "denseState": "tools/compare/evidence/air-cutter-player-dense-state.json.gz",
+      "denseStateSha256": "c7512998435b17d48a558c7588aaf9311701906be7ab2d28a119d215cc00d522",
+      "probeJsonSha256": "b99ea748b05e15cf5e32bc94bf466908ed685e3c76e9c18b50aef7e888fa1b56",
+      "rawRgbArchive": "tools/compare/evidence/air-cutter-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "f36fbb9dc730bf64a364ce0f0a8c9e1563d8d79977c5b603c7edcbfb02acc48e",
+      "rawRgbSequenceSha256": "6f698a7d2b2a794029d6fb6096269fcabc7617bee87d0d753b0f9ea829792674",
+      "changeMap": "tools/compare/evidence/air-cutter-changemap-player.json",
+      "changeMapSha256": "6e2077edd360f3088e9f804dd63f0894ba3cf846b18d695c4c49556e376412c6",
+      "window": {"startFrame": 74, "endFrame": 185, "frameCount": 112}
+    },
+    "opponent-front": {
+      "attacker": "opponent",
+      "scenario": "tools/battle-lab/mechanic-air-cutter-opponent-golbat-player-chansey.json",
+      "scenarioSha256": "b45b65b0386db3d7576484495455055ada9b9d67dfaec8546afb71871795c625",
+      "denseState": "tools/compare/evidence/air-cutter-opponent-dense-state.json.gz",
+      "denseStateSha256": "bad2f4f4e138435057b4f1812741be29772ce5ce765eea04592b3afb22fc5942",
+      "probeJsonSha256": "335b8d32eb2505101e15b668e79d4db740031f30a1159bc970472f3a71b26878",
+      "rawRgbArchive": "tools/compare/evidence/air-cutter-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "38db1a64f830a32ac8b4353c99692ad8a2f2c29a5aa9ba29e3df1345c7524e84",
+      "rawRgbSequenceSha256": "fb1a290ac1179f876b526c593b14b2ac5fc817b893d642b5932396075ca93e3d",
+      "changeMap": "tools/compare/evidence/air-cutter-changemap-opponent.json",
+      "changeMapSha256": "156bf92320dc147fe8abb91889c394f1d80baa82a4f4230c3f8efd18fe517523",
+      "window": {"startFrame": 78, "endFrame": 189, "frameCount": 112}
+    }
+  },
+  "acceptance": {
+    "sourceRows": "112/112 + 112/112",
+    "rawRgbRows": "112/112 + 112/112",
+    "semanticRows": "112/112 + 112/112",
+    "firstInactiveCleanup": "retained in both orientations",
+    "claim": "MOVE_AIR_CUTTER source/legal-staging evidence only; remains unsupported-evidence and grants no sibling or exact coverage credit."
+  }
+}

@@ -9088,9 +9088,21 @@
    "fulfilled": false,
    "evidence": [
     "tools/compare/airCutterSourceAudit.ts",
-    "tests/animation/airCutterSourceCheckpoint.test.ts"
+    "tests/animation/airCutterSourceCheckpoint.test.ts",
+    "tools/battle-lab/mechanic-air-cutter-player-golbat-opponent-chansey.json",
+    "tools/battle-lab/mechanic-air-cutter-opponent-golbat-player-chansey.json",
+    "tools/compare/airCutterProbe.py",
+    "tools/compare/airCutterEvidence.ts",
+    "tools/compare/fixtures/air-cutter-evidence.json",
+    "tools/compare/evidence/air-cutter-player-dense-state.json.gz",
+    "tools/compare/evidence/air-cutter-opponent-dense-state.json.gz",
+    "tools/compare/evidence/air-cutter-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/air-cutter-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/air-cutter-changemap-player.json",
+    "tools/compare/evidence/air-cutter-changemap-opponent.json",
+    "tests/animation/airCutterEvidenceCheckpoint.test.ts"
    ],
-   "goal": "SOURCE-CLASSIFIED ONLY: this singleton Air Cutter projectile track contains the shared AIR_WAVE asset plus Air Cutter's unique slice sprite and projectile task. Sonic Boom is an asset control only; no source timing, latch, reducer, Scene-ON seam, compositor, framebuffer, sibling, or move-coverage credit is granted until Air Cutter has its own complete legal bilateral dense acceptance."
+   "goal": "SOURCE + LEGAL BILATERAL STAGING ONLY: this singleton Air Cutter projectile track contains the shared AIR_WAVE asset plus Air Cutter's unique slice sprite and projectile task. Move-owned complete Scene-ON dense semantic/raw-RGB/change-map receipts exist twice fresh in both orientations, but no reducer, Scene-ON seam, compositor, app framebuffer comparison, sibling, move, or track credit is granted. Sonic Boom is an asset control only."
   }
  ],
  "variantAudits": {

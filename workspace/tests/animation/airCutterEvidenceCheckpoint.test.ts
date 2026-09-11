@@ -1,0 +1,132 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+import { verifyAirCutterEvidence } from "../../tools/compare/airCutterEvidence.ts";
+
+type Json = Record<string, any>;
+const root = resolve(import.meta.dirname, "../..");
+const readJson = (path: string): Json => JSON.parse(readFileSync(resolve(root, path), "utf8")) as Json;
+const stages = {
+  "player-back": readJson("tools/battle-lab/mechanic-air-cutter-player-golbat-opponent-chansey.json"),
+  "opponent-front": readJson("tools/battle-lab/mechanic-air-cutter-opponent-golbat-player-chansey.json"),
+};
+const fixture = readJson("tools/compare/fixtures/air-cutter-evidence.json");
+
+function activeParty(stage: Json, attacker: "player" | "opponent"): Json[] {
+  return stage.overrides.parties[attacker] as Json[];
+}
+
+describe("MOVE_AIR_CUTTER legal bilateral Scene-ON evidence checkpoint", () => {
+  it("keeps both mechanicLab stages complete, party-before-init, and source-route legal", () => {
+    for (const [orientation, stage] of Object.entries(stages)) {
+      expect(stage).toMatchObject({
+        schemaVersion: 1,
+        mode: "mechanicLab",
+        profile: "battle-scene-on",
+        level: 50,
+        challengeNum: 1,
+        battleNum: 0,
+        trainerId: 100,
+      });
+      expect(stage.overrides).toEqual({ parties: expect.any(Object) });
+      expect(stage).not.toHaveProperty("overrides.battlers");
+      expect(stage.overrides.parties.player).toHaveLength(3);
+      expect(stage.overrides.parties.opponent).toHaveLength(3);
+      for (const side of ["player", "opponent"] as const) {
+        for (const mon of stage.overrides.parties[side]) {
+          expect(mon).toEqual(expect.objectContaining({
+            level: 50,
+            ivs: expect.any(Object),
+            evs: expect.any(Object),
+            moves: expect.any(Array),
+            ppUps: [0, 0, 0, 0],
+            item: expect.any(Number),
+            abilitySlot: expect.any(Number),
+            friendship: expect.any(Number),
+            gender: expect.any(String),
+            shiny: false,
+          }));
+          expect(mon.moves).toHaveLength(4);
+        }
+      }
+      const attacker = orientation === "player-back" ? "player" : "opponent";
+      const target = attacker === "player" ? "opponent" : "player";
+      expect(activeParty(stage, attacker)[0]).toMatchObject({ species: 42, moves: [314, 314, 314, 314] });
+      expect(activeParty(stage, target)[0]).toMatchObject({ species: 113, moves: [33, 33, 33, 33] });
+      expect(stage[attacker === "player" ? "playerSetIds" : "opponentSetIds"]).toContain(231);
+    }
+    expect(stages["player-back"].playerSetIds).toEqual([231, 180, 190]);
+    expect(stages["player-back"].opponentSetIds).toEqual([162, 163, 165]);
+    expect(stages["opponent-front"].playerSetIds).toEqual([162, 163, 165]);
+    expect(stages["opponent-front"].opponentSetIds).toEqual([231, 180, 190]);
+  });
+
+  it("replays the two complete dense receipts and their move-owned maps hermetically", () => {
+    const first = verifyAirCutterEvidence();
+    expect(verifyAirCutterEvidence()).toEqual(first);
+    expect(first).toEqual({
+      "player-back": expect.objectContaining({
+        sourceRows: 112,
+        rawRgbRows: 112,
+        firstWaveRamRow: 17,
+        firstWaveFramebufferDelta: 19,
+        firstSliceRamRow: 76,
+        firstInactiveScriptRow: 111,
+        coverageCredit: false,
+      }),
+      "opponent-front": expect.objectContaining({
+        sourceRows: 112,
+        rawRgbRows: 112,
+        firstWaveRamRow: 17,
+        firstWaveFramebufferDelta: 19,
+        firstSliceRamRow: 76,
+        firstInactiveScriptRow: 111,
+        coverageCredit: false,
+      }),
+    });
+    for (const orientation of ["player-back", "opponent-front"] as const) {
+      expect(first[orientation].latches).toMatchObject({
+        hardwareOamEqualsPrecedingSoftware: "111/111",
+        hardwareMatricesEqualsPrecedingSoftware: "111/111",
+        hardwarePaletteEqualsPrecedingFaded: "110/111",
+      });
+    }
+  });
+
+  it("records a staging-only unsupported boundary with no track or move credit", () => {
+    expect(fixture).toMatchObject({
+      schema: "air-cutter-bilateral-evidence/v1",
+      oracleProfile: "battle-scene-on",
+      move: "MOVE_AIR_CUTTER",
+      moveId: 314,
+      status: "unsupported-evidence",
+      coverageCredit: false,
+      evidenceScope: {
+        productionAnimationChanged: false,
+        reducerAdded: false,
+        typedSeamAdded: false,
+        compositorAdded: false,
+        framebufferCompared: false,
+        fullDenseRowsRetained: true,
+        semanticStateRetained: true,
+        rawRgbReceiptsRetained: true,
+        perOrientationChangeMaps: true,
+        twiceFreshByteIdentical: true,
+        coveragePromotion: false,
+        siblingCredit: false,
+      },
+    });
+    const coverage = readJson("ANIMATION_COVERAGE.json");
+    const track = coverage.componentTracks.find((item: Json) => item.id === "air-cutter-projectile");
+    expect(track).toMatchObject({
+      fulfilled: false,
+      representatives: ["MOVE_AIR_CUTTER"],
+      components: [
+        "asset:ANIM_TAG_AIR_WAVE",
+        "sprite:gAirCutterSliceSpriteTemplate",
+        "task:AnimTask_AirCutterProjectile",
+      ],
+    });
+    expect(coverage.entries.some((item: Json) => item.move === "MOVE_AIR_CUTTER")).toBe(false);
+  });
+});
