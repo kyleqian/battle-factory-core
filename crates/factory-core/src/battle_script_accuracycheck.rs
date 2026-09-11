@@ -1,15 +1,13 @@
-//! Pure `B_SCR_OP_ACCURACYCHECK` (0x1, `Cmd_accuracycheck`) -- PART 2 OF 3
-//! (M87): the full-formula operand path (`ACC_CURR_MOVE`/`MOVE_FUTURE_SIGHT`/
-//! `MOVE_DOOM_DESIRE`) -- protect gate, lock-on, the hitmarker/semi-invulnerable
-//! ladder, the weather bypasses, the native accuracy calc + one rng roll, the
-//! MISS tail (`CheckWonderGuardAndLevitate` + missType chooser + miss jump),
-//! and the destiny-bond half of the HIT tail. M86's bypass paths
-//! (`NO_ACC_CALC`/`NO_ACC_CALC_CHECK_LOCK_ON`) and registration are UNCHANGED
-//! from that step. The HIT tail's absorb/Flash-Fire label-jump block
-//! (`AbilityBattleEffects(ABILITYEFFECT_ABSORBING)`) is staged behind
-//! [`BattleScriptAccuracycheckOutcome::AbsorbingTailPending`] -- returned
-//! ONLY when its trigger conditions match -- and its body is the NEXT step
-//! (M88); a plain hit that matches no trigger fully advances here.
+//! Pure `B_SCR_OP_ACCURACYCHECK` (0x1, `Cmd_accuracycheck`) -- COMPLETE
+//! (M86+M87+M88, 3/3): the bypass ladder, the full-formula operand path
+//! (`ACC_CURR_MOVE`/`MOVE_FUTURE_SIGHT`/`MOVE_DOOM_DESIRE`) -- protect gate,
+//! lock-on, the hitmarker/semi-invulnerable ladder, the weather bypasses,
+//! the native accuracy calc + one rng roll, the MISS tail
+//! (`CheckWonderGuardAndLevitate` + missType chooser + miss jump), and the
+//! full HIT tail: the destiny-bond write plus
+//! `AbilityBattleEffects(ABILITYEFFECT_ABSORBING)`'s Volt/Water Absorb and
+//! Flash Fire label-jump arms (M88). A plain hit that matches no absorb/
+//! Flash-Fire trigger fully advances.
 //!
 //! Source authority: `reference/pokeemerald/src/battle_script_commands.c`
 //! -- `Cmd_accuracycheck` :1099-1189 (bypass branch :1103-1113, full-formula
@@ -18,8 +16,11 @@
 //! `JumpIfMoveAffectedByProtect` :1041-1052, `DEFENDER_IS_PROTECTED` :57;
 //! `CheckWonderGuardAndLevitate` :1426-~1490; `TrySetDestinyBondToHappen`
 //! :8285-8296; `battle_util.c` `AbilityBattleEffects`
-//! (`ABILITYEFFECT_ABSORBING`) :2679-2729 (M88's own authority -- cited here
-//! only for the staged trigger conditions); dispatch row :332 (`//0x1`),
+//! (`ABILITYEFFECT_ABSORBING`) :2679-2729 (each case arm and its PPLoss
+//! chooser); committed labels `data/battle_scripts_1.s:4078/4080`
+//! (`BattleScript_MoveHPDrain[_PPLoss]`), `:4091/4093`
+//! (`BattleScript_MonMadeMoveUseless[_PPLoss]`), `:4101/4103`
+//! (`BattleScript_FlashFireBoost[_PPLoss]`); dispatch row :332 (`//0x1`),
 //! forward decl :80; `include/constants/battle_script_commands.h:7`; `asm/
 //! macros/battle_script.inc:6-10`; `include/constants/battle.h:149`
 //! (`STATUS2_DESTINY_BOND`), `:153` (`STATUS2_FORESIGHT`), `:160`
@@ -41,11 +42,12 @@
 //! `accuracycheckOpcodeHandler` :1119-1289 (full-formula body :1160-1288),
 //! `requireMoveRow` :126-130, `resolveMoveTypeName` :139-144,
 //! `jumpToMissTarget` :849-871, `applyTrySetDestinyBondToHappen` :894-906,
-//! `advancePastAccuracyCheck` :921-1004 (this step ports only its
-//! destiny-bond line + the two trigger predicates -- the absorb/Flash-Fire
-//! bodies are M88), `checkWonderGuardAndLevitate` :1013-1058,
-//! `resolveRequiredLabelProgramCounter` :2834-2838 (NOT needed by this step
-//! -- M88's own label jumps are deferred along with the tail body),
+//! `advancePastAccuracyCheck` :921-1004 (complete: destiny-bond line, both
+//! trigger predicates, and the absorb/Flash-Fire label-jump bodies),
+//! `checkWonderGuardAndLevitate` :1013-1058,
+//! `resolveRequiredLabelProgramCounter` :2834-2838 (the shared "SetMoveEffect:
+//! committed Battle Script program does not define label" helper, reused
+//! verbatim by the M88 tail's own required-label error),
 //! `weatherHasEffect` (`battleEndTurnOrchestration.ts:1110-1116`, the Cloud
 //! Nine scan over `battlersCount`), `drawBattleScriptRng`
 //! (`battleScriptMachine.ts:401-426`).
@@ -94,8 +96,7 @@
 //!    `check_wonder_guard_uses_row_power_not_current_move_power` below.
 //!
 //! This leaf owns neither the WASM ABI, scheduler/controller state, nor
-//! presentation. M88 owns the absorb/Flash-Fire tail body (its jump targets,
-//! `multistringChooser`, and `flashFireBoosted` write).
+//! presentation.
 
 use core::fmt;
 
@@ -259,6 +260,12 @@ pub struct BattleScriptAccuracycheckBattlerState {
     pub evasion_stage: i32,
     pub not_first_strike: u8,
     pub target_not_affected: u8,
+    /// Current/max HP, read only by the M88 absorb tail's full-HP check.
+    pub hp: i32,
+    pub max_hp: i32,
+    /// `RESOURCE_FLAG_FLASH_FIRE`, 0|1 -- read AND written by the M88
+    /// Flash-Fire tail (unconditionally set to 1 once it fires).
+    pub flash_fire_boosted: u8,
 }
 
 /// `withClearedLandedMove`'s twin source arrays
@@ -308,6 +315,13 @@ pub struct BattleScriptAccuracycheckRules {
     pub enigma_berry_hold_effects: [u16; BATTLE_SCRIPT_ACCURACYCHECK_BATTLER_COUNT],
     pub enigma_berry_hold_effect_params: [i32; BATTLE_SCRIPT_ACCURACYCHECK_BATTLER_COUNT],
     pub selector_roles: BattleScriptAccuracycheckRoles,
+    /// `MULTISTRING_CHOOSER`, written only by the M88 Flash-Fire tail
+    /// (`B_MSG_FLASH_FIRE_BOOST` 0 / `B_MSG_FLASH_FIRE_NO_BOOST` 1,
+    /// `battle_string_ids.h:557-558`).
+    pub multistring_chooser: u8,
+    /// `gBattleMoveDamage`, written only by the M88 absorb tail's
+    /// not-full-HP arm (a negative heal staging).
+    pub battle_move_damage: i32,
 }
 
 /// One committed-program instruction, used ONLY for registration (find the
@@ -367,6 +381,29 @@ pub struct BattleScriptAccuracycheckExecution<'a> {
     pub move_operand_expression: Option<&'a str>,
     pub fail_label_expression: &'a str,
     pub resolved_fail_program_counter: Option<u32>,
+    /// The six label targets the M88 absorb/Flash-Fire tail may jump to,
+    /// lazily resolved by the caller exactly like `resolved_fail_program_counter`
+    /// -- consulted ONLY for the one label the taken branch actually needs.
+    pub absorbing_tail_labels: BattleScriptAccuracycheckAbsorbingTailLabels,
+}
+
+/// Committed labels `data/battle_scripts_1.s:4078/4080/4091/4093/4101/4103`.
+/// `None` means the committed program has no such label (a checked error
+/// when the branch that needs it actually fires).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct BattleScriptAccuracycheckAbsorbingTailLabels {
+    /// `BattleScript_MoveHPDrain` (`:4080`).
+    pub move_hp_drain: Option<u32>,
+    /// `BattleScript_MoveHPDrain_PPLoss` (`:4078`).
+    pub move_hp_drain_pp_loss: Option<u32>,
+    /// `BattleScript_MonMadeMoveUseless` (`:4093`).
+    pub mon_made_move_useless: Option<u32>,
+    /// `BattleScript_MonMadeMoveUseless_PPLoss` (`:4091`).
+    pub mon_made_move_useless_pp_loss: Option<u32>,
+    /// `BattleScript_FlashFireBoost` (`:4103`).
+    pub flash_fire_boost: Option<u32>,
+    /// `BattleScript_FlashFireBoost_PPLoss` (`:4101`).
+    pub flash_fire_boost_pp_loss: Option<u32>,
 }
 
 /// Mirrors canonical `unsupportedBranch`'s reason object verbatim.
@@ -399,16 +436,6 @@ pub struct BattleScriptAccuracycheckRngDraw {
     pub random_value: u16,
 }
 
-/// The M88 absorb/Flash-Fire trigger this hit matched. Detection only --
-/// the tail body (jump target, `multistringChooser`, `flashFireBoosted`
-/// write, ability reveal) is M88's job.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum BattleScriptAccuracycheckAbsorbingTrigger {
-    VoltAbsorb,
-    WaterAbsorb,
-    FlashFire,
-}
-
 /// Exact observable non-error outcomes.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BattleScriptAccuracycheckOutcome {
@@ -424,25 +451,6 @@ pub enum BattleScriptAccuracycheckOutcome {
         draws: Vec<BattleScriptAccuracycheckRngDraw>,
     },
     Halt(BattleScriptAccuracycheckHalt),
-    /// M88 stages exactly this: `advancePastAccuracyCheck`'s absorb
-    /// (Volt/Water Absorb) or Flash-Fire trigger matched. `rules` already
-    /// carries the hit tail's destiny-bond `hitMarker` write (that part IS
-    /// this step's job -- only the absorb/Flash-Fire label jump itself is
-    /// deferred). Covered only by native unit tests, never generator
-    /// vectors (see the module doc comment).
-    AbsorbingTailPending {
-        rules: BattleScriptAccuracycheckRules,
-        rng: BattleScriptAccuracycheckRngState,
-        draws: Vec<BattleScriptAccuracycheckRngDraw>,
-        attacker: BattleScriptAccuracycheckBattler,
-        target: BattleScriptAccuracycheckBattler,
-        move_id: u16,
-        move_type: u8,
-        trigger: BattleScriptAccuracycheckAbsorbingTrigger,
-        /// `attackerBattler.notFirstStrike === 1`, computed here for M88's
-        /// label-suffix choice.
-        pp_was_already_reduced: bool,
-    },
 }
 
 /// Exact observable errors in canonical evaluation order.
@@ -465,6 +473,10 @@ pub enum BattleScriptAccuracycheckError {
     /// `resolveBattleScriptBattlerHoldEffect(Param)` (`:1647-1677`); same
     /// text as [`BattleScriptBaseDamageError::ItemOutOfRange`].
     ItemOutOfRange { item: u16 },
+    /// `resolveRequiredLabelProgramCounter` (`hitChainOpcode.ts:2834-2838`),
+    /// taken only by the M88 absorb/Flash-Fire tail's own required label.
+    /// The "SetMoveEffect:" prefix is the shared helper's text verbatim.
+    MissingRequiredLabel { label: String },
 }
 
 impl fmt::Display for BattleScriptAccuracycheckError {
@@ -495,6 +507,10 @@ impl fmt::Display for BattleScriptAccuracycheckError {
             Self::ItemOutOfRange { item } => {
                 write!(formatter, "item {item} is outside the source gItems corpus")
             }
+            Self::MissingRequiredLabel { label } => write!(
+                formatter,
+                "SetMoveEffect: committed Battle Script program does not define label {label}"
+            ),
         }
     }
 }
@@ -820,26 +836,115 @@ fn check_wonder_guard_and_levitate(
     WonderGuardOutcome { last_used_ability: None, miss_type: None, target_not_affected: false }
 }
 
-/// `JumpIfMoveFailed`'s "not failed" branch, narrowed to THIS step:
-/// `TrySetDestinyBondToHappen` (always applied) plus the two M88 trigger
-/// predicates. A trigger match stages [`BattleScriptAccuracycheckOutcome::AbsorbingTailPending`];
-/// otherwise this fully advances with the destiny-bond write and the
-/// already-persisted hitmarker.
+/// Required-label lookup for the M88 tail: `label` is the exact source
+/// name used both for resolution and for
+/// [`BattleScriptAccuracycheckError::MissingRequiredLabel`]'s text.
+fn resolve_required_label(
+    label: &'static str,
+    program_counter: Option<u32>,
+) -> Result<u32, BattleScriptAccuracycheckError> {
+    program_counter
+        .ok_or(BattleScriptAccuracycheckError::MissingRequiredLabel { label: label.to_string() })
+}
+
+/// `AbilityBattleEffects(ABILITYEFFECT_ABSORBING)`'s Volt/Water Absorb arm
+/// (`battle_util.c:2682-2701,2718-2744`): stage the negative heal (skipped
+/// at full HP), record the reveal, and jump to the HP-drain/useless label
+/// chosen by the full-HP check and the PPLoss suffix rule.
+fn apply_absorb_tail(
+    rules: &BattleScriptAccuracycheckRules,
+    labels: &BattleScriptAccuracycheckAbsorbingTailLabels,
+    target: BattleScriptAccuracycheckBattler,
+    ability: u16,
+    pp_was_already_reduced: bool,
+    rng: BattleScriptAccuracycheckRngState,
+    draws: Vec<BattleScriptAccuracycheckRngDraw>,
+) -> Result<BattleScriptAccuracycheckOutcome, BattleScriptAccuracycheckError> {
+    let target_state = rules.battlers[target.index()];
+    let mut next = *rules;
+    next.last_used_ability = ability;
+    let is_full_hp = target_state.hp == target_state.max_hp;
+    if !is_full_hp {
+        next.battle_move_damage = -core::cmp::max(1, target_state.max_hp / 4);
+    }
+    next = apply_ability_reveal(&next, target, ability);
+
+    let (label, program_counter) = if is_full_hp {
+        if pp_was_already_reduced {
+            (
+                "BattleScript_MonMadeMoveUseless",
+                labels.mon_made_move_useless,
+            )
+        } else {
+            (
+                "BattleScript_MonMadeMoveUseless_PPLoss",
+                labels.mon_made_move_useless_pp_loss,
+            )
+        }
+    } else if pp_was_already_reduced {
+        ("BattleScript_MoveHPDrain", labels.move_hp_drain)
+    } else {
+        (
+            "BattleScript_MoveHPDrain_PPLoss",
+            labels.move_hp_drain_pp_loss,
+        )
+    };
+    let program_counter = resolve_required_label(label, program_counter)?;
+    Ok(BattleScriptAccuracycheckOutcome::Jump { program_counter, rules: next, rng, draws })
+}
+
+/// `AbilityBattleEffects(ABILITYEFFECT_ABSORBING)`'s Flash Fire arm
+/// (`battle_util.c:2705-2725`): the boost flag is written UNCONDITIONALLY
+/// (idempotent on re-trigger); `multistringChooser` reflects only whether
+/// it was ALREADY boosted before this write.
+fn apply_flash_fire_tail(
+    rules: &BattleScriptAccuracycheckRules,
+    labels: &BattleScriptAccuracycheckAbsorbingTailLabels,
+    target: BattleScriptAccuracycheckBattler,
+    pp_was_already_reduced: bool,
+    rng: BattleScriptAccuracycheckRngState,
+    draws: Vec<BattleScriptAccuracycheckRngDraw>,
+) -> Result<BattleScriptAccuracycheckOutcome, BattleScriptAccuracycheckError> {
+    let already_boosted = rules.battlers[target.index()].flash_fire_boosted == 1;
+    let mut next = *rules;
+    next.last_used_ability = ABILITY_FLASH_FIRE;
+    next.multistring_chooser = u8::from(already_boosted);
+    next.battlers[target.index()].flash_fire_boosted = 1;
+    next = apply_ability_reveal(&next, target, ABILITY_FLASH_FIRE);
+
+    let (label, program_counter) = if pp_was_already_reduced {
+        ("BattleScript_FlashFireBoost", labels.flash_fire_boost)
+    } else {
+        (
+            "BattleScript_FlashFireBoost_PPLoss",
+            labels.flash_fire_boost_pp_loss,
+        )
+    };
+    let program_counter = resolve_required_label(label, program_counter)?;
+    Ok(BattleScriptAccuracycheckOutcome::Jump { program_counter, rules: next, rng, draws })
+}
+
+/// `JumpIfMoveFailed`'s "not failed" branch: `TrySetDestinyBondToHappen`
+/// (always applied) plus `AbilityBattleEffects(ABILITYEFFECT_ABSORBING)`'s
+/// Volt/Water Absorb and Flash Fire arms (M88, `battle_util.c:2679-2729`).
+/// Absorb is checked before Flash Fire (pin); no trigger match fully
+/// advances with the destiny-bond write and the already-persisted
+/// hitmarker.
 fn accuracycheck_hit_tail(
     rules: &BattleScriptAccuracycheckRules,
+    execution: &BattleScriptAccuracycheckExecution<'_>,
     attacker: BattleScriptAccuracycheckBattler,
     target: BattleScriptAccuracycheckBattler,
-    move_id: u16,
     move_type: u8,
     rng: BattleScriptAccuracycheckRngState,
     draws: Vec<BattleScriptAccuracycheckRngDraw>,
-) -> BattleScriptAccuracycheckOutcome {
+) -> Result<BattleScriptAccuracycheckOutcome, BattleScriptAccuracycheckError> {
     let next_rules = apply_destiny_bond(rules, attacker, target);
     let attacker_state = next_rules.battlers[attacker.index()];
     // `advancePastAccuracyCheck` reads `targetBattler` off the ORIGINAL
     // `rulesContext` parameter, not its own `nextRulesContext` local --
     // functionally identical here since the destiny-bond write never
-    // touches a battler's ability/status1/status2, but mirrored exactly.
+    // touches a battler's ability/status1/status2/hp, but mirrored exactly.
     let target_state = rules.battlers[target.index()];
     let pp_was_already_reduced = attacker_state.not_first_strike == 1;
 
@@ -852,40 +957,36 @@ fn accuracycheck_hit_tail(
             .map_or(0, |row| row.power),
     );
 
-    let trigger = if target_state.ability == ABILITY_VOLT_ABSORB
-        && move_type == TYPE_ELECTRIC
-        && current_move_power != 0
+    let labels = &execution.absorbing_tail_labels;
+    if (target_state.ability == ABILITY_VOLT_ABSORB && move_type == TYPE_ELECTRIC)
+        || (target_state.ability == ABILITY_WATER_ABSORB && move_type == TYPE_WATER)
     {
-        Some(BattleScriptAccuracycheckAbsorbingTrigger::VoltAbsorb)
-    } else if target_state.ability == ABILITY_WATER_ABSORB
-        && move_type == TYPE_WATER
-        && current_move_power != 0
-    {
-        Some(BattleScriptAccuracycheckAbsorbingTrigger::WaterAbsorb)
+        if current_move_power != 0 {
+            return apply_absorb_tail(
+                &next_rules,
+                labels,
+                target,
+                target_state.ability,
+                pp_was_already_reduced,
+                rng,
+                draws,
+            );
+        }
     } else if target_state.ability == ABILITY_FLASH_FIRE
         && move_type == TYPE_FIRE
         && (target_state.status1 & STATUS1_FREEZE) == 0
     {
-        Some(BattleScriptAccuracycheckAbsorbingTrigger::FlashFire)
-    } else {
-        None
-    };
-
-    if let Some(trigger) = trigger {
-        return BattleScriptAccuracycheckOutcome::AbsorbingTailPending {
-            rules: next_rules,
+        return apply_flash_fire_tail(
+            &next_rules,
+            labels,
+            target,
+            pp_was_already_reduced,
             rng,
             draws,
-            attacker,
-            target,
-            move_id,
-            move_type,
-            trigger,
-            pp_was_already_reduced,
-        };
+        );
     }
 
-    BattleScriptAccuracycheckOutcome::Advance { rules: next_rules, rng, draws }
+    Ok(BattleScriptAccuracycheckOutcome::Advance { rules: next_rules, rng, draws })
 }
 
 /// The full-formula path shared by `ACC_CURR_MOVE`/`MOVE_FUTURE_SIGHT`/
@@ -1022,15 +1123,15 @@ fn accuracycheck_full_formula(
         || move_row.effect == EFFECT_ALWAYS_HIT
         || move_row.effect == EFFECT_VITAL_THROW;
     if always_hits {
-        return Ok(accuracycheck_hit_tail(
+        return accuracycheck_hit_tail(
             &rules_with_hit_marker,
+            execution,
             attacker,
             target,
-            move_id,
             move_type,
             rng,
             Vec::new(),
-        ));
+        );
     }
 
     let hold_effect_rules = to_base_damage_rules_for_hold_effect(rules);
@@ -1082,15 +1183,15 @@ fn accuracycheck_full_formula(
     let hit = roll_accuracy_hits(calc, random_value);
 
     if hit {
-        return Ok(accuracycheck_hit_tail(
+        return accuracycheck_hit_tail(
             &rules_with_hit_marker,
+            execution,
             attacker,
             target,
-            move_id,
             move_type,
             rng_after,
             vec![draw],
-        ));
+        );
     }
 
     // Miss tail.
@@ -1194,6 +1295,9 @@ mod tests {
             evasion_stage: 6,
             not_first_strike: 0,
             target_not_affected: 0,
+            hp: 100,
+            max_hp: 100,
+            flash_fire_boosted: 0,
         }
     }
 
@@ -1223,6 +1327,19 @@ mod tests {
                 attacker: Some(BattleScriptAccuracycheckBattler::Battler0),
                 target: Some(BattleScriptAccuracycheckBattler::Battler1),
             },
+            multistring_chooser: 0xff,
+            battle_move_damage: 0,
+        }
+    }
+
+    fn all_labels_resolved() -> BattleScriptAccuracycheckAbsorbingTailLabels {
+        BattleScriptAccuracycheckAbsorbingTailLabels {
+            move_hp_drain: Some(7000),
+            move_hp_drain_pp_loss: Some(7001),
+            mon_made_move_useless: Some(7002),
+            mon_made_move_useless_pp_loss: Some(7003),
+            flash_fire_boost: Some(7004),
+            flash_fire_boost_pp_loss: Some(7005),
         }
     }
 
@@ -1237,6 +1354,7 @@ mod tests {
             move_operand_expression: Some("NO_ACC_CALC_CHECK_LOCK_ON"),
             fail_label_expression: "BattleScript_ButItFailed",
             resolved_fail_program_counter: Some(9000),
+            absorbing_tail_labels: all_labels_resolved(),
         }
     }
 
@@ -1568,11 +1686,12 @@ mod tests {
         // RESOLVED move's type, matching TS `moveType` derived from `move`.
         let outcome = apply_battle_script_accuracycheck(&fs_execution, &r, rng()).unwrap();
         assert!(
-            !matches!(
+            matches!(
                 outcome,
-                BattleScriptAccuracycheckOutcome::AbsorbingTailPending { .. }
+                BattleScriptAccuracycheckOutcome::Advance { .. }
+                    | BattleScriptAccuracycheckOutcome::Jump { .. }
             ),
-            "psychic Future Sight must not trigger Volt Absorb regardless of currentMove's type"
+            "psychic Future Sight must not trigger Volt Absorb regardless of currentMove's type: {outcome:?}"
         );
     }
 
@@ -1587,40 +1706,42 @@ mod tests {
         let outcome =
             apply_battle_script_accuracycheck(&acc_curr_move_execution(), &r, rng()).unwrap();
         assert!(
-            !matches!(
+            matches!(
                 outcome,
-                BattleScriptAccuracycheckOutcome::AbsorbingTailPending { .. }
+                BattleScriptAccuracycheckOutcome::Advance { .. }
+                    | BattleScriptAccuracycheckOutcome::Jump { .. }
             ),
-            "zero currentMovePower must not trigger absorb even when ability/type match"
+            "zero currentMovePower must not trigger absorb even when ability/type match: {outcome:?}"
         );
+        if let BattleScriptAccuracycheckOutcome::Advance { rules: out, .. } = outcome {
+            assert_eq!(
+                out.last_used_ability, 0,
+                "no ability reveal without a trigger"
+            );
+        }
     }
 
     #[test]
-    fn flash_fire_trigger_stages_pending_and_non_firing_when_frozen() {
+    fn flash_fire_trigger_jumps_to_boost_label_and_non_firing_when_frozen() {
         let mut r = rules();
         r.current_move = 52; // MOVE_EMBER, TYPE_FIRE, accuracy 100 -> the native calc always hits (neutral stages)
         r.battlers[1].ability = ABILITY_FLASH_FIRE;
-        let outcome =
-            apply_battle_script_accuracycheck(&acc_curr_move_execution(), &r, rng()).unwrap();
-        match outcome {
-            BattleScriptAccuracycheckOutcome::AbsorbingTailPending {
-                trigger, rules: out, ..
-            } => {
+        match apply_battle_script_accuracycheck(&acc_curr_move_execution(), &r, rng()).unwrap() {
+            BattleScriptAccuracycheckOutcome::Jump { program_counter, rules: out, .. } => {
+                assert_eq!(program_counter, 7005, "not-yet-reduced -> _PPLoss label");
+                assert_eq!(out.last_used_ability, ABILITY_FLASH_FIRE);
                 assert_eq!(
-                    trigger,
-                    BattleScriptAccuracycheckAbsorbingTrigger::FlashFire
+                    out.multistring_chooser, 0,
+                    "first boost -> B_MSG_FLASH_FIRE_BOOST"
                 );
+                assert_eq!(out.battlers[1].flash_fire_boosted, 1);
                 assert_eq!(
                     out.hit_marker & (1 << 6),
                     0,
                     "destiny bond not set (target has none)"
                 );
             }
-            BattleScriptAccuracycheckOutcome::Jump { .. } => {
-                // A missed roll never reaches the hit tail; acceptable for this
-                // deterministic-rng smoke case.
-            }
-            other => panic!("unexpected outcome {other:?}"),
+            other => panic!("expected jump, got {other:?}"),
         }
 
         let mut r2 = rules();
@@ -1629,13 +1750,131 @@ mod tests {
         r2.battlers[1].status1 = STATUS1_FREEZE;
         let outcome2 =
             apply_battle_script_accuracycheck(&acc_curr_move_execution(), &r2, rng()).unwrap();
-        assert!(
-            !matches!(
-                outcome2,
-                BattleScriptAccuracycheckOutcome::AbsorbingTailPending { .. }
-            ),
-            "frozen Flash Fire target never triggers"
+        if let BattleScriptAccuracycheckOutcome::Advance { rules: out, .. } = outcome2 {
+            assert_eq!(
+                out.last_used_ability, 0,
+                "frozen Flash Fire target never triggers"
+            );
+        } else {
+            panic!("frozen Flash Fire target must plain-advance, got {outcome2:?}");
+        }
+    }
+
+    // --- M88: absorb tail (both HP arms, both PPLoss suffix forms) ----------
+
+    #[test]
+    fn absorb_drain_arm_stages_negative_heal_and_suffix_rule_inversion() {
+        let mut r = rules();
+        r.current_move = 85; // MOVE_THUNDERBOLT: TYPE_ELECTRIC, power 95, accuracy 100
+        r.battlers[1].ability = ABILITY_VOLT_ABSORB;
+        r.battlers[1].hp = 50;
+        r.battlers[1].max_hp = 100;
+        r.battlers[0].not_first_strike = 0; // not yet reduced -> _PPLoss
+        match apply_battle_script_accuracycheck(&acc_curr_move_execution(), &r, rng()).unwrap() {
+            BattleScriptAccuracycheckOutcome::Jump { program_counter, rules: out, .. } => {
+                assert_eq!(program_counter, 7001, "BattleScript_MoveHPDrain_PPLoss");
+                assert_eq!(out.battle_move_damage, -25, "-max(1, maxHP/4)");
+                assert_eq!(out.last_used_ability, ABILITY_VOLT_ABSORB);
+                assert_eq!(out.ai_observed_ability_ids[1], ABILITY_VOLT_ABSORB as u8);
+            }
+            other => panic!("expected jump, got {other:?}"),
+        }
+
+        r.battlers[0].not_first_strike = 1; // already reduced -> bare label (suffix inversion)
+        match apply_battle_script_accuracycheck(&acc_curr_move_execution(), &r, rng()).unwrap() {
+            BattleScriptAccuracycheckOutcome::Jump { program_counter, .. } => {
+                assert_eq!(program_counter, 7000, "BattleScript_MoveHPDrain (bare)");
+            }
+            other => panic!("expected jump, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn absorb_full_hp_arm_writes_no_battle_move_damage() {
+        let mut r = rules();
+        r.current_move = 57; // MOVE_SURF: TYPE_WATER, power 95, accuracy 100
+        r.battlers[1].ability = ABILITY_WATER_ABSORB;
+        r.battlers[1].hp = 100;
+        r.battlers[1].max_hp = 100;
+        r.battlers[0].not_first_strike = 0;
+        match apply_battle_script_accuracycheck(&acc_curr_move_execution(), &r, rng()).unwrap() {
+            BattleScriptAccuracycheckOutcome::Jump { program_counter, rules: out, .. } => {
+                assert_eq!(
+                    program_counter, 7003,
+                    "BattleScript_MonMadeMoveUseless_PPLoss"
+                );
+                assert_eq!(out.battle_move_damage, 0, "full HP arm writes no damage");
+                assert_eq!(out.last_used_ability, ABILITY_WATER_ABSORB);
+            }
+            other => panic!("expected jump, got {other:?}"),
+        }
+
+        r.battlers[0].not_first_strike = 1;
+        match apply_battle_script_accuracycheck(&acc_curr_move_execution(), &r, rng()).unwrap() {
+            BattleScriptAccuracycheckOutcome::Jump { program_counter, .. } => {
+                assert_eq!(
+                    program_counter, 7002,
+                    "BattleScript_MonMadeMoveUseless (bare)"
+                );
+            }
+            other => panic!("expected jump, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn flash_fire_already_boosted_stays_boosted_and_chooses_no_boost_string() {
+        let mut r = rules();
+        r.current_move = 52; // MOVE_EMBER
+        r.battlers[1].ability = ABILITY_FLASH_FIRE;
+        r.battlers[1].flash_fire_boosted = 1;
+        r.battlers[0].not_first_strike = 1; // bare label
+        match apply_battle_script_accuracycheck(&acc_curr_move_execution(), &r, rng()).unwrap() {
+            BattleScriptAccuracycheckOutcome::Jump { program_counter, rules: out, .. } => {
+                assert_eq!(program_counter, 7004, "BattleScript_FlashFireBoost (bare)");
+                assert_eq!(
+                    out.multistring_chooser, 1,
+                    "already boosted -> B_MSG_FLASH_FIRE_NO_BOOST"
+                );
+                assert_eq!(
+                    out.battlers[1].flash_fire_boosted, 1,
+                    "flag stays set (idempotent)"
+                );
+            }
+            other => panic!("expected jump, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn missing_required_label_reports_setmoveeffect_prefix_verbatim() {
+        let mut r = rules();
+        r.current_move = 85; // MOVE_THUNDERBOLT
+        r.battlers[1].ability = ABILITY_VOLT_ABSORB;
+        r.battlers[1].hp = 50;
+        r.battlers[1].max_hp = 100;
+        let mut execution = acc_curr_move_execution();
+        execution.absorbing_tail_labels.move_hp_drain_pp_loss = None;
+        let error = apply_battle_script_accuracycheck(&execution, &r, rng()).unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "SetMoveEffect: committed Battle Script program does not define label \
+             BattleScript_MoveHPDrain_PPLoss"
         );
+    }
+
+    #[test]
+    fn absorb_and_flash_fire_tails_draw_zero_rng() {
+        let mut r = rules();
+        r.current_move = 85; // MOVE_THUNDERBOLT
+        r.battlers[1].ability = ABILITY_VOLT_ABSORB;
+        r.battlers[1].hp = 50;
+        r.battlers[1].max_hp = 100;
+        match apply_battle_script_accuracycheck(&acc_curr_move_execution(), &r, rng()).unwrap() {
+            BattleScriptAccuracycheckOutcome::Jump { rng: out_rng, draws, .. } => {
+                assert_eq!(draws.len(), 1, "one accuracy roll happened before the tail");
+                assert_eq!(out_rng.calls, 1, "the tail itself draws nothing further");
+            }
+            other => panic!("expected jump, got {other:?}"),
+        }
     }
 
     // --- Divergence 3: CheckWonderGuardAndLevitate uses row power -----------
