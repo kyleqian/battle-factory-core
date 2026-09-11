@@ -5,6 +5,59 @@ full history regardless.
 
 ---
 
+## R87 — [supervised session, 2026-09-10 15:01 UTC–, unattended] **M84 type-jump + curse trio folded (third green fold this session)**
+
+- **State:** `rust-main` = master (no-op merge at orient) + `7d3206705` M82
+  byte-algebra trio + `4ecf69eb0` M83 tryKO + `3c0e8c0fe` M84 type-curse
+  trio, each a verified Sonnet worker fast-forward followed by its ledger
+  commit and `backup-refs.sh` push. Tree clean, committed, green. No ABI,
+  adapter, canonical TS, or npm file touched; the main supervisor's fold
+  remains `core-rs/**` + `RUST_PROGRESS*.md` only.
+- **Did (this step):** worker (claude-sonnet-5, 45-min brief cap, one
+  commit, ~26 min, foreground gates) ported 0x22 jumpiftype / 0x42
+  jumpiftype2 / 0xAF cursetarget as one module
+  (`battle_script_commands.c:3243-3253/:3981-3990/:8468-8483`): the two
+  type-jumps share one both-slots compare core (IS_BATTLER_OF_TYPE,
+  battle.h:471) but pin OPPOSITE validation philosophies — jumpiftype's
+  runtime-only type-universe Halt (which PRECEDES selector-Block) vs the
+  curse factory's eager exactly-1 registration with label
+  PREVALIDATION (a FIFTH registration convention: labels resolve at
+  registration, unlike every lazy-jump sibling) and jumpiftype2's
+  no-runtime-Halt compare-false asymmetry; cursetarget's cursed-guard fail
+  jump vs fresh-curse bit-set + `max(1, floor(attacker.maxHP/2))` damage
+  staging, roles-required errors verbatim (the ungrammatical "a attacker"
+  again). **27 jump + 8 curse behavior + 17 registration** cases; corpus
+  sha256
+  `9425dbc41803aa61cde8b7f38a1c46a48fe0e31d47dbf57dc14b8fb05b9af499`.
+- **Next:** the big remaining scouted leaf is ACCURACYCHECK (0x1, 66 call
+  sites) — scouted this session: `calculate_accuracy`/`roll_accuracy_hits`
+  are ALREADY NATIVE in `damage_calc.rs` (:777-845), and the opcode layer
+  adds the NO_ACC_CALC/CHECK_LOCK_ON bypass (hitChainOpcode.ts:1082-1118),
+  protect/semi-invulnerable/hitmarker-clear ladder, rain/sun Thunder +
+  always-hit bypasses, and the heavy miss/hit tails — `jumpToMissTarget`
+  (moveHistory clear, :849), wonder-guard/levitate (:1000-1058, typecalc
+  cousin native), and `advancePastAccuracyCheck`'s destiny-bond +
+  Volt/Water-Absorb + Flash-Fire absorbing tails with PP-loss label
+  variants (:921-999). Judged too heavy for this session's remaining
+  window; recommend it as the NEXT-SESSION opener, possibly split
+  bypass-path-first then full-formula path. 88 of 215 TS opcode names
+  ported. No deferral is open.
+- **Notes:** supervisor audit covered both apply bodies and all three
+  registration ladders against TS (Halt-precedes-Block order, the
+  runtime-vs-registration asymmetry both directions, lazy taken-only
+  labels, cursed-guard precedence, truncating-vs-floor equivalence),
+  battle.h:152/:471 and pokemon.h:6-23 citations; independent regeneration
+  was byte-identical. Generated Rust **67,614 bytes**, sha256
+  `655571de82857a9f33dbecc0c5fc98ae6680105f1e99572a5ecb6d84c5c8d341`;
+  generator **38,706 bytes**, sha256
+  `df8255f498bd6b03e92e12ec55a48caf57142b87519c95374d3a2ad4c791fa55`.
+  Gates on `rust-main` post-fold: **1,582/1,582** native (+22), fmt,
+  strict workspace Clippy, wasm32 release; artifact **512,235 bytes**,
+  sha256
+  `0975fe75ac7aeb8b1e4477ef257728f0e2f6549ab7b33052c73e4d595688f67b`.
+  Worker: 26.2 min, $4.04. No npm gate required; no deferral or barrier
+  added. R84 archived.
+
 ## R86 — [supervised session, 2026-09-10 15:01 UTC–, unattended] **M83 tryKO folded (second green fold this session)**
 
 - **State:** `rust-main` = master (no-op merge at orient) + `7d3206705` M82

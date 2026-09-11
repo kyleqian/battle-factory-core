@@ -6,6 +6,62 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R90 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M87 ACCURACYCHECK part 2/3 (full-formula path) folded**
+
+- **State:** `rust-main` = R89 + `338b86785` M87 full-formula fold (merge
+  commit `10b0d3e2f`; not a fast-forward only because the R89 ledger
+  commit intervened) + this ledger commit. Gates green post-fold. Tree
+  clean, committed. Core-only; no ABI/adapter/TS/npm files touched. M88
+  worker (part 3/3, absorb/Flash-Fire tail) ALREADY DISPATCHED off this
+  HEAD (brief `/tmp/rust-briefs/accuracycheck-m88.txt`, 45-min cap).
+- **Did (this step):** worker (claude-sonnet-5, 55-min cap, one commit,
+  33.5 min, $8.22, foreground gates) replaced M86's staging with the
+  full-formula path (`accuracycheckOpcodeHandler` :1160-1288): FS/DD
+  explicit literals vs ACC_CURR_MOVE, protect gate on the RESOLVED move,
+  lock-on plain advance, the hitmarker/semi-invulnerable ladder with the
+  exact per-leg carry asymmetry (a leg's own miss-jump carries only PRIOR
+  legs' clears; ladder misses write no missType and skip CWGL),
+  rain-Thunder/ALWAYS_HIT/VITAL_THROW zero-draw bypasses (Cloud-Nine
+  weather negation), sun-Thunder acc-50, native
+  calculate_accuracy/roll_accuracy_hits reuse + exactly ONE
+  "accuracycheck" rng draw, the miss tail (native
+  check_wonder_guard_and_levitate: Struggle/zero-power skip, Levitate
+  B_MSG_GROUND_MISS, foresight ghost-skip only vs NORMAL/FIGHTING,
+  immunity -> DOESNT_AFFECT_FOE + attacker targetNotAffected, Wonder
+  Guard arm, reveal, double-battle B_MSG_AVOIDED_ATK chooser), and the
+  destiny-bond half of the hit tail (native
+  apply_try_set_destiny_bond_to_happen reuse); absorb/Flash-Fire staged
+  as typed `AbsorbingTailPending` (native unit tests only). THREE
+  documented TS-vs-C divergence pins: lock-on advances with NO tail (C
+  runs destiny-bond+absorb there), absorb trigger reads currentMove's
+  row power (C reads the same quantity; TS makes it observable for
+  FS/DD), CWGL reads the resolved move ROW's power (asymmetric with the
+  absorb trigger). **74 behavior + 3 registration** TS-differential
+  cases + 32 native unit tests; corpus sha256
+  `8ceb8ee92038968276397dd76c28dc37a9954f74767549f74d25133e4ef43fd7`.
+- **Next:** verify + fold M88 (completes the opcode -> 92 of 215 TS
+  opcode names); then wind-down (ledger, backup, clean tree) before the
+  07:05 UTC deadline. If M88 lands early enough, scout one more thin
+  leaf only if it can land AND be verified by ~06:20 UTC.
+- **Notes:** supervisor audit walked the full-formula body, ladder
+  asymmetry, CWGL walk (incl. find-miss -> continue), miss-tail write
+  set, hit-tail ordering (destiny bond before triggers, absorb before
+  flash fire), and the three divergence pins against TS; unknown
+  currentMove -> row-power 0 is an acceptable projection (TS errors at
+  context creation, unreachable in-opcode). Independent regeneration
+  byte-identical. Generated Rust **435,388 bytes**, sha256
+  `fa55d11de77a65da3b43b3c658ed4b7eee13a859330ed317261e640a2795ba0f`;
+  generator **43,047 bytes**, sha256
+  `ecfa305a8fef052221dd92d1873dc64651e498a897ada57fb911fa89e42e7663`.
+  Gates on `rust-main` post-fold: **1,633/1,633** native (+21), fmt,
+  strict workspace Clippy, wasm32 release; artifact **512,220 bytes**,
+  sha256
+  `05844657cd152cee38bf277bbeba88fc1d98168ada23b50c2282b583da591b51`
+  (R89's 15,509 B shrink reversed itself with this fold — deterministic
+  codegen drift both times, builds reproduce across trees). R87
+  archived. No npm gate required; no deferral added. No PAPERCUT.
+
+
 ## R89 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M86 ACCURACYCHECK part 1/3 (bypass paths) folded**
 
 - **State:** `rust-main` = master (no-op merge at orient; origin fetch
@@ -116,59 +172,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   + 3 semi-invulnerable; 91 of 215 TS opcode names). Also fixed two glued
   archive headers (R85 commit). No npm gate required; no deferral or
   barrier added. R85 archived. No PAPERCUT.
-
-
-## R87 — [supervised session, 2026-09-10 15:01 UTC–, unattended] **M84 type-jump + curse trio folded (third green fold this session)**
-
-- **State:** `rust-main` = master (no-op merge at orient) + `7d3206705` M82
-  byte-algebra trio + `4ecf69eb0` M83 tryKO + `3c0e8c0fe` M84 type-curse
-  trio, each a verified Sonnet worker fast-forward followed by its ledger
-  commit and `backup-refs.sh` push. Tree clean, committed, green. No ABI,
-  adapter, canonical TS, or npm file touched; the main supervisor's fold
-  remains `core-rs/**` + `RUST_PROGRESS*.md` only.
-- **Did (this step):** worker (claude-sonnet-5, 45-min brief cap, one
-  commit, ~26 min, foreground gates) ported 0x22 jumpiftype / 0x42
-  jumpiftype2 / 0xAF cursetarget as one module
-  (`battle_script_commands.c:3243-3253/:3981-3990/:8468-8483`): the two
-  type-jumps share one both-slots compare core (IS_BATTLER_OF_TYPE,
-  battle.h:471) but pin OPPOSITE validation philosophies — jumpiftype's
-  runtime-only type-universe Halt (which PRECEDES selector-Block) vs the
-  curse factory's eager exactly-1 registration with label
-  PREVALIDATION (a FIFTH registration convention: labels resolve at
-  registration, unlike every lazy-jump sibling) and jumpiftype2's
-  no-runtime-Halt compare-false asymmetry; cursetarget's cursed-guard fail
-  jump vs fresh-curse bit-set + `max(1, floor(attacker.maxHP/2))` damage
-  staging, roles-required errors verbatim (the ungrammatical "a attacker"
-  again). **27 jump + 8 curse behavior + 17 registration** cases; corpus
-  sha256
-  `9425dbc41803aa61cde8b7f38a1c46a48fe0e31d47dbf57dc14b8fb05b9af499`.
-- **Next:** the big remaining scouted leaf is ACCURACYCHECK (0x1, 66 call
-  sites) — scouted this session: `calculate_accuracy`/`roll_accuracy_hits`
-  are ALREADY NATIVE in `damage_calc.rs` (:777-845), and the opcode layer
-  adds the NO_ACC_CALC/CHECK_LOCK_ON bypass (hitChainOpcode.ts:1082-1118),
-  protect/semi-invulnerable/hitmarker-clear ladder, rain/sun Thunder +
-  always-hit bypasses, and the heavy miss/hit tails — `jumpToMissTarget`
-  (moveHistory clear, :849), wonder-guard/levitate (:1000-1058, typecalc
-  cousin native), and `advancePastAccuracyCheck`'s destiny-bond +
-  Volt/Water-Absorb + Flash-Fire absorbing tails with PP-loss label
-  variants (:921-999). Judged too heavy for this session's remaining
-  window; recommend it as the NEXT-SESSION opener, possibly split
-  bypass-path-first then full-formula path. 88 of 215 TS opcode names
-  ported. No deferral is open.
-- **Notes:** supervisor audit covered both apply bodies and all three
-  registration ladders against TS (Halt-precedes-Block order, the
-  runtime-vs-registration asymmetry both directions, lazy taken-only
-  labels, cursed-guard precedence, truncating-vs-floor equivalence),
-  battle.h:152/:471 and pokemon.h:6-23 citations; independent regeneration
-  was byte-identical. Generated Rust **67,614 bytes**, sha256
-  `655571de82857a9f33dbecc0c5fc98ae6680105f1e99572a5ecb6d84c5c8d341`;
-  generator **38,706 bytes**, sha256
-  `df8255f498bd6b03e92e12ec55a48caf57142b87519c95374d3a2ad4c791fa55`.
-  Gates on `rust-main` post-fold: **1,582/1,582** native (+22), fmt,
-  strict workspace Clippy, wasm32 release; artifact **512,235 bytes**,
-  sha256
-  `0975fe75ac7aeb8b1e4477ef257728f0e2f6549ab7b33052c73e4d595688f67b`.
-  Worker: 26.2 min, $4.04. No npm gate required; no deferral or barrier
-  added. R84 archived.
 
 
