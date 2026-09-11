@@ -7,11 +7,12 @@
 
 use factory_core::battle_script_accuracycheck::{
     apply_battle_script_accuracycheck, register_battle_script_accuracycheck,
-    BattleScriptAccuracycheckBattler, BattleScriptAccuracycheckBattlerState,
-    BattleScriptAccuracycheckExecution, BattleScriptAccuracycheckHalt,
-    BattleScriptAccuracycheckInstruction, BattleScriptAccuracycheckMoveHistory,
-    BattleScriptAccuracycheckOutcome, BattleScriptAccuracycheckRngState,
-    BattleScriptAccuracycheckRoles, BattleScriptAccuracycheckRules,
+    BattleScriptAccuracycheckAbsorbingTailLabels, BattleScriptAccuracycheckBattler,
+    BattleScriptAccuracycheckBattlerState, BattleScriptAccuracycheckExecution,
+    BattleScriptAccuracycheckHalt, BattleScriptAccuracycheckInstruction,
+    BattleScriptAccuracycheckMoveHistory, BattleScriptAccuracycheckOutcome,
+    BattleScriptAccuracycheckRngState, BattleScriptAccuracycheckRoles,
+    BattleScriptAccuracycheckRules,
 };
 use factory_core::battle_script_accuracycheck_vectors_gen::{
     BattleScriptAccuracycheckRegistrationVectorCase, BattleScriptAccuracycheckVectorCase,
@@ -41,6 +42,9 @@ fn rules(value: BattleScriptAccuracycheckVectorState) -> BattleScriptAccuracyche
                 evasion_stage: battler.evasion_stage,
                 not_first_strike: battler.not_first_strike,
                 target_not_affected: battler.target_not_affected,
+                hp: battler.hp,
+                max_hp: battler.max_hp,
+                flash_fire_boosted: battler.flash_fire_boosted,
             }),
         battlers_count: value.battlers_count,
         current_move: value.current_move,
@@ -66,6 +70,21 @@ fn rules(value: BattleScriptAccuracycheckVectorState) -> BattleScriptAccuracyche
                 .target
                 .and_then(BattleScriptAccuracycheckBattler::from_u8),
         },
+        multistring_chooser: value.multistring_chooser,
+        battle_move_damage: value.battle_move_damage,
+    }
+}
+
+fn absorbing_tail_labels(
+    value: factory_core::battle_script_accuracycheck_vectors_gen::BattleScriptAccuracycheckVectorAbsorbingTailLabels,
+) -> BattleScriptAccuracycheckAbsorbingTailLabels {
+    BattleScriptAccuracycheckAbsorbingTailLabels {
+        move_hp_drain: value.move_hp_drain,
+        move_hp_drain_pp_loss: value.move_hp_drain_pp_loss,
+        mon_made_move_useless: value.mon_made_move_useless,
+        mon_made_move_useless_pp_loss: value.mon_made_move_useless_pp_loss,
+        flash_fire_boost: value.flash_fire_boost,
+        flash_fire_boost_pp_loss: value.flash_fire_boost_pp_loss,
     }
 }
 
@@ -86,6 +105,9 @@ fn vector_state(value: &BattleScriptAccuracycheckRules) -> BattleScriptAccuracyc
                 evasion_stage: battler.evasion_stage,
                 not_first_strike: battler.not_first_strike,
                 target_not_affected: battler.target_not_affected,
+                hp: battler.hp,
+                max_hp: battler.max_hp,
+                flash_fire_boosted: battler.flash_fire_boosted,
             }
         }),
         battlers_count: value.battlers_count,
@@ -104,12 +126,14 @@ fn vector_state(value: &BattleScriptAccuracycheckRules) -> BattleScriptAccuracyc
         enigma_berry_hold_effect_params: value.enigma_berry_hold_effect_params,
         attacker: value.selector_roles.attacker.map(BattleScriptAccuracycheckBattler::as_u8),
         target: value.selector_roles.target.map(BattleScriptAccuracycheckBattler::as_u8),
+        multistring_chooser: value.multistring_chooser,
+        battle_move_damage: value.battle_move_damage,
     }
 }
 
 #[test]
 fn complete_projected_outputs_and_errors_match_canonical_typescript() {
-    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_CASES.len(), 74);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_CASES.len(), 90);
     for (case_index, case) in BATTLE_SCRIPT_ACCURACYCHECK_CASES.iter().enumerate() {
         let input = rules(case.initial);
         let before = input;
@@ -121,6 +145,7 @@ fn complete_projected_outputs_and_errors_match_canonical_typescript() {
             move_operand_expression: case.move_operand_expression,
             fail_label_expression: case.fail_label_expression,
             resolved_fail_program_counter: case.resolved_fail_program_counter,
+            absorbing_tail_labels: absorbing_tail_labels(case.absorbing_tail_labels),
         };
 
         let result = apply_battle_script_accuracycheck(&execution, &input, rng);
@@ -154,7 +179,7 @@ fn complete_projected_outputs_and_errors_match_canonical_typescript() {
             (
                 Err(actual),
                 "missing-attacker-role" | "missing-target-role" | "unresolved-fail-label" | "unknown-move-row"
-                | "unknown-type-id",
+                | "unknown-type-id" | "missing-required-label",
             ) => {
                 assert_eq!(actual.to_string(), case.expected_error.unwrap(), "case {case_index} {} exact error", case.label);
             }
@@ -238,6 +263,10 @@ fn corpus_censuses_and_hash_are_pinned() {
             ("full-formula-protect", 2),
             ("full-formula-unresolved-label", 3),
             ("lock-on", 2),
+            ("m88-absorb", 10),
+            ("m88-flash-fire", 4),
+            ("m88-missing-label", 1),
+            ("m88-order", 1),
             ("precedence", 1),
             ("protect", 4),
             ("role-errors", 3),
@@ -272,6 +301,6 @@ fn corpus_censuses_and_hash_are_pinned() {
     assert_eq!(total_rng, BATTLE_SCRIPT_ACCURACYCHECK_CASES.len());
     assert_eq!(
         BATTLE_SCRIPT_ACCURACYCHECK_VECTOR_CORPUS_SHA256,
-        "8ceb8ee92038968276397dd76c28dc37a9954f74767549f74d25133e4ef43fd7"
+        "a614543a0a533fd7f346417dc0e0917a2133ff091fd5c14c97e867b932b3ab01"
     );
 }
