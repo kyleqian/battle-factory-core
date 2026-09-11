@@ -31867,7 +31867,7 @@ export function renderSceneOnMovePresentation(
     if (monbgVisible) {
       const base = digState.config.animationInputs.monBg.baseScroll;
       const snapshot = digState.config.animationInputs.monBg.snapshot;
-      const scanline = view.scanline.state === 1
+      const scanline = view.scanline.state !== 0
         ? view.scanline.buffers[view.scanline.srcBuffer].slice(0, 160)
         : Array.from({ length: 160 }, () => view.registers.hardwareScroll.x);
       drawDragonDanceMonBg(
@@ -31919,7 +31919,17 @@ export function renderSceneOnMovePresentation(
       });
     };
     addBattler(attacker, displayed.attacker, attackerArt, attackerIdle);
-    addBattler(target, displayed.target, targetArt, targetIdle);
+    const taskDisplayed = sceneOnDigView({ ...digState, age: Math.max(0, digState.age - 2) });
+    const displayedShake = displayed.tasks.find((task) => task.callback === "AnimTask_ShakeMon_Step");
+    const precedingShake = taskDisplayed.tasks.find((task) => task.callback === "AnimTask_ShakeMon_Step");
+    // CreateTask runs the ShakeMon initializer synchronously before the
+    // first scheduled callback.  That one creation-row +amplitude pose is
+    // already present in software OAM and scans out at age+1; later callback
+    // writes take the task-owned age+2 path.
+    const displayedTarget = displayedShake && !precedingShake
+      ? { ...taskDisplayed.target, x2: taskDisplayed.target.x2 + displayedShake.data[4]! }
+      : taskDisplayed.target;
+    addBattler(target, displayedTarget, targetArt, targetIdle);
 
     for (const sprite of displayed.sprites) {
       if (!sprite.visible || !displayed.order.ownedSlots.includes(sprite.slot)) continue;
@@ -31983,13 +31993,15 @@ export function renderSceneOnMovePresentation(
       currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
     }));
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-    drawMessageTextLines(
-      fb,
-      attacker.geometry.side === "player"
-        ? `${attacker.species} used` : `Foe ${attacker.species} used`,
-      "DIG!",
-      99,
-    );
+    if (digState.config.body === "unleash") {
+      drawMessageTextLines(
+        fb,
+        attacker.geometry.side === "player"
+          ? `${attacker.species} used` : `Foe ${attacker.species} used`,
+        "DIG!",
+        99,
+      );
+    }
     return;
   }
 

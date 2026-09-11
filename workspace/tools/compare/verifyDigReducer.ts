@@ -286,6 +286,44 @@ export function digInputsFor(rows: Json[], side: DigOrientation, body: DigBody):
   };
 }
 
+/** Build an ordinary typed presentation config from live retained facts. */
+export function digConfigFor(
+  rows: Json[], side: DigOrientation, body: DigBody,
+): SceneOnDigConfig {
+  const input = digInputsFor(rows, side, body);
+  const phase = phaseRows(rows, body);
+  const attacker = phase[0]!.battlerSprites.attacker;
+  const target = phase[0]!.battlerSprites.target;
+  const { body: _body, attackerSide: _attackerSide, targetSide: _targetSide,
+    attackerSpecies: _attackerSpecies, targetSpecies: _targetSpecies,
+    attackerCenter: _attackerCenter, targetCenter: _targetCenter, ...animationInputs } = input;
+  return {
+    move: "DIG",
+    body,
+    attacker: { species: input.attackerSpecies, geometry: {
+      side: input.attackerSide,
+      spriteCorner: { x: attacker.x - 32, y: attacker.y - 32 },
+      animationCenter: input.attackerCenter,
+      battlePositionCenter: input.attackerCenter,
+    } },
+    target: { species: input.targetSpecies, geometry: {
+      side: input.targetSide,
+      spriteCorner: { x: target.x - 32, y: target.y - 32 },
+      animationCenter: input.targetAnimationOrigin ?? input.targetCenter,
+      battlePositionCenter: input.targetCenter,
+    } },
+    fieldProfile: {
+      playerHp: phase[0]!.battlers.player.hp,
+      playerMaxHp: phase[0]!.battlers.player.maxHp,
+      opponentHp: phase[0]!.battlers.opponent.hp,
+      opponentMaxHp: phase[0]!.battlers.opponent.maxHp,
+      playerGender: side === "player-back" ? "male" : "female",
+      opponentGender: side === "player-back" ? "female" : "male",
+    },
+    animationInputs,
+  };
+}
+
 function seamState(age: number, input: DigLiveInputs): SceneOnDigPresentationState {
   const { body: _body, attackerSide: _attackerSide, targetSide: _targetSide,
     attackerSpecies: _attackerSpecies, targetSpecies: _targetSpecies,
