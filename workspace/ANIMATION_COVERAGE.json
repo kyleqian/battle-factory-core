@@ -9165,9 +9165,19 @@
     "tools/battle-lab/mechanic-sheer-cold-opponent-dewgong-player-chansey.json",
     "tools/compare/sheerColdStagingProbe.py",
     "tools/compare/fixtures/sheer-cold-staging-receipt.json",
-    "tools/compare/verifySheerColdStaging.ts"
+    "tools/compare/verifySheerColdStaging.ts",
+    "tools/compare/sheerColdProbe.py",
+    "tools/compare/fixtures/sheer-cold-evidence.json",
+    "tools/compare/sheerColdEvidence.ts",
+    "tools/compare/evidence/sheer-cold-player-dense-state.json.gz",
+    "tools/compare/evidence/sheer-cold-opponent-dense-state.json.gz",
+    "tools/compare/evidence/sheer-cold-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/sheer-cold-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/sheer-cold-changemap-player.json",
+    "tools/compare/evidence/sheer-cold-changemap-opponent.json",
+    "tests/animation/sheerColdEvidenceCheckpoint.test.ts"
    ],
-   "goal": "SOURCE + LEGAL BILATERAL STAGING ONLY: this singleton Sheer Cold track contains the ICE_CUBE resource and FrozenIceCube task. Compact twice-fresh Scene-ON endpoint receipts prove legal complete Dewgong/Chansey party-before-init stages, stock-ROM equal-level OHKOs, root reachability, PP use, and immutable checksum-valid benches; they retain no dense state/RGB/change maps and establish no latch. MOVE_ICE_PUNCH's independently exact freeze-status presentation is an art/task control only; it grants no Sheer Cold root, OHKO outcome, body, timing, latch, Scene-ON seam, compositor, framebuffer, sibling, move, or track credit. A later move-owned checkpoint must retain complete twice-fresh legal bilateral dense state/raw-RGB/change-map evidence through first inactive cleanup before any reducer or promotion work."
+   "goal": "UNFULFILLED EVIDENCE ONLY: this singleton Sheer Cold track contains the ICE_CUBE resource and FrozenIceCube task. Complete twice-fresh legal bilateral Scene-ON state/raw-RGB/banked-change maps now retain all 383 root rows through first inactive cleanup, plus BG_ICE, four subsprites, palettes/alpha/monbg, tasks/audio/order/hardware transfers, immutable gameplay RNG/state, PP/OHKO, and checksum-valid benches. MOVE_SHEER_COLD remains unsupported: no reducer, typed seam, compositor, framebuffer acceptance, promotion, or track fulfillment exists. MOVE_ICE_PUNCH remains an independent art/task control and receives no Sheer Cold timing, latch, body, sibling, move, or track credit."
   }
  ],
  "variantAudits": {

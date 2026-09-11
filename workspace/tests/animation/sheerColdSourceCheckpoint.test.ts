@@ -99,6 +99,16 @@ describe("MOVE_SHEER_COLD source/component/carrier checkpoint", () => {
         "tools/compare/sheerColdStagingProbe.py",
         "tools/compare/fixtures/sheer-cold-staging-receipt.json",
         "tools/compare/verifySheerColdStaging.ts",
+        "tools/compare/sheerColdProbe.py",
+        "tools/compare/fixtures/sheer-cold-evidence.json",
+        "tools/compare/sheerColdEvidence.ts",
+        "tools/compare/evidence/sheer-cold-player-dense-state.json.gz",
+        "tools/compare/evidence/sheer-cold-opponent-dense-state.json.gz",
+        "tools/compare/evidence/sheer-cold-player-raw-rgb.tar.gz",
+        "tools/compare/evidence/sheer-cold-opponent-raw-rgb.tar.gz",
+        "tools/compare/evidence/sheer-cold-changemap-player.json",
+        "tools/compare/evidence/sheer-cold-changemap-opponent.json",
+        "tests/animation/sheerColdEvidenceCheckpoint.test.ts",
       ],
     });
   });
