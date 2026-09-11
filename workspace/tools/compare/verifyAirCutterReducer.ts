@@ -85,8 +85,12 @@ function liveInputs(orientation: Orientation, rows: readonly Json[]): AirCutterL
     taskSlots: { projectile: projectile.slot, targetShake: shake.slot, partnerShake: 2, updateMonBg: update.slot, clearMonBg: clear.slot },
     resources: { airWave: allocation(rows[1]!, 10003), cut: allocation(rows[4]!, 10138), impact: allocation(rows[7]!, 10135) },
     matrixBitmap: row0.resourceAllocators.matrixBitmap,
-    spriteOrder: row0.sprites.map((sprite: Json) => sprite.slot),
-    monbg: { layer: targetSide === "player" ? "bg2" : "bg1", bgX: update.data[3], bgY: update.data[4] },
+    spriteOrder: row0.spriteOrder,
+    monbg: {
+      layer: targetSide === "player" ? "bg2" : "bg1",
+      center: { x: update.data[1], y: update.data[2] },
+      bgX: update.data[3], bgY: update.data[4],
+    },
   };
 }
 
@@ -106,15 +110,35 @@ function config(input: AirCutterLiveInputs): SceneOnAirCutterPresentationState {
 
 function compareRow(orientation: Orientation, age: number, row: Json, state: ReturnType<typeof airCutterAtAge>): void {
   invariant(state.active === row.animScriptActive, `${orientation}/${age}: source active`);
+  invariant(state.source.pointerOffset === row.scriptOffset, `${orientation}/${age}: source pointer offset`);
+  invariant(state.source.wait === row.scriptWait, `${orientation}/${age}: source wait`);
   const expected = owned(row);
   invariant(state.sprites.length === expected.length, `${orientation}/${age}: owned sprite count`);
   for (const sprite of expected) {
     const actual = state.sprites.find((candidate) => candidate.slot === sprite.slot);
     invariant(actual, `${orientation}/${age}: missing owned slot ${sprite.slot}`);
     invariant(actual.template === sprite.template.symbol, `${orientation}/${age}: template slot ${sprite.slot}`);
+    invariant(actual.callback === sprite.callback.symbol, `${orientation}/${age}: callback slot ${sprite.slot}`);
+    invariant(JSON.stringify(actual.data) === JSON.stringify(sprite.data), `${orientation}/${age}: data slot ${sprite.slot}`);
     invariant(actual.x === sprite.x && actual.y === sprite.y && actual.x2 === sprite.x2 && actual.y2 === sprite.y2,
       `${orientation}/${age}: source callback coordinates slot ${sprite.slot}`);
     invariant(actual.subpriority === sprite.subpriority, `${orientation}/${age}: source subpriority slot ${sprite.slot}`);
+  }
+  invariant(JSON.stringify(state.painterOrder) === JSON.stringify(
+    row.spriteOrder.filter((slot: number) => expected.some((sprite) => sprite.slot === slot)),
+  ), `${orientation}/${age}: owned painter order`);
+
+  const expectedTasks = row.tasks.filter((task: Json) => [
+    "AirCutterProjectileStep1", "AirCutterProjectileStep2", "AnimTask_ShakeMon2_Step",
+    "Task_UpdateMonBg", "Task_ClearMonBg",
+  ].includes(task.func?.symbol));
+  invariant(state.tasks.length === expectedTasks.length, `${orientation}/${age}: owned task count`);
+  for (const task of state.tasks) {
+    const expectedTask = expectedTasks.find((candidate: Json) =>
+      candidate.slot === task.slot && candidate.func?.symbol === task.callback);
+    invariant(expectedTask, `${orientation}/${age}: missing ${task.callback} task ${task.slot}`);
+    invariant(JSON.stringify(task.data) === JSON.stringify(expectedTask.data.slice(0, task.data.length)),
+      `${orientation}/${age}: ${task.callback} task data ${task.slot}`);
   }
   const tags = [
     ["airWave", 10003], ["cut", 10138], ["impact", 10135],
@@ -127,6 +151,15 @@ function compareRow(orientation: Orientation, age: number, row: Json, state: Ret
   invariant(state.battlers.target.offset.x === row.battlerSprites.target.x2
     && state.battlers.target.offset.y === row.battlerSprites.target.y2,
   `${orientation}/${age}: target ShakeMon2 axis`);
+  invariant(state.background.monbg === Boolean(namedTask(row, "Task_UpdateMonBg")),
+    `${orientation}/${age}: monbg lifetime`);
+  invariant(state.registers.bldcnt === row.registers.bldcnt
+    && state.registers.bldalpha === row.registers.bldalpha,
+  `${orientation}/${age}: blend registers`);
+  invariant(state.cleanup.visualTasks === row.visualTaskCount,
+    `${orientation}/${age}: visual task count`);
+  invariant(state.cleanup.ownedSprites === expected.length,
+    `${orientation}/${age}: owned cleanup sprite count`);
 }
 
 function replay(orientation: Orientation): Json {

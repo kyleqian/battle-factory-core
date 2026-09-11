@@ -23,7 +23,7 @@ const live = (overrides: Partial<AirCutterLiveInputs> = {}): AirCutterLiveInputs
     impact: { paletteBank: 9, tileSlot: 12, tileRange: [453, 16] },
   },
   matrixBitmap: 6, spriteOrder: [62, 60, 0, 63, 1, 61, 6, 8, 2, 3, 4, 5],
-  monbg: { layer: "bg1", bgX: -144, bgY: -17 },
+  monbg: { layer: "bg1", center: { x: 176, y: 49 }, bgX: -144, bgY: -17 },
   ...overrides,
 });
 
@@ -72,7 +72,8 @@ describe("MOVE_AIR_CUTTER source-relative reducer and typed seam", () => {
         cut: { paletteBank: 11, tileSlot: 22, tileRange: [609, 64] },
         impact: { paletteBank: 12, tileSlot: 23, tileRange: [673, 16] },
       },
-      matrixBitmap: 0x95, spriteOrder: [17, 11, 13, 14, 15, 16], monbg: { layer: "bg2", bgX: -40, bgY: -59 },
+      matrixBitmap: 0x95, spriteOrder: [17, 11, 13, 14, 15, 16],
+      monbg: { layer: "bg2", center: { x: 202, y: 45 }, bgX: -40, bgY: -59 },
     }));
     expect(altered).not.toEqual(first);
     expect(altered).toMatchObject({

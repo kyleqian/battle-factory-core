@@ -60,7 +60,13 @@ export interface AirCutterLiveInputs {
   readonly matrixBitmap: number;
   /** Live source order, consumed semantically but not painted by this reducer. */
   readonly spriteOrder: readonly number[];
-  readonly monbg: Readonly<{ readonly layer: "bg1" | "bg2"; readonly bgX: number; readonly bgY: number; }>;
+  readonly monbg: Readonly<{
+    readonly layer: "bg1" | "bg2";
+    /** Battler coordinates captured by Task_UpdateMonBg (not the projectile coordinate pair). */
+    readonly center: Readonly<AirCutterPoint>;
+    readonly bgX: number;
+    readonly bgY: number;
+  }>;
 }
 
 export const AIR_CUTTER_SOURCE_START = 0x082ced58;
@@ -152,15 +158,17 @@ function sourceAtAge(age: number): AirCutterSourceCursor {
   let pointerOffset = 97;
   let wait = 0;
   if (age === 0) pointerOffset = 0;
-  else if (age <= 3) pointerOffset = 3;
-  else if (age <= 6) pointerOffset = 6;
-  else if (age <= 9) pointerOffset = 9;
-  else if (age <= 11) pointerOffset = 11;
-  else if (age <= 14) pointerOffset = 13;
-  else if (age <= 16) pointerOffset = 18;
+  else if (age <= 3) { pointerOffset = 3; wait = age === 1 ? 1 : 0; }
+  else if (age <= 6) { pointerOffset = 6; wait = age === 4 ? 1 : 0; }
+  else if (age <= 9) { pointerOffset = 9; wait = age === 7 ? 1 : 0; }
+  else if (age <= 11) { pointerOffset = 11; wait = age === 10 ? -1 : 0; }
+  else if (age <= 14) { pointerOffset = 13; wait = age === 12 ? 1 : 0; }
+  else if (age <= 16) { pointerOffset = 18; wait = age === 15 ? -1 : 0; }
   else if (age <= 75) { pointerOffset = 35; wait = 1; }
-  else if (age <= 81) { pointerOffset = 57; wait = 81 - age; }
+  else if (age <= 82) { pointerOffset = 57; wait = Math.max(0, 81 - age); }
   else if (age <= 100) { pointerOffset = 91; wait = 1; }
+  else if (age === 101) wait = -1;
+  else if (age >= 105) wait = 1;
   return {
     owner: "Move_AIR_CUTTER",
     pointer: AIR_CUTTER_SOURCE_START + pointerOffset,
@@ -309,13 +317,15 @@ function taskState(age: number, input: AirCutterLiveInputs, waves: readonly AirC
       slot: input.taskSlots.projectile,
       callback: beforeThird ? "AirCutterProjectileStep1" : "AirCutterProjectileStep2",
       role: "projectile",
-      data: [beforeThird ? 2 - cycle : 2, waves.length, input.targetSprite.subpriority, 2, input.targetSide === "player" ? 1 : 0, projectileProfile(input).horizontal],
+      data: [beforeThird ? 2 - cycle : 2, waves.length, input.targetSprite.subpriority, 2,
+        input.targetSide === "player" ? 1 : 0, age < 29 ? projectileProfile(input).horizontal : 4, 11],
     });
   }
   if (age >= 12 && age <= 103) {
     tasks.push({
       slot: input.taskSlots.updateMonBg, callback: "Task_UpdateMonBg", role: "update-monbg",
-      data: [input.targetSprite.slot, input.targetCenter.x, input.targetCenter.y, input.monbg.bgX, input.monbg.bgY, input.monbg.layer === "bg2" ? 1 : 0],
+      data: [input.targetSprite.slot, input.monbg.center.x, input.monbg.center.y, input.monbg.bgX, input.monbg.bgY,
+        input.monbg.layer === "bg2" ? 1 : 0, input.targetSide === "opponent" ? 1 : 0],
     });
   }
   if (age >= AIR_CUTTER_SHAKE_START_AGE && age <= AIR_CUTTER_SHAKE_END_AGE) {
@@ -334,17 +344,23 @@ function taskState(age: number, input: AirCutterLiveInputs, waves: readonly AirC
   if (age >= 101 && age <= 103) {
     tasks.push({
       slot: input.taskSlots.clearMonBg, callback: "Task_ClearMonBg", role: "clear-monbg",
-      data: [0, age === 101 ? 1 : 2, 0, 0, 0, 0],
+      data: [0, age === 101 ? 1 : 2, input.targetSide === "opponent" ? 1 : 0, 0, 0, 0],
     });
   }
   return tasks;
 }
 
 function painterOrder(input: AirCutterLiveInputs, sprites: readonly AirCutterSprite[]): number[] {
-  const owned = sprites.map((sprite) => sprite.slot);
-  const order = input.spriteOrder.filter((slot) => owned.includes(slot));
-  for (const slot of owned) if (!order.includes(slot)) order.push(slot);
-  return order;
+  // A newly-created wave is appended for its creation row. On the following
+  // row the engine's subpriority pass places lower subpriorities first. Keep
+  // the live order as the tie breaker so allocator reuse remains caller-owned.
+  return [...sprites].sort((left, right) => {
+    const rightNewborn = right.kind === "air-wave" && right.callback === "AnimAirWaveProjectile" && right.data[0] === 11;
+    const leftNewborn = left.kind === "air-wave" && left.callback === "AnimAirWaveProjectile" && left.data[0] === 11;
+    if (leftNewborn !== rightNewborn) return leftNewborn ? 1 : -1;
+    if (left.subpriority !== right.subpriority) return left.subpriority - right.subpriority;
+    return input.spriteOrder.indexOf(left.slot) - input.spriteOrder.indexOf(right.slot);
+  }).map((sprite) => sprite.slot);
 }
 
 /** Pure source-relative reducer through Air Cutter's first inactive cleanup row. */
@@ -359,7 +375,11 @@ export function airCutterAtAge(age: number, input: Readonly<AirCutterLiveInputs>
   const tasks = taskState(age, input, waves);
   const targetOffset = shakeOffset(age);
   const partnerOffset = input.targetPartner?.visible ? shakeOffset(age) : { x: 0, y: 0 };
-  const visualTasks = tasks.filter((task) => task.role === "projectile" || task.role.endsWith("shake")).length;
+  // The engine's visual-task counter owns each projectile/slice group as one
+  // lifetime, even while that group has multiple sprites, plus each live
+  // ShakeMon2 task.
+  const visualTasks = (sprites.length > 0 ? 1 : 0)
+    + tasks.filter((task) => task.role.endsWith("shake")).length;
   const events = [
     ...AIR_CUTTER_WAVE_START_AGES.filter((eventAge) => eventAge === age).map((eventAge) => ({
       age: eventAge, sound: "SE_M_BLIZZARD2" as const, pan: input.attackerSide === "player" ? -63 : 63,
