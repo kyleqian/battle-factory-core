@@ -375,7 +375,7 @@ describe("slam-hit-slide-shake standalone fulfilled component-track ratchet", ()
   it("fulfills only the exact ten-component track at the unchanged coverage count", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(247);
+      .toHaveLength(248);
     expect(coverage.entries.filter((entry: { move: string }) => [
       "MOVE_SLAM", "MOVE_SECRET_POWER",
     ].includes(entry.move))).toEqual([

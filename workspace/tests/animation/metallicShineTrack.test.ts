@@ -251,7 +251,7 @@ describe("metallic-shine component-track receipt ratchet", () => {
       "MOVE_HARDEN", "MOVE_STEEL_WING", "MOVE_IRON_TAIL", "MOVE_METAL_CLAW",
       "MOVE_IRON_DEFENSE", "MOVE_POISON_TAIL",
     ]);
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(247);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(248);
     expect(coverage.entries.filter((entry) => moves.has(entry.move)).map((entry) => [
       entry.move, entry.status,
     ]).sort(([left], [right]) => left.localeCompare(right))).toEqual([

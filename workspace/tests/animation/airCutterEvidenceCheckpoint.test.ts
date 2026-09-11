@@ -93,7 +93,7 @@ describe("MOVE_AIR_CUTTER legal bilateral Scene-ON evidence checkpoint", () => {
     }
   });
 
-  it("records a staging-only unsupported boundary with no track or move credit", () => {
+  it("retains the pre-promotion evidence receipt and current independent exact boundary", () => {
     expect(fixture).toMatchObject({
       schema: "air-cutter-bilateral-evidence/v1",
       oracleProfile: "battle-scene-on",
@@ -133,7 +133,7 @@ describe("MOVE_AIR_CUTTER legal bilateral Scene-ON evidence checkpoint", () => {
     const coverage = readJson("ANIMATION_COVERAGE.json");
     const track = coverage.componentTracks.find((item: Json) => item.id === "air-cutter-projectile");
     expect(track).toMatchObject({
-      fulfilled: false,
+      fulfilled: true,
       representatives: ["MOVE_AIR_CUTTER"],
       components: [
         "asset:ANIM_TAG_AIR_WAVE",
@@ -141,6 +141,7 @@ describe("MOVE_AIR_CUTTER legal bilateral Scene-ON evidence checkpoint", () => {
         "task:AnimTask_AirCutterProjectile",
       ],
     });
-    expect(coverage.entries.some((item: Json) => item.move === "MOVE_AIR_CUTTER")).toBe(false);
+    expect(coverage.entries.find((item: Json) => item.move === "MOVE_AIR_CUTTER"))
+      .toMatchObject({ status: "exact" });
   });
 });

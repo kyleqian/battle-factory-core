@@ -5164,7 +5164,7 @@
     "the source-relative reducer ports all three duration-15 gSonicBoomSpriteTemplate linear translations, side-derived affine matrices and pans, the animation-2 target IMPACT, ShakeMon(3,0,10,1), ANIM_DEF_PARTNER monbg/target split priority, 12:8 alpha, all source waits, and first inactive cleanup",
     "the typed Scene-ON seam and shared compositor source-extract AIR_WAVE plus legal Magneton front/back art, reuse exact IMPACT/ShakeMon/Onix/chrome primitives, reproduce orientation-specific OBJ ordering and the source-owned elevated-enemy-shadow scanout latch, and match every raw framebuffer without absolute ticks, pixel lookup, or coordinate/RGB exceptions",
     "sonicBoomPortable.ts records and verifies every source offset, callback/task/template instance, palette tag, software and hardware OAM/matrix/palette state, registers, audio pan, raw RGB, typed seam, and shared framebuffer twice fresh",
-    "MOVE_AIR_CUTTER remains unsupported: its shared AIR_WAVE asset is not a reducer because it owns AnimTask_AirCutterProjectile, CUT/gAirCutterSliceSpriteTemplate, dual target and ANIM_DEF_PARTNER ShakeMon2(2,0,8,1), and distinct wait/audio timing without independent dense acceptance",
+    "MOVE_AIR_CUTTER now has independent exact acceptance for its distinct projectile task, CUT slice, dual target and ANIM_DEF_PARTNER ShakeMon2 schedule, wait/audio timing, and cleanup; AIR_WAVE source identity transfers no timing, latch, body, or acceptance credit between the moves",
     "no battle logic, RNG, controller, turn order, round/facility state, boundary list, or unsupported barrier changed"
    ],
    "evidence": [
@@ -7099,6 +7099,45 @@
     "tests/animation/digReducer.test.ts",
     "tests/animation/digActualCore.test.ts",
     "tests/animation/dirtPlumeFissureDigTrack.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_AIR_CUTTER",
+   "status": "exact",
+   "covered": [
+    "the complete pointer-owned Move_AIR_CUTTER body and its ten source components are independently accepted: shared AIR_WAVE art, Air Cutter's exclusive three-projectile task and CUT slice callback, IMPACT palette, target plus ANIM_DEF_PARTNER ShakeMon2 schedule, monbg, alpha, resources, audio, waits, and first-inactive cleanup",
+    "complete legal bilateral GOLBAT/CHANSEY Battle Scene ON evidence retains ages 0..111: 112/112 player-back plus 112/112 opponent-front rows, with the source-relative reducer and narrow typed seam replaying every retained component row twice from live side, species, geometry, sprite/task allocation, matrices, painter order, monbg, registers, resources, and audio inputs",
+    "Air Cutter's move-owned maps prove whole hardware OAM and matrices predecessor-latched 111/111 and hardware palette predecessor-latched 110/111 in both orientations; first wave RAM/display is 17/19, the slice begins at source age 76, target ShakeMon2 spans 83..96, and first inactive cleanup is age 111",
+    "two independent actual-core processes each pass all 224/224 component, typed-seam, retained raw-RGB, and shared-framebuffer rows with zero residual pixels; the deterministic verdict digest is 4ebf05822ddfb1a0c8fc526048d6f623e239b14352fbbf5ff8ea6de37985c734",
+    "a material CROBAT/BLISSEY live control changes species, geometry, sprite/task/resource allocation, affine matrices, painter order, and monbg inputs and changes the rendered framebuffer; production imports no evidence, RGB, screenshot, canonical party identity, fitted per-frame framebuffer table, or absolute battle tick",
+    "MOVE_SONIC_BOOM receives no credit and retains its independent exact acceptance. No damage, gameplay RNG, turn order, controller, round/facility state, animation boundary list, unsupported-branch barrier, or durable latch ledger changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-air-cutter-player-golbat-opponent-chansey.json",
+    "tools/battle-lab/mechanic-air-cutter-opponent-golbat-player-chansey.json",
+    "tools/compare/airCutterSourceAudit.ts",
+    "tools/compare/airCutterProbe.py",
+    "tools/compare/airCutterEvidence.ts",
+    "tools/compare/verifyAirCutterReducer.ts",
+    "tools/compare/airCutterActualCore.ts",
+    "tools/compare/fixtures/air-cutter-evidence.json",
+    "tools/compare/evidence/air-cutter-player-dense-state.json.gz",
+    "tools/compare/evidence/air-cutter-opponent-dense-state.json.gz",
+    "tools/compare/evidence/air-cutter-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/air-cutter-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/air-cutter-changemap-player.json",
+    "tools/compare/evidence/air-cutter-changemap-opponent.json",
+    "tools/compare/extractAirCutterAssets.ts",
+    "src/animation/assets/air-cutter.json",
+    "src/animation/airCutter.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/airCutterAssets.test.ts",
+    "tests/animation/airCutterSourceCheckpoint.test.ts",
+    "tests/animation/airCutterEvidenceCheckpoint.test.ts",
+    "tests/animation/airCutterReducer.test.ts",
+    "tests/animation/airCutterActualCore.test.ts"
    ]
   }
 ],
@@ -9085,7 +9124,7 @@
     "task:AnimTask_AirCutterProjectile"
    ],
    "representatives": ["MOVE_AIR_CUTTER"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/airCutterSourceAudit.ts",
     "tests/animation/airCutterSourceCheckpoint.test.ts",
@@ -9106,9 +9145,11 @@
     "tests/animation/airCutterAssets.test.ts",
     "src/animation/airCutter.ts",
     "tools/compare/verifyAirCutterReducer.ts",
-    "tests/animation/airCutterReducer.test.ts"
+    "tests/animation/airCutterReducer.test.ts",
+    "tools/compare/airCutterActualCore.ts",
+    "tests/animation/airCutterActualCore.test.ts"
    ],
-   "goal": "UNFULFILLED / MOVE UNSUPPORTED: this singleton Air Cutter projectile track contains the shared AIR_WAVE asset plus Air Cutter's unique slice sprite and projectile task. Its source-derived relative-age reducer, reproducible source asset wiring, and narrow typed Scene-ON semantic seam replay every retained bilateral component row twice (112 player-back + 112 opponent-front; 448 reducer and 448 seam invocations) with live species/geometry, allocator slots, matrices, task slots, resource banks, and painter order. Own maps retain predecessor OAM/matrix 111/111 and palette 110/111 per orientation, with wave RAM/display 17/19, slice 76, and the overlapping target/partner ShakeMon2 schedule. No compositor, app/actual-core framebuffer comparison, move/track/sibling promotion, Sonic Boom credit, or latch transfer is granted. Sonic Boom remains an AIR_WAVE source-identity asset control only."
+   "goal": "FULFILLED by MOVE_AIR_CUTTER only: its source-derived reducer, AIR_WAVE/CUT assets, narrow typed seam, and generic live compositor pass all 224 bilateral component, retained-RGB, and actual-core framebuffer rows twice with zero residual pixels through inactive cleanup. The material altered control changes species, geometry, allocation, matrices, task/resource slots, order, and monbg inputs. Sonic Boom remains an independently exact AIR_WAVE control and receives no Air Cutter timing, latch, body, track, or move credit."
   }
  ],
  "variantAudits": {

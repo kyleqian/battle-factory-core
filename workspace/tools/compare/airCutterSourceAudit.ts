@@ -203,8 +203,8 @@ const moveEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_AI
 if (!track || JSON.stringify(track.components) !== JSON.stringify([
   "asset:ANIM_TAG_AIR_WAVE", "sprite:gAirCutterSliceSpriteTemplate", "task:AnimTask_AirCutterProjectile",
 ]) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_AIR_CUTTER"])
-  || track.fulfilled !== false || moveEntry !== undefined) {
-  throw new Error("MOVE_AIR_CUTTER unsupported track boundary drifted");
+  || track.fulfilled !== true || moveEntry?.status !== "exact") {
+  throw new Error("MOVE_AIR_CUTTER exact track boundary drifted");
 }
 
 requireTokens("Air Cutter script", rootBody, expectedCommands);
