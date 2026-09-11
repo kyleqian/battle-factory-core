@@ -9076,6 +9076,21 @@
     "tests/animation/destinyBondActualCore.test.ts"
    ],
    "goal": "FULFILLED by MOVE_DESTINY_BOND only: its source-derived reducer, WHITE_SHADOW/Ghost-BG assets, typed seam, and generic live compositor pass all 376 bilateral component and actual-core framebuffer rows twice with zero residual pixels through inactive cleanup. The material altered live control changes species, geometry, allocation, matrix, task, order, palette, and background inputs. Shared controls and siblings receive no acceptance or latch credit."
+  },
+  {
+   "id": "air-cutter-projectile",
+   "components": [
+    "asset:ANIM_TAG_AIR_WAVE",
+    "sprite:gAirCutterSliceSpriteTemplate",
+    "task:AnimTask_AirCutterProjectile"
+   ],
+   "representatives": ["MOVE_AIR_CUTTER"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/airCutterSourceAudit.ts",
+    "tests/animation/airCutterSourceCheckpoint.test.ts"
+   ],
+   "goal": "SOURCE-CLASSIFIED ONLY: this singleton Air Cutter projectile track contains the shared AIR_WAVE asset plus Air Cutter's unique slice sprite and projectile task. Sonic Boom is an asset control only; no source timing, latch, reducer, Scene-ON seam, compositor, framebuffer, sibling, or move-coverage credit is granted until Air Cutter has its own complete legal bilateral dense acceptance."
   }
  ],
  "variantAudits": {
