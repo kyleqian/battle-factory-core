@@ -32,7 +32,7 @@ describe("MOVE_SHEER_COLD complete legal bilateral Scene-ON evidence", () => {
     expect(fixture.measured).toMatchObject({
       window: expect.stringContaining("first fully clean inactive row"),
       bgIce: expect.stringContaining("BG_ICE VRAM loads at 20"),
-      iceCube: expect.stringContaining("four 32x32 subsprites"),
+      iceCube: expect.stringContaining("64x64, 64x32, 32x64, and 32x32 subsprites"),
       paletteAlpha: expect.stringContaining("faded palette bank 23"),
       monbg: expect.stringContaining("player-back BG1 setup registers change same-row"),
       hardware: expect.stringContaining("Whole hardware OAM and matrices equal preceding software"),

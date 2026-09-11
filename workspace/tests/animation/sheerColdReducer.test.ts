@@ -56,7 +56,12 @@ describe("MOVE_SHEER_COLD source-relative reducer and typed Scene-ON seam", () =
     expect(sheerColdAtAge(45, input)).toMatchObject({
       registers: { bldalpha: 4096 },
       sprites: [{ slot: 3, x: 144, y: 13 }],
-      subsprites: { software: expect.arrayContaining([expect.objectContaining({ width: 32, tileOffset: 0 })]) },
+      subsprites: { software: [
+        expect.objectContaining({ width: 64, height: 64, tileOffset: 0 }),
+        expect.objectContaining({ width: 64, height: 32, tileOffset: 64 }),
+        expect.objectContaining({ width: 32, height: 64, tileOffset: 96 }),
+        expect.objectContaining({ width: 32, height: 32, tileOffset: 128 }),
+      ] },
       tasks: expect.arrayContaining([expect.objectContaining({ callback: "AnimTask_FrozenIceCube_Step1", slot: 1 })]),
     });
     expect(sheerColdAtAge(62, input).audio).toEqual([{ age: 62, sound: "SE_M_HAIL", pan: 63 }]);

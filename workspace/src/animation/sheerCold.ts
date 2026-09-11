@@ -132,8 +132,8 @@ export interface SheerColdCubeSubsprite {
   readonly index: number;
   readonly x: number;
   readonly y: number;
-  readonly width: 32;
-  readonly height: 32;
+  readonly width: 32 | 64;
+  readonly height: 32 | 64;
   readonly tileOffset: number;
   readonly priority: 2;
   readonly flipX: boolean;
@@ -335,12 +335,22 @@ function cubeSubsprites(age: number, input: SheerColdLiveInputs): SheerColdState
   const hardware = age >= 46 && age <= SHEER_COLD_CUBE_HARDWARE_OAM_END_AGE;
   const center = input.targetAnimationCenter ?? input.targetBattlePositionCenter;
   const x = center.x - 32, y = center.y - 36;
-  const offsets = sheerColdAsset.subsprites.map((piece) => [piece.x, piece.y] as const);
-  const tiles = sheerColdAsset.subsprites.map((piece) => piece.tileOffset);
-  const make = (): SheerColdCubeSubsprite[] => offsets.map(([dx, dy], index) => ({
-    index, x: x + dx, y: y + dy, width: 32, height: 32, tileOffset: tiles[index]!, priority: 2,
-    flipX: false, flipY: false,
-  }));
+  const dimensions = (shape: string): readonly [32 | 64, 32 | 64] => {
+    switch (shape) {
+      case "64x64": return [64, 64];
+      case "64x32": return [64, 32];
+      case "32x64": return [32, 64];
+      case "32x32": return [32, 32];
+      default: throw new Error(`unsupported FrozenIceCube subsprite shape ${shape}`);
+    }
+  };
+  const make = (): SheerColdCubeSubsprite[] => sheerColdAsset.subsprites.map((piece, index) => {
+    const [width, height] = dimensions(piece.shape);
+    return {
+      index, x: x + piece.x, y: y + piece.y, width, height,
+      tileOffset: piece.tileOffset, priority: 2, flipX: false, flipY: false,
+    };
+  });
   return { software: software ? make() : [], hardware: hardware ? make() : [] };
 }
 

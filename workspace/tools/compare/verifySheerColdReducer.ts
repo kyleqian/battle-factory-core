@@ -213,9 +213,9 @@ function compareRow(
   const parentX = (input.targetAnimationCenter ?? input.targetBattlePositionCenter).x - 32;
   const parentY = (input.targetAnimationCenter ?? input.targetBattlePositionCenter).y - 36;
   const expectedPieces = [
-    { index: 0, x: parentX - 16, y: parentY - 16, width: 32, height: 32, tileOffset: 0, priority: 2, flipX: false, flipY: false },
-    { index: 1, x: parentX - 16, y: parentY + 48, width: 32, height: 32, tileOffset: 64, priority: 2, flipX: false, flipY: false },
-    { index: 2, x: parentX + 48, y: parentY - 16, width: 32, height: 32, tileOffset: 96, priority: 2, flipX: false, flipY: false },
+    { index: 0, x: parentX - 16, y: parentY - 16, width: 64, height: 64, tileOffset: 0, priority: 2, flipX: false, flipY: false },
+    { index: 1, x: parentX - 16, y: parentY + 48, width: 64, height: 32, tileOffset: 64, priority: 2, flipX: false, flipY: false },
+    { index: 2, x: parentX + 48, y: parentY - 16, width: 32, height: 64, tileOffset: 96, priority: 2, flipX: false, flipY: false },
     { index: 3, x: parentX + 48, y: parentY + 48, width: 32, height: 32, tileOffset: 128, priority: 2, flipX: false, flipY: false },
   ];
   invariant(same(state.subsprites.software, softwareCube ? expectedPieces : [])
