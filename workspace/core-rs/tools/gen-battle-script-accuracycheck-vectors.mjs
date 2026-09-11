@@ -1,16 +1,13 @@
 #!/usr/bin/env node
-// Differential corpus for the B_SCR_OP_ACCURACYCHECK (0x1) leaf -- PART 2 OF 3
-// (M87): the full-formula operand path (`ACC_CURR_MOVE`/`MOVE_FUTURE_SIGHT`/
-// `MOVE_DOOM_DESIRE`) -- protect gate, lock-on, the hitmarker/semi-invulnerable
-// ladder, the weather bypasses, the native accuracy calc + one rng roll, and
-// the MISS/HIT tails up to (but not through) the M88 absorb/Flash-Fire label
-// jump. M86's bypass paths (`NO_ACC_CALC`/`NO_ACC_CALC_CHECK_LOCK_ON`) keep
-// their original cases here, re-projected through the widened per-case state
-// shape. The M88 `AbsorbingTailPending` staged variant is DELIBERATELY not
-// exercised here -- canonical TypeScript has no such staging (it really jumps
-// to the absorb/Flash-Fire label), so no committed or custom case in this
-// generator ever gives a target Volt Absorb/Water Absorb/Flash Fire against a
-// matching move; that trigger is covered only by native unit tests.
+// Differential corpus for the B_SCR_OP_ACCURACYCHECK (0x1) leaf -- COMPLETE
+// (M86+M87+M88, 3/3): the bypass ladder, the full-formula operand path
+// (`ACC_CURR_MOVE`/`MOVE_FUTURE_SIGHT`/`MOVE_DOOM_DESIRE`) -- protect gate,
+// lock-on, the hitmarker/semi-invulnerable ladder, the weather bypasses, the
+// native accuracy calc + one rng roll, the MISS tail, and the full HIT tail
+// including `AbilityBattleEffects(ABILITYEFFECT_ABSORBING)`'s Volt/Water
+// Absorb and Flash Fire label-jump arms (M88). Each case carries the real
+// committed program's six absorb/Flash-Fire label program counters
+// (`absorbingTailLabels`) alongside its usual fail-label resolution.
 //
 // `accuracycheckOpcodeHandler` in src/engine/battleScriptHitChainOpcode.ts
 // (:1131-1289, doc comment :1119-1130).
@@ -75,6 +72,12 @@ const MOVE_EMBER = 52; // TYPE_FIRE, acc 100
 const MOVE_EARTHQUAKE = 89; // TYPE_GROUND, acc 100
 const MOVE_FUTURE_SIGHT_ID = 248;
 const MOVE_DOOM_DESIRE_ID = 353;
+const MOVE_THUNDERBOLT = 85; // TYPE_ELECTRIC, power 95, accuracy 100
+const MOVE_SURF = 57; // TYPE_WATER, power 95, accuracy 100
+const MOVE_THUNDER_WAVE = 86; // TYPE_ELECTRIC, power 0
+const ABILITY_VOLT_ABSORB = 10;
+const ABILITY_WATER_ABSORB = 11;
+const ABILITY_FLASH_FIRE = 18;
 
 const TYPE_NAME_BY_ID = [
   "TYPE_NORMAL", "TYPE_FIGHTING", "TYPE_FLYING", "TYPE_POISON", "TYPE_GROUND",
@@ -102,7 +105,7 @@ function defaultBattlerSpec(index) {
     side: index % 2, ability: 0, item: 0, types: ["TYPE_NORMAL", "TYPE_NORMAL"], species: 1 + index,
     attack: 60, defense: 60, spAttack: 60, spDefense: 60, level: 50, hp: 100, maxHP: 100,
     status1: 0, status2: 0, status3: 0, statStages: [6, 6, 6, 6, 6, 6, 6, 6],
-    protected: 0, battlerWithSureHit: 0, notFirstStrike: 0,
+    protected: 0, battlerWithSureHit: 0, notFirstStrike: 0, flashFireBoosted: 0,
   };
 }
 
@@ -121,6 +124,7 @@ function canonicalBattler(spec, index) {
     specialStatus: Object.freeze({ focusBanded: 0 }),
     protected: spec.protected, battlerWithSureHit: spec.battlerWithSureHit,
     notFirstStrike: spec.notFirstStrike ?? 0,
+    flashFireBoosted: spec.flashFireBoosted ?? 0,
   });
 }
 
@@ -209,6 +213,8 @@ function projectBattler(b) {
     accuracy_stage: b.statStages[6], evasion_stage: b.statStages[7],
     not_first_strike: b.notFirstStrike ?? 0,
     target_not_affected: b.targetNotAffected ?? 0,
+    hp: b.hp, max_hp: b.maxHP,
+    flash_fire_boosted: b.flashFireBoosted ?? 0,
   });
 }
 function projectRules(rules) {
@@ -230,6 +236,8 @@ function projectRules(rules) {
     enigmaBerryHoldEffectParams: freezeArray(rules.enigmaBerryHoldEffectParams),
     attacker: rules.selectorRoles.attacker,
     target: rules.selectorRoles.target,
+    multistringChooser: rules.multistringChooser,
+    battleMoveDamage: rules.battleMoveDamage,
   });
 }
 function same(left, right) { return JSON.stringify(left) === JSON.stringify(right); }
@@ -263,6 +271,28 @@ for (const site of accCurrMoveSites) {
 
 const resolvedFail = programModule.resolveBattleScriptLabel(program, FAIL_LABEL);
 assert(resolvedFail !== undefined, `real committed program has no label ${FAIL_LABEL}`);
+
+// === M88: the six absorb/Flash-Fire tail labels ===========================
+const ABSORB_LABEL_NAMES = Object.freeze({
+  moveHpDrain: "BattleScript_MoveHPDrain",
+  moveHpDrainPpLoss: "BattleScript_MoveHPDrain_PPLoss",
+  monMadeMoveUseless: "BattleScript_MonMadeMoveUseless",
+  monMadeMoveUselessPpLoss: "BattleScript_MonMadeMoveUseless_PPLoss",
+  flashFireBoost: "BattleScript_FlashFireBoost",
+  flashFireBoostPpLoss: "BattleScript_FlashFireBoost_PPLoss",
+});
+function resolveAbsorbingTailLabels(activeProgram) {
+  const out = {};
+  for (const [key, name] of Object.entries(ABSORB_LABEL_NAMES)) {
+    const entry = programModule.resolveBattleScriptLabel(activeProgram, name);
+    out[key] = entry ? entry.programCounter : null;
+  }
+  return Object.freeze(out);
+}
+const REAL_ABSORBING_TAIL_LABELS = resolveAbsorbingTailLabels(program);
+for (const [key, value] of Object.entries(REAL_ABSORBING_TAIL_LABELS)) {
+  assert(value !== null, `real committed program has no label ${ABSORB_LABEL_NAMES[key]}`);
+}
 
 const ports = Object.freeze({
   isControllerIdle: () => true,
@@ -344,6 +374,7 @@ function addCase(label, category, rulesSpec, instruction, programCounter = 500) 
     moveOperandExpression, failLabelExpression,
     resolvedFailProgramCounter: failEntry ? failEntry.programCounter : null,
     initial: projectRules(canonicalRules(rulesSpec)),
+    absorbingTailLabels: REAL_ABSORBING_TAIL_LABELS,
     ...outcome,
   }));
 }
@@ -607,6 +638,153 @@ addCase(
   baseSpec({ currentMove: MOVE_THUNDER }), UNRESOLVED_ACC_CURR_MOVE,
 );
 
+// === M88: absorb/Flash-Fire hit-tail label jumps ===========================
+// Volt/Water Absorb drain arm, both HP arms x both PPLoss suffix forms.
+addCase(
+  "m88_volt_absorb_drain_pploss", "m88-absorb",
+  withBattler(baseSpec({ currentMove: MOVE_THUNDERBOLT }), 1, { ability: ABILITY_VOLT_ABSORB, hp: 50, maxHP: 100 }),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_volt_absorb_drain_bare", "m88-absorb",
+  withBattler(
+    withBattler(baseSpec({ currentMove: MOVE_THUNDERBOLT }), 1, { ability: ABILITY_VOLT_ABSORB, hp: 50, maxHP: 100 }),
+    0, { notFirstStrike: 1 },
+  ),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_volt_absorb_full_hp_useless_pploss", "m88-absorb",
+  withBattler(baseSpec({ currentMove: MOVE_THUNDERBOLT }), 1, { ability: ABILITY_VOLT_ABSORB, hp: 100, maxHP: 100 }),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_volt_absorb_full_hp_useless_bare", "m88-absorb",
+  withBattler(
+    withBattler(baseSpec({ currentMove: MOVE_THUNDERBOLT }), 1, { ability: ABILITY_VOLT_ABSORB, hp: 100, maxHP: 100 }),
+    0, { notFirstStrike: 1 },
+  ),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_water_absorb_drain", "m88-absorb",
+  withBattler(baseSpec({ currentMove: MOVE_SURF }), 1, { ability: ABILITY_WATER_ABSORB, hp: 1, maxHP: 100 }),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_water_absorb_full_hp_useless", "m88-absorb",
+  withBattler(baseSpec({ currentMove: MOVE_SURF }), 1, { ability: ABILITY_WATER_ABSORB, hp: 100, maxHP: 100 }),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_water_absorb_drain_bare", "m88-absorb",
+  withBattler(
+    withBattler(baseSpec({ currentMove: MOVE_SURF }), 1, { ability: ABILITY_WATER_ABSORB, hp: 1, maxHP: 100 }),
+    0, { notFirstStrike: 1 },
+  ),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_absorb_current_move_power_zero_no_trigger", "m88-absorb",
+  withBattler(baseSpec({ currentMove: MOVE_THUNDER_WAVE }), 1, { ability: ABILITY_VOLT_ABSORB }),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_always_hit_bypass_reaches_absorb_zero_draws", "m88-absorb",
+  withBattler(
+    baseSpec({ currentMove: MOVE_THUNDER, weather: 1 << 0 }), // rain -> EFFECT_THUNDER always-hit bypass
+    1, { ability: ABILITY_VOLT_ABSORB, hp: 50, maxHP: 100 },
+  ),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_destiny_bond_present_through_absorb_jump", "m88-absorb",
+  withBattler(
+    withBattler(baseSpec({ currentMove: MOVE_THUNDER, weather: 1 << 0 }), 1, { ability: ABILITY_VOLT_ABSORB, hp: 50, maxHP: 100 }),
+    1, { status2: 1 << 25 }, // STATUS2_DESTINY_BOND
+  ),
+  ACC_CURR_MOVE,
+);
+
+// Flash Fire: boost (both suffix forms) and no-boost, frozen non-trigger.
+addCase(
+  "m88_flash_fire_boost_first_time_pploss", "m88-flash-fire",
+  withBattler(baseSpec({ currentMove: MOVE_EMBER }), 1, { ability: ABILITY_FLASH_FIRE }),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_flash_fire_boost_first_time_bare", "m88-flash-fire",
+  withBattler(
+    withBattler(baseSpec({ currentMove: MOVE_EMBER }), 1, { ability: ABILITY_FLASH_FIRE }),
+    0, { notFirstStrike: 1 },
+  ),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_flash_fire_no_boost_already_boosted", "m88-flash-fire",
+  withBattler(baseSpec({ currentMove: MOVE_EMBER }), 1, { ability: ABILITY_FLASH_FIRE, flashFireBoosted: 1 }),
+  ACC_CURR_MOVE,
+);
+addCase(
+  "m88_flash_fire_frozen_no_trigger", "m88-flash-fire",
+  withBattler(baseSpec({ currentMove: MOVE_EMBER }), 1, { ability: ABILITY_FLASH_FIRE, status1: 1 << 5 }),
+  ACC_CURR_MOVE,
+);
+
+// Order: absorb checked before Flash Fire (structurally exclusive per
+// ability, so this pins a would-match-neither ability falls plainly through).
+addCase(
+  "m88_no_trigger_neutral_ability_plain_advance", "m88-order",
+  withBattler(baseSpec({ currentMove: MOVE_THUNDERBOLT }), 1, { ability: 0 }),
+  ACC_CURR_MOVE,
+);
+
+// Missing required label: excise BattleScript_MoveHPDrain_PPLoss from a
+// scratch copy of the real committed program's labelEntries (same technique
+// M83's tryko generator used for its own missing-label case), then confirm
+// the REAL canonical handler throws the exact "SetMoveEffect:..." text.
+{
+  const missingKey = "moveHpDrainPpLoss";
+  const missingName = ABSORB_LABEL_NAMES[missingKey];
+  const { [missingName]: _omittedEntry, ...labelEntriesWithoutIt } = program.labelEntries;
+  const noLabelProgram = Object.freeze({ ...program, labelEntries: Object.freeze(labelEntriesWithoutIt) });
+  assert(!programModule.resolveBattleScriptLabel(noLabelProgram, missingName), "excised label must be absent");
+  const noLabelHandlers = opcodeModule.createBattleScriptHitChainOpcodeHandlers(noLabelProgram, ports);
+  const noLabelHandler = noLabelHandlers[ACC_ID];
+
+  const rulesSpec = withBattler(
+    baseSpec({ currentMove: MOVE_THUNDERBOLT }), 1, { ability: ABILITY_VOLT_ABSORB, hp: 50, maxHP: 100 },
+  );
+  const rules = canonicalRules(rulesSpec);
+  const scaffold = machineModule.createBattleScriptMachine(noLabelProgram, ENTRY_LABEL, rules, RNG_SEED);
+  const state = Object.freeze({ ...scaffold, programCounter: 500 });
+  let expectedError = null;
+  try {
+    noLabelHandler({ program: noLabelProgram, instruction: ACC_CURR_MOVE, state });
+  } catch (error) {
+    assert(error instanceof Error, `non-Error throw ${String(error)}`);
+    expectedError = error.message;
+  }
+  assert(
+    expectedError === "SetMoveEffect: committed Battle Script program does not define label BattleScript_MoveHPDrain_PPLoss",
+    `unexpected missing-label message: ${expectedError}`,
+  );
+  const label = "m88_missing_required_label_move_hp_drain_pploss";
+  assert(!cases.some((value) => value.label === label), `duplicate label ${label}`);
+  cases.push(Object.freeze({
+    label, category: "m88-missing-label", branch: "missing-required-label",
+    programCounter: 500,
+    moveOperandExpression: "ACC_CURR_MOVE",
+    failLabelExpression: FAIL_LABEL,
+    resolvedFailProgramCounter: resolvedFail.programCounter,
+    initial: projectRules(rules),
+    absorbingTailLabels: Object.freeze({ ...REAL_ABSORBING_TAIL_LABELS, [missingKey]: null }),
+    expected: null, jumpProgramCounter: null, halt: null,
+    error: expectedError,
+    rng: Object.freeze({ value: RNG_SEED, calls: 0 }), draws: [],
+  }));
+}
+
 console.log(`gen-battle-script-accuracycheck-vectors: ${cases.length} behavior cases`);
 
 // === Registration (unchanged from M86) =====================================
@@ -688,7 +866,7 @@ function rustOptionalU8Hex(value) { return value === null || value === undefined
 function rustOptionalU32(value) { return value === null || value === undefined ? "None" : `Some(${value}u32)`; }
 function rustOptionalString(value) { return value === null ? "None" : `Some(${rustString(value)})`; }
 function rustBattlerState(value) {
-  return `BattleScriptAccuracycheckVectorBattlerState { status1: ${hex32(value.status1)}, status2: ${hex32(value.status2)}, status3: ${hex32(value.status3)}, protected: ${value.protected}u8, battler_with_sure_hit: ${value.battler_with_sure_hit}u8, ability: ${hex16(value.ability)}, item: ${hex16(value.item)}, types: ${rustArr2u8(value.types)}, side: ${value.side}u8, accuracy_stage: ${value.accuracy_stage}i32, evasion_stage: ${value.evasion_stage}i32, not_first_strike: ${value.not_first_strike}u8, target_not_affected: ${value.target_not_affected}u8 }`;
+  return `BattleScriptAccuracycheckVectorBattlerState { status1: ${hex32(value.status1)}, status2: ${hex32(value.status2)}, status3: ${hex32(value.status3)}, protected: ${value.protected}u8, battler_with_sure_hit: ${value.battler_with_sure_hit}u8, ability: ${hex16(value.ability)}, item: ${hex16(value.item)}, types: ${rustArr2u8(value.types)}, side: ${value.side}u8, accuracy_stage: ${value.accuracy_stage}i32, evasion_stage: ${value.evasion_stage}i32, not_first_strike: ${value.not_first_strike}u8, target_not_affected: ${value.target_not_affected}u8, hp: ${value.hp}i32, max_hp: ${value.max_hp}i32, flash_fire_boosted: ${value.flash_fire_boosted}u8 }`;
 }
 function rustState(value) {
   return [
@@ -705,10 +883,23 @@ function rustState(value) {
     `enigma_berry_hold_effects: ${rustArr4u16(value.enigmaBerryHoldEffects)},`,
     `enigma_berry_hold_effect_params: ${rustArr4i32(value.enigmaBerryHoldEffectParams)},`,
     `attacker: ${rustOptionU8(value.attacker)}, target: ${rustOptionU8(value.target)},`,
+    `multistring_chooser: ${value.multistringChooser}u8, battle_move_damage: ${value.battleMoveDamage}i32,`,
     "}",
   ].join(" ");
 }
 function rustOptionalState(value) { return value === null ? "None" : `Some(${rustState(value)})`; }
+function rustAbsorbingTailLabels(value) {
+  return [
+    "BattleScriptAccuracycheckVectorAbsorbingTailLabels {",
+    `move_hp_drain: ${rustOptionalU32(value.moveHpDrain)},`,
+    `move_hp_drain_pp_loss: ${rustOptionalU32(value.moveHpDrainPpLoss)},`,
+    `mon_made_move_useless: ${rustOptionalU32(value.monMadeMoveUseless)},`,
+    `mon_made_move_useless_pp_loss: ${rustOptionalU32(value.monMadeMoveUselessPpLoss)},`,
+    `flash_fire_boost: ${rustOptionalU32(value.flashFireBoost)},`,
+    `flash_fire_boost_pp_loss: ${rustOptionalU32(value.flashFireBoostPpLoss)},`,
+    "}",
+  ].join(" ");
+}
 function rustHalt(value) {
   if (value === null || value === undefined) return "None";
   return [
@@ -750,15 +941,17 @@ lines.push(`pub const BATTLE_SCRIPT_ACCURACYCHECK_CONCRETE_CALL_SITE_COUNT: usiz
 lines.push(`pub const BATTLE_SCRIPT_ACCURACYCHECK_BYPASS_CALL_SITE_COUNT: usize = ${bypassSites.length};`);
 lines.push("");
 lines.push("#[derive(Debug, Clone, Copy, PartialEq, Eq)]");
-lines.push("pub struct BattleScriptAccuracycheckVectorBattlerState { pub status1: u32, pub status2: u32, pub status3: u32, pub protected: u8, pub battler_with_sure_hit: u8, pub ability: u16, pub item: u16, pub types: [u8; 2], pub side: u8, pub accuracy_stage: i32, pub evasion_stage: i32, pub not_first_strike: u8, pub target_not_affected: u8 }");
+lines.push("pub struct BattleScriptAccuracycheckVectorBattlerState { pub status1: u32, pub status2: u32, pub status3: u32, pub protected: u8, pub battler_with_sure_hit: u8, pub ability: u16, pub item: u16, pub types: [u8; 2], pub side: u8, pub accuracy_stage: i32, pub evasion_stage: i32, pub not_first_strike: u8, pub target_not_affected: u8, pub hp: i32, pub max_hp: i32, pub flash_fire_boosted: u8 }");
 lines.push("#[derive(Debug, Clone, Copy, PartialEq, Eq)]");
-lines.push("pub struct BattleScriptAccuracycheckVectorState { pub battlers: [BattleScriptAccuracycheckVectorBattlerState; 4], pub battlers_count: u8, pub current_move: u16, pub dynamic_move_type: u8, pub battle_type_flags: u32, pub weather: u32, pub hit_marker: u32, pub move_result_flags: u32, pub miss_type: u8, pub last_used_ability: u16, pub last_landed_moves: [u16; 4], pub last_hit_by_type: [u16; 4], pub ai_observed_ability_ids: [u8; 4], pub enigma_berry_hold_effects: [u16; 4], pub enigma_berry_hold_effect_params: [i32; 4], pub attacker: Option<u8>, pub target: Option<u8> }");
+lines.push("pub struct BattleScriptAccuracycheckVectorState { pub battlers: [BattleScriptAccuracycheckVectorBattlerState; 4], pub battlers_count: u8, pub current_move: u16, pub dynamic_move_type: u8, pub battle_type_flags: u32, pub weather: u32, pub hit_marker: u32, pub move_result_flags: u32, pub miss_type: u8, pub last_used_ability: u16, pub last_landed_moves: [u16; 4], pub last_hit_by_type: [u16; 4], pub ai_observed_ability_ids: [u8; 4], pub enigma_berry_hold_effects: [u16; 4], pub enigma_berry_hold_effect_params: [i32; 4], pub attacker: Option<u8>, pub target: Option<u8>, pub multistring_chooser: u8, pub battle_move_damage: i32 }");
 lines.push("#[derive(Debug, Clone, Copy, PartialEq, Eq)]");
 lines.push("pub struct BattleScriptAccuracycheckVectorRngDraw { pub call: u32, pub reason: &'static str, pub before: u32, pub after: u32, pub random_value: u16 }");
 lines.push("#[derive(Debug, Clone, PartialEq, Eq)]");
 lines.push("pub struct BattleScriptAccuracycheckVectorHalt { pub opcode_id: u8, pub opcode_name: &'static str, pub source_construct: &'static str, pub source_file: &'static str, pub source_line: u32 }");
+lines.push("#[derive(Debug, Clone, Copy, PartialEq, Eq)]");
+lines.push("pub struct BattleScriptAccuracycheckVectorAbsorbingTailLabels { pub move_hp_drain: Option<u32>, pub move_hp_drain_pp_loss: Option<u32>, pub mon_made_move_useless: Option<u32>, pub mon_made_move_useless_pp_loss: Option<u32>, pub flash_fire_boost: Option<u32>, pub flash_fire_boost_pp_loss: Option<u32> }");
 lines.push("#[derive(Debug, Clone, PartialEq, Eq)]");
-lines.push("pub struct BattleScriptAccuracycheckVectorCase { pub label: &'static str, pub category: &'static str, pub branch: &'static str, pub program_counter: u32, pub move_operand_expression: Option<&'static str>, pub fail_label_expression: &'static str, pub resolved_fail_program_counter: Option<u32>, pub initial: BattleScriptAccuracycheckVectorState, pub expected: Option<BattleScriptAccuracycheckVectorState>, pub jump_program_counter: Option<u32>, pub halt: Option<BattleScriptAccuracycheckVectorHalt>, pub expected_error: Option<&'static str>, pub rng_value: u32, pub rng_calls: u32, pub draws: &'static [BattleScriptAccuracycheckVectorRngDraw] }");
+lines.push("pub struct BattleScriptAccuracycheckVectorCase { pub label: &'static str, pub category: &'static str, pub branch: &'static str, pub program_counter: u32, pub move_operand_expression: Option<&'static str>, pub fail_label_expression: &'static str, pub resolved_fail_program_counter: Option<u32>, pub initial: BattleScriptAccuracycheckVectorState, pub expected: Option<BattleScriptAccuracycheckVectorState>, pub jump_program_counter: Option<u32>, pub halt: Option<BattleScriptAccuracycheckVectorHalt>, pub expected_error: Option<&'static str>, pub rng_value: u32, pub rng_calls: u32, pub draws: &'static [BattleScriptAccuracycheckVectorRngDraw], pub absorbing_tail_labels: BattleScriptAccuracycheckVectorAbsorbingTailLabels }");
 lines.push("#[derive(Debug, Clone, Copy, PartialEq, Eq)]");
 lines.push("pub struct BattleScriptAccuracycheckRegistrationVectorCase { pub label: &'static str, pub instructions: &'static [BattleScriptAccuracycheckInstruction<'static>], pub expected_opcode_id: Option<u8>, pub expected_error: Option<&'static str> }");
 lines.push("");
@@ -788,6 +981,7 @@ for (const value of cases) {
   lines.push(`        expected_error: ${rustOptionalString(value.error)},`);
   lines.push(`        rng_value: ${hex32(value.rng.value)}, rng_calls: ${value.rng.calls}u32,`);
   lines.push(`        draws: &[${value.draws.map(rustDraw).join(", ")}],`);
+  lines.push(`        absorbing_tail_labels: ${rustAbsorbingTailLabels(value.absorbingTailLabels)},`);
   lines.push("    },");
 }
 lines.push("];\n");

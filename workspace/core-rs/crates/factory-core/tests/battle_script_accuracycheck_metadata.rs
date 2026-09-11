@@ -1,6 +1,8 @@
 //! Independent source/macro/call-site and artifact-identity ratchets for
 //! `B_SCR_OP_ACCURACYCHECK`. M87 adds the full-formula source-line pins;
-//! behavioral differential replay lives in the sibling test binary.
+//! M88 adds the absorb/Flash-Fire tail's `AbilityBattleEffects` arms and its
+//! six committed labels. Behavioral differential replay lives in the sibling
+//! test binary.
 
 use std::{fs, path::PathBuf};
 
@@ -45,6 +47,7 @@ fn exact_opcode_dispatch_macro_and_call_site_lines_are_pinned() {
     let abilities_h = source("reference/pokeemerald/include/constants/abilities.h");
     let hold_effects_h = source("reference/pokeemerald/include/constants/hold_effects.h");
     let move_effects_h = source("reference/pokeemerald/include/constants/battle_move_effects.h");
+    let battle_util = source("reference/pokeemerald/src/battle_util.c");
 
     assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_OPCODE, 0x01);
     assert_eq!(
@@ -182,6 +185,48 @@ fn exact_opcode_dispatch_macro_and_call_site_lines_are_pinned() {
     assert!(line(&move_effects_h, 82).contains("EFFECT_VITAL_THROW 78"));
     assert!(line(&move_effects_h, 156).contains("EFFECT_THUNDER 152"));
 
+    // M88: AbilityBattleEffects(ABILITYEFFECT_ABSORBING) arms (:2676-2729).
+    assert_eq!(
+        line(&battle_util, 2676).trim(),
+        "case ABILITYEFFECT_ABSORBING: // 3"
+    );
+    assert!(line(&battle_util, 2679).contains("switch (gLastUsedAbility)"));
+    assert!(line(&battle_util, 2681).contains("case ABILITY_VOLT_ABSORB:"));
+    assert!(line(&battle_util, 2682)
+        .contains("if (moveType == TYPE_ELECTRIC && gBattleMoves[move].power != 0)"));
+    assert!(line(&battle_util, 2692).contains("case ABILITY_WATER_ABSORB:"));
+    assert!(line(&battle_util, 2693)
+        .contains("if (moveType == TYPE_WATER && gBattleMoves[move].power != 0)"));
+    assert!(line(&battle_util, 2703).contains("case ABILITY_FLASH_FIRE:"));
+    assert!(line(&battle_util, 2704).contains(
+        "if (moveType == TYPE_FIRE && !(gBattleMons[battler].status1 & STATUS1_FREEZE))"
+    ));
+    assert!(line(&battle_util, 2708).contains("B_MSG_FLASH_FIRE_BOOST"));
+    assert!(line(&battle_util, 2719).contains("B_MSG_FLASH_FIRE_NO_BOOST"));
+    assert!(line(&battle_util, 2730).contains("if (effect == 1)"));
+    assert!(line(&battle_util, 2732)
+        .contains("if (gBattleMons[battler].maxHP == gBattleMons[battler].hp)"));
+
+    // M88 committed labels (data/battle_scripts_1.s:4078/4080/4091/4093/4101/4103).
+    assert_eq!(
+        line(&scripts, 4078).trim(),
+        "BattleScript_MoveHPDrain_PPLoss::"
+    );
+    assert_eq!(line(&scripts, 4080).trim(), "BattleScript_MoveHPDrain::");
+    assert_eq!(
+        line(&scripts, 4091).trim(),
+        "BattleScript_MonMadeMoveUseless_PPLoss::"
+    );
+    assert_eq!(
+        line(&scripts, 4093).trim(),
+        "BattleScript_MonMadeMoveUseless::"
+    );
+    assert_eq!(
+        line(&scripts, 4101).trim(),
+        "BattleScript_FlashFireBoost_PPLoss::"
+    );
+    assert_eq!(line(&scripts, 4103).trim(), "BattleScript_FlashFireBoost::");
+
     // Committed census: 66 total accuracycheck call sites, split 55/8/1/1/1.
     let bare_accuracycheck_count = scripts
         .lines()
@@ -208,24 +253,24 @@ fn exact_opcode_dispatch_macro_and_call_site_lines_are_pinned() {
 
 #[test]
 fn corpus_counts_sizes_hashes_and_generation_provenance_are_pinned() {
-    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_CASES.len(), 74);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_CASES.len(), 90);
     assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_REGISTRATION_CASES.len(), 3);
     assert_eq!(
         BATTLE_SCRIPT_ACCURACYCHECK_VECTOR_CORPUS_SHA256,
-        "8ceb8ee92038968276397dd76c28dc37a9954f74767549f74d25133e4ef43fd7"
+        "a614543a0a533fd7f346417dc0e0917a2133ff091fd5c14c97e867b932b3ab01"
     );
-    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_VECTOR_CORPUS_BYTES, 244_974);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_VECTOR_CORPUS_BYTES, 342_012);
     assert_eq!(
         BATTLE_SCRIPT_ACCURACYCHECK_VECTOR_GENERATOR_SHA256,
-        "ecfa305a8fef052221dd92d1873dc64651e498a897ada57fb911fa89e42e7663"
+        "5cd3ecc352a86d5099d55e09348c4a10459c5b38081dce82860b02b6a9639fb9"
     );
-    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_VECTOR_GENERATOR_BYTES, 43_047);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_VECTOR_GENERATOR_BYTES, 51_876);
 
     let generated = include_bytes!("../src/battle_script_accuracycheck_vectors_gen.rs");
-    assert_eq!(generated.len(), 435_388);
+    assert_eq!(generated.len(), 576_357);
     assert_eq!(
         sha256("core-rs/crates/factory-core/src/battle_script_accuracycheck_vectors_gen.rs"),
-        "fa55d11de77a65da3b43b3c658ed4b7eee13a859330ed317261e640a2795ba0f"
+        "a4b531c1c61f5030feef8d69b7dacf6cb739d6ec50d3c55ddbdb40c6a624a620"
     );
     assert_eq!(
         fs::metadata(
@@ -233,11 +278,11 @@ fn corpus_counts_sizes_hashes_and_generation_provenance_are_pinned() {
         )
         .unwrap()
         .len(),
-        43_047
+        51_876
     );
     assert_eq!(
         sha256("core-rs/tools/gen-battle-script-accuracycheck-vectors.mjs"),
-        "ecfa305a8fef052221dd92d1873dc64651e498a897ada57fb911fa89e42e7663"
+        "5cd3ecc352a86d5099d55e09348c4a10459c5b38081dce82860b02b6a9639fb9"
     );
     let generated_text = std::str::from_utf8(generated).unwrap();
     assert!(generated_text
