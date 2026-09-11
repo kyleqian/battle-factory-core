@@ -6,6 +6,56 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R93 — [supervised session, 2026-09-11 15:04 UTC–, unattended] **M90 COPYARRAY folded**
+
+- **State:** `rust-main` = R92 + `d60845fbd` M90 fast-forward + this
+  ledger commit. Master merge no-op at orient; baseline re-verified
+  **1,658/1,658** + artifact byte-identical to R92 (507,121 B,
+  `222565a5…`). Post-fold gates green. Tree clean, committed. Core-only;
+  no ABI/adapter/TS/npm files touched. **94 of 215 TS opcode names
+  ported.** M91 worker (array-family trio) dispatched off this HEAD
+  (brief `/tmp/rust-briefs/arrayfamily-m91.txt`, 55-min cap).
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  17.1 min, $2.57, foreground gates) ported 0x31 copyarray
+  (`battle_script_commands.c:3837-3848`): the closed 12-tuple
+  (size, dst, src) catalog in exact TS source order
+  (`ingrainLeechSeedWrapOpcode.ts:166-345`) — battleMoveDamage<->hpDealt
+  both directions, painSplitHp/scriptingBideDmg reads,
+  dynamicBasePower<-tripleKickPower full-u16, the two byte-universe arms
+  (cEFFECT_CHOOSER<-sMULTIHIT_EFFECT, cMULTISTRING_CHOOSER<-
+  sTWOTURN_STRINGID) with their defensive "became undecodable" guards
+  ported as native-unit-test-only dead code, the two REACHABLE
+  role-guard errors verbatim, gBattlerTarget<-sBATTLER +
+  sBATTLER<-sBATTLER_WITH_ABILITY total copies, and
+  gBattleTextBuff1<-sMULTIHIT_STRING as pure advance with the
+  decimal-"6"-not-"0x6" size pin; verbatim fallthrough Halt incl.
+  `<missing>` operand formatting; find-first REQUIRED registration.
+  **22 behavior + 2 registration** cases over all 16 committed sites
+  (12 tuples); corpus sha256
+  `b975bb46eda9b09329d87ad4f366f43a276a5ebf498b631cd60bbb97306d9465`.
+- **Next:** verify + fold M91 (JUMPIFARRAYEQUAL 0x2C + JUMPIFARRAYNOTEQUAL
+  0x2D + COPYARRAYWITHINDEX 0x32, one module, three registration
+  conventions — brief already written), then at most one more thin leaf
+  (PPREDUCE scouted: battle_script_commands.c:1205-1247, hitChainOpcode.ts
+  :1352+, needs events/party-PP modeling; ATTACKSTRING needs
+  prepareMessage/isControllerIdle ports) only if it lands AND verifies by
+  ~18:20 UTC; wind down clean before 19:03 UTC.
+- **Notes:** supervisor audit walked all 12 arms against TS source order,
+  both guard texts, the barrier verbatim, the census both directions, and
+  the metadata C-line pins; independent regeneration byte-identical
+  (generated Rust **32,156 bytes**, sha
+  `0adcac79a8f7889577ea2312d72606e4b4322d79c78eb7a9f1a237bd51ab991f`;
+  generator **23,546 bytes**, sha256
+  `6e856c2a8cb7eeec7f164d1454bb476ca21bcaf48e1e338dbf296ae6d049d244`).
+  Gates on `rust-main` post-fold: **1,678/1,678** native (+20), fmt,
+  strict workspace Clippy, wasm32 release; artifact **507,387 bytes**,
+  sha256
+  `c7c4c367ace13768cf3a2aa731f3fe506362fa3c6041d6d632cdd770d20bfba2`
+  (familiar deterministic codegen size drift). Worker 17.1 min, zero cap
+  expiry. R90 archived. No npm gate required; no deferral added. No
+  PAPERCUT.
+
+
 ## R92 — [supervised session wind-down (final), 2026-09-11 03:05-~05:15 UTC, unattended] **M89 ADDBYTE folded; session close (four green folds)**
 
 - **State:** `rust-main` = master + four verified Sonnet worker folds this
@@ -111,61 +161,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `b5fbb0c3fbbac9b8c276cc0ae45ac0cd09cd8de7287589041f5babc364db27ff`.
   Worker caught its own off-by-3 battle_util.c pin pre-commit. R88
   archived. No npm gate required; no deferral added. No PAPERCUT.
-
-
-## R90 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M87 ACCURACYCHECK part 2/3 (full-formula path) folded**
-
-- **State:** `rust-main` = R89 + `338b86785` M87 full-formula fold (merge
-  commit `10b0d3e2f`; not a fast-forward only because the R89 ledger
-  commit intervened) + this ledger commit. Gates green post-fold. Tree
-  clean, committed. Core-only; no ABI/adapter/TS/npm files touched. M88
-  worker (part 3/3, absorb/Flash-Fire tail) ALREADY DISPATCHED off this
-  HEAD (brief `/tmp/rust-briefs/accuracycheck-m88.txt`, 45-min cap).
-- **Did (this step):** worker (claude-sonnet-5, 55-min cap, one commit,
-  33.5 min, $8.22, foreground gates) replaced M86's staging with the
-  full-formula path (`accuracycheckOpcodeHandler` :1160-1288): FS/DD
-  explicit literals vs ACC_CURR_MOVE, protect gate on the RESOLVED move,
-  lock-on plain advance, the hitmarker/semi-invulnerable ladder with the
-  exact per-leg carry asymmetry (a leg's own miss-jump carries only PRIOR
-  legs' clears; ladder misses write no missType and skip CWGL),
-  rain-Thunder/ALWAYS_HIT/VITAL_THROW zero-draw bypasses (Cloud-Nine
-  weather negation), sun-Thunder acc-50, native
-  calculate_accuracy/roll_accuracy_hits reuse + exactly ONE
-  "accuracycheck" rng draw, the miss tail (native
-  check_wonder_guard_and_levitate: Struggle/zero-power skip, Levitate
-  B_MSG_GROUND_MISS, foresight ghost-skip only vs NORMAL/FIGHTING,
-  immunity -> DOESNT_AFFECT_FOE + attacker targetNotAffected, Wonder
-  Guard arm, reveal, double-battle B_MSG_AVOIDED_ATK chooser), and the
-  destiny-bond half of the hit tail (native
-  apply_try_set_destiny_bond_to_happen reuse); absorb/Flash-Fire staged
-  as typed `AbsorbingTailPending` (native unit tests only). THREE
-  documented TS-vs-C divergence pins: lock-on advances with NO tail (C
-  runs destiny-bond+absorb there), absorb trigger reads currentMove's
-  row power (C reads the same quantity; TS makes it observable for
-  FS/DD), CWGL reads the resolved move ROW's power (asymmetric with the
-  absorb trigger). **74 behavior + 3 registration** TS-differential
-  cases + 32 native unit tests; corpus sha256
-  `8ceb8ee92038968276397dd76c28dc37a9954f74767549f74d25133e4ef43fd7`.
-- **Next:** verify + fold M88 (completes the opcode -> 92 of 215 TS
-  opcode names); then wind-down (ledger, backup, clean tree) before the
-  07:05 UTC deadline. If M88 lands early enough, scout one more thin
-  leaf only if it can land AND be verified by ~06:20 UTC.
-- **Notes:** supervisor audit walked the full-formula body, ladder
-  asymmetry, CWGL walk (incl. find-miss -> continue), miss-tail write
-  set, hit-tail ordering (destiny bond before triggers, absorb before
-  flash fire), and the three divergence pins against TS; unknown
-  currentMove -> row-power 0 is an acceptable projection (TS errors at
-  context creation, unreachable in-opcode). Independent regeneration
-  byte-identical. Generated Rust **435,388 bytes**, sha256
-  `fa55d11de77a65da3b43b3c658ed4b7eee13a859330ed317261e640a2795ba0f`;
-  generator **43,047 bytes**, sha256
-  `ecfa305a8fef052221dd92d1873dc64651e498a897ada57fb911fa89e42e7663`.
-  Gates on `rust-main` post-fold: **1,633/1,633** native (+21), fmt,
-  strict workspace Clippy, wasm32 release; artifact **512,220 bytes**,
-  sha256
-  `05844657cd152cee38bf277bbeba88fc1d98168ada23b50c2282b583da591b51`
-  (R89's 15,509 B shrink reversed itself with this fold — deterministic
-  codegen drift both times, builds reproduce across trees). R87
-  archived. No npm gate required; no deferral added. No PAPERCUT.
-
-

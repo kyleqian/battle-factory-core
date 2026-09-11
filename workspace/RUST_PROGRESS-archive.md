@@ -5,6 +5,61 @@ full history regardless.
 
 ---
 
+## R90 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M87 ACCURACYCHECK part 2/3 (full-formula path) folded**
+
+- **State:** `rust-main` = R89 + `338b86785` M87 full-formula fold (merge
+  commit `10b0d3e2f`; not a fast-forward only because the R89 ledger
+  commit intervened) + this ledger commit. Gates green post-fold. Tree
+  clean, committed. Core-only; no ABI/adapter/TS/npm files touched. M88
+  worker (part 3/3, absorb/Flash-Fire tail) ALREADY DISPATCHED off this
+  HEAD (brief `/tmp/rust-briefs/accuracycheck-m88.txt`, 45-min cap).
+- **Did (this step):** worker (claude-sonnet-5, 55-min cap, one commit,
+  33.5 min, $8.22, foreground gates) replaced M86's staging with the
+  full-formula path (`accuracycheckOpcodeHandler` :1160-1288): FS/DD
+  explicit literals vs ACC_CURR_MOVE, protect gate on the RESOLVED move,
+  lock-on plain advance, the hitmarker/semi-invulnerable ladder with the
+  exact per-leg carry asymmetry (a leg's own miss-jump carries only PRIOR
+  legs' clears; ladder misses write no missType and skip CWGL),
+  rain-Thunder/ALWAYS_HIT/VITAL_THROW zero-draw bypasses (Cloud-Nine
+  weather negation), sun-Thunder acc-50, native
+  calculate_accuracy/roll_accuracy_hits reuse + exactly ONE
+  "accuracycheck" rng draw, the miss tail (native
+  check_wonder_guard_and_levitate: Struggle/zero-power skip, Levitate
+  B_MSG_GROUND_MISS, foresight ghost-skip only vs NORMAL/FIGHTING,
+  immunity -> DOESNT_AFFECT_FOE + attacker targetNotAffected, Wonder
+  Guard arm, reveal, double-battle B_MSG_AVOIDED_ATK chooser), and the
+  destiny-bond half of the hit tail (native
+  apply_try_set_destiny_bond_to_happen reuse); absorb/Flash-Fire staged
+  as typed `AbsorbingTailPending` (native unit tests only). THREE
+  documented TS-vs-C divergence pins: lock-on advances with NO tail (C
+  runs destiny-bond+absorb there), absorb trigger reads currentMove's
+  row power (C reads the same quantity; TS makes it observable for
+  FS/DD), CWGL reads the resolved move ROW's power (asymmetric with the
+  absorb trigger). **74 behavior + 3 registration** TS-differential
+  cases + 32 native unit tests; corpus sha256
+  `8ceb8ee92038968276397dd76c28dc37a9954f74767549f74d25133e4ef43fd7`.
+- **Next:** verify + fold M88 (completes the opcode -> 92 of 215 TS
+  opcode names); then wind-down (ledger, backup, clean tree) before the
+  07:05 UTC deadline. If M88 lands early enough, scout one more thin
+  leaf only if it can land AND be verified by ~06:20 UTC.
+- **Notes:** supervisor audit walked the full-formula body, ladder
+  asymmetry, CWGL walk (incl. find-miss -> continue), miss-tail write
+  set, hit-tail ordering (destiny bond before triggers, absorb before
+  flash fire), and the three divergence pins against TS; unknown
+  currentMove -> row-power 0 is an acceptable projection (TS errors at
+  context creation, unreachable in-opcode). Independent regeneration
+  byte-identical. Generated Rust **435,388 bytes**, sha256
+  `fa55d11de77a65da3b43b3c658ed4b7eee13a859330ed317261e640a2795ba0f`;
+  generator **43,047 bytes**, sha256
+  `ecfa305a8fef052221dd92d1873dc64651e498a897ada57fb911fa89e42e7663`.
+  Gates on `rust-main` post-fold: **1,633/1,633** native (+21), fmt,
+  strict workspace Clippy, wasm32 release; artifact **512,220 bytes**,
+  sha256
+  `05844657cd152cee38bf277bbeba88fc1d98168ada23b50c2282b583da591b51`
+  (R89's 15,509 B shrink reversed itself with this fold — deterministic
+  codegen drift both times, builds reproduce across trees). R87
+  archived. No npm gate required; no deferral added. No PAPERCUT.
+
 ## R89 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M86 ACCURACYCHECK part 1/3 (bypass paths) folded**
 
 - **State:** `rust-main` = master (no-op merge at orient; origin fetch
