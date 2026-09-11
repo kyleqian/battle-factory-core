@@ -900,6 +900,11 @@ import {
   type WaterPulseState,
 } from "./waterPulse.ts";
 import {
+  digAtAge,
+  type DigLiveInputs,
+  type DigState,
+} from "./dig.ts";
+import {
   fissureAtAge,
   type FissureState,
 } from "./fissure.ts";
@@ -3496,6 +3501,22 @@ export interface SceneOnWaterPulseConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/**
+ * Narrow Scene-ON seam for MOVE_DIG.  The body is selected by the live
+ * two-turn animation scheduler; all allocator, matrix, monbg and geometry
+ * facts remain caller-owned and gameplay state stays outside this seam.
+ */
+export interface SceneOnDigConfig {
+  readonly move: "DIG";
+  readonly body: "setup" | "unleash";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<DigLiveInputs,
+    "body" | "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /** Narrow Scene-ON seam for the composed, source-relative Eruption body. */
 export interface SceneOnEruptionConfig {
   readonly move: "ERUPTION";
@@ -4097,6 +4118,7 @@ export type SceneOnMoveConfig =
   | SceneOnSkyUppercutConfig
   | SceneOnDestinyBondConfig
   | SceneOnWaterPulseConfig
+  | SceneOnDigConfig
   | SceneOnEruptionConfig
   | SceneOnWaterSpoutConfig
   | SceneOnSandTombConfig
@@ -4325,6 +4347,8 @@ export type SceneOnDestinyBondPresentationState =
   SceneOnMovePresentationState<SceneOnDestinyBondConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
+export type SceneOnDigPresentationState =
+  SceneOnMovePresentationState<SceneOnDigConfig>;
 export type SceneOnPsybeamPresentationState =
   SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
@@ -5322,6 +5346,11 @@ export interface SceneOnFissureView extends FissureState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnDigView extends DigState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnHardenView extends MetallicShineState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -5982,7 +6011,8 @@ export function createSceneOnMovePresentation<
   | SceneOnCometPunchConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
-  | SceneOnWrapConfig,
+  | SceneOnWrapConfig
+  | SceneOnDigConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -10396,6 +10426,30 @@ export function sceneOnWaterPulseView(
   return {
     ...waterPulseAtAge(state.age, {
       ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerCenter: attacker.geometry.animationCenter,
+      targetCenter: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is the retained root row of the selected MOVE_DIG body. */
+export function sceneOnDigView(
+  state: SceneOnDigPresentationState,
+): SceneOnDigView {
+  if (state.config.move !== "DIG") {
+    throw new Error(`expected DIG presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...digAtAge(state.age, {
+      ...animationInputs,
+      body: state.config.body,
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
       attackerSpecies: attacker.species,
