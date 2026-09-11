@@ -1,0 +1,78 @@
+{
+  "schema": "sheer-cold-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SHEER_COLD",
+  "moveId": 329,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/sheerColdSourceAudit.ts",
+    "auditRunSha256": "2b46feb7282451b0cdce29fa632997a672d642071978ea87b020270a2e8f28bf",
+    "probe": "tools/compare/sheerColdStagingProbe.py",
+    "probeSha256": "fe36eecb07ab0da84dfc57a3e57d438ff1abf508bb947d4504ba5ce600c83d03",
+    "pointerOwnedRoot": {"symbol": "Move_SHEER_COLD", "start": "0x082d5242", "endExclusive": "0x082d5267"}
+  },
+  "factoryLegalSelection": {
+    "carrier": {"setId": 584, "name": "FRONTIER_MON_DEWGONG_3", "species": 87},
+    "sourceRoute": {"challengeNum": 5, "level50SetRange": [564, 659], "trainerId": 160, "regularTrainerRange": [160, 199]},
+    "partyBeforeInit": true,
+    "choiceConstraint": "The Dewgong side has all four move slots set to MOVE_SHEER_COLD. The player selects its first legal slot with ordinary A input; the opponent AI has only legal Sheer Cold choices.",
+    "ohkoRule": "Both active mons are level 50. Stock Cmd_tryKO uses MOVE_SHEER_COLD accuracy 30 plus the level delta and its Random()%100 + 1 < chance predicate; the recorded seeds observe the ROM's own successful result without injected damage, HP, status, stages, weather, side conditions, or outcome."
+  },
+  "runs": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-sheer-cold-player-dewgong-opponent-chansey.json",
+      "scenarioSha256": "9db76a204da839e6bca6725532650c27977673ace8e82293af9cec97a08df31c",
+      "seed": 305420003,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "d504215ce14a860f175985997d20d9e9585bee66cf5085b1949393a539537b1e",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "player", "partyIndex": 0, "species": 87, "level": 50, "moves": [329, 329, 329, 329]},
+      "target": {"side": "opponent", "partyIndex": 0, "species": 113, "level": 50, "initialHp": 357, "maxHp": 357},
+      "choiceConstraint": {"attackerMoveSlots": [329, 329, 329, 329], "opponentAiMoveSlots": [33, 33, 33, 33]},
+      "root": {"symbol": "Move_SHEER_COLD", "start": "0x82d5242", "endExclusive": "0x82d5267", "observations": 191, "attackerBattler": 0, "targetBattler": 1, "controllerExecFlags": 1},
+      "romOutcome": {"kind": "one-hit-ko", "moveResultFlags": 16, "missedBit": 1, "oneHitKoBit": 16, "targetFinalPartyHp": 0, "targetFinalBattleHp": 0, "battleOutcome": 0},
+      "pp": {"before": [5, 5, 5, 5], "after": [4, 5, 5, 5], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "86f208271815e3e687a44756ae87febd8372592d9ce6a5b3f73de623ff9bb5c9", "afterSha256": "86f208271815e3e687a44756ae87febd8372592d9ce6a5b3f73de623ff9bb5c9"},
+      "transientFreeSetup": true
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-sheer-cold-opponent-dewgong-player-chansey.json",
+      "scenarioSha256": "7a1fdf306b0e2b590492ee4ea228da94b877552232ab47bae3965cd709199128",
+      "seed": 305420008,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "cc6a4bd5a1a4a004ab2083e98654a25a14f0aac151ebb59525646ca3506b40d3",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "opponent", "partyIndex": 0, "species": 87, "level": 50, "moves": [329, 329, 329, 329]},
+      "target": {"side": "player", "partyIndex": 0, "species": 113, "level": 50, "initialHp": 357, "maxHp": 357},
+      "choiceConstraint": {"attackerMoveSlots": [329, 329, 329, 329], "opponentAiMoveSlots": [329, 329, 329, 329]},
+      "root": {"symbol": "Move_SHEER_COLD", "start": "0x82d5242", "endExclusive": "0x82d5267", "observations": 190, "attackerBattler": 1, "targetBattler": 0, "controllerExecFlags": 2},
+      "romOutcome": {"kind": "one-hit-ko", "moveResultFlags": 16, "missedBit": 1, "oneHitKoBit": 16, "targetFinalPartyHp": 0, "targetFinalBattleHp": 0, "battleOutcome": 0},
+      "pp": {"before": [5, 5, 5, 5], "after": [5, 4, 5, 5], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "8fe63240097dd132187f92999aee7c727c69285a63b31ffabe383bd7d8adee6a", "afterSha256": "8fe63240097dd132187f92999aee7c727c69285a63b31ffabe383bd7d8adee6a"},
+      "transientFreeSetup": true
+    }
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "rawRgbRetained": false,
+    "denseWindowCaptured": false,
+    "semanticFramesRetained": false,
+    "latchMeasured": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSceneOnSeam": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "transientOverrides": [],
+    "battleStateInjected": false,
+    "entryHooksSkipped": false,
+    "noTimingOrLatchTransfer": true
+  },
+  "remainder": "Keep MOVE_SHEER_COLD and ice-cube-frozen-ice-cube unsupported. A later move-owned checkpoint must retain complete twice-fresh bilateral dense semantic state, raw RGB, and per-orientation change maps through first inactive cleanup under ANIMATION_LATCHES Rules 1-5; it must then independently implement a source-relative reducer, typed Scene-ON seam, and live compositor plus actual-core zero-residual acceptance with a material altered control. Ice Punch and any sibling receive no timing, latch, body, move, or track credit."
+}

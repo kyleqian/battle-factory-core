@@ -16,7 +16,7 @@ describe("MOVE_SHEER_COLD source/component/carrier checkpoint", () => {
   it("pins the complete branchless pointer-owned root, FrozenIceCube callback chain, and source resources", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
-    expect(sha(first)).toBe("78a4e1af2d3cdccb8b6e2d5c7faffe365e9d3cc7baeaf8503beedc9e16b66e12");
+    expect(sha(first)).toBe("2b46feb7282451b0cdce29fa632997a672d642071978ea87b020270a2e8f28bf");
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
       schema: "sheer-cold-source-audit/v1", move: "MOVE_SHEER_COLD", moveId: 329,
@@ -82,7 +82,8 @@ describe("MOVE_SHEER_COLD source/component/carrier checkpoint", () => {
     expect(audit.controls.icePunch).toMatchObject({ status: "exact", credit: expect.stringContaining("no Sheer Cold") });
     expect(audit.checkpoint).toMatchObject({
       sourceAudit: true, completePointerOwnedRoot: true, completeReachableBranches: true, completeCarrierCensus: true,
-      legalBilateralPartyOnlyStaging: false, oracleOrMgbaInvoked: false, denseWindowCaptured: false,
+      legalBilateralPartyOnlyStaging: true, oracleOrMgbaInvoked: true,
+      compactBilateralEndpointReceipts: true, twiceFreshPerOrientation: true, denseWindowCaptured: false,
       reducerAdded: false, typedSceneOnSeam: false, compositorAdded: false, framebufferAcceptance: false,
       coveragePromotion: false, componentTrackFulfilled: false, latchPromotion: false, unsupportedNoCreditBoundary: true,
     });
@@ -91,7 +92,14 @@ describe("MOVE_SHEER_COLD source/component/carrier checkpoint", () => {
     expect(coverage.entries).toHaveLength(248);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SHEER_COLD")?.status ?? "unsupported").toBe("unsupported");
     expect(coverage.componentTracks.find((entry: Json) => entry.id === "ice-cube-frozen-ice-cube")).toMatchObject({
-      representatives: ["MOVE_SHEER_COLD"], fulfilled: false, evidence: ["tools/compare/sheerColdSourceAudit.ts"],
+      representatives: ["MOVE_SHEER_COLD"], fulfilled: false, evidence: [
+        "tools/compare/sheerColdSourceAudit.ts",
+        "tools/battle-lab/mechanic-sheer-cold-player-dewgong-opponent-chansey.json",
+        "tools/battle-lab/mechanic-sheer-cold-opponent-dewgong-player-chansey.json",
+        "tools/compare/sheerColdStagingProbe.py",
+        "tools/compare/fixtures/sheer-cold-staging-receipt.json",
+        "tools/compare/verifySheerColdStaging.ts",
+      ],
     });
   });
 });

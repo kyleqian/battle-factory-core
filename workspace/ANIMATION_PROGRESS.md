@@ -1,3 +1,9 @@
+# MOVE_SHEER_COLD legal bilateral Scene-ON staging — worker (2026-09-11)
+
+- **State:** Level 50 remains **248/276 exact**, **0 partial / 0 staged**, and **28 unsupported**. `MOVE_SHEER_COLD` remains coverage-absent/unsupported; `ice-cube-frozen-ice-cube` remains unfulfilled. Ice Punch remains a source/art control only.
+- **Did:** Completed legal party-before-init challenge-5 (`564..659`) Dewgong set-584 routes in both orientations. Two fresh wrapper receipts per orientation are byte-identical: player-back `d504215c…` (seed `305420003`, root **191** samples) and opponent-front `cc6a4bd5…` (seed `305420008`, root **190**). Both observe `Move_SHEER_COLD 0x082d5242..0x082d5267`, stock equal-level `MOVE_RESULT_ONE_HIT_KO=16`, one PP use, zeroed Chansey, and unchanged checksum-valid benches; no transient state was injected.
+- **Next:** Bank the move's own complete twice-fresh bilateral dense semantic/raw-RGB/change maps through first inactive cleanup, measuring every visible mechanism independently per orientation under `ANIMATION_LATCHES.md` Rules 1–5. Only then consider a source-relative reducer, typed seam, live compositor, and actual-core acceptance; do not infer a latch row or credit from this endpoint checkpoint.
+
 # MOVE_SHEER_COLD source/component/carrier checkpoint — worker (2026-09-11)
 
 - **State:** Level 50 remains **248/276 exact**, **0 partial / 0 staged**, and **28 unsupported**. `MOVE_SHEER_COLD` remains coverage-absent/unsupported; its new non-exclusive `ice-cube-frozen-ice-cube` track is unfulfilled, and Ice Punch is a source/art control only.
