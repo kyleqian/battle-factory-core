@@ -57,9 +57,9 @@
     "timing": "immediately before the first successful bilateral receipt"
   },
   "evidenceScope": {
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
     "compositorAdded": false,
     "framebufferCompared": false,
     "fullDenseRowsRetained": true,
@@ -120,6 +120,6 @@
     "rawRgbRows": "112/112 + 112/112",
     "semanticRows": "112/112 + 112/112",
     "firstInactiveCleanup": "retained in both orientations",
-    "claim": "MOVE_AIR_CUTTER source/legal-staging evidence only; remains unsupported-evidence and grants no sibling or exact coverage credit."
+    "claim": "MOVE_AIR_CUTTER retains source/legal bilateral staging evidence and now has a separate source-relative reducer plus typed semantic seam checkpoint; it remains unsupported-evidence and grants no sibling, track, or exact coverage credit until independent compositor/framebuffer acceptance."
   }
 }

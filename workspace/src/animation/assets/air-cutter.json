@@ -1,0 +1,45 @@
+{
+  "source": {
+    "script": "data/battle_anim_scripts.s Move_AIR_CUTTER",
+    "scriptSha256": "9eb6ca5e2c86325b25961004557306179043ed400cd75fd713381594c0017fd3",
+    "projectile": "src/battle_anim_effects_2.c gAirWaveProjectileSpriteTemplate / AnimTask_AirCutterProjectile",
+    "slice": "src/battle_anim_effects_1.c gAirCutterSliceSpriteTemplate / AnimAirCutterSlice",
+    "airWaveIdentity": "graphics/battle_anims/sprites/air_wave.png; shared with MOVE_SONIC_BOOM as an asset control only"
+  },
+  "resources": {
+    "airWave": {
+      "tag": 10003,
+      "tileBytes": 256,
+      "graphics": "gBattleAnimSpriteGfx_AirWave",
+      "palette": "gBattleAnimSpritePal_AirWave"
+    },
+    "cut": {
+      "tag": 10138,
+      "tileBytes": 2048,
+      "graphics": "gBattleAnimSpriteGfx_Cut",
+      "palette": "gBattleAnimSpritePal_Impact"
+    },
+    "impact": {
+      "tag": 10135,
+      "tileBytes": 512,
+      "graphics": "gBattleAnimSpriteGfx_Impact",
+      "palette": "gBattleAnimSpritePal_Impact"
+    }
+  },
+  "templates": {
+    "airWaveProjectile": {
+      "symbol": "gAirWaveProjectileSpriteTemplate",
+      "shape": "32x16",
+      "affine": false,
+      "objMode": "objblend",
+      "callback": "AnimAirWaveProjectile"
+    },
+    "airCutterSlice": {
+      "symbol": "gAirCutterSliceSpriteTemplate",
+      "shape": "32x32",
+      "affine": false,
+      "objMode": "objblend",
+      "callback": "AnimAirCutterSlice"
+    }
+  }
+}

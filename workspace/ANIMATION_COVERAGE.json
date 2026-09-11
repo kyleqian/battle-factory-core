@@ -9100,9 +9100,15 @@
     "tools/compare/evidence/air-cutter-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/air-cutter-changemap-player.json",
     "tools/compare/evidence/air-cutter-changemap-opponent.json",
-    "tests/animation/airCutterEvidenceCheckpoint.test.ts"
+    "tests/animation/airCutterEvidenceCheckpoint.test.ts",
+    "src/animation/assets/air-cutter.json",
+    "tools/compare/extractAirCutterAssets.ts",
+    "tests/animation/airCutterAssets.test.ts",
+    "src/animation/airCutter.ts",
+    "tools/compare/verifyAirCutterReducer.ts",
+    "tests/animation/airCutterReducer.test.ts"
    ],
-   "goal": "SOURCE + LEGAL BILATERAL STAGING ONLY: this singleton Air Cutter projectile track contains the shared AIR_WAVE asset plus Air Cutter's unique slice sprite and projectile task. Move-owned complete Scene-ON dense semantic/raw-RGB/change-map receipts exist twice fresh in both orientations, but no reducer, Scene-ON seam, compositor, app framebuffer comparison, sibling, move, or track credit is granted. Sonic Boom is an asset control only."
+   "goal": "UNFULFILLED / MOVE UNSUPPORTED: this singleton Air Cutter projectile track contains the shared AIR_WAVE asset plus Air Cutter's unique slice sprite and projectile task. Its source-derived relative-age reducer, reproducible source asset wiring, and narrow typed Scene-ON semantic seam replay every retained bilateral component row twice (112 player-back + 112 opponent-front; 448 reducer and 448 seam invocations) with live species/geometry, allocator slots, matrices, task slots, resource banks, and painter order. Own maps retain predecessor OAM/matrix 111/111 and palette 110/111 per orientation, with wave RAM/display 17/19, slice 76, and the overlapping target/partner ShakeMon2 schedule. No compositor, app/actual-core framebuffer comparison, move/track/sibling promotion, Sonic Boom credit, or latch transfer is granted. Sonic Boom remains an AIR_WAVE source-identity asset control only."
   }
  ],
  "variantAudits": {

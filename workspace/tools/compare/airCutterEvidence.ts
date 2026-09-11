@@ -1,9 +1,9 @@
 /**
  * Hermetic receipt verifier for the MOVE_AIR_CUTTER source/staging checkpoint.
  *
- * This intentionally verifies recorded legal Scene-ON evidence only.  It does
- * not import a production reducer, compositor, or presentation seam, and it
- * grants no coverage credit.  Re-running the mGBA capture is a separate,
+ * This intentionally verifies recorded legal Scene-ON evidence only. It does
+ * not import a production reducer, compositor, or presentation seam. It
+ * grants no coverage credit. Re-running the mGBA capture is a separate,
  * explicit staging operation through tools/run-mgba-probe.py.
  */
 import { execFileSync } from "node:child_process";
@@ -354,12 +354,13 @@ export function verifyAirCutterEvidence(): Record<Orientation, Json> {
     && fixture.evidenceScope.rawRgbReceiptsRetained
     && fixture.evidenceScope.perOrientationChangeMaps
     && fixture.evidenceScope.twiceFreshByteIdentical
-    && !fixture.evidenceScope.productionAnimationChanged
-    && !fixture.evidenceScope.reducerAdded
-    && !fixture.evidenceScope.typedSeamAdded
+    && fixture.evidenceScope.productionAnimationChanged
+    && fixture.evidenceScope.reducerAdded
+    && fixture.evidenceScope.typedSeamAdded
     && !fixture.evidenceScope.compositorAdded
+    && !fixture.evidenceScope.framebufferCompared
     && !fixture.evidenceScope.coveragePromotion,
-  "Air Cutter staging-only boundary drift");
+  "Air Cutter semantic-checkpoint boundary drift");
   return Object.fromEntries(orientations.map((orientation) => [
     orientation,
     verifyOrientation(orientation),

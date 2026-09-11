@@ -102,9 +102,9 @@ describe("MOVE_AIR_CUTTER legal bilateral Scene-ON evidence checkpoint", () => {
       status: "unsupported-evidence",
       coverageCredit: false,
       evidenceScope: {
-        productionAnimationChanged: false,
-        reducerAdded: false,
-        typedSeamAdded: false,
+        productionAnimationChanged: true,
+        reducerAdded: true,
+        typedSeamAdded: true,
         compositorAdded: false,
         framebufferCompared: false,
         fullDenseRowsRetained: true,

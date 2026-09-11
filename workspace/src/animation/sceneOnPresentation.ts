@@ -895,6 +895,11 @@ import {
   type DestinyBondState,
 } from "./destinyBond.ts";
 import {
+  airCutterAtAge,
+  type AirCutterLiveInputs,
+  type AirCutterState,
+} from "./airCutter.ts";
+import {
   waterPulseAtAge,
   type WaterPulseLiveInputs,
   type WaterPulseState,
@@ -2500,6 +2505,21 @@ export interface SceneOnSonicBoomConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/**
+ * Narrow semantic Scene-ON seam for MOVE_AIR_CUTTER. The caller owns live
+ * battler geometry, slots, matrices, resource banks, tasks, and painter
+ * order; no controller state or framebuffer data crosses this boundary.
+ */
+export interface SceneOnAirCutterConfig {
+  readonly move: "AIR_CUTTER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<AirCutterLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
@@ -4007,6 +4027,7 @@ export type SceneOnMoveConfig =
   | SceneOnSpikeCannonConfig
   | SceneOnPinMissileConfig
   | SceneOnSonicBoomConfig
+  | SceneOnAirCutterConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
@@ -4345,6 +4366,8 @@ export type SceneOnSkyUppercutPresentationState =
   SceneOnMovePresentationState<SceneOnSkyUppercutConfig>;
 export type SceneOnDestinyBondPresentationState =
   SceneOnMovePresentationState<SceneOnDestinyBondConfig>;
+export type SceneOnAirCutterPresentationState =
+  SceneOnMovePresentationState<SceneOnAirCutterConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnDigPresentationState =
@@ -4706,6 +4729,11 @@ export interface SceneOnPinMissileView extends PinMissileEffect {
 
 export interface SceneOnSonicBoomView extends SonicBoomEffect {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnAirCutterView extends AirCutterState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8026,6 +8054,29 @@ export function sceneOnSonicBoomView(
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+/** `age=0` is MOVE_AIR_CUTTER's pointer-owned first resource-load row. */
+export function sceneOnAirCutterView(
+  state: SceneOnAirCutterPresentationState,
+): SceneOnAirCutterView {
+  if (state.config.move !== "AIR_CUTTER") {
+    throw new Error(`expected AIR_CUTTER presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...airCutterAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerCenter: attacker.geometry.battlePositionCenter,
+      targetCenter: target.geometry.battlePositionCenter,
+    }),
+    attacker,
+    target,
   };
 }
 
