@@ -22,13 +22,17 @@ const PLAYER_ORDER = [
   31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,
   47,
 ] as const;
+const INITIAL_SCANLINE_BANKS = [
+  Array.from({ length: 320 }, (_, index) => index < 160 ? 2 : 99),
+  Array.from({ length: 320 }, (_, index) => index < 160 ? 3 : 88),
+] as const;
 
 const live = (overrides: Partial<DigLiveInputs> = {}): DigLiveInputs => ({
   body: "setup",
   attackerSide: "player",
   targetSide: "opponent",
-  attackerSpecies: "LOMBRE",
-  targetSpecies: "ONIX",
+  attackerSpecies: "VIBRAVA",
+  targetSpecies: "CHANSEY",
   attackerCenter: { x: 72, y: 97 },
   targetCenter: { x: 176, y: 49 },
   targetAnimationOrigin: { x: 176, y: 49 },
@@ -66,6 +70,10 @@ const live = (overrides: Partial<DigLiveInputs> = {}): DigLiveInputs => ({
   monBg: {
     layer: "bg2", layerId: 4, snapshot: { x: 72, y: 160 },
     baseScroll: { x: -40, y: -128 }, activeCnt: 24066, inactiveCnt: 24064,
+  },
+  initialScanline: {
+    srcBuffer: 1, state: 0, dmaDest: 0x0400001c, dmaControl: 0xa2600001,
+    buffers: INITIAL_SCANLINE_BANKS,
   },
   animationRngSeed: 0x12345678,
   ...overrides,
@@ -136,15 +144,17 @@ describe("MOVE_DIG source-relative reducer", () => {
     });
     expect(first["player-back"]).toMatchObject({
       reducerRows: 263, seamRows: 263,
-      digest: "5e52ee40e4354da97e20d673e8195f322e4bb3d8099ada1b0eee67510fd927c2",
-      setup: { digest: "2bd90e9fd6a2575f1c5c86d0140b9626443ec1bd0536453dbda96c74e045eea8" },
-      unleash: { digest: "c7bfd415ac3b6380b0e990851ad7cda3e55bd9d74482feff4e555d148a4f4b07" },
+      canonicalEvidence: { attacker: { name: "VIBRAVA", speciesId: 333 }, target: { name: "CHANSEY", speciesId: 113 } },
+      digest: "e3051eee70b7b187b02e9d4fe69e780e5b0fa04cb62be8e251593c6d72a75473",
+      setup: { digest: "d107387b0cf2113763ad6c14092c17a8877dd4ad4b243938acb8764ad967dc3b" },
+      unleash: { digest: "1752b070273638f503bda4d7823b7016dfa48387bbaba3697f2a2d6415392d2a" },
     });
     expect(first["opponent-front"]).toMatchObject({
       reducerRows: 263, seamRows: 263,
-      digest: "4fb4eb59545b129fa4f5ab8ea89e12e40e147848c8a63f7162128e1cab7e2c30",
-      setup: { digest: "8b5137cd451d35dd087f0c53aa811004c5fbc8e20eabb3088e0700e1690edb32" },
-      unleash: { digest: "08edcfe20d96a686f5599cb9c389f1eb2ecedcb12d8647324ba55354e0d2b5f3" },
+      canonicalEvidence: { attacker: { name: "VIBRAVA", speciesId: 333 }, target: { name: "CHANSEY", speciesId: 113 } },
+      digest: "dffddf089c15bf35b0e98a82757d7f0af3dee72261cd34f91dfcf8e5fe7156ee",
+      setup: { digest: "a93f8491cc62eb93a28cba27c6125f08b1226b10512069264433b7bd9a78a7af" },
+      unleash: { digest: "a78d169e835da933fa6cb82b61d2923a3e9e56c465aee8dcef277981251ab9f4" },
     });
   });
 
@@ -165,6 +175,16 @@ describe("MOVE_DIG source-relative reducer", () => {
     expect(digAtAge(10, live()).tasks).toEqual(expect.arrayContaining([
       expect.objectContaining({ callback: "AnimTask_DigBounceMovement", data: expect.arrayContaining([2, 0, 0]) }),
     ]));
+    const setupScanline = digAtAge(10, live()).scanline;
+    expect(setupScanline).toMatchObject({ state: 1, srcBuffer: 1, dmaDest: 0x04000018, dmaControl: 0xa2600001 });
+    expect(setupScanline.buffers.map((bank) => bank.length)).toEqual([320, 320]);
+    expect(setupScanline.buffers[0].slice(0, 48)).toEqual(Array.from({ length: 48 }, () => 2));
+    expect(setupScanline.buffers[1].slice(0, 48)).toEqual(Array.from({ length: 48 }, () => 3));
+    expect(setupScanline.buffers[0].slice(48, 112)).toEqual(Array.from({ length: 64 }, () => -40));
+    expect(setupScanline.buffers[1].slice(112, 160)).toEqual(Array.from({ length: 48 }, () => 200));
+    expect(setupScanline.buffers.map((bank) => bank.slice(160))).toEqual([
+      Array.from({ length: 160 }, () => 99), Array.from({ length: 160 }, () => 88),
+    ]);
     expect(digAtAge(18, live())).toMatchObject({
       source: { pointerOffset: 283, wait: 32 },
       audio: { events: [expect.objectContaining({ sound: "SE_M_DIG", pan: -64 })] },
@@ -191,6 +211,13 @@ describe("MOVE_DIG source-relative reducer", () => {
       tasks: expect.arrayContaining([
         expect.objectContaining({ callback: "AnimTask_DigRiseUpFromHole", data: expect.arrayContaining([2]) }),
       ]),
+    });
+    expect(digAtAge(14, unleash).scanline).toMatchObject({
+      state: 1, srcBuffer: 1, dmaDest: 0x04000014, dmaControl: 0xa2600001,
+      buffers: [
+        [...Array.from({ length: 72 }, () => -144), ...Array.from({ length: 88 }, () => 96), ...Array.from({ length: 160 }, () => 99)],
+        [...Array.from({ length: 72 }, () => -144), ...Array.from({ length: 88 }, () => 96), ...Array.from({ length: 160 }, () => 88)],
+      ],
     });
     expect(digAtAge(32, unleash)).toMatchObject({
       source: { pointerOffset: 9, wait: 1 },
@@ -255,10 +282,17 @@ describe("MOVE_DIG source-relative reducer", () => {
     expect(swappedOrder.order.ownedSlots).not.toEqual(canonical.order.ownedSlots);
 
     const seam = sceneOnDigView(sceneState(input, 32));
-    const { attacker: _attacker, target: _target, ...seamCore } = seam;
-    const { attacker: _reducedAttacker, target: _reducedTarget, ...reducedCore } = canonical;
-    expect(seamCore).toEqual(reducedCore);
-    expect(sceneOnDigView(sceneState({ ...input, attackerSpecies: "MAGBY", targetSpecies: "NINETALES" }, 32)))
-      .toMatchObject({ attacker: { species: "MAGBY" }, target: { species: "NINETALES" } });
+    const { presentationAttacker, presentationTarget, ...seamCore } = seam;
+    expect(seamCore).toEqual(canonical);
+    expect(seam.attacker).toEqual(canonical.attacker);
+    expect(seam.target).toEqual(canonical.target);
+    expect({ presentationAttacker, presentationTarget }).toMatchObject({
+      presentationAttacker: { species: "VIBRAVA" }, presentationTarget: { species: "CHANSEY" },
+    });
+    const alteredSeam = sceneOnDigView(sceneState(alteredInput, 32));
+    expect(alteredSeam).toMatchObject({
+      attacker: altered.attacker, target: altered.target,
+      presentationAttacker: { species: "MAGBY" }, presentationTarget: { species: "NINETALES" },
+    });
   });
 });

@@ -80,6 +80,24 @@ export interface DigLiveInputs {
     readonly activeCnt: number;
     readonly inactiveCnt: number;
   }>;
+  /**
+   * Live `gScanlineEffect` state at this source body's root row.
+   *
+   * The hardware allocation is `gScanlineEffectRegBuffers[2][0x3C0]`, but
+   * the Scene-ON probe deliberately retains the first 320 u16 words of each
+   * bank: the 160 display-line words Dig can write, plus a same-sized sampled
+   * suffix that it cannot touch.  `SetDigScanlineEffect` writes only indices
+   * `[startY, 160)`, so the reducer preserves both the pre-start prefix and
+   * that retained suffix verbatim instead of treating either as zero-filled
+   * Dig state.
+   */
+  readonly initialScanline: Readonly<{
+    readonly srcBuffer: 0 | 1;
+    readonly state: 0 | 1 | 3;
+    readonly dmaDest: number;
+    readonly dmaControl: number;
+    readonly buffers: readonly [readonly number[], readonly number[]];
+  }>;
   /** The animation-only stream is passed through; Dig makes no RNG calls. */
   readonly animationRngSeed: number;
 }
@@ -222,11 +240,13 @@ export interface DigState {
 
 const ZERO_MATRIX = [256, 0, 0, 256] as const;
 const IMPACT_MATRIX = [372, 0, 0, 372] as const;
-const DIG_DMA_CONTROL = 0xa2580001;
+// `SCANLINE_EFFECT_DMACNT_16BIT` from `scanline_effect.h`.
+const DIG_DMA_CONTROL = 0xa2600001;
 const DIG_DMA_BG1 = 0x04000014;
 const DIG_DMA_BG2 = 0x04000018;
 const DISPLAY_HEIGHT = 160;
 const DISPLAY_WIDTH = 240;
+const DIG_RETAINED_SCANLINE_WORDS = DISPLAY_HEIGHT * 2;
 const PLUME_SPECS = [
   { side: 0 as const, targetX: 12, wave: -16 },
   { side: 0 as const, targetX: 16, wave: -10 },
@@ -408,24 +428,42 @@ function shakeTask(age: number, input: DigLiveInputs): DigTask | null {
 
 function scanlineFor(body: DigBody, age: number, input: DigLiveInputs): DigState["scanline"] {
   const setup = body === "setup";
+  const startAge = setup ? 10 : 14;
+  const stopAge = setup ? 167 : 27;
+  const initial = input.initialScanline;
+  if (initial.buffers.some((bank) => bank.length !== DIG_RETAINED_SCANLINE_WORDS)) {
+    throw new Error(`Dig requires two ${DIG_RETAINED_SCANLINE_WORDS}-word retained scanline witnesses`);
+  }
   const state: 0 | 1 | 3 = setup
-    ? (inRange(age, 10, 166) ? 1 : age === 167 ? 3 : 0)
-    : (inRange(age, 14, 26) ? 1 : age === 27 ? 3 : 0);
+    ? (inRange(age, 10, 166) ? 1 : age === 167 ? 3 : age < startAge ? initial.state : 0)
+    : (inRange(age, 14, 26) ? 1 : age === 27 ? 3 : age < startAge ? initial.state : 0);
   const startY = setup ? Math.max(0, input.attackerElevationY - 32) : 0;
   const endY = input.attackerElevationY + 32;
   const bgX = setup ? input.setupBgOffset.x : input.monBg.baseScroll.x;
-  const values = Array.from({ length: DISPLAY_HEIGHT }, (_, y) => y < endY && y >= startY ? bgX : bgX + DISPLAY_WIDTH);
-  const bufferSet = setup ? age >= 10 && age < 168 : age >= 14 && age < 28;
-  const stable = bufferSet ? values : Array<number>(DISPLAY_HEIGHT).fill(0);
-  let srcBuffer: 0 | 1;
-  if (setup) {
-    srcBuffer = age < 10 ? 1 : age <= 166 ? (age % 2 === 0 ? 1 : 0) : 0;
-  } else {
-    srcBuffer = age < 14 ? 0 : age <= 27 ? (age % 2) as 0 | 1 : 1;
+  const buffers: [number[], number[]] = [
+    [...initial.buffers[0]], [...initial.buffers[1]],
+  ];
+  if (age >= startAge) {
+    // `SetDigScanlineEffect` never clears the preceding lines.  It fills the
+    // selected vertical band with the current BG x offset, then the rest of
+    // the 160 visible scanlines with the far-side (+240) offset, in both
+    // banks.  Entries 160..319 are retained probe witness data, not a second
+    // display plane, and the source loop does not write them.
+    for (const bank of buffers) {
+      for (let y = startY; y < endY; y += 1) bank[y] = bgX;
+      for (let y = endY; y < DISPLAY_HEIGHT; y += 1) bank[y] = bgX + DISPLAY_WIDTH;
+    }
   }
+  const srcAtStop = (initial.srcBuffer ^ ((stopAge - startAge) & 1)) as 0 | 1;
+  const srcBuffer = age < startAge
+    ? initial.srcBuffer
+    : age <= stopAge
+      ? (initial.srcBuffer ^ ((age - startAge) & 1)) as 0 | 1
+      : srcAtStop;
   const selectedDest = input.monBg.layer === "bg1" ? DIG_DMA_BG1 : DIG_DMA_BG2;
-  return { state, srcBuffer, dmaDest: state === 0 ? 0x0400001c : selectedDest,
-    dmaControl: DIG_DMA_CONTROL, startY, endY, bgX, buffers: [stable, stable] };
+  return { state, srcBuffer, dmaDest: age < startAge ? initial.dmaDest : selectedDest,
+    dmaControl: age < startAge ? initial.dmaControl : DIG_DMA_CONTROL,
+    startY, endY, bgX, buffers };
 }
 
 function sourceScroll(body: DigBody, age: number, input: DigLiveInputs, attackerY2: number): DigPoint {
@@ -503,10 +541,6 @@ function targetAtAge(age: number, body: DigBody, input: DigLiveInputs) {
     y2: input.targetInitialOffset.y, visible: input.targetInitialVisible ?? true, matrixNum, matrix };
 }
 
-function makeScanlineBuffers(scanline: DigState["scanline"]): DigState["scanline"] {
-  return scanline;
-}
-
 function spritesAtAge(age: number, input: DigLiveInputs): DigSprite[] {
   const sprites: DigSprite[] = [];
   if (input.body === "setup") {
@@ -579,7 +613,7 @@ export function digAtAge(age: number, input: DigLiveInputs): DigState {
   }
   tasks.sort((a, b) => a.slot - b.slot);
   const scroll = sourceScroll(input.body, age, input, attacker.y2);
-  const scanline = makeScanlineBuffers(scanlineFor(input.body, age, input));
+  const scanline = scanlineFor(input.body, age, input);
   const setup = input.body === "setup";
   const moundLoaded = setup ? inRange(age, 4, 193) : inRange(age, 4, 66);
   const mudLoaded = setup && inRange(age, 1, 193);

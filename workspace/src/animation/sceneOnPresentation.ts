@@ -5346,9 +5346,14 @@ export interface SceneOnFissureView extends FissureState {
   readonly target: SceneOnPresentationBattler;
 }
 
-export interface SceneOnDigView extends Omit<DigState, "attacker" | "target"> {
-  readonly attacker: SceneOnPresentationBattler;
-  readonly target: SceneOnPresentationBattler;
+/**
+ * Dig keeps reducer battler animation state under `attacker` / `target`.
+ * Presentation identity is deliberately separate so consumers cannot lose
+ * offsets, visibility, or affine matrices while looking up live sprites.
+ */
+export interface SceneOnDigView extends DigState {
+  readonly presentationAttacker: SceneOnPresentationBattler;
+  readonly presentationTarget: SceneOnPresentationBattler;
 }
 
 export interface SceneOnHardenView extends MetallicShineState {
@@ -10455,11 +10460,13 @@ export function sceneOnDigView(
       attackerSpecies: attacker.species,
       targetSpecies: target.species,
       attackerCenter: attacker.geometry.animationCenter,
-      targetCenter: target.geometry.animationCenter,
+      // The target's battler reducer state follows its battle-position
+      // center; the hit-splat helper separately uses the picture origin.
+      targetCenter: target.geometry.battlePositionCenter,
       targetAnimationOrigin: target.geometry.animationCenter,
     }),
-    attacker,
-    target,
+    presentationAttacker: attacker,
+    presentationTarget: target,
   };
 }
 
