@@ -10456,6 +10456,7 @@ export function sceneOnDigView(
       targetSpecies: target.species,
       attackerCenter: attacker.geometry.animationCenter,
       targetCenter: target.geometry.animationCenter,
+      targetAnimationOrigin: target.geometry.animationCenter,
     }),
     attacker,
     target,

@@ -7,7 +7,9 @@
  * coordinates, slots, matrices and background facts are supplied by the
  * Scene-ON caller; no recording is needed to select an animation.
  */
+import moundAsset from "./assets/dig-dirt-mound.json" with { type: "json" };
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import { sortGbaSpriteOrder } from "./gbaObjCompositor.ts";
 
 export type DigBody = "setup" | "unleash";
 export type DigSide = "player" | "opponent";
@@ -29,6 +31,8 @@ export interface DigLiveInputs {
   /** `GetBattlerSpriteCoord(..., X_2)` / sprite primary coordinates. */
   readonly attackerCenter: Readonly<DigPoint>;
   readonly targetCenter: Readonly<DigPoint>;
+  /** `CreateSpriteAndAnimate`'s live target origin (`X_2`, `Y_PIC_OFFSET`). */
+  readonly targetAnimationOrigin?: Readonly<DigPoint>;
   /** `GetBattlerYCoordWithElevation` (distinct from the OAM sprite y). */
   readonly attackerElevationY: number;
   readonly attackerInitialOffset: Readonly<DigPoint>;
@@ -41,6 +45,8 @@ export interface DigLiveInputs {
   readonly targetInitialVisible?: boolean;
   readonly attackerInitialMatrixNum?: number;
   readonly targetInitialMatrixNum?: number;
+  readonly attackerCleanupMatrixNum?: number;
+  readonly targetCleanupMatrixNum?: number;
   readonly attackerInitialMatrix?: readonly [number, number, number, number];
   readonly targetInitialMatrix?: readonly [number, number, number, number];
 
@@ -83,9 +89,10 @@ export const DIG_UNLEASH_FIRST_INACTIVE_AGE = 67;
 export const DIG_SOURCE_START = 0x082ccca1;
 export const DIG_MUD_SAND_TAG = 10074;
 export const DIG_IMPACT_TAG = 10135;
-export const DIG_DIRT_MOUND_TAG = 10281;
+export const DIG_DIRT_MOUND_TAG = moundAsset.dirtMound.tag;
+/** MUD_SAND and IMPACT are deliberately source-identity reuse, not copies. */
 export const DIG_MUD_SAND_TILE_BYTES = 32;
-export const DIG_DIRT_MOUND_TILE_BYTES = 512;
+export const DIG_DIRT_MOUND_TILE_BYTES = moundAsset.dirtMound.tileBytes;
 export const DIG_IMPACT_TILE_BYTES = 512;
 
 export interface DigSourceCursor {
@@ -248,7 +255,7 @@ function sourceAtAge(age: number, body: DigBody): DigSourceCursor {
     else if (age <= 3) { offset = 13; wait = age === 1 ? 1 : 0; }
     else if (age <= 6) { offset = 16; wait = age === 4 ? 1 : 0; }
     else if (age <= 9) { offset = 46; wait = age === 7 ? 1 : 0; }
-    else if (age <= 17) { offset = 57; wait = age <= 16 ? 17 - age : 0; }
+    else if (age <= 17) { offset = 57; wait = age <= 16 ? 16 - age : 0; }
     else if (age <= 187) {
       offset = 283;
       const cycleStart = 18 + Math.floor((age - 18) / 34) * 34;
@@ -260,9 +267,10 @@ function sourceAtAge(age: number, body: DigBody): DigSourceCursor {
     else if (age <= 3) { offset = 104; wait = age === 1 ? 1 : 0; }
     else if (age <= 6) { offset = 107; wait = age === 4 ? 1 : 0; }
     else if (age === 7) { offset = 116; wait = 1; }
-    else if (age <= 10) { offset = 119; wait = age <= 9 ? 1 : 0; }
+    else if (age <= 10) { offset = 119; wait = age === 8 ? 1 : 0; }
     else if (age <= 13) { offset = 147; wait = age === 11 ? 1 : 0; }
-    else if (age <= 31) { offset = 158; wait = age <= 30 ? 31 - age : 0; }
+    else if (age <= 31) { offset = 158; wait = age <= 30 ? 30 - age : 0; }
+    else { wait = 1; }
   }
   const pointer = start + offset;
   return { owner: "Move_DIG", pointer, pointerOffset: offset, scriptOffset: offset,
@@ -276,9 +284,10 @@ function bounceData(age: number, input: DigLiveInputs): readonly number[] {
   const endY = input.attackerElevationY + 32;
   const startY = Math.max(0, input.attackerElevationY - 32);
   let state = n >= 156 ? (n === 156 ? 3 : 4) : 2;
-  let phase = (n * 6) & 0x7f;
-  let group = Math.floor(n / 3);
-  let phaseInGroup = n % 3;
+  const motionN = Math.min(n, 156);
+  let phase = (motionN * 6) & 0x7f;
+  let group = Math.floor(motionN / 3);
+  let phaseInGroup = motionN % 3;
   let height = group + (GBA_SINE_TABLE_256[phase]! >> 4);
   if (height > 63) height = 120 - startY;
   data[0] = state; data[2] = phase; data[3] = group; data[4] = phaseInGroup; data[5] = height;
@@ -320,20 +329,26 @@ function plumeAtAge(age: number, group: number, specIndex: number, input: DigLiv
     callback: "AnimDirtPlumeParticle_Step", x: startX, y: startY, x2, y2, data,
     subpriority: input.attackerSubpriority - 2,
     matrixNum: input.plumeMatrixNum ?? input.moundMatrixNum ?? 0, matrix: ZERO_MATRIX,
-    visible: true, frame: 0, oam: { shape: "8x8", affine: false, priority: 2 } };
+    visible: true, frame: 0, oam: { shape: "8x8", affine: false, priority: 1 } };
 }
 
 function moundAtAge(age: number, body: DigBody, input: DigLiveInputs): DigSprite[] {
   const start = body === "setup" ? 7 : 11;
   const duration = body === "setup" ? 180 : 48;
-  if (age < start || age > start + duration) return [];
+  // The unleash callback is paused for two scheduler ticks while the
+  // affine impact owns the shared matrix.  The mound therefore receives its
+  // destroy callback two ticks after its nominal duration.
+  const cleanupDelay = body === "unleash" ? 2 : 0;
+  if (age < start || age > start + duration + cleanupDelay) return [];
   const elapsed = age - start;
-  let remaining = Math.max(0, duration - 1 - elapsed);
   // Creating the affine impact and its two callbacks temporarily prevents
   // the ordinary mound callback from running.  This is a source scheduling
   // effect, not an evidence-row table.
-  if (body === "unleash") remaining += Math.min(2, Math.max(0, elapsed - 22));
-  const destroying = elapsed === duration;
+  const callbackPause = body === "unleash"
+    ? Math.min(2, Math.max(0, elapsed - 22))
+    : 0;
+  const remaining = Math.max(0, duration - 1 - elapsed + callbackPause);
+  const destroying = elapsed === duration + cleanupDelay;
   const matrix = body === "unleash" && inRange(age, 32, 43)
     && (input.impactMatrixNum === (input.moundMatrixNum ?? 0)) ? IMPACT_MATRIX :
     (input.attackerInitialMatrix ?? ZERO_MATRIX);
@@ -343,18 +358,24 @@ function moundAtAge(age: number, body: DigBody, input: DigLiveInputs): DigSprite
     x: input.attackerCenter.x - 16 + half * 32, y: input.attackerElevationY + 32,
     x2: 0, y2: 0, data: [destroying ? 0 : remaining, 0, 0, 0, 0, 0, 15357, 2058],
     subpriority: input.attackerSubpriority - 1, matrixNum: input.moundMatrixNum ?? 0,
-    matrix, visible: true, frame: 0, oam: { shape: "32x16", affine: false, priority: 1 },
+    matrix, visible: true, frame: 0, oam: { shape: "32x16", affine: false, priority: 2 },
   }));
 }
 
 function impactAtAge(age: number, input: DigLiveInputs): DigSprite | null {
   if (!inRange(age, 32, 43)) return null;
+  const origin = input.targetAnimationOrigin ?? input.targetCenter;
+  // AnimHitSplatBasic calls SetAnimSpriteInitialXOffset with x=-8.  The
+  // helper flips that offset from the attacker/target horizontal ordering.
+  const xOffset = input.attackerCenter.x > input.targetCenter.x
+    ? 8 : input.attackerCenter.x < input.targetCenter.x
+      ? -8 : input.attackerSide === "opponent" ? 8 : -8;
   return { kind: "impact", slot: input.impactSpriteSlot,
     template: "gBasicHitSplatSpriteTemplate", callback: age === 43 ? "DestroyAnimSprite" : "RunStoredCallbackWhenAffineAnimEnds",
-    x: input.targetCenter.x - 8, y: input.targetCenter.y, x2: 0, y2: 0,
+    x: origin.x + xOffset, y: origin.y, x2: 0, y2: 0,
     data: [0, 0, 0, 0, 0, 0, 15357, 2058],
-    subpriority: input.targetSubpriority - 2, matrixNum: input.impactMatrixNum,
-    matrix: IMPACT_MATRIX, visible: true, frame: 2, oam: { shape: "32x32", affine: true, priority: 2 } };
+    subpriority: input.attackerSubpriority - 2, matrixNum: input.impactMatrixNum,
+    matrix: IMPACT_MATRIX, visible: true, frame: 0, oam: { shape: "32x32", affine: true, priority: 1 } };
 }
 
 function updateTask(age: number, input: DigLiveInputs, attackerY2: number): DigTask | null {
@@ -378,8 +399,10 @@ function shakeTask(age: number, input: DigLiveInputs): DigTask | null {
   if (!inRange(age, 32, 43)) return null;
   const data = Array<number>(16).fill(0);
   const step = age - 32;
-  data[0] = input.targetSpriteSlot; data[1] = 6 - Math.floor((step + 1) / 2);
-  data[2] = 1; data[3] = step < 1 ? 1 : step % 2; data[4] = 5; data[5] = 0;
+  data[0] = input.targetSpriteSlot;
+  data[1] = 5 - Math.floor(Math.max(0, step - 2) / 2);
+  data[2] = 1; data[3] = step === 0 || (step >= 4 && step % 2 === 0) ? 1 : 0;
+  data[4] = 5; data[5] = 0;
   return { slot: input.shakeTaskSlot, callback: "AnimTask_ShakeMon_Step", data };
 }
 
@@ -396,9 +419,14 @@ function scanlineFor(body: DigBody, age: number, input: DigLiveInputs): DigState
   const values = Array.from({ length: DISPLAY_HEIGHT }, (_, y) => y < endY && y >= startY ? bgX : bgX + DISPLAY_WIDTH);
   const bufferSet = setup ? age >= 10 && age < 168 : age >= 14 && age < 28;
   const stable = bufferSet ? values : Array<number>(DISPLAY_HEIGHT).fill(0);
-  let srcBuffer: 0 | 1 = setup ? (age <= 167 ? (age & 1) as 0 | 1 : 0) : (age <= 27 ? (age & 1) as 0 | 1 : 1);
-  if (!active && age < startAge) srcBuffer = setup ? 1 : 0;
-  return { state, srcBuffer, dmaDest: input.monBg.layer === "bg1" ? DIG_DMA_BG1 : DIG_DMA_BG2,
+  let srcBuffer: 0 | 1;
+  if (setup) {
+    srcBuffer = age < 10 ? 1 : age <= 166 ? (age % 2 === 0 ? 1 : 0) : 0;
+  } else {
+    srcBuffer = age < 14 ? 0 : age <= 27 ? (age % 2) as 0 | 1 : 1;
+  }
+  const selectedDest = input.monBg.layer === "bg1" ? DIG_DMA_BG1 : DIG_DMA_BG2;
+  return { state, srcBuffer, dmaDest: state === 0 ? 0x0400001c : selectedDest,
     dmaControl: DIG_DMA_CONTROL, startY, endY, bgX, buffers: [stable, stable] };
 }
 
@@ -414,13 +442,44 @@ function sourceScroll(body: DigBody, age: number, input: DigLiveInputs, attacker
     y: input.monBg.baseScroll.y + input.monBg.snapshot.y - (input.attackerCenter.y + attackerY2) };
 }
 
+function hardwareScrollFor(body: DigBody, age: number, input: DigLiveInputs,
+  softwareScroll: DigPoint): DigPoint {
+  if (body === "setup") {
+    if (age < 8) return { x: 0, y: 0 };
+    if (age <= 10) return point(softwareScroll);
+    if (age <= 166) return { x: 0, y: sourceScroll(body, age - 1, input, 0).y };
+    if (age === 167) return { x: 0, y: softwareScroll.y };
+    if (age <= 191) return point(softwareScroll);
+    if (age === 192) return sourceScroll(body, 191, input, 0);
+    return { x: 0, y: 0 };
+  }
+  if (age < 9) return { x: 0, y: 0 };
+  if (age <= 14) return point(softwareScroll);
+  if (age <= 26) {
+    return { x: 0, y: sourceScroll(body, age - 1, input,
+      attackerAtAge(age - 1, body, input).y2).y };
+  }
+  if (age === 27) {
+    return { x: 0, y: sourceScroll(body, 26, input,
+      attackerAtAge(26, body, input).y2).y };
+  }
+  if (age <= 34) return point(softwareScroll);
+  if (age === 35) return sourceScroll(body, 34, input, 0);
+  return { x: 0, y: 0 };
+}
+
 function attackerAtAge(age: number, body: DigBody, input: DigLiveInputs) {
   const initialVisible = input.attackerInitialVisible ?? true;
-  const matrixNum = input.attackerInitialMatrixNum ?? 0;
-  const matrix = input.attackerInitialMatrix ?? ZERO_MATRIX;
+  const firstInactive = body === "setup" ? DIG_SETUP_FIRST_INACTIVE_AGE : DIG_UNLEASH_FIRST_INACTIVE_AGE;
+  const matrixNum = age >= firstInactive
+    ? input.attackerCleanupMatrixNum ?? input.attackerInitialMatrixNum ?? 0
+    : input.attackerInitialMatrixNum ?? 0;
+  const matrix = body === "unleash" && inRange(age, 32, 43)
+    ? IMPACT_MATRIX : input.attackerInitialMatrix ?? ZERO_MATRIX;
   if (body === "setup") {
-    const visible = age < 10 || age >= 189;
-    const x2 = age >= 166 && age < 192 ? DISPLAY_WIDTH + 32 - input.attackerCenter.x : 0;
+    const visible = age < 10 || (age >= 189 && age < DIG_SETUP_FIRST_INACTIVE_AGE);
+    const x2 = age >= 166 && age < DIG_SETUP_FIRST_INACTIVE_AGE
+      ? DISPLAY_WIDTH + 32 - input.attackerCenter.x : 0;
     return { slot: input.attackerSpriteSlot, x: input.attackerCenter.x, y: input.attackerCenter.y,
       x2, y2: 0, visible: age < 0 ? initialVisible : visible, matrixNum, matrix };
   }
@@ -435,8 +494,12 @@ function attackerAtAge(age: number, body: DigBody, input: DigLiveInputs) {
 }
 
 function targetAtAge(age: number, body: DigBody, input: DigLiveInputs) {
-  const matrixNum = input.targetInitialMatrixNum ?? 0;
-  const matrix = input.targetInitialMatrix ?? ZERO_MATRIX;
+  const firstInactive = body === "setup" ? DIG_SETUP_FIRST_INACTIVE_AGE : DIG_UNLEASH_FIRST_INACTIVE_AGE;
+  const matrixNum = age >= firstInactive
+    ? input.targetCleanupMatrixNum ?? input.targetInitialMatrixNum ?? 0
+    : input.targetInitialMatrixNum ?? 0;
+  const matrix = body === "unleash" && inRange(age, 32, 43)
+    ? IMPACT_MATRIX : input.targetInitialMatrix ?? ZERO_MATRIX;
   const x2 = body === "unleash" && inRange(age, 36, 37) || body === "unleash" && inRange(age, 40, 41) ? 5 : input.targetInitialOffset.x;
   return { slot: input.targetSpriteSlot, x: input.targetCenter.x, y: input.targetCenter.y, x2,
     y2: input.targetInitialOffset.y, visible: input.targetInitialVisible ?? true, matrixNum, matrix };
@@ -446,6 +509,49 @@ function makeScanlineBuffers(scanline: DigState["scanline"], input: DigLiveInput
   return scanline;
 }
 
+function spritesAtAge(age: number, input: DigLiveInputs): DigSprite[] {
+  const sprites: DigSprite[] = [];
+  if (input.body === "setup") {
+    sprites.push(...moundAtAge(age, input.body, input));
+    for (let group = 0; group < 5; group += 1) for (let member = 0; member < 4; member += 1) {
+      const sprite = plumeAtAge(age, group, member, input);
+      if (sprite) sprites.push(sprite);
+    }
+  } else {
+    sprites.push(...moundAtAge(age, input.body, input));
+    const impact = impactAtAge(age, input);
+    if (impact) sprites.push(impact);
+  }
+  return sprites.sort((left, right) => left.slot - right.slot);
+}
+
+function spriteOrderKeys(sprites: readonly DigSprite[]) {
+  return sprites.map((sprite) => ({
+    slot: sprite.slot,
+    priority: sprite.oam.priority,
+    subpriority: sprite.subpriority,
+    y: sprite.y + sprite.y2,
+  }));
+}
+
+/** Replays the persistent `sSpriteOrder` tie state up to this source age. */
+function ownedSpriteOrder(age: number, input: DigLiveInputs): number[] {
+  let preceding: number[] = [];
+  for (let tick = 0; tick <= age; tick += 1) {
+    const current = spritesAtAge(tick, input);
+    if (current.length === 0) {
+      preceding = [];
+      continue;
+    }
+    const currentSlots = new Set(current.map((sprite) => sprite.slot));
+    const retained = preceding.filter((slot) => currentSlots.has(slot));
+    const newlyAllocated = input.spriteOrder.filter((slot) =>
+      currentSlots.has(slot) && !retained.includes(slot));
+    preceding = sortGbaSpriteOrder([...retained, ...newlyAllocated], spriteOrderKeys(current));
+  }
+  return preceding;
+}
+
 /** Replays either retained Dig body through its first inactive row. */
 export function digAtAge(age: number, input: DigLiveInputs): DigState {
   const source = sourceAtAge(age, input.body);
@@ -453,17 +559,7 @@ export function digAtAge(age: number, input: DigLiveInputs): DigState {
   const active = age < firstInactive;
   const attacker = attackerAtAge(age, input.body, input);
   const target = targetAtAge(age, input.body, input);
-  let sprites: DigSprite[] = [];
-  if (input.body === "setup") {
-    sprites.push(...moundAtAge(age, input.body, input));
-    for (let group = 0; group < 5; group += 1) for (let member = 0; member < 4; member += 1) {
-      const sprite = plumeAtAge(age, group, member, input); if (sprite) sprites.push(sprite);
-    }
-  } else {
-    sprites.push(...moundAtAge(age, input.body, input));
-    const impact = impactAtAge(age, input); if (impact) sprites.push(impact);
-  }
-  sprites.sort((a, b) => a.slot - b.slot);
+  const sprites = spritesAtAge(age, input);
   const tasks: DigTask[] = [];
   if (input.body === "setup") {
     if (inRange(age, 10, 167)) tasks.push({ slot: input.digTaskSlot, callback: "AnimTask_DigBounceMovement", data: bounceData(age, input) });
@@ -506,16 +602,16 @@ export function digAtAge(age: number, input: DigLiveInputs): DigState {
     : !setup && age === 32
       ? { events: [{ channel: "SE1" as const, sound: "SE_M_MEGA_KICK2" as const, sourcePan: "SOUND_PAN_ATTACKER" as const, pan }] }
       : { events: [] };
-  const ownedSlots = input.spriteOrder.filter((slot) => sprites.some((sprite) => sprite.slot === slot));
+  const ownedSlots = ownedSpriteOrder(age, input);
   const visualTasks = input.body === "setup"
     ? sprites.length + (inRange(age, 10, 167) ? 1 : 0)
-    : sprites.length + (inRange(age, 32, 43) ? 1 : 0);
-  const hardwareScroll = age === 0 ? { x: 0, y: 0 } : selectedOffset;
+    : sprites.length + (inRange(age, 14, 27) || inRange(age, 32, 43) ? 1 : 0);
+  const hardwareScroll = hardwareScrollFor(input.body, age, input, selectedOffset);
   return {
     age, body: input.body, active, source, sprites, tasks,
     attacker, target, order: { callerBaseline: [...input.spriteOrder], ownedSlots },
     background: { layer, vram, vramEvent, scroll, monbg: setup ? inRange(age, 7, 191) : inRange(age, 8, 34) },
-    registers: { layer, hardwareCnt: age >= (setup ? 8 : 9) && age < firstInactive ? input.monBg.activeCnt : input.monBg.inactiveCnt,
+    registers: { layer, hardwareCnt: age >= (setup ? 8 : 9) && age <= firstInactive ? input.monBg.activeCnt : input.monBg.inactiveCnt,
       hardwareScroll, transfer: age === 0 ? "current" : "preceding-software" },
     scanline,
     resources: {
