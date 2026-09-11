@@ -1,0 +1,204 @@
+//! Independent source/macro/call-site and artifact-identity ratchets for
+//! `B_SCR_OP_ACCURACYCHECK`'s M86 bypass-only port. Behavioral differential
+//! replay lives in the sibling test binary.
+
+use std::{fs, path::PathBuf};
+
+use factory_core::battle_script_accuracycheck::*;
+use factory_core::battle_script_accuracycheck_vectors_gen::*;
+
+fn workspace_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../..")
+}
+
+fn source(relative: &str) -> String {
+    fs::read_to_string(workspace_root().join(relative))
+        .unwrap_or_else(|error| panic!("could not read {relative}: {error}"))
+}
+
+fn line(source: &str, number: u32) -> &str {
+    source
+        .lines()
+        .nth(number as usize - 1)
+        .unwrap_or_else(|| panic!("missing source line {number}"))
+}
+
+fn sha256(path: &str) -> String {
+    let output = std::process::Command::new("sh")
+        .args(["-c", &format!("sha256sum {} | cut -d ' ' -f 1", path)])
+        .current_dir(workspace_root())
+        .output()
+        .expect("run sha256sum");
+    assert!(output.status.success());
+    String::from_utf8(output.stdout).unwrap().trim().to_owned()
+}
+
+#[test]
+fn exact_opcode_dispatch_macro_and_call_site_lines_are_pinned() {
+    let commands = source("reference/pokeemerald/src/battle_script_commands.c");
+    let command_ids = source("reference/pokeemerald/include/constants/battle_script_commands.h");
+    let macros = source("reference/pokeemerald/asm/macros/battle_script.inc");
+    let scripts = source("reference/pokeemerald/data/battle_scripts_1.s");
+    let battle_h = source("reference/pokeemerald/include/constants/battle.h");
+    let pokemon_h = source("reference/pokeemerald/include/constants/pokemon.h");
+    let moves_h = source("reference/pokeemerald/include/constants/moves.h");
+
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_OPCODE, 0x01);
+    assert_eq!(
+        BATTLE_SCRIPT_ACCURACYCHECK_OPCODE_NAME,
+        "B_SCR_OP_ACCURACYCHECK"
+    );
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_DISPATCHER, "Cmd_accuracycheck");
+    assert_eq!(
+        BATTLE_SCRIPT_ACCURACYCHECK_STATUS3_ALWAYS_HITS,
+        (1 << 3) | (1 << 4)
+    );
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_STATUS3_ON_AIR, 1 << 6);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_STATUS3_UNDERGROUND, 1 << 7);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_STATUS3_UNDERWATER, 1 << 18);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_MOVE_RESULT_MISSED, 1 << 0);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_B_MSG_PROTECTED, 1);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_FLAG_PROTECT_AFFECTED, 1 << 1);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_MOVE_FUTURE_SIGHT, 248);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_MOVE_DOOM_DESIRE, 353);
+
+    // Forward declaration (:80).
+    assert_eq!(line(&commands, 80), "static void Cmd_accuracycheck(void);");
+
+    // Dispatch row (:332, //0x1).
+    assert_eq!(
+        line(&commands, 332).trim(),
+        "[B_SCR_OP_ACCURACYCHECK]                   = Cmd_accuracycheck,                           //0x1"
+    );
+
+    // Handler body (:1099-1189); bypass branch (:1103-1113).
+    assert_eq!(line(&commands, 1099), "static void Cmd_accuracycheck(void)");
+    let handler_body: String = commands
+        .lines()
+        .skip(1098)
+        .take(91)
+        .collect::<Vec<_>>()
+        .join("\n");
+    assert!(handler_body.contains("if (move == NO_ACC_CALC || move == NO_ACC_CALC_CHECK_LOCK_ON)"));
+    assert!(handler_body.contains(
+        "if (gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS && move == NO_ACC_CALC_CHECK_LOCK_ON && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)"
+    ));
+    assert!(handler_body.contains(
+        "else if (gStatuses3[gBattlerTarget] & (STATUS3_ON_AIR | STATUS3_UNDERGROUND | STATUS3_UNDERWATER))"
+    ));
+    assert!(handler_body.contains("else if (!JumpIfMoveAffectedByProtect(0))"));
+
+    // DEFENDER_IS_PROTECTED (:57).
+    assert_eq!(
+        line(&commands, 57),
+        "#define DEFENDER_IS_PROTECTED ((gProtectStructs[gBattlerTarget].protected) && (gBattleMoves[gCurrentMove].flags & FLAG_PROTECT_AFFECTED))"
+    );
+
+    // JumpIfMoveFailed (:1009-1025).
+    assert_eq!(
+        line(&commands, 1009),
+        "static void JumpIfMoveFailed(u8 adder, u16 move)"
+    );
+    assert!(line(&commands, 1012).contains("if (gMoveResultFlags & MOVE_RESULT_NO_EFFECT)"));
+    assert!(line(&commands, 1014).contains("gLastLandedMoves[gBattlerTarget] = 0;"));
+    assert!(line(&commands, 1015).contains("gLastHitByType[gBattlerTarget] = 0;"));
+
+    // JumpIfMoveAffectedByProtect (:1041-1052).
+    assert_eq!(
+        line(&commands, 1041),
+        "static bool8 JumpIfMoveAffectedByProtect(u16 move)"
+    );
+
+    // Opcode enum position (:7).
+    assert_eq!(line(&command_ids, 7).trim(), "B_SCR_OP_ACCURACYCHECK,");
+
+    // Macro (:6-10): 4-byte fail label, 2-byte move.
+    assert_eq!(
+        line(&macros, 6).trim(),
+        ".macro accuracycheck failPtr:req, move:req"
+    );
+    assert_eq!(line(&macros, 7).trim(), ".byte B_SCR_OP_ACCURACYCHECK");
+    assert_eq!(line(&macros, 8).trim(), ".4byte \\failPtr");
+    assert_eq!(line(&macros, 9).trim(), ".2byte \\move");
+    assert_eq!(line(&macros, 10).trim(), ".endm");
+
+    // STATUS3_* (:160/:163/:164/:175), MOVE_RESULT_MISSED (:220).
+    assert!(line(&battle_h, 160).contains("STATUS3_ALWAYS_HITS"));
+    assert!(line(&battle_h, 163).contains("STATUS3_ON_AIR"));
+    assert!(line(&battle_h, 164).contains("STATUS3_UNDERGROUND"));
+    assert!(line(&battle_h, 175).contains("STATUS3_UNDERWATER"));
+    assert!(line(&battle_h, 220).contains("MOVE_RESULT_MISSED"));
+
+    // FLAG_PROTECT_AFFECTED (:209).
+    assert_eq!(
+        line(&pokemon_h, 209).trim(),
+        "#define FLAG_PROTECT_AFFECTED       (1 << 1)"
+    );
+
+    // MOVE_FUTURE_SIGHT/MOVE_DOOM_DESIRE literals (:252/:357).
+    assert_eq!(line(&moves_h, 252).trim(), "#define MOVE_FUTURE_SIGHT 248");
+    assert_eq!(line(&moves_h, 357).trim(), "#define MOVE_DOOM_DESIRE 353");
+
+    // Committed census: 66 total accuracycheck call sites, split 55/8/1/1/1.
+    let bare_accuracycheck_count = scripts
+        .lines()
+        .filter(|candidate| candidate.trim_start().starts_with("accuracycheck "))
+        .count();
+    assert_eq!(
+        bare_accuracycheck_count, 66,
+        "exactly 66 concrete accuracycheck call sites"
+    );
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_CONCRETE_START_COUNT, 66);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_CONCRETE_CALL_SITE_COUNT, 66);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_BYPASS_CALL_SITE_COUNT, 9);
+    assert_eq!(
+        BATTLE_SCRIPT_ACCURACYCHECK_MOVE_OPERAND_CENSUS,
+        [
+            ("ACC_CURR_MOVE", 55),
+            ("MOVE_DOOM_DESIRE", 1),
+            ("MOVE_FUTURE_SIGHT", 1),
+            ("NO_ACC_CALC", 1),
+            ("NO_ACC_CALC_CHECK_LOCK_ON", 8),
+        ]
+    );
+}
+
+#[test]
+fn corpus_counts_sizes_hashes_and_generation_provenance_are_pinned() {
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_CASES.len(), 30);
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_REGISTRATION_CASES.len(), 3);
+    assert_eq!(
+        BATTLE_SCRIPT_ACCURACYCHECK_VECTOR_CORPUS_SHA256,
+        "ec8e2d37ad28ecad421b63421142b7c016c69891912588fab62831cf2db303b3"
+    );
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_VECTOR_CORPUS_BYTES, 84_656);
+    assert_eq!(
+        BATTLE_SCRIPT_ACCURACYCHECK_VECTOR_GENERATOR_SHA256,
+        "530591975eb7092f527bff4d947b7fab985f5bdf26fd0ee0578db00c0219ab53"
+    );
+    assert_eq!(BATTLE_SCRIPT_ACCURACYCHECK_VECTOR_GENERATOR_BYTES, 30_095);
+
+    let generated = include_bytes!("../src/battle_script_accuracycheck_vectors_gen.rs");
+    assert_eq!(generated.len(), 194_403);
+    assert_eq!(
+        sha256("core-rs/crates/factory-core/src/battle_script_accuracycheck_vectors_gen.rs"),
+        "8c6f5d44e28871d8e0e283608874c63792000e34bdee56ac85f28b3765a0107a"
+    );
+    assert_eq!(
+        fs::metadata(
+            workspace_root().join("core-rs/tools/gen-battle-script-accuracycheck-vectors.mjs")
+        )
+        .unwrap()
+        .len(),
+        30_095
+    );
+    assert_eq!(
+        sha256("core-rs/tools/gen-battle-script-accuracycheck-vectors.mjs"),
+        "530591975eb7092f527bff4d947b7fab985f5bdf26fd0ee0578db00c0219ab53"
+    );
+    let generated_text = std::str::from_utf8(generated).unwrap();
+    assert!(generated_text.contains(
+        "Source: executing canonical src/engine/battleScriptHitChainOpcode.ts via node --experimental-strip-types."
+    ));
+    assert!(generated_text.contains("Regenerate from any cwd; do not hand-edit."));
+}
