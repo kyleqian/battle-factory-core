@@ -21,11 +21,14 @@ const sha = (value: string | Uint8Array): string => createHash("sha256").update(
 const hex = (value: number): string => `0x${value.toString(16).padStart(8, "0")}`;
 
 const scripts = read("data/battle_anim_scripts.s");
+const battleScripts = read("data/battle_scripts_1.s");
 const statusEffects = read("src/battle_anim_status_effects.c");
+const battleCommands = read("src/battle_script_commands.c");
 const runtime = read("src/battle_anim.c");
 const graphics = read("src/graphics.c");
 const registry = read("src/data/battle_anim.h");
 const constants = read("include/constants/battle_anim.h");
+const battleConstants = read("include/constants/battle.h");
 const songs = read("include/constants/songs.h");
 const moves = read("src/data/battle_moves.h");
 const frontierConstants = read("include/constants/battle_frontier_mons.h");
@@ -111,6 +114,11 @@ function bodyRecord(name: string, path: string, source: string, expectedAddress?
   return { source: sourceSpan(path, source, body), rom: romRange(name, undefined, expectedAddress) };
 }
 
+function sourceBodyRecord(name: string, path: string, source: string): Json {
+  const body = functionBody(source, name);
+  return { source: sourceSpan(path, source, body) };
+}
+
 function objectRecord(name: string, path: string, source: string): Json {
   const token = source.indexOf(name);
   if (token < 0) throw new Error(`missing object ${name}`);
@@ -166,6 +174,24 @@ if (JSON.stringify(scriptNode.commands) !== JSON.stringify(expectedCommands)) {
 }
 if (/\b(?:call|goto|jump|jumparg|choosetwoturnanim)\b/u.test(rootBody)) {
   throw new Error("MOVE_SHEER_COLD unexpectedly gained a dispatched root branch");
+}
+
+const ohkoBody = sourceBlock(battleScripts, "BattleScript_EffectOHKO::\n", "BattleScript_EffectRazorWind::\n");
+const expectedOhkoCommands = [
+  "attackcanceler", "attackstring", "ppreduce", "accuracycheck BattleScript_ButItFailed, NO_ACC_CALC_CHECK_LOCK_ON",
+  "typecalc", "jumpifmovehadnoeffect BattleScript_HitFromAtkAnimation", "tryKO BattleScript_KOFail",
+  "trysetdestinybondtohappen", "goto BattleScript_HitFromAtkAnimation", "pause B_WAIT_TIME_LONG",
+  "printfromtable gKOFailedStringIds", "waitmessage B_WAIT_TIME_LONG", "goto BattleScript_MoveEnd",
+] as const;
+const ohkoStart = sym("BattleScript_EffectOHKO").address;
+const ohkoEnd = sym("BattleScript_EffectRazorWind").address;
+const ohkoNode = {
+  source: sourceSpan("data/battle_scripts_1.s", battleScripts, ohkoBody),
+  rom: romRange("BattleScript_EffectOHKO", ohkoEnd),
+  commands: commandRows(ohkoBody),
+};
+if (JSON.stringify(ohkoNode.commands) !== JSON.stringify(expectedOhkoCommands)) {
+  throw new Error("EFFECT_OHKO battle-script branch order drifted");
 }
 
 const expectedComponents = [
@@ -267,6 +293,14 @@ requireTokens("Sheer Cold move/audio", `${moves}\n${songs}`, [
   "[MOVE_SHEER_COLD] =", ".effect = EFFECT_OHKO", ".power = 1", ".accuracy = 30", ".pp = 5",
   "#define SE_M_ICY_WIND               137", "#define SE_M_HAIL                   242",
 ]);
+requireTokens("Sheer Cold OHKO resolution", `${battleScripts}\n${battleCommands}\n${battleConstants}`, [
+  "BattleScript_EffectOHKO::", "accuracycheck BattleScript_ButItFailed, NO_ACC_CALC_CHECK_LOCK_ON",
+  "tryKO BattleScript_KOFail", "BattleScript_KOFail::", "printfromtable gKOFailedStringIds",
+  "static void Cmd_tryKO(void)", "gBattleMoves[gCurrentMove].accuracy + (gBattleMons[gBattlerAttacker].level - gBattleMons[gBattlerTarget].level)",
+  "gBattleMons[gBattlerAttacker].level >= gBattleMons[gBattlerTarget].level", "gMoveResultFlags |= MOVE_RESULT_ONE_HIT_KO",
+  "gMoveResultFlags |= MOVE_RESULT_MISSED", "#define MOVE_RESULT_MISSED             (1 << 0)",
+  "#define MOVE_RESULT_ONE_HIT_KO         (1 << 4)",
+]);
 requireTokens("Sheer Cold carrier constants", frontierConstants, [
   "FRONTIER_MON_DEWGONG_3", "FRONTIER_MON_WALREIN_3", "FRONTIER_MON_DEWGONG_4",
   "FRONTIER_MON_WALREIN_4", "FRONTIER_MON_LAPRAS_7", "FRONTIER_MON_LAPRAS_8",
@@ -318,6 +352,20 @@ console.log(JSON.stringify({
       tasks: taskBodies,
       runtime: runtimeBodies,
     },
+    ohkoResolution: {
+      pointerOwnedBattleScript: {
+        symbol: "BattleScript_EffectOHKO", nextDispatchLabel: "BattleScript_EffectRazorWind",
+        source: ohkoNode.source,
+        rom: { ...ohkoNode.rom, start: hex(ohkoStart), endExclusive: hex(ohkoEnd) },
+        commands: expectedOhkoCommands,
+        branches: [
+          "BattleScript_ButItFailed via accuracycheck",
+          "BattleScript_HitFromAtkAnimation via no-effect or successful tryKO",
+          "BattleScript_KOFail via unsuccessful tryKO",
+        ],
+      },
+      tryKO: sourceBodyRecord("Cmd_tryKO", "src/battle_script_commands.c", battleCommands),
+    },
   },
   graph: {
     blocks: graphEntry.blocks,
@@ -327,6 +375,11 @@ console.log(JSON.stringify({
   },
   behavior: {
     move: { effect: "EFFECT_OHKO", power: 1, accuracy: 30, pp: 5, target: "MOVE_TARGET_SELECTED" },
+    ohko: {
+      sourceRule: "chance = accuracy + attackerLevel - targetLevel; hit only when Random()%100+1 < chance and attackerLevel >= targetLevel",
+      resultFlags: { missed: 1, oneHitKo: 16 },
+      stagingRequirement: "use complete equal-level legal parties and retain the stock-ROM hit/miss result; never inject damage, HP, outcome, status, or stages",
+    },
     root: { background: "BG_ICE", targetMonBg: "ANIM_DEF_PARTNER", alpha: [12, 8], task: "AnimTask_FrozenIceCube", audio: ["SE_M_ICY_WIND", "SE_M_HAIL"], cleanup: ["clearmonbg ANIM_DEF_PARTNER", "blendoff", "restorebg", "waitbgfadein", "end"] },
     frozenIceCube: {
       targetAnchor: { x: "BATTLER_COORD_X_2 - 32", y: "BATTLER_COORD_Y_PIC_OFFSET - 36" },

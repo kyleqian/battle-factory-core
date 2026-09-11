@@ -16,7 +16,7 @@ describe("MOVE_SHEER_COLD source/component/carrier checkpoint", () => {
   it("pins the complete branchless pointer-owned root, FrozenIceCube callback chain, and source resources", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
-    expect(sha(first)).toBe("5cadf27390ee29deb69e70b71de6b97746cfe8e2d4f94ec3a9f9214cd5c64672");
+    expect(sha(first)).toBe("78a4e1af2d3cdccb8b6e2d5c7faffe365e9d3cc7baeaf8503beedc9e16b66e12");
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
       schema: "sheer-cold-source-audit/v1", move: "MOVE_SHEER_COLD", moveId: 329,
@@ -28,6 +28,7 @@ describe("MOVE_SHEER_COLD source/component/carrier checkpoint", () => {
       } },
       behavior: {
         move: { effect: "EFFECT_OHKO", power: 1, accuracy: 30, pp: 5, target: "MOVE_TARGET_SELECTED" },
+        ohko: { resultFlags: { missed: 1, oneHitKo: 16 } },
         frozenIceCube: { targetAnchor: { x: "BATTLER_COORD_X_2 - 32", y: "BATTLER_COORD_Y_PIC_OFFSET - 36" } },
       },
       resources: {
@@ -45,6 +46,15 @@ describe("MOVE_SHEER_COLD source/component/carrier checkpoint", () => {
       "AnimTask_FrozenIceCube", "AnimTask_FrozenIceCube_Step1", "AnimTask_FrozenIceCube_Step2",
       "AnimTask_FrozenIceCube_Step3", "AnimTask_FrozenIceCube_Step4",
     ]);
+    expect(audit.source.ohkoResolution.pointerOwnedBattleScript).toMatchObject({
+      symbol: "BattleScript_EffectOHKO", nextDispatchLabel: "BattleScript_EffectRazorWind",
+      rom: { start: "0x082d8fe7", endExclusive: "0x082d9018", byteLength: 49 },
+      branches: [
+        "BattleScript_ButItFailed via accuracycheck",
+        "BattleScript_HitFromAtkAnimation via no-effect or successful tryKO",
+        "BattleScript_KOFail via unsuccessful tryKO",
+      ],
+    });
   });
 
   it("keeps the two newly ranked components move-owned, checks every Level-50 carrier, and grants Ice Punch no credit", () => {
