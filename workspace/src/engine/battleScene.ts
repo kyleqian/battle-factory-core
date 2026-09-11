@@ -547,6 +547,7 @@ import spiderWebAsset from "../animation/assets/spider-web.json" with { type: "j
 import petalDanceAsset from "../animation/assets/petal-dance.json" with { type: "json" };
 import destinyBondAsset from "../animation/assets/destiny-bond.json" with { type: "json" };
 import waterPulseAsset from "../animation/assets/water-pulse.json" with { type: "json" };
+import digDirtMoundAsset from "../animation/assets/dig-dirt-mound.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
 import waterOrbAsset from "../animation/assets/water-orb.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
@@ -1033,6 +1034,7 @@ import {
   sceneOnSkyUppercutView,
   sceneOnDestinyBondView,
   sceneOnWaterPulseView,
+  sceneOnDigView,
   sceneOnEruptionView,
   sceneOnWaterSpoutView,
   sceneOnSandTombView,
@@ -1270,6 +1272,7 @@ import {
   type SceneOnSkyUppercutConfig,
   type SceneOnDestinyBondConfig,
   type SceneOnWaterPulseConfig,
+  type SceneOnDigConfig,
   type SceneOnSmellingSaltConfig,
   type SceneOnRecycleConfig,
 } from "../animation/sceneOnPresentation.ts";
@@ -1845,6 +1848,9 @@ const destinyBondArt = destinyBondAsset as {
 const waterPulseArt = waterPulseAsset as {
   blueRing2: { tileset: Tileset; palette: RgbColor[] };
 };
+const digDirtMoundArt = (digDirtMoundAsset as {
+  dirtMound: { tileset: Tileset; palette: RgbColor[] };
+}).dirtMound;
 const mudShotArt = mudShotAsset as {
   brownOrb: { tileset: Tileset; palette: RgbColor[] };
   krabbyBack: { tileset: Tileset; palette: RgbColor[] };
@@ -31819,6 +31825,171 @@ export function renderSceneOnMovePresentation(
     drawMessageTextLines(fb,
       view.attacker.geometry.side === "player" ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "WATER PULSE!", 99);
+    return;
+  }
+
+  if (state.config.move === "DIG") {
+    const digState = state as SceneOnMovePresentationState<SceneOnDigConfig>;
+    const view = sceneOnDigView(digState);
+    const displayed = sceneOnDigView({ ...digState, age: Math.max(0, digState.age - 1) });
+    const attacker = view.presentationAttacker;
+    const target = view.presentationTarget;
+    if (attacker.geometry.side === target.geometry.side) {
+      throw new Error("DIG presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`DIG missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(attacker);
+    const targetArt = artFor(target);
+    const idleFor = (battler: typeof attacker): Readonly<{ x2: number; y2: number }> =>
+      battler.geometry.side === "opponent"
+        ? speciesFrontIdleRestOffsetOrZero(battler.species)
+        : { x2: 0, y2: 0 };
+    const attackerIdle = idleFor(attacker);
+    const targetIdle = idleFor(target);
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+
+    // Dig copies the attacker into its side-selected BG and moves that copy
+    // with signed BG scroll plus SetDigScanlineEffect.  The scanline task
+    // owns only the first 160 values; its retained witness tail never enters
+    // the compositor.
+    const monbgVisible = view.background.vram !== "battle";
+    if (monbgVisible) {
+      const base = digState.config.animationInputs.monBg.baseScroll;
+      const snapshot = digState.config.animationInputs.monBg.snapshot;
+      const scanline = view.scanline.state === 1
+        ? view.scanline.buffers[view.scanline.srcBuffer].slice(0, 160)
+        : Array.from({ length: 160 }, () => view.registers.hardwareScroll.x);
+      drawDragonDanceMonBg(
+        fb,
+        { tileset: tilesFor(attackerArt, attacker.geometry.side), palette: attackerArt.palette },
+        {
+          x: snapshot.x - 32 + attackerIdle.x2,
+          y: snapshot.y - 32 + attackerIdle.y2
+            - (view.registers.hardwareScroll.y - base.y),
+        },
+        scanline,
+        base.x,
+      );
+    }
+
+    type Entry = Readonly<{
+      slot: number;
+      subpriority: number;
+      y: number;
+      rank: number;
+      draw: () => void;
+    }>;
+    const entries: Entry[] = [];
+    const rankOf = (slot: number): number => {
+      const owned = displayed.order.ownedSlots.indexOf(slot);
+      if (owned >= 0) return owned;
+      const baseline = displayed.order.callerBaseline.indexOf(slot);
+      return baseline >= 0 ? baseline : Number.MAX_SAFE_INTEGER;
+    };
+    const addBattler = (
+      identity: typeof attacker,
+      reduced: typeof displayed.attacker,
+      art: BattlerArt,
+      idle: Readonly<{ x2: number; y2: number }>,
+    ): void => {
+      if (!reduced.visible || (identity === attacker && monbgVisible)) return;
+      entries.push({
+        slot: reduced.slot,
+        subpriority: identity === attacker
+          ? digState.config.animationInputs.attackerSubpriority
+          : digState.config.animationInputs.targetSubpriority,
+        y: reduced.y + reduced.y2,
+        rank: rankOf(reduced.slot),
+        draw: () => drawSpriteSheet(
+          fb, tilesFor(art, identity.geometry.side), art.palette,
+          identity.geometry.spriteCorner.x + idle.x2 + reduced.x2,
+          identity.geometry.spriteCorner.y + idle.y2 + reduced.y2,
+        ),
+      });
+    };
+    addBattler(attacker, displayed.attacker, attackerArt, attackerIdle);
+    addBattler(target, displayed.target, targetArt, targetIdle);
+
+    for (const sprite of displayed.sprites) {
+      if (!sprite.visible || !displayed.order.ownedSlots.includes(sprite.slot)) continue;
+      const centerX = sprite.x + sprite.x2;
+      const centerY = sprite.y + sprite.y2;
+      entries.push({
+        slot: sprite.slot,
+        subpriority: sprite.subpriority,
+        y: centerY,
+        rank: rankOf(sprite.slot),
+        draw: () => {
+          if (sprite.kind === "dirt-mound") {
+            const half = digState.config.animationInputs.moundSlots.indexOf(sprite.slot);
+            if (half < 0) return;
+            drawSpriteSheet(
+              fb,
+              subTileset(digDirtMoundArt.tileset, half * 2, 2),
+              digDirtMoundArt.palette,
+              centerX - 16,
+              centerY - 8,
+            );
+          } else if (sprite.kind === "dirt-plume") {
+            drawSpriteSheet(
+              fb,
+              { columns: 1, rows: 1, tiles: [battleAnimMudSand.tileset.tiles[0]!] },
+              battleAnimMudSand.palette,
+              centerX - 4,
+              centerY - 4,
+            );
+          } else {
+            drawSpriteSheetAffineRotate(
+              fb,
+              battleAnimHitsplat.tileset,
+              battleAnimHitsplat.palette,
+              centerX,
+              centerY,
+              sprite.matrix[0], sprite.matrix[1], sprite.matrix[2], sprite.matrix[3],
+              undefined,
+              false,
+            );
+          }
+        },
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || right.rank - left.rank || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const player = attacker.geometry.side === "player" ? attacker : target;
+    const opponent = attacker.geometry.side === "opponent" ? attacker : target;
+    const profile = digState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      attacker.geometry.side === "player"
+        ? `${attacker.species} used` : `Foe ${attacker.species} used`,
+      "DIG!",
+      99,
+    );
     return;
   }
 

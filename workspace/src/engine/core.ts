@@ -181,6 +181,7 @@ import {
   type SceneOnSkyUppercutConfig,
   type SceneOnDestinyBondConfig,
   type SceneOnWaterPulseConfig,
+  type SceneOnDigConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -283,6 +284,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "WATER_PULSE") {
     const waterPulsePresentation = presentation as SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
     renderSceneOnMovePresentation(framebuffer, waterPulsePresentation);
+    return;
+  }
+  if (presentation.config.move === "DIG") {
+    const digPresentation = presentation as SceneOnMovePresentationState<SceneOnDigConfig>;
+    renderSceneOnMovePresentation(framebuffer, digPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);
