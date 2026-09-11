@@ -183,6 +183,7 @@ import {
   type SceneOnWaterPulseConfig,
   type SceneOnDigConfig,
   type SceneOnAirCutterConfig,
+  type SceneOnSheerColdConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -295,6 +296,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "AIR_CUTTER") {
     const airCutterPresentation = presentation as SceneOnMovePresentationState<SceneOnAirCutterConfig>;
     renderSceneOnMovePresentation(framebuffer, airCutterPresentation);
+    return;
+  }
+  if (presentation.config.move === "SHEER_COLD") {
+    const sheerColdPresentation = presentation as SceneOnMovePresentationState<SceneOnSheerColdConfig>;
+    renderSceneOnMovePresentation(framebuffer, sheerColdPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

@@ -20,7 +20,7 @@
   ],
   "source": {
     "audit": "tools/compare/sheerColdSourceAudit.ts",
-    "auditSha256": "7becd38c3e78e584e1c501a8869d49a24662583652c71bd12dad933b321433db",
+    "auditSha256": "8c44242d59166aad4771176badbefaee1d731b16da2f71a481165081c06e9be0",
     "auditRunSha256": "2b46feb7282451b0cdce29fa632997a672d642071978ea87b020270a2e8f28bf",
     "probe": "tools/compare/sheerColdProbe.py",
     "probeSha256": "fe398d1be32a9636af4b334c770ea892798fab0d2412688ab35bba4c4b1b5ac0",

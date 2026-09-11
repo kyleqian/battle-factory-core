@@ -49,11 +49,11 @@ describe("MOVE_SHEER_COLD complete legal bilateral Scene-ON evidence", () => {
       siblingCredit: false, icePunchCredit: false,
     });
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(248);
-    expect(data.entries.find((entry: Json) => entry.move === "MOVE_SHEER_COLD")?.status ?? "unsupported").toBe("unsupported");
+    expect(data.entries).toHaveLength(249);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_SHEER_COLD")?.status).toBe("exact");
     expect(data.componentTracks.find((entry: Json) => entry.id === "ice-cube-frozen-ice-cube")).toMatchObject({
-      representatives: ["MOVE_SHEER_COLD"], fulfilled: false,
-      goal: expect.stringContaining("no reducer, typed seam, compositor, framebuffer acceptance, promotion, or track fulfillment"),
+      representatives: ["MOVE_SHEER_COLD"], fulfilled: true,
+      goal: expect.stringContaining("all 383 bilateral semantic, retained-RGB, and actual-core framebuffer rows twice"),
     });
   });
 });

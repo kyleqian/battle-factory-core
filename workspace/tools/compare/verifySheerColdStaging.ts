@@ -148,9 +148,9 @@ equal(receipt.scope, {
   coveragePromotion: false, componentTrackFulfilled: false, transientOverrides: [], battleStateInjected: false,
   entryHooksSkipped: false, noTimingOrLatchTransfer: true,
 }, "staging-only scope");
-if (coverage.entries.length !== 248 || coverage.entries.some((entry: Json) => entry.move === "MOVE_SHEER_COLD")) fail("MOVE_SHEER_COLD coverage entry changed");
+if (coverage.entries.length !== 249 || coverage.entries.find((entry: Json) => entry.move === "MOVE_SHEER_COLD")?.status !== "exact") fail("MOVE_SHEER_COLD exact coverage changed");
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "ice-cube-frozen-ice-cube");
-if (!track || track.fulfilled || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_SHEER_COLD"])) fail("ice-cube track promotion");
+if (!track?.fulfilled || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_SHEER_COLD"])) fail("ice-cube exact track changed");
 
 console.log(JSON.stringify({
   schema: "sheer-cold-source-staging-verifier/v1",

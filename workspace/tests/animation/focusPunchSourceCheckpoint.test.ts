@@ -421,8 +421,8 @@ describe("MOVE_FOCUS_PUNCH source/classification and legal Scene-ON staging chec
     }
 
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(248);
-    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(248);
+    expect(coverage.entries).toHaveLength(249);
+    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(249);
     const focusPunch = coverage.entries.find((entry: Json) => entry.move === "MOVE_FOCUS_PUNCH");
     expect(focusPunch).toMatchObject({ status: "exact" });
     expect(focusPunch.covered.join(" ")).toContain("155/155");

@@ -976,6 +976,7 @@ import {
   sceneOnPinMissileView,
   sceneOnSonicBoomView,
   sceneOnAirCutterView,
+  sceneOnSheerColdView,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
   sceneOnAuroraBeamView,
@@ -1232,6 +1233,7 @@ import {
   type SceneOnPinMissileConfig,
   type SceneOnSonicBoomConfig,
   type SceneOnAirCutterConfig,
+  type SceneOnSheerColdConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
@@ -23125,6 +23127,160 @@ export function renderSceneOnMovePresentation(
         ? `${view.attacker.species} used`
         : `Foe ${view.attacker.species} used`,
       "AIR CUTTER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SHEER_COLD") {
+    const sheerState = state as SceneOnMovePresentationState<SceneOnSheerColdConfig>;
+    const view = sceneOnSheerColdView(sheerState);
+    const displayed = sceneOnSheerColdView({
+      ...sheerState,
+      age: Math.max(0, sheerState.age - 1),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SHEER_COLD presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SHEER_COLD missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    // The retained source rows provide the live sprite center after the
+    // front-idle callback. Their x2/y2 are zero throughout this move, so the
+    // compositor must not apply the species rest offset a second time.
+    const attackerIdle = { x2: 0, y2: 0 };
+    const targetIdle = { x2: 0, y2: 0 };
+    const darken = (palette: readonly RgbColor[]): RgbColor[] => palette.map((color) => {
+      const packed = mgbaDarkenColor(
+        color.r | color.g << 8 | color.b << 16,
+        view.registers.bldy,
+      );
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    });
+
+    // Task_FadeToBg swaps BG_ICE while the screen is black. The restore task
+    // swaps the ordinary battle BG back at age 171, also while black.
+    if (sheerState.age >= 20 && sheerState.age < 171) {
+      drawExtractedTileBg(fb, {
+        tileset: icyWindArt.background.tileset,
+        tilemap: icyWindArt.background.tilemap,
+        subpalettes: [darken(icyWindArt.background.palette)],
+      }, 0, 0);
+    } else {
+      drawTileBg(
+        fb,
+        battleBg.static.tileset,
+        battleBg.static.tilemap,
+        battleBg.palette.map(darken),
+      );
+    }
+
+    // MoveBattlerSpriteToBG copies the target into the selected background.
+    // The copied pixels are target-2 for FrozenIceCube's OBJ alpha blend.
+    if (view.background.monbg) {
+      drawSpriteSheet(
+        fb,
+        tilesFor(targetArt, view.target.geometry.side),
+        targetArt.palette,
+        view.target.geometry.spriteCorner.x + targetIdle.x2,
+        view.target.geometry.spriteCorner.y + targetIdle.y2,
+      );
+    }
+    type Entry = Readonly<{
+      slot: number;
+      subpriority: number;
+      y: number;
+      order: number;
+      draw: () => void;
+    }>;
+    const entries: Entry[] = [];
+    const orderOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    const addBattler = (battler: typeof view.attacker, art: BattlerArt,
+      idle: Readonly<{ x2: number; y2: number }>, slot: number, subpriority: number): void => {
+      entries.push({
+        slot, subpriority, y: battler.geometry.animationCenter.y + idle.y2,
+        order: orderOf(slot),
+        draw: () => drawSpriteSheet(
+          fb, tilesFor(art, battler.geometry.side), art.palette,
+          battler.geometry.spriteCorner.x + idle.x2,
+          battler.geometry.spriteCorner.y + idle.y2,
+        ),
+      });
+    };
+    addBattler(view.attacker, attackerArt, attackerIdle,
+      sheerState.config.animationInputs.attackerSprite.slot,
+      sheerState.config.animationInputs.attackerSprite.subpriority);
+    if (view.background.targetVisible) {
+      addBattler(view.target, targetArt, targetIdle,
+        sheerState.config.animationInputs.targetSprite.slot,
+        sheerState.config.animationInputs.targetSprite.subpriority);
+    }
+    if (displayed.subsprites.software.length > 0 && (view.registers.bldalpha & 0xff) > 0) {
+      const palette = battleAnimIceCube.palette.slice();
+      const rotating = [
+        battleAnimIceCube.palette[13]!,
+        battleAnimIceCube.palette[14]!,
+        battleAnimIceCube.palette[15]!,
+      ];
+      for (let index = 0; index < rotating.length; index += 1) {
+        palette[13 + index] = rotating[
+          (index + displayed.resources.iceCube.paletteRotation) % rotating.length
+        ]!;
+      }
+      const cubeSlot = sheerState.config.animationInputs.cubeSpriteSlot;
+      entries.push({
+        slot: cubeSlot, subpriority: 4,
+        y: view.target.geometry.animationCenter.y - 32,
+        order: orderOf(cubeSlot),
+        draw: () => {
+          for (const piece of displayed.subsprites.software) {
+            const art = battleAnimIceCube.pieces[piece.index]!;
+            drawSpriteSheetBlendedOverFb(
+              fb, art.tileset, palette, piece.x, piece.y,
+              view.registers.bldalpha & 0xff,
+              view.registers.bldalpha >>> 8 & 0xff,
+            );
+          }
+        },
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = sheerState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SHEER COLD!",
       99,
     );
     return;

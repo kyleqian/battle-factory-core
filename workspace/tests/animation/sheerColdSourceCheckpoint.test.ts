@@ -89,10 +89,10 @@ describe("MOVE_SHEER_COLD source/component/carrier checkpoint", () => {
     });
 
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(248);
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SHEER_COLD")?.status ?? "unsupported").toBe("unsupported");
+    expect(coverage.entries).toHaveLength(249);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SHEER_COLD")?.status).toBe("exact");
     expect(coverage.componentTracks.find((entry: Json) => entry.id === "ice-cube-frozen-ice-cube")).toMatchObject({
-      representatives: ["MOVE_SHEER_COLD"], fulfilled: false, evidence: [
+      representatives: ["MOVE_SHEER_COLD"], fulfilled: true, evidence: expect.arrayContaining([
         "tools/compare/sheerColdSourceAudit.ts",
         "tools/battle-lab/mechanic-sheer-cold-player-dewgong-opponent-chansey.json",
         "tools/battle-lab/mechanic-sheer-cold-opponent-dewgong-player-chansey.json",
@@ -109,7 +109,9 @@ describe("MOVE_SHEER_COLD source/component/carrier checkpoint", () => {
         "tools/compare/evidence/sheer-cold-changemap-player.json",
         "tools/compare/evidence/sheer-cold-changemap-opponent.json",
         "tests/animation/sheerColdEvidenceCheckpoint.test.ts",
-      ],
+        "tools/compare/sheerColdActualCore.ts",
+        "tests/animation/sheerColdActualCore.test.ts",
+      ]),
     });
   });
 });

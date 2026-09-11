@@ -120,7 +120,8 @@ export function sheerColdConfigFor(
     fieldProfile: {
       playerHp: row0.battlers.player.hp, playerMaxHp: row0.battlers.player.maxHp,
       opponentHp: row0.battlers.opponent.hp, opponentMaxHp: row0.battlers.opponent.maxHp,
-      playerGender: "male", opponentGender: "female",
+      playerGender: orientation === "player-back" ? "male" : "female",
+      opponentGender: orientation === "player-back" ? "female" : "male",
     },
     animationInputs,
   } as SceneOnSheerColdPresentationState["config"];

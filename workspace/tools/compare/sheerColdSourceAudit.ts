@@ -247,8 +247,8 @@ const track = coverage.componentTracks.find((entry: Json) => entry.id === "ice-c
 const moveEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_SHEER_COLD");
 if (!track || JSON.stringify(track.components) !== JSON.stringify(newTrackComponents)
   || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_SHEER_COLD"])
-  || track.fulfilled !== false || moveEntry !== undefined) {
-  throw new Error("MOVE_SHEER_COLD unsupported track boundary drifted");
+  || track.fulfilled !== true || moveEntry?.status !== "exact") {
+  throw new Error("MOVE_SHEER_COLD exact track boundary drifted");
 }
 
 const statusFreezeBody = sourceBlock(scripts, "Status_Freeze:\n", "Status_Curse:\n");
