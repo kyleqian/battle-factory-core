@@ -5346,7 +5346,7 @@ export interface SceneOnFissureView extends FissureState {
   readonly target: SceneOnPresentationBattler;
 }
 
-export interface SceneOnDigView extends DigState {
+export interface SceneOnDigView extends Omit<DigState, "attacker" | "target"> {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }

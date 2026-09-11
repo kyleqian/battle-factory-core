@@ -408,11 +408,9 @@ function shakeTask(age: number, input: DigLiveInputs): DigTask | null {
 
 function scanlineFor(body: DigBody, age: number, input: DigLiveInputs): DigState["scanline"] {
   const setup = body === "setup";
-  const startAge = setup ? 10 : 14;
   const state: 0 | 1 | 3 = setup
     ? (inRange(age, 10, 166) ? 1 : age === 167 ? 3 : 0)
     : (inRange(age, 14, 26) ? 1 : age === 27 ? 3 : 0);
-  const active = setup ? age >= 10 && age <= 167 : age >= 14 && age <= 27;
   const startY = setup ? Math.max(0, input.attackerElevationY - 32) : 0;
   const endY = input.attackerElevationY + 32;
   const bgX = setup ? input.setupBgOffset.x : input.monBg.baseScroll.x;
@@ -505,7 +503,7 @@ function targetAtAge(age: number, body: DigBody, input: DigLiveInputs) {
     y2: input.targetInitialOffset.y, visible: input.targetInitialVisible ?? true, matrixNum, matrix };
 }
 
-function makeScanlineBuffers(scanline: DigState["scanline"], input: DigLiveInputs): DigState["scanline"] {
+function makeScanlineBuffers(scanline: DigState["scanline"]): DigState["scanline"] {
   return scanline;
 }
 
@@ -581,7 +579,7 @@ export function digAtAge(age: number, input: DigLiveInputs): DigState {
   }
   tasks.sort((a, b) => a.slot - b.slot);
   const scroll = sourceScroll(input.body, age, input, attacker.y2);
-  const scanline = makeScanlineBuffers(scanlineFor(input.body, age, input), input);
+  const scanline = makeScanlineBuffers(scanlineFor(input.body, age, input));
   const setup = input.body === "setup";
   const moundLoaded = setup ? inRange(age, 4, 193) : inRange(age, 4, 66);
   const mudLoaded = setup && inRange(age, 1, 193);
