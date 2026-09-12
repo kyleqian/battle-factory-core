@@ -87,6 +87,8 @@ pub mod battle_script_orword;
 pub mod battle_script_orword_vectors_gen;
 pub mod battle_script_painsplit;
 pub mod battle_script_painsplit_vectors_gen;
+pub mod battle_script_ppreduce;
+pub mod battle_script_ppreduce_vectors_gen;
 pub mod battle_script_recoverbasedonsunlight;
 pub mod battle_script_recoverbasedonsunlight_vectors_gen;
 pub mod battle_script_refresh;
