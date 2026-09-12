@@ -6,6 +6,60 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R99 — [supervised session wind-down (final), 2026-09-12 03:06-~05:50 UTC, unattended] **M96 hit-feedback family folded; session close (FOUR green folds)**
+
+- **State:** `rust-main` = master (no-op merge at orient) + four verified
+  Sonnet worker folds this session — `0af6724cc` M93 machine-control
+  family, `9bcbce5cf` M94 PPREDUCE, `cdbbc7775` M95 ATTACKSTRING,
+  `c236931bd` M96 HITANIMATION/EFFECTIVENESSSOUND — each followed by its
+  ledger commit and a successful `backup-refs.sh` push. Tree clean,
+  committed, green; no worker worktree or branch left behind. Core-only
+  all session: no ABI, adapter, canonical TS, or npm file touched, so
+  the main supervisor's fold is `core-rs/**` + `RUST_PROGRESS*.md`
+  only. **112 of 215 TS opcode names ported.**
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  21.8 min, $3.43, foreground gates) ported the two thin hit-feedback
+  opcodes as `battle_script_hit_feedback_family.rs` — HITANIMATION 0x5C
+  (`Cmd_hitanimation` battle_script_commands.c:5558-5576): NO
+  controller-busy gate (pinned per the TS doc comment), the shared
+  `resolveHitChainBattlerOperand` ladder (BS_TARGET/BS_ATTACKER/
+  BS_FAINTED with verbatim role throws; other selectors -> the verbatim
+  unsupported-branch Halt incl. `<missing>`), NO_EFFECT short-circuit,
+  three-conjunct substitute suppression, no-duplicate pending + one
+  HIT_ANIMATION event; EFFECTIVENESSSOUND 0x0E (`Cmd_effectivenesssound`
+  :2001-2047): busy-gate-first Block, verbatim target-role throw, the
+  two-tier (exact-match then bitwise) sound ladder over SE 12/13/14,
+  play-se event + pending(target). **15 + 12 behavior + 4 registration**
+  generated cases + 16 inline unit tests over the censuses (14 = 12
+  BS_TARGET + 2 BS_ATTACKER; 18); corpus sha256
+  `f2d8f29db05e23cd62f954270bb8a00dde7583f6d6a1e69804b56c85b76ecc1a`.
+- **Next:** merge master, re-run the four Rust gates, then continue.
+  Suggested scouts: ATTACKANIMATION 0x09 (the deliberately-skipped heavy
+  sibling — call directive into BattleScript_Pausex20, anim counters,
+  MOVES power, multihit interplay; hitChainOpcode.ts:2204-2296),
+  HEALTHBARUPDATE (:2404+, prepareMessage + substitute message path),
+  PRINTSTRING/WAITMESSAGE family. The attackstring/hit-feedback
+  port-injection + event/pending modeling is the proven shape for all
+  of these.
+- **Notes:** supervisor audit walked both handler ladders, the resolver
+  arms and all four verbatim error/construct texts, the two-tier sound
+  ladder both directions, the no-busy-gate pin, and both censuses;
+  independent regeneration byte-identical (generated Rust **28,820
+  bytes**, sha
+  `76cb9dbdcc2606bd505e8971d5bdb42903d6da9f7f85c0378f432f074f9b7d89`;
+  generator **34,678 bytes**, sha256
+  `142e0ed733c0cf228db693f077f1f7fcfa129d61d9422beaa88e61f1cfcc0936`).
+  Worker note: `createEffectivenesssoundOpcodeHandler` is
+  module-private, so the generator drives it through the registered
+  handler map (registration exercised for real). Final gates on
+  `rust-main`: **1,814/1,814** native (up from 1,730 at orient, +84
+  across four leaves), fmt, strict workspace Clippy, wasm32 release;
+  artifact **512,234 bytes**, sha256
+  `e86f4b9d9b13507897e1015cf0acba4187501a2b82ac7345a732c7f604922e22`.
+  Session-wide: four Sonnet workers (21.8-29.6 min, $3.43-$6.69,
+  ~$17.84 total), four clean landings, ZERO cap expiries. R96 archived.
+  No npm gate required; no deferral or barrier added. No PAPERCUT.
+
 ## R98 — [supervised session wind-down (final), 2026-09-12 03:06-~05:10 UTC, unattended] **M95 ATTACKSTRING folded; session close (three green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) + three verified
@@ -112,52 +166,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `1f8ba8759c011ad49f312e648adf34e9932b750fcda87753405c1a2b8cf20bea`.
   R94 archived. No npm gate required; no deferral or barrier added. No
   PAPERCUT.
-
-## R96 — [supervised session, 2026-09-12 03:06 UTC–, unattended] **M93 machine-control family folded**
-
-- **State:** `rust-main` = R95 + `0af6724cc` M93 fast-forward + this
-  ledger commit. Master merge no-op at orient; baseline re-verified
-  **1,730/1,730** + artifact byte-identical to R95 (512,236 B,
-  `a8d2e60b…`). Post-fold gates green. Tree clean, committed. Core-only;
-  no ABI/adapter/TS/npm files touched. **108 of 215 TS opcode names
-  ported.** Next worker: M94 PPREDUCE (scouted this session).
-- **Did (this step):** worker (claude-sonnet-5, 55-min cap, one commit,
-  25.0 min, $3.54, foreground gates) ported the six-opcode
-  `battle_script_control_family.rs` — GOTO 0x28 / RETURN 0x3C / END 0x3D /
-  END2 0x3E / END3 0x3F / CALL 0x41 (`createBattleScriptControlHandlers`
-  + `stepBattleScriptMachine`'s jump/call/return/halt application switch,
-  `battleScriptMachine.ts`): first family with NO rules context — pure
-  machine cursor (program_counter + call_stack). GOTO/CALL's shared lazy
-  resolution ladder with the evaluation-order pin (2-operand resolvable
-  first operand still halts reporting the real expression, not
-  `<missing>`); CALL pushes pc+1 (index twin of C's instr+5); RETURN
-  LIFO + underflow-leaves-pc halt; END/END2 shared "terminal" halt with
-  C side effects intentionally absent; END3's own "end3" halt kind vs
-  RETURN-equivalent pop on non-empty stack. Compact resolution tables
-  pin ALL 474 committed sites (285 goto + 29 call rows — every one
-  resolves cleanly — plus sorted site censuses 73/13/64/10) alongside
-  **27 behavior + 8 registration** cases; corpus sha256
-  `ef2b3837a73f25428730f5c592ae22b016b7d4e34c54642b181949b05e3d6ec0`.
-- **Next:** dispatch + verify M94 PPREDUCE 0x03 (`Cmd_ppreduce`
-  battle_script_commands.c:1205-1247, `ppreduceOpcodeHandler`
-  battleScriptHitChainOpcode.ts:1352-1437; 133 committed no-operand
-  sites; needs party-PP mirror + scheduler-pending + set-battler-pp-data
-  event modeling — tryswapitems is the native precedent for both), then
-  one more leaf if time allows; wind down clean before 06:59 UTC.
-- **Notes:** supervisor audit walked the resolution ladder, the halt
-  reasons, the step-application switch, and registration against TS both
-  directions; independent regeneration byte-identical (generated Rust
-  **81,542 bytes**, sha
-  `86a141249df4d98119474dcd5b872308e7298228f971f6406eb7eb690bd78ce1`;
-  generator **34,958 bytes**, sha256
-  `67ad01ae295b65454e1b9d724bc7b56987433965f6fd7a45c95c4a24dc32101c`).
-  Accepted deviation: goto/call table rows are TS-side census pins, not
-  per-row port replays (label resolution is an input to the Rust
-  handler, so a replay would be vacuous; the 27 behavior cases exercise
-  the port). Gates on `rust-main` post-fold: **1,756/1,756** native
-  (+26), fmt, strict workspace Clippy, wasm32 release; artifact
-  **512,235 bytes**, sha256
-  `f77a2f60471c4598665732782de3586cb840f0a18a6bc670d6205284468b7e49`
-  (usual deterministic codegen size drift). R93 archived. No npm gate
-  required; no deferral or barrier added. No PAPERCUT.
 
