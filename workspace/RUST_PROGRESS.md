@@ -6,6 +6,59 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R100 — [supervised session wind-down (FINAL), 2026-09-12 03:06-~06:15 UTC, unattended] **M97 HEALTHBARUPDATE folded; session close (FIVE green folds)**
+
+- **State:** `rust-main` = master (no-op merge at orient) + five verified
+  Sonnet worker folds this session — `0af6724cc` M93 machine-control
+  family, `9bcbce5cf` M94 PPREDUCE, `cdbbc7775` M95 ATTACKSTRING,
+  `c236931bd` M96 hit-feedback family, `cd0276d39` M97 HEALTHBARUPDATE —
+  each followed by its ledger commit and a successful `backup-refs.sh`
+  push. Tree clean, committed, green; no worker worktree or branch left
+  behind. Core-only all session: no ABI, adapter, canonical TS, or npm
+  file touched, so the main supervisor's fold is `core-rs/**` +
+  `RUST_PROGRESS*.md` only. **113 of 215 TS opcode names ported.**
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  19.0 min, $3.53, foreground gates) ported 0x0B HEALTHBARUPDATE
+  (`Cmd_healthbarupdate` battle_script_commands.c:1807-1841,
+  `createHealthbarupdateOpcodeHandler` battleScriptHitChainOpcode.ts
+  :2378-2430) as `battle_script_healthbarupdate.rs`: busy-gate-first
+  Block, NO_EFFECT short-circuit BEFORE operand resolution (ordering
+  pin, contrasting hitanimation), the shared three-selector resolver
+  with verbatim throws + unsupported-branch halt, the substitute
+  STRINGID_SUBSTITUTEDAMAGED message path (opposite IGNORE_SUBSTITUTE
+  polarity vs hitanimation; attackstring's exact payload shape; NO
+  controller pending), the min(damage, 10000) clamp (9999/10000/10001
+  trio + negative pass-through pinned) with no-duplicate pending, and
+  the C playerMonWasDamaged write pinned intentionally absent (TS is
+  the spec). **21 behavior + 2 registration** cases + 13 inline unit
+  tests over the 41-site census (22 BS_ATTACKER + 18 BS_TARGET + 1
+  BS_FAINTED — the fainted arm is committed-reachable here); corpus
+  sha256
+  `63e483f7cdbe793e6663b34979a3f0aeb5c10762639a2f25f2a56a1b4aee9d5d`.
+- **Next:** merge master, re-run the four Rust gates, then continue.
+  Suggested scouts: ATTACKANIMATION 0x09 (heavy sibling: call directive
+  into BattleScript_Pausex20, anim counters, multihit interplay —
+  hitChainOpcode.ts:2204-2296), DATAHPUPDATE (the C sibling at
+  :1843+, big), PRINTSTRING/WAITMESSAGE family. The
+  attackstring/hit-feedback/healthbarupdate port-injection +
+  event/pending modeling is the proven shape.
+- **Notes:** supervisor audit walked the full ladder ordering, the
+  polarity contrast, the payload shape, the clamp domain, and the
+  census; independent regeneration byte-identical (generated Rust
+  **29,903 bytes**, sha
+  `0eb2f4433905fd7aca22ab1d54bc6368ec441008da949be92af7174281446ee1`;
+  generator **31,978 bytes**, sha256
+  `fb815322ad1fc3f5d269a3323a35e8adece96ae7f6b0deeff2753e762dc311f8`).
+  Final gates on `rust-main`: **1,832/1,832** native (up from 1,730 at
+  orient, +102 across five leaves), fmt, strict workspace Clippy,
+  wasm32 release; artifact **507,099 bytes**, sha256
+  `034fca852fb9aa98e161e256f2f70c4458006f822f45f904a92f53f01db6ce20`
+  (512,234 -> 507,099 — the familiar deterministic codegen size
+  drift). Session-wide: five Sonnet workers (19.0-29.6 min,
+  $3.43-$6.69, ~$21.37 total), five clean landings, ZERO cap expiries.
+  R97 archived. No npm gate required; no deferral or barrier added. No
+  PAPERCUT.
+
 ## R99 — [supervised session wind-down (final), 2026-09-12 03:06-~05:50 UTC, unattended] **M96 hit-feedback family folded; session close (FOUR green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) + four verified
@@ -112,58 +165,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Session-wide: three Sonnet workers (22.2-29.6 min, $3.54-$6.69,
   ~$14.41 total), three clean landings, ZERO cap expiries. R95
   archived. No npm gate required; no deferral or barrier added. No
-  PAPERCUT.
-
-## R97 — [supervised session, 2026-09-12 03:06 UTC–, unattended] **M94 PPREDUCE folded (second green fold this session)**
-
-- **State:** `rust-main` = R96 + `9bcbce5cf` M94 fast-forward + this
-  ledger commit. Post-fold gates green. Tree clean, committed. Core-only;
-  no ABI/adapter/TS/npm files touched. **109 of 215 TS opcode names
-  ported.**
-- **Did (this step):** worker (claude-sonnet-5, 55-min cap, one commit,
-  29.6 min, $6.69, foreground gates) ported 0x03 PPREDUCE
-  (`Cmd_ppreduce` battle_script_commands.c:1205-1250,
-  `ppreduceOpcodeHandler` battleScriptHitChainOpcode.ts:1352-1437) as
-  `battle_script_ppreduce.rs`: the three-arm Pressure ladder
-  (FOES_AND_ALLY counts every other battler either side;
-  BOTH/OPPONENTS_FIELD counts opposing side only, ally excluded;
-  default counts target-only with self-target excluded) gated on the
-  `!== 1` ppNotAffectedByPressure pin; the deduct gate
-  (NO_PPDEDUCT|NO_ATTACKSTRING, pp!=0) with saturating clamp,
-  notFirstStrike:=1, and the party-PP mirror; the TRANSFORMED split
-  (pp falls + party mirrors but NO set-battler-pp-data event and NO
-  controller-pending); the unconditional NO_PPDEDUCT clear (survives a
-  blocked deduct); the lane's first native `gen_tables::MOVES[id].target`
-  consumer with per-corpus-move TS agreement pins; verbatim throws incl.
-  the ungrammatical "requires a attacker role". **29 TS-executed (26
-  behavior + 3 throws) + 2 registration + 4 MOVES-agreement** cases +
-  14 inline unit tests over the 133-site census; corpus sha256
-  `c5b4bb76bff88d5eaeeb661765aeccc4ac9fb89f510bbd45b9afa8e22fc839f1`.
-- **Next:** at most one more leaf if it lands AND verifies by ~06:15
-  UTC — ATTACKSTRING 0x02 scouted (`Cmd_attackstring`
-  battle_script_commands.c:1191-1203, `createAttackstringOpcodeHandler`
-  battleScriptHitChainOpcode.ts:1308-1349; 135 committed sites; first
-  controller-busy Block + prepareMessage port modeling; canonical ports
-  at factoryBattleScriptFullTurnDecision.ts:840+). Then wind down clean
-  before 06:59 UTC: final gates, ledger, backup, clean tree.
-- **Notes:** supervisor audit walked the Pressure ladder both
-  directions, the resolve-inside-guard placement, the
-  mirror-before-permanence-split ordering, the no-duplicate pending,
-  and the census; independent regeneration byte-identical (generated
-  Rust **157,286 bytes**, sha
-  `0fc9ccb60a11b8d43a15cc7331f46764839f1a6cfcecffeae57fe6cd0e29a782`;
-  generator **26,185 bytes**, sha256
-  `b02695b81fc6db7063b442567ad20b7420e95291a53d328307c9042913a21ee0`).
-  Accepted worker deviations (documented in-code): (1) constructor
-  validates ppNotAffectedByPressure to 0|1 and eagerly resolves move
-  effect, so the domain-widening `!==1` pin is native-unit-only and the
-  unknown-move throw case uses a documented post-construction shallow
-  copy that still executes the real handler; (2) clippy-mandated
-  `saturating_sub` replaces the literal ternary (semantically equal,
-  pinned both sides). Gates on `rust-main` post-fold: **1,776/1,776**
-  native (+20), fmt, strict workspace Clippy, wasm32 release; artifact
-  **512,234 bytes**, sha256
-  `1f8ba8759c011ad49f312e648adf34e9932b750fcda87753405c1a2b8cf20bea`.
-  R94 archived. No npm gate required; no deferral or barrier added. No
   PAPERCUT.
 

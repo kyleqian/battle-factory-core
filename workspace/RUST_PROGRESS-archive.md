@@ -4,6 +4,60 @@ Older entries moved out of `RUST_PROGRESS.md` (newest first). Git keeps the
 full history regardless.
 
 ---
+## R97 — [supervised session, 2026-09-12 03:06 UTC–, unattended] **M94 PPREDUCE folded (second green fold this session)**
+
+- **State:** `rust-main` = R96 + `9bcbce5cf` M94 fast-forward + this
+  ledger commit. Post-fold gates green. Tree clean, committed. Core-only;
+  no ABI/adapter/TS/npm files touched. **109 of 215 TS opcode names
+  ported.**
+- **Did (this step):** worker (claude-sonnet-5, 55-min cap, one commit,
+  29.6 min, $6.69, foreground gates) ported 0x03 PPREDUCE
+  (`Cmd_ppreduce` battle_script_commands.c:1205-1250,
+  `ppreduceOpcodeHandler` battleScriptHitChainOpcode.ts:1352-1437) as
+  `battle_script_ppreduce.rs`: the three-arm Pressure ladder
+  (FOES_AND_ALLY counts every other battler either side;
+  BOTH/OPPONENTS_FIELD counts opposing side only, ally excluded;
+  default counts target-only with self-target excluded) gated on the
+  `!== 1` ppNotAffectedByPressure pin; the deduct gate
+  (NO_PPDEDUCT|NO_ATTACKSTRING, pp!=0) with saturating clamp,
+  notFirstStrike:=1, and the party-PP mirror; the TRANSFORMED split
+  (pp falls + party mirrors but NO set-battler-pp-data event and NO
+  controller-pending); the unconditional NO_PPDEDUCT clear (survives a
+  blocked deduct); the lane's first native `gen_tables::MOVES[id].target`
+  consumer with per-corpus-move TS agreement pins; verbatim throws incl.
+  the ungrammatical "requires a attacker role". **29 TS-executed (26
+  behavior + 3 throws) + 2 registration + 4 MOVES-agreement** cases +
+  14 inline unit tests over the 133-site census; corpus sha256
+  `c5b4bb76bff88d5eaeeb661765aeccc4ac9fb89f510bbd45b9afa8e22fc839f1`.
+- **Next:** at most one more leaf if it lands AND verifies by ~06:15
+  UTC — ATTACKSTRING 0x02 scouted (`Cmd_attackstring`
+  battle_script_commands.c:1191-1203, `createAttackstringOpcodeHandler`
+  battleScriptHitChainOpcode.ts:1308-1349; 135 committed sites; first
+  controller-busy Block + prepareMessage port modeling; canonical ports
+  at factoryBattleScriptFullTurnDecision.ts:840+). Then wind down clean
+  before 06:59 UTC: final gates, ledger, backup, clean tree.
+- **Notes:** supervisor audit walked the Pressure ladder both
+  directions, the resolve-inside-guard placement, the
+  mirror-before-permanence-split ordering, the no-duplicate pending,
+  and the census; independent regeneration byte-identical (generated
+  Rust **157,286 bytes**, sha
+  `0fc9ccb60a11b8d43a15cc7331f46764839f1a6cfcecffeae57fe6cd0e29a782`;
+  generator **26,185 bytes**, sha256
+  `b02695b81fc6db7063b442567ad20b7420e95291a53d328307c9042913a21ee0`).
+  Accepted worker deviations (documented in-code): (1) constructor
+  validates ppNotAffectedByPressure to 0|1 and eagerly resolves move
+  effect, so the domain-widening `!==1` pin is native-unit-only and the
+  unknown-move throw case uses a documented post-construction shallow
+  copy that still executes the real handler; (2) clippy-mandated
+  `saturating_sub` replaces the literal ternary (semantically equal,
+  pinned both sides). Gates on `rust-main` post-fold: **1,776/1,776**
+  native (+20), fmt, strict workspace Clippy, wasm32 release; artifact
+  **512,234 bytes**, sha256
+  `1f8ba8759c011ad49f312e648adf34e9932b750fcda87753405c1a2b8cf20bea`.
+  R94 archived. No npm gate required; no deferral or barrier added. No
+  PAPERCUT.
+
+
 ## R96 — [supervised session, 2026-09-12 03:06 UTC–, unattended] **M93 machine-control family folded**
 
 - **State:** `rust-main` = R95 + `0af6724cc` M93 fast-forward + this
