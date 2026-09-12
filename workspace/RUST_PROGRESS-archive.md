@@ -4,6 +4,54 @@ Older entries moved out of `RUST_PROGRESS.md` (newest first). Git keeps the
 full history regardless.
 
 ---
+## R94 — [supervised session, 2026-09-11 15:04 UTC–, unattended] **M91 array-family trio folded (second green fold this session)**
+
+- **State:** `rust-main` = R93 + `6e3dbc305` M91 fast-forward + this
+  ledger commit. Gates green post-fold. Tree clean, committed. Core-only;
+  no ABI/adapter/TS/npm files touched. **97 of 215 TS opcode names
+  ported.** M92 worker (multihit rule-command family, final leaf this
+  session) dispatched off this HEAD (brief
+  `/tmp/rust-briefs/multihit-m92.txt`, 55-min cap).
+- **Did (this step):** worker (claude-sonnet-5, 55-min cap, one commit,
+  21.9 min, $3.51, foreground gates) ported the trio in one module
+  `battle_script_array_family.rs` — JUMPIFARRAYNOTEQUAL 0x2D
+  (`battle_script_commands.c:3793-3814`): closed 6-entry operand table
+  (gBattlersCount/roles/sBATTLER/gBattleCommunication[+1]), verbatim
+  not-modeled Halt (the committed :2916 gBattlerFainted link-battle site
+  replays as that barrier), lazy-target jump, unresolved-target throw;
+  JUMPIFARRAYEQUAL 0x2C (`:3771-3791`; ids per dispatch
+  rows :375/:376): ranked-batch1 eager install (exactly-1 +
+  dispatcher + operand-count-4), per-execution tuple validation, the
+  verbatim ungrammatical "requires a attacker role" hit-chain role
+  throws; COPYARRAYWITHINDEX 0x32 (`:3850-3861`): registerSingle
+  convention, gBattlerAttacker := gBattlerByTurnOrder[gBattleCommunication]
+  with the verbatim out-of-range throw. Throw-vs-Halt asymmetry over the
+  identical attacker/target pair (Ghost Curse halts vs Teeter Dance
+  throws) pinned. **29 behavior + 8 registration** cases over all 9
+  committed sites (7 NE + 1 EQ + 1 CAWI); corpus sha256
+  `53bd05991e7336507cd0e3e11306127d5a0397a17c7fb6351361dc60a73dc154`.
+- **Next:** verify + fold M92 (SETMULTIHIT/DECREMENTMULTIHIT/
+  SETMULTIHITCOUNTER/INITMULTIHITSTRING/JUMPIFHASNOHP — first
+  Block-outcome + rng-draw family since the accuracycheck run), then
+  wind down: final gates, ledger, backup, clean tree before 19:03 UTC.
+- **Notes:** supervisor audit walked the operand table both directions,
+  all three registration conventions against their TS sources, the five
+  error texts, and the census; independent regeneration byte-identical
+  (generated Rust **28,156 bytes**, sha
+  `7f10ec4e052727792a6583419a6f9c4af4a5b917c4bcce5fa8e05d3aa9f54374`;
+  generator **30,817 bytes**, sha256
+  `73dfbf4c381b69fc2b92c23fd50bd29e915fc30d565dccd0a3cf3da8afe2c7de`).
+  Gates on `rust-main` post-fold: **1,701/1,701** native (+23), fmt,
+  strict workspace Clippy, wasm32 release; artifact **507,121 bytes**,
+  sha256
+  `84ff35b88196e81ee627c3c522592552cdd79cab4e917eea5f0a1254b1e50662`
+  (back to R92's byte size at a different sha — codegen drift as usual).
+  Worker fixture surprise (harmless): scriptingBattler's 0..3 constructor
+  clamp forced battlersCount=2 fixtures for the equal-value NE cases.
+  R91 archived. No npm gate required; no deferral added. No PAPERCUT.
+
+
+
 ## R93 — [supervised session, 2026-09-11 15:04 UTC–, unattended] **M90 COPYARRAY folded**
 
 - **State:** `rust-main` = R92 + `d60845fbd` M90 fast-forward + this
