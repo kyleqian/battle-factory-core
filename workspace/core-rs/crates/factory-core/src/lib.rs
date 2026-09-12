@@ -34,6 +34,8 @@ pub mod battle_script_chargesport;
 pub mod battle_script_chargesport_vectors_gen;
 pub mod battle_script_confuseifrepeatingattackends;
 pub mod battle_script_confuseifrepeatingattackends_vectors_gen;
+pub mod battle_script_control_family;
+pub mod battle_script_control_family_vectors_gen;
 pub mod battle_script_copyarray;
 pub mod battle_script_copyarray_vectors_gen;
 pub mod battle_script_copyfoestats;
