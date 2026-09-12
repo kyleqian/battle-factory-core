@@ -4,6 +4,63 @@ Older entries moved out of `RUST_PROGRESS.md` (newest first). Git keeps the
 full history regardless.
 
 ---
+## R95 — [supervised session wind-down (final), 2026-09-11 15:04-~17:20 UTC, unattended] **M92 multihit family folded; session close (three green folds)**
+
+- **State:** `rust-main` = master (no-op merge at orient) + three verified
+  Sonnet worker folds this session — `d60845fbd` M90 copyarray,
+  `6e3dbc305` M91 array-family trio, `94ec3c6ab` M92 multihit
+  rule-command family — each followed by its ledger commit and a
+  successful `backup-refs.sh` push. Tree clean, committed, green; no
+  worker worktree or branch left behind. Core-only all session: no ABI,
+  adapter, canonical TS, or npm file touched, so the main supervisor's
+  fold is `core-rs/**` + `RUST_PROGRESS*.md` only. **102 of 215 TS
+  opcode names ported.**
+- **Did (this step):** worker (claude-sonnet-5, 55-min cap, one commit,
+  19.0 min, $3.77, foreground gates) ported the five-opcode
+  `battle_script_multihit_family.rs` — SETMULTIHIT 0x26 / DECREMENTMULTIHIT
+  0x27 / SETMULTIHITCOUNTER 0x8D / INITMULTIHITSTRING 0x8E /
+  JUMPIFHASNOHP 0xE3 (`battleScriptRuleCommands.ts` whole-file spec):
+  the two closed-catalog ports (canonical `resolveByteOperand` digit
+  regex, `resolveRulesBattlerForBattleScript` six named selectors) with
+  typed BLOCK outcomes — the lane's first Block-outcome family since
+  accuracycheck — the shape-halt -> Block -> value-halt ladder,
+  DECREMENTMULTIHIT's always-applied 0 -> 0xff wrap that survives its
+  invalid-control-target halt, SETMULTIHITCOUNTER's 0/1/2-draw rng
+  shapes with full provenance (the family's only rng user;
+  `setmultihitcounter:initial`/`:reroll`), INITMULTIHITSTRING's
+  unconditional counter reset, and JUMPIFHASNOHP's sole verbatim throw.
+  **34 behavior + 7 registration** cases over all 18 committed sites;
+  corpus sha256
+  `7fb2125843122112ef694d1bff99fa9572f804477ea6564a34913e12d82b3df1`.
+- **Next:** merge master, re-run the four Rust gates, then continue.
+  Scouted next candidates: the machine control family
+  (GOTO/CALL/RETURN/END/END2/END3, `battleScriptMachine.ts:645-670` +
+  `battleScriptCallbackStack.ts` — call-stack modeling, deliberately NOT
+  taken as a rushed fourth leaf this session); PPREDUCE
+  (`battle_script_commands.c:1205-1247`, hitChainOpcode.ts:1352+, needs
+  events/party-PP modeling); ATTACKSTRING (needs
+  prepareMessage/isControllerIdle port modeling). The multi-opcode
+  family-module pattern (array-family, multihit-family) is now the
+  proven shape for thin siblings.
+- **Notes:** supervisor audit walked all five handler ladders against the
+  TS closures, both port catalogs both directions, the wrap-survives-halt
+  pin, the rng draw shapes, and the census pins; independent
+  regeneration byte-identical (generated Rust **35,444 bytes**, sha
+  `261d7cfb18fabf14671b1156d38c3995d9c13840e3ace5860136faed4aafc548`;
+  generator **39,046 bytes**, sha256
+  `43717d42bb1443f5ddc07ecbb81048d9ece57e41b43805d1108094baab02621a`).
+  Final gates on `rust-main`: **1,730/1,730** native (up from 1,658 at
+  orient, +72 across three leaves), fmt, strict workspace Clippy, wasm32
+  release; artifact **512,236 bytes**, sha256
+  `a8d2e60b7061c80e090a108cabbd08a8f3f1c2bec12111e43ff648ddc70c269b`
+  (507,121 -> 507,387 -> 507,121 -> 512,236 across folds — the familiar
+  deterministic codegen drift). Session-wide: three Sonnet workers
+  (17.1-21.9 min, $2.57-$3.77, ~$9.85 total), three clean landings, ZERO
+  cap expiries. R92 archived. No npm gate required; no deferral or
+  barrier added. No PAPERCUT.
+
+
+
 ## R94 — [supervised session, 2026-09-11 15:04 UTC–, unattended] **M91 array-family trio folded (second green fold this session)**
 
 - **State:** `rust-main` = R93 + `6e3dbc305` M91 fast-forward + this
