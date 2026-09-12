@@ -23,6 +23,8 @@ pub mod battle_script_ai_reveal;
 pub mod battle_script_ai_reveal_vectors_gen;
 pub mod battle_script_array_family;
 pub mod battle_script_array_family_vectors_gen;
+pub mod battle_script_attackstring;
+pub mod battle_script_attackstring_vectors_gen;
 pub mod battle_script_base_damage;
 pub mod battle_script_base_damage_item_catalog_gen;
 pub mod battle_script_base_damage_vectors_gen;
