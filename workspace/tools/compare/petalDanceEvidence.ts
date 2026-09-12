@@ -234,7 +234,7 @@ export function verifyPetalDanceEvidence(): Json {
     && parsedAudit.graph.components.length === 13 && parsedAudit.scope.productionChanged === false && parsedAudit.scope.coveragePromotion === false, "source/component boundary");
   const coverage = JSON.parse(file("ANIMATION_COVERAGE.json").toString("utf8")) as Json;
   invariant(coverage.entries.some((entry: Json) => entry.move === "MOVE_PETAL_DANCE" && entry.status === "exact")
-    && same(coverage.queue, []), "exact promotion queue boundary");
+    && same(coverage.queue, ["MOVE_SMOG"]), "exact promotion queue boundary");
   invariant(fixture.evidenceScope.productionAnimationChanged === false && fixture.evidenceScope.reducerAdded === false
     && fixture.evidenceScope.typedSeamAdded === false && fixture.evidenceScope.compositorAdded === false
     && fixture.evidenceScope.framebufferAcceptance === false && fixture.evidenceScope.coveragePromotion === false

@@ -241,7 +241,7 @@ export function verifyRapidSpinEvidence(): Record<Side, Json> {
   invariant(sha(auditOutput) === fixture.source.auditRunSha256, "source audit output drift");
   const audit = JSON.parse(auditOutput.toString("utf8")) as Json;
   invariant(audit.status === "exact" && audit.coverageCredit === true && audit.source.pointerOwnedRoot.rom.start === "0x082cd941" && audit.source.pointerOwnedRoot.rom.endExclusive === "0x082cd9ae", "Rapid Spin source boundary drift");
-  invariant(same(JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")).queue, []), "Rapid Spin queue drift");
+  invariant(same(JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")).queue, ["MOVE_SMOG"]), "Rapid Spin queue drift");
   invariant(fixture.evidenceScope.productionAnimationChanged === false && fixture.evidenceScope.reducerAdded === false && fixture.evidenceScope.typedSeamAdded === false && fixture.evidenceScope.compositorAdded === false && fixture.evidenceScope.coveragePromotion === false && fixture.evidenceScope.componentTrackCredit === false && fixture.evidenceScope.latchPromotion === false && fixture.evidenceScope.gameplayStateOwned === false, "Rapid Spin evidence-only boundary drift");
   const result = {} as Record<Side, Json>;
   for (const side of ["player-back", "opponent-front"] as const) result[side] = verifyOrientation(side, fixture.orientations[side]);

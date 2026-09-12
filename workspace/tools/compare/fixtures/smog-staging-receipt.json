@@ -1,0 +1,85 @@
+{
+  "schema": "smog-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SMOG",
+  "moveId": 123,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "freshness": {
+    "check": "tools/check-oracle-freshness.sh",
+    "exitCode": 2,
+    "diagnostic": "both service PID start times were unreadable; this Linux host also treated the harness epoch as a filename while the BSD-date formatting path ran",
+    "sharedOracleCaptureUsed": false,
+    "localMgbaWrapper": "tools/run-mgba-probe.py"
+  },
+  "source": {
+    "audit": "tools/compare/smogSourceAudit.ts",
+    "auditRunSha256": "6079cb8e6aa377c858f643d6dc5a5c583bb312c514190b61121535761d60b945",
+    "probe": "tools/compare/smogStagingProbe.py",
+    "probeSha256": "4b7525e5e4fd6751f5696fb31f33e602086a5adba4c768f98e8eab2f2ab9768d",
+    "pointerOwnedRoot": {"symbol": "Move_SMOG", "start": "0x082d01e5", "endExclusive": "0x082d0260"}
+  },
+  "factoryLegalSelection": {
+    "carrier": {"setId": 149, "name": "FRONTIER_MON_MAGBY", "species": 240},
+    "sourceRoute": {"challengeNum": 0, "level50SetRange": [110, 199], "trainerId": 50},
+    "partyBeforeInit": true,
+    "choiceConstraint": "The Magby side has all four move slots set to MOVE_SMOG. The player selects its ordinary first legal slot with A input; the opponent AI has only legal Smog slots. The Onix control has four Tackle slots.",
+    "outcomeRule": "The stock EFFECT_POISON_HIT route resolves accuracy, damage, and the secondary poison chance; no damage, HP, status, stage, weather, side-condition, RNG, or outcome was injected."
+  },
+  "runs": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-smog-player-magby-opponent-onix.json",
+      "scenarioSha256": "e9253747c27d03d94f361a8516381149fa23c9c1801373dd6f1f3e9ce7e6be87",
+      "seed": 305421230,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "65089ba0d5a89d1f592c85a76f0637586d92ef8c4b941dbdf380146d3bf0ba50",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "player", "partyIndex": 0, "species": 240, "level": 50, "moves": [123, 123, 123, 123]},
+      "target": {"side": "opponent", "partyIndex": 0, "species": 95, "level": 50, "initialHp": 142, "maxHp": 142, "finalHp": 141},
+      "choiceConstraint": {"attackerMoveSlots": [123, 123, 123, 123], "opponentAiMoveSlots": [33, 33, 33, 33]},
+      "root": {"symbol": "Move_SMOG", "start": "0x82d01e5", "endExclusive": "0x82d0260", "observations": 305, "attackerBattler": 0, "targetBattler": 1, "moveResultFlags": 4, "moveDamage": 1},
+      "romOutcome": {"kind": "damaging-poison-hit", "targetFinalPartyHp": 141, "targetFinalBattleHp": 141, "targetFinalStatus": "none", "battleOutcome": 0},
+      "pp": {"before": [20, 20, 20, 20], "after": [19, 20, 20, 20], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "cc68fb67612410b906346647618b31ab8b727bc478cce50604b7d2dfb3bff61c", "afterSha256": "cc68fb67612410b906346647618b31ab8b727bc478cce50604b7d2dfb3bff61c"},
+      "transientFreeSetup": true
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-smog-opponent-magby-player-onix.json",
+      "scenarioSha256": "e52987947153c362762a0684c34b8a73a80ed5a4a3f546aa326a9438ad055a7a",
+      "seed": 305421230,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "38768410994637f10bf0d7b44608ef234253f35329ef4e8672b171a835b3fbb8",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "opponent", "partyIndex": 0, "species": 240, "level": 50, "moves": [123, 123, 123, 123]},
+      "target": {"side": "player", "partyIndex": 0, "species": 95, "level": 50, "initialHp": 142, "maxHp": 142, "finalHp": 124},
+      "choiceConstraint": {"attackerMoveSlots": [123, 123, 123, 123], "opponentAiMoveSlots": [123, 123, 123, 123]},
+      "root": {"symbol": "Move_SMOG", "start": "0x82d01e5", "endExclusive": "0x82d0260", "observations": 305, "attackerBattler": 1, "targetBattler": 0, "moveResultFlags": 4, "moveDamage": 1},
+      "romOutcome": {"kind": "damaging-poison-hit", "targetFinalPartyHp": 124, "targetFinalBattleHp": 124, "targetFinalStatus": "poison", "battleOutcome": 0},
+      "pp": {"before": [20, 20, 20, 20], "after": [20, 19, 20, 20], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "cc84449920a4e3966ca6fe08cda693ef1e4c2fd962bc96a85a4562c066ed19b2", "afterSha256": "cc84449920a4e3966ca6fe08cda693ef1e4c2fd962bc96a85a4562c066ed19b2"},
+      "transientFreeSetup": true
+    }
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "rawRgbRetained": false,
+    "denseWindowCaptured": false,
+    "semanticFramesRetained": false,
+    "latchMeasured": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSceneOnSeam": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "transientOverrides": [],
+    "battleStateInjected": false,
+    "entryHooksSkipped": false,
+    "noTimingOrLatchTransfer": true
+  },
+  "remainder": "Keep MOVE_SMOG and smog-purple-gas-cloud unsupported and unfulfilled. A later Smog-owned checkpoint must retain complete twice-fresh bilateral dense semantic state, raw RGB, and orientation-specific change maps through first inactive cleanup under ANIMATION_LATCHES Rules 1-5; it must independently measure every mechanism before any reducer, typed Scene-ON seam, compositor, framebuffer, latch, track, or coverage claim. Poison Gas, Acid, Grudge, and every shared component remain controls only."
+}

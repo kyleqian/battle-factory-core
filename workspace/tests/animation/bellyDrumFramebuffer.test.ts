@@ -66,7 +66,7 @@ describe("MOVE_BELLY_DRUM production framebuffer", () => {
       .toEqual([]);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_BELLY_DRUM"))
       .toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual([]);
+    expect(coverage.queue).toEqual(["MOVE_SMOG"]);
     expect(coverage.entries.filter((entry: { move: string }) => [
       "MOVE_SING", "MOVE_TEETER_DANCE", "MOVE_FAKE_TEARS", "MOVE_GRASS_WHISTLE",
     ].includes(entry.move))).toEqual(expect.arrayContaining([

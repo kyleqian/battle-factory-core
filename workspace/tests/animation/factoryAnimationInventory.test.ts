@@ -94,7 +94,9 @@ describe("animation coverage ledger", () => {
 
   it("keeps the manual acceptance queue inside Level 50 coverage", () => {
     const queue = queuedAnimationMoves();
-    expect(queue.map(({ move, status }) => ({ move, status }))).toEqual([]);
+    expect(queue.map(({ move, status }) => ({ move, status }))).toEqual([
+      { move: "MOVE_SMOG", status: "unsupported" },
+    ]);
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
       species: 8,
