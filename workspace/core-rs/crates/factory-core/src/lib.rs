@@ -60,6 +60,8 @@ pub mod battle_script_getsecretpowereffect;
 pub mod battle_script_getsecretpowereffect_vectors_gen;
 pub mod battle_script_givepaydaymoney;
 pub mod battle_script_givepaydaymoney_vectors_gen;
+pub mod battle_script_hit_feedback_family;
+pub mod battle_script_hit_feedback_family_vectors_gen;
 pub mod battle_script_incrementgamestat;
 pub mod battle_script_incrementgamestat_vectors_gen;
 pub mod battle_script_jumpif;
