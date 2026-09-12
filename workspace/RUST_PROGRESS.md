@@ -6,6 +6,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 
 
+## R96 — [supervised session, 2026-09-12 03:06 UTC–, unattended] **M93 machine-control family folded**
+
+- **State:** `rust-main` = R95 + `0af6724cc` M93 fast-forward + this
+  ledger commit. Master merge no-op at orient; baseline re-verified
+  **1,730/1,730** + artifact byte-identical to R95 (512,236 B,
+  `a8d2e60b…`). Post-fold gates green. Tree clean, committed. Core-only;
+  no ABI/adapter/TS/npm files touched. **108 of 215 TS opcode names
+  ported.** Next worker: M94 PPREDUCE (scouted this session).
+- **Did (this step):** worker (claude-sonnet-5, 55-min cap, one commit,
+  25.0 min, $3.54, foreground gates) ported the six-opcode
+  `battle_script_control_family.rs` — GOTO 0x28 / RETURN 0x3C / END 0x3D /
+  END2 0x3E / END3 0x3F / CALL 0x41 (`createBattleScriptControlHandlers`
+  + `stepBattleScriptMachine`'s jump/call/return/halt application switch,
+  `battleScriptMachine.ts`): first family with NO rules context — pure
+  machine cursor (program_counter + call_stack). GOTO/CALL's shared lazy
+  resolution ladder with the evaluation-order pin (2-operand resolvable
+  first operand still halts reporting the real expression, not
+  `<missing>`); CALL pushes pc+1 (index twin of C's instr+5); RETURN
+  LIFO + underflow-leaves-pc halt; END/END2 shared "terminal" halt with
+  C side effects intentionally absent; END3's own "end3" halt kind vs
+  RETURN-equivalent pop on non-empty stack. Compact resolution tables
+  pin ALL 474 committed sites (285 goto + 29 call rows — every one
+  resolves cleanly — plus sorted site censuses 73/13/64/10) alongside
+  **27 behavior + 8 registration** cases; corpus sha256
+  `ef2b3837a73f25428730f5c592ae22b016b7d4e34c54642b181949b05e3d6ec0`.
+- **Next:** dispatch + verify M94 PPREDUCE 0x03 (`Cmd_ppreduce`
+  battle_script_commands.c:1205-1247, `ppreduceOpcodeHandler`
+  battleScriptHitChainOpcode.ts:1352-1437; 133 committed no-operand
+  sites; needs party-PP mirror + scheduler-pending + set-battler-pp-data
+  event modeling — tryswapitems is the native precedent for both), then
+  one more leaf if time allows; wind down clean before 06:59 UTC.
+- **Notes:** supervisor audit walked the resolution ladder, the halt
+  reasons, the step-application switch, and registration against TS both
+  directions; independent regeneration byte-identical (generated Rust
+  **81,542 bytes**, sha
+  `86a141249df4d98119474dcd5b872308e7298228f971f6406eb7eb690bd78ce1`;
+  generator **34,958 bytes**, sha256
+  `67ad01ae295b65454e1b9d724bc7b56987433965f6fd7a45c95c4a24dc32101c`).
+  Accepted deviation: goto/call table rows are TS-side census pins, not
+  per-row port replays (label resolution is an input to the Rust
+  handler, so a replay would be vacuous; the 27 behavior cases exercise
+  the port). Gates on `rust-main` post-fold: **1,756/1,756** native
+  (+26), fmt, strict workspace Clippy, wasm32 release; artifact
+  **512,235 bytes**, sha256
+  `f77a2f60471c4598665732782de3586cb840f0a18a6bc670d6205284468b7e49`
+  (usual deterministic codegen size drift). R93 archived. No npm gate
+  required; no deferral or barrier added. No PAPERCUT.
+
 ## R95 — [supervised session wind-down (final), 2026-09-11 15:04-~17:20 UTC, unattended] **M92 multihit family folded; session close (three green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) + three verified
@@ -109,51 +157,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   R91 archived. No npm gate required; no deferral added. No PAPERCUT.
 
 
-## R93 — [supervised session, 2026-09-11 15:04 UTC–, unattended] **M90 COPYARRAY folded**
-
-- **State:** `rust-main` = R92 + `d60845fbd` M90 fast-forward + this
-  ledger commit. Master merge no-op at orient; baseline re-verified
-  **1,658/1,658** + artifact byte-identical to R92 (507,121 B,
-  `222565a5…`). Post-fold gates green. Tree clean, committed. Core-only;
-  no ABI/adapter/TS/npm files touched. **94 of 215 TS opcode names
-  ported.** M91 worker (array-family trio) dispatched off this HEAD
-  (brief `/tmp/rust-briefs/arrayfamily-m91.txt`, 55-min cap).
-- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
-  17.1 min, $2.57, foreground gates) ported 0x31 copyarray
-  (`battle_script_commands.c:3837-3848`): the closed 12-tuple
-  (size, dst, src) catalog in exact TS source order
-  (`ingrainLeechSeedWrapOpcode.ts:166-345`) — battleMoveDamage<->hpDealt
-  both directions, painSplitHp/scriptingBideDmg reads,
-  dynamicBasePower<-tripleKickPower full-u16, the two byte-universe arms
-  (cEFFECT_CHOOSER<-sMULTIHIT_EFFECT, cMULTISTRING_CHOOSER<-
-  sTWOTURN_STRINGID) with their defensive "became undecodable" guards
-  ported as native-unit-test-only dead code, the two REACHABLE
-  role-guard errors verbatim, gBattlerTarget<-sBATTLER +
-  sBATTLER<-sBATTLER_WITH_ABILITY total copies, and
-  gBattleTextBuff1<-sMULTIHIT_STRING as pure advance with the
-  decimal-"6"-not-"0x6" size pin; verbatim fallthrough Halt incl.
-  `<missing>` operand formatting; find-first REQUIRED registration.
-  **22 behavior + 2 registration** cases over all 16 committed sites
-  (12 tuples); corpus sha256
-  `b975bb46eda9b09329d87ad4f366f43a276a5ebf498b631cd60bbb97306d9465`.
-- **Next:** verify + fold M91 (JUMPIFARRAYEQUAL 0x2C + JUMPIFARRAYNOTEQUAL
-  0x2D + COPYARRAYWITHINDEX 0x32, one module, three registration
-  conventions — brief already written), then at most one more thin leaf
-  (PPREDUCE scouted: battle_script_commands.c:1205-1247, hitChainOpcode.ts
-  :1352+, needs events/party-PP modeling; ATTACKSTRING needs
-  prepareMessage/isControllerIdle ports) only if it lands AND verifies by
-  ~18:20 UTC; wind down clean before 19:03 UTC.
-- **Notes:** supervisor audit walked all 12 arms against TS source order,
-  both guard texts, the barrier verbatim, the census both directions, and
-  the metadata C-line pins; independent regeneration byte-identical
-  (generated Rust **32,156 bytes**, sha
-  `0adcac79a8f7889577ea2312d72606e4b4322d79c78eb7a9f1a237bd51ab991f`;
-  generator **23,546 bytes**, sha256
-  `6e856c2a8cb7eeec7f164d1454bb476ca21bcaf48e1e338dbf296ae6d049d244`).
-  Gates on `rust-main` post-fold: **1,678/1,678** native (+20), fmt,
-  strict workspace Clippy, wasm32 release; artifact **507,387 bytes**,
-  sha256
-  `c7c4c367ace13768cf3a2aa731f3fe506362fa3c6041d6d632cdd770d20bfba2`
-  (familiar deterministic codegen size drift). Worker 17.1 min, zero cap
-  expiry. R90 archived. No npm gate required; no deferral added. No
-  PAPERCUT.

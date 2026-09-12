@@ -4,6 +4,55 @@ Older entries moved out of `RUST_PROGRESS.md` (newest first). Git keeps the
 full history regardless.
 
 ---
+## R93 — [supervised session, 2026-09-11 15:04 UTC–, unattended] **M90 COPYARRAY folded**
+
+- **State:** `rust-main` = R92 + `d60845fbd` M90 fast-forward + this
+  ledger commit. Master merge no-op at orient; baseline re-verified
+  **1,658/1,658** + artifact byte-identical to R92 (507,121 B,
+  `222565a5…`). Post-fold gates green. Tree clean, committed. Core-only;
+  no ABI/adapter/TS/npm files touched. **94 of 215 TS opcode names
+  ported.** M91 worker (array-family trio) dispatched off this HEAD
+  (brief `/tmp/rust-briefs/arrayfamily-m91.txt`, 55-min cap).
+- **Did (this step):** worker (claude-sonnet-5, 50-min cap, one commit,
+  17.1 min, $2.57, foreground gates) ported 0x31 copyarray
+  (`battle_script_commands.c:3837-3848`): the closed 12-tuple
+  (size, dst, src) catalog in exact TS source order
+  (`ingrainLeechSeedWrapOpcode.ts:166-345`) — battleMoveDamage<->hpDealt
+  both directions, painSplitHp/scriptingBideDmg reads,
+  dynamicBasePower<-tripleKickPower full-u16, the two byte-universe arms
+  (cEFFECT_CHOOSER<-sMULTIHIT_EFFECT, cMULTISTRING_CHOOSER<-
+  sTWOTURN_STRINGID) with their defensive "became undecodable" guards
+  ported as native-unit-test-only dead code, the two REACHABLE
+  role-guard errors verbatim, gBattlerTarget<-sBATTLER +
+  sBATTLER<-sBATTLER_WITH_ABILITY total copies, and
+  gBattleTextBuff1<-sMULTIHIT_STRING as pure advance with the
+  decimal-"6"-not-"0x6" size pin; verbatim fallthrough Halt incl.
+  `<missing>` operand formatting; find-first REQUIRED registration.
+  **22 behavior + 2 registration** cases over all 16 committed sites
+  (12 tuples); corpus sha256
+  `b975bb46eda9b09329d87ad4f366f43a276a5ebf498b631cd60bbb97306d9465`.
+- **Next:** verify + fold M91 (JUMPIFARRAYEQUAL 0x2C + JUMPIFARRAYNOTEQUAL
+  0x2D + COPYARRAYWITHINDEX 0x32, one module, three registration
+  conventions — brief already written), then at most one more thin leaf
+  (PPREDUCE scouted: battle_script_commands.c:1205-1247, hitChainOpcode.ts
+  :1352+, needs events/party-PP modeling; ATTACKSTRING needs
+  prepareMessage/isControllerIdle ports) only if it lands AND verifies by
+  ~18:20 UTC; wind down clean before 19:03 UTC.
+- **Notes:** supervisor audit walked all 12 arms against TS source order,
+  both guard texts, the barrier verbatim, the census both directions, and
+  the metadata C-line pins; independent regeneration byte-identical
+  (generated Rust **32,156 bytes**, sha
+  `0adcac79a8f7889577ea2312d72606e4b4322d79c78eb7a9f1a237bd51ab991f`;
+  generator **23,546 bytes**, sha256
+  `6e856c2a8cb7eeec7f164d1454bb476ca21bcaf48e1e338dbf296ae6d049d244`).
+  Gates on `rust-main` post-fold: **1,678/1,678** native (+20), fmt,
+  strict workspace Clippy, wasm32 release; artifact **507,387 bytes**,
+  sha256
+  `c7c4c367ace13768cf3a2aa731f3fe506362fa3c6041d6d632cdd770d20bfba2`
+  (familiar deterministic codegen size drift). Worker 17.1 min, zero cap
+  expiry. R90 archived. No npm gate required; no deferral added. No
+  PAPERCUT.
+
 
 ## R92 — [supervised session wind-down (final), 2026-09-11 03:05-~05:15 UTC, unattended] **M89 ADDBYTE folded; session close (four green folds)**
 
