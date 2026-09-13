@@ -1,0 +1,85 @@
+{
+  "schema": "signal-beam-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SIGNAL_BEAM",
+  "moveId": 324,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "freshness": {
+    "check": "tools/check-oracle-freshness.sh",
+    "exitCode": 2,
+    "diagnostic": "both service PID start times were unreadable; this Linux host also treated the harness epoch as a filename while the BSD-date formatting path ran",
+    "sharedOracleCaptureUsed": false,
+    "localMgbaWrapper": "tools/run-mgba-probe.py"
+  },
+  "source": {
+    "audit": "tools/compare/signalBeamSourceAudit.ts",
+    "auditRunSha256": "fd6175610669be5453b79fb554441c8c787b80a6ace2f53a9aa8cf7799ffcce4",
+    "probe": "tools/compare/signalBeamStagingProbe.py",
+    "probeSha256": "965cb2ad4aaa578c03c1e4aff1d70334b691c6193ab647e1d8c179837e251371",
+    "pointerOwnedRoot": {"symbol": "Move_SIGNAL_BEAM", "start": "0x082d0eb2", "endExclusive": "0x082d0f9a"}
+  },
+  "factoryLegalSelection": {
+    "carrier": {"setId": 160, "name": "FRONTIER_MON_ARIADOS", "species": 168},
+    "sourceRoute": {"challengeNum": 0, "level50SetRange": [110, 199], "trainerId": 50},
+    "partyBeforeInit": true,
+    "choiceConstraint": "The Ariados side has all four move slots set to MOVE_SIGNAL_BEAM. The player selects its ordinary first legal slot with A input; the opponent AI has only legal Signal Beam slots. The Chansey control has four Tackle slots.",
+    "outcomeRule": "The stock EFFECT_CONFUSE_HIT route resolves accuracy, damage, and any secondary outcome; no damage, HP, status, stage, weather, side-condition, RNG, or outcome was injected."
+  },
+  "runs": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-signal-beam-player-ariados-opponent-chansey.json",
+      "scenarioSha256": "cd68a145ea20211db12f7c7aad306835abbe45ad36d79b003e3e8e9cce9b327b",
+      "seed": 305419897,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "b759a2d69780cf495b1c3243973812852cb147394531cdf2cd88eaa5de07859f",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "player", "partyIndex": 0, "species": 168, "level": 50, "moves": [324, 324, 324, 324]},
+      "target": {"side": "opponent", "partyIndex": 0, "species": 113, "level": 50, "initialHp": 357, "maxHp": 357, "finalHp": 187},
+      "choiceConstraint": {"attackerMoveSlots": [324, 324, 324, 324], "opponentAiMoveSlots": [33, 33, 33, 33]},
+      "root": {"symbol": "Move_SIGNAL_BEAM", "start": "0x82d0eb2", "endExclusive": "0x82d0f9a", "observations": 145, "attackerBattler": 0, "targetBattler": 1, "moveResultFlags": 0, "moveDamage": 170},
+      "romOutcome": {"kind": "confuse-hit", "targetFinalPartyHp": 187, "targetFinalBattleHp": 187, "targetFinalStatus": "none", "battleOutcome": 0},
+      "pp": {"before": [15, 15, 15, 15], "after": [14, 15, 15, 15], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "26baffe53fb7485824d448208e37343de486d72ef0cd4787bfaadd494bb694ce", "afterSha256": "26baffe53fb7485824d448208e37343de486d72ef0cd4787bfaadd494bb694ce"},
+      "transientFreeSetup": true
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-signal-beam-opponent-ariados-player-chansey.json",
+      "scenarioSha256": "b7d6156e2a21d0552ba26caa116c067046a3fafc21178632f10bde67e39fa28f",
+      "seed": 305419897,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "65cc805056f497797440a03dce2abf0d1eda3ae14a1e2f77a04c76b49aa254be",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "opponent", "partyIndex": 0, "species": 168, "level": 50, "moves": [324, 324, 324, 324]},
+      "target": {"side": "player", "partyIndex": 0, "species": 113, "level": 50, "initialHp": 357, "maxHp": 357, "finalHp": 165},
+      "choiceConstraint": {"attackerMoveSlots": [324, 324, 324, 324], "opponentAiMoveSlots": [324, 324, 324, 324]},
+      "root": {"symbol": "Move_SIGNAL_BEAM", "start": "0x82d0eb2", "endExclusive": "0x82d0f9a", "observations": 144, "attackerBattler": 1, "targetBattler": 0, "moveResultFlags": 0, "moveDamage": 192},
+      "romOutcome": {"kind": "confuse-hit", "targetFinalPartyHp": 165, "targetFinalBattleHp": 165, "targetFinalStatus": "none", "battleOutcome": 0},
+      "pp": {"before": [15, 15, 15, 15], "after": [15, 15, 15, 14], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "e6e9caec586532809a7d8d9e552842de01d440bfc3a080d5670c242b51d55181", "afterSha256": "e6e9caec586532809a7d8d9e552842de01d440bfc3a080d5670c242b51d55181"},
+      "transientFreeSetup": true
+    }
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "rawRgbRetained": false,
+    "denseWindowCaptured": false,
+    "semanticFramesRetained": false,
+    "latchMeasured": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSceneOnSeam": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "transientOverrides": [],
+    "battleStateInjected": false,
+    "entryHooksSkipped": false,
+    "noTimingOrLatchTransfer": true
+  },
+  "remainder": "Keep MOVE_SIGNAL_BEAM unsupported and signal-beam-orb-stream unfulfilled. A later Signal Beam-owned checkpoint must retain complete twice-fresh bilateral dense semantic state, raw RGB, and orientation-specific change maps through first inactive cleanup under ANIMATION_LATCHES Rules 1-5; it must independently measure the paired GLOWY orb stream, sinusoidal timer/callback, attacker/target ShakeMon, target palette blend, Bubble Beam pan sweep, resources, audio, and cleanup before any reducer, typed Scene-ON seam, compositor, framebuffer, latch, track, or coverage claim. Shared DUCK, ShakeMon, StartSinAnimTimer, complex_palette_blend, and panse components transfer no Signal Beam timing or latch credit."
+}

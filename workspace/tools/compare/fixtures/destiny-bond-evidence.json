@@ -18,14 +18,14 @@
   ],
   "source": {
     "audit": "tools/compare/destinyBondSourceAudit.ts",
-    "auditSha256": "641bc6ce52ba1c586d5a445e49f7c5a4cdae42b799e0c8e2456e08a0af5ac021",
+    "auditSha256": "5cf364414d0224aff831ea4e05d1fca7f347cfff2fda7c04dd25366999c0fed0",
     "auditRunSha256": "e77587b596a4ce2764eb35916016e47e168074d153a548276924d0a0aa692925",
     "probe": "tools/compare/destinyBondProbe.py",
     "probeSha256": "4af60176e208aa4f6f1493dcac9fde0229e984e2dd7bb75b7301892d19f3ca6e",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/destiny-bond-staging-receipt.json",
-    "stagingReceiptSha256": "eefe15211ff42809b431d37088eddc6921a25bca82eaa661c76dc3319e84818d",
+  "stagingReceiptSha256": "68abcdf635e9e118e87375f082dd05464c071375a522d158d843b5fb808150d1",
     "pointerOwnedRoot": { "start": "0x082cd62c", "endExclusive": "0x082cd687", "observedParities": [0, 1] }
   },
   "orientations": {

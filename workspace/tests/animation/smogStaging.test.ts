@@ -13,7 +13,7 @@ describe("MOVE_SMOG legal bilateral Scene-ON staging checkpoint", () => {
     const first = verify();
     expect(verify()).toBe(first);
     expect(JSON.parse(first)).toEqual({
-      schema: "smog-source-staging-verifier/v1", auditRunSha256: "6079cb8e6aa377c858f643d6dc5a5c583bb312c514190b61121535761d60b945",
+      schema: "smog-source-staging-verifier/v1", auditRunSha256: "06b37df68b6a10558808187ef95071b5cf5e723233a5d7e43488c4d943e8bf5f",
       runs: { "player-back": { outputSha256: "65089ba0d5a89d1f592c85a76f0637586d92ef8c4b941dbdf380146d3bf0ba50", rootObservations: 305 }, "opponent-front": { outputSha256: "38768410994637f10bf0d7b44608ef234253f35329ef4e8672b171a835b3fbb8", rootObservations: 305 } },
     });
   });

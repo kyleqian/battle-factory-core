@@ -7,7 +7,7 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/destinyBondSourceAudit.ts",
-    "auditRunSha256": "69ec630511b4ef8915ecc7ac5cc503b8f916340895a23e072c3e7447c2473c9b",
+    "auditRunSha256": "e77587b596a4ce2764eb35916016e47e168074d153a548276924d0a0aa692925",
     "probe": "tools/compare/destinyBondStagingProbe.py",
     "probeSha256": "f0ee06eef3bfffbf1f3d05dc87c5c2856f03816591b4731c8b0f80070ebdae25",
     "pointerOwnedRoot": {"start": "0x082cd62c", "endExclusive": "0x082cd687", "romSha256": "7103101a87e4167605c3924a8ab8b251bd48c95b331f85d97d66165848774028"}

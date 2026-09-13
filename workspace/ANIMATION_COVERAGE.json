@@ -7256,7 +7256,7 @@
    ]
   }
  ],
- "queue": [],
+ "queue": ["MOVE_SIGNAL_BEAM"],
  "componentTracks": [
   {
    "id": "spider-web-thread",
@@ -9400,6 +9400,34 @@
       "src/engine/core.ts"
     ],
     "goal": "FULFILLED by MOVE_BONEMERANG alone: its source-derived BONE asset, complete source-age reducer, narrow typed Scene-ON seam, and generic live compositor pass all 144 bilateral component, retained-RGB, and actual-core framebuffer rows twice with zero residual pixels through inactive age 71. The material altered control reverses sides and changes species, picture geometry/origins, allocation/matrices/tasks, painter order, monbg/BG state, presentation RNG, and framebuffer output while gameplay RNG remains opaque and unconsumed. Bone Club, Bone Rush, Iron Tail, Karate Chop, Poison Tail, Sonic Boom, Rock Blast, and every sibling receive no Bonemerang timing, latch, body, move, component, or track credit."
+  },
+  {
+   "id": "signal-beam-orb-stream",
+   "components": [
+    "asset:ANIM_TAG_DUCK",
+    "asset:ANIM_TAG_GLOWY_GREEN_ORB",
+    "asset:ANIM_TAG_GLOWY_RED_ORB",
+    "sprite:gSignalBeamGreenOrbSpriteTemplate",
+    "sprite:gSignalBeamRedOrbSpriteTemplate",
+    "subroutine:SignalBeamOrbs",
+    "task:AnimTask_ShakeMon",
+    "task:AnimTask_StartSinAnimTimer",
+    "visualCommand:complex_palette_blend",
+    "visualCommand:panse"
+   ],
+   "representatives": ["MOVE_SIGNAL_BEAM"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/signalBeamSourceAudit.ts",
+    "tools/battle-lab/mechanic-signal-beam-player-ariados-opponent-chansey.json",
+    "tools/battle-lab/mechanic-signal-beam-opponent-ariados-player-chansey.json",
+    "tools/compare/signalBeamStagingProbe.py",
+    "tools/compare/fixtures/signal-beam-staging-receipt.json",
+    "tools/compare/verifySignalBeamStaging.ts",
+    "tests/animation/signalBeamSourceCheckpoint.test.ts",
+    "tests/animation/signalBeamStaging.test.ts"
+   ],
+   "goal": "UNFULFILLED evidence-only track: MOVE_SIGNAL_BEAM is its sole Level-50 representative. Its direct GLOWY_RED_ORB/GLOWY_GREEN_ORB resources, paired sinusoidal templates, and SignalBeamOrbs subroutine have no exact representative; DUCK, ShakeMon, StartSinAnimTimer, complex_palette_blend, and panse remain independently accepted only where their named moves prove them. Before fulfillment, Signal Beam alone requires complete dense bilateral source-root-to-cleanup state/RGB/change maps, source-relative reducer, typed Scene-ON seam, generic live compositor, and zero-residual actual-core acceptance. No timing, latch, move, component, sibling, or coverage credit transfers from this checkpoint."
   }
  ],
  "variantAudits": {

@@ -19,14 +19,14 @@
   ],
   "source": {
     "audit": "tools/compare/smogSourceAudit.ts",
-    "auditSha256": "f0ec8abff98245e82dc9cf96d17d2efad094dd57754d39037e10e2e280c818a7",
+    "auditSha256": "698519c542bd6600c3f0dd462e793121b23e074a8eb69342f3f7172be8a13e4a",
     "auditRunSha256": "06b37df68b6a10558808187ef95071b5cf5e723233a5d7e43488c4d943e8bf5f",
     "probe": "tools/compare/smogProbe.py",
     "probeSha256": "65547c704fcb2a359b17b3f927fce6c0e89c994bd1455e76ae5c0506a0b038fb",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/smog-staging-receipt.json",
-    "stagingReceiptSha256": "decf631d73e54a60d352c9b13962db3cd1778644fc94adb447d26cb36f4130ec",
+  "stagingReceiptSha256": "73f0a90cdbca34404079b2dbdd3a6ad98a1490397cf4ed8553a3c7e34dfe3328",
     "pointerOwnedRoot": { "start": "0x082d01e5", "endExclusive": "0x082d0260", "observedParities": [0, 1] }
   },
   "orientations": {

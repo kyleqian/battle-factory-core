@@ -146,7 +146,7 @@ describe("MOVE_DESTINY_BOND source/classification and legal Scene-ON staging che
     expect(receipt).toMatchObject({
       schema: "destiny-bond-compact-staging-receipt/v1", oracleProfile: "battle-scene-on", move: "MOVE_DESTINY_BOND", moveId: 194,
       status: "unsupported-source-staging-checkpoint", coverageCredit: false,
-      source: { auditRunSha256: "69ec630511b4ef8915ecc7ac5cc503b8f916340895a23e072c3e7447c2473c9b", pointerOwnedRoot: { start: "0x082cd62c", endExclusive: "0x082cd687" } },
+      source: { auditRunSha256: "e77587b596a4ce2764eb35916016e47e168074d153a548276924d0a0aa692925", pointerOwnedRoot: { start: "0x082cd62c", endExclusive: "0x082cd687" } },
       scope: { framebuffersRetained: false, denseWindowCaptured: false, latchMeasured: false, productionChanged: false, coveragePromotion: false, transientOverrides: [], battleStateInjected: false, entryHooksSkipped: false, noReducerOrSeamOrCompositor: true },
     });
     expect(receipt.source.probeSha256).toBe(sha(readFileSync(resolve(root, receipt.source.probe))));
@@ -168,7 +168,7 @@ describe("MOVE_DESTINY_BOND source/classification and legal Scene-ON staging che
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries).toHaveLength(251);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_DESTINY_BOND")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual([]);
+    expect(coverage.queue).toEqual(["MOVE_SIGNAL_BEAM"]);
     expect(coverage.componentTracks.find((track: Json) => track.id === "destiny-bond-white-shadow")).toMatchObject({
       representatives: ["MOVE_DESTINY_BOND"], fulfilled: true,
       components: ["asset:ANIM_TAG_WHITE_SHADOW", "task:AnimTask_BlendBattleAnimPalExclude", "task:AnimTask_DestinyBondWhiteShadow", "task:AnimTask_ShakeMonInPlace", "visualCommand:blendoff", "visualCommand:clearmonbg", "visualCommand:fadetobg", "visualCommand:restorebg", "visualCommand:waitbgfadein"],
