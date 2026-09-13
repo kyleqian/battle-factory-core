@@ -1,0 +1,85 @@
+{
+  "schema": "bonemerang-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_BONEMERANG",
+  "moveId": 155,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "freshness": {
+    "check": "tools/check-oracle-freshness.sh",
+    "exitCode": 2,
+    "diagnostic": "both service PID start times were unreadable; this Linux host also treated the harness epoch as a filename while the BSD-date formatting path ran",
+    "sharedOracleCaptureUsed": false,
+    "localMgbaWrapper": "tools/run-mgba-probe.py"
+  },
+  "source": {
+    "audit": "tools/compare/bonemerangSourceAudit.ts",
+    "auditRunSha256": "21a372bbdc54bf7a6ea8882ca72c51979dea452fe960f57fc7d5c4f8c6f04f53",
+    "probe": "tools/compare/bonemerangStagingProbe.py",
+    "probeSha256": "61f7f0dbfb1d27de7874e82e39634157685c02c1b6e0a376d7f945e28d9796b3",
+    "pointerOwnedRoot": {"symbol": "Move_BONEMERANG", "start": "0x082d17cc", "endExclusive": "0x082d1820"}
+  },
+  "factoryLegalSelection": {
+    "carrier": {"setId": 387, "name": "FRONTIER_MON_MAROWAK_1", "species": 105},
+    "sourceRoute": {"challengeNum": 3, "level50SetRange": [372, 467], "trainerId": 140},
+    "partyBeforeInit": true,
+    "choiceConstraint": "The Marowak side has all four move slots set to MOVE_BONEMERANG. The player selects its ordinary first legal slot with A input; the opponent AI has only legal Bonemerang slots. The Chansey control has four Tackle slots.",
+    "outcomeRule": "The stock EFFECT_DOUBLE_HIT route resolves accuracy and both damage hits; no damage, HP, status, stage, weather, side-condition, RNG, or outcome was injected."
+  },
+  "runs": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-bonemerang-player-marowak-opponent-chansey.json",
+      "scenarioSha256": "e7824cdab5ab3efb2d7f7657835861ed210ad27437c73a43c90d24dd7b61d677",
+      "seed": 305421231,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "abc9bf3f271d37ef9bd47dd7feca33e5b98d17be14f6973857e853d4ba793b40",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "player", "partyIndex": 0, "species": 105, "level": 50, "moves": [155, 155, 155, 155]},
+      "target": {"side": "opponent", "partyIndex": 0, "species": 113, "level": 50, "initialHp": 357, "maxHp": 357, "finalHp": 14},
+      "choiceConstraint": {"attackerMoveSlots": [155, 155, 155, 155], "opponentAiMoveSlots": [33, 33, 33, 33]},
+      "root": {"symbol": "Move_BONEMERANG", "start": "0x82d17cc", "endExclusive": "0x82d1820", "observations": 142, "attackerBattler": 0, "targetBattler": 1, "moveResultFlags": 0, "moveDamage": 164},
+      "romOutcome": {"kind": "double-hit", "targetFinalPartyHp": 14, "targetFinalBattleHp": 14, "targetFinalStatus": "none", "battleOutcome": 0},
+      "pp": {"before": [10, 10, 10, 10], "after": [9, 10, 10, 10], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "5cfc876961634621be278be1edd6b1e2c7282d1793b902d60fb86b664fad490c", "afterSha256": "5cfc876961634621be278be1edd6b1e2c7282d1793b902d60fb86b664fad490c"},
+      "transientFreeSetup": true
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-bonemerang-opponent-marowak-player-chansey.json",
+      "scenarioSha256": "5490addbfdc1a3a825df2ab101569b48a9810b14cddbfe4436b096b75b3b8890",
+      "seed": 305421231,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "a2c4a9de20cf4d4dc668cf247f1619ea78c9d9bbca7552959651120a559a50de",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "opponent", "partyIndex": 0, "species": 105, "level": 50, "moves": [155, 155, 155, 155]},
+      "target": {"side": "player", "partyIndex": 0, "species": 113, "level": 50, "initialHp": 357, "maxHp": 357, "finalHp": 3},
+      "choiceConstraint": {"attackerMoveSlots": [155, 155, 155, 155], "opponentAiMoveSlots": [155, 155, 155, 155]},
+      "root": {"symbol": "Move_BONEMERANG", "start": "0x82d17cc", "endExclusive": "0x82d1820", "observations": 142, "attackerBattler": 1, "targetBattler": 0, "moveResultFlags": 0, "moveDamage": 183},
+      "romOutcome": {"kind": "double-hit", "targetFinalPartyHp": 3, "targetFinalBattleHp": 3, "targetFinalStatus": "none", "battleOutcome": 0},
+      "pp": {"before": [10, 10, 10, 10], "after": [9, 10, 10, 10], "spent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "8f725be55882cf61914531458c27d6aa7a5794fe8c608d6be3f975fd8474279f", "afterSha256": "8f725be55882cf61914531458c27d6aa7a5794fe8c608d6be3f975fd8474279f"},
+      "transientFreeSetup": true
+    }
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "rawRgbRetained": false,
+    "denseWindowCaptured": false,
+    "semanticFramesRetained": false,
+    "latchMeasured": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSceneOnSeam": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "transientOverrides": [],
+    "battleStateInjected": false,
+    "entryHooksSkipped": false,
+    "noTimingOrLatchTransfer": true
+  },
+  "remainder": "Keep MOVE_BONEMERANG and bone-projectile-bonemerang unsupported and unfulfilled. A later Bonemerang-owned checkpoint must retain complete twice-fresh bilateral dense semantic state, raw RGB, and orientation-specific change maps through first inactive cleanup under ANIMATION_LATCHES Rules 1-5; it must independently measure every mechanism, including BONE OAM/matrix/palette, target monbg, split priority, hitsplat/lunge, ShakeMon, resource, audio, and cleanup, before any reducer, typed Scene-ON seam, compositor, framebuffer, latch, track, or coverage claim. MOVE_BONE_CLUB and MOVE_BONE_RUSH remain outside-Factory source controls only."
+}

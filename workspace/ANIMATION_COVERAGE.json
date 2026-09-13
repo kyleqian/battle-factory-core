@@ -7217,7 +7217,9 @@
    ]
   }
  ],
- "queue": [],
+ "queue": [
+  "MOVE_BONEMERANG"
+ ],
  "componentTracks": [
   {
    "id": "spider-web-thread",
@@ -9312,6 +9314,38 @@
     "src/engine/core.ts"
    ],
    "goal": "FULFILLED by MOVE_SMOG only: its source-derived PURPLE_GAS_CLOUD asset, complete source-age reducer, narrow typed Scene-ON seam, and generic live compositor pass all 612 bilateral component, retained-RGB, and actual-core framebuffer rows twice with zero residual pixels through inactive cleanup. The material altered control reverses sides and changes species, geometry/picture origin, sprite/task/resource/matrix allocation, painter order, monbg, BG, target palette, and presentation RNG. Poison Gas, Acid, Grudge, and every sibling receive no Smog timing, latch, body, move, component, or track credit."
+  },
+  {
+   "id": "bone-projectile-bonemerang",
+   "components": [
+    "asset:ANIM_TAG_BONE",
+    "asset:ANIM_TAG_IMPACT",
+    "sprite:gBonemerangSpriteTemplate",
+    "sprite:gHorizontalLungeSpriteTemplate",
+    "task:AnimTask_ShakeMon",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:create_basic_hitsplat_sprite",
+    "visualCommand:monbg",
+    "visualCommand:setalpha",
+    "visualCommand:splitbgprio"
+   ],
+   "representatives": ["MOVE_BONEMERANG"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/bonemerangSourceAudit.ts",
+    "tools/compare/extractBonemerangAssets.ts",
+    "src/animation/assets/bonemerang.json",
+    "tests/animation/bonemerangSourceCheckpoint.test.ts",
+    "tests/animation/bonemerangAssets.test.ts",
+    "tools/battle-lab/mechanic-bonemerang-player-marowak-opponent-chansey.json",
+    "tools/battle-lab/mechanic-bonemerang-opponent-marowak-player-chansey.json",
+    "tools/compare/bonemerangStagingProbe.py",
+    "tools/compare/fixtures/bonemerang-staging-receipt.json",
+    "tools/compare/verifyBonemerangStaging.ts",
+    "tests/animation/bonemerangStaging.test.ts"
+   ],
+   "goal": "UNFULFILLED evidence-only track. MOVE_BONEMERANG is the sole Level-50 representative and its complete eleven-component source graph must later receive its own twice-fresh bilateral dense state/RGB/change maps, source-relative reducer, typed Scene-ON seam, live compositor, and zero-residual framebuffer acceptance through first inactive cleanup. ANIM_TAG_BONE and gBonemerangSpriteTemplate are newly unrepresented; the nine shared components do not transfer timing, latch, move, or acceptance credit. MOVE_BONE_CLUB and MOVE_BONE_RUSH are outside-Factory source controls only and receive no track credit."
   }
  ],
  "variantAudits": {
