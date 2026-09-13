@@ -13,7 +13,7 @@ describe("MOVE_BONEMERANG legal bilateral Scene-ON staging checkpoint", () => {
     const first = verify();
     expect(verify()).toBe(first);
     expect(JSON.parse(first)).toEqual({
-      schema: "bonemerang-source-staging-verifier/v1", auditRunSha256: "21a372bbdc54bf7a6ea8882ca72c51979dea452fe960f57fc7d5c4f8c6f04f53",
+      schema: "bonemerang-source-staging-verifier/v1", auditRunSha256: "3d051550d121ee6729d7bbd5075ab5a111c625cb82f486f4104be647d003fc1f",
       runs: { "player-back": { outputSha256: "abc9bf3f271d37ef9bd47dd7feca33e5b98d17be14f6973857e853d4ba793b40", rootObservations: 142 }, "opponent-front": { outputSha256: "a2c4a9de20cf4d4dc668cf247f1619ea78c9d9bbca7552959651120a559a50de", rootObservations: 142 } },
     });
   });

@@ -90,14 +90,14 @@ describe("MOVE_BONEMERANG source-relative reducer and narrow Scene-ON seam", () 
     expect(seam.sprites[0]).toMatchObject({ slot: 12, x: 201, y: 43 });
   });
 
-  it("keeps retained evidence out of production and leaves the move/track unfulfilled", () => {
+  it("keeps retained evidence out of production and promotes only Bonemerang and its own track", () => {
     const source = readFileSync(resolve(root, "src/animation/bonemerang.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     const data = coverage as Json;
-    expect(data.entries.find((entry: Json) => entry.move === "MOVE_BONEMERANG")).toBeUndefined();
-    expect(data.queue).toContain("MOVE_BONEMERANG");
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_BONEMERANG")).toMatchObject({ status: "exact" });
+    expect(data.queue).toEqual([]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "bone-projectile-bonemerang")).toMatchObject({
-      representatives: ["MOVE_BONEMERANG"], fulfilled: false,
+      representatives: ["MOVE_BONEMERANG"], fulfilled: true,
     });
   });
 });

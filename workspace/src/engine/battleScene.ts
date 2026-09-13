@@ -547,6 +547,7 @@ import spiderWebAsset from "../animation/assets/spider-web.json" with { type: "j
 import petalDanceAsset from "../animation/assets/petal-dance.json" with { type: "json" };
 import destinyBondAsset from "../animation/assets/destiny-bond.json" with { type: "json" };
 import smogAsset from "../animation/assets/smog.json" with { type: "json" };
+import bonemerangAsset from "../animation/assets/bonemerang.json" with { type: "json" };
 import waterPulseAsset from "../animation/assets/water-pulse.json" with { type: "json" };
 import digDirtMoundAsset from "../animation/assets/dig-dirt-mound.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
@@ -979,6 +980,7 @@ import {
   sceneOnAirCutterView,
   sceneOnSheerColdView,
   sceneOnSmogView,
+  sceneOnBonemerangView,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
   sceneOnAuroraBeamView,
@@ -1237,6 +1239,7 @@ import {
   type SceneOnAirCutterConfig,
   type SceneOnSheerColdConfig,
   type SceneOnSmogConfig,
+  type SceneOnBonemerangConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
@@ -1855,6 +1858,9 @@ const destinyBondArt = destinyBondAsset as {
 const smogArt = (smogAsset as {
   art: { purpleGasCloud: { tileset: Tileset; palette: RgbColor[] } };
 }).art;
+const bonemerangArt = (bonemerangAsset as {
+  bone: { tileset: Tileset; palette: RgbColor[] };
+}).bone;
 const waterPulseArt = waterPulseAsset as {
   blueRing2: { tileset: Tileset; palette: RgbColor[] };
 };
@@ -23451,6 +23457,148 @@ export function renderSceneOnMovePresentation(
         ? `${view.attacker.species} used`
         : `Foe ${view.attacker.species} used`,
       "SMOG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "BONEMERANG") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnBonemerangConfig>;
+    const view = sceneOnBonemerangView(moveState);
+    const displayed = sceneOnBonemerangView({
+      ...moveState,
+      age: Math.max(0, moveState.age - 1),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("BONEMERANG presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`BONEMERANG missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const input = moveState.config.animationInputs;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const fieldTarget2 = fb.slice();
+    const monBgTarget2 = fieldTarget2.slice();
+    if (displayed.background.monbg) {
+      drawSpriteSheet(
+        monBgTarget2,
+        tilesFor(targetArt, view.target.geometry.side),
+        targetArt.palette,
+        -view.background.hardwareScroll.x,
+        -view.background.hardwareScroll.y,
+      );
+    }
+
+    type ObjEntry = Readonly<{
+      slot: number;
+      priority: number;
+      order: number;
+      draw: (target2: Uint8Array) => void;
+    }>;
+    const orderOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    const objects: ObjEntry[] = [{
+      slot: input.attackerSprite.slot,
+      priority: input.attackerSprite.oamPriority,
+      order: orderOf(input.attackerSprite.slot),
+      draw: () => drawSpriteSheet(
+        fb,
+        tilesFor(attackerArt, view.attacker.geometry.side),
+        attackerArt.palette,
+        view.attacker.geometry.spriteCorner.x + input.attackerSprite.x2 + displayed.battlers.attacker.lunge.x,
+        view.attacker.geometry.spriteCorner.y + input.attackerSprite.y2,
+      ),
+    }];
+    if (displayed.background.targetVisible) {
+      objects.push({
+        slot: input.targetSprite.slot,
+        priority: input.targetSprite.oamPriority,
+        order: orderOf(input.targetSprite.slot),
+        draw: () => drawSpriteSheet(
+          fb,
+          tilesFor(targetArt, view.target.geometry.side),
+          targetArt.palette,
+          view.target.geometry.spriteCorner.x + input.targetSprite.x2 + displayed.battlers.target.shake.x,
+          view.target.geometry.spriteCorner.y + input.targetSprite.y2 + displayed.battlers.target.shake.y,
+        ),
+      });
+    }
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "lunge") continue;
+      objects.push({
+        slot: sprite.slot,
+        priority: sprite.oamPriority,
+        order: orderOf(sprite.slot),
+        draw: (target2) => sprite.kind === "bone"
+          ? drawSpriteSheetAffineRotate(
+            fb, bonemerangArt.tileset, bonemerangArt.palette,
+            sprite.x + sprite.x2, sprite.y + sprite.y2,
+            sprite.matrix[0], sprite.matrix[1], sprite.matrix[2], sprite.matrix[3],
+            undefined, false,
+          )
+          : drawSpriteSheetAffineStretchBlendedOverFb(
+            fb, poisonTailArt.impact.tileset, poisonTailArt.impact.palette,
+            sprite.x - 16, sprite.y - 16,
+            sprite.matrix[0], sprite.matrix[3],
+            view.registers.bldalpha & 0xff, view.registers.bldalpha >>> 8 & 0xff,
+            false, target2,
+          ),
+      });
+    }
+
+    const targetBgPriority = displayed.background.layer === "bg1"
+      ? view.registers.bg1cnt & 3
+      : view.registers.bg2cnt & 3;
+    for (let priority = 3; priority >= 0; priority -= 1) {
+      if (displayed.background.monbg && priority === targetBgPriority) {
+        drawSpriteSheet(
+          fb,
+          tilesFor(targetArt, view.target.geometry.side),
+          targetArt.palette,
+          -view.background.hardwareScroll.x,
+          -view.background.hardwareScroll.y,
+        );
+      }
+      for (const entry of objects
+        .filter((item) => item.priority === priority)
+        .sort((left, right) => right.order - left.order || right.slot - left.slot)) {
+        entry.draw(priority <= targetBgPriority ? monBgTarget2 : fieldTarget2);
+      }
+    }
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "BONEMERANG!",
       99,
     );
     return;

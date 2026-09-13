@@ -7215,11 +7215,48 @@
     "tests/animation/smogReducer.test.ts",
     "tests/animation/smogActualCore.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_BONEMERANG",
+   "status": "exact",
+   "covered": [
+    "the complete branchless Move_BONEMERANG body and all eleven source components are independently accepted: BONE and IMPACT resources, the affine gBonemerangSpriteTemplate arc, basic hitsplat, AnimTask_ShakeMon, horizontal lunge, target monbg/split/clear, alpha registers, audio waits, and first-inactive cleanup",
+    "complete legal bilateral MAROWAK/CHANSEY Battle Scene ON evidence retains player-back and opponent-front ages 0..71; the reducer and narrow typed sceneOnBonemerangView seam reproduce all 144 rows from live sides, species, picture geometry/origins, sprite/task/resource/matrix allocation, painter order, monbg/BG/register state, and presentation RNG",
+    "Bonemerang's own maps prove BONE ages 10..50, hitsplat 32..41, ShakeMon 32..39, horizontal lunge 51..65, whole OAM and matrices at ordinary predecessor/RAM+1 on 71/71 comparable rows, hardware palette predecessor/RAM+1 on 70/71 with only age-7 monbg same-row, and selected target-BG setup/shake/clear at RAM+1",
+    "two independent actual-core processes are byte-identical at digest 0b3c6220fcb0165e38258e29ec0f4cfdc00cf4ffe2dc24c7a97528a6db7ab7a3 and each passes all 144/144 component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels through inactive age 71",
+    "a material CUBONE/BLISSEY live control reverses sides and changes species, picture geometry/origins, sprite/task/resource/matrix allocation, painter order, monbg/BG state, presentation RNG, and framebuffer output while gameplay RNG remains opaque and unconsumed",
+    "MOVE_BONE_CLUB, MOVE_BONE_RUSH, MOVE_IRON_TAIL, MOVE_KARATE_CHOP, MOVE_POISON_TAIL, MOVE_SONIC_BOOM, MOVE_ROCK_BLAST, and every sibling receive no Bonemerang timing, latch, body, move, component, or track credit"
+   ],
+   "evidence": [
+    "tools/compare/bonemerangSourceAudit.ts",
+    "tools/compare/extractBonemerangAssets.ts",
+    "src/animation/assets/bonemerang.json",
+    "tools/battle-lab/mechanic-bonemerang-player-marowak-opponent-chansey.json",
+    "tools/battle-lab/mechanic-bonemerang-opponent-marowak-player-chansey.json",
+    "tools/compare/fixtures/bonemerang-staging-receipt.json",
+    "tools/compare/verifyBonemerangStaging.ts",
+    "tools/compare/fixtures/bonemerang-evidence.json",
+    "tools/compare/evidence/bonemerang-player-dense-state.json.gz",
+    "tools/compare/evidence/bonemerang-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/bonemerang-changemap-player.json",
+    "tools/compare/evidence/bonemerang-opponent-dense-state.json.gz",
+    "tools/compare/evidence/bonemerang-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/bonemerang-changemap-opponent.json",
+    "src/animation/bonemerang.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifyBonemerangReducer.ts",
+    "tools/compare/bonemerangActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/bonemerangSourceCheckpoint.test.ts",
+    "tests/animation/bonemerangStaging.test.ts",
+    "tests/animation/bonemerangEvidenceCheckpoint.test.ts",
+    "tests/animation/bonemerangReducer.test.ts",
+    "tests/animation/bonemerangActualCore.test.ts"
+   ]
   }
  ],
- "queue": [
-  "MOVE_BONEMERANG"
- ],
+ "queue": [],
  "componentTracks": [
   {
    "id": "spider-web-thread",
@@ -9331,7 +9368,7 @@
     "visualCommand:splitbgprio"
    ],
    "representatives": ["MOVE_BONEMERANG"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/bonemerangSourceAudit.ts",
     "tools/compare/extractBonemerangAssets.ts",
@@ -9356,9 +9393,13 @@
       "tests/animation/bonemerangEvidenceCheckpoint.test.ts",
       "src/animation/bonemerang.ts",
       "tools/compare/verifyBonemerangReducer.ts",
-      "tests/animation/bonemerangReducer.test.ts"
+      "tests/animation/bonemerangReducer.test.ts",
+      "tools/compare/bonemerangActualCore.ts",
+      "tests/animation/bonemerangActualCore.test.ts",
+      "src/engine/battleScene.ts",
+      "src/engine/core.ts"
     ],
-    "goal": "UNFULFILLED after the complete evidence-only checkpoint and the source-relative reducer/typed Scene-ON seam checkpoint. MOVE_BONEMERANG is the sole Level-50 representative with twice-fresh bilateral 72+72 dense state/RGB/change maps and a complete generic live reducer/seam, but still requires separate live compositor wiring and zero-residual framebuffer acceptance. ANIM_TAG_BONE and gBonemerangSpriteTemplate remain unrepresented by an exact move; the nine shared components do not transfer timing, latch, move, or acceptance credit. MOVE_BONE_CLUB and MOVE_BONE_RUSH are outside-Factory source controls only and receive no track credit."
+    "goal": "FULFILLED by MOVE_BONEMERANG alone: its source-derived BONE asset, complete source-age reducer, narrow typed Scene-ON seam, and generic live compositor pass all 144 bilateral component, retained-RGB, and actual-core framebuffer rows twice with zero residual pixels through inactive age 71. The material altered control reverses sides and changes species, picture geometry/origins, allocation/matrices/tasks, painter order, monbg/BG state, presentation RNG, and framebuffer output while gameplay RNG remains opaque and unconsumed. Bone Club, Bone Rush, Iron Tail, Karate Chop, Poison Tail, Sonic Boom, Rock Blast, and every sibling receive no Bonemerang timing, latch, body, move, component, or track credit."
   }
  ],
  "variantAudits": {

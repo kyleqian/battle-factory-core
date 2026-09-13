@@ -96,7 +96,7 @@ describe("MOVE_SOLAR_BEAM source and dense acceptance", () => {
 
   it("promotes only Solar Beam after all target-side track members are independently exact", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8"));
-    expect(coverage.entries).toHaveLength(250);
+    expect(coverage.entries).toHaveLength(251);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SOLAR_BEAM")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "contest-target-side-impact-bg")).toMatchObject({ fulfilled: true, representatives: ["MOVE_HYPER_FANG", "MOVE_MEGA_PUNCH", "MOVE_MEGA_KICK", "MOVE_SOLAR_BEAM", "MOVE_FOCUS_PUNCH"] });
   });

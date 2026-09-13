@@ -49,7 +49,7 @@ equal(receipt.freshness, {
   sharedOracleCaptureUsed: false, localMgbaWrapper: "tools/run-mgba-probe.py",
 }, "freshness diagnostic");
 if (!audit.checkpoint.sourceAudit || !audit.checkpoint.completePointerOwnedRoot || !audit.checkpoint.completeReachableBranches || !audit.checkpoint.completeCarrierCensus || !audit.checkpoint.legalBilateralPartyOnlyStaging || !audit.checkpoint.oracleOrMgbaInvoked || !audit.checkpoint.compactBilateralEndpointReceipts || !audit.checkpoint.twiceFreshPerOrientation || !audit.checkpoint.denseWindowCaptured || !audit.checkpoint.reducerAdded || !audit.checkpoint.typedSceneOnSeam || !audit.checkpoint.compositorAdded || !audit.checkpoint.framebufferAcceptance || !audit.checkpoint.coveragePromotion || !audit.checkpoint.componentTrackFulfilled || !audit.checkpoint.latchPromotion || audit.checkpoint.unsupportedNoCreditBoundary) fail("source audit exact boundary");
-if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_SMOG" && entry.status === "exact") || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_BONEMERANG"])) fail("coverage promotion boundary");
+if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_SMOG" && entry.status === "exact") || JSON.stringify(coverage.queue) !== JSON.stringify([])) fail("coverage promotion boundary");
 equal(receipt.factoryLegalSelection.carrier, { setId: 149, name: "FRONTIER_MON_MAGBY", species: 240 }, "legal carrier");
 equal(receipt.factoryLegalSelection.sourceRoute, { challengeNum: 0, level50SetRange: [110, 199], trainerId: 50 }, "legal source route");
 

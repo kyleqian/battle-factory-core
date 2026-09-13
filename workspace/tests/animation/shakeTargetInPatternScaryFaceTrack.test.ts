@@ -508,8 +508,8 @@ describe("shake-target-in-pattern-scary-face standalone fulfilled component-trac
     ]) expect(latches).toContain(token);
 
     const coverage = json("ANIMATION_COVERAGE.json");
-    expect(coverage.entries).toHaveLength(250);
-    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(250);
+    expect(coverage.entries).toHaveLength(251);
+    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(251);
     expect(coverage.entries.filter((entry: Json) => entry.status === "partial" || entry.status === "staged")).toEqual([]);
     expect(["MOVE_SCARY_FACE", "MOVE_GLARE", "MOVE_THUNDER", "MOVE_TRI_ATTACK"].map((move) =>
       coverage.entries.find((entry: Json) => entry.move === move),
@@ -519,7 +519,7 @@ describe("shake-target-in-pattern-scary-face standalone fulfilled component-trac
       expect.objectContaining({ move: "MOVE_THUNDER", status: "exact" }),
       expect.objectContaining({ move: "MOVE_TRI_ATTACK", status: "exact" }),
     ]);
-    expect(276 - coverage.entries.length).toBe(26);
+    expect(276 - coverage.entries.length).toBe(25);
     expect(coverage.componentTracks.filter((track: Json) => track.id === "shake-target-in-pattern-scary-face"))
       .toEqual([{
         id: "shake-target-in-pattern-scary-face", components: [...trackComponents],
