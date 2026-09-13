@@ -9425,7 +9425,11 @@
     "tools/compare/fixtures/signal-beam-staging-receipt.json",
     "tools/compare/verifySignalBeamStaging.ts",
     "tests/animation/signalBeamSourceCheckpoint.test.ts",
-    "tests/animation/signalBeamStaging.test.ts"
+    "tests/animation/signalBeamStaging.test.ts",
+    "tools/compare/signalBeamProbe.py",
+    "tools/compare/fixtures/signal-beam-evidence.json",
+    "tools/compare/signalBeamEvidence.ts",
+    "tests/animation/signalBeamEvidenceCheckpoint.test.ts"
    ],
    "goal": "UNFULFILLED evidence-only track: MOVE_SIGNAL_BEAM is its sole Level-50 representative. Its direct GLOWY_RED_ORB/GLOWY_GREEN_ORB resources, paired sinusoidal templates, and SignalBeamOrbs subroutine have no exact representative; DUCK, ShakeMon, StartSinAnimTimer, complex_palette_blend, and panse remain independently accepted only where their named moves prove them. Before fulfillment, Signal Beam alone requires complete dense bilateral source-root-to-cleanup state/RGB/change maps, source-relative reducer, typed Scene-ON seam, generic live compositor, and zero-residual actual-core acceptance. No timing, latch, move, component, sibling, or coverage credit transfers from this checkpoint."
   }
