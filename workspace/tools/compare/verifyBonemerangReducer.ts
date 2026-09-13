@@ -94,8 +94,14 @@ export function bonemerangConfigFor(side: BonemerangOrientation, rows: readonly 
     move: "BONEMERANG",
     attacker: { species: attackerSpecies as never, geometry: { side: attackerSide, spriteCorner: { x: attackerPictureCenter.x - 32, y: attackerPictureCenter.y - 32 }, animationCenter: attackerPictureCenter, battlePositionCenter: attackerPictureCenter } },
     target: { species: targetSpecies as never, geometry: { side: targetSide, spriteCorner: { x: targetPictureCenter.x - 32, y: targetPictureCenter.y - 32 }, animationCenter: targetPictureCenter, battlePositionCenter: targetPictureCenter } },
-    fieldProfile: {}, animationInputs,
-  } as SceneOnBonemerangPresentationState["config"];
+    fieldProfile: {
+      playerHp: rows[0]!.parties.player[0].hp,
+      playerMaxHp: rows[0]!.parties.player[0].maxHp,
+      opponentHp: rows[0]!.parties.opponent[0].hp,
+      opponentMaxHp: rows[0]!.parties.opponent[0].maxHp,
+    },
+    animationInputs,
+  };
 }
 function ownedSprites(row: Json): Json[] {
   const names = new Set(["gBonemerangSpriteTemplate", "gBasicHitSplatSpriteTemplate", "gHorizontalLungeSpriteTemplate"]);

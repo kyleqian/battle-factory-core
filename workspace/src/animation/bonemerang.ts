@@ -150,7 +150,7 @@ export interface BonemerangLunge {
   readonly subpriority: number;
   readonly oamPriority: 3;
   readonly matrixNum: 0;
-  readonly matrix: readonly [256, 0, 0, 256];
+  readonly matrix: BonemerangMatrix;
   readonly data: readonly [number, number, 0, number, 6, 0, number, number];
   readonly sourceCreationOrder: 2;
 }
@@ -368,7 +368,7 @@ function animationRngAtAge(seed: number, age: number): number {
 function dynamicOrderKey(sprite: BonemerangSprite): BonemerangPainterSprite {
   return { slot: sprite.slot, subpriority: sprite.subpriority, oamPriority: sprite.oamPriority, oamY: sprite.y + sprite.y2 };
 }
-function painterOrderAtAge(age: number, input: Readonly<BonemerangLiveInputs>, sprites: readonly BonemerangSprite[]): readonly number[] {
+function painterOrderAtAge(input: Readonly<BonemerangLiveInputs>, sprites: readonly BonemerangSprite[]): readonly number[] {
   const keys = new Map(input.painterSprites.map((sprite) => [sprite.slot, sprite]));
   // Reset destroyed slots exactly as Sprite reset does before the next sort.
   for (const slot of [input.allocations.boneSpriteSlot, input.allocations.impactSpriteSlot, input.allocations.lungeSpriteSlot]) {
@@ -443,7 +443,7 @@ export function bonemerangAtAge(age: number, input: Readonly<BonemerangLiveInput
       bg1cnt, bg2cnt,
     },
     displayTransfer: { oam: age === 0 ? "initial" : "preceding-software", matrices: age === 0 ? "initial" : "preceding-software", palette: age === 0 ? "initial" : age === 7 ? "same-row-monbg-setup" : "preceding-faded" },
-    painterOrder: painterOrderAtAge(age, input, sprites), audio,
+    painterOrder: painterOrderAtAge(input, sprites), audio,
     rng: { animation: animationRngAtAge(input.animationRngSeed, age), sourceDraws: paletteDrawsAtAge(age), gameplay: input.gameplayRng, gameplayUnchanged: true },
     cleanup: { firstInactive: age === BONEMERANG_FIRST_INACTIVE_AGE, visualTasks: sprites.length + tasks.filter((task) => task.role === "shake").length, soundTasks: 0, ownedSprites: sprites.length, resourcesReleased: age >= BONEMERANG_FIRST_INACTIVE_AGE },
   };
