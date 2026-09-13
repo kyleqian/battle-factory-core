@@ -9351,11 +9351,14 @@
     "tools/compare/evidence/bonemerang-opponent-dense-state.json.gz",
     "tools/compare/evidence/bonemerang-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/bonemerang-changemap-opponent.json",
-    "tools/compare/fixtures/bonemerang-evidence.json",
-    "tools/compare/bonemerangEvidence.ts",
-    "tests/animation/bonemerangEvidenceCheckpoint.test.ts"
-   ],
-   "goal": "UNFULFILLED after the complete evidence-only checkpoint. MOVE_BONEMERANG is the sole Level-50 representative and now retains its own twice-fresh bilateral 72+72 dense state/RGB/change maps through first inactive cleanup, but still requires a separate source-relative reducer, typed Scene-ON seam, live compositor, and zero-residual framebuffer acceptance. ANIM_TAG_BONE and gBonemerangSpriteTemplate remain unrepresented by an exact move; the nine shared components do not transfer timing, latch, move, or acceptance credit. MOVE_BONE_CLUB and MOVE_BONE_RUSH are outside-Factory source controls only and receive no track credit."
+      "tools/compare/fixtures/bonemerang-evidence.json",
+      "tools/compare/bonemerangEvidence.ts",
+      "tests/animation/bonemerangEvidenceCheckpoint.test.ts",
+      "src/animation/bonemerang.ts",
+      "tools/compare/verifyBonemerangReducer.ts",
+      "tests/animation/bonemerangReducer.test.ts"
+    ],
+    "goal": "UNFULFILLED after the complete evidence-only checkpoint and the source-relative reducer/typed Scene-ON seam checkpoint. MOVE_BONEMERANG is the sole Level-50 representative with twice-fresh bilateral 72+72 dense state/RGB/change maps and a complete generic live reducer/seam, but still requires separate live compositor wiring and zero-residual framebuffer acceptance. ANIM_TAG_BONE and gBonemerangSpriteTemplate remain unrepresented by an exact move; the nine shared components do not transfer timing, latch, move, or acceptance credit. MOVE_BONE_CLUB and MOVE_BONE_RUSH are outside-Factory source controls only and receive no track credit."
   }
  ],
  "variantAudits": {

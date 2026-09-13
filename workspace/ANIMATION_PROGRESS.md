@@ -1,3 +1,10 @@
+# MOVE_BONEMERANG source-relative reducer + typed Scene-ON seam — bounded worker (2026-09-13)
+
+- **State:** Level 50 remains **250/276 exact**, **0 partial / 0 staged**, and **26 unsupported**. `MOVE_BONEMERANG` remains the sole queue item and `bone-projectile-bonemerang` remains unfulfilled; no compositor, framebuffer acceptance, promotion, boundary/barrier, gameplay, controller, or facility state changed.
+- **Did:** Added a complete source-relative `bonemerangAtAge` reducer and narrow `sceneOnBonemerangView` seam. Live sides/species, picture origins, battler/task/resource/matrix allocation, painter seed/order, monbg/BG/register inputs, presentation RNG, and opaque unchanged gameplay RNG drive source cursor/waits, Q8.8 outward/return BONE arc/affine state, hitsplat/ShakeMon/lunge, audio/pan, blend/split/monbg cleanup, and first inactive age 71.
+- **Proof:** `verifyBonemerangReducer()` replays both retained 72-row orientations twice through reducer and typed seam: **144 retained rows, 288 reducer + 288 seam calls**, exact owned sprites/tasks/resources/matrices/order/registers/RNG/audio and ordinary OAM/matrix RAM+1 plus the local age-7 palette exception. The material live control changes sides/species, origins, allocation/matrices, painter order, and output; retained evidence stays test/tool-only.
+- **Next:** Keep this as a reducer/seam checkpoint only. A later move-owned step needs generic live compositor wiring and complete bilateral zero-residual framebuffer acceptance before any move or track promotion. **For the main program:** nothing blocking.
+
 # Animation supervisor verification — MOVE_BONEMERANG bilateral dense evidence (2026-09-13 supervisor)
 
 - **State / merge:** Independently reviewed and fast-forwarded Sol/high commit `252352b41`. Level 50 remains **250/276 exact**, **0 partial / 0 staged**, and **26 unsupported**; `MOVE_BONEMERANG` remains the sole queue item and `bone-projectile-bonemerang` remains unfulfilled. No reducer/seam/compositor/framebuffer acceptance, production/core file, move/component/sibling/track credit, boundary/barrier, gameplay, controller, or facility owner changed.

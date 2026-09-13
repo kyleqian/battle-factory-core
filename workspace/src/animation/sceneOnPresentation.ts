@@ -910,6 +910,11 @@ import {
   type SmogState,
 } from "./smog.ts";
 import {
+  bonemerangAtAge,
+  type BonemerangLiveInputs,
+  type BonemerangState,
+} from "./bonemerang.ts";
+import {
   waterPulseAtAge,
   type WaterPulseLiveInputs,
   type WaterPulseState,
@@ -2559,6 +2564,21 @@ export interface SceneOnSmogConfig {
     "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies">>;
 }
 
+/**
+ * Narrow Scene-ON seam for MOVE_BONEMERANG.  The scene supplies current
+ * battler picture origins and allocator state; this does not own damage,
+ * gameplay RNG, turn timing, or any controller transition.
+ */
+export interface SceneOnBonemerangConfig {
+  readonly move: "BONEMERANG";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<BonemerangLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerPictureCenter" | "targetPictureCenter">>;
+}
+
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
@@ -4069,6 +4089,7 @@ export type SceneOnMoveConfig =
   | SceneOnAirCutterConfig
   | SceneOnSheerColdConfig
   | SceneOnSmogConfig
+  | SceneOnBonemerangConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
@@ -4413,6 +4434,8 @@ export type SceneOnSheerColdPresentationState =
   SceneOnMovePresentationState<SceneOnSheerColdConfig>;
 export type SceneOnSmogPresentationState =
   SceneOnMovePresentationState<SceneOnSmogConfig>;
+export type SceneOnBonemerangPresentationState =
+  SceneOnMovePresentationState<SceneOnBonemerangConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnDigPresentationState =
@@ -4790,6 +4813,11 @@ export interface SceneOnSheerColdView extends SheerColdState {
 }
 
 export interface SceneOnSmogView extends SmogState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnBonemerangView extends BonemerangState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8174,6 +8202,29 @@ export function sceneOnSmogView(
       targetSide: target.geometry.side,
       attackerSpecies: attacker.species,
       targetSpecies: target.species,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_BONEMERANG's first source-owned resource command row. */
+export function sceneOnBonemerangView(
+  state: SceneOnBonemerangPresentationState,
+): SceneOnBonemerangView {
+  if (state.config.move !== "BONEMERANG") {
+    throw new Error(`expected BONEMERANG presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...bonemerangAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerPictureCenter: attacker.geometry.animationCenter,
+      targetPictureCenter: target.geometry.animationCenter,
     }),
     attacker,
     target,
