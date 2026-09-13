@@ -546,6 +546,7 @@ import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import spiderWebAsset from "../animation/assets/spider-web.json" with { type: "json" };
 import petalDanceAsset from "../animation/assets/petal-dance.json" with { type: "json" };
 import destinyBondAsset from "../animation/assets/destiny-bond.json" with { type: "json" };
+import smogAsset from "../animation/assets/smog.json" with { type: "json" };
 import waterPulseAsset from "../animation/assets/water-pulse.json" with { type: "json" };
 import digDirtMoundAsset from "../animation/assets/dig-dirt-mound.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
@@ -977,6 +978,7 @@ import {
   sceneOnSonicBoomView,
   sceneOnAirCutterView,
   sceneOnSheerColdView,
+  sceneOnSmogView,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
   sceneOnAuroraBeamView,
@@ -1234,6 +1236,7 @@ import {
   type SceneOnSonicBoomConfig,
   type SceneOnAirCutterConfig,
   type SceneOnSheerColdConfig,
+  type SceneOnSmogConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
@@ -1849,6 +1852,9 @@ const petalDanceArt = petalDanceAsset as {
 const destinyBondArt = destinyBondAsset as {
   whiteShadow: { tileset: Tileset; palette: RgbColor[] };
 };
+const smogArt = (smogAsset as {
+  art: { purpleGasCloud: { tileset: Tileset; palette: RgbColor[] } };
+}).art;
 const waterPulseArt = waterPulseAsset as {
   blueRing2: { tileset: Tileset; palette: RgbColor[] };
 };
@@ -23281,6 +23287,170 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.side === "player"
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "SHEER COLD!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SMOG") {
+    const smogState = state as SceneOnMovePresentationState<SceneOnSmogConfig>;
+    const view = sceneOnSmogView(smogState);
+    const displayed = sceneOnSmogView({
+      ...smogState,
+      age: Math.max(0, smogState.age - 1),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SMOG presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SMOG missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const tintPacked = mgbaColorFromBgr555(26650);
+    const targetPalette = blendPaletteToward(targetArt.palette, {
+      r: tintPacked & 0xff,
+      g: tintPacked >>> 8 & 0xff,
+      b: tintPacked >>> 16 & 0xff,
+    }, displayed.palette.target.blendAmount);
+    const input = smogState.config.animationInputs;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+
+    type ObjEntry = Readonly<{
+      slot: number;
+      priority: number;
+      order: number;
+      kind: "opaque" | "cloud";
+      draw: (target2: Uint8Array) => void;
+    }>;
+    const orderOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    const objects: ObjEntry[] = [];
+    objects.push({
+      slot: input.attackerSprite.slot,
+      priority: input.attackerSprite.oamPriority,
+      order: orderOf(input.attackerSprite.slot),
+      kind: "opaque",
+      draw: () => drawSpriteSheet(
+        fb,
+        tilesFor(attackerArt, view.attacker.geometry.side),
+        attackerArt.palette,
+        view.attacker.geometry.spriteCorner.x + input.attackerSprite.x2,
+        view.attacker.geometry.spriteCorner.y + input.attackerSprite.y2,
+      ),
+    });
+    if (displayed.background.targetVisible) {
+      const targetOffset = smogState.age <= 4
+        ? { x: input.targetSprite.x2, y: input.targetSprite.y2 }
+        : view.battlers.target.shake;
+      objects.push({
+        slot: input.targetSprite.slot,
+        priority: input.targetSprite.oamPriority,
+        order: orderOf(input.targetSprite.slot),
+        kind: "opaque",
+        draw: () => drawSpriteSheet(
+          fb,
+          tilesFor(targetArt, view.target.geometry.side),
+          targetPalette,
+          view.target.geometry.spriteCorner.x + targetOffset.x,
+          view.target.geometry.spriteCorner.y + targetOffset.y,
+        ),
+      });
+    }
+    for (const cloud of displayed.sprites) {
+      const frame = subTileset(
+        smogArt.purpleGasCloud.tileset,
+        cloud.animCmdIndex * 2,
+        2,
+      );
+      objects.push({
+        slot: cloud.slot,
+        priority: cloud.oamPriority,
+        order: orderOf(cloud.slot),
+        kind: "cloud",
+        draw: (target2) => drawSpriteSheetBlendedOverBackdrop(
+          fb,
+          target2,
+          frame,
+          smogArt.purpleGasCloud.palette,
+          cloud.x + cloud.x2 - 16,
+          cloud.y + cloud.y2 - 8,
+          view.registers.bldalpha & 0xff,
+          view.registers.bldalpha >>> 8 & 0xff,
+        ),
+      });
+    }
+
+    const targetBgPriority = input.targetBgPriority;
+    // OBJ selection happens before alpha blending: overlapping clouds never
+    // become one another's target 2. Keep pure non-OBJ snapshots for both
+    // sides of the monbg priority split, then let the winning OAM entry paint
+    // from the appropriate snapshot.
+    const fieldTarget2 = fb.slice();
+    const monBgTarget2 = fieldTarget2.slice();
+    if (displayed.background.monbg) {
+      drawSpriteSheet(
+        monBgTarget2,
+        tilesFor(targetArt, view.target.geometry.side),
+        targetPalette,
+        -view.background.hardwareScroll.x,
+        -view.background.hardwareScroll.y,
+      );
+    }
+    for (let priority = 3; priority >= 0; priority -= 1) {
+      if (displayed.background.monbg && priority === targetBgPriority) {
+        drawSpriteSheet(
+          fb,
+          tilesFor(targetArt, view.target.geometry.side),
+          targetPalette,
+          -view.background.hardwareScroll.x,
+          -view.background.hardwareScroll.y,
+        );
+      }
+      for (const entry of objects
+        .filter((item) => item.priority === priority)
+        .sort((left, right) => right.order - left.order || right.slot - left.slot)) {
+        entry.draw(priority <= targetBgPriority ? monBgTarget2 : fieldTarget2);
+      }
+    }
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = smogState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used`
+        : `Foe ${view.attacker.species} used`,
+      "SMOG!",
       99,
     );
     return;

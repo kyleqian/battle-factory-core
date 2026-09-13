@@ -115,9 +115,9 @@ describe("MOVE_SKY_UPPERCUT source-age reducer and typed Scene-ON seam", () => {
 
   it("retains the source-derived reducer after independent exact promotion", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.queue).toEqual(["MOVE_SMOG"]);
+    expect(coverage.queue).toEqual([]);
     expect(coverage.entries.find((entry: { move: string }) =>
       entry.move === "MOVE_SKY_UPPERCUT")).toMatchObject({ status: "exact" });
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(249);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(250);
   });
 });

@@ -77,7 +77,7 @@ describe("MOVE_MAGNITUDE authoritative source and legal bilateral branch staging
 
   it("promotes only Magnitude, preserving Spider Web as the sole manual queue item", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.queue).toEqual(["MOVE_SMOG"]);
+    expect(coverage.queue).toEqual([]);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_MAGNITUDE")?.status).toBe("exact");
     expect(audit().checkpoint).toEqual({ legalPartyOnlyStaging: true, branches: ["regular", "intense"], orientations: ["player-back", "opponent-front"], denseWindowCaptured: true, twiceFresh: true, normalizedMaps: true, productionChanged: true, coveragePromotion: true, componentTrackCredit: false, latchPromotion: false });
   });

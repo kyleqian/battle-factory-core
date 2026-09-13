@@ -184,6 +184,7 @@ import {
   type SceneOnDigConfig,
   type SceneOnAirCutterConfig,
   type SceneOnSheerColdConfig,
+  type SceneOnSmogConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -301,6 +302,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "SHEER_COLD") {
     const sheerColdPresentation = presentation as SceneOnMovePresentationState<SceneOnSheerColdConfig>;
     renderSceneOnMovePresentation(framebuffer, sheerColdPresentation);
+    return;
+  }
+  if (presentation.config.move === "SMOG") {
+    const smogPresentation = presentation as SceneOnMovePresentationState<SceneOnSmogConfig>;
+    renderSceneOnMovePresentation(framebuffer, smogPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

@@ -11,10 +11,10 @@ describe("MOVE_SMOG source/component/carrier checkpoint", () => {
   it("pins the complete odd-root interval, both source blocks, cloud frame/callback graph, blend task, audio, resources, and cleanup", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
-    expect(createHash("sha256").update(first).digest("hex")).toBe("6079cb8e6aa377c858f643d6dc5a5c583bb312c514190b61121535761d60b945");
+    expect(createHash("sha256").update(first).digest("hex")).toBe("06b37df68b6a10558808187ef95071b5cf5e723233a5d7e43488c4d943e8bf5f");
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
-      schema: "smog-source-audit/v1", move: "MOVE_SMOG", moveId: 123, status: "unsupported-source-legal-staging-checkpoint", coverageCredit: false,
+      schema: "smog-source-audit/v1", move: "MOVE_SMOG", moveId: 123, status: "exact", coverageCredit: true,
       source: { pointerOwnedRoot: { symbol: "Move_SMOG", nextDispatchLabel: "Move_FAINT_ATTACK", rom: { start: "0x082d01e5", endExclusive: "0x082d0260", byteLength: 123, romSha256: "a21d2fd5098afec42310a94a76bc1bc13c279f04eea941a0da5f6106668c6def" }, branches: { directlyReachableBlocks: ["Move_SMOG", "SmogCloud"], dispatchedBranches: [], complete: true } } },
       behavior: { move: { effect: "EFFECT_POISON_HIT", power: 20, accuracy: 70, pp: 20, secondaryEffectChance: 40, target: "MOVE_TARGET_SELECTED" }, clouds: { calls: 7, args: [0, -24, 48, 240, 1, 0], frameData: [[0, 8], [8, 8]], callback: "InitSwirlingFogAnim -> AnimSwirlingFogAnim" }, blendCycle: { priority: 2, selector: "F_PAL_TARGET", delay: 2, numBlends: 2, initialBlendY: 0, targetBlendY: 12, color: "RGB(26, 0, 26)" }, shake: { task: "AnimTask_ShakeMon2", args: ["ANIM_TARGET", 2, 0, 15, 1] }, monbg: { setup: "ANIM_DEF_PARTNER", split: "splitbgprio_all", alpha: [12, 8], cleanup: ["waitforvisualfinish", "clearmonbg ANIM_DEF_PARTNER", "blendoff", "end"] } },
       resources: { purpleGasCloud: { tag: "ANIM_TAG_PURPLE_GAS_CLOUD", tagValue: 10172, tileBytes: 0x0200 }, audio: { SE_M_MIST: { id: 168, schedule: [17, 10] }, SE_M_TOXIC: { id: 148, schedule: [18, 2] } } },
@@ -25,16 +25,16 @@ describe("MOVE_SMOG source/component/carrier checkpoint", () => {
     expect(audit.source.blocks.SmogCloud.commands).toEqual(["createsprite gSmogCloudSpriteTemplate, ANIM_ATTACKER, 2, 0, -24, 48, 240, 1, 0", "delay 7", "return"]);
   });
 
-  it("keeps the exact ten-component graph source-audited, the sole Level-50 Magby carrier queued, and controls independent", () => {
+  it("keeps the exact ten-component graph source-audited, the sole Level-50 Magby carrier accepted, and controls independent", () => {
     const audit = JSON.parse(auditText()) as Json;
     expect(audit.graph).toMatchObject({
       blocks: ["Move_SMOG", "SmogCloud"],
       components: ["asset:ANIM_TAG_PURPLE_GAS_CLOUD", "sprite:gSmogCloudSpriteTemplate", "subroutine:SmogCloud", "task:AnimTask_ShakeMon2", "visualCommand:blend_color_cycle", "visualCommand:blendoff", "visualCommand:clearmonbg", "visualCommand:monbg", "visualCommand:setalpha", "visualCommand:splitbgprio_all"],
-      track: { id: "smog-purple-gas-cloud", representatives: ["MOVE_SMOG"], fulfilled: false },
+      track: { id: "smog-purple-gas-cloud", representatives: ["MOVE_SMOG"], fulfilled: true },
     });
     expect(audit.carriers).toMatchObject({ count: 1, lowest: { index: 149, label: "FRONTIER_MON_MAGBY", species: "SPECIES_MAGBY" }, outsideLevel50: [] });
     expect(audit.carriers.all.map((carrier: Json) => carrier.index)).toEqual([149]);
     expect(audit.controls).toMatchObject({ poisonGas: { tier: "outsideFactory", shares: ["asset:ANIM_TAG_PURPLE_GAS_CLOUD"], distinctTemplate: "gPoisonGasCloudSpriteTemplate", distinctCallback: "InitPoisonGasCloudAnim -> MovePoisonGasCloud", factoryCredit: false }, acid: { status: "exact" }, grudge: { status: "exact" } });
-    expect(audit.checkpoint).toMatchObject({ sourceAudit: true, completePointerOwnedRoot: true, completeReachableBranches: true, completeCarrierCensus: true, legalBilateralPartyOnlyStaging: true, oracleOrMgbaInvoked: true, compactBilateralEndpointReceipts: true, twiceFreshPerOrientation: true, denseWindowCaptured: false, reducerAdded: false, typedSceneOnSeam: false, compositorAdded: false, framebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false, latchPromotion: false, unsupportedNoCreditBoundary: true });
+    expect(audit.checkpoint).toMatchObject({ sourceAudit: true, completePointerOwnedRoot: true, completeReachableBranches: true, completeCarrierCensus: true, legalBilateralPartyOnlyStaging: true, oracleOrMgbaInvoked: true, compactBilateralEndpointReceipts: true, twiceFreshPerOrientation: true, denseWindowCaptured: true, reducerAdded: true, typedSceneOnSeam: true, compositorAdded: true, framebufferAcceptance: true, coveragePromotion: true, componentTrackFulfilled: true, latchPromotion: true, unsupportedNoCreditBoundary: false });
   });
 });

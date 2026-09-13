@@ -61,12 +61,12 @@ describe("MOVE_BELLY_DRUM production framebuffer", () => {
   it("promotes only Belly Drum and preserves the current Spider Web queue", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(249);
+      .toHaveLength(250);
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "partial"))
       .toEqual([]);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_BELLY_DRUM"))
       .toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual(["MOVE_SMOG"]);
+    expect(coverage.queue).toEqual([]);
     expect(coverage.entries.filter((entry: { move: string }) => [
       "MOVE_SING", "MOVE_TEETER_DANCE", "MOVE_FAKE_TEARS", "MOVE_GRASS_WHISTLE",
     ].includes(entry.move))).toEqual(expect.arrayContaining([

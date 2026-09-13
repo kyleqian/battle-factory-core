@@ -7181,9 +7181,43 @@
     "tests/animation/sheerColdReducer.test.ts",
     "tests/animation/sheerColdActualCore.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_SMOG",
+   "status": "exact",
+   "covered": [
+    "the complete branchless Move_SMOG pointer-owned body and all ten source components are independently accepted, including seven source-timed PURPLE_GAS_CLOUD lives, target palette cycling, ShakeMon2, target monbg, alpha registers, audio waits, resources, and first-inactive cleanup",
+    "complete legal bilateral MAGBY/ONIX Battle Scene ON evidence retains player-back and opponent-front ages 0..305; the source reducer and narrow typed sceneOnSmogView seam reproduce all 612 rows from live species, side, geometry, sprite/task/resource allocation, painter order, monbg/background, palette, and presentation-RNG inputs",
+    "two independent actual-core processes are byte-identical and each passes all 612/612 semantic, typed-seam, retained raw-RGB, and shared-framebuffer rows with zero residual pixels through cleanup",
+    "a material CROBAT/BLISSEY live control reverses sides and changes species, geometry/picture origin, sprite/task/resource/matrix allocation, painter order, monbg, BG, target palette, presentation RNG, and framebuffer output",
+    "MOVE_POISON_GAS, MOVE_ACID, MOVE_GRUDGE, and every sibling receive no Smog timing, body, latch, move, component, or track credit; gameplay state and gameplay RNG remain opaque and unowned"
+   ],
+   "evidence": [
+    "tools/compare/smogSourceAudit.ts",
+    "tools/battle-lab/mechanic-smog-player-magby-opponent-onix.json",
+    "tools/battle-lab/mechanic-smog-opponent-magby-player-onix.json",
+    "tools/compare/fixtures/smog-evidence.json",
+    "tools/compare/evidence/smog-player-dense-state.json.gz",
+    "tools/compare/evidence/smog-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/smog-opponent-dense-state.json.gz",
+    "tools/compare/evidence/smog-opponent-raw-rgb.tar.gz",
+    "tools/compare/extractSmogAssets.ts",
+    "src/animation/assets/smog.json",
+    "src/animation/smog.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifySmogReducer.ts",
+    "tools/compare/smogActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/smogSourceCheckpoint.test.ts",
+    "tests/animation/smogStaging.test.ts",
+    "tests/animation/smogEvidenceCheckpoint.test.ts",
+    "tests/animation/smogReducer.test.ts",
+    "tests/animation/smogActualCore.test.ts"
+   ]
   }
-],
- "queue": ["MOVE_SMOG"],
+ ],
+ "queue": [],
  "componentTracks": [
   {
    "id": "spider-web-thread",
@@ -9246,7 +9280,7 @@
     "visualCommand:splitbgprio_all"
    ],
    "representatives": ["MOVE_SMOG"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/smogSourceAudit.ts",
     "tools/battle-lab/mechanic-smog-player-magby-opponent-onix.json",
@@ -9271,9 +9305,13 @@
     "src/animation/smog.ts",
     "src/animation/sceneOnPresentation.ts",
     "tools/compare/verifySmogReducer.ts",
-    "tests/animation/smogReducer.test.ts"
+    "tests/animation/smogReducer.test.ts",
+    "tools/compare/smogActualCore.ts",
+    "tests/animation/smogActualCore.test.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts"
    ],
-   "goal": "UNFULFILLED: MOVE_SMOG now has its own source-derived PURPLE_GAS_CLOUD asset, complete source-age reducer, narrow typed Scene-ON seam, and twice-over-612-row bilateral semantic replay with a material live-input control, but it still requires separate generic live compositor and framebuffer acceptance before any move/component/track fulfillment. The shared PURPLE_GAS_CLOUD asset, Poison Gas control, Acid, Grudge, and every shared command grant no timing, latch, body, move, sibling, or track credit."
+   "goal": "FULFILLED by MOVE_SMOG only: its source-derived PURPLE_GAS_CLOUD asset, complete source-age reducer, narrow typed Scene-ON seam, and generic live compositor pass all 612 bilateral component, retained-RGB, and actual-core framebuffer rows twice with zero residual pixels through inactive cleanup. The material altered control reverses sides and changes species, geometry/picture origin, sprite/task/resource/matrix allocation, painter order, monbg, BG, target palette, and presentation RNG. Poison Gas, Acid, Grudge, and every sibling receive no Smog timing, latch, body, move, component, or track credit."
   }
  ],
  "variantAudits": {

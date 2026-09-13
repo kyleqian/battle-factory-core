@@ -3,6 +3,9 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { decodeIndexedPng } from "../extract/indexedPng.ts";
+import { loadJascPal } from "../extract/jascPal.ts";
+import { sliceTiles } from "../extract/tiles.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const outAt = process.argv.indexOf("--out");
@@ -59,6 +62,16 @@ if (!constants.includes("ANIM_SPRITES_START")
   throw new Error("Smog constants drifted");
 }
 
+const cloudImage = decodeIndexedPng(join(
+  root,
+  "reference/pokeemerald/graphics/battle_anims/sprites/mist_cloud.png",
+));
+const cloudTiles = sliceTiles(cloudImage);
+const cloudPalette = loadJascPal(join(
+  root,
+  "reference/pokeemerald/graphics/battle_anims/sprites/purple_gas_cloud.pal",
+));
+
 const extracted = {
   schema: "smog-source-assets/v1",
   source: {
@@ -73,6 +86,17 @@ const extracted = {
   },
   templates: {
     smogCloud: { symbol: "gSmogCloudSpriteTemplate", affine: false, objMode: "objblend", shape: "32x16", callback: "InitSwirlingFogAnim -> AnimSwirlingFogAnim", frames: [[0, 8], [8, 8]], loop: 0, matrixNum: 0 },
+  },
+  art: {
+    purpleGasCloud: {
+      dimensions: { width: cloudImage.width, height: cloudImage.height },
+      tileset: {
+        columns: cloudTiles.columns,
+        rows: cloudTiles.rows,
+        tiles: cloudTiles.tiles.map((tile) => [...tile.pixels]),
+      },
+      palette: cloudPalette,
+    },
   },
   cloud: { calls: 7, args: [0, -24, 48, 240, 1, 0], initialPhase: 64, phaseStep: 3, radiusX: 32, radiusY: -6, linearY: 48, duration: 240, delay: 7 },
   blendColorCycle: { priority: 2, selector: "F_PAL_TARGET", selectorValue: 4, delay: 2, numBlends: 2, initialBlendY: 0, targetBlendY: 12, colorRgb555: 26650 },

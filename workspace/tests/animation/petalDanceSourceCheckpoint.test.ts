@@ -142,7 +142,7 @@ describe("MOVE_PETAL_DANCE source/classification and legal Scene-ON staging chec
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_PETAL_DANCE"))
       .toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual(["MOVE_SMOG"]);
+    expect(coverage.queue).toEqual([]);
     expect(audit.independence).toContain("stays unsupported");
   });
 

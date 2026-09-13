@@ -65,8 +65,8 @@ export function smogInputsFor(orientation: SmogOrientation, rows: readonly Json[
   });
   return {
     attackerSide: orientation === "player-back" ? "player" : "opponent", targetSide,
-    attackerSpecies: orientation === "player-back" ? "MAGBY" : "ONIX",
-    targetSpecies: orientation === "player-back" ? "ONIX" : "MAGBY",
+    attackerSpecies: "MAGBY",
+    targetSpecies: "ONIX",
     targetPictureOrigin: { x: first.x, y: first.y + 24 - (targetSide === "player" ? 8 : 0) },
     targetBgPriority: (first.attr[2] >>> 10) & 3,
     attackerSprite: attacker, targetSprite: target, cloudSpriteSlots: cloudSlots,
@@ -108,8 +108,8 @@ export function smogConfigFor(orientation: SmogOrientation, rows: readonly Json[
     fieldProfile: {
       playerHp: row0.battlers.player.hp, playerMaxHp: row0.battlers.player.maxHp,
       opponentHp: row0.battlers.opponent.hp, opponentMaxHp: row0.battlers.opponent.maxHp,
-      playerGender: orientation === "player-back" ? "male" : "female",
-      opponentGender: orientation === "player-back" ? "female" : "male",
+      playerGender: "male",
+      opponentGender: "male",
     }, animationInputs,
   } as SceneOnSmogPresentationState["config"];
 }

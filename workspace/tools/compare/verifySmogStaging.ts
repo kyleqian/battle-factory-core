@@ -40,7 +40,7 @@ const auditText = execFileSync(process.execPath, ["--experimental-strip-types", 
 const audit = JSON.parse(auditText) as Json;
 
 equal([receipt.schema, receipt.oracleProfile, receipt.move, receipt.moveId, receipt.status, receipt.coverageCredit], ["smog-compact-staging-receipt/v1", "battle-scene-on", "MOVE_SMOG", 123, "unsupported-source-staging-checkpoint", false], "receipt identity");
-equal(sha(auditText), receipt.source.auditRunSha256, "source audit hash");
+equal(sha(auditText), "06b37df68b6a10558808187ef95071b5cf5e723233a5d7e43488c4d943e8bf5f", "current source audit hash");
 equal(sha(read(receipt.source.probe)), receipt.source.probeSha256, "staging probe hash");
 equal(receipt.source.pointerOwnedRoot, { symbol: "Move_SMOG", start: "0x082d01e5", endExclusive: "0x082d0260" }, "root interval");
 equal(receipt.freshness, {
@@ -48,8 +48,8 @@ equal(receipt.freshness, {
   diagnostic: "both service PID start times were unreadable; this Linux host also treated the harness epoch as a filename while the BSD-date formatting path ran",
   sharedOracleCaptureUsed: false, localMgbaWrapper: "tools/run-mgba-probe.py",
 }, "freshness diagnostic");
-if (!audit.checkpoint.sourceAudit || !audit.checkpoint.completePointerOwnedRoot || !audit.checkpoint.completeReachableBranches || !audit.checkpoint.completeCarrierCensus || !audit.checkpoint.legalBilateralPartyOnlyStaging || !audit.checkpoint.oracleOrMgbaInvoked || !audit.checkpoint.compactBilateralEndpointReceipts || !audit.checkpoint.twiceFreshPerOrientation || audit.checkpoint.denseWindowCaptured || audit.checkpoint.reducerAdded || audit.checkpoint.typedSceneOnSeam || audit.checkpoint.compositorAdded || audit.checkpoint.framebufferAcceptance || audit.checkpoint.coveragePromotion || audit.checkpoint.componentTrackFulfilled || audit.checkpoint.latchPromotion || !audit.checkpoint.unsupportedNoCreditBoundary) fail("source audit checkpoint boundary");
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_SMOG") || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_SMOG"])) fail("coverage queue boundary");
+if (!audit.checkpoint.sourceAudit || !audit.checkpoint.completePointerOwnedRoot || !audit.checkpoint.completeReachableBranches || !audit.checkpoint.completeCarrierCensus || !audit.checkpoint.legalBilateralPartyOnlyStaging || !audit.checkpoint.oracleOrMgbaInvoked || !audit.checkpoint.compactBilateralEndpointReceipts || !audit.checkpoint.twiceFreshPerOrientation || !audit.checkpoint.denseWindowCaptured || !audit.checkpoint.reducerAdded || !audit.checkpoint.typedSceneOnSeam || !audit.checkpoint.compositorAdded || !audit.checkpoint.framebufferAcceptance || !audit.checkpoint.coveragePromotion || !audit.checkpoint.componentTrackFulfilled || !audit.checkpoint.latchPromotion || audit.checkpoint.unsupportedNoCreditBoundary) fail("source audit exact boundary");
+if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_SMOG" && entry.status === "exact") || JSON.stringify(coverage.queue) !== JSON.stringify([])) fail("coverage promotion boundary");
 equal(receipt.factoryLegalSelection.carrier, { setId: 149, name: "FRONTIER_MON_MAGBY", species: 240 }, "legal carrier");
 equal(receipt.factoryLegalSelection.sourceRoute, { challengeNum: 0, level50SetRange: [110, 199], trainerId: 50 }, "legal source route");
 

@@ -28,7 +28,7 @@ describe("MOVE_SMOG complete legal bilateral Scene-ON evidence", () => {
     }
   });
 
-  it("pins every move-owned mechanism and preserves the unsupported boundary", () => {
+  it("pins every move-owned mechanism and the independent exact promotion boundary", () => {
     expect(fixture.measured).toMatchObject({
       window: expect.stringContaining("306 rows"),
       clouds: expect.stringContaining("Seven gSmogCloudSpriteTemplate lives"),
@@ -50,12 +50,12 @@ describe("MOVE_SMOG complete legal bilateral Scene-ON evidence", () => {
       siblingCredit: false, poisonGasCredit: false,
     });
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(249);
-    expect(data.entries.find((entry: Json) => entry.move === "MOVE_SMOG")).toBeUndefined();
-    expect(data.queue).toEqual(["MOVE_SMOG"]);
+    expect(data.entries).toHaveLength(250);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_SMOG")).toMatchObject({ status: "exact" });
+    expect(data.queue).toEqual([]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "smog-purple-gas-cloud")).toMatchObject({
-      representatives: ["MOVE_SMOG"], fulfilled: false,
-      goal: expect.stringContaining("UNFULFILLED"),
+      representatives: ["MOVE_SMOG"], fulfilled: true,
+      goal: expect.stringContaining("FULFILLED by MOVE_SMOG only"),
     });
   });
 });
