@@ -51,7 +51,7 @@ describe("MOVE_DESTINY_BOND complete bilateral retained evidence", () => {
     const data = coverage as Json;
     expect(data.entries).toHaveLength(250);
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_DESTINY_BOND")).toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual([]);
+    expect(data.queue).toEqual(["MOVE_BONEMERANG"]);
     const track = data.componentTracks.find((entry: Json) => entry.id === "destiny-bond-white-shadow");
     expect(track).toMatchObject({ representatives: ["MOVE_DESTINY_BOND"], fulfilled: true });
     expect(track.components).toHaveLength(9);
