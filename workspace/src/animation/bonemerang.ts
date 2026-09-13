@@ -261,6 +261,7 @@ function q8Delta(from: number, to: number): number {
 }
 function q8Offset(delta: number, callbacks: number): number {
   const value = Math.trunc(delta * callbacks / 256);
+  if (value === 0) return 0;
   return delta & 1 ? -value : value;
 }
 function arcLeg(from: Readonly<BonemerangPoint>, to: Readonly<BonemerangPoint>, height: number, callbacks: number) {

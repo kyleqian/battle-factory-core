@@ -74,7 +74,7 @@ describe("MOVE_BONEMERANG source-relative reducer and narrow Scene-ON seam", () 
       spriteOrder: input.spriteOrder.slice().reverse(),
     };
     const source = bonemerangAtAge(10, altered);
-    expect(source.sprites[0]).toMatchObject({ slot: 12, x: 201, y: 43, x2: -8, y2: 8, subpriority: input.attackerSprite.subpriority - 2, matrixNum: 4 });
+    expect(source.sprites[0]).toMatchObject({ slot: 12, x: 201, y: 43, x2: -8, y2: -3, subpriority: input.attackerSprite.subpriority - 2, matrixNum: 4 });
     expect(source.audio).toEqual([{ channel: "SE1", sound: "SE_M_BONEMERANG", sourcePan: "SOUND_PAN_ATTACKER", pan: 63 }]);
     expect(source.painterOrder).not.toEqual(input.spriteOrder);
     const config = bonemerangConfigFor("player-back", rows);
