@@ -9343,9 +9343,19 @@
     "tools/compare/bonemerangStagingProbe.py",
     "tools/compare/fixtures/bonemerang-staging-receipt.json",
     "tools/compare/verifyBonemerangStaging.ts",
-    "tests/animation/bonemerangStaging.test.ts"
+    "tests/animation/bonemerangStaging.test.ts",
+    "tools/compare/bonemerangProbe.py",
+    "tools/compare/evidence/bonemerang-player-dense-state.json.gz",
+    "tools/compare/evidence/bonemerang-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/bonemerang-changemap-player.json",
+    "tools/compare/evidence/bonemerang-opponent-dense-state.json.gz",
+    "tools/compare/evidence/bonemerang-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/bonemerang-changemap-opponent.json",
+    "tools/compare/fixtures/bonemerang-evidence.json",
+    "tools/compare/bonemerangEvidence.ts",
+    "tests/animation/bonemerangEvidenceCheckpoint.test.ts"
    ],
-   "goal": "UNFULFILLED evidence-only track. MOVE_BONEMERANG is the sole Level-50 representative and its complete eleven-component source graph must later receive its own twice-fresh bilateral dense state/RGB/change maps, source-relative reducer, typed Scene-ON seam, live compositor, and zero-residual framebuffer acceptance through first inactive cleanup. ANIM_TAG_BONE and gBonemerangSpriteTemplate are newly unrepresented; the nine shared components do not transfer timing, latch, move, or acceptance credit. MOVE_BONE_CLUB and MOVE_BONE_RUSH are outside-Factory source controls only and receive no track credit."
+   "goal": "UNFULFILLED after the complete evidence-only checkpoint. MOVE_BONEMERANG is the sole Level-50 representative and now retains its own twice-fresh bilateral 72+72 dense state/RGB/change maps through first inactive cleanup, but still requires a separate source-relative reducer, typed Scene-ON seam, live compositor, and zero-residual framebuffer acceptance. ANIM_TAG_BONE and gBonemerangSpriteTemplate remain unrepresented by an exact move; the nine shared components do not transfer timing, latch, move, or acceptance credit. MOVE_BONE_CLUB and MOVE_BONE_RUSH are outside-Factory source controls only and receive no track credit."
   }
  ],
  "variantAudits": {
