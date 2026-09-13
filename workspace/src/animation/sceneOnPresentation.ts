@@ -905,6 +905,11 @@ import {
   type SheerColdState,
 } from "./sheerCold.ts";
 import {
+  smogAtAge,
+  type SmogLiveInputs,
+  type SmogState,
+} from "./smog.ts";
+import {
   waterPulseAtAge,
   type WaterPulseLiveInputs,
   type WaterPulseState,
@@ -2540,6 +2545,20 @@ export interface SceneOnSheerColdConfig {
       | "targetAnimationCenter" | "targetBattlePositionCenter">>;
 }
 
+/**
+ * Narrow semantic Scene-ON seam for MOVE_SMOG. Battle outcome, damage, RNG
+ * ownership, and controller timing remain outside this presentation-only
+ * source-age reducer.
+ */
+export interface SceneOnSmogConfig {
+  readonly move: "SMOG";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<SmogLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies">>;
+}
+
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
@@ -4049,6 +4068,7 @@ export type SceneOnMoveConfig =
   | SceneOnSonicBoomConfig
   | SceneOnAirCutterConfig
   | SceneOnSheerColdConfig
+  | SceneOnSmogConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
@@ -4391,6 +4411,8 @@ export type SceneOnAirCutterPresentationState =
   SceneOnMovePresentationState<SceneOnAirCutterConfig>;
 export type SceneOnSheerColdPresentationState =
   SceneOnMovePresentationState<SceneOnSheerColdConfig>;
+export type SceneOnSmogPresentationState =
+  SceneOnMovePresentationState<SceneOnSmogConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnDigPresentationState =
@@ -4763,6 +4785,11 @@ export interface SceneOnAirCutterView extends AirCutterState {
 
 export interface SceneOnSheerColdView extends SheerColdState {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSmogView extends SmogState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8126,6 +8153,27 @@ export function sceneOnSheerColdView(
       targetSpecies: target.species,
       targetAnimationCenter: target.geometry.animationCenter,
       targetBattlePositionCenter: target.geometry.battlePositionCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_SMOG's first loadspritegfx source row. */
+export function sceneOnSmogView(
+  state: SceneOnSmogPresentationState,
+): SceneOnSmogView {
+  if (state.config.move !== "SMOG") {
+    throw new Error(`expected SMOG presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...smogAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
     }),
     attacker,
     target,

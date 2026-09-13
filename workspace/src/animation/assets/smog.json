@@ -1,0 +1,99 @@
+{
+  "schema": "smog-source-assets/v1",
+  "source": {
+    "script": "data/battle_anim_scripts.s Move_SMOG + SmogCloud",
+    "scriptSha256": "3a3056254b4d75a9b72a44a0b38d5a78d0da1dd29052246e02f55d92dbb3b8f4",
+    "moveSha256": "7d54111ce388b853dc38facaf7f51428b0fdd65eb0e87d38d10c675364e441b2",
+    "cloudSha256": "ec3a9ae78963bd7a8c95e2271765f54f35f02ff25e68ef1c61f3471112b22a3d",
+    "task": "src/battle_anim_ice.c InitSwirlingFogAnim + AnimSwirlingFogAnim",
+    "runtime": "src/battle_anim.c loadspritegfx/monbg/splitbgprio_all/loopsewithpan/clearmonbg/blendoff/end",
+    "rom": {
+      "gameCode": "AGB-BPEE",
+      "symbol": "Move_SMOG",
+      "start": "0x082d01e5",
+      "endExclusive": "0x082d0260"
+    }
+  },
+  "resources": {
+    "purpleGasCloud": {
+      "tag": 10172,
+      "tileBytes": 512,
+      "graphics": "gBattleAnimSpriteGfx_MistCloud",
+      "palette": "gBattleAnimSpritePal_PurpleGasCloud",
+      "source": "graphics/battle_anims/sprites/mist_cloud.png + purple_gas_cloud.pal"
+    }
+  },
+  "templates": {
+    "smogCloud": {
+      "symbol": "gSmogCloudSpriteTemplate",
+      "affine": false,
+      "objMode": "objblend",
+      "shape": "32x16",
+      "callback": "InitSwirlingFogAnim -> AnimSwirlingFogAnim",
+      "frames": [
+        [
+          0,
+          8
+        ],
+        [
+          8,
+          8
+        ]
+      ],
+      "loop": 0,
+      "matrixNum": 0
+    }
+  },
+  "cloud": {
+    "calls": 7,
+    "args": [
+      0,
+      -24,
+      48,
+      240,
+      1,
+      0
+    ],
+    "initialPhase": 64,
+    "phaseStep": 3,
+    "radiusX": 32,
+    "radiusY": -6,
+    "linearY": 48,
+    "duration": 240,
+    "delay": 7
+  },
+  "blendColorCycle": {
+    "priority": 2,
+    "selector": "F_PAL_TARGET",
+    "selectorValue": 4,
+    "delay": 2,
+    "numBlends": 2,
+    "initialBlendY": 0,
+    "targetBlendY": 12,
+    "colorRgb555": 26650
+  },
+  "shake": {
+    "task": "AnimTask_ShakeMon2",
+    "args": [
+      "ANIM_TARGET",
+      2,
+      0,
+      15,
+      1
+    ]
+  },
+  "audio": {
+    "mist": {
+      "song": "SE_M_MIST",
+      "id": 168,
+      "interval": 17,
+      "plays": 10
+    },
+    "toxic": {
+      "song": "SE_M_TOXIC",
+      "id": 148,
+      "interval": 18,
+      "plays": 2
+    }
+  }
+}

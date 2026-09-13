@@ -9265,9 +9265,15 @@
     "tools/compare/evidence/smog-opponent-dense-state.json.gz",
     "tools/compare/evidence/smog-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/smog-changemap-opponent.json",
-    "tests/animation/smogEvidenceCheckpoint.test.ts"
+    "tests/animation/smogEvidenceCheckpoint.test.ts",
+    "tools/compare/extractSmogAssets.ts",
+    "src/animation/assets/smog.json",
+    "src/animation/smog.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifySmogReducer.ts",
+    "tests/animation/smogReducer.test.ts"
    ],
-   "goal": "UNFULFILLED: MOVE_SMOG alone must retain its own complete twice-fresh bilateral dense Scene-ON window through first inactive cleanup, independently map its cloud, blend-cycle, ShakeMon2, monbg/split, audio/resource, palette/OAM/matrix, and cleanup behavior under ANIMATION_LATCHES Rules 1-5, then earn any reducer/seam/compositor/framebuffer acceptance. The shared PURPLE_GAS_CLOUD asset, Poison Gas control, Acid, Grudge, and every shared command grant no timing, latch, body, move, sibling, or track credit."
+   "goal": "UNFULFILLED: MOVE_SMOG now has its own source-derived PURPLE_GAS_CLOUD asset, complete source-age reducer, narrow typed Scene-ON seam, and twice-over-612-row bilateral semantic replay with a material live-input control, but it still requires separate generic live compositor and framebuffer acceptance before any move/component/track fulfillment. The shared PURPLE_GAS_CLOUD asset, Poison Gas control, Acid, Grudge, and every shared command grant no timing, latch, body, move, sibling, or track credit."
   }
  ],
  "variantAudits": {
