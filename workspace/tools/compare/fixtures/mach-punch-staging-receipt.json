@@ -1,0 +1,57 @@
+{
+  "schema": "mach-punch-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_MACH_PUNCH",
+  "moveId": 183,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/machPunchSourceAudit.ts",
+    "auditSha256": "d7a929f0989929531f223ba24f0bc3cfed2e9908f8530460d9a6b24d33fc0465",
+    "auditRunSha256": "1717bed917de85d623b00bffdc878eeb0a9adcf6410dedbb36cdadd609dfb6f5",
+    "probe": "tools/compare/machPunchStagingProbe.py",
+    "probeSha256": "51a1b99f31738956885aac2cecea8b18526ed9c36b9fbbc002e583934e3fa9d2",
+    "pointerOwnedRoot": {"symbol":"Move_MACH_PUNCH","start":"0x082cd565","endExclusive":"0x082cd5ed","byteLength":136,"romSha256":"b437f773d63fa1ef5062f58c478fdeb43dbdcd98351ad97b9da794097a6db4ff"}
+  },
+  "factoryLegalSelection": {
+    "carrier": {"setId":234,"name":"FRONTIER_MON_HITMONCHAN_1","species":107},
+    "allSourceCarriers": [15,32,234,236,339,382],
+    "level50Carriers": [234,236,339,382],
+    "sourceRoute": {"challengeNum":1,"level50SetRange":[162,266],"trainerId":100},
+    "partyBeforeInit": true,
+    "choiceConstraint": "The Hitmonchan side has all four move slots set to MOVE_MACH_PUNCH. The player selects its ordinary first legal slot; the opponent AI has only legal Mach Punch slots. The Chansey control has four Tackle slots."
+  },
+  "freshness": {
+    "check":"tools/check-oracle-freshness.sh","exitCode":2,
+    "diagnostic":"both service PID start times were unreadable; this Linux host also treated the harness epoch as a filename while the BSD-date formatting path ran",
+    "sharedOracleCaptureUsed":false,"localMgbaWrapper":"tools/run-mgba-probe.py"
+  },
+  "runs": {
+    "player-back": {
+      "scenario":"tools/battle-lab/mechanic-mach-punch-player-hitmonchan-opponent-chansey.json","scenarioSha256":"f44abd79243ff3f8f4a349b510e01e0fe604aeaa0ef80b4cd0636933ede4c342","seed":305420471,
+      "freshRuns":2,"outputsByteIdentical":true,"outputSha256":"d183caed41ed2f37a6af710121db7b043c773473786dcf83a030e9f7ef2e7e92","sourceInitialized":true,"customPartiesBuiltBeforeBattle":true,
+      "attacker":{"side":"player","partyIndex":0,"species":107,"level":50,"moves":[183,183,183,183]},
+      "target":{"side":"opponent","partyIndex":0,"species":113,"level":50,"initialHp":357,"maxHp":357,"finalHp":8},
+      "choiceConstraint":{"attackerMoveSlots":[183,183,183,183],"opponentAiMoveSlots":[33,33,33,33]},
+      "root":{"symbol":"Move_MACH_PUNCH","start":"0x82cd565","endExclusive":"0x82cd5ed","observations":110,"attackerBattler":0,"targetBattler":1,"moveResultFlags":2,"moveDamage":349},
+      "romOutcome":{"kind":"damaging-priority-hit","targetFinalPartyHp":8,"targetFinalBattleHp":8,"targetFinalStatus":"none","battleOutcome":0},
+      "pp":{"before":[30,30,30,30],"after":[29,30,30,30],"spent":1},
+      "benches":{"partyIndices":[1,2],"unchanged":true,"checksumValid":true,"beforeSha256":"bb12c91210bd1537595ed7b1f483b0751a95cc7f3e509bf7d8726ef5235b37a1","afterSha256":"bb12c91210bd1537595ed7b1f483b0751a95cc7f3e509bf7d8726ef5235b37a1"},
+      "transientFreeSetup":true
+    },
+    "opponent-front": {
+      "scenario":"tools/battle-lab/mechanic-mach-punch-opponent-hitmonchan-player-chansey.json","scenarioSha256":"11693defd294a36823f4e3260694c89873abbb8bcc1c6b5e28cb6c317949479f","seed":305420471,
+      "freshRuns":2,"outputsByteIdentical":true,"outputSha256":"e945c303a29b09bbe2dc4cc75d89b026835038f926f6e6fa743365655977a71b","sourceInitialized":true,"customPartiesBuiltBeforeBattle":true,
+      "attacker":{"side":"opponent","partyIndex":0,"species":107,"level":50,"moves":[183,183,183,183]},
+      "target":{"side":"player","partyIndex":0,"species":113,"level":50,"initialHp":357,"maxHp":357,"finalHp":15},
+      "choiceConstraint":{"attackerMoveSlots":[183,183,183,183],"opponentAiMoveSlots":[183,183,183,183]},
+      "root":{"symbol":"Move_MACH_PUNCH","start":"0x82cd565","endExclusive":"0x82cd5ed","observations":109,"attackerBattler":1,"targetBattler":0,"moveResultFlags":2,"moveDamage":342},
+      "romOutcome":{"kind":"damaging-priority-hit","targetFinalPartyHp":15,"targetFinalBattleHp":15,"targetFinalStatus":"none","battleOutcome":0},
+      "pp":{"before":[30,30,30,30],"after":[30,30,29,30],"spent":1},
+      "benches":{"partyIndices":[1,2],"unchanged":true,"checksumValid":true,"beforeSha256":"47fd0dd2785bff37f3997aca51dcc3d69be77f9ae558473702768aa4017ae400","afterSha256":"47fd0dd2785bff37f3997aca51dcc3d69be77f9ae558473702768aa4017ae400"},
+      "transientFreeSetup":true
+    }
+  },
+  "scope": {"framebuffersRetained":false,"rawRgbRetained":false,"denseWindowCaptured":false,"semanticFramesRetained":false,"latchMeasured":false,"productionChanged":false,"reducerAdded":false,"typedSceneOnSeam":false,"compositorAdded":false,"coveragePromotion":false,"componentTrackFulfilled":false,"transientOverrides":[],"battleStateInjected":false,"entryHooksSkipped":false,"noTimingOrLatchTransfer":true},
+  "remainder": "Keep MOVE_MACH_PUNCH unsupported, coverage-absent, queue-absent, and without component-track or latch credit. A later move-owned step must capture complete twice-fresh bilateral dense semantic/RGB/change-map evidence and independently measure the high-speed BG branch, sliding BG, attacker trace punch, hitsplat/fist, target shake, alpha, audio, resource cleanup, and display latches before any reducer, typed seam, compositor, framebuffer, coverage, track, sibling, or latch claim."
+}
