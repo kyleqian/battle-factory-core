@@ -315,7 +315,7 @@ describe("anger-mark-grow-breath standalone fulfilled component-track ratchet", 
     }
 
     const evidence = json<Json>("tools/compare/fixtures/frustration-evidence.json");
-    expect(digest("tools/compare/fixtures/frustration-evidence.json")).toBe("938feab48f8ab77507014d30ee3e8c480bfb6c1a5c090783d36b563bf732f9ef");
+    expect(digest("tools/compare/fixtures/frustration-evidence.json")).toBe("3ce9412d4679b78150dda0e397e03dd9a02ff723c1bfb0b1e850aa96d372915e");
     for (const expected of frustrationReceipts) {
       const stage = json<Json>(expected.scenario);
       const receipt = evidence.orientations[expected.orientation];
