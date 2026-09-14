@@ -7400,9 +7400,19 @@
     "tools/compare/psychUpStagingProbe.py",
     "tools/compare/fixtures/psych-up-staging-receipt.json",
     "tools/compare/verifyPsychUpStaging.ts",
-    "tests/animation/psychUpSourceStaging.test.ts"
+    "tests/animation/psychUpSourceStaging.test.ts",
+    "tools/compare/psychUpProbe.py",
+    "tools/compare/psychUpEvidence.ts",
+    "tools/compare/fixtures/psych-up-evidence.json",
+    "tools/compare/evidence/psych-up-player-dense-state.json.gz",
+    "tools/compare/evidence/psych-up-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/psych-up-changemap-player.json",
+    "tools/compare/evidence/psych-up-opponent-dense-state.json.gz",
+    "tools/compare/evidence/psych-up-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/psych-up-changemap-opponent.json",
+    "tests/animation/psychUpEvidenceCheckpoint.test.ts"
    ],
-   "goal": "UNFULFILLED. MOVE_PSYCH_UP alone has a source/ELF/ROM root audit and compact legal bilateral party-before-init receipts only. It needs its own complete twice-fresh dense Scene-ON maps through cleanup, its own latch measurements, source-relative reducer, typed seam, compositor, and zero-residual framebuffer acceptance before any move, component, sibling, timing, latch, or coverage credit. Leer, Frustration, Sleep Talk, Hyper Voice, Snore, Psychic, Future Sight, and every palette sibling are source-identity controls only."
+   "goal": "UNFULFILLED. MOVE_PSYCH_UP now has its own complete twice-fresh bilateral 179-row semantic/raw-RGB/banked-change-map evidence through inactive cleanup and move-owned latch measurements. It still needs its source-relative reducer, typed seam, compositor, and zero-residual framebuffer acceptance before any move, component, sibling, track, or coverage credit. Leer, Frustration, Sleep Talk, Hyper Voice, Snore, Psychic, Future Sight, Hyper Beam, Thunderbolt, and every palette sibling remain identity/no-transfer controls only."
   },
   {
    "id": "spider-web-thread",

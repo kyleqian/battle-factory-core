@@ -1,0 +1,93 @@
+{
+  "schema": "psych-up-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_PSYCH_UP",
+  "moveId": 244,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "components": [
+    "asset:ANIM_TAG_SPIRAL",
+    "sprite:gPsychUpSpiralSpriteTemplate",
+    "task:AnimTask_BlendBattleAnimPal",
+    "task:AnimTask_ScaleMonAndRestore",
+    "task:AnimTask_SwayMon",
+    "visualCommand:blend_color_cycleexclude",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:monbg",
+    "visualCommand:setalpha"
+  ],
+  "source": {
+    "audit": "tools/compare/psychUpSourceAudit.ts",
+    "auditSha256": "81d62378acef92657e893e34b9c293a39ce60dc1dbaf76d6801aac8560d7ad2d",
+    "auditRunSha256": "239bc664c39b09b73a17cb7ddbf0e2af011094038709f50657a2967ec2d81772",
+    "probe": "tools/compare/psychUpProbe.py",
+    "probeSha256": "8b5c68b4382d5e8063d42589188d8a28ed3a12f555a19bb98f1cbe270fa1a972",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
+    "stagingReceipt": "tools/compare/fixtures/psych-up-staging-receipt.json",
+    "stagingReceiptSha256": "1930fb312988c9738123762a72844abaecdb12ff76d13da3079f85ee973a0af6",
+    "pointerOwnedRoot": { "start": "0x082caaea", "endExclusive": "0x082cab5c", "observedParities": [0, 1] }
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-psych-up-player-jumpluff-opponent-ninjask.json",
+      "scenarioSha256": "1e894e4a805d23b2419a91c3aeddc0ef2fe7380f889c6d651e2789f073cee294",
+      "freshRuns": 2,
+      "sourceWindow": { "startFrame": 379, "endFrame": 557, "frameCount": 179, "sourceFrameCount": 179 },
+      "denseState": "tools/compare/evidence/psych-up-player-dense-state.json.gz",
+      "denseStateSha256": "85070ef3033cd99f2243d5e63f16e54039e68ad99a2dcc391fe1ab57330fe943",
+      "probeJsonSha256": "1dff102b53e70896db3e9ff94886b1383a8f28eb38f630ad3ffa542c2cf0bee5",
+      "repeatProbeJsonSha256": "1dff102b53e70896db3e9ff94886b1383a8f28eb38f630ad3ffa542c2cf0bee5",
+      "rawRgbArchive": "tools/compare/evidence/psych-up-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "f23bb997ba454a8fd11fd07a8e1824c90ff572541ff977fc490947972159b62f",
+      "rawRgbSequenceSha256": "59134eb7472f8af9768931ee3442d2f78707430a1d5d04989f90456e1f425a20",
+      "repeatRawRgbSequenceSha256": "59134eb7472f8af9768931ee3442d2f78707430a1d5d04989f90456e1f425a20",
+      "changeMap": "tools/compare/evidence/psych-up-changemap-player.json",
+      "changeMapSha256": "b95c1796adcb37fd2aecd224833f3d654a2c6820274bdab65059d91fc56e8957"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-psych-up-opponent-jumpluff-player-ninjask.json",
+      "scenarioSha256": "0e5766e7bafc62b2adc205a156d0b0adef0e0ee7b99a3b5dd0c8318177198c18",
+      "freshRuns": 2,
+      "sourceWindow": { "startFrame": 375, "endFrame": 553, "frameCount": 179, "sourceFrameCount": 179 },
+      "denseState": "tools/compare/evidence/psych-up-opponent-dense-state.json.gz",
+      "denseStateSha256": "a34ce03a38db248fb28389e7eb36f7f174f4c643a248419f80f4c5a74575c820",
+      "probeJsonSha256": "6c1cc7651aec15fa6e622972a2e2d0f0398f26970c39cd86a1d6e07d9546ebf6",
+      "repeatProbeJsonSha256": "6c1cc7651aec15fa6e622972a2e2d0f0398f26970c39cd86a1d6e07d9546ebf6",
+      "rawRgbArchive": "tools/compare/evidence/psych-up-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "9bfbfe5d122e6eea264512593cbccd651e1e7a09fdd4e8a4784068f256890c94",
+      "rawRgbSequenceSha256": "526ced01d9005b675e4191440b5bb73b2c39776e83d17244c5d3179abd321c41",
+      "repeatRawRgbSequenceSha256": "526ced01d9005b675e4191440b5bb73b2c39776e83d17244c5d3179abd321c41",
+      "changeMap": "tools/compare/evidence/psych-up-changemap-opponent.json",
+      "changeMapSha256": "d6859b3f465eb82d6f790e747d9cda57bdc4c3a002e0552dc79e76104ccfba62"
+    }
+  },
+  "measured": {
+    "window": "Both orientations retain 179 unthinned rows from active Move_PSYCH_UP root age 0 through first fully inactive age 178: player frames 379..557 and opponent frames 375..553, with 149 RGB-changing transitions each.",
+    "spiral": "The single gPsychUpSpiralSpriteTemplate occupies slot 3 at ages 7..127. All 121 rows retain AnimSpriteOnMonPos, the one 64x64 cell, exact affine program, side geometry/subpriority, stable sprite order, matrix 0, and teardown.",
+    "tasks": "Every full 16-word row is retained for BlendColorCycleExcludeLoop 7..169, SwayMonStep 7..108, ScaleMonAndRestore 142..160, BlendSpriteColor_Step2 142..172, UpdateMonBg 4..176, ClearMonBg 174..176, and looped audio 7..59.",
+    "palette": "BlendColorCycleExclude selector/mask data are pinned; BG banks 1..3 change on 32 source ages and hardware follows at RAM+1. BlendBattleAnimPal changes the attacker/copy banks on ages 143..173 at three-row cadence and hardware follows at RAM+1. Age-4 monbg copy is the sole same-row palette exception.",
+    "latches": "Whole OAM is predecessor-latched on all 178 comparable rows. Spiral matrices are ordinary RAM+1; ScaleMonAndRestore's live attacker matrix is RAM+2 on ages 144..162 in both orientations. Hidden-attacker SwayMon source offsets reach the selected BG scroll at RAM+1.",
+    "monbgRegisters": "Attacker monbg membership begins at age 4 and clears at 142; Update/Clear tasks and VRAM copy/restore continue through 176/178. setalpha installs BLDCNT=16192 and BLDALPHA=2060 at 7; blendoff clears them at 174.",
+    "resourcesAudio": "SPIRAL tag 10196 loads at age 1, matrix 0 allocates at 7 and frees at 128, and tags free at 178. SE_M_PSYBEAM2 loops from age 7 with attacker pan (-64/+63), followed by SE_M_PSYBEAM at 142.",
+    "stateCleanup": "Party, battle, outcome, weather, sides, and gameplay RNG remain immutable; presentation RNG changes on 176 transitions. Exactly one legal Jumpluff Psych Up PP is spent, benches remain checksum-valid, and inactive age 178 has zero owned tasks/counts/tags/blend registers with restored BG state."
+  },
+  "latchConclusion": "Psych Up independently establishes ordinary spiral OAM/matrix and palette RAM+1, an age-4 same-row monbg palette setup, hidden-attacker SwayMon selected-BG RAM+1, and live ScaleMonAndRestore matrix RAM+2, bilaterally from its own maps only.",
+  "scope": {
+    "legalBilateralPartyOnlySceneOn": true,
+    "twiceFreshSemanticAndRawRgb": true,
+    "chronologicalRawRgb888Retained": true,
+    "normalizedBankedChangeMapsRetained": true,
+    "gameplayStateOwned": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "assetWiringAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferAcceptanceAdded": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "siblingCredit": false
+  }
+}
