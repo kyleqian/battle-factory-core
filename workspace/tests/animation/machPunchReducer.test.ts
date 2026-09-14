@@ -45,7 +45,7 @@ describe("MOVE_MACH_PUNCH source-relative reducer and narrow Scene-ON seam", () 
     expect(machPunchAtAge(29, player)).toMatchObject({ background: { branch: "opponent", scrollX: -9 }, tasks: expect.arrayContaining([expect.objectContaining({ role: "sliding-bg" })]) });
     expect(machPunchAtAge(29, opponent)).toMatchObject({ background: { branch: "player", scrollX: 9 }, tasks: expect.arrayContaining([expect.objectContaining({ role: "sliding-bg" })]) });
     expect(machPunchAtAge(58, player)).toMatchObject({
-      alpha: { eva: 9, evb: 8 }, targetOffset: { x: 0, y: 0 },
+      alpha: { eva: 9, evb: 8 },
       sprites: expect.arrayContaining([
         expect.objectContaining({ kind: "hitsplat", slot: 13 }),
         expect.objectContaining({ kind: "fist", slot: 14 }),
@@ -56,6 +56,11 @@ describe("MOVE_MACH_PUNCH source-relative reducer and narrow Scene-ON seam", () 
     expect(machPunchAtAge(58, player).sprites.filter((sprite) => sprite.kind === "trace")).toHaveLength(8);
     expect(machPunchAtAge(66, player).sprites.filter((sprite) => sprite.kind === "fist")).toHaveLength(1);
     expect(machPunchAtAge(67, player).sprites.filter((sprite) => sprite.kind === "hitsplat")).toHaveLength(1);
+    expect(machPunchAtAge(71, player).rng).toMatchObject({ animation: machPunchAtAge(70, player).rng.animation, sourceDraws: 70 });
+    expect(machPunchAtAge(72, opponent).rng).toMatchObject({ animation: machPunchAtAge(70, opponent).rng.animation, sourceDraws: 70 });
+    expect(machPunchAtAge(91, player).rng).toMatchObject({ animation: machPunchAtAge(90, player).rng.animation, sourceDraws: 88 });
+    expect(machPunchAtAge(110, player).rng.sourceDraws).toBe(107);
+    expect(machPunchAtAge(109, opponent).rng.sourceDraws).toBe(107);
     expect(machPunchAtAge(110, player)).toMatchObject({ active: false, sprites: [], tasks: [], resources: { impact: { loaded: false }, handsAndFeet: { loaded: false } }, cleanup: { firstInactive: true, resourcesReleased: true } });
   });
 
@@ -75,9 +80,10 @@ describe("MOVE_MACH_PUNCH source-relative reducer and narrow Scene-ON seam", () 
       registers: { bg3hofs: 0xa5, bldcnt: 0x5a, bldalpha: 0x44, bldy: 0x22 }, animationRngSeed: 0x12345678, gameplayRng: { opaque: "gameplay-owned" },
     };
     const baseline = machPunchAtAge(58, input), source = machPunchAtAge(58, altered);
-    expect(source).toMatchObject({ battlers: { attacker: { side: "opponent", species: "CROBAT", sprite: { slot: 21 } }, target: { side: "player", species: "BLISSEY", sprite: { slot: 22 } } }, background: { branch: "player" }, resources: { impact: { paletteBank: 9, tileSlot: 31 }, allocator: { matrixBitmap: 0x95 | (1 << 6) } }, rng: { gameplay: { opaque: "gameplay-owned" }, gameplayUnchanged: true } });
+    expect(source).toMatchObject({ battlers: { attacker: { side: "opponent", species: "CROBAT", sprite: { slot: 21 } }, target: { side: "player", species: "BLISSEY", sprite: { slot: 22 } } }, background: { branch: "player" }, resources: { impact: { allocation: { paletteBank: 9, tileSlot: 31 } }, allocator: { matrixBitmap: 0x95 | (1 << 6) } }, rng: { gameplay: { opaque: "gameplay-owned" }, gameplayUnchanged: true } });
     expect(source).not.toEqual(baseline);
     expect(source.painterOrder).not.toEqual(baseline.painterOrder);
+    expect(machPunchAtAge(0, altered).registers).toEqual({ bg3hofs: 0xa5, bldcnt: 0x5a, bldalpha: 0x44, bldy: 0x22 });
     const config = machPunchConfigFor("player-back");
     const { attackerSide: _attackerSide, targetSide: _targetSide, attackerSpecies: _attackerSpecies, targetSpecies: _targetSpecies, ...animationInputs } = altered;
     const seam = sceneOnMachPunchView({ age: 58, config: {

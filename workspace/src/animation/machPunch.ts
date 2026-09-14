@@ -154,8 +154,6 @@ export interface MachPunchFistSprite {
   readonly y2: 0;
   readonly subpriority: number;
   readonly oamPriority: number;
-  readonly matrixNum: number;
-  readonly matrix: MachPunchMatrix;
   readonly data: readonly number[];
   readonly sourceCreationOrder: 9;
 }
@@ -169,21 +167,21 @@ export interface MachPunchState {
   readonly animArgs: readonly [number, number, number, number, number, number, number, number];
   readonly battlers: Readonly<{
     readonly attacker: Readonly<{ readonly side: MachPunchSide; readonly species: string; readonly sprite: MachPunchBattlerSprite }>;
-    readonly target: Readonly<{ readonly side: MachPunchSide; readonly species: string; readonly sprite: MachPunchBattlerSprite; readonly shake: MachPunchPoint }>;
+    readonly target: Readonly<{ readonly side: MachPunchSide; readonly species: string; readonly sprite: MachPunchBattlerSprite }>;
   }>;
   readonly background: Readonly<{
     readonly id: "BG_HIGHSPEED_PLAYER" | "BG_HIGHSPEED_OPPONENT";
     readonly branch: "player" | "opponent";
     readonly scrollX: number;
-    readonly highSpeed: true;
+    readonly highSpeed: boolean;
   }>;
   readonly sprites: readonly MachPunchSprite[];
   readonly tasks: readonly MachPunchTask[];
-  readonly targetOnMonBg: boolean;
+  readonly attackerOnMonBg: boolean;
   readonly alpha: Readonly<{ readonly eva: 9; readonly evb: 8 }> | null;
   readonly resources: Readonly<{
-    readonly impact: Readonly<MachPunchResourceAllocation & { readonly tag: number | null; readonly loaded: boolean }>;
-    readonly handsAndFeet: Readonly<MachPunchResourceAllocation & { readonly tag: number | null; readonly loaded: boolean }>;
+    readonly impact: Readonly<{ readonly tag: number | null; readonly loaded: boolean; readonly allocation: MachPunchResourceAllocation | null }>;
+    readonly handsAndFeet: Readonly<{ readonly tag: number | null; readonly loaded: boolean; readonly allocation: MachPunchResourceAllocation | null }>;
     readonly allocator: Readonly<{ readonly matrixBitmap: number; readonly matrixSlots: readonly MachPunchMatrix[]; readonly affineAllocated: boolean }>;
   }>;
   readonly registers: Readonly<{ readonly bg3hofs: number; readonly bldcnt: number; readonly bldalpha: number; readonly bldy: number }>;
@@ -191,8 +189,8 @@ export interface MachPunchState {
     readonly oam: "initial" | "preceding-software";
     readonly matrices: "initial" | "preceding-software";
     readonly palette: "initial" | "preceding-faded" | "same-row-monbg";
+    readonly bg3Scroll: "initial" | "preceding-software";
   }>;
-  readonly targetOffset: MachPunchPoint;
   readonly painterOrder: readonly number[];
   readonly audio: readonly Readonly<{
     readonly channel: "SE1";
@@ -248,9 +246,17 @@ export function machPunchSourceAtAge(age: number, firstInactiveAge: number): Mac
   return { owner: "Move_MACH_PUNCH", pointer: MACH_PUNCH_SOURCE_START + pointerOffset, pointerOffset, active: age < firstInactiveAge, wait };
 }
 
-function animationRngAtAge(seed: number, age: number): number {
+function animationDrawsAtAge(age: number, attackerSide: MachPunchSide): number {
+  let draws = age;
+  if (age >= 71) draws -= 1;
+  if (age >= 72) draws -= 1;
+  if (attackerSide === "player" && age >= 91) draws -= 1;
+  return draws;
+}
+
+function animationRngAtAge(seed: number, draws: number): number {
   let result = seed >>> 0;
-  for (let draw = 0; draw < age; draw += 1) result = (Math.imul(result, 1103515245) + 24691) >>> 0;
+  for (let draw = 0; draw < draws; draw += 1) result = (Math.imul(result, 1103515245) + 24691) >>> 0;
   return result;
 }
 
@@ -283,7 +289,8 @@ function restoreFadeValue(age: number, firstInactive: number): number {
   return Math.max(0, end - age);
 }
 
-function bldState(age: number, firstInactive: number): { readonly bldcnt: number; readonly bldalpha: number; readonly bldy: number } {
+function bldState(age: number, firstInactive: number, input: Readonly<MachPunchLiveInputs>): { readonly bldcnt: number; readonly bldalpha: number; readonly bldy: number } {
+  if (age < 11) return input.registers;
   if (age >= 11 && age <= 46) return { bldcnt: 232, bldalpha: 0, bldy: initialFadeValue(age) };
   if (age >= 50 && age <= 68) return { bldcnt: 16192, bldalpha: 2057, bldy: 0 };
   if (age >= 70 && age <= firstInactive - 2) return { bldcnt: 232, bldalpha: 0, bldy: restoreFadeValue(age, firstInactive) };
@@ -305,15 +312,32 @@ function attackerPunchOffset(age: number, input: Readonly<MachPunchLiveInputs>):
 }
 
 function battlerSpriteAtAge(age: number, input: Readonly<MachPunchLiveInputs>, sprite: "attacker" | "target"): MachPunchBattlerSprite {
+  const firstInactive = machPunchFirstInactiveAge(input);
+  const source = sprite === "attacker" ? input.attackerSprite : input.targetSprite;
+  const side = sprite === "attacker" ? input.attackerSide : input.targetSide;
+  const matrix = age >= 58 && age < 68 && source.matrixNum === input.matrixSlot ? input.fistMatrix : source.matrix;
+  if (age >= firstInactive) {
+    return { ...source, x2: 0, y2: 0, matrixNum: side === "player" ? 1 : 2, matrix: source.matrix };
+  }
   if (sprite === "attacker") {
     return {
-      ...input.attackerSprite,
+      ...source,
       x2: attackerPunchOffset(age, input),
-      matrix: age >= 58 && age < 68 ? input.fistMatrix : input.attackerSprite.matrix,
+      matrix,
     };
   }
   const shake = targetShakeAtAge(age);
-  return { ...input.targetSprite, x2: shake.x, y2: shake.y, matrix: age >= 58 && age < 68 ? input.fistMatrix : input.targetSprite.matrix };
+  return { ...source, x2: shake.x, y2: shake.y, matrix };
+}
+
+function taskData(...values: number[]): readonly number[] {
+  return [...values, ...Array.from({ length: 16 - values.length }, () => 0)];
+}
+
+function fadeTaskData(background: number, phase: number): readonly number[] {
+  const data = taskData(background) as number[];
+  data[10] = phase;
+  return data;
 }
 
 function taskAtAge(age: number, input: Readonly<MachPunchLiveInputs>, firstInactive: number): MachPunchTask[] {
@@ -321,14 +345,15 @@ function taskAtAge(age: number, input: Readonly<MachPunchLiveInputs>, firstInact
   const targetDeltaY = input.targetSide === "opponent" ? -60 : -12;
   const tasks: MachPunchTask[] = [];
   if (age >= 7 && age <= 71) {
-    tasks.push({ slot: input.taskSlots.monBg, callback: "Task_UpdateMonBg", role: "monbg", data: [input.attackerSprite.slot, input.attackerSprite.x, input.attackerSprite.y, targetDeltaX, targetDeltaY, input.targetSide === "player" ? 0 : 1, input.attackerSide === "opponent" ? 1 : 0] });
+    tasks.push({ slot: input.taskSlots.monBg, callback: "Task_UpdateMonBg", role: "monbg", data: taskData(input.attackerSprite.slot, input.attackerSprite.x, input.attackerSprite.y, targetDeltaX, targetDeltaY, input.targetSide === "player" ? 0 : 1, input.attackerSide === "opponent" ? 1 : 0) });
   }
   if (age >= 10 && age <= 46) {
-    tasks.push({ slot: input.taskSlots.initialFade, callback: "Task_FadeToBg", role: "fade-initial", data: [input.targetSide === "opponent" ? 9 : 10, 0, 0] });
+    const phase = age < 28 ? 1 : age === 28 ? 2 : 3;
+    tasks.push({ slot: input.taskSlots.initialFade, callback: "Task_FadeToBg", role: "fade-initial", data: fadeTaskData(input.targetSide === "opponent" ? 9 : 10, phase) });
   }
   if (age >= 29 && age <= 89) {
     const direction = input.targetSide === "opponent" ? -2304 : 2304;
-    tasks.push({ slot: input.taskSlots.slidingBg, callback: "AnimTask_UpdateSlidingBg", role: "sliding-bg", data: [1, direction, 0, -1] });
+    tasks.push({ slot: input.taskSlots.slidingBg, callback: "AnimTask_UpdateSlidingBg", role: "sliding-bg", data: taskData(1, direction, 0, -1) });
   }
   if (age >= 50 && age <= 65) {
     const punchX = input.attackerSide === "player" ? 8 : -8;
@@ -336,17 +361,18 @@ function taskAtAge(age: number, input: Readonly<MachPunchLiveInputs>, firstInact
     const tracePhase = local < 4 ? 0 : local < 8 ? 1 : 2;
     const traceFrame = local < 4 ? local + 1 : local < 8 ? 8 - local : 0;
     const traceLife = local < 8 ? local + 1 : 8 - (local - 8);
-    tasks.push({ slot: input.taskSlots.punch, callback: "AnimTask_AttackerPunchWithTrace_Step", role: "punch", data: [input.attackerSprite.slot, punchX, tracePhase, traceFrame, 9, traceLife, input.attackerSide === "player" ? 3 : 2, 0] });
+    tasks.push({ slot: input.taskSlots.punch, callback: "AnimTask_AttackerPunchWithTrace_Step", role: "punch", data: taskData(input.attackerSprite.slot, punchX, tracePhase, traceFrame, 9, traceLife, input.attackerSide === "player" ? 3 : 2, 0) });
   }
   if (age >= 58 && age <= 67) {
     const local = age - 58;
-    tasks.push({ slot: input.taskSlots.shake, callback: "AnimTask_ShakeMon_Step", role: "shake", data: [input.targetSprite.slot, 5 - Math.floor(local / 2), 1, local % 2 === 0 ? 1 : 0, 3, 0, 0, 0] });
+    tasks.push({ slot: input.taskSlots.shake, callback: "AnimTask_ShakeMon_Step", role: "shake", data: taskData(input.targetSprite.slot, 5 - Math.floor(local / 2), 1, local % 2 === 0 ? 1 : 0, 3, 0, 0, 0) });
   }
   if (age >= 69 && age <= 71) {
-    tasks.push({ slot: input.taskSlots.clearMonBg, callback: "Task_ClearMonBg", role: "clear-monbg", data: [0, age === 69 ? 1 : 2, input.attackerSide === "player" ? 0 : 1, 0] });
+    tasks.push({ slot: input.taskSlots.clearMonBg, callback: "Task_ClearMonBg", role: "clear-monbg", data: taskData(0, age === 69 ? 1 : 2, input.attackerSide === "player" ? 0 : 1, 0) });
   }
   if (age >= 69 && age <= firstInactive - 2) {
-    tasks.push({ slot: input.taskSlots.restoreFade, callback: "Task_FadeToBg", role: "fade-restore", data: [-1, 0, 0] });
+    const phase = age < 89 ? 1 : age === 89 || (input.attackerSide === "player" && age === 90) ? 2 : 3;
+    tasks.push({ slot: input.taskSlots.restoreFade, callback: "Task_FadeToBg", role: "fade-restore", data: fadeTaskData(-1, phase) });
   }
   return tasks.sort((left, right) => left.slot - right.slot || left.role.localeCompare(right.role));
 }
@@ -369,8 +395,10 @@ function traceSpritesAtAge(age: number, input: Readonly<MachPunchLiveInputs>): M
     return {
       kind: "trace", slot: input.traceSlots[index]!, template: "gMultiuseSpriteTemplate", callback: "AnimBattlerTrace",
       x: input.attackerPictureOrigin.x, y: input.attackerPictureOrigin.y, x2, y2: 0,
-      subpriority: input.attackerSprite.subpriority, oamPriority: input.attackerSprite.oamPriority,
-      matrixNum: input.attackerSprite.matrixNum, matrix: age >= 58 ? input.fistMatrix : input.attackerSprite.matrix,
+      subpriority: input.attackerSprite.subpriority,
+      oamPriority: input.attackerSprite.subpriority === 20 || input.attackerSprite.subpriority === 40 ? 2 : 3,
+      matrixNum: input.attackerSprite.matrixNum,
+      matrix: age >= 58 && input.attackerSprite.matrixNum === input.matrixSlot ? input.fistMatrix : input.attackerSprite.matrix,
       data: [life, 0, input.traceSlots[index]!, input.attackerSide === "player" ? 3 : 0, input.attackerSide === "player" ? 0 : 256, input.attackerSide === "player" ? 2 : 256, 0, 0], sourceCreationOrder: index,
     };
   });
@@ -393,23 +421,30 @@ function impactSpritesAtAge(age: number, input: Readonly<MachPunchLiveInputs>): 
       callback: age === 66 ? "DestroyAnimSprite" : "WaitAnimForDuration",
       x: input.targetPictureOrigin.x, y: input.targetPictureOrigin.y, x2: 0, y2: 0,
       subpriority: input.targetSprite.subpriority - 4, oamPriority: input.targetSprite.oamPriority,
-      matrixNum: input.matrixSlot, matrix: input.fistMatrix, data: [Math.max(0, 7 - (age - 58)), 0, 0, 0, 0, 0, 15357, 2058], sourceCreationOrder: 9,
+      data: [Math.max(0, 7 - (age - 58)), 0, 0, 0, 0, 0, 15357, 2058], sourceCreationOrder: 9,
     });
   }
   return sprites;
 }
 
-function dynamicOrderKey(sprite: MachPunchSprite): MachPunchPainterSprite {
-  return { slot: sprite.slot, subpriority: sprite.subpriority, oamPriority: sprite.oamPriority, oamY: sprite.y + sprite.y2 };
+function dynamicOrderKey(sprite: MachPunchSprite, input: Readonly<MachPunchLiveInputs>): MachPunchPainterSprite {
+  const oamY = sprite.kind === "trace"
+    ? input.painterSprites.find((entry) => entry.slot === input.attackerSprite.slot)?.oamY ?? input.attackerSprite.y
+    : sprite.y - 16;
+  return { slot: sprite.slot, subpriority: sprite.subpriority, oamPriority: sprite.oamPriority, oamY };
 }
 
 function painterOrderAtAge(age: number, input: Readonly<MachPunchLiveInputs>): readonly number[] {
   let order = input.spriteOrder.slice();
   const owned = new Set<number>([...input.traceSlots, input.hitSplatSlot, input.fistSlot]);
-  for (let current = 0; current <= age; current += 1) {
+  for (let current = 1; current <= age; current += 1) {
     const keys = new Map(input.painterSprites.map((sprite) => [sprite.slot, sprite]));
     for (const slot of owned) keys.set(slot, { slot, subpriority: 0xff, oamPriority: 3, oamY: 160 });
-    for (const sprite of impactSpritesAtAge(current, input)) keys.set(sprite.slot, dynamicOrderKey(sprite));
+    for (const sprite of impactSpritesAtAge(current, input)) {
+      // Task-created traces are allocated after this row's SortSprites pass.
+      if (sprite.kind === "trace" && sprite.data[0] === 8) continue;
+      keys.set(sprite.slot, dynamicOrderKey(sprite, input));
+    }
     const keyFor = (slot: number): MachPunchPainterSprite => keys.get(slot) ?? { slot, subpriority: 0xff, oamPriority: 3, oamY: 160 };
     for (let index = 1; index < order.length; index += 1) {
       let cursor = index;
@@ -427,10 +462,11 @@ function painterOrderAtAge(age: number, input: Readonly<MachPunchLiveInputs>): r
 }
 
 function animArgsAtAge(age: number, input: Readonly<MachPunchLiveInputs>): MachPunchState["animArgs"] {
-  if (age < 10) return [0, 0, 0, 0, 0, 0, 0, 0];
-  if (age < 29) return [input.targetSide === "opponent" ? 9 : 10, 0, 0, 0, 0, 0, 0, 0];
-  if (age < 50) return [1, input.targetSide === "opponent" ? -2304 : 2304, 0, -1, 0, 0, 0, age - 29];
-  return [input.attackerSprite.slot, input.attackerSide === "player" ? 8 : -8, 0, 1, 9, 1, input.attackerSide === "player" ? 3 : 2, Math.max(0, age - 50)];
+  const sideArg = input.attackerSide === "opponent" && age >= 10 ? 1 : 0;
+  if (age < 29) return [0, 0, 0, 0, 0, 0, 0, sideArg];
+  if (age < 50) return [input.targetSide === "opponent" ? -2304 : 2304, 0, 1, -1, 0, 0, 0, sideArg];
+  if (age < 58) return [28968, 10, 1, -1, 0, 0, 0, sideArg];
+  return [1, 3, 0, 6, 1, 0, 0, age >= 90 ? -1 : sideArg];
 }
 
 /** Complete MOVE_MACH_PUNCH source-root reduction through its inactive cleanup row. */
@@ -443,11 +479,12 @@ export function machPunchAtAge(age: number, input: Readonly<MachPunchLiveInputs>
   const attackerSprite = battlerSpriteAtAge(age, input, "attacker");
   const targetSprite = battlerSpriteAtAge(age, input, "target");
   const backgroundId = input.targetSide === "opponent" ? "BG_HIGHSPEED_OPPONENT" : "BG_HIGHSPEED_PLAYER";
-  const fadeState = bldState(age, firstInactive);
+  const fadeState = bldState(age, firstInactive, input);
   const impactLoaded = age >= 1 && age < firstInactive;
   const handsLoaded = age >= 4 && age < firstInactive;
   const matrixAllocated = age >= 58 && age < 68;
-  const shake = targetShakeAtAge(age);
+  const matrixSlots = input.matrixSlots.map((matrix, slot) => matrixAllocated && slot === input.matrixSlot ? input.fistMatrix : matrix);
+  const sourceDraws = animationDrawsAtAge(age, input.attackerSide);
   const audio = age === 50
     ? [{ channel: "SE1" as const, sound: "SE_M_JUMP_KICK" as const, sourcePan: "SOUND_PAN_ATTACKER" as const, pan: input.attackerSide === "player" ? -64 : 63 }]
     : age === 58
@@ -458,20 +495,26 @@ export function machPunchAtAge(age: number, input: Readonly<MachPunchLiveInputs>
     age, active: source.active, source, animArgs: animArgsAtAge(age, input),
     battlers: {
       attacker: { side: input.attackerSide, species: input.attackerSpecies, sprite: attackerSprite },
-      target: { side: input.targetSide, species: input.targetSpecies, sprite: targetSprite, shake },
+      target: { side: input.targetSide, species: input.targetSpecies, sprite: targetSprite },
     },
-    background: { id: backgroundId, branch: input.targetSide, scrollX: slideX(age, input), highSpeed: true },
-    sprites, tasks: source.active ? tasks : [], targetOnMonBg: age >= 7 && age < 72,
+    background: { id: backgroundId, branch: input.targetSide, scrollX: slideX(age, input), highSpeed: age >= 29 && age < 90 },
+    sprites, tasks: source.active ? tasks : [], attackerOnMonBg: age >= 7 && age < 69,
     alpha: age >= 50 && age <= 68 ? { eva: 9, evb: 8 } : null,
     resources: {
-      impact: { ...input.resources.impact, tag: impactLoaded ? MACH_PUNCH_IMPACT_TAG : null, loaded: impactLoaded },
-      handsAndFeet: { ...input.resources.handsAndFeet, tag: handsLoaded ? MACH_PUNCH_HANDS_AND_FEET_TAG : null, loaded: handsLoaded },
-      allocator: { matrixBitmap: input.matrixBitmap | (matrixAllocated ? (1 << input.matrixSlot) : 0), matrixSlots: input.matrixSlots, affineAllocated: matrixAllocated },
+      impact: { tag: impactLoaded ? MACH_PUNCH_IMPACT_TAG : null, loaded: impactLoaded, allocation: impactLoaded ? input.resources.impact : null },
+      handsAndFeet: { tag: handsLoaded ? MACH_PUNCH_HANDS_AND_FEET_TAG : null, loaded: handsLoaded, allocation: handsLoaded ? input.resources.handsAndFeet : null },
+      allocator: { matrixBitmap: input.matrixBitmap | (matrixAllocated ? (1 << input.matrixSlot) : 0), matrixSlots, affineAllocated: matrixAllocated },
     },
     registers: { bg3hofs: registerHofs(age, input), bldcnt: fadeState.bldcnt, bldalpha: fadeState.bldalpha, bldy: fadeState.bldy },
-    displayTransfer: { oam: age === 0 ? "initial" : "preceding-software", matrices: age === 0 ? "initial" : "preceding-software", palette: age === 0 ? "initial" : age === 7 ? "same-row-monbg" : "preceding-faded" },
-    targetOffset: shake, painterOrder: painterOrderAtAge(age, input), audio,
-    rng: { animation: animationRngAtAge(input.animationRngSeed, age), sourceDraws: age, gameplay: input.gameplayRng, gameplayUnchanged: true },
-    cleanup: { firstInactive: cleanup, visualTasks: source.active ? tasks.length + sprites.length : 0, soundTasks: audio.length, ownedSprites: sprites.length, resourcesReleased: age >= firstInactive },
+    displayTransfer: { oam: age === 0 ? "initial" : "preceding-software", matrices: age === 0 ? "initial" : "preceding-software", palette: age === 0 ? "initial" : age === 7 ? "same-row-monbg" : "preceding-faded", bg3Scroll: age === 0 ? "initial" : "preceding-software" },
+    painterOrder: painterOrderAtAge(age, input), audio,
+    rng: { animation: animationRngAtAge(input.animationRngSeed, sourceDraws), sourceDraws, gameplay: input.gameplayRng, gameplayUnchanged: true },
+    cleanup: {
+      firstInactive: cleanup,
+      visualTasks: age >= 50 && age <= 57 ? 1 : age >= 58 && age <= 65 ? 4 : age === 66 ? 3 : age === 67 ? 2 : 0,
+      soundTasks: 0,
+      ownedSprites: sprites.length,
+      resourcesReleased: age >= firstInactive,
+    },
   };
 }

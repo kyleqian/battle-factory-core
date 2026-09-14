@@ -132,16 +132,30 @@ function ownedState(state: MachPunchState): Json[] {
   return state.sprites.map((entry) => ({ ...entry })).sort((left, right) => left.slot - right.slot);
 }
 
-function compareSprites(orientation: MachPunchOrientation, age: number, row: Json, state: MachPunchState): void {
+function expectedBattler(entry: Json) {
+  return {
+    slot: entry.slot, x: entry.x, y: entry.y, x2: entry.x2, y2: entry.y2,
+    subpriority: entry.subpriority, oamPriority: (entry.attr[2] >>> 10) & 3,
+    matrixNum: entry.matrixNum, matrix: entry.matrix,
+  };
+}
+
+function compareSprites(orientation: MachPunchOrientation, age: number, row: Json, state: MachPunchState, input: MachPunchLiveInputs): void {
   const expected = ownedRows(row), actual = ownedState(state);
   invariant(expected.length === actual.length, `${orientation}/${age}: trace/hitsplat/fist count`);
   for (let index = 0; index < expected.length; index += 1) {
     const left = expected[index]!, right = actual[index]!;
     invariant(left.slot === right.slot && left.template.symbol === right.template && left.callback.symbol === right.callback,
       `${orientation}/${age}: sprite ${index} identity`);
-    for (const key of ["x", "y", "x2", "y2", "subpriority", "matrixNum"] as const) invariant(left[key] === right[key], `${orientation}/${age}: sprite ${left.slot} ${key}`);
-    invariant(same(left.matrix, right.matrix), `${orientation}/${age}: sprite ${left.slot} matrix`);
-    invariant(same(left.data.slice(0, right.data.length), right.data), `${orientation}/${age}: sprite ${left.slot} callback data`);
+    for (const key of ["x", "y", "x2", "y2", "subpriority"] as const) invariant(left[key] === right[key], `${orientation}/${age}: sprite ${left.slot} ${key}`);
+    invariant(((left.attr[2] >>> 10) & 3) === right.oamPriority, `${orientation}/${age}: sprite ${left.slot} OAM priority`);
+    if (right.kind !== "fist") {
+      invariant(left.matrixNum === right.matrixNum, `${orientation}/${age}: sprite ${left.slot} matrix slot`);
+      invariant(same(left.matrix, right.matrix), `${orientation}/${age}: sprite ${left.slot} matrix`);
+    }
+    invariant(same(left.data, right.data), `${orientation}/${age}: sprite ${left.slot} callback data`);
+    const creation = right.kind === "trace" ? input.traceSlots.indexOf(right.slot) : right.kind === "hitsplat" ? 8 : 9;
+    invariant(right.sourceCreationOrder === creation, `${orientation}/${age}: sprite ${left.slot} source creation order`);
   }
 }
 
@@ -153,7 +167,14 @@ function compareTasks(orientation: MachPunchOrientation, age: number, row: Json,
   for (let index = 0; index < expected.length; index += 1) {
     const left = expected[index]!, right = actual[index]!;
     invariant(left.slot === right.slot && left.func.symbol === right.callback, `${orientation}/${age}: task ${index} identity`);
-    invariant(same(left.data.slice(0, right.data.length), right.data), `${orientation}/${age}: task ${right.slot} data`);
+    const role = left.func.symbol === "Task_UpdateMonBg" ? "monbg"
+      : left.func.symbol === "AnimTask_UpdateSlidingBg" ? "sliding-bg"
+        : left.func.symbol === "AnimTask_AttackerPunchWithTrace_Step" ? "punch"
+          : left.func.symbol === "AnimTask_ShakeMon_Step" ? "shake"
+            : left.func.symbol === "Task_ClearMonBg" ? "clear-monbg"
+              : left.data[0] === -1 ? "fade-restore" : "fade-initial";
+    invariant(right.role === role, `${orientation}/${age}: task ${right.slot} role`);
+    invariant(same(left.data, right.data), `${orientation}/${age}: task ${right.slot} data`);
   }
 }
 
@@ -161,32 +182,74 @@ function compareImmutable(row: Json, first: Json, orientation: MachPunchOrientat
   for (const key of ["playerParty", "opponentParty", "battleMons", "battleOutcome", "battleWeather", "gameplayRng"]) {
     if (key in row.rawBattleState && key in first.rawBattleState) invariant(same(row.rawBattleState[key], first.rawBattleState[key]), `${orientation}/${age}: immutable gameplay ${key}`);
   }
+  for (const key of ["parties", "battlers", "engine"] as const) invariant(same(row[key], first[key]), `${orientation}/${age}: immutable retained ${key}`);
   invariant(same(row.immutableState, first.immutableState), `${orientation}/${age}: immutable semantic state`);
 }
 
-function compareRow(orientation: MachPunchOrientation, age: number, row: Json, first: Json, input: MachPunchLiveInputs): void {
+function compareRow(orientation: MachPunchOrientation, age: number, row: Json, rows: Json[], input: MachPunchLiveInputs): void {
+  const first = rows[0]!;
   const state = machPunchAtAge(age, input);
-  invariant(state.active === row.animScriptActive && state.source.pointer === row.scriptPtr && state.source.pointerOffset === row.scriptOffset && state.source.wait === row.scriptWait,
+  invariant(state.age === age && state.active === row.animScriptActive && state.source.active === row.animScriptActive
+    && state.source.owner === row.scriptOwner && state.source.pointer === row.scriptPtr
+    && state.source.pointerOffset === row.scriptOffset && state.source.wait === row.scriptWait,
     `${orientation}/${age}: source cursor/wait/active`);
+  invariant(same(state.animArgs, row.animArgs), `${orientation}/${age}: complete animation arguments`);
+  invariant(state.battlers.attacker.side === input.attackerSide && state.battlers.attacker.species === input.attackerSpecies
+    && state.battlers.target.side === input.targetSide && state.battlers.target.species === input.targetSpecies,
+  `${orientation}/${age}: live battler identity`);
+  invariant(same(state.battlers.attacker.sprite, expectedBattler(row.battlerSprites.attacker))
+    && same(state.battlers.target.sprite, expectedBattler(row.battlerSprites.target)),
+  `${orientation}/${age}: complete live battler geometry/matrix`);
+  const expectedId = input.targetSide === "opponent" ? "BG_HIGHSPEED_OPPONENT" : "BG_HIGHSPEED_PLAYER";
+  invariant(state.background.id === expectedId && state.background.branch === input.targetSide
+    && state.background.highSpeed === (age >= 29 && age < 90), `${orientation}/${age}: high-speed BG branch/lifetime`);
   invariant(state.background.scrollX === row.battleBg.gBattle_BG3_X, `${orientation}/${age}: BG3 sliding scroll`);
   invariant(state.registers.bg3hofs === row.registers.bg3hofs, `${orientation}/${age}: predecessor-latched BG3HOFS`);
   invariant(state.registers.bldcnt === row.registers.bldcnt && state.registers.bldalpha === row.registers.bldalpha && state.registers.bldy === row.registers.bldy,
     `${orientation}/${age}: blend/fade registers`);
-  invariant(state.battlers.attacker.sprite.x2 === row.battlerSprites.attacker.x2 && state.battlers.target.sprite.x2 === row.battlerSprites.target.x2,
-    `${orientation}/${age}: live battler geometry/shake`);
+  invariant(state.attackerOnMonBg === row.battlerSprites.attacker.invisible && !row.battlerSprites.target.invisible,
+    `${orientation}/${age}: attacker monbg membership`);
+  const expectedAlpha = row.registers.bldcnt === 16192 && row.registers.bldalpha === 2057 ? { eva: 9, evb: 8 } : null;
+  invariant(same(state.alpha, expectedAlpha), `${orientation}/${age}: target alpha schedule`);
   compareTasks(orientation, age, row, state);
-  compareSprites(orientation, age, row, state);
+  compareSprites(orientation, age, row, state, input);
   const impactLoaded = row.tileTags.includes(MACH_PUNCH_IMPACT_TAG), handsLoaded = row.tileTags.includes(MACH_PUNCH_HANDS_AND_FEET_TAG);
-  invariant(state.resources.impact.loaded === impactLoaded && state.resources.handsAndFeet.loaded === handsLoaded, `${orientation}/${age}: resource lifetime`);
-  invariant(state.resources.allocator.matrixBitmap === row.resourceAllocators.matrixBitmap, `${orientation}/${age}: affine allocator bitmap`);
+  invariant(state.resources.impact.loaded === impactLoaded && state.resources.impact.tag === (impactLoaded ? MACH_PUNCH_IMPACT_TAG : null)
+    && same(state.resources.impact.allocation, impactLoaded ? allocation(row, MACH_PUNCH_IMPACT_TAG) : null), `${orientation}/${age}: IMPACT resource tag/allocation/lifetime`);
+  invariant(state.resources.handsAndFeet.loaded === handsLoaded && state.resources.handsAndFeet.tag === (handsLoaded ? MACH_PUNCH_HANDS_AND_FEET_TAG : null)
+    && same(state.resources.handsAndFeet.allocation, handsLoaded ? allocation(row, MACH_PUNCH_HANDS_AND_FEET_TAG) : null), `${orientation}/${age}: HANDS_AND_FEET resource tag/allocation/lifetime`);
+  invariant(state.resources.allocator.matrixBitmap === row.resourceAllocators.matrixBitmap
+    && same(state.resources.allocator.matrixSlots, row.softwareMatrices)
+    && state.resources.allocator.affineAllocated === (age >= 58 && age < 68), `${orientation}/${age}: affine allocator bitmap/matrix slots/lifetime`);
+  invariant(same(state.painterOrder, row.spriteOrder), `${orientation}/${age}: complete sprite painter order`);
   if (age === 50 || age === 58) {
     const track = row.audio.SE1.tracks.find((entry: Json) => entry.flags & 0x80);
-    invariant(track && state.audio.length === 1 && state.audio[0]!.pan === track.panX, `${orientation}/${age}: audio/pan`);
+    const sound = age === 50 ? "SE_M_JUMP_KICK" : "SE_M_COMET_PUNCH";
+    const sourcePan = age === 50 ? "SOUND_PAN_ATTACKER" : "SOUND_PAN_TARGET";
+    invariant(track && state.audio.length === 1 && state.audio[0]!.channel === "SE1"
+      && state.audio[0]!.sound === sound && state.audio[0]!.sourcePan === sourcePan
+      && state.audio[0]!.pan === track.panX, `${orientation}/${age}: audio identity/pan`);
   } else invariant(state.audio.length === 0, `${orientation}/${age}: unexpected audio event`);
-  if (age === 7) invariant(state.displayTransfer.palette === "same-row-monbg", `${orientation}/${age}: monbg palette latch exception`);
-  if (age === 0) invariant(state.displayTransfer.oam === "initial" && state.displayTransfer.matrices === "initial", `${orientation}/${age}: initial display transfer`);
+  if (age === 0) {
+    invariant(same(state.displayTransfer, { oam: "initial", matrices: "initial", palette: "initial", bg3Scroll: "initial" }), `${orientation}/${age}: initial display transfer labels`);
+  } else {
+    const previous = rows[age - 1]!;
+    invariant(state.displayTransfer.oam === "preceding-software" && same(row.hardwareOam, previous.softwareOam), `${orientation}/${age}: OAM RAM+1 transfer`);
+    invariant(state.displayTransfer.matrices === "preceding-software" && same(row.hardwareMatrices, previous.softwareMatrices), `${orientation}/${age}: matrix RAM+1 transfer`);
+    if (age === 7) invariant(state.displayTransfer.palette === "same-row-monbg" && same(row.hardwarePalette, row.fadedPalette), `${orientation}/${age}: same-row monbg palette transfer`);
+    else invariant(state.displayTransfer.palette === "preceding-faded" && same(row.hardwarePalette, previous.fadedPalette), `${orientation}/${age}: palette RAM+1 transfer`);
+    invariant(state.displayTransfer.bg3Scroll === "preceding-software"
+      && state.registers.bg3hofs === ((previous.battleBg.gBattle_BG3_X % 512) + 512) % 512, `${orientation}/${age}: BG3 scroll RAM+1 transfer`);
+  }
+  const expectedDraws = rows.slice(1, age + 1).filter((entry, index) => entry.animationRng !== rows[index]!.animationRng).length;
+  invariant(state.rng.animation === row.animationRng && state.rng.sourceDraws === expectedDraws
+    && same(state.rng.gameplay, row.rawBattleState.gameplayRng) && state.rng.gameplayUnchanged,
+  `${orientation}/${age}: presentation RNG/source draws and opaque gameplay RNG`);
   const inactive = machPunchFirstInactiveAge(input);
-  invariant(state.cleanup.firstInactive === (age === inactive) && state.cleanup.resourcesReleased === (age >= inactive), `${orientation}/${age}: teardown`);
+  invariant(state.cleanup.firstInactive === (age === inactive)
+    && state.cleanup.visualTasks === row.visualTaskCount && state.cleanup.soundTasks === row.soundTaskCount
+    && state.cleanup.ownedSprites === ownedRows(row).length
+    && state.cleanup.resourcesReleased === (!impactLoaded && !handsLoaded && age >= inactive), `${orientation}/${age}: task/sprite/resource teardown`);
   compareImmutable(row, first, orientation, age);
 }
 
@@ -194,12 +257,14 @@ function replayOrientation(orientation: MachPunchOrientation): { readonly retain
   const rows = rowsFor(orientation), input = machPunchInputsFor(orientation, rows), config = machPunchConfigFor(orientation, rows);
   for (let pass = 0; pass < 2; pass += 1) {
     for (const [age, row] of rows.entries()) {
-      compareRow(orientation, age, row!, rows[0]!, input);
+      compareRow(orientation, age, row!, rows, input);
       const seam = sceneOnMachPunchView({ age, config } as SceneOnMachPunchPresentationState);
       const reduced = machPunchAtAge(age, input);
-      invariant(same(seam.sprites, reduced.sprites) && same(seam.tasks, reduced.tasks), `${orientation}/${age}: typed seam divergence`);
+      const { attacker, target, ...seamState } = seam;
+      invariant(same(seamState, reduced) && same(attacker, config.attacker) && same(target, config.target), `${orientation}/${age}: complete typed seam divergence`);
     }
   }
+  invariant(machPunchAtAge(rows.length - 1, input).rng.sourceDraws === 107, `${orientation}: exactly 107 presentation source draws`);
   return { retainedRows: rows.length, reducerRows: rows.length * 2, seamRows: rows.length * 2, cleanup: rows.length - 1 };
 }
 
