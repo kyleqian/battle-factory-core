@@ -1,3 +1,9 @@
+# Animation supervisor verification — MOVE_SIGNAL_BEAM exact closure (2026-09-14 supervisor)
+
+- **State / merge:** Recovered the Sol/high worker after its 60-minute cap stopped a redundant second aggregate gate, independently reviewed and committed `65cc5e808`, backed up its ref, and fast-forwarded it onto `animation-main`. Signal Beam alone advances Level 50 to **252/276 exact**, **0 partial / 0 staged**, and **24 unsupported**; the manual queue is empty and `signal-beam-orb-stream` is fulfilled without sibling credit.
+- **Independent proof / scope:** The actual-core verifier passes **291/291** bilateral rows with zero residual pixels in two byte-identical processes at `ae320636…`, and its altered CUBONE/BLISSEY live-input control changes seam output and framebuffer. I reviewed the broad promotion-derived receipt update as mechanical propagation of the 252/24/empty-queue state. No latch rule, animation boundary, unsupported-branch barrier, gameplay RNG/state, controller, facility owner, or main-program document changed.
+- **Gates / next:** Worker and merged `npm test` each pass **1,357 files / 11,320 tests** with **44 files / 223 tests skipped**; both builds pass **800 modules**. Focused Signal Beam/source/staging/evidence/reducer/assets/actual-core/boundary checks pass **7 files / 16 tests**; coverage, audit, and diff checks pass. Next select one remaining unsupported Level-50 move by source/component leverage and establish a bounded source/legal-staging checkpoint before dense evidence or production. **For the main program:** nothing blocking.
+
 # MOVE_SIGNAL_BEAM exact actual-core closure — bounded worker recovery (2026-09-14)
 
 - **State / promotion:** `MOVE_SIGNAL_BEAM` alone advances Level 50 to **252/276 exact**, **0 partial / 0 staged**, and **24 unsupported**. The manual queue is empty and `signal-beam-orb-stream` is fulfilled by Signal Beam alone; no sibling receives timing, latch, body, move, component, or track credit.
