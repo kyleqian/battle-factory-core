@@ -319,7 +319,7 @@ describe("elemental-punch component-track receipt ratchet", () => {
     };
     const moves = new Set(["MOVE_FIRE_PUNCH", "MOVE_ICE_PUNCH", "MOVE_THUNDER_PUNCH"]);
 
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(251);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(252);
     expect(coverage.entries.filter((entry) => entry.status === "partial" || entry.status === "staged"))
       .toHaveLength(0);
     expect(coverage.entries.filter((entry) => moves.has(entry.move)).map((entry) => [

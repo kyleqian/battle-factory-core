@@ -36,7 +36,7 @@
   "source": {
     "audit": "tools/compare/frustrationSourceAudit.ts",
     "auditSha256": "2965574d929f94b9b21f40cf458625341672e4903e38aadf623e9470e51900c0",
-    "auditRunSha256": "249d41ae47a31ffc9422f55c24178ee1278ea4b0de103e7b0e540f63d9bbcc72",
+    "auditRunSha256": "61e40dce6b6451696f2242ce41443f7400b7c2a8dac87027efbd07c241282eea",
     "probe": "tools/compare/frustrationProbe.py",
     "probeSha256": "e907d20d73a1ef00309c45414aeb1cb9140cabf297c7048bd3db35c176214e4c",
     "changeMapBuilder": "tools/compare/frustrationChangeMap.ts",

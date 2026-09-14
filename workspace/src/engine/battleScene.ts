@@ -548,6 +548,7 @@ import petalDanceAsset from "../animation/assets/petal-dance.json" with { type: 
 import destinyBondAsset from "../animation/assets/destiny-bond.json" with { type: "json" };
 import smogAsset from "../animation/assets/smog.json" with { type: "json" };
 import bonemerangAsset from "../animation/assets/bonemerang.json" with { type: "json" };
+import signalBeamAsset from "../animation/assets/signal-beam.json" with { type: "json" };
 import waterPulseAsset from "../animation/assets/water-pulse.json" with { type: "json" };
 import digDirtMoundAsset from "../animation/assets/dig-dirt-mound.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
@@ -981,6 +982,7 @@ import {
   sceneOnSheerColdView,
   sceneOnSmogView,
   sceneOnBonemerangView,
+  sceneOnSignalBeamView,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
   sceneOnAuroraBeamView,
@@ -1240,6 +1242,7 @@ import {
   type SceneOnSheerColdConfig,
   type SceneOnSmogConfig,
   type SceneOnBonemerangConfig,
+  type SceneOnSignalBeamConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
@@ -1861,6 +1864,9 @@ const smogArt = (smogAsset as {
 const bonemerangArt = (bonemerangAsset as {
   bone: { tileset: Tileset; palette: RgbColor[] };
 }).bone;
+const signalBeamArt = (signalBeamAsset as {
+  art: { tileset: Tileset; redPalette: RgbColor[]; greenPalette: RgbColor[] };
+}).art;
 const waterPulseArt = waterPulseAsset as {
   blueRing2: { tileset: Tileset; palette: RgbColor[] };
 };
@@ -23599,6 +23605,124 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.side === "player"
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "BONEMERANG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SIGNAL_BEAM") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnSignalBeamConfig>;
+    const view = sceneOnSignalBeamView(moveState);
+    // Signal Beam's move-owned maps prove ordinary predecessor transfer for
+    // the complete OAM, affine-matrix, and faded-palette buffers.
+    const displayed = sceneOnSignalBeamView({
+      ...moveState,
+      age: Math.max(0, moveState.age - 1),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SIGNAL_BEAM presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SIGNAL_BEAM missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const targetPalette = displayed.palette.faded.map(rgb555);
+    const input = moveState.config.animationInputs;
+    // AnimTask_ShakeMon writes after BuildOamBuffer. Signal Beam's own two
+    // task axes therefore expose the initializer pose at hardware local age
+    // 1, then each of the remaining 24 poses for two scans at four-row
+    // cadence. This is independent of the root's ordinary whole-OAM RAM+1
+    // transfer and is measured bilaterally for both task invocations.
+    const displayedShake = (startAge: number, x: number, y: number): { x: number; y: number } => {
+      const local = moveState.age - startAge;
+      const displaced = local === 1 || (local >= 4 && local <= 49 && (local & 3) <= 1);
+      return displaced ? { x, y } : { x: 0, y: 0 };
+    };
+    const attackerShake = displayedShake(10, 0, 2);
+    const targetShake = displayedShake(36, 3, 0);
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    type ObjEntry = Readonly<{ slot: number; priority: number; order: number; draw: () => void }>;
+    const orderOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    const objects: ObjEntry[] = [
+      {
+        slot: input.attackerSprite.slot,
+        priority: input.attackerSprite.oamPriority,
+        order: orderOf(input.attackerSprite.slot),
+        draw: () => drawSpriteSheet(
+          fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerArt.palette,
+          view.attacker.geometry.spriteCorner.x + input.attackerSprite.x2 + attackerShake.x,
+          view.attacker.geometry.spriteCorner.y + input.attackerSprite.y2 + attackerShake.y,
+        ),
+      },
+      {
+        slot: input.targetSprite.slot,
+        priority: input.targetSprite.oamPriority,
+        order: orderOf(input.targetSprite.slot),
+        draw: () => drawSpriteSheet(
+          fb, tilesFor(targetArt, view.target.geometry.side), targetPalette,
+          view.target.geometry.spriteCorner.x + input.targetSprite.x2 + targetShake.x,
+          view.target.geometry.spriteCorner.y + input.targetSprite.y2 + targetShake.y,
+        ),
+      },
+    ];
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "complex-palette-blend") continue;
+      objects.push({
+        slot: sprite.slot,
+        priority: sprite.oamPriority,
+        order: orderOf(sprite.slot),
+        draw: () => drawSpriteSheet(
+          fb,
+          signalBeamArt.tileset,
+          sprite.kind === "red-orb" ? signalBeamArt.redPalette : signalBeamArt.greenPalette,
+          sprite.x + sprite.x2 - 4,
+          sprite.y + sprite.y2 - 4,
+        ),
+      });
+    }
+    for (let priority = 3; priority >= 0; priority -= 1) {
+      for (const entry of objects
+        .filter((item) => item.priority === priority)
+        .sort((left, right) => right.order - left.order || right.slot - left.slot)) entry.draw();
+    }
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SIGNAL BEAM!",
       99,
     );
     return;

@@ -1,0 +1,278 @@
+{
+  "schema": "signal-beam-source-assets/v1",
+  "source": {
+    "move": "data/battle_anim_scripts.s Move_SIGNAL_BEAM + SignalBeamOrbs",
+    "moveSha256": "598313db8728d69c1013ac58fb772d8920ca2aa8691782c6bfb9169ddf8eab77",
+    "templates": "src/battle_anim_water.c gSignalBeam{Red,Green}OrbSpriteTemplate",
+    "image": "graphics/battle_anims/sprites/glowy_red_orb.png",
+    "imageSha256": "17d0717cde31181e3ec94125f64f627f2664cfe6464ad9169f0985b4246c6ef5",
+    "greenPalette": "graphics/battle_anims/sprites/glowy_green_orb.pal",
+    "greenPaletteSha256": "0d5702d6026a563d252a93e088dcb10c6d1d4e80d5982c0b1612f3f9df808ee2"
+  },
+  "resources": {
+    "red": {
+      "tag": "ANIM_TAG_GLOWY_RED_ORB",
+      "tagValue": 10264,
+      "tileBytes": 32
+    },
+    "green": {
+      "tag": "ANIM_TAG_GLOWY_GREEN_ORB",
+      "tagValue": 10265,
+      "tileBytes": 32
+    }
+  },
+  "templates": {
+    "red": {
+      "symbol": "gSignalBeamRedOrbSpriteTemplate",
+      "shape": "8x8",
+      "affine": false,
+      "objMode": "objnormal",
+      "callback": "AnimToTargetInSinWave"
+    },
+    "green": {
+      "symbol": "gSignalBeamGreenOrbSpriteTemplate",
+      "shape": "8x8",
+      "affine": false,
+      "objMode": "objnormal",
+      "callback": "AnimToTargetInSinWave"
+    }
+  },
+  "art": {
+    "tileset": {
+      "columns": 1,
+      "rows": 1,
+      "tiles": [
+        [
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          2,
+          3,
+          3,
+          2,
+          1,
+          0,
+          1,
+          2,
+          3,
+          3,
+          3,
+          3,
+          2,
+          1,
+          1,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          1,
+          1,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          1,
+          1,
+          2,
+          3,
+          3,
+          3,
+          3,
+          2,
+          1,
+          0,
+          1,
+          2,
+          3,
+          3,
+          2,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ]
+      ]
+    },
+    "redPalette": [
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 255,
+        "g": 148,
+        "b": 148
+      },
+      {
+        "r": 255,
+        "g": 74,
+        "b": 74
+      },
+      {
+        "r": 255,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 206,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      }
+    ],
+    "greenPalette": [
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 206,
+        "g": 247,
+        "b": 198
+      },
+      {
+        "r": 107,
+        "g": 247,
+        "b": 99
+      },
+      {
+        "r": 8,
+        "g": 247,
+        "b": 0
+      },
+      {
+        "r": 8,
+        "g": 173,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      }
+    ]
+  }
+}

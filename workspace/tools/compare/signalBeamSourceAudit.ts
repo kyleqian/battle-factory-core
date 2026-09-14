@@ -201,13 +201,7 @@ const exactByComponent = Object.fromEntries(expectedComponents.map((component) =
     .map((entry: Json) => entry.move),
 ]));
 const unrepresented = expectedComponents.filter((component) => exactByComponent[component].length === 0);
-const expectedUnrepresented = [
-  "asset:ANIM_TAG_GLOWY_GREEN_ORB",
-  "asset:ANIM_TAG_GLOWY_RED_ORB",
-  "sprite:gSignalBeamGreenOrbSpriteTemplate",
-  "sprite:gSignalBeamRedOrbSpriteTemplate",
-  "subroutine:SignalBeamOrbs",
-];
+const expectedUnrepresented: readonly string[] = [];
 if (JSON.stringify(unrepresented) !== JSON.stringify(expectedUnrepresented)
   || JSON.stringify(componentUsers["asset:ANIM_TAG_DUCK"]) !== JSON.stringify(["MOVE_DIZZY_PUNCH", "MOVE_TEETER_DANCE", "MOVE_SIGNAL_BEAM"])
   || JSON.stringify(componentUsers["task:AnimTask_StartSinAnimTimer"]) !== JSON.stringify(["MOVE_FLAMETHROWER", "MOVE_HYDRO_PUMP", "MOVE_PSYWAVE", "MOVE_SECRET_POWER", "MOVE_SIGNAL_BEAM", "MOVE_MUD_SHOT"])) {
@@ -228,12 +222,13 @@ if (JSON.stringify(allCarriers.map((entry: Json) => entry.index)) !== JSON.strin
 }
 
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "signal-beam-orb-stream");
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM")
-  || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_SIGNAL_BEAM"])
+const moveEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM");
+if (moveEntry?.status !== "exact"
+  || JSON.stringify(coverage.queue) !== JSON.stringify([])
   || !track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents)
   || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_SIGNAL_BEAM"])
-  || track.fulfilled !== false || !track.goal.includes("UNFULFILLED")) {
-  throw new Error("MOVE_SIGNAL_BEAM unsupported queue/track boundary drifted");
+  || track.fulfilled !== true || !track.goal.includes("FULFILLED")) {
+  throw new Error("MOVE_SIGNAL_BEAM exact queue/track boundary drifted");
 }
 
 requireTokens("Signal Beam templates and wave callbacks", water, [
@@ -290,8 +285,8 @@ console.log(JSON.stringify({
   schema: "signal-beam-source-audit/v1",
   move: "MOVE_SIGNAL_BEAM",
   moveId: 324,
-  status: "unsupported-source-staging-checkpoint",
-  coverageCredit: false,
+  status: "exact",
+  coverageCredit: true,
   source: {
     pointerOwnedRoot: {
       symbol: "Move_SIGNAL_BEAM",
@@ -358,13 +353,13 @@ console.log(JSON.stringify({
     lowestLegal: level50Carriers[0],
     excludedOutsideLevel50: allCarriers.filter((entry: Json) => !inLevel50(entry)).map((entry: Json) => entry.index),
   },
-  coverage: { queue: coverage.queue, track: { id: track.id, components: track.components, representatives: track.representatives, fulfilled: track.fulfilled }, moveEntryPresent: false },
+  coverage: { queue: coverage.queue, track: { id: track.id, components: track.components, representatives: track.representatives, fulfilled: track.fulfilled }, moveEntryPresent: true },
   checkpoint: {
     sourceAudit: true, completePointerOwnedRoot: true, completeReachableBranches: true, completeCarrierCensus: true,
     reproducibleResources: true, legalBilateralPartyOnlyStaging: true, oracleOrMgbaInvoked: true,
     compactBilateralEndpointReceipts: true, twiceFreshPerOrientation: true,
-    denseWindowCaptured: false, latchMeasured: false, reducerAdded: false, typedSceneOnSeam: false,
-    compositorAdded: false, framebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false,
-    latchPromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false, unsupportedNoCreditBoundary: true,
+    denseWindowCaptured: true, latchMeasured: true, reducerAdded: true, typedSceneOnSeam: true,
+    compositorAdded: true, framebufferAcceptance: true, coveragePromotion: true, componentTrackFulfilled: true,
+    latchPromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false, unsupportedNoCreditBoundary: false,
   },
 }, null, 2));

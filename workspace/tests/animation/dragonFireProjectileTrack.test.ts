@@ -619,16 +619,16 @@ describe("dragon-fire-projectile component-track receipt ratchet", () => {
       }[];
     };
 
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(251);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(252);
     expect(coverage.entries.filter((entry) =>
       entry.status === "partial" || entry.status === "staged")).toHaveLength(0);
     expect(animationCoverageSummary()[0]).toEqual({
       tier: "level50",
       total: 276,
-      exact: 251,
+      exact: 252,
       partial: 0,
       staged: 0,
-      unsupported: 25,
+      unsupported: 24,
     });
     expect(coverage.entries.filter((entry) => trackMoves.includes(
       entry.move as (typeof trackMoves)[number],

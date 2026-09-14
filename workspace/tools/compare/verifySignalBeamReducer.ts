@@ -75,7 +75,7 @@ export function signalBeamInputsFor(side: SignalBeamOrientation, rows: readonly 
   });
   const targetBank = 16 + ((row0.battlerSprites.target.attr[2] >>> 12) & 0xf);
   return {
-    attackerSide, targetSide, attackerSpecies: "ARIADOS", targetSpecies: "ARIADOS",
+    attackerSide, targetSide, attackerSpecies: "ARIADOS", targetSpecies: "CHANSEY",
     attackerPictureOrigin: { x: firstRed.x - (attackerSide === "player" ? 10 : -10), y: firstRed.y - 10 },
     targetPictureOrigin: { x: helper.x, y: helper.y },
     attackerSprite: battler(row0.battlerSprites.attacker), targetSprite: battler(row0.battlerSprites.target),

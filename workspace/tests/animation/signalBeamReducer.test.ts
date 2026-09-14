@@ -118,14 +118,14 @@ describe("MOVE_SIGNAL_BEAM source-relative reducer and narrow Scene-ON seam", ()
     expect(seam.target.geometry.animationCenter).toEqual({ x: 39, y: 117 });
   });
 
-  it("keeps retained evidence out of production and leaves Signal Beam unsupported", () => {
+  it("keeps retained evidence out of production and promotes only Signal Beam", () => {
     const source = readFileSync(resolve(root, "src/animation/signalBeam.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     const data = coverage as Json;
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM")).toBe(false);
-    expect(data.queue).toEqual(["MOVE_SIGNAL_BEAM"]);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM")).toMatchObject({ status: "exact" });
+    expect(data.queue).toEqual([]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "signal-beam-orb-stream")).toMatchObject({
-      representatives: ["MOVE_SIGNAL_BEAM"], fulfilled: false, goal: expect.stringContaining("UNFULFILLED"),
+      representatives: ["MOVE_SIGNAL_BEAM"], fulfilled: true, goal: expect.stringContaining("FULFILLED"),
     });
   });
 });

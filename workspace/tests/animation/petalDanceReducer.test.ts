@@ -118,7 +118,7 @@ describe("MOVE_PETAL_DANCE source-age reducer and typed Scene-ON seam", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.find((entry: { move: string }) =>
       entry.move === "MOVE_PETAL_DANCE")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual(["MOVE_SIGNAL_BEAM"]);
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(251);
+    expect(coverage.queue).toEqual([]);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(252);
   });
 });

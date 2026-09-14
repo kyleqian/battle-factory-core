@@ -28,7 +28,7 @@ describe("MOVE_SIGNAL_BEAM complete legal bilateral Scene-ON evidence", () => {
     }
   });
 
-  it("pins all ten mechanisms without promoting the move or track", () => {
+  it("pins all ten mechanisms while the later closure promotes the move and track", () => {
     expect(fixture.measured).toMatchObject({
       window: expect.stringContaining("Player-back frames 78..223"), orbStream: expect.stringContaining("23 red/green pairs"),
       timerWave: expect.stringContaining("ages 18..116"), shake: expect.stringContaining("RAM+1"), palette: expect.stringContaining("37/45/54/63/72/81/91"),
@@ -38,9 +38,9 @@ describe("MOVE_SIGNAL_BEAM complete legal bilateral Scene-ON evidence", () => {
     expect(fixture.latchConclusion).toContain("independently proves move-owned");
     expect(fixture.scope).toMatchObject({ productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferAcceptanceAdded: false, coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false });
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(251);
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM")).toBe(false);
-    expect(data.queue).toEqual(["MOVE_SIGNAL_BEAM"]);
-    expect(data.componentTracks.find((entry: Json) => entry.id === "signal-beam-orb-stream")).toMatchObject({ representatives: ["MOVE_SIGNAL_BEAM"], fulfilled: false, goal: expect.stringContaining("UNFULFILLED") });
+    expect(data.entries).toHaveLength(252);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM")).toMatchObject({ status: "exact" });
+    expect(data.queue).toEqual([]);
+    expect(data.componentTracks.find((entry: Json) => entry.id === "signal-beam-orb-stream")).toMatchObject({ representatives: ["MOVE_SIGNAL_BEAM"], fulfilled: true, goal: expect.stringContaining("FULFILLED") });
   });
 });
