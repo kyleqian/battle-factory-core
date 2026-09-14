@@ -7410,9 +7410,13 @@
     "tools/compare/evidence/psych-up-opponent-dense-state.json.gz",
     "tools/compare/evidence/psych-up-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/psych-up-changemap-opponent.json",
-    "tests/animation/psychUpEvidenceCheckpoint.test.ts"
+    "tests/animation/psychUpEvidenceCheckpoint.test.ts",
+    "src/animation/psychUp.ts",
+    "tools/compare/verifyPsychUpReducer.ts",
+    "tests/animation/psychUpReducer.test.ts",
+    "src/animation/sceneOnPresentation.ts"
    ],
-   "goal": "UNFULFILLED. MOVE_PSYCH_UP now has its own complete twice-fresh bilateral 179-row semantic/raw-RGB/banked-change-map evidence through inactive cleanup and move-owned latch measurements. It still needs its source-relative reducer, typed seam, compositor, and zero-residual framebuffer acceptance before any move, component, sibling, track, or coverage credit. Leer, Frustration, Sleep Talk, Hyper Voice, Snore, Psychic, Future Sight, Hyper Beam, Thunderbolt, and every palette sibling remain identity/no-transfer controls only."
+   "goal": "UNFULFILLED. MOVE_PSYCH_UP now has its own complete twice-fresh bilateral 179-row semantic/raw-RGB/banked-change-map evidence through inactive cleanup and a source-relative pure reducer plus narrow typed Scene-ON seam. The hermetic reducer/seam replay checks every retained row twice (716 direct reducer + 716 seam calls), including root/tasks/spiral/attacker/palettes/monbg/registers/resources/audio/RNG/cleanup and a material live-input control. It still needs a compositor and zero-residual framebuffer acceptance before any move, component, sibling, track, or coverage credit. Leer, Frustration, Sleep Talk, Hyper Voice, Snore, Psychic, Future Sight, Hyper Beam, Thunderbolt, and every palette sibling remain identity/no-transfer controls only."
   },
   {
    "id": "spider-web-thread",

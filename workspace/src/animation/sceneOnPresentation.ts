@@ -579,6 +579,11 @@ import {
   type MachPunchState,
 } from "./machPunch.ts";
 import {
+  psychUpAtAge,
+  type PsychUpLiveInputs,
+  type PsychUpState,
+} from "./psychUp.ts";
+import {
   solarBeamAtAge,
   type SolarBeamBody,
   type SolarBeamState,
@@ -2347,6 +2352,16 @@ export interface SceneOnMachPunchConfig {
     "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies">>;
 }
 
+/** Narrow Scene-ON seam for MOVE_PSYCH_UP's source-relative presentation. */
+export interface SceneOnPsychUpConfig {
+  readonly move: "PSYCH_UP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<PsychUpLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies">>;
+}
+
 /** Narrow Scene-ON seam for Solar Beam's source-isolated two-turn bodies. */
 export interface SceneOnSolarBeamConfig {
   readonly move: "SOLAR_BEAM";
@@ -4097,6 +4112,7 @@ export type SceneOnMoveConfig =
   | SceneOnMegaKickConfig
   | SceneOnFocusPunchConfig
   | SceneOnMachPunchConfig
+  | SceneOnPsychUpConfig
   | SceneOnSolarBeamConfig
   | SceneOnHiJumpKickConfig
   | SceneOnRollingKickConfig
@@ -4475,6 +4491,8 @@ export type SceneOnBonemerangPresentationState =
   SceneOnMovePresentationState<SceneOnBonemerangConfig>;
 export type SceneOnMachPunchPresentationState =
   SceneOnMovePresentationState<SceneOnMachPunchConfig>;
+export type SceneOnPsychUpPresentationState =
+  SceneOnMovePresentationState<SceneOnPsychUpConfig>;
 export type SceneOnSignalBeamPresentationState =
   SceneOnMovePresentationState<SceneOnSignalBeamConfig>;
 export type SceneOnWaterPulsePresentationState =
@@ -4657,6 +4675,11 @@ export interface SceneOnFocusPunchView extends FocusPunchState {
 }
 
 export interface SceneOnMachPunchView extends MachPunchState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnPsychUpView extends PsychUpState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7685,6 +7708,27 @@ export function sceneOnMachPunchView(
   const { attacker, target, animationInputs } = state.config;
   return {
     ...machPunchAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_PSYCH_UP's first source-root row. */
+export function sceneOnPsychUpView(
+  state: SceneOnPsychUpPresentationState,
+): SceneOnPsychUpView {
+  if (state.config.move !== "PSYCH_UP") {
+    throw new Error(`expected PSYCH_UP presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...psychUpAtAge(state.age, {
       ...animationInputs,
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
