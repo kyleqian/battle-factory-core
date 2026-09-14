@@ -915,6 +915,11 @@ import {
   type BonemerangState,
 } from "./bonemerang.ts";
 import {
+  signalBeamAtAge,
+  type SignalBeamLiveInputs,
+  type SignalBeamState,
+} from "./signalBeam.ts";
+import {
   waterPulseAtAge,
   type WaterPulseLiveInputs,
   type WaterPulseState,
@@ -2579,6 +2584,21 @@ export interface SceneOnBonemerangConfig {
       | "attackerPictureCenter" | "targetPictureCenter">>;
 }
 
+/**
+ * Narrow Scene-ON semantic seam for MOVE_SIGNAL_BEAM. The scene supplies
+ * current battler identity plus live source picture origins, allocator,
+ * palette, painter, and presentation-only inputs; battle resolution remains
+ * outside this reducer.
+ */
+export interface SceneOnSignalBeamConfig {
+  readonly move: "SIGNAL_BEAM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<SignalBeamLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies">>;
+}
+
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
@@ -4090,6 +4110,7 @@ export type SceneOnMoveConfig =
   | SceneOnSheerColdConfig
   | SceneOnSmogConfig
   | SceneOnBonemerangConfig
+  | SceneOnSignalBeamConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
@@ -4436,6 +4457,8 @@ export type SceneOnSmogPresentationState =
   SceneOnMovePresentationState<SceneOnSmogConfig>;
 export type SceneOnBonemerangPresentationState =
   SceneOnMovePresentationState<SceneOnBonemerangConfig>;
+export type SceneOnSignalBeamPresentationState =
+  SceneOnMovePresentationState<SceneOnSignalBeamConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnDigPresentationState =
@@ -4818,6 +4841,11 @@ export interface SceneOnSmogView extends SmogState {
 }
 
 export interface SceneOnBonemerangView extends BonemerangState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSignalBeamView extends SignalBeamState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8225,6 +8253,27 @@ export function sceneOnBonemerangView(
       targetSpecies: target.species,
       attackerPictureCenter: attacker.geometry.animationCenter,
       targetPictureCenter: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is Move_SIGNAL_BEAM's root resource-command source row. */
+export function sceneOnSignalBeamView(
+  state: SceneOnSignalBeamPresentationState,
+): SceneOnSignalBeamView {
+  if (state.config.move !== "SIGNAL_BEAM") {
+    throw new Error(`expected SIGNAL_BEAM presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...signalBeamAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
     }),
     attacker,
     target,
