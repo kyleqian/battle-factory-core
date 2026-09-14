@@ -1,0 +1,57 @@
+{
+  "schema": "mach-punch-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_MACH_PUNCH",
+  "moveId": 183,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/machPunchSourceAudit.ts",
+    "auditSha256": "d7a929f0989929531f223ba24f0bc3cfed2e9908f8530460d9a6b24d33fc0465",
+    "probe": "tools/compare/machPunchProbe.py",
+    "probeSha256": "17cc59d31a65a4e2c02e68306d75ae16a095a1743b6a71c0a06d217850e3b870",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "stagingReceipt": "tools/compare/fixtures/mach-punch-staging-receipt.json",
+    "stagingReceiptSha256": "c4ed293b7a9c13aae29138ec836b21486e6e7d0d76ba206abe2d17518398554d"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-mach-punch-player-hitmonchan-opponent-chansey.json",
+      "scenarioSha256": "f44abd79243ff3f8f4a349b510e01e0fe604aeaa0ef80b4cd0636933ede4c342",
+      "denseState": "tools/compare/evidence/mach-punch-player-dense-state.json.gz",
+      "denseStateSha256": "91767d79dd309d442577066fd5f59aad8dbe835ed5ab70a5269bcbfdb28dfb41",
+      "probeJsonSha256": "8e3c0f0a5d110a4e1f6754f9f47f06bfe54c84bc99236fb1724db54bc1fdecfa",
+      "repeatProbeJsonSha256": "8e3c0f0a5d110a4e1f6754f9f47f06bfe54c84bc99236fb1724db54bc1fdecfa",
+      "rawRgbArchive": "tools/compare/evidence/mach-punch-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "f7d39d93a194615eb071d9de6d5fa64f47ef87139b9f291b45d03759bb15ab54",
+      "rawRgbSequenceSha256": "ef4e9cee9787b82d959fe4589978882d1fd839899634b7c566d259be9c0e7b4d",
+      "repeatRawRgbSequenceSha256": "ef4e9cee9787b82d959fe4589978882d1fd839899634b7c566d259be9c0e7b4d",
+      "changeMap": "tools/compare/evidence/mach-punch-changemap-player.json",
+      "changeMapSha256": "603ab52b826349235096890f8a5ab105f813920c02ee2f9bdcc2a350303e2319"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-mach-punch-opponent-hitmonchan-player-chansey.json",
+      "scenarioSha256": "11693defd294a36823f4e3260694c89873abbb8bcc1c6b5e28cb6c317949479f",
+      "denseState": "tools/compare/evidence/mach-punch-opponent-dense-state.json.gz",
+      "denseStateSha256": "3e3a416cfc79a5b496a0bde40dad531f4045a46a03efe15865cf559557004ff2",
+      "probeJsonSha256": "ed77e376adbdb6fe0d78b5b831b637a509256455a57c04c2320c363085bf7895",
+      "repeatProbeJsonSha256": "ed77e376adbdb6fe0d78b5b831b637a509256455a57c04c2320c363085bf7895",
+      "rawRgbArchive": "tools/compare/evidence/mach-punch-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "569fed2a25c5f378d9fe648e155d235e274fb5949fd17a5bb5ac87515e15d5d7",
+      "rawRgbSequenceSha256": "efd1f40061fd8a3575c6533933f0e82ecd5cc88e308796c95150e4fb156913f0",
+      "repeatRawRgbSequenceSha256": "efd1f40061fd8a3575c6533933f0e82ecd5cc88e308796c95150e4fb156913f0",
+      "changeMap": "tools/compare/evidence/mach-punch-changemap-opponent.json",
+      "changeMapSha256": "bfaa818bdc829726074626b18b616dbb162ac6f07922165da52940ae40339529"
+    }
+  },
+  "measured": {
+    "window": "Complete root-to-first-inactive-cleanup: player-back ages 0..110 (frames 78..188), opponent-front ages 0..109 (frames 82..191), twice fresh.",
+    "background": "Both BG_HIGHSPEED_OPPONENT and BG_HIGHSPEED_PLAYER branches retained; AnimTask_UpdateSlidingBg lives 29..89 and BG3HOFS displays every write at RAM+1.",
+    "punch": "AnimTask_AttackerPunchWithTrace lives 50..65 with eight chronological trace objects; the hitsplat lives 58..67 and fist 58..66.",
+    "shake": "Target AnimTask_ShakeMon lives 58..67; source target x2 edges at 60,62,64,66 are measured independently in both orientations.",
+    "transfer": "Whole hardware OAM and matrices equal preceding software on every comparable row. Hardware palette equals preceding faded except same-row monbg age 7; unfaded, faded, and hardware boundaries are separately pinned.",
+    "audioResources": "SE_M_JUMP_KICK at age 50 then target-panned SE_M_COMET_PUNCH at 58; IMPACT 10135 and HANDS_AND_FEET 10143 allocations, affine matrix lifetime, and cleanup are retained.",
+    "stateCleanup": "Party, battler, weather, outcome, and gameplay RNG are immutable; animation RNG changes 107 times; exactly one Mach Punch PP is spent; cleanup has no animation tasks/resources/blend state."
+  },
+  "scope": { "productionChanged": false, "reducerAdded": false, "typedSeamAdded": false, "compositorAdded": false, "framebufferAcceptanceAdded": false, "coveragePromotion": false, "componentTrackFulfilled": false, "latchCredit": false, "siblingCredit": false }
+}
