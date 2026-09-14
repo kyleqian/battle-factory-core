@@ -7378,6 +7378,33 @@
    "goal": "FULFILLED by MOVE_MACH_PUNCH alone: its complete source-age reducer, narrow typed Scene-ON seam, and generic live compositor pass all 221 bilateral component, retained-RGB, and actual-core framebuffer rows twice with zero residual pixels through cleanup ages 110/109. Its own maps retain both BG_HIGHSPEED branches, BG3 sliding, trace/fist/hitsplat and ShakeMon lifetimes, alpha/fades, audio/resources, painter order, ordinary predecessor OAM/matrix transfer, the age-7 same-row monbg palette exception, BG3 scroll transfer, presentation RNG holds and exactly 107 draws per orientation. The material altered control changes identity, sides/species, geometry/origins, allocations/matrices/tasks/resources/order, registers, presentation RNG, seam output, and framebuffer while gameplay state/RNG remains opaque and unchanged. Every sibling receives no Mach Punch timing, latch, body, move, component, or track credit."
   },
   {
+   "id": "psych-up-spiral-palette-cycle",
+   "components": [
+    "asset:ANIM_TAG_SPIRAL",
+    "sprite:gPsychUpSpiralSpriteTemplate",
+    "task:AnimTask_BlendBattleAnimPal",
+    "task:AnimTask_ScaleMonAndRestore",
+    "task:AnimTask_SwayMon",
+    "visualCommand:blend_color_cycleexclude",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:monbg",
+    "visualCommand:setalpha"
+   ],
+   "representatives": ["MOVE_PSYCH_UP"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/psychUpSourceAudit.ts",
+    "tools/battle-lab/mechanic-psych-up-player-jumpluff-opponent-ninjask.json",
+    "tools/battle-lab/mechanic-psych-up-opponent-jumpluff-player-ninjask.json",
+    "tools/compare/psychUpStagingProbe.py",
+    "tools/compare/fixtures/psych-up-staging-receipt.json",
+    "tools/compare/verifyPsychUpStaging.ts",
+    "tests/animation/psychUpSourceStaging.test.ts"
+   ],
+   "goal": "UNFULFILLED. MOVE_PSYCH_UP alone has a source/ELF/ROM root audit and compact legal bilateral party-before-init receipts only. It needs its own complete twice-fresh dense Scene-ON maps through cleanup, its own latch measurements, source-relative reducer, typed seam, compositor, and zero-residual framebuffer acceptance before any move, component, sibling, timing, latch, or coverage credit. Leer, Frustration, Sleep Talk, Hyper Voice, Snore, Psychic, Future Sight, and every palette sibling are source-identity controls only."
+  },
+  {
    "id": "spider-web-thread",
    "components": [
     "asset:ANIM_TAG_SPIDER_WEB",

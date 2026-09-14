@@ -1,0 +1,95 @@
+{
+  "schema": "psych-up-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_PSYCH_UP",
+  "moveId": 244,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/psychUpSourceAudit.ts",
+    "auditSha256": "81d62378acef92657e893e34b9c293a39ce60dc1dbaf76d6801aac8560d7ad2d",
+    "auditRunSha256": "239bc664c39b09b73a17cb7ddbf0e2af011094038709f50657a2967ec2d81772",
+    "probe": "tools/compare/psychUpStagingProbe.py",
+    "probeSha256": "65f20e1f3bed4014aefbacec8de16be237347232da95cb9c09f50e920afd50bf",
+    "pointerOwnedRoot": {
+      "symbol": "Move_PSYCH_UP",
+      "elf": "reference/pokeemerald/pokeemerald.elf",
+      "start": "0x082caaea",
+      "endExclusive": "0x082cab5c",
+      "byteLength": 114,
+      "romSha256": "1f2f503f855e81dba03c471fc740f72f22d3318bb77d82af5a35d3c28adc254f"
+    }
+  },
+  "factoryLegalSelection": {
+    "representative": {"setId": 229, "name": "FRONTIER_MON_JUMPLUFF_1", "species": 189},
+    "swordsDanceControl": {"setId": 238, "name": "FRONTIER_MON_NINJASK_1", "species": 302},
+    "allSourceCarriers": [50, 229, 428, 478, 512, 514, 562, 570, 593, 639, 652, 782, 837, 841, 844],
+    "level50Carriers": [229, 428, 478, 512, 514, 562, 570, 593, 639, 652, 782, 837, 841, 844],
+    "sourceRoute": {"challengeNum": 1, "level50SetRange": [162, 266], "trainerId": 100},
+    "partyBeforeInit": true,
+    "choiceConstraint": "Both orientations use three complete legal Factory-derived records per side. Jumpluff's four active slots are constrained to its source-set Psych Up, and Ninjask's four active slots are constrained to its source-set Swords Dance; the ROM derives stats and runs entry hooks before either ordinary action."
+  },
+  "freshness": {
+    "check": "tools/check-oracle-freshness.sh",
+    "exitCode": 2,
+    "diagnostic": "SKIP: could not read start time for pid 43588 on 8014; SKIP: could not read start time for pid 43560 on 8012; date: 1788164325: No such file or directory; harness HEAD: 3f76b234d Back up lanes before provider preflight ()",
+    "sharedOracleCaptureUsed": false,
+    "localMgbaWrapper": "tools/run-mgba-probe.py"
+  },
+  "runs": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-psych-up-player-jumpluff-opponent-ninjask.json",
+      "scenarioSha256": "1e894e4a805d23b2419a91c3aeddc0ef2fe7380f889c6d651e2789f073cee294",
+      "seed": 305420244,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "0cff7447239515bd2a96ecfca356fab9f613c5a39a9ba9600ce237db6c812933",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "player", "partyIndex": 0, "species": 189, "level": 50, "moves": [244, 244, 244, 244]},
+      "target": {"side": "opponent", "partyIndex": 0, "species": 302, "level": 50, "moves": [14, 14, 14, 14], "speed": 212},
+      "choiceConstraint": {"attackerMoveSlots": [244, 244, 244, 244], "targetMoveSlots": [14, 14, 14, 14], "targetActsFirst": true},
+      "root": {"symbol": "Move_PSYCH_UP", "start": "0x82caaea", "endExclusive": "0x82cab5c", "observations": 178, "currentMove": 244, "scriptPointer": "0x82caaea", "scriptPointerParity": 0, "attackerBattler": 0, "targetBattler": 1, "attackerStages": [6, 8, 6, 6, 6, 6, 6, 6], "targetStages": [6, 8, 6, 6, 6, 6, 6, 6]},
+      "romOutcome": {"kind": "copies-real-swords-dance-stages", "swordsDance": {"attackerStages": [6, 6, 6, 6, 6, 6, 6, 6], "targetStages": [6, 8, 6, 6, 6, 6, 6, 6]}, "attackerFinalStages": [6, 8, 6, 6, 6, 6, 6, 6], "targetFinalStages": [6, 8, 6, 7, 6, 6, 6, 6], "battleOutcome": 0},
+      "pp": {"psychUpBefore": [10, 10, 10, 10], "psychUpAfter": [9, 10, 10, 10], "psychUpSpent": 1, "swordsDanceBefore": [30, 30, 30, 30], "swordsDanceAfter": [30, 30, 30, 29], "swordsDanceSpent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "ef2794787b7b5aa7245be2c45b323b5c09cd4f48362e024fa8571293aeea0124", "afterSha256": "ef2794787b7b5aa7245be2c45b323b5c09cd4f48362e024fa8571293aeea0124"},
+      "transientFreeSetup": true
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-psych-up-opponent-jumpluff-player-ninjask.json",
+      "scenarioSha256": "0e5766e7bafc62b2adc205a156d0b0adef0e0ee7b99a3b5dd0c8318177198c18",
+      "seed": 305420244,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "549e39ee21307fbde6791d863d7cecec86e302600513da30ceaeddd1ce1b47b9",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {"side": "opponent", "partyIndex": 0, "species": 189, "level": 50, "moves": [244, 244, 244, 244]},
+      "target": {"side": "player", "partyIndex": 0, "species": 302, "level": 50, "moves": [14, 14, 14, 14], "speed": 212},
+      "choiceConstraint": {"attackerMoveSlots": [244, 244, 244, 244], "targetMoveSlots": [14, 14, 14, 14], "targetActsFirst": true},
+      "root": {"symbol": "Move_PSYCH_UP", "start": "0x82caaea", "endExclusive": "0x82cab5c", "observations": 178, "currentMove": 244, "scriptPointer": "0x82caaea", "scriptPointerParity": 0, "attackerBattler": 1, "targetBattler": 0, "attackerStages": [6, 8, 6, 6, 6, 6, 6, 6], "targetStages": [6, 8, 6, 6, 6, 6, 6, 6]},
+      "romOutcome": {"kind": "copies-real-swords-dance-stages", "swordsDance": {"attackerStages": [6, 6, 6, 6, 6, 6, 6, 6], "targetStages": [6, 8, 6, 6, 6, 6, 6, 6]}, "attackerFinalStages": [6, 8, 6, 6, 6, 6, 6, 6], "targetFinalStages": [6, 8, 6, 7, 6, 6, 6, 6], "battleOutcome": 0},
+      "pp": {"psychUpBefore": [10, 10, 10, 10], "psychUpAfter": [10, 9, 10, 10], "psychUpSpent": 1, "swordsDanceBefore": [30, 30, 30, 30], "swordsDanceAfter": [29, 30, 30, 30], "swordsDanceSpent": 1},
+      "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "616ec65e7a91875a6f258c526b1a2e332e81b7934f977f04418cf40c8ae3ad36", "afterSha256": "616ec65e7a91875a6f258c526b1a2e332e81b7934f977f04418cf40c8ae3ad36"},
+      "transientFreeSetup": true
+    }
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "rawRgbRetained": false,
+    "denseWindowCaptured": false,
+    "semanticFramesRetained": false,
+    "latchMeasured": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSceneOnSeam": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "transientOverrides": [],
+    "battleStateInjected": false,
+    "entryHooksSkipped": false,
+    "noTimingOrLatchTransfer": true
+  },
+  "remainder": "Keep MOVE_PSYCH_UP unsupported, coverage-absent, queue-absent, and without component-track, sibling, or latch credit. A later Psych Up-owned step needs a complete twice-fresh dense bilateral window and its own maps before making any timing, palette, resource, OAM, BG, latch, reducer, seam, compositor, framebuffer, coverage, or component claim. The named controls are source/component identity controls only."
+}
