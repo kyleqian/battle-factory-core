@@ -574,6 +574,11 @@ import {
   type FocusPunchState,
 } from "./focusPunch.ts";
 import {
+  machPunchAtAge,
+  type MachPunchLiveInputs,
+  type MachPunchState,
+} from "./machPunch.ts";
+import {
   solarBeamAtAge,
   type SolarBeamBody,
   type SolarBeamState,
@@ -2332,6 +2337,16 @@ export interface SceneOnFocusPunchConfig {
   readonly fieldProfile: Readonly<SceneOnFocusPunchFieldProfile>;
 }
 
+/** Narrow Scene-ON seam for MOVE_MACH_PUNCH's live source-relative body. */
+export interface SceneOnMachPunchConfig {
+  readonly move: "MACH_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<MachPunchLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies">>;
+}
+
 /** Narrow Scene-ON seam for Solar Beam's source-isolated two-turn bodies. */
 export interface SceneOnSolarBeamConfig {
   readonly move: "SOLAR_BEAM";
@@ -4081,6 +4096,7 @@ export type SceneOnMoveConfig =
   | SceneOnMegaPunchConfig
   | SceneOnMegaKickConfig
   | SceneOnFocusPunchConfig
+  | SceneOnMachPunchConfig
   | SceneOnSolarBeamConfig
   | SceneOnHiJumpKickConfig
   | SceneOnRollingKickConfig
@@ -4457,6 +4473,8 @@ export type SceneOnSmogPresentationState =
   SceneOnMovePresentationState<SceneOnSmogConfig>;
 export type SceneOnBonemerangPresentationState =
   SceneOnMovePresentationState<SceneOnBonemerangConfig>;
+export type SceneOnMachPunchPresentationState =
+  SceneOnMovePresentationState<SceneOnMachPunchConfig>;
 export type SceneOnSignalBeamPresentationState =
   SceneOnMovePresentationState<SceneOnSignalBeamConfig>;
 export type SceneOnWaterPulsePresentationState =
@@ -4634,6 +4652,11 @@ export interface SceneOnMegaKickView extends MegaKickState {
 
 export interface SceneOnFocusPunchView extends FocusPunchState {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMachPunchView extends MachPunchState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7649,6 +7672,27 @@ export function sceneOnFocusPunchView(
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+/** `age=0` is MOVE_MACH_PUNCH's first source-root row. */
+export function sceneOnMachPunchView(
+  state: SceneOnMachPunchPresentationState,
+): SceneOnMachPunchView {
+  if (state.config.move !== "MACH_PUNCH") {
+    throw new Error(`expected MACH_PUNCH presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...machPunchAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+    }),
+    attacker,
+    target,
   };
 }
 

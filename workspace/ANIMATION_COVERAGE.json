@@ -7301,6 +7301,41 @@
  "queue": [],
  "componentTracks": [
   {
+   "id": "mach-punch-source-relative-body",
+   "components": [
+    "asset:ANIM_TAG_HANDS_AND_FEET",
+    "asset:ANIM_TAG_IMPACT",
+    "subroutine:MachPunchAgainstPlayer",
+    "subroutine:MachPunchContinue",
+    "task:AnimTask_AttackerPunchWithTrace",
+    "task:AnimTask_GetAttackerSide",
+    "task:AnimTask_ShakeMon",
+    "task:AnimTask_StartSlidingBg",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:create_basic_hitsplat_sprite",
+    "visualCommand:create_fist_sprite",
+    "visualCommand:fadetobg",
+    "visualCommand:monbg",
+    "visualCommand:restorebg",
+    "visualCommand:setalpha",
+    "visualCommand:setarg",
+    "visualCommand:waitbgfadein",
+    "visualCommand:waitbgfadeout"
+   ],
+   "representatives": ["MOVE_MACH_PUNCH"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/machPunchSourceAudit.ts",
+    "tests/animation/machPunchEvidenceCheckpoint.test.ts",
+    "tools/compare/verifyMachPunchReducer.ts",
+    "tests/animation/machPunchReducer.test.ts",
+    "src/animation/machPunch.ts",
+    "src/animation/sceneOnPresentation.ts"
+   ],
+   "goal": "UNFULFILLED reducer/seam checkpoint only: MOVE_MACH_PUNCH now has a source-relative bilateral semantic reducer and typed Scene-ON seam, with dense RGB evidence retained separately. It receives no exact move, component, sibling, track, compositor, or framebuffer acceptance credit until the complete shared presentation body is independently accepted. Mach Punch's BG_HIGHSPEED branches, trace/fist/hitsplat callbacks, resource/matrix ownership, and latch rows remain move-owned; every sibling receives no transfer."
+  },
+  {
    "id": "spider-web-thread",
    "components": [
     "asset:ANIM_TAG_SPIDER_WEB",
