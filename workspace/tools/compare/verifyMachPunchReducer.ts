@@ -75,6 +75,9 @@ export function machPunchInputsFor(orientation: MachPunchOrientation, rows = row
   const targetEntry = row0.battlerSprites.target;
   const hit = sprite(row58, "gBasicHitSplatSpriteTemplate");
   invariant(hit, `${orientation}: root hit-splat allocation`);
+  const firstTrace = sprite(row50, "gMultiuseSpriteTemplate", "AnimBattlerTrace");
+  invariant(firstTrace, `${orientation}: root trace palette allocation`);
+  const tracePaletteBank = firstTrace.attr[2] >>> 12 & 15;
   const monBg = task(row7, "Task_UpdateMonBg"), initialFade = task(row10, "Task_FadeToBg");
   const slidingBg = task(row29, "AnimTask_UpdateSlidingBg"), punch = task(row50, "AnimTask_AttackerPunchWithTrace_Step");
   const shake = task(row58, "AnimTask_ShakeMon_Step"), clearMonBg = task(row69, "Task_ClearMonBg");
@@ -93,6 +96,10 @@ export function machPunchInputsFor(orientation: MachPunchOrientation, rows = row
     fistSlot: sprite(row58, "gFistFootSpriteTemplate")?.slot ?? 14,
     matrixSlot: hit.matrixNum,
     resources: { impact: allocation(row1, MACH_PUNCH_IMPACT_TAG), handsAndFeet: allocation(row4, MACH_PUNCH_HANDS_AND_FEET_TAG) },
+    tracePalette: {
+      bank: tracePaletteBank,
+      bgr555: row50.unfadedPalette.slice(256 + tracePaletteBank * 16, 256 + (tracePaletteBank + 1) * 16),
+    },
     matrixBitmap: row0.resourceAllocators.matrixBitmap,
     matrixSlots: row0.softwareMatrices,
     fistMatrix: hit.matrix,
@@ -115,7 +122,8 @@ export function machPunchConfigFor(orientation: MachPunchOrientation, rows = row
     fieldProfile: {
       playerHp: rows[0]!.parties.player[0].hp, playerMaxHp: rows[0]!.parties.player[0].maxHp,
       opponentHp: rows[0]!.parties.opponent[0].hp, opponentMaxHp: rows[0]!.parties.opponent[0].maxHp,
-      playerGender: "male", opponentGender: "female",
+      playerGender: orientation === "player-back" ? "male" : "female",
+      opponentGender: orientation === "player-back" ? "female" : "male",
     },
     animationInputs,
   };

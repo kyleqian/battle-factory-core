@@ -64,6 +64,11 @@ export interface MachPunchLiveInputs {
     readonly impact: MachPunchResourceAllocation;
     readonly handsAndFeet: MachPunchResourceAllocation;
   }>;
+  /** Unfaded contents of the live OBJ palette bank allocated to traces. */
+  readonly tracePalette: Readonly<{
+    readonly bank: number;
+    readonly bgr555: readonly number[];
+  }>;
   readonly matrixBitmap: number;
   readonly matrixSlots: readonly MachPunchMatrix[];
   readonly fistMatrix: MachPunchMatrix;
@@ -218,6 +223,11 @@ function assertInputs(input: Readonly<MachPunchLiveInputs>): void {
   assertSlot(input.hitSplatSlot, "hit splat sprite", 64);
   assertSlot(input.fistSlot, "fist sprite", 64);
   assertSlot(input.matrixSlot, "matrix", input.matrixSlots.length || 32);
+  assertSlot(input.tracePalette.bank, "trace palette", 16);
+  if (input.tracePalette.bgr555.length !== 16
+    || input.tracePalette.bgr555.some((color) => !Number.isInteger(color) || color < 0 || color > 0x7fff)) {
+    throw new Error("Mach Punch requires one live 16-color trace OBJ palette");
+  }
   if (input.spriteOrder.length !== 64 || new Set(input.spriteOrder).size !== 64 || input.spriteOrder.some((slot) => !Number.isInteger(slot) || slot < 0 || slot >= 64)) {
     throw new Error("Mach Punch requires a 64-slot painter order seed");
   }

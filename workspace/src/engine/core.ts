@@ -186,6 +186,7 @@ import {
   type SceneOnSheerColdConfig,
   type SceneOnSmogConfig,
   type SceneOnBonemerangConfig,
+  type SceneOnMachPunchConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
@@ -314,6 +315,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "BONEMERANG") {
     const bonemerangPresentation = presentation as SceneOnMovePresentationState<SceneOnBonemerangConfig>;
     renderSceneOnMovePresentation(framebuffer, bonemerangPresentation);
+    return;
+  }
+  if (presentation.config.move === "MACH_PUNCH") {
+    const machPunchPresentation = presentation as SceneOnMovePresentationState<SceneOnMachPunchConfig>;
+    renderSceneOnMovePresentation(framebuffer, machPunchPresentation);
     return;
   }
   if (presentation.config.move === "SIGNAL_BEAM") {

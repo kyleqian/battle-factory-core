@@ -982,6 +982,7 @@ import {
   sceneOnSheerColdView,
   sceneOnSmogView,
   sceneOnBonemerangView,
+  sceneOnMachPunchView,
   sceneOnSignalBeamView,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
@@ -1242,6 +1243,7 @@ import {
   type SceneOnSheerColdConfig,
   type SceneOnSmogConfig,
   type SceneOnBonemerangConfig,
+  type SceneOnMachPunchConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
@@ -23605,6 +23607,203 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.side === "player"
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "BONEMERANG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MACH_PUNCH") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnMachPunchConfig>;
+    const view = sceneOnMachPunchView(moveState);
+    // Mach Punch independently measures ordinary predecessor transfer for
+    // OAM and matrices. BG3 scroll and brightness registers are already the
+    // current displayed hardware values.
+    const displayed = sceneOnMachPunchView({
+      ...moveState,
+      age: Math.max(0, moveState.age - 1),
+    });
+    const twoBack = sceneOnMachPunchView({
+      ...moveState,
+      age: Math.max(0, moveState.age - 2),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("MACH_PUNCH presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`MACH_PUNCH missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const darken = (palette: readonly RgbColor[]): RgbColor[] =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | color.g << 8 | color.b << 16,
+          view.registers.bldy,
+        );
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      });
+    if (view.background.highSpeed) {
+      drawExtractedTileBg(fb, {
+        tileset: extremeSpeedBg.tileset,
+        tilemap: view.background.branch === "opponent"
+          ? extremeSpeedBg.opponentTilemap : extremeSpeedBg.playerTilemap,
+        subpalettes: [darken(extremeSpeedBg.palette)],
+      }, view.registers.bg3hofs & 0xff);
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(darken),
+      });
+    }
+
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const drawBattler = (battler: typeof view.attacker, sprite: typeof displayed.battlers.attacker.sprite, art: BattlerArt, target: Uint8Array = fb) =>
+      drawSpriteSheetAffineRotate(
+        target,
+        tilesFor(art, battler.geometry.side),
+        art.palette,
+        sprite.x + sprite.x2,
+        sprite.y + sprite.y2,
+        256, 0, 0, 256,
+        undefined,
+        false,
+      );
+    // Task-created objects miss their creation row's OAM build, then their
+    // callbacks update after later builds. Intersecting the two-back body
+    // with the preceding live set preserves the extra birth lag without
+    // extending destruction; matrices still transfer from the preceding RAM.
+    const firstImpactOam = displayed.sprites.some((sprite) => sprite.kind === "hitsplat")
+      && !twoBack.sprites.some((sprite) => sprite.kind === "hitsplat");
+    const traceBody = firstImpactOam ? displayed : twoBack;
+    const displayedSprites = [
+      ...traceBody.sprites.filter((sprite) => sprite.kind === "trace"
+        && displayed.sprites.some((current) => current.slot === sprite.slot && current.kind === "trace")),
+      ...displayed.sprites.filter((sprite) => sprite.kind !== "trace"),
+    ];
+    const matrixFor = (sprite: (typeof displayedSprites)[number]) =>
+      sprite.kind === "hitsplat"
+        ? displayed.resources.allocator.matrixSlots[sprite.matrixNum] ?? sprite.matrix
+        : [256, 0, 0, 256] as const;
+    const orderOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    // CloneBattlerSpriteWithBlend keeps the attacker's tiles but replaces
+    // its OBJ palette with BlendPalette(RGB(8, 9, 28), 10) before the
+    // semi-transparent OBJ stage applies BLDALPHA 9:8.
+    const traceTint = mgbaColorFromBgr555(0x7128);
+    const tracePalette = blendPaletteToward(
+      moveState.config.animationInputs.tracePalette.bgr555.map((color) => {
+        const packed = mgbaColorFromBgr555(color);
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      }),
+      { r: traceTint & 0xff, g: traceTint >>> 8 & 0xff, b: traceTint >>> 16 & 0xff },
+      10,
+    );
+    // Player-back traces are priority 3 and therefore sit behind the
+    // priority-2 attacker monbg copy. Paint them against BG3 first so that
+    // the opaque mon copy masks their overlap exactly like the PPU.
+    if (view.attackerOnMonBg && view.attacker.geometry.side === "player") {
+      const traceTarget2 = fb.slice();
+      for (const sprite of displayedSprites
+        .filter((entry) => entry.kind === "trace")
+        .sort((left, right) => orderOf(right.slot) - orderOf(left.slot))) {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb, traceTarget2, tilesFor(attackerArt, view.attacker.geometry.side), tracePalette,
+          sprite.x + sprite.x2, sprite.y + sprite.y2, ...matrixFor(sprite),
+          view.alpha?.eva ?? 9, view.alpha?.evb ?? 8, false,
+        );
+      }
+    }
+    if (view.attackerOnMonBg) drawBattler(view.attacker, displayed.battlers.attacker.sprite, attackerArt);
+    const nonObjTarget2 = fb.slice();
+    // ShakeMon performs its first callback after the row's SortSprites,
+    // so the first impact OAM carries the task's initial +x amplitude even
+    // though the retained post-callback battler state has already returned
+    // to zero. Subsequent rows follow the ordinary two-back callback latch.
+    const shakeTask = displayed.tasks.find((task) => task.role === "shake");
+    const displayedTargetSprite = firstImpactOam && shakeTask
+      ? { ...twoBack.battlers.target.sprite, x2: shakeTask.data[4] ?? 0, y2: shakeTask.data[5] ?? 0 }
+      : twoBack.battlers.target.sprite;
+
+    type ObjEntry = Readonly<{ slot: number; priority: number; order: number; draw: () => void }>;
+    const objects: ObjEntry[] = [];
+    if (!view.attackerOnMonBg) {
+      objects.push({
+        slot: displayed.battlers.attacker.sprite.slot,
+        priority: displayed.battlers.attacker.sprite.oamPriority,
+        order: orderOf(displayed.battlers.attacker.sprite.slot),
+        draw: () => drawBattler(view.attacker, displayed.battlers.attacker.sprite, attackerArt),
+      });
+    }
+    objects.push({
+      slot: displayedTargetSprite.slot,
+      priority: displayedTargetSprite.oamPriority,
+      order: orderOf(displayedTargetSprite.slot),
+      draw: () => drawBattler(view.target, displayedTargetSprite, targetArt),
+    });
+    for (const sprite of displayedSprites) {
+      if (sprite.kind === "trace" && view.attacker.geometry.side === "player") continue;
+      const matrix = matrixFor(sprite);
+      objects.push({
+        slot: sprite.slot,
+        priority: sprite.oamPriority,
+        order: orderOf(sprite.slot),
+        draw: () => {
+          if (sprite.kind === "trace") {
+            drawSpriteSheetAffineRotateBlendedOverFb(
+              fb, nonObjTarget2, tilesFor(attackerArt, view.attacker.geometry.side), tracePalette,
+              sprite.x + sprite.x2, sprite.y + sprite.y2, ...matrix,
+              view.alpha?.eva ?? 9, view.alpha?.evb ?? 8, false,
+            );
+          } else if (sprite.kind === "hitsplat") {
+            drawSpriteSheetAffineRotateBlendedOverFb(
+              fb, nonObjTarget2, battleAnimHitsplat.tileset, battleAnimHitsplat.palette,
+              sprite.x, sprite.y, ...matrix,
+              view.alpha?.eva ?? 9, view.alpha?.evb ?? 8, false,
+            );
+          } else {
+            drawSpriteSheet(
+              fb, subTileset(battleAnimHandsAndFeet.tileset, 0, 4),
+              battleAnimHandsAndFeet.palette, sprite.x - 16, sprite.y - 16,
+            );
+          }
+        },
+      });
+    }
+    for (let priority = 3; priority >= 0; priority -= 1) {
+      for (const entry of objects
+        .filter((item) => item.priority === priority)
+        .sort((left, right) => right.order - left.order || right.slot - left.slot)) entry.draw();
+    }
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "MACH PUNCH!",
       99,
     );
     return;
