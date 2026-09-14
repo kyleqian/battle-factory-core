@@ -98,12 +98,12 @@ describe("MOVE_MACH_PUNCH source-relative reducer and narrow Scene-ON seam", () 
     expect(seam.target.geometry.animationCenter).toEqual({ x: 39, y: 117 });
   });
 
-  it("records this reducer/seam checkpoint without exact move or component credit", () => {
+  it("keeps the reducer evidence-free while recognizing later exact promotion", () => {
     const source = readFileSync(resolve(root, "src/animation/machPunch.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     const data = coverage as Json;
-    expect(data.entries.find((entry: Json) => entry.move === "MOVE_MACH_PUNCH")).toBeUndefined();
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_MACH_PUNCH")).toMatchObject({ status: "exact" });
     expect(data.queue).not.toContain("MOVE_MACH_PUNCH");
-    expect(data.componentTracks.find((entry: Json) => entry.id === "mach-punch-source-relative-body")).toMatchObject({ representatives: ["MOVE_MACH_PUNCH"], fulfilled: false });
+    expect(data.componentTracks.find((entry: Json) => entry.id === "mach-punch-source-relative-body")).toMatchObject({ representatives: ["MOVE_MACH_PUNCH"], fulfilled: true, goal: expect.stringContaining("FULFILLED") });
   });
 });

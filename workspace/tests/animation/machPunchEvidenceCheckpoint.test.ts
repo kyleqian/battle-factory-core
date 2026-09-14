@@ -13,14 +13,14 @@ describe("MOVE_MACH_PUNCH complete bilateral Scene-ON evidence checkpoint", () =
     }});
   });
 
-  it("keeps all credit and implementation boundaries closed", () => {
+  it("keeps historical evidence scope distinct while recognizing exact promotion", () => {
     expect(fixture.measured.background).toContain("BG_HIGHSPEED_OPPONENT");
     expect(fixture.measured.transfer).toContain("same-row monbg age 7");
     expect(fixture.scope).toEqual({ productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferAcceptanceAdded: false, coveragePromotion: false, componentTrackFulfilled: false, latchCredit: false, siblingCredit: false });
-    expect(coverage.entries.some((entry) => entry.move === "MOVE_MACH_PUNCH")).toBe(false);
+    expect(coverage.entries.find((entry) => entry.move === "MOVE_MACH_PUNCH")).toMatchObject({ status: "exact" });
     expect(coverage.queue).toEqual([]);
     const machPunchTracks = coverage.componentTracks.filter((track) => track.representatives?.includes("MOVE_MACH_PUNCH"));
     expect(machPunchTracks).toHaveLength(1);
-    expect(machPunchTracks[0]).toMatchObject({ id: "mach-punch-source-relative-body", fulfilled: false });
+    expect(machPunchTracks[0]).toMatchObject({ id: "mach-punch-source-relative-body", fulfilled: true, goal: expect.stringContaining("FULFILLED") });
   });
 });

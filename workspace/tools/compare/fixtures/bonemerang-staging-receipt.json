@@ -14,7 +14,7 @@
   },
   "source": {
     "audit": "tools/compare/bonemerangSourceAudit.ts",
-    "auditRunSha256": "6077eb434ff19b3071fec29c71b12c8a05e12563e48aa9e10a6e52f417cbffaf",
+    "auditRunSha256": "92bbb8704fc25d7d59fc94a8e6f2f60ce12cd650046347970b769e49982977a3",
     "probe": "tools/compare/bonemerangStagingProbe.py",
     "probeSha256": "61f7f0dbfb1d27de7874e82e39634157685c02c1b6e0a376d7f945e28d9796b3",
     "pointerOwnedRoot": {"symbol": "Move_BONEMERANG", "start": "0x082d17cc", "endExclusive": "0x082d1820"}

@@ -93,7 +93,7 @@ describe("MOVE_HYPER_BEAM source/classification checkpoint", () => {
   it("keeps the exact shared controls independently accepted", () => {
     const componentGraph = JSON.parse(readFileSync("src/data/gen/battle-animation-components.json", "utf8"));
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries).toHaveLength(252);
+    expect(coverage.entries).toHaveLength(253);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_HYPER_BEAM")).toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_AURORA_BEAM")).toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_PSYBEAM")).toMatchObject({ status: "exact" });

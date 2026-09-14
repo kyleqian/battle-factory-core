@@ -12,7 +12,7 @@ describe("MOVE_SIGNAL_BEAM source/component/carrier checkpoint", () => {
   it("pins the complete root/subroutine, direct wave/palette/shake/pan bodies, and reproducible orb resources", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
-    expect(createHash("sha256").update(first).digest("hex")).toBe("b6298810a10b53ea59dd4511d5e75b863b71732e72216c33bd3446b09cf981d3");
+    expect(createHash("sha256").update(first).digest("hex")).toBe("040e8063b78f6bc99ee353e7d25a229dd0e2132fac9563c5e117aa9fa852774a");
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
       schema: "signal-beam-source-audit/v1", move: "MOVE_SIGNAL_BEAM", moveId: 324,
