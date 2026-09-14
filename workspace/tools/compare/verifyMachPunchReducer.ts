@@ -23,7 +23,6 @@ import {
 type Json = Record<string, any>;
 export type MachPunchOrientation = "player-back" | "opponent-front";
 const root = resolve(import.meta.dirname, "../..");
-const orientations: readonly MachPunchOrientation[] = ["player-back", "opponent-front"];
 const same = (left: unknown, right: unknown): boolean => JSON.stringify(left) === JSON.stringify(right);
 
 function invariant(value: unknown, message: string): asserts value {
@@ -212,4 +211,3 @@ export function verifyMachPunchReducer() {
     bilateral: { retainedRows: player.retainedRows + opponent.retainedRows, passes: 2, reducerRows: player.reducerRows + opponent.reducerRows, seamRows: player.seamRows + opponent.seamRows, framebufferCompared: false, coverageCredit: false },
   } as const;
 }
-

@@ -204,9 +204,6 @@ export interface MachPunchState {
   readonly cleanup: Readonly<{ readonly firstInactive: boolean; readonly visualTasks: number; readonly soundTasks: number; readonly ownedSprites: number; readonly resourcesReleased: boolean }>;
 }
 
-const IDENTITY: MachPunchMatrix = [256, 0, 0, 256];
-const PUNCH_MATRIX_SLOT_BIT = 1;
-
 function assertAge(age: number): void {
   if (!Number.isInteger(age) || age < 0) throw new Error(`invalid Mach Punch source age ${age}`);
 }
@@ -293,7 +290,7 @@ function bldState(age: number, firstInactive: number): { readonly bldcnt: number
   return { bldcnt: 0, bldalpha: 0, bldy: 0 };
 }
 
-function targetShakeAtAge(age: number, input: Readonly<MachPunchLiveInputs>): MachPunchPoint {
+function targetShakeAtAge(age: number): MachPunchPoint {
   if (age < 58 || age >= 68) return { x: 0, y: 0 };
   const local = age - 58;
   const pulse = Math.floor(local / 2) % 2 === 1;
@@ -315,7 +312,7 @@ function battlerSpriteAtAge(age: number, input: Readonly<MachPunchLiveInputs>, s
       matrix: age >= 58 && age < 68 ? input.fistMatrix : input.attackerSprite.matrix,
     };
   }
-  const shake = targetShakeAtAge(age, input);
+  const shake = targetShakeAtAge(age);
   return { ...input.targetSprite, x2: shake.x, y2: shake.y, matrix: age >= 58 && age < 68 ? input.fistMatrix : input.targetSprite.matrix };
 }
 
@@ -349,7 +346,6 @@ function taskAtAge(age: number, input: Readonly<MachPunchLiveInputs>, firstInact
     tasks.push({ slot: input.taskSlots.clearMonBg, callback: "Task_ClearMonBg", role: "clear-monbg", data: [0, age === 69 ? 1 : 2, input.attackerSide === "player" ? 0 : 1, 0] });
   }
   if (age >= 69 && age <= firstInactive - 2) {
-    const local = age - 69;
     tasks.push({ slot: input.taskSlots.restoreFade, callback: "Task_FadeToBg", role: "fade-restore", data: [-1, 0, 0] });
   }
   return tasks.sort((left, right) => left.slot - right.slot || left.role.localeCompare(right.role));
@@ -451,7 +447,7 @@ export function machPunchAtAge(age: number, input: Readonly<MachPunchLiveInputs>
   const impactLoaded = age >= 1 && age < firstInactive;
   const handsLoaded = age >= 4 && age < firstInactive;
   const matrixAllocated = age >= 58 && age < 68;
-  const shake = targetShakeAtAge(age, input);
+  const shake = targetShakeAtAge(age);
   const audio = age === 50
     ? [{ channel: "SE1" as const, sound: "SE_M_JUMP_KICK" as const, sourcePan: "SOUND_PAN_ATTACKER" as const, pan: input.attackerSide === "player" ? -64 : 63 }]
     : age === 58
