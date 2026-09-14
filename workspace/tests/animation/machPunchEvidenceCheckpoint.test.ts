@@ -19,6 +19,8 @@ describe("MOVE_MACH_PUNCH complete bilateral Scene-ON evidence checkpoint", () =
     expect(fixture.scope).toEqual({ productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferAcceptanceAdded: false, coveragePromotion: false, componentTrackFulfilled: false, latchCredit: false, siblingCredit: false });
     expect(coverage.entries.some((entry) => entry.move === "MOVE_MACH_PUNCH")).toBe(false);
     expect(coverage.queue).toEqual([]);
-    expect(coverage.componentTracks.some((track) => track.representatives?.includes("MOVE_MACH_PUNCH"))).toBe(false);
+    const machPunchTracks = coverage.componentTracks.filter((track) => track.representatives?.includes("MOVE_MACH_PUNCH"));
+    expect(machPunchTracks).toHaveLength(1);
+    expect(machPunchTracks[0]).toMatchObject({ id: "mach-punch-source-relative-body", fulfilled: false });
   });
 });
