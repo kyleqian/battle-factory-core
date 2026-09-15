@@ -42,7 +42,7 @@
   },
   "source": {
     "audit": "tools/compare/rapidSpinSourceAudit.ts",
-    "auditSha256": "162688794d50165e443a338b269482f753df5eda840ef7f40bfd36b3025b1852",
+    "auditSha256": "20225e44abbce6e1235f605f00a832dae609bf8c597dbc146a339b94e2e0634a",
     "auditRunSha256": "651076e9313aa1f7e8e14fbafdf820fcc31519d7e7563a310d48bd0b232ebfe4",
     "probe": "tools/compare/rapidSpinProbe.py",
     "probeSha256": "b1406d594672947237b642d3cbc8f5031b60a3451125cb6ebc01bda47368020a",

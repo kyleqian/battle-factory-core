@@ -44,7 +44,7 @@ describe("MOVE_BONEMERANG source/component/carrier checkpoint", () => {
     expect(audit.checkpoint).toMatchObject({ sourceAudit: true, completePointerOwnedRoot: true, completeReachableBranches: true, completeCarrierCensus: true, reproducibleBoneAsset: true, legalBilateralPartyOnlyStaging: true, oracleOrMgbaInvoked: true, compactBilateralEndpointReceipts: true, twiceFreshPerOrientation: true, denseWindowCaptured: true, reducerAdded: true, typedSceneOnSeam: true, compositorAdded: true, framebufferAcceptance: true, coveragePromotion: true, componentTrackFulfilled: true, latchPromotion: true, unsupportedNoCreditBoundary: false });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_BONEMERANG")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual([]);
+    expect(coverage.queue).toEqual(["MOVE_SHOCK_WAVE"]);
     expect(coverage.componentTracks.find((entry: Json) => entry.id === "bone-projectile-bonemerang")).toMatchObject({ representatives: ["MOVE_BONEMERANG"], fulfilled: true });
   });
 });

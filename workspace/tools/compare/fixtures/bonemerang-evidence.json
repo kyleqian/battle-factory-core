@@ -20,7 +20,7 @@
   ],
   "source": {
     "audit": "tools/compare/bonemerangSourceAudit.ts",
-    "auditSha256": "477bcd7e7461174709a5b925b6ecd65000f0204949afbf625985cfe6865caddf",
+    "auditSha256": "5176a8e8bedc7ff55439431f6ba519d124f0db7099f920fe309e5ac3e475eeba",
     "auditRunSha256": "92bbb8704fc25d7d59fc94a8e6f2f60ce12cd650046347970b769e49982977a3",
     "probe": "tools/compare/bonemerangProbe.py",
     "probeSha256": "ee3fe5556a95183f212260822a6bca6bcd4289ab4c4e756b00212da6e4ce4c27",

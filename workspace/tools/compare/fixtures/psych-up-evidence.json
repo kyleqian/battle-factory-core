@@ -19,14 +19,14 @@
   ],
   "source": {
     "audit": "tools/compare/psychUpSourceAudit.ts",
-    "auditSha256": "4f4054b911461c9514a86fac787070b47a61237bbac10aae1da0e2d6305ddf4b",
+    "auditSha256": "60eb7fa6f66835259023583b763378bd075145d546fe0270340abd0aa856c6a5",
     "auditRunSha256": "239bc664c39b09b73a17cb7ddbf0e2af011094038709f50657a2967ec2d81772",
     "probe": "tools/compare/psychUpProbe.py",
     "probeSha256": "8b5c68b4382d5e8063d42589188d8a28ed3a12f555a19bb98f1cbe270fa1a972",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/psych-up-staging-receipt.json",
-    "stagingReceiptSha256": "f76a1e593f79fbabc9356ce4a57e8bd7bbcbd0bb8effb4c8d5ab6c8f68bf37e0",
+    "stagingReceiptSha256": "2eb8979c0132ae4846b4add634cf8ac1359cc82f9146c9ca2e564668a142a95f",
     "pointerOwnedRoot": { "start": "0x082caaea", "endExclusive": "0x082cab5c", "observedParities": [0, 1] }
   },
   "orientations": {

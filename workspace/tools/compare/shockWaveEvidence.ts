@@ -114,7 +114,11 @@ function verifySide(side: Side, config: Json): Json {
   invariant(rows.slice(1).every((row, index) => same(row.hardwareMatrices, rows[index]!.softwareMatrices)), `${side}: whole matrices RAM+1`);
   invariant(rows.every((row) => row.spriteOrder.length === 64 && new Set(row.spriteOrder).size === 64), `${side}: complete painter-order permutations`);
   invariant(rows.slice(1).flatMap((row, index) => same(row.hardwarePalette, rows[index]!.fadedPalette) ? [] : [index + 1]).every((age) => age === 13) && same(rows[13]!.hardwarePalette, rows[13]!.fadedPalette), `${side}: palette RAM+1 except same-row monbg setup`);
-  const shakeEdges = Array.from({ length: 8 }, (_, index) => [facts.shakeStart + 2 + index * 4, [0,6]] as const).flatMap(([age,value]) => [[age,value],[age+2,[0,0]]]);
+  const shakeEdges: Array<[number, [number, number]]> = [];
+  for (let index = 0; index < 8; index++) {
+    const age = facts.shakeStart + 2 + index * 4;
+    shakeEdges.push([age, [0, 6]], [age + 2, [0, 0]]);
+  }
   invariant(same(transitions(rows, (row) => [row.battlerSprites.target.x2,row.battlerSprites.target.y2]), shakeEdges.map(([age]) => age)), `${side}: ShakeMon source axis edges`);
   const targetRank = side === "player-back" ? 11 : 10;
   invariant(shakeEdges.every(([age, [, y]]) => rows[age]!.battlerSprites.target.y2 === y && rows[age + 1]!.hardwareOam[targetRank] === rows[age]!.softwareOam[targetRank]), `${side}: target ShakeMon values and RAM+1 OAM retained`);

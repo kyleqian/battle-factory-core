@@ -49,7 +49,7 @@ describe("MOVE_PSYCH_UP complete legal bilateral Scene-ON evidence", () => {
     const data = coverage as Json;
     expect(data.entries).toHaveLength(255);
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")).toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual([]);
+    expect(data.queue).toEqual(["MOVE_SHOCK_WAVE"]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle")).toMatchObject({ representatives: ["MOVE_PSYCH_UP"], fulfilled: true });
   });
 });
