@@ -104,7 +104,8 @@ const all = frontier.entries.filter((entry: Json) => entry.moves.includes("MOVE_
 const level50 = all.filter((entry: Json) => ranges.some((range) => entry.index >= range.start && entry.index <= range.end));
 if (JSON.stringify(all.map((entry: Json) => entry.index)) !== JSON.stringify([10, 49, 108, 148, 150, 204, 244]) || JSON.stringify(level50.map((entry: Json) => entry.index)) !== JSON.stringify([148, 150, 204, 244])) throw new Error("Shock Wave carrier census drifted");
 if ((frontierSource.match(/MOVE_SHOCK_WAVE/g) ?? []).length !== 7) throw new Error("Shock Wave source carrier count drifted");
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_SHOCK_WAVE") || coverage.queue.includes("MOVE_SHOCK_WAVE") || coverage.componentTracks.some((entry: Json) => entry.representatives?.includes("MOVE_SHOCK_WAVE"))) throw new Error("Shock Wave must remain unsupported and uncredited");
+const shockWaveTrack = coverage.componentTracks.find((entry: Json) => entry.id === "shock-wave-electric-bolts");
+if (coverage.entries.some((entry: Json) => entry.move === "MOVE_SHOCK_WAVE") || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_SHOCK_WAVE"]) || !shockWaveTrack || shockWaveTrack.fulfilled !== false || JSON.stringify(shockWaveTrack.representatives) !== JSON.stringify(["MOVE_SHOCK_WAVE"]) || JSON.stringify(shockWaveTrack.components) !== JSON.stringify(expectedComponents)) throw new Error("Shock Wave must remain unsupported with one unfulfilled evidence track and sole queue position");
 
 const callbacks = [
   ["src/battle_anim_electric.c", electric, "AnimTask_ElectricChargingParticles"], ["src/battle_anim_electric.c", electric, "AnimTask_ElectricChargingParticles_Step"],
