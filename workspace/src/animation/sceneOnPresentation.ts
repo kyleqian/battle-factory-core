@@ -584,6 +584,11 @@ import {
   type PsychUpState,
 } from "./psychUp.ts";
 import {
+  hyperVoiceAtAge,
+  type HyperVoiceLiveInputs,
+  type HyperVoiceState,
+} from "./hyperVoice.ts";
+import {
   solarBeamAtAge,
   type SolarBeamBody,
   type SolarBeamState,
@@ -2362,6 +2367,21 @@ export interface SceneOnPsychUpConfig {
     "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies">>;
 }
 
+/**
+ * Narrow semantic Scene-ON seam for MOVE_HYPER_VOICE.  The scene supplies
+ * current geometry/allocation/palette facts; damage, gameplay RNG, and turn
+ * progression remain outside this presentation-only source-age reducer.
+ */
+export interface SceneOnHyperVoiceConfig {
+  readonly move: "HYPER_VOICE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<HyperVoiceLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+    | "attackerPictureOrigin" | "targetPictureOrigin">>;
+}
+
 /** Narrow Scene-ON seam for Solar Beam's source-isolated two-turn bodies. */
 export interface SceneOnSolarBeamConfig {
   readonly move: "SOLAR_BEAM";
@@ -4113,6 +4133,7 @@ export type SceneOnMoveConfig =
   | SceneOnFocusPunchConfig
   | SceneOnMachPunchConfig
   | SceneOnPsychUpConfig
+  | SceneOnHyperVoiceConfig
   | SceneOnSolarBeamConfig
   | SceneOnHiJumpKickConfig
   | SceneOnRollingKickConfig
@@ -4493,6 +4514,8 @@ export type SceneOnMachPunchPresentationState =
   SceneOnMovePresentationState<SceneOnMachPunchConfig>;
 export type SceneOnPsychUpPresentationState =
   SceneOnMovePresentationState<SceneOnPsychUpConfig>;
+export type SceneOnHyperVoicePresentationState =
+  SceneOnMovePresentationState<SceneOnHyperVoiceConfig>;
 export type SceneOnSignalBeamPresentationState =
   SceneOnMovePresentationState<SceneOnSignalBeamConfig>;
 export type SceneOnWaterPulsePresentationState =
@@ -4680,6 +4703,11 @@ export interface SceneOnMachPunchView extends MachPunchState {
 }
 
 export interface SceneOnPsychUpView extends PsychUpState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnHyperVoiceView extends HyperVoiceState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7734,6 +7762,29 @@ export function sceneOnPsychUpView(
       targetSide: target.geometry.side,
       attackerSpecies: attacker.species,
       targetSpecies: target.species,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_HYPER_VOICE's first loadspritegfx source row. */
+export function sceneOnHyperVoiceView(
+  state: SceneOnHyperVoicePresentationState,
+): SceneOnHyperVoiceView {
+  if (state.config.move !== "HYPER_VOICE") {
+    throw new Error(`expected HYPER_VOICE presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...hyperVoiceAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerPictureOrigin: attacker.geometry.animationCenter,
+      targetPictureOrigin: target.geometry.animationCenter,
     }),
     attacker,
     target,

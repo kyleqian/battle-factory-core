@@ -9684,9 +9684,13 @@
     "tools/compare/evidence/hyper-voice-changemap-player.json",
     "tools/compare/evidence/hyper-voice-changemap-opponent.json",
     "tests/animation/hyperVoiceEvidenceCheckpoint.test.ts",
-    "ANIMATION_LATCHES.md"
-   ],
-   "goal": "UNFULFILLED: MOVE_HYPER_VOICE now has complete twice-fresh legal bilateral 105+105-row semantic/raw-RGB/normalized-map evidence and move-owned latch measurements through first inactive cleanup. Thin Ring OAM/matrix is RAM+1, live ScaleMonAndRestore and short target ShakeMon2 are RAM+2, platform BG3 is RAM+1, and palette transfer is bank-specific; the singles defender-partner invocation tears down immediately. Reducer, typed seam, assets/compositor/core wiring, framebuffer acceptance, coverage, component, sibling, and move acceptance remain absent and are later steps. Uproar, Roar, Rock Tomb, Snore, and every sibling remain independent controls with no credit transfer."
+    "ANIMATION_LATCHES.md",
+    "src/animation/hyperVoice.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifyHyperVoiceReducer.ts",
+    "tests/animation/hyperVoiceReducer.test.ts"
+  ],
+  "goal": "UNFULFILLED: MOVE_HYPER_VOICE now has complete twice-fresh legal bilateral 105+105-row semantic/raw-RGB/normalized-map evidence and move-owned latch measurements through first inactive cleanup, plus a strict source-relative reducer and narrow typed Scene-ON seam replaying every retained row twice. Thin Ring OAM/matrix is RAM+1, live ScaleMonAndRestore and short target ShakeMon2 are RAM+2, platform BG3 is RAM+1, and palette transfer is bank-specific; the singles defender-partner invocation tears down immediately. Assets/compositor/core wiring, framebuffer acceptance, coverage, component, sibling, and move acceptance remain absent and are later steps. Uproar, Roar, Rock Tomb, Snore, and every sibling remain independent controls with no credit transfer."
   }
  ],
  "variantAudits": {
