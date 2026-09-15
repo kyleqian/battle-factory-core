@@ -1,0 +1,215 @@
+{
+  "schema": "hyper-voice-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_HYPER_VOICE",
+  "moveId": 304,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/hyperVoiceSourceAudit.ts",
+    "auditSha256": "e49d4541964c7e70204c212e0c1b9c69d52ce8616150d81930d04d1c56b2c4f9",
+    "auditRunSha256": "ecf1986ba957454d31163cdc22cedda4ed011815bd6c36d677a13532ab53c975",
+    "probe": "tools/compare/hyperVoiceStagingProbe.py",
+    "probeSha256": "afcf1e4b994f7f6496482dd07b372b54aef98863b7375fb955b44047e5f54e7b",
+    "pointerOwnedRoot": {
+      "symbol": "Move_HYPER_VOICE",
+      "elf": "reference/pokeemerald/pokeemerald.elf",
+      "start": "0x082d50d6",
+      "hyperVoiceEffect": "0x082d50fa",
+      "endExclusive": "0x082d516a",
+      "byteLength": 148,
+      "romSha256": "3a1a178d165c247303bf2476e06dc019215e8939278dfe1a5cfaaeb9a26e3b9b"
+    }
+  },
+  "factoryLegalSelection": {
+    "representative": {
+      "setId": 397,
+      "name": "FRONTIER_MON_EXPLOUD_1",
+      "species": 372
+    },
+    "slowkingControl": {
+      "setId": 410,
+      "name": "FRONTIER_MON_SLOWKING_1",
+      "species": 199
+    },
+    "allSourceCarriers": [397],
+    "level50Carriers": [397],
+    "sourceRoute": {
+      "challengeNum": 3,
+      "level50SetRange": [372, 467],
+      "trainerId": 120
+    },
+    "partyBeforeInit": true,
+    "choiceConstraint": "Both orientations use three complete legal Factory-derived records per side. Exploud's four active slots are constrained to its source-set Hyper Voice, and Slowking's four active slots are constrained to its source-set Amnesia; the ROM derives stats and runs entry hooks before the ordinary action."
+  },
+  "freshness": {
+    "check": "tools/check-oracle-freshness.sh",
+    "exitCode": 2,
+    "diagnostic": "SKIP: could not read start time for pid 43588 on 8014; SKIP: could not read start time for pid 43560 on 8012; date: 1788164325: No such file or directory; harness HEAD: 3f76b234d Back up lanes before provider preflight ()",
+    "sharedOracleCaptureUsed": false,
+    "localMgbaWrapper": "tools/run-mgba-probe.py"
+  },
+  "runs": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-hyper-voice-player-exploud-opponent-slowking.json",
+      "scenarioSha256": "e5cbaa9c2839891b11c006e128333abb5640df9aa925363d2035d8f7fbf6beca",
+      "seed": 305420304,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "fbe3fba3f8f7aded8b0f0c2bca52cd096ea79144b858e0f6159a07e3579392ac",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {
+        "side": "player",
+        "partyIndex": 0,
+        "species": 372,
+        "level": 50,
+        "moves": [304, 304, 304, 304],
+        "speed": 88
+      },
+      "target": {
+        "side": "opponent",
+        "partyIndex": 0,
+        "species": 199,
+        "level": 50,
+        "moves": [133, 133, 133, 133],
+        "speed": 31,
+        "initialHp": 202,
+        "finalHp": 158
+      },
+      "choiceConstraint": {
+        "attackerMoveSlots": [304, 304, 304, 304],
+        "opponentAiMoveSlots": [133, 133, 133, 133],
+        "attackerActsFirst": true
+      },
+      "root": {
+        "symbol": "Move_HYPER_VOICE",
+        "start": "0x82d50d6",
+        "hyperVoiceEffect": "0x82d50fa",
+        "endExclusive": "0x82d516a",
+        "observations": 104,
+        "sourceOwnedEffectCalls": 2,
+        "currentMove": 304,
+        "scriptPointer": "0x82d50d6",
+        "scriptPointerParity": 0,
+        "attackerBattler": 0,
+        "targetBattler": 1,
+        "firstInactiveCleanupFrame": 180,
+        "firstInactiveVisualTaskCount": 0,
+        "firstInactiveSoundTaskCount": 0
+      },
+      "romOutcome": {
+        "kind": "damaging-two-effect-cry-body",
+        "moveDamage": 56,
+        "moveResultFlags": 0,
+        "targetFinalBattleHp": 158,
+        "targetFinalPartyHp": 158,
+        "targetFinalStatus": {"kind": "none"},
+        "battleOutcome": 0
+      },
+      "pp": {
+        "before": [10, 10, 10, 10],
+        "after": [9, 10, 10, 10],
+        "spent": 1
+      },
+      "benches": {
+        "partyIndices": [1, 2],
+        "unchanged": true,
+        "checksumValid": true,
+        "beforeSha256": "28ed44469150bdf6fd240dab1327531e5e28b3dbb11745fe10d1e03357cc5e04",
+        "afterSha256": "28ed44469150bdf6fd240dab1327531e5e28b3dbb11745fe10d1e03357cc5e04"
+      },
+      "transientFreeSetup": true
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-hyper-voice-opponent-exploud-player-slowking.json",
+      "scenarioSha256": "b7b7260fb59e55482c3c686466fd79544ec13a2fc2a122e6fd57003ce00bad19",
+      "seed": 305420304,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "6ea48b8b96365df80ed2845d2294838a830a4a225dbad0fb1ba3adc92414436a",
+      "sourceInitialized": true,
+      "customPartiesBuiltBeforeBattle": true,
+      "attacker": {
+        "side": "opponent",
+        "partyIndex": 0,
+        "species": 372,
+        "level": 50,
+        "moves": [304, 304, 304, 304],
+        "speed": 88
+      },
+      "target": {
+        "side": "player",
+        "partyIndex": 0,
+        "species": 199,
+        "level": 50,
+        "moves": [133, 133, 133, 133],
+        "speed": 31,
+        "initialHp": 202,
+        "finalHp": 155
+      },
+      "choiceConstraint": {
+        "attackerMoveSlots": [304, 304, 304, 304],
+        "opponentAiMoveSlots": [304, 304, 304, 304],
+        "attackerActsFirst": true
+      },
+      "root": {
+        "symbol": "Move_HYPER_VOICE",
+        "start": "0x82d50d6",
+        "hyperVoiceEffect": "0x82d50fa",
+        "endExclusive": "0x82d516a",
+        "observations": 104,
+        "sourceOwnedEffectCalls": 2,
+        "currentMove": 304,
+        "scriptPointer": "0x82d50d6",
+        "scriptPointerParity": 0,
+        "attackerBattler": 1,
+        "targetBattler": 0,
+        "firstInactiveCleanupFrame": 184,
+        "firstInactiveVisualTaskCount": 0,
+        "firstInactiveSoundTaskCount": 0
+      },
+      "romOutcome": {
+        "kind": "damaging-two-effect-cry-body",
+        "moveDamage": 59,
+        "moveResultFlags": 0,
+        "targetFinalBattleHp": 155,
+        "targetFinalPartyHp": 155,
+        "targetFinalStatus": {"kind": "none"},
+        "battleOutcome": 0
+      },
+      "pp": {
+        "before": [10, 10, 10, 10],
+        "after": [10, 10, 10, 9],
+        "spent": 1
+      },
+      "benches": {
+        "partyIndices": [1, 2],
+        "unchanged": true,
+        "checksumValid": true,
+        "beforeSha256": "2d4ea0e978c156944b1467ee781165e2ef9319e8008f8aa9dbf583753818550f",
+        "afterSha256": "2d4ea0e978c156944b1467ee781165e2ef9319e8008f8aa9dbf583753818550f"
+      },
+      "transientFreeSetup": true
+    }
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "rawRgbRetained": false,
+    "denseWindowCaptured": false,
+    "semanticFramesRetained": false,
+    "latchMeasured": false,
+    "durableLatchRowAdded": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSceneOnSeam": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "transientOverrides": [],
+    "battleStateInjected": false,
+    "entryHooksSkipped": false,
+    "noTimingOrLatchTransfer": true
+  },
+  "remainder": "Keep MOVE_HYPER_VOICE unsupported, coverage-absent, queue-absent, and without component-track, sibling, or latch credit. A later Hyper Voice-owned step needs a complete twice-fresh dense bilateral window and its own per-component scanout/latch measurements for every ring, live-affine scale, target shake, platform/BG3, palette, audio/task/resource, ordering, and teardown boundary before any reducer, seam, compositor, framebuffer, coverage, component, sibling, or latch claim. The named controls are source/component identity controls only."
+}
