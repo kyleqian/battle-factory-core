@@ -187,6 +187,7 @@ import {
   type SceneOnSmogConfig,
   type SceneOnBonemerangConfig,
   type SceneOnMachPunchConfig,
+  type SceneOnPsychUpConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
@@ -320,6 +321,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "MACH_PUNCH") {
     const machPunchPresentation = presentation as SceneOnMovePresentationState<SceneOnMachPunchConfig>;
     renderSceneOnMovePresentation(framebuffer, machPunchPresentation);
+    return;
+  }
+  if (presentation.config.move === "PSYCH_UP") {
+    const psychUpPresentation = presentation as SceneOnMovePresentationState<SceneOnPsychUpConfig>;
+    renderSceneOnMovePresentation(framebuffer, psychUpPresentation);
     return;
   }
   if (presentation.config.move === "SIGNAL_BEAM") {

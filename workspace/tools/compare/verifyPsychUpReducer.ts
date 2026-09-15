@@ -114,13 +114,13 @@ export function psychUpConfigFor(orientation: PsychUpOrientation, rows = rowsFor
   const { attackerSide, targetSide, attackerSpecies, targetSpecies, ...animationInputs } = input;
   return {
     move: "PSYCH_UP",
-    attacker: { species: attackerSpecies as never, geometry: { side: attackerSide, spriteCorner: { x: input.attackerSprite.x - 32, y: input.attackerSprite.y - 32 }, animationCenter: input.attackerPictureOrigin, battlePositionCenter: { x: input.attackerSprite.x, y: input.attackerSprite.y } } },
-    target: { species: targetSpecies as never, geometry: { side: targetSide, spriteCorner: { x: input.targetSprite.x - 32, y: input.targetSprite.y - 32 }, animationCenter: input.targetPictureOrigin, battlePositionCenter: { x: input.targetSprite.x, y: input.targetSprite.y } } },
+    attacker: { species: attackerSpecies as never, geometry: { side: attackerSide, spriteCorner: { x: input.attackerSprite.x - 32, y: input.attackerSprite.y - 32 }, animationCenter: input.attackerPictureOrigin, battlePositionCenter: attackerSide === "player" ? { x: 72, y: 80 } : { x: 176, y: 40 } } },
+    target: { species: targetSpecies as never, geometry: { side: targetSide, spriteCorner: { x: input.targetSprite.x - 32, y: input.targetSprite.y - 32 }, animationCenter: input.targetPictureOrigin, battlePositionCenter: targetSide === "player" ? { x: 72, y: 80 } : { x: 176, y: 40 } } },
     fieldProfile: {
       playerHp: rows[0]!.parties.player[0].hp, playerMaxHp: rows[0]!.parties.player[0].maxHp,
       opponentHp: rows[0]!.parties.opponent[0].hp, opponentMaxHp: rows[0]!.parties.opponent[0].maxHp,
-      playerGender: orientation === "player-back" ? "male" : "female",
-      opponentGender: orientation === "player-back" ? "female" : "male",
+      playerGender: "male",
+      opponentGender: "male",
     },
     animationInputs,
   };

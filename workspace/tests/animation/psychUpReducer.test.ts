@@ -106,13 +106,13 @@ describe("MOVE_PSYCH_UP source-relative reducer and narrow Scene-ON seam", () =>
     expect(target.geometry.animationCenter).toEqual({ x: 39, y: 117 });
   });
 
-  it("keeps the reducer evidence-free and Psych Up unsupported without transfer credit", () => {
+  it("keeps the reducer evidence-free and grants no sibling transfer credit", () => {
     const source = readFileSync(resolve(root, "src/animation/psychUp.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(253);
-    expect(data.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")).toBeUndefined();
+    expect(data.entries).toHaveLength(254);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")).toMatchObject({ status: "exact" });
     expect(data.queue).toEqual([]);
-    expect(data.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle")).toMatchObject({ representatives: ["MOVE_PSYCH_UP"], fulfilled: false, goal: expect.stringContaining("reducer") });
+    expect(data.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle")).toMatchObject({ representatives: ["MOVE_PSYCH_UP"], fulfilled: true, goal: expect.stringContaining("MOVE_PSYCH_UP alone") });
   });
 });

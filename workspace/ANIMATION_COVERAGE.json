@@ -7334,6 +7334,47 @@
     "tests/animation/signalBeamReducer.test.ts",
     "tests/animation/signalBeamActualCore.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_PSYCH_UP",
+   "status": "exact",
+   "covered": [
+    "the complete branchless Move_PSYCH_UP pointer-owned body and all ten source components are independently accepted: ANIM_TAG_SPIRAL, gPsychUpSpiralSpriteTemplate, BlendColorCycleExclude, attacker monbg SwayMon, ScaleMonAndRestore, attacker palette blend, alpha registers, audio, resources, waits, and first-inactive cleanup",
+    "complete legal bilateral JUMPLUFF/NINJASK Battle Scene ON evidence retains player-back and opponent-front ages 0..178; the source-relative reducer and narrow typed sceneOnPsychUpView seam reproduce all 358 component rows from live sides/species, geometry/picture origins, sprite/task/resource/matrix allocations, painter order, monbg/BG/register/palette state, and presentation RNG",
+    "Psych Up's own maps prove SPIRAL source ages 7..127 with plain OAM and affine matrix RAM+1, excluded BG banks and attacker-yellow palette RAM+1 except age 4's same-row attacker-monbg setup, hidden-attacker SwayMon selected-BG scroll RAM+1, visible-attacker ScaleMonAndRestore matrix RAM+2 over ages 144..162, and direct same-row BLDCNT/BLDALPHA schedules",
+    "two independent actual-core processes are byte-identical at digest 7087f4bf01da8d540e598e931fa8c6d371572c2f2635c0d9029f460a4d49b546 and each passes all 358/358 component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels through inactive cleanup",
+    "a material CROBAT/BLISSEY live control reverses sides and changes species, geometry/picture origins, sprite/task/resource/matrix allocations, painter order, seam output, and framebuffer while gameplay RNG remains opaque and unchanged",
+    "Leer, Frustration, Sleep Talk, Hyper Voice, Snore, Psychic, Future Sight, Hyper Beam, Thunderbolt, every palette move, and every sibling receive no Psych Up timing, latch, body, move, component, or track credit"
+   ],
+   "evidence": [
+    "tools/compare/psychUpSourceAudit.ts",
+    "tools/battle-lab/mechanic-psych-up-player-jumpluff-opponent-ninjask.json",
+    "tools/battle-lab/mechanic-psych-up-opponent-jumpluff-player-ninjask.json",
+    "tools/compare/psychUpStagingProbe.py",
+    "tools/compare/fixtures/psych-up-staging-receipt.json",
+    "tools/compare/verifyPsychUpStaging.ts",
+    "tools/compare/psychUpProbe.py",
+    "tools/compare/psychUpEvidence.ts",
+    "tools/compare/fixtures/psych-up-evidence.json",
+    "tools/compare/evidence/psych-up-player-dense-state.json.gz",
+    "tools/compare/evidence/psych-up-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/psych-up-changemap-player.json",
+    "tools/compare/evidence/psych-up-opponent-dense-state.json.gz",
+    "tools/compare/evidence/psych-up-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/psych-up-changemap-opponent.json",
+    "tools/compare/extractPsychUpAssets.ts",
+    "src/animation/assets/psych-up.json",
+    "src/animation/psychUp.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifyPsychUpReducer.ts",
+    "tools/compare/psychUpActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/psychUpSourceStaging.test.ts",
+    "tests/animation/psychUpEvidenceCheckpoint.test.ts",
+    "tests/animation/psychUpReducer.test.ts",
+    "tests/animation/psychUpActualCore.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -7392,7 +7433,7 @@
     "visualCommand:setalpha"
    ],
    "representatives": ["MOVE_PSYCH_UP"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/psychUpSourceAudit.ts",
     "tools/battle-lab/mechanic-psych-up-player-jumpluff-opponent-ninjask.json",
@@ -7414,9 +7455,15 @@
     "src/animation/psychUp.ts",
     "tools/compare/verifyPsychUpReducer.ts",
     "tests/animation/psychUpReducer.test.ts",
-    "src/animation/sceneOnPresentation.ts"
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/extractPsychUpAssets.ts",
+    "src/animation/assets/psych-up.json",
+    "tools/compare/psychUpActualCore.ts",
+    "tests/animation/psychUpActualCore.test.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts"
    ],
-   "goal": "UNFULFILLED. MOVE_PSYCH_UP now has its own complete twice-fresh bilateral 179-row semantic/raw-RGB/banked-change-map evidence through inactive cleanup and a source-relative pure reducer plus narrow typed Scene-ON seam. The hermetic reducer/seam replay checks every retained row twice (716 direct reducer + 716 seam calls), including root/tasks/spiral/attacker/palettes/monbg/registers/resources/audio/RNG/cleanup and a material live-input control. It still needs a compositor and zero-residual framebuffer acceptance before any move, component, sibling, track, or coverage credit. Leer, Frustration, Sleep Talk, Hyper Voice, Snore, Psychic, Future Sight, Hyper Beam, Thunderbolt, and every palette sibling remain identity/no-transfer controls only."
+   "goal": "FULFILLED by MOVE_PSYCH_UP alone: its complete source-relative reducer, narrow typed Scene-ON seam, source-derived SPIRAL asset, and generic live compositor pass all 358 bilateral component, retained-RGB, and shared-framebuffer rows twice with zero residual pixels through inactive cleanup age 178. Its own maps retain SPIRAL OAM/matrix RAM+1, excluded BG and attacker-yellow palette RAM+1 with only age 4's same-row monbg setup, hidden-attacker SwayMon selected-BG scroll RAM+1, visible-attacker ScaleMonAndRestore matrix RAM+2 over ages 144..162, and direct same-row blend-register schedules. The material altered control reverses sides and changes species, geometry/origins, allocations/matrices/tasks/resources/order, seam output, and framebuffer while gameplay RNG remains opaque and unchanged. Every palette move and other sibling receives no Psych Up timing, latch, body, move, component, or track credit."
   },
   {
    "id": "spider-web-thread",

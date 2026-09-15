@@ -12,7 +12,7 @@
     "probeSha256": "17cc59d31a65a4e2c02e68306d75ae16a095a1743b6a71c0a06d217850e3b870",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "stagingReceipt": "tools/compare/fixtures/mach-punch-staging-receipt.json",
-    "stagingReceiptSha256": "c4ed293b7a9c13aae29138ec836b21486e6e7d0d76ba206abe2d17518398554d"
+    "stagingReceiptSha256": "9312380718b19486aea9e7348a985e0c0c982b4db17da5bd968085d76078305e"
   },
   "orientations": {
     "player-back": {

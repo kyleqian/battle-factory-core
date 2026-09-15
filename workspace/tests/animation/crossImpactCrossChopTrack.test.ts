@@ -561,10 +561,10 @@ describe("cross-impact-cross-chop standalone fulfilled component-track ratchet",
     const level50Moves = new Set<string>(inventory.tiers.level50.moves
       .map((entry: { move: string }) => entry.move));
     expect(level50Moves.size).toBe(276);
-    expect(coverage.entries).toHaveLength(253);
+    expect(coverage.entries).toHaveLength(254);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && entry.status === "exact",
-    )).toHaveLength(253);
+    )).toHaveLength(254);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && (entry.status === "partial" || entry.status === "staged"),
     )).toEqual([]);

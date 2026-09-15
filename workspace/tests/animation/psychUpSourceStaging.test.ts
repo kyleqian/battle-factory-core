@@ -47,7 +47,7 @@ describe("MOVE_PSYCH_UP source/component classification + legal bilateral Scene-
     expect(audit.controls.paletteSiblings.some((entry: Json) => entry.move === "MOVE_FRUSTRATION" && entry.status === "exact")).toBe(true);
   });
 
-  it("pins the full Factory and Level-50 carrier census while leaving Psych Up unsupported", () => {
+  it("pins the full Factory and Level-50 carrier census alongside the later exact promotion", () => {
     const audit = JSON.parse(auditText()) as Json;
     expect(audit.carriers.factoryCount).toBe(15);
     expect(audit.carriers.level50Count).toBe(14);
@@ -55,10 +55,10 @@ describe("MOVE_PSYCH_UP source/component classification + legal bilateral Scene-
     expect(audit.carriers.level50.map((entry: Json) => entry.index)).toEqual([229, 428, 478, 512, 514, 562, 570, 593, 639, 652, 782, 837, 841, 844]);
     expect(audit.carriers.representative).toMatchObject({ index: 229, label: "FRONTIER_MON_JUMPLUFF_1", species: "SPECIES_JUMPLUFF" });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(253);
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")).toBeUndefined();
+    expect(coverage.entries).toHaveLength(254);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")).toMatchObject({ status: "exact" });
     expect(coverage.queue).toEqual([]);
-    expect(coverage.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle")).toMatchObject({ fulfilled: false, representatives: ["MOVE_PSYCH_UP"] });
+    expect(coverage.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle")).toMatchObject({ fulfilled: true, representatives: ["MOVE_PSYCH_UP"] });
   });
 
   it.each([

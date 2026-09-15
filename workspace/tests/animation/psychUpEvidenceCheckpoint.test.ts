@@ -28,7 +28,7 @@ describe("MOVE_PSYCH_UP complete legal bilateral Scene-ON evidence", () => {
     }
   });
 
-  it("keeps Psych Up unsupported and every sibling/control independent", () => {
+  it("keeps the evidence checkpoint historical while promotion remains Psych-Up-only", () => {
     expect(fixture.measured).toMatchObject({
       window: expect.stringContaining("179 unthinned rows"),
       spiral: expect.stringContaining("ages 7..127"),
@@ -47,9 +47,9 @@ describe("MOVE_PSYCH_UP complete legal bilateral Scene-ON evidence", () => {
       framebufferAcceptanceAdded: false, coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false,
     });
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(253);
-    expect(data.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")).toBeUndefined();
+    expect(data.entries).toHaveLength(254);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")).toMatchObject({ status: "exact" });
     expect(data.queue).toEqual([]);
-    expect(data.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle")).toMatchObject({ representatives: ["MOVE_PSYCH_UP"], fulfilled: false });
+    expect(data.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle")).toMatchObject({ representatives: ["MOVE_PSYCH_UP"], fulfilled: true });
   });
 });

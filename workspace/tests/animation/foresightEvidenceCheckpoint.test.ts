@@ -47,7 +47,7 @@ describe("MOVE_FORESIGHT exact source and production acceptance", () => {
       "tools/compare/extractForesightAssets.ts", "--out", output]);
     expect(readFileSync(output)).toEqual(readFileSync("src/animation/assets/foresight.json"));
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(253);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(254);
     expect(coverage.entries.find((entry: { move: string; status: string }) => entry.move === "MOVE_FORESIGHT")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) =>
       track.id === "foresight-magnifying-glass")).toMatchObject({

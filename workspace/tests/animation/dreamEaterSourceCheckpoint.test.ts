@@ -203,8 +203,8 @@ describe("MOVE_DREAM_EATER source and legal staging checkpoint", () => {
     }
     expect(coverage.entries.find((entry) => entry.move === "MOVE_DREAM_EATER")).toMatchObject({ status: "exact" });
     expect(coverage.queue).not.toContain("MOVE_DREAM_EATER");
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(253);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(254);
     const report = execFileSync("npm", ["run", "animation:coverage", "--silent"], { encoding: "utf8" });
-    expect(report).toContain("Level 50: 253/276 exact, 0 partial, 0 staged, 23 unsupported");
+    expect(report).toContain("Level 50: 254/276 exact, 0 partial, 0 staged, 22 unsupported");
   });
 });

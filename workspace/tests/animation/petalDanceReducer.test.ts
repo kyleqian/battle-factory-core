@@ -119,6 +119,6 @@ describe("MOVE_PETAL_DANCE source-age reducer and typed Scene-ON seam", () => {
     expect(coverage.entries.find((entry: { move: string }) =>
       entry.move === "MOVE_PETAL_DANCE")).toMatchObject({ status: "exact" });
     expect(coverage.queue).toEqual([]);
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(253);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(254);
   });
 });

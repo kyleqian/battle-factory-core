@@ -118,6 +118,6 @@ describe("MOVE_SKY_UPPERCUT source-age reducer and typed Scene-ON seam", () => {
     expect(coverage.queue).toEqual([]);
     expect(coverage.entries.find((entry: { move: string }) =>
       entry.move === "MOVE_SKY_UPPERCUT")).toMatchObject({ status: "exact" });
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(253);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(254);
   });
 });

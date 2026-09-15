@@ -171,7 +171,7 @@ if ((frontierSource.match(/MOVE_PSYCH_UP/g) ?? []).length !== expectedAllCarrier
 
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle");
 const coverageEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP");
-if (coverageEntry || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 253 || coverage.queue.length !== 0 || !track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_PSYCH_UP"]) || track.fulfilled !== false) throw new Error("Psych Up unsupported/unfulfilled coverage boundary drifted");
+if (coverageEntry?.status !== "exact" || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 254 || coverage.queue.length !== 0 || !track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_PSYCH_UP"]) || track.fulfilled !== true) throw new Error("Psych Up exact/fulfilled coverage boundary drifted");
 
 const namedControls = {
   MOVE_LEER: { component: "task:AnimTask_ScaleMonAndRestore", token: "Move_LEER:" },
@@ -219,7 +219,9 @@ console.log(JSON.stringify({
       resources: { gfxSource: lineRecord("src/graphics.c", graphics, "const u32 gBattleAnimSpriteGfx_Spiral[]"), paletteSource: lineRecord("src/graphics.c", graphics, "const u32 gBattleAnimSpritePal_Spiral[]"), gfx: romRange("gBattleAnimSpriteGfx_Spiral"), palette: romRange("gBattleAnimSpritePal_Spiral"), registryGfx: lineRecord("src/data/battle_anim.h", registry, "{gBattleAnimSpriteGfx_Spiral, 0x0800, ANIM_TAG_SPIRAL}"), registryPalette: lineRecord("src/data/battle_anim.h", registry, "{gBattleAnimSpritePal_Spiral, ANIM_TAG_SPIRAL}") },
     },
   },
-  graph: { blocks: graphEntry.blocks, components: expectedComponents, track: { id: track.id, components: track.components, representatives: track.representatives, fulfilled: track.fulfilled } },
+  // This artifact records the staging-time classification. Current exact
+  // promotion is guarded above but does not rewrite the historical receipt.
+  graph: { blocks: graphEntry.blocks, components: expectedComponents, track: { id: track.id, components: track.components, representatives: track.representatives, fulfilled: false } },
   behavior: { monbg: "ANIM_ATK_PARTNER", blendColorCycleExclude: { args: [1, 2, 6, 1, 11, "RGB_BLACK"], macro: "createvisualtask AnimTask_BlendColorCycleExclude, priority=2" }, alpha: [12, 8], spiral: { args: ["ANIM_ATTACKER", 0, 0, 0, 0], affine: [[256, 256, 0, 0], [-2, -2, -10, 120]] }, sway: { args: [0, 5, 2560, 8, "ANIM_ATTACKER"] }, scale: { args: [-5, -5, 10, "ANIM_ATTACKER", 1] }, palette: { args: ["F_PAL_ATTACKER", 2, 10, 0, "RGB_YELLOW"] }, audio: [{ sound: "SE_M_PSYBEAM2", id: 200, pan: "SOUND_PAN_ATTACKER", schedule: [5, 10] }, { sound: "SE_M_PSYBEAM", id: 189, pan: "SOUND_PAN_ATTACKER" }], cleanup: ["clearmonbg ANIM_ATK_PARTNER", "blendoff", "waitforvisualfinish", "end"] },
   resources: { spiral: { tag: "ANIM_TAG_SPIRAL", tagValue: 10196, tileBytes: 0x0800, source: "graphics/battle_anims/sprites/spiral.png" } },
   carriers: { factoryCount: allCarriers.length, level50Count: level50Carriers.length, allFactory: allCarriers.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species, moves: entry.moves, itemName: entry.itemName, nature: entry.nature, evSpreadStats: entry.evSpreadStats })), level50: level50Carriers.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species, moves: entry.moves, itemName: entry.itemName, nature: entry.nature, evSpreadStats: entry.evSpreadStats })), excludedOutsideLevel50: allCarriers.filter((entry: Json) => !inLevel50(entry)).map((entry: Json) => entry.index), representative: level50Carriers[0] },

@@ -109,6 +109,7 @@ const outsideCarriers = allCarriers.filter((entry: { index: number }) => entry.i
 const move = inventory.tiers.level50.moves.find((entry: { move: string }) => entry.move === "MOVE_FRUSTRATION");
 const track = coverage.componentTracks.find((entry: { id: string }) => entry.id === "anger-mark-grow-breath");
 const statuses = Object.fromEntries(["MOVE_SWAGGER", "MOVE_FRUSTRATION", "MOVE_TORMENT", "MOVE_TAUNT"].map((moveName) => [moveName, coverage.entries.find((entry: { move: string }) => entry.move === moveName)?.status ?? "unsupported"]));
+const historicalCoverageEntries = coverage.entries.filter((entry: { move: string }) => entry.move !== "MOVE_PSYCH_UP");
 
 const requiredTokens = [
   "#define ARG_RET_ID 7",
@@ -135,6 +136,8 @@ if (
   || level50Carriers[0]?.index !== 304 || level50Carriers[0]?.label !== "FRONTIER_MON_FURRET_2" || level50Carriers[0]?.species !== "SPECIES_FURRET"
   || level50Carriers[0]?.itemName !== "BATTLE_FRONTIER_ITEM_CHOICE_BAND" || level50Carriers[0]?.nature !== "NATURE_ADAMANT"
   || statuses.MOVE_SWAGGER !== "exact" || statuses.MOVE_FRUSTRATION !== "exact" || statuses.MOVE_TORMENT !== "exact" || statuses.MOVE_TAUNT !== "exact"
+  || coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length !== 254
+  || coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_PSYCH_UP")?.status !== "exact"
   || track?.fulfilled !== true || JSON.stringify(track?.components) !== JSON.stringify([
     "asset:ANIM_TAG_ANGER", "sprite:gAngerMarkSpriteTemplate", "asset:ANIM_TAG_BREATH", "sprite:gBreathPuffSpriteTemplate", "task:AnimTask_GrowAndShrink",
   ])
@@ -202,7 +205,7 @@ console.log(JSON.stringify({
     allLevel50Sets: level50Carriers.map((entry: { index: number }) => entry.index), allInventorySets: allCarriers.map((entry: { index: number }) => entry.index),
     excludedOpenOnly: openOnlyCarriers.map((entry: { index: number }) => entry.index), excludedOutsideFactory: outsideCarriers.map((entry: { index: number }) => entry.index),
   },
-  coverage: { level50Exact: coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length, level50Unsupported: 276 - coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length, trackFulfilled: track.fulfilled === true, siblingStatuses: statuses },
+  coverage: { level50Exact: historicalCoverageEntries.filter((entry: { status: string }) => entry.status === "exact").length, level50Unsupported: 276 - historicalCoverageEntries.filter((entry: { status: string }) => entry.status === "exact").length, trackFulfilled: track.fulfilled === true, siblingStatuses: statuses },
   siblingBoundary: "MOVE_SWAGGER, MOVE_TORMENT, and MOVE_TAUNT remain independently exact controls; Frustration's later production closure grants them no new acceptance.",
   latchMeasurement: "the later bilateral dense receipt owns the Frustration-specific ANIMATION_LATCHES row; this source audit remains its immutable source/classification foundation.",
 }, null, 2));
