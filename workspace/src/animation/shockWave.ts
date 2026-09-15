@@ -300,7 +300,7 @@ function blendColor(source: number, target: number, coefficient: number): number
 }
 
 /** The actual move-script cursor, including its cleanup row. */
-export function shockWaveSourceAtAge(age: number, lightningStart = PLAYER_TIMING.lightningStart): ShockWaveSourceCursor {
+export function shockWaveSourceAtAge(age: number, lightningStart: number = PLAYER_TIMING.lightningStart): ShockWaveSourceCursor {
   assertAge(age);
   const shakeStart = lightningStart + (lightningStart === OPPONENT_TIMING.lightningStart ? 38 : 36);
   const clearStart = shakeStart + 67;
@@ -541,7 +541,7 @@ function hardwarePaletteAtAge(age: number, input: Readonly<ShockWaveLiveInputs>,
   return hardware;
 }
 
-function painterOrder(age: number, input: Readonly<ShockWaveLiveInputs>, sprites: readonly ShockWaveSprite[]): readonly number[] {
+function painterOrder(input: Readonly<ShockWaveLiveInputs>, sprites: readonly ShockWaveSprite[]): readonly number[] {
   const order = input.allocator.spriteOrder.filter((slot) => !sprites.some((sprite) => sprite.slot === slot));
   const transient = sprites.slice().sort((left, right) => left.sourceCreationOrder - right.sourceCreationOrder || left.slot - right.slot);
   return [...order, ...transient.map((sprite) => sprite.slot)];
@@ -584,7 +584,7 @@ export function shockWaveAtAge(age: number, input: Readonly<ShockWaveLiveInputs>
   const resourceTags = { circleOfLight: loaded("circleOfLight", input.resources.circleOfLight), electricOrbs: loaded("electricOrbs", input.resources.electricOrbs), spark: loaded("spark", input.resources.spark), lightning: loaded("lightning", input.resources.lightning) };
   const matrixBitmap = age >= ORB_START && age <= ORB_END ? input.allocator.initialMatrixBitmap | (1 << input.matrixSlots.orb) : input.allocator.initialMatrixBitmap;
   const monbgVram = age < 14 ? input.background.vram : age < timing.cleanupAge - 2 ? input.background.setupVram : input.background.clearVram;
-  const audio: ShockWaveState["audio"] = [];
+  const audio: Array<ShockWaveState["audio"][number]> = [];
   if (age === CHARGING_START) audio.push({ sound: "se_m_charge", pan: input.attackerSide === "player" ? -64 : 63 });
   const lightningStart = timing.lightningStart;
   if (age === lightningStart) audio.push({ sound: "se_m_tri_attack2", pan: input.targetSide === "player" ? -63 : 63 });
@@ -597,7 +597,7 @@ export function shockWaveAtAge(age: number, input: Readonly<ShockWaveLiveInputs>
     palette: { faded, hardware, banks: [1, 2, 3, input.attackerSprite.attr[2] >>> 12 & 0xf, input.targetSprite.attr[2] >>> 12 & 0xf], simpleBlendCoefficient: palette.simple, targetBlendCoefficient: palette.target },
     background: { values, vram: monbgVram }, registers,
     displayTransfer: { oam: age === 0 ? "initial" : "preceding-software", matrices: age === 0 ? "initial" : "preceding-software", palette: age === 0 ? "initial" : age === 13 ? "same-row-monbg-setup" : "preceding-faded", selectedBackground: age >= 14 ? "visible-after-age-14" : "initial" },
-    painterOrder: painterOrder(age, input, sprites),
+    painterOrder: painterOrder(input, sprites),
     audio,
     rng: { animation: animationRngAtAge(input.animationRngSeed, age, timing.cleanupAge), sourceDraws: age, gameplay: input.gameplayRng, gameplayUnchanged: true },
     cleanup: { firstInactive: age === timing.cleanupAge, visualTasks: Number(tasks.some((task) => task.role === "charging")) + Number(sprites.some((sprite) => sprite.kind === "orb")) + Number(tasks.some((task) => task.role === "progressing")) + Number(tasks.some((task) => task.role === "lightning")) + Number(sprites.some((sprite) => sprite.kind === "palette-blend")) + Number(tasks.some((task) => task.role === "shake")) + Number(tasks.some((task) => task.role === "blend")), soundTasks: 0, ownedSprites: sprites.length, resourcesReleased: age >= timing.cleanupAge },

@@ -4154,6 +4154,7 @@ export type SceneOnMoveConfig =
   | SceneOnMachPunchConfig
   | SceneOnPsychUpConfig
   | SceneOnHyperVoiceConfig
+  | SceneOnShockWaveConfig
   | SceneOnSolarBeamConfig
   | SceneOnHiJumpKickConfig
   | SceneOnRollingKickConfig
