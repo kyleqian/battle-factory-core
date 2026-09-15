@@ -1,0 +1,31 @@
+{
+  "schema": "shock-wave-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SHOCK_WAVE",
+  "moveId": 351,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/shockWaveSourceAudit.ts",
+    "auditSha256": "b65fc10266b81bdfd75037a8b1b5a6e855138fb8861820e65fb1aa21b73e3876",
+    "auditRunSha256": "e604016da8e74a7f93be0980ae8ff5c5547bbd66e040c85b8b58413df5152f9f",
+    "probe": "tools/compare/shockWaveStagingProbe.py",
+    "probeSha256": "f59fd04f7836b5b6ab3f433d452b9bf5f7282b1013dd72a31d3e4a848c094518",
+    "pointerOwnedRoot": {"start":"0x082cf422","endExclusive":"0x082cf4c4","byteLength":162,"romSha256":"954ef9e5653649b09ac7dbd325d125f7406087e24835be7073036db0fbaeefc0"}
+  },
+  "factoryLegalSelection": {
+    "representative": {"setId":148,"name":"FRONTIER_MON_FLAAFFY","species":180},
+    "allFactoryCarriers": [10,49,108,148,150,204,244],
+    "level50Carriers": [148,150,204,244],
+    "lowestLevel50Carrier": 148,
+    "partyBeforeInit": true,
+    "choiceConstraint": "Both orientations use complete legal three-Pokemon-per-side challenge-0 source records; active Flaaffy's four slots are Shock Wave and active Corsola's four slots are Mirror Coat."
+  },
+  "freshness": {"check":"tools/check-oracle-freshness.sh","exitCode":2,"diagnostic":"known PID/date diagnostic; no shared capture used","sharedOracleCaptureUsed":false,"localMgbaWrapper":"tools/run-mgba-probe.py"},
+  "runs": {
+    "player-back": {"scenario":"tools/battle-lab/mechanic-shock-wave-player-flaaffy-opponent-corsola.json","scenarioSha256":"faadb88c2d1079964781ca9156aacf2b9c334b561658491ab7eb8a09a95fdbff","freshRuns":2,"outputsByteIdentical":true,"outputSha256":"16d32052dc37bf47485b607e0aac8446794988d49e73f35e17362ab32d0332d0","attacker":{"side":"player","species":180,"moves":[351,351,351,351],"speed":65},"target":{"side":"opponent","species":222,"moves":[243,243,243,243],"speed":55,"initialHp":151,"finalHp":47},"root":{"observations":266,"firstFrame":75,"firstInactiveCleanupFrame":341,"attackerBattler":0,"targetBattler":1},"pp":{"before":[20,20,20,20],"after":[19,20,20,20],"spent":1},"benchesSha256":"5dc5aa0f7e9889ad68a22b22993b06bb6c0561e344918e417e9d985748909e00"},
+    "opponent-front": {"scenario":"tools/battle-lab/mechanic-shock-wave-opponent-flaaffy-player-corsola.json","scenarioSha256":"77171c6598f5801ba19c7ad98cd78085f2aa2a01512fd15adca5d8f43b3dcee4","freshRuns":2,"outputsByteIdentical":true,"outputSha256":"1b89578a88f45707cd167ae9da5feda310118d47be71cb80d14adc8763cfaa6a","attacker":{"side":"opponent","species":180,"moves":[351,351,351,351],"speed":65},"target":{"side":"player","species":222,"moves":[243,243,243,243],"speed":55,"initialHp":151,"finalHp":63},"root":{"observations":262,"firstFrame":79,"firstInactiveCleanupFrame":341,"attackerBattler":1,"targetBattler":0},"pp":{"before":[20,20,20,20],"after":[20,20,20,19],"spent":1},"benchesSha256":"74279b9486a6ee890fa5f07a1be27a0d61b7ac871fece57fc8c5119b406f1915"}
+  },
+  "scope": {"framebuffersRetained":false,"rawRgbRetained":false,"denseWindowCaptured":false,"semanticFramesRetained":false,"latchMeasured":false,"durableLatchRowAdded":false,"productionChanged":false,"reducerAdded":false,"typedSceneOnSeam":false,"compositorAdded":false,"coreDispatchAdded":false,"coveragePromotion":false,"coverageEntryAdded":false,"queueEntryAdded":false,"componentTrackFulfilled":false,"battleStateInjected":false,"boundaryOrBarrierChanged":false,"noTimingOrLatchTransfer":true},
+  "remainder": "Keep MOVE_SHOCK_WAVE unsupported and absent from coverage entries and queue. Next retain a complete twice-fresh bilateral dense root-to-cleanup state/RGB window and independently measure every owned resource, charging particle, growing orb, progressing bolt, lightning, shake, palette, audio, ordering, and teardown latch before reducer, seam, compositor, core dispatch, framebuffer acceptance, durable latch, track, or promotion work."
+}
