@@ -550,6 +550,7 @@ import smogAsset from "../animation/assets/smog.json" with { type: "json" };
 import bonemerangAsset from "../animation/assets/bonemerang.json" with { type: "json" };
 import psychUpAsset from "../animation/assets/psych-up.json" with { type: "json" };
 import signalBeamAsset from "../animation/assets/signal-beam.json" with { type: "json" };
+import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import waterPulseAsset from "../animation/assets/water-pulse.json" with { type: "json" };
 import digDirtMoundAsset from "../animation/assets/dig-dirt-mound.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
@@ -986,6 +987,7 @@ import {
   sceneOnMachPunchView,
   sceneOnPsychUpView,
   sceneOnHyperVoiceView,
+  sceneOnShockWaveView,
   sceneOnSignalBeamView,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
@@ -1249,6 +1251,7 @@ import {
   type SceneOnMachPunchConfig,
   type SceneOnPsychUpConfig,
   type SceneOnHyperVoiceConfig,
+  type SceneOnShockWaveConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
@@ -1873,6 +1876,10 @@ const bonemerangArt = (bonemerangAsset as {
 }).bone;
 const signalBeamArt = (signalBeamAsset as {
   art: { tileset: Tileset; redPalette: RgbColor[]; greenPalette: RgbColor[] };
+}).art;
+const shockWaveArt = (shockWaveAsset as {
+  art: Record<"circleOfLight" | "electricOrbs" | "spark" | "lightning",
+    { tileset: Tileset; palette: RgbColor[] }>;
 }).art;
 const waterPulseArt = waterPulseAsset as {
   blueRing2: { tileset: Tileset; palette: RgbColor[] };
@@ -23809,6 +23816,156 @@ export function renderSceneOnMovePresentation(
       "PSYCH UP!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "SHOCK_WAVE") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnShockWaveConfig>;
+    const view = sceneOnShockWaveView(moveState);
+    const displayed = sceneOnShockWaveView({ ...moveState,
+      age: Math.max(0, moveState.age - 1) });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SHOCK_WAVE presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SHOCK_WAVE missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const oamTop = (attr: readonly [number, number, number]): { x: number; y: number } => {
+      const rawX = attr[1] & 0x1ff, rawY = attr[0] & 0xff;
+      return { x: rawX >= 240 ? rawX - 512 : rawX,
+        y: rawY >= 160 ? rawY - 256 : rawY };
+    };
+    const input = moveState.config.animationInputs;
+    const attackerArt = artFor(view.attacker), targetArt = artFor(view.target);
+    const attackerBank = 16 + (input.attackerSprite.attr[2] >>> 12 & 0xf);
+    const targetBank = 16 + (input.targetSprite.attr[2] >>> 12 & 0xf);
+
+    // The static battlefield occupies hardware BG palette bank 2. The
+    // simple/background blend tasks update the live hardware palette before
+    // this scanout, while the copied attacker monbg uses its allocator bank.
+    drawStaticBgShiftedX(fb, 0, [2, 3, 4].map(paletteBank));
+    const attackerOnBg = moveState.age >= 14
+      && view.tasks.some((task) => task.role === "monbg");
+    if (attackerOnBg) {
+      drawSpriteSheet(
+        fb, tilesFor(attackerArt, view.attacker.geometry.side),
+        paletteBank(input.background.monbgPaletteBank),
+        -view.background.values[input.background.xKey]!,
+        -view.background.values[input.background.yKey]!,
+      );
+    }
+    const nonObjTarget2 = fb.slice();
+
+    type ObjEntry = Readonly<{ slot: number; priority: number; order: number;
+      draw: () => void }>;
+    const orderOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    const objects: ObjEntry[] = [];
+    if (!attackerOnBg) {
+      const sprite = displayed.battlers.attacker.sprite;
+      const top = oamTop(sprite.attr);
+      objects.push({ slot: sprite.slot, priority: sprite.oamPriority,
+        order: orderOf(sprite.slot), draw: () => drawSpriteSheet(
+          fb, tilesFor(attackerArt, view.attacker.geometry.side), paletteBank(attackerBank),
+          top.x, top.y,
+        ) });
+    }
+    {
+      const sprite = displayed.battlers.target.sprite;
+      const top = oamTop(sprite.attr);
+      objects.push({ slot: sprite.slot, priority: sprite.oamPriority,
+        order: orderOf(sprite.slot), draw: () => drawSpriteSheet(
+          fb, tilesFor(targetArt, view.target.geometry.side), paletteBank(targetBank),
+          top.x, top.y,
+        ) });
+    }
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "palette-blend") continue;
+      // Task-created sprites are born after BuildOamBuffer and therefore do
+      // not enter the software OAM copied by the following scanout until the
+      // task's next row. Script-created palette/orb sprites are synchronous.
+      if (sprite.kind !== "orb" && sprite.birthAge === displayed.age) continue;
+      const common = { slot: sprite.slot, priority: sprite.oamPriority,
+        order: orderOf(sprite.slot) };
+      if (sprite.kind === "charging") {
+        const tile = (sprite.attr[2] & 0x3ff)
+          - input.resources.electricOrbs.tileRange[0];
+        const frame = subTileset(shockWaveArt.electricOrbs.tileset,
+          tile, 1);
+        const top = oamTop(sprite.attr);
+        objects.push({ ...common, draw: () => drawSpriteSheet(
+          fb, frame, paletteBank(input.resources.electricOrbs.hardwarePaletteBank),
+          top.x, top.y,
+        ) });
+      } else if (sprite.kind === "progressing") {
+        const tile = (sprite.attr[2] & 0x3ff) - input.resources.spark.tileRange[0];
+        const frame = subTileset(shockWaveArt.spark.tileset, tile, 1);
+        const top = oamTop(sprite.attr);
+        objects.push({ ...common, draw: () => drawSpriteSheet(
+          fb, frame, paletteBank(input.resources.spark.hardwarePaletteBank),
+          top.x, top.y,
+        ) });
+      } else if (sprite.kind === "lightning") {
+        const tile = (sprite.attr[2] & 0x3ff) - input.resources.lightning.tileRange[0];
+        const frame = subTileset(shockWaveArt.lightning.tileset, tile / 4, 4);
+        const top = oamTop(sprite.attr);
+        objects.push({ ...common, draw: () => drawSpriteSheet(
+          fb, frame, paletteBank(input.resources.lightning.hardwarePaletteBank),
+          top.x, top.y,
+        ) });
+      } else {
+        objects.push({ ...common, draw: () => drawSpriteSheetAffineRotateBlendedOverFb(
+          fb, nonObjTarget2, shockWaveArt.circleOfLight.tileset,
+          paletteBank(input.resources.circleOfLight.hardwarePaletteBank),
+          sprite.x, sprite.y,
+          sprite.matrix[0], sprite.matrix[1], sprite.matrix[2], sprite.matrix[3],
+          view.registers.bldalpha & 0xff, view.registers.bldalpha >>> 8 & 0xff,
+          false,
+        ) });
+      }
+    }
+    for (let priority = 3; priority >= 0; priority -= 1) {
+      for (const entry of objects.filter((item) => item.priority === priority)
+        .sort((left, right) => right.order - left.order || right.slot - left.slot)) {
+        entry.draw();
+      }
+    }
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SHOCK WAVE!", 99);
     return;
   }
 

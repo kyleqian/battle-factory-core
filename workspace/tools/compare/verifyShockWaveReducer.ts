@@ -137,7 +137,7 @@ export function shockWaveConfigFor(orientation: ShockWaveOrientation, rows = row
     move: "SHOCK_WAVE",
     attacker: { species: attackerSpecies as never, geometry: { side: attackerSide, spriteCorner: { x: input.attackerSprite.x - 32, y: input.attackerSprite.y - 32 }, animationCenter: attackerPictureOrigin, battlePositionCenter: input.attackerPictureOrigin } },
     target: { species: targetSpecies as never, geometry: { side: targetSide, spriteCorner: { x: input.targetSprite.x - 32, y: input.targetSprite.y - 32 }, animationCenter: targetPictureOrigin, battlePositionCenter: input.targetBattlePosition } },
-    fieldProfile: { playerHp: rows[0]!.parties.player[0].hp, playerMaxHp: rows[0]!.parties.player[0].maxHp, opponentHp: rows[0]!.parties.opponent[0].hp, opponentMaxHp: rows[0]!.parties.opponent[0].maxHp, playerGender: "male", opponentGender: "male" },
+    fieldProfile: { playerHp: rows[0]!.parties.player[0].hp, playerMaxHp: rows[0]!.parties.player[0].maxHp, opponentHp: rows[0]!.parties.opponent[0].hp, opponentMaxHp: rows[0]!.parties.opponent[0].maxHp, playerGender: rows[0]!.parties.player[0].gender, opponentGender: rows[0]!.parties.opponent[0].gender },
     animationInputs,
   };
 }

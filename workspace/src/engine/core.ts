@@ -189,6 +189,7 @@ import {
   type SceneOnMachPunchConfig,
   type SceneOnPsychUpConfig,
   type SceneOnHyperVoiceConfig,
+  type SceneOnShockWaveConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
@@ -332,6 +333,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "HYPER_VOICE") {
     const hyperVoicePresentation = presentation as SceneOnMovePresentationState<SceneOnHyperVoiceConfig>;
     renderSceneOnMovePresentation(framebuffer, hyperVoicePresentation);
+    return;
+  }
+  if (presentation.config.move === "SHOCK_WAVE") {
+    const shockWavePresentation = presentation as SceneOnMovePresentationState<SceneOnShockWaveConfig>;
+    renderSceneOnMovePresentation(framebuffer, shockWavePresentation);
     return;
   }
   if (presentation.config.move === "SIGNAL_BEAM") {
