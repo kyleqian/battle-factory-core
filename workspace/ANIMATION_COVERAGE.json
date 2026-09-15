@@ -9673,9 +9673,20 @@
     "tools/compare/hyperVoiceStagingProbe.py",
     "tools/compare/fixtures/hyper-voice-staging-receipt.json",
     "tools/compare/verifyHyperVoiceStaging.ts",
-    "tests/animation/hyperVoiceSourceStaging.test.ts"
+    "tests/animation/hyperVoiceSourceStaging.test.ts",
+    "tools/compare/hyperVoiceProbe.py",
+    "tools/compare/hyperVoiceEvidence.ts",
+    "tools/compare/fixtures/hyper-voice-evidence.json",
+    "tools/compare/evidence/hyper-voice-player-dense-state.json.gz",
+    "tools/compare/evidence/hyper-voice-opponent-dense-state.json.gz",
+    "tools/compare/evidence/hyper-voice-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/hyper-voice-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/hyper-voice-changemap-player.json",
+    "tools/compare/evidence/hyper-voice-changemap-opponent.json",
+    "tests/animation/hyperVoiceEvidenceCheckpoint.test.ts",
+    "ANIMATION_LATCHES.md"
    ],
-   "goal": "UNFULFILLED: MOVE_HYPER_VOICE alone has only source/component classification and compact twice-fresh legal bilateral staging. It has no dense body, RGB/change maps, latch row, reducer, typed seam, compositor, framebuffer, coverage, component, sibling, or move acceptance. Uproar, Roar, Rock Tomb, Snore, and every sibling remain independent controls with no credit transfer."
+   "goal": "UNFULFILLED: MOVE_HYPER_VOICE now has complete twice-fresh legal bilateral 105+105-row semantic/raw-RGB/normalized-map evidence and move-owned latch measurements through first inactive cleanup. Thin Ring OAM/matrix is RAM+1, live ScaleMonAndRestore and short target ShakeMon2 are RAM+2, platform BG3 is RAM+1, and palette transfer is bank-specific; the singles defender-partner invocation tears down immediately. Reducer, typed seam, assets/compositor/core wiring, framebuffer acceptance, coverage, component, sibling, and move acceptance remain absent and are later steps. Uproar, Roar, Rock Tomb, Snore, and every sibling remain independent controls with no credit transfer."
   }
  ],
  "variantAudits": {

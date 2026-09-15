@@ -1,0 +1,92 @@
+{
+  "schema": "hyper-voice-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_HYPER_VOICE",
+  "moveId": 304,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "components": [
+    "asset:ANIM_TAG_THIN_RING",
+    "sprite:gHyperVoiceRingSpriteTemplate",
+    "subroutine:HyperVoiceEffect",
+    "task:AnimTask_ScaleMonAndRestore",
+    "task:AnimTask_ShakeMon2",
+    "task:SoundTask_PlayCryWithEcho",
+    "task:SoundTask_WaitForCry",
+    "visualCommand:shake_battle_platforms",
+    "visualCommand:simple_palette_blend"
+  ],
+  "source": {
+    "audit": "tools/compare/hyperVoiceSourceAudit.ts",
+    "auditSha256": "e49d4541964c7e70204c212e0c1b9c69d52ce8616150d81930d04d1c56b2c4f9",
+    "auditRunSha256": "ecf1986ba957454d31163cdc22cedda4ed011815bd6c36d677a13532ab53c975",
+    "probe": "tools/compare/hyperVoiceProbe.py",
+    "probeSha256": "fdf51d31195af80e2973a893fe2751b1cd2b4ee3a31f49fc76a2f24d4bbe5790",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
+    "stagingReceipt": "tools/compare/fixtures/hyper-voice-staging-receipt.json",
+    "stagingReceiptSha256": "1c3a9ba3d009bb8ec4a11065b45a50cbd935fdfef7fedaa0a07a7d976a9e2daa",
+    "pointerOwnedRoot": { "start": "0x082d50d6", "endExclusive": "0x082d516a", "observedParities": [0, 1] }
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-hyper-voice-player-exploud-opponent-slowking.json",
+      "scenarioSha256": "e5cbaa9c2839891b11c006e128333abb5640df9aa925363d2035d8f7fbf6beca",
+      "freshRuns": 2,
+      "sourceWindow": { "startFrame": 76, "endFrame": 180, "frameCount": 105, "sourceFrameCount": 105 },
+      "denseState": "tools/compare/evidence/hyper-voice-player-dense-state.json.gz",
+      "denseStateSha256": "993ac4c9e6e8194a5a92414340d15266e623f45c9aa5ac2f3c2057325d92e98b",
+      "probeJsonSha256": "eff30163a480fcdfbb4b5f4ff269fad2311dcf8f8e32ffe7c4ef8c4410a9658c",
+      "repeatProbeJsonSha256": "eff30163a480fcdfbb4b5f4ff269fad2311dcf8f8e32ffe7c4ef8c4410a9658c",
+      "rawRgbArchive": "tools/compare/evidence/hyper-voice-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "8f63850f762b81c78f4bca26ed156e69ba71f611710c55dbaf4653850ffb2a2c",
+      "rawRgbSequenceSha256": "ddc0ba9ef39d8020b4f07b7f2b208633d9491930a77826454cbb31e44fbf3e18",
+      "repeatRawRgbSequenceSha256": "ddc0ba9ef39d8020b4f07b7f2b208633d9491930a77826454cbb31e44fbf3e18",
+      "changeMap": "tools/compare/evidence/hyper-voice-changemap-player.json",
+      "changeMapSha256": "ee07601ba8325d7750a21c7afbbf7720fdaf8fe26e982aa9857b637c75267cda"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-hyper-voice-opponent-exploud-player-slowking.json",
+      "scenarioSha256": "b7b7260fb59e55482c3c686466fd79544ec13a2fc2a122e6fd57003ce00bad19",
+      "freshRuns": 2,
+      "sourceWindow": { "startFrame": 80, "endFrame": 184, "frameCount": 105, "sourceFrameCount": 105 },
+      "denseState": "tools/compare/evidence/hyper-voice-opponent-dense-state.json.gz",
+      "denseStateSha256": "b4e24ed587851bcaf2b0aeadc7b8656b42817f086cefb49b2b3f2f5d08952ce8",
+      "probeJsonSha256": "93f7050c033ac78a74837340a6d88da7b21540ca838d2b38c3d178052943e970",
+      "repeatProbeJsonSha256": "93f7050c033ac78a74837340a6d88da7b21540ca838d2b38c3d178052943e970",
+      "rawRgbArchive": "tools/compare/evidence/hyper-voice-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "f92caca4ef9ce33e76185524c4ac33ae4152ca47d099b5c04f1b8b57ac8eb7db",
+      "rawRgbSequenceSha256": "5b7f30b73c1b6cb14ccb6650be48fff7916d78fc50f89c49ef7807e03259ca77",
+      "repeatRawRgbSequenceSha256": "5b7f30b73c1b6cb14ccb6650be48fff7916d78fc50f89c49ef7807e03259ca77",
+      "changeMap": "tools/compare/evidence/hyper-voice-changemap-opponent.json",
+      "changeMapSha256": "1f381b41aa130f1f66c418069b59afa8b6cb4d5cbbc66eab61e61b2a8bfeb267"
+    }
+  },
+  "measured": {
+    "window": "Both orientations retain 105 unthinned rows from Move_HYPER_VOICE root age 0 through first inactive age 104: player frames 76..180 and opponent frames 80..184; all four fresh local-mGBA captures reproduce byte-for-byte per orientation.",
+    "rings": "Both HyperVoiceEffect calls create one Thin Ring in slot 4 at ages 4..47 and 59..102. Each 44-row life retains its callback, affine program/matrix, OAM rank/order, geometry, linear translation, and creation/teardown transfer.",
+    "tasks": "Every 16-word row is retained for both ScaleMonAndRestore 4..12/59..67, target ShakeMon2 4..13/59..68, platform shake 4..13/59..68, PlayCryWithEcho 4..32/59..87, WaitForCry creation rows 4/59, and the resulting DuckBGM task 88..104.",
+    "latches": "Whole OAM and both Thin Ring affine lives are RAM+1. The visible attacker ScaleMonAndRestore matrices are RAM+2 through creation/body/restore. Both short target ShakeMon2 schedules display in OAM at RAM+2; the singles-only defender-partner invocation is retained by its args and immediately has no live partner task/sprite.",
+    "platform": "Both shake_battle_platforms tasks write gBattle_BG3_X at ages 4,6,8,10,12,14 and 59,61,63,65,67,69; BG3HOFS displays each preceding source row at RAM+1 through zero teardown.",
+    "palette": "Thin Ring OBJ palette bank 23 is RAM+1. Simple palette blend battler banks 16/17 are RAM+1 throughout; BG banks 1/2 are same-row only on the two setup ages 4/59 and otherwise RAM+1.",
+    "audioResources": "Both cry tasks retain Exploud species 372, bilateral pan -64/+63, echo flags 0/1, WaitForCry rows, full SE channel state, and task counts. Thin Ring tag 10203 loads at age 1, matrices allocate/free around each effect, and tags free at age 104.",
+    "stateCleanup": "Parties, battle mons, outcome, weather, sides, and gameplay RNG remain immutable; animation RNG changes on every one of 104 transitions. Exactly one legal Exploud PP is spent, benches remain checksum-valid, and inactive age 104 has no move-owned sprite/task/resource/count residue."
+  },
+  "latchConclusion": "Hyper Voice independently proves Thin Ring OAM/matrix RAM+1, live ScaleMonAndRestore RAM+2, short target ShakeMon2 visible-OAM RAM+2, platform BG3 RAM+1, Thin Ring/battler palette RAM+1, and setup-only same-row BG palette transfer from its own bilateral maps.",
+  "scope": {
+    "legalBilateralPartyOnlySceneOn": true,
+    "twiceFreshSemanticAndRawRgb": true,
+    "chronologicalRawRgb888Retained": true,
+    "normalizedBankedChangeMapsRetained": true,
+    "gameplayStateOwned": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "assetWiringAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferAcceptanceAdded": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "siblingCredit": false
+  }
+}
