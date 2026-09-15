@@ -24,14 +24,14 @@
   ],
   "source": {
     "audit": "tools/compare/shockWaveSourceAudit.ts",
-    "auditSha256": "74d8834a06cac525eadd9e8c33a693b45f56063ca04fe40725c0707e7e6e3ed1",
-    "auditRunSha256": "e604016da8e74a7f93be0980ae8ff5c5547bbd66e040c85b8b58413df5152f9f",
+    "auditSha256": "7e28d6d2b23930e6568e0273fde03fdea139f7821c12c8a768f90714fe1c4af3",
+    "auditRunSha256": "9a2da9b2461a723884e54a898495759fec59da6e90e31885ee724a731439ed76",
     "probe": "tools/compare/shockWaveProbe.py",
     "probeSha256": "66b2c6c0ee305bf95f6867754cc76fd79949ae01c8113e771f846c5e880ede1d",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/shock-wave-staging-receipt.json",
-    "stagingReceiptSha256": "f1047814266741d61c896a0bd7005247f76cc8146d023626d068c03995b8c317",
+    "stagingReceiptSha256": "e64a0bed49ecd6be9423176ec64e1668bd9f829c75a627f4edf912e2bb7760ba",
     "pointerOwnedRoot": { "start": "0x082cf422", "endExclusive": "0x082cf4c4", "observedParities": [0, 1] }
   },
   "orientations": {

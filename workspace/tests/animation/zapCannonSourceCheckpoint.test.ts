@@ -42,7 +42,7 @@ describe("MOVE_ZAP_CANNON authoritative source and legal staging checkpoint", ()
       { move: "MOVE_SPARK", status: "exact", blocks: ["Move_SPARK", "ElectricityEffect"] },
       { move: "MOVE_THUNDERBOLT", status: "exact", blocks: ["Move_THUNDERBOLT", "ElectricityEffect"] },
       { move: "MOVE_THUNDER_WAVE", status: "exact", blocks: ["Move_THUNDER_WAVE"] },
-      { move: "MOVE_SHOCK_WAVE", status: "unsupported", blocks: ["Move_SHOCK_WAVE"] },
+      { move: "MOVE_SHOCK_WAVE", status: "exact", blocks: ["Move_SHOCK_WAVE"] },
       { move: "MOVE_ZAP_CANNON", status: "exact", blocks: ["Move_ZAP_CANNON", "ElectricityEffect"] },
     ]);
   });

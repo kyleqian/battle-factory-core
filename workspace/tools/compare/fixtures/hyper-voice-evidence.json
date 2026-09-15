@@ -18,14 +18,14 @@
   ],
   "source": {
     "audit": "tools/compare/hyperVoiceSourceAudit.ts",
-    "auditSha256": "36e78c5bb8a465cf17bcf901ff554d87e33e2976559b544287c5537ea74fd250",
+    "auditSha256": "408beb992f5ec2763f5b9bf0d903a4318f4cb4e44b4048b2ac4a809f2f3d772a",
     "auditRunSha256": "ecf1986ba957454d31163cdc22cedda4ed011815bd6c36d677a13532ab53c975",
     "probe": "tools/compare/hyperVoiceProbe.py",
     "probeSha256": "fdf51d31195af80e2973a893fe2751b1cd2b4ee3a31f49fc76a2f24d4bbe5790",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/hyper-voice-staging-receipt.json",
-    "stagingReceiptSha256": "2fa6e56d037ae58cbc866f189637e632ab5e3ad77f468d8a885379bbfd29a4a6",
+    "stagingReceiptSha256": "e9866549925379c4084d8f19c5b266afb5125bdc96a7758621a242db2ebc0d73",
     "pointerOwnedRoot": { "start": "0x082d50d6", "endExclusive": "0x082d516a", "observedParities": [0, 1] }
   },
   "orientations": {

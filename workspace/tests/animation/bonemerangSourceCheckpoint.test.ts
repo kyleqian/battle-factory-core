@@ -12,7 +12,7 @@ describe("MOVE_BONEMERANG source/component/carrier checkpoint", () => {
   it("pins the complete branchless root, direct projectile/lunge/shake bodies, and BONE ROM resources", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
-    expect(createHash("sha256").update(first).digest("hex")).toBe("92bbb8704fc25d7d59fc94a8e6f2f60ce12cd650046347970b769e49982977a3");
+    expect(createHash("sha256").update(first).digest("hex")).toBe("21c6a33b9c61e5fff368b7016710d059edb9c1a6a38527648d3a4bfed3e2c31a");
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
       schema: "bonemerang-source-audit/v1", move: "MOVE_BONEMERANG", moveId: 155,
@@ -44,7 +44,7 @@ describe("MOVE_BONEMERANG source/component/carrier checkpoint", () => {
     expect(audit.checkpoint).toMatchObject({ sourceAudit: true, completePointerOwnedRoot: true, completeReachableBranches: true, completeCarrierCensus: true, reproducibleBoneAsset: true, legalBilateralPartyOnlyStaging: true, oracleOrMgbaInvoked: true, compactBilateralEndpointReceipts: true, twiceFreshPerOrientation: true, denseWindowCaptured: true, reducerAdded: true, typedSceneOnSeam: true, compositorAdded: true, framebufferAcceptance: true, coveragePromotion: true, componentTrackFulfilled: true, latchPromotion: true, unsupportedNoCreditBoundary: false });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_BONEMERANG")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual(["MOVE_SHOCK_WAVE"]);
+    expect(coverage.queue).toEqual([]);
     expect(coverage.componentTracks.find((entry: Json) => entry.id === "bone-projectile-bonemerang")).toMatchObject({ representatives: ["MOVE_BONEMERANG"], fulfilled: true });
   });
 });

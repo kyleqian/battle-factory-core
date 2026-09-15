@@ -19,14 +19,14 @@
   ],
   "source": {
     "audit": "tools/compare/signalBeamSourceAudit.ts",
-    "auditSha256": "1b62af948524df2fe4f7607f0c6100610f77d071ef5e64c023be2aeaf7ba3e22",
-    "auditRunSha256": "ae42e538e0b5ee4804052bad60cdaaba5570745a4c1d55d5baa44c664113a956",
+    "auditSha256": "3bd615240c0f03f5bf34ea13964ff91fee63ab81178160fd61defca9454b72e3",
+    "auditRunSha256": "3c58f0132440d09b1409cd2ec83d8bcbca4bc8171eff9b1d5d95a853e0e874ad",
     "probe": "tools/compare/signalBeamProbe.py",
     "probeSha256": "c9d07ea268c419c9c7b4109fd35d6262d312f744c6311148133b7e9b74c06b29",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/signal-beam-staging-receipt.json",
-    "stagingReceiptSha256": "cda01168bdf23871afef68740975f0b73113e13020107a98f3ba3f3d4a10f193",
+    "stagingReceiptSha256": "39a2338f98767f15bbd229ac2fead77333b6a11c20a5ce21449f052c0326634e",
     "pointerOwnedRoot": { "start": "0x082d0eb2", "endExclusive": "0x082d0f9a", "observedParities": [0, 1] }
   },
   "orientations": {

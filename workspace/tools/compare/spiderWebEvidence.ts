@@ -206,7 +206,7 @@ export function verifySpiderWebEvidence(): Json {
   invariant(auditJson.status === "exact" && auditJson.coverageCredit === false && auditJson.source.pointerOwnedRoot.rom.start === "0x082d38e0" && auditJson.source.pointerOwnedRoot.rom.endExclusive === "0x082d3981", "source audit boundary");
   invariant(same(auditJson.graph.components, components) && auditJson.carrierSource.lowestLegalLevel50Set === 27 && auditJson.carriers[0].setId === 27, "source audit graph/carrier");
   const coverage = JSON.parse(file("ANIMATION_COVERAGE.json").toString("utf8")) as Json;
-  invariant(same(coverage.queue, ["MOVE_SHOCK_WAVE"]) && coverage.entries.some((entry: Json) =>
+  invariant(same(coverage.queue, []) && coverage.entries.some((entry: Json) =>
     entry.move === "MOVE_SPIDER_WEB" && entry.status === "exact"), "coverage queue boundary");
   return { schema: fixture.schema, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries((["player-back", "opponent-front"] as const).map((side) => [side, verifySide(side, fixture.orientations[side])])) };
 }

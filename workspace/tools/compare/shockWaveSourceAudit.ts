@@ -105,7 +105,7 @@ const level50 = all.filter((entry: Json) => ranges.some((range) => entry.index >
 if (JSON.stringify(all.map((entry: Json) => entry.index)) !== JSON.stringify([10, 49, 108, 148, 150, 204, 244]) || JSON.stringify(level50.map((entry: Json) => entry.index)) !== JSON.stringify([148, 150, 204, 244])) throw new Error("Shock Wave carrier census drifted");
 if ((frontierSource.match(/MOVE_SHOCK_WAVE/g) ?? []).length !== 7) throw new Error("Shock Wave source carrier count drifted");
 const shockWaveTrack = coverage.componentTracks.find((entry: Json) => entry.id === "shock-wave-electric-bolts");
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_SHOCK_WAVE") || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_SHOCK_WAVE"]) || !shockWaveTrack || shockWaveTrack.fulfilled !== false || JSON.stringify(shockWaveTrack.representatives) !== JSON.stringify(["MOVE_SHOCK_WAVE"]) || JSON.stringify(shockWaveTrack.components) !== JSON.stringify(expectedComponents)) throw new Error("Shock Wave must remain unsupported with one unfulfilled evidence track and sole queue position");
+if (coverage.entries.find((entry: Json) => entry.move === "MOVE_SHOCK_WAVE")?.status !== "exact" || JSON.stringify(coverage.queue) !== JSON.stringify([]) || !shockWaveTrack || shockWaveTrack.fulfilled !== true || !shockWaveTrack.goal.includes("FULFILLED") || JSON.stringify(shockWaveTrack.representatives) !== JSON.stringify(["MOVE_SHOCK_WAVE"]) || JSON.stringify(shockWaveTrack.components) !== JSON.stringify(expectedComponents)) throw new Error("Shock Wave exact queue/track boundary drifted");
 
 const callbacks = [
   ["src/battle_anim_electric.c", electric, "AnimTask_ElectricChargingParticles"], ["src/battle_anim_electric.c", electric, "AnimTask_ElectricChargingParticles_Step"],
@@ -123,14 +123,14 @@ const resources = [
 ] as const;
 
 console.log(JSON.stringify({
-  schema: "shock-wave-source-audit/v1", move: "MOVE_SHOCK_WAVE", moveId: 351, status: "unsupported-source-staging-checkpoint", coverageCredit: false,
+  schema: "shock-wave-source-audit/v1", move: "MOVE_SHOCK_WAVE", moveId: 351, status: "exact", coverageCredit: true,
   source: { pointerOwnedRoot: { symbol: "Move_SHOCK_WAVE", nextDispatchLabel: "Move_HARDEN", source: sourceRecord("data/battle_anim_scripts.s", scripts, rootBody), rom: romRecord("Move_SHOCK_WAVE", rootEnd), branches: { directlyReachableBlocks: ["Move_SHOCK_WAVE"], complete: true } }, commands,
     callbacks: Object.fromEntries(callbacks.map(([path, source, name]) => [name, bodyRecord(path, source, name)])) },
   graph: { blocks: graphEntry.blocks, components: expectedComponents },
   resources: Object.fromEntries(resources.map(([tag, gfx, palette, tileBytes]) => [tag, { tileBytes, gfx: romRecord(gfx), palette: romRecord(palette), gfxSource: line("src/graphics.c", graphics, `const u32 ${gfx}[]`), registryGfx: line("src/data/battle_anim.h", registry, `{${gfx},`), registryPalette: line("src/data/battle_anim.h", registry, `{${palette}, ${tag}}`) }])),
   audio: { script: ["SE_M_CHARGE", "SE_M_TRI_ATTACK2"], callbackOwned: ["SE_M_THUNDERBOLT"], panning: ["SOUND_PAN_ATTACKER", "SOUND_PAN_TARGET", "BattleAnimAdjustPanning"] },
   carriers: { allFactory: all, level50, lowestLevel50: level50[0] },
-  controls: { kind: "independent identity controls only; no sibling timing, component, track, latch, or coverage credit", named: { MOVE_CHARGE: ["AnimTask_ElectricChargingParticles"], MOVE_SPARK: ["ANIM_TAG_SPARK"], MOVE_THUNDER: ["ANIM_TAG_LIGHTNING"], MOVE_TAIL_GLOW: ["ANIM_TAG_CIRCLE_OF_LIGHT"], MOVE_THUNDERBOLT: ["AnimTask_BlendBattleAnimPal", "AnimTask_ShakeMon"] } },
-  checkpoint: { completePointerOwnedRoot: true, completeReachableVisualGraph: true, resourcesCallbacksAudio: true, completeLevel50CarrierCensus: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: false, reducerAdded: false, typedSceneOnSeam: false, compositorAdded: false, coveragePromotion: false, componentTrackFulfilled: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false, unsupportedNoCreditBoundary: true },
+  controls: { kind: "independent identity controls only; no sibling timing, component, track, latch, or coverage credit", named: { MOVE_CHARGE: ["AnimTask_ElectricChargingParticles"], MOVE_SPARK: ["ANIM_TAG_SPARK"], MOVE_THUNDER: ["ANIM_TAG_LIGHTNING"], MOVE_TAIL_GLOW: ["ANIM_TAG_CIRCLE_OF_LIGHT"], MOVE_THUNDERBOLT: ["AnimTask_BlendBattleAnimPal", "AnimTask_ShakeMon"], MOVE_SUPERPOWER: ["ANIM_TAG_METEOR", "ANIM_TAG_FLAT_ROCK"] } },
+  checkpoint: { completePointerOwnedRoot: true, completeReachableVisualGraph: true, resourcesCallbacksAudio: true, completeLevel50CarrierCensus: true, legalBilateralPartyOnlyStaging: true, denseWindowCaptured: true, reducerAdded: true, typedSceneOnSeam: true, compositorAdded: true, framebufferAcceptance: true, coveragePromotion: true, componentTrackFulfilled: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false, unsupportedNoCreditBoundary: false },
   sourceIdentity: { constantsSha256: sha(constants), movesSha256: sha(moves), registrySha256: sha(registry), graphicsSha256: sha(graphics) },
 }));

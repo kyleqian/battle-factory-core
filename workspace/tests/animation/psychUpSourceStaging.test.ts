@@ -31,7 +31,7 @@ describe("MOVE_PSYCH_UP source/component classification + legal bilateral Scene-
   it("pins the complete pointer-owned root, command order, direct task/callback/resource bodies, and source identity controls", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
-    expect(sha(first)).toBe("239bc664c39b09b73a17cb7ddbf0e2af011094038709f50657a2967ec2d81772");
+    expect(sha(first)).toBe("f97bca8819c8ad6c3317444ccdec3773ec26b47780431a1d0f20ffe65c50304a");
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({ schema: "psych-up-source-audit/v1", move: "MOVE_PSYCH_UP", moveId: 244, status: "unsupported-source-staging-checkpoint", coverageCredit: false,
       source: { pointerOwnedRoot: { symbol: "Move_PSYCH_UP", nextDispatchLabel: "Move_DIZZY_PUNCH", rom: { start: "0x082caaea", endExclusive: "0x082cab5c", byteLength: 114 }, branches: { directlyReachableBlocks: ["Move_PSYCH_UP"], dispatchedBranches: [], complete: true } } },
@@ -55,9 +55,9 @@ describe("MOVE_PSYCH_UP source/component classification + legal bilateral Scene-
     expect(audit.carriers.level50.map((entry: Json) => entry.index)).toEqual([229, 428, 478, 512, 514, 562, 570, 593, 639, 652, 782, 837, 841, 844]);
     expect(audit.carriers.representative).toMatchObject({ index: 229, label: "FRONTIER_MON_JUMPLUFF_1", species: "SPECIES_JUMPLUFF" });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(255);
+    expect(coverage.entries).toHaveLength(256);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual(["MOVE_SHOCK_WAVE"]);
+    expect(coverage.queue).toEqual([]);
     expect(coverage.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle")).toMatchObject({ fulfilled: true, representatives: ["MOVE_PSYCH_UP"] });
   });
 
@@ -84,7 +84,7 @@ describe("MOVE_PSYCH_UP source/component classification + legal bilateral Scene-
     expect(verifyText()).toBe(first);
     expect(JSON.parse(first)).toEqual({
       schema: "psych-up-source-staging-verifier/v1",
-      auditRunSha256: "239bc664c39b09b73a17cb7ddbf0e2af011094038709f50657a2967ec2d81772",
+      auditRunSha256: "f97bca8819c8ad6c3317444ccdec3773ec26b47780431a1d0f20ffe65c50304a",
       runs: {
         "player-back": { outputSha256: "0cff7447239515bd2a96ecfca356fab9f613c5a39a9ba9600ce237db6c812933", rootObservations: 178 },
         "opponent-front": { outputSha256: "549e39ee21307fbde6791d863d7cecec86e302600513da30ceaeddd1ce1b47b9", rootObservations: 178 },

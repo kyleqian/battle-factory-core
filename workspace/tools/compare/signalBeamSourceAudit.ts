@@ -224,7 +224,7 @@ if (JSON.stringify(allCarriers.map((entry: Json) => entry.index)) !== JSON.strin
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "signal-beam-orb-stream");
 const moveEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM");
 if (moveEntry?.status !== "exact"
-  || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_SHOCK_WAVE"])
+  || JSON.stringify(coverage.queue) !== JSON.stringify([])
   || !track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents)
   || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_SIGNAL_BEAM"])
   || track.fulfilled !== true || !track.goal.includes("FULFILLED")) {

@@ -50,9 +50,9 @@ describe("MOVE_BONEMERANG complete legal bilateral Scene-ON evidence", () => {
       siblingCredit: false, boneClubCredit: false, boneRushCredit: false,
     });
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(255);
+    expect(data.entries).toHaveLength(256);
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_BONEMERANG")).toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual(["MOVE_SHOCK_WAVE"]);
+    expect(data.queue).toEqual([]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "bone-projectile-bonemerang")).toMatchObject({
       representatives: ["MOVE_BONEMERANG"], fulfilled: true,
       goal: expect.stringContaining("FULFILLED by MOVE_BONEMERANG alone"),

@@ -78,7 +78,7 @@ export function verifySkyUppercutEvidence(): Json {
   for (const key of ["audit", "probe", "sharedProbe", "mapBuilder", "frameChangeMapBuilder"] as const) fileHash(fixture.source[key], fixture.source[`${key}Sha256`]);
   const auditOutput = execFileSync(process.execPath, ["--experimental-strip-types", path(fixture.source.audit)], { cwd: root }); invariant(sha(auditOutput) === fixture.source.auditRunSha256, "source audit output drift");
   const audit = JSON.parse(auditOutput.toString("utf8")) as Json; invariant(audit.status === "unsupported-evidence" && audit.coverageCredit === false && audit.source.pointerOwnedRoot.rom.start === "0x082d6ed7" && audit.source.pointerOwnedRoot.rom.endExclusive === "0x082d6fd0" && audit.carriers.all.length === 3, "source boundary drift");
-  const coverage = JSON.parse(readFileSync(path("ANIMATION_COVERAGE.json"), "utf8")) as Json; invariant(same(coverage.queue, ["MOVE_SHOCK_WAVE"]) && coverage.entries.some((entry: Json) => entry.move === "MOVE_SKY_UPPERCUT" && entry.status === "exact"), "coverage boundary drift");
+  const coverage = JSON.parse(readFileSync(path("ANIMATION_COVERAGE.json"), "utf8")) as Json; invariant(same(coverage.queue, []) && coverage.entries.some((entry: Json) => entry.move === "MOVE_SKY_UPPERCUT" && entry.status === "exact"), "coverage boundary drift");
   return { schema: fixture.schema, status: fixture.status, coverageCredit: false, sourceAuditRunSha256: sha(auditOutput), orientations: { "player-back": verifyOrientation("player-back"), "opponent-front": verifyOrientation("opponent-front") } };
 }
 

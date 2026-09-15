@@ -28,7 +28,7 @@ describe("MOVE_SHOCK_WAVE complete legal bilateral Scene-ON evidence", () => {
     }
   });
 
-  it("pins all fifteen retained mechanisms without promoting the move or controls", () => {
+  it("pins the historical evidence boundary while current coverage promotes only Shock Wave", () => {
     expect(fixture.components).toHaveLength(15);
     expect(fixture.measured).toMatchObject({
       window: expect.stringContaining("complete and unthinned"), charging: expect.stringContaining("Twenty"),
@@ -44,8 +44,8 @@ describe("MOVE_SHOCK_WAVE complete legal bilateral Scene-ON evidence", () => {
       framebufferAcceptanceAdded: false, coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false, namedControlCredit: false,
     });
     const data = coverage as Json;
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_SHOCK_WAVE")).toBe(false);
-    expect(data.queue).toEqual(["MOVE_SHOCK_WAVE"]);
-    expect(data.componentTracks.find((track: Json) => track.id === "shock-wave-electric-bolts")).toMatchObject({ representatives: ["MOVE_SHOCK_WAVE"], fulfilled: false });
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_SHOCK_WAVE")).toMatchObject({ status: "exact" });
+    expect(data.queue).toEqual([]);
+    expect(data.componentTracks.find((track: Json) => track.id === "shock-wave-electric-bolts")).toMatchObject({ representatives: ["MOVE_SHOCK_WAVE"], fulfilled: true });
   });
 });

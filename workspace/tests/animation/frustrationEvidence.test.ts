@@ -20,7 +20,7 @@ describe("MOVE_FRUSTRATION dense Scene-ON evidence checkpoint", () => {
     expect(second).toEqual(first);
     expect(first).toMatchObject({
       schema: "frustration-bilateral-evidence/v1", status: "unsupported-evidence", coverageCredit: false,
-      move: "MOVE_FRUSTRATION", moveId: 218, sourceAuditRunSha256: "e1c385b6d992127ca411334fd4c9bccf2ca7360352c906f0795dcce759ca5c18",
+      move: "MOVE_FRUSTRATION", moveId: 218, sourceAuditRunSha256: "cc2ea43ba24a2f0c7ef60fa6e286f6ec4834967fbe87f54fe1f14c06cf0f35ff",
       twiceFresh: true, rowsPerOrientation: 229,
       orientations: {
         "player-back": { rows: 229, sourceWindow: { startFrame: 76, endFrame: 304, frameCount: 229 }, changedRows: 112, lifecycle: { sprites: 8, tasks: 7 }, cleanup: { active: false, ownedSprites: 0, ownedTasks: 0 } },
@@ -40,7 +40,7 @@ describe("MOVE_FRUSTRATION dense Scene-ON evidence checkpoint", () => {
     expect(fixture.evidenceScope).toMatchObject({ freshRunsPerOrientation: 2, completeDenseRowsPerOrientation: 229, rawRgbRowsPerOrientation: 229,
       sourceEntryThroughFirstInactiveCleanup: true, productionAnimationChanged: false, coveragePromotion: false, gameplayStateOwned: false,
       reducerOrAssetsAdded: false, compositorOrPresentationSeamAdded: false, framebufferFitterAdded: false, transientOverrides: [] });
-    expect(coverage.entries).toHaveLength(255);
+    expect(coverage.entries).toHaveLength(256);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_FRUSTRATION")).toMatchObject({ status: "exact" });
     expect(coverage.entries.filter((entry: Json) => ["MOVE_SWAGGER", "MOVE_TORMENT", "MOVE_TAUNT"].includes(entry.move)).every((entry: Json) => entry.status === "exact")).toBe(true);
     const track = coverage.componentTracks.find((entry: Json) => entry.id === "anger-mark-grow-breath");

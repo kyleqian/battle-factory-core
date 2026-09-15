@@ -7,8 +7,8 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/shockWaveSourceAudit.ts",
-    "auditSha256": "74d8834a06cac525eadd9e8c33a693b45f56063ca04fe40725c0707e7e6e3ed1",
-    "auditRunSha256": "e604016da8e74a7f93be0980ae8ff5c5547bbd66e040c85b8b58413df5152f9f",
+    "auditSha256": "7e28d6d2b23930e6568e0273fde03fdea139f7821c12c8a768f90714fe1c4af3",
+    "auditRunSha256": "9a2da9b2461a723884e54a898495759fec59da6e90e31885ee724a731439ed76",
     "probe": "tools/compare/shockWaveStagingProbe.py",
     "probeSha256": "f59fd04f7836b5b6ab3f433d452b9bf5f7282b1013dd72a31d3e4a848c094518",
     "pointerOwnedRoot": {"start":"0x082cf422","endExclusive":"0x082cf4c4","byteLength":162,"romSha256":"954ef9e5653649b09ac7dbd325d125f7406087e24835be7073036db0fbaeefc0"}

@@ -136,12 +136,12 @@ describe("MOVE_SHOCK_WAVE source-relative reducer and narrow Scene-ON seam", () 
     expect(target.geometry.animationCenter).toEqual(altered.targetPictureOrigin);
   });
 
-  it("keeps the checkpoint evidence-free and uncredited", () => {
+  it("keeps production evidence-free and promotes only Shock Wave", () => {
     const source = readFileSync(resolve(root, "src/animation/shockWave.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     const data = coverage as { entries: Array<{ move: string }>; queue: string[]; componentTracks: Array<{ id: string; components: readonly string[]; representatives: string[]; fulfilled: boolean; goal: string }> };
-    expect(data.entries.some((entry) => entry.move === "MOVE_SHOCK_WAVE")).toBe(false);
-    expect(data.queue).toEqual(["MOVE_SHOCK_WAVE"]);
-    expect(data.componentTracks.find((entry) => entry.id === "shock-wave-electric-bolts")).toMatchObject({ components: TRACK_COMPONENTS, representatives: ["MOVE_SHOCK_WAVE"], fulfilled: false, goal: expect.stringContaining("UNFULFILLED") });
+    expect(data.entries.find((entry) => entry.move === "MOVE_SHOCK_WAVE")).toMatchObject({ status: "exact" });
+    expect(data.queue).toEqual([]);
+    expect(data.componentTracks.find((entry) => entry.id === "shock-wave-electric-bolts")).toMatchObject({ components: TRACK_COMPONENTS, representatives: ["MOVE_SHOCK_WAVE"], fulfilled: true, goal: expect.stringContaining("FULFILLED") });
   });
 });
