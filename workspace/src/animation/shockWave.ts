@@ -9,6 +9,8 @@
  * part of the production reducer.
  */
 
+import { sortGbaSpriteOrder } from "./gbaObjCompositor.ts";
+
 export type ShockWaveSide = "player" | "opponent";
 export interface ShockWavePoint { readonly x: number; readonly y: number; }
 export type ShockWaveMatrix = readonly [number, number, number, number];
@@ -29,7 +31,10 @@ export interface ShockWaveBattlerSprite {
 
 export interface ShockWaveResourceAllocation {
   readonly tag: number;
-  readonly paletteBank: number;
+  /** Slot in pokeemerald's 16-entry OBJ palette-tag allocator. */
+  readonly paletteAllocatorSlot: number;
+  /** Full 32-bank `gPlttBuffer*` index (OBJ slots are banks 16..31). */
+  readonly hardwarePaletteBank: number;
   readonly tileSlot: number;
   readonly tileRange: readonly [number, number];
   /** The live 16-color palette uploaded for this resource, when available. */
@@ -70,6 +75,11 @@ export interface ShockWaveLiveInputs {
     readonly initialOccupiedSprites: readonly number[];
     readonly initialMatrixBitmap: number;
     readonly spriteOrder: readonly number[];
+    readonly initialLiveSprites: readonly Readonly<{
+      readonly slot: number;
+      readonly attr: ShockWaveOam;
+      readonly subpriority: number;
+    }>[];
   }>;
   readonly oam: Readonly<{
     readonly charging: ShockWaveOam;
@@ -85,13 +95,23 @@ export interface ShockWaveLiveInputs {
   }>;
   readonly background: Readonly<{
     readonly values: Readonly<Record<string, number>>;
-    readonly key: string;
-    readonly register: string;
+    readonly xKey: string;
+    readonly yKey: string;
+    readonly controlRegister: string;
+    readonly horizontalRegister: string;
+    readonly verticalRegister: string;
     readonly setupX: number;
-    readonly setupValue: number;
-    readonly clearValue: number;
-    readonly vram: unknown;
+    readonly setupY: number;
+    readonly setupControl: number;
+    readonly clearX: number;
+    readonly clearY: number;
+    readonly clearControl: number;
+    readonly clearHorizontal: number;
+    readonly clearVertical: number;
+    readonly monbgPaletteBank: number;
+    readonly initialVram: unknown;
     readonly setupVram: unknown;
+    readonly clearingVram: unknown;
     readonly clearVram: unknown;
   }>;
   readonly registers: Readonly<Record<string, number>>;
@@ -231,10 +251,12 @@ export interface ShockWaveState {
     readonly matrixBitmap: number;
   }>;
   readonly palette: Readonly<{
+    readonly unfaded: readonly number[];
     readonly faded: readonly number[];
     readonly hardware: readonly number[];
     readonly banks: readonly number[];
     readonly simpleBlendCoefficient: number;
+    readonly backgroundBlendCoefficient: number;
     readonly targetBlendCoefficient: number;
   }>;
   readonly background: Readonly<{ readonly values: Readonly<Record<string, number>>; readonly vram: unknown }>;
@@ -266,12 +288,18 @@ function assertInputs(input: Readonly<ShockWaveLiveInputs>): void {
     || input.allocator.spriteOrder.some((slot) => !Number.isInteger(slot) || slot < 0 || slot >= 64)) {
     throw new Error("Shock Wave requires a live 64-slot painter order seed");
   }
+  if (new Set(input.allocator.initialLiveSprites.map((entry) => entry.slot)).size !== input.allocator.initialLiveSprites.length
+    || input.allocator.initialLiveSprites.some((entry) => !input.allocator.initialOccupiedSprites.includes(entry.slot))) {
+    throw new Error("Shock Wave live sprite-order keys must be unique occupied slots");
+  }
   if (input.palettes.unfaded.length !== 512 || input.palettes.faded.length !== 512 || input.palettes.hardware.length !== 512) {
     throw new Error("Shock Wave requires complete live palette banks");
   }
   for (const [name, resource] of Object.entries(input.resources)) {
     if (resource.tag !== SHOCK_WAVE_RESOURCE_TAGS[name as keyof typeof SHOCK_WAVE_RESOURCE_TAGS]) throw new Error(`Shock Wave resource tag mismatch: ${name}`);
-    assertSlot(resource.paletteBank, `${name} palette bank`, 32);
+    assertSlot(resource.paletteAllocatorSlot, `${name} OBJ palette allocator slot`, 16);
+    assertSlot(resource.hardwarePaletteBank, `${name} hardware palette bank`, 32);
+    if (resource.hardwarePaletteBank !== resource.paletteAllocatorSlot + 16) throw new Error(`Shock Wave OBJ palette mapping mismatch: ${name}`);
     if (resource.palette && resource.palette.length !== 16) throw new Error(`Shock Wave ${name} palette must contain one bank`);
   }
 }
@@ -280,8 +308,11 @@ function words(...values: number[]): readonly number[] {
 }
 function u32(value: number): number { return value >>> 0; }
 function nextAnimationRng(value: number): number { return u32(Math.imul(value, 0x41c64e6d) + 0x6073); }
+function animationRngDrawsAtAge(age: number, cleanupAge: number): number {
+  return age < cleanupAge - 2 ? age : age < cleanupAge ? cleanupAge - 3 : cleanupAge - 2;
+}
 function animationRngAtAge(seed: number, age: number, cleanupAge: number): number {
-  const draws = age < cleanupAge - 2 ? age : age < cleanupAge ? cleanupAge - 3 : cleanupAge - 2;
+  const draws = animationRngDrawsAtAge(age, cleanupAge);
   let value = u32(seed);
   for (let index = 0; index < draws; index += 1) value = nextAnimationRng(value);
   return value;
@@ -337,7 +368,7 @@ function allocateSlot(occupied: Set<number>): number {
   for (let slot = 0; slot < 64; slot += 1) if (!occupied.has(slot)) { occupied.add(slot); return slot; }
   throw new Error("Shock Wave exhausted the live sprite allocator");
 }
-interface Birth { readonly slot: number; readonly age: number; readonly end: number; readonly kind: "charging" | "orb" | "progressing" | "lightning" | "palette"; readonly x: number; readonly y: number; readonly tileOffset: number; }
+interface Birth { readonly slot: number; readonly age: number; readonly end: number; readonly kind: "charging" | "orb" | "progressing" | "lightning" | "palette"; readonly x: number; readonly y: number; readonly tileOffset: number; readonly soundPan?: number; }
 
 function progressingTimeline(input: Readonly<ShockWaveLiveInputs>): { readonly taskByAge: Map<number, readonly number[]>; readonly births: readonly Omit<Birth, "slot">[] } {
   const taskByAge = new Map<number, readonly number[]>();
@@ -359,10 +390,11 @@ function progressingTimeline(input: Readonly<ShockWaveLiveInputs>): { readonly t
       if (state[1] > 0) {
         state[1] = 0;
         const tileOffset = state[4];
-        births.push({ age, end: age + 12, kind: "progressing", x: state[6]!, y: state[7]!, tileOffset });
         live.push({ age, x: state[6]!, y: state[7]!, tileOffset }); state[3] += 1;
         state[4] += state[5]; if (state[4] < 0) state[4] = 7; if (state[4] > 7) state[4] = 0;
-        if (state[4] === 0 && state[5]! > 0) state[14] += state[15]!;
+        let soundPan: number | undefined;
+        if (state[4] === 0 && state[5]! > 0) { state[14] += state[15]!; soundPan = state[14]; }
+        births.push({ age, end: age + 12, kind: "progressing", x: state[6]!, y: state[7]!, tileOffset, soundPan });
         if ((state[5] < 0 && state[7]! <= state[8]!) || (state[5] > 0 && state[7]! >= state[8]!)) { state[2] += 1; state[6] += state[9]!; if (state[2] === 5) state[0] = 3; else state[0] += 1; }
         else state[7] += state[5]! * 8;
       }
@@ -515,22 +547,34 @@ function tasksAt(age: number, input: Readonly<ShockWaveLiveInputs>): ShockWaveTa
   if (age >= timing.shakeStart && age <= timing.clearStart - 2) { const local = age - timing.shakeStart; tasks.push({ slot: input.taskSlots.blend, callback: "AnimTask_BlendSpriteColor_Step2", role: "blend", data: words(14, 0, 3, 16, 0, 32767, 0, 0, 0, (local + 2) % 4, Math.max(0, 16 - Math.floor((local + 2) / 4)), 0) }); }
   if (age >= 13 && age <= timing.cleanupAge - 2) {
     const mode = input.attackerSide === "player" ? 6 : 8;
-    tasks.push({ slot: input.taskSlots.monbg, callback: "Task_UpdateMonBg", role: "monbg", data: words(mode, input.attackerSprite.x, input.attackerSprite.y, input.background.setupX, input.background.setupValue, input.attackerSide === "player" ? 1 : 0, input.attackerSide === "player" ? 0 : 1) });
+    tasks.push({ slot: input.taskSlots.monbg, callback: "Task_UpdateMonBg", role: "monbg", data: words(mode, input.attackerSprite.x, input.attackerSprite.y, input.background.setupX, input.background.setupY, input.attackerSide === "player" ? 1 : 0, input.attackerSide === "player" ? 0 : 1) });
   }
   if (age >= timing.clearStart && age <= timing.clearStart + 2) tasks.push({ slot: input.taskSlots.clear, callback: "Task_ClearMonBg", role: "clear", data: words(0, Math.min(2, age - timing.clearStart + 1), input.attackerSide === "opponent" ? 1 : 0) });
   return tasks.sort((left, right) => left.slot - right.slot || left.callback.localeCompare(right.callback));
 }
 
-function paletteAtAge(age: number, input: Readonly<ShockWaveLiveInputs>, timing: ShockWaveTiming): { readonly faded: readonly number[]; readonly simple: number; readonly target: number } {
+function paletteAtAge(age: number, input: Readonly<ShockWaveLiveInputs>, timing: ShockWaveTiming): { readonly unfaded: readonly number[]; readonly faded: readonly number[]; readonly simple: number; readonly background: number; readonly target: number } {
+  const unfaded = input.palettes.unfaded.slice();
   const faded = input.palettes.faded.slice();
   const loaded = [input.resources.electricOrbs, input.resources.circleOfLight, input.resources.spark, input.resources.lightning];
   const resourceStarts = [1, 4, 7, 10];
-  for (let index = 0; index < loaded.length; index += 1) if (age >= resourceStarts[index]! && age < timing.cleanupAge && loaded[index]!.palette) replaceBank(faded, loaded[index]!.paletteBank, loaded[index]!.palette!);
+  for (let index = 0; index < loaded.length; index += 1) if (age >= resourceStarts[index]! && loaded[index]!.palette) {
+    replaceBank(unfaded, loaded[index]!.hardwarePaletteBank, loaded[index]!.palette!);
+    replaceBank(faded, loaded[index]!.hardwarePaletteBank, loaded[index]!.palette!);
+  }
+  const attackerBank = 16 + ((input.attackerSprite.attr[2] >>> 12) & 0xf);
+  if (age >= 13) {
+    const monbg = paletteBank(unfaded, attackerBank);
+    replaceBank(unfaded, input.background.monbgPaletteBank, monbg);
+    replaceBank(faded, input.background.monbgPaletteBank, monbg);
+  }
   const simple = age < 19 ? 0 : age < 23 ? 2 : age < timing.shakeStart + 2 ? 4 : 0;
+  const background = age < timing.shakeStart + 2 ? 0 : Math.max(0, 16 - Math.floor((age - timing.shakeStart - 2) / 4));
   const target = age >= timing.shakeStart && age < timing.shakeStart + 6 ? 16 : 0;
   if (simple > 0) for (const bank of [1, 2, 3]) replaceBank(faded, bank, paletteBank(input.palettes.unfaded, bank).map((color) => blendColor(color, 0, simple)));
-  if (target === 16) replaceBank(faded, input.targetSprite.attr[2] >>> 12 & 0xf, Array.from({ length: 16 }, () => 0));
-  return { faded, simple, target };
+  if (background > 0) for (const bank of [1, 2, 3]) replaceBank(faded, bank, paletteBank(unfaded, bank).map((color) => blendColor(color, 32767, background)));
+  if (target === 16) replaceBank(faded, 16 + ((input.targetSprite.attr[2] >>> 12) & 0xf), Array.from({ length: 16 }, () => 0));
+  return { unfaded, faded, simple, background, target };
 }
 function hardwarePaletteAtAge(age: number, input: Readonly<ShockWaveLiveInputs>, timing: ShockWaveTiming): readonly number[] {
   if (age === 0) return input.palettes.hardware.slice();
@@ -541,10 +585,30 @@ function hardwarePaletteAtAge(age: number, input: Readonly<ShockWaveLiveInputs>,
   return hardware;
 }
 
-function painterOrder(input: Readonly<ShockWaveLiveInputs>, sprites: readonly ShockWaveSprite[]): readonly number[] {
-  const order = input.allocator.spriteOrder.filter((slot) => !sprites.some((sprite) => sprite.slot === slot));
-  const transient = sprites.slice().sort((left, right) => left.sourceCreationOrder - right.sourceCreationOrder || left.slot - right.slot);
-  return [...order, ...transient.map((sprite) => sprite.slot)];
+function signedOamY(value: number): number { const byte = value & 0xff; return byte >= 160 ? byte - 256 : byte; }
+const painterOrderCache = new WeakMap<object, number[][]>();
+function painterOrderAtAge(age: number, input: Readonly<ShockWaveLiveInputs>): readonly number[] {
+  let orders = painterOrderCache.get(input);
+  if (!orders) { orders = []; painterOrderCache.set(input, orders); }
+  let order = orders.at(-1)?.slice() ?? input.allocator.spriteOrder.slice();
+  const external = input.allocator.initialLiveSprites.filter((entry) => entry.slot !== input.attackerSprite.slot && entry.slot !== input.targetSprite.slot);
+  for (let tick = orders.length; tick <= age; tick += 1) {
+    const timing = shockWaveTimingFor(input);
+    const battlers = battlerAtAge(tick, input, timing);
+    const owned = sourceBirthsAtAge(tick, input)
+      // Sprites created from a visual-task callback miss that row's already
+      // completed SortSprites pass. Script-created palette/orb sprites do not.
+      .filter((birth) => birth.age < tick || birth.kind === "palette" || birth.kind === "orb")
+      .map((birth) => spriteForBirth(birth, tick, input));
+    const bySlot = new Map<number, { readonly priority: 0 | 1 | 2 | 3; readonly subpriority: number; readonly y: number }>();
+    for (const entry of external) bySlot.set(entry.slot, { priority: ((entry.attr[2] >>> 10) & 3) as 0 | 1 | 2 | 3, subpriority: entry.subpriority, y: signedOamY(entry.attr[0]) });
+    for (const battler of [battlers.attacker, battlers.target]) bySlot.set(battler.slot, { priority: battler.oamPriority as 0 | 1 | 2 | 3, subpriority: battler.subpriority, y: signedOamY(battler.attr[0]) });
+    for (const sprite of owned) bySlot.set(sprite.slot, { priority: sprite.oamPriority as 0 | 1 | 2 | 3, subpriority: sprite.subpriority, y: signedOamY(sprite.attr[0]) });
+    const keys = order.map((slot) => ({ slot, ...(bySlot.get(slot) ?? { priority: 3 as const, subpriority: 255, y: -96 }) }));
+    order = sortGbaSpriteOrder(order, keys);
+    orders.push(order);
+  }
+  return orders[age]!.slice();
 }
 function spriteForBirth(birth: Birth, age: number, input: Readonly<ShockWaveLiveInputs>): ShockWaveSprite {
   if (birth.kind === "palette") return paletteSprite(age, input)!;
@@ -555,9 +619,16 @@ function spriteForBirth(birth: Birth, age: number, input: Readonly<ShockWaveLive
 }
 function battlerAtAge(age: number, input: Readonly<ShockWaveLiveInputs>, timing: ShockWaveTiming): { readonly attacker: ShockWaveBattlerSprite; readonly target: ShockWaveBattlerSprite } {
   // ShakeMon's first visible write starts two source rows after task setup.
-  const local = age - timing.shakeStart;
-  const y2 = local >= 2 && local < 34 && Math.floor((local - 2) / 2) % 2 === 0 ? 6 : 0;
-  return { attacker: { ...input.attackerSprite }, target: { ...input.targetSprite, x2: 0, y2 } };
+  const shakeY2 = (sourceAge: number): number => {
+    const local = sourceAge - timing.shakeStart;
+    return local >= 2 && local < 34 && Math.floor((local - 2) / 2) % 2 === 0 ? 6 : 0;
+  };
+  const y2 = shakeY2(age);
+  // CreateVisualTask invokes ShakeMon once synchronously after this row's OAM
+  // build, then the ordinary UpdateOamCoords path observes the prior RAM row.
+  const oamY2 = age === timing.shakeStart ? 6 : age > timing.shakeStart ? shakeY2(age - 1) : input.targetSprite.y2;
+  const targetAttr: ShockWaveOam = [((input.targetSprite.attr[0] + oamY2 - input.targetSprite.y2) & 0xff), input.targetSprite.attr[1], input.targetSprite.attr[2]];
+  return { attacker: { ...input.attackerSprite }, target: { ...input.targetSprite, x2: 0, y2, attr: targetAttr } };
 }
 
 /** Reduce one source-relative age of the complete Shock Wave root. */
@@ -569,37 +640,46 @@ export function shockWaveAtAge(age: number, input: Readonly<ShockWaveLiveInputs>
   const sprites = sourceSprites.map((sprite) => sprite.matrixNum === input.matrixSlots.orb ? { ...sprite, matrix } : sprite).sort((left, right) => left.slot - right.slot);
   const tasks = tasksAt(age, input);
   const battlerState = battlerAtAge(age, input, timing);
-  const battlers = { attacker: { ...battlerState.attacker, matrix }, target: { ...battlerState.target, matrix } };
+  const battlerMatrix = (sprite: ShockWaveBattlerSprite): ShockWaveMatrix => sprite.matrixNum === input.matrixSlots.orb && age >= ORB_START && age <= ORB_END ? matrix : sprite.matrix;
+  const battlers = { attacker: { ...battlerState.attacker, matrix: battlerMatrix(battlerState.attacker) }, target: { ...battlerState.target, matrix: battlerMatrix(battlerState.target) } };
   const palette = paletteAtAge(age, input, timing);
-  const faded = active ? palette.faded : input.palettes.faded.slice();
-  const hardware = active ? hardwarePaletteAtAge(age, input, timing) : input.palettes.faded.slice();
+  const unfaded = palette.unfaded;
+  const faded = palette.faded;
+  const hardware = hardwarePaletteAtAge(age, input, timing);
   const values = { ...input.background.values };
-  if (age >= 13 && age < timing.cleanupAge - 1) values[input.background.key] = input.background.setupValue;
-  if (age >= timing.cleanupAge - 1) values[input.background.key] = input.background.clearValue;
+  if (age >= 13 && age < timing.cleanupAge - 1) { values[input.background.xKey] = input.background.setupX; values[input.background.yKey] = input.background.setupY; }
+  if (age >= timing.cleanupAge - 1) { values[input.background.xKey] = input.background.clearX; values[input.background.yKey] = input.background.clearY; }
   const registers = { ...input.registers };
   if (age >= 16 && age < timing.clearStart) { registers.bldcnt = 16192; registers.bldalpha = 2060; }
-  if (age >= timing.clearStart) { registers.bldcnt = 0; registers.bldalpha = 0; registers[input.background.register] = 0; }
-  if (age >= 14 && age < timing.cleanupAge) registers[input.background.register] = (input.background.setupValue + 512) % 512;
+  if (age >= timing.clearStart) { registers.bldcnt = 0; registers.bldalpha = 0; }
+  if (age >= 14) registers[input.background.controlRegister] = age < timing.cleanupAge ? input.background.setupControl : input.background.clearControl;
+  if (age >= 14 && age < timing.cleanupAge) {
+    registers[input.background.horizontalRegister] = (input.background.setupX + 512) % 512;
+    registers[input.background.verticalRegister] = (input.background.setupY + 512) % 512;
+  } else if (age >= timing.cleanupAge) {
+    registers[input.background.horizontalRegister] = input.background.clearHorizontal;
+    registers[input.background.verticalRegister] = input.background.clearVertical;
+  }
   const loaded = (name: keyof typeof SHOCK_WAVE_RESOURCE_TAGS, resource: ShockWaveResourceAllocation): ShockWaveResourceAllocation & { readonly loaded: boolean } => ({ ...resource, loaded: active && age >= ({ electricOrbs: 1, circleOfLight: 4, spark: 7, lightning: 10 } as const)[name] && age < timing.cleanupAge });
   const resourceTags = { circleOfLight: loaded("circleOfLight", input.resources.circleOfLight), electricOrbs: loaded("electricOrbs", input.resources.electricOrbs), spark: loaded("spark", input.resources.spark), lightning: loaded("lightning", input.resources.lightning) };
   const matrixBitmap = age >= ORB_START && age <= ORB_END ? input.allocator.initialMatrixBitmap | (1 << input.matrixSlots.orb) : input.allocator.initialMatrixBitmap;
-  const monbgVram = age < 14 ? input.background.vram : age < timing.cleanupAge - 2 ? input.background.setupVram : input.background.clearVram;
+  const monbgVram = age < 14 ? input.background.initialVram : age < timing.cleanupAge - 2 ? input.background.setupVram : age < timing.cleanupAge ? input.background.clearingVram : input.background.clearVram;
   const audio: Array<ShockWaveState["audio"][number]> = [];
   if (age === CHARGING_START) audio.push({ sound: "se_m_charge", pan: input.attackerSide === "player" ? -64 : 63 });
   const lightningStart = timing.lightningStart;
   if (age === lightningStart) audio.push({ sound: "se_m_tri_attack2", pan: input.targetSide === "player" ? -63 : 63 });
-  if (sprites.some((sprite) => sprite.kind === "progressing" && sprite.birthAge === age)) audio.push({ sound: "se_m_thunderbolt", pan: input.attackerSide === "player" ? -64 : 63 });
+  for (const birth of sourceBirthsAtAge(age, input)) if (birth.kind === "progressing" && birth.age === age && birth.soundPan !== undefined) audio.push({ sound: "se_m_thunderbolt", pan: birth.soundPan });
   return {
     age, active, source, animArgs: sourceArgs(age, timing),
     battlers: { attacker: { side: input.attackerSide, species: input.attackerSpecies, sprite: battlers.attacker }, target: { side: input.targetSide, species: input.targetSpecies, sprite: battlers.target, shake: { x: 0, y: battlers.target.y2 }, displayedShake: { x: 0, y: battlers.target.y2 } } },
     sprites, tasks,
     resources: { tags: resourceTags, matrixBitmap },
-    palette: { faded, hardware, banks: [1, 2, 3, input.attackerSprite.attr[2] >>> 12 & 0xf, input.targetSprite.attr[2] >>> 12 & 0xf], simpleBlendCoefficient: palette.simple, targetBlendCoefficient: palette.target },
+    palette: { unfaded, faded, hardware, banks: [1, 2, 3, input.background.monbgPaletteBank, 16 + (input.attackerSprite.attr[2] >>> 12 & 0xf), 16 + (input.targetSprite.attr[2] >>> 12 & 0xf), ...Object.values(input.resources).map((resource) => resource.hardwarePaletteBank)], simpleBlendCoefficient: palette.simple, backgroundBlendCoefficient: palette.background, targetBlendCoefficient: palette.target },
     background: { values, vram: monbgVram }, registers,
     displayTransfer: { oam: age === 0 ? "initial" : "preceding-software", matrices: age === 0 ? "initial" : "preceding-software", palette: age === 0 ? "initial" : age === 13 ? "same-row-monbg-setup" : "preceding-faded", selectedBackground: age >= 14 ? "visible-after-age-14" : "initial" },
-    painterOrder: painterOrder(input, sprites),
+    painterOrder: painterOrderAtAge(age, input),
     audio,
-    rng: { animation: animationRngAtAge(input.animationRngSeed, age, timing.cleanupAge), sourceDraws: age, gameplay: input.gameplayRng, gameplayUnchanged: true },
+    rng: { animation: animationRngAtAge(input.animationRngSeed, age, timing.cleanupAge), sourceDraws: animationRngDrawsAtAge(age, timing.cleanupAge), gameplay: input.gameplayRng, gameplayUnchanged: true },
     cleanup: { firstInactive: age === timing.cleanupAge, visualTasks: Number(tasks.some((task) => task.role === "charging")) + Number(sprites.some((sprite) => sprite.kind === "orb")) + Number(tasks.some((task) => task.role === "progressing")) + Number(tasks.some((task) => task.role === "lightning")) + Number(sprites.some((sprite) => sprite.kind === "palette-blend")) + Number(tasks.some((task) => task.role === "shake")) + Number(tasks.some((task) => task.role === "blend")), soundTasks: 0, ownedSprites: sprites.length, resourcesReleased: age >= timing.cleanupAge },
   };
 }

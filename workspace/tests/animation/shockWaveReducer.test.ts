@@ -50,6 +50,8 @@ describe("MOVE_SHOCK_WAVE source-relative reducer and narrow Scene-ON seam", () 
     const input = shockWaveInputsFor("player-back");
     const initialOccupiedSprites = input.allocator.initialOccupiedSprites
       .filter((slot) => slot !== input.attackerSprite.slot && slot !== input.targetSprite.slot);
+    const initialLiveSprites = input.allocator.initialLiveSprites
+      .filter((entry) => entry.slot !== input.attackerSprite.slot && entry.slot !== input.targetSprite.slot);
     const altered: ShockWaveLiveInputs = {
       ...input,
       attackerSide: "opponent",
@@ -65,14 +67,23 @@ describe("MOVE_SHOCK_WAVE source-relative reducer and narrow Scene-ON seam", () 
       spriteSlots: { orb: 30, paletteBlend: 31 },
       matrixSlots: { orb: 5 },
       resources: {
-        circleOfLight: { ...input.resources.circleOfLight, paletteBank: 9, tileSlot: 31, tileRange: [620, 1] },
-        electricOrbs: { ...input.resources.electricOrbs, paletteBank: 10, tileSlot: 32, tileRange: [621, 1] },
-        spark: { ...input.resources.spark, paletteBank: 11, tileSlot: 33, tileRange: [622, 1] },
-        lightning: { ...input.resources.lightning, paletteBank: 12, tileSlot: 34, tileRange: [623, 1] },
+        circleOfLight: { ...input.resources.circleOfLight, paletteAllocatorSlot: 9, hardwarePaletteBank: 25, tileSlot: 31, tileRange: [620, 1] },
+        electricOrbs: { ...input.resources.electricOrbs, paletteAllocatorSlot: 10, hardwarePaletteBank: 26, tileSlot: 32, tileRange: [621, 1] },
+        spark: { ...input.resources.spark, paletteAllocatorSlot: 11, hardwarePaletteBank: 27, tileSlot: 33, tileRange: [622, 1] },
+        lightning: { ...input.resources.lightning, paletteAllocatorSlot: 12, hardwarePaletteBank: 28, tileSlot: 34, tileRange: [623, 1] },
       },
-      allocator: { initialOccupiedSprites: [...initialOccupiedSprites, 21, 22], initialMatrixBitmap: 0x95, spriteOrder: input.allocator.spriteOrder.slice().reverse() },
-      background: { ...input.background, setupX: -12, setupValue: -23, clearValue: -3 },
-      registers: { ...input.registers, bldcnt: 0x1234, bldalpha: 0x5678 },
+      allocator: {
+        initialOccupiedSprites: [...initialOccupiedSprites, 21, 22],
+        initialMatrixBitmap: 0x95,
+        spriteOrder: input.allocator.spriteOrder.slice().reverse(),
+        initialLiveSprites: [
+          ...initialLiveSprites,
+          { slot: 21, attr: input.attackerSprite.attr, subpriority: 55 },
+          { slot: 22, attr: input.targetSprite.attr, subpriority: 14 },
+        ],
+      },
+      background: { ...input.background, values: { ...input.background.values, callerOwnedAxis: 73 }, setupX: -12, setupY: -23, clearX: -2, clearY: -3 },
+      registers: { ...input.registers, bldcnt: 0x1234, bldalpha: 0x5678, callerOwnedRegister: 0x2468 },
       animationRngSeed: 0x12345678,
       gameplayRng: { opaque: "gameplay-owned" },
     };
@@ -86,10 +97,27 @@ describe("MOVE_SHOCK_WAVE source-relative reducer and narrow Scene-ON seam", () 
       },
       sprites: expect.arrayContaining([expect.objectContaining({ kind: "orb", slot: 30 })]),
       tasks: expect.arrayContaining([expect.objectContaining({ role: "progressing", slot: 10 }), expect.objectContaining({ role: "monbg", slot: 14 })]),
-      resources: { tags: { electricOrbs: { paletteBank: 10, tileSlot: 32 } }, matrixBitmap: 0x95 | (1 << 5) },
+      resources: { tags: { electricOrbs: { paletteAllocatorSlot: 10, hardwarePaletteBank: 26, tileSlot: 32 } }, matrixBitmap: 0x95 | (1 << 5) },
       rng: { gameplay: { opaque: "gameplay-owned" }, gameplayUnchanged: true },
     });
     expect(changed.painterOrder).not.toEqual(baseline.painterOrder);
+    expect(changed.painterOrder).toHaveLength(64);
+    expect(changed.battlers.attacker.sprite.matrix).toEqual([192, 16, -16, 192]);
+    expect(changed.battlers.target.sprite.matrix).toEqual([224, 0, 0, 224]);
+    expect(changed.sprites.find((sprite) => sprite.kind === "orb")?.matrix).not.toEqual(changed.battlers.attacker.sprite.matrix);
+    expect(baseline.battlers.attacker.sprite.matrix).toEqual(baseline.sprites.find((sprite) => sprite.kind === "orb")?.matrix);
+    expect(changed.background.values[altered.background.xKey]).toBe(-12);
+    expect(changed.background.values[altered.background.yKey]).toBe(-23);
+    expect(changed.registers[altered.background.horizontalRegister]).toBe(500);
+    expect(changed.registers[altered.background.verticalRegister]).toBe(489);
+    expect(changed.background.values.callerOwnedAxis).toBe(73);
+    expect(changed.registers.callerOwnedRegister).toBe(0x2468);
+    expect(changed.palette.faded.slice(31 * 16, 32 * 16)).toEqual(altered.palettes.faded.slice(31 * 16, 32 * 16));
+
+    const cleanup = shockWaveAtAge(266, input);
+    expect(shockWaveAtAge(264, input).rng.sourceDraws).toBe(263);
+    expect(shockWaveAtAge(265, input).rng.sourceDraws).toBe(263);
+    expect(cleanup.rng.sourceDraws).toBe(264);
 
     const config = shockWaveConfigFor("player-back");
     const { attackerSide: _attackerSide, targetSide: _targetSide, attackerSpecies: _attackerSpecies, targetSpecies: _targetSpecies, attackerPictureOrigin: _attackerPictureOrigin, targetPictureOrigin: _targetPictureOrigin, targetBattlePosition: _targetBattlePosition, ...animationInputs } = altered;

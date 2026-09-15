@@ -55,11 +55,12 @@ function battler(entry: Json): ShockWaveLiveInputs["attackerSprite"] {
   };
 }
 function allocation(rows: Json[], start: number, tag: number): ShockWaveLiveInputs["resources"]["circleOfLight"] {
-  const row = rows[start]!, tileSlot = row.tileTags.indexOf(tag), paletteBank = row.paletteTags.indexOf(tag);
-  invariant(tileSlot >= 0 && paletteBank >= 0, `missing live allocation ${tag}`);
+  const row = rows[start]!, tileSlot = row.tileTags.indexOf(tag), paletteAllocatorSlot = row.paletteTags.indexOf(tag);
+  invariant(tileSlot >= 0 && paletteAllocatorSlot >= 0, `missing live allocation ${tag}`);
   const tileRange = row.resourceAllocators.tileRanges[tileSlot];
   invariant(Array.isArray(tileRange) && tileRange.length === 2, `missing live tile range ${tag}`);
-  return { tag, tileSlot, paletteBank, tileRange: [tileRange[0], tileRange[1]], palette: row.fadedPalette.slice(paletteBank * 16, paletteBank * 16 + 16) };
+  const hardwarePaletteBank = 16 + paletteAllocatorSlot;
+  return { tag, tileSlot, paletteAllocatorSlot, hardwarePaletteBank, tileRange: [tileRange[0], tileRange[1]], palette: row.fadedPalette.slice(hardwarePaletteBank * 16, hardwarePaletteBank * 16 + 16) };
 }
 function sourceOam(row: Json, symbol: string): ShockWaveOam {
   const entry = sprite(row, symbol);
@@ -100,10 +101,27 @@ export function shockWaveInputsFor(orientation: ShockWaveOrientation, rows = row
       spark: allocation(rows, 7, SHOCK_WAVE_RESOURCE_TAGS.spark),
       lightning: allocation(rows, 10, SHOCK_WAVE_RESOURCE_TAGS.lightning),
     },
-    allocator: { initialOccupiedSprites: initialOccupied, initialMatrixBitmap: row0.resourceAllocators.matrixBitmap, spriteOrder: row0.spriteOrder },
+    allocator: {
+      initialOccupiedSprites: initialOccupied,
+      initialMatrixBitmap: row0.resourceAllocators.matrixBitmap,
+      spriteOrder: row0.spriteOrder,
+      initialLiveSprites: row0.sprites.map((entry: Json) => ({ slot: entry.slot, attr: [entry.attr[0], entry.attr[1], entry.attr[2]], subpriority: entry.subpriority })),
+    },
     oam: { charging: sourceOam(row31, "gElectricChargingParticlesSpriteTemplate"), orb: sourceOam(row45, "gGrowingShockWaveOrbSpriteTemplate"), progressing: sourceOam(row77, "gShockWaveProgressingBoltSpriteTemplate"), lightning: sourceOam(rowLightningSprite, "gLightningSpriteTemplate"), paletteBlend: sourceOam(row16, "gSimplePaletteBlendSpriteTemplate") },
     palettes: { unfaded: row0.unfadedPalette, faded: row0.fadedPalette, hardware: row0.hardwarePalette },
-    background: { values: row0.battleBg, key: orientation === "player-back" ? "gBattle_BG2_Y" : "gBattle_BG1_Y", register: orientation === "player-back" ? "bg2vofs" : "bg1vofs", setupX: rows[13]!.battleBg[orientation === "player-back" ? "gBattle_BG2_X" : "gBattle_BG1_X"], setupValue: rows[13]!.battleBg[orientation === "player-back" ? "gBattle_BG2_Y" : "gBattle_BG1_Y"], clearValue: rows[timing.cleanupAge - 1]!.battleBg[orientation === "player-back" ? "gBattle_BG2_Y" : "gBattle_BG1_Y"], vram: row0.bgVram, setupVram: rows[14]!.bgVram, clearVram: rows[timing.cleanupAge]!.bgVram },
+    background: (() => {
+      const bg = orientation === "player-back" ? 2 : 1;
+      const xKey = `gBattle_BG${bg}_X`, yKey = `gBattle_BG${bg}_Y`;
+      const controlRegister = `bg${bg}cnt`, horizontalRegister = `bg${bg}hofs`, verticalRegister = `bg${bg}vofs`;
+      return {
+        values: row0.battleBg, xKey, yKey, controlRegister, horizontalRegister, verticalRegister,
+        setupX: rows[13]!.battleBg[xKey], setupY: rows[13]!.battleBg[yKey], setupControl: rows[14]!.registers[controlRegister],
+        clearX: rows[timing.cleanupAge - 1]!.battleBg[xKey], clearY: rows[timing.cleanupAge - 1]!.battleBg[yKey], clearControl: rows[timing.cleanupAge]!.registers[controlRegister],
+        clearHorizontal: rows[timing.cleanupAge]!.registers[horizontalRegister], clearVertical: rows[timing.cleanupAge]!.registers[verticalRegister],
+        monbgPaletteBank: orientation === "player-back" ? 9 : 8,
+        initialVram: row0.bgVram, setupVram: rows[14]!.bgVram, clearingVram: rows[timing.cleanupAge - 2]!.bgVram, clearVram: rows[timing.cleanupAge]!.bgVram,
+      };
+    })(),
     registers: row0.registers,
     animationRngSeed: row0.animationRng, gameplayRng: row0.rawBattleState.gameplayRng,
   };
@@ -141,13 +159,34 @@ function compareSprites(orientation: ShockWaveOrientation, age: number, row: Jso
   invariant(same(expected, actual), `${orientation}/${age}: complete owned sprite bodies`);
 }
 function compareLatches(orientation: ShockWaveOrientation, age: number, rows: Json[], state: ShockWaveState, input: ShockWaveLiveInputs): void {
-  const row = rows[age]!, timing = shockWaveTimingFor(input);
+  const row = rows[age]!;
   invariant(state.displayTransfer.oam === (age === 0 ? "initial" : "preceding-software") && state.displayTransfer.matrices === (age === 0 ? "initial" : "preceding-software"), `${orientation}/${age}: OAM/matrix transfer latch`);
   if (age > 0) { invariant(same(row.hardwareOam, rows[age - 1]!.softwareOam) && same(row.hardwareMatrices, rows[age - 1]!.softwareMatrices), `${orientation}/${age}: whole OAM/matrices RAM+1`); }
   invariant(state.displayTransfer.palette === (age === 0 ? "initial" : age === 13 ? "same-row-monbg-setup" : "preceding-faded"), `${orientation}/${age}: palette transfer latch`);
-  if (age > 0) invariant(same(row.hardwarePalette, rows[age - 1]!.fadedPalette) || age === 13, `${orientation}/${age}: hardware palette preceding faded`);
+  if (age > 0) invariant(age === 13 ? same(row.hardwarePalette, row.fadedPalette) : same(row.hardwarePalette, rows[age - 1]!.fadedPalette), `${orientation}/${age}: exact hardware palette transfer`);
   invariant(state.displayTransfer.selectedBackground === (age >= 14 ? "visible-after-age-14" : "initial"), `${orientation}/${age}: BG/VRAM visibility latch`);
-  invariant(state.registers[input.background.register] === (age >= 14 && age < timing.cleanupAge ? (input.background.setupValue + 512) % 512 : 0), `${orientation}/${age}: selected BG register schedule`);
+  invariant(state.background.values[input.background.xKey] === row.battleBg[input.background.xKey] && state.background.values[input.background.yKey] === row.battleBg[input.background.yKey], `${orientation}/${age}: selected BG source X/Y`);
+  for (const register of [input.background.controlRegister, input.background.horizontalRegister, input.background.verticalRegister]) invariant(state.registers[register] === row.registers[register], `${orientation}/${age}: selected ${register}`);
+  invariant(same(state.background.vram, row.bgVram), `${orientation}/${age}: setup/clear BG VRAM`);
+  for (const register of Object.keys(input.registers).filter((entry) => ![input.background.controlRegister, input.background.horizontalRegister, input.background.verticalRegister, "bldcnt", "bldalpha"].includes(entry))) invariant(state.registers[register] === input.registers[register], `${orientation}/${age}: preserve unrelated register ${register}`);
+}
+function bank(palette: readonly number[], index: number): readonly number[] { return palette.slice(index * 16, index * 16 + 16); }
+function comparePalette(orientation: ShockWaveOrientation, age: number, row: Json, state: ShockWaveState, input: ShockWaveLiveInputs): void {
+  const banks = [...new Set(state.palette.banks)];
+  for (const index of banks) {
+    invariant(same(bank(state.palette.unfaded, index), bank(row.unfadedPalette, index)), `${orientation}/${age}: unfaded bank ${index}`);
+    invariant(same(bank(state.palette.faded, index), bank(row.fadedPalette, index)), `${orientation}/${age}: faded bank ${index}`);
+    invariant(same(bank(state.palette.hardware, index), bank(row.hardwarePalette, index)), `${orientation}/${age}: hardware bank ${index}`);
+  }
+  const unrelated = 31;
+  invariant(!banks.includes(unrelated) && same(bank(state.palette.unfaded, unrelated), bank(input.palettes.unfaded, unrelated)) && same(bank(state.palette.faded, unrelated), bank(input.palettes.faded, unrelated)), `${orientation}/${age}: caller-owned palette bank preserved`);
+}
+function compareAudio(orientation: ShockWaveOrientation, age: number, row: Json, state: ShockWaveState, input: ShockWaveLiveInputs): void {
+  for (const event of state.audio) {
+    const channel = event.sound === "se_m_thunderbolt" ? row.audio.SE2 : row.audio.SE1;
+    invariant(channel.songHeaderIdentity.symbol === event.sound && channel.tracks.some((track: Json) => track.panX === event.pan), `${orientation}/${age}: ${event.sound} pan ${event.pan}`);
+  }
+  if (age === 31 || age === shockWaveTimingFor(input).lightningStart) invariant(state.audio.length > 0, `${orientation}/${age}: scripted audio event`);
 }
 function compareRow(orientation: ShockWaveOrientation, age: number, rows: Json[], input: ShockWaveLiveInputs): void {
   const row = rows[age]!, state = shockWaveAtAge(age, input), timing = shockWaveTimingFor(input);
@@ -158,12 +197,22 @@ function compareRow(orientation: ShockWaveOrientation, age: number, rows: Json[]
   // surrounding battle scene.  The move-owned contract is live geometry plus
   // ShakeMon's x2/y2 writes; whole OAM transfer is pinned independently below.
   invariant(state.battlers.attacker.sprite.x === row.battlerSprites.attacker.x && state.battlers.attacker.sprite.y === row.battlerSprites.attacker.y && state.battlers.attacker.sprite.x2 === row.battlerSprites.attacker.x2 && state.battlers.attacker.sprite.y2 === row.battlerSprites.attacker.y2 && state.battlers.target.sprite.x === row.battlerSprites.target.x && state.battlers.target.sprite.y === row.battlerSprites.target.y && state.battlers.target.sprite.x2 === row.battlerSprites.target.x2 && state.battlers.target.sprite.y2 === row.battlerSprites.target.y2, `${orientation}/${age}: battler geometry/ShakeMon`);
-  invariant(state.painterOrder.length === 64 && new Set(state.painterOrder).size === 64 && state.painterOrder.every((slot) => row.spriteOrder.includes(slot)), `${orientation}/${age}: live painter-order permutation`);
+  if (age < timing.cleanupAge) for (const role of ["attacker", "target"] as const) {
+    const actual = state.battlers[role].sprite, expected = row.battlerSprites[role];
+    invariant(same({ attr: actual.attr, subpriority: actual.subpriority, oamPriority: actual.oamPriority, matrixNum: actual.matrixNum, matrix: actual.matrix }, { attr: expected.attr, subpriority: expected.subpriority, oamPriority: (expected.attr[2] >>> 10) & 3, matrixNum: expected.matrixNum, matrix: expected.matrix }), `${orientation}/${age}: ${role} OAM/matrix state`);
+  }
+  invariant(same(state.painterOrder, row.spriteOrder), `${orientation}/${age}: exact live painter order`);
   invariant(state.resources.matrixBitmap === row.resourceAllocators.matrixBitmap, `${orientation}/${age}: matrix allocator bitmap`);
-  for (const [name, tag] of Object.entries(SHOCK_WAVE_RESOURCE_TAGS)) invariant(state.resources.tags[name as keyof typeof SHOCK_WAVE_RESOURCE_TAGS].loaded === row.tileTags.includes(tag) && state.resources.tags[name as keyof typeof SHOCK_WAVE_RESOURCE_TAGS].loaded === row.paletteTags.includes(tag), `${orientation}/${age}: resource ${name} lifetime`);
+  for (const [name, tag] of Object.entries(SHOCK_WAVE_RESOURCE_TAGS)) {
+    const resource = state.resources.tags[name as keyof typeof SHOCK_WAVE_RESOURCE_TAGS];
+    invariant(resource.loaded === row.tileTags.includes(tag) && resource.loaded === row.paletteTags.includes(tag), `${orientation}/${age}: resource ${name} lifetime`);
+    if (resource.loaded) invariant(row.tileTags[resource.tileSlot] === tag && row.paletteTags[resource.paletteAllocatorSlot] === tag && resource.hardwarePaletteBank === resource.paletteAllocatorSlot + 16 && same(row.resourceAllocators.tileRanges[resource.tileSlot], resource.tileRange), `${orientation}/${age}: exact resource ${name} allocation`);
+  }
   invariant(state.palette.simpleBlendCoefficient === (age < 19 ? 0 : age < 23 ? 2 : age < timing.shakeStart + 2 ? 4 : 0), `${orientation}/${age}: simple palette program`);
-  invariant(state.cleanup.visualTasks === row.visualTaskCount && state.cleanup.soundTasks === row.soundTaskCount && state.cleanup.firstInactive === (age === timing.cleanupAge) && state.cleanup.resourcesReleased === (age >= timing.cleanupAge), `${orientation}/${age}: cleanup counters`);
-  invariant(state.rng.animation === row.animationRng && state.rng.gameplay === row.rawBattleState.gameplayRng && state.rng.gameplayUnchanged, `${orientation}/${age}: RNG split`);
+  comparePalette(orientation, age, row, state, input); compareAudio(orientation, age, row, state, input);
+  invariant(state.cleanup.visualTasks === row.visualTaskCount && state.cleanup.soundTasks === row.soundTaskCount && state.cleanup.ownedSprites === ownedRows(row).length && state.cleanup.firstInactive === (age === timing.cleanupAge) && state.cleanup.resourcesReleased === (age >= timing.cleanupAge), `${orientation}/${age}: cleanup counters and owned sprites`);
+  const expectedDraws = age < timing.cleanupAge - 2 ? age : age < timing.cleanupAge ? timing.cleanupAge - 3 : timing.cleanupAge - 2;
+  invariant(state.rng.animation === row.animationRng && state.rng.sourceDraws === expectedDraws && state.rng.gameplay === row.rawBattleState.gameplayRng && state.rng.gameplayUnchanged, `${orientation}/${age}: RNG split and source draw schedule`);
   invariant(same(row.immutableState, rows[0]!.immutableState) && same(row.rawBattleState.gameplayRng, rows[0]!.rawBattleState.gameplayRng), `${orientation}/${age}: immutable gameplay`);
   compareLatches(orientation, age, rows, state, input);
 }
