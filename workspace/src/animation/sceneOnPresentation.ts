@@ -589,6 +589,11 @@ import {
   type HyperVoiceState,
 } from "./hyperVoice.ts";
 import {
+  shockWaveAtAge,
+  type ShockWaveLiveInputs,
+  type ShockWaveState,
+} from "./shockWave.ts";
+import {
   solarBeamAtAge,
   type SolarBeamBody,
   type SolarBeamState,
@@ -2380,6 +2385,21 @@ export interface SceneOnHyperVoiceConfig {
   readonly animationInputs: Readonly<Omit<HyperVoiceLiveInputs,
     "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
     | "attackerPictureOrigin" | "targetPictureOrigin">>;
+}
+
+/**
+ * Narrow semantic Scene-ON seam for MOVE_SHOCK_WAVE.  All allocation,
+ * geometry, palette and register facts remain live inputs; battle outcome and
+ * gameplay RNG stay outside this presentation-only reducer.
+ */
+export interface SceneOnShockWaveConfig {
+  readonly move: "SHOCK_WAVE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<ShockWaveLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+    | "attackerPictureOrigin" | "targetPictureOrigin" | "targetBattlePosition">>;
 }
 
 /** Narrow Scene-ON seam for Solar Beam's source-isolated two-turn bodies. */
@@ -4516,6 +4536,8 @@ export type SceneOnPsychUpPresentationState =
   SceneOnMovePresentationState<SceneOnPsychUpConfig>;
 export type SceneOnHyperVoicePresentationState =
   SceneOnMovePresentationState<SceneOnHyperVoiceConfig>;
+export type SceneOnShockWavePresentationState =
+  SceneOnMovePresentationState<SceneOnShockWaveConfig>;
 export type SceneOnSignalBeamPresentationState =
   SceneOnMovePresentationState<SceneOnSignalBeamConfig>;
 export type SceneOnWaterPulsePresentationState =
@@ -4708,6 +4730,11 @@ export interface SceneOnPsychUpView extends PsychUpState {
 }
 
 export interface SceneOnHyperVoiceView extends HyperVoiceState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnShockWaveView extends ShockWaveState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7785,6 +7812,30 @@ export function sceneOnHyperVoiceView(
       targetSpecies: target.species,
       attackerPictureOrigin: attacker.geometry.animationCenter,
       targetPictureOrigin: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_SHOCK_WAVE's first loadspritegfx source row. */
+export function sceneOnShockWaveView(
+  state: SceneOnShockWavePresentationState,
+): SceneOnShockWaveView {
+  if (state.config.move !== "SHOCK_WAVE") {
+    throw new Error(`expected SHOCK_WAVE presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...shockWaveAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerPictureOrigin: attacker.geometry.animationCenter,
+      targetPictureOrigin: target.geometry.animationCenter,
+      targetBattlePosition: target.geometry.battlePositionCenter,
     }),
     attacker,
     target,
