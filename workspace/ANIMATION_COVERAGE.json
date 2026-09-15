@@ -9779,9 +9779,13 @@
     "tools/compare/evidence/shock-wave-changemap-player.json",
     "tools/compare/evidence/shock-wave-changemap-opponent.json",
     "tests/animation/shockWaveEvidenceCheckpoint.test.ts",
-    "ANIMATION_LATCHES.md"
+    "ANIMATION_LATCHES.md",
+    "src/animation/shockWave.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifyShockWaveReducer.ts",
+    "tests/animation/shockWaveReducer.test.ts"
    ],
-   "goal": "UNFULFILLED evidence checkpoint only: MOVE_SHOCK_WAVE retains complete twice-fresh legal bilateral Scene-ON state/RGB/change maps at 267 player-back and 263 opponent-front rows through first inactive cleanup. Its own maps retain all four resources, twenty charging particles, growing orb, 49/43 progressing bolts, 3/4 lightning sprites, target ShakeMon, palette tasks, simple palette blend, audio/panning, OAM/matrices/order, attacker monbg/registers, presentation RNG, opaque unchanged gameplay state, one PP spend, valid benches, and exact teardown. No reducer, asset/compositor, typed seam, engine wiring, framebuffer acceptance, move/component/track promotion, or Charge/Spark/Tail Glow/Thunder/Thunderbolt sibling credit exists yet."
+   "goal": "UNFULFILLED reducer/seam checkpoint only: MOVE_SHOCK_WAVE's pure source-relative reducer and narrow typed Scene-ON seam replay all 267 player-back + 263 opponent-front retained rows twice through each path (1,060 reducer + 1,060 seam calls), preserving its source cursor/args, four resources, twenty charging particles, growing orb, progressing bolts, lightning, ShakeMon, palette/monbg/register schedules, order/OAM/matrix transfer, presentation RNG, opaque unchanged gameplay state/RNG, and cleanup. A material reversed-side CROBAT/BLISSEY live control changes reducer and seam output without gameplay ownership. Later exact closure requires source-derived effect assets, generic live compositor/core wiring, and two fresh bilateral zero-residual actual-core windows through cleanup before any move or track promotion. Charge, Spark, Tail Glow, Thunder, and Thunderbolt remain identity controls only; no component, sibling, framebuffer, or coverage credit is granted."
   }
  ],
  "variantAudits": {
