@@ -1589,7 +1589,7 @@
     "the typed seam carries only resolved Sudowoodo/Onix geometry and immutable HP/gender state; presentation exposes no trapped flag and owns no trap effect, damage, RNG, turn order, controller, or facility state",
     "source extraction regenerates Sudowoodo front/back and X_SIGN art with its source-shared HollowOrb palette byte-for-byte; the production compositor uses the shared battle framebuffer and source OAM latch/order without absolute ticks, baked frames, coordinate/RGB fitting, or screenshots",
     "blockEvidence.ts proves every source/component/typed-seam/software+hardware OAM/matrix/palette/register/audio/state/raw-RGB/production-framebuffer frame twice fresh in both orientations",
-    "MOVE_ROCK_TOMB now has an independent dense Scene-ON acceptance; MOVE_HYPER_VOICE remains unsupported and receives no inherited acceptance"
+    "MOVE_ROCK_TOMB now has an independent dense Scene-ON acceptance; MOVE_HYPER_VOICE is independently exact and receives no inherited Rock Tomb acceptance"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-block-player-sudowoodo-opponent-onix.json",
@@ -1617,7 +1617,7 @@
     "the pure source-relative reducer ports all four gRockTombRockSpriteTemplate falls, gRedXSpriteTemplate, AnimTask_ShakeMon(target,3,0,20,1), six platform shakes, source audio/waits, cleanup, and all 348 retained state rows",
     "the typed seam carries only source-derived GRIMER/ONIX geometry, effect center, and immutable field presentation; the compositor reuses source ROCKS, X_SIGN, battler, healthbox, field, and window assets without owning damage, Speed drops, RNG, AI, turn, controller, or facility state",
     "the move-local late ShakeMon transfer and fourth-rock OAM tie order are independently pinned; hardware OAM/matrices/palettes pass 346/346/346 comparable rows, audio 10/10, immutable state 348/348, and raw RGB 348/348",
-    "MOVE_HYPER_VOICE remains independently unsupported and receives no shared reducer, seam, compositor, receipt, or coverage acceptance"
+    "MOVE_HYPER_VOICE is independently exact and receives no shared Roar reducer, seam, compositor, receipt, or coverage acceptance"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-rock-tomb-player-grimer-opponent-onix.json",
@@ -7375,6 +7375,48 @@
     "tests/animation/psychUpReducer.test.ts",
     "tests/animation/psychUpActualCore.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_HYPER_VOICE",
+   "status": "exact",
+   "covered": [
+    "the complete branchless Move_HYPER_VOICE root and all nine source components are independently accepted: ANIM_TAG_THIN_RING, gHyperVoiceRingSpriteTemplate, both HyperVoiceEffect calls, ScaleMonAndRestore, short target ShakeMon2 plus the singles defender-partner teardown, platform BG3 shake, simple palette blend, cry/echo audio tasks, waits, resources, and first-inactive cleanup",
+    "complete legal bilateral EXPLOUD/SLOWKING Battle Scene ON evidence retains player-back and opponent-front ages 0..104; the source-relative reducer and narrow typed sceneOnHyperVoiceView seam reproduce all 210 component rows from live sides/species, geometry/picture origins, sprite/task/resource/matrix allocation, painter order, BG3 platform, palette banks, cry/audio state, animation RNG, and opaque gameplay RNG",
+    "Hyper Voice's own maps prove Thin Ring ages 4..47 and 59..102 with OAM and ring matrices RAM+1, visible-attacker ScaleMonAndRestore RAM+2 over both ten-row schedules including restore, target ShakeMon2's -1,-1,+1,+1,-1,-1,+1,+1,-1,-1,0 sequence at RAM+2 after its source-relative +1 creation seed, platform BG3 RAM+1, Thin Ring bank 23 and battler banks 16/17 RAM+1, and BG banks 1/2 same-row only at ages 4/59 then RAM+1",
+    "two independent actual-core processes are byte-identical at digest bb3c41b3996a5f349b43d737ef86bf1f3dedc59c0baf588f0d70c05d27b0e834 and each passes all 210/210 component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels through inactive age 104, including the second-call setup's source-relative 16-row upper scanout palette hold",
+    "a material CROBAT/BLISSEY live control reverses sides and changes species, geometry/picture origins, sprite/task/resource/matrix allocations, painter order, palettes, cry/audio identity, animation RNG, seam output, and framebuffer while gameplay RNG remains opaque and unchanged",
+    "MOVE_UPROAR, MOVE_ROAR, MOVE_ROCK_TOMB, MOVE_SNORE, and every sibling receive no Hyper Voice timing, latch, body, move, component, or track credit"
+   ],
+   "evidence": [
+    "tools/compare/hyperVoiceSourceAudit.ts",
+    "tools/battle-lab/mechanic-hyper-voice-player-exploud-opponent-slowking.json",
+    "tools/battle-lab/mechanic-hyper-voice-opponent-exploud-player-slowking.json",
+    "tools/compare/hyperVoiceStagingProbe.py",
+    "tools/compare/fixtures/hyper-voice-staging-receipt.json",
+    "tools/compare/verifyHyperVoiceStaging.ts",
+    "tools/compare/hyperVoiceProbe.py",
+    "tools/compare/hyperVoiceEvidence.ts",
+    "tools/compare/fixtures/hyper-voice-evidence.json",
+    "tools/compare/evidence/hyper-voice-player-dense-state.json.gz",
+    "tools/compare/evidence/hyper-voice-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/hyper-voice-changemap-player.json",
+    "tools/compare/evidence/hyper-voice-opponent-dense-state.json.gz",
+    "tools/compare/evidence/hyper-voice-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/hyper-voice-changemap-opponent.json",
+    "tools/compare/extractUproarAssets.ts",
+    "src/animation/assets/uproar.json",
+    "ANIMATION_LATCHES.md",
+    "src/animation/hyperVoice.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifyHyperVoiceReducer.ts",
+    "tools/compare/hyperVoiceActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/hyperVoiceSourceStaging.test.ts",
+    "tests/animation/hyperVoiceEvidenceCheckpoint.test.ts",
+    "tests/animation/hyperVoiceReducer.test.ts",
+    "tests/animation/hyperVoiceActualCore.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -8820,7 +8862,7 @@
     "goal": "FULFILLED: MOVE_SAFEGUARD alone independently passes complete twice-fresh legal 71/71 player-back plus 71/71 opponent-front source/component/reducer/typed-seam/raw-RGB/actual core.ts -> renderSceneOnMovePresentation rows through first inactive cleanup with zero residual pixels on two production-render passes. Source Guard Ring art, the three Q8 rings, attacker monbg copy/cleanup, setalpha/blendoff, white BlendColorCycleByTag palette transfer, typed live species/sides/geometry and allocator/subpriority facts, generic front/back art, chrome, and cleanup use no pair gate, recording/RGB/framebuffer lookup, coordinate fitting, absolute tick, or gameplay ownership. MOVE_SWEET_SCENT, MOVE_BARRIER, and MOVE_LIGHT_SCREEN remain independent controls and receive no sibling credit."
   },
   {
-    "id": "helping-hand-clap",
+  "id": "helping-hand-clap",
    "components": [
     "asset:ANIM_TAG_TAG_HAND",
     "sprite:gHelpingHandClapSpriteTemplate",
@@ -9665,7 +9707,7 @@
     "visualCommand:simple_palette_blend"
    ],
    "representatives": ["MOVE_HYPER_VOICE"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/hyperVoiceSourceAudit.ts",
     "tools/battle-lab/mechanic-hyper-voice-player-exploud-opponent-slowking.json",
@@ -9688,9 +9730,15 @@
     "src/animation/hyperVoice.ts",
     "src/animation/sceneOnPresentation.ts",
     "tools/compare/verifyHyperVoiceReducer.ts",
-    "tests/animation/hyperVoiceReducer.test.ts"
+    "tests/animation/hyperVoiceReducer.test.ts",
+    "tools/compare/extractUproarAssets.ts",
+    "src/animation/assets/uproar.json",
+    "tools/compare/hyperVoiceActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/hyperVoiceActualCore.test.ts"
   ],
-  "goal": "UNFULFILLED: MOVE_HYPER_VOICE now has complete twice-fresh legal bilateral 105+105-row semantic/raw-RGB/normalized-map evidence and move-owned latch measurements through first inactive cleanup, plus a strict source-relative reducer and narrow typed Scene-ON seam replaying every retained row twice. Thin Ring OAM/matrix is RAM+1, live ScaleMonAndRestore and short target ShakeMon2 are RAM+2, platform BG3 is RAM+1, and palette transfer is bank-specific; the singles defender-partner invocation tears down immediately. Assets/compositor/core wiring, framebuffer acceptance, coverage, component, sibling, and move acceptance remain absent and are later steps. Uproar, Roar, Rock Tomb, Snore, and every sibling remain independent controls with no credit transfer."
+  "goal": "FULFILLED by MOVE_HYPER_VOICE alone: its complete source-age reducer, narrow typed Scene-ON seam, reproducible source Thin Ring asset, and generic live compositor pass all 210 bilateral component, retained-RGB, and actual-core framebuffer rows twice with zero residual pixels through inactive age 104. Its own maps retain both Thin Ring lives, ScaleMonAndRestore, short target ShakeMon2 plus singles partner teardown, platform BG3, bank-specific palette blend and scanout, cry/echo audio, resources, matrices, painter order, hardware latches, and cleanup. The material altered CROBAT/BLISSEY control reverses sides and changes species, geometry/origins, allocations/order/matrices, palettes/audio, animation RNG, seam output, and framebuffer while gameplay state/RNG remains opaque and unchanged. Uproar, Roar, Rock Tomb, Snore, and every sibling receive no Hyper Voice timing, latch, body, move, component, or track credit."
   }
  ],
  "variantAudits": {

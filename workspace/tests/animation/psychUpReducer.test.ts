@@ -110,7 +110,7 @@ describe("MOVE_PSYCH_UP source-relative reducer and narrow Scene-ON seam", () =>
     const source = readFileSync(resolve(root, "src/animation/psychUp.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(254);
+    expect(data.entries).toHaveLength(255);
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")).toMatchObject({ status: "exact" });
     expect(data.queue).toEqual([]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle")).toMatchObject({ representatives: ["MOVE_PSYCH_UP"], fulfilled: true, goal: expect.stringContaining("MOVE_PSYCH_UP alone") });

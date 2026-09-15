@@ -315,16 +315,16 @@ describe("mud-sand-scatter component-track receipt ratchet", () => {
     const moves = new Set(["MOVE_SAND_ATTACK", "MOVE_MUD_SLAP"]);
     const accepted = coverage.entries.filter((entry) => moves.has(entry.move));
 
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(254);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(255);
     expect(coverage.entries.filter((entry) => entry.status === "partial" || entry.status === "staged"))
       .toHaveLength(0);
     expect(animationCoverageSummary()[0]).toEqual({
       tier: "level50",
       total: 276,
-      exact: 254,
+      exact: 255,
       partial: 0,
       staged: 0,
-      unsupported: 22,
+      unsupported: 21,
     });
     expect(accepted.map(({ move, status }) => [move, status]).sort(([left], [right]) =>
       left.localeCompare(right))).toEqual([

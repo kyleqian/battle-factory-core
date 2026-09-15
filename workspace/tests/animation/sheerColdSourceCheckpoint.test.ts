@@ -89,7 +89,7 @@ describe("MOVE_SHEER_COLD source/component/carrier checkpoint", () => {
     });
 
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(254);
+    expect(coverage.entries).toHaveLength(255);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SHEER_COLD")?.status).toBe("exact");
     expect(coverage.componentTracks.find((entry: Json) => entry.id === "ice-cube-frozen-ice-cube")).toMatchObject({
       representatives: ["MOVE_SHEER_COLD"], fulfilled: true, evidence: expect.arrayContaining([

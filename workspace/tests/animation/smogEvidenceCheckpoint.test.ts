@@ -50,7 +50,7 @@ describe("MOVE_SMOG complete legal bilateral Scene-ON evidence", () => {
       siblingCredit: false, poisonGasCredit: false,
     });
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(254);
+    expect(data.entries).toHaveLength(255);
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_SMOG")).toMatchObject({ status: "exact" });
     expect(data.queue).toEqual([]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "smog-purple-gas-cloud")).toMatchObject({

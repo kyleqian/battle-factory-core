@@ -63,10 +63,15 @@ export interface HyperVoiceLiveInputs {
   /** Source-order slots used to place a transient ring/palette sprite. */
   readonly painter: Readonly<{ readonly shadowSlot: number; readonly ringInsertionBefore: number; }>;
   readonly palettes: Readonly<{
-    readonly backgroundBanks: readonly [number, number];
+    readonly unfaded: readonly number[];
+    readonly faded: readonly number[];
+    readonly hardware: readonly number[];
+    readonly backgroundBanks: readonly [number, number, number];
     readonly attackerBank: number;
     readonly targetBank: number;
     readonly thinRingBank: number;
+    /** Palette uploaded by `loadspritegfx ANIM_TAG_THIN_RING`. */
+    readonly thinRingPalette: readonly number[];
   }>;
   readonly matrixBitmap: number;
   /** Presentation RNG evolves here; gameplay RNG is opaque and read-only. */
@@ -146,7 +151,7 @@ export interface HyperVoiceState {
   readonly effect: Readonly<{ readonly call: 1 | 2 | null; readonly localAge: number | null; readonly callsStarted: number; }>;
   readonly battlers: Readonly<{
     readonly attacker: Readonly<{ readonly side: HyperVoiceSide; readonly species: string; readonly sprite: HyperVoiceBattlerSprite; readonly scale: number; }>;
-    readonly target: Readonly<{ readonly side: HyperVoiceSide; readonly species: string; readonly sprite: HyperVoiceBattlerSprite; readonly shake: HyperVoicePoint; }>;
+    readonly target: Readonly<{ readonly side: HyperVoiceSide; readonly species: string; readonly sprite: HyperVoiceBattlerSprite; readonly shake: HyperVoicePoint; readonly displayedShake: HyperVoicePoint; }>;
   }>;
   readonly sprites: Readonly<{ readonly ring: HyperVoiceRingSprite | null; readonly paletteBlend: HyperVoicePaletteSprite | null; }>;
   readonly tasks: readonly HyperVoiceTask[];
@@ -162,10 +167,13 @@ export interface HyperVoiceState {
   }>;
   readonly platform: Readonly<{ readonly sourceX: number; readonly sourceY: 0; readonly hardwareX: number; }>;
   readonly palette: Readonly<{
+    readonly faded: readonly number[];
+    readonly hardware: readonly number[];
     readonly selector: "F_PAL_BG | F_PAL_BATTLERS";
     readonly banks: readonly number[];
     readonly thinRingBank: number;
     readonly fade: Readonly<{ readonly active: boolean; readonly effectCall: 1 | 2 | null; readonly sourceBlendY: number | null; readonly initialBlendY: 8; readonly targetBlendY: 0; readonly color: "RGB_YELLOW" }>;
+    readonly scanout: Readonly<{ readonly upperRows: 0 | 16; readonly upperHardware: readonly number[] }>;
   }>;
   readonly displayTransfer: Readonly<{
     readonly oam: "initial" | "preceding-software";
@@ -203,6 +211,10 @@ function assertInputs(input: Readonly<HyperVoiceLiveInputs>): void {
   for (const [label, slot] of Object.entries(input.spriteSlots)) assertSlot(slot, label, 64);
   for (const [label, slot] of Object.entries(input.matrixSlots)) assertSlot(slot, label, 32);
   if (!Number.isInteger(input.attackerCrySpecies) || input.attackerCrySpecies < 0) throw new Error("invalid Hyper Voice live cry species");
+  if (input.palettes.unfaded.length !== 512 || input.palettes.faded.length !== 512
+    || input.palettes.hardware.length !== 512 || input.palettes.thinRingPalette.length !== 16) {
+    throw new Error("Hyper Voice requires live 32-bank palette memory");
+  }
   assertSlot(input.resource.paletteBank, "Thin Ring palette bank", 16);
   assertSlot(input.resource.tileSlot, "Thin Ring tile slot", 32);
   if (input.resource.tag !== HYPER_VOICE_THIN_RING_TAG) throw new Error("Hyper Voice requires the live ANIM_TAG_THIN_RING allocation");
@@ -244,14 +256,83 @@ function platformTaskData(local: number): readonly number[] {
   return data(1, 0, 5 - Math.floor(local / 2), local % 2 === 0 ? 1 : 0, 0, 0, 0, 0, 1);
 }
 function sourceBlendY(local: number): number {
-  // BeginNormalPaletteFade starts at 8, then its delay-3 cadence moves toward
-  // zero. The remaining normal-fade bookkeeping is renderer-owned.
+  // AnimSimplePaletteBlend starts at 8, then changes by two on its delay-3
+  // cadence. BG palettes receive one extra UpdatePaletteFade on setup; their
+  // one-row lead is represented separately by paletteAtAge.
   if (local < 4) return 8;
-  if (local < 9) return 7;
-  if (local < 14) return 6;
-  if (local < 19) return 5;
-  if (local < 24) return 4;
+  if (local < 9) return 6;
+  if (local < 14) return 4;
+  if (local < 19) return 2;
   return 0;
+}
+
+function blendColor(source: number, target: number, coefficient: number): number {
+  const blend = (component: number, targetComponent: number): number =>
+    ((component * (16 - coefficient)) + targetComponent * coefficient) >> 4;
+  const r = blend(source & 0x1f, target & 0x1f);
+  const g = blend((source >> 5) & 0x1f, (target >> 5) & 0x1f);
+  const b = blend((source >> 10) & 0x1f, (target >> 10) & 0x1f);
+  return r | (g << 5) | (b << 10);
+}
+
+function effectStartForPalette(age: number): number | null {
+  if (age >= EFFECT_STARTS[1] && age < EFFECT_STARTS[1] + 26) return EFFECT_STARTS[1];
+  if (age >= EFFECT_STARTS[0] && age < EFFECT_STARTS[0] + 26) return EFFECT_STARTS[0];
+  return null;
+}
+
+function paletteAtAge(age: number, input: Readonly<HyperVoiceLiveInputs>): readonly number[] {
+  const palette = input.palettes.faded.slice();
+  if (age >= 1) {
+    const resourceStart = input.palettes.thinRingBank * 16;
+    for (let color = 0; color < 16; color += 1) {
+      palette[resourceStart + color] = input.palettes.thinRingPalette[color]!;
+    }
+  }
+  const start = effectStartForPalette(age);
+  if (start === null) return palette;
+  const local = age - start;
+  const bgCoefficient = sourceBlendY(local);
+  const battlerCoefficient = sourceBlendY(Math.max(0, local - 1));
+  for (const bank of input.palettes.backgroundBanks) {
+    for (let color = 0; color < 16; color += 1) {
+      const index = bank * 16 + color;
+      palette[index] = blendColor(input.palettes.unfaded[index]!, 0x03ff, bgCoefficient);
+    }
+  }
+  for (const bank of [input.palettes.attackerBank, input.palettes.targetBank]) {
+    for (let color = 0; color < 16; color += 1) {
+      const index = bank * 16 + color;
+      palette[index] = blendColor(input.palettes.unfaded[index]!, 0x03ff, battlerCoefficient);
+    }
+  }
+  return palette;
+}
+
+function hardwarePaletteAtAge(age: number, input: Readonly<HyperVoiceLiveInputs>): readonly number[] {
+  if (age === 0) return input.palettes.hardware.slice();
+  const hardware = paletteAtAge(age - 1, input).slice();
+  if (EFFECT_STARTS.includes(age as 4 | 59)) {
+    const current = paletteAtAge(age, input);
+    for (const bank of input.palettes.backgroundBanks) {
+      hardware.splice(bank * 16, 16, ...current.slice(bank * 16, bank * 16 + 16));
+    }
+  }
+  return hardware;
+}
+
+function sourceTargetX2AtAge(age: number, input: Readonly<HyperVoiceLiveInputs>): number {
+  const effect = effectFor(age);
+  if (effect) return effect.local <= 10 ? shakeForLocal(effect.local) : 0;
+  return age >= EFFECT_STARTS[0] ? 0 : input.targetSprite.x2;
+}
+
+function displayedTargetX2AtAge(age: number, input: Readonly<HyperVoiceLiveInputs>): number {
+  const effect = effectFor(age);
+  // ShakeMon2's creation callback seeds +1 into the first post-creation OAM
+  // build. Its steady callback sequence then follows the measured RAM+2 path.
+  if (effect?.local === 1) return 1;
+  return sourceTargetX2AtAge(Math.max(0, age - 2), input);
 }
 function cryPhase(local: number): "queued" | "echo-start" | "waiting" | "echo-end" {
   if (local === 0) return "queued";
@@ -382,13 +463,15 @@ export function hyperVoiceAtAge(age: number, input: Readonly<HyperVoiceLiveInput
   const attackerMatrix = scaleActive ? [scale, 0, 0, scale] as HyperVoiceMatrix : attackerPrepared ? IDENTITY : input.attackerSprite.matrix;
   const targetX2 = effectActive ? shakeX : age >= EFFECT_STARTS[0] ? 0 : input.targetSprite.x2;
   const targetY2 = effectActive || age >= EFFECT_STARTS[0] ? 0 : input.targetSprite.y2;
+  const fadedPalette = paletteAtAge(age, input);
+  const hardwarePalette = hardwarePaletteAtAge(age, input);
   return {
     age, active: source.active, source,
     animArgs: age < 4 ? [0, 0, 0, 0, 0, 0, 0, 0] : [1, 0, 6, 1, 1, 0, 1, 0],
     effect: { call: effect?.call ?? null, localAge: effect?.local ?? null, callsStarted: effectStarted(age) },
     battlers: {
       attacker: { side: input.attackerSide, species: input.attackerSpecies, sprite: { ...input.attackerSprite, matrixNum: attackerMatrixNum, matrix: attackerMatrix }, scale },
-      target: { side: input.targetSide, species: input.targetSpecies, sprite: { ...input.targetSprite, x2: targetX2, y2: targetY2 }, shake: { x: effectActive ? shakeX : 0, y: 0 } },
+      target: { side: input.targetSide, species: input.targetSpecies, sprite: { ...input.targetSprite, x2: targetX2, y2: targetY2 }, shake: { x: effectActive ? shakeX : 0, y: 0 }, displayedShake: { x: displayedTargetX2AtAge(age, input), y: 0 } },
     },
     sprites: { ring, paletteBlend }, tasks,
     partnerShake: { requested: effectActive, selector: "ANIM_DEF_PARTNER", active: false, reason: "singles-no-visible-partner" },
@@ -401,8 +484,17 @@ export function hyperVoiceAtAge(age: number, input: Readonly<HyperVoiceLiveInput
     resources: { thinRing: { tag: loaded ? input.resource.tag : null, loaded, allocation: loaded ? input.resource : null } },
     platform: { sourceX: platformX, sourceY: 0, hardwareX: priorPlatformX },
     palette: {
+      faded: fadedPalette, hardware: hardwarePalette,
       selector: "F_PAL_BG | F_PAL_BATTLERS", banks: [...input.palettes.backgroundBanks, input.palettes.attackerBank, input.palettes.targetBank], thinRingBank: input.palettes.thinRingBank,
       fade: { active: paletteBlend !== null, effectCall: paletteBlend ? effect!.call : null, sourceBlendY: paletteBlend ? sourceBlendY(local) : null, initialBlendY: 8, targetBlendY: 0, color: "RGB_YELLOW" },
+      // The second call begins late enough in its source frame for scanlines
+      // 0..15 to retain the preceding hardware palette. The lower field and
+      // both palette-RAM snapshots already contain the new setup blend.
+      scanout: {
+        upperRows: effect?.call === 2 && local === 0 ? 16 : 0,
+        upperHardware: effect?.call === 2 && local === 0
+          ? hardwarePaletteAtAge(age - 1, input) : hardwarePalette,
+      },
     },
     displayTransfer: displayTransfer(age, effect),
     audio: {

@@ -30,7 +30,7 @@ const policy = JSON.parse(readFileSync(resolve(root, "src/data/gen/factory-round
 const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
 // Preserve the committed Mach Punch source payload as later exact moves join
 // shared visual commands; the current ledger is checked independently below.
-const historicalCoverageEntries = coverage.entries.filter((entry: Json) => entry.move !== "MOVE_PSYCH_UP");
+const historicalCoverageEntries = coverage.entries.filter((entry: Json) => entry.move !== "MOVE_PSYCH_UP" && entry.move !== "MOVE_HYPER_VOICE");
 
 const symbols = new Map<string, SymbolEntry[]>();
 for (const line of execFileSync("arm-none-eabi-nm", ["-a", "-S", resolve(sourceRoot, "pokeemerald.elf")], { encoding: "utf8", maxBuffer: 32 * 1024 * 1024 }).split("\n")) {
@@ -117,7 +117,7 @@ const level50 = allCarriers.filter(legal);
 const inventoryEntry = inventory.tiers.level50.moves.find((entry: Json) => entry.move === "MOVE_MACH_PUNCH");
 if (JSON.stringify(allCarriers.map((entry: Json) => entry.index)) !== JSON.stringify([15, 32, 234, 236, 339, 382]) || JSON.stringify(level50.map((entry: Json) => entry.index)) !== JSON.stringify([234, 236, 339, 382]) || inventoryEntry?.id !== 183 || inventoryEntry?.frontierMonCount !== 4 || JSON.stringify(inventoryEntry.exampleMons) !== JSON.stringify(["FRONTIER_MON_HITMONCHAN_1", "FRONTIER_MON_HITMONTOP_1", "FRONTIER_MON_HITMONCHAN_2"])) throw new Error("MOVE_MACH_PUNCH carrier census drifted");
 const machPunchTracks = coverage.componentTracks.filter((track: Json) => track.representatives?.includes("MOVE_MACH_PUNCH"));
-if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_MACH_PUNCH" && entry.status === "exact") || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 254 || coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")?.status !== "exact" || coverage.queue.length !== 0 || machPunchTracks.length !== 1 || machPunchTracks[0].id !== "mach-punch-source-relative-body" || machPunchTracks[0].fulfilled !== true) throw new Error("MOVE_MACH_PUNCH exact/queue/fulfilled-track boundary drifted");
+if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_MACH_PUNCH" && entry.status === "exact") || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 255 || coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")?.status !== "exact" || coverage.queue.length !== 0 || machPunchTracks.length !== 1 || machPunchTracks[0].id !== "mach-punch-source-relative-body" || machPunchTracks[0].fulfilled !== true) throw new Error("MOVE_MACH_PUNCH exact/queue/fulfilled-track boundary drifted");
 
 requireTokens("Mach Punch task bodies", `${mons}\n${movement}\n${utility}`, ["void AnimTask_AttackerPunchWithTrace", "static void AnimTask_AttackerPunchWithTrace_Step", "void AnimTask_GetAttackerSide", "void AnimTask_StartSlidingBg", "void AnimTask_ShakeMon", "static void AnimTask_ShakeMon_Step"]);
 requireTokens("Mach Punch backgrounds/resources", `${registry}\n${graphics}\n${constants}`, ["BG_HIGHSPEED_OPPONENT 9", "BG_HIGHSPEED_PLAYER 10", "gBattleAnimBgImage_Highspeed", "gBattleAnimBgPalette_Highspeed", "gBattleAnimBgTilemap_HighspeedOpponent", "gBattleAnimBgTilemap_HighspeedPlayer", "gBattleAnimSpriteGfx_HandsAndFeet", "gBattleAnimSpriteGfx_Impact"]);

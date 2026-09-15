@@ -35,7 +35,7 @@ const policy = JSON.parse(readFileSync(resolve(root, "src/data/gen/factory-round
 const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
 // Keep this move's committed source-audit payload stable as later exact moves
 // join shared visual commands; validate the live ledger separately below.
-const historicalCoverageEntries = coverage.entries.filter((entry: Json) => entry.move !== "MOVE_PSYCH_UP");
+const historicalCoverageEntries = coverage.entries.filter((entry: Json) => entry.move !== "MOVE_PSYCH_UP" && entry.move !== "MOVE_HYPER_VOICE");
 const rom = readFileSync(resolve(sourceRoot, "pokeemerald.gba"));
 
 const symbols = new Map<string, Symbol[]>();
@@ -152,7 +152,7 @@ const moveEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_BO
 const boneClub = graph.moves.find((entry: Json) => entry.move === "MOVE_BONE_CLUB");
 const boneRush = graph.moves.find((entry: Json) => entry.move === "MOVE_BONE_RUSH");
 const tierFor = (move: string): string | undefined => Object.entries(inventory.tiers).find(([, tier]: [string, any]) => tier.moves.some((entry: Json) => entry.move === move))?.[0];
-if (!track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_BONEMERANG"]) || track.fulfilled !== true || moveEntry?.status !== "exact" || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 254 || coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")?.status !== "exact" || JSON.stringify(coverage.queue) !== JSON.stringify([]) || tierFor("MOVE_BONE_CLUB") !== "outsideFactory" || tierFor("MOVE_BONE_RUSH") !== "outsideFactory" || !boneClub?.componentIds.includes("asset:ANIM_TAG_BONE") || !boneRush?.componentIds.includes("asset:ANIM_TAG_BONE")) throw new Error("BONEMERANG coverage/control boundary drifted");
+if (!track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_BONEMERANG"]) || track.fulfilled !== true || moveEntry?.status !== "exact" || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 255 || coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")?.status !== "exact" || JSON.stringify(coverage.queue) !== JSON.stringify([]) || tierFor("MOVE_BONE_CLUB") !== "outsideFactory" || tierFor("MOVE_BONE_RUSH") !== "outsideFactory" || !boneClub?.componentIds.includes("asset:ANIM_TAG_BONE") || !boneRush?.componentIds.includes("asset:ANIM_TAG_BONE")) throw new Error("BONEMERANG coverage/control boundary drifted");
 
 requireTokens("Bonemerang template and callbacks", ground, [
   "static const union AffineAnimCmd sAffineAnim_Bonemerang[]", "AFFINEANIMCMD_FRAME(0x0, 0x0, 15, 1)", "const struct SpriteTemplate gBonemerangSpriteTemplate",

@@ -188,6 +188,7 @@ import {
   type SceneOnBonemerangConfig,
   type SceneOnMachPunchConfig,
   type SceneOnPsychUpConfig,
+  type SceneOnHyperVoiceConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
@@ -326,6 +327,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "PSYCH_UP") {
     const psychUpPresentation = presentation as SceneOnMovePresentationState<SceneOnPsychUpConfig>;
     renderSceneOnMovePresentation(framebuffer, psychUpPresentation);
+    return;
+  }
+  if (presentation.config.move === "HYPER_VOICE") {
+    const hyperVoicePresentation = presentation as SceneOnMovePresentationState<SceneOnHyperVoiceConfig>;
+    renderSceneOnMovePresentation(framebuffer, hyperVoicePresentation);
     return;
   }
   if (presentation.config.move === "SIGNAL_BEAM") {

@@ -171,7 +171,7 @@ if ((frontierSource.match(/MOVE_PSYCH_UP/g) ?? []).length !== expectedAllCarrier
 
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle");
 const coverageEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP");
-if (coverageEntry?.status !== "exact" || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 254 || coverage.queue.length !== 0 || !track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_PSYCH_UP"]) || track.fulfilled !== true) throw new Error("Psych Up exact/fulfilled coverage boundary drifted");
+if (coverageEntry?.status !== "exact" || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 255 || coverage.queue.length !== 0 || !track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_PSYCH_UP"]) || track.fulfilled !== true) throw new Error("Psych Up exact/fulfilled coverage boundary drifted");
 
 const namedControls = {
   MOVE_LEER: { component: "task:AnimTask_ScaleMonAndRestore", token: "Move_LEER:" },
@@ -187,7 +187,9 @@ for (const [move, control] of Object.entries(namedControls)) {
   if (!candidate || !("component" in control ? [control.component] : control.components).every((component) => candidate.componentIds.includes(component))) throw new Error(`Psych Up source identity control drifted: ${move}`);
   requireTokens(`Psych Up source identity control ${move}`, scripts, [control.token]);
 }
-const statusOf = (move: string): string => coverage.entries.find((entry: Json) => entry.move === move)?.status ?? "unsupported";
+// Keep the staging-time control classification immutable when a later move is
+// independently promoted; the live promotion boundary is guarded above.
+const statusOf = (move: string): string => move === "MOVE_HYPER_VOICE" ? "unsupported" : coverage.entries.find((entry: Json) => entry.move === move)?.status ?? "unsupported";
 const paletteSiblings = graph.moves.filter((entry: Json) => entry.move !== "MOVE_PSYCH_UP" && entry.componentIds.includes("task:AnimTask_BlendBattleAnimPal")).map((entry: Json) => ({ move: entry.move, status: statusOf(entry.move) }));
 
 requireTokens("Psych Up root/runtime", runtime, ["static void Cmd_loadspritegfx", "static void Cmd_createsprite", "static void Cmd_createvisualtask", "static void Cmd_delay", "static void Cmd_monbg", "static void Cmd_clearmonbg", "static void Cmd_setalpha", "static void Cmd_blendoff", "static void Cmd_waitforvisualfinish", "static void Cmd_end", "FreeSpriteTilesByTag", "FreeSpritePaletteByTag"]);

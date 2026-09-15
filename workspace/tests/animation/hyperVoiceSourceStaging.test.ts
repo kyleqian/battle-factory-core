@@ -57,10 +57,10 @@ describe("MOVE_HYPER_VOICE source/component classification + legal bilateral Sce
     expect(audit.controls.kind).toContain("no Hyper Voice timing");
   });
 
-  it("keeps Hyper Voice coverage-absent while hermetically validating two legal fresh bilateral party-before-init receipts", () => {
+  it("keeps the staging checkpoint historical while Hyper Voice is independently exact", () => {
     const coverage = readJson("ANIMATION_COVERAGE.json");
-    expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_HYPER_VOICE")).toBe(false);
-    expect(coverage.componentTracks.find((track: Json) => track.id === "hyper-voice-ring-cry-platform")).toMatchObject({ representatives: ["MOVE_HYPER_VOICE"], fulfilled: false });
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_HYPER_VOICE")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "hyper-voice-ring-cry-platform")).toMatchObject({ representatives: ["MOVE_HYPER_VOICE"], fulfilled: true });
     const stages = [
       ["tools/battle-lab/mechanic-hyper-voice-player-exploud-opponent-slowking.json", [397, 398, 399], [410, 411, 412], "player", "opponent"],
       ["tools/battle-lab/mechanic-hyper-voice-opponent-exploud-player-slowking.json", [410, 411, 412], [397, 398, 399], "opponent", "player"],

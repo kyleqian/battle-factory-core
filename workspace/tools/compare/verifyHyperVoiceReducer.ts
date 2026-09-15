@@ -104,8 +104,12 @@ export function hyperVoiceInputsFor(
     spriteOrder: row0.spriteOrder,
     painter: { shadowSlot: row4.spriteOrder[paletteIndex + 1]!, ringInsertionBefore: row4.spriteOrder[ringIndex + 1]! },
     palettes: {
-      backgroundBanks: [1, 2], attackerBank: paletteBankForBattler(attacker), targetBank: paletteBankForBattler(target),
+      unfaded: row0.unfadedPalette,
+      faded: row0.fadedPalette,
+      hardware: row0.hardwarePalette,
+      backgroundBanks: [1, 2, 3], attackerBank: paletteBankForBattler(attacker), targetBank: paletteBankForBattler(target),
       thinRingBank: 16 + resource.paletteBank,
+      thinRingPalette: row1.fadedPalette.slice((16 + resource.paletteBank) * 16, (17 + resource.paletteBank) * 16),
     },
     matrixBitmap: row0.resourceAllocators.matrixBitmap,
     animationRngSeed: row0.animationRng,
@@ -327,7 +331,8 @@ function compareRow(orientation: HyperVoiceOrientation, age: number, row: Json, 
     && same(state.matrices.attackerScale.matrix, state.battlers.attacker.sprite.matrix),
   `${orientation}/${age}: Thin Ring resource/matrix allocation/free lifecycle`);
   invariant(state.palette.thinRingBank === input.palettes.thinRingBank
-    && same(state.palette.banks, [1, 2, input.palettes.attackerBank, input.palettes.targetBank])
+    && same(state.palette.banks, [1, 2, 3, input.palettes.attackerBank, input.palettes.targetBank])
+    && same(state.palette.faded, row.fadedPalette) && same(state.palette.hardware, row.hardwarePalette)
     && state.palette.fade.active === (state.sprites.paletteBlend !== null), `${orientation}/${age}: simple palette blend program/banks`);
   compareAudio(orientation, age, state, input);
   invariant(state.cleanup.visualTasks === row.visualTaskCount && state.cleanup.soundTasks === row.soundTaskCount

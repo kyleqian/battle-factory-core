@@ -985,6 +985,7 @@ import {
   sceneOnBonemerangView,
   sceneOnMachPunchView,
   sceneOnPsychUpView,
+  sceneOnHyperVoiceView,
   sceneOnSignalBeamView,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
@@ -1247,6 +1248,7 @@ import {
   type SceneOnBonemerangConfig,
   type SceneOnMachPunchConfig,
   type SceneOnPsychUpConfig,
+  type SceneOnHyperVoiceConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
@@ -12505,7 +12507,17 @@ function drawStaticBgShiftedX(
   shiftX: number,
   paletteOverride?: RgbColor[][],
 ): void {
-  for (let screenY = 0; screenY < 160; screenY += 1) {
+  drawStaticBgShiftedXRows(fb, shiftX, paletteOverride, 0, 160);
+}
+
+function drawStaticBgShiftedXRows(
+  fb: Uint8Array,
+  shiftX: number,
+  paletteOverride: RgbColor[][] | undefined,
+  startY: number,
+  endY: number,
+): void {
+  for (let screenY = startY; screenY < endY; screenY += 1) {
     for (let screenX = 0; screenX < 240; screenX += 1) {
       const c = staticBgPixel(screenX + shiftX, screenY, paletteOverride);
       if (c) setPixel(fb, screenX, screenY, c);
@@ -23795,6 +23807,174 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.side === "player"
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "PSYCH UP!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HYPER_VOICE") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnHyperVoiceConfig>;
+    const view = sceneOnHyperVoiceView(moveState);
+    const displayed = sceneOnHyperVoiceView({
+      ...moveState,
+      age: Math.max(0, moveState.age - 1),
+    });
+    const delayedBattlers = sceneOnHyperVoiceView({
+      ...moveState,
+      age: Math.max(0, moveState.age - 2),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("HYPER_VOICE presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`HYPER_VOICE missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map((color) => {
+        const packed = mgbaColorFromBgr555(color);
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      });
+    const paletteBankFrom = (palette: readonly number[], bank: number): RgbColor[] =>
+      palette.slice(bank * 16, bank * 16 + 16).map((color) => {
+        const packed = mgbaColorFromBgr555(color);
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      });
+    const input = moveState.config.animationInputs;
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+
+    // Hyper Voice's platform task reaches BG3 at RAM+1. The same live
+    // hardware palette supplies the setup-row BG exception and every later
+    // predecessor upload without a rendered-frame dependency.
+    drawStaticBgShiftedX(
+      fb,
+      view.platform.hardwareX,
+      [paletteBank(2), paletteBank(3), paletteBank(4)],
+    );
+    if (view.palette.scanout.upperRows > 0) {
+      drawStaticBgShiftedXRows(
+        fb,
+        view.platform.hardwareX,
+        [2, 3, 4].map((bank) => paletteBankFrom(view.palette.scanout.upperHardware, bank)),
+        0,
+        view.palette.scanout.upperRows,
+      );
+    }
+    if (moveState.age === 0) {
+      const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+      drawSourceOpponentEnemyShadow(fb, opponent.species, opponent.geometry.battlePositionCenter);
+    }
+
+    type ObjEntry = Readonly<{
+      slot: number;
+      subpriority: number;
+      order: number;
+      draw: () => void;
+    }>;
+    const orderOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    const attackerPalette = paletteBank(input.palettes.attackerBank);
+    const targetPalette = paletteBank(input.palettes.targetBank);
+    const attackerSprite = displayed.battlers.attacker.sprite;
+    const targetSprite = {
+      ...delayedBattlers.battlers.target.sprite,
+      x2: view.battlers.target.displayedShake.x,
+      y2: view.battlers.target.displayedShake.y,
+    };
+    const objects: ObjEntry[] = [
+      {
+        slot: targetSprite.slot,
+        subpriority: targetSprite.subpriority,
+        order: orderOf(targetSprite.slot),
+        draw: () => drawSpriteSheet(
+          fb,
+          tilesFor(targetArt, view.target.geometry.side),
+          targetPalette,
+          view.target.geometry.spriteCorner.x + targetSprite.x2,
+          view.target.geometry.spriteCorner.y + targetSprite.y2,
+        ),
+      },
+      {
+        slot: attackerSprite.slot,
+        subpriority: attackerSprite.subpriority,
+        order: orderOf(attackerSprite.slot),
+        draw: () => {
+          if (moveState.age >= 5) {
+            const matrix = delayedBattlers.battlers.attacker.sprite.matrix;
+            drawSpriteSheetAffineRotate(
+              fb,
+              tilesFor(attackerArt, view.attacker.geometry.side),
+              attackerPalette,
+              input.attackerSprite.x + attackerSprite.x2,
+              input.attackerSprite.y + attackerSprite.y2,
+              matrix[0], matrix[1], matrix[2], matrix[3],
+              undefined,
+              true,
+            );
+          } else {
+            drawSpriteSheet(
+              fb,
+              tilesFor(attackerArt, view.attacker.geometry.side),
+              attackerPalette,
+              view.attacker.geometry.spriteCorner.x + attackerSprite.x2,
+              view.attacker.geometry.spriteCorner.y + attackerSprite.y2,
+            );
+          }
+        },
+      },
+    ];
+    if (displayed.sprites.ring) {
+      const ring = displayed.sprites.ring;
+      objects.push({
+        slot: ring.slot,
+        subpriority: ring.subpriority,
+        order: orderOf(ring.slot),
+        draw: () => drawSpriteSheetAffineRotate(
+          fb,
+          uproarAsset.thinRing.tileset,
+          paletteBank(view.palette.thinRingBank),
+          ring.x + ring.x2,
+          ring.y + ring.y2,
+          ring.matrix[0], ring.matrix[1], ring.matrix[2], ring.matrix[3],
+          undefined,
+          true,
+        ),
+      });
+    }
+    objects.sort((left, right) => right.subpriority - left.subpriority
+      || right.order - left.order || right.slot - left.slot);
+    for (const object of objects) object.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "HYPER VOICE!",
       99,
     );
     return;

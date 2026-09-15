@@ -95,7 +95,7 @@ describe("MOVE_HYPER_VOICE source-relative reducer and narrow Scene-ON seam", ()
       matrixSlots: { ring: 5, attackerScale: 6 },
       resource: { tag: 10203, tileSlot: 31, paletteBank: 11, tileRange: [620, 64] },
       spriteOrder: input.spriteOrder.slice().reverse(), painter: { shadowSlot: 2, ringInsertionBefore: 21 },
-      palettes: { backgroundBanks: [3, 4], attackerBank: 21, targetBank: 22, thinRingBank: 27 },
+      palettes: { ...input.palettes, backgroundBanks: [3, 4, 5], attackerBank: 21, targetBank: 22, thinRingBank: 27 },
       matrixBitmap: 0xd5, animationRngSeed: 0x12345678, gameplayRng: gameplay,
     };
     const baseline = hyperVoiceAtAge(59, input), source = hyperVoiceAtAge(59, altered);
@@ -132,16 +132,16 @@ describe("MOVE_HYPER_VOICE source-relative reducer and narrow Scene-ON seam", ()
     expect(target.geometry.animationCenter).toEqual({ x: 39, y: 117 });
   });
 
-  it("keeps production evidence-free and Hyper Voice plus siblings uncredited", () => {
+  it("keeps production evidence-free and credits Hyper Voice alone", () => {
     const source = readFileSync(resolve(root, "src/animation/hyperVoice.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     expect(source).not.toMatch(/absolute\s*(?:battle\s*)?(?:tick|frame)|framebuffer|controller-frame/iu);
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(254);
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_HYPER_VOICE")).toBe(false);
+    expect(data.entries).toHaveLength(255);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_HYPER_VOICE")).toMatchObject({ status: "exact" });
     expect(data.queue).toEqual([]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "hyper-voice-ring-cry-platform")).toMatchObject({
-      representatives: ["MOVE_HYPER_VOICE"], fulfilled: false,
+      representatives: ["MOVE_HYPER_VOICE"], fulfilled: true,
     });
     for (const move of ["MOVE_UPROAR", "MOVE_ROAR", "MOVE_ROCK_TOMB", "MOVE_SNORE"]) {
       expect(JSON.stringify(data.componentTracks.find((track: Json) => track.representatives?.includes(move)) ?? {}))

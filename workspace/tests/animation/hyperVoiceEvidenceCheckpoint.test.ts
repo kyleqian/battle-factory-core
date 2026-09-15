@@ -42,10 +42,10 @@ describe("MOVE_HYPER_VOICE complete bilateral Scene-ON evidence checkpoint", () 
       framebufferAcceptanceAdded: false, coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false,
     });
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(254);
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_HYPER_VOICE")).toBe(false);
+    expect(data.entries).toHaveLength(255);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_HYPER_VOICE")).toMatchObject({ status: "exact" });
     expect(data.queue).toEqual([]);
-    expect(data.componentTracks.find((entry: Json) => entry.id === "hyper-voice-ring-cry-platform")).toMatchObject({ representatives: ["MOVE_HYPER_VOICE"], fulfilled: false });
+    expect(data.componentTracks.find((entry: Json) => entry.id === "hyper-voice-ring-cry-platform")).toMatchObject({ representatives: ["MOVE_HYPER_VOICE"], fulfilled: true });
     for (const move of ["MOVE_UPROAR","MOVE_ROAR","MOVE_ROCK_TOMB","MOVE_SNORE"]) expect(JSON.stringify(fixture)).not.toContain(`\"${move}\":\"exact\"`);
   });
 });
