@@ -9855,7 +9855,7 @@
    "evidence": [
     "tools/compare/nightmareSourceAudit.ts",
     "tools/battle-lab/mechanic-nightmare-player-haunter-opponent-shuckle.json",
-    "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-kangaskhan.json",
+    "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
     "tools/compare/nightmareStagingProbe.py",
     "tools/compare/fixtures/nightmare-staging-receipt.json",
     "tools/compare/verifyNightmareStaging.ts",

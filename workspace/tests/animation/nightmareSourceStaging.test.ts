@@ -96,7 +96,7 @@ describe("MOVE_NIGHTMARE authoritative source classification and legal bilateral
       auditRunSha256: receipt.source.auditRunSha256,
       runs: {
         "player-back": { outputSha256: "b2f7ae99f773c4f2f75feb8336387fba3110623bda0c62eb63f77843f21c8850", rootObservations: 168, ppSpent: 1 },
-        "opponent-front": { outputSha256: "1da8133ea52ef1f63f9d44e3b8872035e551913a5f482bb0af83d4a0afb2dab5", rootObservations: 168, ppSpent: 1 },
+        "opponent-front": { outputSha256: "aff073db623208940c17f88d697833ea92775e0e5175bdeb2ca438b4c3f007c0", rootObservations: 168, ppSpent: 1 },
       },
     });
   });
