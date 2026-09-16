@@ -9,7 +9,7 @@
  },
  "source": {
   "audit": "tools/compare/nightmareSourceAudit.ts",
-  "auditSha256": "bf0137dce175be45941631b4e9308507b4f9bea0916a9d64f4af7e9739ca3906",
+    "auditSha256": "f35054f15718a467cbf6733c64277d9c1a055dbe615c5916f3a09972f0fb4316",
   "auditRunSha256": "d3ddbfb5dd65e139d5da49e4a1fd4df9194c9df80e9a572f36852d182c4c64c3",
   "probe": "tools/compare/nightmareStagingProbe.py",
   "probeSha256": "a76db7b31010d8424e5bc0e9bc5c53ffaf5d95f2a35688e283bb2f1041e36180",

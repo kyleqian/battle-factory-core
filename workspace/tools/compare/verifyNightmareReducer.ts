@@ -46,7 +46,8 @@ export function nightmareInputsFor(side: NightmareOrientation, rows: readonly Js
   const clone = cloneAt(cloneStart)!;
   const sourceTarget = cloneStart.battlerSprites.target;
   return {
-    attackerSide, targetSide, attackerSpecies: "HAUNTER", targetSpecies: "SLEEPING_TARGET",
+    attackerSide, targetSide, attackerSpecies: "HAUNTER",
+    targetSpecies: side === "player-back" ? "SHUCKLE" : "KANGASKHAN",
     attackerPictureOrigin: { x: cloneStart.battlerSprites.attacker.x, y: cloneStart.battlerSprites.attacker.y },
     targetPictureOrigin: { x: clone.x, y: clone.y },
     attackerSprite: compactSprite(current.battlerSprites.attacker), targetSprite: compactSprite(current.battlerSprites.target),
@@ -72,16 +73,20 @@ export function nightmareInputsFor(side: NightmareOrientation, rows: readonly Js
 
 export function nightmareConfigFor(side: NightmareOrientation, rows: readonly Json[], age = 0): SceneOnNightmarePresentationState["config"] {
   const input = nightmareInputsFor(side, rows, age);
-  const { attackerSide, targetSide, attackerSpecies, targetSpecies, attackerPictureOrigin, targetPictureOrigin, ...animationInputs } = input;
+  const { attackerSide, targetSide, attackerSpecies, targetSpecies,
+    attackerPictureOrigin, targetPictureOrigin, ...animationInputs } = input;
   const first = rows[0]!;
   return {
     move: "NIGHTMARE",
-    attacker: { species: attackerSpecies as never, geometry: { side: attackerSide, spriteCorner: { x: input.attackerSprite.x - 32, y: input.attackerSprite.y - 32 }, animationCenter: attackerPictureOrigin, battlePositionCenter: attackerPictureOrigin } },
+    attacker: { species: attackerSpecies as never, geometry: { side: attackerSide, spriteCorner: { x: input.attackerSprite.x - 32, y: input.attackerSprite.y - 32 }, animationCenter: attackerPictureOrigin, battlePositionCenter: { x: attackerPictureOrigin.x, y: attackerSide === "opponent" ? 40 : attackerPictureOrigin.y } } },
     target: { species: targetSpecies as never, geometry: { side: targetSide, spriteCorner: { x: input.targetSprite.x - 32, y: input.targetSprite.y - 32 }, animationCenter: targetPictureOrigin, battlePositionCenter: targetPictureOrigin } },
     fieldProfile: {
       playerHp: first.parties.player[0].hp, playerMaxHp: first.parties.player[0].maxHp,
       opponentHp: first.parties.opponent[0].hp, opponentMaxHp: first.parties.opponent[0].maxHp,
-      playerGender: "male", opponentGender: "female",
+      playerGender: side === "opponent-front" ? "female" : "male",
+      opponentGender: "female",
+      playerStatus: side === "opponent-front" ? "sleep" : "none",
+      opponentStatus: side === "player-back" ? "sleep" : "none",
     },
     animationInputs,
   };

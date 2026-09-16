@@ -20,14 +20,14 @@
   ],
   "source": {
     "audit": "tools/compare/bonemerangSourceAudit.ts",
-    "auditSha256": "7d8447540fb254d8bc4a91893ae45a5949f1e9958665ebcb234ae68374a320cd",
-    "auditRunSha256": "21c6a33b9c61e5fff368b7016710d059edb9c1a6a38527648d3a4bfed3e2c31a",
+    "auditSha256": "e047a36b2346cbbff422e60be55a21ed5193dfb40d28af6d8ba3f83de800e22b",
+    "auditRunSha256": "37609c8a86ee11e3fd7e0d8466f99384ccd53778a3bb8eda1aa74b307136206d",
     "probe": "tools/compare/bonemerangProbe.py",
     "probeSha256": "ee3fe5556a95183f212260822a6bca6bcd4289ab4c4e756b00212da6e4ce4c27",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/bonemerang-staging-receipt.json",
-    "stagingReceiptSha256": "cbf7ba2fe142a1bc6d1d085b92b5ecb7525e8e27b7b4bfa803db517fc4bf490f",
+    "stagingReceiptSha256": "dff731e7256afcb95474665b96f77d7a83bbff39dbee614af94612a65ab9837c",
     "pointerOwnedRoot": { "start": "0x082d17cc", "endExclusive": "0x082d1820", "observedParities": [0, 1] }
   },
   "orientations": {

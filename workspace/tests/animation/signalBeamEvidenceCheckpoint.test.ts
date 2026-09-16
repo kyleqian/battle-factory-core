@@ -38,9 +38,9 @@ describe("MOVE_SIGNAL_BEAM complete legal bilateral Scene-ON evidence", () => {
     expect(fixture.latchConclusion).toContain("independently proves move-owned");
     expect(fixture.scope).toMatchObject({ productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferAcceptanceAdded: false, coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false });
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(256);
+    expect(data.entries).toHaveLength(257);
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM")).toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual(["MOVE_NIGHTMARE"]);
+    expect(data.queue).toEqual([]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "signal-beam-orb-stream")).toMatchObject({ representatives: ["MOVE_SIGNAL_BEAM"], fulfilled: true, goal: expect.stringContaining("FULFILLED") });
   });
 });

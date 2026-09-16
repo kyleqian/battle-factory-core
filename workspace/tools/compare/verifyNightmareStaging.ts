@@ -28,7 +28,8 @@ if (audit.source.pointerOwnedRoot.rom.romSha256 !== receipt.source.pointerOwnedR
 if (!audit.controls.kind.includes("no Nightmare timing") || Object.keys(audit.controls.named).length !== 14) fail("identity-only controls");
 
 const coverage = json("ANIMATION_COVERAGE.json");
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_NIGHTMARE") || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_NIGHTMARE"])) fail("unsupported coverage boundary");
+if (coverage.entries.find((entry: Json) => entry.move === "MOVE_NIGHTMARE")?.status !== "exact"
+  || coverage.queue.length !== 0) fail("exact coverage boundary");
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "nightmare-clone-blend");
 if (!track || track.fulfilled !== false || JSON.stringify(track.components) !== JSON.stringify(components)) fail("unfulfilled track declaration");
 

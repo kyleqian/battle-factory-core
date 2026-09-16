@@ -24,14 +24,14 @@
   ],
   "source": {
     "audit": "tools/compare/shockWaveSourceAudit.ts",
-    "auditSha256": "f7dbad4d9776cc52fc71f0fbd725e4e1108d2350c2274f36338da8c12a8d08ca",
+    "auditSha256": "fff45b9e409f9beacfab66acd3a210c8c5844a7fd4783c7ebcb95bb37da727e2",
     "auditRunSha256": "9a2da9b2461a723884e54a898495759fec59da6e90e31885ee724a731439ed76",
     "probe": "tools/compare/shockWaveProbe.py",
     "probeSha256": "66b2c6c0ee305bf95f6867754cc76fd79949ae01c8113e771f846c5e880ede1d",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/shock-wave-staging-receipt.json",
-    "stagingReceiptSha256": "d8838e5bb0dade3fb5d2558881499ce5b15355a54a40a036ba1d45b244fd0b72",
+    "stagingReceiptSha256": "18a64b62bdd934e7e0fec65192ca5dff17d34d6898e6357ef731df60d2ae6f6d",
     "pointerOwnedRoot": { "start": "0x082cf422", "endExclusive": "0x082cf4c4", "observedParities": [0, 1] }
   },
   "orientations": {

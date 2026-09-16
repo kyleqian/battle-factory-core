@@ -989,6 +989,7 @@ import {
   sceneOnHyperVoiceView,
   sceneOnShockWaveView,
   sceneOnSignalBeamView,
+  sceneOnNightmareView,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
   sceneOnAuroraBeamView,
@@ -1253,6 +1254,7 @@ import {
   type SceneOnHyperVoiceConfig,
   type SceneOnShockWaveConfig,
   type SceneOnSignalBeamConfig,
+  type SceneOnNightmareConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
@@ -23966,6 +23968,165 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.side === "player"
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "SHOCK WAVE!", 99);
+    return;
+  }
+
+  if (state.config.move === "NIGHTMARE") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnNightmareConfig>;
+    const view = sceneOnNightmareView(moveState);
+    const displayed = sceneOnNightmareView({
+      ...moveState,
+      age: Math.max(0, moveState.age - 1),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("NIGHTMARE presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`NIGHTMARE missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const darken = (palette: readonly RgbColor[]): RgbColor[] =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | color.g << 8 | color.b << 16,
+          view.registers.bldy,
+        );
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      });
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const ghostBackground = moveState.age >= 20 && moveState.age < 148;
+    if (ghostBackground) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimGhostBg.tileset,
+        tilemap: battleAnimGhostBg.tilemap,
+        subpalettes: [darken(paletteBank(2))],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: [2, 3, 4].map((bank) => darken(paletteBank(bank))),
+      });
+    }
+
+    // The hidden target is copied to the side-selected BG. Its hardware
+    // scroll is the predecessor ShakeMon pose, which is exactly the
+    // displayed reducer row. MoveBattlerSpriteToBG allocates BG palette 8
+    // for the opponent and 9 for the player in this singles layout.
+    const targetOnBg = displayed.background.targetOnBg;
+    if (targetOnBg) {
+      drawSpriteSheet(
+        fb,
+        tilesFor(targetArt, view.target.geometry.side),
+        paletteBank(view.target.geometry.side === "opponent" ? 8 : 9),
+        view.target.geometry.spriteCorner.x + displayed.battlers.target.shake.x,
+        view.target.geometry.spriteCorner.y + displayed.battlers.target.shake.y,
+      );
+    }
+    if (moveState.age === 0 && view.attacker.geometry.side === "opponent") {
+      drawSourceOpponentEnemyShadow(
+        fb, view.attacker.species, view.attacker.geometry.battlePositionCenter,
+      );
+    }
+    const nonObjTarget2 = fb.slice();
+    const input = moveState.config.animationInputs;
+    const attackerBank = 16 + (input.attackerSprite.attr[2] >>> 12 & 0xf);
+    const targetBank = 16 + (input.targetSprite.attr[2] >>> 12 & 0xf);
+    const rankOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    type Entry = Readonly<{
+      slot: number;
+      subpriority: number;
+      y: number;
+      order: number;
+      draw: () => void;
+    }>;
+    const entries: Entry[] = [];
+    entries.push({
+      slot: input.attackerSprite.slot,
+      subpriority: input.attackerSprite.subpriority,
+      y: view.attacker.geometry.animationCenter.y,
+      order: rankOf(input.attackerSprite.slot),
+      draw: () => drawSpriteSheet(
+        fb, tilesFor(attackerArt, view.attacker.geometry.side),
+        paletteBank(attackerBank),
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      ),
+    });
+    if (!targetOnBg) {
+      entries.push({
+        slot: input.targetSprite.slot,
+        subpriority: input.targetSprite.subpriority,
+        y: view.target.geometry.animationCenter.y,
+        order: rankOf(input.targetSprite.slot),
+        draw: () => drawSpriteSheet(
+          fb, tilesFor(targetArt, view.target.geometry.side), paletteBank(targetBank),
+          view.target.geometry.spriteCorner.x + displayed.battlers.target.shake.x,
+          view.target.geometry.spriteCorner.y + displayed.battlers.target.shake.y,
+        ),
+      });
+    }
+    const clone = displayed.sprites[0];
+    if (clone) {
+      const rawX = clone.attr[1] & 0x1ff;
+      const rawY = clone.attr[0] & 0xff;
+      const x = rawX >= 240 ? rawX - 512 : rawX;
+      const y = rawY >= 160 ? rawY - 256 : rawY;
+      entries.push({
+        slot: clone.slot,
+        subpriority: clone.subpriority,
+        y: clone.y + clone.y2,
+        order: rankOf(clone.slot),
+        draw: () => drawSpriteSheetBlendedOverBackdrop(
+          fb, nonObjTarget2, tilesFor(targetArt, view.target.geometry.side),
+          paletteBank(targetBank), x, y,
+          view.registers.bldalpha & 0xff,
+          view.registers.bldalpha >>> 8 & 0xff,
+        ),
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "NIGHTMARE!", 99,
+    );
     return;
   }
 

@@ -191,6 +191,7 @@ import {
   type SceneOnHyperVoiceConfig,
   type SceneOnShockWaveConfig,
   type SceneOnSignalBeamConfig,
+  type SceneOnNightmareConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -343,6 +344,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "SIGNAL_BEAM") {
     const signalBeamPresentation = presentation as SceneOnMovePresentationState<SceneOnSignalBeamConfig>;
     renderSceneOnMovePresentation(framebuffer, signalBeamPresentation);
+    return;
+  }
+  if (presentation.config.move === "NIGHTMARE") {
+    const nightmarePresentation = presentation as SceneOnMovePresentationState<SceneOnNightmareConfig>;
+    renderSceneOnMovePresentation(framebuffer, nightmarePresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

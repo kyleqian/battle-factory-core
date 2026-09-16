@@ -30,9 +30,9 @@ describe("MOVE_NIGHTMARE legal-battle reducer and narrow Scene-ON seam", () => {
     const first = verifyNightmareReducer();
     expect(verifyNightmareReducer()).toEqual(first);
     expect(first).toEqual({
-      "player-back": { retainedRows: 169, reducerRows: 338, seamRows: 338, cleanup: 168, digest: "5909497a977ec8de6af55c81ea9dff90ac693e04a216c4b9d46f7f84a69e4737", framebufferCompared: false, coverageCredit: false },
-      "opponent-front": { retainedRows: 169, reducerRows: 338, seamRows: 338, cleanup: 168, digest: "fc497cff8c0203b6b2bab289774ea83f01db611afe3a60a101dd2c19ef4def52", framebufferCompared: false, coverageCredit: false },
-      bilateral: { retainedRows: 338, passes: 2, reducerRows: 676, seamRows: 676, digest: "024237dc6d0d0b9f7b2320b80e40bb2dbefe665c5e9bb6419c7e1086b30ca0e2", framebufferCompared: false, coverageCredit: false },
+      "player-back": { retainedRows: 169, reducerRows: 338, seamRows: 338, cleanup: 168, digest: "2badd5e0774aba8378c27c51175a6049df7d37f95c04b9625f6181bbed500f48", framebufferCompared: false, coverageCredit: false },
+      "opponent-front": { retainedRows: 169, reducerRows: 338, seamRows: 338, cleanup: 168, digest: "6388680a3e8594be05b638379b54f5dff55d91c574a8b3f98f884ceb2276c09e", framebufferCompared: false, coverageCredit: false },
+      bilateral: { retainedRows: 338, passes: 2, reducerRows: 676, seamRows: 676, digest: "eb6c068f153849de04f43603da14167478ad3de760c9e7614e48dfdcdfdae8b5", framebufferCompared: false, coverageCredit: false },
     });
   });
 
@@ -118,12 +118,13 @@ describe("MOVE_NIGHTMARE legal-battle reducer and narrow Scene-ON seam", () => {
     expect(seam.target.geometry.animationCenter).toEqual({ x: 39, y: 117 });
   });
 
-  it("keeps retained evidence out of production and leaves Nightmare unsupported/unfulfilled", () => {
+  it("keeps retained evidence out of production and the contest track unfulfilled", () => {
     const source = readFileSync(resolve(root, "src/animation/nightmare.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     const data = coverage as Json;
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_NIGHTMARE")).toBe(false);
-    expect(data.queue).toEqual(["MOVE_NIGHTMARE"]);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_NIGHTMARE"))
+      .toMatchObject({ status: "exact" });
+    expect(data.queue).toEqual([]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "nightmare-clone-blend")).toMatchObject({ representatives: ["MOVE_NIGHTMARE"], fulfilled: false });
   });
 });

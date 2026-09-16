@@ -55,9 +55,9 @@ describe("MOVE_PSYCH_UP source/component classification + legal bilateral Scene-
     expect(audit.carriers.level50.map((entry: Json) => entry.index)).toEqual([229, 428, 478, 512, 514, 562, 570, 593, 639, 652, 782, 837, 841, 844]);
     expect(audit.carriers.representative).toMatchObject({ index: 229, label: "FRONTIER_MON_JUMPLUFF_1", species: "SPECIES_JUMPLUFF" });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(256);
+    expect(coverage.entries).toHaveLength(257);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual(["MOVE_NIGHTMARE"]);
+    expect(coverage.queue).toEqual([]);
     expect(coverage.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle")).toMatchObject({ fulfilled: true, representatives: ["MOVE_PSYCH_UP"] });
   });
 

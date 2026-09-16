@@ -65,9 +65,10 @@ describe("MOVE_NIGHTMARE authoritative source classification and legal bilateral
 
   it("keeps the unfulfilled track and compact twice-fresh party-before-init receipts without a latch or coverage claim", () => {
     const coverage = readJson("ANIMATION_COVERAGE.json");
-    expect(coverage.entries).toHaveLength(256);
-    expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_NIGHTMARE")).toBe(false);
-    expect(coverage.queue).toEqual(["MOVE_NIGHTMARE"]);
+    expect(coverage.entries).toHaveLength(257);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_NIGHTMARE"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.queue).toEqual([]);
     expect(coverage.componentTracks.find((entry: Json) => entry.id === "nightmare-clone-blend")).toMatchObject({ representatives: ["MOVE_NIGHTMARE"], fulfilled: false, components });
     const receipt = readJson("tools/compare/fixtures/nightmare-staging-receipt.json");
     expect(receipt).toMatchObject({ schema: "nightmare-compact-staging-receipt/v1", status: "unsupported-source-staging-checkpoint", coverageCredit: false, carrierCensus: { allFactory: [284, 497], level50: [284, 497], partyBeforeInit: true }, scope: { framebuffersRetained: false, rawRgbRetained: false, denseWindowCaptured: false, semanticFramesRetained: false, latchMeasured: false, durableLatchRowAdded: false, productionChanged: false, reducerAdded: false, typedSceneOnSeam: false, compositorAdded: false, coveragePromotion: false, coverageEntryAdded: false, componentTrackFulfilled: false, battleStateInjected: false, transientOverrides: [], boundaryOrBarrierChanged: false, noTimingOrLatchTransfer: true } });

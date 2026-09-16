@@ -160,9 +160,9 @@ describe("MOVE_SUNNY_DAY source and legal staging checkpoint", () => {
       coveragePromotion: true, componentTrackCredit: false, latchPromotion: true, unsupportedNoCreditBoundary: false,
     });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(256);
+    expect(coverage.entries).toHaveLength(257);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SUNNY_DAY")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual(["MOVE_NIGHTMARE"]);
+    expect(coverage.queue).toEqual([]);
     for (const move of ["MOVE_RAIN_DANCE", "MOVE_SANDSTORM", "MOVE_HAIL"]) {
       expect(coverage.entries.find((entry: Json) => entry.move === move)).toMatchObject({ status: "exact" });
     }

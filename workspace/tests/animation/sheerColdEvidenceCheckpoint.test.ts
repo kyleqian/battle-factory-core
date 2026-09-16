@@ -49,7 +49,7 @@ describe("MOVE_SHEER_COLD complete legal bilateral Scene-ON evidence", () => {
       siblingCredit: false, icePunchCredit: false,
     });
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(256);
+    expect(data.entries).toHaveLength(257);
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_SHEER_COLD")?.status).toBe("exact");
     expect(data.componentTracks.find((entry: Json) => entry.id === "ice-cube-frozen-ice-cube")).toMatchObject({
       representatives: ["MOVE_SHEER_COLD"], fulfilled: true,

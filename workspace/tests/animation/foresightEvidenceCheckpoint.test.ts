@@ -47,7 +47,7 @@ describe("MOVE_FORESIGHT exact source and production acceptance", () => {
       "tools/compare/extractForesightAssets.ts", "--out", output]);
     expect(readFileSync(output)).toEqual(readFileSync("src/animation/assets/foresight.json"));
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(256);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(257);
     expect(coverage.entries.find((entry: { move: string; status: string }) => entry.move === "MOVE_FORESIGHT")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) =>
       track.id === "foresight-magnifying-glass")).toMatchObject({
@@ -56,7 +56,7 @@ describe("MOVE_FORESIGHT exact source and production acceptance", () => {
     const statuses = new Map(coverage.entries.map((entry: { move: string; status: string }) => [entry.move, entry.status]));
     for (const move of ["MOVE_SUPER_FANG", "MOVE_FLAME_WHEEL", "MOVE_HIDDEN_POWER",
       "MOVE_TORMENT", "MOVE_RECYCLE", "MOVE_ENDEAVOR"]) expect(statuses.get(move)).toBe("exact");
-    for (const move of ["MOVE_NIGHTMARE", "MOVE_HELPING_HAND", "MOVE_SKILL_SWAP",
+    for (const move of ["MOVE_HELPING_HAND", "MOVE_SKILL_SWAP",
       "MOVE_EXTRASENSORY", "MOVE_RAGE"]) expect(statuses.has(move)).toBe(false);
   });
 });

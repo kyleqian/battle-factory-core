@@ -363,13 +363,13 @@ describe("flying-dirt-sandstorm standalone fulfilled component-track ratchet", (
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     const inventory = JSON.parse(readFileSync("src/data/gen/factory-animation-inventory.json", "utf8"));
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(256);
+      .toHaveLength(257);
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "partial"))
       .toHaveLength(0);
     expect(coverage.entries.filter((entry: { status: string }) => entry.status === "staged"))
       .toHaveLength(0);
     expect(inventory.tiers.level50.moves).toHaveLength(276);
-    expect(inventory.tiers.level50.moves.length - coverage.entries.length).toBe(20);
+    expect(inventory.tiers.level50.moves.length - coverage.entries.length).toBe(19);
     expect(coverage.entries.filter((entry: { move: string }) =>
       ["MOVE_SANDSTORM", "MOVE_HEAT_WAVE"].includes(entry.move),
     )).toEqual([

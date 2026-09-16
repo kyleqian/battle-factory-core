@@ -7460,9 +7460,49 @@
     "tests/animation/shockWaveReducer.test.ts",
     "tests/animation/shockWaveActualCore.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_NIGHTMARE",
+   "status": "exact",
+   "covered": [
+    "the complete legal-battle Move_NIGHTMARE root is independently accepted: BG_GHOST fade/restore, target monbg/clear, AnimTask_NightmareClone, target AnimTask_ShakeMon, direct alpha registers, audio, waits, allocation, and first-inactive cleanup; the contest-only NightmareInContest / AnimTask_BlendMonInAndOut arm is not executed and receives no credit",
+    "complete legal bilateral HAUNTER/SHUCKLE and HAUNTER/KANGASKHAN Battle Scene ON evidence retains 169 player-back plus 169 opponent-front ages 0..168; the pure source-age reducer and narrow typed sceneOnNightmareView seam reproduce all 338 rows from live sides/species, picture geometry/origins, sprite/task/clone/resource/matrix allocation, painter order, BG/register/palette state, presentation RNG, and opaque gameplay RNG",
+    "Nightmare's own maps prove clone/task lives 43..122/43..125, ShakeMon 43..120, complete hardware OAM and matrices from predecessor software on 168/168 comparable rows per orientation, hardware palette from predecessor faded on 167/168 with age 40 target-monbg setup the sole same-row exception, selected target-BG shake at RAM+1, Ghost BG VRAM/fade edges, and direct blend registers",
+    "two independent actual-core processes are byte-identical at digest 54afeed80fad9432ed07f372b0e80445ccf69f9fbf564f37b7f7e3f218e08ac1 and each passes all 338/338 component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels through bilateral inactive cleanup",
+    "a material reversed-side CROBAT/BLISSEY live control changes species, geometry/origins, sprite/task/clone/resource/matrix allocation, painter order, palettes, presentation RNG, typed seam output, and framebuffer while gameplay state/RNG remains opaque and unchanged",
+    "the legal move alone is exact; nightmare-clone-blend remains UNFULFILLED because its explicit contest-only NightmareInContest / AnimTask_BlendMonInAndOut contract has no executable evidence, and every named sibling receives no Nightmare timing, latch, body, move, component, contest-arm, or track credit"
+   ],
+   "evidence": [
+    "tools/compare/nightmareSourceAudit.ts",
+    "tools/battle-lab/mechanic-nightmare-player-haunter-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
+    "tools/compare/nightmareStagingProbe.py",
+    "tools/compare/fixtures/nightmare-staging-receipt.json",
+    "tools/compare/verifyNightmareStaging.ts",
+    "tools/compare/nightmareProbe.py",
+    "tools/compare/nightmareEvidence.ts",
+    "tools/compare/fixtures/nightmare-evidence.json",
+    "tools/compare/evidence/nightmare-player-dense-state.json.gz",
+    "tools/compare/evidence/nightmare-opponent-dense-state.json.gz",
+    "tools/compare/evidence/nightmare-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/nightmare-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/nightmare-changemap-player.json",
+    "tools/compare/evidence/nightmare-changemap-opponent.json",
+    "ANIMATION_LATCHES.md",
+    "src/animation/nightmare.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifyNightmareReducer.ts",
+    "tools/compare/nightmareActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/nightmareSourceStaging.test.ts",
+    "tests/animation/nightmareEvidenceCheckpoint.test.ts",
+    "tests/animation/nightmareReducer.test.ts",
+    "tests/animation/nightmareActualCore.test.ts"
+   ]
   }
  ],
- "queue": ["MOVE_NIGHTMARE"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "mach-punch-source-relative-body",
@@ -9872,9 +9912,13 @@
     "tests/animation/nightmareEvidenceCheckpoint.test.ts",
     "src/animation/nightmare.ts",
     "tools/compare/verifyNightmareReducer.ts",
-    "tests/animation/nightmareReducer.test.ts"
+    "tests/animation/nightmareReducer.test.ts",
+    "tools/compare/nightmareActualCore.ts",
+    "tests/animation/nightmareActualCore.test.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts"
    ],
-   "goal": "UNFULFILLED. MOVE_NIGHTMARE retains complete twice-fresh legal bilateral 169-row Scene-ON semantic/raw-RGB/change maps and now has a source-relative legal-battle reducer plus narrow typed Scene-ON seam that replay every retained row twice (676 reducer + 676 seam calls) with exact source/task/clone/OAM/matrix/palette/BG/register/audio/order/RNG/cleanup checks and a material live-input control. The contest-only NightmareInContest / BlendMonInAndOut arm remains source-pinned but absent from legal battle execution. No compositor, source asset, actual-core framebuffer acceptance, engine dispatch, promotion, component, track, sibling, or coverage credit exists. Foresight, Super Fang, Hidden Power, Flame Wheel, Torment, Helping Hand, Recycle, Endeavor, Skill Swap, Extrasensory, Rage, Night Shade, Spite, Destiny Bond, and every sibling remain identity-only controls."
+   "goal": "UNFULFILLED. MOVE_NIGHTMARE's legal battle body is independently exact with complete bilateral 338/338 zero-residual actual-core acceptance, but the explicit track also owns contest-only NightmareInContest / AnimTask_BlendMonInAndOut. That arm is source-pinned yet absent from legal battle execution and has no executable latch/framebuffer evidence, so it receives no contest-arm or track fulfillment. Foresight, Super Fang, Hidden Power, Flame Wheel, Torment, Helping Hand, Recycle, Endeavor, Skill Swap, Extrasensory, Rage, Night Shade, Spite, Destiny Bond, and every sibling remain identity-only controls without transferred credit."
   }
  ],
  "variantAudits": {

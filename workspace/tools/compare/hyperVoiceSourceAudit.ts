@@ -167,7 +167,7 @@ for (const carrier of allCarriers) requireTokens(`Hyper Voice carrier ${carrier.
 if ((frontierSource.match(/MOVE_HYPER_VOICE/g) ?? []).length !== 1) throw new Error("MOVE_HYPER_VOICE source carrier count drifted");
 
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "hyper-voice-ring-cry-platform");
-if (coverage.entries.find((entry: Json) => entry.move === "MOVE_HYPER_VOICE")?.status !== "exact" || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 256 || !track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_HYPER_VOICE"]) || track.fulfilled !== true) throw new Error("Hyper Voice exact/fulfilled coverage boundary drifted");
+if (coverage.entries.find((entry: Json) => entry.move === "MOVE_HYPER_VOICE")?.status !== "exact" || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 257 || !track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_HYPER_VOICE"]) || track.fulfilled !== true) throw new Error("Hyper Voice exact/fulfilled coverage boundary drifted");
 const namedControls = {
   MOVE_UPROAR: { components: ["asset:ANIM_TAG_THIN_RING", "sprite:gUproarRingSpriteTemplate"], token: "Move_UPROAR:" },
   MOVE_ROAR: { components: ["task:AnimTask_ScaleMonAndRestore", "task:SoundTask_WaitForCry"], token: "Move_ROAR:" },

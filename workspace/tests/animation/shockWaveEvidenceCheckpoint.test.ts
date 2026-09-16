@@ -45,7 +45,7 @@ describe("MOVE_SHOCK_WAVE complete legal bilateral Scene-ON evidence", () => {
     });
     const data = coverage as Json;
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_SHOCK_WAVE")).toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual(["MOVE_NIGHTMARE"]);
+    expect(data.queue).toEqual([]);
     expect(data.componentTracks.find((track: Json) => track.id === "shock-wave-electric-bolts")).toMatchObject({ representatives: ["MOVE_SHOCK_WAVE"], fulfilled: true });
   });
 });

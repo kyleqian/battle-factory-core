@@ -13,7 +13,7 @@ describe("MOVE_SIGNAL_BEAM legal bilateral Scene-ON staging checkpoint", () => {
     const first = verify();
     expect(verify()).toBe(first);
     expect(JSON.parse(first)).toEqual({
-      schema: "signal-beam-source-staging-verifier/v1", auditRunSha256: "b923dccdddaeb8706dc43d9eb9eb5714d441b1cdb86f44f8f48cae52562fd9a5",
+      schema: "signal-beam-source-staging-verifier/v1", auditRunSha256: "babbfa35c3d48cc04ee80e378bfc20c283b73e2582877c16fdb1b32715b12ef3",
       runs: { "player-back": { outputSha256: "b759a2d69780cf495b1c3243973812852cb147394531cdf2cd88eaa5de07859f", rootObservations: 145 }, "opponent-front": { outputSha256: "65cc805056f497797440a03dce2abf0d1eda3ae14a1e2f77a04c76b49aa254be", rootObservations: 144 } },
     });
   });

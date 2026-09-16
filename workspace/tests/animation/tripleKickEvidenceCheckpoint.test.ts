@@ -54,7 +54,7 @@ describe("MOVE_TRIPLE_KICK bilateral exact acceptance", () => {
     expect(receipt.latches.continuationMessage).toContain("blank window chrome");
     expect(receipt.latches.continuationTargetX2).toContain("prior ShakeMon overwrite");
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(256);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(257);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_TRIPLE_KICK"))
       .toMatchObject({ status: "exact" });
   });

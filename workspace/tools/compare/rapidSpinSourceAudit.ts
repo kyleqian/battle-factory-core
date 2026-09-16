@@ -311,7 +311,7 @@ const controls = Object.fromEntries(controlMoves.map((move) => {
 }));
 
 if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_RAPID_SPIN" && entry.status === "exact")
-  || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_NIGHTMARE"])
+  || coverage.queue.length !== 0
   || coverage.componentTracks.some((track: Json) => track.moves?.includes("MOVE_RAPID_SPIN"))) {
   throw new Error("Rapid Spin exact coverage or component-track boundary drifted");
 }
