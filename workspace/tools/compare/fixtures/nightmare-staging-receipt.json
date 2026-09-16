@@ -1,0 +1,116 @@
+{
+ "schema": "nightmare-compact-staging-receipt/v1",
+ "status": "unsupported-source-staging-checkpoint",
+ "coverageCredit": false,
+ "freshness": {
+  "check": "tools/check-oracle-freshness.sh",
+  "sharedOracleCaptureUsed": false,
+  "localMgbaWrapper": "tools/run-mgba-probe.py"
+ },
+ "source": {
+  "audit": "tools/compare/nightmareSourceAudit.ts",
+  "auditSha256": "bf0137dce175be45941631b4e9308507b4f9bea0916a9d64f4af7e9739ca3906",
+  "auditRunSha256": "d3ddbfb5dd65e139d5da49e4a1fd4df9194c9df80e9a572f36852d182c4c64c3",
+  "probe": "tools/compare/nightmareStagingProbe.py",
+  "probeSha256": "a76db7b31010d8424e5bc0e9bc5c53ffaf5d95f2a35688e283bb2f1041e36180",
+  "pointerOwnedRoot": {
+   "symbol": "Move_NIGHTMARE",
+   "start": "0x082cd4a3",
+   "endExclusive": "0x082cd4f9",
+   "romSha256": "48ef131ebfd7ca628e1ffd2c1cca5d97dde1aa2d559542e93023e6f7953501b6"
+  }
+ },
+ "carrierCensus": {
+  "allFactory": [284, 497],
+  "level50": [284, 497],
+  "representative": 284,
+  "partyBeforeInit": true
+ },
+ "runs": {
+  "player-back": {
+   "freshRuns": 2,
+   "outputsByteIdentical": true,
+   "scenario": "tools/battle-lab/mechanic-nightmare-player-haunter-opponent-shuckle.json",
+   "scenarioSha256": "1affe7b4ba0b2decff50a173722aef2791548fb2b6a2ab1cd691d7a91ba1f63e",
+   "outputSha256": "b2f7ae99f773c4f2f75feb8336387fba3110623bda0c62eb63f77843f21c8850",
+   "output": {
+    "attacker": {"moves": [95, 171, 94, 109], "partyIndex": 0, "side": "player", "species": 93},
+    "benches": {"afterSha256": "f482685b6c97c3967bf53f9d6a926dcd6c767bd33ae30441c0a3781cb6e636f1", "beforeSha256": "f482685b6c97c3967bf53f9d6a926dcd6c767bd33ae30441c0a3781cb6e636f1", "checksumValid": true, "partyIndices": {"opponent": [1, 2], "player": [1, 2]}, "unchanged": true},
+    "cleanup": {"soundTasks": 0, "visualTasks": 0},
+    "customPartiesBuiltBeforeBattle": true,
+    "entryHooks": {"stockDerived": false, "weather": 0, "weatherTurns": 0},
+    "move": "MOVE_NIGHTMARE",
+    "moveId": 171,
+    "oracleProfile": "battle-scene-on",
+    "pp": {"after": 14, "before": 15, "slots": [1], "spent": 1},
+    "root": {
+     "endExclusive": "0x82cd4f9",
+     "first": {"attackerBattler": 0, "currentMove": 171, "pointer": "0x82cd4a3", "scriptActive": true, "soundTasks": 0, "targetBattler": 1, "targetStatus1": 4, "targetStatus2": 0, "visualTasks": 0},
+     "last": {"attackerBattler": 0, "currentMove": 171, "pointer": "0x82cd4cd", "scriptActive": true, "soundTasks": 0, "targetBattler": 1, "targetStatus1": 4, "targetStatus2": 0, "visualTasks": 0},
+     "observations": 168,
+     "start": "0x82cd4a3",
+     "symbol": "Move_NIGHTMARE"
+    },
+    "scenario": "tools/battle-lab/mechanic-nightmare-player-haunter-opponent-shuckle.json",
+    "schema": "nightmare-compact-staging/v2",
+    "scope": {"battleStateInjected": false, "componentTrackFulfilled": false, "compositorAdded": false, "coveragePromotion": false, "denseWindowCaptured": false, "durableLatchRowAdded": false, "framebuffersRetained": false, "latchMeasured": false, "noTimingOrLatchTransfer": true, "productionChanged": false, "rawRgbRetained": false, "reducerAdded": false, "semanticFramesRetained": false, "transientOverrides": [], "typedSceneOnSeam": false},
+    "sourceInitialized": true,
+    "stockOutcome": {"battleOutcome": 0, "nightmareEffect": {"attackerBattler": 0, "currentMove": 171, "pointer": "0x82cd4ce", "scriptActive": false, "targetBattler": 1, "targetStatus1": 4, "targetStatus2": 134217728}, "targetStatus": {"kind": "sleep", "turns": 3}},
+    "target": {"partyIndex": 0, "side": "opponent", "species": 213},
+    "transientFreeSetup": true
+   }
+  },
+  "opponent-front": {
+   "freshRuns": 2,
+   "outputsByteIdentical": true,
+   "scenario": "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
+   "scenarioSha256": "2621331310c36201a7dba816d6c07087c05c90242fd017bb05b2744dbae3eb9d",
+   "outputSha256": "aff073db623208940c17f88d697833ea92775e0e5175bdeb2ca438b4c3f007c0",
+   "output": {
+    "attacker": {"moves": [95, 171, 171, 171], "partyIndex": 0, "side": "opponent", "species": 93},
+    "benches": {"afterSha256": "3af2c6820048026b46a17e5d5cf86a18ddce9a133336145c0893764080da2ba5", "beforeSha256": "3af2c6820048026b46a17e5d5cf86a18ddce9a133336145c0893764080da2ba5", "checksumValid": true, "partyIndices": {"opponent": [1, 2], "player": [1, 2]}, "unchanged": true},
+    "cleanup": {"soundTasks": 0, "visualTasks": 0},
+    "customPartiesBuiltBeforeBattle": true,
+    "entryHooks": {"stockDerived": false, "weather": 0, "weatherTurns": 0},
+    "move": "MOVE_NIGHTMARE",
+    "moveId": 171,
+    "oracleProfile": "battle-scene-on",
+    "pp": {"after": 44, "before": 45, "slots": [1, 2, 3], "spent": 1},
+    "root": {
+     "endExclusive": "0x82cd4f9",
+     "first": {"attackerBattler": 1, "currentMove": 171, "pointer": "0x82cd4a3", "scriptActive": true, "soundTasks": 0, "targetBattler": 0, "targetStatus1": 1, "targetStatus2": 0, "visualTasks": 0},
+     "last": {"attackerBattler": 1, "currentMove": 171, "pointer": "0x82cd4cd", "scriptActive": true, "soundTasks": 0, "targetBattler": 0, "targetStatus1": 1, "targetStatus2": 0, "visualTasks": 0},
+     "observations": 168,
+     "start": "0x82cd4a3",
+     "symbol": "Move_NIGHTMARE"
+    },
+    "scenario": "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
+    "schema": "nightmare-compact-staging/v2",
+    "scope": {"battleStateInjected": false, "componentTrackFulfilled": false, "compositorAdded": false, "coveragePromotion": false, "denseWindowCaptured": false, "durableLatchRowAdded": false, "framebuffersRetained": false, "latchMeasured": false, "noTimingOrLatchTransfer": true, "productionChanged": false, "rawRgbRetained": false, "reducerAdded": false, "semanticFramesRetained": false, "transientOverrides": [], "typedSceneOnSeam": false},
+    "sourceInitialized": true,
+    "stockOutcome": {"battleOutcome": 0, "nightmareEffect": {"attackerBattler": 1, "currentMove": 171, "pointer": "0x82cd4ce", "scriptActive": false, "targetBattler": 0, "targetStatus1": 1, "targetStatus2": 134217728}, "targetStatus": {"kind": "sleep", "turns": 1}},
+    "target": {"partyIndex": 0, "side": "player", "species": 115},
+    "transientFreeSetup": true
+   }
+  }
+ },
+ "scope": {
+  "framebuffersRetained": false,
+  "rawRgbRetained": false,
+  "denseWindowCaptured": false,
+  "semanticFramesRetained": false,
+  "latchMeasured": false,
+  "durableLatchRowAdded": false,
+  "productionChanged": false,
+  "reducerAdded": false,
+  "typedSceneOnSeam": false,
+  "compositorAdded": false,
+  "coveragePromotion": false,
+  "coverageEntryAdded": false,
+  "componentTrackFulfilled": false,
+  "battleStateInjected": false,
+  "transientOverrides": [],
+  "boundaryOrBarrierChanged": false,
+  "noTimingOrLatchTransfer": true
+ }
+}
