@@ -94,7 +94,7 @@ describe("animation coverage ledger", () => {
 
   it("keeps the manual acceptance queue inside Level 50 coverage", () => {
     const queue = queuedAnimationMoves();
-    expect(queue).toEqual(["MOVE_NIGHTMARE"]);
+    expect(queue.map(({ move }) => move)).toEqual(["MOVE_NIGHTMARE"]);
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
       species: 8,
