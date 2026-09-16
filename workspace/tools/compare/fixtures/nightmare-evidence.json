@@ -1,0 +1,67 @@
+{
+  "schema": "nightmare-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_NIGHTMARE",
+  "moveId": 171,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/nightmareSourceAudit.ts",
+    "auditSha256": "bf0137dce175be45941631b4e9308507b4f9bea0916a9d64f4af7e9739ca3906",
+    "auditRunSha256": "d3ddbfb5dd65e139d5da49e4a1fd4df9194c9df80e9a572f36852d182c4c64c3",
+    "probe": "tools/compare/nightmareProbe.py",
+    "probeSha256": "caf2746f1083c150b6e5086dc58a0f10274aee1544e4a5dd2cfc21244fb82287",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
+    "stagingReceipt": "tools/compare/fixtures/nightmare-staging-receipt.json",
+    "stagingReceiptSha256": "075e566cbe68936af14e89c1649448ee1ce6f42747e25742fd734d184b762e2c",
+    "pointerOwnedRoot": { "start": "0x082cd4a3", "endExclusive": "0x082cd4f9", "observedParities": [0,1] }
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-nightmare-player-haunter-opponent-shuckle.json",
+      "scenarioSha256": "1affe7b4ba0b2decff50a173722aef2791548fb2b6a2ab1cd691d7a91ba1f63e",
+      "freshRuns": 2,
+      "denseState": "tools/compare/evidence/nightmare-player-dense-state.json.gz",
+      "denseStateSha256": "f23bddbba6e10015ceb1d27e89e8a6826474275f61c3c2a6fabc4c7540e71863",
+      "probeJsonSha256": "fe19f62f70a3f91b98f4a6e2ebe6c998318ffbd3ed16c44d1fdf78d0536f5969",
+      "repeatProbeJsonSha256": "fe19f62f70a3f91b98f4a6e2ebe6c998318ffbd3ed16c44d1fdf78d0536f5969",
+      "rawRgbArchive": "tools/compare/evidence/nightmare-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "d7b5c9e3ed81808c82c589e1b880eb4e25f04737a986c86f4cc33485616fce56",
+      "rawRgbSequenceSha256": "0ab0d939fbb3300ff94922fea8d9d8ecc126b629e1dd957cec374a8013875001",
+      "repeatRawRgbSequenceSha256": "0ab0d939fbb3300ff94922fea8d9d8ecc126b629e1dd957cec374a8013875001",
+      "changeMap": "tools/compare/evidence/nightmare-changemap-player.json",
+      "changeMapSha256": "53a0b74e8cf35633ffcb5072a61db4b3cce4957c2e94124d5083023520d8c2ef"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
+      "scenarioSha256": "2621331310c36201a7dba816d6c07087c05c90242fd017bb05b2744dbae3eb9d",
+      "freshRuns": 2,
+      "denseState": "tools/compare/evidence/nightmare-opponent-dense-state.json.gz",
+      "denseStateSha256": "b16bc94a2fe35363ad7902e779c0f907feab8062a890293024f45c86a9fc256a",
+      "probeJsonSha256": "f48c1c56e30c074ba9c67345584b0d84353c5e41f1ce62e6b7e47df05698f09c",
+      "repeatProbeJsonSha256": "f48c1c56e30c074ba9c67345584b0d84353c5e41f1ce62e6b7e47df05698f09c",
+      "rawRgbArchive": "tools/compare/evidence/nightmare-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "495f0ffdddd6ba983f649def136cab18bc918f4cb58ec34b64b80a66a5b341fc",
+      "rawRgbSequenceSha256": "0615ff83c1232bc1db55efc0d4e2a9e8910e67601fa05042d802cac4a80f9872",
+      "repeatRawRgbSequenceSha256": "0615ff83c1232bc1db55efc0d4e2a9e8910e67601fa05042d802cac4a80f9872",
+      "changeMap": "tools/compare/evidence/nightmare-changemap-opponent.json",
+      "changeMapSha256": "11efec5851dd419855f408a7574ffb62875dffc1f1d89c891884270db85cdd1d"
+    }
+  },
+  "scope": {
+    "legalBilateralPartyOnlySceneOn": true,
+    "twiceFreshSemanticAndRawRgb": true,
+    "chronologicalRawRgb888Retained": true,
+    "normalizedBankedChangeMapsRetained": true,
+    "gameplayStateOwned": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferAcceptanceAdded": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "siblingCredit": false
+  }
+}
