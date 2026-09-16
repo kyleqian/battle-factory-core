@@ -940,6 +940,11 @@ import {
   type SignalBeamState,
 } from "./signalBeam.ts";
 import {
+  nightmareAtAge,
+  type NightmareLiveInputs,
+  type NightmareState,
+} from "./nightmare.ts";
+import {
   waterPulseAtAge,
   type WaterPulseLiveInputs,
   type WaterPulseState,
@@ -2669,6 +2674,21 @@ export interface SceneOnSignalBeamConfig {
     "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies">>;
 }
 
+/**
+ * Narrow Scene-ON seam for MOVE_NIGHTMARE's legal-battle body.  The scene
+ * supplies the current picture origins and live presentation allocations;
+ * damage, gameplay RNG, controller timing, and contest execution stay out.
+ */
+export interface SceneOnNightmareConfig {
+  readonly move: "NIGHTMARE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<NightmareLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerPictureOrigin" | "targetPictureOrigin">>;
+}
+
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
@@ -4185,6 +4205,7 @@ export type SceneOnMoveConfig =
   | SceneOnSmogConfig
   | SceneOnBonemerangConfig
   | SceneOnSignalBeamConfig
+  | SceneOnNightmareConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
@@ -4541,6 +4562,8 @@ export type SceneOnShockWavePresentationState =
   SceneOnMovePresentationState<SceneOnShockWaveConfig>;
 export type SceneOnSignalBeamPresentationState =
   SceneOnMovePresentationState<SceneOnSignalBeamConfig>;
+export type SceneOnNightmarePresentationState =
+  SceneOnMovePresentationState<SceneOnNightmareConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnDigPresentationState =
@@ -4948,6 +4971,11 @@ export interface SceneOnBonemerangView extends BonemerangState {
 }
 
 export interface SceneOnSignalBeamView extends SignalBeamState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnNightmareView extends NightmareState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8465,6 +8493,29 @@ export function sceneOnSignalBeamView(
       targetSide: target.geometry.side,
       attackerSpecies: attacker.species,
       targetSpecies: target.species,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_NIGHTMARE's first legal-body source row. */
+export function sceneOnNightmareView(
+  state: SceneOnNightmarePresentationState,
+): SceneOnNightmareView {
+  if (state.config.move !== "NIGHTMARE") {
+    throw new Error(`expected NIGHTMARE presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...nightmareAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerPictureOrigin: attacker.geometry.animationCenter,
+      targetPictureOrigin: target.geometry.animationCenter,
     }),
     attacker,
     target,
