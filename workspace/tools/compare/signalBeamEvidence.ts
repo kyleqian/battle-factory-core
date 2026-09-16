@@ -108,7 +108,7 @@ export function verifySignalBeamEvidence(): Json {
   for (const key of ["audit","probe","sharedProbe","stagingReceipt"]) invariant(sha(file(fixture.source[key])) === fixture.source[`${key}Sha256`], `source ${key}`);
   invariant(sha(execFileSync(process.execPath,["--experimental-strip-types",fixture.source.audit],{cwd:root})) === fixture.source.auditRunSha256, "source audit regeneration");
   const coverage = JSON.parse(file("ANIMATION_COVERAGE.json").toString("utf8")) as Json, track = coverage.componentTracks.find((entry: Json) => entry.id === "signal-beam-orb-stream");
-  invariant(coverage.entries.some((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM" && entry.status === "exact") && same(coverage.queue, []) && track?.fulfilled === true, "exact queue/track boundary");
+  invariant(coverage.entries.some((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM" && entry.status === "exact") && same(coverage.queue, ["MOVE_NIGHTMARE"]) && track?.fulfilled === true, "exact queue/track boundary");
   return { schema: fixture.schema, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries((["player-back","opponent-front"] as const).map((side) => [side,verifySide(side,fixture.orientations[side])])) };
 }
 

@@ -123,7 +123,7 @@ describe("MOVE_SIGNAL_BEAM source-relative reducer and narrow Scene-ON seam", ()
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     const data = coverage as Json;
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM")).toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual([]);
+    expect(data.queue).toEqual(["MOVE_NIGHTMARE"]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "signal-beam-orb-stream")).toMatchObject({
       representatives: ["MOVE_SIGNAL_BEAM"], fulfilled: true, goal: expect.stringContaining("FULFILLED"),
     });

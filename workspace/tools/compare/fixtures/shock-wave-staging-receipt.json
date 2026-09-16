@@ -7,7 +7,7 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/shockWaveSourceAudit.ts",
-    "auditSha256": "7e28d6d2b23930e6568e0273fde03fdea139f7821c12c8a768f90714fe1c4af3",
+    "auditSha256": "f7dbad4d9776cc52fc71f0fbd725e4e1108d2350c2274f36338da8c12a8d08ca",
     "auditRunSha256": "9a2da9b2461a723884e54a898495759fec59da6e90e31885ee724a731439ed76",
     "probe": "tools/compare/shockWaveStagingProbe.py",
     "probeSha256": "f59fd04f7836b5b6ab3f433d452b9bf5f7282b1013dd72a31d3e4a848c094518",

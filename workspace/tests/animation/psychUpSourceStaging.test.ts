@@ -57,7 +57,7 @@ describe("MOVE_PSYCH_UP source/component classification + legal bilateral Scene-
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries).toHaveLength(256);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual([]);
+    expect(coverage.queue).toEqual(["MOVE_NIGHTMARE"]);
     expect(coverage.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle")).toMatchObject({ fulfilled: true, representatives: ["MOVE_PSYCH_UP"] });
   });
 

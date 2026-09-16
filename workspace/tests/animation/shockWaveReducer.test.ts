@@ -141,7 +141,7 @@ describe("MOVE_SHOCK_WAVE source-relative reducer and narrow Scene-ON seam", () 
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     const data = coverage as { entries: Array<{ move: string }>; queue: string[]; componentTracks: Array<{ id: string; components: readonly string[]; representatives: string[]; fulfilled: boolean; goal: string }> };
     expect(data.entries.find((entry) => entry.move === "MOVE_SHOCK_WAVE")).toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual([]);
+    expect(data.queue).toEqual(["MOVE_NIGHTMARE"]);
     expect(data.componentTracks.find((entry) => entry.id === "shock-wave-electric-bolts")).toMatchObject({ components: TRACK_COMPONENTS, representatives: ["MOVE_SHOCK_WAVE"], fulfilled: true, goal: expect.stringContaining("FULFILLED") });
   });
 });

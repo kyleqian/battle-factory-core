@@ -193,7 +193,7 @@ if (!generated || generated.id !== 80 || generated.rootScript !== "Move_PETAL_DA
   throw new Error("Petal Dance generated component graph drifted");
 }
 if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_PETAL_DANCE" && entry.status === "exact")
-  || JSON.stringify(coverage.queue) !== JSON.stringify([])) {
+  || JSON.stringify(coverage.queue) !== JSON.stringify(["MOVE_NIGHTMARE"])) {
   throw new Error("Petal Dance exact promotion and Sky Uppercut queue boundary drifted");
 }
 

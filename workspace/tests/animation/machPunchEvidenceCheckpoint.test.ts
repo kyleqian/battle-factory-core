@@ -18,7 +18,7 @@ describe("MOVE_MACH_PUNCH complete bilateral Scene-ON evidence checkpoint", () =
     expect(fixture.measured.transfer).toContain("same-row monbg age 7");
     expect(fixture.scope).toEqual({ productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferAcceptanceAdded: false, coveragePromotion: false, componentTrackFulfilled: false, latchCredit: false, siblingCredit: false });
     expect(coverage.entries.find((entry) => entry.move === "MOVE_MACH_PUNCH")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual([]);
+    expect(coverage.queue).toEqual(["MOVE_NIGHTMARE"]);
     const machPunchTracks = coverage.componentTracks.filter((track) => track.representatives?.includes("MOVE_MACH_PUNCH"));
     expect(machPunchTracks).toHaveLength(1);
     expect(machPunchTracks[0]).toMatchObject({ id: "mach-punch-source-relative-body", fulfilled: true, goal: expect.stringContaining("FULFILLED") });

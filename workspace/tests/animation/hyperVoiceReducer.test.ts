@@ -139,7 +139,7 @@ describe("MOVE_HYPER_VOICE source-relative reducer and narrow Scene-ON seam", ()
     const data = coverage as Json;
     expect(data.entries).toHaveLength(256);
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_HYPER_VOICE")).toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual([]);
+    expect(data.queue).toEqual(["MOVE_NIGHTMARE"]);
     expect(data.componentTracks.find((entry: Json) => entry.id === "hyper-voice-ring-cry-platform")).toMatchObject({
       representatives: ["MOVE_HYPER_VOICE"], fulfilled: true,
     });

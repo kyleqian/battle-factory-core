@@ -7,7 +7,7 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/machPunchSourceAudit.ts",
-    "auditSha256": "99978deee4b81a112b927878f127a130069b21303cebb1ff702a20f7f8f364e4",
+    "auditSha256": "8b5733cccabfd2bc321a6ba2427ba7acb5a7cc660700d68f97cd1d9c0dee5d4a",
     "auditRunSha256": "2e6d8f35f6999849d9bef18919ce690c7ade02f272852cb7d94c34b15d94c7f0",
     "probe": "tools/compare/machPunchStagingProbe.py",
     "probeSha256": "51a1b99f31738956885aac2cecea8b18526ed9c36b9fbbc002e583934e3fa9d2",

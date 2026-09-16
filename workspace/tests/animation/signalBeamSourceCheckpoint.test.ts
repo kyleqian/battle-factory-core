@@ -12,7 +12,7 @@ describe("MOVE_SIGNAL_BEAM source/component/carrier checkpoint", () => {
   it("pins the complete root/subroutine, direct wave/palette/shake/pan bodies, and reproducible orb resources", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
-    expect(createHash("sha256").update(first).digest("hex")).toBe("3c58f0132440d09b1409cd2ec83d8bcbca4bc8171eff9b1d5d95a853e0e874ad");
+    expect(createHash("sha256").update(first).digest("hex")).toBe("b923dccdddaeb8706dc43d9eb9eb5714d441b1cdb86f44f8f48cae52562fd9a5");
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
       schema: "signal-beam-source-audit/v1", move: "MOVE_SIGNAL_BEAM", moveId: 324,
@@ -44,7 +44,7 @@ describe("MOVE_SIGNAL_BEAM source/component/carrier checkpoint", () => {
     expect(audit.checkpoint).toMatchObject({ sourceAudit: true, completePointerOwnedRoot: true, completeReachableBranches: true, completeCarrierCensus: true, reproducibleResources: true, legalBilateralPartyOnlyStaging: true, oracleOrMgbaInvoked: true, compactBilateralEndpointReceipts: true, twiceFreshPerOrientation: true, denseWindowCaptured: true, latchMeasured: true, reducerAdded: true, typedSceneOnSeam: true, compositorAdded: true, framebufferAcceptance: true, coveragePromotion: true, componentTrackFulfilled: true, latchPromotion: false, unsupportedNoCreditBoundary: false });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual([]);
+    expect(coverage.queue).toEqual(["MOVE_NIGHTMARE"]);
     expect(coverage.componentTracks.find((entry: Json) => entry.id === "signal-beam-orb-stream")).toMatchObject({ representatives: ["MOVE_SIGNAL_BEAM"], fulfilled: true });
   });
 });
