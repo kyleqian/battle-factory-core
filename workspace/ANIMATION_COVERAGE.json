@@ -7462,7 +7462,7 @@
    ]
   }
  ],
- "queue": ["MOVE_NIGHTMARE"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "mach-punch-source-relative-body",
@@ -9836,32 +9836,6 @@
     "tests/animation/shockWaveActualCore.test.ts"
    ],
    "goal": "FULFILLED by MOVE_SHOCK_WAVE alone: its complete source-age reducer, narrow typed Scene-ON seam, four reproducible source effect resources, and generic live compositor pass all 530 bilateral component, retained-RGB, and actual-core framebuffer rows twice with zero residual pixels through inactive ages 266/262. Its own maps retain charging particles, growing orb, progressing bolts, lightning, target ShakeMon, palette tasks, attacker monbg, resources, matrices, persistent painter order, hardware latches, registers/audio, and cleanup. The material reversed-side CROBAT/BLISSEY control changes species, geometry/origins, allocations/order/matrices, resources, and presentation RNG while gameplay state/RNG remains opaque and unchanged. Charge, Spark, Tail Glow, Thunder, Thunderbolt, Superpower, and every sibling remain identity controls only and receive no Shock Wave timing, latch, body, move, component, or track credit."
-  },
-  {
-   "id": "nightmare-clone-blend",
-   "components": [
-    "subroutine:NightmareInContest",
-    "task:AnimTask_BlendMonInAndOut",
-    "task:AnimTask_NightmareClone",
-    "task:AnimTask_ShakeMon",
-    "visualCommand:clearmonbg",
-    "visualCommand:fadetobg",
-    "visualCommand:monbg",
-    "visualCommand:restorebg",
-    "visualCommand:waitbgfadein"
-   ],
-   "representatives": ["MOVE_NIGHTMARE"],
-   "fulfilled": false,
-   "evidence": [
-    "tools/compare/nightmareSourceAudit.ts",
-    "tools/battle-lab/mechanic-nightmare-player-haunter-opponent-shuckle.json",
-    "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
-    "tools/compare/nightmareStagingProbe.py",
-    "tools/compare/fixtures/nightmare-staging-receipt.json",
-    "tools/compare/verifyNightmareStaging.ts",
-    "tests/animation/nightmareSourceStaging.test.ts"
-   ],
-   "goal": "UNFULFILLED. MOVE_NIGHTMARE alone must later retain a complete dense Battle Scene ON root-to-cleanup window in both orientations and independently verify every clone, BlendMonInAndOut, ShakeMon, Ghost-BG, monbg, fade, palette, resource, audio, order, cleanup, and display-latch mechanism through a source-relative presentation seam and live compositor. This source/staging checkpoint grants no timing, body, latch, move, component, sibling, track, framebuffer, or coverage credit; Foresight, Super Fang, Hidden Power, Flame Wheel, Torment, Helping Hand, Recycle, Endeavor, Skill Swap, Extrasensory, Rage, Night Shade, Spite, Destiny Bond, and every sibling remain identity-only controls."
   }
  ],
  "variantAudits": {
