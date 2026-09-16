@@ -1,0 +1,118 @@
+{
+  "schema": "overheat-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_OVERHEAT",
+  "moveId": 315,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/overheatSourceAudit.ts",
+    "auditSha256": "e5d2ac616ffd89fd8bf875f2c1db2335fc6ceba2f2f5d7a5963284a1a190a1a8",
+    "auditRunSha256": "880d9dc00b58ae294967aa6979d26eb51f6ed89455d6d0acf9f0403d4f46051f",
+    "probe": "tools/compare/overheatStagingProbe.py",
+    "probeSha256": "c11254587a2461c7a68c70a048c7a53c6fd3ccad2109fa53a9f413b94f2c9f62",
+    "pointerOwnedRoot": {
+      "symbol": "Move_OVERHEAT",
+      "elf": "reference/pokeemerald/pokeemerald.elf",
+      "start": "0x082d6694",
+      "endExclusive": "0x082d6986",
+      "byteLength": 754,
+      "romSha256": "04d271b2b39997488524ec3401e116c521f65240d8f9980238b6b8c7e1a1697c"
+    }
+  },
+  "factoryLegalSelection": {
+    "playerBackCarrier": {"setId": 328, "name": "FRONTIER_MON_SOLROCK_2", "species": 349},
+    "opponentFrontCarrier": {"setId": 299, "name": "FRONTIER_MON_MAGCARGO_2", "species": 219},
+    "allSourceCarriers": [299, 328, 337, 357, 474, 589, 611, 618, 636, 643, 647, 656, 685, 707, 714, 718, 732, 739, 742, 743, 752, 769, 791, 874, 875],
+    "level50Carriers": [299, 328, 337, 357, 474, 589, 611, 618, 636, 643, 647, 656, 685, 707, 714, 718, 732, 739, 742, 743, 752, 769, 791],
+    "excludedOutsideLevel50": [874, 875],
+    "sourceRoute": {"challengeNum": 2, "battleNum": 2, "trainerId": 110},
+    "partyBeforeInit": true,
+    "choiceConstraint": "Both orientations build complete legal three-Pokémon parties before battle initialization. The source-set Solrock/Magcargo carrier has four Overheat slots; the Shuckle control has four Tackle slots. The regular input trace and stock Factory AI select the action without injected battle state."
+  },
+  "freshness": {
+    "check": "tools/check-oracle-freshness.sh",
+    "exitCode": 2,
+    "diagnostic": "SKIP: could not read start time for pid 43588 on 8014; SKIP: could not read start time for pid 43560 on 8012; date: 1788164325: No such file or directory; harness HEAD: 3f76b234d Back up lanes before provider preflight ()",
+    "sharedOracleCaptureUsed": false,
+    "localMgbaWrapper": "tools/run-mgba-probe.py"
+  },
+  "runs": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-overheat-player-solrock-opponent-shuckle.json",
+      "scenarioSha256": "bbc440fe80d609b5b274ab73376191d327fa28194c64285ce17bad1ef8bb621f",
+      "seed": 305420315,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "7b31b91543b0261b14e16a4cbf2fe3a9ca5e8db6c428ba1a2724212baef64525",
+      "output": {
+        "attacker": {"level": 50, "moves": [315, 315, 315, 315], "partyIndex": 0, "side": "player", "species": 349},
+        "benches": {"afterSha256": "ca6b79b80ed920f01aeec71ece4624c3f0657541d7f9cbc110a3016afabf482b", "beforeSha256": "ca6b79b80ed920f01aeec71ece4624c3f0657541d7f9cbc110a3016afabf482b", "checksumValid": true, "partyIndices": [1, 2], "unchanged": true},
+        "choiceConstraint": {"attackerMoveSlots": [315, 315, 315, 315], "opponentAiMoveSlots": [150, 150, 150, 150]},
+        "cleanup": {"soundTasks": 0, "visualTasks": 0},
+        "customPartiesBuiltBeforeBattle": true,
+        "move": "MOVE_OVERHEAT",
+        "moveId": 315,
+        "oracleProfile": "battle-scene-on",
+        "pp": {"after": [4, 5, 5, 5], "before": [5, 5, 5, 5], "spent": 1},
+        "romOutcome": {"battleOutcome": 0, "kind": "damaging-overheat-hit", "targetFinalBattleHp": 110, "targetFinalPartyHp": 110, "targetFinalStatus": {"kind": "none"}},
+        "root": {"endExclusive": "0x82d6986", "first": {"attackerBattler": 0, "battleOutcome": 0, "currentMove": 315, "scriptActive": true, "scriptPointer": "0x82d6694", "soundTasks": 0, "targetBattleHp": 127, "targetBattler": 1, "targetPartyHp": 127, "visualTasks": 0}, "observations": 229, "start": "0x82d6694", "symbol": "Move_OVERHEAT"},
+        "scenario": "tools/battle-lab/mechanic-overheat-player-solrock-opponent-shuckle.json",
+        "schema": "overheat-compact-staging/v1",
+        "scope": {"battleStateInjected": false, "boundaryOrBarrierChanged": false, "componentTrackFulfilled": false, "compositorAdded": false, "coverageEntryAdded": false, "coveragePromotion": false, "denseWindowCaptured": false, "durableLatchRowAdded": false, "framebuffersRetained": false, "latchMeasured": false, "noTimingOrLatchTransfer": true, "productionChanged": false, "rawRgbRetained": false, "reducerAdded": false, "semanticFramesRetained": false, "transientOverrides": [], "typedSceneOnSeam": false},
+        "selection": {"attackerBattler": 0, "currentMove": 315, "targetBattler": 0},
+        "sourceInitialized": true,
+        "target": {"finalHp": 110, "initialHp": 127, "level": 50, "maxHp": 127, "partyIndex": 0, "side": "opponent", "species": 213},
+        "transientFreeSetup": true
+      }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-overheat-opponent-magcargo-player-shuckle.json",
+      "scenarioSha256": "673a3d9d2e4f5029710d6060d7751a98b9f9a5157d6c0ecf3435bec2fe3d65f8",
+      "seed": 305420315,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "14e5f7547ac3cedcab866273b0ad729d6d16f15a739a65ef864d337fa2095a99",
+      "output": {
+        "attacker": {"level": 50, "moves": [315, 315, 315, 315], "partyIndex": 0, "side": "opponent", "species": 219},
+        "benches": {"afterSha256": "06b138400b7b12e46ad72ec431b6581d9734993d32e3f044cbd279678d1daaba", "beforeSha256": "06b138400b7b12e46ad72ec431b6581d9734993d32e3f044cbd279678d1daaba", "checksumValid": true, "partyIndices": [1, 2], "unchanged": true},
+        "choiceConstraint": {"attackerMoveSlots": [315, 315, 315, 315], "opponentAiMoveSlots": [315, 315, 315, 315]},
+        "cleanup": {"soundTasks": 0, "visualTasks": 0},
+        "customPartiesBuiltBeforeBattle": true,
+        "move": "MOVE_OVERHEAT",
+        "moveId": 315,
+        "oracleProfile": "battle-scene-on",
+        "pp": {"after": [5, 5, 4, 5], "before": [5, 5, 5, 5], "spent": 1},
+        "romOutcome": {"battleOutcome": 0, "kind": "damaging-overheat-hit", "targetFinalBattleHp": 90, "targetFinalPartyHp": 90, "targetFinalStatus": {"kind": "none"}},
+        "root": {"endExclusive": "0x82d6986", "first": {"attackerBattler": 1, "battleOutcome": 0, "currentMove": 315, "scriptActive": true, "scriptPointer": "0x82d6694", "soundTasks": 0, "targetBattleHp": 127, "targetBattler": 0, "targetPartyHp": 127, "visualTasks": 0}, "observations": 229, "start": "0x82d6694", "symbol": "Move_OVERHEAT"},
+        "scenario": "tools/battle-lab/mechanic-overheat-opponent-magcargo-player-shuckle.json",
+        "schema": "overheat-compact-staging/v1",
+        "scope": {"battleStateInjected": false, "boundaryOrBarrierChanged": false, "componentTrackFulfilled": false, "compositorAdded": false, "coverageEntryAdded": false, "coveragePromotion": false, "denseWindowCaptured": false, "durableLatchRowAdded": false, "framebuffersRetained": false, "latchMeasured": false, "noTimingOrLatchTransfer": true, "productionChanged": false, "rawRgbRetained": false, "reducerAdded": false, "semanticFramesRetained": false, "transientOverrides": [], "typedSceneOnSeam": false},
+        "selection": {"attackerBattler": 0, "currentMove": 315, "targetBattler": 0},
+        "sourceInitialized": true,
+        "target": {"finalHp": 90, "initialHp": 127, "level": 50, "maxHp": 127, "partyIndex": 0, "side": "player", "species": 213},
+        "transientFreeSetup": true
+      }
+    }
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "rawRgbRetained": false,
+    "denseWindowCaptured": false,
+    "semanticFramesRetained": false,
+    "latchMeasured": false,
+    "durableLatchRowAdded": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSceneOnSeam": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "coverageEntryAdded": false,
+    "componentTrackFulfilled": false,
+    "battleStateInjected": false,
+    "transientOverrides": [],
+    "boundaryOrBarrierChanged": false,
+    "noTimingOrLatchTransfer": true
+  },
+  "remainder": "Keep MOVE_OVERHEAT unsupported, coverage-absent, queue-absent, and without component, sibling, track, or latch credit. A later Overheat-owned step must retain a complete twice-fresh dense bilateral Scene-ON window and independently map every flame, hitsplat, palette-buffer/task, monbg/blend, audio, ordering, resource, and cleanup scanout/latch boundary before any reducer, seam, compositor, framebuffer, component, track, sibling, or coverage claim. The named controls are source/component identity controls only."
+}
