@@ -63,9 +63,9 @@
   "opponent-front": {
    "freshRuns": 2,
    "outputsByteIdentical": true,
-   "scenario": "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
+   "scenario": "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-kangaskhan.json",
    "scenarioSha256": "2621331310c36201a7dba816d6c07087c05c90242fd017bb05b2744dbae3eb9d",
-   "outputSha256": "aff073db623208940c17f88d697833ea92775e0e5175bdeb2ca438b4c3f007c0",
+   "outputSha256": "1da8133ea52ef1f63f9d44e3b8872035e551913a5f482bb0af83d4a0afb2dab5",
    "output": {
     "attacker": {"moves": [95, 171, 171, 171], "partyIndex": 0, "side": "opponent", "species": 93},
     "benches": {"afterSha256": "3af2c6820048026b46a17e5d5cf86a18ddce9a133336145c0893764080da2ba5", "beforeSha256": "3af2c6820048026b46a17e5d5cf86a18ddce9a133336145c0893764080da2ba5", "checksumValid": true, "partyIndices": {"opponent": [1, 2], "player": [1, 2]}, "unchanged": true},
@@ -84,7 +84,7 @@
      "start": "0x82cd4a3",
      "symbol": "Move_NIGHTMARE"
     },
-    "scenario": "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
+    "scenario": "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-kangaskhan.json",
     "schema": "nightmare-compact-staging/v2",
     "scope": {"battleStateInjected": false, "componentTrackFulfilled": false, "compositorAdded": false, "coveragePromotion": false, "denseWindowCaptured": false, "durableLatchRowAdded": false, "framebuffersRetained": false, "latchMeasured": false, "noTimingOrLatchTransfer": true, "productionChanged": false, "rawRgbRetained": false, "reducerAdded": false, "semanticFramesRetained": false, "transientOverrides": [], "typedSceneOnSeam": false},
     "sourceInitialized": true,
