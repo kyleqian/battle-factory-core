@@ -1,0 +1,54 @@
+{
+  "schema": "overheat-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_OVERHEAT",
+  "moveId": 315,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/overheatSourceAudit.ts",
+    "auditSha256": "e5d2ac616ffd89fd8bf875f2c1db2335fc6ceba2f2f5d7a5963284a1a190a1a8",
+    "auditRunSha256": "880d9dc00b58ae294967aa6979d26eb51f6ed89455d6d0acf9f0403d4f46051f",
+    "probe": "tools/compare/overheatProbe.py",
+    "probeSha256": "649d553583f8086179ed81d3c5bdeee00a4bae9051fd75047feeaefe189c66df",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
+    "stagingReceipt": "tools/compare/fixtures/overheat-staging-receipt.json",
+    "stagingReceiptSha256": "df88cce52a94bc7f08cf96606ff145a3ad304029af5e94e55762bf7786c35dc2",
+    "pointerOwnedRoot": { "start": "0x082d6694", "endExclusive": "0x082d6986", "observedParities": [0,1] }
+  },
+  "freshness": { "check": "tools/check-oracle-freshness.sh", "exitCode": 2, "sharedOracleCaptureUsed": false, "localMgbaWrapper": "tools/run-mgba-probe.py" },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-overheat-player-solrock-opponent-shuckle.json",
+      "scenarioSha256": "bbc440fe80d609b5b274ab73376191d327fa28194c64285ce17bad1ef8bb621f",
+      "freshRuns": 2,
+      "denseState": "tools/compare/evidence/overheat-player-dense-state.json.gz",
+      "denseStateSha256": "1f34f8d839d361bc59e73b849efa19eb4ac7ff40f567518aa56b6b893bc07a13",
+      "probeJsonSha256": "08426d2d459e8a7038a0bbe5d0f18cc1d7af98144a5a78540dd552c7d74dc188",
+      "repeatProbeJsonSha256": "08426d2d459e8a7038a0bbe5d0f18cc1d7af98144a5a78540dd552c7d74dc188",
+      "rawRgbArchive": "tools/compare/evidence/overheat-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "a61d2c7e124bf7e233c3cb4d86c5cc9aed2b11a70f70014e2ce96fc67312e91b",
+      "rawRgbSequenceSha256": "6d445fc68c90f3c2b0243288822d9da0b649e241b489b8d1eca4e8db6bf7b81c",
+      "repeatRawRgbSequenceSha256": "6d445fc68c90f3c2b0243288822d9da0b649e241b489b8d1eca4e8db6bf7b81c",
+      "changeMap": "tools/compare/evidence/overheat-changemap-player.json",
+      "changeMapSha256": "894c48763a6949a1201a02b80ccca3f246aec8dd9ff10e7320ad3f9cab44734a"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-overheat-opponent-magcargo-player-shuckle.json",
+      "scenarioSha256": "673a3d9d2e4f5029710d6060d7751a98b9f9a5157d6c0ecf3435bec2fe3d65f8",
+      "freshRuns": 2,
+      "denseState": "tools/compare/evidence/overheat-opponent-dense-state.json.gz",
+      "denseStateSha256": "1279dd194550033433834ec1638a12e3b2d5067118d6d5e6b3ba18afc03a61f4",
+      "probeJsonSha256": "97e2b4eed250e9b2cfcc19e5e071b9c8692a63d1a78455d4460ab3913fa4c780",
+      "repeatProbeJsonSha256": "97e2b4eed250e9b2cfcc19e5e071b9c8692a63d1a78455d4460ab3913fa4c780",
+      "rawRgbArchive": "tools/compare/evidence/overheat-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "9cdbd2335d9f99f7abf20b79ce386d8ea85169063826cb4bf9f70070f05de411",
+      "rawRgbSequenceSha256": "aa26ea96621c1216ba227ef2085df200e921f145c3db29008b887467312ac33e",
+      "repeatRawRgbSequenceSha256": "aa26ea96621c1216ba227ef2085df200e921f145c3db29008b887467312ac33e",
+      "changeMap": "tools/compare/evidence/overheat-changemap-opponent.json",
+      "changeMapSha256": "24674434cd4f722ee46f72ef5ba592a0a3234460fb1ad48557be2708e893d95a"
+    }
+  },
+  "scope": { "legalBilateralPartyOnlySceneOn": true, "twiceFreshSemanticAndRawRgb": true, "chronologicalRawRgb888Retained": true, "normalizedBankedChangeMapsRetained": true, "gameplayStateOwned": false, "productionChanged": false, "reducerAdded": false, "typedSeamAdded": false, "compositorAdded": false, "framebufferAcceptanceAdded": false, "coveragePromotion": false, "coverageEntryAdded": false, "queueChanged": false, "componentTrackFulfilled": false, "siblingCredit": false }
+}
