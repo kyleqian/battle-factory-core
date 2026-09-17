@@ -153,7 +153,7 @@ export function verifyOverheatEvidence(compareMaps = true): Json {
   const audit = JSON.parse(auditText) as Json;
   invariant(sha(auditText) === fixture.source.auditRunSha256 && audit.graph.coverage.entryPresent === false && audit.graph.coverage.queueContainsMove === false && audit.graph.coverage.componentTrackPresent === false, "source repeatability/no credit");
   const data = coverage as Json;
-  invariant(!data.entries.some((entry: Json) => entry.move === "MOVE_OVERHEAT") && !data.queue.includes("MOVE_OVERHEAT") && !data.componentTracks.some((track: Json) => track.representatives?.includes("MOVE_OVERHEAT")), "coverage/queue/track absence");
+  invariant(data.entries.find((entry: Json) => entry.move === "MOVE_OVERHEAT")?.status === "exact" && !data.queue.includes("MOVE_OVERHEAT") && !data.componentTracks.some((track: Json) => track.representatives?.includes("MOVE_OVERHEAT")), "exact coverage with queue/track absence");
   return { schema: fixture.schema, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries((["player-back","opponent-front"] as const).map((side) => [side,verifySide(side,fixture.orientations[side],compareMaps)])) };
 }
 

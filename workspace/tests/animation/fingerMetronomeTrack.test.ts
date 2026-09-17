@@ -431,7 +431,7 @@ describe("finger-metronome standalone fulfilled component-track ratchet", () => 
     expect(level50Moves.size).toBe(276);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && entry.status === "exact",
-    )).toHaveLength(257);
+    )).toHaveLength(258);
     expect(coverage.entries.filter((entry: { move: string; status: string }) =>
       level50Moves.has(entry.move) && (entry.status === "partial" || entry.status === "staged"),
     )).toEqual([]);

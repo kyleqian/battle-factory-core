@@ -28,10 +28,10 @@ describe("MOVE_OVERHEAT complete bilateral Scene-ON evidence checkpoint", () => 
     }
   });
 
-  it("retains the unsupported evidence boundary without queue, track, component, sibling, or gameplay credit", () => {
+  it("retains the historical evidence boundary while the accepted move has no track, sibling, or gameplay credit", () => {
     expect(fixture.scope).toEqual({ legalBilateralPartyOnlySceneOn: true, twiceFreshSemanticAndRawRgb: true, chronologicalRawRgb888Retained: true, normalizedBankedChangeMapsRetained: true, gameplayStateOwned: false, productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferAcceptanceAdded: false, coveragePromotion: false, coverageEntryAdded: false, queueChanged: false, componentTrackFulfilled: false, siblingCredit: false });
     const data = coverage as Json;
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_OVERHEAT")).toBe(false);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_OVERHEAT")).toMatchObject({ status: "exact" });
     expect(data.queue).not.toContain("MOVE_OVERHEAT");
     expect(data.componentTracks.some((track: Json) => track.representatives?.includes("MOVE_OVERHEAT"))).toBe(false);
   });

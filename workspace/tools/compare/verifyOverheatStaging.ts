@@ -98,7 +98,9 @@ for (const [key, value] of Object.entries(audit.checkpoint)) {
     if (value !== true) fail(`checkpoint ${key}`);
   } else if (value !== false) fail(`no-credit checkpoint ${key}`);
 }
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_OVERHEAT") || coverage.queue.includes("MOVE_OVERHEAT") || coverage.componentTracks.some((track: Json) => track.representatives?.includes("MOVE_OVERHEAT"))) fail("MOVE_OVERHEAT must remain coverage-absent, queue-absent, and track-absent");
+if (coverage.entries.find((entry: Json) => entry.move === "MOVE_OVERHEAT")?.status !== "exact"
+  || coverage.queue.includes("MOVE_OVERHEAT")
+  || coverage.componentTracks.some((track: Json) => track.representatives?.includes("MOVE_OVERHEAT"))) fail("MOVE_OVERHEAT must be exact, queue-empty, and track-absent");
 equal(receipt.factoryLegalSelection, {
   playerBackCarrier: { setId: 328, name: "FRONTIER_MON_SOLROCK_2", species: 349 },
   opponentFrontCarrier: { setId: 299, name: "FRONTIER_MON_MAGCARGO_2", species: 219 },

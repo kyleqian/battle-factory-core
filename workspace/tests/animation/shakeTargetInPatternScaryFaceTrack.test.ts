@@ -508,8 +508,8 @@ describe("shake-target-in-pattern-scary-face standalone fulfilled component-trac
     ]) expect(latches).toContain(token);
 
     const coverage = json("ANIMATION_COVERAGE.json");
-    expect(coverage.entries).toHaveLength(257);
-    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(257);
+    expect(coverage.entries).toHaveLength(258);
+    expect(coverage.entries.filter((entry: Json) => entry.status === "exact")).toHaveLength(258);
     expect(coverage.entries.filter((entry: Json) => entry.status === "partial" || entry.status === "staged")).toEqual([]);
     expect(["MOVE_SCARY_FACE", "MOVE_GLARE", "MOVE_THUNDER", "MOVE_TRI_ATTACK"].map((move) =>
       coverage.entries.find((entry: Json) => entry.move === move),

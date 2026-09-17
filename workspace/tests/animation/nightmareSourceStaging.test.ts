@@ -65,7 +65,7 @@ describe("MOVE_NIGHTMARE authoritative source classification and legal bilateral
 
   it("keeps the unfulfilled track and compact twice-fresh party-before-init receipts without a latch or coverage claim", () => {
     const coverage = readJson("ANIMATION_COVERAGE.json");
-    expect(coverage.entries).toHaveLength(257);
+    expect(coverage.entries).toHaveLength(258);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_NIGHTMARE"))
       .toMatchObject({ status: "exact" });
     expect(coverage.queue).toEqual([]);

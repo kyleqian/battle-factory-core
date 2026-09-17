@@ -92,11 +92,11 @@ describe("MOVE_OVERHEAT source-relative reducer and narrow Scene-ON seam", () =>
     expect(target.geometry.animationCenter).toEqual(altered.targetPictureOrigin);
   });
 
-  it("keeps production evidence-free and MOVE_OVERHEAT unsupported with no queue or track credit", () => {
+  it("keeps production evidence-free and MOVE_OVERHEAT exact with no queue or track credit", () => {
     const source = readFileSync(resolve(root, "src/animation/overheat.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     const data = coverage as { entries: Array<{ move: string }>; queue: string[]; componentTracks: Array<{ representatives?: readonly string[] }> };
-    expect(data.entries.some((entry) => entry.move === "MOVE_OVERHEAT")).toBe(false);
+    expect(data.entries.find((entry) => entry.move === "MOVE_OVERHEAT")).toMatchObject({ status: "exact" });
     expect(data.queue).not.toContain("MOVE_OVERHEAT");
     expect(data.componentTracks.some((track) => track.representatives?.includes("MOVE_OVERHEAT"))).toBe(false);
   });

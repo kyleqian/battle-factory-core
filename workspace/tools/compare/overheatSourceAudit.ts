@@ -153,7 +153,11 @@ if (JSON.stringify(audioCommands) !== JSON.stringify([
 
 const graphEntry = graph.moves.find((entry: Json) => entry.move === "MOVE_OVERHEAT");
 if (!graphEntry || graphEntry.id !== 315 || graphEntry.rootScript !== "Move_OVERHEAT" || JSON.stringify(graphEntry.blocks) !== JSON.stringify(["Move_OVERHEAT"]) || JSON.stringify(graphEntry.componentIds) !== JSON.stringify(expectedComponents)) throw new Error("generated MOVE_OVERHEAT graph drifted");
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_OVERHEAT") || coverage.queue.includes("MOVE_OVERHEAT") || coverage.componentTracks.some((entry: Json) => entry.representatives?.includes("MOVE_OVERHEAT"))) throw new Error("MOVE_OVERHEAT must remain coverage-absent and untracked");
+if (coverage.entries.find((entry: Json) => entry.move === "MOVE_OVERHEAT")?.status !== "exact"
+  || coverage.queue.includes("MOVE_OVERHEAT")
+  || coverage.componentTracks.some((entry: Json) => entry.representatives?.includes("MOVE_OVERHEAT"))) {
+  throw new Error("MOVE_OVERHEAT must be exact, queue-empty, and component-track absent");
+}
 
 const level50Ranges = policy.rentalSelection.ranges.level50 as readonly { start: number; end: number }[];
 const inLevel50 = (entry: Json): boolean => level50Ranges.some((range) => entry.index >= range.start && entry.index <= range.end);

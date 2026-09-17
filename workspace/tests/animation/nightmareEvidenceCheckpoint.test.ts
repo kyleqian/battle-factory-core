@@ -31,7 +31,7 @@ describe("MOVE_NIGHTMARE complete bilateral Scene-ON evidence checkpoint", () =>
   it("keeps the historical evidence scope while the contest arm and siblings stay uncredited", () => {
     expect(fixture.scope).toEqual({ legalBilateralPartyOnlySceneOn: true, twiceFreshSemanticAndRawRgb: true, chronologicalRawRgb888Retained: true, normalizedBankedChangeMapsRetained: true, gameplayStateOwned: false, productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferAcceptanceAdded: false, coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false });
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(257);
+    expect(data.entries).toHaveLength(258);
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_NIGHTMARE"))
       .toMatchObject({ status: "exact" });
     expect(data.queue).toEqual([]);

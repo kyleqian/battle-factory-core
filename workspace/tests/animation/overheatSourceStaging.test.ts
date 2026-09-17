@@ -77,7 +77,7 @@ describe("MOVE_OVERHEAT authoritative source classification and legal bilateral 
       },
     });
     const coverage = readJson("ANIMATION_COVERAGE.json");
-    expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_OVERHEAT")).toBe(false);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_OVERHEAT")).toMatchObject({ status: "exact" });
     expect(coverage.queue).not.toContain("MOVE_OVERHEAT");
     expect(coverage.componentTracks.some((track: Json) => track.representatives?.includes("MOVE_OVERHEAT"))).toBe(false);
   });

@@ -192,6 +192,7 @@ import {
   type SceneOnShockWaveConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnNightmareConfig,
+  type SceneOnOverheatConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -349,6 +350,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "NIGHTMARE") {
     const nightmarePresentation = presentation as SceneOnMovePresentationState<SceneOnNightmareConfig>;
     renderSceneOnMovePresentation(framebuffer, nightmarePresentation);
+    return;
+  }
+  if (presentation.config.move === "OVERHEAT") {
+    const overheatPresentation = presentation as SceneOnMovePresentationState<SceneOnOverheatConfig>;
+    renderSceneOnMovePresentation(framebuffer, overheatPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

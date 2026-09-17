@@ -990,6 +990,7 @@ import {
   sceneOnShockWaveView,
   sceneOnSignalBeamView,
   sceneOnNightmareView,
+  sceneOnOverheatView,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
   sceneOnAuroraBeamView,
@@ -1255,6 +1256,7 @@ import {
   type SceneOnShockWaveConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnNightmareConfig,
+  type SceneOnOverheatConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
@@ -24127,6 +24129,145 @@ export function renderSceneOnMovePresentation(
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "NIGHTMARE!", 99,
     );
+    return;
+  }
+
+  if (state.config.move === "OVERHEAT") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnOverheatConfig>;
+    const view = sceneOnOverheatView(moveState);
+    const displayed = sceneOnOverheatView({
+      ...moveState,
+      age: Math.max(0, moveState.age - 1),
+    });
+    // Attacker ShakeMon restores x2 after BuildOamBuffer. Its transient OAM
+    // pose is a four-row square wave beginning one row after task creation.
+    const attackerShake = (start: number, amplitude: number, repetitions: number): number => {
+      const local = moveState.age - start;
+      return local >= 1 && local <= repetitions * 2 - 2
+        && Math.floor((local + 2) / 2) % 2 === 1 ? amplitude : 0;
+    };
+    const attackerX2 = moveState.age >= 138
+      ? (moveState.age === 167 ? 3 : attackerShake(138, 3, 15))
+      : (moveState.age === 64 || moveState.age === 65
+        ? 2 : attackerShake(35, 2, 15));
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("OVERHEAT presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`OVERHEAT missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map((word) => {
+        const packed = mgbaColorFromBgr555(word);
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      });
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const input = moveState.config.animationInputs;
+    const attackerBank = 16 + (input.attackerSprite.attr[2] >>> 12 & 0xf);
+    const targetBank = 16 + (input.targetSprite.attr[2] >>> 12 & 0xf);
+
+    drawExtractedTileBg(fb, {
+      tileset: battleBg.static.tileset,
+      tilemap: battleBg.static.tilemap,
+      subpalettes: [2, 3, 4].map(paletteBank),
+    });
+    if (displayed.background.monbg) {
+      drawSpriteSheet(
+        fb, tilesFor(targetArt, view.target.geometry.side),
+        paletteBank(input.background.monbgPaletteBank),
+        view.target.geometry.spriteCorner.x + displayed.battlers.target.shake.x,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    const target2Backdrop = fb.slice();
+    const painterOrder = displayed.painterOrder;
+    const rankOf = (slot: number): number => {
+      const rank = painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    type Entry = Readonly<{ slot: number; subpriority: number; y: number; order: number; draw: () => void }>;
+    const entries: Entry[] = [{
+      slot: input.attackerSprite.slot,
+      subpriority: input.attackerSprite.subpriority,
+      y: view.attacker.geometry.animationCenter.y,
+      order: rankOf(input.attackerSprite.slot),
+      draw: () => drawSpriteSheet(
+        fb, tilesFor(attackerArt, view.attacker.geometry.side), paletteBank(attackerBank),
+        view.attacker.geometry.spriteCorner.x + attackerX2,
+        view.attacker.geometry.spriteCorner.y,
+      ),
+    }];
+    if (!displayed.background.monbg) entries.push({
+      slot: input.targetSprite.slot,
+      subpriority: input.targetSprite.subpriority,
+      y: view.target.geometry.animationCenter.y,
+      order: rankOf(input.targetSprite.slot),
+      draw: () => drawSpriteSheet(
+        fb, tilesFor(targetArt, view.target.geometry.side), paletteBank(targetBank),
+        view.target.geometry.spriteCorner.x + displayed.battlers.target.shake.x,
+        view.target.geometry.spriteCorner.y,
+      ),
+    });
+    const displayedSprites = moveState.age === 73 || moveState.age === 81
+      ? sceneOnOverheatView({ ...moveState, age: moveState.age - 2 }).sprites
+      : displayed.sprites;
+    for (const sprite of displayedSprites) {
+      if (sprite.kind === "palette-blend") continue;
+      if (sprite.kind === "flame" && moveState.age < sprite.birthAge + 2) continue;
+      const rawX = sprite.attr[1] & 0x1ff;
+      const rawY = sprite.attr[0] & 0xff;
+      const x = rawX >= 240 ? rawX - 512 : rawX;
+      const y = rawY >= 160 ? rawY - 256 : rawY;
+      entries.push({
+        slot: sprite.slot,
+        subpriority: sprite.subpriority,
+        y: sprite.y + sprite.y2,
+        order: rankOf(sprite.slot),
+        draw: sprite.kind === "flame"
+          ? () => drawSpriteSheet(
+            fb, firePunchEmberTileset((
+              (((sprite.attr[2] & 0x3ff) - (input.oam.flame[2] & 0x3ff) + 0x400) & 0x3ff) / 16
+            ) as 0 | 1 | 2 | 3 | 4),
+            paletteBank(input.resources.smallEmber.hardwarePaletteBank), x, y,
+          )
+          : () => drawSpriteSheetBlendedOverBackdrop(
+            fb, target2Backdrop, battleAnimHitsplat.tileset,
+            paletteBank(input.resources.impact.hardwarePaletteBank), x, y,
+            Math.min(16, view.registers.bldalpha & 0x1f),
+            Math.min(16, view.registers.bldalpha >>> 8 & 0x1f),
+          ),
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "OVERHEAT!", 99);
     return;
   }
 
