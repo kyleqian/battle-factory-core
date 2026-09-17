@@ -1,4 +1,4 @@
-# Animation unattended campaign — through 2026-09-18
+# Animation unattended campaign — through 2026-09-24
 
 This file is campaign policy for `animation-main` only. It must not be added to
 `master`; remove/exclude it when the product work from this lane is folded.
@@ -14,7 +14,7 @@ This file is campaign policy for `animation-main` only. It must not be added to
 ## Durable checkpoints
 
 - The system wrapper backs up committed lane/worker refs before each session
-  and at wind-down under `autonomy/20260913-through-20260918/`.
+  and at wind-down under `autonomy/20260913-through-20260924/`.
 - The worker launcher backs up every successful committed disposable worker
   branch before supervisor verification.
 - After every committed green checkpoint—including a direct supervisor repair
@@ -27,11 +27,17 @@ This file is campaign policy for `animation-main` only. It must not be added to
 
 ## Continuation and resource discipline
 
-- Resume from the committed `MOVE_SMOG` staging checkpoint already present on
-  `animation-main`; do not repeat its source audit or bilateral legal staging.
+- First recover and independently verify the preserved Silver Wind fade
+  checkpoint `2eec5d465` from
+  `autonomy/20260913-through-20260918/workers/animation-20260917-123219`.
+  Its worker suite passed, but it must not merge until the production build is
+  green under the campaign heap setting. After that handoff is resolved,
+  continue from the current unsupported frontier rather than repeating closed
+  source, evidence, reducer, or actual-core work.
 - At the start of each session, run the complete Linux test and build baseline
-  before dispatching. The service supplies the portable tar wrapper and a
-  single Vitest worker; do not bypass either setting.
+  before dispatching. The service supplies the portable tar wrapper, a single
+  Vitest worker, and an 8 GiB Node heap for both TypeScript and Vite; do not
+  bypass those settings.
 - Run only one heavyweight local gate at a time across the supervisor and its
   worker. In particular, never overlap `npm test`, typecheck/build, an mGBA
   capture, or a batch comparator with another heavyweight command. Wait for
