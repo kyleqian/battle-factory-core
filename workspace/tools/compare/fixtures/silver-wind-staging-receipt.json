@@ -1,0 +1,102 @@
+{
+  "schema": "silver-wind-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SILVER_WIND",
+  "moveId": 318,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/silverWindSourceAudit.ts",
+    "auditSha256": "de21aec108622031651f351c8896b993f10367c1912f12e034b8e7d6327ab542",
+    "auditRunSha256": "5e4ca54ba6f1db909f0a5f9c7df821879491a295c9c75c830d163889929d8d0d",
+    "probe": "tools/compare/silverWindStagingProbe.py",
+    "probeSha256": "f396564629abf2d91575b54ece6d6eab7c79fa4e688f0d0f0f44add185e1bc4d",
+    "pointerOwnedRoot": {
+      "symbol": "Move_SILVER_WIND",
+      "elf": {"image": "reference/pokeemerald/pokeemerald.elf", "symbol": "Move_SILVER_WIND", "start": "0x082d630b", "endExclusive": "0x082d6523", "byteLength": 536},
+      "start": "0x082d630b",
+      "endExclusive": "0x082d6523",
+      "byteLength": 536,
+      "romSha256": "0c814127f77e551907c127660aea24c6d26e3fc368f20d88cc967fda7de9a2ee"
+    }
+  },
+  "factoryLegalSelection": {
+    "lowestLevel50Carrier": {"setId": 153, "name": "FRONTIER_MON_BUTTERFREE", "species": 12},
+    "allSourceCarriers": [21, 153, 157, 158, 172, 173, 198, 226, 278, 368, 519, 711],
+    "level50Carriers": [153, 157, 158, 172, 173, 198, 226, 278, 368, 519, 711],
+    "excludedOutsideLevel50": [21],
+    "sourceRoute": {"challengeNum": 0, "level50SetRange": [110, 199], "trainerId": 50},
+    "partyBeforeInit": true,
+    "choiceConstraint": "Both orientations build complete legal three-Pokémon parties before battle initialization. Butterfree has four Silver Wind slots; Onix has four Tackle slots. Ordinary controller input selects the player action and stock AI selects the opponent action without transient battle-state injection."
+  },
+  "freshness": {
+    "sharedOracleCaptureUsed": false,
+    "localMgbaWrapper": "tools/run-mgba-probe.py",
+    "profileCheckedAtProbe": "battle-scene-on",
+    "runsPerOrientation": 2
+  },
+  "runs": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-silver-wind-player-butterfree-opponent-onix.json",
+      "scenarioSha256": "ce7e8ec0d324499824e9624618c0f787c698373f8fa570e2b1dd413d3a972b37",
+      "seed": 305420318,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "6f67295907bbb3247529c66ee8d0bf75bdcff8844e224923d2a046a03a45c4c4",
+      "output": {
+        "attacker": {"side": "player", "partyIndex": 0, "species": 12, "level": 50, "moves": [318, 318, 318, 318]},
+        "target": {"side": "opponent", "partyIndex": 0, "species": 95, "level": 50, "initialHp": 110, "maxHp": 110, "finalHp": 96},
+        "choiceConstraint": {"attackerMoveSlots": [318, 318, 318, 318], "opponentAiMoveSlots": [33, 33, 33, 33]},
+        "root": {"symbol": "Move_SILVER_WIND", "start": "0x82d630b", "endExclusive": "0x82d6523", "observations": 192, "attackerBattler": 0, "targetBattler": 1},
+        "romOutcome": {"kind": "damaging-silver-wind-hit", "targetFinalPartyHp": 96, "targetFinalBattleHp": 96, "targetFinalStatus": {"kind": "none"}, "battleOutcome": 0},
+        "pp": {"before": [5, 5, 5, 5], "after": [4, 5, 5, 5], "spent": 1},
+        "cleanup": {"visualTasks": 0, "soundTasks": 0},
+        "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "658293189675442b5e24c6766926198021c6e4570f373289e45fcdb99775f466", "afterSha256": "658293189675442b5e24c6766926198021c6e4570f373289e45fcdb99775f466"},
+        "sourceInitialized": true,
+        "customPartiesBuiltBeforeBattle": true,
+        "transientFreeSetup": true
+      }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-silver-wind-opponent-butterfree-player-onix.json",
+      "scenarioSha256": "6b7d7bf18a8a829cf7257a761c879256a548d48f240b9e5a7e2b70f804570aac",
+      "seed": 305420318,
+      "freshRuns": 2,
+      "outputsByteIdentical": true,
+      "outputSha256": "80a40dcaad79e20c8a36eaf3d6e5a60169a8e33c6ec471485c3e894025bfe885",
+      "output": {
+        "attacker": {"side": "opponent", "partyIndex": 0, "species": 12, "level": 50, "moves": [318, 318, 318, 318]},
+        "target": {"side": "player", "partyIndex": 0, "species": 95, "level": 50, "initialHp": 110, "maxHp": 110, "finalHp": 96},
+        "choiceConstraint": {"attackerMoveSlots": [318, 318, 318, 318], "opponentAiMoveSlots": [318, 318, 318, 318]},
+        "root": {"symbol": "Move_SILVER_WIND", "start": "0x82d630b", "endExclusive": "0x82d6523", "observations": 195, "attackerBattler": 1, "targetBattler": 0},
+        "romOutcome": {"kind": "damaging-silver-wind-hit", "targetFinalPartyHp": 96, "targetFinalBattleHp": 96, "targetFinalStatus": {"kind": "none"}, "battleOutcome": 0},
+        "pp": {"before": [5, 5, 5, 5], "after": [5, 4, 5, 5], "spent": 1},
+        "cleanup": {"visualTasks": 0, "soundTasks": 0},
+        "benches": {"partyIndices": [1, 2], "unchanged": true, "checksumValid": true, "beforeSha256": "6bf776b7ad3d9b14deeb0e26fb29b60d2d52a38e8fcdc02cd21ede118b41148c", "afterSha256": "6bf776b7ad3d9b14deeb0e26fb29b60d2d52a38e8fcdc02cd21ede118b41148c"},
+        "sourceInitialized": true,
+        "customPartiesBuiltBeforeBattle": true,
+        "transientFreeSetup": true
+      }
+    }
+  },
+  "scope": {
+    "framebuffersRetained": false,
+    "rawRgbRetained": false,
+    "denseWindowCaptured": false,
+    "semanticFramesRetained": false,
+    "latchMeasured": false,
+    "durableLatchRowAdded": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSceneOnSeam": false,
+    "compositorAdded": false,
+    "coveragePromotion": false,
+    "coverageEntryAdded": false,
+    "componentTrackFulfilled": false,
+    "battleStateInjected": false,
+    "transientOverrides": [],
+    "boundaryOrBarrierChanged": false,
+    "noTimingOrLatchTransfer": true
+  },
+  "remainder": "MOVE_SILVER_WIND remains unsupported and absent from coverage entries and queue. Before any reducer or promotion, retain complete twice-fresh dense bilateral Battle Scene ON evidence and independently fit the side-specific BUG background, sliding BG, split priority, both exclude-palette passes, all eighteen sparkle callbacks/resources, audio, restoration, and cleanup display latches; then prove a live source-derived presentation without per-tick recording or absolute-tick fitting."
+}
