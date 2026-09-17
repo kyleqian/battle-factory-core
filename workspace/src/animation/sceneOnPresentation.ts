@@ -594,6 +594,11 @@ import {
   type ShockWaveState,
 } from "./shockWave.ts";
 import {
+  overheatAtAge,
+  type OverheatLiveInputs,
+  type OverheatState,
+} from "./overheat.ts";
+import {
   solarBeamAtAge,
   type SolarBeamBody,
   type SolarBeamState,
@@ -2407,6 +2412,21 @@ export interface SceneOnShockWaveConfig {
     | "attackerPictureOrigin" | "targetPictureOrigin" | "targetBattlePosition">>;
 }
 
+/**
+ * Narrow Scene-ON seam for MOVE_OVERHEAT's pure source-relative body.  The
+ * scene supplies current battler geometry and allocator/palette facts; the
+ * reducer cannot inspect or alter gameplay state.
+ */
+export interface SceneOnOverheatConfig {
+  readonly move: "OVERHEAT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<OverheatLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+    | "attackerPictureOrigin" | "targetPictureOrigin">>;
+}
+
 /** Narrow Scene-ON seam for Solar Beam's source-isolated two-turn bodies. */
 export interface SceneOnSolarBeamConfig {
   readonly move: "SOLAR_BEAM";
@@ -4175,6 +4195,7 @@ export type SceneOnMoveConfig =
   | SceneOnPsychUpConfig
   | SceneOnHyperVoiceConfig
   | SceneOnShockWaveConfig
+  | SceneOnOverheatConfig
   | SceneOnSolarBeamConfig
   | SceneOnHiJumpKickConfig
   | SceneOnRollingKickConfig
@@ -4560,6 +4581,8 @@ export type SceneOnHyperVoicePresentationState =
   SceneOnMovePresentationState<SceneOnHyperVoiceConfig>;
 export type SceneOnShockWavePresentationState =
   SceneOnMovePresentationState<SceneOnShockWaveConfig>;
+export type SceneOnOverheatPresentationState =
+  SceneOnMovePresentationState<SceneOnOverheatConfig>;
 export type SceneOnSignalBeamPresentationState =
   SceneOnMovePresentationState<SceneOnSignalBeamConfig>;
 export type SceneOnNightmarePresentationState =
@@ -4759,6 +4782,11 @@ export interface SceneOnHyperVoiceView extends HyperVoiceState {
 }
 
 export interface SceneOnShockWaveView extends ShockWaveState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnOverheatView extends OverheatState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7865,6 +7893,29 @@ export function sceneOnShockWaveView(
       attackerPictureOrigin: attacker.geometry.animationCenter,
       targetPictureOrigin: target.geometry.animationCenter,
       targetBattlePosition: target.geometry.battlePositionCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_OVERHEAT's first `loadspritegfx` source row. */
+export function sceneOnOverheatView(
+  state: SceneOnOverheatPresentationState,
+): SceneOnOverheatView {
+  if (state.config.move !== "OVERHEAT") {
+    throw new Error(`expected OVERHEAT presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...overheatAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerPictureOrigin: attacker.geometry.animationCenter,
+      targetPictureOrigin: target.geometry.animationCenter,
     }),
     attacker,
     target,
