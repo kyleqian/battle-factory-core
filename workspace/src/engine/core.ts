@@ -193,6 +193,7 @@ import {
   type SceneOnSignalBeamConfig,
   type SceneOnNightmareConfig,
   type SceneOnOverheatConfig,
+  type SceneOnSilverWindConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -355,6 +356,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "OVERHEAT") {
     const overheatPresentation = presentation as SceneOnMovePresentationState<SceneOnOverheatConfig>;
     renderSceneOnMovePresentation(framebuffer, overheatPresentation);
+    return;
+  }
+  if (presentation.config.move === "SILVER_WIND") {
+    const silverWindPresentation = presentation as SceneOnMovePresentationState<SceneOnSilverWindConfig>;
+    renderSceneOnMovePresentation(framebuffer, silverWindPresentation);
     return;
   }
   renderSceneOnMovePresentation(framebuffer, presentation);

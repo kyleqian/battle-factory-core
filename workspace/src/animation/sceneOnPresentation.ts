@@ -600,6 +600,7 @@ import {
 } from "./overheat.ts";
 import {
   silverWindAtAge,
+  silverWindDisplayPlanAtAge,
   type SilverWindLiveInputs,
   type SilverWindState,
 } from "./silverWind.ts";
@@ -7971,6 +7972,25 @@ export function sceneOnSilverWindView(
     attacker,
     target,
   };
+}
+
+/** Live, evidence-free scanout plan for the shared Silver Wind compositor. */
+export function sceneOnSilverWindDisplayPlan(
+  state: SceneOnSilverWindPresentationState,
+): ReturnType<typeof silverWindDisplayPlanAtAge> {
+  if (state.config.move !== "SILVER_WIND") {
+    throw new Error(`expected SILVER_WIND presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return silverWindDisplayPlanAtAge(state.age, {
+    ...animationInputs,
+    attackerSide: attacker.geometry.side,
+    targetSide: target.geometry.side,
+    attackerSpecies: attacker.species,
+    targetSpecies: target.species,
+    attackerPictureOrigin: attacker.geometry.animationCenter,
+    targetPictureOrigin: target.geometry.animationCenter,
+  });
 }
 
 /** `age=0` is the first display of the selected Solar Beam source body. */

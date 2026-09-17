@@ -551,6 +551,7 @@ import bonemerangAsset from "../animation/assets/bonemerang.json" with { type: "
 import psychUpAsset from "../animation/assets/psych-up.json" with { type: "json" };
 import signalBeamAsset from "../animation/assets/signal-beam.json" with { type: "json" };
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
+import silverWindAsset from "../animation/assets/silver-wind.json" with { type: "json" };
 import waterPulseAsset from "../animation/assets/water-pulse.json" with { type: "json" };
 import digDirtMoundAsset from "../animation/assets/dig-dirt-mound.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
@@ -991,6 +992,8 @@ import {
   sceneOnSignalBeamView,
   sceneOnNightmareView,
   sceneOnOverheatView,
+  sceneOnSilverWindView,
+  sceneOnSilverWindDisplayPlan,
   sceneOnRazorWindView,
   sceneOnHornDrillView,
   sceneOnAuroraBeamView,
@@ -1257,6 +1260,7 @@ import {
   type SceneOnSignalBeamConfig,
   type SceneOnNightmareConfig,
   type SceneOnOverheatConfig,
+  type SceneOnSilverWindConfig,
   type SceneOnRazorWindConfig,
   type SceneOnHornDrillConfig,
   type SceneOnAuroraBeamConfig,
@@ -1885,6 +1889,13 @@ const shockWaveArt = (shockWaveAsset as {
   art: Record<"circleOfLight" | "electricOrbs" | "spark" | "lightning",
     { tileset: Tileset; palette: RgbColor[] }>;
 }).art;
+const silverWindResources = (silverWindAsset as {
+  resources: {
+    sparkle6: { tileset: Tileset; palette: RgbColor[] };
+    bugBackground: { palette: RgbColor[] };
+  };
+}).resources;
+const silverWindArt = silverWindResources.sparkle6;
 const waterPulseArt = waterPulseAsset as {
   blueRing2: { tileset: Tileset; palette: RgbColor[] };
 };
@@ -24129,6 +24140,117 @@ export function renderSceneOnMovePresentation(
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "NIGHTMARE!", 99,
     );
+    return;
+  }
+
+  if (state.config.move === "SILVER_WIND") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnSilverWindConfig>;
+    const view = sceneOnSilverWindView(moveState);
+    const plan = sceneOnSilverWindDisplayPlan(moveState);
+    const displayed = plan.displayed;
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SILVER_WIND presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SILVER_WIND missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const darken = (palette: readonly RgbColor[]): RgbColor[] => palette.map((color) => {
+      const hardwareFade = (view.registers.bldcnt ?? 0) === 0x00e8
+        ? Math.min(16, (view.registers.bldy ?? 0) + 1) : 0;
+      const packed = mgbaDarkenColor(color.r | color.g << 8 | color.b << 16,
+        hardwareFade);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    });
+    const paletteBank = (bank: number): RgbColor[] => darken(
+      plan.hardwarePalette.slice(bank * 16, bank * 16 + 16).map(rgb555),
+    );
+    if (plan.bugBackgroundVisible) {
+      drawExtractedTileBg(fb, {
+        tileset: extremeSpeedBg.tileset,
+        tilemap: view.attacker.geometry.side === "player"
+          ? extremeSpeedBg.opponentTilemap : extremeSpeedBg.playerTilemap,
+        subpalettes: [darken(blendPaletteToward(silverWindResources.bugBackground.palette,
+          { r: 0, g: 0, b: 0 }, 4))],
+      }, view.registers.bg3hofs & 0xff);
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: [2, 3, 4].map(paletteBank),
+      });
+    }
+    const input = moveState.config.animationInputs;
+    const attackerArt = artFor(view.attacker), targetArt = artFor(view.target);
+    if (displayed.background.monbgActive) {
+      drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+        paletteBank(input.background.monbg.paletteBank),
+        view.target.geometry.spriteCorner.x + displayed.battlers.target.sprite.x2,
+        view.target.geometry.spriteCorner.y + displayed.battlers.target.sprite.y2);
+    }
+    if (moveState.age === 0 && view.attacker.geometry.side === "opponent") {
+      drawSourceOpponentEnemyShadow(fb, view.attacker.species,
+        view.attacker.geometry.battlePositionCenter);
+    }
+    const orderOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    type Entry = Readonly<{ slot: number; priority: number; order: number; draw: () => void }>;
+    const entries: Entry[] = [];
+    const attackerBank = 16 + (input.attackerSprite.attr[2] >>> 12 & 0xf);
+    const targetBank = 16 + (input.targetSprite.attr[2] >>> 12 & 0xf);
+    entries.push({ slot: input.attackerSprite.slot, priority: input.attackerSprite.oamPriority,
+      order: orderOf(input.attackerSprite.slot), draw: () => drawSpriteSheet(
+        fb, tilesFor(attackerArt, view.attacker.geometry.side), paletteBank(attackerBank),
+        view.attacker.geometry.spriteCorner.x + displayed.battlers.attacker.sprite.x2,
+        view.attacker.geometry.spriteCorner.y + displayed.battlers.attacker.sprite.y2) });
+    if (!displayed.background.monbgActive) entries.push({
+      slot: input.targetSprite.slot, priority: input.targetSprite.oamPriority,
+      order: orderOf(input.targetSprite.slot), draw: () => drawSpriteSheet(
+        fb, tilesFor(targetArt, view.target.geometry.side), paletteBank(targetBank),
+        view.target.geometry.spriteCorner.x + displayed.battlers.target.sprite.x2,
+        view.target.geometry.spriteCorner.y + displayed.battlers.target.sprite.y2),
+    });
+    for (const sparkle of displayed.sprites) entries.push({
+      slot: sparkle.slot, priority: sparkle.oamPriority, order: orderOf(sparkle.slot),
+      draw: () => drawSpriteSheetAffineRotate(fb, silverWindArt.tileset,
+        paletteBank(input.resources.sparkle6.paletteBank),
+        sparkle.x + sparkle.x2, sparkle.y + sparkle.y2,
+        sparkle.matrix[0], sparkle.matrix[1], sparkle.matrix[2], sparkle.matrix[3],
+        undefined, false),
+    });
+    for (let priority = 3; priority >= 0; priority -= 1) {
+      for (const entry of entries.filter((item) => item.priority === priority)
+        .sort((left, right) => right.order - left.order || right.slot - left.slot)) entry.draw();
+    }
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SILVER WIND!", 99);
     return;
   }
 

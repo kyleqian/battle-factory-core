@@ -327,7 +327,7 @@ function tasksAtAge(age: number, input: Readonly<SilverWindLiveInputs>): SilverW
 }
 
 function paletteAtAge(age: number, input: Readonly<SilverWindLiveInputs>) {
-  const { clearStart, clearEnd, slideEnd, inactive } = sideRange(input);
+  const { clearEnd, slideEnd, inactive } = sideRange(input);
   const unfaded = [...input.palettes.unfaded], faded = [...input.palettes.faded];
   const attackerBank = 16 + ((input.attackerSprite.attr[2] >>> 12) & 0xf);
   const targetBank = 16 + ((input.targetSprite.attr[2] >>> 12) & 0xf);
@@ -340,10 +340,11 @@ function paletteAtAge(age: number, input: Readonly<SilverWindLiveInputs>) {
     copyBank(unfaded, input.background.monbg.paletteBank, input.palettes.unfaded.slice(targetBank * 16, targetBank * 16 + 16));
     copyBank(faded, input.background.monbg.paletteBank, input.palettes.faded.slice(targetBank * 16, targetBank * 16 + 16));
   }
-  const blend = age >= 11 && age <= 14 ? Math.min(4, age - 10) : 0;
+  const blend = age >= 12 && age <= 14 ? age - 11
+    : age >= 15 && age <= slideEnd ? 4 : 0;
   if (blend) blendBanks(faded, unfaded, [1, 2, 3, attackerBank], blend);
-  if (age >= 32 && age < clearStart) blendBanks(faded, unfaded, [1, 2, 3], 4);
-  if (age >= slideEnd && age <= slideEnd + 3) blendBanks(faded, unfaded, [1, 2, 3, attackerBank], Math.max(0, 4 - (age - slideEnd + 1)));
+  if (age > slideEnd && age <= slideEnd + 4) blendBanks(faded, unfaded,
+    [1, 2, 3, attackerBank], Math.max(0, 4 - (age - slideEnd)));
   const hardware = age === 0 ? [...input.palettes.hardware] : [...faded];
   // The hardware latch is RAM+1 except for the synchronous monbg palette load.
   const displayPalette = age === 6 ? "same-row-monbg" as const : age === 0 ? "initial" as const : "preceding-faded" as const;
@@ -351,7 +352,7 @@ function paletteAtAge(age: number, input: Readonly<SilverWindLiveInputs>) {
 }
 
 function backgroundAtAge(age: number, input: Readonly<SilverWindLiveInputs>) {
-  const { clearEnd, slideEnd } = sideRange(input);
+  const { clearEnd, restoreStart, slideEnd } = sideRange(input);
   const values = { ...input.background.values }, registers = { ...input.background.registers };
   const monbg = input.background.monbg;
   const xKey = `gBattle_BG${monbg.bg}_X`, yKey = `gBattle_BG${monbg.bg}_Y`;
@@ -381,6 +382,24 @@ function backgroundAtAge(age: number, input: Readonly<SilverWindLiveInputs>) {
   // StartSlidingBg writes gBattle_BG3_X in software; BG3HOFS receives that
   // value on the next callback pass, including the final zero after cleanup.
   if (age >= 31) registers.bg3hofs = slidingX(age - 1) & 0x1ff;
+  // Task_FadeToBg uses BeginHardwarePaletteFade(0xE8): BG1/BG2/BG3 and
+  // OBJ are darkened by BLDY while BG0 (the message window) stays intact.
+  const hardwareFade = (start: number, downAt: number): number | null => {
+    if (age < start + 1 || age > start + 37) return null;
+    if (age <= start + 17) return age - start - 1;
+    if (age < downAt) return 16;
+    return Math.max(0, 16 - (age - downAt + 1));
+  };
+  const firstFade = hardwareFade(11, 32);
+  const restoreFade = hardwareFade(restoreStart, slideEnd + 3);
+  const fade = restoreFade ?? firstFade;
+  if (fade !== null) {
+    registers.bldcnt = 0x00e8;
+    registers.bldy = fade;
+  } else {
+    registers.bldcnt = 0;
+    registers.bldy = 0;
+  }
   return { values, registers, monbgActive: age >= 6 && age <= clearEnd, sliding: age >= 30 && age < slideEnd, bugBackground: age >= 11 && age < slideEnd ? input.background.bugBackground[input.attackerSide] : null };
 }
 
@@ -444,5 +463,30 @@ export function silverWindAtAge(age: number, input: Readonly<SilverWindLiveInput
     painterOrder, audio, rng: { ...rng, gameplay: input.gameplayRng, gameplayState: input.gameplayState, gameplayUnchanged: true },
     latches: { oamAndMatrices: age === 0 ? "initial" : "preceding-software", palette: palette.displayPalette, targetExcludedBank: palette.targetBank },
     cleanup: { visualTasks: tasks.filter((task) => task.callback !== "Task_PanFromInitialToTarget").length, soundTasks: age >= 4 && age < (input.attackerSide === "player" ? 67 : 66) ? 1 : 0, ownedSprites: sprites.length, ownedTasks: tasks.length, firstInactive: age === range.inactive, resourcesReleased: age === range.inactive },
+  };
+}
+
+/**
+ * Source-relative scanout plan used by any live compositor. Ordinary OBJ,
+ * matrix and palette DMA consume the preceding software row; monbg's palette
+ * setup at age 6 is the sole same-row exception measured by this move.
+ */
+export function silverWindDisplayPlanAtAge(
+  age: number,
+  input: Readonly<SilverWindLiveInputs>,
+): Readonly<{
+  current: SilverWindState;
+  displayed: SilverWindState;
+  hardwarePalette: readonly number[];
+  bugBackgroundVisible: boolean;
+}> {
+  const current = silverWindAtAge(age, input);
+  const displayed = silverWindAtAge(Math.max(0, age - 1), input);
+  return {
+    current,
+    displayed,
+    hardwarePalette: age === 6 ? current.palette.faded : age === 0
+      ? input.palettes.hardware : displayed.palette.faded,
+    bugBackgroundVisible: age >= 30 && age < sideRange(input).slideEnd,
   };
 }
