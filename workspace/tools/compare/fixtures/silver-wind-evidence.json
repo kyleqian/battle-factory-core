@@ -1,0 +1,77 @@
+{
+  "schema": "silver-wind-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SILVER_WIND",
+  "moveId": 318,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/silverWindSourceAudit.ts",
+    "auditSha256": "de21aec108622031651f351c8896b993f10367c1912f12e034b8e7d6327ab542",
+    "auditRunSha256": "5e4ca54ba6f1db909f0a5f9c7df821879491a295c9c75c830d163889929d8d0d",
+    "probe": "tools/compare/silverWindProbe.py",
+    "probeSha256": "a86ad9e942eecb1294e575e9e1b4fa7b7df8e1ccd70fcb513d8cc2ed8aedcc56",
+    "sharedProbe": "tools/compare/sweetScentProbe.py",
+    "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
+    "stagingReceipt": "tools/compare/fixtures/silver-wind-staging-receipt.json",
+    "stagingReceiptSha256": "a11d5ea67212a1949bbbf4bec9867dfb63da7c4c34fb34050559ea6572e4e885",
+    "pointerOwnedRoot": { "start": "0x082d630b", "endExclusive": "0x082d6523", "observedParities": [0, 1] }
+  },
+  "freshness": {
+    "check": "tools/check-oracle-freshness.sh",
+    "result": "SKIP: could not read start time for pid 43588 on 8014; SKIP: could not read start time for pid 43560 on 8012; date/PID diagnostic exited 2",
+    "exitCode": 2,
+    "sharedOracleCaptureUsed": false,
+    "localMgbaWrapper": "tools/run-mgba-probe.py"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-silver-wind-player-butterfree-opponent-onix.json",
+      "scenarioSha256": "ce7e8ec0d324499824e9624618c0f787c698373f8fa570e2b1dd413d3a972b37",
+      "freshRuns": 2,
+      "denseState": "tools/compare/evidence/silver-wind-player-dense-state.json.gz",
+      "denseStateSha256": "2014da890581b20bfb22cbbd83a72374b2a9e4bdbefad5844d59dbced08f026e",
+      "probeJsonSha256": "416bcc0f84501c945b79ade41b0f0d2615ea727b8cfcd71708db02c97cb75d5e",
+      "repeatProbeJsonSha256": "416bcc0f84501c945b79ade41b0f0d2615ea727b8cfcd71708db02c97cb75d5e",
+      "rawRgbArchive": "tools/compare/evidence/silver-wind-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "f270296a3b2b5e90ecf0d7419a357c8280224ecdfd44a5694e6a913601929b76",
+      "rawRgbSequenceSha256": "2694dc3097053c98f64adc7f76d52e98a499aa47b802d78a4664c36414978d2b",
+      "repeatRawRgbSequenceSha256": "2694dc3097053c98f64adc7f76d52e98a499aa47b802d78a4664c36414978d2b",
+      "changeMap": "tools/compare/evidence/silver-wind-changemap-player.json",
+      "changeMapSha256": "89e7f0f172293a6d3e65ea904000f7201c3a80f75d0ea1a089b2b6b80d1c52c1"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-silver-wind-opponent-butterfree-player-onix.json",
+      "scenarioSha256": "6b7d7bf18a8a829cf7257a761c879256a548d48f240b9e5a7e2b70f804570aac",
+      "freshRuns": 2,
+      "denseState": "tools/compare/evidence/silver-wind-opponent-dense-state.json.gz",
+      "denseStateSha256": "7c3d3f425f4711a973abed9737c1c8b040acddfda6e125ccfb155adf7d28af54",
+      "probeJsonSha256": "3fed2dda881b3f79b70169f7554e1812d72b4a82c4cd72aa677a907fbcdde517",
+      "repeatProbeJsonSha256": "3fed2dda881b3f79b70169f7554e1812d72b4a82c4cd72aa677a907fbcdde517",
+      "rawRgbArchive": "tools/compare/evidence/silver-wind-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "ab680d448e10e40e77cbedd71e887b8104994c85c7cdb521b1ebaec5f9105190",
+      "rawRgbSequenceSha256": "8c32e7335376eb95bdefb08d01513c4e5fc0a658cb5890bf7b45c8d858c05653",
+      "repeatRawRgbSequenceSha256": "8c32e7335376eb95bdefb08d01513c4e5fc0a658cb5890bf7b45c8d858c05653",
+      "changeMap": "tools/compare/evidence/silver-wind-changemap-opponent.json",
+      "changeMapSha256": "2d06056b756904fd50c61a06c5afabbdb481d2ad6a1f63e8537a68a81ac809a2"
+    }
+  },
+  "scope": {
+    "legalBilateralPartyOnlySceneOn": true,
+    "twiceFreshSemanticAndRawRgb": true,
+    "chronologicalRawRgb888Retained": true,
+    "normalizedBankedChangeMapsRetained": true,
+    "moveOwnedLatchMap": true,
+    "gameplayStateOwned": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferAcceptanceAdded": false,
+    "coveragePromotion": false,
+    "coverageEntryAdded": false,
+    "queueChanged": false,
+    "componentTrackFulfilled": false,
+    "siblingCredit": false
+  }
+}
