@@ -13,6 +13,20 @@ import { silverWindConfigFor, silverWindInputsFor, verifySilverWindReducer, type
 type Json = Record<string, any>;
 const root = resolve(import.meta.dirname, "../..");
 const sha256 = (value: Uint8Array | string): string => createHash("sha256").update(value).digest("hex");
+type ScopedBand = Readonly<{ readonly name: string; readonly firstAge: number; readonly lastAge: number }>;
+const scopedBandsFor = (orientation: SilverWindOrientation): readonly ScopedBand[] =>
+  orientation === "player-back"
+    ? [
+      { name: "fade", firstAge: 12, lastAge: 29 },
+      { name: "post-bug-restore", firstAge: 168, lastAge: 183 },
+    ]
+    : [
+      // The row is checked against its retained RGB, not a synthetic mask:
+      // the production draw applies this move-local shadow at y - 1.
+      { name: "entry-enemy-shadow", firstAge: 0, lastAge: 0 },
+      { name: "fade", firstAge: 12, lastAge: 29 },
+      { name: "post-bug-restore", firstAge: 171, lastAge: 186 },
+    ];
 function rowsFor(orientation: SilverWindOrientation): Json[] {
   const stem = orientation === "player-back" ? "player" : "opponent";
   const corpus = JSON.parse(gunzipSync(readFileSync(resolve(root, `tools/compare/evidence/silver-wind-${stem}-dense-state.json.gz`))).toString("utf8")) as Json;
@@ -31,6 +45,9 @@ function compareOrientation(orientation: SilverWindOrientation): Json {
   execFileSync("tar", ["-xzf", resolve(root, `tools/compare/evidence/silver-wind-${stem}-raw-rgb.tar.gz`), "-C", scratch]);
   let componentMatched = 0, seamMatched = 0, rawRgbMatched = 0, framebufferMatched = 0, residualPixels = 0;
   const failures: string[] = [];
+  const bands = scopedBandsFor(orientation).map((band) => ({ ...band, rows: 0, framebufferMatched: 0, residualPixels: 0 }));
+  let blackFadeResidualPixels = -1;
+  const blackFadeAge = orientation === "player-back" ? 28 : 30;
   const input = silverWindInputsFor(orientation, rows), config = silverWindConfigFor(orientation, rows);
   for (const [age, row] of rows.entries()) {
     const component = silverWindAtAge(age, input);
@@ -46,8 +63,30 @@ function compareOrientation(orientation: SilverWindOrientation): Json {
     const residual = frameDiff(render({ ...createInitialState(), rngMode: "frontierBattle", sceneOnPresentation: state }), raw);
     residualPixels += residual;
     if (residual === 0) framebufferMatched += 1; else failures.push(`${age}:${residual}`);
+    if (age === blackFadeAge) blackFadeResidualPixels = residual;
+    for (const band of bands) if (age >= band.firstAge && age <= band.lastAge) {
+      band.rows += 1;
+      if (residual === 0) band.framebufferMatched += 1;
+      band.residualPixels += residual;
+    }
   }
-  return { orientation, rows: rows.length, componentMatched, seamMatched, rawRgbMatched, framebufferMatched, residualPixels, failures };
+  if (blackFadeResidualPixels < 0) throw new Error(`${orientation}: missing black-fade diagnostic row`);
+  return {
+    orientation, rows: rows.length, componentMatched, seamMatched, rawRgbMatched,
+    framebufferMatched, residualPixels, failures,
+    scopedBands: bands.map((band) => ({
+      ...band,
+      residualRows: band.rows - band.framebufferMatched,
+      exact: band.framebufferMatched === band.rows && band.residualPixels === 0,
+      ...(band.name === "entry-enemy-shadow"
+        ? { retainedRgbBbox: [160, 65, 191, 73], moveLocalYOffset: -1 }
+        : {}),
+    })),
+    blackFadeDiagnostic: {
+      age: blackFadeAge, framebufferExact: blackFadeResidualPixels === 0,
+      residualPixels: blackFadeResidualPixels,
+    },
+  };
 }
 function alteredControl(): Json {
   const rows = rowsFor("player-back"), base = silverWindConfigFor("player-back", rows), input = base.animationInputs;
@@ -78,9 +117,26 @@ function alteredControl(): Json {
 
 verifySilverWindReducer();
 const orientations = [compareOrientation("player-back"), compareOrientation("opponent-front")];
+const scopedBands = orientations.flatMap((orientation) => orientation.scopedBands);
+const scopedRows = scopedBands.reduce((sum, band) => sum + band.rows, 0);
+const scopedFramebufferMatched = scopedBands.reduce((sum, band) => sum + band.framebufferMatched, 0);
+const scopedResidualPixels = scopedBands.reduce((sum, band) => sum + band.residualPixels, 0);
+const globalFramebufferMatched = orientations.reduce((sum, row) => sum + row.framebufferMatched, 0);
+const globalResidualPixels = orientations.reduce((sum, row) => sum + row.residualPixels, 0);
 const stable = { schema: "silver-wind-actual-core-verdict/v1", oracleProfile: "battle-scene-on", move: "MOVE_SILVER_WIND", rows: 389,
   componentMatched: 389, seamMatched: 389, rawRgbMatched: 389,
-  framebufferMatched: orientations.reduce((sum, row) => sum + row.framebufferMatched, 0), residualPixels: orientations.reduce((sum, row) => sum + row.residualPixels, 0), orientations, alteredLiveControl: alteredControl(), componentTrackFulfilled: false };
+  framebufferMatched: globalFramebufferMatched, residualPixels: globalResidualPixels,
+  scoped: {
+    rows: scopedRows, framebufferMatched: scopedFramebufferMatched,
+    residualRows: scopedRows - scopedFramebufferMatched, residualPixels: scopedResidualPixels,
+    exact: scopedFramebufferMatched === scopedRows && scopedResidualPixels === 0,
+    outOfScope: {
+      rows: 389 - scopedRows, framebufferMatched: globalFramebufferMatched - scopedFramebufferMatched,
+      residualRows: (389 - scopedRows) - (globalFramebufferMatched - scopedFramebufferMatched),
+      residualPixels: globalResidualPixels - scopedResidualPixels,
+    },
+  },
+  orientations, alteredLiveControl: alteredControl(), componentTrackFulfilled: false };
 const report = { ...stable, digest: sha256(JSON.stringify(stable)) };
 console.log(JSON.stringify(report));
 if (process.argv.includes("--require-exact") && report.residualPixels !== 0) process.exitCode = 1;
