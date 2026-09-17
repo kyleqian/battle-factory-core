@@ -599,6 +599,11 @@ import {
   type OverheatState,
 } from "./overheat.ts";
 import {
+  silverWindAtAge,
+  type SilverWindLiveInputs,
+  type SilverWindState,
+} from "./silverWind.ts";
+import {
   solarBeamAtAge,
   type SolarBeamBody,
   type SolarBeamState,
@@ -2427,6 +2432,21 @@ export interface SceneOnOverheatConfig {
     | "attackerPictureOrigin" | "targetPictureOrigin">>;
 }
 
+/**
+ * Narrow Scene-ON seam for MOVE_SILVER_WIND. The scene supplies live battler
+ * geometry, allocation, palette and BG/register facts; battle resolution and
+ * gameplay state remain opaque to the presentation reducer.
+ */
+export interface SceneOnSilverWindConfig {
+  readonly move: "SILVER_WIND";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<SilverWindLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+    | "attackerPictureOrigin" | "targetPictureOrigin">>;
+}
+
 /** Narrow Scene-ON seam for Solar Beam's source-isolated two-turn bodies. */
 export interface SceneOnSolarBeamConfig {
   readonly move: "SOLAR_BEAM";
@@ -4196,6 +4216,7 @@ export type SceneOnMoveConfig =
   | SceneOnHyperVoiceConfig
   | SceneOnShockWaveConfig
   | SceneOnOverheatConfig
+  | SceneOnSilverWindConfig
   | SceneOnSolarBeamConfig
   | SceneOnHiJumpKickConfig
   | SceneOnRollingKickConfig
@@ -4583,6 +4604,8 @@ export type SceneOnShockWavePresentationState =
   SceneOnMovePresentationState<SceneOnShockWaveConfig>;
 export type SceneOnOverheatPresentationState =
   SceneOnMovePresentationState<SceneOnOverheatConfig>;
+export type SceneOnSilverWindPresentationState =
+  SceneOnMovePresentationState<SceneOnSilverWindConfig>;
 export type SceneOnSignalBeamPresentationState =
   SceneOnMovePresentationState<SceneOnSignalBeamConfig>;
 export type SceneOnNightmarePresentationState =
@@ -4787,6 +4810,11 @@ export interface SceneOnShockWaveView extends ShockWaveState {
 }
 
 export interface SceneOnOverheatView extends OverheatState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSilverWindView extends SilverWindState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7909,6 +7937,29 @@ export function sceneOnOverheatView(
   const { attacker, target, animationInputs } = state.config;
   return {
     ...overheatAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerPictureOrigin: attacker.geometry.animationCenter,
+      targetPictureOrigin: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_SILVER_WIND's source `loadspritegfx ANIM_TAG_SPARKLE_6`. */
+export function sceneOnSilverWindView(
+  state: SceneOnSilverWindPresentationState,
+): SceneOnSilverWindView {
+  if (state.config.move !== "SILVER_WIND") {
+    throw new Error(`expected SILVER_WIND presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...silverWindAtAge(state.age, {
       ...animationInputs,
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
