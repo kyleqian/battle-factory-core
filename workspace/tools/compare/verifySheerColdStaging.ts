@@ -148,7 +148,7 @@ equal(receipt.scope, {
   coveragePromotion: false, componentTrackFulfilled: false, transientOverrides: [], battleStateInjected: false,
   entryHooksSkipped: false, noTimingOrLatchTransfer: true,
 }, "staging-only scope");
-if (coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 257 || coverage.entries.find((entry: Json) => entry.move === "MOVE_SHEER_COLD")?.status !== "exact" || coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")?.status !== "exact") fail("MOVE_SHEER_COLD exact coverage changed");
+if (coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 258 || coverage.entries.find((entry: Json) => entry.move === "MOVE_SHEER_COLD")?.status !== "exact" || coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")?.status !== "exact") fail("MOVE_SHEER_COLD exact coverage changed");
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "ice-cube-frozen-ice-cube");
 if (!track?.fulfilled || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_SHEER_COLD"])) fail("ice-cube exact track changed");
 

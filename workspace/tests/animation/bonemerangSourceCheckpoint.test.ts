@@ -12,7 +12,7 @@ describe("MOVE_BONEMERANG source/component/carrier checkpoint", () => {
   it("pins the complete branchless root, direct projectile/lunge/shake bodies, and BONE ROM resources", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
-    expect(createHash("sha256").update(first).digest("hex")).toBe("37609c8a86ee11e3fd7e0d8466f99384ccd53778a3bb8eda1aa74b307136206d");
+    expect(createHash("sha256").update(first).digest("hex")).toBe("b5c8c3907494457110a9ba38e50735c3ac524668a0083c987326b1a261593e86");
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
       schema: "bonemerang-source-audit/v1", move: "MOVE_BONEMERANG", moveId: 155,

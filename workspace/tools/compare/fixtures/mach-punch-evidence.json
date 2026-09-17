@@ -7,12 +7,12 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/machPunchSourceAudit.ts",
-    "auditSha256": "7e2ab9d83b00397b32df5faeb8cf84f20b5c75b5d38653c38974bbe1e957e681",
+    "auditSha256": "d864b01cbd1aad3a24e227889d099f050375e19ed13f346f5772ff9b51e70999",
     "probe": "tools/compare/machPunchProbe.py",
     "probeSha256": "17cc59d31a65a4e2c02e68306d75ae16a095a1743b6a71c0a06d217850e3b870",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "stagingReceipt": "tools/compare/fixtures/mach-punch-staging-receipt.json",
-    "stagingReceiptSha256": "c8b2408e972719ee98121611d21b3721c20cb40f712e42710b0ad869cd4facfe"
+    "stagingReceiptSha256": "36e653a4aa6958afa77fe2623b680856b0b1aa162a813a8daf8d0d3fc3c012c8"
   },
   "orientations": {
     "player-back": {

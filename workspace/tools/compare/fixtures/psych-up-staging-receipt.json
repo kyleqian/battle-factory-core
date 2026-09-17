@@ -7,7 +7,7 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/psychUpSourceAudit.ts",
-    "auditSha256": "eb8b9976abe1f490afb504b8d78a31981b95bea165fe3b17acbd48d13c6d2b48",
+    "auditSha256": "02a9463014f9a9e1e27638058919c432d9f1f426aa8de7120105ad3f16faf6c5",
     "auditRunSha256": "f97bca8819c8ad6c3317444ccdec3773ec26b47780431a1d0f20ffe65c50304a",
     "probe": "tools/compare/psychUpStagingProbe.py",
     "probeSha256": "65f20e1f3bed4014aefbacec8de16be237347232da95cb9c09f50e920afd50bf",

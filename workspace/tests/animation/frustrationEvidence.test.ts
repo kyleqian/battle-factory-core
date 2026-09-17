@@ -20,7 +20,7 @@ describe("MOVE_FRUSTRATION dense Scene-ON evidence checkpoint", () => {
     expect(second).toEqual(first);
     expect(first).toMatchObject({
       schema: "frustration-bilateral-evidence/v1", status: "unsupported-evidence", coverageCredit: false,
-      move: "MOVE_FRUSTRATION", moveId: 218, sourceAuditRunSha256: "1f4e01ec3bdc76f3800a8495ad3fab90a677b3ad8ecdf7c8613dee4b90fb932b",
+      move: "MOVE_FRUSTRATION", moveId: 218, sourceAuditRunSha256: "4e267262e3428239e2adabed636836152c2fbebbc3e955945f28104bb53b7b60",
       twiceFresh: true, rowsPerOrientation: 229,
       orientations: {
         "player-back": { rows: 229, sourceWindow: { startFrame: 76, endFrame: 304, frameCount: 229 }, changedRows: 112, lifecycle: { sprites: 8, tasks: 7 }, cleanup: { active: false, ownedSprites: 0, ownedTasks: 0 } },

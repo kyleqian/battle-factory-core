@@ -136,7 +136,7 @@ if (
   || level50Carriers[0]?.index !== 304 || level50Carriers[0]?.label !== "FRONTIER_MON_FURRET_2" || level50Carriers[0]?.species !== "SPECIES_FURRET"
   || level50Carriers[0]?.itemName !== "BATTLE_FRONTIER_ITEM_CHOICE_BAND" || level50Carriers[0]?.nature !== "NATURE_ADAMANT"
   || statuses.MOVE_SWAGGER !== "exact" || statuses.MOVE_FRUSTRATION !== "exact" || statuses.MOVE_TORMENT !== "exact" || statuses.MOVE_TAUNT !== "exact"
-  || coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length !== 257
+  || coverage.entries.filter((entry: { status: string }) => entry.status === "exact").length !== 258
   || coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_PSYCH_UP")?.status !== "exact"
   || track?.fulfilled !== true || JSON.stringify(track?.components) !== JSON.stringify([
     "asset:ANIM_TAG_ANGER", "sprite:gAngerMarkSpriteTemplate", "asset:ANIM_TAG_BREATH", "sprite:gBreathPuffSpriteTemplate", "task:AnimTask_GrowAndShrink",
