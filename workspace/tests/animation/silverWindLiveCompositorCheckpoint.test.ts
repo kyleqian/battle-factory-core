@@ -20,13 +20,22 @@ describe("MOVE_SILVER_WIND live compositor checkpoint", () => {
     expect(readFileSync(output, "utf8")).toBe(committed);
   });
 
-  it("drives every retained row and the material live control without promotion", () => {
+  it("closes only the scoped fade/shadow rows and retains the honest global remainder", () => {
     const first = run(), second = run();
     expect(second).toEqual(first);
     expect(first).toMatchObject({
       schema: "silver-wind-actual-core-verdict/v1", oracleProfile: "battle-scene-on",
       move: "MOVE_SILVER_WIND", rows: 389, componentMatched: 389,
-      seamMatched: 389, rawRgbMatched: 389, framebufferMatched: 41,
+      seamMatched: 389, rawRgbMatched: 389, framebufferMatched: 110,
+      residualPixels: 2_828_934,
+      scoped: {
+        rows: 69, framebufferMatched: 69, residualRows: 0, residualPixels: 0,
+        exact: true,
+        outOfScope: {
+          rows: 320, framebufferMatched: 41, residualRows: 279,
+          residualPixels: 2_828_934,
+        },
+      },
       alteredLiveControl: {
         species: ["CHARIZARD", "BLISSEY"], sidesReversed: true,
         geometryAllocationOrderPaletteAndPresentationRngChanged: true,
@@ -34,7 +43,30 @@ describe("MOVE_SILVER_WIND live compositor checkpoint", () => {
       },
       componentTrackFulfilled: false,
     });
-    expect(first.residualPixels).toBeGreaterThan(0);
+    expect(first.orientations).toMatchObject([
+      {
+        orientation: "player-back", framebufferMatched: 55,
+        scopedBands: [
+          { name: "fade", firstAge: 12, lastAge: 29, rows: 18, framebufferMatched: 18, residualPixels: 0, exact: true },
+          { name: "post-bug-restore", firstAge: 168, lastAge: 183, rows: 16, framebufferMatched: 16, residualPixels: 0, exact: true },
+        ],
+        // The scoped black row no longer darkens OBJ.
+        blackFadeDiagnostic: { age: 28, framebufferExact: true, residualPixels: 0 },
+      },
+      {
+        orientation: "opponent-front", framebufferMatched: 55,
+        scopedBands: [
+          { name: "entry-enemy-shadow", firstAge: 0, lastAge: 0, rows: 1, framebufferMatched: 1, residualPixels: 0, exact: true,
+            retainedRgbBbox: [160, 65, 191, 73], moveLocalYOffset: -1 },
+          { name: "fade", firstAge: 12, lastAge: 29, rows: 18, framebufferMatched: 18, residualPixels: 0, exact: true },
+          { name: "post-bug-restore", firstAge: 171, lastAge: 186, rows: 16, framebufferMatched: 16, residualPixels: 0, exact: true },
+        ],
+        // Age 30 remains intentionally outside this bounded fade repair.
+        blackFadeDiagnostic: { age: 30, framebufferExact: false, residualPixels: 2839 },
+      },
+    ]);
+    expect(first.orientations[0].failures).toContain("30:3760");
+    expect(first.orientations[1].failures).toContain("30:2839");
     expect(first.alteredLiveControl.changed).not.toBe(first.alteredLiveControl.canonical);
-  }, 30_000);
+  }, 45_000);
 });

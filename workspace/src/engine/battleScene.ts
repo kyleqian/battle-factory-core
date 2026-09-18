@@ -24148,6 +24148,7 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnSilverWindView(moveState);
     const plan = sceneOnSilverWindDisplayPlan(moveState);
     const displayed = plan.displayed;
+    const input = moveState.config.animationInputs;
     if (view.attacker.geometry.side === view.target.geometry.side) {
       throw new Error("SILVER_WIND presentation requires battlers on opposite sides");
     }
@@ -24165,42 +24166,91 @@ export function renderSceneOnMovePresentation(
       const packed = mgbaColorFromBgr555(word);
       return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
     };
-    const darken = (palette: readonly RgbColor[]): RgbColor[] => palette.map((color) => {
-      const hardwareFade = (view.registers.bldcnt ?? 0) === 0x00e8
+    const darken = (palette: readonly RgbColor[], coefficient: number): RgbColor[] =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | color.g << 8 | color.b << 16,
+          coefficient,
+        );
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      });
+    const postBugRestore = view.attacker.geometry.side === "player"
+      ? moveState.age >= 168 && moveState.age <= 183
+      : moveState.age >= 171 && moveState.age <= 186;
+    const scopedBackdropFade = (moveState.age >= 12 && moveState.age <= 29)
+      || postBugRestore;
+    // Silver Wind's FadeToBg uses BLDCNT=0x00E8.  In its two retained
+    // static-field fade bands, brightness decrease selects the BG3/backdrop
+    // only: BLDY is already the hardware coefficient, while battler/effect
+    // OBJ and window layers keep their independently uploaded palettes.
+    // Leave the distinct BUG transition and sparkle body on the committed
+    // checkpoint path for its own bounded follow-up.
+    const directBackdropBldy = scopedBackdropFade
+      && (view.registers.bldcnt ?? 0) === 0x00e8
+      ? view.registers.bldy ?? 0
+      : null;
+    const legacyCheckpointPalette = (palette: readonly RgbColor[]): RgbColor[] => {
+      const checkpointBldy = (view.registers.bldcnt ?? 0) === 0x00e8
         ? Math.min(16, (view.registers.bldy ?? 0) + 1) : 0;
-      const packed = mgbaDarkenColor(color.r | color.g << 8 | color.b << 16,
-        hardwareFade);
-      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
-    });
-    const paletteBank = (bank: number): RgbColor[] => darken(
-      plan.hardwarePalette.slice(bank * 16, bank * 16 + 16).map(rgb555),
-    );
+      return darken(palette, checkpointBldy);
+    };
+    const paletteFromHardware = (bank: number): RgbColor[] =>
+      plan.hardwarePalette.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const fadeOnsetPalette = (bank: number): RgbColor[] =>
+      view.palette.faded.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const fieldPaletteBank = (bank: number): RgbColor[] => {
+      // The first exclude pass mutates the field's faded BG banks before
+      // its steady hardware palette settles. The static backdrop therefore
+      // observes its live fade edge at 12..15.
+      const palette = moveState.age >= 12 && moveState.age <= 15
+        ? fadeOnsetPalette(bank)
+        : paletteFromHardware(bank);
+      return directBackdropBldy === null
+        ? legacyCheckpointPalette(palette)
+        : darken(palette, directBackdropBldy);
+    };
+    const objPaletteBank = (bank: number): RgbColor[] => {
+      const attackerBank = 16 + (input.attackerSprite.attr[2] >>> 12 & 0xf);
+      // The same source pass includes the attacker bank, but explicitly
+      // excludes the target bank. This is its palette edge, not BLDY: the
+      // scoped brightness decrease remains outside every OBJ target.
+      const initialAttackerExclude = moveState.age >= 12 && moveState.age <= 15
+        && bank === attackerBank;
+      const palette = initialAttackerExclude ? fadeOnsetPalette(bank) : paletteFromHardware(bank);
+      return directBackdropBldy === null ? legacyCheckpointPalette(palette) : palette;
+    };
     if (plan.bugBackgroundVisible) {
       drawExtractedTileBg(fb, {
         tileset: extremeSpeedBg.tileset,
         tilemap: view.attacker.geometry.side === "player"
           ? extremeSpeedBg.opponentTilemap : extremeSpeedBg.playerTilemap,
-        subpalettes: [darken(blendPaletteToward(silverWindResources.bugBackground.palette,
-          { r: 0, g: 0, b: 0 }, 4))],
+        subpalettes: [legacyCheckpointPalette(blendPaletteToward(
+          silverWindResources.bugBackground.palette, { r: 0, g: 0, b: 0 }, 4,
+        ))],
       }, view.registers.bg3hofs & 0xff);
     } else {
       drawExtractedTileBg(fb, {
         tileset: battleBg.static.tileset,
         tilemap: battleBg.static.tilemap,
-        subpalettes: [2, 3, 4].map(paletteBank),
+        subpalettes: [2, 3, 4].map(fieldPaletteBank),
       });
     }
-    const input = moveState.config.animationInputs;
     const attackerArt = artFor(view.attacker), targetArt = artFor(view.target);
     if (displayed.background.monbgActive) {
       drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
-        paletteBank(input.background.monbg.paletteBank),
+        objPaletteBank(input.background.monbg.paletteBank),
         view.target.geometry.spriteCorner.x + displayed.battlers.target.sprite.x2,
         view.target.geometry.spriteCorner.y + displayed.battlers.target.sprite.y2);
     }
     if (moveState.age === 0 && view.attacker.geometry.side === "opponent") {
+      // Silver Wind's retained age-zero OAM row leaves the elevated enemy
+      // shadow one source pixel above the generic idle placement.  Keep this
+      // adjustment move-local: no species idle/shadow rule is changed.
       drawSourceOpponentEnemyShadow(fb, view.attacker.species,
-        view.attacker.geometry.battlePositionCenter);
+        {
+          ...view.attacker.geometry.battlePositionCenter,
+          y: view.attacker.geometry.battlePositionCenter.y - 1,
+        });
     }
     const orderOf = (slot: number): number => {
       const rank = displayed.painterOrder.indexOf(slot);
@@ -24212,20 +24262,20 @@ export function renderSceneOnMovePresentation(
     const targetBank = 16 + (input.targetSprite.attr[2] >>> 12 & 0xf);
     entries.push({ slot: input.attackerSprite.slot, priority: input.attackerSprite.oamPriority,
       order: orderOf(input.attackerSprite.slot), draw: () => drawSpriteSheet(
-        fb, tilesFor(attackerArt, view.attacker.geometry.side), paletteBank(attackerBank),
+        fb, tilesFor(attackerArt, view.attacker.geometry.side), objPaletteBank(attackerBank),
         view.attacker.geometry.spriteCorner.x + displayed.battlers.attacker.sprite.x2,
         view.attacker.geometry.spriteCorner.y + displayed.battlers.attacker.sprite.y2) });
     if (!displayed.background.monbgActive) entries.push({
       slot: input.targetSprite.slot, priority: input.targetSprite.oamPriority,
       order: orderOf(input.targetSprite.slot), draw: () => drawSpriteSheet(
-        fb, tilesFor(targetArt, view.target.geometry.side), paletteBank(targetBank),
+        fb, tilesFor(targetArt, view.target.geometry.side), objPaletteBank(targetBank),
         view.target.geometry.spriteCorner.x + displayed.battlers.target.sprite.x2,
         view.target.geometry.spriteCorner.y + displayed.battlers.target.sprite.y2),
     });
     for (const sparkle of displayed.sprites) entries.push({
       slot: sparkle.slot, priority: sparkle.oamPriority, order: orderOf(sparkle.slot),
       draw: () => drawSpriteSheetAffineRotate(fb, silverWindArt.tileset,
-        paletteBank(input.resources.sparkle6.paletteBank),
+        objPaletteBank(input.resources.sparkle6.paletteBank),
         sparkle.x + sparkle.x2, sparkle.y + sparkle.y2,
         sparkle.matrix[0], sparkle.matrix[1], sparkle.matrix[2], sparkle.matrix[3],
         undefined, false),
