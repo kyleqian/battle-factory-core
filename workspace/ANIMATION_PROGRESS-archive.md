@@ -15631,3 +15631,35 @@ infatuation result, RNG, controller, turn/facility state, boundary list,
 unsupported barrier, or canonical allowlist. Coverage is **104 exact / 0
 partial / 0 staged / 172 unsupported**. Next ranked incomplete component
 track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
+# Animation maintenance — throughput and bookkeeping (2026-09-19)
+
+- **State:** User requested a controlled stop, branch maintenance, and restart
+  of the Hetzner animation campaign. Maintenance is complete; resume from this
+  verified checkpoint. Base `8e7c8706e` already contains the independently
+  reviewed Silver Wind fade worker `2eec5d465`; its recovery worktree is clean.
+  Coverage remains **258/276 exact, 18 unsupported**.
+- **Did:** Centralized global coverage totals; scoped move queue checks and
+  evidence receipts to their own move. Added a mutation regression proving
+  unrelated promotion/queue changes preserve source audit bytes while a real
+  move-status regression still fails. Added `ANIMATION_VERIFICATION.md`, aligned
+  supervisor/worker/campaign instructions, combined routine briefing phases,
+  and archived older live-ledger entries intact.
+- **Verification:** Hetzner full gates passed on code commit `cdb82a9bc`: **1,388
+  files / 11,387 tests passed**, 44 files / 223 tests skipped; typecheck and
+  **810-module build** passed with the service-equivalent 8 GiB heap and one
+  Vitest worker. Runner dispatch/default-workspace checks, coverage, asset
+  audit, Scene-ON oracle info, and diff checks passed. Durable logs are in
+  `/var/lib/pokebench-autonomy/maintenance/20260919/`. Only ledger/archive docs
+  follow that code commit, so reuse this green baseline unless master or the
+  relevant environment changes. No production animation or pixel changed.
+- **Runner:** The animation-only systemd drop-in selects this branch's
+  `tools/autonomy/run-lane.sh` and `POKEBENCH_SUPERVISOR_WORKSPACE`; it loads the
+  updated verification prompt. Keep the existing 5.5h cap, six-hour cadence,
+  September 24 campaign end, and paused Rust lane.
+- **Next:** Resume Silver Wind BUG/sparkle closure. The accepted fade/shadow
+  bands are **69/69 scoped exact**, global **110/389 exact**, with **279 rows /
+  2,828,934 residual pixels** left. All **389/389** component/seam/raw-RGB rows
+  pass; preserve the altered live CHARIZARD/BLISSEY control. Promote only after
+  complete bilateral **389/389 twice**, zero residual. Never repeat the recovery
+  merge or closed source/evidence/reducer/fade work. Use the new verification
+  contract and keep only three short checkpoints in this live ledger.
