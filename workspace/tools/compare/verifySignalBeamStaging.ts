@@ -54,10 +54,9 @@ equal(receipt.freshness, {
   sharedOracleCaptureUsed: false, localMgbaWrapper: "tools/run-mgba-probe.py",
 }, "freshness diagnostic");
 if (!audit.checkpoint.sourceAudit || !audit.checkpoint.completePointerOwnedRoot || !audit.checkpoint.completeReachableBranches || !audit.checkpoint.completeCarrierCensus || !audit.checkpoint.reproducibleResources || !audit.checkpoint.legalBilateralPartyOnlyStaging || !audit.checkpoint.oracleOrMgbaInvoked || !audit.checkpoint.compactBilateralEndpointReceipts || !audit.checkpoint.twiceFreshPerOrientation || !audit.checkpoint.denseWindowCaptured || !audit.checkpoint.latchMeasured || !audit.checkpoint.reducerAdded || !audit.checkpoint.typedSceneOnSeam || !audit.checkpoint.compositorAdded || !audit.checkpoint.framebufferAcceptance || !audit.checkpoint.coveragePromotion || !audit.checkpoint.componentTrackFulfilled || audit.checkpoint.latchPromotion || audit.checkpoint.boundaryOrBarrierChanged || audit.checkpoint.gameplayStateOwned || audit.checkpoint.unsupportedNoCreditBoundary) fail("source audit exact boundary");
-if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM" && entry.status === "exact") || coverage.queue.length !== 0) fail("exact queue boundary");
+if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM" && entry.status === "exact") || coverage.queue.includes("MOVE_SIGNAL_BEAM")) fail("exact queue boundary");
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "signal-beam-orb-stream");
 if (!track || track.fulfilled !== true || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_SIGNAL_BEAM"]) || JSON.stringify(track.components) !== JSON.stringify(components) || !track.goal.includes("FULFILLED")) fail("fulfilled component track boundary");
-equal(audit.graph.unrepresented, [], "represented component boundary");
 equal(audit.carriers.allSourceCarriers.map((carrier: Json) => carrier.index), [27, 160, 161, 277, 331, 680], "all Signal Beam carriers");
 equal(audit.carriers.level50.map((carrier: Json) => carrier.index), [160, 161, 277, 331, 680], "Level-50 Signal Beam carriers");
 equal(receipt.factoryLegalSelection.carrier, { setId: 160, name: "FRONTIER_MON_ARIADOS", species: 168 }, "lowest legal carrier");

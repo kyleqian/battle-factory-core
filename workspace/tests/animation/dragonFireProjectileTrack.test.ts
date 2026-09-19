@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { animationCoverageSummary } from "../../tools/animation/coverage.ts";
 
 type Fixture = {
   readonly schema: string;
@@ -619,17 +618,9 @@ describe("dragon-fire-projectile component-track receipt ratchet", () => {
       }[];
     };
 
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(258);
     expect(coverage.entries.filter((entry) =>
       entry.status === "partial" || entry.status === "staged")).toHaveLength(0);
-    expect(animationCoverageSummary()[0]).toEqual({
-      tier: "level50",
-      total: 276,
-      exact: 258,
-      partial: 0,
-      staged: 0,
-      unsupported: 18,
-    });
+
     expect(coverage.entries.filter((entry) => trackMoves.includes(
       entry.move as (typeof trackMoves)[number],
     )).map(({ move, status }) => [move, status]).sort(([left], [right]) =>

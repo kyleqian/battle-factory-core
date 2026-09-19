@@ -29,7 +29,7 @@ if (!audit.controls.kind.includes("no Nightmare timing") || Object.keys(audit.co
 
 const coverage = json("ANIMATION_COVERAGE.json");
 if (coverage.entries.find((entry: Json) => entry.move === "MOVE_NIGHTMARE")?.status !== "exact"
-  || coverage.queue.length !== 0) fail("exact coverage boundary");
+  || coverage.queue.includes("MOVE_NIGHTMARE")) fail("exact coverage boundary");
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "nightmare-clone-blend");
 if (!track || track.fulfilled !== false || JSON.stringify(track.components) !== JSON.stringify(components)) fail("unfulfilled track declaration");
 

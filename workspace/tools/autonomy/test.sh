@@ -60,6 +60,37 @@ git -C "${fixture_root}/remote.git" show-ref --verify --quiet \
 git -C "${fixture_root}/remote.git" show-ref --verify --quiet \
   "refs/heads/autonomy/test/recovery/stash-${stash_oid:0:12}"
 
+# Exercise lane dispatch without model/network access. Linux production uses
+# flock; macOS can still run the remaining portable wrapper checks.
+if command -v flock >/dev/null 2>&1; then
+  mkdir -p "${fixture_root}/bin" "${fixture_root}/repo/workspace" "${fixture_root}/lane-workspace"
+  cat >"${fixture_root}/bin/codex" <<'MOCK'
+#!/usr/bin/env bash
+[[ "$*" == "login status" ]]
+MOCK
+  cat >"${fixture_root}/repo/workspace/run-supervisor.sh" <<'MOCK'
+#!/usr/bin/env bash
+[[ "$*" == "--headless --lane animation --supervisor codex --sub-agent codex --cap-hours 0.25" ]] || exit 8
+pwd >"$DISPATCH_RECEIPT"
+MOCK
+  cp "${fixture_root}/repo/workspace/run-supervisor.sh" "${fixture_root}/lane-workspace/run-supervisor.sh"
+  chmod +x "${fixture_root}/bin/codex" "${fixture_root}/repo/workspace/run-supervisor.sh" "${fixture_root}/lane-workspace/run-supervisor.sh"
+  for selected_workspace in "" "${fixture_root}/lane-workspace"; do
+    PATH="${fixture_root}/bin:$PATH" \
+    POKEBENCH_REPO_ROOT="${fixture_root}/repo" \
+    POKEBENCH_BACKUP_NAMESPACE=autonomy/test \
+    POKEBENCH_SUPERVISOR_WORKSPACE="$selected_workspace" \
+    POKEBENCH_ANIMATION_SUPERVISOR_AGENT=codex \
+    POKEBENCH_ANIMATION_SUB_AGENT=codex \
+    POKEBENCH_ANIMATION_CAP_HOURS=0.25 POKEBENCH_MIN_FREE_GB=0 \
+    AUTONOMY_END_EPOCH="$(( $(date +%s) + 3600 ))" \
+    STATE_DIRECTORY="${fixture_root}/state" RUNTIME_DIRECTORY="${fixture_root}/run" \
+    DISPATCH_RECEIPT="${fixture_root}/dispatch.txt" \
+      "${SCRIPT_DIR}/run-lane.sh" animation >/dev/null
+    [[ "$(cat "${fixture_root}/dispatch.txt")" == "${selected_workspace:-${fixture_root}/repo/workspace}" ]]
+  done
+fi
+
 grep -q '^POKEBENCH_RUST_SUPERVISOR_AGENT=codex$' \
   "${SCRIPT_DIR}/autonomy.env.example"
 grep -q '^POKEBENCH_UNATTENDED_DEFERRED_POLICY=block$' \

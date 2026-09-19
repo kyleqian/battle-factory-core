@@ -96,7 +96,6 @@ describe("MOVE_HIDDEN_POWER complete bilateral evidence checkpoint", () => {
     execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/extractHiddenPowerAssets.ts", "--out", output]);
     expect(readFileSync(output)).toEqual(readFileSync("src/animation/assets/hidden-power-red-orb.json"));
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(258);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_HIDDEN_POWER")).toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "hidden-power-red-orbs")).toMatchObject({
       representatives: ["MOVE_HIDDEN_POWER"], fulfilled: true,

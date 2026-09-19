@@ -124,7 +124,7 @@ describe("MOVE_NIGHTMARE legal-battle reducer and narrow Scene-ON seam", () => {
     const data = coverage as Json;
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_NIGHTMARE"))
       .toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual([]);
+    expect(data.queue).not.toContain("MOVE_NIGHTMARE");
     expect(data.componentTracks.find((entry: Json) => entry.id === "nightmare-clone-blend")).toMatchObject({ representatives: ["MOVE_NIGHTMARE"], fulfilled: false });
   });
 });

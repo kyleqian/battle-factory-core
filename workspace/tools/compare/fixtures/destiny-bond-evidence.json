@@ -18,7 +18,7 @@
   ],
   "source": {
     "audit": "tools/compare/destinyBondSourceAudit.ts",
-    "auditSha256": "625cb8a117c8bf6a8416eb54d8316efd413ba62dfbeb725622c7410f5ed90776",
+    "auditSha256": "46b818050eabb52fdbffb87036dfff27289f3cf64ade3b19badd72a33ba3d9fc",
     "auditRunSha256": "e77587b596a4ce2764eb35916016e47e168074d153a548276924d0a0aa692925",
     "probe": "tools/compare/destinyBondProbe.py",
     "probeSha256": "4af60176e208aa4f6f1493dcac9fde0229e984e2dd7bb75b7301892d19f3ca6e",

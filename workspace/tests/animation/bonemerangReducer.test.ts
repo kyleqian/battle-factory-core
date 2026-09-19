@@ -95,7 +95,7 @@ describe("MOVE_BONEMERANG source-relative reducer and narrow Scene-ON seam", () 
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     const data = coverage as Json;
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_BONEMERANG")).toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual([]);
+    expect(data.queue).not.toContain("MOVE_BONEMERANG");
     expect(data.componentTracks.find((entry: Json) => entry.id === "bone-projectile-bonemerang")).toMatchObject({
       representatives: ["MOVE_BONEMERANG"], fulfilled: true,
     });

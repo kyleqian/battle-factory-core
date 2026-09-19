@@ -43,8 +43,9 @@ substitutions:
    conflict inside your owned paths you resolve; a conflict outside them
    means the boundary leaked — abort the merge, record it in
    `ANIMATION_DEFERRED.md`, and work from the unmerged tree.
-2. `npm install --no-audit --no-fund` (cheap when clean), then `npm test`
-   and `npm run build` to pin the session baseline.
+2. Follow `ANIMATION_VERIFICATION.md` for baseline reuse and scope-based gates.
+   Install dependencies when needed; run the full baseline if the current code
+   or relevant environment lacks a recorded green receipt.
 3. Orient: `ANIMATION_PROGRESS.md` top entry, `npm run animation:coverage`,
    `git log` since your last session.
 
@@ -61,6 +62,10 @@ substitutions:
   the sibling moves to batch-check. A move is the acceptance unit; shared
   code never promotes siblings without their own dense evidence. Require
   both animation ledgers updated; a canonical window alone stays `partial`.
+  Default to source + legal staging + complete evidence in one assignment,
+  then reducer/seam + compositor + actual-core acceptance in another. Split
+  further only for a named unresolved mechanism or a credible worker-cap
+  constraint; keep intermediate commits without paying a new handoff per phase.
   Do not invent filler work just to occupy the session — wind down early
   instead.
 - **Pre-supply the latch facts.** Every brief points the worker at
@@ -92,8 +97,11 @@ substitutions:
   when a result fails your verification, and say so in the ledger.
 - **Verify** in the worker's worktree, then merge `worker/<id>` into
   `animation-main` **from this tree** (never from inside the worker's
-  worktree — the cwd self-merge trap), rerun `npm test` + `npm run build`
-  on the merged result, then remove the worker worktree and branch.
+  worktree — the cwd self-merge trap). Follow `ANIMATION_VERIFICATION.md`:
+  independently check the central claim and use focused/smoke verification
+  between steps, reusing a valid same-code worker full-suite/build receipt.
+  Run full union gates when code changes invalidate that receipt and once at
+  wind-down, then remove the worker worktree and branch.
 - **Oracle:** Battle Scene ON at `POKEBENCH_ORACLE_URL` (the launcher
   ensures it). `./tools/check-oracle-freshness.sh` before staging anything
   if the service might predate the harness commit.
@@ -116,6 +124,9 @@ substitutions:
   Main-program deferrals in `DEFERRED.md` do not block you.
 - Usage/rate limits: worker exit 42 or your own limit errors → wind down
   immediately, same as SUPERVISOR.md.
+- Keep the live progress ledger to the latest three concise checkpoints. Move
+  older entries intact to `ANIMATION_PROGRESS-archive.md`; link detailed move
+  receipts instead of repeating worker and supervisor narratives.
 - Wind-down bar: `animation-main` committed and green; ANIMATION_PROGRESS.md
   top entry current (State / Did / Next / Notes, including any "For the
   main program:" findings); no worker worktrees or branches left behind.

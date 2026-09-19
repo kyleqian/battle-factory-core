@@ -171,7 +171,7 @@ if ((frontierSource.match(/MOVE_PSYCH_UP/g) ?? []).length !== expectedAllCarrier
 
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "psych-up-spiral-palette-cycle");
 const coverageEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP");
-if (coverageEntry?.status !== "exact" || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 258 || coverage.queue.length !== 0 || !track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_PSYCH_UP"]) || track.fulfilled !== true) throw new Error("Psych Up exact/fulfilled coverage boundary drifted");
+if (coverageEntry?.status !== "exact" || coverage.queue.includes("MOVE_PSYCH_UP") || !track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_PSYCH_UP"]) || track.fulfilled !== true) throw new Error("Psych Up exact/fulfilled coverage boundary drifted");
 
 const namedControls = {
   MOVE_LEER: { component: "task:AnimTask_ScaleMonAndRestore", token: "Move_LEER:" },

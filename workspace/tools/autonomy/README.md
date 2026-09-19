@@ -61,6 +61,17 @@ inference is remote.
 Run the network-free wrapper checks locally with
 `workspace/tools/autonomy/test.sh`.
 
+## Using a lane's maintained launcher
+
+An animation-specific systemd drop-in can select the branch's launcher while
+keeping the shared master/Rust service unchanged. Set both `ExecStart` (clear
+the inherited command first) to the branch's `tools/autonomy/run-lane.sh animation`
+and `Environment=POKEBENCH_SUPERVISOR_WORKSPACE=/absolute/lane/workspace`.
+Keep `POKEBENCH_REPO_ROOT` pointing at the primary repository for locks and backups.
+The default workspace is still `$POKEBENCH_REPO_ROOT/workspace`. Stop the lane
+and timer before updating its branch, verify the branch, run `daemon-reload`,
+then restart the lane and its timer. The branch must retain the launcher files.
+
 ## Credential boundaries
 
 Use ChatGPT device authorization on the VM, not an API key:

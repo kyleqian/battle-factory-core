@@ -132,7 +132,7 @@ if (!graphEntry || graphEntry.id !== 171 || graphEntry.rootScript !== "Move_NIGH
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "nightmare-clone-blend");
 if (!track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_NIGHTMARE"]) || track.fulfilled !== false) throw new Error("Nightmare track drifted");
 if (coverage.entries.find((entry: Json) => entry.move === "MOVE_NIGHTMARE")?.status !== "exact"
-  || coverage.queue.length !== 0) throw new Error("Nightmare exact coverage boundary drifted");
+  || coverage.queue.includes("MOVE_NIGHTMARE")) throw new Error("Nightmare exact coverage boundary drifted");
 
 const level50Ranges = policy.rentalSelection.ranges.level50 as readonly { start: number; end: number }[];
 const inLevel50 = (entry: Json): boolean => level50Ranges.some((range) => entry.index >= range.start && entry.index <= range.end);

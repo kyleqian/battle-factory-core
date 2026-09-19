@@ -7,14 +7,14 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/nightmareSourceAudit.ts",
-    "auditSha256": "f35054f15718a467cbf6733c64277d9c1a055dbe615c5916f3a09972f0fb4316",
+    "auditSha256": "9bcc657818dcb64fcd773f47a3a25d2707cc96b07035c572de51a11b530e401f",
     "auditRunSha256": "d3ddbfb5dd65e139d5da49e4a1fd4df9194c9df80e9a572f36852d182c4c64c3",
     "probe": "tools/compare/nightmareProbe.py",
     "probeSha256": "caf2746f1083c150b6e5086dc58a0f10274aee1544e4a5dd2cfc21244fb82287",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/nightmare-staging-receipt.json",
-    "stagingReceiptSha256": "cf96a2352c3acee1fff08453b4b7b9bb12ca889d17ed66d3caa396e103fcc133",
+    "stagingReceiptSha256": "5882ff1578b1df313612b6ec60c195809591205bfdaa8943b8d841020548c768",
     "pointerOwnedRoot": { "start": "0x082cd4a3", "endExclusive": "0x082cd4f9", "observedParities": [0,1] }
   },
   "orientations": {

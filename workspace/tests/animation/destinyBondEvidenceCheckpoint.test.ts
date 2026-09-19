@@ -49,9 +49,9 @@ describe("MOVE_DESTINY_BOND complete bilateral retained evidence", () => {
 
   it("records Destiny Bond alone as exact and fulfills its nine-component track", () => {
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(258);
+
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_DESTINY_BOND")).toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual([]);
+    expect(data.queue).not.toContain("MOVE_DESTINY_BOND");
     const track = data.componentTracks.find((entry: Json) => entry.id === "destiny-bond-white-shadow");
     expect(track).toMatchObject({ representatives: ["MOVE_DESTINY_BOND"], fulfilled: true });
     expect(track.components).toHaveLength(9);

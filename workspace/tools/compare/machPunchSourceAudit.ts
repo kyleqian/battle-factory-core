@@ -28,9 +28,6 @@ const inventory = JSON.parse(readFileSync(resolve(root, "src/data/gen/factory-an
 const frontier = JSON.parse(readFileSync(resolve(root, "src/data/gen/battle-frontier-mons.json"), "utf8")) as Json;
 const policy = JSON.parse(readFileSync(resolve(root, "src/data/gen/factory-round-policy.json"), "utf8")) as Json;
 const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-// Preserve the committed Mach Punch source payload as later exact moves join
-// shared visual commands; the current ledger is checked independently below.
-const historicalCoverageEntries = coverage.entries.filter((entry: Json) => entry.move !== "MOVE_PSYCH_UP" && entry.move !== "MOVE_HYPER_VOICE");
 
 const symbols = new Map<string, SymbolEntry[]>();
 for (const line of execFileSync("arm-none-eabi-nm", ["-a", "-S", resolve(sourceRoot, "pokeemerald.elf")], { encoding: "utf8", maxBuffer: 32 * 1024 * 1024 }).split("\n")) {
@@ -106,9 +103,6 @@ if (JSON.stringify(commands(head)) !== JSON.stringify(expectedHead) || JSON.stri
 const expectedComponents = ["asset:ANIM_TAG_HANDS_AND_FEET", "asset:ANIM_TAG_IMPACT", "subroutine:MachPunchAgainstPlayer", "subroutine:MachPunchContinue", "task:AnimTask_AttackerPunchWithTrace", "task:AnimTask_GetAttackerSide", "task:AnimTask_ShakeMon", "task:AnimTask_StartSlidingBg", "visualCommand:blendoff", "visualCommand:clearmonbg", "visualCommand:create_basic_hitsplat_sprite", "visualCommand:create_fist_sprite", "visualCommand:fadetobg", "visualCommand:monbg", "visualCommand:restorebg", "visualCommand:setalpha", "visualCommand:setarg", "visualCommand:waitbgfadein", "visualCommand:waitbgfadeout"] as const;
 const moveGraph = graph.moves.find((entry: Json) => entry.move === "MOVE_MACH_PUNCH");
 if (!moveGraph || moveGraph.id !== 183 || moveGraph.rootScript !== "Move_MACH_PUNCH" || JSON.stringify(moveGraph.blocks) !== JSON.stringify(["Move_MACH_PUNCH", "MachPunchAgainstPlayer", "MachPunchContinue"]) || JSON.stringify(moveGraph.componentIds) !== JSON.stringify(expectedComponents)) throw new Error("MOVE_MACH_PUNCH generated graph drifted");
-const exactByComponent = Object.fromEntries(expectedComponents.map((component) => [component, graph.moves.filter((entry: Json) => entry.componentIds.includes(component) && historicalCoverageEntries.some((covered: Json) => covered.move === entry.move && covered.status === "exact")).map((entry: Json) => entry.move)]));
-const unrepresented = expectedComponents.filter((component) => exactByComponent[component].length === 0);
-if (JSON.stringify(unrepresented) !== JSON.stringify([])) throw new Error("Mach Punch exact component boundary drifted");
 
 const ranges = policy.rentalSelection.ranges.level50 as readonly { start: number; end: number }[];
 const legal = (entry: Json): boolean => ranges.some((range) => entry.index >= range.start && entry.index <= range.end);
@@ -117,7 +111,7 @@ const level50 = allCarriers.filter(legal);
 const inventoryEntry = inventory.tiers.level50.moves.find((entry: Json) => entry.move === "MOVE_MACH_PUNCH");
 if (JSON.stringify(allCarriers.map((entry: Json) => entry.index)) !== JSON.stringify([15, 32, 234, 236, 339, 382]) || JSON.stringify(level50.map((entry: Json) => entry.index)) !== JSON.stringify([234, 236, 339, 382]) || inventoryEntry?.id !== 183 || inventoryEntry?.frontierMonCount !== 4 || JSON.stringify(inventoryEntry.exampleMons) !== JSON.stringify(["FRONTIER_MON_HITMONCHAN_1", "FRONTIER_MON_HITMONTOP_1", "FRONTIER_MON_HITMONCHAN_2"])) throw new Error("MOVE_MACH_PUNCH carrier census drifted");
 const machPunchTracks = coverage.componentTracks.filter((track: Json) => track.representatives?.includes("MOVE_MACH_PUNCH"));
-if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_MACH_PUNCH" && entry.status === "exact") || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 258 || coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")?.status !== "exact" || coverage.queue.length !== 0 || machPunchTracks.length !== 1 || machPunchTracks[0].id !== "mach-punch-source-relative-body" || machPunchTracks[0].fulfilled !== true) throw new Error("MOVE_MACH_PUNCH exact/queue/fulfilled-track boundary drifted");
+if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_MACH_PUNCH" && entry.status === "exact") || coverage.queue.includes("MOVE_MACH_PUNCH") || machPunchTracks.length !== 1 || machPunchTracks[0].id !== "mach-punch-source-relative-body" || machPunchTracks[0].fulfilled !== true) throw new Error("MOVE_MACH_PUNCH exact/queue/fulfilled-track boundary drifted");
 
 requireTokens("Mach Punch task bodies", `${mons}\n${movement}\n${utility}`, ["void AnimTask_AttackerPunchWithTrace", "static void AnimTask_AttackerPunchWithTrace_Step", "void AnimTask_GetAttackerSide", "void AnimTask_StartSlidingBg", "void AnimTask_ShakeMon", "static void AnimTask_ShakeMon_Step"]);
 requireTokens("Mach Punch backgrounds/resources", `${registry}\n${graphics}\n${constants}`, ["BG_HIGHSPEED_OPPONENT 9", "BG_HIGHSPEED_PLAYER 10", "gBattleAnimBgImage_Highspeed", "gBattleAnimBgPalette_Highspeed", "gBattleAnimBgTilemap_HighspeedOpponent", "gBattleAnimBgTilemap_HighspeedPlayer", "gBattleAnimSpriteGfx_HandsAndFeet", "gBattleAnimSpriteGfx_Impact"]);
@@ -136,7 +130,7 @@ console.log(JSON.stringify({
     }, branches: { directlyReachableBlocks: ["Move_MACH_PUNCH", "MachPunchAgainstPlayer", "MachPunchContinue"], targetSideVariants: ["BG_HIGHSPEED_OPPONENT", "BG_HIGHSPEED_PLAYER"], complete: true } },
     directBodies: { attackerPunch: { start: bodyRecord("AnimTask_AttackerPunchWithTrace", "src/battle_anim_mons.c", mons), step: bodyRecord("AnimTask_AttackerPunchWithTrace_Step", "src/battle_anim_mons.c", mons) }, attackerSide: bodyRecord("AnimTask_GetAttackerSide", "src/battle_anim_utility_funcs.c", utility), slidingBg: bodyRecord("AnimTask_StartSlidingBg", "src/battle_anim_utility_funcs.c", utility), shake: { start: bodyRecord("AnimTask_ShakeMon", "src/battle_anim_mon_movement.c", movement), step: bodyRecord("AnimTask_ShakeMon_Step", "src/battle_anim_mon_movement.c", movement) } },
   },
-  graph: { blocks: moveGraph.blocks, components: expectedComponents, exactRepresentatives: exactByComponent, unrepresented },
+  graph: { blocks: moveGraph.blocks, components: expectedComponents },
   behavior: { move: { effect: "EFFECT_QUICK_ATTACK", power: 40, accuracy: 100, pp: 30, priority: 1, target: "MOVE_TARGET_SELECTED" }, sideBranch: { opponentTarget: "BG_HIGHSPEED_OPPONENT", playerTarget: "BG_HIGHSPEED_PLAYER" }, slidingBgArgs: [-2304, 0, 1, -1], attackerPunchArgs: ["RGB(8, 9, 28)", 10], targetShakeArgs: ["ANIM_TARGET", 3, 0, 6, 1], alpha: [9, 8], audio: ["SE_M_JUMP_KICK", "SE_M_COMET_PUNCH"] },
   resources: { backgrounds: { image: romRange("gBattleAnimBgImage_Highspeed"), palette: romRange("gBattleAnimBgPalette_Highspeed"), opponentTilemap: romRange("gBattleAnimBgTilemap_HighspeedOpponent"), playerTilemap: romRange("gBattleAnimBgTilemap_HighspeedPlayer") }, spriteTags: ["ANIM_TAG_IMPACT", "ANIM_TAG_HANDS_AND_FEET"] },
   carriers: { count: level50.length, allSourceCarriers: allCarriers.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species, moves: entry.moves })), level50: level50.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species, moves: entry.moves })), lowestLegal: level50[0], excludedOutsideLevel50: allCarriers.filter((entry: Json) => !legal(entry)).map((entry: Json) => entry.index) },

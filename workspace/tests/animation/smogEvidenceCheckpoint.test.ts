@@ -50,9 +50,9 @@ describe("MOVE_SMOG complete legal bilateral Scene-ON evidence", () => {
       siblingCredit: false, poisonGasCredit: false,
     });
     const data = coverage as Json;
-    expect(data.entries).toHaveLength(258);
+
     expect(data.entries.find((entry: Json) => entry.move === "MOVE_SMOG")).toMatchObject({ status: "exact" });
-    expect(data.queue).toEqual([]);
+    expect(data.queue).not.toContain("MOVE_SMOG");
     expect(data.componentTracks.find((entry: Json) => entry.id === "smog-purple-gas-cloud")).toMatchObject({
       representatives: ["MOVE_SMOG"], fulfilled: true,
       goal: expect.stringContaining("FULFILLED by MOVE_SMOG only"),

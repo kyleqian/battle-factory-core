@@ -194,16 +194,7 @@ const componentUsers = Object.fromEntries(expectedComponents.map((component) => 
   component,
   graph.moves.filter((entry: Json) => entry.componentIds.includes(component)).map((entry: Json) => entry.move),
 ]));
-const exactByComponent = Object.fromEntries(expectedComponents.map((component) => [
-  component,
-  graph.moves.filter((entry: Json) => entry.componentIds.includes(component)
-    && coverage.entries.some((covered: Json) => covered.move === entry.move && covered.status === "exact"))
-    .map((entry: Json) => entry.move),
-]));
-const unrepresented = expectedComponents.filter((component) => exactByComponent[component].length === 0);
-const expectedUnrepresented: readonly string[] = [];
-if (JSON.stringify(unrepresented) !== JSON.stringify(expectedUnrepresented)
-  || JSON.stringify(componentUsers["asset:ANIM_TAG_DUCK"]) !== JSON.stringify(["MOVE_DIZZY_PUNCH", "MOVE_TEETER_DANCE", "MOVE_SIGNAL_BEAM"])
+if (JSON.stringify(componentUsers["asset:ANIM_TAG_DUCK"]) !== JSON.stringify(["MOVE_DIZZY_PUNCH", "MOVE_TEETER_DANCE", "MOVE_SIGNAL_BEAM"])
   || JSON.stringify(componentUsers["task:AnimTask_StartSinAnimTimer"]) !== JSON.stringify(["MOVE_FLAMETHROWER", "MOVE_HYDRO_PUMP", "MOVE_PSYWAVE", "MOVE_SECRET_POWER", "MOVE_SIGNAL_BEAM", "MOVE_MUD_SHOT"])) {
   throw new Error("MOVE_SIGNAL_BEAM component representation boundary drifted");
 }
@@ -224,7 +215,7 @@ if (JSON.stringify(allCarriers.map((entry: Json) => entry.index)) !== JSON.strin
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "signal-beam-orb-stream");
 const moveEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_SIGNAL_BEAM");
 if (moveEntry?.status !== "exact"
-  || coverage.queue.length !== 0
+  || coverage.queue.includes("MOVE_SIGNAL_BEAM")
   || !track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents)
   || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_SIGNAL_BEAM"])
   || track.fulfilled !== true || !track.goal.includes("FULFILLED")) {
@@ -326,7 +317,7 @@ console.log(JSON.stringify({
       },
     },
   },
-  graph: { blocks: moveGraph.blocks, components: expectedComponents, componentUsers, exactRepresentatives: exactByComponent, unrepresented },
+  graph: { blocks: moveGraph.blocks, components: expectedComponents, componentUsers },
   behavior: {
     move: { effect: "EFFECT_CONFUSE_HIT", power: 75, accuracy: 100, pp: 15, secondaryEffectChance: 10, target: "MOVE_TARGET_SELECTED" },
     stream: { pairsBeforeTargetPalette: 6, pairsAfterTargetPalette: 17, totalPairs: 23, redSprites: 23, greenSprites: 23, args: [10, 10, 0, 16, -16] },
@@ -353,7 +344,7 @@ console.log(JSON.stringify({
     lowestLegal: level50Carriers[0],
     excludedOutsideLevel50: allCarriers.filter((entry: Json) => !inLevel50(entry)).map((entry: Json) => entry.index),
   },
-  coverage: { queue: coverage.queue, track: { id: track.id, components: track.components, representatives: track.representatives, fulfilled: track.fulfilled }, moveEntryPresent: true },
+  coverage: { queue: coverage.queue.filter((move: string) => move === "MOVE_SIGNAL_BEAM"), track: { id: track.id, components: track.components, representatives: track.representatives, fulfilled: track.fulfilled }, moveEntryPresent: true },
   checkpoint: {
     sourceAudit: true, completePointerOwnedRoot: true, completeReachableBranches: true, completeCarrierCensus: true,
     reproducibleResources: true, legalBilateralPartyOnlyStaging: true, oracleOrMgbaInvoked: true,

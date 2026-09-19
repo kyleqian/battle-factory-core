@@ -544,6 +544,8 @@ else
     # The Rust supervisor prompt separately requires npm test/build before a
     # fold that actually touches its narrowly allowed adapter surface.
     WORKTREE_FINISH_REQUIREMENT="Before finishing: cargo test and cargo build -p factory-wasm --target wasm32-unknown-unknown --release green, work committed on ${WT_BRANCH}."
+  elif [[ "$LANE" == "animation" ]]; then
+    WORKTREE_FINISH_REQUIREMENT="Before finishing: follow ANIMATION_VERIFICATION.md. Evidence/test/tooling-only steps use all affected verifier/test and boundary/inventory gates; production/configuration changes additionally require full npm test and npm run build. Record the tested code commit/tree and outcomes, and commit on ${WT_BRANCH}. Docs-only steps need diff/ledger checks."
   else
     WORKTREE_FINISH_REQUIREMENT="Before finishing: npm test and npm run build green, work committed on ${WT_BRANCH}."
   fi
@@ -554,7 +556,7 @@ if [[ "$IS_WORKTREE" == "1" ]]; then
   if [[ "$READ_ONLY" == "1" ]]; then
     LANE_CONTRACT="Use the selected ${ORACLE_PROFILE} oracle only for read-only validation relevant to the assigned audit."
   elif [[ "$LANE" == "animation" ]]; then
-    LANE_CONTRACT="This is the animation/presentation lane. Read ANIMATION_PROGRESS.md and run npm run animation:coverage before changing code. Work the assigned non-exclusive component track behind the battle presentation seam: prove one representative, reuse the source-derived components, and batch-check the named siblings. Moves remain independent acceptance units; shared code alone never promotes coverage. Do not own facility progression or shared battle state. Use the Battle Scene ON oracle. You own ANIMATION_PROGRESS.md, ANIMATION_COVERAGE.json, src/animation/**, and tests/animation/** (plus the animation comparators/fixtures under tools/compare/); the only engine files you may touch are battleScene.ts and core.ts, and only their animation draw/wiring cases — tests/animation/animationBoundaryRatchet.test.ts pins the import boundary and widening its lists needs brief-level justification. A canonical window alone is partial; exact requires a complete dense window through the shared seam and every evidence-required variant."
+    LANE_CONTRACT="This is the animation/presentation lane. Read the current ANIMATION_PROGRESS.md entry and ANIMATION_VERIFICATION.md, and run npm run animation:coverage before changing code. Work the assigned non-exclusive component track behind the battle presentation seam: prove one representative, reuse the source-derived components, and batch-check the named siblings. Moves remain independent acceptance units; shared code alone never promotes coverage. Do not own facility progression or shared battle state. Use the Battle Scene ON oracle. You own ANIMATION_PROGRESS.md, ANIMATION_COVERAGE.json, src/animation/**, and tests/animation/** (plus the animation comparators/fixtures under tools/compare/); the only engine files you may touch are battleScene.ts and core.ts, and only their animation draw/wiring cases — tests/animation/animationBoundaryRatchet.test.ts pins the import boundary and widening its lists needs brief-level justification. A canonical window alone is partial; exact requires a complete dense window through the shared seam and every evidence-required variant."
   else
     LANE_CONTRACT="This is the side implementation lane. Prefer source extraction, deterministic scenario staging, data breadth, or another file-disjoint task assigned by the supervisor. Use the Battle Scene OFF oracle."
   fi

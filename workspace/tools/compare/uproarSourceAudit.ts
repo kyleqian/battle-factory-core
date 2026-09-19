@@ -166,7 +166,7 @@ if (
   || JSON.stringify(entry?.componentIds) !== JSON.stringify(components)
   || JSON.stringify(carriers.map((item: Json) => item.index)) !== JSON.stringify(carrierIds)
   || !coverage.entries.some((item: Json) => item.move === "MOVE_UPROAR" && item.status === "exact")
-  || coverage.queue.length !== 0
+  || coverage.queue.includes("MOVE_UPROAR")
   || coverage.componentTracks.some((track: Json) => track.moves?.includes("MOVE_UPROAR"))
   || !moveConstants.includes("#define MOVE_UPROAR 253")
   || !songConstants.includes("#define SE_M_UPROAR                 241")

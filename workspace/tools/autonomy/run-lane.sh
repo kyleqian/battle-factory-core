@@ -12,7 +12,8 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export PATH="${SCRIPT_DIR}/bin:${PATH}"
 REPO_ROOT="${POKEBENCH_REPO_ROOT:-$(cd "${SCRIPT_DIR}/../../.." && pwd)}"
-WORKSPACE_ROOT="${REPO_ROOT}/workspace"
+# A lane-specific service can run its maintained launcher without changing master.
+WORKSPACE_ROOT="${POKEBENCH_SUPERVISOR_WORKSPACE:-${REPO_ROOT}/workspace}"
 STATE_ROOT="${STATE_DIRECTORY:-${REPO_ROOT}/.git/pokebench-autonomy}"
 LOCK_ROOT="${RUNTIME_DIRECTORY:-${STATE_ROOT}/run}"
 END_EPOCH="${AUTONOMY_END_EPOCH:-}"

@@ -7,7 +7,7 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/hyperVoiceSourceAudit.ts",
-    "auditSha256": "6e77bd350912fd4a9bc79455c221c4f391ae2d4965e829ff6b65899fb86fac01",
+    "auditSha256": "db65402817b2a03059a6a80838d57e0dd445540d55e8f3c40542b7c1d765bba1",
     "auditRunSha256": "ecf1986ba957454d31163cdc22cedda4ed011815bd6c36d677a13532ab53c975",
     "probe": "tools/compare/hyperVoiceStagingProbe.py",
     "probeSha256": "afcf1e4b994f7f6496482dd07b372b54aef98863b7375fb955b44047e5f54e7b",

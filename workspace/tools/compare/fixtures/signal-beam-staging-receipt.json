@@ -14,7 +14,7 @@
   },
   "source": {
     "audit": "tools/compare/signalBeamSourceAudit.ts",
-    "auditRunSha256": "dfda44110b7c69fe2f0986ef120cfd2f91634111668879f8d397e8d07457722e",
+    "auditRunSha256": "a7586d2f3420c444f53a97611f4e4ee4a7a03519ffaabcf7c55066c4012eb664",
     "probe": "tools/compare/signalBeamStagingProbe.py",
     "probeSha256": "965cb2ad4aaa578c03c1e4aff1d70334b691c6193ab647e1d8c179837e251371",
     "pointerOwnedRoot": {"symbol": "Move_SIGNAL_BEAM", "start": "0x082d0eb2", "endExclusive": "0x082d0f9a"}

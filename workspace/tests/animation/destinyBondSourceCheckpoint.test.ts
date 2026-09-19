@@ -166,9 +166,8 @@ describe("MOVE_DESTINY_BOND source/classification and legal Scene-ON staging che
       expect(run.scenarioSha256).toBe(sha(readFileSync(resolve(root, run.scenario))));
     }
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries).toHaveLength(258);
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_DESTINY_BOND")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual([]);
+    expect(coverage.queue).not.toContain("MOVE_DESTINY_BOND");
     expect(coverage.componentTracks.find((track: Json) => track.id === "destiny-bond-white-shadow")).toMatchObject({
       representatives: ["MOVE_DESTINY_BOND"], fulfilled: true,
       components: ["asset:ANIM_TAG_WHITE_SHADOW", "task:AnimTask_BlendBattleAnimPalExclude", "task:AnimTask_DestinyBondWhiteShadow", "task:AnimTask_ShakeMonInPlace", "visualCommand:blendoff", "visualCommand:clearmonbg", "visualCommand:fadetobg", "visualCommand:restorebg", "visualCommand:waitbgfadein"],

@@ -7,8 +7,8 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/machPunchSourceAudit.ts",
-    "auditSha256": "d864b01cbd1aad3a24e227889d099f050375e19ed13f346f5772ff9b51e70999",
-    "auditRunSha256": "122548f0d7fe8233e65e90cb17d3bbda3e4c306c81246cab82faffd43f430b5d",
+    "auditSha256": "0cf4205a154b318eb13412f6308ee1dc0e798ed83013471ec7844ae6681d717b",
+    "auditRunSha256": "81ba53168083bde75e52d6bf07deec098d093a31a1ac10dced33c2d395352ff5",
     "probe": "tools/compare/machPunchStagingProbe.py",
     "probeSha256": "51a1b99f31738956885aac2cecea8b18526ed9c36b9fbbc002e583934e3fa9d2",
     "pointerOwnedRoot": {"symbol":"Move_MACH_PUNCH","start":"0x082cd565","endExclusive":"0x082cd5ed","byteLength":136,"romSha256":"b437f773d63fa1ef5062f58c478fdeb43dbdcd98351ad97b9da794097a6db4ff"}

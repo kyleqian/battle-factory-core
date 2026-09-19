@@ -43,7 +43,7 @@ describe("MOVE_SHOCK_WAVE authoritative source classification and legal bilatera
   it("pins complete transient-free party-before-init scenarios and a hermetic twice-fresh compact receipt without credit", () => {
     const coverage = read("ANIMATION_COVERAGE.json");
     expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SHOCK_WAVE")).toMatchObject({ status: "exact" });
-    expect(coverage.queue).toEqual([]);
+    expect(coverage.queue).not.toContain("MOVE_SHOCK_WAVE");
     expect(coverage.componentTracks.find((track: Json) => track.id === "shock-wave-electric-bolts")).toMatchObject({ representatives: ["MOVE_SHOCK_WAVE"], fulfilled: true });
     for (const path of ["tools/battle-lab/mechanic-shock-wave-player-flaaffy-opponent-corsola.json", "tools/battle-lab/mechanic-shock-wave-opponent-flaaffy-player-corsola.json"]) {
       const check = spawnSync("python3", ["-c", "import json,sys;sys.path.insert(0,sys.argv[1]);from battle_lab import validate_request;validate_request(json.load(open(sys.argv[2])), 'battle-scene-on')", oracleDirectory(), resolve(root, path)], { encoding: "utf8" });

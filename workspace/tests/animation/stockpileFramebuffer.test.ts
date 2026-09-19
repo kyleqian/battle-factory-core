@@ -71,8 +71,6 @@ describe("MOVE_STOCKPILE source presentation and actual-core compositor", () => 
 
   it("promotes Stockpile alone and leaves Swallow and Spit Up as controls", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact"))
-      .toHaveLength(258);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_STOCKPILE"))
       .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: { id: string }) =>

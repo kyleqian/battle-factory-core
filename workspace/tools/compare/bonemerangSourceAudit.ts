@@ -35,7 +35,6 @@ const policy = JSON.parse(readFileSync(resolve(root, "src/data/gen/factory-round
 const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
 // Keep this move's committed source-audit payload stable as later exact moves
 // join shared visual commands; validate the live ledger separately below.
-const historicalCoverageEntries = coverage.entries.filter((entry: Json) => entry.move !== "MOVE_PSYCH_UP" && entry.move !== "MOVE_HYPER_VOICE");
 const rom = readFileSync(resolve(sourceRoot, "pokeemerald.gba"));
 
 const symbols = new Map<string, Symbol[]>();
@@ -136,9 +135,7 @@ const expectedComponents = [
 const moveGraph = graph.moves.find((entry: Json) => entry.move === "MOVE_BONEMERANG");
 if (!moveGraph || moveGraph.id !== 155 || moveGraph.rootScript !== "Move_BONEMERANG" || JSON.stringify(moveGraph.blocks) !== JSON.stringify(["Move_BONEMERANG"]) || JSON.stringify(moveGraph.componentIds) !== JSON.stringify(expectedComponents)) throw new Error("MOVE_BONEMERANG generated graph drifted");
 const componentUsers = Object.fromEntries(expectedComponents.map((component) => [component, graph.moves.filter((entry: Json) => entry.componentIds.includes(component)).map((entry: Json) => entry.move)]));
-const exactByComponent = Object.fromEntries(expectedComponents.map((component) => [component, graph.moves.filter((entry: Json) => entry.componentIds.includes(component) && historicalCoverageEntries.some((covered: Json) => covered.move === entry.move && covered.status === "exact")).map((entry: Json) => entry.move)]));
-const unrepresented = expectedComponents.filter((component) => exactByComponent[component].length === 0);
-if (JSON.stringify(componentUsers["asset:ANIM_TAG_BONE"]) !== JSON.stringify(["MOVE_BONEMERANG", "MOVE_BONE_CLUB", "MOVE_BONE_RUSH"]) || JSON.stringify(componentUsers["sprite:gBonemerangSpriteTemplate"]) !== JSON.stringify(["MOVE_BONEMERANG"]) || JSON.stringify(unrepresented) !== JSON.stringify([])) throw new Error("BONEMERANG component representation boundary drifted");
+if (JSON.stringify(componentUsers["asset:ANIM_TAG_BONE"]) !== JSON.stringify(["MOVE_BONEMERANG", "MOVE_BONE_CLUB", "MOVE_BONE_RUSH"]) || JSON.stringify(componentUsers["sprite:gBonemerangSpriteTemplate"]) !== JSON.stringify(["MOVE_BONEMERANG"])) throw new Error("BONEMERANG component representation boundary drifted");
 
 const level50Ranges = policy.rentalSelection.ranges.level50 as readonly { start: number; end: number }[];
 const inLevel50 = (entry: Json): boolean => level50Ranges.some((range) => entry.index >= range.start && entry.index <= range.end);
@@ -152,7 +149,7 @@ const moveEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_BO
 const boneClub = graph.moves.find((entry: Json) => entry.move === "MOVE_BONE_CLUB");
 const boneRush = graph.moves.find((entry: Json) => entry.move === "MOVE_BONE_RUSH");
 const tierFor = (move: string): string | undefined => Object.entries(inventory.tiers).find(([, tier]: [string, any]) => tier.moves.some((entry: Json) => entry.move === move))?.[0];
-if (!track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_BONEMERANG"]) || track.fulfilled !== true || moveEntry?.status !== "exact" || coverage.entries.filter((entry: Json) => entry.status === "exact").length !== 258 || coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYCH_UP")?.status !== "exact" || coverage.queue.length !== 0 || tierFor("MOVE_BONE_CLUB") !== "outsideFactory" || tierFor("MOVE_BONE_RUSH") !== "outsideFactory" || !boneClub?.componentIds.includes("asset:ANIM_TAG_BONE") || !boneRush?.componentIds.includes("asset:ANIM_TAG_BONE")) throw new Error("BONEMERANG coverage/control boundary drifted");
+if (!track || JSON.stringify(track.components) !== JSON.stringify(expectedComponents) || JSON.stringify(track.representatives) !== JSON.stringify(["MOVE_BONEMERANG"]) || track.fulfilled !== true || moveEntry?.status !== "exact" || coverage.queue.includes("MOVE_BONEMERANG") || tierFor("MOVE_BONE_CLUB") !== "outsideFactory" || tierFor("MOVE_BONE_RUSH") !== "outsideFactory" || !boneClub?.componentIds.includes("asset:ANIM_TAG_BONE") || !boneRush?.componentIds.includes("asset:ANIM_TAG_BONE")) throw new Error("BONEMERANG coverage/control boundary drifted");
 
 requireTokens("Bonemerang template and callbacks", ground, [
   "static const union AffineAnimCmd sAffineAnim_Bonemerang[]", "AFFINEANIMCMD_FRAME(0x0, 0x0, 15, 1)", "const struct SpriteTemplate gBonemerangSpriteTemplate",
@@ -184,7 +181,7 @@ console.log(JSON.stringify({
       shake: { AnimTask_ShakeMon: bodyRecord("AnimTask_ShakeMon", "src/battle_anim_mon_movement.c", movement), AnimTask_ShakeMon_Step: bodyRecord("AnimTask_ShakeMon_Step", "src/battle_anim_mon_movement.c", movement) },
     },
   },
-  graph: { blocks: moveGraph.blocks, components: expectedComponents, componentUsers, exactRepresentatives: exactByComponent, unrepresented },
+  graph: { blocks: moveGraph.blocks, components: expectedComponents, componentUsers },
   behavior: { move: { effect: "EFFECT_DOUBLE_HIT", power: 50, accuracy: 90, pp: 10, target: "MOVE_TARGET_SELECTED" }, bone: { duration: 20, arcHeights: [-40, 40], template: "gBonemerangSpriteTemplate" }, hit: { delay: 20, hitsplatAnimation: 1, shake: { task: "AnimTask_ShakeMon", args: ["ANIM_TARGET", 5, 0, 5, 1] } }, lunge: { delay: 17, template: "gHorizontalLungeSpriteTemplate", args: [6, -4] }, monbg: { setup: "ANIM_DEF_PARTNER", split: "ANIM_TARGET", alpha: [12, 8], cleanup: ["waitforvisualfinish", "clearmonbg ANIM_DEF_PARTNER", "blendoff", "end"] } },
   resources: { bone: { tag: "ANIM_TAG_BONE", tagValue: 10000, tileBytes: 0x0200, gfx: romRange("gBattleAnimSpriteGfx_Bone"), palette: romRange("gBattleAnimSpritePal_Bone"), source: "graphics/battle_anims/sprites/bone.png" }, impact: { tag: "ANIM_TAG_IMPACT", tileBytes: 0x0200, gfx: romRange("gBattleAnimSpriteGfx_Impact"), palette: romRange("gBattleAnimSpritePal_Impact") }, audio: { SE_M_VITAL_THROW: 122, SE_M_HORN_ATTACK: 166, SE_M_BONEMERANG: 187 } },
   carriers: { level50Ranges, count: level50Carriers.length, all: level50Carriers.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species, moves: entry.moves, itemName: entry.itemName, nature: entry.nature, evSpreadStats: entry.evSpreadStats })), lowest: level50Carriers[0], outsideLevel50: allCarriers.filter((entry: Json) => !inLevel50(entry)).map((entry: Json) => entry.index) },

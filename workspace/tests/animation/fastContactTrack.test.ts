@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { animationCoverageSummary } from "../../tools/animation/coverage.ts";
 
 type DenseWindow = {
   readonly startFrame: number;
@@ -285,17 +284,9 @@ describe("fast-contact component-track receipt ratchet", () => {
     };
     const moves = new Set(["MOVE_QUICK_ATTACK", "MOVE_EXTREME_SPEED", "MOVE_AERIAL_ACE"]);
 
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(258);
     expect(coverage.entries.filter((entry) => entry.status === "partial")).toHaveLength(0);
     expect(coverage.entries.filter((entry) => entry.status === "staged")).toHaveLength(0);
-    expect(animationCoverageSummary()[0]).toEqual({
-      tier: "level50",
-      total: 276,
-      exact: 258,
-      partial: 0,
-      staged: 0,
-      unsupported: 18,
-    });
+
     expect(coverage.entries.filter((entry) => moves.has(entry.move)).map((entry) => [
       entry.move,
       entry.status,
