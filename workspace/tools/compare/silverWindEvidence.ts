@@ -166,8 +166,9 @@ export function verifySilverWindEvidence(compareMaps = true): Json {
   invariant(sha(auditText) === fixture.source.auditRunSha256 && audit.graph.coverage.entryPresent === false && audit.graph.coverage.queueContainsMove === false && audit.graph.coverage.sharedTrackListedButUnfulfilled === "blend-battle-anim-palette-exclude", "source repeatability/no credit");
   const data = coverage as Json;
   invariant(data.entries.find((entry: Json) => entry.move === "MOVE_SILVER_WIND")?.status === "exact"
+    && data.entries.find((entry: Json) => entry.move === "MOVE_SKY_ATTACK")?.status === "exact"
     && !data.queue.includes("MOVE_SILVER_WIND")
-    && data.componentTracks.find((track: Json) => track.id === "blend-battle-anim-palette-exclude")?.fulfilled !== true,
+    && data.componentTracks.find((track: Json) => track.id === "blend-battle-anim-palette-exclude")?.fulfilled === true,
   "exact coverage/queue/component-track boundary");
   return { schema: fixture.schema, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries((["player-back", "opponent-front"] as const).map((side) => [side, verifySide(side, fixture.orientations[side], compareMaps)])) };
 }
