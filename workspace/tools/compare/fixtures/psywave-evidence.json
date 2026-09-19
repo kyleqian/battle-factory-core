@@ -1,0 +1,88 @@
+{
+  "schema": "psywave-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_PSYWAVE",
+  "moveId": 149,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/psywaveSourceAudit.ts",
+    "auditSha256": "0ed8c28342c889cc4379236a0cd2f3d1ae52b45c3dffde9b1aaa7f42a25e9d26",
+    "auditRunSha256": "367156e54e16be42ae8ec031b2d08a84f17aba2ce4d25f70fd7a63e39a55b16f",
+    "probe": "tools/compare/psywaveProbe.py",
+    "probeSha256": "9219e17a00694acc26cfd8dfc5bfe95d48e8fe8d1b2265ffc4bab83e1d5dd09c",
+    "verifier": "tools/compare/psywaveEvidence.ts",
+    "verifierSha256": "d860fcd25843e4b4073c8c9935d0a49160cab35cada246830d6ba4f2a777a815"
+  },
+  "acceptance": {
+    "sourceRows": 410,
+    "rawRgbRows": 410,
+    "freshRunsPerOrientation": 2,
+    "firstInactiveCleanupAge": 204,
+    "ringGroups": 6,
+    "ringSprites": 12,
+    "completePartyOnlyStaging": true,
+    "normalizedMaps": true,
+    "latchMeasured": true
+  },
+  "factoryCarrierCensus": {
+    "level50": [121, 209],
+    "labels": ["FRONTIER_MON_SPOINK", "FRONTIER_MON_CHIMECHO_1"],
+    "excludedOutsideLevel50": []
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-psywave-player-spoink-opponent-onix.json",
+      "scenarioSha256": "7597fa96ffe5f7d6afec35ed3eb281fe5d7542144b921906d4d750958b2db07f",
+      "seed": 305420601,
+      "sourceWindow": {"startFrame":72,"endFrame":276,"frameCount":205,"sourceFrameCount":128},
+      "attacker": {"side":"player","species":325,"factoryCarrier":121,"moves":[149,149,149,149],"sourceStartPp":[14,15,15,15]},
+      "target": {"side":"opponent","species":95},
+      "denseState": "tools/compare/evidence/psywave-player-dense-state.json.gz",
+      "denseStateSha256": "c774428c071f8adfd9a9b6488336328898606f549ddc4cd788fee5c0705c5c5a",
+      "probeJsonSha256": "ead7203b55c40ae502b2a3d4501f74b6c2b59e5104fbb786559982f33cc995af",
+      "repeatProbeJsonSha256": "ead7203b55c40ae502b2a3d4501f74b6c2b59e5104fbb786559982f33cc995af",
+      "rawRgbArchive": "tools/compare/evidence/psywave-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "a86386bd8934b6248321e8d476e5e34ba7b5707e0cd105355cb96a8cbf5cc5e2",
+      "rawRgbSequenceSha256": "72c839835e281cc88edfa3495445637f25d160a68f28fd05f3cc6b02f4fad5bd",
+      "repeatRawRgbSequenceSha256": "72c839835e281cc88edfa3495445637f25d160a68f28fd05f3cc6b02f4fad5bd",
+      "changeMap": "tools/compare/evidence/psywave-changemap-player.json",
+      "changeMapSha256": "da8416a48828cb75de11c3f6c878af8948db39bb672a238dc78713963f09057b"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-psywave-opponent-chimecho-player-onix.json",
+      "scenarioSha256": "d8309517a786ed157a9249fcae28cd0375e1618f39d9c5d159554eb69f785c14",
+      "seed": 305420603,
+      "sourceWindow": {"startFrame":211,"endFrame":415,"frameCount":205,"sourceFrameCount":128},
+      "attacker": {"side":"opponent","species":358,"factoryCarrier":209,"moves":[149,149,149,149],"sourceStartPp":[14,15,15,15]},
+      "target": {"side":"player","species":95},
+      "denseState": "tools/compare/evidence/psywave-opponent-dense-state.json.gz",
+      "denseStateSha256": "7689a9b2e0f3a943230361cd9b2dfeae27bc2d2d74692be043a6a8fe0cdff41a",
+      "probeJsonSha256": "a0d32331bf9f25202887d6686f2e16dbd16b9b6d8f8ca7a16f8b44403dcedcae",
+      "repeatProbeJsonSha256": "a0d32331bf9f25202887d6686f2e16dbd16b9b6d8f8ca7a16f8b44403dcedcae",
+      "rawRgbArchive": "tools/compare/evidence/psywave-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "9b3c986abd68d5e463c8a7fc6a2ad1a1d1e889577a0371bd2e75762c83436980",
+      "rawRgbSequenceSha256": "1141a341a7590d17c2bd8be04da1ebf6b5a82b0d4fcdeaec8e9f8cd50f9a3599",
+      "repeatRawRgbSequenceSha256": "1141a341a7590d17c2bd8be04da1ebf6b5a82b0d4fcdeaec8e9f8cd50f9a3599",
+      "changeMap": "tools/compare/evidence/psywave-changemap-opponent.json",
+      "changeMapSha256": "b524b8722f38dfbf6b9faa3dc692d9e2df371e764cde8fc5bac60c63bc78b2c0"
+    }
+  },
+  "controls": {
+    "named": {"MOVE_SHADOW_BALL":"identity-only","MOVE_PSYBEAM":"identity-only","MOVE_AURORA_BEAM":"identity-only","MOVE_HYPER_BEAM":"identity-only","MOVE_TRI_ATTACK":"identity-only"},
+    "transferCredit": false
+  },
+  "scope": {
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "actualCoreFramebufferAcceptance": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "siblingCredit": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false
+  },
+  "verdict": "MOVE_PSYWAVE remains unsupported after complete twice-fresh bilateral source/component/raw-RGB evidence and independent latch measurement; no reducer, seam, compositor, actual-core framebuffer, coverage, track, sibling, or gameplay credit is granted."
+}
