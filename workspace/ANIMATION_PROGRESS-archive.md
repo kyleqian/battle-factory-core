@@ -1,3 +1,9 @@
+# Animation supervisor verification — MOVE_SNORE reducer + typed seam (2026-09-19 supervisor)
+
+- **State / merge:** Independently reviewed and fast-forwarded Sol/high commits `c91554334` and `f613ccd23` onto `animation-main`. `MOVE_SNORE` remains unsupported at **259/276 exact**, **0 partial / 0 staged**, and **17 unsupported**; no compositor/core dispatch/framebuffer, coverage/component/track credit, boundary/barrier, gameplay owner, or main-program document changed.
+- **Independent proof:** Fresh verifier digest `99466721…` reproduces all **70 player-back + 70 opponent-front** retained rows twice as **280 reducer + 280 typed-seam calls** with the worker's four exact state hashes and age-69 cleanup. The WAILORD/BLISSEY control materially changes live species/art, sides, geometry/origins, allocation/order, palettes/registers, and presentation RNG while gameplay RNG/state stays opaque.
+- **Gates / next:** Supervisor-focused Snore source/evidence/reducer/boundary/inventory checks pass **4 files / 16 tests**. The worker's same-code smoke passes **8 / 448**, full suite **1,390 files / 11,394 tests** with **44 / 223 skipped**, and build **811 modules**. Next add only the generic live compositor/core dispatch and two-process **140/140** zero-residual actual-core acceptance; promote Snore only if every move-owned gate passes.
+
 # MOVE_SNORE pure reducer + typed Scene-ON seam checkpoint — bounded worker (2026-09-19)
 
 - **State / scope:** Added only the pure source-age reducer, narrow typed Scene-ON seam, retained-row verifier/test, and a material WAILORD/BLISSEY altered live-input control. `MOVE_SNORE` remains unsupported: Level 50 stays **259/276 exact**, **0 partial / 0 staged**, and **17 unsupported**. No compositor/core dispatch/framebuffer, coverage/component/track/sibling credit, boundary/barrier, or gameplay/RNG/status/damage/turn/facility ownership changed.
