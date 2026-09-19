@@ -45,7 +45,7 @@ describe("MOVE_SKY_ATTACK pure source-age reducer and narrow Scene-ON seam", () 
     const baseline = skyAttackAtAge("unleash", 90, input), changed = skyAttackAtAge("unleash", 90, altered);
     expect(changed).not.toEqual(baseline); expect(digest(changed)).not.toBe(digest(baseline));
     expect(changed).toMatchObject({ battlers: { attacker: { side: "opponent", species: "WAILORD", sprite: { slot: 21, matrixNum: 6 } }, target: { side: "player", species: "BLISSEY", sprite: { slot: 22 } } }, resources: { matrixBitmap: 0x95 }, rng: { gameplay: gameplayRng, gameplayState, gameplayUnchanged: true } });
-    const config = skyAttackConfigFor("player-back", "unleash", altered), seam = sceneOnSkyAttackView({ age: 90, config } as SceneOnSkyAttackPresentationState); const { attacker, target, ...seamBody } = seam;
+    const config = skyAttackConfigFor("unleash", altered), seam = sceneOnSkyAttackView({ age: 90, config } as SceneOnSkyAttackPresentationState); const { attacker, target, ...seamBody } = seam;
     expect(seamBody).toEqual(changed); expect(attacker.species).toBe("WAILORD"); expect(target.species).toBe("BLISSEY");
     expect(gameplayRng).toEqual({ opaque: "gameplay-rng", value: 0x0badc0de }); expect(gameplayState).toEqual({ opaque: "battle-state", turn: 17 });
   });

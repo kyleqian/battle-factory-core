@@ -241,7 +241,7 @@ function backgroundAtAge(body: SkyAttackBody, age: number, input: Readonly<SkyAt
   return { values, registers, vram: { ...input.background.vram, phase: body === "setup" ? (age >= 129 ? 3 : age >= 2 ? 2 : 1) : (age >= 161 ? 3 : age >= 26 ? 2 : 1) } };
 }
 
-function orderAtAge(body: SkyAttackBody, age: number, input: Readonly<SkyAttackLiveInputs>, bird: SkyAttackBirdSprite | null): readonly number[] {
+function orderAtAge(input: Readonly<SkyAttackLiveInputs>, bird: SkyAttackBirdSprite | null): readonly number[] {
   const order = [...input.allocator.spriteOrder];
   if (!bird) return order;
   const transient = new Map(input.allocator.activeOrderKeys.map((entry) => [entry.slot, entry]));
@@ -266,7 +266,7 @@ export function skyAttackAtAge(body: SkyAttackBody, age: number, input: Readonly
   const tasks = body === "setup" ? setupTasks(age, input) : unleashTasks(age, input), bird = birdAtAge(body, age, input);
   const loaded = body === "unleash" && age >= 1 && age < 180;
   const events = body === "setup" && age === 43 ? [{ sound: "SE_M_STAT_INCREASE" as const, pan: input.attackerSide }] : body === "unleash" && age === 70 ? [{ sound: "SE_M_SKY_UPPERCUT" as const, pan: input.attackerSide }] : body === "unleash" && age === 86 ? [{ sound: "SE_M_MEGA_KICK2" as const, pan: input.targetSide }] : [];
-  return { body, age, active: source.active, source, animArgs, battlers: battlersAtAge(body, age, input), tasks, sprites: { bird }, painterOrder: orderAtAge(body, age, input, bird), palette: paletteAtAge(body, age, input), background: backgroundAtAge(body, age, input),
+  return { body, age, active: source.active, source, animArgs, battlers: battlersAtAge(body, age, input), tasks, sprites: { bird }, painterOrder: orderAtAge(input, bird), palette: paletteAtAge(body, age, input), background: backgroundAtAge(body, age, input),
     resources: { impact: { loaded, tag: loaded ? SKY_ATTACK_IMPACT_TAG : null, allocation: loaded ? input.resources.impact : null }, bird: { loaded: body === "unleash" && age >= 4 && age < 180, tag: body === "unleash" && age >= 4 && age < 180 ? SKY_ATTACK_BIRD_TAG : null, allocation: body === "unleash" && age >= 4 && age < 180 ? input.resources.bird : null }, matrixBitmap: input.allocator.matrixBitmap },
     audio: { events }, rng: { animation: rngAtAge(input.animationRngSeed, age), gameplay: input.gameplayRng, gameplayState: input.gameplayState, gameplayUnchanged: true },
     displayTransfer: { oam: age === 0 ? "initial" : "preceding-software", matrices: age === 0 ? "initial" : "preceding-software", palette: age === 0 ? "initial" : "preceding-faded", bg: age === 0 ? "initial" : "preceding-software" },
