@@ -10186,20 +10186,24 @@
    "fulfilled": false,
    "evidence": [
     "tools/compare/pursuitSourceAudit.ts",
-    "tools/battle-lab/mechanic-pursuit-player-beedrill-opponent-shuckle.json",
-    "tools/battle-lab/mechanic-pursuit-opponent-beedrill-player-shuckle.json",
+      "tools/battle-lab/mechanic-pursuit-player-beedrill-opponent-shuckle.json",
+      "tools/battle-lab/mechanic-pursuit-opponent-beedrill-player-shuckle.json",
+      "tools/battle-lab/mechanic-pursuit-switchout-opponent-beedrill-player-shuckle.json",
     "tools/compare/pursuitProbe.py",
     "tools/compare/pursuitEvidence.ts",
     "tools/compare/fixtures/pursuit-evidence.json",
     "tools/compare/evidence/pursuit-player-dense-state.json.gz",
-    "tools/compare/evidence/pursuit-opponent-dense-state.json.gz",
+      "tools/compare/evidence/pursuit-opponent-dense-state.json.gz",
+      "tools/compare/evidence/pursuit-switchout-opponent-dense-state.json.gz",
     "tools/compare/evidence/pursuit-player-raw-rgb.tar.gz",
-    "tools/compare/evidence/pursuit-opponent-raw-rgb.tar.gz",
+      "tools/compare/evidence/pursuit-opponent-raw-rgb.tar.gz",
+      "tools/compare/evidence/pursuit-switchout-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/pursuit-changemap-player.json",
-    "tools/compare/evidence/pursuit-changemap-opponent.json",
+      "tools/compare/evidence/pursuit-changemap-opponent.json",
+      "tools/compare/evidence/pursuit-changemap-switchout-opponent.json",
     "tests/animation/pursuitEvidenceCheckpoint.test.ts"
    ],
-   "goal": "UNFULFILLED evidence-only checkpoint. MOVE_PURSUIT's authoritative 13-component graph, six Level-50 carriers, and normal branch have complete legal bilateral 206-row state/raw-RGB/normalized-map evidence twice fresh through inactive cleanup. The separately selected PursuitOnSwitchout affine-animation-1 branch still requires a legal switch-interception receipt, and no reducer, typed seam, compositor, actual-core framebuffer acceptance, move promotion, component fulfillment, or sibling credit is granted."
+    "goal": "UNFULFILLED evidence-only checkpoint. MOVE_PURSUIT's authoritative 13-component graph and six Level-50 carriers have legal bilateral normal staging plus a legal complete-party switch-interception stage. All three 103-row normal/switchout state, raw-RGB, and normalized-map windows are retained twice fresh through inactive cleanup. No reducer, typed seam, compositor, actual-core framebuffer acceptance, move promotion, component fulfillment, or sibling credit is granted."
   }
  ],
  "variantAudits": {

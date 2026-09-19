@@ -17,8 +17,9 @@
       "legalBilateralEvidence": true
     },
     "switchout": {
-      "legalBilateralEvidence": false,
-      "outstanding": true
+      "legalCompletePartyEvidence": true,
+      "orientation": "opponent-front",
+      "selectedAffineAnimation": 1
     }
   },
   "evidenceScope": {
@@ -27,6 +28,7 @@
     "normalizedMaps": true,
     "twiceFreshByteIdentical": true,
     "latchMeasured": true,
+    "allSourceBranchesObserved": true,
     "productionChanged": false,
     "reducerAdded": false,
     "typedSeamAdded": false,
@@ -39,12 +41,13 @@
     "boundaryOrBarrierChanged": false
   },
   "acceptance": {
-    "freshRunsPerOrientation": 2,
+    "freshRunsPerWindow": 2,
     "rows": {
       "player-back": 103,
-      "opponent-front": 103
+      "opponent-front": 103,
+      "switchout-opponent-front": 103
     },
-    "totalRows": 206,
+    "totalRows": 309,
     "firstInactiveCleanupRetained": true
   },
   "orientations": {
@@ -1083,7 +1086,525 @@
           "impactTiles": false
         }
       }
+    },
+    "switchout-opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-pursuit-switchout-opponent-beedrill-player-shuckle.json",
+      "scenarioSha256": "9bd2e752156201fccedc54ba17bb1ed9a7277be0ec80e5eea5249b39cbb39e0e",
+      "denseState": "tools/compare/evidence/pursuit-switchout-opponent-dense-state.json.gz",
+      "denseStateSha256": "53ea6133d2373864d47e94e79995dc0445d11d73c9fe795770671f0e46cc4997",
+      "probeJsonSha256": "80fe56dcaffb394f2f4de3f7146f4b5865231a6373610fccade806e9f7c4dbd1",
+      "repeatProbeJsonSha256": "80fe56dcaffb394f2f4de3f7146f4b5865231a6373610fccade806e9f7c4dbd1",
+      "rawRgbArchive": "tools/compare/evidence/pursuit-switchout-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "4b77b537dc1f1b6689de2ab4c1f4569cd234bfd50a781a3bdbe2b988ce268cc4",
+      "rawRgbSequenceSha256": "6f24ec62d2b88e38cdbed4f99bc9938192622b859c14e1e27ef4c63e307f8cc1",
+      "repeatRawRgbSequenceSha256": "6f24ec62d2b88e38cdbed4f99bc9938192622b859c14e1e27ef4c63e307f8cc1",
+      "changeMap": "tools/compare/evidence/pursuit-changemap-switchout-opponent.json",
+      "changeMapSha256": "48359067706ebe1d9ee2576d2fa85c9f6f635fe9b58c4399e134bae5ff5b0ddd",
+      "sourceWindow": {
+        "startFrame": 360,
+        "endFrame": 462,
+        "frameCount": 103,
+        "sourceFrameCount": 103
+      },
+      "summary": {
+        "lifecycle": {
+          "tasks": {
+            "Task_UpdateMonBg": [
+              [
+                4,
+                61
+              ]
+            ],
+            "Task_ClearMonBg": [
+              [
+                59,
+                61
+              ]
+            ],
+            "Task_FadeToBg": [
+              [
+                7,
+                43
+              ],
+              [
+                63,
+                100
+              ]
+            ],
+            "AnimTask_ShakeTargetBasedOnMovePowerOrDmg_Step": [
+              [
+                47,
+                57
+              ]
+            ]
+          },
+          "hitsplat": [
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56
+          ],
+          "hitsplatRows": [
+            [
+              0,
+              []
+            ],
+            [
+              47,
+              [
+                {
+                  "slot": 5,
+                  "callback": "RunStoredCallbackWhenAffineAnimEnds",
+                  "attr": [
+                    1363,
+                    33848,
+                    27029
+                  ],
+                  "matrixNum": 2,
+                  "matrix": [
+                    303,
+                    0,
+                    0,
+                    303
+                  ],
+                  "x": 72,
+                  "y": 99,
+                  "x2": 0,
+                  "y2": 0,
+                  "data": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    15357,
+                    2058
+                  ],
+                  "order": 7
+                }
+              ]
+            ],
+            [
+              56,
+              [
+                {
+                  "slot": 5,
+                  "callback": "DestroyAnimSprite",
+                  "attr": [
+                    1363,
+                    33848,
+                    27029
+                  ],
+                  "matrixNum": 2,
+                  "matrix": [
+                    303,
+                    0,
+                    0,
+                    303
+                  ],
+                  "x": 72,
+                  "y": 99,
+                  "x2": 0,
+                  "y2": 0,
+                  "data": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    15357,
+                    2058
+                  ],
+                  "order": 7
+                }
+              ]
+            ],
+            [
+              57,
+              []
+            ]
+          ]
+        },
+        "latches": {
+          "hardwareOamEqualsPrecedingSoftware": "102/102",
+          "hardwareMatricesEqualPrecedingSoftware": "102/102",
+          "hardwarePaletteEqualsPrecedingFaded": "101/102",
+          "oamExceptions": [],
+          "matrixExceptions": [],
+          "paletteExceptions": [
+            4
+          ],
+          "targetAxes": [
+            [
+              0,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              48,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              50,
+              [
+                -1,
+                0
+              ]
+            ],
+            [
+              52,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              54,
+              [
+                -1,
+                0
+              ]
+            ],
+            [
+              56,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              58,
+              [
+                0,
+                0
+              ]
+            ]
+          ]
+        },
+        "transitions": {
+          "registers": {
+            "bg2cnt": [
+              5
+            ],
+            "bg2hofs": [
+              5,
+              49,
+              51,
+              53,
+              55,
+              57,
+              59,
+              63
+            ],
+            "bg2vofs": [
+              5,
+              63
+            ],
+            "win0h": [
+              1
+            ],
+            "win0v": [
+              1
+            ],
+            "bldcnt": [
+              8,
+              44,
+              47,
+              59,
+              64,
+              101
+            ],
+            "bldalpha": [
+              47,
+              59
+            ],
+            "bldy": [
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              28,
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              92,
+              93,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100
+            ]
+          },
+          "battleBg": {
+            "gBattle_BG2_X": [
+              4,
+              48,
+              50,
+              52,
+              54,
+              56,
+              58,
+              62
+            ],
+            "gBattle_BG2_Y": [
+              4,
+              62
+            ]
+          },
+          "bgVram": [
+            5,
+            26,
+            61,
+            63,
+            82
+          ],
+          "fadedBanks": {
+            "2": [
+              26,
+              82
+            ],
+            "9": [
+              4
+            ],
+            "22": [
+              1
+            ]
+          },
+          "hardwareBanks": {
+            "2": [
+              27,
+              83
+            ],
+            "9": [
+              4
+            ],
+            "22": [
+              2
+            ]
+          },
+          "audio": [
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73
+          ],
+          "animationRng": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102
+          ]
+        },
+        "resources": {
+          "palette": [
+            1,
+            101
+          ],
+          "tile": [
+            1,
+            101
+          ]
+        },
+        "state": {
+          "partiesStable": true,
+          "battlersStable": true,
+          "engineStable": true,
+          "immutableStateStable": true,
+          "rawBattleStateStable": true
+        },
+        "cleanup": {
+          "age": 102,
+          "active": false,
+          "visualTasks": 0,
+          "soundTasks": 0,
+          "ownedTasks": 0,
+          "hitsplats": 0,
+          "impactPalette": false,
+          "impactTiles": false
+        }
+      }
     }
   },
-  "verdict": "Evidence-only normal-body checkpoint; MOVE_PURSUIT and its non-exclusive track remain unsupported, and the switch-interception branch remains separately outstanding."
+  "verdict": "Evidence-only checkpoint with legal bilateral normal bodies and the legal switch-interception branch; MOVE_PURSUIT and its non-exclusive track remain unsupported pending reducer/seam and production acceptance."
 }
