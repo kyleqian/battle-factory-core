@@ -1,3 +1,9 @@
+# Animation supervisor verification — MOVE_SNORE evidence/latch checkpoint (2026-09-19 supervisor)
+
+- **State / merge:** Independently reviewed and fast-forwarded Sol/high commits `cebd83671` and `1e69bc6c4` onto `animation-main`. `MOVE_SNORE` remains unsupported and Level 50 stays **259/276 exact**, **0 partial / 0 staged**, and **17 unsupported**; no production module, coverage/component/track credit, boundary/barrier, gameplay owner, or main-program document changed.
+- **Independent proof:** Fresh hermetic regeneration reproduces all **70 player-back + 70 opponent-front = 140** unthinned semantic/raw-RGB/normalized-map rows and move-owned OAM, affine, shake, BG3, palette, audio, resource, and cleanup latches; verdict digest `15edeeea…`. Source/ELF/ROM, sole set-196 carrier, and ordinary set-226 Sleep-Powder reachability are pinned without transient injection.
+- **Gates / next:** Supervisor-focused source/evidence/boundary/inventory checks pass **3 files / 12 tests**; the worker's same-code smoke, typecheck, coverage, animation audit, and diff checks pass. Next add a material altered-species live-input control plus only the pure source-age reducer and narrow typed seam across all 140 rows; keep compositor/framebuffer acceptance and any promotion for a separate bounded step.
+
 # MOVE_SNORE source + bilateral evidence/latch checkpoint — bounded worker (2026-09-19)
 
 - **State / scope:** `MOVE_SNORE` remains unsupported: Level 50 stays **259/276 exact**, **0 partial / 0 staged**, **17 unsupported**. No reducer, typed seam, compositor, framebuffer, component/track, sibling, gameplay/RNG/turn/facility, boundary, or barrier credit changed.
