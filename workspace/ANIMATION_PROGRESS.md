@@ -1,3 +1,9 @@
+# Animation supervisor verification — MOVE_SILVER_WIND exact closure (2026-09-19 supervisor)
+
+- **State / merge:** Independently reviewed and fast-forwarded Sol/high commits `ff2ef430e`, `eb120c4ea`, and `e57b7ccd4` onto `animation-main`. Level 50 is now **259/276 exact**, **0 partial / 0 staged**, and **17 unsupported**. Only `MOVE_SILVER_WIND` was promoted; the shared `blend-battle-anim-palette-exclude` track remains unfulfilled pending `MOVE_SKY_ATTACK`, and no gameplay/controller/facility owner, boundary/barrier, sibling, or main-program document changed.
+- **Independent proof:** A fresh direct actual-core run passes **193/193 player-back + 196/196 opponent-front = 389/389** component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels and verdict digest `e3c66e5f…`. The reversed CHARIZARD/BLISSEY control remains material (`8187cde5…` → `16065984…`) while gameplay RNG/state stays opaque and unchanged.
+- **Gates / next:** Supervisor-focused Silver Wind/boundary/inventory checks pass **6 files / 17 tests**, and shared smoke passes **8 files / 448 tests**. The worker's same-code full receipt passes **1,388 files / 11,387 tests** with **44 files / 223 tests skipped** plus the **810-module** build. Select the next unsupported Level-50 move as a separate bounded unit; `MOVE_SKY_ATTACK` is still required to close the palette-exclude track.
+
 # MOVE_SILVER_WIND exact BUG/Sparkle6 closure — bounded worker (2026-09-19)
 
 - **State / scope:** `MOVE_SILVER_WIND` alone advances Level 50 to **259/276 exact**, **0 partial / 0 staged**, and **17 unsupported**. The `blend-battle-anim-palette-exclude` track remains **UNFULFILLED** because `MOVE_SKY_ATTACK` is still unsupported; no sibling/track, gameplay/RNG/turn/facility, boundary, or barrier credit changed.
@@ -37,9 +43,3 @@
   complete bilateral **389/389 twice**, zero residual. Never repeat the recovery
   merge or closed source/evidence/reducer/fade work. Use the new verification
   contract and keep only three short checkpoints in this live ledger.
-
-# Animation supervisor wind-down — Silver Wind fade worker preserved, not merged (2026-09-17 supervisor)
-
-- **State:** `animation-main` stays on the previously verified **258/276 exact**, **0 partial / 0 staged**, **18 unsupported** checkpoint; `MOVE_SILVER_WIND` remains unsupported and all coverage/component/inventory credit is unchanged. Session baseline passed **1,387 files / 11,386 tests** and the **810-module** production build before dispatch.
-- **Preserved result:** Recovered Terra/max worker commit **`2eec5d465`** is backed up at `origin/autonomy/20260913-through-20260918/workers/animation-20260917-123219`, but is deliberately **not merged**. It closes the requested opponent age-0 shadow plus bilateral fade/restore bands at **69/69 scoped rows / zero residual pixels**, improving the honest global checkpoint **41→110/389 exact** while preserving all **389/389** component/seam/raw-RGB rows and leaving **279 rows / 2,828,934 pixels** out of scope. Its full suite passed **1,387 files / 11,386 tests**.
-- **Why stopped / next:** Vite hit its default **2 GB** heap after TypeScript passed and all **810 modules** transformed. The unattended memory-pressure rule stopped the immediate retry and ended dispatch. Next session should restore `2eec5d465` into one disposable animation worktree, run one fresh correctly inherited high-heap production build from a clean process group, independently review the three code/test files, then merge only if green. Afterward, continue Silver Wind with the independent BUG/sparkle body; never promote before bilateral **389/389 twice** at zero residual. **For the main program:** nothing blocking.
