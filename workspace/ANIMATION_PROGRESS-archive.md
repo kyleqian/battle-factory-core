@@ -1,3 +1,9 @@
+# Animation supervisor verification — MOVE_SILVER_WIND exact closure (2026-09-19 supervisor)
+
+- **State / merge:** Independently reviewed and fast-forwarded Sol/high commits `ff2ef430e`, `eb120c4ea`, and `e57b7ccd4` onto `animation-main`. Level 50 is now **259/276 exact**, **0 partial / 0 staged**, and **17 unsupported**. Only `MOVE_SILVER_WIND` was promoted; the shared `blend-battle-anim-palette-exclude` track remains unfulfilled pending `MOVE_SKY_ATTACK`, and no gameplay/controller/facility owner, boundary/barrier, sibling, or main-program document changed.
+- **Independent proof:** A fresh direct actual-core run passes **193/193 player-back + 196/196 opponent-front = 389/389** component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels and verdict digest `e3c66e5f…`. The reversed CHARIZARD/BLISSEY control remains material (`8187cde5…` → `16065984…`) while gameplay RNG/state stays opaque and unchanged.
+- **Gates / next:** Supervisor-focused Silver Wind/boundary/inventory checks pass **6 files / 17 tests**, and shared smoke passes **8 files / 448 tests**. The worker's same-code full receipt passes **1,388 files / 11,387 tests** with **44 files / 223 tests skipped** plus the **810-module** build. Select the next unsupported Level-50 move as a separate bounded unit; `MOVE_SKY_ATTACK` is still required to close the palette-exclude track.
+
 # MOVE_SILVER_WIND exact BUG/Sparkle6 closure — bounded worker (2026-09-19)
 
 - **State / scope:** `MOVE_SILVER_WIND` alone advances Level 50 to **259/276 exact**, **0 partial / 0 staged**, and **17 unsupported**. The `blend-battle-anim-palette-exclude` track remains **UNFULFILLED** because `MOVE_SKY_ATTACK` is still unsupported; no sibling/track, gameplay/RNG/turn/facility, boundary, or barrier credit changed.
