@@ -433,18 +433,48 @@ export interface SilverWindState {
   readonly cleanup: Readonly<{ visualTasks: number; soundTasks: number; ownedSprites: number; ownedTasks: number; firstInactive: boolean; resourcesReleased: boolean }>;
 }
 
+/**
+ * Replay Emerald's persistent `sSpriteOrder` carrier through the requested
+ * source row. SortSprites is stable for equal priority/subpriority/wrapped Y,
+ * so recomputing a row from the root order loses information once moving
+ * Sparkle6 objects cross. Newly created slots append before that row's sort;
+ * destroyed slots drop without resetting the surviving order.
+ */
+function painterOrderAtAge(age: number, input: Readonly<SilverWindLiveInputs>): readonly number[] {
+  let order = [...input.allocator.spriteOrder];
+  for (let currentAge = 0; currentAge <= age; currentAge += 1) {
+    const currentSprites = SPARKLE_PROGRAMS
+      .map((_, index) => particleAtAge(currentAge, index, input))
+      .filter((entry): entry is SilverWindSparkle => entry !== null);
+    const activeSlots = new Set(currentSprites.map((sprite) => sprite.slot));
+    const keys = [
+      ...input.allocator.initialSprites.filter((sprite) => !activeSlots.has(sprite.slot)),
+      ...currentSprites.map((sprite) => ({
+        slot: sprite.slot,
+        subpriority: sprite.subpriority,
+        oamPriority: sprite.oamPriority,
+        oamY: sprite.attr[0] & 0xff,
+      })),
+    ];
+    const liveSlots = new Set(keys.map((key) => key.slot));
+    order = order.filter((slot) => liveSlots.has(slot));
+    for (const sprite of currentSprites) if (!order.includes(sprite.slot)) order.push(sprite.slot);
+    order = sortGbaSpriteOrder(order, keys.map((key) => ({
+      slot: key.slot,
+      priority: key.oamPriority as 0 | 1 | 2 | 3,
+      subpriority: key.subpriority,
+      y: signed8(key.oamY),
+    })));
+  }
+  return order;
+}
+
 export function silverWindAtAge(age: number, input: Readonly<SilverWindLiveInputs>): SilverWindState {
   assertAge(age, input);
   const source = silverWindSourceAtAge(age, input.attackerSide), palette = paletteAtAge(age, input), background = backgroundAtAge(age, input);
   const sprites = SPARKLE_PROGRAMS.map((_, index) => particleAtAge(age, index, input)).filter((entry): entry is SilverWindSparkle => entry !== null);
   const tasks = tasksAtAge(age, input);
-  const activeSlots = new Set(sprites.map((sprite) => sprite.slot));
-  const keys = [
-    ...input.allocator.initialSprites.filter((sprite) => !activeSlots.has(sprite.slot)),
-    ...sprites.map((sprite) => ({ slot: sprite.slot, subpriority: sprite.subpriority, oamPriority: sprite.oamPriority, oamY: sprite.attr[0] & 0xff })),
-  ];
-  const order = [...input.allocator.spriteOrder.filter((slot) => keys.some((key) => key.slot === slot)), ...sprites.map((sprite) => sprite.slot).filter((slot) => !input.allocator.spriteOrder.includes(slot))];
-  const painterOrder = sortGbaSpriteOrder(order, keys.map((key) => ({ slot: key.slot, priority: key.oamPriority as 0 | 1 | 2 | 3, subpriority: key.subpriority, y: signed8(key.oamY) })));
+  const painterOrder = painterOrderAtAge(age, input);
   const range = sideRange(input), resourceLoaded = age >= 1 && age < range.inactive;
   const rng = animationRngAtAge(age, input);
   const audio: Array<{ sound: "SE_M_GUST" | "SE_M_MORNING_SUN" | "SE_M_GUST2"; pan: "attacker" | "target" | 0 }> = [];
@@ -487,6 +517,10 @@ export function silverWindDisplayPlanAtAge(
     displayed,
     hardwarePalette: age === 6 ? current.palette.faded : age === 0
       ? input.palettes.hardware : displayed.palette.faded,
-    bugBackgroundVisible: age >= 30 && age < sideRange(input).slideEnd,
+    // LoadBattleAnimBackground writes the BUG VRAM at age 30 while the
+    // brightness fade is fully black. The newly loaded BG3 first becomes
+    // distinguishable at age 32; this is independent of the age-31 BG3HOFS
+    // latch and the following palette-exclude transfer.
+    bugBackgroundVisible: age >= 32 && age < sideRange(input).slideEnd,
   };
 }

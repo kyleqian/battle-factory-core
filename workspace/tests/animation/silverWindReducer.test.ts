@@ -98,12 +98,14 @@ describe("MOVE_SILVER_WIND source-relative reducer and narrow Scene-ON seam", ()
     expect(target.geometry.animationCenter).toEqual(altered.targetPictureOrigin);
   });
 
-  it("keeps production evidence-free and MOVE_SILVER_WIND unsupported with no queue or component credit", () => {
+  it("keeps production evidence-free and records only the independently accepted move", () => {
     const source = readFileSync(resolve(root, "src/animation/silverWind.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
-    const data = coverage as { entries: Array<{ move: string }>; queue: string[]; componentTracks: Array<{ id: string; fulfilled?: boolean }> };
-    expect(data.entries.some((entry) => entry.move === "MOVE_SILVER_WIND")).toBe(false);
+    const data = coverage as { entries: Array<{ move: string; status: string }>; queue: string[]; componentTracks: Array<{ id: string; fulfilled?: boolean }> };
+    expect(data.entries.find((entry) => entry.move === "MOVE_SILVER_WIND")).toMatchObject({ status: "exact" });
     expect(data.queue).not.toContain("MOVE_SILVER_WIND");
+    // SKY_ATTACK remains independently unsupported, so the multi-move track
+    // cannot inherit fulfillment from Silver Wind's exact body.
     expect(data.componentTracks.find((track) => track.id === "blend-battle-anim-palette-exclude")?.fulfilled).not.toBe(true);
   });
 });

@@ -44,7 +44,9 @@ equal(sha(auditText), receipt.source.auditRunSha256, "source audit run hash");
 equal(sha(read(receipt.source.audit)), receipt.source.auditSha256, "source audit file hash");
 equal(sha(read(receipt.source.probe)), receipt.source.probeSha256, "probe file hash");
 equal(audit.source.pointerOwnedRoot.rom, receipt.source.pointerOwnedRoot, "pointer-owned ROM/ELF interval");
-if (audit.graph.coverage.entryPresent || audit.graph.coverage.queueContainsMove || coverage.entries.some((entry: Json) => entry.move === "MOVE_SILVER_WIND") || coverage.queue.includes("MOVE_SILVER_WIND")) fail("coverage/queue boundary");
+if (audit.graph.coverage.entryPresent || audit.graph.coverage.queueContainsMove
+  || coverage.entries.find((entry: Json) => entry.move === "MOVE_SILVER_WIND")?.status !== "exact"
+  || coverage.queue.includes("MOVE_SILVER_WIND")) fail("coverage/queue boundary");
 if (!audit.checkpoint.sourceAudit || !audit.checkpoint.completePointerOwnedRoot || !audit.checkpoint.completeReachableVisualGraph || !audit.checkpoint.directTaskCallbackResourceBodies || !audit.checkpoint.fullFactoryCarrierCensus || !audit.checkpoint.completeLevel50CarrierCensus || !audit.checkpoint.legalBilateralPartyOnlyStaging || !audit.checkpoint.compactBilateralEndpointReceipts || !audit.checkpoint.twiceFreshPerOrientation || !audit.checkpoint.unsupportedNoCreditBoundary) fail("source checkpoint boundary");
 for (const key of ["denseWindowCaptured", "rawRgbRetained", "latchMeasured", "durableLatchRowAdded", "productionChanged", "reducerAdded", "typedSceneOnSeam", "compositorAdded", "framebufferAcceptance", "coveragePromotion", "coverageEntryAdded", "componentTrackFulfilled", "queueChanged", "boundaryOrBarrierChanged", "gameplayStateOwned"]) if (audit.checkpoint[key] !== false) fail(`audit no-credit scope ${key}`);
 equal(receipt.factoryLegalSelection, {

@@ -24217,16 +24217,28 @@ export function renderSceneOnMovePresentation(
       const initialAttackerExclude = moveState.age >= 12 && moveState.age <= 15
         && bank === attackerBank;
       const palette = initialAttackerExclude ? fadeOnsetPalette(bank) : paletteFromHardware(bank);
-      return directBackdropBldy === null ? legacyCheckpointPalette(palette) : palette;
+      // FadeToBg's 0x00E8 target excludes OBJ. Battler and Sparkle6 banks
+      // therefore retain their hardware-uploaded palette throughout both
+      // the BUG transition and restore, just as in the already-closed static
+      // fade bands.
+      return palette;
     };
     if (plan.bugBackgroundVisible) {
       drawExtractedTileBg(fb, {
         tileset: extremeSpeedBg.tileset,
         tilemap: view.attacker.geometry.side === "player"
-          ? extremeSpeedBg.opponentTilemap : extremeSpeedBg.playerTilemap,
-        subpalettes: [legacyCheckpointPalette(blendPaletteToward(
-          silverWindResources.bugBackground.palette, { r: 0, g: 0, b: 0 }, 4,
-        ))],
+          ? extremeSpeedBg.playerTilemap : extremeSpeedBg.opponentTilemap,
+        // The exclude task has already settled BG3 at coefficient 4 when
+        // the BUG tilemap reaches scanout. FadeToBg's BLDY is a separate
+        // hardware brightness stage and uses the measured coefficient as-is;
+        // the old checkpoint's +1 fit applied only to its deliberately
+        // unowned transition rows.
+        subpalettes: [darken(blendPaletteToward(
+          silverWindResources.bugBackground.palette, { r: 0, g: 0, b: 0 },
+          // The freshly loaded BUG palette reaches scanout one row before
+          // the already-running exclude task reapplies its coefficient 4.
+          moveState.age === 32 ? 0 : 4,
+        ), view.registers.bldy ?? 0)],
       }, view.registers.bg3hofs & 0xff);
     } else {
       drawExtractedTileBg(fb, {
@@ -24236,12 +24248,12 @@ export function renderSceneOnMovePresentation(
       });
     }
     const attackerArt = artFor(view.attacker), targetArt = artFor(view.target);
-    if (displayed.background.monbgActive) {
+    const drawTargetMonBg = (): void => {
       drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
         objPaletteBank(input.background.monbg.paletteBank),
         view.target.geometry.spriteCorner.x + displayed.battlers.target.sprite.x2,
         view.target.geometry.spriteCorner.y + displayed.battlers.target.sprite.y2);
-    }
+    };
     if (moveState.age === 0 && view.attacker.geometry.side === "opponent") {
       // Silver Wind's retained age-zero OAM row leaves the elevated enemy
       // shadow one source pixel above the generic idle placement.  Keep this
@@ -24281,6 +24293,15 @@ export function renderSceneOnMovePresentation(
         undefined, false),
     });
     for (let priority = 3; priority >= 0; priority -= 1) {
+      // splitbgprio_all places the selected target BG between OBJ priority
+      // bands. Lower numeric OBJ priority wins ties with BG, so paint the BG
+      // immediately before its equal-priority OBJ band: player-target BG1
+      // priority 1 covers priority-2 sparkles, while opponent-target BG2
+      // priority 2 covers only priority-3 sparkles.
+      if (displayed.background.monbgActive
+        && priority === (view.registers[`bg${input.background.monbg.bg}cnt`] & 3)) {
+        drawTargetMonBg();
+      }
       for (const entry of entries.filter((item) => item.priority === priority)
         .sort((left, right) => right.order - left.order || right.slot - left.slot)) entry.draw();
     }

@@ -7540,6 +7540,48 @@
     "tests/animation/overheatReducer.test.ts",
     "tests/animation/overheatActualCore.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_SILVER_WIND",
+   "status": "exact",
+   "covered": [
+    "the complete 536-byte Move_SILVER_WIND pointer-owned root and all nineteen source components are independently accepted: side-selected BUG background, StartSlidingBg, target monbg/splitbgprio_all/clear, two BlendBattleAnimPalExclude passes, all eighteen big/medium/small Sparkle6 objects, fades/restoration, audio, resources, waits, and first-inactive cleanup",
+    "complete legal bilateral BUTTERFREE/ONIX Battle Scene ON evidence retains player-back ages 0..192 and opponent-front ages 0..195; the source-relative reducer and typed sceneOnSilverWindView seam reproduce all 389 component rows from live sides/species, geometry, sprite/task/resource/matrix allocation, persistent painter order, BG/register/palette state, presentation RNG, and opaque gameplay state/RNG",
+    "Silver Wind's own maps prove whole hardware OAM/matrices from predecessor software on 192/192 player and 195/195 opponent rows, hardware palette from predecessor faded on 191/192 and 194/195 with age-6 target-monbg setup the sole same-row exception, exclude banks and target exclusions, BG3 slide 30->31 and cleanup 165->166 / 168->169, BUG VRAM, selected target-BG priority, Sparkle6 lives, and tag teardown",
+    "the generic production compositor consumes the source BG swap/palette epochs, measured brightness transfer, live BGxCNT priority against OBJ, and Emerald's persistent stable sSpriteOrder across moving equal-Y Sparkle6 crossings; two independent processes are byte-identical at digest e3c66e5fdd42c5c7d13165a6bbd05cbcba09a8f987935f34f26a9298c1a9614b and each passes all 389/389 component, typed-seam, chronological raw-RGB, and actual-core framebuffer rows with zero residual pixels",
+    "a material reversed CHARIZARD/BLISSEY control changes sides, species, geometry, sprite/task/resource/matrix allocation, persistent order, palette, and presentation RNG, changing seam output and framebuffer while gameplay state/RNG remains opaque and unchanged",
+    "MOVE_SILVER_WIND alone is promoted; MOVE_SKY_ATTACK remains independently unsupported, so blend-battle-anim-palette-exclude remains unfulfilled and every sibling receives no Silver Wind timing, latch, body, move, component-track, or acceptance credit"
+   ],
+   "evidence": [
+    "tools/compare/silverWindSourceAudit.ts",
+    "tools/battle-lab/mechanic-silver-wind-player-butterfree-opponent-onix.json",
+    "tools/battle-lab/mechanic-silver-wind-opponent-butterfree-player-onix.json",
+    "tools/compare/silverWindStagingProbe.py",
+    "tools/compare/fixtures/silver-wind-staging-receipt.json",
+    "tools/compare/verifySilverWindStaging.ts",
+    "tools/compare/silverWindProbe.py",
+    "tools/compare/silverWindEvidence.ts",
+    "tools/compare/fixtures/silver-wind-evidence.json",
+    "tools/compare/evidence/silver-wind-player-dense-state.json.gz",
+    "tools/compare/evidence/silver-wind-opponent-dense-state.json.gz",
+    "tools/compare/evidence/silver-wind-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/silver-wind-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/silver-wind-changemap-player.json",
+    "tools/compare/evidence/silver-wind-changemap-opponent.json",
+    "ANIMATION_LATCHES.md",
+    "tools/compare/extractSilverWindAssets.ts",
+    "src/animation/assets/silver-wind.json",
+    "src/animation/silverWind.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifySilverWindReducer.ts",
+    "tools/compare/silverWindActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/silverWindSourceStaging.test.ts",
+    "tests/animation/silverWindEvidenceCheckpoint.test.ts",
+    "tests/animation/silverWindReducer.test.ts",
+    "tests/animation/silverWindLiveCompositorCheckpoint.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -8253,7 +8295,7 @@
     "MOVE_LUSTER_PURGE",
     "MOVE_SILVER_WIND"
    ],
-   "goal": "MOVE_CALM_MIND independently proves its complete exclude-attacker BG/non-attacker black blend, attacker-partner monbg, non-attacker hide/reveal, three delay-14 shrinking affine/OBJ-alpha thin rings, reverse blend, and cleanup in both orientations at 101/101 task/palette/software+hardware-OAM/register/raw-RGB and framebuffer frames, reproduced twice. MOVE_LUSTER_PURGE independently proves its BG-selected BlendBattleAnimPalExclude ramp and complete psychic BG/screen-white, luster-circle, particle, six-hit, HorizontalShake, reverse-blend, and cleanup body at 333/333 complete bilateral rows twice fresh. HEAL BELL independently proves its own bell, twelve palette-managed music notes, three normal rings, SPARKLE_2 phase, asset unload/reload, and final blended ring at 522/522 bilateral rows. HARDEN 101/101, SYNTHESIS 130/130, and BIND 45/45 remain exact controls. SKY ATTACK needs independent evidence for both two-turn branches; DESTINY BOND needs its BG_GHOST, white-shadow, shake, gray-palette, and cleanup body; SILVER WIND needs its side-specific BUG BGs, sliding BG, split priority, eighteen sparkles, exclude blends, and restoration. Every remaining sibling stays unsupported pending its own complete dense move evidence."
+   "goal": "UNFULFILLED pending MOVE_SKY_ATTACK. MOVE_CALM_MIND independently proves its complete exclude-attacker blend body at 101/101 bilateral rows, MOVE_LUSTER_PURGE its full 333/333 bilateral psychic body, HEAL_BELL its 522/522 bilateral bell/note/ring/star body, MOVE_DESTINY_BOND its own complete ghost-background body, and MOVE_SILVER_WIND now independently proves its side-selected BUG BG, slide, split priority, two exclude passes, eighteen Sparkle6 objects, restoration, and cleanup at 389/389 bilateral rows twice fresh with zero residual pixels. HARDEN 101/101, SYNTHESIS 130/130, and BIND 45/45 remain exact controls. SKY_ATTACK still needs independent evidence for both two-turn branches; no accepted sibling transfers its body, latch, or move credit."
   },
   {
    "id": "metallic-shine",

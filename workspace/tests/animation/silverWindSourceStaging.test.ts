@@ -42,7 +42,7 @@ describe("MOVE_SILVER_WIND authoritative source classification and legal bilater
       freshness: { sharedOracleCaptureUsed: false, localMgbaWrapper: "tools/run-mgba-probe.py", runsPerOrientation: 2 },
       scope: { framebuffersRetained: false, rawRgbRetained: false, denseWindowCaptured: false, semanticFramesRetained: false, latchMeasured: false, durableLatchRowAdded: false, productionChanged: false, reducerAdded: false, typedSceneOnSeam: false, compositorAdded: false, coveragePromotion: false, coverageEntryAdded: false, componentTrackFulfilled: false, battleStateInjected: false, transientOverrides: [], boundaryOrBarrierChanged: false, noTimingOrLatchTransfer: true },
     });
-    expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_SILVER_WIND")).toBe(false);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SILVER_WIND")).toMatchObject({ status: "exact" });
     expect(coverage.queue).not.toContain("MOVE_SILVER_WIND");
     expect(read("tools/compare/silverWindSourceAudit.ts")).not.toContain("../../src/");
     expect(read("tools/compare/silverWindStagingProbe.py")).not.toContain("src/");

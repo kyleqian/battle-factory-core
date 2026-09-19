@@ -7,7 +7,7 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/silverWindSourceAudit.ts",
-    "auditSha256": "de21aec108622031651f351c8896b993f10367c1912f12e034b8e7d6327ab542",
+    "auditSha256": "6a9a23047c4fbdb23388abce4c43ba6869ec67c1181b1f414512cd565bb6d353",
     "auditRunSha256": "5e4ca54ba6f1db909f0a5f9c7df821879491a295c9c75c830d163889929d8d0d",
     "probe": "tools/compare/silverWindStagingProbe.py",
     "probeSha256": "f396564629abf2d91575b54ece6d6eab7c79fa4e688f0d0f0f44add185e1bc4d",

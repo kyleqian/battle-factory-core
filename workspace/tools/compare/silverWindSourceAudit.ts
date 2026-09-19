@@ -145,8 +145,9 @@ if (JSON.stringify(graphEntry) === undefined || graphEntry.id !== 318 || graphEn
 if (!move || move.id !== 318 || move.effect !== "EFFECT_ALL_STATS_UP_HIT" || move.frontierMonCount !== 11 || move.speciesCount !== 9) {
   throw new Error("MOVE_SILVER_WIND inventory classification drifted");
 }
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_SILVER_WIND") || coverage.queue.includes("MOVE_SILVER_WIND")) {
-  throw new Error("MOVE_SILVER_WIND must remain coverage-absent and queue-absent");
+if (coverage.entries.find((entry: Json) => entry.move === "MOVE_SILVER_WIND")?.status !== "exact"
+  || coverage.queue.includes("MOVE_SILVER_WIND")) {
+  throw new Error("MOVE_SILVER_WIND must remain exact and queue-absent");
 }
 if (spriteCommands.length !== 18 || taskCommands.length !== 6 || audioCommands.length !== 3
   || rootCommands.filter((line) => line === "fadetobg BG_BUG_OPPONENT").length !== 1

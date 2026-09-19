@@ -7,14 +7,14 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/silverWindSourceAudit.ts",
-    "auditSha256": "de21aec108622031651f351c8896b993f10367c1912f12e034b8e7d6327ab542",
+    "auditSha256": "6a9a23047c4fbdb23388abce4c43ba6869ec67c1181b1f414512cd565bb6d353",
     "auditRunSha256": "5e4ca54ba6f1db909f0a5f9c7df821879491a295c9c75c830d163889929d8d0d",
     "probe": "tools/compare/silverWindProbe.py",
     "probeSha256": "a86ad9e942eecb1294e575e9e1b4fa7b7df8e1ccd70fcb513d8cc2ed8aedcc56",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/silver-wind-staging-receipt.json",
-    "stagingReceiptSha256": "a11d5ea67212a1949bbbf4bec9867dfb63da7c4c34fb34050559ea6572e4e885",
+    "stagingReceiptSha256": "2d91213c48097944b5c16992274aabb225f07779e54741e5416baf39a2e08b58",
     "pointerOwnedRoot": { "start": "0x082d630b", "endExclusive": "0x082d6523", "observedParities": [0, 1] }
   },
   "freshness": {
