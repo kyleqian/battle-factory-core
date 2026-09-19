@@ -6,6 +6,7 @@
  * presentation resources/tasks/registers.  It deliberately has no damage,
  * accuracy, turn, facility, charge-choice, or gameplay-RNG dependency.
  */
+import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
 
 export type SkyAttackBody = "setup" | "unleash";
 export type SkyAttackSide = "player" | "opponent";
@@ -195,9 +196,42 @@ export interface SkyAttackBirdSprite {
 }
 function birdAtAge(body: SkyAttackBody, age: number, input: Readonly<SkyAttackLiveInputs>): SkyAttackBirdSprite | null {
   if (body !== "unleash" || age < 70 || age > (input.attackerSide === "player" ? 93 : 92)) return null;
-  const local = age - 70, dx = input.targetPictureOrigin.x - input.attackerPictureOrigin.x, dy = input.targetPictureOrigin.y - input.attackerPictureOrigin.y;
-  const x2 = Math.trunc(dx * local / 12), y2 = Math.trunc(dy * local / 12);
-  return { slot: input.bird.slot, template: "gSkyAttackBirdSpriteTemplate", callback: age === (input.attackerSide === "player" ? 93 : 92) ? "DestroyAnimSprite" : "AnimTranslateLinear", attr: input.bird.attr, x: input.attackerPictureOrigin.x, y: input.attackerPictureOrigin.y, x2, y2, subpriority: input.bird.subpriority, oamPriority: input.bird.oamPriority, matrixNum: input.bird.matrixNum, matrix: IDENTITY, flags: input.bird.flags, data: words(Math.max(0, 11 - local), dx, dy, x2, y2) };
+  const local = age - 69;
+  const start = { x: input.attackerSprite.x,
+    y: input.attackerSprite.y + (input.attackerSide === "player" ? 8 : 0) };
+  const end = { x: input.targetSprite.x,
+    y: input.targetSprite.y + (input.targetSide === "player" ? 8 : 0) };
+  const dx = end.x - start.x, dy = end.y - start.y;
+  const stepX = Math.trunc((dx << 4) / 12), stepY = Math.trunc((dy << 4) / 12);
+  const x = (start.x << 4) + stepX * local >> 4;
+  const y = (start.y << 4) + stepY * local >> 4;
+  const biosArcTan = (value: number): number => {
+    const mulShift = (left: number, right: number, shift: number) => Math.imul(left, right) >> shift;
+    const squared = -(Math.imul(value, value) >> 14);
+    let coefficient = mulShift(0xa9, squared, 14) + 0x390;
+    coefficient = mulShift(coefficient, squared, 14) + 0x91c;
+    coefficient = mulShift(coefficient, squared, 14) + 0xfb6;
+    coefficient = mulShift(coefficient, squared, 14) + 0x16aa;
+    coefficient = mulShift(coefficient, squared, 14) + 0x2081;
+    coefficient = mulShift(coefficient, squared, 14) + 0x3651;
+    coefficient = mulShift(coefficient, squared, 14) + 0xa2f9;
+    return Math.imul(value, coefficient) >> 16;
+  };
+  const atan2 = (ax: number, ay: number): number => {
+    const div = (n: number, d: number) => Math.trunc(n / d);
+    if (ay === 0) return ax < 0 ? 0x8000 : 0;
+    if (ax === 0) return ay < 0 ? 0xc000 : 0x4000;
+    const sx = ax << 14, sy = ay << 14;
+    if (ay >= 0) return ax >= 0
+      ? (ax >= ay ? biosArcTan(div(sy, ax)) : 0x4000 - biosArcTan(div(sx, ay)))
+      : (-ax < ay ? 0x4000 - biosArcTan(div(sx, ay)) : 0x8000 + biosArcTan(div(sy, ax)));
+    return ax <= 0
+      ? (-ax > -ay ? 0x8000 + biosArcTan(div(sy, ax)) : 0xc000 - biosArcTan(div(sx, ay)))
+      : (ax < -ay ? 0xc000 - biosArcTan(div(sx, ay)) : 0x10000 + biosArcTan(div(sy, ax)));
+  };
+  const rotation = (-atan2(dx, dy) - 0x4000) & 0xffff, turn = rotation >>> 8;
+  const sin = GBA_SINE_TABLE_256[turn]!, cos = GBA_SINE_TABLE_256[(turn + 64) & 0xff]!;
+  return { slot: input.bird.slot, template: "gSkyAttackBirdSpriteTemplate", callback: age === (input.attackerSide === "player" ? 93 : 92) ? "DestroyAnimSprite" : "AnimTranslateLinear", attr: input.bird.attr, x, y, x2: 0, y2: 0, subpriority: input.bird.subpriority, oamPriority: input.bird.oamPriority, matrixNum: input.bird.matrixNum, matrix: [cos, sin === 0 ? 0 : -sin, sin, cos], flags: input.bird.flags, data: words(Math.max(0, 11 - local), dx, dy, x, y) };
 }
 
 function battlersAtAge(body: SkyAttackBody, age: number, input: Readonly<SkyAttackLiveInputs>) {

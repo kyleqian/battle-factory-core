@@ -190,6 +190,7 @@ import {
   type SceneOnPsychUpConfig,
   type SceneOnHyperVoiceConfig,
   type SceneOnSnoreConfig,
+  type SceneOnSkyAttackConfig,
   type SceneOnShockWaveConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnNightmareConfig,
@@ -342,6 +343,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "SNORE") {
     const snorePresentation = presentation as SceneOnMovePresentationState<SceneOnSnoreConfig>;
     renderSceneOnMovePresentation(framebuffer, snorePresentation);
+    return;
+  }
+  if (presentation.config.move === "SKY_ATTACK") {
+    const skyAttackPresentation = presentation as SceneOnMovePresentationState<SceneOnSkyAttackConfig>;
+    renderSceneOnMovePresentation(framebuffer, skyAttackPresentation);
     return;
   }
   if (presentation.config.move === "SHOCK_WAVE") {

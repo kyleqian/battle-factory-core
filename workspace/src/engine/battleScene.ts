@@ -553,6 +553,7 @@ import signalBeamAsset from "../animation/assets/signal-beam.json" with { type: 
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import silverWindAsset from "../animation/assets/silver-wind.json" with { type: "json" };
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
+import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
 import waterPulseAsset from "../animation/assets/water-pulse.json" with { type: "json" };
 import digDirtMoundAsset from "../animation/assets/dig-dirt-mound.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
@@ -990,6 +991,7 @@ import {
   sceneOnPsychUpView,
   sceneOnHyperVoiceView,
   sceneOnSnoreView,
+  sceneOnSkyAttackView,
   sceneOnShockWaveView,
   sceneOnSignalBeamView,
   sceneOnNightmareView,
@@ -1259,6 +1261,7 @@ import {
   type SceneOnPsychUpConfig,
   type SceneOnHyperVoiceConfig,
   type SceneOnSnoreConfig,
+  type SceneOnSkyAttackConfig,
   type SceneOnShockWaveConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnNightmareConfig,
@@ -1902,6 +1905,10 @@ const silverWindArt = silverWindResources.sparkle6;
 const snoreArt = (snoreAsset as {
   snoreZ: { tileset: Tileset; palette: RgbColor[] };
 }).snoreZ;
+const skyAttackArt = skyAttackAsset as {
+  bird: { tileset: Tileset; palette: RgbColor[] };
+  skyPalette: RgbColor[];
+};
 const waterPulseArt = waterPulseAsset as {
   blueRing2: { tileset: Tileset; palette: RgbColor[] };
 };
@@ -24812,6 +24819,169 @@ export function renderSceneOnMovePresentation(
       "SNORE!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "SKY_ATTACK") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnSkyAttackConfig>;
+    const view = sceneOnSkyAttackView(moveState);
+    const displayed = sceneOnSkyAttackView({ ...moveState,
+      age: Math.max(0, moveState.age - 1) });
+    const twoBack = sceneOnSkyAttackView({ ...moveState,
+      age: Math.max(0, moveState.age - 2) });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SKY_ATTACK presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SKY_ATTACK missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const baseBank = (bank: number): RgbColor[] =>
+      moveState.config.animationInputs.palettes.hardware
+        .slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const black = { r: 0, g: 0, b: 0 }, white = { r: 255, g: 255, b: 255 };
+    const input = moveState.config.animationInputs;
+    const attackerBank = 16 + (input.attackerSprite.attr[2] >>> 12 & 0xf);
+    const targetBank = 16 + (input.targetSprite.attr[2] >>> 12 & 0xf);
+    const monbgBank = input.background.monbg.paletteBank;
+    const setupBlack = moveState.age < 7 ? 0 : moveState.age < 109
+      ? Math.min(12, Math.floor((moveState.age - 5) / 2))
+      : moveState.age < 125 ? Math.max(0, 8 - Math.floor((moveState.age - 109) / 2)) : 0;
+    const setupWhite = moveState.age < 46 ? 0 : moveState.age < 66
+      ? Math.floor((moveState.age - 44) / 2)
+      : moveState.age < 96 ? Math.max(0, 15 - Math.floor((moveState.age - 66) / 2)) : 0;
+    const unleashWhite = moveState.age < 50 ? 0 : moveState.age <= 65
+      ? moveState.age - 49 : moveState.age <= 112 ? 16
+      : moveState.age <= 128 ? 128 - moveState.age : 0;
+    const paletteBank = (bank: number): RgbColor[] => {
+      if (view.body === "setup") {
+        if (bank === monbgBank) return baseBank(targetBank);
+        if (bank === attackerBank && moveState.age >= 44) {
+          return blendPaletteToward(baseBank(bank), white, setupWhite);
+        }
+        if ([1, 2, 3, attackerBank].includes(bank)) {
+          return blendPaletteToward(baseBank(bank), black, setupBlack);
+        }
+      } else if (bank === monbgBank) {
+        return blendPaletteToward(baseBank(attackerBank), white, unleashWhite);
+      }
+      return baseBank(bank);
+    };
+    const attackerArt = artFor(view.attacker), targetArt = artFor(view.target);
+    let fade = 0;
+    if (view.body === "unleash") {
+      const age = moveState.age;
+      if (age >= 9 && age <= 24) fade = age - 8;
+      else if (age >= 25 && age <= 27) fade = 16;
+      else if (age >= 28 && age <= 43) fade = 43 - age;
+      else if (age >= 142 && age <= 144) fade = 1;
+      else if (age >= 145 && age <= 159) fade = age - 143;
+      else if (age >= 160 && age <= 162) fade = 16;
+      else if (age >= 163 && age <= 178) fade = 178 - age;
+    }
+    const brightnessDarken = (palette: readonly RgbColor[]): RgbColor[] =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(color.r | color.g << 8 | color.b << 16, fade);
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      });
+    const fieldPalettes = [2, 3, 4].map((bank) => brightnessDarken(paletteBank(bank)));
+    if (view.body === "unleash" && moveState.age >= 26 && moveState.age <= 161) {
+      const scrollStep = moveState.age <= 142
+        ? moveState.age - 26
+        : moveState.age <= 144 ? 116 : moveState.age - 28;
+      const scrollDirection = view.attacker.geometry.side === "player" ? -1 : 1;
+      drawScrolledTileBg(fb, hornDrillArt.drill.tileset, hornDrillArt.drill.tilemap,
+        [brightnessDarken(skyAttackArt.skyPalette)],
+        scrollDirection * 9 * scrollStep & 0x1ff,
+        -scrollDirection * 3 * scrollStep & 0x1ff);
+    } else {
+      drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, fieldPalettes);
+    }
+    const targetMonbg = view.body === "setup" && moveState.age >= 1 && moveState.age <= 128;
+    const attackerMonbg = view.body === "unleash" && moveState.age >= 45 && moveState.age <= 142;
+    if (targetMonbg) drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+      paletteBank(monbgBank), view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y);
+    if (attackerMonbg) {
+      const eva = moveState.age >= 140 ? 16 : moveState.age <= 54 ? 16 : moveState.age <= 70
+        ? 70 - moveState.age : moveState.age <= 109 ? 0
+        : Math.min(15, Math.floor((moveState.age - 108) / 2));
+      const backdrop = fb.slice();
+      drawSpriteSheetBlendedOverBackdrop(fb, backdrop,
+        tilesFor(attackerArt, view.attacker.geometry.side), paletteBank(monbgBank),
+        view.attacker.geometry.spriteCorner.x, view.attacker.geometry.spriteCorner.y,
+        eva, 16 - eva);
+    }
+    if (moveState.age === 0 && view.attacker.geometry.side === "opponent") {
+      drawSourceOpponentEnemyShadow(fb, view.attacker.species,
+        view.attacker.geometry.battlePositionCenter);
+    }
+    type Obj = Readonly<{ slot: number; subpriority: number; order: number; draw: () => void }>;
+    const orderOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    const objects: Obj[] = [];
+    const attackerSprite = (view.body === "setup" ? twoBack : displayed)
+      .battlers.attacker.sprite;
+    const targetSpriteBase = view.body === "unleash"
+      ? twoBack.battlers.target.sprite : displayed.battlers.target.sprite;
+    const targetSprite = view.body === "unleash" && moveState.age === 87
+      ? { ...targetSpriteBase, x2: 10 }
+      : targetSpriteBase;
+    if (!attackerMonbg || moveState.age === 45 || moveState.age >= 141) objects.push({
+      slot: attackerSprite.slot, subpriority: attackerSprite.subpriority,
+      order: orderOf(attackerSprite.slot), draw: () => drawSpriteSheet(fb,
+        tilesFor(attackerArt, view.attacker.geometry.side), paletteBank(attackerBank),
+        view.attacker.geometry.spriteCorner.x + attackerSprite.x2,
+        view.attacker.geometry.spriteCorner.y + attackerSprite.y2),
+    });
+    if (!targetMonbg || moveState.age === 1 || moveState.age >= 129) objects.push({
+      slot: targetSprite.slot, subpriority: targetSprite.subpriority,
+      order: orderOf(targetSprite.slot), draw: () => drawSpriteSheet(fb,
+        tilesFor(targetArt, view.target.geometry.side), paletteBank(targetBank),
+        view.target.geometry.spriteCorner.x + targetSprite.x2,
+        view.target.geometry.spriteCorner.y + targetSprite.y2),
+    });
+    if (displayed.sprites.bird) {
+      const bird = displayed.sprites.bird;
+      objects.push({ slot: bird.slot, subpriority: bird.subpriority,
+        order: orderOf(bird.slot), draw: () => drawSpriteSheetAffineRotate(fb,
+          skyAttackArt.bird.tileset, skyAttackArt.bird.palette, bird.x, bird.y,
+          bird.matrix[0], bird.matrix[1], bird.matrix[2], bird.matrix[3]) });
+    }
+    objects.sort((left, right) => right.subpriority - left.subpriority
+      || right.order - left.order || right.slot - left.slot);
+    for (const object of objects) object.draw();
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    if (view.body === "unleash") drawMessageTextLines(fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SKY ATTACK!", 99);
     return;
   }
 

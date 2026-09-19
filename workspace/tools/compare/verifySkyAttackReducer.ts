@@ -39,7 +39,8 @@ export function skyAttackInputsFor(orientation: SkyAttackOrientation, corpus = c
 export function skyAttackConfigFor(body: SkyAttackBody, input: SkyAttackLiveInputs): SceneOnSkyAttackPresentationState["config"] {
   const geometry = (side: "player" | "opponent", point: Readonly<{ x: number; y: number }>, species: string) => ({ species: species as never, geometry: { side, spriteCorner: { x: point.x - 32, y: point.y - 32 }, animationCenter: point, battlePositionCenter: side === "player" ? { x: 64, y: 92 } : { x: 176, y: 40 } } });
   const { attackerSide, targetSide, attackerSpecies, targetSpecies, attackerPictureOrigin, targetPictureOrigin, ...animationInputs } = input;
-  return { move: "SKY_ATTACK", body, attacker: geometry(attackerSide, attackerPictureOrigin, attackerSpecies), target: geometry(targetSide, targetPictureOrigin, targetSpecies), fieldProfile: { playerHp: 1, playerMaxHp: 1, opponentHp: 1, opponentMaxHp: 1 }, animationInputs };
+  const playerIsAttacker = attackerSide === "player";
+  return { move: "SKY_ATTACK", body, attacker: geometry(attackerSide, attackerPictureOrigin, attackerSpecies), target: geometry(targetSide, targetPictureOrigin, targetSpecies), fieldProfile: { playerHp: playerIsAttacker ? 140 : 127, playerMaxHp: playerIsAttacker ? 140 : 127, opponentHp: playerIsAttacker ? 127 : 140, opponentMaxHp: playerIsAttacker ? 127 : 140 }, animationInputs };
 }
 function compare(body: SkyAttackBody, age: number, row: Json, input: SkyAttackLiveInputs): void {
   const state = skyAttackAtAge(body, age, input);
