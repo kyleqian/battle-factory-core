@@ -42,8 +42,8 @@
   },
   "source": {
     "audit": "tools/compare/rapidSpinSourceAudit.ts",
-    "auditSha256": "9e579484a3e6cd24aa71dab73c2ef5cbbaa241311300c322b7d706088dafd8ed",
-    "auditRunSha256": "651076e9313aa1f7e8e14fbafdf820fcc31519d7e7563a310d48bd0b232ebfe4",
+    "auditSha256": "c52f8657f23d4e92325cc690b45da15db16cd3f443f45b788d32ed691dd39d6d",
+    "auditRunSha256": "c9556889b33632b8e39314d929f4d9102a689dbd31343bc19f39abd4a56b75a2",
     "probe": "tools/compare/rapidSpinProbe.py",
     "probeSha256": "b1406d594672947237b642d3cbc8f5031b60a3451125cb6ebc01bda47368020a",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
