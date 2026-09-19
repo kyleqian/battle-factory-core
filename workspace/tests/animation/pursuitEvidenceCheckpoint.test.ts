@@ -11,15 +11,15 @@ const sha = (value: string | Uint8Array): string => createHash("sha256").update(
 const run = (path: string): string => execFileSync(process.execPath, ["--experimental-strip-types", path], { cwd: root, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
 const completeKeys = ["abilitySlot", "evs", "friendship", "gender", "item", "ivs", "level", "moves", "nature", "ppUps", "shiny", "species"];
 
-describe("MOVE_PURSUIT evidence and reducer/seam checkpoint", () => {
+describe("MOVE_PURSUIT evidence and exact closure", () => {
   it("pins the complete source graph, resources, callbacks, audio, variants, and six Level-50 carriers", () => {
     const text = run("tools/compare/pursuitSourceAudit.ts");
     expect(run("tools/compare/pursuitSourceAudit.ts")).toBe(text);
-    expect(sha(text)).toBe("ea938b9d1fc5f476f8d0dbe3f53e381540db69b6eb0f8dc0fac27b8ee1b735e3");
+    expect(sha(text)).toBe("8164e7af6df92754be6f0626a7d470a1d7a5204daa749c3a27c44927b904a571");
     const audit = JSON.parse(text) as Json;
-    expect(audit).toMatchObject({ schema: "pursuit-source-audit/v1", move: "MOVE_PURSUIT", moveId: 228, status: "unsupported", coverageCredit: false,
+    expect(audit).toMatchObject({ schema: "pursuit-source-audit/v1", move: "MOVE_PURSUIT", moveId: 228, status: "exact", coverageCredit: true,
       source: { root: { source: { byteLength: 819, sha256: "ef2501380077566476de8c5add0940072e169632f505bda7d0d148741b2ca0d0" }, rom: { start: "0x082ca980", endExclusive: "0x082ca9f1", byteLength: 113, romSha256: "a57e504992b94694c91325564659944b8f314b43b9f3310bd95d00a56d65621d" } }, branches: { normal: { hitsplatAffineAnimation: 2 }, switchout: { hitsplatAffineAnimation: 1 } }, audio: { symbol: "se_m_comet_punch" } },
-      graph: { componentCount: 13, novelComponents: [] }, variants: { normal: { evidenceRequired: true, legalBilateralStage: true }, switchout: { evidenceRequired: true, legalCompletePartyStage: true, orientation: "opponent-front" } }, checkpoint: { allSourceBranchesStaged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: false, productionChanged: true, framebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false } });
+      graph: { componentCount: 13, novelComponents: [] }, variants: { normal: { evidenceRequired: true, legalBilateralStage: true }, switchout: { evidenceRequired: true, legalCompletePartyStage: true, orientation: "opponent-front" } }, checkpoint: { allSourceBranchesStaged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, productionChanged: true, framebufferAcceptance: true, coveragePromotion: true, siblingPromotion: false, componentTrackFulfilled: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false } });
     expect(audit.graph.components).toEqual(["asset:ANIM_TAG_IMPACT", "subroutine:PursuitContinue", "subroutine:PursuitNormal", "subroutine:PursuitOnSwitchout", "task:AnimTask_ShakeTargetBasedOnMovePowerOrDmg", "visualCommand:blendoff", "visualCommand:clearmonbg", "visualCommand:create_basic_hitsplat_sprite", "visualCommand:fadetobg", "visualCommand:monbg", "visualCommand:restorebg", "visualCommand:setalpha", "visualCommand:waitbgfadein"]);
     expect(audit.carriers.map((entry: Json) => [entry.setId, entry.label])).toEqual([[154,"FRONTIER_MON_BEEDRILL"],[197,"FRONTIER_MON_RATICATE_1"],[206,"FRONTIER_MON_METANG_1"],[319,"FRONTIER_MON_SWELLOW_2"],[473,"FRONTIER_MON_FEAROW_2"],[508,"FRONTIER_MON_ALTARIA_2"]]);
   });
@@ -38,7 +38,7 @@ describe("MOVE_PURSUIT evidence and reducer/seam checkpoint", () => {
     expect(stage.overrides.parties[target][0]).toMatchObject({ species: 213, level: 50, moves: [33,33,33,33], abilitySlot: 0 });
   });
 
-  it("regenerates all 309 normal and switch-interception rows and three normalized maps without granting credit", () => {
+  it("regenerates all 309 historical evidence rows and preserves the exact coverage boundary", () => {
     const fixture = json("tools/compare/fixtures/pursuit-evidence.json");
     expect(fixture).toMatchObject({ schema: "pursuit-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_PURSUIT", moveId: 228, status: "unsupported", coverageCredit: false, variants: { normal: { legalBilateralEvidence: true }, switchout: { legalCompletePartyEvidence: true, orientation: "opponent-front", selectedAffineAnimation: 1 } }, acceptance: { freshRunsPerWindow: 2, rows: { "player-back": 103, "opponent-front": 103, "switchout-opponent-front": 103 }, totalRows: 309, firstInactiveCleanupRetained: true }, evidenceScope: { fullDenseRowsRetained: true, rawRgbRetained: true, normalizedMaps: true, twiceFreshByteIdentical: true, latchMeasured: true, allSourceBranchesObserved: true, productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, gameplayStateOwned: false, boundaryOrBarrierChanged: false } });
     expect(fixture.orientations["player-back"]).toMatchObject({ probeJsonSha256: "137dda59c38224477ed4b78e9cdbe3a988e7a8523fceb025f91453d175305a08", repeatProbeJsonSha256: "137dda59c38224477ed4b78e9cdbe3a988e7a8523fceb025f91453d175305a08", rawRgbSequenceSha256: "4da40d97ff687ff8226b796e9d5e855ce3d57e0d466a670f79e001f1c14e07da", repeatRawRgbSequenceSha256: "4da40d97ff687ff8226b796e9d5e855ce3d57e0d466a670f79e001f1c14e07da", changeMapSha256: "550ccc1c63caab25044db739fa65dc635b21d513e99999289623f462d81f77c5" });
@@ -50,7 +50,7 @@ describe("MOVE_PURSUIT evidence and reducer/seam checkpoint", () => {
     const result = JSON.parse(run("tools/compare/pursuitEvidence.ts")) as Json;
     expect(result).toMatchObject({ move: "MOVE_PURSUIT", status: "unsupported", coverageCredit: false, acceptance: { totalRows: 309 }, boundary: { allSourceBranchesObserved: true, productionChanged: false, reducerAdded: false, typedSeamAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, boundaryOrBarrierChanged: false } });
     const coverage = json("ANIMATION_COVERAGE.json");
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_PURSUIT")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: Json) => track.id === "pursuit-dark-background-power-shake")).toMatchObject({ representatives: ["MOVE_PURSUIT"], fulfilled: false });
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_PURSUIT")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "pursuit-dark-background-power-shake")).toMatchObject({ representatives: ["MOVE_PURSUIT"], fulfilled: true });
   });
 });

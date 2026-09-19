@@ -173,13 +173,14 @@ describe("MOVE_PURSUIT source-relative reducer and narrow Scene-ON seam", () => 
     expect(target.geometry.side).toBe("opponent");
   });
 
-  it("keeps retained evidence out of production and leaves Pursuit unsupported/unfulfilled", () => {
+  it("keeps retained evidence out of production and pins Pursuit exact/fulfilled", () => {
     const source = readFileSync(resolve(root, "src/animation/pursuit.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party|reference)[^"']*["']/u);
     expect(source).not.toMatch(/absolute\s*(?:battle\s*)?(?:tick|frame)|framebuffer|controller-frame/iu);
     const data = coverage as Json;
-    expect(data.entries.find((entry: Json) => entry.move === "MOVE_PURSUIT")).toBeUndefined();
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_PURSUIT"))
+      .toMatchObject({ status: "exact" });
     expect(data.componentTracks.find((entry: Json) => entry.id === "pursuit-dark-background-power-shake"))
-      .toMatchObject({ representatives: ["MOVE_PURSUIT"], fulfilled: false });
+      .toMatchObject({ representatives: ["MOVE_PURSUIT"], fulfilled: true });
   });
 });
