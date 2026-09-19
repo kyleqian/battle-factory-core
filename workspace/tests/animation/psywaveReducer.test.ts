@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -205,6 +206,10 @@ describe("MOVE_PSYWAVE source-relative reducer and narrow Scene-ON seam", () => 
     expect(seamState).toEqual(source);
     expect(attacker.geometry.side).toBe("opponent");
     expect(target.geometry.side).toBe("player");
+    const alteredControlDigest = createHash("sha256")
+      .update(JSON.stringify({ reducer: source, seam: seamState, gameplayRng, gameplayState }))
+      .digest("hex");
+    expect(alteredControlDigest).toBe("031045c09740da93f41393616ff4ae5310c1132562ae362f61338a7677cc2787");
   });
 
   it("keeps retained evidence out of production and preserves Psywave as unsupported/no-credit", () => {
