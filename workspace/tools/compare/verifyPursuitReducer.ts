@@ -93,6 +93,8 @@ export function pursuitInputsFor(
     branch: branchFor(window),
     attackerSpriteSlot: current.battlerSprites.attacker.slot,
     targetSpriteSlot: current.battlerSprites.target.slot,
+    attackerAttr2: current.battlerSprites.attacker.attr[2],
+    targetAttr2: current.battlerSprites.target.attr[2],
     targetInitialOffset: { x: first.battlerSprites.target.x2, y: first.battlerSprites.target.y2 },
     taskSlots: {
       fadeToDark: fadeToDark.slot,

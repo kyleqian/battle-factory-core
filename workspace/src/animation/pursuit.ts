@@ -40,6 +40,9 @@ export interface PursuitLiveInputs {
   readonly branch: PursuitBranch;
   readonly attackerSpriteSlot: number;
   readonly targetSpriteSlot: number;
+  /** Live battler tile/palette identities used to find their hardware OAM. */
+  readonly attackerAttr2: number;
+  readonly targetAttr2: number;
   readonly targetInitialOffset: Readonly<PursuitPoint>;
   readonly taskSlots: Readonly<{
     readonly fadeToDark: number;
@@ -210,6 +213,23 @@ export interface PursuitState {
   }>;
 }
 
+export interface PursuitDisplayedObject {
+  readonly oamIndex: number;
+  readonly attr: readonly [number, number, number];
+  readonly matrixNum: number;
+  readonly matrix: PursuitMatrix;
+}
+
+export interface PursuitDisplayPlan {
+  readonly attacker: PursuitDisplayedObject;
+  readonly target: PursuitDisplayedObject | null;
+  readonly impact: PursuitDisplayedObject | null;
+  readonly hardwarePalette: readonly number[];
+  readonly targetOnBg: boolean;
+  readonly targetBgScroll: PursuitPoint;
+  readonly darkBackgroundVisible: boolean;
+}
+
 export const PURSUIT_SOURCE_START = 0x082c_a980;
 export const PURSUIT_SOURCE_END_EXCLUSIVE = 0x082c_a9f1;
 export const PURSUIT_IMPACT_TAG = 10135;
@@ -234,6 +254,9 @@ function assertInputs(input: Readonly<PursuitLiveInputs>): void {
   }
   assertSlot(input.attackerSpriteSlot, "attacker sprite slot", 64);
   assertSlot(input.targetSpriteSlot, "target sprite slot", 64);
+  if (!Number.isInteger(input.attackerAttr2) || !Number.isInteger(input.targetAttr2)) {
+    throw new Error("Pursuit requires live battler OAM identities");
+  }
   for (const [label, slot] of Object.entries(input.taskSlots)) assertSlot(slot, label, 16);
   assertSlot(input.impact.slot, "IMPACT sprite slot", 64);
   assertSlot(input.impact.matrixSlot, "IMPACT matrix slot", 32);
@@ -259,6 +282,67 @@ function assertInputs(input: Readonly<PursuitLiveInputs>): void {
   if (!Number.isFinite(input.movePower) || !Number.isFinite(input.moveDamage)) {
     throw new Error("Pursuit requires live move power and damage");
   }
+}
+
+function decodeHardwareOam(entry: unknown, oamIndex: number): PursuitDisplayedObject | null {
+  if (typeof entry !== "string" || !/^[0-9a-f]{16}$/iu.test(entry)) return null;
+  const word = (offset: number): number => Number.parseInt(
+    `${entry.slice(offset + 2, offset + 4)}${entry.slice(offset, offset + 2)}`, 16,
+  );
+  const attr = [word(0), word(4), word(8)] as const;
+  return { oamIndex, attr, matrixNum: attr[1] >>> 9 & 0x1f,
+    matrix: [256, 0, 0, 256] };
+}
+
+function signed9(value: number): number {
+  const wrapped = value & 0x1ff;
+  return wrapped >= 0x100 ? wrapped - 0x200 : wrapped;
+}
+
+/**
+ * Resolves Pursuit scanout from live hardware buffers and allocation state.
+ * It contains no retained-frame or controller chronology knowledge.
+ */
+export function pursuitDisplayPlan(state: Readonly<PursuitState>,
+  input: Readonly<PursuitLiveInputs>): PursuitDisplayPlan {
+  const objects = state.buffers.hardwareOam
+    .map(decodeHardwareOam)
+    .filter((entry): entry is PursuitDisplayedObject => entry !== null)
+    .map((entry) => ({ ...entry,
+      matrix: state.buffers.hardwareMatrices[entry.matrixNum] ?? [256, 0, 0, 256] as const }));
+  const findBattler = (attr2: number): PursuitDisplayedObject | null =>
+    objects.find((entry) => entry.attr[2] === attr2) ?? null;
+  const allocator = state.resources.allocator as Readonly<{
+    readonly tileRanges?: readonly (readonly [number, number])[];
+  }>;
+  const tileRange = state.resources.tileSlot === null
+    ? null : allocator.tileRanges?.[state.resources.tileSlot] ?? null;
+  const impact = tileRange === null || state.resources.paletteBank === null ? null
+    : objects.find((entry) => {
+      const tile = entry.attr[2] & 0x3ff;
+      return tile >= tileRange[0] && tile < tileRange[0] + tileRange[1]
+        && 16 + (entry.attr[2] >>> 12 & 0xf) === state.resources.paletteBank
+        && (entry.attr[0] & 0x0100) !== 0 && (entry.attr[0] & 0x0200) === 0;
+    }) ?? null;
+  const hofsKey = state.monbg.layer === "bg1" ? "bg1hofs" : "bg2hofs";
+  const vofsKey = state.monbg.layer === "bg1" ? "bg1vofs" : "bg2vofs";
+  const attacker = findBattler(input.attackerAttr2);
+  const target = findBattler(input.targetAttr2);
+  if (!attacker) throw new Error("missing displayed Pursuit attacker OAM");
+  const targetOnBg = state.monbg.active && state.age >= 5;
+  if (!targetOnBg && !target) throw new Error("missing displayed Pursuit target OAM");
+  return {
+    attacker,
+    target,
+    impact,
+    hardwarePalette: state.palette.hardware,
+    targetOnBg,
+    targetBgScroll: {
+      x: signed9(state.registers[hofsKey] ?? 0),
+      y: signed9(state.registers[vofsKey] ?? 0),
+    },
+    darkBackgroundVisible: state.age >= 26 && state.age < 82,
+  };
 }
 
 function data16(...values: number[]): readonly number[] {

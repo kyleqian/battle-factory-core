@@ -972,6 +972,7 @@ import {
   type SkillSwapState,
 } from "./skillSwap.ts";
 import {
+  pursuitDisplayPlan,
   pursuitAtAge,
   type PursuitLiveInputs,
   type PursuitState,
@@ -8839,6 +8840,23 @@ export function sceneOnPursuitView(
     attacker,
     target,
   };
+}
+
+/** Live, evidence-free scanout plan for Pursuit's hardware display buffers. */
+export function sceneOnPursuitDisplayPlan(
+  state: SceneOnPursuitPresentationState,
+): ReturnType<typeof pursuitDisplayPlan> {
+  const view = sceneOnPursuitView(state);
+  return pursuitDisplayPlan(view, {
+    ...state.config.animationInputs,
+    attackerSide: view.attacker.geometry.side,
+    targetSide: view.target.geometry.side,
+    attackerSpecies: view.attacker.species,
+    targetSpecies: view.target.species,
+    attackerCenter: view.attacker.geometry.animationCenter,
+    targetCenter: view.target.geometry.animationCenter,
+    targetImpactCenter: view.target.geometry.battlePositionCenter,
+  });
 }
 
 /** `age=0` is the selected Razor Wind source body's first display. */
