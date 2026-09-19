@@ -69,7 +69,6 @@ export const SKY_ATTACK_SOURCE_START = 0x082cd17b;
 export const SKY_ATTACK_SOURCE_SHARED = 0x082d7ce5;
 export const SKY_ATTACK_SOURCE_END_EXCLUSIVE = 0x082cd313;
 
-const IDENTITY: SkyAttackMatrix = [256, 0, 0, 256];
 const ZERO_ARGS = [0, 0, 0, 0, 0, 0, 0, 0] as const;
 const words = (...values: number[]): number[] => [...values, ...Array.from({ length: Math.max(0, 16 - values.length) }, () => 0)].slice(0, 16);
 const u32 = (value: number): number => value >>> 0;
