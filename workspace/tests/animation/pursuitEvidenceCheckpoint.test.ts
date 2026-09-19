@@ -11,15 +11,15 @@ const sha = (value: string | Uint8Array): string => createHash("sha256").update(
 const run = (path: string): string => execFileSync(process.execPath, ["--experimental-strip-types", path], { cwd: root, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
 const completeKeys = ["abilitySlot", "evs", "friendship", "gender", "item", "ivs", "level", "moves", "nature", "ppUps", "shiny", "species"];
 
-describe("MOVE_PURSUIT evidence-only checkpoint", () => {
+describe("MOVE_PURSUIT evidence and reducer/seam checkpoint", () => {
   it("pins the complete source graph, resources, callbacks, audio, variants, and six Level-50 carriers", () => {
     const text = run("tools/compare/pursuitSourceAudit.ts");
     expect(run("tools/compare/pursuitSourceAudit.ts")).toBe(text);
-    expect(sha(text)).toBe("34b99989a4b9a30c782db016ad260d7a4a355f2d25815d9262d927e4c735e0c2");
+    expect(sha(text)).toBe("ea938b9d1fc5f476f8d0dbe3f53e381540db69b6eb0f8dc0fac27b8ee1b735e3");
     const audit = JSON.parse(text) as Json;
     expect(audit).toMatchObject({ schema: "pursuit-source-audit/v1", move: "MOVE_PURSUIT", moveId: 228, status: "unsupported", coverageCredit: false,
       source: { root: { source: { byteLength: 819, sha256: "ef2501380077566476de8c5add0940072e169632f505bda7d0d148741b2ca0d0" }, rom: { start: "0x082ca980", endExclusive: "0x082ca9f1", byteLength: 113, romSha256: "a57e504992b94694c91325564659944b8f314b43b9f3310bd95d00a56d65621d" } }, branches: { normal: { hitsplatAffineAnimation: 2 }, switchout: { hitsplatAffineAnimation: 1 } }, audio: { symbol: "se_m_comet_punch" } },
-      graph: { componentCount: 13, novelComponents: [] }, variants: { normal: { evidenceRequired: true, legalBilateralStage: true }, switchout: { evidenceRequired: true, legalCompletePartyStage: true, orientation: "opponent-front" } }, checkpoint: { allSourceBranchesStaged: true, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, productionChanged: false, framebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false } });
+      graph: { componentCount: 13, novelComponents: [] }, variants: { normal: { evidenceRequired: true, legalBilateralStage: true }, switchout: { evidenceRequired: true, legalCompletePartyStage: true, orientation: "opponent-front" } }, checkpoint: { allSourceBranchesStaged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: false, productionChanged: true, framebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false } });
     expect(audit.graph.components).toEqual(["asset:ANIM_TAG_IMPACT", "subroutine:PursuitContinue", "subroutine:PursuitNormal", "subroutine:PursuitOnSwitchout", "task:AnimTask_ShakeTargetBasedOnMovePowerOrDmg", "visualCommand:blendoff", "visualCommand:clearmonbg", "visualCommand:create_basic_hitsplat_sprite", "visualCommand:fadetobg", "visualCommand:monbg", "visualCommand:restorebg", "visualCommand:setalpha", "visualCommand:waitbgfadein"]);
     expect(audit.carriers.map((entry: Json) => [entry.setId, entry.label])).toEqual([[154,"FRONTIER_MON_BEEDRILL"],[197,"FRONTIER_MON_RATICATE_1"],[206,"FRONTIER_MON_METANG_1"],[319,"FRONTIER_MON_SWELLOW_2"],[473,"FRONTIER_MON_FEAROW_2"],[508,"FRONTIER_MON_ALTARIA_2"]]);
   });

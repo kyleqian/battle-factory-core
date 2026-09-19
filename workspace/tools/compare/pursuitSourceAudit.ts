@@ -51,7 +51,7 @@ const move = inventory.tiers.level50.moves.find((entry: Json) => entry.move === 
 const carriers = frontier.entries.filter((entry: Json) => entry.index >= 110 && entry.index <= 849 && entry.moves.includes("MOVE_PURSUIT"));
 if (!move || move.frontierMonCount !== 6 || move.speciesCount !== 6 || carriers.length !== 6) throw new Error("six-carrier census drift");
 const status = coverage.entries.find((entry: Json) => entry.move === "MOVE_PURSUIT")?.status ?? "unsupported";
-if (status !== "unsupported") throw new Error("evidence-only checkpoint must remain unsupported");
+if (status !== "unsupported") throw new Error("Pursuit reducer/seam checkpoint must remain unsupported");
 
 console.log(JSON.stringify({
   schema: "pursuit-source-audit/v1", move: "MOVE_PURSUIT", moveId: 228, status, coverageCredit: false,
@@ -65,5 +65,5 @@ console.log(JSON.stringify({
   graph: { blocks: generated.blocks, componentCount: generated.componentIds.length, components: generated.componentIds, novelComponents: [] },
   carriers: carriers.map((entry: Json) => ({ setId: entry.index, label: entry.label, species: entry.species, moves: entry.moves, itemName: entry.itemName, evSpreadStats: entry.evSpreadStats, nature: entry.nature })),
   variants: { normal: { evidenceRequired: true, legalBilateralStage: true }, switchout: { evidenceRequired: true, legalCompletePartyStage: true, orientation: "opponent-front", trigger: "player selects a legal bench switch while the opponent is constrained to Pursuit" } },
-  checkpoint: { sourceAudit: true, graphPinned: true, sixLevel50CarriersPinned: true, legalBilateralParties: true, allSourceBranchesStaged: true, denseEvidenceRequired: true, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, productionChanged: false, framebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false },
+  checkpoint: { sourceAudit: true, graphPinned: true, sixLevel50CarriersPinned: true, legalBilateralParties: true, allSourceBranchesStaged: true, denseEvidenceRequired: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: false, productionChanged: true, framebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false },
 }, null, 2));

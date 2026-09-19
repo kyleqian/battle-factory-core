@@ -972,6 +972,11 @@ import {
   type SkillSwapState,
 } from "./skillSwap.ts";
 import {
+  pursuitAtAge,
+  type PursuitLiveInputs,
+  type PursuitState,
+} from "./pursuit.ts";
+import {
   waterPulseAtAge,
   type WaterPulseLiveInputs,
   type WaterPulseState,
@@ -2784,6 +2789,21 @@ export interface SceneOnSkillSwapConfig {
     "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies">>;
 }
 
+/**
+ * Narrow Scene-ON seam for MOVE_PURSUIT. The caller supplies the resolved
+ * normal/switch-interception branch and current shared presentation buffers;
+ * switch resolution, damage, gameplay state, and gameplay RNG remain outside.
+ */
+export interface SceneOnPursuitConfig {
+  readonly move: "PURSUIT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<PursuitLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter" | "targetImpactCenter">>;
+}
+
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
@@ -4306,6 +4326,7 @@ export type SceneOnMoveConfig =
   | SceneOnSignalBeamConfig
   | SceneOnNightmareConfig
   | SceneOnSkillSwapConfig
+  | SceneOnPursuitConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
@@ -4674,6 +4695,8 @@ export type SceneOnNightmarePresentationState =
   SceneOnMovePresentationState<SceneOnNightmareConfig>;
 export type SceneOnSkillSwapPresentationState =
   SceneOnMovePresentationState<SceneOnSkillSwapConfig>;
+export type SceneOnPursuitPresentationState =
+  SceneOnMovePresentationState<SceneOnPursuitConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnDigPresentationState =
@@ -5111,6 +5134,11 @@ export interface SceneOnNightmareView extends NightmareState {
 }
 
 export interface SceneOnSkillSwapView extends SkillSwapState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnPursuitView extends PursuitState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8783,6 +8811,30 @@ export function sceneOnSkillSwapView(
       targetSide: target.geometry.side,
       attackerSpecies: attacker.species,
       targetSpecies: target.species,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_PURSUIT's root resource-command source row. */
+export function sceneOnPursuitView(
+  state: SceneOnPursuitPresentationState,
+): SceneOnPursuitView {
+  if (state.config.move !== "PURSUIT") {
+    throw new Error(`expected PURSUIT presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...pursuitAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerCenter: attacker.geometry.animationCenter,
+      targetCenter: target.geometry.animationCenter,
+      targetImpactCenter: target.geometry.battlePositionCenter,
     }),
     attacker,
     target,

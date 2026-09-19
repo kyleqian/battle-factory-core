@@ -10201,9 +10201,13 @@
     "tools/compare/evidence/pursuit-changemap-player.json",
       "tools/compare/evidence/pursuit-changemap-opponent.json",
       "tools/compare/evidence/pursuit-changemap-switchout-opponent.json",
-    "tests/animation/pursuitEvidenceCheckpoint.test.ts"
+    "src/animation/pursuit.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifyPursuitReducer.ts",
+    "tests/animation/pursuitEvidenceCheckpoint.test.ts",
+    "tests/animation/pursuitReducer.test.ts"
    ],
-    "goal": "UNFULFILLED evidence-only checkpoint. MOVE_PURSUIT's authoritative 13-component graph and six Level-50 carriers have legal bilateral normal staging plus a legal complete-party switch-interception stage. All three 103-row normal/switchout state, raw-RGB, and normalized-map windows are retained twice fresh through inactive cleanup. No reducer, typed seam, compositor, actual-core framebuffer acceptance, move promotion, component fulfillment, or sibling credit is granted."
+    "goal": "UNFULFILLED reducer/seam checkpoint. MOVE_PURSUIT's source-relative reducer and narrow typed Scene-ON seam replay each retained 103-row normal player-back (73..175), normal opponent-front (77..179), and legal switch-interception opponent-front (360..462) window twice: 309 retained / 618 reducer / 618 seam rows, combined receipt aae5bf5e4da117ba6fa0b3a2984d3a4ea1dc6e37cdc5c8fe6cb4b41d71965f97. Source branches, whole live OAM/matrix/palette buffers, allocation-history IMPACT bank, DARK/monbg latches, BG/register timing, resources, audio, animation RNG, opaque caller-owned gameplay, and inactive cleanup are pinned. A material altered live-input/allocation-history control is pinned. No compositor, core dispatch, actual-core framebuffer acceptance, promotion, component fulfillment, or sibling credit is granted."
   }
  ],
  "variantAudits": {
