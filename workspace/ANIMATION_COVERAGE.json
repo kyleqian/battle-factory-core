@@ -10113,9 +10113,13 @@
     "tools/compare/evidence/skill-swap-changemap-player.json",
     "tools/compare/evidence/skill-swap-changemap-opponent.json",
     "tests/animation/skillSwapEvidenceCheckpoint.test.ts",
+    "src/animation/skillSwap.ts",
+    "tools/compare/verifySkillSwapReducer.ts",
+    "tests/animation/skillSwapReducer.test.ts",
+    "src/animation/sceneOnPresentation.ts",
     "ANIMATION_LATCHES.md"
    ],
-   "goal": "UNFULFILLED evidence-only track. MOVE_SKILL_SWAP is the sole representative and the sole owner of the novel ANIM_TAG_BLUEGREEN_ORB asset and AnimTask_SkillSwap. Complete bilateral dense Scene-ON evidence is banked, but no reducer, typed seam, compositor/core dispatch, production asset, actual-core framebuffer acceptance, move/sibling promotion, or fulfilled-track credit exists. Foresight, Nightmare, Psywave, and Extrasensory remain controls only and receive no transferred credit."
+   "goal": "UNFULFILLED reducer/seam checkpoint. MOVE_SKILL_SWAP is the sole representative and the sole owner of the novel ANIM_TAG_BLUEGREEN_ORB asset and AnimTask_SkillSwap. Its source-relative reducer and narrow typed Scene-ON seam replay complete bilateral dense evidence (196 player-back + 195 opponent-front rows) twice, including source cursor, two 12-orb cadence legs, live OAM/matrices/palette/register/resource/audio inputs, predecessor-buffer latches, legal ability outcome, and first inactive cleanup. No generic compositor/core dispatch, production asset, actual-core framebuffer acceptance, move/sibling promotion, or fulfilled-track credit exists. Foresight, Nightmare, Psywave, and Extrasensory remain controls only and receive no transferred credit."
   }
  ],
  "variantAudits": {

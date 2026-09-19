@@ -967,6 +967,11 @@ import {
   type NightmareState,
 } from "./nightmare.ts";
 import {
+  skillSwapAtAge,
+  type SkillSwapLiveInputs,
+  type SkillSwapState,
+} from "./skillSwap.ts";
+import {
   waterPulseAtAge,
   type WaterPulseLiveInputs,
   type WaterPulseState,
@@ -2764,6 +2769,21 @@ export interface SceneOnNightmareConfig {
       | "attackerPictureOrigin" | "targetPictureOrigin">>;
 }
 
+/**
+ * Narrow Scene-ON seam for MOVE_SKILL_SWAP. The scene supplies live corner
+ * geometry, allocation/OAM/matrix/palette/resource/audio state and the
+ * already-resolved legal ability result; gameplay and controller state stay
+ * outside the presentation reducer.
+ */
+export interface SceneOnSkillSwapConfig {
+  readonly move: "SKILL_SWAP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<SkillSwapLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies">>;
+}
+
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
@@ -4285,6 +4305,7 @@ export type SceneOnMoveConfig =
   | SceneOnBonemerangConfig
   | SceneOnSignalBeamConfig
   | SceneOnNightmareConfig
+  | SceneOnSkillSwapConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
@@ -4651,6 +4672,8 @@ export type SceneOnSignalBeamPresentationState =
   SceneOnMovePresentationState<SceneOnSignalBeamConfig>;
 export type SceneOnNightmarePresentationState =
   SceneOnMovePresentationState<SceneOnNightmareConfig>;
+export type SceneOnSkillSwapPresentationState =
+  SceneOnMovePresentationState<SceneOnSkillSwapConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnDigPresentationState =
@@ -5083,6 +5106,11 @@ export interface SceneOnSignalBeamView extends SignalBeamState {
 }
 
 export interface SceneOnNightmareView extends NightmareState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSkillSwapView extends SkillSwapState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8734,6 +8762,27 @@ export function sceneOnNightmareView(
       targetSpecies: target.species,
       attackerPictureOrigin: attacker.geometry.animationCenter,
       targetPictureOrigin: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_SKILL_SWAP's root resource-command source row. */
+export function sceneOnSkillSwapView(
+  state: SceneOnSkillSwapPresentationState,
+): SceneOnSkillSwapView {
+  if (state.config.move !== "SKILL_SWAP") {
+    throw new Error(`expected SKILL_SWAP presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...skillSwapAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
     }),
     attacker,
     target,
