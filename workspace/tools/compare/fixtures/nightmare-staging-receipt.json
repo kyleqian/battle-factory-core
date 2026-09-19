@@ -10,7 +10,7 @@
  "source": {
   "audit": "tools/compare/nightmareSourceAudit.ts",
     "auditSha256": "9bcc657818dcb64fcd773f47a3a25d2707cc96b07035c572de51a11b530e401f",
-  "auditRunSha256": "d3ddbfb5dd65e139d5da49e4a1fd4df9194c9df80e9a572f36852d182c4c64c3",
+  "auditRunSha256": "a9a90125a9722d65b041b10ea7dd6eda471cf6f53271a4805edc966aae506d43",
   "probe": "tools/compare/nightmareStagingProbe.py",
   "probeSha256": "a76db7b31010d8424e5bc0e9bc5c53ffaf5d95f2a35688e283bb2f1041e36180",
   "pointerOwnedRoot": {

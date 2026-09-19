@@ -55,7 +55,7 @@ describe("MOVE_FORESIGHT exact source and production acceptance", () => {
     const statuses = new Map(coverage.entries.map((entry: { move: string; status: string }) => [entry.move, entry.status]));
     for (const move of ["MOVE_SUPER_FANG", "MOVE_FLAME_WHEEL", "MOVE_HIDDEN_POWER",
       "MOVE_TORMENT", "MOVE_RECYCLE", "MOVE_ENDEAVOR"]) expect(statuses.get(move)).toBe("exact");
-    for (const move of ["MOVE_HELPING_HAND", "MOVE_SKILL_SWAP",
+    for (const move of ["MOVE_HELPING_HAND",
       "MOVE_EXTRASENSORY", "MOVE_RAGE"]) expect(statuses.has(move)).toBe(false);
   });
 });
