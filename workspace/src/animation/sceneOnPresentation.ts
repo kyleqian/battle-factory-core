@@ -610,6 +610,12 @@ import {
   type SilverWindState,
 } from "./silverWind.ts";
 import {
+  skyAttackAtAge,
+  type SkyAttackBody,
+  type SkyAttackLiveInputs,
+  type SkyAttackState,
+} from "./skyAttack.ts";
+import {
   solarBeamAtAge,
   type SolarBeamBody,
   type SolarBeamState,
@@ -2464,6 +2470,18 @@ export interface SceneOnSnoreConfig {
     | "attackerPictureOrigin" | "targetPictureOrigin">>;
 }
 
+/** Narrow Scene-ON seam for MOVE_SKY_ATTACK's controller-selected body. */
+export interface SceneOnSkyAttackConfig {
+  readonly move: "SKY_ATTACK";
+  readonly body: SkyAttackBody;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<SkyAttackLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+    | "attackerPictureOrigin" | "targetPictureOrigin">>;
+}
+
 /** Narrow Scene-ON seam for Solar Beam's source-isolated two-turn bodies. */
 export interface SceneOnSolarBeamConfig {
   readonly move: "SOLAR_BEAM";
@@ -4232,6 +4250,7 @@ export type SceneOnMoveConfig =
   | SceneOnPsychUpConfig
   | SceneOnHyperVoiceConfig
   | SceneOnSnoreConfig
+  | SceneOnSkyAttackConfig
   | SceneOnShockWaveConfig
   | SceneOnOverheatConfig
   | SceneOnSilverWindConfig
@@ -4620,6 +4639,8 @@ export type SceneOnHyperVoicePresentationState =
   SceneOnMovePresentationState<SceneOnHyperVoiceConfig>;
 export type SceneOnSnorePresentationState =
   SceneOnMovePresentationState<SceneOnSnoreConfig>;
+export type SceneOnSkyAttackPresentationState =
+  SceneOnMovePresentationState<SceneOnSkyAttackConfig>;
 export type SceneOnShockWavePresentationState =
   SceneOnMovePresentationState<SceneOnShockWaveConfig>;
 export type SceneOnOverheatPresentationState =
@@ -4825,6 +4846,11 @@ export interface SceneOnHyperVoiceView extends HyperVoiceState {
 }
 
 export interface SceneOnSnoreView extends SnoreState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSkyAttackView extends SkyAttackState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7938,6 +7964,29 @@ export function sceneOnSnoreView(
   const { attacker, target, animationInputs } = state.config;
   return {
     ...snoreAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerPictureOrigin: attacker.geometry.animationCenter,
+      targetPictureOrigin: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is the controller-selected MOVE_SKY_ATTACK body root. */
+export function sceneOnSkyAttackView(
+  state: SceneOnSkyAttackPresentationState,
+): SceneOnSkyAttackView {
+  if (state.config.move !== "SKY_ATTACK") {
+    throw new Error(`expected SKY_ATTACK presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs, body } = state.config;
+  return {
+    ...skyAttackAtAge(body, state.age, {
       ...animationInputs,
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
