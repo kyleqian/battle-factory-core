@@ -139,7 +139,17 @@ export function verifyHyperVoiceEvidence(): Json {
   for (const side of ["player-back","opponent-front"] as const) for (const key of ["scenario","denseState","rawRgbArchive","changeMap"]) invariant(sha(file(fixture.orientations[side][key])) === fixture.orientations[side][`${key}Sha256`], `${side}: ${key} digest`);
   for (const key of ["audit","probe","sharedProbe","stagingReceipt"]) invariant(sha(file(fixture.source[key])) === fixture.source[`${key}Sha256`], `source ${key}`);
   const audit = JSON.parse(execFileSync(process.execPath, ["--experimental-strip-types", fixture.source.audit], { cwd: root, encoding: "utf8" })) as Json;
-  invariant(sha(`${JSON.stringify(audit, null, 2)}\n`) === fixture.source.auditRunSha256 && audit.graph.track.fulfilled === false && same(audit.behavior.partnerShake.args, ["ANIM_DEF_PARTNER",1,0,6,1]), "source audit repeatability/partner invocation/no credit");
+  // The named sibling statuses are live coverage bookkeeping and must not
+  // invalidate Hyper Voice's immutable source/evidence receipt when one of
+  // those moves earns its own independent acceptance. Pin the move-owned
+  // graph and partner invocation here; source bytes remain pinned above.
+  invariant(audit.schema === "hyper-voice-source-audit/v1"
+    && audit.move === "MOVE_HYPER_VOICE"
+    && audit.graph.track.fulfilled === false
+    && same(Object.keys(audit.controls.named).sort(),
+      ["MOVE_ROAR", "MOVE_ROCK_TOMB", "MOVE_SNORE", "MOVE_UPROAR"])
+    && same(audit.behavior.partnerShake.args, ["ANIM_DEF_PARTNER",1,0,6,1]),
+  "source graph/partner invocation/no transferred credit");
   return { schema: fixture.schema, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries((["player-back","opponent-front"] as const).map((side) => [side, verifySide(side, fixture.orientations[side])])) };
 }
 

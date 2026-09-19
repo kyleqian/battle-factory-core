@@ -88,13 +88,13 @@ describe("MOVE_SNORE pure source-age reducer and narrow Scene-ON seam", () => {
     expect(gameplayState).toEqual({ opaque: "battle-state", turn: 17 });
   });
 
-  it("keeps production evidence-free and MOVE_SNORE unsupported", () => {
+  it("keeps production evidence-free and promotes only MOVE_SNORE", () => {
     const source = readFileSync(resolve(root, "src/animation/snore.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party)[^"']*["']/u);
     expect(source).not.toMatch(/absolute\s*(?:battle\s*)?(?:tick|frame)|framebuffer|controller-frame/iu);
     const data = coverage as Json;
     expect(data.queue).not.toContain("MOVE_SNORE");
-    expect(data.entries.find((entry: Json) => entry.move === "MOVE_SNORE")).toBeUndefined();
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_SNORE")).toMatchObject({ status: "exact" });
     expect(JSON.stringify(data.componentTracks.filter((track: Json) => track.representatives?.includes("MOVE_SNORE")))).toBe("[]");
   });
 });

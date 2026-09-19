@@ -7582,6 +7582,43 @@
     "tests/animation/silverWindReducer.test.ts",
     "tests/animation/silverWindLiveCompositorCheckpoint.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_SNORE",
+   "status": "exact",
+   "covered": [
+    "the complete Move_SNORE root and exact ten-component boundary are independently accepted: ANIM_TAG_SNORE_Z, gSnoreZSpriteTemplate, both SnoreEffect calls, ScaleMonAndRestore, target ShakeMon2, platform shake, attacker monbg/clear, direct alpha, audio, resources, waits, and first-inactive cleanup",
+    "complete legal bilateral SEALEO/VENOMOTH Battle Scene ON evidence retains 70 player-back plus 70 opponent-front ages 0..69; the pure reducer and narrow typed sceneOnSnoreView seam reproduce all 140 rows from live sides/species, picture geometry/origins, sprite/task/resource/matrix allocation, persistent painter order, BG/register/palette state, presentation RNG, and opaque gameplay state/RNG",
+    "Snore's own two maps prove ordinary Z and whole hardware OAM from predecessor software on 69/69 comparable rows per orientation, visible-attacker ScaleMonAndRestore matrices at RAM+2 for 14 rows per call, target ShakeMon2 at RAM+2 for 13 rows per call plus the synchronous initial +amplitude creation edge, platform BG3 and tag-10197 palette at RAM+1, direct alpha ages 7/65, and attacker-monbg VRAM ages 5/67/69",
+    "the source-derived live compositor paints the opaque attacker monbg beneath its 8:8 semi-transparent scaled OBJ and consumes current hardware palettes, sides, species art, geometry, allocation/order, matrices, registers, and presentation RNG; two independent processes are byte-identical at digest 12538306ca9fa301893724a72e5395b588ad7b1dd50b4b0bf21ebd6c32f5de58 and each passes all 140/140 component, typed-seam, chronological raw-RGB, and actual-core framebuffer rows with zero residual pixels through age-69 cleanup",
+    "a material reversed WAILORD/BLISSEY control changes sides, species, geometry/origins, sprite/task/resource/matrix allocation, persistent painter order, palettes/registers, and presentation RNG, changing seam output and framebuffer while gameplay state/RNG remains opaque and unchanged",
+    "MOVE_SNORE alone is promoted; Rest, Sleep Talk, Hyper Voice, and every sibling retain independent status and receive no Snore timing, latch, body, move, component-track, or acceptance credit"
+   ],
+   "evidence": [
+    "tools/compare/snoreSourceAudit.ts",
+    "tools/battle-lab/mechanic-snore-player-sealeo-opponent-venomoth.json",
+    "tools/battle-lab/mechanic-snore-opponent-sealeo-player-venomoth.json",
+    "tools/compare/snoreProbe.py",
+    "tools/compare/snoreEvidence.ts",
+    "tools/compare/evidence/snore-player-dense-state.json.gz",
+    "tools/compare/evidence/snore-opponent-dense-state.json.gz",
+    "tools/compare/evidence/snore-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/snore-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/snore-changemap-player.json",
+    "tools/compare/evidence/snore-changemap-opponent.json",
+    "ANIMATION_LATCHES.md",
+    "tools/compare/extractSnoreAssets.ts",
+    "src/animation/assets/snore.json",
+    "src/animation/snore.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifySnoreReducer.ts",
+    "tools/compare/snoreActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/snoreEvidenceCheckpoint.test.ts",
+    "tests/animation/snoreReducer.test.ts",
+    "tests/animation/snoreActualCore.test.ts"
+   ]
   }
  ],
  "queue": [],

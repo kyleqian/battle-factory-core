@@ -30,8 +30,8 @@ describe("MOVE_SNORE source/legal bilateral evidence checkpoint",()=>{
     for(const stem of ["player","opponent"]){const map=JSON.parse(readFileSync(resolve(root,`tools/compare/evidence/snore-changemap-${stem}.json`),"utf8"));expect(map.rows).toHaveLength(70);expect(map.rows[0]).toMatchObject({age:0,active:true,scriptOffset:0});expect(map.rows.at(-1)).toMatchObject({age:69,active:false,counts:[0,0]});}
   });
 
-  it("keeps Snore unsupported with no reducer, seam, compositor, component, track, or sibling credit",()=>{
-    const data=coverage as Json; expect(data.queue).not.toContain("MOVE_SNORE"); expect(data.entries.find((entry:Json)=>entry.move==="MOVE_SNORE")).toBeUndefined();
+  it("keeps the evidence receipt independent while promoting only Snore",()=>{
+    const data=coverage as Json; expect(data.queue).not.toContain("MOVE_SNORE"); expect(data.entries.find((entry:Json)=>entry.move==="MOVE_SNORE")).toMatchObject({status:"exact"});
     expect(JSON.stringify(data.componentTracks.filter((track:Json)=>track.representatives?.includes("MOVE_SNORE")))).toBe("[]");
   });
 });

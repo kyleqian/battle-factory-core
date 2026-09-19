@@ -552,6 +552,7 @@ import psychUpAsset from "../animation/assets/psych-up.json" with { type: "json"
 import signalBeamAsset from "../animation/assets/signal-beam.json" with { type: "json" };
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import silverWindAsset from "../animation/assets/silver-wind.json" with { type: "json" };
+import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import waterPulseAsset from "../animation/assets/water-pulse.json" with { type: "json" };
 import digDirtMoundAsset from "../animation/assets/dig-dirt-mound.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
@@ -988,6 +989,7 @@ import {
   sceneOnMachPunchView,
   sceneOnPsychUpView,
   sceneOnHyperVoiceView,
+  sceneOnSnoreView,
   sceneOnShockWaveView,
   sceneOnSignalBeamView,
   sceneOnNightmareView,
@@ -1256,6 +1258,7 @@ import {
   type SceneOnMachPunchConfig,
   type SceneOnPsychUpConfig,
   type SceneOnHyperVoiceConfig,
+  type SceneOnSnoreConfig,
   type SceneOnShockWaveConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnNightmareConfig,
@@ -1896,6 +1899,9 @@ const silverWindResources = (silverWindAsset as {
   };
 }).resources;
 const silverWindArt = silverWindResources.sparkle6;
+const snoreArt = (snoreAsset as {
+  snoreZ: { tileset: Tileset; palette: RgbColor[] };
+}).snoreZ;
 const waterPulseArt = waterPulseAsset as {
   blueRing2: { tileset: Tileset; palette: RgbColor[] };
 };
@@ -24627,6 +24633,183 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.side === "player"
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "HYPER VOICE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SNORE") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnSnoreConfig>;
+    const view = sceneOnSnoreView(moveState);
+    const displayed = sceneOnSnoreView({
+      ...moveState,
+      age: Math.max(0, moveState.age - 1),
+    });
+    const delayedBattlers = sceneOnSnoreView({
+      ...moveState,
+      age: Math.max(0, moveState.age - 2),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SNORE presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SNORE missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map((color) => {
+        const packed = mgbaColorFromBgr555(color);
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      });
+    const input = moveState.config.animationInputs;
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const attackerPalette = paletteBank(16 + (input.attackerSprite.attr[2] >>> 12 & 0xf));
+    const targetPalette = paletteBank(16 + (input.targetSprite.attr[2] >>> 12 & 0xf));
+
+    // The platform shake writes source BG3 first and reaches scanout through
+    // the following VBlank. Battler affine/shake state has the independently
+    // measured extra task-to-OAM row, while ordinary Z OAM is RAM+1.
+    drawStaticBgShiftedX(
+      fb,
+      view.background.platform.hardwareX,
+      [paletteBank(2), paletteBank(3), paletteBank(4)],
+    );
+    if (moveState.age === 0) {
+      const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+      drawSourceOpponentEnemyShadow(fb, opponent.species, opponent.geometry.battlePositionCenter);
+    }
+    if (view.background.monbg.active) {
+      const bg = input.background.monbg.bg;
+      drawSpriteSheet(
+        fb,
+        tilesFor(attackerArt, view.attacker.geometry.side),
+        paletteBank(input.background.monbg.paletteBank),
+        -view.background.values[`gBattle_BG${bg}_X`]!,
+        -view.background.values[`gBattle_BG${bg}_Y`]!,
+      );
+    }
+    const nonObjTarget2 = fb.slice();
+
+    type ObjEntry = Readonly<{
+      slot: number;
+      subpriority: number;
+      order: number;
+      draw: () => void;
+    }>;
+    const orderOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    const effectStart = moveState.age < 39 ? 7 : 39;
+    // ShakeMon2's synchronous creation write puts the initial +amplitude in
+    // the next hardware OAM row. Later post-build callbacks use the measured
+    // RAM+2 body. Both Snore calls independently retain this birth edge.
+    const targetSprite = moveState.age === effectStart + 1
+      ? { ...displayed.battlers.target.sprite,
+          x2: -displayed.battlers.target.sprite.x2 }
+      : delayedBattlers.battlers.target.sprite;
+    const attackerSprite = delayedBattlers.battlers.attacker.sprite;
+    const objects: ObjEntry[] = [
+      {
+        slot: targetSprite.slot,
+        subpriority: targetSprite.subpriority,
+        order: orderOf(targetSprite.slot),
+        draw: () => drawSpriteSheet(
+          fb,
+          tilesFor(targetArt, view.target.geometry.side),
+          targetPalette,
+          view.target.geometry.spriteCorner.x + targetSprite.x2,
+          view.target.geometry.spriteCorner.y + targetSprite.y2,
+        ),
+      },
+      {
+        slot: attackerSprite.slot,
+        subpriority: attackerSprite.subpriority,
+        order: orderOf(attackerSprite.slot),
+        draw: () => {
+          if ((attackerSprite.attr[0] & 0x500) === 0x500) {
+            drawSpriteSheetAffineRotateBlendedOverFb(
+              fb, nonObjTarget2,
+              tilesFor(attackerArt, view.attacker.geometry.side),
+              attackerPalette,
+              input.attackerSprite.x + attackerSprite.x2,
+              input.attackerSprite.y + attackerSprite.y2,
+              attackerSprite.matrix[0], attackerSprite.matrix[1],
+              attackerSprite.matrix[2], attackerSprite.matrix[3],
+              view.background.registers.bldalpha & 0xff,
+              view.background.registers.bldalpha >>> 8 & 0xff,
+              true,
+            );
+          } else if ((attackerSprite.attr[0] & 0x100) !== 0) {
+            drawSpriteSheetAffineRotate(
+              fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerPalette,
+              input.attackerSprite.x + attackerSprite.x2,
+              input.attackerSprite.y + attackerSprite.y2,
+              attackerSprite.matrix[0], attackerSprite.matrix[1],
+              attackerSprite.matrix[2], attackerSprite.matrix[3], undefined, true,
+            );
+          } else {
+            drawSpriteSheet(
+              fb,
+              tilesFor(attackerArt, view.attacker.geometry.side),
+              attackerPalette,
+              view.attacker.geometry.spriteCorner.x + attackerSprite.x2,
+              view.attacker.geometry.spriteCorner.y + attackerSprite.y2,
+            );
+          }
+        },
+      },
+    ];
+    for (const sprite of displayed.sprites.z) {
+      const rawX = sprite.attr[1] & 0x1ff;
+      const rawY = sprite.attr[0] & 0xff;
+      const x = rawX >= 240 ? rawX - 512 : rawX;
+      const y = rawY >= 160 ? rawY - 256 : rawY;
+      objects.push({
+        slot: sprite.slot,
+        subpriority: sprite.subpriority,
+        order: orderOf(sprite.slot),
+        draw: () => drawSpriteSheet(
+          fb,
+          snoreArt.tileset,
+          paletteBank(input.resource.paletteBank),
+          x,
+          y,
+        ),
+      });
+    }
+    objects.sort((left, right) => right.subpriority - left.subpriority
+      || right.order - left.order || right.slot - left.slot);
+    for (const object of objects) object.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SNORE!",
       99,
     );
     return;
