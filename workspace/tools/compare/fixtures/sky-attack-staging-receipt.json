@@ -1,0 +1,53 @@
+{
+  "schema": "sky-attack-compact-staging-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SKY_ATTACK",
+  "moveId": 143,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "audit": "tools/compare/skyAttackSourceAudit.ts",
+    "auditSha256": "35b9230c61502670081621a486191389669ffd20f9a914e276b838d9d06258bc",
+    "auditRunSha256": "f8ef8e4282cfc4b6b674d9500c3cdc33eb500c4738d0fd833281a9df7cfa1835",
+    "probe": "tools/compare/skyAttackStagingProbe.py",
+    "probeSha256": "beb159653591a7d32060e486589c8fe0149bcb4d2780833731da8a19b4157339",
+    "pointerOwnedRoot": {"start":"0x082cd17b","endExclusive":"0x082cd313","byteLength":408,"romSha256":"f01aa15269c59aecc78bde4f74513c9ce3a96859d947bfe760da89d79a5620d1"},
+    "sharedSkyBackground": {"start":"0x082d7ce5","endExclusive":"0x082d7d1d","byteLength":56,"romSha256":"996d89dc89b048cfcd9d920047a17a981fd2aea877342538bf02935d151247cd"}
+  },
+  "carrier": {
+    "setId": 663,
+    "label": "FRONTIER_MON_FEAROW_4",
+    "species": "SPECIES_FEAROW",
+    "moves": ["MOVE_DRILL_PECK","MOVE_DOUBLE_EDGE","MOVE_STEEL_WING","MOVE_SKY_ATTACK"],
+    "soleLevel50AndFactoryCarrier": true
+  },
+  "freshness": {"localMgbaWrapper":"tools/run-mgba-probe.py","profileCheckedAtProbe":"battle-scene-on","runsPerOrientation":2},
+  "runs": {
+    "player-back": {
+      "scenario":"tools/battle-lab/mechanic-sky-attack-player-fearow-opponent-shuckle.json",
+      "scenarioSha256":"2767222f992d5fbd0eae5d5bdeea329cbbbe3d70146aecdc0c8f0f878b09f00b",
+      "freshRuns":2,"outputsByteIdentical":true,"outputSha256":"d1784d816e3cf2be862d48108e554b469c755d7a5f2a805ee921d34ed3db198d",
+      "attacker":{"side":"player","species":22,"moves":[143,143,143,143]},
+      "target":{"side":"opponent","species":213,"initialHp":127,"finalHp":79},
+      "sourceRoot":{"start":"0x82cd17b","endExclusive":"0x82cd313","setup":{"firstPointer":"0x82cd187","gAnimMoveTurn":0,"attackerBattler":0,"targetBattler":1},"unleash":{"firstPointer":"0x82cd291","gAnimMoveTurn":1,"attackerBattler":0,"targetBattler":1},"observations":{"setup":124,"unleash":101}},
+      "twoTurn":{"chargeStatusSeen":true,"chargeStatusCleared":true,"setupAnimTurn":0,"unleashAnimTurn":1,"pp":{"before":[5,5,5,5],"after":[4,5,5,5],"spent":1}},
+      "benches":{"unchanged":true,"checksumValid":true,"beforeSha256":"358846a264fd641fa43e299334353437379e3282c5fb990f93e4c37430da1e5d","afterSha256":"358846a264fd641fa43e299334353437379e3282c5fb990f93e4c37430da1e5d"}
+    },
+    "opponent-front": {
+      "scenario":"tools/battle-lab/mechanic-sky-attack-opponent-fearow-player-shuckle.json",
+      "scenarioSha256":"10891234eb7ac367b9000133dd2073f15048464e1db93609e26d1e4614661219",
+      "freshRuns":2,"outputsByteIdentical":true,"outputSha256":"e91018f27573dd4845d626418df4067df8b6e4cdae2ba82a31397c1c38e8dac8",
+      "attacker":{"side":"opponent","species":22,"moves":[143,143,143,143]},
+      "target":{"side":"player","species":213,"initialHp":127,"finalHp":43},
+      "sourceRoot":{"start":"0x82cd17b","endExclusive":"0x82cd313","setup":{"firstPointer":"0x82cd187","gAnimMoveTurn":0,"attackerBattler":1,"targetBattler":0},"unleash":{"firstPointer":"0x82cd291","gAnimMoveTurn":1,"attackerBattler":1,"targetBattler":0},"observations":{"setup":124,"unleash":101}},
+      "twoTurn":{"chargeStatusSeen":true,"chargeStatusCleared":true,"setupAnimTurn":0,"unleashAnimTurn":1,"pp":{"before":[5,5,5,5],"after":[5,5,4,5],"spent":1}},
+      "benches":{"unchanged":true,"checksumValid":true,"beforeSha256":"8fc1a0b895417ecf6e55d0ce9240a11e34935f1a69ed2af8c2d2498d2e3ca0cd","afterSha256":"8fc1a0b895417ecf6e55d0ce9240a11e34935f1a69ed2af8c2d2498d2e3ca0cd"}
+    }
+  },
+  "reachability": {
+    "factorySinglesReachable":["SkyAttackSetUp","SkyAttackSetUpAgainstOpponent","SkyAttackUnleash","SetSkyBg","SetSkyBgContinue","UnsetSkyBg","SkyAttackEnd"],
+    "unreachableNoCredit":["SkyAttackSetUpAgainstPartner","SetSkyBgContest","contest move-turn override"]
+  },
+  "scope": {"framebuffersRetained":false,"rawRgbRetained":false,"denseWindowCaptured":false,"semanticFramesRetained":false,"latchMeasured":false,"productionChanged":false,"reducerAdded":false,"typedSceneOnSeam":false,"compositorAdded":false,"coveragePromotion":false,"coverageEntryAdded":false,"componentTrackFulfilled":false,"battleStateInjected":false,"transientOverrides":[],"boundaryOrBarrierChanged":false},
+  "remainder": "MOVE_SKY_ATTACK remains unsupported. Exact work requires complete twice-fresh dense bilateral setup and unleash windows; independent latch measurement for the reachable opponent setup, palette fades, horizontal shake, BG_SKY slide/restore, bird, target ShakeMon2, attacker fades, audio, resources, and cleanup; then a source-derived reducer, typed seam, generic compositor, live core dispatch, and zero-residual actual-core framebuffer acceptance. Partner and contest branches remain unreachable and uncredited in Factory singles."
+}
