@@ -10164,6 +10164,42 @@
     "src/engine/core.ts"
    ],
    "goal": "FULFILLED by MOVE_SKILL_SWAP alone: its complete source-age reducer, narrow typed Scene-ON seam, reproducible Bluegreen Orb source asset, and generic hardware-buffer compositor pass all 391 bilateral component, retained-RGB, and actual-core framebuffer rows twice with zero residual pixels through inactive ages 195/194. Its own maps retain both twelve-orb seven-row cadence legs, same-row slot reuse, affine matrices, target/attacker white palette programs, Psychic BG fades/restoration, resources, persistent order, registers/audio, legal ability outcome, predecessor OAM/matrix/palette latches, and cleanup. The material reversed-side CROBAT/BLISSEY control changes species, sides/geometry, allocation/order/OAM/matrices, resources/palettes/registers/audio, and animation RNG while gameplay state/RNG remains opaque and unchanged. Foresight and Nightmare remain independent exact controls; Psywave, Extrasensory, and every sibling receive no transferred credit."
+  },
+  {
+   "id": "pursuit-dark-background-power-shake",
+   "components": [
+    "asset:ANIM_TAG_IMPACT",
+    "subroutine:PursuitContinue",
+    "subroutine:PursuitNormal",
+    "subroutine:PursuitOnSwitchout",
+    "task:AnimTask_ShakeTargetBasedOnMovePowerOrDmg",
+    "visualCommand:blendoff",
+    "visualCommand:clearmonbg",
+    "visualCommand:create_basic_hitsplat_sprite",
+    "visualCommand:fadetobg",
+    "visualCommand:monbg",
+    "visualCommand:restorebg",
+    "visualCommand:setalpha",
+    "visualCommand:waitbgfadein"
+   ],
+   "representatives": ["MOVE_PURSUIT"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/pursuitSourceAudit.ts",
+    "tools/battle-lab/mechanic-pursuit-player-beedrill-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-pursuit-opponent-beedrill-player-shuckle.json",
+    "tools/compare/pursuitProbe.py",
+    "tools/compare/pursuitEvidence.ts",
+    "tools/compare/fixtures/pursuit-evidence.json",
+    "tools/compare/evidence/pursuit-player-dense-state.json.gz",
+    "tools/compare/evidence/pursuit-opponent-dense-state.json.gz",
+    "tools/compare/evidence/pursuit-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/pursuit-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/pursuit-changemap-player.json",
+    "tools/compare/evidence/pursuit-changemap-opponent.json",
+    "tests/animation/pursuitEvidenceCheckpoint.test.ts"
+   ],
+   "goal": "UNFULFILLED evidence-only checkpoint. MOVE_PURSUIT's authoritative 13-component graph, six Level-50 carriers, and normal branch have complete legal bilateral 206-row state/raw-RGB/normalized-map evidence twice fresh through inactive cleanup. The separately selected PursuitOnSwitchout affine-animation-1 branch still requires a legal switch-interception receipt, and no reducer, typed seam, compositor, actual-core framebuffer acceptance, move promotion, component fulfillment, or sibling credit is granted."
   }
  ],
  "variantAudits": {
