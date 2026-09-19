@@ -20,7 +20,7 @@ describe("MOVE_PSYWAVE unsupported bilateral evidence checkpoint", () => {
       source: { pointerOwnedRoot: { start: "0x082d3212", endExclusive: "0x082d3298", byteLength: 134 }, blocks: { Move_PSYWAVE: {}, PsywaveRings: {}, SetPsychicBackground: {}, UnsetPsychicBackground: {} } },
       behavior: { rings: { calls: 6, perCall: 2, total: 12 }, sinTimer: 100, targetPaletteCycle: { blends: 4 }, branches: { playerBack: "reachable", opponentFront: "reachable", contest: "unreachable-in-Factory-singles", partnerBattlers: "unreachable-in-singles" } },
       carriers: { count: 2, excludedOutsideLevel50: [] },
-      checkpoint: { sourceAudit: true, completePointerOwnedRoot: true, completeReachableGraph: true, completeCarrierCensus: true, bilateralReachability: true, unreachableFactorySinglesBranchesNamed: true, reducerAdded: false, typedSceneOnSeam: false, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false },
+      checkpoint: { sourceAudit: true, completePointerOwnedRoot: true, completeReachableGraph: true, completeCarrierCensus: true, bilateralReachability: true, unreachableFactorySinglesBranchesNamed: true, reducerAdded: true, typedSceneOnSeam: true, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false },
     });
     expect(audit.graph.components).toHaveLength(14);
     expect(audit.carriers.level50.map((entry: Json) => [entry.index, entry.label])).toEqual([[121, "FRONTIER_MON_SPOINK"], [209, "FRONTIER_MON_CHIMECHO_1"]]);
@@ -34,7 +34,7 @@ describe("MOVE_PSYWAVE unsupported bilateral evidence checkpoint", () => {
       status: "unsupported-evidence-checkpoint", coverageCredit: false,
       acceptance: { sourceRows: 410, rawRgbRows: 410, freshRunsPerOrientation: 2, firstInactiveCleanupAge: 204, ringGroups: 6, ringSprites: 12, completePartyOnlyStaging: true, normalizedMaps: true, latchMeasured: true },
       factoryCarrierCensus: { level50: [121, 209], excludedOutsideLevel50: [] },
-      scope: { productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false },
+      scope: { productionChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false },
     });
     for (const side of ["player-back", "opponent-front"] as const) {
       const config = fixture.orientations[side];

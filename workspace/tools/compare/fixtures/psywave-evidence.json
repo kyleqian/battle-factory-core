@@ -7,8 +7,8 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/psywaveSourceAudit.ts",
-    "auditSha256": "0ed8c28342c889cc4379236a0cd2f3d1ae52b45c3dffde9b1aaa7f42a25e9d26",
-    "auditRunSha256": "367156e54e16be42ae8ec031b2d08a84f17aba2ce4d25f70fd7a63e39a55b16f",
+    "auditSha256": "8780a4b6b42600f6b1dce2523faebb0f47f44a4c03c6c0c77f1c9cdec34d5c3e",
+    "auditRunSha256": "7102ee25933adbc4c771789887958ca62153e8bf610e40a93f0a09ac9b88e79c",
     "probe": "tools/compare/psywaveProbe.py",
     "probeSha256": "9219e17a00694acc26cfd8dfc5bfe95d48e8fe8d1b2265ffc4bab83e1d5dd09c",
     "verifier": "tools/compare/psywaveEvidence.ts",
@@ -73,9 +73,9 @@
     "transferCredit": false
   },
   "scope": {
-    "productionChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
+    "productionChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
     "compositorAdded": false,
     "actualCoreFramebufferAcceptance": false,
     "coveragePromotion": false,

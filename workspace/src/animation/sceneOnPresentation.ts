@@ -978,6 +978,11 @@ import {
   type PursuitState,
 } from "./pursuit.ts";
 import {
+  psywaveAtAge,
+  type PsywaveLiveInputs,
+  type PsywaveState,
+} from "./psywave.ts";
+import {
   waterPulseAtAge,
   type WaterPulseLiveInputs,
   type WaterPulseState,
@@ -2805,6 +2810,22 @@ export interface SceneOnPursuitConfig {
       | "attackerCenter" | "targetCenter" | "targetImpactCenter">>;
 }
 
+/**
+ * Narrow Scene-ON seam for MOVE_PSYWAVE. The caller supplies current art,
+ * allocator, palette, background, audio, and opaque gameplay state while the
+ * seam supplies live battler identity and source picture geometry.
+ */
+export interface SceneOnPsywaveConfig {
+  readonly move: "PSYWAVE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<PsywaveLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerPictureCenter" | "targetPictureCenter"
+      | "attackerAnimationCenter" | "targetAnimationCenter">>;
+}
+
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
@@ -4328,6 +4349,7 @@ export type SceneOnMoveConfig =
   | SceneOnNightmareConfig
   | SceneOnSkillSwapConfig
   | SceneOnPursuitConfig
+  | SceneOnPsywaveConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
@@ -4698,6 +4720,8 @@ export type SceneOnSkillSwapPresentationState =
   SceneOnMovePresentationState<SceneOnSkillSwapConfig>;
 export type SceneOnPursuitPresentationState =
   SceneOnMovePresentationState<SceneOnPursuitConfig>;
+export type SceneOnPsywavePresentationState =
+  SceneOnMovePresentationState<SceneOnPsywaveConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnDigPresentationState =
@@ -5140,6 +5164,11 @@ export interface SceneOnSkillSwapView extends SkillSwapState {
 }
 
 export interface SceneOnPursuitView extends PursuitState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnPsywaveView extends PsywaveState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8836,6 +8865,31 @@ export function sceneOnPursuitView(
       attackerCenter: attacker.geometry.animationCenter,
       targetCenter: target.geometry.animationCenter,
       targetImpactCenter: target.geometry.battlePositionCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_PSYWAVE's root resource-command source row. */
+export function sceneOnPsywaveView(
+  state: SceneOnPsywavePresentationState,
+): SceneOnPsywaveView {
+  if (state.config.move !== "PSYWAVE") {
+    throw new Error(`expected PSYWAVE presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...psywaveAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerPictureCenter: attacker.geometry.battlePositionCenter,
+      targetPictureCenter: target.geometry.battlePositionCenter,
+      attackerAnimationCenter: attacker.geometry.animationCenter,
+      targetAnimationCenter: target.geometry.animationCenter,
     }),
     attacker,
     target,
