@@ -10081,6 +10081,41 @@
     "src/engine/core.ts"
    ],
    "goal": "UNFULFILLED. MOVE_NIGHTMARE's legal battle body is independently exact with complete bilateral 338/338 zero-residual actual-core acceptance, but the explicit track also owns contest-only NightmareInContest / AnimTask_BlendMonInAndOut. That arm is source-pinned yet absent from legal battle execution and has no executable latch/framebuffer evidence, so it receives no contest-arm or track fulfillment. Foresight, Super Fang, Hidden Power, Flame Wheel, Torment, Helping Hand, Recycle, Endeavor, Skill Swap, Extrasensory, Rage, Night Shade, Spite, Destiny Bond, and every sibling remain identity-only controls without transferred credit."
+  },
+  {
+   "id": "skill-swap-bluegreen-orb",
+   "components": [
+    "asset:ANIM_TAG_BLUEGREEN_ORB",
+    "subroutine:SetPsychicBackground",
+    "subroutine:UnsetPsychicBackground",
+    "task:AnimTask_BlendMonInAndOut",
+    "task:AnimTask_SetPsychicBackground",
+    "task:AnimTask_SkillSwap",
+    "visualCommand:fadetobg",
+    "visualCommand:restorebg",
+    "visualCommand:setarg",
+    "visualCommand:waitbgfadein",
+    "visualCommand:waitbgfadeout"
+   ],
+   "representatives": ["MOVE_SKILL_SWAP"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/skillSwapSourceAudit.ts",
+    "tools/battle-lab/mechanic-skill-swap-player-girafarig-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-skill-swap-opponent-girafarig-player-shuckle.json",
+    "tools/compare/skillSwapProbe.py",
+    "tools/compare/skillSwapEvidence.ts",
+    "tools/compare/fixtures/skill-swap-evidence.json",
+    "tools/compare/evidence/skill-swap-player-dense-state.json.gz",
+    "tools/compare/evidence/skill-swap-opponent-dense-state.json.gz",
+    "tools/compare/evidence/skill-swap-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/skill-swap-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/skill-swap-changemap-player.json",
+    "tools/compare/evidence/skill-swap-changemap-opponent.json",
+    "tests/animation/skillSwapEvidenceCheckpoint.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "goal": "UNFULFILLED evidence-only track. MOVE_SKILL_SWAP is the sole representative and the sole owner of the novel ANIM_TAG_BLUEGREEN_ORB asset and AnimTask_SkillSwap. Complete bilateral dense Scene-ON evidence is banked, but no reducer, typed seam, compositor/core dispatch, production asset, actual-core framebuffer acceptance, move/sibling promotion, or fulfilled-track credit exists. Foresight, Nightmare, Psywave, and Extrasensory remain controls only and receive no transferred credit."
   }
  ],
  "variantAudits": {
