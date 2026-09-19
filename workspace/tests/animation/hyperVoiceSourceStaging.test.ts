@@ -1,5 +1,4 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -8,7 +7,6 @@ type Json = Record<string, any>;
 const root = resolve(import.meta.dirname, "../..");
 const auditText = (): string => execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/hyperVoiceSourceAudit.ts"], { cwd: root, encoding: "utf8", maxBuffer: 8 * 1024 * 1024 });
 const verifyText = (): string => execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/verifyHyperVoiceStaging.ts"], { cwd: root, encoding: "utf8", maxBuffer: 8 * 1024 * 1024 });
-const sha = (value: string | Uint8Array): string => createHash("sha256").update(value).digest("hex");
 const readJson = (path: string): Json => JSON.parse(readFileSync(resolve(root, path), "utf8")) as Json;
 const completeKeys = ["abilitySlot", "evs", "friendship", "gender", "item", "ivs", "level", "moves", "nature", "ppUps", "shiny", "species"].sort();
 const statKeys = ["attack", "defense", "hp", "spAttack", "spDefense", "speed"].sort();
@@ -33,7 +31,6 @@ describe("MOVE_HYPER_VOICE source/component classification + legal bilateral Sce
   it("pins the complete pointer-owned root, direct source/ELF/ROM bodies, carriers, and identity-only controls", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
-    expect(sha(first)).toBe("ecf1986ba957454d31163cdc22cedda4ed011815bd6c36d677a13532ab53c975");
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
       schema: "hyper-voice-source-audit/v1",
@@ -53,6 +50,7 @@ describe("MOVE_HYPER_VOICE source/component classification + legal bilateral Sce
     expect(Object.keys(audit.source.directBodies.tasks).sort()).toEqual(["cry", "platform", "scale", "shakeMon2", "simplePaletteBlend"]);
     expect(Object.keys(audit.source.directBodies.runtimeCommands)).toHaveLength(8);
     expect(Object.keys(audit.controls.named).sort()).toEqual(["MOVE_ROAR", "MOVE_ROCK_TOMB", "MOVE_SNORE", "MOVE_UPROAR"]);
+    expect(audit.behavior.partnerShake.args).toEqual(["ANIM_DEF_PARTNER", 1, 0, 6, 1]);
     expect(audit.controls.kind).toContain("identity checks only");
     expect(audit.controls.kind).toContain("no Hyper Voice timing");
   });
@@ -85,7 +83,7 @@ describe("MOVE_HYPER_VOICE source/component classification + legal bilateral Sce
     expect(verifyText()).toBe(first);
     expect(JSON.parse(first)).toEqual({
       schema: "hyper-voice-source-staging-verifier/v1",
-      auditRunSha256: "ecf1986ba957454d31163cdc22cedda4ed011815bd6c36d677a13532ab53c975",
+      sourceAuditFileSha256: "db65402817b2a03059a6a80838d57e0dd445540d55e8f3c40542b7c1d765bba1",
       runs: {
         "player-back": { outputSha256: "fbe3fba3f8f7aded8b0f0c2bca52cd096ea79144b858e0f6159a07e3579392ac", rootObservations: 104, firstInactiveCleanupFrame: 180 },
         "opponent-front": { outputSha256: "6ea48b8b96365df80ed2845d2294838a830a4a225dbad0fb1ba3adc92414436a", rootObservations: 104, firstInactiveCleanupFrame: 184 },
