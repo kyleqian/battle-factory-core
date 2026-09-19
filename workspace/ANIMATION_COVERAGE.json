@@ -7550,7 +7550,7 @@
     "Silver Wind's own maps prove whole hardware OAM/matrices from predecessor software on 192/192 player and 195/195 opponent rows, hardware palette from predecessor faded on 191/192 and 194/195 with age-6 target-monbg setup the sole same-row exception, exclude banks and target exclusions, BG3 slide 30->31 and cleanup 165->166 / 168->169, BUG VRAM, selected target-BG priority, Sparkle6 lives, and tag teardown",
     "the generic production compositor consumes the source BG swap/palette epochs, measured brightness transfer, live BGxCNT priority against OBJ, and Emerald's persistent stable sSpriteOrder across moving equal-Y Sparkle6 crossings; two independent processes are byte-identical at digest e3c66e5fdd42c5c7d13165a6bbd05cbcba09a8f987935f34f26a9298c1a9614b and each passes all 389/389 component, typed-seam, chronological raw-RGB, and actual-core framebuffer rows with zero residual pixels",
     "a material reversed CHARIZARD/BLISSEY control changes sides, species, geometry, sprite/task/resource/matrix allocation, persistent order, palette, and presentation RNG, changing seam output and framebuffer while gameplay state/RNG remains opaque and unchanged",
-    "MOVE_SILVER_WIND alone is promoted; MOVE_SKY_ATTACK remains independently unsupported, so blend-battle-anim-palette-exclude remains unfulfilled and every sibling receives no Silver Wind timing, latch, body, move, component-track, or acceptance credit"
+    "MOVE_SILVER_WIND alone receives Silver Wind credit; MOVE_SKY_ATTACK is now independently exact and fulfills blend-battle-anim-palette-exclude through its own bilateral two-turn proof, while every sibling receives no transferred Silver Wind timing, latch, body, move, component-track, or acceptance credit"
    ],
    "evidence": [
     "tools/compare/silverWindSourceAudit.ts",
@@ -7618,6 +7618,46 @@
     "tests/animation/snoreEvidenceCheckpoint.test.ts",
     "tests/animation/snoreReducer.test.ts",
     "tests/animation/snoreActualCore.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_SKY_ATTACK",
+   "status": "exact",
+   "covered": [
+    "the complete two-turn Move_SKY_ATTACK legal singles body is independently accepted: the 149-row setup and 181-row unleash branches in both orientations include the opponent setup dispatch, black/white palette programs, horizontal shake, BG_SKY slide and restore, bird affine flight, impact, target ShakeMon2, attacker fades, audio, resources, waits, and first-inactive cleanup",
+    "complete legal bilateral FEAROW/SHUCKLE Battle Scene ON evidence retains 660 chronological rows; the pure source-age reducer and narrow typed sceneOnSkyAttackView seam reproduce every row from live sides, species, geometry, sprite/task/resource/matrix allocation, painter order, BG/register/palette state, presentation RNG, and opaque gameplay state/RNG",
+    "the generic production compositor consumes source-derived bird and sky assets plus live battler art, geometry, hardware palettes, monbg/blend state, source-relative scroll, predecessor display latches, allocation, and order without evidence imports, absolute battle ticks, or framebuffer lookup",
+    "two independent actual-core processes are byte-identical at digest a33398a20ece8f5bb66efac90d9fa735c5e2dc4abf880a844a77214cb9a9bc88 and each passes all 660/660 component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels",
+    "a material reversed-side WAILORD/BLISSEY live control changes species, geometry/origins, sprite/task/resource/matrix allocation, painter order, and presentation RNG, changing the framebuffer while gameplay state/RNG remains opaque and unchanged",
+    "MOVE_SKY_ATTACK alone is promoted and fulfills only play-se1-with-panning, blend-battle-anim-palette-exclude, and horizontal-shake-complex-bg-palette; every sibling retains its independent status and receives no Sky Attack timing, latch, branch, move, component, or acceptance credit"
+   ],
+   "evidence": [
+    "tools/compare/skyAttackSourceAudit.ts",
+    "tools/battle-lab/mechanic-sky-attack-player-fearow-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-sky-attack-opponent-fearow-player-shuckle.json",
+    "tools/compare/skyAttackStagingProbe.py",
+    "tools/compare/fixtures/sky-attack-staging-receipt.json",
+    "tools/compare/skyAttackProbe.py",
+    "tools/compare/skyAttackEvidence.ts",
+    "tools/compare/fixtures/sky-attack-evidence.json",
+    "tools/compare/evidence/sky-attack-player-dense-state.json.gz",
+    "tools/compare/evidence/sky-attack-opponent-dense-state.json.gz",
+    "tools/compare/evidence/sky-attack-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/sky-attack-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/sky-attack-changemap-player.json",
+    "tools/compare/evidence/sky-attack-changemap-opponent.json",
+    "src/animation/skyAttack.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifySkyAttackReducer.ts",
+    "tools/compare/extractSkyAttackAssets.ts",
+    "src/animation/assets/sky-attack.json",
+    "tools/compare/skyAttackActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/skyAttackSourceStaging.test.ts",
+    "tests/animation/skyAttackEvidence.test.ts",
+    "tests/animation/skyAttackReducer.test.ts",
+    "tests/animation/skyAttackActualCore.test.ts"
    ]
   }
  ],
@@ -8242,10 +8282,11 @@
     "MOVE_SKY_ATTACK",
     "MOVE_RETURN",
     "MOVE_FLATTER",
-    "MOVE_LUSTER_PURGE",
-    "MOVE_COSMIC_POWER"
-   ],
-   "goal": "MOVE_DRAGON_CLAW independently proves SoundTask_PlaySE1WithPanning and its complete palette/shake/lunge/FireSpin/claw/cleanup body in both orientations at 137/137 strengthened source component/task/sprite/OAM/global-coordinate/palette/audio and shared-seam framebuffer frames, reproduced twice. MOVE_COSMIC_POWER independently proves its non-attacker blend, BG_COSMIC slide/restore, two granting stars, and distinct centered/attacker-pan sounds at 241/241 complete bilateral source/hardware/raw-RGB/framebuffer rows twice fresh. MOVE_LUSTER_PURGE independently proves six target-panned SoundTask_PlaySE1WithPanning calls and its complete psychic/white BG, circle/particle blend, six visual-RNG hitsplat, target-shake, and restore body at 333/333 complete bilateral rows twice fresh. SKY ATTACK retains both two-turn selector branches, black/white charge blends and shake, plus sky BG/bird/fade/impact strike. RETURN requires every friendship-power branch, repeated Tail Whip sound tasks, dips/lunges/hitsplats/shakes, and branch-specific timing. FLATTER needs spotlight create/remove, hardware palette fades, vertical dips, 38 confetti sprites, and both attacker/target sound events. Each remaining sibling stays unsupported pending independent complete dense framebuffer evidence."
+   "MOVE_LUSTER_PURGE",
+   "MOVE_COSMIC_POWER"
+  ],
+   "fulfilled": true,
+   "goal": "FULFILLED by MOVE_SKY_ATTACK's independent complete 660-row bilateral two-turn body: its unleash branch proves SoundTask_PlaySE1WithPanning together with BG_SKY, bird, impact, target ShakeMon2, fades, live compositor, and cleanup twice with zero residual pixels. DRAGON_CLAW, COSMIC_POWER, and LUSTER_PURGE retain their independent exact bodies. RETURN and FLATTER remain unsupported; no Sky Attack timing, latch, branch, or acceptance transfers to any sibling."
   },
   {
    "id": "ice-beam-crystals",
@@ -8329,10 +8370,11 @@
     "MOVE_SKY_ATTACK",
     "MOVE_DESTINY_BOND",
     "MOVE_HEAL_BELL",
-    "MOVE_LUSTER_PURGE",
-    "MOVE_SILVER_WIND"
-   ],
-   "goal": "UNFULFILLED pending MOVE_SKY_ATTACK. MOVE_CALM_MIND independently proves its complete exclude-attacker blend body at 101/101 bilateral rows, MOVE_LUSTER_PURGE its full 333/333 bilateral psychic body, HEAL_BELL its 522/522 bilateral bell/note/ring/star body, MOVE_DESTINY_BOND its own complete ghost-background body, and MOVE_SILVER_WIND now independently proves its side-selected BUG BG, slide, split priority, two exclude passes, eighteen Sparkle6 objects, restoration, and cleanup at 389/389 bilateral rows twice fresh with zero residual pixels. HARDEN 101/101, SYNTHESIS 130/130, and BIND 45/45 remain exact controls. SKY_ATTACK still needs independent evidence for both two-turn branches; no accepted sibling transfers its body, latch, or move credit."
+   "MOVE_LUSTER_PURGE",
+   "MOVE_SILVER_WIND"
+  ],
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_SKY_ATTACK independently proves both setup and unleash selector branches, including its exclude-attacker black/white palette programs, at 660/660 bilateral source/component/raw-RGB/shared-framebuffer rows twice with zero residual pixels. CALM_MIND, LUSTER_PURGE, HEAL_BELL, DESTINY_BOND, and SILVER_WIND retain independently exact bodies; no timing, latch, move, or acceptance credit transfers among representatives."
   },
   {
    "id": "metallic-shine",
@@ -8379,10 +8421,11 @@
     "MOVE_FISSURE",
     "MOVE_SKY_ATTACK",
     "MOVE_MAGNITUDE",
-    "MOVE_ERUPTION",
-    "MOVE_LUSTER_PURGE"
-   ],
-   "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MEGA_PUNCH and MOVE_MEGA_KICK independently prove their complex-palette bodies. MOVE_FISSURE independently proves its target/platform (10,50) shake, two BG-only palette pulses, three stable-OAM dirt groups, BG_FISSURE pipeline, and cleanup at 254/254 complete bilateral source/component/framebuffer rows twice fresh. MOVE_LUSTER_PURGE independently proves its target-only (5,14) HorizontalShake and distinct BlendBattleAnimPalExclude/BlendParticle psychic body at 333/333 complete bilateral rows twice fresh; it inherits no Fissure argument-set behavior. MOVE_ERUPTION independently proves its platform/all-battler (8,60) schedule inside its complete 476/494-row Warm Rock body. MOVE_MAGNITUDE independently proves its regular/intense power branches at 764/764 complete bilateral source/component/framebuffer rows twice fresh. SKY ATTACK retains its distinct unsupported body. Exact move acceptance remains independent and does not fulfill this shared track."
+   "MOVE_ERUPTION",
+   "MOVE_LUSTER_PURGE"
+  ],
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_SKY_ATTACK independently proves its distinct target/platform HorizontalShake and complex black/white BG palette programs across both two-turn branches at 660/660 bilateral source/component/raw-RGB/shared-framebuffer rows twice with zero residual pixels. EARTHQUAKE, FISSURE, LUSTER_PURGE, ERUPTION, and MAGNITUDE retain their independently exact argument sets and bodies; shared task identity transfers no timing, latch, branch, or move acceptance."
   },
   {
    "id": "elemental-punch",

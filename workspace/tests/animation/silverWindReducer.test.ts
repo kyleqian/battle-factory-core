@@ -104,8 +104,7 @@ describe("MOVE_SILVER_WIND source-relative reducer and narrow Scene-ON seam", ()
     const data = coverage as { entries: Array<{ move: string; status: string }>; queue: string[]; componentTracks: Array<{ id: string; fulfilled?: boolean }> };
     expect(data.entries.find((entry) => entry.move === "MOVE_SILVER_WIND")).toMatchObject({ status: "exact" });
     expect(data.queue).not.toContain("MOVE_SILVER_WIND");
-    // SKY_ATTACK remains independently unsupported, so the multi-move track
-    // cannot inherit fulfillment from Silver Wind's exact body.
-    expect(data.componentTracks.find((track) => track.id === "blend-battle-anim-palette-exclude")?.fulfilled).not.toBe(true);
+    expect(data.entries.find((entry) => entry.move === "MOVE_SKY_ATTACK")).toMatchObject({ status: "exact" });
+    expect(data.componentTracks.find((track) => track.id === "blend-battle-anim-palette-exclude")?.fulfilled).toBe(true);
   });
 });

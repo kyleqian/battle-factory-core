@@ -7,7 +7,7 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/skyAttackSourceAudit.ts",
-    "auditSha256": "35b9230c61502670081621a486191389669ffd20f9a914e276b838d9d06258bc",
+    "auditSha256": "f24c0b0010a574d330c6700c4bfe526509595232cce3e23d09f470eed1043c4e",
     "auditRunSha256": "f8ef8e4282cfc4b6b674d9500c3cdc33eb500c4738d0fd833281a9df7cfa1835",
     "probe": "tools/compare/skyAttackStagingProbe.py",
     "probeSha256": "beb159653591a7d32060e486589c8fe0149bcb4d2780833731da8a19b4157339",

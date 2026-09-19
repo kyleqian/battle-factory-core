@@ -73,7 +73,7 @@ describe("MOVE_SKY_ATTACK authoritative source, carrier, and legal bilateral sta
     expect(stage.overrides.parties[targetSide][0]).toMatchObject({ species: 213, level: 50, moves: [150, 150, 150, 150] });
   });
 
-  it("retains compact twice-fresh setup/unleash endpoints with no move or track credit", () => {
+  it("retains the historical compact no-credit receipt beside current exact acceptance", () => {
     const receipt = json("tools/compare/fixtures/sky-attack-staging-receipt.json");
     const coverage = json("ANIMATION_COVERAGE.json");
     expect(receipt).toMatchObject({ schema: "sky-attack-compact-staging-receipt/v1", oracleProfile: "battle-scene-on", move: "MOVE_SKY_ATTACK", moveId: 143, status: "unsupported-source-staging-checkpoint", coverageCredit: false, freshness: { runsPerOrientation: 2 } });
@@ -90,9 +90,9 @@ describe("MOVE_SKY_ATTACK authoritative source, carrier, and legal bilateral sta
       expect(sha(read(run.scenario))).toBe(run.scenarioSha256);
     }
     expect(receipt.scope).toMatchObject({ denseWindowCaptured: false, rawRgbRetained: false, latchMeasured: false, productionChanged: false, reducerAdded: false, typedSceneOnSeam: false, compositorAdded: false, coveragePromotion: false, coverageEntryAdded: false, componentTrackFulfilled: false, battleStateInjected: false, boundaryOrBarrierChanged: false });
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SKY_ATTACK")).toBeUndefined();
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SKY_ATTACK")).toMatchObject({ status: "exact" });
     const blendTrack = coverage.componentTracks.find((track: Json) => track.id === "blend-battle-anim-palette-exclude");
-    expect(blendTrack.fulfilled).not.toBe(true);
+    expect(blendTrack.fulfilled).toBe(true);
     expect(blendTrack.representatives).toEqual(["MOVE_CALM_MIND", "MOVE_SKY_ATTACK", "MOVE_DESTINY_BOND", "MOVE_HEAL_BELL", "MOVE_LUSTER_PURGE", "MOVE_SILVER_WIND"]);
     for (const sibling of blendTrack.representatives.filter((move: string) => move !== "MOVE_SKY_ATTACK")) {
       expect(coverage.entries.find((entry: Json) => entry.move === sibling)?.status).toBe("exact");

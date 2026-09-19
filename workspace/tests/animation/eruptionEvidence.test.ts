@@ -12,7 +12,7 @@ describe("MOVE_ERUPTION bilateral dense exact evidence", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ERUPTION")?.status).toBe("exact");
     expect(coverage.componentTracks.find((track: any) => track.id === "eruption-warm-rock")).toMatchObject({ fulfilled: true, representatives: ["MOVE_ERUPTION"] });
-    for (const [move, status] of [["MOVE_EARTHQUAKE", "exact"], ["MOVE_FISSURE", "exact"], ["MOVE_LUSTER_PURGE", "exact"], ["MOVE_SKY_ATTACK", undefined], ["MOVE_MAGNITUDE", "exact"]] as const) expect(coverage.entries.find((entry: any) => entry.move === move)?.status).toBe(status);
+    for (const [move, status] of [["MOVE_EARTHQUAKE", "exact"], ["MOVE_FISSURE", "exact"], ["MOVE_LUSTER_PURGE", "exact"], ["MOVE_SKY_ATTACK", "exact"], ["MOVE_MAGNITUDE", "exact"]] as const) expect(coverage.entries.find((entry: any) => entry.move === move)?.status).toBe(status);
   });
   it("strictly replays every retained bilateral row, transfer fit, lifecycle, and cleanup", () => {
     expect(sha(fixture.source.audit)).toBe(fixture.source.auditSha256);

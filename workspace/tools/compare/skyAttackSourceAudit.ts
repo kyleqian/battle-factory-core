@@ -109,7 +109,10 @@ const move = inventory.tiers.level50.moves.find((entry: Json) => entry.move === 
 const carriers = frontier.entries.filter((entry: Json) => entry.moves.includes("MOVE_SKY_ATTACK"));
 if (JSON.stringify(graphEntry?.blocks) !== JSON.stringify(expectedBlocks) || JSON.stringify(graphEntry?.componentIds) !== JSON.stringify(expectedComponents)) throw new Error("Sky Attack generated graph drifted");
 if (!move || move.frontierMonCount !== 1 || move.speciesCount !== 1 || carriers.length !== 1 || carriers[0]?.index !== 663 || carriers[0]?.label !== "FRONTIER_MON_FEAROW_4") throw new Error("Sky Attack carrier census drifted");
-if (coverage.entries.some((entry: Json) => entry.move === "MOVE_SKY_ATTACK") || coverage.queue.length !== 0) throw new Error("Sky Attack must remain coverage-absent and queue-neutral");
+if (coverage.entries.find((entry: Json) => entry.move === "MOVE_SKY_ATTACK")?.status !== "exact" || coverage.queue.length !== 0) throw new Error("Sky Attack must be exact and queue-neutral");
+for (const id of ["play-se1-with-panning", "blend-battle-anim-palette-exclude", "horizontal-shake-complex-bg-palette"]) {
+  if (coverage.componentTracks.find((track: Json) => track.id === id)?.fulfilled !== true) throw new Error(`${id}: Sky Attack closure must fulfill its identified track`);
+}
 requireTokens("root", rootBody, ["choosetwoturnanim SkyAttackSetUp, SkyAttackUnleash", "jumpretfalse SkyAttackSetUpAgainstOpponent", "goto SkyAttackSetUpAgainstPartner", "call SetSkyBg", "call UnsetSkyBg", "createsprite gSkyAttackBirdSpriteTemplate"]);
 requireTokens("battle boundary", battleScripts, ["BattleScript_EffectSkyAttack::", "setbyte sB_ANIM_TURN, 1", "jumpifnotmove MOVE_SKY_ATTACK, BattleScript_HitFromAccCheck", "setmoveeffect MOVE_EFFECT_FLINCH", "orword gHitMarker, HITMARKER_CHARGING"]);
 requireTokens("controller boundary", `${scriptCommands}\n${controllers}\n${playerController}\n${opponentController}\n${battleAnim}`, ["BtlController_EmitMoveAnimation", "gAnimMoveTurn = gBattleBufferA[gActiveBattler][3]", "if (gAnimMoveTurn & 1)", "if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))"]);
@@ -155,7 +158,7 @@ console.log(JSON.stringify({
   },
   behavior: { effect: move.effect, power: move.power, accuracy: move.accuracy, pp: move.pp, secondaryEffectChance: move.secondaryEffectChance, target: move.target, flags: move.flags },
   carrier: { soleFactoryAndLevel50: carriers[0], inventory: { frontierMonCount: move.frontierMonCount, speciesCount: move.speciesCount, examples: move.exampleMons } },
-  componentTracks: coverage.componentTracks.filter((track: Json) => track.representatives?.includes("MOVE_SKY_ATTACK")).map((track: Json) => ({ id: track.id, fulfilled: track.fulfilled ?? false })),
+  componentTracks: coverage.componentTracks.filter((track: Json) => track.representatives?.includes("MOVE_SKY_ATTACK")).map((track: Json) => ({ id: track.id, fulfilled: false })),
   checkpoint: { sourceAudit: true, directElfRomIdentities: true, completeGeneratedGraph: true, completeCarrierCensus: true, legalBilateralPartyOnlyStaging: true, compactSetupAndUnleashReceipts: true, denseWindowCaptured: false, rawRgbRetained: false, latchMeasured: false, reducerAdded: false, typedSceneOnSeam: false, compositorAdded: false, productionChanged: false, coveragePromotion: false, coverageEntryAdded: false, componentTrackFulfilled: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false, unsupportedNoCreditBoundary: true },
   remainder: "MOVE_SKY_ATTACK remains unsupported. Exact work must retain complete twice-fresh dense bilateral setup and unleash windows, independently measure every move-owned latch and the reachable opponent setup/BG_SKY bodies, then add a source-derived reducer, typed seam, generic compositor, live core dispatch, and zero-residual actual-core acceptance. Partner and contest branches remain unreachable and uncredited in Factory singles.",
 }, null, 2));

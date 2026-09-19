@@ -50,10 +50,13 @@ describe("MOVE_SKY_ATTACK pure source-age reducer and narrow Scene-ON seam", () 
     expect(gameplayRng).toEqual({ opaque: "gameplay-rng", value: 0x0badc0de }); expect(gameplayState).toEqual({ opaque: "battle-state", turn: 17 });
   });
 
-  it("keeps Sky Attack unsupported and related component tracks unfulfilled", () => {
+  it("promotes only Sky Attack and fulfills its three identified component tracks", () => {
     const data = coverage as any;
     expect(data.queue).not.toContain("MOVE_SKY_ATTACK");
-    expect(data.entries.some((entry: any) => entry.move === "MOVE_SKY_ATTACK")).toBe(false);
-    for (const track of data.componentTracks.filter((entry: any) => entry.representatives?.includes("MOVE_SKY_ATTACK"))) expect(track.fulfilled).not.toBe(true);
+    expect(data.entries.find((entry: any) => entry.move === "MOVE_SKY_ATTACK")).toMatchObject({ status: "exact" });
+    expect(data.componentTracks.filter((entry: any) => entry.representatives?.includes("MOVE_SKY_ATTACK")).map((entry: any) => entry.id).sort()).toEqual([
+      "blend-battle-anim-palette-exclude", "horizontal-shake-complex-bg-palette", "play-se1-with-panning",
+    ]);
+    for (const track of data.componentTracks.filter((entry: any) => entry.representatives?.includes("MOVE_SKY_ATTACK"))) expect(track.fulfilled).toBe(true);
   });
 });

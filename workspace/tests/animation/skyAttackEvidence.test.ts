@@ -28,12 +28,12 @@ describe("MOVE_SKY_ATTACK twice-fresh bilateral dense evidence", () => {
     }
   });
 
-  it("replays the hermetic verifier and leaves coverage and all three tracks untouched", () => {
+  it("replays the immutable evidence checkpoint against the exact move and three fulfilled tracks", () => {
     const result = verify();
     expect(result).toMatchObject({ schema: "sky-attack-bilateral-evidence/v1", move: "MOVE_SKY_ATTACK", status: "unsupported-evidence", coverageCredit: false, boundary: { productionChanged: false, coveragePromotion: false, componentTracksFulfilled: false, barrierChanged: false } });
     for (const side of ["player-back", "opponent-front"]) expect(result.orientations[side]).toMatchObject({ setupRows: 149, unleashRows: 181, bodyWindows: [{ frameCount: 149 }, { frameCount: 181 }] });
     const coverage = readJson("ANIMATION_COVERAGE.json");
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SKY_ATTACK")).toBeUndefined();
-    for (const id of ["play-se1-with-panning", "blend-battle-anim-palette-exclude", "horizontal-shake-complex-bg-palette"]) expect(coverage.componentTracks.find((track: Json) => track.id === id)?.fulfilled).not.toBe(true);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SKY_ATTACK")).toMatchObject({ status: "exact" });
+    for (const id of ["play-se1-with-panning", "blend-battle-anim-palette-exclude", "horizontal-shake-complex-bg-palette"]) expect(coverage.componentTracks.find((track: Json) => track.id === id)?.fulfilled).toBe(true);
   });
 });

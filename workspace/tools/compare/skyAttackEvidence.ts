@@ -188,7 +188,9 @@ if (process.argv.includes("--write")) {
 
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Json;
 const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-invariant(fixture.status === "unsupported-evidence" && fixture.coverageCredit === false && !coverage.entries.some((entry: Json) => entry.move === "MOVE_SKY_ATTACK"), "Sky Attack must remain unsupported/coverage-absent");
-for (const id of ["play-se1-with-panning", "blend-battle-anim-palette-exclude", "horizontal-shake-complex-bg-palette"]) invariant(coverage.componentTracks.find((track: Json) => track.id === id)?.fulfilled !== true, `${id}: must remain unfulfilled`);
+invariant(fixture.status === "unsupported-evidence" && fixture.coverageCredit === false
+  && coverage.entries.find((entry: Json) => entry.move === "MOVE_SKY_ATTACK")?.status === "exact",
+"historical evidence checkpoint must remain immutable while current coverage is exact");
+for (const id of ["play-se1-with-panning", "blend-battle-anim-palette-exclude", "horizontal-shake-complex-bg-palette"]) invariant(coverage.componentTracks.find((track: Json) => track.id === id)?.fulfilled === true, `${id}: must be fulfilled by exact Sky Attack closure`);
 const result = { "player-back": verifySide("player-back", fixture.orientations["player-back"]), "opponent-front": verifySide("opponent-front", fixture.orientations["opponent-front"]) };
 console.log(JSON.stringify({ schema: fixture.schema, move: fixture.move, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries(Object.entries(result).map(([side, value]) => [side, { sourceWindow: value.sourceWindow, bodyWindows: value.bodyWindows, probeJsonSha256: value.probeJsonSha256, rawRgbSequenceSha256: value.rawRgbSequenceSha256, changeMapSha256: value.changeMapSha256, setupRows: value.summary.setup.frameCount, unleashRows: value.summary.unleash.frameCount, setupLatches: value.summary.setup.latches, unleashLatches: value.summary.unleash.latches }])), boundary: { productionChanged: false, coveragePromotion: false, componentTracksFulfilled: false, barrierChanged: false } }, null, 2));
