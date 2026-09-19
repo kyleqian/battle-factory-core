@@ -589,6 +589,11 @@ import {
   type HyperVoiceState,
 } from "./hyperVoice.ts";
 import {
+  snoreAtAge,
+  type SnoreLiveInputs,
+  type SnoreState,
+} from "./snore.ts";
+import {
   shockWaveAtAge,
   type ShockWaveLiveInputs,
   type ShockWaveState,
@@ -2448,6 +2453,17 @@ export interface SceneOnSilverWindConfig {
     | "attackerPictureOrigin" | "targetPictureOrigin">>;
 }
 
+/** Narrow Scene-ON seam for MOVE_SNORE's two source-owned effect calls. */
+export interface SceneOnSnoreConfig {
+  readonly move: "SNORE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<SnoreLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+    | "attackerPictureOrigin" | "targetPictureOrigin">>;
+}
+
 /** Narrow Scene-ON seam for Solar Beam's source-isolated two-turn bodies. */
 export interface SceneOnSolarBeamConfig {
   readonly move: "SOLAR_BEAM";
@@ -4215,6 +4231,7 @@ export type SceneOnMoveConfig =
   | SceneOnMachPunchConfig
   | SceneOnPsychUpConfig
   | SceneOnHyperVoiceConfig
+  | SceneOnSnoreConfig
   | SceneOnShockWaveConfig
   | SceneOnOverheatConfig
   | SceneOnSilverWindConfig
@@ -4601,6 +4618,8 @@ export type SceneOnPsychUpPresentationState =
   SceneOnMovePresentationState<SceneOnPsychUpConfig>;
 export type SceneOnHyperVoicePresentationState =
   SceneOnMovePresentationState<SceneOnHyperVoiceConfig>;
+export type SceneOnSnorePresentationState =
+  SceneOnMovePresentationState<SceneOnSnoreConfig>;
 export type SceneOnShockWavePresentationState =
   SceneOnMovePresentationState<SceneOnShockWaveConfig>;
 export type SceneOnOverheatPresentationState =
@@ -4801,6 +4820,11 @@ export interface SceneOnPsychUpView extends PsychUpState {
 }
 
 export interface SceneOnHyperVoiceView extends HyperVoiceState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSnoreView extends SnoreState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7891,6 +7915,29 @@ export function sceneOnHyperVoiceView(
   const { attacker, target, animationInputs } = state.config;
   return {
     ...hyperVoiceAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerPictureOrigin: attacker.geometry.animationCenter,
+      targetPictureOrigin: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_SNORE's `loadspritegfx ANIM_TAG_SNORE_Z` row. */
+export function sceneOnSnoreView(
+  state: SceneOnSnorePresentationState,
+): SceneOnSnoreView {
+  if (state.config.move !== "SNORE") {
+    throw new Error(`expected SNORE presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...snoreAtAge(state.age, {
       ...animationInputs,
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
