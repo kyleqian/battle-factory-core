@@ -3,11 +3,11 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_SKILL_SWAP",
   "moveId": 285,
-  "status": "unsupported-reducer-seam",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "track": {
     "id": "skill-swap-bluegreen-orb",
-    "fulfilled": false,
+    "fulfilled": true,
     "representatives": [
       "MOVE_SKILL_SWAP"
     ],
@@ -30,11 +30,11 @@
     "productionChanged": true,
     "reducerAdded": true,
     "typedSeamAdded": true,
-    "compositorAdded": false,
-    "actualCoreFramebufferAcceptance": false,
-    "coveragePromotion": false,
+    "compositorAdded": true,
+    "actualCoreFramebufferAcceptance": true,
+    "coveragePromotion": true,
     "siblingPromotion": false,
-    "componentTrackFulfilled": false,
+    "componentTrackFulfilled": true,
     "gameplayStateOwned": false,
     "boundaryOrBarrierChanged": false
   },
@@ -3586,5 +3586,5 @@
       "repeatRawRgbSequenceSha256": "85fefb13f890bead54ad8f15b1a0366f051bfb0f958afc005baf47c1e998b5d0"
     }
   },
-  "verdict": "Reducer/seam checkpoint only. MOVE_SKILL_SWAP remains unsupported; no compositor/core dispatch, production asset, framebuffer acceptance, move/sibling promotion, or fulfilled-track claim."
+  "verdict": "MOVE_SKILL_SWAP alone is exact and fulfills skill-swap-bluegreen-orb after two independent 391/391 zero-residual actual-core processes; no sibling receives credit."
 }

@@ -176,13 +176,14 @@ describe("MOVE_SKILL_SWAP source-relative reducer and narrow Scene-ON seam", () 
     expect(target.geometry.side).toBe("player");
   });
 
-  it("keeps retained evidence out of production and retains the unsupported move/track boundary", () => {
+  it("keeps retained evidence out of production and grants only Skill Swap/its sole track credit", () => {
     const source = readFileSync(resolve(root, "src/animation/skillSwap.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party|reference)[^"']*["']/u);
     expect(source).not.toMatch(/absolute\s*(?:battle\s*)?(?:tick|frame)|framebuffer|controller-frame/iu);
     const data = coverage as Json;
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_SKILL_SWAP")).toBe(false);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_SKILL_SWAP"))
+      .toMatchObject({ status: "exact" });
     expect(data.componentTracks.find((track: Json) => track.id === "skill-swap-bluegreen-orb"))
-      .toMatchObject({ representatives: ["MOVE_SKILL_SWAP"], fulfilled: false });
+      .toMatchObject({ representatives: ["MOVE_SKILL_SWAP"], fulfilled: true });
   });
 });

@@ -194,6 +194,7 @@ import {
   type SceneOnShockWaveConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnNightmareConfig,
+  type SceneOnSkillSwapConfig,
   type SceneOnOverheatConfig,
   type SceneOnSilverWindConfig,
   type SceneOnMovePresentationState,
@@ -363,6 +364,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "NIGHTMARE") {
     const nightmarePresentation = presentation as SceneOnMovePresentationState<SceneOnNightmareConfig>;
     renderSceneOnMovePresentation(framebuffer, nightmarePresentation);
+    return;
+  }
+  if (presentation.config.move === "SKILL_SWAP") {
+    const skillSwapPresentation = presentation as SceneOnMovePresentationState<SceneOnSkillSwapConfig>;
+    renderSceneOnMovePresentation(framebuffer, skillSwapPresentation);
     return;
   }
   if (presentation.config.move === "OVERHEAT") {

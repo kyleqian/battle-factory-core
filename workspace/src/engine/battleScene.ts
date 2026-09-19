@@ -701,6 +701,7 @@ import sunnyDayAsset from "../animation/assets/sunny-day.json" with { type: "jso
 import uproarAsset from "../animation/assets/uproar.json" with { type: "json" };
 import rapidSpinAsset from "../animation/assets/rapid-spin.json" with { type: "json" };
 import foresightAsset from "../animation/assets/foresight.json" with { type: "json" };
+import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
@@ -995,6 +996,7 @@ import {
   sceneOnShockWaveView,
   sceneOnSignalBeamView,
   sceneOnNightmareView,
+  sceneOnSkillSwapView,
   sceneOnOverheatView,
   sceneOnSilverWindView,
   sceneOnSilverWindDisplayPlan,
@@ -1265,6 +1267,7 @@ import {
   type SceneOnShockWaveConfig,
   type SceneOnSignalBeamConfig,
   type SceneOnNightmareConfig,
+  type SceneOnSkillSwapConfig,
   type SceneOnOverheatConfig,
   type SceneOnSilverWindConfig,
   type SceneOnRazorWindConfig,
@@ -1353,6 +1356,7 @@ import { minimizeDisplayedClonesAtAge } from "../animation/minimize.ts";
 import { futureSightBgPaletteRowAtAge } from "../animation/futureSight.ts";
 import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE, confusionTargetEffectAtAge } from "../animation/confusion.ts";
 import { psychicBgPaletteRowAtAge, PSYCHIC_WINDOW2_START_AGE, psychicTargetEffectAtAge, PSYCHIC_BLEND_TINT_COLOR } from "../animation/psychic.ts";
+import { skillSwapDisplayPlan } from "../animation/skillSwap.ts";
 import {
   hypnosisBgPaletteRowAtAge,
   HYPNOSIS_TARGET_BLEND_COLOR,
@@ -2511,6 +2515,9 @@ const hiddenPowerRedOrbArt = hiddenPowerRedOrbAsset as {
   };
 };
 const battleAnimPsychicBg = battleAnimPsychicBgAsset as { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
+const skillSwapOrbArt = (skillSwapOrbAsset as {
+  orb: { tileset: Tileset; palette: RgbColor[] };
+}).orb;
 const meteorMashArt = meteorMashAsset as {
   background: { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
   goldStars: { tileset: Tileset; palette: RgbColor[] };
@@ -24153,6 +24160,93 @@ export function renderSceneOnMovePresentation(
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "NIGHTMARE!", 99,
     );
+    return;
+  }
+
+  if (state.config.move === "SKILL_SWAP") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnSkillSwapConfig>;
+    const view = sceneOnSkillSwapView(moveState);
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SKILL_SWAP presentation requires battlers on opposite sides");
+    }
+    const plan = skillSwapDisplayPlan(view);
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`SKILL_SWAP missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const darken = (palette: readonly RgbColor[]): RgbColor[] =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(color.r | color.g << 8 | color.b << 16,
+          view.registers.bldy ?? 0);
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      });
+    if (view.background.phase === "psychic" || view.background.phase === "restoring") {
+      drawExtractedTileBg(fb, { tileset: battleAnimPsychicBg.tileset,
+        tilemap: battleAnimPsychicBg.tilemap,
+        subpalettes: [darken(paletteBank(2))] });
+    } else {
+      drawExtractedTileBg(fb, { tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: [2, 3, 4].map((bank) => darken(paletteBank(bank))) });
+    }
+    const top = (attr: readonly [number, number, number]): { x: number; y: number } => {
+      const rawX = attr[1] & 0x1ff, rawY = attr[0] & 0xff;
+      return { x: rawX >= 240 ? rawX - 512 : rawX,
+        y: rawY >= 160 ? rawY - 256 : rawY };
+    };
+    const attackerArt = artFor(view.attacker), targetArt = artFor(view.target);
+    const drawBattler = (battler: typeof view.attacker, object: typeof plan.attacker,
+      art: BattlerArt): void => {
+      const corner = top(object.attr);
+      drawSpriteSheet(fb, tilesFor(art, battler.geometry.side),
+        paletteBank(16 + (object.attr[2] >>> 12 & 0xf)), corner.x, corner.y);
+    };
+    const entries = [
+      { oamIndex: plan.attacker.oamIndex,
+        draw: () => drawBattler(view.attacker, plan.attacker, attackerArt) },
+      { oamIndex: plan.target.oamIndex,
+        draw: () => drawBattler(view.target, plan.target, targetArt) },
+      ...plan.orbs.map((orb) => ({ oamIndex: orb.oamIndex, draw: () => {
+        const corner = top(orb.attr);
+        drawSpriteSheetAffineRotate(fb, skillSwapOrbArt.tileset,
+          paletteBank(16 + (orb.attr[2] >>> 12 & 0xf)), corner.x + 8, corner.y + 8,
+          orb.matrix[0], orb.matrix[1], orb.matrix[2], orb.matrix[3], undefined, false);
+      } })),
+    ];
+    // Lower hardware OAM indices win equal-priority overlap.
+    for (const entry of entries.sort((left, right) => right.oamIndex - left.oamIndex)) entry.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "SKILL SWAP!", 99);
     return;
   }
 

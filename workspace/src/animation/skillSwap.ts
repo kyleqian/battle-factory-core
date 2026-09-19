@@ -251,6 +251,20 @@ export interface SkillSwapState {
   }>;
 }
 
+export interface SkillSwapDisplayedObject {
+  readonly oamIndex: number;
+  readonly attr: SkillSwapOam;
+  readonly matrixNum: number;
+  readonly matrix: SkillSwapMatrix;
+}
+
+export interface SkillSwapDisplayPlan {
+  readonly attacker: SkillSwapDisplayedObject;
+  readonly target: SkillSwapDisplayedObject;
+  /** Hardware-OAM order, front to back; paint in reverse for overlap. */
+  readonly orbs: readonly SkillSwapDisplayedObject[];
+}
+
 export const SKILL_SWAP_SOURCE_START = 0x082c_e3d8;
 export const SKILL_SWAP_SOURCE_END_EXCLUSIVE = 0x082c_e423;
 export const SKILL_SWAP_PSYCHIC_BACKGROUND_START = 0x082d_7cd1;
@@ -260,6 +274,47 @@ export const SKILL_SWAP_ORB_TAG = 10251;
 const ORB_DURATION = 16;
 const ORBS_PER_LEG = 12;
 const ORB_CADENCE = 7;
+
+function decodeHardwareOam(entry: unknown, oamIndex: number): SkillSwapDisplayedObject | null {
+  if (typeof entry !== "string" || !/^[0-9a-f]{16}$/iu.test(entry)) return null;
+  const word = (offset: number): number => Number.parseInt(
+    `${entry.slice(offset + 2, offset + 4)}${entry.slice(offset, offset + 2)}`, 16);
+  const attr = [word(0), word(4), word(8)] as const;
+  return { oamIndex, attr, matrixNum: attr[1] >>> 9 & 0x1f,
+    matrix: [256, 0, 0, 256] };
+}
+
+/**
+ * Resolves scanout objects from the live hardware buffers. This is the
+ * generic compositor boundary for the measured predecessor OAM/matrix latch;
+ * it does not know controller frames or retained evidence.
+ */
+export function skillSwapDisplayPlan(state: Readonly<SkillSwapState>): SkillSwapDisplayPlan {
+  const objects = state.buffers.hardwareOam
+    .map(decodeHardwareOam)
+    .filter((entry): entry is SkillSwapDisplayedObject => entry !== null)
+    .map((entry) => ({ ...entry,
+      matrix: state.buffers.hardwareMatrices[entry.matrixNum] ?? [256, 0, 0, 256] as const }));
+  const findBattler = (attr2: number, role: string): SkillSwapDisplayedObject => {
+    const found = objects.find((entry) => entry.attr[2] === attr2
+      && (entry.attr[0] & 0x0200) === 0);
+    if (!found) throw new Error(`missing displayed Skill Swap ${role} OAM`);
+    return found;
+  };
+  const range = state.resources.tileRange;
+  const bank = state.resources.paletteBank;
+  const orbs = range === null || bank === null ? [] : objects.filter((entry) => {
+    const tile = entry.attr[2] & 0x03ff;
+    return tile >= range[0] && tile < range[0] + range[1]
+      && 16 + (entry.attr[2] >>> 12 & 0xf) === bank
+      && (entry.attr[0] & 0x0100) !== 0 && (entry.attr[0] & 0x0200) === 0;
+  });
+  return {
+    attacker: findBattler(state.battlers.attacker.sprite.attr[2], "attacker"),
+    target: findBattler(state.battlers.target.sprite.attr[2], "target"),
+    orbs,
+  };
+}
 
 function assertAge(age: number, input: Readonly<SkillSwapLiveInputs>): void {
   if (!Number.isInteger(age) || age < 0) throw new Error(`invalid Skill Swap source age ${age}`);

@@ -57,7 +57,7 @@ const carriers = frontier.entries.filter((entry: Json) => entry.index >= 110 && 
 if (!move || move.frontierMonCount !== 5 || move.speciesCount !== 5 || carriers.length !== 5) throw new Error("five-carrier census drift");
 const status = (name: string) => coverage.entries.find((entry: Json) => entry.move === name)?.status ?? "unsupported";
 const output = {
-  schema: "skill-swap-source-audit/v1", move: "MOVE_SKILL_SWAP", moveId: 285, status: "unsupported-reducer-seam-checkpoint", coverageCredit: false,
+  schema: "skill-swap-source-audit/v1", move: "MOVE_SKILL_SWAP", moveId: 285, status: "exact", coverageCredit: true,
   source: {
     root: { source: sourceIdentity("data/battle_anim_scripts.s", scripts, rootBody), rom: range("Move_SKILL_SWAP", "Move_IMPRISON") },
     psychicBackground: { source: sourceIdentity("data/battle_anim_scripts.s", scripts, bgBody), rom: range("SetPsychicBackground", "SetSkyBg") },
@@ -70,6 +70,6 @@ const output = {
   graph: { blocks: generated.blocks, componentCount: generated.componentIds.length, components: generated.componentIds, novelComponents: ["asset:ANIM_TAG_BLUEGREEN_ORB", "task:AnimTask_SkillSwap"] },
   carriers: carriers.map((entry: Json) => ({ setId: entry.index, label: entry.label, species: entry.species, moves: entry.moves, itemName: entry.itemName, evSpreadStats: entry.evSpreadStats, nature: entry.nature })),
   controls: { named: { MOVE_FORESIGHT: status("MOVE_FORESIGHT"), MOVE_NIGHTMARE: status("MOVE_NIGHTMARE"), MOVE_PSYWAVE: status("MOVE_PSYWAVE"), MOVE_EXTRASENSORY: status("MOVE_EXTRASENSORY") }, transferCredit: false, note: "Foresight controls BlendMonInAndOut; Nightmare is exact only for its legal body; Psywave and Extrasensory remain unsupported." },
-  checkpoint: { sourceAudit: true, graphPinned: true, fiveLevel50CarriersPinned: true, legalBilateralParties: true, denseEvidenceRequired: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: false, productionChanged: true, framebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false },
+  checkpoint: { sourceAudit: true, graphPinned: true, fiveLevel50CarriersPinned: true, legalBilateralParties: true, denseEvidenceRequired: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, productionChanged: true, framebufferAcceptance: true, coveragePromotion: true, siblingPromotion: false, componentTrackFulfilled: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false },
 };
 console.log(JSON.stringify(output, null, 2));
