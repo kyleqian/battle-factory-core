@@ -15702,3 +15702,9 @@ track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
   complete bilateral **389/389 twice**, zero residual. Never repeat the recovery
   merge or closed source/evidence/reducer/fade work. Use the new verification
   contract and keep only three short checkpoints in this live ledger.
+
+# Animation supervisor verification — MOVE_SNORE exact closure (2026-09-19 supervisor)
+
+- **State / merge:** Independently reviewed and fast-forwarded Sol/high commits `80c985b0b` and `d45ed3a49` onto `animation-main`. `MOVE_SNORE` alone advances Level 50 to **260/276 exact**, **0 partial / 0 staged**, and **16 unsupported**; no sibling/track, boundary/barrier, gameplay/controller/facility owner, or main-program document changed.
+- **Independent proof:** A fresh actual-core run passes all **70 player-back + 70 opponent-front = 140/140** component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels at digest `12538306…`. The WAILORD/BLISSEY control materially changes live species, sides, geometry, allocation/order, palettes/registers, and presentation RNG while gameplay remains opaque; the focused supervisor union passes **8 files / 23 tests**, including Hyper Voice's independent **210-row** control.
+- **Gates / next:** The authoritative merged full suite passes **1,391 files / 11,396 tests** with **44 files / 223 tests skipped**; the production build passes **812 modules**. The worker's own final pair was interrupted by its 60-minute cap after focused/smoke success, so this supervisor receipt is the governing gate. Next take `MOVE_SKY_ATTACK` as a bounded source/component/carrier plus legal bilateral staging checkpoint: it is the remaining move required by the already-proved `blend-battle-anim-palette-exclude` track, but earns no timing, latch, component, track, or move credit before its own dense acceptance.
