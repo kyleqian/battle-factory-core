@@ -9,6 +9,7 @@
  */
 
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import { decodeGbaHardwareOam } from "./gbaObjCompositor.ts";
 
 export type PsywaveSide = "player" | "opponent";
 export type PsywaveMatrix = readonly [number, number, number, number];
@@ -21,6 +22,8 @@ export interface PsywavePoint {
 
 /** Current battler art identity carried by the Scene-ON presentation seam. */
 export interface PsywaveBattlerArt {
+  /** Live picture/name chrome identity loaded before mechanic-lab overrides. */
+  readonly displaySpecies: string;
   readonly slot: number;
   readonly attr: PsywaveOam;
   readonly subpriority: number;
@@ -259,6 +262,20 @@ export interface PsywaveState {
   }>;
 }
 
+export interface PsywaveDisplayedObject {
+  readonly oamIndex: number;
+  readonly attr: PsywaveOam;
+  readonly matrixNum: number;
+  readonly matrix: PsywaveMatrix;
+}
+
+export interface PsywaveDisplayPlan {
+  readonly attacker: PsywaveDisplayedObject;
+  readonly target: PsywaveDisplayedObject;
+  /** Hardware OAM order; lower indices win equal-priority overlap. */
+  readonly rings: readonly PsywaveDisplayedObject[];
+}
+
 export const PSYWAVE_SOURCE_START = 0x082d_3212;
 export const PSYWAVE_SOURCE_END_EXCLUSIVE = 0x082d_3298;
 export const PSYWAVE_SET_PSYCHIC_START = 0x082d_7cd1;
@@ -275,6 +292,35 @@ const RING_PHASE_STEP = 3;
 const RING_WAVE_STEP = 0xd200 / RING_DURATION;
 const TARGET_PALETTE_COLOR = 32351;
 const ZERO_ARGS = [0, 0, 0, 0, 0, 0, 0, 0] as const;
+const IDENTITY_MATRIX: PsywaveMatrix = [256, 0, 0, 256];
+
+/** Live hardware-buffer scanout plan, independent of retained evidence. */
+export function psywaveDisplayPlan(state: Readonly<PsywaveState>): PsywaveDisplayPlan {
+  const objects = decodeGbaHardwareOam(
+    state.buffers.hardwareOam,
+    state.buffers.hardwareMatrices,
+    IDENTITY_MATRIX,
+  );
+  const findBattler = (attr2: number, role: string): PsywaveDisplayedObject => {
+    const found = objects.find((entry) => entry.attr[2] === attr2
+      && (entry.attr[0] & 0x0200) === 0);
+    if (!found) throw new Error(`missing displayed Psywave ${role} OAM`);
+    return found;
+  };
+  const range = state.resources.tileRange;
+  const bank = state.resources.paletteBank;
+  const rings = range === null || bank === null ? [] : objects.filter((entry) => {
+    const tile = entry.attr[2] & 0x03ff;
+    return tile >= range[0] && tile < range[0] + range[1]
+      && 16 + (entry.attr[2] >>> 12 & 0xf) === bank
+      && (entry.attr[0] & 0x0300) === 0x0300;
+  });
+  return {
+    attacker: findBattler(state.battlers.attacker.art.attr[2], "attacker"),
+    target: findBattler(state.battlers.target.art.attr[2], "target"),
+    rings,
+  };
+}
 
 function assertSlot(slot: number, label: string, maximum: number): void {
   if (!Number.isInteger(slot) || slot < 0 || slot >= maximum) {
@@ -291,7 +337,7 @@ function assertPoint(point: Readonly<PsywavePoint>, label: string): void {
 function assertArt(art: Readonly<PsywaveBattlerArt>, label: string): void {
   assertSlot(art.slot, `${label} sprite slot`, 64);
   assertSlot(art.matrixNum, `${label} matrix slot`, 32);
-  if (art.attr.length !== 3 || art.matrix.length !== 4) {
+  if (!art.displaySpecies || art.attr.length !== 3 || art.matrix.length !== 4) {
     throw new Error(`invalid Psywave ${label} art identity`);
   }
 }

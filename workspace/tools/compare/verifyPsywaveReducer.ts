@@ -64,14 +64,21 @@ function speciesFor(window: PsywaveWindow): Readonly<{ attacker: string; target:
     : { attacker: "CHIMECHO", target: "ONIX" };
 }
 
-function artFor(sprite: Json): PsywaveLiveInputs["attackerArt"] {
+function artFor(sprite: Json, displaySpecies: string): PsywaveLiveInputs["attackerArt"] {
   return {
+    displaySpecies,
     slot: sprite.slot,
     attr: sprite.attr,
     subpriority: sprite.subpriority,
     matrixNum: sprite.matrixNum,
     matrix: sprite.matrix,
   };
+}
+
+function displaySpeciesFor(window: PsywaveWindow): Readonly<{ attacker: string; target: string }> {
+  return window === "player-back"
+    ? { attacker: "LUVDISC", target: "ONIX" }
+    : { attacker: "SWABLU", target: "ONIX" };
 }
 
 function pictureCenter(sprite: Json, side: "player" | "opponent"): Readonly<{ x: number; y: number }> {
@@ -122,8 +129,8 @@ export function psywaveInputsFor(
     targetPictureCenter: pictureCenter(current.battlerSprites.target, targetSide),
     attackerAnimationCenter: { x: current.battlerSprites.attacker.x, y: current.battlerSprites.attacker.y },
     targetAnimationCenter: { x: current.battlerSprites.target.x, y: current.battlerSprites.target.y },
-    attackerArt: artFor(current.battlerSprites.attacker),
-    targetArt: artFor(current.battlerSprites.target),
+    attackerArt: artFor(current.battlerSprites.attacker, displaySpeciesFor(window).attacker),
+    targetArt: artFor(current.battlerSprites.target, displaySpeciesFor(window).target),
     taskSlots: {
       fadeToPsychic: fadeToPsychic.slot,
       psychicBackground: psychicBackground.slot,
@@ -308,8 +315,8 @@ function compareRow(window: PsywaveWindow, rows: readonly Json[], age: number): 
   invariant(same(reducedRings(state), retainedRings(row)), `${window}/${age}: twelve BLUE_RING trajectory/OAM/matrix/data state`);
   invariant(same(state.battlers.attacker.animationCenter, { x: row.battlerSprites.attacker.x, y: row.battlerSprites.attacker.y })
     && same(state.battlers.target.animationCenter, { x: row.battlerSprites.target.x, y: row.battlerSprites.target.y })
-    && same(state.battlers.attacker.art, artFor(row.battlerSprites.attacker))
-    && same(state.battlers.target.art, artFor(row.battlerSprites.target)), `${window}/${age}: live art identity and geometry`);
+    && same(state.battlers.attacker.art, artFor(row.battlerSprites.attacker, displaySpeciesFor(window).attacker))
+    && same(state.battlers.target.art, artFor(row.battlerSprites.target, displaySpeciesFor(window).target)), `${window}/${age}: live art identity and geometry`);
   invariant(same(state.painterOrder, row.spriteOrder), `${window}/${age}: live source painter order`);
   invariant(same(state.buffers.softwareOam, row.softwareOam)
     && same(state.buffers.hardwareOam, row.hardwareOam)

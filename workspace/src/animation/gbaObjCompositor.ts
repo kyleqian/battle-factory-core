@@ -51,6 +51,35 @@ export interface GbaSpriteOrderKey {
   readonly y: number;
 }
 
+/** One source hardware-OAM entry paired with its live affine matrix. */
+export interface GbaHardwareOamObject<TMatrix = readonly [number, number, number, number]> {
+  readonly oamIndex: number;
+  readonly attr: readonly [number, number, number];
+  readonly matrixNum: number;
+  readonly matrix: TMatrix;
+}
+
+/**
+ * Decode pokeemerald's retained little-endian OAM hex rows.  Move display
+ * plans classify these generic scanout objects by live tile/palette ranges;
+ * this helper deliberately has no move, species, or controller timing data.
+ */
+export function decodeGbaHardwareOam<TMatrix>(
+  hardwareOam: readonly unknown[],
+  hardwareMatrices: readonly TMatrix[],
+  identityMatrix: TMatrix,
+): readonly GbaHardwareOamObject<TMatrix>[] {
+  return hardwareOam.flatMap((entry, oamIndex) => {
+    if (typeof entry !== "string" || !/^[0-9a-f]{16}$/iu.test(entry)) return [];
+    const word = (offset: number): number => Number.parseInt(
+      `${entry.slice(offset + 2, offset + 4)}${entry.slice(offset, offset + 2)}`, 16);
+    const attr = [word(0), word(4), word(8)] as const;
+    const matrixNum = attr[1] >>> 9 & 0x1f;
+    return [{ oamIndex, attr, matrixNum,
+      matrix: hardwareMatrices[matrixNum] ?? identityMatrix }];
+  });
+}
+
 /**
  * Apply one stable BuildSpritePriorities/SortSprites pass. Equal keys retain
  * their order from the preceding frame, which matters when sprite slots are

@@ -32,8 +32,8 @@ describe("MOVE_PSYWAVE source-relative reducer and narrow Scene-ON seam", () => 
         retainedRows: 205,
         reducerRows: 410,
         seamRows: 410,
-        reducerSha256: "cc397b813a0321f8424aabef4fe1209fb7cea1d4afa482c35f1760f5da55423f",
-        seamSha256: "cc397b813a0321f8424aabef4fe1209fb7cea1d4afa482c35f1760f5da55423f",
+        reducerSha256: "824865c841f7a9f4deedf4189d3a17380b28caddc81cecfef25351535b87025d",
+        seamSha256: "824865c841f7a9f4deedf4189d3a17380b28caddc81cecfef25351535b87025d",
         framebufferCompared: false,
         coverageCredit: false,
       },
@@ -41,8 +41,8 @@ describe("MOVE_PSYWAVE source-relative reducer and narrow Scene-ON seam", () => 
         retainedRows: 205,
         reducerRows: 410,
         seamRows: 410,
-        reducerSha256: "21bb2fe8d561fa97895df267681b891b74ba0b6a39e68b7867db731df35f4ca9",
-        seamSha256: "21bb2fe8d561fa97895df267681b891b74ba0b6a39e68b7867db731df35f4ca9",
+        reducerSha256: "27b0e4b02f258f8d216733248250063e3919491a526e0d851c88be02996a7109",
+        seamSha256: "27b0e4b02f258f8d216733248250063e3919491a526e0d851c88be02996a7109",
         framebufferCompared: false,
         coverageCredit: false,
       },
@@ -51,8 +51,8 @@ describe("MOVE_PSYWAVE source-relative reducer and narrow Scene-ON seam", () => 
         passes: 2,
         reducerRows: 820,
         seamRows: 820,
-        reducerSha256: "01f8cdd2bdaaa835bb4b532d33a7ffddcfb514d73afdcb4587dd0303b0b40308",
-        seamSha256: "01f8cdd2bdaaa835bb4b532d33a7ffddcfb514d73afdcb4587dd0303b0b40308",
+        reducerSha256: "8af3d1978858c51082a08169a25e26908b8593dd833d8432b6b5e6ae9aa3df4b",
+        seamSha256: "8af3d1978858c51082a08169a25e26908b8593dd833d8432b6b5e6ae9aa3df4b",
         framebufferCompared: false,
         coverageCredit: false,
       },
@@ -124,8 +124,8 @@ describe("MOVE_PSYWAVE source-relative reducer and narrow Scene-ON seam", () => 
       targetPictureCenter: { x: 37, y: 124 },
       attackerAnimationCenter: { x: 202, y: 38 },
       targetAnimationCenter: { x: 37, y: 116 },
-      attackerArt: { slot: 21, attr: [38, 0xc0a9, 0x6d23], subpriority: 55, matrixNum: 6, matrix: matrices[6]! },
-      targetArt: { slot: 22, attr: [116, 0xc007, 0xd123], subpriority: 14, matrixNum: 7, matrix: matrices[7]! },
+      attackerArt: { displaySpecies: "CROBAT", slot: 21, attr: [38, 0xc0a9, 0x6d23], subpriority: 55, matrixNum: 6, matrix: matrices[6]! },
+      targetArt: { displaySpecies: "BLISSEY", slot: 22, attr: [116, 0xc007, 0xd123], subpriority: 14, matrixNum: 7, matrix: matrices[7]! },
       taskSlots: { fadeToPsychic: 8, psychicBackground: 9, sinTimer: 10, loopSound: 11, paletteCycle: 12, restoreBattle: 13 },
       ringAllocations: allocations,
       ringOam: baseline.rings.map((ring, index) => ({ slot: allocations[ring.sourceCreationOrder]!.slot, attr: [index + 1, 0xc000 | index, 0x4300 | index] as const, subpriority: 40 + index })),
@@ -209,7 +209,7 @@ describe("MOVE_PSYWAVE source-relative reducer and narrow Scene-ON seam", () => 
     const alteredControlDigest = createHash("sha256")
       .update(JSON.stringify({ reducer: source, seam: seamState, gameplayRng, gameplayState }))
       .digest("hex");
-    expect(alteredControlDigest).toBe("031045c09740da93f41393616ff4ae5310c1132562ae362f61338a7677cc2787");
+    expect(alteredControlDigest).toBe("6ce2485a29cc48b3be4478b5076c436e015cbd0602485d7c981c0cb9c7f239fc");
   });
 
   it("keeps retained evidence out of production and preserves Psywave as unsupported/no-credit", () => {

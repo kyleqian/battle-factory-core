@@ -195,6 +195,7 @@ import {
   type SceneOnSignalBeamConfig,
   type SceneOnNightmareConfig,
   type SceneOnSkillSwapConfig,
+  type SceneOnPsywaveConfig,
   type SceneOnPursuitConfig,
   type SceneOnOverheatConfig,
   type SceneOnSilverWindConfig,
@@ -370,6 +371,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "SKILL_SWAP") {
     const skillSwapPresentation = presentation as SceneOnMovePresentationState<SceneOnSkillSwapConfig>;
     renderSceneOnMovePresentation(framebuffer, skillSwapPresentation);
+    return;
+  }
+  if (presentation.config.move === "PSYWAVE") {
+    const psywavePresentation = presentation as SceneOnMovePresentationState<SceneOnPsywaveConfig>;
+    renderSceneOnMovePresentation(framebuffer, psywavePresentation);
     return;
   }
   if (presentation.config.move === "PURSUIT") {
