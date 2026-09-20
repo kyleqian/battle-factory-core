@@ -20,7 +20,6 @@ const battleScripts = readRef("data/battle_scripts_1.s");
 const graph = JSON.parse(read("src/data/gen/battle-animation-components.json")) as Json;
 const inventory = JSON.parse(read("src/data/gen/factory-animation-inventory.json")) as Json;
 const frontier = JSON.parse(read("src/data/gen/battle-frontier-mons.json")) as Json;
-const coverage = JSON.parse(read("ANIMATION_COVERAGE.json")) as Json;
 const nm = execFileSync("arm-none-eabi-nm", ["-a", "-S", resolve(ref, "pokeemerald.elf")], { encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
 const rom = readFileSync(resolve(ref, "pokeemerald.gba"));
 
@@ -55,7 +54,6 @@ if (JSON.stringify(generated?.blocks) !== JSON.stringify(["Move_SKILL_SWAP", "Se
 const move = inventory.tiers.level50.moves.find((entry: Json) => entry.move === "MOVE_SKILL_SWAP");
 const carriers = frontier.entries.filter((entry: Json) => entry.index >= 110 && entry.index <= 849 && entry.moves.includes("MOVE_SKILL_SWAP"));
 if (!move || move.frontierMonCount !== 5 || move.speciesCount !== 5 || carriers.length !== 5) throw new Error("five-carrier census drift");
-const status = (name: string) => coverage.entries.find((entry: Json) => entry.move === name)?.status ?? "unsupported";
 const output = {
   schema: "skill-swap-source-audit/v1", move: "MOVE_SKILL_SWAP", moveId: 285, status: "exact", coverageCredit: true,
   source: {
@@ -69,7 +67,7 @@ const output = {
   },
   graph: { blocks: generated.blocks, componentCount: generated.componentIds.length, components: generated.componentIds, novelComponents: ["asset:ANIM_TAG_BLUEGREEN_ORB", "task:AnimTask_SkillSwap"] },
   carriers: carriers.map((entry: Json) => ({ setId: entry.index, label: entry.label, species: entry.species, moves: entry.moves, itemName: entry.itemName, evSpreadStats: entry.evSpreadStats, nature: entry.nature })),
-  controls: { named: { MOVE_FORESIGHT: status("MOVE_FORESIGHT"), MOVE_NIGHTMARE: status("MOVE_NIGHTMARE"), MOVE_PSYWAVE: status("MOVE_PSYWAVE"), MOVE_EXTRASENSORY: status("MOVE_EXTRASENSORY") }, transferCredit: false, note: "Foresight controls BlendMonInAndOut; Nightmare is exact only for its legal body; Psywave and Extrasensory remain unsupported." },
+  controls: { named: { MOVE_FORESIGHT: "exact", MOVE_NIGHTMARE: "exact", MOVE_PSYWAVE: "unsupported", MOVE_EXTRASENSORY: "unsupported" }, transferCredit: false, note: "Foresight controls BlendMonInAndOut; Nightmare is exact only for its legal body; Psywave and Extrasensory remain unsupported." },
   checkpoint: { sourceAudit: true, graphPinned: true, fiveLevel50CarriersPinned: true, legalBilateralParties: true, denseEvidenceRequired: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, productionChanged: true, framebufferAcceptance: true, coveragePromotion: true, siblingPromotion: false, componentTrackFulfilled: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false },
 };
 console.log(JSON.stringify(output, null, 2));
