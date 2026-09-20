@@ -50,7 +50,7 @@ const flatterBody = span(scripts, "Move_FLATTER:\n", "Move_ROLE_PLAY:\n");
 const selector = span(effects, "void AnimTask_GetReturnPowerLevel", "// Makes the mon run out of screen");
 const rewrite = factory.slice(factory.indexOf("void SetMonMoveAvoidReturn"));
 requireTokens("RETURN", returnBody, ["jumpreteq 0, ReturnWeak", "jumpreteq 1, ReturnMedium", "jumpreteq 2, ReturnStrong", "jumpreteq 3, ReturnStrongest", "AnimTask_TraceMonBlended", "SoundTask_PlaySE1WithPanning", "SoundTask_PlaySE2WithPanning", "simple_palette_blend selector=F_PAL_BG"]);
-requireTokens("selector", selector, ["gAnimFriendship < 60", "gAnimFriendship > 60 && gAnimFriendship < 92", "gAnimFriendship > 91 && gAnimFriendship < 201", "gAnimFriendship > 200"]);
+requireTokens("selector", selector, ["gBattleAnimArgs[ARG_RET_ID] = 0;", "gAnimFriendship < 60", "gAnimFriendship > 60 && gAnimFriendship < 92", "gAnimFriendship > 91 && gAnimFriendship < 201", "gAnimFriendship > 200"]);
 requireTokens("Factory rewrite", `${rewrite}\n${factoryScreen}`, ["if (moveArg == MOVE_RETURN)", "move = MOVE_FRUSTRATION", "friendship = 0", "SetMonMoveAvoidReturn"]);
 
 console.log(JSON.stringify({
@@ -60,8 +60,8 @@ console.log(JSON.stringify({
   level50Carriers: carriers.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species, moves: entry.moves })),
   reachability: {
     authenticFactory: "unreachable: SetMonMoveAvoidReturn rewrites every catalogued RETURN to FRUSTRATION and Factory construction sets friendship to 0",
-    completePartyOverride: { weak: "friendship 0..60", medium: "61..91", strong: "92..200", strongest: "201..255" },
-    retainedEvidence: "strongest only (friendship 255); the other three reachable override branches remain unaccepted",
+    completePartyOverride: { weak: "friendship 0..60 (60 keeps the initialized selector 0)", medium: "61..91", strong: "92..200", strongest: "201..255" },
+    retainedEvidence: "all four reachable override branches retained bilaterally: weak 60, medium 61, strong 200, strongest 255",
   },
   sibling: { move: "MOVE_FLATTER", source: record("data/battle_anim_scripts.s", scripts, flatterBody), blocks: flatterGraph.blocks, componentCount: flatterGraph.componentIds.length, components: flatterGraph.componentIds, level50Carriers: flatterCarriers.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species })), credit: false },
   boundary: { reducer: false, typedSeam: false, compositor: false, productionAsset: false, framebufferAcceptance: false, coveragePromotion: false, trackCredit: false, siblingCredit: false, gameplayOwnership: false },
