@@ -197,6 +197,6 @@ describe("MOVE_RETURN source-relative reducer and narrow Scene-ON seam", () => {
     expect(reducer.allBranches).toMatchObject({ retainedRows: 1190, passes: 2, reducerRows: 2380, seamRows: 2380, framebufferCompared: false, coverageCredit: false });
     const data = coverage as Json;
     expect(data.entries.some((entry: Json) => entry.move === "MOVE_RETURN" && entry.status === "exact")).toBe(true);
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_FLATTER")).toBe(false);
+    expect(data.entries.some((entry: Json) => entry.move === "MOVE_FLATTER" && entry.status === "exact")).toBe(true);
   });
 });

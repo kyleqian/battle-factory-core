@@ -46,8 +46,8 @@ const carrierIds = [288, 306, 355, 459, 534, 567, 747, 827];
 if (JSON.stringify(carriers.map((entry: Json) => entry.index)) !== JSON.stringify(carrierIds)) throw new Error("RETURN Level-50 carrier census drifted");
 if (JSON.stringify(flatterCarriers.map((entry: Json) => entry.index)) !== JSON.stringify([146, 147])) throw new Error("FLATTER Level-50 carrier census drifted");
 if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_RETURN" && entry.status === "exact")
-  || coverage.entries.some((entry: Json) => entry.move === "MOVE_FLATTER")) {
-  throw new Error("RETURN exact / FLATTER unsupported coverage boundary drifted");
+  || !coverage.entries.some((entry: Json) => entry.move === "MOVE_FLATTER" && entry.status === "exact")) {
+  throw new Error("RETURN / FLATTER independent exact coverage boundary drifted");
 }
 
 const returnBody = span(scripts, "Move_RETURN:\n", "Move_COSMIC_POWER:\n");
