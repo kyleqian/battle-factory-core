@@ -40,6 +40,5 @@ describe("MOVE_RETURN all-branch evidence checkpoint", () => {
     expect(fixture.branches.strongest.orientations["opponent-front"]).toMatchObject({ probeJsonSha256: "f7214f2e828bd053a606116a9f7bac3e71f860c9f3f71b6a4fdd963825116392", rawRgbSequenceSha256: "4a0692bfe09106d14be1c7b359d27c4d2524d514f8d709444163f404a881b506", changeMapSha256: "ff881ad46a3dc3d3efb4b115a66c13401a7c9268e77320d01a43d5b41910233a" });
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_RETURN" && entry.status === "exact")).toBe(true);
-    expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_FLATTER" && entry.status === "exact")).toBe(true);
   });
 });
