@@ -9,6 +9,7 @@
  */
 
 import { horizontalLungeX2AtTick } from "./horizontalLunge.ts";
+import { decodeGbaHardwareOam } from "./gbaObjCompositor.ts";
 
 export type ReturnSide = "player" | "opponent";
 export type ReturnBranch = "weak" | "medium" | "strong" | "strongest";
@@ -311,8 +312,71 @@ export interface ReturnState {
   }>;
 }
 
+export interface ReturnDisplayedObject {
+  readonly oamIndex: number;
+  readonly attr: ReturnOam;
+  readonly matrixNum: number;
+  readonly matrix: ReturnMatrix;
+}
+
+export interface ReturnDisplayPlan {
+  readonly attacker: ReturnDisplayedObject;
+  readonly target: ReturnDisplayedObject | null;
+  readonly impacts: readonly ReturnDisplayedObject[];
+  readonly traces: readonly ReturnDisplayedObject[];
+  readonly hardwarePalette: readonly number[];
+  readonly targetOnBg: boolean;
+  readonly targetBgScroll: ReturnPoint;
+}
+
 export const RETURN_SOURCE_START = 0x082d_5ace;
 export const RETURN_IMPACT_TAG = 10135;
+const RETURN_IDENTITY_MATRIX: ReturnMatrix = [256, 0, 0, 256];
+
+function signed9(value: number): number {
+  const wrapped = value & 0x1ff;
+  return wrapped >= 0x100 ? wrapped - 0x200 : wrapped;
+}
+
+/** Generic hardware-buffer scanout for every Return friendship branch. */
+export function returnDisplayPlan(state: Readonly<ReturnState>): ReturnDisplayPlan {
+  const objects = decodeGbaHardwareOam(
+    state.buffers.hardwareOam,
+    state.buffers.hardwareMatrices,
+    RETURN_IDENTITY_MATRIX,
+  );
+  const visible = (entry: ReturnDisplayedObject): boolean =>
+    (entry.attr[0] & 0x0200) === 0;
+  const normalBattler = (attr2: number): ReturnDisplayedObject | null =>
+    objects.find((entry) => entry.attr[2] === attr2
+      && (entry.attr[0] & 0x0c00) === 0 && visible(entry)) ?? null;
+  const attacker = normalBattler(state.battlers.attacker.art.attr[2]);
+  const target = normalBattler(state.battlers.target.art.attr[2]);
+  if (!attacker) throw new Error("missing displayed Return attacker OAM");
+  const targetOnBg = state.monbg.active && state.age >= 5;
+  if (!targetOnBg && !target) throw new Error("missing displayed Return target OAM");
+  const range = state.resources.tileRange;
+  const bank = state.resources.paletteBank;
+  const impacts = range === null || bank === null ? [] : objects.filter((entry) => {
+    const tile = entry.attr[2] & 0x03ff;
+    return visible(entry) && tile >= range[0] && tile < range[0] + range[1]
+      && 16 + (entry.attr[2] >>> 12 & 0xf) === bank
+      && (entry.attr[0] & 0x0500) === 0x0500;
+  });
+  const traces = objects.filter((entry) => visible(entry)
+    && entry.attr[2] === state.battlers.attacker.art.attr[2]
+    && (entry.attr[0] & 0x0c00) === 0x0400);
+  const hofs = state.monbg.layer === "bg1" ? "bg1hofs" : "bg2hofs";
+  const vofs = state.monbg.layer === "bg1" ? "bg1vofs" : "bg2vofs";
+  return {
+    attacker, target, impacts, traces, hardwarePalette: state.palette.hardware,
+    targetOnBg,
+    targetBgScroll: {
+      x: signed9(state.registers[hofs] ?? 0),
+      y: signed9(state.registers[vofs] ?? 0),
+    },
+  };
+}
 
 interface VerticalSpec {
   readonly start: number;

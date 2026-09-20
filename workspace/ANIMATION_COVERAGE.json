@@ -1686,7 +1686,7 @@
     "the pure source-relative reducer ports gVerticalDipSpriteTemplate(6,1,attacker), both gSlideMonToOffsetSpriteTemplate calls, animation-0 basic IMPACT at the side-relative target offset, AnimTask_ShakeMonInPlace(target,4,0,12,1), both gSlideMonToOriginalPosSpriteTemplate calls, target monbg, 12/8 alpha registers, audio, and cleanup without battle-clock, input-delay, coordinate, RGB, or pixel exceptions",
     "bodySlamProbe.py v2 records both SE1 and SE2 for every currentMove=34 frame through tools/run-mgba-probe.py; bodySlamEvidence.ts proves TAKE_DOWN on SE2 at attacker pan (age 7) and both MEGA_KICK2 loop cues on SE1 at target pan (ages 44/54), including player identity/status/flags in both orientations, and proves the complete 107-frame receipts twice fresh; independent outputs are byte-identical with player digest 79e4bfaa690241ca7e7cf11f372729f1df1872db06211bf597c7d72cf3f5258c and opponent digest 02c0ee9db45c41d727616708c3f0c9fa025b8261c495446bb04ae366a6828c01",
     "source extraction byte-pins LICKITUNG front/back art and reuses the independently source-generated ANIM_TAG_IMPACT asset; the narrow shared compositor ports source pic coordinates, target monbg, prior-software battler/effect OAM and palette transfer, 12:8 alpha IMPACT, both moving battlers, field chrome, both healthboxes, move text, first clear, and 107/107 shared-framebuffer equality twice fresh in both orientations",
-    "MOVE_RETURN remains unsupported because its four friendship-power branches have distinct dip counts, lunges, hitsplats, shakes, sound tasks, and timing and lack independent complete dense acceptance",
+    "MOVE_RETURN is independently exact across all four friendship branches and both orientations; no Return acceptance transfers from this Body Slam entry",
     "MOVE_FLATTER remains unsupported because it adds spotlight create/remove, hardware palette fades, two target dips, 38 confetti sprites, and distinct attacker/target sound tasks and lacks independent complete dense acceptance",
     "MOVE_WEATHER_BALL is outside Factory and remains unsupported because it adds a weather selector and five projectile/impact bodies"
    ],
@@ -7773,6 +7773,50 @@
     "tests/animation/psywaveReducer.test.ts",
     "tests/animation/psywaveActualCore.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_RETURN",
+   "status": "exact",
+   "covered": [
+    "the complete Move_RETURN friendship selector and all weak, medium, strong, and strongest source bodies are independently accepted, including every VerticalDip, HorizontalLunge, IMPACT, ShakeMon, TraceMonBlended, F_PAL_BG blend, monbg, alpha, audio, resource, and cleanup schedule",
+    "complete legal bilateral DRAGONAIR/ONIX Battle Scene ON evidence retains weak 88+88, medium 100+100, strong 125+125, and strongest 282+282 rows through first inactive cleanup; the source-relative reducer and typed sceneOnReturnView seam replay all 1,190 rows from live friendship, sides/species, geometry, art, allocation/order, buffers, palettes, registers, BG, audio, presentation RNG, and opaque gameplay state/RNG",
+    "Return's own maps prove predecessor OAM/matrix latches 87/87, 99/99, 124/124, and 281/281 and predecessor faded-palette latches 86/87, 98/99, 123/124, and 280/281, with only age-4 same-row monbg; selected hidden-target BG scroll edges display at +1 and direct alpha ages are 7/83, 7/75, 7/120, and 7/277",
+    "the generic live display plan decodes hardware OAM and matrices, classifies battlers, traces, and IMPACT objects from live art and resource ranges, and composites hardware palettes, target monbg, affine hitsplats, blended traces, field chrome, and cleanup; two independent actual-core processes pass all 1,190/1,190 component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels at digest 86407f1ff6a46e69ed15eb2c41a7f2bbc43de3062b4df998869d19e5078f4659",
+    "the material CROBAT/BLISSEY control changes live species, sides/geometry, palette, presentation RNG, typed reducer input, and framebuffer while gameplay state/RNG remains caller-owned, opaque, and unchanged",
+    "MOVE_RETURN alone is promoted in this step; MOVE_FLATTER and every sibling receive no timing, latch, branch, move, component, track, or acceptance credit"
+   ],
+   "evidence": [
+    "tools/compare/returnSourceAudit.ts",
+    "tools/compare/returnEvidence.ts",
+    "tools/compare/fixtures/return-evidence.json",
+    "tools/compare/evidence/return-weak-player-dense-state.json.gz",
+    "tools/compare/evidence/return-weak-opponent-dense-state.json.gz",
+    "tools/compare/evidence/return-medium-player-dense-state.json.gz",
+    "tools/compare/evidence/return-medium-opponent-dense-state.json.gz",
+    "tools/compare/evidence/return-strong-player-dense-state.json.gz",
+    "tools/compare/evidence/return-strong-opponent-dense-state.json.gz",
+    "tools/compare/evidence/return-player-dense-state.json.gz",
+    "tools/compare/evidence/return-opponent-dense-state.json.gz",
+    "tools/compare/evidence/return-weak-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/return-weak-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/return-medium-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/return-medium-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/return-strong-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/return-strong-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/return-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/return-opponent-raw-rgb.tar.gz",
+    "ANIMATION_LATCHES.md",
+    "src/animation/gbaObjCompositor.ts",
+    "src/animation/return.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifyReturnReducer.ts",
+    "tools/compare/returnActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/returnEvidenceCheckpoint.test.ts",
+    "tests/animation/returnReducer.test.ts",
+    "tests/animation/returnActualCore.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -8400,7 +8444,7 @@
    "MOVE_COSMIC_POWER"
   ],
    "fulfilled": true,
-   "goal": "FULFILLED by MOVE_SKY_ATTACK's independent complete 660-row bilateral two-turn body: its unleash branch proves SoundTask_PlaySE1WithPanning together with BG_SKY, bird, impact, target ShakeMon2, fades, live compositor, and cleanup twice with zero residual pixels. DRAGON_CLAW, COSMIC_POWER, and LUSTER_PURGE retain their independent exact bodies. RETURN and FLATTER remain unsupported; no Sky Attack timing, latch, branch, or acceptance transfers to any sibling."
+   "goal": "FULFILLED by independently exact representatives. MOVE_RETURN now independently proves its own SoundTask_PlaySE1WithPanning use inside all four friendship branches and complete 1,190-row bilateral body with zero residual pixels. SKY_ATTACK retains its independent complete 660-row two-turn proof; DRAGON_CLAW, COSMIC_POWER, and LUSTER_PURGE retain their independent exact bodies. FLATTER remains unsupported and no timing, latch, branch, or acceptance transfers between siblings."
   },
   {
    "id": "ice-beam-crystals",

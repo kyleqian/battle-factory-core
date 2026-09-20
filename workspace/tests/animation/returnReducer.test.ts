@@ -184,7 +184,7 @@ describe("MOVE_RETURN source-relative reducer and narrow Scene-ON seam", () => {
     expect(target.geometry.side).toBe("player");
   });
 
-  it("keeps retained evidence outside production, runs the source/evidence/reducer receipts twice, and leaves RETURN unsupported", () => {
+  it("keeps retained evidence outside production and runs the source/evidence/reducer receipts twice", () => {
     const source = readFileSync(resolve(root, "src/animation/return.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party|reference)[^"']*["']/u);
     expect(source).not.toMatch(/absolute\s*(?:battle\s*)?(?:tick|frame)|framebuffer|controller-frame/iu);
@@ -196,7 +196,7 @@ describe("MOVE_RETURN source-relative reducer and narrow Scene-ON seam", () => {
     expect(run("tools/compare/verifyReturnReducer.ts")).toEqual(reducer);
     expect(reducer.allBranches).toMatchObject({ retainedRows: 1190, passes: 2, reducerRows: 2380, seamRows: 2380, framebufferCompared: false, coverageCredit: false });
     const data = coverage as Json;
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_RETURN")).toBe(false);
+    expect(data.entries.some((entry: Json) => entry.move === "MOVE_RETURN" && entry.status === "exact")).toBe(true);
     expect(data.entries.some((entry: Json) => entry.move === "MOVE_FLATTER")).toBe(false);
   });
 });

@@ -983,6 +983,7 @@ import {
   type PsywaveState,
 } from "./psywave.ts";
 import {
+  returnDisplayPlan,
   returnAtAge,
   type ReturnLiveInputs,
   type ReturnState,
@@ -8945,6 +8946,13 @@ export function sceneOnReturnView(
     attacker,
     target,
   };
+}
+
+/** Live, evidence-free scanout plan for every Return selector branch. */
+export function sceneOnReturnDisplayPlan(
+  state: SceneOnReturnPresentationState,
+): ReturnType<typeof returnDisplayPlan> {
+  return returnDisplayPlan(sceneOnReturnView(state));
 }
 
 /** Live, evidence-free scanout plan for Pursuit's hardware display buffers. */

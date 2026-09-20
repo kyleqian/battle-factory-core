@@ -1000,6 +1000,8 @@ import {
   sceneOnPsywaveView,
   sceneOnPursuitView,
   sceneOnPursuitDisplayPlan,
+  sceneOnReturnView,
+  sceneOnReturnDisplayPlan,
   sceneOnOverheatView,
   sceneOnSilverWindView,
   sceneOnSilverWindDisplayPlan,
@@ -1273,6 +1275,7 @@ import {
   type SceneOnSkillSwapConfig,
   type SceneOnPsywaveConfig,
   type SceneOnPursuitConfig,
+  type SceneOnReturnConfig,
   type SceneOnOverheatConfig,
   type SceneOnSilverWindConfig,
   type SceneOnRazorWindConfig,
@@ -24470,6 +24473,114 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.side === "player"
         ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
       "PURSUIT!", 99);
+    return;
+  }
+
+  if (state.config.move === "RETURN") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnReturnConfig>;
+    const view = sceneOnReturnView(moveState);
+    const plan = sceneOnReturnDisplayPlan(moveState);
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("RETURN presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker, species: string): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[species];
+      if (!art) throw new Error(`RETURN missing live battler art ${species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const paletteBank = (bank: number): RgbColor[] =>
+      plan.hardwarePalette.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    drawExtractedTileBg(fb, { tileset: battleBg.static.tileset,
+      tilemap: battleBg.static.tilemap,
+      subpalettes: [2, 3, 4].map(paletteBank) });
+    const top = (attr: readonly [number, number, number]): { x: number; y: number } => {
+      const rawX = attr[1] & 0x1ff, rawY = attr[0] & 0xff;
+      return { x: rawX >= 240 ? rawX - 512 : rawX,
+        y: rawY >= 160 ? rawY - 256 : rawY };
+    };
+    const attackerArt = artFor(view.attacker, view.battlers.attacker.art.displaySpecies);
+    const targetArt = artFor(view.target, view.battlers.target.art.displaySpecies);
+    if (plan.targetOnBg) {
+      drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+        paletteBank(view.target.geometry.side === "opponent" ? 8 : 9),
+        -plan.targetBgScroll.x, -plan.targetBgScroll.y);
+    }
+    if (moveState.age === 0 && view.attacker.geometry.side === "opponent") {
+      const frontPictureOffset = (plan.attacker.attr[0] & 0xff) - 8;
+      drawSourceOpponentEnemyShadow(fb, view.battlers.attacker.art.displaySpecies, {
+        x: view.attacker.geometry.battlePositionCenter.x,
+        y: view.attacker.geometry.battlePositionCenter.y - frontPictureOffset,
+      });
+    }
+    const nonObjTarget2 = fb.slice();
+    const drawBattler = (battler: typeof view.attacker,
+      object: typeof plan.attacker, art: BattlerArt): void => {
+      const corner = top(object.attr);
+      drawSpriteSheet(fb, tilesFor(art, battler.geometry.side),
+        paletteBank(16 + (object.attr[2] >>> 12 & 0xf)), corner.x, corner.y);
+    };
+    const eva = view.registers.bldalpha & 0x1f;
+    const evb = view.registers.bldalpha >>> 8 & 0x1f;
+    const entries: Array<{ oamIndex: number; draw: () => void }> = [
+      { oamIndex: plan.attacker.oamIndex,
+        draw: () => drawBattler(view.attacker, plan.attacker, attackerArt) },
+    ];
+    if (plan.target) {
+      const target = plan.target;
+      entries.push({ oamIndex: target.oamIndex,
+        draw: () => drawBattler(view.target, target, targetArt) });
+    }
+    for (const trace of plan.traces) {
+      const corner = top(trace.attr);
+      entries.push({ oamIndex: trace.oamIndex, draw: () =>
+        drawSpriteSheetBlendedOverBackdrop(fb, nonObjTarget2,
+          tilesFor(attackerArt, view.attacker.geometry.side),
+          paletteBank(16 + (trace.attr[2] >>> 12 & 0xf)),
+          corner.x, corner.y, eva, evb) });
+    }
+    for (const impact of plan.impacts) {
+      const corner = top(impact.attr);
+      entries.push({ oamIndex: impact.oamIndex, draw: () =>
+        drawSpriteSheetAffineRotateBlendedOverFb(fb, nonObjTarget2,
+          battleAnimHitsplat.tileset,
+          paletteBank(16 + (impact.attr[2] >>> 12 & 0xf)),
+          corner.x + 16, corner.y + 16,
+          impact.matrix[0], impact.matrix[1], impact.matrix[2], impact.matrix[3],
+          eva, evb, false) });
+    }
+    for (const entry of entries.sort((left, right) => right.oamIndex - left.oamIndex)) entry.draw();
+
+    const playerSpecies = view.attacker.geometry.side === "player"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const opponentSpecies = view.attacker.geometry.side === "opponent"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.battlers.attacker.art.displaySpecies} used`
+        : `Foe ${view.battlers.attacker.art.displaySpecies} used`,
+      "RETURN!", 99);
     return;
   }
 

@@ -197,6 +197,7 @@ import {
   type SceneOnSkillSwapConfig,
   type SceneOnPsywaveConfig,
   type SceneOnPursuitConfig,
+  type SceneOnReturnConfig,
   type SceneOnOverheatConfig,
   type SceneOnSilverWindConfig,
   type SceneOnMovePresentationState,
@@ -381,6 +382,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "PURSUIT") {
     const pursuitPresentation = presentation as SceneOnMovePresentationState<SceneOnPursuitConfig>;
     renderSceneOnMovePresentation(framebuffer, pursuitPresentation);
+    return;
+  }
+  if (presentation.config.move === "RETURN") {
+    const returnPresentation = presentation as SceneOnMovePresentationState<SceneOnReturnConfig>;
+    renderSceneOnMovePresentation(framebuffer, returnPresentation);
     return;
   }
   if (presentation.config.move === "OVERHEAT") {
