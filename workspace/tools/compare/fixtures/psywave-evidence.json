@@ -3,16 +3,16 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_PSYWAVE",
   "moveId": 149,
-  "status": "unsupported-evidence-checkpoint",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "source": {
     "audit": "tools/compare/psywaveSourceAudit.ts",
-    "auditSha256": "8780a4b6b42600f6b1dce2523faebb0f47f44a4c03c6c0c77f1c9cdec34d5c3e",
-    "auditRunSha256": "7102ee25933adbc4c771789887958ca62153e8bf610e40a93f0a09ac9b88e79c",
+    "auditSha256": "b01fa858b66022df36116435cdfdf60c2b3932c93cc0912107eea25a5e04c66f",
+    "auditRunSha256": "908f61703bcd324a2cbeb561930f097e5a76b71de0cf1ccddeb6137f7096216a",
     "probe": "tools/compare/psywaveProbe.py",
     "probeSha256": "9219e17a00694acc26cfd8dfc5bfe95d48e8fe8d1b2265ffc4bab83e1d5dd09c",
     "verifier": "tools/compare/psywaveEvidence.ts",
-    "verifierSha256": "d860fcd25843e4b4073c8c9935d0a49160cab35cada246830d6ba4f2a777a815"
+    "verifierSha256": "60eb2900ed4294af0e58cd891c079020134dbe9fcd2f2a08774875c537a12725"
   },
   "acceptance": {
     "sourceRows": 410,
@@ -76,13 +76,13 @@
     "productionChanged": true,
     "reducerAdded": true,
     "typedSeamAdded": true,
-    "compositorAdded": false,
-    "actualCoreFramebufferAcceptance": false,
-    "coveragePromotion": false,
-    "componentTrackFulfilled": false,
+    "compositorAdded": true,
+    "actualCoreFramebufferAcceptance": true,
+    "coveragePromotion": true,
+    "componentTrackFulfilled": true,
     "siblingCredit": false,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false
   },
-  "verdict": "MOVE_PSYWAVE remains unsupported after complete twice-fresh bilateral source/component/raw-RGB evidence and independent latch measurement; no reducer, seam, compositor, actual-core framebuffer, coverage, track, sibling, or gameplay credit is granted."
+  "verdict": "MOVE_PSYWAVE is exact after complete twice-fresh bilateral source/component/typed-seam/raw-RGB/shared-framebuffer acceptance and independent latch measurement; loop-se-adjust-panning is fulfilled without sibling or gameplay ownership credit."
 }

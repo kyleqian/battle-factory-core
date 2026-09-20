@@ -87,14 +87,14 @@ function verifySide(side: Side, config: Json): Json {
 
 export function verifyPsywaveEvidence(): Json {
   const fixture = JSON.parse(file("tools/compare/fixtures/psywave-evidence.json").toString("utf8")) as Json;
-  invariant(fixture.status === "unsupported-evidence-checkpoint" && !fixture.coverageCredit, "unsupported/no-credit boundary");
+  invariant(fixture.status === "exact" && fixture.coverageCredit, "exact coverage boundary");
   for (const key of ["audit", "probe", "verifier"]) invariant(sha(file(fixture.source[key])) === fixture.source[`${key}Sha256`], `source ${key} digest`);
   const auditRun = execFileSync(process.execPath, ["--experimental-strip-types", resolve(root, fixture.source.audit)]);
   invariant(sha(auditRun) === fixture.source.auditRunSha256, "source audit output digest");
   const coverage = JSON.parse(file("ANIMATION_COVERAGE.json").toString("utf8")) as Json;
-  invariant(!coverage.entries.some((entry: Json) => entry.move === "MOVE_PSYWAVE"), "Psywave must remain unsupported");
+  invariant(coverage.entries.some((entry: Json) => entry.move === "MOVE_PSYWAVE" && entry.status === "exact"), "Psywave exact coverage");
   const track = coverage.componentTracks.find((entry: Json) => entry.id === "loop-se-adjust-panning");
-  invariant(track?.representatives.includes("MOVE_PSYWAVE") && track.fulfilled !== true, "shared sound track remains unfulfilled/no-credit");
+  invariant(track?.representatives.includes("MOVE_PSYWAVE") && track.fulfilled === true, "shared sound track fulfillment");
   for (const side of ["player-back", "opponent-front"] as const) {
     const config = { ...configs[side], ...fixture.orientations[side] };
     for (const key of ["scenario", "denseState", "rawRgbArchive", "changeMap"]) invariant(sha(file(config[key])) === config[`${key}Sha256`], `${side} ${key} digest`);

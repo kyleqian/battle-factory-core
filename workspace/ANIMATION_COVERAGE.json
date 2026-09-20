@@ -7736,6 +7736,43 @@
     "tests/animation/skillSwapReducer.test.ts",
     "tests/animation/skillSwapActualCore.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_PSYWAVE",
+   "status": "exact",
+   "covered": [
+    "the complete branchless Move_PSYWAVE root and all fourteen source components are independently accepted: BLUE_RING resources and twelve affine rings, StartSinAnimTimer, Psychic background setup/restore, four-leg target blend_color_cycle, the distinct 2/9/0/10 LoopSEAdjustPanning schedule, fades, waits, allocation, and age-204 inactive cleanup",
+    "complete legal bilateral SPOINK/CHIMECHO Battle Scene ON evidence retains player-back frames 72..276 and opponent-front frames 211..415, 205 rows each; the source-relative reducer and typed sceneOnPsywaveView seam reproduce all 410 rows from live sides/species, geometry, art/OAM/matrices, tasks, allocation/order, resources/palettes/registers/audio, presentation RNG, and opaque gameplay state/RNG",
+    "Psywave's own maps prove whole hardware OAM and affine matrices equal predecessor software on 204/204 comparable rows per orientation and hardware palette equals predecessor faded on 204/204; all twelve rings live 29 rows from ages 42,48,54,60,66,72,78,84,90,96,102,108 with slot reuse, target OBJ palette has 24 edges, Psychic VRAM changes at ages 23/184 without scroll, BLUE_RING loads at age 1 and frees at inactive age 204, and monbg is unused",
+    "the generic production display plan decodes live hardware OAM and matrices, classifies battlers and BLUE_RING objects from live art and resource banks, and composites the existing source-derived gold-ring tiles with hardware palettes plus Psychic BG fades; two independent actual-core processes pass all 410/410 component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels at digest c6c4440f2f6cfcf636f91d0e3f28d701d4163c6c305ce944b81b4a5f8df23c93",
+    "the material CROBAT/BLISSEY control changes sides/species/geometry, art/OAM/matrices, allocation/order, resources/palettes/registers/audio, presentation RNG, typed seam output, and framebuffer while gameplay state/RNG remains opaque and unchanged",
+    "MOVE_PSYWAVE alone is promoted in this step and fulfills loop-se-adjust-panning only after its own complete acceptance; every representative retains independent acceptance and no sibling receives Psywave timing, latch, move, component, track, or coverage credit"
+   ],
+   "evidence": [
+    "tools/compare/psywaveSourceAudit.ts",
+    "tools/battle-lab/mechanic-psywave-player-spoink-opponent-onix.json",
+    "tools/battle-lab/mechanic-psywave-opponent-chimecho-player-onix.json",
+    "tools/compare/psywaveProbe.py",
+    "tools/compare/psywaveEvidence.ts",
+    "tools/compare/fixtures/psywave-evidence.json",
+    "tools/compare/evidence/psywave-player-dense-state.json.gz",
+    "tools/compare/evidence/psywave-opponent-dense-state.json.gz",
+    "tools/compare/evidence/psywave-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/psywave-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/psywave-changemap-player.json",
+    "tools/compare/evidence/psywave-changemap-opponent.json",
+    "ANIMATION_LATCHES.md",
+    "src/animation/gbaObjCompositor.ts",
+    "src/animation/psywave.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifyPsywaveReducer.ts",
+    "tools/compare/psywaveActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/psywaveEvidenceCheckpoint.test.ts",
+    "tests/animation/psywaveReducer.test.ts",
+    "tests/animation/psywaveActualCore.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -8421,10 +8458,21 @@
     "MOVE_PSYBEAM",
     "MOVE_AURORA_BEAM",
     "MOVE_HYPER_BEAM",
-    "MOVE_PSYWAVE",
-    "MOVE_TRI_ATTACK"
+   "MOVE_PSYWAVE",
+   "MOVE_TRI_ATTACK"
    ],
-   "goal": "MOVE_SHADOW_BALL independently proves its complete 5/5/0/5 LoopSEAdjustPanning task schedule and full ghost-BG/projectile/impact/shake/restore body in both orientations at 148/148 task/sprite/OAM/matrix/register/palette/raw-RGB and framebuffer frames, reproduced twice. No sibling is promoted. ICE BEAM needs its BG darken/restore, two outer-crystal beam starters, eleven IceBeamCreateCrystals groups, target blue blend, target ShakeMon2, terminal inner crystals, IceCrystalEffectShort, monbg/splitbgprio/alpha teardown, and its distinct 4/4/0/10 sound schedule. PSYBEAM needs SetPsychicBackground/UnsetPsychicBackground, eleven GoldRing groups, target SwayMon, two-leg target blend_color_cycle, and its distinct 3/4/0/15 sound schedule. AURORA BEAM needs BG_AURORA fade/restore, rotating rainbow-ring palette task, ten four-ring groups, both target ShakeMon2 tasks, script arg-7 lifetime gate, and its distinct 3/6/0/10 sound schedule. HYPER BEAM needs full BG blackout/restore, attacker ShakeMon2 and Y-shake, flashing orb palette, twenty-six HyperBeamOrbs groups, target ShakeMon2, both target palette blends, and its distinct 1/15/0/5 sound schedule. PSYWAVE needs SetPsychicBackground/UnsetPsychicBackground, StartSinAnimTimer, twelve blue-ring sprites, four-leg target blend_color_cycle, and its distinct 2/9/0/10 sound schedule. TRI ATTACK needs the translating triangle, two initial sound/delay legs, BG blackout, eight fire scatters plus patterned shake, three lightning strikes plus inversion/patterned shake, the final ice body, and its distinct 5/6/0/7 sound schedule. Every sibling remains unsupported pending independent complete dense move evidence."
+   "fulfilled": true,
+   "evidence": [
+    "tools/compare/psywaveSourceAudit.ts",
+    "tools/compare/psywaveEvidence.ts",
+    "tools/compare/verifyPsywaveReducer.ts",
+    "tools/compare/psywaveActualCore.ts",
+    "tests/animation/psywaveEvidenceCheckpoint.test.ts",
+    "tests/animation/psywaveReducer.test.ts",
+    "tests/animation/psywaveActualCore.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "goal": "FULFILLED after MOVE_PSYWAVE independently proves its complete Psychic-BG, twelve affine BLUE_RING, StartSinAnimTimer, four-leg target palette-cycle, resource/allocator/latch/cleanup body and distinct 2/9/0/10 LoopSEAdjustPanning schedule in both orientations: 410/410 source/component/typed-seam/chronological raw-RGB/shared-framebuffer rows pass twice fresh with zero residual pixels through age-204 inactive cleanup. MOVE_SHADOW_BALL, MOVE_ICE_BEAM, MOVE_PSYBEAM, MOVE_AURORA_BEAM, MOVE_HYPER_BEAM, and MOVE_TRI_ATTACK retain their independent exact bodies and sound schedules; no timing, latch, move, component, track, or sibling credit transfers among representatives."
   },
   {
    "id": "adjust-panning-var-confuse-ray",

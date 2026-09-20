@@ -212,14 +212,16 @@ describe("MOVE_PSYWAVE source-relative reducer and narrow Scene-ON seam", () => 
     expect(alteredControlDigest).toBe("6ce2485a29cc48b3be4478b5076c436e015cbd0602485d7c981c0cb9c7f239fc");
   });
 
-  it("keeps retained evidence out of production and preserves Psywave as unsupported/no-credit", () => {
+  it("keeps retained evidence out of production and pins Psywave's exact move-only credit", () => {
     const source = readFileSync(resolve(root, "src/animation/psywave.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party|reference)[^"']*["']/u);
     expect(source).not.toMatch(/absolute\s*(?:battle\s*)?(?:tick|frame)|framebuffer|controller-frame/iu);
     const data = coverage as Json;
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_PSYWAVE")).toBe(false);
+    expect(data.entries.find((entry: Json) => entry.move === "MOVE_PSYWAVE"))
+      .toMatchObject({ status: "exact" });
     const loopPanningTrack = data.componentTracks.find((entry: Json) => entry.id === "loop-se-adjust-panning");
-    expect(loopPanningTrack).not.toHaveProperty("fulfilled");
-    expect(loopPanningTrack.goal).toContain("PSYWAVE needs");
+    expect(loopPanningTrack).toMatchObject({ fulfilled: true,
+      representatives: expect.arrayContaining(["MOVE_PSYWAVE"]) });
+    expect(loopPanningTrack.goal).toContain("FULFILLED");
   });
 });

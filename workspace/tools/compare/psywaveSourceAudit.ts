@@ -67,7 +67,7 @@ const inventoryEntry = inventory.tiers.level50.moves.find((entry: Json) => entry
 if (JSON.stringify(allCarriers.map((entry: Json) => entry.index)) !== JSON.stringify([121, 209]) || JSON.stringify(level50.map((entry: Json) => entry.index)) !== JSON.stringify([121, 209]) || inventoryEntry?.frontierMonCount !== 2) throw new Error("Psywave carrier census drifted");
 const coverageEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_PSYWAVE");
 const status = coverageEntry?.status ?? "unsupported";
-if (status !== "unsupported" || coverageEntry !== undefined) throw new Error("Psywave unsupported boundary drifted");
+if (status !== "exact" || coverageEntry === undefined) throw new Error("Psywave exact coverage boundary drifted");
 
 requireTokens("Psywave sprite/timer", water, ["const struct SpriteTemplate gPsywaveRingSpriteTemplate", ".oam = &gOamData_AffineDouble_ObjNormal_16x32", ".affineAnims = gGrowingRingAffineAnimTable", ".callback = AnimToTargetInSinWave", "void AnimTask_StartSinAnimTimer", "static void AnimTask_RunSinAnimTimer"]);
 requireTokens("Psywave palette cycle", normal, ["void AnimTask_BlendColorCycle", "static void BlendColorCycle", "static void AnimTask_BlendColorCycleLoop"]);
@@ -77,7 +77,7 @@ requireTokens("Psywave audio/runtime", `${sound}\n${songs}\n${runtime}`, ["void 
 requireTokens("Psywave move", moves, ["[MOVE_PSYWAVE] =", ".effect = EFFECT_PSYWAVE", ".power = 1", ".accuracy = 80", ".pp = 15"]);
 
 console.log(JSON.stringify({
-  schema: "psywave-source-audit/v1", move: "MOVE_PSYWAVE", moveId: 149, status, coverageCredit: false,
+  schema: "psywave-source-audit/v1", move: "MOVE_PSYWAVE", moveId: 149, status, coverageCredit: true,
   source: { pointerOwnedRoot: { ...romRange("Move_PSYWAVE", sym("Move_ZAP_CANNON").address), nextDispatchLabel: "Move_ZAP_CANNON", source: sourceRecord("data/battle_anim_scripts.s", scripts, rootBody) }, blocks: {
     Move_PSYWAVE: { commands: expectedRoot }, PsywaveRings: { romStart: hex(sym("PsywaveRings").address), commands: expectedRing },
     SetPsychicBackground: { rom: romRange("SetPsychicBackground", sym("UnsetPsychicBackground").address), commands: commands(setBg) },
@@ -93,5 +93,5 @@ console.log(JSON.stringify({
   behavior: { move: { effect: "EFFECT_PSYWAVE", power: 1, accuracy: 80, pp: 15, target: "MOVE_TARGET_SELECTED" }, rings: { calls: 6, perCall: 2, total: 12, args: [10, 10, 0, 16], delay: 4 }, sinTimer: 100, targetPaletteCycle: { selector: "F_PAL_TARGET", delay: 1, blends: 4, initial: 0, target: 12, color: "RGB(31, 18, 31)" }, audio: { initial: "SE_M_PSYBEAM", loop: "SE_M_TELEPORT", loopArgs: [2, 9, 0, 10] }, branches: { playerBack: "reachable", opponentFront: "reachable", contest: "unreachable-in-Factory-singles", partnerBattlers: "unreachable-in-singles" } },
   resources: { sprite: { tile: romRange("gBattleAnimSpriteGfx_GoldRing"), palette: romRange("gBattleAnimSpritePal_BlueRing"), template: romRange("gPsywaveRingSpriteTemplate"), affineTable: romRange("gGrowingRingAffineAnimTable"), oam: romRange("gOamData_AffineDouble_ObjNormal_16x32") }, background: { id: "BG_PSYCHIC", image: romRange("gBattleAnimBgImage_Psychic"), palette: romRange("gBattleAnimBgPalette_Psychic"), tilemap: romRange("gBattleAnimBgTilemap_Psychic") }, sounds: [hex(sym("se_m_psybeam").address), hex(sym("se_m_teleport").address)] },
   carriers: { count: level50.length, allSourceCarriers: allCarriers, level50, excludedOutsideLevel50: allCarriers.filter((entry: Json) => !legal(entry)).map((entry: Json) => entry.index), inventoryExamples: inventoryEntry.exampleMons },
-  checkpoint: { sourceAudit: true, completePointerOwnedRoot: true, completeReachableGraph: true, completeCarrierCensus: true, bilateralReachability: true, unreachableFactorySinglesBranchesNamed: true, denseWindowCaptured: true, latchMeasured: true, reducerAdded: true, typedSceneOnSeam: true, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false, siblingCredit: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false },
+  checkpoint: { sourceAudit: true, completePointerOwnedRoot: true, completeReachableGraph: true, completeCarrierCensus: true, bilateralReachability: true, unreachableFactorySinglesBranchesNamed: true, denseWindowCaptured: true, latchMeasured: true, reducerAdded: true, typedSceneOnSeam: true, compositorAdded: true, actualCoreFramebufferAcceptance: true, coveragePromotion: true, componentTrackFulfilled: true, siblingCredit: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false },
 }, null, 2));
