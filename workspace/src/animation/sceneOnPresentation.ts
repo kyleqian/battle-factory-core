@@ -989,6 +989,7 @@ import {
   type ReturnState,
 } from "./return.ts";
 import {
+  flatterDisplayPlan,
   flatterAtAge,
   type FlatterLiveInputs,
   type FlatterState,
@@ -8997,6 +8998,13 @@ export function sceneOnFlatterView(
     attacker,
     target,
   };
+}
+
+/** Live, evidence-free scanout plan for Flatter's hardware display state. */
+export function sceneOnFlatterDisplayPlan(
+  state: SceneOnFlatterPresentationState,
+): ReturnType<typeof flatterDisplayPlan> {
+  return flatterDisplayPlan(sceneOnFlatterView(state));
 }
 
 /** Live, evidence-free scanout plan for every Return selector branch. */

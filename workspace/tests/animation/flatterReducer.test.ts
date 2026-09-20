@@ -183,11 +183,17 @@ describe("MOVE_FLATTER source-relative reducer and narrow Scene-ON seam", () => 
     expect(target.geometry.side).toBe("player");
   });
 
-  it("keeps the reducer source-derived and the retained evidence outside production and coverage", () => {
+  it("keeps the reducer source-derived while exact coverage points at live production proof", () => {
     const source = readFileSync(resolve(root, "src/animation/flatter.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["'][^"']*(?:tools\/compare|evidence|raw-rgb|screenshot|canonical-party|reference)[^"']*["']/u);
     expect(source).not.toMatch(/absolute\s*(?:battle\s*)?(?:tick|frame)|framebuffer|controller-frame/iu);
     const data = coverage as Json;
-    expect(data.entries.some((entry: Json) => entry.move === "MOVE_FLATTER")).toBe(false);
+    expect(data.entries).toContainEqual(expect.objectContaining({
+      move: "MOVE_FLATTER", status: "exact",
+      evidence: expect.arrayContaining([
+        "tools/compare/flatterActualCore.ts",
+        "src/engine/core.ts",
+      ]),
+    }));
   });
 });

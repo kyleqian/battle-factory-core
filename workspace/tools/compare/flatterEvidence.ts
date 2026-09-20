@@ -196,6 +196,13 @@ if (process.argv.includes("--write")) {
 }
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Json;
 const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-invariant(fixture.status === "unsupported-evidence" && fixture.coverageCredit === false && !coverage.entries.some((entry: Json) => entry.move === "MOVE_FLATTER"), "unsupported no-credit boundary");
+const coverageEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_FLATTER");
+invariant(
+  fixture.status === "unsupported-evidence"
+    && fixture.coverageCredit === false
+    && coverageEntry?.status === "exact"
+    && coverageEntry.evidence?.includes("tools/compare/flatterActualCore.ts"),
+  "retained evidence and exact-production boundary",
+);
 const result = { "player-back": verifySide("player-back", fixture.orientations["player-back"]), "opponent-front": verifySide("opponent-front", fixture.orientations["opponent-front"]) };
 console.log(JSON.stringify({ schema: fixture.schema, move: fixture.move, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries(Object.entries(result).map(([side, value]) => [side, { sourceWindow: value.sourceWindow, probeJsonSha256: value.probeJsonSha256, rawRgbSequenceSha256: value.rawRgbSequenceSha256, changeMapSha256: value.changeMapSha256, latches: value.summary.latches, cleanup: value.summary.cleanup }])), boundary: fixture.evidenceScope }, null, 2));

@@ -198,6 +198,7 @@ import {
   type SceneOnPsywaveConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
+  type SceneOnFlatterConfig,
   type SceneOnOverheatConfig,
   type SceneOnSilverWindConfig,
   type SceneOnMovePresentationState,
@@ -387,6 +388,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "RETURN") {
     const returnPresentation = presentation as SceneOnMovePresentationState<SceneOnReturnConfig>;
     renderSceneOnMovePresentation(framebuffer, returnPresentation);
+    return;
+  }
+  if (presentation.config.move === "FLATTER") {
+    const flatterPresentation = presentation as SceneOnMovePresentationState<SceneOnFlatterConfig>;
+    renderSceneOnMovePresentation(framebuffer, flatterPresentation);
     return;
   }
   if (presentation.config.move === "OVERHEAT") {

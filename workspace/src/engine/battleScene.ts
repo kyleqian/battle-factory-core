@@ -635,6 +635,7 @@ import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
 import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
 import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: "json" };
 import encoreAsset from "../animation/assets/encore.json" with { type: "json" };
+import flatterAsset from "../animation/assets/flatter.json" with { type: "json" };
 import dragonClawAsset from "../animation/assets/dragon-claw.json" with { type: "json" };
 import singAsset from "../animation/assets/sing.json" with { type: "json" };
 import teeterDanceAsset from "../animation/assets/teeter-dance.json" with { type: "json" };
@@ -1002,6 +1003,8 @@ import {
   sceneOnPursuitDisplayPlan,
   sceneOnReturnView,
   sceneOnReturnDisplayPlan,
+  sceneOnFlatterView,
+  sceneOnFlatterDisplayPlan,
   sceneOnOverheatView,
   sceneOnSilverWindView,
   sceneOnSilverWindDisplayPlan,
@@ -1276,6 +1279,7 @@ import {
   type SceneOnPsywaveConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
+  type SceneOnFlatterConfig,
   type SceneOnOverheatConfig,
   type SceneOnSilverWindConfig,
   type SceneOnRazorWindConfig,
@@ -2271,6 +2275,10 @@ const encoreArt = encoreAsset as {
   clappingHand: { tileset: Tileset; palette: RgbColor[] };
   minunBack: { tileset: Tileset; palette: RgbColor[] };
   minunFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const flatterArt = flatterAsset as {
+  spotlight: { tileset: Tileset; palette: RgbColor[] };
+  confetti: { tileset: Tileset; palette: RgbColor[] };
 };
 const spark2Art = battleAnimSpark2Asset as {
   frames: {
@@ -24581,6 +24589,211 @@ export function renderSceneOnMovePresentation(
         ? `${view.battlers.attacker.art.displaySpecies} used`
         : `Foe ${view.battlers.attacker.art.displaySpecies} used`,
       "RETURN!", 99);
+    return;
+  }
+
+  if (state.config.move === "FLATTER") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnFlatterConfig>;
+    const view = sceneOnFlatterView(moveState);
+    const plan = sceneOnFlatterDisplayPlan(moveState);
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("FLATTER presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`FLATTER missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const paletteBank = (bank: number): RgbColor[] =>
+      plan.hardwarePalette.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const top = (attr: readonly [number, number, number]): { x: number; y: number } => {
+      const rawX = attr[1] & 0x1ff, rawY = attr[0] & 0xff;
+      return { x: rawX >= 240 ? rawX - 512 : rawX,
+        y: rawY >= 160 ? rawY - 256 : rawY };
+    };
+    drawExtractedTileBg(fb, { tileset: battleBg.static.tileset,
+      tilemap: battleBg.static.tilemap,
+      subpalettes: [2, 3, 4].map(paletteBank) });
+    if (moveState.age === 0 && view.attacker.geometry.side === "opponent") {
+      const frontPictureOffset = (plan.attacker.attr[0] & 0xff) - 8;
+      drawSourceOpponentEnemyShadow(fb, view.attacker.species, {
+        x: view.attacker.geometry.battlePositionCenter.x,
+        y: view.attacker.geometry.battlePositionCenter.y - frontPictureOffset,
+      });
+    }
+
+    const attackerArt = artFor(view.attacker), targetArt = artFor(view.target);
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    const opponentHealthbox = composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    });
+    const playerHealthbox = composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    });
+    const rasterForBattler = (
+      battler: typeof view.attacker,
+      object: typeof plan.attacker,
+      art: BattlerArt,
+    ): GbaObjRaster<RgbColor> => {
+      const corner = top(object.attr);
+      return {
+        oamIndex: object.oamIndex,
+        priority: (object.attr[2] >>> 10 & 3) as 0 | 1 | 2 | 3,
+        mode: "normal",
+        declaredWidth: 64,
+        x: corner.x,
+        y: corner.y,
+        ...spriteSheetRaster(tilesFor(art, battler.geometry.side),
+          paletteBank(16 + (object.attr[2] >>> 12 & 0xf))),
+      };
+    };
+    const rasters: GbaObjRaster<RgbColor>[] = [
+      {
+        oamIndex: 5,
+        priority: 0,
+        mode: "normal",
+        declaredWidth: 128,
+        x: PLAYER_HEALTHBOX_FRAME_ORIGIN.x,
+        y: PLAYER_HEALTHBOX_FRAME_ORIGIN.y,
+        ...playerHealthbox,
+      },
+      {
+        oamIndex: 7,
+        priority: 0,
+        mode: "normal",
+        declaredWidth: 128,
+        x: HEALTHBOX_FRAME_ORIGIN.x,
+        y: HEALTHBOX_FRAME_ORIGIN.y,
+        ...opponentHealthbox,
+      },
+      rasterForBattler(view.attacker, plan.attacker, attackerArt),
+      rasterForBattler(view.target, plan.target, targetArt),
+    ];
+    if (plan.confettiTileRange) {
+      for (const object of plan.confetti) {
+        const corner = top(object.attr);
+        const tileOffset = (object.attr[2] & 0x03ff) - plan.confettiTileRange[0];
+        const tile = flatterArt.confetti.tileset.tiles[tileOffset];
+        if (!tile) throw new Error(`FLATTER missing confetti tile ${tileOffset}`);
+        rasters.push({
+          oamIndex: object.oamIndex,
+          priority: (object.attr[2] >>> 10 & 3) as 0 | 1 | 2 | 3,
+          mode: "normal",
+          declaredWidth: 8,
+          x: corner.x,
+          y: corner.y,
+          ...spriteSheetRaster({ columns: 1, rows: 1, tiles: [tile] },
+            paletteBank(16 + (object.attr[2] >>> 12 & 0xf))),
+        });
+      }
+    }
+    if (plan.objWindowEnabled && plan.spotlight) {
+      const corner = top(plan.spotlight.attr);
+      rasters.push({
+        oamIndex: plan.spotlight.oamIndex,
+        priority: (plan.spotlight.attr[2] >>> 10 & 3) as 0 | 1 | 2 | 3,
+        mode: "objWindow",
+        declaredWidth: 64,
+        affine: true,
+        doubleSize: true,
+        ...affineDoubleSpriteMaskRaster(
+          flatterArt.spotlight.tileset,
+          corner.x + 64,
+          corner.y + 64,
+          plan.spotlight.matrix[0],
+          plan.spotlight.matrix[1],
+          plan.spotlight.matrix[2],
+          plan.spotlight.matrix[3],
+        ),
+      });
+    }
+    // OAM scanline evaluation charges every intersecting object, including
+    // transparent chrome and disabled-effect objects. Supply unpainted live
+    // entries as transparent fetch consumers so an early healthbox can
+    // exhaust the budget before the affine-double OBJ-window spotlight.
+    const paintedOam = new Set(rasters.map((raster) => raster.oamIndex));
+    const dimensions = (attr: readonly [number, number, number]):
+      readonly [number, number] | null => {
+      const shape = attr[0] >>> 14 & 3, size = attr[1] >>> 14 & 3;
+      const table = [
+        [[8, 8], [16, 16], [32, 32], [64, 64]],
+        [[16, 8], [32, 8], [32, 16], [64, 32]],
+        [[8, 16], [8, 32], [16, 32], [32, 64]],
+      ] as const;
+      return shape < 3 ? table[shape]![size]! : null;
+    };
+    for (const object of plan.hardwareObjects) {
+      if (paintedOam.has(object.oamIndex)) continue;
+      const affine = (object.attr[0] & 0x0100) !== 0;
+      if (!affine && (object.attr[0] & 0x0200) !== 0) continue;
+      const size = dimensions(object.attr);
+      if (!size) continue;
+      const doubleSize = affine && (object.attr[0] & 0x0200) !== 0;
+      const corner = top(object.attr);
+      const width = size[0] * (doubleSize ? 2 : 1);
+      const height = size[1] * (doubleSize ? 2 : 1);
+      rasters.push({
+        oamIndex: object.oamIndex,
+        priority: (object.attr[2] >>> 10 & 3) as 0 | 1 | 2 | 3,
+        mode: (object.attr[0] & 0x0c00) === 0x0800 ? "objWindow" : "normal",
+        declaredWidth: size[0],
+        affine,
+        doubleSize,
+        x: corner.x,
+        y: corner.y,
+        width,
+        height,
+        pixels: new Array<RgbColor | null>(width * height).fill(null),
+      });
+    }
+    const composite = compositeGbaObjScanlines(240, 160, rasters);
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      const normalPixel = composite.normalPixels[pixel];
+      if (!normalPixel) continue;
+      const offset = pixel * 4;
+      fb[offset] = normalPixel.r;
+      fb[offset + 1] = normalPixel.g;
+      fb[offset + 2] = normalPixel.b;
+    }
+
+    if (plan.brightness !== 0) {
+      for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+        const y = Math.floor(pixel / 240);
+        const inWin1 = plan.win1Enabled && plan.win1DisablesEffects && y >= 120;
+        const inObjWindow = plan.objWindowEnabled && plan.objWindowDisablesEffects
+          && composite.objWindowMask[pixel] !== 0;
+        if (inWin1 || inObjWindow) continue;
+        const offset = pixel * 4;
+        const packed = mgbaDarkenColor(
+          fb[offset]! | fb[offset + 1]! << 8 | fb[offset + 2]! << 16,
+          plan.brightness,
+        );
+        fb[offset] = packed & 0xff;
+        fb[offset + 1] = packed >>> 8 & 0xff;
+        fb[offset + 2] = packed >>> 16 & 0xff;
+      }
+    }
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "FLATTER!", 99);
     return;
   }
 

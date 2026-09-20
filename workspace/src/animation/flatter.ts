@@ -7,6 +7,8 @@
  * battle state or gameplay RNG is resolved or mutated here.
  */
 
+import { decodeGbaHardwareOam } from "./gbaObjCompositor.ts";
+
 export type FlatterSide = "player" | "opponent";
 export type FlatterMatrix = readonly [number, number, number, number];
 export type FlatterOam = readonly [number, number, number];
@@ -265,6 +267,30 @@ export interface FlatterState {
   }>;
 }
 
+export interface FlatterDisplayedObject {
+  readonly oamIndex: number;
+  readonly attr: FlatterOam;
+  readonly matrixNum: number;
+  readonly matrix: FlatterMatrix;
+}
+
+export interface FlatterDisplayPlan {
+  readonly hardwareObjects: readonly FlatterDisplayedObject[];
+  readonly attacker: FlatterDisplayedObject;
+  readonly target: FlatterDisplayedObject;
+  /** Hardware-OAM scanout objects selected by live resource allocation. */
+  readonly spotlight: FlatterDisplayedObject | null;
+  readonly confetti: readonly FlatterDisplayedObject[];
+  readonly spotlightTileRange: readonly [number, number] | null;
+  readonly confettiTileRange: readonly [number, number] | null;
+  readonly hardwarePalette: readonly number[];
+  readonly brightness: number;
+  readonly win1Enabled: boolean;
+  readonly objWindowEnabled: boolean;
+  readonly win1DisablesEffects: boolean;
+  readonly objWindowDisablesEffects: boolean;
+}
+
 export const FLATTER_SOURCE_START = 0x082d_4eb2;
 export const FLATTER_SOURCE_END_EXCLUSIVE = 0x082d_4fae;
 export const FLATTER_FIRST_INACTIVE_AGE = 218;
@@ -275,6 +301,66 @@ const ZERO_ARGS = [0, 0, 0, 0, 0, 0, 0, 0] as const;
 const FADE_DATA = Array.from({ length: 16 }, () => 0) as readonly number[];
 const SPOTLIGHT_SHRINK = [4096, 2048, 1365, 1024, 819, 682, 585, 512, 455, 409, 372, 341, 315, 292, 273, 256] as const;
 const SPOTLIGHT_GROW = [215, 227, 240, 256, 273, 292, 315, 341, 372, 409, 455, 512, 585, 682, 819, 1024, 1365, 2048, 4096] as const;
+const IDENTITY_MATRIX: FlatterMatrix = [256, 0, 0, 256];
+
+/** Live hardware-buffer scanout with no retained-frame chronology. */
+export function flatterDisplayPlan(state: Readonly<FlatterState>): FlatterDisplayPlan {
+  const objects = decodeGbaHardwareOam(
+    state.buffers.hardwareOam,
+    state.buffers.hardwareMatrices,
+    IDENTITY_MATRIX,
+  );
+  // Attr0 bit 9 disables a non-affine OBJ, but is the double-size flag when
+  // affine bit 8 is set (the spotlight is affine-double).
+  const visible = (entry: FlatterDisplayedObject): boolean =>
+    (entry.attr[0] & 0x0100) !== 0 || (entry.attr[0] & 0x0200) === 0;
+  const battler = (attr2: number, role: string): FlatterDisplayedObject => {
+    const found = objects.find((entry) => entry.attr[2] === attr2 && visible(entry));
+    if (!found) throw new Error(`missing displayed Flatter ${role} OAM`);
+    return found;
+  };
+  const allocator = state.resources.allocator as Readonly<{
+    readonly tileRanges?: readonly (readonly [number, number])[];
+  }>;
+  const tileRange = (slot: number | null): readonly [number, number] | null =>
+    slot === null ? null : allocator.tileRanges?.[slot] ?? null;
+  const spotlightTileRange = tileRange(state.resources.spotlightTileSlot);
+  const confettiTileRange = tileRange(state.resources.confettiTileSlot);
+  const inResource = (
+    entry: FlatterDisplayedObject,
+    range: readonly [number, number] | null,
+    paletteSlot: number | null,
+  ): boolean => {
+    if (!visible(entry) || range === null || paletteSlot === null) return false;
+    const tile = entry.attr[2] & 0x03ff;
+    return tile >= range[0] && tile < range[0] + range[1]
+      && 16 + (entry.attr[2] >>> 12 & 0x0f) === 16 + paletteSlot;
+  };
+  const spotlight = objects.find((entry) =>
+    inResource(entry, spotlightTileRange, state.resources.spotlightPaletteSlot)
+      && (entry.attr[0] & 0x0c00) === 0x0800) ?? null;
+  const confetti = objects.filter((entry) =>
+    inResource(entry, confettiTileRange, state.resources.confettiPaletteSlot)
+      && (entry.attr[0] & 0x0c00) === 0);
+  const dispcnt = state.registers.dispcnt ?? 0;
+  const winin = state.registers.winin ?? 0x3f3f;
+  const winout = state.registers.winout ?? 0x3f3f;
+  return {
+    hardwareObjects: objects,
+    attacker: battler(state.battlers.attacker.art.attr[2], "attacker"),
+    target: battler(state.battlers.target.art.attr[2], "target"),
+    spotlight,
+    confetti,
+    spotlightTileRange,
+    confettiTileRange,
+    hardwarePalette: state.palette.hardware,
+    brightness: state.registers.bldcnt === 0x00f8 ? state.registers.bldy ?? 0 : 0,
+    win1Enabled: (dispcnt & 0x4000) !== 0,
+    objWindowEnabled: (dispcnt & 0x8000) !== 0,
+    win1DisablesEffects: ((winin >>> 8) & 0x20) === 0,
+    objWindowDisablesEffects: ((winout >>> 8) & 0x20) === 0,
+  };
+}
 
 function assertSlot(slot: number, label: string, maximum: number): void {
   if (!Number.isInteger(slot) || slot < 0 || slot >= maximum) {

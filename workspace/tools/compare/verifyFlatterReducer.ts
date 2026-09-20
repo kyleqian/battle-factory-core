@@ -33,6 +33,11 @@ function rowsFor(orientation: FlatterOrientation): Json[] {
   return (JSON.parse(gunzipSync(readFileSync(file)).toString("utf8")) as Json).frames;
 }
 
+/** Complete retained dense rows for actual-core framebuffer acceptance. */
+export function flatterRowsFor(orientation: FlatterOrientation): Json[] {
+  return rowsFor(orientation);
+}
+
 function owned(rows: readonly Json[], age: number, template: string): Json[] {
   return rows[age]!.sprites.filter((sprite: Json) => sprite.template?.symbol === template);
 }
@@ -183,8 +188,8 @@ function inputFor(
 export function flatterInputsFor(
   orientation: FlatterOrientation,
   age: number,
+  rows = rowsFor(orientation),
 ): FlatterLiveInputs {
-  const rows = rowsFor(orientation);
   invariant(rows[age], `${orientation}/${age}: retained row`);
   return inputFor(orientation, rows, age);
 }

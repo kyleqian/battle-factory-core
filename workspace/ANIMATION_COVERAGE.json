@@ -7817,6 +7817,46 @@
     "tests/animation/returnReducer.test.ts",
     "tests/animation/returnActualCore.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_FLATTER",
+   "status": "exact",
+   "covered": [
+    "the complete branchless Move_FLATTER root and all eleven source components are independently accepted: SPOTLIGHT and CONFETTI resources, create/remove spotlight tasks, both HardwarePaletteFade directions, two VerticalDip controllers, all 38 presentation-RNG confetti paths, both panning sound tasks, waits, registers, allocation, and age-218 cleanup",
+    "complete legal bilateral NIDORINA/ONIX Battle Scene ON evidence retains player-back frames 70..288 and opponent-front frames 74..292, 219 rows each; the source-relative reducer and typed sceneOnFlatterView seam reproduce all 438 rows from live sides/species, geometry, art/OAM/matrices, task and sprite allocation/order, buffers, palettes/registers/audio, presentation RNG, and opaque gameplay state/RNG",
+    "Flatter's own maps prove whole hardware OAM and palette predecessor transfer on 218/218 comparable rows per orientation and hardware matrices on 217/218, with the sole age-68 two-frame spotlight shrink edge; source spotlight ages 49..174, fades 7..47 and 176..216, dips 51..63 and 63..78, all 38 confetti lives through age 97, and first inactive resource cleanup at age 218 remain independently pinned",
+    "the generic live display plan decodes hardware OAM and matrices, classifies battlers plus SPOTLIGHT and CONFETTI from live resource ranges, and composites source-extracted art with live hardware palettes, OBJ-window priority, complete healthbox OAM arbitration, WIN1, brightness registers, field chrome, and cleanup; two fresh actual-core verifier processes are byte-identical at output SHA-256 86b47d5b61bd50d1487307d9b55d7f990b6cb0d4d6ffdaae6c07346a86af3020 and pass all 438/438 component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels at verdict digest 23b937f914158f8447305e2b3dfd93f8c6ee0fe7f15cbfc500a0ac3c50024683",
+    "the material CROBAT/BLISSEY control changes live sides/species/geometry, hardware OAM order and matrices, palettes, resource allocation, audio, presentation RNG, typed seam output, and framebuffer while gameplay state/RNG remain caller-owned, opaque, and unchanged",
+    "MOVE_FLATTER alone is promoted in this step; play-se1-with-panning was already fulfilled before this promotion, and no sibling, unrelated component, track, controller, facility, gameplay, or boundary credit is transferred"
+   ],
+   "evidence": [
+    "tools/compare/flatterSourceAudit.ts",
+    "tools/battle-lab/mechanic-flatter-player-nidorina-opponent-onix.json",
+    "tools/battle-lab/mechanic-flatter-opponent-nidorina-player-onix.json",
+    "tools/compare/flatterProbe.py",
+    "tools/compare/flatterEvidence.ts",
+    "tools/compare/fixtures/flatter-evidence.json",
+    "tools/compare/evidence/flatter-player-dense-state.json.gz",
+    "tools/compare/evidence/flatter-opponent-dense-state.json.gz",
+    "tools/compare/evidence/flatter-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/flatter-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/flatter-changemap-player.json",
+    "tools/compare/evidence/flatter-changemap-opponent.json",
+    "ANIMATION_LATCHES.md",
+    "tools/compare/extractFlatterAssets.ts",
+    "src/animation/assets/flatter.json",
+    "src/animation/gbaObjCompositor.ts",
+    "src/animation/flatter.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/verifyFlatterReducer.ts",
+    "tools/compare/flatterActualCore.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tests/animation/flatterStagingCheckpoint.test.ts",
+    "tests/animation/flatterEvidenceCheckpoint.test.ts",
+    "tests/animation/flatterReducer.test.ts",
+    "tests/animation/flatterActualCore.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -8444,7 +8484,7 @@
    "MOVE_COSMIC_POWER"
   ],
    "fulfilled": true,
-   "goal": "FULFILLED by independently exact representatives. MOVE_RETURN now independently proves its own SoundTask_PlaySE1WithPanning use inside all four friendship branches and complete 1,190-row bilateral body with zero residual pixels. SKY_ATTACK retains its independent complete 660-row two-turn proof; DRAGON_CLAW, COSMIC_POWER, and LUSTER_PURGE retain their independent exact bodies. FLATTER remains unsupported and no timing, latch, branch, or acceptance transfers between siblings."
+   "goal": "FULFILLED before Flatter's promotion by independently exact representatives. MOVE_FLATTER now independently proves its own SoundTask_PlaySE1WithPanning calls inside its complete 438-row bilateral body with zero residual pixels; this adds no new track fulfillment. MOVE_RETURN, SKY_ATTACK, DRAGON_CLAW, COSMIC_POWER, and LUSTER_PURGE retain their independent exact bodies, and no timing, latch, branch, or acceptance transfers between siblings."
   },
   {
    "id": "ice-beam-crystals",

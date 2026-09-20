@@ -8,8 +8,8 @@ const root = resolve(import.meta.dirname, "../..");
 const json = (path: string): Json => JSON.parse(readFileSync(resolve(root, path), "utf8")) as Json;
 const run = (): Json => JSON.parse(execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/flatterEvidence.ts"], { cwd: root, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 })) as Json;
 
-describe("MOVE_FLATTER bilateral dense unsupported-evidence checkpoint", () => {
-  it("retains byte-identical complete windows without granting production or coverage credit", () => {
+describe("MOVE_FLATTER bilateral dense evidence checkpoint", () => {
+  it("retains the immutable pre-production windows beside the separately gated exact promotion", () => {
     const fixture = json("tools/compare/fixtures/flatter-evidence.json");
     expect(fixture).toMatchObject({
       schema: "flatter-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_FLATTER", moveId: 260,
@@ -33,6 +33,8 @@ describe("MOVE_FLATTER bilateral dense unsupported-evidence checkpoint", () => {
       expect(entry.summary.cleanup).toEqual({ age: 218, active: false, visualTasks: 0, soundTasks: 0, ownedSprites: 0, resourcesReleased: true });
     }
     expect(run()).toMatchObject({ schema: fixture.schema, move: "MOVE_FLATTER", status: "unsupported-evidence", coverageCredit: false, boundary: fixture.evidenceScope });
-    expect(json("ANIMATION_COVERAGE.json").entries.some((entry: Json) => entry.move === "MOVE_FLATTER")).toBe(false);
+    expect(json("ANIMATION_COVERAGE.json").entries).toContainEqual(
+      expect.objectContaining({ move: "MOVE_FLATTER", status: "exact" }),
+    );
   });
 });
