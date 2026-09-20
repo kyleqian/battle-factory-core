@@ -1,0 +1,36 @@
+{
+  "schema": "flatter-bilateral-staging/v1",
+  "move": "MOVE_FLATTER",
+  "moveId": 260,
+  "oracleProfile": "battle-scene-on",
+  "status": "unsupported-staging",
+  "coverageCredit": false,
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-flatter-player-nidorina-opponent-onix.json",
+      "scenarioSha256": "22aa3b0e6f95615f42f43067a438d460366a2310b973e7e9bfd9cf965f60078e",
+      "finalFrame": 634,
+      "finalRawRgbSha256": "1ea4e5cdde5b0e9864f43da2fcb9fa6a3a41adaac3a22f8022148541161edc0d"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-flatter-opponent-nidorina-player-onix.json",
+      "scenarioSha256": "fc016ddcdb0605afbd2eaec4e7b48c234a8fbafbafeb590b4ac71c39fae6d19b",
+      "finalFrame": 634,
+      "finalRawRgbSha256": "7e76870acf8f7c792a3d4c39400ead5bb7182681fe0a8021234d7a37cec09aef"
+    }
+  },
+  "boundary": {
+    "denseEvidenceRetained": false,
+    "firstInactiveCleanupRetained": false,
+    "latchDocumented": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferAcceptance": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "siblingCredit": false,
+    "gameplayOwnership": false
+  },
+  "next": "Capture both scenarios with flatterProbe.py through the first inactive cleanup, twice fresh; retain dense state and raw RGB, bank orientation-specific change maps, then document only Flatter's measured latches."
+}
