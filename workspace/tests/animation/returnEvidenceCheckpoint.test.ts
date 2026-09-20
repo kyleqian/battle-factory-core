@@ -10,7 +10,7 @@ const run = (path: string): Json => JSON.parse(execFileSync(process.execPath, ["
 describe("MOVE_RETURN all-branch unsupported evidence checkpoint", () => {
   it("pins the complete 20-component graph, eight carriers, four staging branches, and FLATTER identity only", () => {
     const audit = run("tools/compare/returnSourceAudit.ts");
-    expect(audit).toMatchObject({ schema: "return-source-audit/v1", move: "MOVE_RETURN", status: "unsupported-evidence", coverageCredit: false, graph: { componentCount: 20 }, sibling: { move: "MOVE_FLATTER", componentCount: 11, credit: false }, boundary: { reducer: false, typedSeam: false, compositor: false, framebufferAcceptance: false, coveragePromotion: false, trackCredit: false, siblingCredit: false } });
+    expect(audit).toMatchObject({ schema: "return-source-audit/v1", move: "MOVE_RETURN", status: "unsupported-reducer-seam", coverageCredit: false, graph: { componentCount: 20 }, sibling: { move: "MOVE_FLATTER", componentCount: 11, credit: false }, boundary: { reducer: true, typedSeam: true, compositor: false, framebufferAcceptance: false, coveragePromotion: false, trackCredit: false, siblingCredit: false } });
     expect(audit.level50Carriers.map((entry: Json) => entry.index)).toEqual([288, 306, 355, 459, 534, 567, 747, 827]);
     expect(audit.sibling.level50Carriers.map((entry: Json) => entry.index)).toEqual([146, 147]);
     expect(audit.reachability.completePartyOverride).toEqual({ weak: "friendship 0..60 (60 keeps the initialized selector 0)", medium: "61..91", strong: "92..200", strongest: "201..255" });

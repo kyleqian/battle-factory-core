@@ -54,7 +54,7 @@ requireTokens("selector", selector, ["gBattleAnimArgs[ARG_RET_ID] = 0;", "gAnimF
 requireTokens("Factory rewrite", `${rewrite}\n${factoryScreen}`, ["if (moveArg == MOVE_RETURN)", "move = MOVE_FRUSTRATION", "friendship = 0", "SetMonMoveAvoidReturn"]);
 
 console.log(JSON.stringify({
-  schema: "return-source-audit/v1", move: "MOVE_RETURN", moveId: 216, status: "unsupported-evidence", coverageCredit: false,
+  schema: "return-source-audit/v1", move: "MOVE_RETURN", moveId: 216, status: "unsupported-reducer-seam", coverageCredit: false,
   source: { root: record("data/battle_anim_scripts.s", scripts, returnBody), selector: record("src/battle_anim_effects_3.c", effects, selector), factoryRewrite: record("src/battle_factory.c", factory, rewrite) },
   graph: { blocks: returnGraph.blocks, componentCount: returnGraph.componentIds.length, components: returnGraph.componentIds },
   level50Carriers: carriers.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species, moves: entry.moves })),
@@ -64,5 +64,5 @@ console.log(JSON.stringify({
     retainedEvidence: "all four reachable override branches retained bilaterally: weak 60, medium 61, strong 200, strongest 255",
   },
   sibling: { move: "MOVE_FLATTER", source: record("data/battle_anim_scripts.s", scripts, flatterBody), blocks: flatterGraph.blocks, componentCount: flatterGraph.componentIds.length, components: flatterGraph.componentIds, level50Carriers: flatterCarriers.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species })), credit: false },
-  boundary: { reducer: false, typedSeam: false, compositor: false, productionAsset: false, framebufferAcceptance: false, coveragePromotion: false, trackCredit: false, siblingCredit: false, gameplayOwnership: false },
+  boundary: { reducer: true, typedSeam: true, compositor: false, productionAsset: false, framebufferAcceptance: false, coveragePromotion: false, trackCredit: false, siblingCredit: false, gameplayOwnership: false },
 }, null, 2));

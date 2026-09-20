@@ -983,6 +983,11 @@ import {
   type PsywaveState,
 } from "./psywave.ts";
 import {
+  returnAtAge,
+  type ReturnLiveInputs,
+  type ReturnState,
+} from "./return.ts";
+import {
   waterPulseAtAge,
   type WaterPulseLiveInputs,
   type WaterPulseState,
@@ -2826,6 +2831,21 @@ export interface SceneOnPsywaveConfig {
       | "attackerAnimationCenter" | "targetAnimationCenter">>;
 }
 
+/**
+ * Narrow Scene-ON seam for MOVE_RETURN. The caller carries the live
+ * friendship-selected presentation snapshot; damage, Return power, gameplay
+ * RNG, and all battle state remain outside this animation-only reducer.
+ */
+export interface SceneOnReturnConfig {
+  readonly move: "RETURN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<ReturnLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
@@ -4350,6 +4370,7 @@ export type SceneOnMoveConfig =
   | SceneOnSkillSwapConfig
   | SceneOnPursuitConfig
   | SceneOnPsywaveConfig
+  | SceneOnReturnConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
@@ -4722,6 +4743,8 @@ export type SceneOnPursuitPresentationState =
   SceneOnMovePresentationState<SceneOnPursuitConfig>;
 export type SceneOnPsywavePresentationState =
   SceneOnMovePresentationState<SceneOnPsywaveConfig>;
+export type SceneOnReturnPresentationState =
+  SceneOnMovePresentationState<SceneOnReturnConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnDigPresentationState =
@@ -5169,6 +5192,11 @@ export interface SceneOnPursuitView extends PursuitState {
 }
 
 export interface SceneOnPsywaveView extends PsywaveState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnReturnView extends ReturnState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8890,6 +8918,29 @@ export function sceneOnPsywaveView(
       targetPictureCenter: target.geometry.battlePositionCenter,
       attackerAnimationCenter: attacker.geometry.animationCenter,
       targetAnimationCenter: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_RETURN's root resource-command source row. */
+export function sceneOnReturnView(
+  state: SceneOnReturnPresentationState,
+): SceneOnReturnView {
+  if (state.config.move !== "RETURN") {
+    throw new Error(`expected RETURN presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...returnAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerCenter: attacker.geometry.animationCenter,
+      targetCenter: target.geometry.animationCenter,
     }),
     attacker,
     target,
