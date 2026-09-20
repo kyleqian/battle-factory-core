@@ -1,0 +1,7452 @@
+{
+  "schema": "flatter-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_FLATTER",
+  "moveId": 260,
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "fullDenseRowsRetained": true,
+    "rawRgbRetained": true,
+    "normalizedMaps": true,
+    "twiceFreshByteIdentical": true,
+    "latchMeasured": true,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "actualCoreFramebufferAcceptance": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "siblingCredit": false,
+    "gameplayStateOwned": false,
+    "boundaryOrBarrierChanged": false
+  },
+  "source": {
+    "audit": "tools/compare/flatterSourceAudit.ts",
+    "probe": "tools/compare/flatterProbe.py",
+    "verifier": "tools/compare/flatterEvidence.ts"
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "rows": {
+      "player-back": 219,
+      "opponent-front": 219
+    },
+    "totalRows": 438,
+    "firstInactiveCleanupRetained": true
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-flatter-player-nidorina-opponent-onix.json",
+      "scenarioSha256": "22aa3b0e6f95615f42f43067a438d460366a2310b973e7e9bfd9cf965f60078e",
+      "denseState": "tools/compare/evidence/flatter-player-dense-state.json.gz",
+      "denseStateSha256": "aef8df8688e044537f284d2910d543f3a8c4635224b1030fe7c6e8dc54ea6030",
+      "probeJsonSha256": "988dec61bb18658d217901d803bcc7cd53efedca2609dd241bef7a7ffcc42894",
+      "rawRgbArchive": "tools/compare/evidence/flatter-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "3e63537b9ddefdddccb7d97ef760a283d1f67c9cba4826ee6bd39f96c7c290c5",
+      "rawRgbSequenceSha256": "6a414edaad3c1b2d3f9caa6ccc3a9be8dbad097d7ef4544a7bdb892ab6e94394",
+      "changeMap": "tools/compare/evidence/flatter-changemap-player.json",
+      "changeMapSha256": "46152f94eb52d1e0fd4c5283128633ffa5c6c8e6cf41f6dfd6b235bed69c4a04",
+      "sourceWindow": {
+        "startFrame": 70,
+        "endFrame": 288,
+        "frameCount": 219,
+        "sourceFrameCount": 219
+      },
+      "summary": {
+        "chronology": {
+          "script": [
+            [
+              0,
+              [
+                0,
+                0,
+                0,
+                0
+              ]
+            ],
+            [
+              1,
+              [
+                3,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              2,
+              [
+                3,
+                0,
+                0,
+                0
+              ]
+            ],
+            [
+              4,
+              [
+                6,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              5,
+              [
+                6,
+                0,
+                0,
+                0
+              ]
+            ],
+            [
+              7,
+              [
+                41,
+                1,
+                1,
+                0
+              ]
+            ],
+            [
+              48,
+              [
+                41,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              49,
+              [
+                57,
+                -1,
+                1,
+                0
+              ]
+            ],
+            [
+              50,
+              [
+                57,
+                0,
+                1,
+                0
+              ]
+            ],
+            [
+              51,
+              [
+                72,
+                10,
+                2,
+                0
+              ]
+            ],
+            [
+              52,
+              [
+                72,
+                9,
+                2,
+                0
+              ]
+            ],
+            [
+              53,
+              [
+                72,
+                8,
+                2,
+                0
+              ]
+            ],
+            [
+              54,
+              [
+                72,
+                7,
+                2,
+                0
+              ]
+            ],
+            [
+              55,
+              [
+                72,
+                6,
+                2,
+                0
+              ]
+            ],
+            [
+              56,
+              [
+                72,
+                5,
+                2,
+                0
+              ]
+            ],
+            [
+              57,
+              [
+                72,
+                4,
+                2,
+                0
+              ]
+            ],
+            [
+              58,
+              [
+                72,
+                3,
+                2,
+                0
+              ]
+            ],
+            [
+              59,
+              [
+                72,
+                2,
+                2,
+                0
+              ]
+            ],
+            [
+              60,
+              [
+                72,
+                1,
+                2,
+                0
+              ]
+            ],
+            [
+              61,
+              [
+                72,
+                0,
+                2,
+                0
+              ]
+            ],
+            [
+              63,
+              [
+                87,
+                -1,
+                3,
+                0
+              ]
+            ],
+            [
+              64,
+              [
+                87,
+                0,
+                2,
+                0
+              ]
+            ],
+            [
+              65,
+              [
+                242,
+                0,
+                16,
+                0
+              ]
+            ],
+            [
+              66,
+              [
+                242,
+                0,
+                30,
+                0
+              ]
+            ],
+            [
+              67,
+              [
+                195,
+                5,
+                40,
+                0
+              ]
+            ],
+            [
+              69,
+              [
+                195,
+                4,
+                40,
+                0
+              ]
+            ],
+            [
+              70,
+              [
+                195,
+                3,
+                40,
+                0
+              ]
+            ],
+            [
+              71,
+              [
+                195,
+                2,
+                40,
+                0
+              ]
+            ],
+            [
+              72,
+              [
+                195,
+                1,
+                40,
+                0
+              ]
+            ],
+            [
+              73,
+              [
+                195,
+                0,
+                40,
+                0
+              ]
+            ],
+            [
+              75,
+              [
+                206,
+                1,
+                40,
+                0
+              ]
+            ],
+            [
+              79,
+              [
+                206,
+                1,
+                39,
+                0
+              ]
+            ],
+            [
+              98,
+              [
+                206,
+                1,
+                1,
+                0
+              ]
+            ],
+            [
+              175,
+              [
+                206,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              176,
+              [
+                224,
+                1,
+                1,
+                0
+              ]
+            ],
+            [
+              217,
+              [
+                224,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              218,
+              [
+                232,
+                0,
+                0,
+                0
+              ]
+            ]
+          ],
+          "hardwarePaletteFadeTasks": [
+            {
+              "slot": 0,
+              "start": 7,
+              "initialData": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "end": 47
+            },
+            {
+              "slot": 0,
+              "start": 176,
+              "initialData": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "end": 216
+            }
+          ],
+          "spotlight": [
+            {
+              "slot": 3,
+              "start": 49,
+              "end": 174,
+              "displayedStart": 50,
+              "displayedEnd": 175,
+              "first": {
+                "callback": "AnimFlatterSpotlight_Step",
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  80,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  4096,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterSpotlight_Step",
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  3,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 5,
+                "matrix": [
+                  4096,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            }
+          ],
+          "verticalDips": [
+            {
+              "slot": 4,
+              "start": 51,
+              "end": 63,
+              "displayedStart": 52,
+              "displayedEnd": 64,
+              "first": {
+                "callback": "TranslateSpriteLinearById",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  4,
+                  0,
+                  2,
+                  8,
+                  5,
+                  0,
+                  22853,
+                  2061
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  1365,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  0,
+                  -2,
+                  8,
+                  5,
+                  0,
+                  15357,
+                  2058
+                ],
+                "flags": 5,
+                "matrix": [
+                  273,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 5,
+              "start": 63,
+              "end": 78,
+              "displayedStart": 64,
+              "displayedEnd": 79,
+              "first": {
+                "callback": "TranslateSpriteLinearById",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  4,
+                  0,
+                  2,
+                  8,
+                  5,
+                  0,
+                  22853,
+                  2061
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  273,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  0,
+                  -2,
+                  8,
+                  5,
+                  0,
+                  15357,
+                  2058
+                ],
+                "flags": 5,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            }
+          ],
+          "confetti": [
+            {
+              "slot": 4,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1759,
+                  976,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 153,
+                "y2": -18,
+                "data": [
+                  1099,
+                  -464,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 7,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1318,
+                  910,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -102,
+                "y2": -10,
+                "data": [
+                  658,
+                  -530,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 9,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1500,
+                  1247,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 123,
+                "y2": -48,
+                "data": [
+                  840,
+                  -193,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 10,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1925,
+                  1301,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -175,
+                "y2": -56,
+                "data": [
+                  1265,
+                  -139,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 11,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1849,
+                  1199,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 164,
+                "y2": -43,
+                "data": [
+                  1189,
+                  -241,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 12,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1763,
+                  1357,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -153,
+                "y2": -62,
+                "data": [
+                  1103,
+                  -83,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 13,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1442,
+                  1353,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 118,
+                "y2": -62,
+                "data": [
+                  782,
+                  -87,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 14,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1440,
+                  1163,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -117,
+                "y2": -40,
+                "data": [
+                  780,
+                  -277,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 15,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1507,
+                  1167,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 123,
+                "y2": -40,
+                "data": [
+                  847,
+                  -273,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 16,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1891,
+                  1283,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -170,
+                "y2": -54,
+                "data": [
+                  1231,
+                  -157,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 17,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1741,
+                  1211,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 151,
+                "y2": -45,
+                "data": [
+                  1081,
+                  -229,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 18,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1689,
+                  1289,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -146,
+                "y2": -54,
+                "data": [
+                  1029,
+                  -151,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 19,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1741,
+                  1403,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 151,
+                "y2": -68,
+                "data": [
+                  1081,
+                  -37,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 20,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1849,
+                  1371,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -164,
+                "y2": -64,
+                "data": [
+                  1189,
+                  -69,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 21,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 75,
+                "y2": -18,
+                "data": [
+                  428,
+                  -456,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 22,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1719,
+                  1341,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -149,
+                "y2": -60,
+                "data": [
+                  1059,
+                  -99,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 23,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1839,
+                  928,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 163,
+                "y2": -13,
+                "data": [
+                  1179,
+                  -512,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 24,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1318,
+                  1112,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -102,
+                "y2": -34,
+                "data": [
+                  658,
+                  -328,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 25,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1268,
+                  1199,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 95,
+                "y2": -43,
+                "data": [
+                  608,
+                  -241,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 26,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1300,
+                  1022,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -99,
+                "y2": -22,
+                "data": [
+                  640,
+                  -418,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 27,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1192,
+                  1293,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 88,
+                "y2": -54,
+                "data": [
+                  532,
+                  -147,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 28,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1270,
+                  1002,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -95,
+                "y2": -20,
+                "data": [
+                  610,
+                  -438,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 29,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1913,
+                  940,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 173,
+                "y2": -13,
+                "data": [
+                  1253,
+                  -500,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 30,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1168,
+                  952,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -86,
+                "y2": -15,
+                "data": [
+                  508,
+                  -488,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 31,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1166,
+                  1289,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 86,
+                "y2": -54,
+                "data": [
+                  506,
+                  -151,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 32,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1124,
+                  972,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -80,
+                "y2": -17,
+                "data": [
+                  464,
+                  -468,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 33,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1492,
+                  1275,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 122,
+                "y2": -52,
+                "data": [
+                  832,
+                  -165,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 34,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1759,
+                  1345,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -153,
+                "y2": -62,
+                "data": [
+                  1099,
+                  -95,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 35,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1256,
+                  1203,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 94,
+                "y2": -45,
+                "data": [
+                  596,
+                  -237,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 36,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": -5,
+                "y2": -4,
+                "data": [
+                  1276,
+                  1171,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -99,
+                "y2": -47,
+                "data": [
+                  638,
+                  -221,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 37,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 7,
+                "y2": -4,
+                "data": [
+                  1983,
+                  1066,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 182,
+                "y2": -34,
+                "data": [
+                  1345,
+                  -326,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 38,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": -6,
+                "y2": -4,
+                "data": [
+                  1727,
+                  1181,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -152,
+                "y2": -47,
+                "data": [
+                  1089,
+                  -211,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 39,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 6,
+                "y2": -4,
+                "data": [
+                  1605,
+                  1137,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 139,
+                "y2": -43,
+                "data": [
+                  967,
+                  -255,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 40,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": -4,
+                "y2": -4,
+                "data": [
+                  1034,
+                  1167,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -71,
+                "y2": -45,
+                "data": [
+                  396,
+                  -225,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 41,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 5,
+                "y2": -4,
+                "data": [
+                  1424,
+                  1217,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 118,
+                "y2": -52,
+                "data": [
+                  786,
+                  -175,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 42,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": -5,
+                "y2": -3,
+                "data": [
+                  1314,
+                  936,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -104,
+                "y2": -18,
+                "data": [
+                  676,
+                  -456,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 43,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 4,
+                "y2": -3,
+                "data": [
+                  1050,
+                  926,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 73,
+                "y2": -17,
+                "data": [
+                  412,
+                  -466,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 44,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": -5,
+                "y2": -4,
+                "data": [
+                  1302,
+                  1147,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -103,
+                "y2": -43,
+                "data": [
+                  664,
+                  -245,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            }
+          ],
+          "confettiCount": 38,
+          "audio": {
+            "encore2": {
+              "age": 7,
+              "channel": "SE2",
+              "pan": 63
+            },
+            "flatterAttacker": {
+              "age": 65,
+              "channel": "SE1",
+              "pan": -64
+            },
+            "flatterTarget": {
+              "age": 75,
+              "channel": "SE1",
+              "pan": 63
+            }
+          }
+        },
+        "latches": {
+          "hardwareOamEqualsPrecedingSoftware": "218/218",
+          "hardwareMatricesEqualPrecedingSoftware": "217/218",
+          "hardwarePaletteEqualsPrecedingFaded": "218/218",
+          "oamExceptions": [],
+          "matrixExceptions": [
+            68
+          ],
+          "paletteExceptions": [],
+          "targetAxes": [
+            [
+              0,
+              [
+                1,
+                0
+              ]
+            ],
+            [
+              51,
+              [
+                1,
+                2
+              ]
+            ],
+            [
+              52,
+              [
+                1,
+                4
+              ]
+            ],
+            [
+              53,
+              [
+                1,
+                6
+              ]
+            ],
+            [
+              54,
+              [
+                1,
+                8
+              ]
+            ],
+            [
+              55,
+              [
+                1,
+                10
+              ]
+            ],
+            [
+              58,
+              [
+                1,
+                8
+              ]
+            ],
+            [
+              59,
+              [
+                1,
+                6
+              ]
+            ],
+            [
+              60,
+              [
+                1,
+                4
+              ]
+            ],
+            [
+              61,
+              [
+                1,
+                2
+              ]
+            ],
+            [
+              62,
+              [
+                1,
+                0
+              ]
+            ],
+            [
+              63,
+              [
+                1,
+                2
+              ]
+            ],
+            [
+              64,
+              [
+                1,
+                4
+              ]
+            ],
+            [
+              67,
+              [
+                1,
+                6
+              ]
+            ],
+            [
+              69,
+              [
+                1,
+                8
+              ]
+            ],
+            [
+              70,
+              [
+                1,
+                10
+              ]
+            ],
+            [
+              73,
+              [
+                1,
+                8
+              ]
+            ],
+            [
+              74,
+              [
+                1,
+                6
+              ]
+            ],
+            [
+              75,
+              [
+                1,
+                4
+              ]
+            ],
+            [
+              76,
+              [
+                1,
+                2
+              ]
+            ],
+            [
+              77,
+              [
+                1,
+                0
+              ]
+            ]
+          ],
+          "spotlightSoftware": [
+            [
+              0,
+              null
+            ],
+            [
+              49,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  4096,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              50,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  2048,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              51,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  1365,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              52,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  1024,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              53,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  819,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              54,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  682,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              55,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  585,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              56,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  512,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              57,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  455,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              58,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  409,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              59,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  372,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              60,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  341,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              61,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  315,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              62,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  292,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              63,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  273,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              64,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              67,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              69,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  227,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              70,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  215,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              71,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              73,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 1
+              }
+            ],
+            [
+              153,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              154,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  215,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              155,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  227,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              156,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              157,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              158,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  273,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              159,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  292,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              160,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  315,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              161,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  341,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              162,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  372,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              163,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  409,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              164,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  455,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              165,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  512,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              166,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  585,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              167,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  682,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              168,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  819,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              169,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  1024,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              170,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  1365,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              171,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  2048,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              172,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  4096,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              174,
+              {
+                "x": 176,
+                "y": 32,
+                "x2": 0,
+                "y2": 0,
+                "flags": 5,
+                "matrix": [
+                  4096,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 3
+              }
+            ],
+            [
+              175,
+              null
+            ]
+          ]
+        },
+        "transitions": {
+          "registers": {
+            "dispcnt": [
+              [
+                0,
+                48960
+              ],
+              [
+                7,
+                65344
+              ],
+              [
+                175,
+                32576
+              ],
+              [
+                218,
+                16192
+              ]
+            ],
+            "win0h": [
+              [
+                0,
+                240
+              ],
+              [
+                1,
+                0
+              ]
+            ],
+            "win0v": [
+              [
+                0,
+                161
+              ],
+              [
+                1,
+                0
+              ]
+            ],
+            "winin": [
+              [
+                0,
+                16191
+              ],
+              [
+                7,
+                7999
+              ],
+              [
+                218,
+                16191
+              ]
+            ],
+            "winout": [
+              [
+                0,
+                16191
+              ],
+              [
+                49,
+                7999
+              ],
+              [
+                175,
+                16191
+              ]
+            ],
+            "bldcnt": [
+              [
+                0,
+                0
+              ],
+              [
+                8,
+                248
+              ],
+              [
+                217,
+                0
+              ]
+            ],
+            "bldy": [
+              [
+                0,
+                0
+              ],
+              [
+                8,
+                1
+              ],
+              [
+                12,
+                2
+              ],
+              [
+                16,
+                3
+              ],
+              [
+                20,
+                4
+              ],
+              [
+                24,
+                5
+              ],
+              [
+                28,
+                6
+              ],
+              [
+                32,
+                7
+              ],
+              [
+                36,
+                8
+              ],
+              [
+                40,
+                9
+              ],
+              [
+                44,
+                10
+              ],
+              [
+                177,
+                9
+              ],
+              [
+                181,
+                8
+              ],
+              [
+                185,
+                7
+              ],
+              [
+                189,
+                6
+              ],
+              [
+                193,
+                5
+              ],
+              [
+                197,
+                4
+              ],
+              [
+                201,
+                3
+              ],
+              [
+                205,
+                2
+              ],
+              [
+                209,
+                1
+              ],
+              [
+                213,
+                0
+              ]
+            ]
+          },
+          "fadedPaletteBanks": {
+            "23": [
+              1
+            ],
+            "24": [
+              4
+            ]
+          },
+          "hardwarePaletteBanks": {
+            "23": [
+              2
+            ],
+            "24": [
+              5
+            ]
+          }
+        },
+        "resources": {
+          "spotlight": {
+            "tag": 10227,
+            "palette": [
+              1,
+              217
+            ],
+            "tile": [
+              1,
+              217
+            ]
+          },
+          "confetti": {
+            "tag": 10240,
+            "palette": [
+              4,
+              217
+            ],
+            "tile": [
+              4,
+              217
+            ]
+          }
+        },
+        "cleanup": {
+          "age": 218,
+          "active": false,
+          "visualTasks": 0,
+          "soundTasks": 0,
+          "ownedSprites": 0,
+          "resourcesReleased": true
+        }
+      },
+      "repeatProbeJsonSha256": "988dec61bb18658d217901d803bcc7cd53efedca2609dd241bef7a7ffcc42894",
+      "repeatRawRgbSequenceSha256": "6a414edaad3c1b2d3f9caa6ccc3a9be8dbad097d7ef4544a7bdb892ab6e94394"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-flatter-opponent-nidorina-player-onix.json",
+      "scenarioSha256": "fc016ddcdb0605afbd2eaec4e7b48c234a8fbafbafeb590b4ac71c39fae6d19b",
+      "denseState": "tools/compare/evidence/flatter-opponent-dense-state.json.gz",
+      "denseStateSha256": "a0f00cd08d92556fc289c49019938069a1d2dd8c6a9b08d8c2d98ec1b4e90314",
+      "probeJsonSha256": "92ea6b6f7d419a3c73b70d22c3174879613b15eab276c14e71042c371383f7bf",
+      "rawRgbArchive": "tools/compare/evidence/flatter-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "32e9874543a8da4761a05f54d73617eb1b0ef7835639feea12f480bba8f45ba7",
+      "rawRgbSequenceSha256": "b00a052fb71cf8dfe4663d076d754a42c2c7fb5fe4a566f8b3f2fee8c7640909",
+      "changeMap": "tools/compare/evidence/flatter-changemap-opponent.json",
+      "changeMapSha256": "5a43325b50619cf1908cd289eacc56248b26b29f4ad892e4494be07716b330f5",
+      "sourceWindow": {
+        "startFrame": 74,
+        "endFrame": 292,
+        "frameCount": 219,
+        "sourceFrameCount": 219
+      },
+      "summary": {
+        "chronology": {
+          "script": [
+            [
+              0,
+              [
+                0,
+                0,
+                0,
+                0
+              ]
+            ],
+            [
+              1,
+              [
+                3,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              2,
+              [
+                3,
+                0,
+                0,
+                0
+              ]
+            ],
+            [
+              4,
+              [
+                6,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              5,
+              [
+                6,
+                0,
+                0,
+                0
+              ]
+            ],
+            [
+              7,
+              [
+                41,
+                1,
+                1,
+                0
+              ]
+            ],
+            [
+              48,
+              [
+                41,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              49,
+              [
+                57,
+                -1,
+                1,
+                0
+              ]
+            ],
+            [
+              50,
+              [
+                57,
+                0,
+                1,
+                0
+              ]
+            ],
+            [
+              51,
+              [
+                72,
+                10,
+                2,
+                0
+              ]
+            ],
+            [
+              52,
+              [
+                72,
+                9,
+                2,
+                0
+              ]
+            ],
+            [
+              53,
+              [
+                72,
+                8,
+                2,
+                0
+              ]
+            ],
+            [
+              54,
+              [
+                72,
+                7,
+                2,
+                0
+              ]
+            ],
+            [
+              55,
+              [
+                72,
+                6,
+                2,
+                0
+              ]
+            ],
+            [
+              56,
+              [
+                72,
+                5,
+                2,
+                0
+              ]
+            ],
+            [
+              57,
+              [
+                72,
+                4,
+                2,
+                0
+              ]
+            ],
+            [
+              58,
+              [
+                72,
+                3,
+                2,
+                0
+              ]
+            ],
+            [
+              59,
+              [
+                72,
+                2,
+                2,
+                0
+              ]
+            ],
+            [
+              60,
+              [
+                72,
+                1,
+                2,
+                0
+              ]
+            ],
+            [
+              61,
+              [
+                72,
+                0,
+                2,
+                0
+              ]
+            ],
+            [
+              63,
+              [
+                87,
+                -1,
+                3,
+                0
+              ]
+            ],
+            [
+              64,
+              [
+                87,
+                0,
+                2,
+                0
+              ]
+            ],
+            [
+              65,
+              [
+                251,
+                0,
+                17,
+                0
+              ]
+            ],
+            [
+              66,
+              [
+                251,
+                0,
+                31,
+                0
+              ]
+            ],
+            [
+              67,
+              [
+                195,
+                5,
+                40,
+                0
+              ]
+            ],
+            [
+              69,
+              [
+                195,
+                4,
+                40,
+                0
+              ]
+            ],
+            [
+              70,
+              [
+                195,
+                3,
+                40,
+                0
+              ]
+            ],
+            [
+              71,
+              [
+                195,
+                2,
+                40,
+                0
+              ]
+            ],
+            [
+              72,
+              [
+                195,
+                1,
+                40,
+                0
+              ]
+            ],
+            [
+              73,
+              [
+                195,
+                0,
+                40,
+                0
+              ]
+            ],
+            [
+              75,
+              [
+                206,
+                1,
+                40,
+                0
+              ]
+            ],
+            [
+              79,
+              [
+                206,
+                1,
+                39,
+                0
+              ]
+            ],
+            [
+              98,
+              [
+                206,
+                1,
+                1,
+                0
+              ]
+            ],
+            [
+              175,
+              [
+                206,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              176,
+              [
+                224,
+                1,
+                1,
+                0
+              ]
+            ],
+            [
+              217,
+              [
+                224,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              218,
+              [
+                232,
+                0,
+                0,
+                0
+              ]
+            ]
+          ],
+          "hardwarePaletteFadeTasks": [
+            {
+              "slot": 0,
+              "start": 7,
+              "initialData": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "end": 47
+            },
+            {
+              "slot": 0,
+              "start": 176,
+              "initialData": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "end": 216
+            }
+          ],
+          "spotlight": [
+            {
+              "slot": 3,
+              "start": 49,
+              "end": 174,
+              "displayedStart": 50,
+              "displayedEnd": 175,
+              "first": {
+                "callback": "AnimFlatterSpotlight_Step",
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  80,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  4096,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterSpotlight_Step",
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  3,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 5,
+                "matrix": [
+                  4096,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            }
+          ],
+          "verticalDips": [
+            {
+              "slot": 4,
+              "start": 51,
+              "end": 63,
+              "displayedStart": 52,
+              "displayedEnd": 64,
+              "first": {
+                "callback": "TranslateSpriteLinearById",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  4,
+                  0,
+                  2,
+                  6,
+                  5,
+                  0,
+                  22853,
+                  2061
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  1365,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  0,
+                  -2,
+                  6,
+                  5,
+                  0,
+                  15357,
+                  2058
+                ],
+                "flags": 5,
+                "matrix": [
+                  273,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 5,
+              "start": 63,
+              "end": 78,
+              "displayedStart": 64,
+              "displayedEnd": 79,
+              "first": {
+                "callback": "TranslateSpriteLinearById",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  4,
+                  0,
+                  2,
+                  6,
+                  5,
+                  0,
+                  22853,
+                  2061
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  273,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  0,
+                  -2,
+                  6,
+                  5,
+                  0,
+                  15357,
+                  2058
+                ],
+                "flags": 5,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            }
+          ],
+          "confetti": [
+            {
+              "slot": 4,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1759,
+                  976,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 153,
+                "y2": -18,
+                "data": [
+                  1099,
+                  -464,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 7,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1318,
+                  910,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -102,
+                "y2": -10,
+                "data": [
+                  658,
+                  -530,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 9,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1500,
+                  1247,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 123,
+                "y2": -48,
+                "data": [
+                  840,
+                  -193,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 10,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1925,
+                  1301,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -175,
+                "y2": -56,
+                "data": [
+                  1265,
+                  -139,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 11,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1849,
+                  1199,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 164,
+                "y2": -43,
+                "data": [
+                  1189,
+                  -241,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 12,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1763,
+                  1357,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -153,
+                "y2": -62,
+                "data": [
+                  1103,
+                  -83,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 13,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1442,
+                  1353,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 118,
+                "y2": -62,
+                "data": [
+                  782,
+                  -87,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 14,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1440,
+                  1163,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -117,
+                "y2": -40,
+                "data": [
+                  780,
+                  -277,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 15,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1507,
+                  1167,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 123,
+                "y2": -40,
+                "data": [
+                  847,
+                  -273,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 16,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1891,
+                  1283,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -170,
+                "y2": -54,
+                "data": [
+                  1231,
+                  -157,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 17,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1741,
+                  1211,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 151,
+                "y2": -45,
+                "data": [
+                  1081,
+                  -229,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 18,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1689,
+                  1289,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -146,
+                "y2": -54,
+                "data": [
+                  1029,
+                  -151,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 19,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1741,
+                  1403,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 151,
+                "y2": -68,
+                "data": [
+                  1081,
+                  -37,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 20,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1849,
+                  1371,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -164,
+                "y2": -64,
+                "data": [
+                  1189,
+                  -69,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 21,
+              "start": 65,
+              "end": 97,
+              "displayedStart": 66,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1088,
+                  984,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 75,
+                "y2": -18,
+                "data": [
+                  428,
+                  -456,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 22,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1719,
+                  1341,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -149,
+                "y2": -60,
+                "data": [
+                  1059,
+                  -99,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 23,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1839,
+                  928,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 163,
+                "y2": -13,
+                "data": [
+                  1179,
+                  -512,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 24,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1318,
+                  1112,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -102,
+                "y2": -34,
+                "data": [
+                  658,
+                  -328,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 25,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1268,
+                  1199,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 95,
+                "y2": -43,
+                "data": [
+                  608,
+                  -241,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 26,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1300,
+                  1022,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -99,
+                "y2": -22,
+                "data": [
+                  640,
+                  -418,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 27,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1192,
+                  1293,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 88,
+                "y2": -54,
+                "data": [
+                  532,
+                  -147,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 28,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1270,
+                  1002,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -95,
+                "y2": -20,
+                "data": [
+                  610,
+                  -438,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 29,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1913,
+                  940,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 173,
+                "y2": -13,
+                "data": [
+                  1253,
+                  -500,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 30,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1168,
+                  952,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -86,
+                "y2": -15,
+                "data": [
+                  508,
+                  -488,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 31,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1166,
+                  1289,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 86,
+                "y2": -54,
+                "data": [
+                  506,
+                  -151,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 32,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1124,
+                  972,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -80,
+                "y2": -17,
+                "data": [
+                  464,
+                  -468,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 33,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1492,
+                  1275,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 122,
+                "y2": -52,
+                "data": [
+                  832,
+                  -165,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 34,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1759,
+                  1345,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -153,
+                "y2": -62,
+                "data": [
+                  1099,
+                  -95,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 35,
+              "start": 66,
+              "end": 97,
+              "displayedStart": 67,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1256,
+                  1203,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 94,
+                "y2": -45,
+                "data": [
+                  596,
+                  -237,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 36,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": -5,
+                "y2": -4,
+                "data": [
+                  1276,
+                  1171,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -99,
+                "y2": -47,
+                "data": [
+                  638,
+                  -221,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 37,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 7,
+                "y2": -4,
+                "data": [
+                  1983,
+                  1066,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 182,
+                "y2": -34,
+                "data": [
+                  1345,
+                  -326,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 38,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": -6,
+                "y2": -4,
+                "data": [
+                  1727,
+                  1181,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -152,
+                "y2": -47,
+                "data": [
+                  1089,
+                  -211,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 39,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 6,
+                "y2": -4,
+                "data": [
+                  1605,
+                  1137,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 139,
+                "y2": -43,
+                "data": [
+                  967,
+                  -255,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 40,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": -4,
+                "y2": -4,
+                "data": [
+                  1034,
+                  1167,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -71,
+                "y2": -45,
+                "data": [
+                  396,
+                  -225,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 41,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 5,
+                "y2": -4,
+                "data": [
+                  1424,
+                  1217,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 118,
+                "y2": -52,
+                "data": [
+                  786,
+                  -175,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 42,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": -5,
+                "y2": -3,
+                "data": [
+                  1314,
+                  936,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -104,
+                "y2": -18,
+                "data": [
+                  676,
+                  -456,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 43,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": -8,
+                "y": 104,
+                "x2": 4,
+                "y2": -3,
+                "data": [
+                  1050,
+                  926,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": 73,
+                "y2": -17,
+                "data": [
+                  412,
+                  -466,
+                  0,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            },
+            {
+              "slot": 44,
+              "start": 67,
+              "end": 97,
+              "displayedStart": 68,
+              "displayedEnd": 98,
+              "first": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x": 248,
+                "y": 104,
+                "x2": -5,
+                "y2": -4,
+                "data": [
+                  1302,
+                  1147,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrixNum": 0,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ]
+              },
+              "last": {
+                "callback": "AnimFlatterConfetti_Step",
+                "x2": -103,
+                "y2": -43,
+                "data": [
+                  664,
+                  -245,
+                  1,
+                  30,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ]
+              }
+            }
+          ],
+          "confettiCount": 38,
+          "audio": {
+            "encore2": {
+              "age": 7,
+              "channel": "SE2",
+              "pan": -63
+            },
+            "flatterAttacker": {
+              "age": 65,
+              "channel": "SE1",
+              "pan": 63
+            },
+            "flatterTarget": {
+              "age": 75,
+              "channel": "SE1",
+              "pan": -63
+            }
+          }
+        },
+        "latches": {
+          "hardwareOamEqualsPrecedingSoftware": "218/218",
+          "hardwareMatricesEqualPrecedingSoftware": "217/218",
+          "hardwarePaletteEqualsPrecedingFaded": "218/218",
+          "oamExceptions": [],
+          "matrixExceptions": [
+            68
+          ],
+          "paletteExceptions": [],
+          "targetAxes": [
+            [
+              0,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              51,
+              [
+                0,
+                2
+              ]
+            ],
+            [
+              52,
+              [
+                0,
+                4
+              ]
+            ],
+            [
+              53,
+              [
+                0,
+                6
+              ]
+            ],
+            [
+              54,
+              [
+                0,
+                8
+              ]
+            ],
+            [
+              55,
+              [
+                0,
+                10
+              ]
+            ],
+            [
+              58,
+              [
+                0,
+                8
+              ]
+            ],
+            [
+              59,
+              [
+                0,
+                6
+              ]
+            ],
+            [
+              60,
+              [
+                0,
+                4
+              ]
+            ],
+            [
+              61,
+              [
+                0,
+                2
+              ]
+            ],
+            [
+              62,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              63,
+              [
+                0,
+                2
+              ]
+            ],
+            [
+              64,
+              [
+                0,
+                4
+              ]
+            ],
+            [
+              67,
+              [
+                0,
+                6
+              ]
+            ],
+            [
+              69,
+              [
+                0,
+                8
+              ]
+            ],
+            [
+              70,
+              [
+                0,
+                10
+              ]
+            ],
+            [
+              73,
+              [
+                0,
+                8
+              ]
+            ],
+            [
+              74,
+              [
+                0,
+                6
+              ]
+            ],
+            [
+              75,
+              [
+                0,
+                4
+              ]
+            ],
+            [
+              76,
+              [
+                0,
+                2
+              ]
+            ],
+            [
+              77,
+              [
+                0,
+                0
+              ]
+            ]
+          ],
+          "spotlightSoftware": [
+            [
+              0,
+              null
+            ],
+            [
+              49,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  4096,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              50,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  2048,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              51,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  1365,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              52,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  1024,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              53,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  819,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              54,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  682,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              55,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  585,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              56,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  512,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              57,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  455,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              58,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  409,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              59,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  372,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              60,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  341,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              61,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  315,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              62,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  292,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              63,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  273,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              64,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              67,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              69,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  227,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              70,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  215,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              71,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 0
+              }
+            ],
+            [
+              73,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 1
+              }
+            ],
+            [
+              153,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  204,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              154,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  215,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              155,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  227,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              156,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  240,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              157,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              158,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  273,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              159,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  292,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              160,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  315,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              161,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  341,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              162,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  372,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              163,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  409,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              164,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  455,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              165,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  512,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              166,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  585,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              167,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  682,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              168,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  819,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              169,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  1024,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              170,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  1365,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              171,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  2048,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              172,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 1,
+                "matrix": [
+                  4096,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 2
+              }
+            ],
+            [
+              174,
+              {
+                "x": 72,
+                "y": 72,
+                "x2": 0,
+                "y2": 0,
+                "flags": 5,
+                "matrix": [
+                  4096,
+                  0,
+                  0,
+                  170
+                ],
+                "phase": 3
+              }
+            ],
+            [
+              175,
+              null
+            ]
+          ]
+        },
+        "transitions": {
+          "registers": {
+            "dispcnt": [
+              [
+                0,
+                48960
+              ],
+              [
+                7,
+                65344
+              ],
+              [
+                175,
+                32576
+              ],
+              [
+                218,
+                16192
+              ]
+            ],
+            "win0h": [
+              [
+                0,
+                240
+              ],
+              [
+                1,
+                0
+              ]
+            ],
+            "win0v": [
+              [
+                0,
+                161
+              ],
+              [
+                1,
+                0
+              ]
+            ],
+            "winin": [
+              [
+                0,
+                16191
+              ],
+              [
+                7,
+                7999
+              ],
+              [
+                218,
+                16191
+              ]
+            ],
+            "winout": [
+              [
+                0,
+                16191
+              ],
+              [
+                49,
+                7999
+              ],
+              [
+                175,
+                16191
+              ]
+            ],
+            "bldcnt": [
+              [
+                0,
+                0
+              ],
+              [
+                8,
+                248
+              ],
+              [
+                217,
+                0
+              ]
+            ],
+            "bldy": [
+              [
+                0,
+                0
+              ],
+              [
+                8,
+                1
+              ],
+              [
+                12,
+                2
+              ],
+              [
+                16,
+                3
+              ],
+              [
+                20,
+                4
+              ],
+              [
+                24,
+                5
+              ],
+              [
+                28,
+                6
+              ],
+              [
+                32,
+                7
+              ],
+              [
+                36,
+                8
+              ],
+              [
+                40,
+                9
+              ],
+              [
+                44,
+                10
+              ],
+              [
+                177,
+                9
+              ],
+              [
+                181,
+                8
+              ],
+              [
+                185,
+                7
+              ],
+              [
+                189,
+                6
+              ],
+              [
+                193,
+                5
+              ],
+              [
+                197,
+                4
+              ],
+              [
+                201,
+                3
+              ],
+              [
+                205,
+                2
+              ],
+              [
+                209,
+                1
+              ],
+              [
+                213,
+                0
+              ]
+            ]
+          },
+          "fadedPaletteBanks": {
+            "23": [
+              1
+            ],
+            "24": [
+              4
+            ]
+          },
+          "hardwarePaletteBanks": {
+            "23": [
+              2
+            ],
+            "24": [
+              5
+            ]
+          }
+        },
+        "resources": {
+          "spotlight": {
+            "tag": 10227,
+            "palette": [
+              1,
+              217
+            ],
+            "tile": [
+              1,
+              217
+            ]
+          },
+          "confetti": {
+            "tag": 10240,
+            "palette": [
+              4,
+              217
+            ],
+            "tile": [
+              4,
+              217
+            ]
+          }
+        },
+        "cleanup": {
+          "age": 218,
+          "active": false,
+          "visualTasks": 0,
+          "soundTasks": 0,
+          "ownedSprites": 0,
+          "resourcesReleased": true
+        }
+      },
+      "repeatProbeJsonSha256": "92ea6b6f7d419a3c73b70d22c3174879613b15eab276c14e71042c371383f7bf",
+      "repeatRawRgbSequenceSha256": "b00a052fb71cf8dfe4663d076d754a42c2c7fb5fe4a566f8b3f2fee8c7640909"
+    }
+  },
+  "verdict": "MOVE_FLATTER remains unsupported: bilateral dense Scene-ON state/raw-RGB and move-owned latch evidence only; no reducer, seam, compositor, framebuffer, coverage, component, track, sibling, gameplay, or boundary credit."
+}
