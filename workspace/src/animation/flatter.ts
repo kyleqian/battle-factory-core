@@ -47,6 +47,16 @@ export interface FlatterConfettiAllocation {
     readonly flags: number;
     readonly callback: "AnimFlatterConfetti" | "AnimFlatterConfetti_Step";
   }>;
+  /** State after `AnimFlatterConfetti` has consumed its three Random2 words. */
+  readonly initialized: Readonly<{
+    readonly x: number;
+    readonly y: number;
+    readonly x2: number;
+    readonly y2: number;
+    readonly data: readonly number[];
+    readonly flags: number;
+    readonly callback: "AnimFlatterConfetti_Step";
+  }>;
 }
 
 export interface FlatterTaskSlots {
@@ -129,6 +139,7 @@ export interface FlatterSpotlight {
   readonly flags: 1 | 5;
   readonly matrixNum: number;
   readonly matrix: FlatterMatrix;
+  readonly data: readonly number[];
   readonly phase: 0 | 1 | 2 | 3;
   readonly localAge: number;
   readonly displayedAge: number;
@@ -348,6 +359,12 @@ function spotlightPhase(age: number): 0 | 1 | 2 | 3 {
   return 3;
 }
 
+function spotlightData(age: number): readonly number[] {
+  const phase = spotlightPhase(age);
+  const duration = phase === 0 ? 80 : phase === 1 ? 153 - age : 0;
+  return [duration, phase, 0, 0, 0, 0, 0, 0];
+}
+
 function spotlightAtAge(age: number, input: Readonly<FlatterLiveInputs>): FlatterSpotlight | null {
   if (age < 49 || age > 174) return null;
   return {
@@ -355,12 +372,13 @@ function spotlightAtAge(age: number, input: Readonly<FlatterLiveInputs>): Flatte
     template: "gFlatterSpotlightSpriteTemplate",
     callback: "AnimFlatterSpotlight_Step",
     x: input.targetCenter.x,
-    y: input.targetCenter.y - 10,
+    y: input.targetCenter.y - 8,
     x2: 0,
     y2: 0,
     flags: age === 174 ? 5 : 1,
     matrixNum: input.spotlight.matrixNum,
     matrix: [spotlightMatrix(age), 0, 0, 170],
+    data: spotlightData(age),
     phase: spotlightPhase(age),
     localAge: age - 49,
     displayedAge: age + 1,
@@ -387,19 +405,20 @@ function verticalDipAtAge(
   return lives.flatMap(({ start, end }, index) => {
     if (age < start || age > end) return [];
     const localAge = age - start;
-    const firstHalf = localAge <= 5;
-    const returnHalf = localAge >= 6 && localAge <= 11;
-    const callback = age === end
+    // The second proxy pauses while the script creates the confetti batch.
+    const effectiveAge = index === 0
+      ? localAge
+      : [0, 1, 1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12][localAge]!;
+    const callback = effectiveAge === 12
       ? "DestroyAnimSprite" as const
-      : localAge === 5
+      : effectiveAge === 5
         ? "ReverseVerticalDipDirection" as const
         : "TranslateSpriteLinearById" as const;
-    const remaining = firstHalf
-      ? 4 - Math.min(localAge, 4)
-      : returnHalf ? 5 - (localAge - 6) : 0;
-    const delta = firstHalf || localAge === 5 ? 2 : -2;
-    const delayedLocalAge = index === 1 && localAge >= 2 && localAge <= 3
-      ? 1 : localAge;
+    const returning = effectiveAge >= 6;
+    const remaining = effectiveAge <= 5
+      ? Math.max(0, 4 - effectiveAge)
+      : Math.max(0, 11 - effectiveAge);
+    const delta = returning ? -2 : 2;
     return [{
       slot: input.verticalDipSlots[index]!,
       template: "gVerticalDipSpriteTemplate",
@@ -412,9 +431,8 @@ function verticalDipAtAge(
       x2: 0,
       y2: 0,
       data: [remaining, 0, delta, input.targetArt.slot, 5, 0,
-        callback === "DestroyAnimSprite" ? 15357 : 22853,
-        callback === "DestroyAnimSprite" ? 2058 : 2061,
-        delayedLocalAge],
+        returning ? 15357 : 22853,
+        returning ? 2058 : 2061],
     }];
   });
 }
@@ -426,16 +444,26 @@ function confettiAtAge(
   return input.confetti.flatMap((allocation) => {
     if (age < allocation.start || age > allocation.end) return [];
     const localAge = age - allocation.start;
-    const initial = allocation.initial;
-    const steps = Math.max(0, Math.min(31, localAge));
-    const vx = initial.data[0] ?? 0;
-    const vy = initial.data[1] ?? 0;
-    let x2 = initial.x2;
-    let y2 = initial.y2;
+    if (localAge === 0 && allocation.initial.callback === "AnimFlatterConfetti") {
+      return [{
+        slot: allocation.slot,
+        template: "gFlatterConfettiSpriteTemplate" as const,
+        ...allocation.initial,
+        localAge,
+      }];
+    }
+    const initialized = allocation.initialized;
+    // All 38 callbacks begin stepping together after the script finishes the
+    // three-row create batch; their creation row alone is not their tick age.
+    const steps = age < 67 ? 0 : Math.min(30, Math.max(1, age - 67));
+    const vx = initialized.data[0] ?? 0;
+    const vy = initialized.data[1] ?? 0;
+    let x2 = initialized.x2;
+    let y2 = initialized.y2;
     for (let tick = 0; tick < steps; tick += 1) {
-      const dx = Math.trunc(Math.max(0, vx - 22 * tick) / 256);
-      const dy = Math.trunc((vy - 48 * tick) / 256);
-      if ((initial.data[2] ?? 0) === 0) x2 += dx;
+      const dx = Math.max(0, vx - 22 * tick) >> 8;
+      const dy = (vy - 48 * tick) >> 8;
+      if ((initialized.data[2] ?? 0) === 0) x2 += dx;
       else x2 -= dx;
       y2 -= dy;
     }
@@ -444,13 +472,13 @@ function confettiAtAge(
     return [{
       slot: allocation.slot,
       template: "gFlatterConfettiSpriteTemplate",
-      callback: localAge === 0 ? initial.callback : "AnimFlatterConfetti_Step",
-      x: initial.x,
-      y: initial.y,
+      callback: "AnimFlatterConfetti_Step",
+      x: initialized.x,
+      y: initialized.y,
       x2,
       y2,
-      flags: initial.flags,
-      data: [data0, data1, initial.data[2] ?? 0, Math.min(30, (initial.data[3] ?? 0) + steps), ...(initial.data.slice(4))],
+      flags: initialized.flags,
+      data: [data0, data1, initialized.data[2] ?? 0, Math.min(30, (initialized.data[3] ?? 0) + steps), ...(initialized.data.slice(4))],
       localAge,
     }];
   });

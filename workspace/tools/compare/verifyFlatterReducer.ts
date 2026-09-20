@@ -58,21 +58,42 @@ function allocationRows(rows: readonly Json[]): FlatterLiveInputs["confetti"] {
       else life.end = age;
     }
   }
-  return [...lives.entries()].sort((a, b) => a[1].start - b[1].start || a[0] - b[0]).map(([slot, life]) => ({
-    slot,
-    start: life.start,
-    end: life.end,
-    initial: {
-      x: life.first.x,
-      y: life.first.y,
-      x2: life.first.x2,
-      y2: life.first.y2,
-      data: life.first.data,
-      flags: life.first.flags,
-      callback: life.first.callback.symbol === "AnimFlatterConfetti"
-        ? "AnimFlatterConfetti" as const : "AnimFlatterConfetti_Step" as const,
-    },
-  })) as FlatterLiveInputs["confetti"];
+  return [...lives.entries()].sort((a, b) => a[1].start - b[1].start || a[0] - b[0]).map(([slot, life]) => {
+    const initializedRow = rows.slice(life.start, life.end + 1)
+      .map((row, index) => ({ age: life.start + index, sprite: owned([row], 0, "gFlatterConfettiSpriteTemplate")
+        .find((sprite: Json) => sprite.slot === slot && sprite.callback?.symbol === "AnimFlatterConfetti_Step") }))
+      .find((entry) => entry.sprite !== undefined);
+    invariant(initializedRow?.sprite, `confetti slot ${slot}: initialized state`);
+    const observed = initializedRow.sprite;
+    const steps = initializedRow.age < 67 ? 0 : Math.min(30, Math.max(1, initializedRow.age - 67));
+    invariant(steps <= 1, `confetti slot ${slot}: reconstructable initialized state`);
+    const initialized = steps === 0 ? observed : {
+      ...observed,
+      x2: observed.x2 - (observed.data[2] === 0 ? 1 : -1) * ((observed.data[0] + 22) >> 8),
+      y2: observed.y2 + ((observed.data[1] + 48) >> 8),
+      data: [observed.data[0] + 22, observed.data[1] + 48, observed.data[2], observed.data[3] - 1,
+        ...observed.data.slice(4)],
+    };
+    const fields = (sprite: Json) => ({
+      x: sprite.x,
+      y: sprite.y,
+      x2: sprite.x2,
+      y2: sprite.y2,
+      data: sprite.data,
+      flags: sprite.flags,
+    });
+    return {
+      slot,
+      start: life.start,
+      end: life.end,
+      initial: {
+        ...fields(life.first),
+        callback: life.first.callback.symbol === "AnimFlatterConfetti"
+          ? "AnimFlatterConfetti" as const : "AnimFlatterConfetti_Step" as const,
+      },
+      initialized: { ...fields(initialized), callback: "AnimFlatterConfetti_Step" as const },
+    };
+  }) as FlatterLiveInputs["confetti"];
 }
 
 function stableSlots(rows: readonly Json[]): Readonly<{
@@ -118,7 +139,7 @@ function inputFor(
     attackerSpecies: speciesName[first.parties[attackerSide][0].species] ?? "NIDORINA",
     targetSpecies: speciesName[first.parties[targetSide][0].species] ?? "ONIX",
     attackerCenter: { x: first.battlerSprites.attacker.x, y: first.battlerSprites.attacker.y },
-    targetCenter: { x: spotlight.x, y: spotlight.y },
+    targetCenter: { x: spotlight.x, y: spotlight.y + 8 },
     targetSpriteOrigin: { x: dip.x, y: dip.y },
     attackerInitialOffset: { x2: first.battlerSprites.attacker.x2, y2: first.battlerSprites.attacker.y2 },
     targetInitialOffset: { x2: first.battlerSprites.target.x2, y2: first.battlerSprites.target.y2 },
@@ -233,29 +254,250 @@ function compact(state: FlatterState): unknown {
   };
 }
 
+function spriteCallback(sprite: Json): string {
+  return sprite.callback?.symbol;
+}
+
+function assertSpotlight(
+  orientation: FlatterOrientation,
+  age: number,
+  state: FlatterState,
+  sprites: readonly Json[],
+): void {
+  invariant((state.spotlight ? 1 : 0) === sprites.length, `${orientation}/${age}: spotlight lifecycle`);
+  if (!state.spotlight) return;
+  const actual = sprites[0]!;
+  invariant(same({
+    slot: state.spotlight.slot,
+    callback: state.spotlight.callback,
+    x: state.spotlight.x,
+    y: state.spotlight.y,
+    x2: state.spotlight.x2,
+    y2: state.spotlight.y2,
+    flags: state.spotlight.flags,
+    matrixNum: state.spotlight.matrixNum,
+    matrix: state.spotlight.matrix,
+    data: state.spotlight.data,
+  }, {
+    slot: actual.slot,
+    callback: spriteCallback(actual),
+    x: actual.x,
+    y: actual.y,
+    x2: actual.x2,
+    y2: actual.y2,
+    flags: actual.flags,
+    matrixNum: actual.matrixNum,
+    matrix: actual.matrix,
+    data: actual.data,
+  }), `${orientation}/${age}: exact spotlight state`);
+  invariant(state.spotlight.template === actual.template?.symbol
+    && state.spotlight.phase === actual.data[1]
+    && state.spotlight.localAge === age - 49
+    && state.spotlight.displayedAge === age + 1, `${orientation}/${age}: spotlight source phase`);
+}
+
+function assertVerticalDips(
+  orientation: FlatterOrientation,
+  age: number,
+  input: FlatterLiveInputs,
+  state: FlatterState,
+  sprites: readonly Json[],
+): void {
+  invariant(state.verticalDips.length === sprites.length, `${orientation}/${age}: VerticalDip lifecycle`);
+  for (const dip of state.verticalDips) {
+    const actual = sprites.find((sprite) => sprite.slot === dip.slot);
+    invariant(actual, `${orientation}/${age}: VerticalDip slot ${dip.slot}`);
+    invariant(same({
+      callback: dip.callback,
+      x: dip.x,
+      y: dip.y,
+      x2: dip.x2,
+      y2: dip.y2,
+      data: dip.data,
+    }, {
+      callback: spriteCallback(actual),
+      x: actual.x,
+      y: actual.y,
+      x2: actual.x2,
+      y2: actual.y2,
+      data: actual.data,
+    }), `${orientation}/${age}: exact VerticalDip slot ${dip.slot}`);
+    const index = input.verticalDipSlots.indexOf(dip.slot);
+    const start = index === 0 ? 51 : 63;
+    const end = index === 0 ? 63 : 78;
+    invariant(index >= 0 && dip.template === actual.template?.symbol
+      && dip.start === start && dip.end === end && dip.localAge === age - start,
+    `${orientation}/${age}: VerticalDip source metadata slot ${dip.slot}`);
+  }
+}
+
+function assertConfetti(
+  orientation: FlatterOrientation,
+  age: number,
+  input: FlatterLiveInputs,
+  state: FlatterState,
+  sprites: readonly Json[],
+): void {
+  invariant(state.confetti.length === sprites.length, `${orientation}/${age}: confetti lifecycle`);
+  for (const confetti of state.confetti) {
+    const actual = sprites.find((sprite) => sprite.slot === confetti.slot);
+    invariant(actual, `${orientation}/${age}: confetti slot ${confetti.slot}`);
+    invariant(same({
+      callback: confetti.callback,
+      x: confetti.x,
+      y: confetti.y,
+      x2: confetti.x2,
+      y2: confetti.y2,
+      flags: confetti.flags,
+      data: confetti.data,
+    }, {
+      callback: spriteCallback(actual),
+      x: actual.x,
+      y: actual.y,
+      x2: actual.x2,
+      y2: actual.y2,
+      flags: actual.flags,
+      data: actual.data,
+    }), `${orientation}/${age}: exact confetti slot ${confetti.slot}`);
+    const allocation = input.confetti.find((entry) => entry.slot === confetti.slot);
+    invariant(allocation && confetti.template === actual.template?.symbol
+      && confetti.localAge === age - allocation.start,
+    `${orientation}/${age}: confetti source metadata slot ${confetti.slot}`);
+  }
+}
+
+function actualLifecycle(rows: readonly Json[]): unknown {
+  const ages = (template: string) => rows.flatMap((_, age) => owned(rows, age, template).length ? [age] : []);
+  const spotlight = ages("gFlatterSpotlightSpriteTemplate");
+  const dips = rows.flatMap((_, age) => owned(rows, age, "gVerticalDipSpriteTemplate")
+    .filter((sprite: Json) => !rows.slice(0, age).some((row) => row.sprites.some((prior: Json) => prior.slot === sprite.slot
+      && prior.template?.symbol === "gVerticalDipSpriteTemplate"))).map(() => age));
+  const confetti = allocationRows(rows);
+  const starts = confetti.reduce<Record<number, number>>((counts, entry) => {
+    counts[entry.start] = (counts[entry.start] ?? 0) + 1;
+    return counts;
+  }, {});
+  return {
+    spotlight: { start: Math.min(...spotlight), end: Math.max(...spotlight) },
+    verticalDipStarts: dips,
+    confettiStarts: starts,
+    confettiEnd: Math.max(...confetti.map((entry) => entry.end)),
+    firstInactive: rows.findIndex((row) => !row.animScriptActive),
+  };
+}
+
+function assertDisplayTransfer(
+  orientation: FlatterOrientation,
+  rows: readonly Json[],
+  age: number,
+  state: FlatterState,
+): void {
+  if (age === 0) {
+    invariant(same(state.displayTransfer, {
+      oam: "initial", matrices: "initial", palette: "initial", registers: "current-source",
+    }), `${orientation}/${age}: initial transfer`);
+    return;
+  }
+  const row = rows[age]!, previous = rows[age - 1]!;
+  invariant(same(row.hardwareOam, previous.softwareOam), `${orientation}/${age}: retained OAM transfer`);
+  invariant(same(row.hardwarePalette, previous.fadedPalette), `${orientation}/${age}: retained palette transfer`);
+  const matrixSource = rows[age === 68 ? age - 2 : age - 1]!.softwareMatrices;
+  invariant(same(row.hardwareMatrices, matrixSource), `${orientation}/${age}: retained matrix transfer`);
+  invariant(same(state.displayTransfer, {
+    oam: "preceding-software",
+    matrices: age === 68 ? "two-frame-spotlight-edge" : "preceding-software",
+    palette: "preceding-faded",
+    registers: "current-source",
+  }), `${orientation}/${age}: transfer latch`);
+}
+
 function compareRow(orientation: FlatterOrientation, rows: readonly Json[], age: number): void {
   const row = rows[age]!, input = inputFor(orientation, rows, age), state = flatterAtAge(age, input);
-  invariant(state.active === row.animScriptActive, `${orientation}/${age}: active`);
-  invariant(state.source.pointer === row.scriptPtr && state.source.pointerOffset === row.scriptOffset
+  invariant(state.age === age && state.active === row.animScriptActive, `${orientation}/${age}: active age`);
+  invariant(state.source.owner === row.scriptOwner && state.source.pointer === row.scriptPtr
+    && state.source.pointerOffset === row.scriptOffset && state.source.active === row.animScriptActive
     && state.source.wait === row.scriptWait, `${orientation}/${age}: source cursor`);
   invariant(same(state.animArgs, row.animArgs), `${orientation}/${age}: source args`);
-  invariant(same(state.battlers.target.offset, { x2: row.battlerSprites.target.x2, y2: row.battlerSprites.target.y2 }), `${orientation}/${age}: target axis`);
-  invariant((state.spotlight ? 1 : 0) === owned(rows, age, "gFlatterSpotlightSpriteTemplate").length, `${orientation}/${age}: spotlight lifecycle`);
-  invariant(state.verticalDips.length === owned(rows, age, "gVerticalDipSpriteTemplate").length, `${orientation}/${age}: VerticalDip lifecycle`);
-  invariant(state.confetti.length === owned(rows, age, "gFlatterConfettiSpriteTemplate").length, `${orientation}/${age}: confetti lifecycle`);
-  invariant(state.tasks.length === row.tasks.filter((task: Json) => task.func?.symbol === "AnimTask_HardwarePaletteFade_Step").length, `${orientation}/${age}: fade lifecycle`);
-  invariant(state.resources.spotlightLoaded === (age >= 1 && age < FLATTER_FIRST_INACTIVE_AGE)
-    && state.resources.confettiLoaded === (age >= 4 && age < FLATTER_FIRST_INACTIVE_AGE), `${orientation}/${age}: resource lifecycle`);
+  invariant(same(state.battlers.attacker.offset, { x2: row.battlerSprites.attacker.x2, y2: row.battlerSprites.attacker.y2 })
+    && same(state.battlers.target.offset, { x2: row.battlerSprites.target.x2, y2: row.battlerSprites.target.y2 }), `${orientation}/${age}: battler axes`);
+  invariant(state.battlers.attacker.side === input.attackerSide
+    && state.battlers.target.side === input.targetSide
+    && state.battlers.attacker.species === input.attackerSpecies
+    && state.battlers.target.species === input.targetSpecies
+    && same(state.battlers.attacker.center, input.attackerCenter)
+    && same(state.battlers.target.center, input.targetCenter)
+    && same(state.battlers.attacker.art, art(row, "attacker"))
+    && same(state.battlers.target.art, art(row, "target")), `${orientation}/${age}: exact battler inputs`);
+  const spotlight = owned(rows, age, "gFlatterSpotlightSpriteTemplate");
+  const dips = owned(rows, age, "gVerticalDipSpriteTemplate");
+  const confetti = owned(rows, age, "gFlatterConfettiSpriteTemplate");
+  assertSpotlight(orientation, age, state, spotlight);
+  assertVerticalDips(orientation, age, input, state, dips);
+  assertConfetti(orientation, age, input, state, confetti);
+  const fadeTasks = row.tasks.filter((task: Json) => task.func?.symbol === "AnimTask_HardwarePaletteFade_Step");
+  invariant(state.tasks.length === fadeTasks.length, `${orientation}/${age}: fade lifecycle`);
+  for (const task of state.tasks) {
+    const actual = fadeTasks.find((entry: Json) => entry.slot === task.slot);
+    invariant(actual && task.callback === actual.func.symbol && same(task.data, actual.data), `${orientation}/${age}: exact fade task`);
+    const restore = age >= 176;
+    invariant(task.role === (restore ? "restore-battle" : "fade-to-dark")
+      && task.start === (restore ? 176 : 7) && task.end === (restore ? 216 : 47)
+      && same(task.args, row.animArgs.slice(0, 5)), `${orientation}/${age}: fade task source metadata`);
+  }
+  invariant(same(state.lifecycle, actualLifecycle(rows)), `${orientation}/${age}: retained lifecycle`);
+  const tileSlot = (tag: number) => row.tileTags.indexOf(tag);
+  const paletteSlot = (tag: number) => row.paletteTags.indexOf(tag);
+  const spotlightTileSlot = tileSlot(FLATTER_SPOTLIGHT_TAG);
+  const spotlightPaletteSlot = paletteSlot(FLATTER_SPOTLIGHT_TAG);
+  const confettiTileSlot = tileSlot(FLATTER_CONFETTI_TAG);
+  const confettiPaletteSlot = paletteSlot(FLATTER_CONFETTI_TAG);
+  invariant(same(state.resources, {
+    spotlightLoaded: spotlightTileSlot >= 0 && spotlightPaletteSlot >= 0,
+    confettiLoaded: confettiTileSlot >= 0 && confettiPaletteSlot >= 0,
+    spotlightTag: spotlightTileSlot >= 0 && spotlightPaletteSlot >= 0 ? FLATTER_SPOTLIGHT_TAG : null,
+    confettiTag: confettiTileSlot >= 0 && confettiPaletteSlot >= 0 ? FLATTER_CONFETTI_TAG : null,
+    spotlightTileSlot: spotlightTileSlot >= 0 ? spotlightTileSlot : null,
+    spotlightPaletteSlot: spotlightPaletteSlot >= 0 ? spotlightPaletteSlot : null,
+    confettiTileSlot: confettiTileSlot >= 0 ? confettiTileSlot : null,
+    confettiPaletteSlot: confettiPaletteSlot >= 0 ? confettiPaletteSlot : null,
+    matrixBitmap: row.resourceAllocators.matrixBitmap,
+    allocator: row.resourceAllocators,
+  }), `${orientation}/${age}: exact resources and allocator`);
+  invariant(same(state.registers, row.registers)
+    && same(state.painterOrder, row.spriteOrder)
+    && same(state.buffers, {
+      softwareOam: row.softwareOam,
+      hardwareOam: row.hardwareOam,
+      softwareMatrices: row.softwareMatrices,
+      hardwareMatrices: row.hardwareMatrices,
+    }) && same(state.palette, {
+      unfaded: row.unfadedPalette, faded: row.fadedPalette, hardware: row.hardwarePalette,
+    }), `${orientation}/${age}: exact caller-owned display state`);
   invariant(same(state.audio.events, age === 7 ? [{ channel: "SE2", sound: "SE_M_ENCORE2", pan: input.audio.targetPan }]
     : age === 65 ? [{ channel: "SE1", sound: "SE_M_FLATTER", pan: input.audio.attackerPan }]
       : age === 75 ? [{ channel: "SE1", sound: "SE_M_FLATTER", pan: input.audio.targetPan }] : []), `${orientation}/${age}: audio`);
+  for (const event of state.audio.events) {
+    const channel = row.audio[event.channel];
+    const symbol = event.sound === "SE_M_ENCORE2" ? "se_m_encore2" : "se_m_flatter";
+    invariant(channel.songHeaderIdentity?.symbol === symbol
+      && channel.tracks[0]?.panX === event.pan
+      && (channel.tracks[0]?.flags & 3) === 3, `${orientation}/${age}: exact audio start`);
+  }
+  invariant(same(state.audio.live, row.audio) && state.rng.animation === row.animationRng,
+    `${orientation}/${age}: caller-owned audio and animation RNG`);
   invariant(state.rng.gameplayUnchanged && same(state.rng.gameplay, row.rawBattleState.gameplayRng)
     && same(state.gameplay, row.immutableState), `${orientation}/${age}: gameplay opacity`);
-  invariant(state.cleanup.firstInactive === (age === FLATTER_FIRST_INACTIVE_AGE)
-    && state.cleanup.resourcesReleased === (age === FLATTER_FIRST_INACTIVE_AGE), `${orientation}/${age}: cleanup`);
-  if (age === 0) invariant(state.displayTransfer.oam === "initial" && state.displayTransfer.matrices === "initial" && state.displayTransfer.palette === "initial", `${orientation}/${age}: initial transfer`);
-  else invariant(state.displayTransfer.oam === "preceding-software" && state.displayTransfer.palette === "preceding-faded"
-    && state.displayTransfer.matrices === (age === 68 ? "two-frame-spotlight-edge" : "preceding-software"), `${orientation}/${age}: transfer latch`);
+  const firstInactive = age === FLATTER_FIRST_INACTIVE_AGE;
+  invariant(same(state.cleanup, {
+    firstInactive,
+    visualTasks: row.visualTaskCount,
+    soundTasks: row.soundTaskCount,
+    ownedTasks: fadeTasks.length,
+    ownedSprites: spotlight.length + dips.length + confetti.length,
+    resourcesReleased: firstInactive && spotlightTileSlot < 0 && spotlightPaletteSlot < 0
+      && confettiTileSlot < 0 && confettiPaletteSlot < 0,
+  }), `${orientation}/${age}: exact cleanup`);
+  assertDisplayTransfer(orientation, rows, age, state);
   const seam = sceneOnFlatterView({ age, config: flatterConfigFor(orientation, age, input) } as SceneOnFlatterPresentationState);
   const { attacker: _attacker, target: _target, ...seamState } = seam;
   invariant(same(compact(seamState), compact(state)), `${orientation}/${age}: typed seam`);
