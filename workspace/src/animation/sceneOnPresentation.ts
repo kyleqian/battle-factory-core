@@ -989,6 +989,11 @@ import {
   type ReturnState,
 } from "./return.ts";
 import {
+  flatterAtAge,
+  type FlatterLiveInputs,
+  type FlatterState,
+} from "./flatter.ts";
+import {
   waterPulseAtAge,
   type WaterPulseLiveInputs,
   type WaterPulseState,
@@ -2847,6 +2852,21 @@ export interface SceneOnReturnConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/**
+ * Narrow Scene-ON seam for MOVE_FLATTER.  The caller owns all live sprite
+ * allocation, transfer buffers, palette/register/audio snapshots, and the
+ * presentation RNG.  Battle state and gameplay RNG remain opaque.
+ */
+export interface SceneOnFlatterConfig {
+  readonly move: "FLATTER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<FlatterLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /** Narrow Scene-ON seam for Razor Wind's setup and unleash bodies. */
 export interface SceneOnRazorWindConfig {
   readonly move: "RAZOR_WIND";
@@ -4372,6 +4392,7 @@ export type SceneOnMoveConfig =
   | SceneOnPursuitConfig
   | SceneOnPsywaveConfig
   | SceneOnReturnConfig
+  | SceneOnFlatterConfig
   | SceneOnRazorWindConfig
   | SceneOnHornDrillConfig
   | SceneOnAuroraBeamConfig
@@ -4746,6 +4767,8 @@ export type SceneOnPsywavePresentationState =
   SceneOnMovePresentationState<SceneOnPsywaveConfig>;
 export type SceneOnReturnPresentationState =
   SceneOnMovePresentationState<SceneOnReturnConfig>;
+export type SceneOnFlatterPresentationState =
+  SceneOnMovePresentationState<SceneOnFlatterConfig>;
 export type SceneOnWaterPulsePresentationState =
   SceneOnMovePresentationState<SceneOnWaterPulseConfig>;
 export type SceneOnDigPresentationState =
@@ -5198,6 +5221,11 @@ export interface SceneOnPsywaveView extends PsywaveState {
 }
 
 export interface SceneOnReturnView extends ReturnState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFlatterView extends FlatterState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8935,6 +8963,29 @@ export function sceneOnReturnView(
   const { attacker, target, animationInputs } = state.config;
   return {
     ...returnAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerCenter: attacker.geometry.animationCenter,
+      targetCenter: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_FLATTER's first source-pointer row. */
+export function sceneOnFlatterView(
+  state: SceneOnFlatterPresentationState,
+): SceneOnFlatterView {
+  if (state.config.move !== "FLATTER") {
+    throw new Error(`expected FLATTER presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...flatterAtAge(state.age, {
       ...animationInputs,
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
