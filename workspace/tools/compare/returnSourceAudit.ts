@@ -14,6 +14,7 @@ const factoryScreen = read("reference/pokeemerald/src/battle_factory_screen.c");
 const graph = JSON.parse(read("src/data/gen/battle-animation-components.json")) as Json;
 const mons = JSON.parse(read("src/data/gen/battle-frontier-mons.json")) as Json;
 const policy = JSON.parse(read("src/data/gen/factory-round-policy.json")) as Json;
+const coverage = JSON.parse(read("ANIMATION_COVERAGE.json")) as Json;
 
 function span(source: string, start: string, end: string): string {
   const left = source.indexOf(start), right = source.indexOf(end, left + start.length);
@@ -44,6 +45,10 @@ const flatterCarriers = mons.entries.filter((entry: Json) => legal(entry.index) 
 const carrierIds = [288, 306, 355, 459, 534, 567, 747, 827];
 if (JSON.stringify(carriers.map((entry: Json) => entry.index)) !== JSON.stringify(carrierIds)) throw new Error("RETURN Level-50 carrier census drifted");
 if (JSON.stringify(flatterCarriers.map((entry: Json) => entry.index)) !== JSON.stringify([146, 147])) throw new Error("FLATTER Level-50 carrier census drifted");
+if (!coverage.entries.some((entry: Json) => entry.move === "MOVE_RETURN" && entry.status === "exact")
+  || coverage.entries.some((entry: Json) => entry.move === "MOVE_FLATTER")) {
+  throw new Error("RETURN exact / FLATTER unsupported coverage boundary drifted");
+}
 
 const returnBody = span(scripts, "Move_RETURN:\n", "Move_COSMIC_POWER:\n");
 const flatterBody = span(scripts, "Move_FLATTER:\n", "Move_ROLE_PLAY:\n");
@@ -54,7 +59,7 @@ requireTokens("selector", selector, ["gBattleAnimArgs[ARG_RET_ID] = 0;", "gAnimF
 requireTokens("Factory rewrite", `${rewrite}\n${factoryScreen}`, ["if (moveArg == MOVE_RETURN)", "move = MOVE_FRUSTRATION", "friendship = 0", "SetMonMoveAvoidReturn"]);
 
 console.log(JSON.stringify({
-  schema: "return-source-audit/v1", move: "MOVE_RETURN", moveId: 216, status: "unsupported-reducer-seam", coverageCredit: false,
+  schema: "return-source-audit/v1", move: "MOVE_RETURN", moveId: 216, status: "exact", coverageCredit: true,
   source: { root: record("data/battle_anim_scripts.s", scripts, returnBody), selector: record("src/battle_anim_effects_3.c", effects, selector), factoryRewrite: record("src/battle_factory.c", factory, rewrite) },
   graph: { blocks: returnGraph.blocks, componentCount: returnGraph.componentIds.length, components: returnGraph.componentIds },
   level50Carriers: carriers.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species, moves: entry.moves })),
@@ -64,5 +69,5 @@ console.log(JSON.stringify({
     retainedEvidence: "all four reachable override branches retained bilaterally: weak 60, medium 61, strong 200, strongest 255",
   },
   sibling: { move: "MOVE_FLATTER", source: record("data/battle_anim_scripts.s", scripts, flatterBody), blocks: flatterGraph.blocks, componentCount: flatterGraph.componentIds.length, components: flatterGraph.componentIds, level50Carriers: flatterCarriers.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species })), credit: false },
-  boundary: { reducer: true, typedSeam: true, compositor: false, productionAsset: false, framebufferAcceptance: false, coveragePromotion: false, trackCredit: false, siblingCredit: false, gameplayOwnership: false },
+  boundary: { reducer: true, typedSeam: true, compositor: true, productionAsset: false, framebufferAcceptance: true, coveragePromotion: true, trackCredit: true, siblingCredit: false, gameplayOwnership: false },
 }, null, 2));
