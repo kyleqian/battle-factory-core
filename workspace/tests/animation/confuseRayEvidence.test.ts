@@ -102,12 +102,12 @@ describe("MOVE_CONFUSE_RAY dense unsupported checkpoint", () => {
     expect(receipt.siblingAudit).toMatchObject({ move: "MOVE_WILL_O_WISP", promoted: false });
   });
 
-  it("promotes only Confuse Ray after complete bilateral production equality", () => {
+  it("retains independent exact credit for Confuse Ray and Will-O-Wisp", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_CONFUSE_RAY"))
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_WILL_O_WISP"))
-      .toMatchObject({ status: "staged" });
+      .toMatchObject({ status: "exact" });
   });
 
   it("ratchets only the independently receipted AdjustPanningVar component track", () => {
@@ -120,6 +120,6 @@ describe("MOVE_CONFUSE_RAY dense unsupported checkpoint", () => {
     });
     expect(coverage.componentTracks.find((track: { id: string }) =>
       track.id === "adjust-panning-var-confuse-ray").goal)
-      .toContain("MOVE_WILL_O_WISP now has independent complete dense evidence");
+      .toContain("MOVE_WILL_O_WISP now independently proves its distinct ten-component body through complete bilateral actual-core cleanup acceptance");
   });
 });
