@@ -50,9 +50,9 @@ describe("MOVE_SUPERPOWER source and legal bilateral staging checkpoint", () => 
     expect(mons.every((mon: Json) => mon.level === 50 && mon.moves.length === 4)).toBe(true);
   });
 
-  it("keeps the coverage boundary staged and the sole five-component track unfulfilled", () => {
+  it("keeps the historical source receipt isolated after exact promotion", () => {
     const coverage = readJson("ANIMATION_COVERAGE.json");
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SUPERPOWER")).toMatchObject({ status: "staged" });
-    expect(coverage.componentTracks.find((track: Json) => track.id === "superpower-rock-orb-fire")).toMatchObject({ components: ["asset:ANIM_TAG_FLAT_ROCK", "asset:ANIM_TAG_METEOR", "sprite:gSuperpowerFireballSpriteTemplate", "sprite:gSuperpowerOrbSpriteTemplate", "sprite:gSuperpowerRockSpriteTemplate"], representatives: ["MOVE_SUPERPOWER"], fulfilled: false });
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SUPERPOWER")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "superpower-rock-orb-fire")).toMatchObject({ components: ["asset:ANIM_TAG_FLAT_ROCK", "asset:ANIM_TAG_METEOR", "sprite:gSuperpowerFireballSpriteTemplate", "sprite:gSuperpowerOrbSpriteTemplate", "sprite:gSuperpowerRockSpriteTemplate"], representatives: ["MOVE_SUPERPOWER"], fulfilled: true });
   });
 });

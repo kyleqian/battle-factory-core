@@ -28,10 +28,10 @@ describe("MOVE_SUPERPOWER complete bilateral Scene-ON evidence", () => {
     }
   });
 
-  it("keeps the staged/no-credit boundary and exactly one unfulfilled novel track", () => {
+  it("keeps the historical evidence receipt isolated after exact promotion", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SUPERPOWER")).toMatchObject({ status: "staged" });
-    expect(coverage.componentTracks.find((track: Json) => track.id === "superpower-rock-orb-fire")).toMatchObject({ representatives: ["MOVE_SUPERPOWER"], fulfilled: false });
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_SUPERPOWER")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "superpower-rock-orb-fire")).toMatchObject({ representatives: ["MOVE_SUPERPOWER"], fulfilled: true });
     expect(fixture.controls).toMatchObject({ named: { MOVE_SUPERPOWER: "staged", MOVE_REVENGE: "not-started" }, transferCredit: false });
   });
 });

@@ -113,6 +113,7 @@ import {
   type HornDrillState,
 } from "./hornDrill.ts";
 import { megaHornAtAge, type MegaHornLiveInputs, type MegaHornState } from "./megaHorn.ts";
+import { superpowerAtAge, type SuperpowerLiveInputs, type SuperpowerState } from "./superpower.ts";
 import {
   auroraBeamAtAge,
   type AuroraBeamGeometry,
@@ -2877,6 +2878,16 @@ export interface SceneOnMegaHornConfig {
     "attackerSide"|"targetSide"|"attackerSpecies"|"targetSpecies"|"attackerCenter"|"targetCenter">>;
 }
 
+/** Narrow Scene-ON presentation seam for MOVE_SUPERPOWER. */
+export interface SceneOnSuperpowerConfig {
+  readonly move: "SUPERPOWER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<SuperpowerLiveInputs,
+    "attackerSide"|"targetSide"|"attackerSpecies"|"targetSpecies"|"attackerCenter"|"targetCenter">>;
+}
+
 /**
  * Narrow Scene-ON seam for MOVE_RETURN. The caller carries the live
  * friendship-selected presentation snapshot; damage, Return power, gameplay
@@ -4434,6 +4445,7 @@ export type SceneOnMoveConfig =
   | SceneOnExtrasensoryConfig
   | SceneOnWillOWispConfig
   | SceneOnMegaHornConfig
+  | SceneOnSuperpowerConfig
   | SceneOnReturnConfig
   | SceneOnFlatterConfig
   | SceneOnRazorWindConfig
@@ -4814,6 +4826,8 @@ export type SceneOnWillOWispPresentationState =
   SceneOnMovePresentationState<SceneOnWillOWispConfig>;
 export type SceneOnMegaHornPresentationState =
   SceneOnMovePresentationState<SceneOnMegaHornConfig>;
+export type SceneOnSuperpowerPresentationState =
+  SceneOnMovePresentationState<SceneOnSuperpowerConfig>;
 export type SceneOnReturnPresentationState =
   SceneOnMovePresentationState<SceneOnReturnConfig>;
 export type SceneOnFlatterPresentationState =
@@ -5278,6 +5292,10 @@ export interface SceneOnWillOWispView extends WillOWispState {
   readonly target: SceneOnPresentationBattler;
 }
 export interface SceneOnMegaHornView extends MegaHornState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+export interface SceneOnSuperpowerView extends SuperpowerState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -9062,6 +9080,16 @@ export function sceneOnMegaHornView(state: SceneOnMegaHornPresentationState): Sc
     attackerSpecies: attacker.species, targetSpecies: target.species,
     attackerCenter: attacker.geometry.animationCenter, targetCenter: target.geometry.animationCenter }),
     attacker, target };
+}
+
+/** `age=0` is MOVE_SUPERPOWER's first resource-command row. */
+export function sceneOnSuperpowerView(state: SceneOnSuperpowerPresentationState): SceneOnSuperpowerView {
+  if(state.config.move!=="SUPERPOWER")throw new Error(`expected SUPERPOWER presentation, got ${state.config.move}`);
+  const{attacker,target,animationInputs}=state.config;
+  return{...superpowerAtAge(state.age,{...animationInputs,
+    attackerSide:attacker.geometry.side,targetSide:target.geometry.side,
+    attackerSpecies:attacker.species,targetSpecies:target.species,
+    attackerCenter:attacker.geometry.animationCenter,targetCenter:target.geometry.animationCenter}),attacker,target};
 }
 
 /** `age=0` is MOVE_RETURN's root resource-command source row. */

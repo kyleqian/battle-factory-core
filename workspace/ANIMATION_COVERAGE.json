@@ -7980,13 +7980,15 @@
   },
   {
    "move": "MOVE_SUPERPOWER",
-   "status": "staged",
+   "status": "exact",
    "covered": [
     "source classification confirms the exact 14-component Move_SUPERPOWER graph and the five sole unrepresented components: FLAT_ROCK, METEOR, gSuperpowerFireballSpriteTemplate, gSuperpowerOrbSpriteTemplate, and gSuperpowerRockSpriteTemplate",
     "a reproducible production asset byte-pins CIRCLE_OF_LIGHT tag 10212 with its ElectricOrbs palette, METEOR tag 10256, and FLAT_ROCK tag 10257 from source PNG through 4bpp tile packing and GBA LZ77 ROM decompression; it also pins the three OAM/template/callback bodies and the orb affine 32,+4,-6,+6 program",
     "legal bilateral Battle Scene ON staging retains 248 dense semantic and raw-RGB rows per player-back and opponent-front orientation through first inactive cleanup, with two fresh byte-identical runs per orientation",
     "move-owned maps measure orb affine allocation, five rock lifetimes and trajectories, fireball translation/flips, attacker monbg and alpha, BG-Y shake, target ShakeMon2, audio, resources, predecessor display latches, opaque gameplay state/RNG, and teardown",
-    "this is an evidence-only checkpoint: no production reducer, typed seam, compositor, actual-core framebuffer acceptance, promotion, sibling, shared-component, or gameplay-state credit is claimed"
+    "the pure source-relative reducer and narrow typed Scene-ON seam retain the complete 187-byte cursor body, all live sprite/task/OAM/matrix/palette/register/resource/audio state, side-selected attacker monbg, BG-Y shake, target ShakeMon2, opaque gameplay state/RNG, and first-inactive cleanup",
+    "the generic live production display plan and compositor use live species/presentation identities, sides, geometry, hardware buffers, allocator ranges, painter order, resource tags, and presentation RNG; all 496 component, typed-seam, chronological raw-RGB, and shared-core framebuffer rows pass twice fresh with zero residual pixels",
+    "a material CROBAT/BLISSEY species-art, side/orientation, geometry, allocation/order/matrix, and presentation-RNG control changes the framebuffer while gameplay state and gameplay RNG remain the same opaque references; no sibling or shared-component credit transfers"
    ],
    "evidence": [
     "tools/compare/superpowerSourceAudit.ts",
@@ -8007,10 +8009,17 @@
     "tools/compare/evidence/superpower-changemap-opponent.json",
     "tests/animation/superpowerSourceStaging.test.ts",
     "tests/animation/superpowerEvidenceCheckpoint.test.ts",
+    "src/animation/superpower.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tools/compare/verifySuperpowerReducer.ts",
+    "tools/compare/superpowerActualCore.ts",
+    "tests/animation/superpowerReducer.test.ts",
+    "tests/animation/superpowerActualCore.test.ts",
     "ANIMATION_LATCHES.md"
    ],
-   "remaining": "Implement and independently accept the source-relative Superpower reducer, narrow typed Scene-ON seam, generic compositor, material altered control, and twice-fresh actual-core zero-residual framebuffer proof for the five novel components; keep MOVE_SUPERPOWER staged/unsupported and the sole track unfulfilled until then.",
-   "acceptance": "Staged only: 496 retained rows and twice-fresh receipts are source/evidence inputs for a future live implementation; exact and component-track credit remain false."
+   "acceptance": "Two independent actual-core verifier processes each pass all 496 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest bfa61d58bf15a4909fe3d49b0e21f4f687b57ddd2cf7d7fcc507f1377f73b3b0; player/opponent RGB sequences 69d70845cc2e2d7b0d82d490db9365c7bfc467eb65325fe0be80ee729c91c580 / b1aa859dc305a11257c5e01b701bf234ebda29087c5103fad9871d149eb3bf9c."
   }
  ],
  "queue": [],
@@ -10649,7 +10658,7 @@
     "sprite:gSuperpowerRockSpriteTemplate"
    ],
    "representatives": ["MOVE_SUPERPOWER"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/superpowerSourceAudit.ts",
     "tools/compare/evidence/superpower-source-audit.json",
@@ -10658,9 +10667,17 @@
     "tests/animation/superpowerAssets.test.ts",
     "tools/compare/superpowerEvidence.ts",
     "tools/compare/fixtures/superpower-evidence.json",
+    "src/animation/superpower.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tools/compare/verifySuperpowerReducer.ts",
+    "tools/compare/superpowerActualCore.ts",
+    "tests/animation/superpowerReducer.test.ts",
+    "tests/animation/superpowerActualCore.test.ts",
     "ANIMATION_LATCHES.md"
    ],
-   "goal": "UNFULFILLED: MOVE_SUPERPOWER is the sole representative and remains staged/unsupported after source classification and legal bilateral evidence only. The five novel components still need a future source-relative live reducer, typed presentation seam, generic compositor, and actual-core framebuffer acceptance; no sibling or shared-component credit is transferred."
+   "goal": "FULFILLED by MOVE_SUPERPOWER alone after complete source classification, source-extracted CIRCLE_OF_LIGHT/METEOR/FLAT_ROCK assets, legal bilateral dense evidence, a source-relative reducer, typed Scene-ON seam, generic live compositor, material altered control, and twice-fresh 496/496 zero-residual actual-core acceptance through cleanup. No sibling or shared-component credit is transferred."
   }
  ],
  "variantAudits": {

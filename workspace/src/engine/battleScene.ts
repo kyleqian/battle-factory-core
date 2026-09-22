@@ -705,6 +705,7 @@ import foresightAsset from "../animation/assets/foresight.json" with { type: "js
 import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
 import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
 import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
+import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
@@ -1004,6 +1005,7 @@ import {
   sceneOnExtrasensoryView,
   sceneOnWillOWispView,
   sceneOnMegaHornView,
+  sceneOnSuperpowerView,
   sceneOnPursuitView,
   sceneOnPursuitDisplayPlan,
   sceneOnReturnView,
@@ -1285,6 +1287,7 @@ import {
   type SceneOnExtrasensoryConfig,
   type SceneOnWillOWispConfig,
   type SceneOnMegaHornConfig,
+  type SceneOnSuperpowerConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -1381,6 +1384,7 @@ import { psywaveDisplayPlan } from "../animation/psywave.ts";
 import { extrasensoryDisplayPlan } from "../animation/extrasensory.ts";
 import { willOWispDisplayPlan } from "../animation/willOWisp.ts";
 import { megaHornDisplayPlan } from "../animation/megaHorn.ts";
+import { superpowerDisplayPlan } from "../animation/superpower.ts";
 import {
   hypnosisBgPaletteRowAtAge,
   HYPNOSIS_TARGET_BLEND_COLOR,
@@ -2549,6 +2553,19 @@ const willOWispArt = willOWispAsset as unknown as {
 };
 const megaHornArt = megaHornAsset as unknown as {
   hornHit2: { tileset: Tileset; palette: RgbColor[] };
+};
+const superpowerSourceArt = superpowerAsset as unknown as { resources: {
+  circleOfLight: { art: { tiles: Tileset["tiles"]; palette: RgbColor[] } };
+  meteor: { art: { tiles: Tileset["tiles"]; palette: RgbColor[] } };
+  flatRock: { art: { tiles: Tileset["tiles"]; palette: RgbColor[] } };
+} };
+const superpowerArt = {
+  orb: { tileset: { columns: 8, rows: 8, tiles: superpowerSourceArt.resources.circleOfLight.art.tiles } as Tileset,
+    palette: superpowerSourceArt.resources.circleOfLight.art.palette },
+  meteor: { tileset: { columns: 8, rows: 8, tiles: superpowerSourceArt.resources.meteor.art.tiles } as Tileset,
+    palette: superpowerSourceArt.resources.meteor.art.palette },
+  rock: { tileset: { columns: 2, rows: 10, tiles: superpowerSourceArt.resources.flatRock.art.tiles } as Tileset,
+    palette: superpowerSourceArt.resources.flatRock.art.palette },
 };
 const skillSwapOrbArt = (skillSwapOrbAsset as {
   orb: { tileset: Tileset; palette: RgbColor[] };
@@ -24385,6 +24402,64 @@ export function renderSceneOnMovePresentation(
         : `Foe ${view.battlers.attacker.art.displaySpecies} used`,
       "PSYWAVE!", 99);
     return;
+  }
+
+  if (state.config.move === "SUPERPOWER") {
+    const moveState=state as SceneOnMovePresentationState<SceneOnSuperpowerConfig>;
+    const view=sceneOnSuperpowerView(moveState),plan=superpowerDisplayPlan(view);
+    if(view.attacker.geometry.side===view.target.geometry.side)throw new Error("SUPERPOWER requires opposite sides");
+    type BattlerArt=BattleBackSpriteAsset|OpponentFrontSpriteAsset;
+    const artFor=(battler:typeof view.attacker,displaySpecies:string):BattlerArt=>{const found=battler.geometry.side==="player"?
+      (battleBackSpritesAsset as Record<string,BattleBackSpriteAsset>)[displaySpecies]:
+      (opponentFrontSpritesAsset as Record<string,OpponentFrontSpriteAsset>)[displaySpecies];
+      if(!found)throw new Error(`SUPERPOWER missing live battler art ${displaySpecies}`);return found;};
+    const tilesFor=(art:BattlerArt,side:"player"|"opponent"):Tileset=>side==="player"?art.tileset:subTileset(art.tileset,0,8);
+    const rgb555=(word:number):RgbColor=>{const packed=mgbaColorFromBgr555(word);return{r:packed&0xff,g:packed>>>8&0xff,b:packed>>>16&0xff};};
+    const paletteBank=(bank:number):RgbColor[]=>view.palette.hardware.slice(bank*16,bank*16+16).map(rgb555);
+    const signed=(value:number)=>{const raw=value&0x1ff;return raw>=256?raw-512:raw;};
+    const top=(attr:readonly[number,number,number])=>({x:signed(attr[1]),y:(attr[0]&0xff)>=160?(attr[0]&0xff)-256:attr[0]&0xff});
+    drawScrolledTileBg(fb,battleBg.static.tileset,battleBg.static.tilemap,[2,3,4].map(paletteBank),
+      view.registers.bg3hofs??0,view.registers.bg3vofs??0);
+    const attackerArt=artFor(view.attacker,view.battlers.attacker.art.displaySpecies);
+    const targetArt=artFor(view.target,view.battlers.target.art.displaySpecies);
+    if(moveState.age===0){const opponent=view.attacker.geometry.side==="opponent"?
+      {battler:view.attacker,object:plan.attacker,species:view.battlers.attacker.art.displaySpecies}:
+      {battler:view.target,object:plan.target,species:view.battlers.target.art.displaySpecies};
+      if(opponent.object){const offset=(opponent.object.attr[0]&0xff)-8;drawSourceOpponentEnemyShadow(fb,opponent.species,
+        {x:opponent.battler.geometry.battlePositionCenter.x,y:opponent.battler.geometry.battlePositionCenter.y-offset});}}
+    if(view.monbg.active){const x=-signed(view.registers[view.monbg.selected==="bg1"?"bg1hofs":"bg2hofs"]??0);
+      const y=-signed(view.registers[view.monbg.selected==="bg1"?"bg1vofs":"bg2vofs"]??0);
+      drawSpriteSheet(fb,tilesFor(attackerArt,view.attacker.geometry.side),paletteBank(view.monbg.paletteBank),x,y);}
+    const nonObjTarget2=fb.slice(),disabled=(attr:readonly[number,number,number])=>(attr[0]&0x300)===0x200;
+    const entries=[...(plan.attacker?[plan.attacker]:[]),...(plan.target?[plan.target]:[]),...plan.orbs,...plan.rocks,...plan.meteors]
+      .filter((object,index,array)=>array.findIndex(candidate=>candidate.oamIndex===object.oamIndex)===index)
+      .sort((left,right)=>right.oamIndex-left.oamIndex);
+    for(const object of entries){if(disabled(object.attr))continue;const tile=object.attr[2]&0x3ff;
+      const bank=16+(object.attr[2]>>>12&0xf),corner=top(object.attr);
+      if(tile>=view.resources.orbTileBase&&tile<view.resources.orbTileBase+64){
+        if(view.alpha.active)drawSpriteSheetAffineRotateBlendedOverFb(fb,nonObjTarget2,superpowerArt.orb.tileset,paletteBank(bank),
+          corner.x+64,corner.y+64,object.matrix[0],object.matrix[1],object.matrix[2],object.matrix[3],view.alpha.eva,view.alpha.evb,true);
+        else drawSpriteSheetAffineRotate(fb,superpowerArt.orb.tileset,paletteBank(bank),corner.x+64,corner.y+64,
+          object.matrix[0],object.matrix[1],object.matrix[2],object.matrix[3],undefined,true);continue;}
+      if(tile>=view.resources.rockTileBase&&tile<view.resources.rockTileBase+20){const offset=tile-view.resources.rockTileBase;
+        drawSpriteSheet(fb,subTileset(superpowerArt.rock.tileset,Math.floor(offset/2),2),paletteBank(bank),corner.x,corner.y);continue;}
+      if(tile>=view.resources.meteorTileBase&&tile<view.resources.meteorTileBase+64){
+        drawSpriteSheetFlipped(fb,superpowerArt.meteor.tileset,paletteBank(bank),corner.x,corner.y,
+          (object.attr[1]&0x1000)!==0,(object.attr[1]&0x2000)!==0);continue;}
+      const attacker=object.attr[2]===view.battlers.attacker.art.attr[2],battler=attacker?view.attacker:view.target;
+      drawSpriteSheet(fb,tilesFor(attacker?attackerArt:targetArt,battler.geometry.side),paletteBank(bank),corner.x,corner.y);
+    }
+    const playerSpecies=view.attacker.geometry.side==="player"?view.battlers.attacker.art.displaySpecies:view.battlers.target.art.displaySpecies;
+    const opponentSpecies=view.attacker.geometry.side==="opponent"?view.battlers.attacker.art.displaySpecies:view.battlers.target.art.displaySpecies;
+    const profile=moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb,0,composeOpponentHealthbox(healthboxAssemblyAssets,{name:opponentSpecies,level:50,
+      gender:profile.opponentGender??"male",hpFraction:profile.opponentHp/profile.opponentMaxHp,status:profile.opponentStatus??"none"}));
+    drawComposedPlayerHealthbox(fb,composePlayerHealthbox(playerHealthboxAssets,{name:playerSpecies,level:50,
+      gender:profile.playerGender??"male",hpFraction:profile.playerHp/profile.playerMaxHp,status:profile.playerStatus??"none",
+      currentHp:profile.playerHp,maxHp:profile.playerMaxHp}));
+    drawTileBg(fb,battleWindow.tileset,battleWindow.tilemap,battleWindow.palette);
+    drawMessageTextLines(fb,view.attacker.geometry.side==="player"?`${view.battlers.attacker.art.displaySpecies} used`:
+      `Foe ${view.battlers.attacker.art.displaySpecies} used`,"SUPERPOWER!",99);return;
   }
 
   if (state.config.move === "MEGAHORN") {

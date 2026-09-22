@@ -69,9 +69,9 @@ describe("animation coverage ledger", () => {
         tier: "level50",
         total: 276,
         unsupported: 6,
-        staged: 1,
+        staged: 0,
         partial: 0,
-        exact: 269,
+        exact: 270,
       },
       {
         tier: "openOnly",
@@ -95,7 +95,7 @@ describe("animation coverage ledger", () => {
   it("queues unfinished Level 50 moves before Open-only Outrage", () => {
     const queue = queuedAnimationMoves();
     expect(queue.map(({ move }) => move)).toEqual([
-      "MOVE_SUPERPOWER", "MOVE_REVENGE", "MOVE_SPIT_UP",
+      "MOVE_REVENGE", "MOVE_SPIT_UP",
       "MOVE_FURY_CUTTER", "MOVE_CURSE", "MOVE_ICE_BALL",
       "MOVE_OUTRAGE",
     ]);
