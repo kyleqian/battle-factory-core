@@ -1,6 +1,6 @@
 /** Source-relative Scene-ON reducer for MOVE_EXTRASENSORY. */
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
-import { decodeGbaHardwareOam } from "./gbaObjCompositor.ts";
+import { decodeGbaHardwareOam, type GbaHardwareOamObject } from "./gbaObjCompositor.ts";
 
 export type ExtrasensorySide = "player" | "opponent";
 export type ExtrasensoryMatrix = readonly [number, number, number, number];
@@ -129,9 +129,9 @@ export interface ExtrasensoryState {
 }
 
 export interface ExtrasensoryDisplayPlan {
-  readonly attacker: ReturnType<typeof decodeGbaHardwareOam>[number];
-  readonly target: ReturnType<typeof decodeGbaHardwareOam>[number];
-  readonly clone: ReturnType<typeof decodeGbaHardwareOam>[number] | null;
+  readonly attacker: GbaHardwareOamObject<ExtrasensoryMatrix>;
+  readonly target: GbaHardwareOamObject<ExtrasensoryMatrix>;
+  readonly clone: GbaHardwareOamObject<ExtrasensoryMatrix> | null;
 }
 
 export const EXTRASENSORY_ROOT = 0x082c_efec;
@@ -248,7 +248,24 @@ export function extrasensoryAtAge(age: number, input: Readonly<ExtrasensoryLiveI
       : age < 141 ? [age < 94 ? 1 : 2, 891, 12, 1, 1, 0, 0, age >= 141 ? -1 : 0]
         : [2, 891, 12, 1, 1, 0, 0, -1];
   const displayedAge = age - 1;
-  const displayedStage = stageAt(displayedAge);
+  // The stop-state row is retained in RAM at source ages 66/92/118, but
+  // mGBA has already restored the base HOFS on the following scanout.
+  const displayedStage = age >= 43 && age <= 66 ? stageAt(age - 1)
+    : age >= 69 && age <= 92 ? stageAt(age - 1)
+      : age >= 95 && age <= 118 ? stageAt(age - 1) : null;
+  const currentScanline = input.scanline.buffers[input.scanline.srcBuffer]!.slice(0, 160);
+  const precedingScanline = generatedScanline(displayedAge, input);
+  // During the severe-distortion program's data[1]=5 callback, the
+  // concurrently growing affine clone pushes the player-back task workload
+  // across the scanline-DMA handoff: scanlines through 28 have consumed the
+  // preceding bank while 29 onward consume the current bank.  This is keyed
+  // to live component state, not a battle tick; the opponent slice begins at
+  // 48 and is wholly after the boundary.
+  const splitScanout = input.targetSide === "opponent"
+    && stage?.stage === 2 && distortionData(age, input)?.[1] === 5;
+  const displayedScanline = splitScanout
+    ? currentScanline.map((value, y) => y <= 28 ? precedingScanline[y]! : value)
+    : currentScanline;
   const audioEvents = [42, 68, 94].includes(age)
     ? [{ sound: age === 94 ? "SE_M_LEER" as const : "SE_M_BIND" as const,
       pan: age === 94 ? "attacker" as const : "target" as const }]
@@ -268,7 +285,7 @@ export function extrasensoryAtAge(age: number, input: Readonly<ExtrasensoryLiveI
       upper: input.targetSide === "opponent" ? 72 : 112,
       baseHofs: input.targetSide === "opponent" ? -144 : -40,
       sourceScanlineHofs: generatedScanline(age, input),
-      scanlineHofs: displayedStage ? input.scanline.buffers[input.scanline.srcBuffer]!.slice(0, 160) : generatedScanline(displayedAge, input),
+      scanlineHofs: displayedStage ? displayedScanline : precedingScanline,
     },
     psychicBackground: age >= 20 && age < 141,
     targetOnMonBg: age >= 39 && age <= 122,
@@ -288,11 +305,19 @@ export function extrasensoryAtAge(age: number, input: Readonly<ExtrasensoryLiveI
 export function extrasensoryDisplayPlan(state: Readonly<ExtrasensoryState>): ExtrasensoryDisplayPlan {
   const objects = decodeGbaHardwareOam(state.buffers.hardwareOam, state.buffers.hardwareMatrices, IDENTITY);
   const find = (attr2: number, role: string) => {
-    const result = objects.find((entry) => entry.attr[2] === attr2 && (entry.attr[0] & 0x0200) === 0);
+    const matches = objects.filter((entry) => entry.attr[2] === attr2);
+    const result = role === "attacker" && matches.length > 1
+      ? matches.find((entry) => (entry.attr[0] & 0x0300) !== 0x0300)
+      : matches[0];
+    if (!result && role === "target" && state.targetOnMonBg) {
+      return { oamIndex: 127, attr: state.battlers.target.art.attr,
+        matrixNum: 0, matrix: IDENTITY };
+    }
     if (!result) throw new Error(`missing Extrasensory ${role} hardware OAM`);
     return result;
   };
-  const clone = state.clone === null ? null : objects.find((entry) => entry.oamIndex === state.clone!.slot) ?? null;
+  const clone = objects.find((entry) => entry.attr[2] === state.battlers.attacker.art.attr[2]
+    && (entry.attr[0] & 0x0300) === 0x0300) ?? null;
   return { attacker: find(state.battlers.attacker.art.attr[2], "attacker"),
     target: find(state.battlers.target.art.attr[2], "target"), clone };
 }

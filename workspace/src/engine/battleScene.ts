@@ -999,6 +999,7 @@ import {
   sceneOnNightmareView,
   sceneOnSkillSwapView,
   sceneOnPsywaveView,
+  sceneOnExtrasensoryView,
   sceneOnPursuitView,
   sceneOnPursuitDisplayPlan,
   sceneOnReturnView,
@@ -1277,6 +1278,7 @@ import {
   type SceneOnNightmareConfig,
   type SceneOnSkillSwapConfig,
   type SceneOnPsywaveConfig,
+  type SceneOnExtrasensoryConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -1370,6 +1372,7 @@ import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE, confusionTarge
 import { psychicBgPaletteRowAtAge, PSYCHIC_WINDOW2_START_AGE, psychicTargetEffectAtAge, PSYCHIC_BLEND_TINT_COLOR } from "../animation/psychic.ts";
 import { skillSwapDisplayPlan } from "../animation/skillSwap.ts";
 import { psywaveDisplayPlan } from "../animation/psywave.ts";
+import { extrasensoryDisplayPlan } from "../animation/extrasensory.ts";
 import {
   hypnosisBgPaletteRowAtAge,
   HYPNOSIS_TARGET_BLEND_COLOR,
@@ -24366,6 +24369,119 @@ export function renderSceneOnMovePresentation(
         ? `${view.battlers.attacker.art.displaySpecies} used`
         : `Foe ${view.battlers.attacker.art.displaySpecies} used`,
       "PSYWAVE!", 99);
+    return;
+  }
+
+  if (state.config.move === "EXTRASENSORY") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnExtrasensoryConfig>;
+    const view = sceneOnExtrasensoryView(moveState);
+    const plan = extrasensoryDisplayPlan(view);
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("EXTRASENSORY presentation requires battlers on opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker, displaySpecies: string): BattlerArt => {
+      const found = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[displaySpecies]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[displaySpecies];
+      if (!found) throw new Error(`EXTRASENSORY missing live battler art ${displaySpecies}`);
+      return found;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const darken = (palette: readonly RgbColor[]): RgbColor[] =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(color.r | color.g << 8 | color.b << 16,
+          view.registers.bldy ?? 0);
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      });
+    if (view.psychicBackground) {
+      drawExtractedTileBg(fb, { tileset: battleAnimPsychicBg.tileset,
+        tilemap: battleAnimPsychicBg.tilemap,
+        subpalettes: [darken(paletteBank(2))] });
+    } else {
+      drawExtractedTileBg(fb, { tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: [2, 3, 4].map((bank) => darken(paletteBank(bank))) });
+    }
+    const top = (attr: readonly [number, number, number]): { x: number; y: number } => {
+      const rawX = attr[1] & 0x1ff, rawY = attr[0] & 0xff;
+      return { x: rawX >= 240 ? rawX - 512 : rawX,
+        y: rawY >= 160 ? rawY - 256 : rawY };
+    };
+    const attackerArt = artFor(view.attacker, view.battlers.attacker.art.displaySpecies);
+    const targetArt = artFor(view.target, view.battlers.target.art.displaySpecies);
+    if (moveState.age === 0) {
+      const opponent = view.attacker.geometry.side === "opponent"
+        ? { battler: view.attacker, object: plan.attacker,
+          displaySpecies: view.battlers.attacker.art.displaySpecies }
+        : { battler: view.target, object: plan.target,
+          displaySpecies: view.battlers.target.art.displaySpecies };
+      const frontPictureOffset = (opponent.object.attr[0] & 0xff) - 8;
+      drawSourceOpponentEnemyShadow(fb, opponent.displaySpecies, {
+        x: opponent.battler.geometry.battlePositionCenter.x,
+        y: opponent.battler.geometry.battlePositionCenter.y - frontPictureOffset,
+      });
+    }
+    if (view.targetOnMonBg) {
+      const scanlines = view.distortion.displayed
+        ? view.distortion.scanlineHofs
+        : Array(160).fill(view.distortion.baseHofs);
+      drawDragonDanceMonBg(fb, {
+        tileset: tilesFor(targetArt, view.target.geometry.side),
+        palette: paletteBank(view.background.monbgPaletteBank),
+      }, view.target.geometry.spriteCorner, scanlines, view.distortion.baseHofs);
+    }
+    const nonObjTarget2 = fb.slice();
+    // The affine transparent clone has attacker+1 subpriority, so it paints
+    // behind the real attacker and blends only with the non-OBJ backdrop.
+    if (plan.clone) {
+      const cloneTop = top(plan.clone.attr);
+      const centerX = cloneTop.x + 64, centerY = cloneTop.y + 64;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb, nonObjTarget2, tilesFor(attackerArt, view.attacker.geometry.side),
+        paletteBank(16 + (plan.clone.attr[2] >>> 12 & 0xf)), centerX, centerY,
+        plan.clone.matrix[0], plan.clone.matrix[1], plan.clone.matrix[2], plan.clone.matrix[3],
+        view.registers.bldalpha & 0xff, view.registers.bldalpha >>> 8 & 0xff, true,
+      );
+    }
+    const drawBattler = (battler: typeof view.attacker, object: typeof plan.attacker,
+      art: BattlerArt): void => {
+      const corner = top(object.attr);
+      drawSpriteSheet(fb, tilesFor(art, battler.geometry.side),
+        paletteBank(16 + (object.attr[2] >>> 12 & 0xf)), corner.x, corner.y);
+    };
+    drawBattler(view.attacker, plan.attacker, attackerArt);
+    if (!view.targetOnMonBg) drawBattler(view.target, plan.target, targetArt);
+
+    const playerDisplaySpecies = view.attacker.geometry.side === "player"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const opponentDisplaySpecies = view.attacker.geometry.side === "opponent"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentDisplaySpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerDisplaySpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: profile.playerStatus ?? "none", currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.battlers.attacker.art.displaySpecies} used`
+        : `Foe ${view.battlers.attacker.art.displaySpecies} used`,
+      "EXTRASENSORY!", 99);
     return;
   }
 

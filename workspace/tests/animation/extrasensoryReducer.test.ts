@@ -15,11 +15,11 @@ describe("MOVE_EXTRASENSORY source-relative reducer and typed Scene-ON seam", ()
     expect(verifyExtrasensoryReducer()).toEqual(first);
     expect(first).toEqual({
       "player-back": { rows: 161, passes: 2, componentRows: 322, seamRows: 322,
-        componentSha256: "8d8f985654671686d1ded13f011f1e914c902f037d1c563621556d4b956e2c6c",
-        seamSha256: "8d8f985654671686d1ded13f011f1e914c902f037d1c563621556d4b956e2c6c" },
+        componentSha256: "a58c6b13ef148dda82b392db6a9f28005888f2089d77d7fa666fba4e05a0d142",
+        seamSha256: "a58c6b13ef148dda82b392db6a9f28005888f2089d77d7fa666fba4e05a0d142" },
       "opponent-front": { rows: 161, passes: 2, componentRows: 322, seamRows: 322,
-        componentSha256: "f11470c8f45b9357fd34f93b2707fcee79c9d41479f1938c042e0f2d634f817d",
-        seamSha256: "f11470c8f45b9357fd34f93b2707fcee79c9d41479f1938c042e0f2d634f817d" },
+        componentSha256: "46271a3de2a7f4117da8c2006d49072c920291563d1e1534dd57de39b3539939",
+        seamSha256: "46271a3de2a7f4117da8c2006d49072c920291563d1e1534dd57de39b3539939" },
       bilateral: { rows: 322, passes: 2, componentRows: 644, seamRows: 644 },
     });
   });

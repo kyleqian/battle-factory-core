@@ -196,6 +196,7 @@ import {
   type SceneOnNightmareConfig,
   type SceneOnSkillSwapConfig,
   type SceneOnPsywaveConfig,
+  type SceneOnExtrasensoryConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -378,6 +379,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "PSYWAVE") {
     const psywavePresentation = presentation as SceneOnMovePresentationState<SceneOnPsywaveConfig>;
     renderSceneOnMovePresentation(framebuffer, psywavePresentation);
+    return;
+  }
+  if (presentation.config.move === "EXTRASENSORY") {
+    const extrasensoryPresentation = presentation as SceneOnMovePresentationState<SceneOnExtrasensoryConfig>;
+    renderSceneOnMovePresentation(framebuffer, extrasensoryPresentation);
     return;
   }
   if (presentation.config.move === "PURSUIT") {

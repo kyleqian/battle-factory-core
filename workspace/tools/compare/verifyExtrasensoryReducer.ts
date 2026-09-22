@@ -41,8 +41,8 @@ function art(sprite: Json, displaySpecies: string) {
 
 function liveSpecies(window: ExtrasensoryWindow) {
   return window === "player-back"
-    ? { attacker: "NUZLEAF", target: "SHUCKLE", attackerDisplay: "KADABRA", targetDisplay: "MAGNETON" }
-    : { attacker: "NUZLEAF", target: "SHUCKLE", attackerDisplay: "KADABRA", targetDisplay: "MAGNETON" };
+    ? { attacker: "NUZLEAF", target: "SHUCKLE", attackerDisplay: "NUZLEAF", targetDisplay: "SHUCKLE" }
+    : { attacker: "NUZLEAF", target: "SHUCKLE", attackerDisplay: "NUZLEAF", targetDisplay: "SHUCKLE" };
 }
 
 export function extrasensoryInputsFor(window: ExtrasensoryWindow,
