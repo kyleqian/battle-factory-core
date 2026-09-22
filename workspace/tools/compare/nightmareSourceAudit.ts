@@ -150,7 +150,6 @@ const namedControls = Object.fromEntries(namedControlMoves.map((move) => {
   if (!entry) throw new Error(`missing Nightmare identity control ${move}`);
   requireTokens(`Nightmare identity control ${move}`, scripts, [`${move.replace("MOVE_", "Move_")}:`]);
   return [move, {
-    status: coverage.entries.find((candidate: Json) => candidate.move === move)?.status ?? "unsupported",
     sharedComponents: expectedComponents.filter((component) => entry.componentIds.includes(component)),
   }];
 }));
