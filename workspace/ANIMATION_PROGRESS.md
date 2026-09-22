@@ -1,3 +1,35 @@
+# Animation worker checkpoint — MOVE_REVENGE source + dense evidence (2026-09-22)
+
+- **State / scope:** `MOVE_REVENGE` remains **unsupported** with no exact,
+  partial, or staged credit, so Level 50 remains **270/276 exact, 0 partial, 0
+  staged, 6 unsupported**. Source classification pins all 14 components and
+  isolates the five-component `revenge-purple-scratch-persist-hit` track as
+  explicitly **unfulfilled**. No reducer, typed seam, production compositor,
+  core dispatch, framebuffer acceptance, sibling/shared credit, gameplay/RNG,
+  facility, boundary, or barrier ownership moved.
+- **Evidence:** Complete legal party-before-init Scene-ON staging retains every
+  dense semantic and raw RGB row through first inactive cleanup twice fresh:
+  player-back MACHAMP frames **238..382 / 145 rows** and opponent-front
+  QWILFISH frames **235..379 / 145 rows**. Semantic hashes are
+  `5b432fa8…` / `b41abed8…`; chronological RGB sequences are `1fcf5f56…` /
+  `47e7b19f…`; normalized maps are `3202d7fa…` / `749c863d…`. Both maps pin
+  the side-relative small/big scratch animation, attacker red blend cycle,
+  horizontal lunge, target ShakeMon2, two persistent hitsplats, resource/audio
+  lifetimes, OAM/matrix RAM+1, the age-4 same-row monbg palette exception,
+  opaque stable battle state/gameplay RNG, and zero-owned age-144 cleanup.
+- **Verification / next:** Evidence commit `3113f7965`; source and evidence
+  verifiers each reproduce twice deterministically. The affected source /
+  evidence / boundary / inventory union passes **4 files / 15 tests**;
+  typecheck, coverage, animation audit, and `git diff --check` pass. The
+  requested `npm run animation:diff-check` alias does not exist on this tree;
+  `ANIMATION_VERIFICATION.md` names `git diff --check`, which was run directly.
+  No production/configuration file changed, so the recorded supervisor full
+  suite/build baseline remains applicable. Resume `MOVE_REVENGE` only with
+  source-extracted PURPLE_SCRATCH/PURPLE_SWIPE assets, a source-relative
+  reducer, narrow seam, generic compositor, material control, and twice-fresh
+  **290/290** zero-residual actual-core proof. Do not infer sibling credit or
+  start `MOVE_SPIT_UP`.
+
 # Animation worker closure — MOVE_SUPERPOWER exact (2026-09-22)
 
 - **State / scope:** `MOVE_SUPERPOWER` is **exact**, so Level 50 is **270/276
