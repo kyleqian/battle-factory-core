@@ -1,3 +1,26 @@
+# Animation supervisor verification — MOVE_EXTRASENSORY exact closure (2026-09-22 supervisor)
+
+- **State / merge:** Recovered, independently reviewed, and fast-forwarded the
+  completed Sol/high worker commits `ca3edcb0d`..`1becd7511`, then landed the
+  move-local receipt repair `ca8944465`. `MOVE_EXTRASENSORY` and its sole
+  `extrasensory-distortion-clone` track are exact; Level 50 is **267/276 exact,
+  0 partial / 0 staged, 9 unsupported**. Open-only remains **0/1 exact**. No
+  sibling/shared-Psychic credit, boundary/barrier, or gameplay/RNG owner moved.
+- **Independent proof:** Two fresh supervisor actual-core processes each pass
+  all **322/322** component, typed-seam, chronological raw-RGB, and shared-core
+  framebuffer rows with **0 residual pixels**, digest `266a4d21…`, through
+  bilateral age-160 cleanup. The altered CROBAT/BLISSEY control changes live
+  presentation output while opaque gameplay state/RNG remain unchanged.
+- **Gates / next:** Affected Extrasensory + Psychic controls + boundary/inventory
+  pass **11 files / 65 tests**; smoke passes **8 / 448**. The final repaired tree
+  passes full `npm test` **1,416 files / 11,468 tests** with **44 / 223 skipped**
+  in **1,752.28s**, and `npm run build` passes **822 modules** with only the
+  inherited chunk warning. Coverage reports **9 ready + 1 blocked**; animation
+  audit and diff checks pass. Next dispatch `MOVE_WILL_O_WISP` for complete
+  source/carrier classification, legal bilateral staging, dense evidence, and
+  its own latch maps; Helping Hand remains blocked on legal doubles staging.
+  **For the main program:** nothing blocking.
+
 # Animation worker checkpoint — MOVE_EXTRASENSORY dense/latch evidence (2026-09-22)
 
 - **State / scope:** `MOVE_EXTRASENSORY` is now **staged**, so Level 50 is
@@ -52,33 +75,3 @@
   clean at `f5df34bb2`, with no code/evidence to recover; its research log and
   a maintenance note are retained on Hetzner. Campaign end, cadence, provider
   routing, and paused Rust lane are unchanged.
-
-# Animation maintenance — derived work queue and idle-run repair (2026-09-22)
-
-- **State:** Coverage remains **266/276 exact**, **10 unsupported**. The work
-  report now accounts for **9 ready + 1 explicitly blocked**. Prior entries
-  calling the empty manual list an exhausted/unauthorized queue are superseded.
-- **Did:** Commit `c94af4788` derives every unfinished Level 50 move from the
-  inventory. The manual list changes priority only; accepted moves leave the
-  derived queue automatically. Source-component reuse ranks candidates but
-  grants no acceptance. Helping Hand alone has an evidence-backed doubles
-  blocker and explicit resume condition. Unchanged, genuinely idle sessions
-  now skip full gates and no-change ledger commits under the shared contract.
-- **Verification:** Scoped local and Hetzner gates on `c94af4788`: **5 files /
-  16 tests** pass, including queue regression cases, inventory/boundary checks,
-  audit-byte isolation, and fresh bilateral Helping Hand failure-before-animation
-  proof. Typecheck, runner checks, coverage, asset audit, Scene-ON oracle info,
-  and diff checks pass. Logs: `/var/lib/pokebench-autonomy/maintenance/20260922/`.
-  Production sources/assets/dependencies/configuration are unchanged from
-  `056e9978f`'s fresh **1,411 files / 11,451 tests** and **821-module build**
-  receipt. Reuse that full baseline plus this scoped tooling receipt; only
-  ledger/archive docs follow `c94af4788`.
-- **Next:** Dispatch **Extrasensory** (the current first ready move), initially
-  source + legal bilateral staging + dense evidence in one bounded assignment.
-  Its two components without an exact representative are
-  `AnimTask_ExtrasensoryDistortion` and `AnimTask_TransparentCloneGrowAndShrink`;
-  shared Psychic backgrounds supply source references, never inherited latch
-  or framebuffer proof. Then advance the derived queue. Keep Helping Hand's
-  success body unsupported until legal doubles staging exists. Nightmare's
-  contest-only arm does not block singles moves. Existing campaign end,
-  cadence, provider routing, and paused Rust lane remain unchanged.
