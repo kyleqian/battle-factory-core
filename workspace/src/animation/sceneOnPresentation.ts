@@ -983,6 +983,11 @@ import {
   type PsywaveState,
 } from "./psywave.ts";
 import {
+  extrasensoryAtAge,
+  type ExtrasensoryLiveInputs,
+  type ExtrasensoryState,
+} from "./extrasensory.ts";
+import {
   returnDisplayPlan,
   returnAtAge,
   type ReturnLiveInputs,
@@ -2838,6 +2843,17 @@ export interface SceneOnPsywaveConfig {
       | "attackerAnimationCenter" | "targetAnimationCenter">>;
 }
 
+/** Narrow Scene-ON seam for MOVE_EXTRASENSORY presentation only. */
+export interface SceneOnExtrasensoryConfig {
+  readonly move: "EXTRASENSORY";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<ExtrasensoryLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /**
  * Narrow Scene-ON seam for MOVE_RETURN. The caller carries the live
  * friendship-selected presentation snapshot; damage, Return power, gameplay
@@ -4392,6 +4408,7 @@ export type SceneOnMoveConfig =
   | SceneOnSkillSwapConfig
   | SceneOnPursuitConfig
   | SceneOnPsywaveConfig
+  | SceneOnExtrasensoryConfig
   | SceneOnReturnConfig
   | SceneOnFlatterConfig
   | SceneOnRazorWindConfig
@@ -4766,6 +4783,8 @@ export type SceneOnPursuitPresentationState =
   SceneOnMovePresentationState<SceneOnPursuitConfig>;
 export type SceneOnPsywavePresentationState =
   SceneOnMovePresentationState<SceneOnPsywaveConfig>;
+export type SceneOnExtrasensoryPresentationState =
+  SceneOnMovePresentationState<SceneOnExtrasensoryConfig>;
 export type SceneOnReturnPresentationState =
   SceneOnMovePresentationState<SceneOnReturnConfig>;
 export type SceneOnFlatterPresentationState =
@@ -5217,6 +5236,11 @@ export interface SceneOnPursuitView extends PursuitState {
 }
 
 export interface SceneOnPsywaveView extends PsywaveState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnExtrasensoryView extends ExtrasensoryState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8948,6 +8972,29 @@ export function sceneOnPsywaveView(
       targetPictureCenter: target.geometry.battlePositionCenter,
       attackerAnimationCenter: attacker.geometry.animationCenter,
       targetAnimationCenter: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_EXTRASENSORY's first root resource-command row. */
+export function sceneOnExtrasensoryView(
+  state: SceneOnExtrasensoryPresentationState,
+): SceneOnExtrasensoryView {
+  if (state.config.move !== "EXTRASENSORY") {
+    throw new Error(`expected EXTRASENSORY presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...extrasensoryAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerCenter: attacker.geometry.animationCenter,
+      targetCenter: target.geometry.animationCenter,
     }),
     attacker,
     target,
