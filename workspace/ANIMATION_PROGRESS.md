@@ -1,3 +1,38 @@
+# Animation worker checkpoint — MOVE_SUPERPOWER source/evidence staging (2026-09-22)
+
+- **State / scope:** `MOVE_SUPERPOWER` is **staged/unsupported**, so Level 50 is
+  **269/276 exact, 0 partial, 1 staged, 6 unsupported**; Open-only remains
+  **0/1 exact**. Source classification confirms 14 components and creates the
+  sole-representative, precisely five-component
+  `superpower-rock-orb-fire` track, which remains **unfulfilled**. No reducer,
+  typed seam, compositor, actual-core framebuffer acceptance, promotion,
+  sibling/shared credit, gameplay/RNG, facility, or boundary credit moved.
+- **Evidence:** Legal Scene-ON MechanicLab parties retain complete dense state
+  and every raw RGB frame through cleanup: player-back **79..326 / 248 rows**
+  and opponent-front **81..328 / 248 rows**, with two fresh byte-identical
+  runs per orientation. Player hashes are dense
+  `6a8950947ea4f16d5e70162e676e5ca64b92486751e35a77b888a5051f7e4a8b`,
+  probe `b9ded455e88f6f01c9fe05b3bcc8143f733013fadfa0cf49dd7ff3cd92ef06ec`,
+  RGB sequence `69d70845cc2e2d7b0d82d490db9365c7bfc467eb65325fe0be80ee729c91c580`,
+  map `ac78be9e9040db45a1ad7e330dba3c8897ebd65ac030dc72c9d7c317eb5c9ba4`;
+  opponent hashes are dense
+  `8c9ac82a2863c6eb4d03b92462e91d491628062f66f8db919eb05ef47cc8715f`,
+  probe `b8a3a06431970e197a2584c53edd9e4b414ad02c7bcb764a479e8162f6a4cbba`,
+  RGB sequence `b1aa859dc305a11257c5e01b701bf234ebda29087c5103fad9871d149eb3bf9c`,
+  map `0641f09f9af2f5a4e5321006498c969252e381833145674ce1cfec51a4550c4f`.
+  The source audit receipt is
+  `066cbc1291900aa3e47b85cc5adb7112a0f0b05bfbab91dc4ef2dcc6b0d2c03b`.
+  Both maps independently measure orb/rock/fireball lifetimes and flips,
+  target ShakeMon2 RAM+2 axes, BG-Y/monbg/alpha timing, audio, allocators,
+  opaque gameplay state/RNG, predecessor OAM/matrix latches, the age-10 sole
+  palette exception, and zero-owned cleanup at age 247.
+- **Verification / next:** `superpowerSourceStaging.test.ts` and
+  `superpowerEvidenceCheckpoint.test.ts` pass **6/6**; the strict source and
+  evidence verifiers, legal-party validators, coverage/track boundary, and
+  receipt hashes are green. Resume only when a source-relative live reducer,
+  narrow seam, generic compositor, material control, and actual-core
+  zero-residual proof can be implemented; do not begin MOVE_REVENGE.
+
 # Animation worker closure — MOVE_MEGAHORN exact (2026-09-22)
 
 - **State / scope:** `MOVE_MEGAHORN` is **exact**, so Level 50 is **269/276

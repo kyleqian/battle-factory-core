@@ -1,0 +1,7598 @@
+{
+  "schema": "superpower-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SUPERPOWER",
+  "moveId": 276,
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "sourceAudit": true,
+    "completePointerBody": true,
+    "fullDenseRowsRetained": true,
+    "rawRgbRetained": true,
+    "normalizedBankedMaps": true,
+    "twiceFreshByteIdentical": true,
+    "legalBilateralParties": true,
+    "hitLegallyConstrained": true,
+    "orbAffine": true,
+    "fiveRockTrajectories": true,
+    "fireballTranslationAndFlips": true,
+    "attackerMonbg": true,
+    "alphaBlend": true,
+    "targetShakeMon2": true,
+    "bgYShake": true,
+    "audioAndResources": true,
+    "firstInactiveCleanup": true,
+    "latchMeasured": true,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "actualCoreFramebufferAcceptance": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "gameplayStateOwned": false,
+    "boundaryOrBarrierChanged": false
+  },
+  "source": {
+    "rootStart": "0x082cdfa3",
+    "rootEndExclusive": "0x082ce05e",
+    "components": 14,
+    "novelComponents": [
+      "asset:ANIM_TAG_FLAT_ROCK",
+      "asset:ANIM_TAG_METEOR",
+      "sprite:gSuperpowerFireballSpriteTemplate",
+      "sprite:gSuperpowerOrbSpriteTemplate",
+      "sprite:gSuperpowerRockSpriteTemplate"
+    ],
+    "audit": "tools/compare/superpowerSourceAudit.ts",
+    "receipt": "tools/compare/evidence/superpower-source-audit.json",
+    "probe": "tools/compare/superpowerProbe.py",
+    "verifier": "tools/compare/superpowerEvidence.ts"
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "rows": {
+      "player-back": 248,
+      "opponent-front": 248
+    },
+    "totalRows": 496,
+    "firstInactiveCleanupRetained": true,
+    "productionFramebufferCompared": false
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-superpower-player-nidoqueen-opponent-onix.json",
+      "scenarioSha256": "4d81e056455d1b4e23f68e0ba64b781052f6d0fdd94b3eb3b5355e7742b81d38",
+      "denseState": "tools/compare/evidence/superpower-player-dense-state.json.gz",
+      "denseStateSha256": "6a8950947ea4f16d5e70162e676e5ca64b92486751e35a77b888a5051f7e4a8b",
+      "probeJsonSha256": "b9ded455e88f6f01c9fe05b3bcc8143f733013fadfa0cf49dd7ff3cd92ef06ec",
+      "rawRgbArchive": "tools/compare/evidence/superpower-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "3f413c64dfe5502faea1db99666313663e43aedeb3308df47d71e7a7dafa8259",
+      "rawRgbSequenceSha256": "69d70845cc2e2d7b0d82d490db9365c7bfc467eb65325fe0be80ee729c91c580",
+      "changeMap": "tools/compare/evidence/superpower-changemap-player.json",
+      "changeMapSha256": "ac78be9e9040db45a1ad7e330dba3c8897ebd65ac030dc72c9d7c317eb5c9ba4",
+      "sourceWindow": {
+        "startFrame": 79,
+        "endFrame": 326,
+        "frameCount": 248,
+        "sourceFrameCount": 248
+      },
+      "summary": {
+        "latches": {
+          "hardwareOamEqualsPrecedingSoftware": "247/247",
+          "hardwareMatricesEqualsPrecedingSoftware": "247/247",
+          "hardwarePaletteEqualsPrecedingFaded": "246/247",
+          "oamExceptions": [],
+          "matrixExceptions": [],
+          "paletteExceptions": [
+            10
+          ],
+          "changedPaletteBanks": [
+            9,
+            23,
+            24,
+            25
+          ],
+          "selectedBg": "gBattle_BG2",
+          "monbgSpriteSlot": 6,
+          "paletteBankTransitions": {
+            "9": {
+              "faded": [
+                10
+              ],
+              "hardware": [
+                10
+              ]
+            },
+            "23": {
+              "faded": [
+                1
+              ],
+              "hardware": [
+                2
+              ]
+            },
+            "24": {
+              "faded": [
+                4
+              ],
+              "hardware": [
+                5
+              ]
+            },
+            "25": {
+              "faded": [
+                7
+              ],
+              "hardware": [
+                8
+              ]
+            }
+          }
+        },
+        "lifecycle": {
+          "sprites": [
+            {
+              "id": "5:gSuperpowerRockSpriteTemplate",
+              "start": 77,
+              "end": 204,
+              "first": {
+                "slot": 5,
+                "template": "gSuperpowerRockSpriteTemplate",
+                "callback": "AnimSuperpowerRock_Step1",
+                "x": 200,
+                "y": 119,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  119,
+                  0,
+                  0,
+                  0,
+                  30624,
+                  0,
+                  96,
+                  0
+                ],
+                "matrix": [
+                  232,
+                  0,
+                  0,
+                  232
+                ],
+                "attr": [
+                  111,
+                  16576,
+                  39349
+                ],
+                "subpriority": 3,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "AnimSuperpowerRock_Step2",
+                "x": 245,
+                "y": 55,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  104,
+                  -45,
+                  3928,
+                  885,
+                  19200,
+                  0,
+                  96,
+                  0
+                ],
+                "matrix": [
+                  227,
+                  0,
+                  0,
+                  227
+                ],
+                "attr": [
+                  47,
+                  16621,
+                  39349
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "7:gSuperpowerRockSpriteTemplate",
+              "start": 87,
+              "end": 205,
+              "first": {
+                "slot": 7,
+                "template": "gSuperpowerRockSpriteTemplate",
+                "callback": "AnimSuperpowerRock_Step1",
+                "x": 20,
+                "y": 119,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  111,
+                  0,
+                  0,
+                  0,
+                  30472,
+                  0,
+                  248,
+                  0
+                ],
+                "matrix": [
+                  254,
+                  0,
+                  0,
+                  254
+                ],
+                "attr": [
+                  111,
+                  16396,
+                  39361
+                ],
+                "subpriority": 3,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "AnimSuperpowerRock_Step2",
+                "x": 59,
+                "y": -6,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  104,
+                  -45,
+                  944,
+                  -94,
+                  2944,
+                  0,
+                  248,
+                  0
+                ],
+                "matrix": [
+                  232,
+                  0,
+                  0,
+                  232
+                ],
+                "attr": [
+                  242,
+                  16435,
+                  39361
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "3:gSuperpowerOrbSpriteTemplate",
+              "start": 13,
+              "end": 209,
+              "first": {
+                "slot": 3,
+                "template": "gSuperpowerOrbSpriteTemplate",
+                "callback": "AnimSuperpowerOrb_Step",
+                "x": 72,
+                "y": 94,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1,
+                  12,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "matrix": [
+                  1820,
+                  0,
+                  0,
+                  1820
+                ],
+                "attr": [
+                  1822,
+                  49160,
+                  31025
+                ],
+                "subpriority": 38,
+                "persistentOrder": 7
+              },
+              "last": {
+                "callback": "DestroySpriteAndMatrix",
+                "x": 72,
+                "y": 94,
+                "x2": 104,
+                "y2": -45,
+                "data": [
+                  0,
+                  1664,
+                  721,
+                  26624,
+                  11536,
+                  0,
+                  26445,
+                  2058
+                ],
+                "matrix": [
+                  254,
+                  0,
+                  0,
+                  254
+                ],
+                "attr": [
+                  2033,
+                  49264,
+                  31025
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "12:gSuperpowerFireballSpriteTemplate",
+              "start": 193,
+              "end": 209,
+              "first": {
+                "slot": 12,
+                "template": "gSuperpowerFireballSpriteTemplate",
+                "callback": "AnimTranslateLinear_WithFollowup",
+                "x": 72,
+                "y": 94,
+                "x2": 6,
+                "y2": -2,
+                "data": [
+                  15,
+                  1664,
+                  721,
+                  1664,
+                  721,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  254,
+                  0,
+                  0,
+                  254
+                ],
+                "attr": [
+                  60,
+                  49198,
+                  35353
+                ],
+                "subpriority": 37,
+                "persistentOrder": 12
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x": 72,
+                "y": 94,
+                "x2": 104,
+                "y2": -45,
+                "data": [
+                  0,
+                  1664,
+                  721,
+                  26624,
+                  11536,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  254,
+                  0,
+                  0,
+                  254
+                ],
+                "attr": [
+                  17,
+                  49296,
+                  35353
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "4:gShakeMonOrPlatformSpriteTemplate",
+              "start": 35,
+              "end": 214,
+              "first": {
+                "slot": 4,
+                "template": "gShakeMonOrPlatformSpriteTemplate",
+                "callback": "AnimShakeMonOrBattlePlatforms_Step",
+                "x": 176,
+                "y": 49,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  -4,
+                  0,
+                  1,
+                  179,
+                  0,
+                  1,
+                  11810,
+                  514
+                ],
+                "matrix": [
+                  528,
+                  0,
+                  0,
+                  528
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 28,
+                "persistentOrder": 9
+              },
+              "last": {
+                "callback": "AnimShakeMonOrBattlePlatforms_Step",
+                "x": 176,
+                "y": 49,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  -4,
+                  1,
+                  1,
+                  0,
+                  0,
+                  1,
+                  11810,
+                  514
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "11:gSuperpowerRockSpriteTemplate",
+              "start": 117,
+              "end": 215,
+              "first": {
+                "slot": 11,
+                "template": "gSuperpowerRockSpriteTemplate",
+                "callback": "AnimSuperpowerRock_Step1",
+                "x": 60,
+                "y": 118,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  87,
+                  0,
+                  0,
+                  0,
+                  30432,
+                  0,
+                  288,
+                  0
+                ],
+                "matrix": [
+                  266,
+                  0,
+                  0,
+                  266
+                ],
+                "attr": [
+                  110,
+                  16436,
+                  39357
+                ],
+                "subpriority": 3,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "AnimSuperpowerRock_Step2",
+                "x": 125,
+                "y": -8,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  104,
+                  -45,
+                  2000,
+                  -114,
+                  5376,
+                  0,
+                  288,
+                  0
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  240,
+                  16501,
+                  39357
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "10:gSuperpowerRockSpriteTemplate",
+              "start": 107,
+              "end": 216,
+              "first": {
+                "slot": 10,
+                "template": "gSuperpowerRockSpriteTemplate",
+                "callback": "AnimSuperpowerRock_Step1",
+                "x": 160,
+                "y": 119,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  95,
+                  0,
+                  0,
+                  0,
+                  30528,
+                  0,
+                  192,
+                  0
+                ],
+                "matrix": [
+                  232,
+                  0,
+                  0,
+                  232
+                ],
+                "attr": [
+                  111,
+                  16536,
+                  39345
+                ],
+                "subpriority": 3,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "AnimSuperpowerRock_Step2",
+                "x": 244,
+                "y": 11,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  104,
+                  -45,
+                  3912,
+                  183,
+                  12288,
+                  0,
+                  192,
+                  0
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  3,
+                  16620,
+                  39345
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "9:gSuperpowerRockSpriteTemplate",
+              "start": 97,
+              "end": 219,
+              "first": {
+                "slot": 9,
+                "template": "gSuperpowerRockSpriteTemplate",
+                "callback": "AnimSuperpowerRock_Step1",
+                "x": 130,
+                "y": 119,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  103,
+                  0,
+                  0,
+                  0,
+                  30560,
+                  0,
+                  160,
+                  0
+                ],
+                "matrix": [
+                  254,
+                  0,
+                  0,
+                  254
+                ],
+                "attr": [
+                  111,
+                  16506,
+                  39353
+                ],
+                "subpriority": 3,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "AnimSuperpowerRock_Step2",
+                "x": 247,
+                "y": 4,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  104,
+                  -45,
+                  3952,
+                  70,
+                  14080,
+                  0,
+                  160,
+                  0
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  252,
+                  16623,
+                  39353
+                ],
+                "invisible": false
+              }
+            }
+          ],
+          "tasks": [
+            {
+              "id": "0:AnimTask_ShakeMon2_Step",
+              "start": 211,
+              "end": 240,
+              "first": {
+                "slot": 0,
+                "func": "AnimTask_ShakeMon2_Step",
+                "data": [
+                  8,
+                  15,
+                  1,
+                  1,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  8,
+                  1,
+                  1,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "1:Task_UpdateMonBg",
+              "start": 10,
+              "end": 244,
+              "first": {
+                "slot": 1,
+                "func": "Task_UpdateMonBg",
+                "data": [
+                  6,
+                  72,
+                  86,
+                  -40,
+                  -54,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  6,
+                  72,
+                  86,
+                  -40,
+                  -54,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:Task_ClearMonBg",
+              "start": 242,
+              "end": 244,
+              "first": {
+                "slot": 0,
+                "func": "Task_ClearMonBg",
+                "data": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  0,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            }
+          ]
+        },
+        "transitions": {
+          "sourcePointer": [
+            [
+              0,
+              [
+                137158563,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              1,
+              [
+                137158566,
+                0,
+                3,
+                1
+              ]
+            ],
+            [
+              2,
+              [
+                137158566,
+                0,
+                3,
+                0
+              ]
+            ],
+            [
+              4,
+              [
+                137158569,
+                1,
+                6,
+                1
+              ]
+            ],
+            [
+              5,
+              [
+                137158569,
+                1,
+                6,
+                0
+              ]
+            ],
+            [
+              7,
+              [
+                137158572,
+                0,
+                9,
+                1
+              ]
+            ],
+            [
+              8,
+              [
+                137158572,
+                0,
+                9,
+                0
+              ]
+            ],
+            [
+              10,
+              [
+                137158574,
+                0,
+                11,
+                1
+              ]
+            ],
+            [
+              11,
+              [
+                137158574,
+                0,
+                11,
+                0
+              ]
+            ],
+            [
+              13,
+              [
+                137158594,
+                0,
+                31,
+                20
+              ]
+            ],
+            [
+              14,
+              [
+                137158594,
+                0,
+                31,
+                19
+              ]
+            ],
+            [
+              15,
+              [
+                137158594,
+                0,
+                31,
+                18
+              ]
+            ],
+            [
+              16,
+              [
+                137158594,
+                0,
+                31,
+                17
+              ]
+            ],
+            [
+              17,
+              [
+                137158594,
+                0,
+                31,
+                16
+              ]
+            ],
+            [
+              18,
+              [
+                137158594,
+                0,
+                31,
+                15
+              ]
+            ],
+            [
+              19,
+              [
+                137158594,
+                0,
+                31,
+                14
+              ]
+            ],
+            [
+              20,
+              [
+                137158594,
+                0,
+                31,
+                13
+              ]
+            ],
+            [
+              21,
+              [
+                137158594,
+                0,
+                31,
+                12
+              ]
+            ],
+            [
+              22,
+              [
+                137158594,
+                0,
+                31,
+                11
+              ]
+            ],
+            [
+              23,
+              [
+                137158594,
+                0,
+                31,
+                10
+              ]
+            ],
+            [
+              24,
+              [
+                137158594,
+                0,
+                31,
+                9
+              ]
+            ],
+            [
+              25,
+              [
+                137158594,
+                0,
+                31,
+                8
+              ]
+            ],
+            [
+              26,
+              [
+                137158594,
+                0,
+                31,
+                7
+              ]
+            ],
+            [
+              27,
+              [
+                137158594,
+                0,
+                31,
+                6
+              ]
+            ],
+            [
+              28,
+              [
+                137158594,
+                0,
+                31,
+                5
+              ]
+            ],
+            [
+              29,
+              [
+                137158594,
+                0,
+                31,
+                4
+              ]
+            ],
+            [
+              30,
+              [
+                137158594,
+                0,
+                31,
+                3
+              ]
+            ],
+            [
+              31,
+              [
+                137158594,
+                0,
+                31,
+                2
+              ]
+            ],
+            [
+              32,
+              [
+                137158594,
+                0,
+                31,
+                1
+              ]
+            ],
+            [
+              33,
+              [
+                137158594,
+                0,
+                31,
+                0
+              ]
+            ],
+            [
+              35,
+              [
+                137158622,
+                0,
+                59,
+                40
+              ]
+            ],
+            [
+              36,
+              [
+                137158622,
+                0,
+                59,
+                39
+              ]
+            ],
+            [
+              37,
+              [
+                137158622,
+                0,
+                59,
+                38
+              ]
+            ],
+            [
+              38,
+              [
+                137158622,
+                0,
+                59,
+                37
+              ]
+            ],
+            [
+              39,
+              [
+                137158622,
+                0,
+                59,
+                36
+              ]
+            ],
+            [
+              40,
+              [
+                137158622,
+                0,
+                59,
+                35
+              ]
+            ],
+            [
+              41,
+              [
+                137158622,
+                0,
+                59,
+                34
+              ]
+            ],
+            [
+              42,
+              [
+                137158622,
+                0,
+                59,
+                33
+              ]
+            ],
+            [
+              43,
+              [
+                137158622,
+                0,
+                59,
+                32
+              ]
+            ],
+            [
+              44,
+              [
+                137158622,
+                0,
+                59,
+                31
+              ]
+            ],
+            [
+              45,
+              [
+                137158622,
+                0,
+                59,
+                30
+              ]
+            ],
+            [
+              46,
+              [
+                137158622,
+                0,
+                59,
+                29
+              ]
+            ],
+            [
+              47,
+              [
+                137158622,
+                0,
+                59,
+                28
+              ]
+            ],
+            [
+              48,
+              [
+                137158622,
+                0,
+                59,
+                27
+              ]
+            ],
+            [
+              49,
+              [
+                137158622,
+                0,
+                59,
+                26
+              ]
+            ],
+            [
+              50,
+              [
+                137158622,
+                0,
+                59,
+                25
+              ]
+            ],
+            [
+              51,
+              [
+                137158622,
+                0,
+                59,
+                24
+              ]
+            ],
+            [
+              52,
+              [
+                137158622,
+                0,
+                59,
+                23
+              ]
+            ],
+            [
+              53,
+              [
+                137158622,
+                0,
+                59,
+                22
+              ]
+            ],
+            [
+              54,
+              [
+                137158622,
+                0,
+                59,
+                21
+              ]
+            ],
+            [
+              55,
+              [
+                137158622,
+                0,
+                59,
+                20
+              ]
+            ],
+            [
+              56,
+              [
+                137158622,
+                0,
+                59,
+                19
+              ]
+            ],
+            [
+              57,
+              [
+                137158622,
+                0,
+                59,
+                18
+              ]
+            ],
+            [
+              58,
+              [
+                137158622,
+                0,
+                59,
+                17
+              ]
+            ],
+            [
+              59,
+              [
+                137158622,
+                0,
+                59,
+                16
+              ]
+            ],
+            [
+              60,
+              [
+                137158622,
+                0,
+                59,
+                15
+              ]
+            ],
+            [
+              61,
+              [
+                137158622,
+                0,
+                59,
+                14
+              ]
+            ],
+            [
+              62,
+              [
+                137158622,
+                0,
+                59,
+                13
+              ]
+            ],
+            [
+              63,
+              [
+                137158622,
+                0,
+                59,
+                12
+              ]
+            ],
+            [
+              64,
+              [
+                137158622,
+                0,
+                59,
+                11
+              ]
+            ],
+            [
+              65,
+              [
+                137158622,
+                0,
+                59,
+                10
+              ]
+            ],
+            [
+              66,
+              [
+                137158622,
+                0,
+                59,
+                9
+              ]
+            ],
+            [
+              67,
+              [
+                137158622,
+                0,
+                59,
+                8
+              ]
+            ],
+            [
+              68,
+              [
+                137158622,
+                0,
+                59,
+                7
+              ]
+            ],
+            [
+              69,
+              [
+                137158622,
+                0,
+                59,
+                6
+              ]
+            ],
+            [
+              70,
+              [
+                137158622,
+                0,
+                59,
+                5
+              ]
+            ],
+            [
+              71,
+              [
+                137158622,
+                0,
+                59,
+                4
+              ]
+            ],
+            [
+              72,
+              [
+                137158622,
+                0,
+                59,
+                3
+              ]
+            ],
+            [
+              73,
+              [
+                137158622,
+                0,
+                59,
+                2
+              ]
+            ],
+            [
+              74,
+              [
+                137158622,
+                0,
+                59,
+                1
+              ]
+            ],
+            [
+              75,
+              [
+                137158622,
+                0,
+                59,
+                0
+              ]
+            ],
+            [
+              77,
+              [
+                137158639,
+                1,
+                76,
+                8
+              ]
+            ],
+            [
+              78,
+              [
+                137158639,
+                1,
+                76,
+                7
+              ]
+            ],
+            [
+              79,
+              [
+                137158639,
+                1,
+                76,
+                6
+              ]
+            ],
+            [
+              80,
+              [
+                137158639,
+                1,
+                76,
+                5
+              ]
+            ],
+            [
+              81,
+              [
+                137158639,
+                1,
+                76,
+                4
+              ]
+            ],
+            [
+              82,
+              [
+                137158639,
+                1,
+                76,
+                3
+              ]
+            ],
+            [
+              83,
+              [
+                137158639,
+                1,
+                76,
+                2
+              ]
+            ],
+            [
+              84,
+              [
+                137158639,
+                1,
+                76,
+                1
+              ]
+            ],
+            [
+              85,
+              [
+                137158639,
+                1,
+                76,
+                0
+              ]
+            ],
+            [
+              87,
+              [
+                137158656,
+                0,
+                93,
+                8
+              ]
+            ],
+            [
+              88,
+              [
+                137158656,
+                0,
+                93,
+                7
+              ]
+            ],
+            [
+              89,
+              [
+                137158656,
+                0,
+                93,
+                6
+              ]
+            ],
+            [
+              90,
+              [
+                137158656,
+                0,
+                93,
+                5
+              ]
+            ],
+            [
+              91,
+              [
+                137158656,
+                0,
+                93,
+                4
+              ]
+            ],
+            [
+              92,
+              [
+                137158656,
+                0,
+                93,
+                3
+              ]
+            ],
+            [
+              93,
+              [
+                137158656,
+                0,
+                93,
+                2
+              ]
+            ],
+            [
+              94,
+              [
+                137158656,
+                0,
+                93,
+                1
+              ]
+            ],
+            [
+              95,
+              [
+                137158656,
+                0,
+                93,
+                0
+              ]
+            ],
+            [
+              97,
+              [
+                137158673,
+                1,
+                110,
+                8
+              ]
+            ],
+            [
+              98,
+              [
+                137158673,
+                1,
+                110,
+                7
+              ]
+            ],
+            [
+              99,
+              [
+                137158673,
+                1,
+                110,
+                6
+              ]
+            ],
+            [
+              100,
+              [
+                137158673,
+                1,
+                110,
+                5
+              ]
+            ],
+            [
+              101,
+              [
+                137158673,
+                1,
+                110,
+                4
+              ]
+            ],
+            [
+              102,
+              [
+                137158673,
+                1,
+                110,
+                3
+              ]
+            ],
+            [
+              103,
+              [
+                137158673,
+                1,
+                110,
+                2
+              ]
+            ],
+            [
+              104,
+              [
+                137158673,
+                1,
+                110,
+                1
+              ]
+            ],
+            [
+              105,
+              [
+                137158673,
+                1,
+                110,
+                0
+              ]
+            ],
+            [
+              107,
+              [
+                137158690,
+                0,
+                127,
+                8
+              ]
+            ],
+            [
+              108,
+              [
+                137158690,
+                0,
+                127,
+                7
+              ]
+            ],
+            [
+              109,
+              [
+                137158690,
+                0,
+                127,
+                6
+              ]
+            ],
+            [
+              110,
+              [
+                137158690,
+                0,
+                127,
+                5
+              ]
+            ],
+            [
+              111,
+              [
+                137158690,
+                0,
+                127,
+                4
+              ]
+            ],
+            [
+              112,
+              [
+                137158690,
+                0,
+                127,
+                3
+              ]
+            ],
+            [
+              113,
+              [
+                137158690,
+                0,
+                127,
+                2
+              ]
+            ],
+            [
+              114,
+              [
+                137158690,
+                0,
+                127,
+                1
+              ]
+            ],
+            [
+              115,
+              [
+                137158690,
+                0,
+                127,
+                0
+              ]
+            ],
+            [
+              117,
+              [
+                137158707,
+                1,
+                144,
+                74
+              ]
+            ],
+            [
+              118,
+              [
+                137158707,
+                1,
+                144,
+                73
+              ]
+            ],
+            [
+              119,
+              [
+                137158707,
+                1,
+                144,
+                72
+              ]
+            ],
+            [
+              120,
+              [
+                137158707,
+                1,
+                144,
+                71
+              ]
+            ],
+            [
+              121,
+              [
+                137158707,
+                1,
+                144,
+                70
+              ]
+            ],
+            [
+              122,
+              [
+                137158707,
+                1,
+                144,
+                69
+              ]
+            ],
+            [
+              123,
+              [
+                137158707,
+                1,
+                144,
+                68
+              ]
+            ],
+            [
+              124,
+              [
+                137158707,
+                1,
+                144,
+                67
+              ]
+            ],
+            [
+              125,
+              [
+                137158707,
+                1,
+                144,
+                66
+              ]
+            ],
+            [
+              126,
+              [
+                137158707,
+                1,
+                144,
+                65
+              ]
+            ],
+            [
+              127,
+              [
+                137158707,
+                1,
+                144,
+                64
+              ]
+            ],
+            [
+              128,
+              [
+                137158707,
+                1,
+                144,
+                63
+              ]
+            ],
+            [
+              129,
+              [
+                137158707,
+                1,
+                144,
+                62
+              ]
+            ],
+            [
+              130,
+              [
+                137158707,
+                1,
+                144,
+                61
+              ]
+            ],
+            [
+              131,
+              [
+                137158707,
+                1,
+                144,
+                60
+              ]
+            ],
+            [
+              132,
+              [
+                137158707,
+                1,
+                144,
+                59
+              ]
+            ],
+            [
+              133,
+              [
+                137158707,
+                1,
+                144,
+                58
+              ]
+            ],
+            [
+              134,
+              [
+                137158707,
+                1,
+                144,
+                57
+              ]
+            ],
+            [
+              135,
+              [
+                137158707,
+                1,
+                144,
+                56
+              ]
+            ],
+            [
+              136,
+              [
+                137158707,
+                1,
+                144,
+                55
+              ]
+            ],
+            [
+              137,
+              [
+                137158707,
+                1,
+                144,
+                54
+              ]
+            ],
+            [
+              138,
+              [
+                137158707,
+                1,
+                144,
+                53
+              ]
+            ],
+            [
+              139,
+              [
+                137158707,
+                1,
+                144,
+                52
+              ]
+            ],
+            [
+              140,
+              [
+                137158707,
+                1,
+                144,
+                51
+              ]
+            ],
+            [
+              141,
+              [
+                137158707,
+                1,
+                144,
+                50
+              ]
+            ],
+            [
+              142,
+              [
+                137158707,
+                1,
+                144,
+                49
+              ]
+            ],
+            [
+              143,
+              [
+                137158707,
+                1,
+                144,
+                48
+              ]
+            ],
+            [
+              144,
+              [
+                137158707,
+                1,
+                144,
+                47
+              ]
+            ],
+            [
+              145,
+              [
+                137158707,
+                1,
+                144,
+                46
+              ]
+            ],
+            [
+              146,
+              [
+                137158707,
+                1,
+                144,
+                45
+              ]
+            ],
+            [
+              147,
+              [
+                137158707,
+                1,
+                144,
+                44
+              ]
+            ],
+            [
+              148,
+              [
+                137158707,
+                1,
+                144,
+                43
+              ]
+            ],
+            [
+              149,
+              [
+                137158707,
+                1,
+                144,
+                42
+              ]
+            ],
+            [
+              150,
+              [
+                137158707,
+                1,
+                144,
+                41
+              ]
+            ],
+            [
+              151,
+              [
+                137158707,
+                1,
+                144,
+                40
+              ]
+            ],
+            [
+              152,
+              [
+                137158707,
+                1,
+                144,
+                39
+              ]
+            ],
+            [
+              153,
+              [
+                137158707,
+                1,
+                144,
+                38
+              ]
+            ],
+            [
+              154,
+              [
+                137158707,
+                1,
+                144,
+                37
+              ]
+            ],
+            [
+              155,
+              [
+                137158707,
+                1,
+                144,
+                36
+              ]
+            ],
+            [
+              156,
+              [
+                137158707,
+                1,
+                144,
+                35
+              ]
+            ],
+            [
+              157,
+              [
+                137158707,
+                1,
+                144,
+                34
+              ]
+            ],
+            [
+              158,
+              [
+                137158707,
+                1,
+                144,
+                33
+              ]
+            ],
+            [
+              159,
+              [
+                137158707,
+                1,
+                144,
+                32
+              ]
+            ],
+            [
+              160,
+              [
+                137158707,
+                1,
+                144,
+                31
+              ]
+            ],
+            [
+              161,
+              [
+                137158707,
+                1,
+                144,
+                30
+              ]
+            ],
+            [
+              162,
+              [
+                137158707,
+                1,
+                144,
+                29
+              ]
+            ],
+            [
+              163,
+              [
+                137158707,
+                1,
+                144,
+                28
+              ]
+            ],
+            [
+              164,
+              [
+                137158707,
+                1,
+                144,
+                27
+              ]
+            ],
+            [
+              165,
+              [
+                137158707,
+                1,
+                144,
+                26
+              ]
+            ],
+            [
+              166,
+              [
+                137158707,
+                1,
+                144,
+                25
+              ]
+            ],
+            [
+              167,
+              [
+                137158707,
+                1,
+                144,
+                24
+              ]
+            ],
+            [
+              168,
+              [
+                137158707,
+                1,
+                144,
+                23
+              ]
+            ],
+            [
+              169,
+              [
+                137158707,
+                1,
+                144,
+                22
+              ]
+            ],
+            [
+              170,
+              [
+                137158707,
+                1,
+                144,
+                21
+              ]
+            ],
+            [
+              171,
+              [
+                137158707,
+                1,
+                144,
+                20
+              ]
+            ],
+            [
+              172,
+              [
+                137158707,
+                1,
+                144,
+                19
+              ]
+            ],
+            [
+              173,
+              [
+                137158707,
+                1,
+                144,
+                18
+              ]
+            ],
+            [
+              174,
+              [
+                137158707,
+                1,
+                144,
+                17
+              ]
+            ],
+            [
+              175,
+              [
+                137158707,
+                1,
+                144,
+                16
+              ]
+            ],
+            [
+              176,
+              [
+                137158707,
+                1,
+                144,
+                15
+              ]
+            ],
+            [
+              177,
+              [
+                137158707,
+                1,
+                144,
+                14
+              ]
+            ],
+            [
+              178,
+              [
+                137158707,
+                1,
+                144,
+                13
+              ]
+            ],
+            [
+              179,
+              [
+                137158707,
+                1,
+                144,
+                12
+              ]
+            ],
+            [
+              180,
+              [
+                137158707,
+                1,
+                144,
+                11
+              ]
+            ],
+            [
+              181,
+              [
+                137158707,
+                1,
+                144,
+                10
+              ]
+            ],
+            [
+              182,
+              [
+                137158707,
+                1,
+                144,
+                9
+              ]
+            ],
+            [
+              183,
+              [
+                137158707,
+                1,
+                144,
+                8
+              ]
+            ],
+            [
+              184,
+              [
+                137158707,
+                1,
+                144,
+                7
+              ]
+            ],
+            [
+              185,
+              [
+                137158707,
+                1,
+                144,
+                6
+              ]
+            ],
+            [
+              186,
+              [
+                137158707,
+                1,
+                144,
+                5
+              ]
+            ],
+            [
+              187,
+              [
+                137158707,
+                1,
+                144,
+                4
+              ]
+            ],
+            [
+              188,
+              [
+                137158707,
+                1,
+                144,
+                3
+              ]
+            ],
+            [
+              189,
+              [
+                137158707,
+                1,
+                144,
+                2
+              ]
+            ],
+            [
+              190,
+              [
+                137158707,
+                1,
+                144,
+                1
+              ]
+            ],
+            [
+              191,
+              [
+                137158707,
+                1,
+                144,
+                0
+              ]
+            ],
+            [
+              193,
+              [
+                137158722,
+                0,
+                159,
+                16
+              ]
+            ],
+            [
+              194,
+              [
+                137158722,
+                0,
+                159,
+                15
+              ]
+            ],
+            [
+              195,
+              [
+                137158722,
+                0,
+                159,
+                14
+              ]
+            ],
+            [
+              196,
+              [
+                137158722,
+                0,
+                159,
+                13
+              ]
+            ],
+            [
+              197,
+              [
+                137158722,
+                0,
+                159,
+                12
+              ]
+            ],
+            [
+              198,
+              [
+                137158722,
+                0,
+                159,
+                11
+              ]
+            ],
+            [
+              199,
+              [
+                137158722,
+                0,
+                159,
+                10
+              ]
+            ],
+            [
+              200,
+              [
+                137158722,
+                0,
+                159,
+                9
+              ]
+            ],
+            [
+              201,
+              [
+                137158722,
+                0,
+                159,
+                8
+              ]
+            ],
+            [
+              202,
+              [
+                137158722,
+                0,
+                159,
+                7
+              ]
+            ],
+            [
+              203,
+              [
+                137158722,
+                0,
+                159,
+                6
+              ]
+            ],
+            [
+              204,
+              [
+                137158722,
+                0,
+                159,
+                5
+              ]
+            ],
+            [
+              205,
+              [
+                137158722,
+                0,
+                159,
+                4
+              ]
+            ],
+            [
+              206,
+              [
+                137158722,
+                0,
+                159,
+                3
+              ]
+            ],
+            [
+              207,
+              [
+                137158722,
+                0,
+                159,
+                2
+              ]
+            ],
+            [
+              208,
+              [
+                137158722,
+                0,
+                159,
+                1
+              ]
+            ],
+            [
+              209,
+              [
+                137158722,
+                0,
+                159,
+                0
+              ]
+            ],
+            [
+              211,
+              [
+                137158743,
+                1,
+                180,
+                1
+              ]
+            ],
+            [
+              242,
+              [
+                137158749,
+                1,
+                186,
+                1
+              ]
+            ],
+            [
+              243,
+              [
+                137158749,
+                1,
+                186,
+                0
+              ]
+            ]
+          ],
+          "registers": {
+            "bg1cnt": [
+              13
+            ],
+            "bg2cnt": [
+              10
+            ],
+            "bg2hofs": [
+              10,
+              246
+            ],
+            "bg2vofs": [
+              10,
+              246
+            ],
+            "bg3vofs": [
+              37,
+              39,
+              41,
+              43,
+              45,
+              47,
+              49,
+              51,
+              53,
+              55,
+              57,
+              59,
+              61,
+              63,
+              65,
+              67,
+              69,
+              71,
+              73,
+              75,
+              77,
+              79,
+              81,
+              83,
+              85,
+              87,
+              89,
+              91,
+              93,
+              95,
+              97,
+              99,
+              101,
+              103,
+              105,
+              107,
+              109,
+              111,
+              113,
+              115,
+              117,
+              119,
+              121,
+              123,
+              125,
+              127,
+              129,
+              131,
+              133,
+              135,
+              137,
+              139,
+              141,
+              143,
+              145,
+              147,
+              149,
+              151,
+              153,
+              155,
+              157,
+              159,
+              161,
+              163,
+              165,
+              167,
+              169,
+              171,
+              173,
+              175,
+              177,
+              179,
+              181,
+              183,
+              185,
+              187,
+              189,
+              191,
+              193,
+              195,
+              197,
+              199,
+              201,
+              203,
+              205,
+              207,
+              209,
+              211,
+              213,
+              215
+            ],
+            "win0h": [
+              1
+            ],
+            "win0v": [
+              1
+            ],
+            "bldcnt": [
+              13,
+              192
+            ],
+            "bldalpha": [
+              13,
+              242
+            ]
+          },
+          "softwareBg": {
+            "gBattle_BG2_X": [
+              10,
+              245
+            ],
+            "gBattle_BG2_Y": [
+              10,
+              245
+            ],
+            "gBattle_BG3_Y": [
+              36,
+              38,
+              40,
+              42,
+              44,
+              46,
+              48,
+              50,
+              52,
+              54,
+              56,
+              58,
+              60,
+              62,
+              64,
+              66,
+              68,
+              70,
+              72,
+              74,
+              76,
+              78,
+              80,
+              82,
+              84,
+              86,
+              88,
+              90,
+              92,
+              94,
+              96,
+              98,
+              100,
+              102,
+              104,
+              106,
+              108,
+              110,
+              112,
+              114,
+              116,
+              118,
+              120,
+              122,
+              124,
+              126,
+              128,
+              130,
+              132,
+              134,
+              136,
+              138,
+              140,
+              142,
+              144,
+              146,
+              148,
+              150,
+              152,
+              154,
+              156,
+              158,
+              160,
+              162,
+              164,
+              166,
+              168,
+              170,
+              172,
+              174,
+              176,
+              178,
+              180,
+              182,
+              184,
+              186,
+              188,
+              190,
+              192,
+              194,
+              196,
+              198,
+              200,
+              202,
+              204,
+              206,
+              208,
+              210,
+              212,
+              214
+            ]
+          },
+          "bgVram": [
+            11,
+            244,
+            246
+          ],
+          "resourceAllocators": {
+            "paletteTags": [
+              1,
+              4,
+              7,
+              247
+            ],
+            "tileTags": [
+              1,
+              4,
+              7,
+              247
+            ],
+            "tileRanges": [
+              1,
+              4,
+              7
+            ],
+            "tileBitmap": [
+              1,
+              4,
+              7,
+              247
+            ],
+            "matrixBitmap": [
+              13,
+              210
+            ]
+          },
+          "audio": [
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212,
+            213,
+            214,
+            215,
+            216,
+            217,
+            218,
+            219,
+            220,
+            221,
+            222,
+            223,
+            224,
+            225,
+            226,
+            227,
+            228,
+            229,
+            230,
+            231,
+            232,
+            233,
+            234,
+            235,
+            236,
+            237,
+            238,
+            239,
+            240,
+            241,
+            242,
+            243,
+            244,
+            245,
+            246
+          ],
+          "animationRng": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212,
+            213,
+            214,
+            215,
+            216,
+            217,
+            218,
+            219,
+            220,
+            221,
+            222,
+            223,
+            224,
+            225,
+            226,
+            227,
+            228,
+            229,
+            230,
+            231,
+            232,
+            233,
+            234,
+            235,
+            236,
+            237,
+            238,
+            239,
+            240,
+            241,
+            242,
+            243,
+            246,
+            247
+          ],
+          "gameplayRng": [],
+          "attackerAxes": [
+            [
+              0,
+              [
+                0,
+                0
+              ]
+            ]
+          ],
+          "targetAxes": [
+            [
+              0,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              211,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              213,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              215,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              217,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              219,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              221,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              223,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              225,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              227,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              229,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              231,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              233,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              235,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              237,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              239,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              241,
+              [
+                0,
+                0
+              ]
+            ]
+          ]
+        },
+        "resources": {
+          "circleOfLight": {
+            "tag": 10212,
+            "tile": {
+              "first": 1,
+              "last": 246,
+              "count": 246
+            },
+            "palette": {
+              "first": 1,
+              "last": 246,
+              "count": 246
+            }
+          },
+          "meteor": {
+            "tag": 10256,
+            "tile": {
+              "first": 4,
+              "last": 246,
+              "count": 243
+            },
+            "palette": {
+              "first": 4,
+              "last": 246,
+              "count": 243
+            }
+          },
+          "flatRock": {
+            "tag": 10257,
+            "tile": {
+              "first": 7,
+              "last": 246,
+              "count": 240
+            },
+            "palette": {
+              "first": 7,
+              "last": 246,
+              "count": 240
+            }
+          }
+        },
+        "audio": {
+          "transitions": [
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212,
+            213,
+            214,
+            215,
+            216,
+            217,
+            218,
+            219,
+            220,
+            221,
+            222,
+            223,
+            224,
+            225,
+            226,
+            227,
+            228,
+            229,
+            230,
+            231,
+            232,
+            233,
+            234,
+            235,
+            236,
+            237,
+            238,
+            239,
+            240,
+            241,
+            242,
+            243,
+            244,
+            245,
+            246
+          ],
+          "headers": [
+            "se_ball_open",
+            "se_select",
+            "se_m_mega_kick",
+            "se_m_earthquake",
+            "se_m_swagger",
+            "se_m_mega_kick2"
+          ]
+        },
+        "state": {
+          "attacker": 0,
+          "target": 1,
+          "partiesStable": true,
+          "battlersStable": true,
+          "engineStable": true,
+          "immutableStable": true,
+          "rawBattleStateStable": true,
+          "gameplayRngTransitions": []
+        },
+        "cleanup": {
+          "age": 247,
+          "frame": 326,
+          "active": false,
+          "visualTasks": 0,
+          "soundTasks": 0,
+          "ownedSprites": 0,
+          "ownedTasks": 0,
+          "circleOfLight": {
+            "first": 1,
+            "last": 246,
+            "count": 246
+          },
+          "meteor": {
+            "first": 4,
+            "last": 246,
+            "count": 243
+          },
+          "flatRock": {
+            "first": 7,
+            "last": 246,
+            "count": 240
+          }
+        }
+      },
+      "repeatProbeJsonSha256": "b9ded455e88f6f01c9fe05b3bcc8143f733013fadfa0cf49dd7ff3cd92ef06ec",
+      "repeatRawRgbSequenceSha256": "69d70845cc2e2d7b0d82d490db9365c7bfc467eb65325fe0be80ee729c91c580"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-superpower-opponent-registeel-player-regirock.json",
+      "scenarioSha256": "9af4cf5a92b9274a8fb98b83e5b896cc266c06865cd19ed0926e1f4432bd2c75",
+      "denseState": "tools/compare/evidence/superpower-opponent-dense-state.json.gz",
+      "denseStateSha256": "8c9ac82a2863c6eb4d03b92462e91d491628062f66f8db919eb05ef47cc8715f",
+      "probeJsonSha256": "b8a3a06431970e197a2584c53edd9e4b414ad02c7bcb764a479e8162f6a4cbba",
+      "rawRgbArchive": "tools/compare/evidence/superpower-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "b5c39c530c8fb2b630bfa9980f75c27af759bffef5029bb40dbc2e59cbb3910f",
+      "rawRgbSequenceSha256": "b1aa859dc305a11257c5e01b701bf234ebda29087c5103fad9871d149eb3bf9c",
+      "changeMap": "tools/compare/evidence/superpower-changemap-opponent.json",
+      "changeMapSha256": "0641f09f9af2f5a4e5321006498c969252e381833145674ce1cfec51a4550c4f",
+      "sourceWindow": {
+        "startFrame": 81,
+        "endFrame": 328,
+        "frameCount": 248,
+        "sourceFrameCount": 248
+      },
+      "summary": {
+        "latches": {
+          "hardwareOamEqualsPrecedingSoftware": "247/247",
+          "hardwareMatricesEqualsPrecedingSoftware": "247/247",
+          "hardwarePaletteEqualsPrecedingFaded": "246/247",
+          "oamExceptions": [],
+          "matrixExceptions": [],
+          "paletteExceptions": [
+            10
+          ],
+          "changedPaletteBanks": [
+            8,
+            23,
+            24,
+            25
+          ],
+          "selectedBg": "gBattle_BG1",
+          "monbgSpriteSlot": 8,
+          "paletteBankTransitions": {
+            "8": {
+              "faded": [
+                10
+              ],
+              "hardware": [
+                10
+              ]
+            },
+            "23": {
+              "faded": [
+                1
+              ],
+              "hardware": [
+                2
+              ]
+            },
+            "24": {
+              "faded": [
+                4
+              ],
+              "hardware": [
+                5
+              ]
+            },
+            "25": {
+              "faded": [
+                7
+              ],
+              "hardware": [
+                8
+              ]
+            }
+          }
+        },
+        "lifecycle": {
+          "sprites": [
+            {
+              "id": "7:gSuperpowerRockSpriteTemplate",
+              "start": 87,
+              "end": 203,
+              "first": {
+                "slot": 7,
+                "template": "gSuperpowerRockSpriteTemplate",
+                "callback": "AnimSuperpowerRock_Step1",
+                "x": 20,
+                "y": 119,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  111,
+                  0,
+                  0,
+                  0,
+                  30472,
+                  0,
+                  248,
+                  0
+                ],
+                "matrix": [
+                  254,
+                  0,
+                  0,
+                  254
+                ],
+                "attr": [
+                  111,
+                  16396,
+                  39361
+                ],
+                "subpriority": 3,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "AnimSuperpowerRock_Step2",
+                "x": -6,
+                "y": 23,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  -104,
+                  51,
+                  -96,
+                  380,
+                  2944,
+                  0,
+                  248,
+                  0
+                ],
+                "matrix": [
+                  232,
+                  0,
+                  0,
+                  232
+                ],
+                "attr": [
+                  15,
+                  16882,
+                  39361
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "3:gSuperpowerOrbSpriteTemplate",
+              "start": 13,
+              "end": 209,
+              "first": {
+                "slot": 3,
+                "template": "gSuperpowerOrbSpriteTemplate",
+                "callback": "AnimSuperpowerOrb_Step",
+                "x": 176,
+                "y": 48,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  1,
+                  12,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "matrix": [
+                  1820,
+                  0,
+                  0,
+                  1820
+                ],
+                "attr": [
+                  2032,
+                  49264,
+                  31025
+                ],
+                "subpriority": 28,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "DestroySpriteAndMatrix",
+                "x": 176,
+                "y": 48,
+                "x2": -104,
+                "y2": 51,
+                "data": [
+                  0,
+                  1665,
+                  816,
+                  26640,
+                  13056,
+                  0,
+                  26445,
+                  2058
+                ],
+                "matrix": [
+                  254,
+                  0,
+                  0,
+                  254
+                ],
+                "attr": [
+                  1827,
+                  49160,
+                  31025
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "12:gSuperpowerFireballSpriteTemplate",
+              "start": 193,
+              "end": 209,
+              "first": {
+                "slot": 12,
+                "template": "gSuperpowerFireballSpriteTemplate",
+                "callback": "AnimTranslateLinear_WithFollowup",
+                "x": 176,
+                "y": 48,
+                "x2": -6,
+                "y2": 3,
+                "data": [
+                  15,
+                  1665,
+                  816,
+                  1665,
+                  816,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  19,
+                  61578,
+                  35353
+                ],
+                "subpriority": 27,
+                "persistentOrder": 11
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x": 176,
+                "y": 48,
+                "x2": -104,
+                "y2": 51,
+                "data": [
+                  0,
+                  1665,
+                  816,
+                  26640,
+                  13056,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  67,
+                  61480,
+                  35353
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "5:gSuperpowerRockSpriteTemplate",
+              "start": 77,
+              "end": 211,
+              "first": {
+                "slot": 5,
+                "template": "gSuperpowerRockSpriteTemplate",
+                "callback": "AnimSuperpowerRock_Step1",
+                "x": 200,
+                "y": 119,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  119,
+                  0,
+                  0,
+                  0,
+                  30624,
+                  0,
+                  96,
+                  0
+                ],
+                "matrix": [
+                  232,
+                  0,
+                  0,
+                  232
+                ],
+                "attr": [
+                  111,
+                  16576,
+                  39349
+                ],
+                "subpriority": 3,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "AnimSuperpowerRock_Step2",
+                "x": 109,
+                "y": 119,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  -104,
+                  51,
+                  1744,
+                  1914,
+                  19200,
+                  0,
+                  96,
+                  0
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  111,
+                  16485,
+                  39349
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "4:gShakeMonOrPlatformSpriteTemplate",
+              "start": 35,
+              "end": 214,
+              "first": {
+                "slot": 4,
+                "template": "gShakeMonOrPlatformSpriteTemplate",
+                "callback": "AnimShakeMonOrBattlePlatforms_Step",
+                "x": 72,
+                "y": 99,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  -4,
+                  0,
+                  1,
+                  179,
+                  0,
+                  1,
+                  11810,
+                  514
+                ],
+                "matrix": [
+                  528,
+                  0,
+                  0,
+                  528
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 38,
+                "persistentOrder": 9
+              },
+              "last": {
+                "callback": "AnimShakeMonOrBattlePlatforms_Step",
+                "x": 72,
+                "y": 99,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  -4,
+                  1,
+                  1,
+                  0,
+                  0,
+                  1,
+                  11810,
+                  514
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "11:gSuperpowerRockSpriteTemplate",
+              "start": 117,
+              "end": 215,
+              "first": {
+                "slot": 11,
+                "template": "gSuperpowerRockSpriteTemplate",
+                "callback": "AnimSuperpowerRock_Step1",
+                "x": 60,
+                "y": 118,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  87,
+                  0,
+                  0,
+                  0,
+                  30432,
+                  0,
+                  288,
+                  0
+                ],
+                "matrix": [
+                  266,
+                  0,
+                  0,
+                  266
+                ],
+                "attr": [
+                  110,
+                  16436,
+                  39357
+                ],
+                "subpriority": 3,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "AnimSuperpowerRock_Step2",
+                "x": -5,
+                "y": 52,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  -104,
+                  51,
+                  -80,
+                  846,
+                  5376,
+                  0,
+                  288,
+                  0
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  44,
+                  16883,
+                  39357
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "9:gSuperpowerRockSpriteTemplate",
+              "start": 97,
+              "end": 221,
+              "first": {
+                "slot": 9,
+                "template": "gSuperpowerRockSpriteTemplate",
+                "callback": "AnimSuperpowerRock_Step1",
+                "x": 130,
+                "y": 119,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  103,
+                  0,
+                  0,
+                  0,
+                  30560,
+                  0,
+                  160,
+                  0
+                ],
+                "matrix": [
+                  254,
+                  0,
+                  0,
+                  254
+                ],
+                "attr": [
+                  111,
+                  16506,
+                  39353
+                ],
+                "subpriority": 3,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "AnimSuperpowerRock_Step2",
+                "x": 0,
+                "y": 118,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  -104,
+                  51,
+                  0,
+                  1900,
+                  14080,
+                  0,
+                  160,
+                  0
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  110,
+                  16888,
+                  39353
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "10:gSuperpowerRockSpriteTemplate",
+              "start": 107,
+              "end": 225,
+              "first": {
+                "slot": 10,
+                "template": "gSuperpowerRockSpriteTemplate",
+                "callback": "AnimSuperpowerRock_Step1",
+                "x": 160,
+                "y": 119,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  95,
+                  0,
+                  0,
+                  0,
+                  30528,
+                  0,
+                  192,
+                  0
+                ],
+                "matrix": [
+                  232,
+                  0,
+                  0,
+                  232
+                ],
+                "attr": [
+                  111,
+                  16536,
+                  39345
+                ],
+                "subpriority": 3,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "AnimSuperpowerRock_Step2",
+                "x": 17,
+                "y": 118,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  -104,
+                  51,
+                  272,
+                  1890,
+                  12288,
+                  0,
+                  192,
+                  0
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  110,
+                  16393,
+                  39345
+                ],
+                "invisible": false
+              }
+            }
+          ],
+          "tasks": [
+            {
+              "id": "0:AnimTask_ShakeMon2_Step",
+              "start": 211,
+              "end": 240,
+              "first": {
+                "slot": 0,
+                "func": "AnimTask_ShakeMon2_Step",
+                "data": [
+                  6,
+                  15,
+                  1,
+                  1,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  6,
+                  1,
+                  1,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "1:Task_UpdateMonBg",
+              "start": 10,
+              "end": 244,
+              "first": {
+                "slot": 1,
+                "func": "Task_UpdateMonBg",
+                "data": [
+                  8,
+                  176,
+                  48,
+                  -144,
+                  -16,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  8,
+                  176,
+                  48,
+                  -144,
+                  -16,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:Task_ClearMonBg",
+              "start": 242,
+              "end": 244,
+              "first": {
+                "slot": 0,
+                "func": "Task_ClearMonBg",
+                "data": [
+                  0,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  0,
+                  2,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            }
+          ]
+        },
+        "transitions": {
+          "sourcePointer": [
+            [
+              0,
+              [
+                137158563,
+                1,
+                0,
+                0
+              ]
+            ],
+            [
+              1,
+              [
+                137158566,
+                0,
+                3,
+                1
+              ]
+            ],
+            [
+              2,
+              [
+                137158566,
+                0,
+                3,
+                0
+              ]
+            ],
+            [
+              4,
+              [
+                137158569,
+                1,
+                6,
+                1
+              ]
+            ],
+            [
+              5,
+              [
+                137158569,
+                1,
+                6,
+                0
+              ]
+            ],
+            [
+              7,
+              [
+                137158572,
+                0,
+                9,
+                1
+              ]
+            ],
+            [
+              8,
+              [
+                137158572,
+                0,
+                9,
+                0
+              ]
+            ],
+            [
+              10,
+              [
+                137158574,
+                0,
+                11,
+                1
+              ]
+            ],
+            [
+              11,
+              [
+                137158574,
+                0,
+                11,
+                0
+              ]
+            ],
+            [
+              13,
+              [
+                137158594,
+                0,
+                31,
+                20
+              ]
+            ],
+            [
+              14,
+              [
+                137158594,
+                0,
+                31,
+                19
+              ]
+            ],
+            [
+              15,
+              [
+                137158594,
+                0,
+                31,
+                18
+              ]
+            ],
+            [
+              16,
+              [
+                137158594,
+                0,
+                31,
+                17
+              ]
+            ],
+            [
+              17,
+              [
+                137158594,
+                0,
+                31,
+                16
+              ]
+            ],
+            [
+              18,
+              [
+                137158594,
+                0,
+                31,
+                15
+              ]
+            ],
+            [
+              19,
+              [
+                137158594,
+                0,
+                31,
+                14
+              ]
+            ],
+            [
+              20,
+              [
+                137158594,
+                0,
+                31,
+                13
+              ]
+            ],
+            [
+              21,
+              [
+                137158594,
+                0,
+                31,
+                12
+              ]
+            ],
+            [
+              22,
+              [
+                137158594,
+                0,
+                31,
+                11
+              ]
+            ],
+            [
+              23,
+              [
+                137158594,
+                0,
+                31,
+                10
+              ]
+            ],
+            [
+              24,
+              [
+                137158594,
+                0,
+                31,
+                9
+              ]
+            ],
+            [
+              25,
+              [
+                137158594,
+                0,
+                31,
+                8
+              ]
+            ],
+            [
+              26,
+              [
+                137158594,
+                0,
+                31,
+                7
+              ]
+            ],
+            [
+              27,
+              [
+                137158594,
+                0,
+                31,
+                6
+              ]
+            ],
+            [
+              28,
+              [
+                137158594,
+                0,
+                31,
+                5
+              ]
+            ],
+            [
+              29,
+              [
+                137158594,
+                0,
+                31,
+                4
+              ]
+            ],
+            [
+              30,
+              [
+                137158594,
+                0,
+                31,
+                3
+              ]
+            ],
+            [
+              31,
+              [
+                137158594,
+                0,
+                31,
+                2
+              ]
+            ],
+            [
+              32,
+              [
+                137158594,
+                0,
+                31,
+                1
+              ]
+            ],
+            [
+              33,
+              [
+                137158594,
+                0,
+                31,
+                0
+              ]
+            ],
+            [
+              35,
+              [
+                137158622,
+                0,
+                59,
+                40
+              ]
+            ],
+            [
+              36,
+              [
+                137158622,
+                0,
+                59,
+                39
+              ]
+            ],
+            [
+              37,
+              [
+                137158622,
+                0,
+                59,
+                38
+              ]
+            ],
+            [
+              38,
+              [
+                137158622,
+                0,
+                59,
+                37
+              ]
+            ],
+            [
+              39,
+              [
+                137158622,
+                0,
+                59,
+                36
+              ]
+            ],
+            [
+              40,
+              [
+                137158622,
+                0,
+                59,
+                35
+              ]
+            ],
+            [
+              41,
+              [
+                137158622,
+                0,
+                59,
+                34
+              ]
+            ],
+            [
+              42,
+              [
+                137158622,
+                0,
+                59,
+                33
+              ]
+            ],
+            [
+              43,
+              [
+                137158622,
+                0,
+                59,
+                32
+              ]
+            ],
+            [
+              44,
+              [
+                137158622,
+                0,
+                59,
+                31
+              ]
+            ],
+            [
+              45,
+              [
+                137158622,
+                0,
+                59,
+                30
+              ]
+            ],
+            [
+              46,
+              [
+                137158622,
+                0,
+                59,
+                29
+              ]
+            ],
+            [
+              47,
+              [
+                137158622,
+                0,
+                59,
+                28
+              ]
+            ],
+            [
+              48,
+              [
+                137158622,
+                0,
+                59,
+                27
+              ]
+            ],
+            [
+              49,
+              [
+                137158622,
+                0,
+                59,
+                26
+              ]
+            ],
+            [
+              50,
+              [
+                137158622,
+                0,
+                59,
+                25
+              ]
+            ],
+            [
+              51,
+              [
+                137158622,
+                0,
+                59,
+                24
+              ]
+            ],
+            [
+              52,
+              [
+                137158622,
+                0,
+                59,
+                23
+              ]
+            ],
+            [
+              53,
+              [
+                137158622,
+                0,
+                59,
+                22
+              ]
+            ],
+            [
+              54,
+              [
+                137158622,
+                0,
+                59,
+                21
+              ]
+            ],
+            [
+              55,
+              [
+                137158622,
+                0,
+                59,
+                20
+              ]
+            ],
+            [
+              56,
+              [
+                137158622,
+                0,
+                59,
+                19
+              ]
+            ],
+            [
+              57,
+              [
+                137158622,
+                0,
+                59,
+                18
+              ]
+            ],
+            [
+              58,
+              [
+                137158622,
+                0,
+                59,
+                17
+              ]
+            ],
+            [
+              59,
+              [
+                137158622,
+                0,
+                59,
+                16
+              ]
+            ],
+            [
+              60,
+              [
+                137158622,
+                0,
+                59,
+                15
+              ]
+            ],
+            [
+              61,
+              [
+                137158622,
+                0,
+                59,
+                14
+              ]
+            ],
+            [
+              62,
+              [
+                137158622,
+                0,
+                59,
+                13
+              ]
+            ],
+            [
+              63,
+              [
+                137158622,
+                0,
+                59,
+                12
+              ]
+            ],
+            [
+              64,
+              [
+                137158622,
+                0,
+                59,
+                11
+              ]
+            ],
+            [
+              65,
+              [
+                137158622,
+                0,
+                59,
+                10
+              ]
+            ],
+            [
+              66,
+              [
+                137158622,
+                0,
+                59,
+                9
+              ]
+            ],
+            [
+              67,
+              [
+                137158622,
+                0,
+                59,
+                8
+              ]
+            ],
+            [
+              68,
+              [
+                137158622,
+                0,
+                59,
+                7
+              ]
+            ],
+            [
+              69,
+              [
+                137158622,
+                0,
+                59,
+                6
+              ]
+            ],
+            [
+              70,
+              [
+                137158622,
+                0,
+                59,
+                5
+              ]
+            ],
+            [
+              71,
+              [
+                137158622,
+                0,
+                59,
+                4
+              ]
+            ],
+            [
+              72,
+              [
+                137158622,
+                0,
+                59,
+                3
+              ]
+            ],
+            [
+              73,
+              [
+                137158622,
+                0,
+                59,
+                2
+              ]
+            ],
+            [
+              74,
+              [
+                137158622,
+                0,
+                59,
+                1
+              ]
+            ],
+            [
+              75,
+              [
+                137158622,
+                0,
+                59,
+                0
+              ]
+            ],
+            [
+              77,
+              [
+                137158639,
+                1,
+                76,
+                8
+              ]
+            ],
+            [
+              78,
+              [
+                137158639,
+                1,
+                76,
+                7
+              ]
+            ],
+            [
+              79,
+              [
+                137158639,
+                1,
+                76,
+                6
+              ]
+            ],
+            [
+              80,
+              [
+                137158639,
+                1,
+                76,
+                5
+              ]
+            ],
+            [
+              81,
+              [
+                137158639,
+                1,
+                76,
+                4
+              ]
+            ],
+            [
+              82,
+              [
+                137158639,
+                1,
+                76,
+                3
+              ]
+            ],
+            [
+              83,
+              [
+                137158639,
+                1,
+                76,
+                2
+              ]
+            ],
+            [
+              84,
+              [
+                137158639,
+                1,
+                76,
+                1
+              ]
+            ],
+            [
+              85,
+              [
+                137158639,
+                1,
+                76,
+                0
+              ]
+            ],
+            [
+              87,
+              [
+                137158656,
+                0,
+                93,
+                8
+              ]
+            ],
+            [
+              88,
+              [
+                137158656,
+                0,
+                93,
+                7
+              ]
+            ],
+            [
+              89,
+              [
+                137158656,
+                0,
+                93,
+                6
+              ]
+            ],
+            [
+              90,
+              [
+                137158656,
+                0,
+                93,
+                5
+              ]
+            ],
+            [
+              91,
+              [
+                137158656,
+                0,
+                93,
+                4
+              ]
+            ],
+            [
+              92,
+              [
+                137158656,
+                0,
+                93,
+                3
+              ]
+            ],
+            [
+              93,
+              [
+                137158656,
+                0,
+                93,
+                2
+              ]
+            ],
+            [
+              94,
+              [
+                137158656,
+                0,
+                93,
+                1
+              ]
+            ],
+            [
+              95,
+              [
+                137158656,
+                0,
+                93,
+                0
+              ]
+            ],
+            [
+              97,
+              [
+                137158673,
+                1,
+                110,
+                8
+              ]
+            ],
+            [
+              98,
+              [
+                137158673,
+                1,
+                110,
+                7
+              ]
+            ],
+            [
+              99,
+              [
+                137158673,
+                1,
+                110,
+                6
+              ]
+            ],
+            [
+              100,
+              [
+                137158673,
+                1,
+                110,
+                5
+              ]
+            ],
+            [
+              101,
+              [
+                137158673,
+                1,
+                110,
+                4
+              ]
+            ],
+            [
+              102,
+              [
+                137158673,
+                1,
+                110,
+                3
+              ]
+            ],
+            [
+              103,
+              [
+                137158673,
+                1,
+                110,
+                2
+              ]
+            ],
+            [
+              104,
+              [
+                137158673,
+                1,
+                110,
+                1
+              ]
+            ],
+            [
+              105,
+              [
+                137158673,
+                1,
+                110,
+                0
+              ]
+            ],
+            [
+              107,
+              [
+                137158690,
+                0,
+                127,
+                8
+              ]
+            ],
+            [
+              108,
+              [
+                137158690,
+                0,
+                127,
+                7
+              ]
+            ],
+            [
+              109,
+              [
+                137158690,
+                0,
+                127,
+                6
+              ]
+            ],
+            [
+              110,
+              [
+                137158690,
+                0,
+                127,
+                5
+              ]
+            ],
+            [
+              111,
+              [
+                137158690,
+                0,
+                127,
+                4
+              ]
+            ],
+            [
+              112,
+              [
+                137158690,
+                0,
+                127,
+                3
+              ]
+            ],
+            [
+              113,
+              [
+                137158690,
+                0,
+                127,
+                2
+              ]
+            ],
+            [
+              114,
+              [
+                137158690,
+                0,
+                127,
+                1
+              ]
+            ],
+            [
+              115,
+              [
+                137158690,
+                0,
+                127,
+                0
+              ]
+            ],
+            [
+              117,
+              [
+                137158707,
+                1,
+                144,
+                74
+              ]
+            ],
+            [
+              118,
+              [
+                137158707,
+                1,
+                144,
+                73
+              ]
+            ],
+            [
+              119,
+              [
+                137158707,
+                1,
+                144,
+                72
+              ]
+            ],
+            [
+              120,
+              [
+                137158707,
+                1,
+                144,
+                71
+              ]
+            ],
+            [
+              121,
+              [
+                137158707,
+                1,
+                144,
+                70
+              ]
+            ],
+            [
+              122,
+              [
+                137158707,
+                1,
+                144,
+                69
+              ]
+            ],
+            [
+              123,
+              [
+                137158707,
+                1,
+                144,
+                68
+              ]
+            ],
+            [
+              124,
+              [
+                137158707,
+                1,
+                144,
+                67
+              ]
+            ],
+            [
+              125,
+              [
+                137158707,
+                1,
+                144,
+                66
+              ]
+            ],
+            [
+              126,
+              [
+                137158707,
+                1,
+                144,
+                65
+              ]
+            ],
+            [
+              127,
+              [
+                137158707,
+                1,
+                144,
+                64
+              ]
+            ],
+            [
+              128,
+              [
+                137158707,
+                1,
+                144,
+                63
+              ]
+            ],
+            [
+              129,
+              [
+                137158707,
+                1,
+                144,
+                62
+              ]
+            ],
+            [
+              130,
+              [
+                137158707,
+                1,
+                144,
+                61
+              ]
+            ],
+            [
+              131,
+              [
+                137158707,
+                1,
+                144,
+                60
+              ]
+            ],
+            [
+              132,
+              [
+                137158707,
+                1,
+                144,
+                59
+              ]
+            ],
+            [
+              133,
+              [
+                137158707,
+                1,
+                144,
+                58
+              ]
+            ],
+            [
+              134,
+              [
+                137158707,
+                1,
+                144,
+                57
+              ]
+            ],
+            [
+              135,
+              [
+                137158707,
+                1,
+                144,
+                56
+              ]
+            ],
+            [
+              136,
+              [
+                137158707,
+                1,
+                144,
+                55
+              ]
+            ],
+            [
+              137,
+              [
+                137158707,
+                1,
+                144,
+                54
+              ]
+            ],
+            [
+              138,
+              [
+                137158707,
+                1,
+                144,
+                53
+              ]
+            ],
+            [
+              139,
+              [
+                137158707,
+                1,
+                144,
+                52
+              ]
+            ],
+            [
+              140,
+              [
+                137158707,
+                1,
+                144,
+                51
+              ]
+            ],
+            [
+              141,
+              [
+                137158707,
+                1,
+                144,
+                50
+              ]
+            ],
+            [
+              142,
+              [
+                137158707,
+                1,
+                144,
+                49
+              ]
+            ],
+            [
+              143,
+              [
+                137158707,
+                1,
+                144,
+                48
+              ]
+            ],
+            [
+              144,
+              [
+                137158707,
+                1,
+                144,
+                47
+              ]
+            ],
+            [
+              145,
+              [
+                137158707,
+                1,
+                144,
+                46
+              ]
+            ],
+            [
+              146,
+              [
+                137158707,
+                1,
+                144,
+                45
+              ]
+            ],
+            [
+              147,
+              [
+                137158707,
+                1,
+                144,
+                44
+              ]
+            ],
+            [
+              148,
+              [
+                137158707,
+                1,
+                144,
+                43
+              ]
+            ],
+            [
+              149,
+              [
+                137158707,
+                1,
+                144,
+                42
+              ]
+            ],
+            [
+              150,
+              [
+                137158707,
+                1,
+                144,
+                41
+              ]
+            ],
+            [
+              151,
+              [
+                137158707,
+                1,
+                144,
+                40
+              ]
+            ],
+            [
+              152,
+              [
+                137158707,
+                1,
+                144,
+                39
+              ]
+            ],
+            [
+              153,
+              [
+                137158707,
+                1,
+                144,
+                38
+              ]
+            ],
+            [
+              154,
+              [
+                137158707,
+                1,
+                144,
+                37
+              ]
+            ],
+            [
+              155,
+              [
+                137158707,
+                1,
+                144,
+                36
+              ]
+            ],
+            [
+              156,
+              [
+                137158707,
+                1,
+                144,
+                35
+              ]
+            ],
+            [
+              157,
+              [
+                137158707,
+                1,
+                144,
+                34
+              ]
+            ],
+            [
+              158,
+              [
+                137158707,
+                1,
+                144,
+                33
+              ]
+            ],
+            [
+              159,
+              [
+                137158707,
+                1,
+                144,
+                32
+              ]
+            ],
+            [
+              160,
+              [
+                137158707,
+                1,
+                144,
+                31
+              ]
+            ],
+            [
+              161,
+              [
+                137158707,
+                1,
+                144,
+                30
+              ]
+            ],
+            [
+              162,
+              [
+                137158707,
+                1,
+                144,
+                29
+              ]
+            ],
+            [
+              163,
+              [
+                137158707,
+                1,
+                144,
+                28
+              ]
+            ],
+            [
+              164,
+              [
+                137158707,
+                1,
+                144,
+                27
+              ]
+            ],
+            [
+              165,
+              [
+                137158707,
+                1,
+                144,
+                26
+              ]
+            ],
+            [
+              166,
+              [
+                137158707,
+                1,
+                144,
+                25
+              ]
+            ],
+            [
+              167,
+              [
+                137158707,
+                1,
+                144,
+                24
+              ]
+            ],
+            [
+              168,
+              [
+                137158707,
+                1,
+                144,
+                23
+              ]
+            ],
+            [
+              169,
+              [
+                137158707,
+                1,
+                144,
+                22
+              ]
+            ],
+            [
+              170,
+              [
+                137158707,
+                1,
+                144,
+                21
+              ]
+            ],
+            [
+              171,
+              [
+                137158707,
+                1,
+                144,
+                20
+              ]
+            ],
+            [
+              172,
+              [
+                137158707,
+                1,
+                144,
+                19
+              ]
+            ],
+            [
+              173,
+              [
+                137158707,
+                1,
+                144,
+                18
+              ]
+            ],
+            [
+              174,
+              [
+                137158707,
+                1,
+                144,
+                17
+              ]
+            ],
+            [
+              175,
+              [
+                137158707,
+                1,
+                144,
+                16
+              ]
+            ],
+            [
+              176,
+              [
+                137158707,
+                1,
+                144,
+                15
+              ]
+            ],
+            [
+              177,
+              [
+                137158707,
+                1,
+                144,
+                14
+              ]
+            ],
+            [
+              178,
+              [
+                137158707,
+                1,
+                144,
+                13
+              ]
+            ],
+            [
+              179,
+              [
+                137158707,
+                1,
+                144,
+                12
+              ]
+            ],
+            [
+              180,
+              [
+                137158707,
+                1,
+                144,
+                11
+              ]
+            ],
+            [
+              181,
+              [
+                137158707,
+                1,
+                144,
+                10
+              ]
+            ],
+            [
+              182,
+              [
+                137158707,
+                1,
+                144,
+                9
+              ]
+            ],
+            [
+              183,
+              [
+                137158707,
+                1,
+                144,
+                8
+              ]
+            ],
+            [
+              184,
+              [
+                137158707,
+                1,
+                144,
+                7
+              ]
+            ],
+            [
+              185,
+              [
+                137158707,
+                1,
+                144,
+                6
+              ]
+            ],
+            [
+              186,
+              [
+                137158707,
+                1,
+                144,
+                5
+              ]
+            ],
+            [
+              187,
+              [
+                137158707,
+                1,
+                144,
+                4
+              ]
+            ],
+            [
+              188,
+              [
+                137158707,
+                1,
+                144,
+                3
+              ]
+            ],
+            [
+              189,
+              [
+                137158707,
+                1,
+                144,
+                2
+              ]
+            ],
+            [
+              190,
+              [
+                137158707,
+                1,
+                144,
+                1
+              ]
+            ],
+            [
+              191,
+              [
+                137158707,
+                1,
+                144,
+                0
+              ]
+            ],
+            [
+              193,
+              [
+                137158722,
+                0,
+                159,
+                16
+              ]
+            ],
+            [
+              194,
+              [
+                137158722,
+                0,
+                159,
+                15
+              ]
+            ],
+            [
+              195,
+              [
+                137158722,
+                0,
+                159,
+                14
+              ]
+            ],
+            [
+              196,
+              [
+                137158722,
+                0,
+                159,
+                13
+              ]
+            ],
+            [
+              197,
+              [
+                137158722,
+                0,
+                159,
+                12
+              ]
+            ],
+            [
+              198,
+              [
+                137158722,
+                0,
+                159,
+                11
+              ]
+            ],
+            [
+              199,
+              [
+                137158722,
+                0,
+                159,
+                10
+              ]
+            ],
+            [
+              200,
+              [
+                137158722,
+                0,
+                159,
+                9
+              ]
+            ],
+            [
+              201,
+              [
+                137158722,
+                0,
+                159,
+                8
+              ]
+            ],
+            [
+              202,
+              [
+                137158722,
+                0,
+                159,
+                7
+              ]
+            ],
+            [
+              203,
+              [
+                137158722,
+                0,
+                159,
+                6
+              ]
+            ],
+            [
+              204,
+              [
+                137158722,
+                0,
+                159,
+                5
+              ]
+            ],
+            [
+              205,
+              [
+                137158722,
+                0,
+                159,
+                4
+              ]
+            ],
+            [
+              206,
+              [
+                137158722,
+                0,
+                159,
+                3
+              ]
+            ],
+            [
+              207,
+              [
+                137158722,
+                0,
+                159,
+                2
+              ]
+            ],
+            [
+              208,
+              [
+                137158722,
+                0,
+                159,
+                1
+              ]
+            ],
+            [
+              209,
+              [
+                137158722,
+                0,
+                159,
+                0
+              ]
+            ],
+            [
+              211,
+              [
+                137158743,
+                1,
+                180,
+                1
+              ]
+            ],
+            [
+              242,
+              [
+                137158749,
+                1,
+                186,
+                1
+              ]
+            ],
+            [
+              243,
+              [
+                137158749,
+                1,
+                186,
+                0
+              ]
+            ]
+          ],
+          "registers": {
+            "bg1cnt": [
+              11
+            ],
+            "bg1hofs": [
+              11,
+              246
+            ],
+            "bg1vofs": [
+              11,
+              246
+            ],
+            "bg3vofs": [
+              37,
+              39,
+              41,
+              43,
+              45,
+              47,
+              49,
+              51,
+              53,
+              55,
+              57,
+              59,
+              61,
+              63,
+              65,
+              67,
+              69,
+              71,
+              73,
+              75,
+              77,
+              79,
+              81,
+              83,
+              85,
+              87,
+              89,
+              91,
+              93,
+              95,
+              97,
+              99,
+              101,
+              103,
+              105,
+              107,
+              109,
+              111,
+              113,
+              115,
+              117,
+              119,
+              121,
+              123,
+              125,
+              127,
+              129,
+              131,
+              133,
+              135,
+              137,
+              139,
+              141,
+              143,
+              145,
+              147,
+              149,
+              151,
+              153,
+              155,
+              157,
+              159,
+              161,
+              163,
+              165,
+              167,
+              169,
+              171,
+              173,
+              175,
+              177,
+              179,
+              181,
+              183,
+              185,
+              187,
+              189,
+              191,
+              193,
+              195,
+              197,
+              199,
+              201,
+              203,
+              205,
+              207,
+              209,
+              211,
+              213,
+              215
+            ],
+            "win0h": [
+              1
+            ],
+            "win0v": [
+              1
+            ],
+            "bldcnt": [
+              13,
+              192
+            ],
+            "bldalpha": [
+              13,
+              242
+            ]
+          },
+          "softwareBg": {
+            "gBattle_BG1_X": [
+              10,
+              245
+            ],
+            "gBattle_BG1_Y": [
+              10,
+              245
+            ],
+            "gBattle_BG3_Y": [
+              36,
+              38,
+              40,
+              42,
+              44,
+              46,
+              48,
+              50,
+              52,
+              54,
+              56,
+              58,
+              60,
+              62,
+              64,
+              66,
+              68,
+              70,
+              72,
+              74,
+              76,
+              78,
+              80,
+              82,
+              84,
+              86,
+              88,
+              90,
+              92,
+              94,
+              96,
+              98,
+              100,
+              102,
+              104,
+              106,
+              108,
+              110,
+              112,
+              114,
+              116,
+              118,
+              120,
+              122,
+              124,
+              126,
+              128,
+              130,
+              132,
+              134,
+              136,
+              138,
+              140,
+              142,
+              144,
+              146,
+              148,
+              150,
+              152,
+              154,
+              156,
+              158,
+              160,
+              162,
+              164,
+              166,
+              168,
+              170,
+              172,
+              174,
+              176,
+              178,
+              180,
+              182,
+              184,
+              186,
+              188,
+              190,
+              192,
+              194,
+              196,
+              198,
+              200,
+              202,
+              204,
+              206,
+              208,
+              210,
+              212,
+              214
+            ]
+          },
+          "bgVram": [
+            11,
+            244,
+            246
+          ],
+          "resourceAllocators": {
+            "paletteTags": [
+              1,
+              4,
+              7,
+              247
+            ],
+            "tileTags": [
+              1,
+              4,
+              7,
+              247
+            ],
+            "tileRanges": [
+              1,
+              4,
+              7
+            ],
+            "tileBitmap": [
+              1,
+              4,
+              7,
+              247
+            ],
+            "matrixBitmap": [
+              13,
+              210
+            ]
+          },
+          "audio": [
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212,
+            213,
+            214,
+            215,
+            216,
+            217,
+            218,
+            219,
+            220,
+            221,
+            222,
+            223,
+            224,
+            225,
+            226,
+            227,
+            228,
+            229,
+            230,
+            231,
+            232,
+            233,
+            234,
+            235,
+            236,
+            237,
+            238,
+            239,
+            240,
+            241,
+            242,
+            243,
+            244,
+            245,
+            246
+          ],
+          "animationRng": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212,
+            213,
+            214,
+            215,
+            216,
+            217,
+            218,
+            219,
+            220,
+            221,
+            222,
+            223,
+            224,
+            225,
+            226,
+            227,
+            228,
+            229,
+            230,
+            231,
+            232,
+            233,
+            234,
+            235,
+            236,
+            237,
+            238,
+            239,
+            240,
+            241,
+            242,
+            243,
+            246,
+            247
+          ],
+          "gameplayRng": [],
+          "attackerAxes": [
+            [
+              0,
+              [
+                0,
+                0
+              ]
+            ]
+          ],
+          "targetAxes": [
+            [
+              0,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              211,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              213,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              215,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              217,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              219,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              221,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              223,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              225,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              227,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              229,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              231,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              233,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              235,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              237,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              239,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              241,
+              [
+                0,
+                0
+              ]
+            ]
+          ]
+        },
+        "resources": {
+          "circleOfLight": {
+            "tag": 10212,
+            "tile": {
+              "first": 1,
+              "last": 246,
+              "count": 246
+            },
+            "palette": {
+              "first": 1,
+              "last": 246,
+              "count": 246
+            }
+          },
+          "meteor": {
+            "tag": 10256,
+            "tile": {
+              "first": 4,
+              "last": 246,
+              "count": 243
+            },
+            "palette": {
+              "first": 4,
+              "last": 246,
+              "count": 243
+            }
+          },
+          "flatRock": {
+            "tag": 10257,
+            "tile": {
+              "first": 7,
+              "last": 246,
+              "count": 240
+            },
+            "palette": {
+              "first": 7,
+              "last": 246,
+              "count": 240
+            }
+          }
+        },
+        "audio": {
+          "transitions": [
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212,
+            213,
+            214,
+            215,
+            216,
+            217,
+            218,
+            219,
+            220,
+            221,
+            222,
+            223,
+            224,
+            225,
+            226,
+            227,
+            228,
+            229,
+            230,
+            231,
+            232,
+            233,
+            234,
+            235,
+            236,
+            237,
+            238,
+            239,
+            240,
+            241,
+            242,
+            243,
+            244,
+            245,
+            246
+          ],
+          "headers": [
+            "se_ball_open",
+            "se_select",
+            "se_m_mega_kick",
+            "se_m_earthquake",
+            "se_m_swagger",
+            "se_m_mega_kick2"
+          ]
+        },
+        "state": {
+          "attacker": 1,
+          "target": 0,
+          "partiesStable": true,
+          "battlersStable": true,
+          "engineStable": true,
+          "immutableStable": true,
+          "rawBattleStateStable": true,
+          "gameplayRngTransitions": []
+        },
+        "cleanup": {
+          "age": 247,
+          "frame": 328,
+          "active": false,
+          "visualTasks": 0,
+          "soundTasks": 0,
+          "ownedSprites": 0,
+          "ownedTasks": 0,
+          "circleOfLight": {
+            "first": 1,
+            "last": 246,
+            "count": 246
+          },
+          "meteor": {
+            "first": 4,
+            "last": 246,
+            "count": 243
+          },
+          "flatRock": {
+            "first": 7,
+            "last": 246,
+            "count": 240
+          }
+        }
+      },
+      "repeatProbeJsonSha256": "b8a3a06431970e197a2584c53edd9e4b414ad02c7bcb764a479e8162f6a4cbba",
+      "repeatRawRgbSequenceSha256": "b1aa859dc305a11257c5e01b701bf234ebda29087c5103fad9871d149eb3bf9c"
+    }
+  },
+  "controls": {
+    "named": {
+      "MOVE_SUPERPOWER": "staged",
+      "MOVE_REVENGE": "not-started"
+    },
+    "transferCredit": false
+  },
+  "acceptanceVerdict": "Evidence only: MOVE_SUPERPOWER remains staged/unsupported and superpower-rock-orb-fire remains unfulfilled; no reducer, typed seam, compositor, actual-core framebuffer acceptance, exact promotion, sibling, shared-component, or gameplay-state credit is claimed."
+}

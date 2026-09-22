@@ -7977,6 +7977,36 @@
     "tests/animation/flatterReducer.test.ts",
     "tests/animation/flatterActualCore.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_SUPERPOWER",
+   "status": "staged",
+   "covered": [
+    "source classification confirms the exact 14-component Move_SUPERPOWER graph and the five sole unrepresented components: FLAT_ROCK, METEOR, gSuperpowerFireballSpriteTemplate, gSuperpowerOrbSpriteTemplate, and gSuperpowerRockSpriteTemplate",
+    "legal bilateral Battle Scene ON staging retains 248 dense semantic and raw-RGB rows per player-back and opponent-front orientation through first inactive cleanup, with two fresh byte-identical runs per orientation",
+    "move-owned maps measure orb affine allocation, five rock lifetimes and trajectories, fireball translation/flips, attacker monbg and alpha, BG-Y shake, target ShakeMon2, audio, resources, predecessor display latches, opaque gameplay state/RNG, and teardown",
+    "this is an evidence-only checkpoint: no production reducer, typed seam, compositor, actual-core framebuffer acceptance, promotion, sibling, shared-component, or gameplay-state credit is claimed"
+   ],
+   "evidence": [
+    "tools/compare/superpowerSourceAudit.ts",
+    "tools/compare/evidence/superpower-source-audit.json",
+    "tools/battle-lab/mechanic-superpower-player-nidoqueen-opponent-onix.json",
+    "tools/battle-lab/mechanic-superpower-opponent-registeel-player-regirock.json",
+    "tools/compare/superpowerProbe.py",
+    "tools/compare/superpowerEvidence.ts",
+    "tools/compare/fixtures/superpower-evidence.json",
+    "tools/compare/evidence/superpower-player-dense-state.json.gz",
+    "tools/compare/evidence/superpower-opponent-dense-state.json.gz",
+    "tools/compare/evidence/superpower-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/superpower-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/superpower-changemap-player.json",
+    "tools/compare/evidence/superpower-changemap-opponent.json",
+    "tests/animation/superpowerSourceStaging.test.ts",
+    "tests/animation/superpowerEvidenceCheckpoint.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "remaining": "Implement and independently accept the source-relative Superpower reducer, narrow typed Scene-ON seam, generic compositor, material altered control, and twice-fresh actual-core zero-residual framebuffer proof for the five novel components; keep MOVE_SUPERPOWER staged/unsupported and the sole track unfulfilled until then.",
+   "acceptance": "Staged only: 496 retained rows and twice-fresh receipts are source/evidence inputs for a future live implementation; exact and component-track credit remain false."
   }
  ],
  "queue": [],
@@ -10604,6 +10634,26 @@
     "ANIMATION_LATCHES.md"
    ],
    "goal": "FULFILLED by MOVE_MEGAHORN alone after complete source, exact Horn Hit 2 extraction, legal bilateral dense semantic/raw-RGB evidence, move-owned latches, battle-only source-relative reducer, typed seam, generic compositor, material altered control, and twice-fresh 353/353 zero-residual actual-core acceptance through cleanup. The contest-only MegahornInContest branch remains represented by source identity and its join into MegahornContinue without inventing a legal battle execution. No sibling or unrelated component receives transferred credit."
+  },
+  {
+   "id": "superpower-rock-orb-fire",
+   "components": [
+    "asset:ANIM_TAG_FLAT_ROCK",
+    "asset:ANIM_TAG_METEOR",
+    "sprite:gSuperpowerFireballSpriteTemplate",
+    "sprite:gSuperpowerOrbSpriteTemplate",
+    "sprite:gSuperpowerRockSpriteTemplate"
+   ],
+   "representatives": ["MOVE_SUPERPOWER"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/superpowerSourceAudit.ts",
+    "tools/compare/evidence/superpower-source-audit.json",
+    "tools/compare/superpowerEvidence.ts",
+    "tools/compare/fixtures/superpower-evidence.json",
+    "ANIMATION_LATCHES.md"
+   ],
+   "goal": "UNFULFILLED: MOVE_SUPERPOWER is the sole representative and remains staged/unsupported after source classification and legal bilateral evidence only. The five novel components still need a future source-relative live reducer, typed presentation seam, generic compositor, and actual-core framebuffer acceptance; no sibling or shared-component credit is transferred."
   }
  ],
  "variantAudits": {

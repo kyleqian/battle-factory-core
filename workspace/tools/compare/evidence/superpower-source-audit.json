@@ -1,0 +1,547 @@
+{
+  "schema": "superpower-source-audit/v1",
+  "move": "MOVE_SUPERPOWER",
+  "moveId": 276,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "pointerOwnedRoot": {
+      "symbol": "Move_SUPERPOWER",
+      "nextDispatchLabel": "Move_RECYCLE",
+      "blocks": [
+        "Move_SUPERPOWER"
+      ],
+      "commands": [
+        "loadspritegfx ANIM_TAG_CIRCLE_OF_LIGHT",
+        "loadspritegfx ANIM_TAG_METEOR",
+        "loadspritegfx ANIM_TAG_FLAT_ROCK",
+        "monbg ANIM_ATK_PARTNER",
+        "splitbgprio ANIM_ATTACKER",
+        "setalpha 12, 8",
+        "createsprite gSuperpowerOrbSpriteTemplate, ANIM_TARGET, 2, ANIM_ATTACKER",
+        "playsewithpan SE_M_MEGA_KICK, SOUND_PAN_ATTACKER",
+        "delay 20",
+        "shake_mon_or_platform velocity=4, shake_timer=1, shake_duration=180, type=SHAKE_BG_Y",
+        "createvisualtask SoundTask_PlaySE2WithPanning, 5, SE_M_EARTHQUAKE, 0",
+        "delay 40",
+        "createsprite gSuperpowerRockSpriteTemplate, ANIM_ATTACKER, 41, 200, 96, 1, 120",
+        "delay 8",
+        "createsprite gSuperpowerRockSpriteTemplate, ANIM_ATTACKER, 41, 20, 248, 4, 112",
+        "delay 8",
+        "createsprite gSuperpowerRockSpriteTemplate, ANIM_ATTACKER, 41, 130, 160, 2, 104",
+        "delay 8",
+        "createsprite gSuperpowerRockSpriteTemplate, ANIM_ATTACKER, 41, 160, 192, 0, 96",
+        "delay 8",
+        "createsprite gSuperpowerRockSpriteTemplate, ANIM_ATTACKER, 41, 60, 288, 3, 88",
+        "delay 74",
+        "createsprite gSuperpowerFireballSpriteTemplate, ANIM_TARGET, 3, ANIM_ATTACKER",
+        "playsewithpan SE_M_SWAGGER, SOUND_PAN_ATTACKER",
+        "delay 16",
+        "createvisualtask AnimTask_ShakeMon2, 2, ANIM_TARGET, 8, 0, 16, 1",
+        "playsewithpan SE_M_MEGA_KICK2, SOUND_PAN_TARGET",
+        "waitforvisualfinish",
+        "clearmonbg ANIM_ATK_PARTNER",
+        "blendoff",
+        "delay 1",
+        "end"
+      ],
+      "source": {
+        "sourcePath": "data/battle_anim_scripts.s",
+        "sourceStart": 141024,
+        "sourceEndExclusive": 142286,
+        "sourceByteLength": 1262,
+        "sourceSha256": "337f67ee5ee312071360ad23562eac50c601e2dc94f3a3da53ba49eba8c0b0a3"
+      },
+      "rom": {
+        "symbol": "Move_SUPERPOWER",
+        "start": "0x082cdfa3",
+        "endExclusive": "0x082ce05e",
+        "byteLength": 187,
+        "romSha256": "d22cced71a15c78e68e6b5868123ac32e84ff43fbbd1e960a421164dda845f62"
+      }
+    },
+    "templates": {
+      "orb": {
+        "source": {
+          "sourcePath": "src/battle_anim_fight.c",
+          "sourceStart": 7811,
+          "sourceEndExclusive": 8149,
+          "sourceByteLength": 338,
+          "sourceSha256": "f82c5d127e3d5dc70e31dfa153e128965d62a69c34b54b2c3838a29ed5469d73"
+        },
+        "rom": {
+          "symbol": "gSuperpowerOrbSpriteTemplate",
+          "start": "0x08595fec",
+          "endExclusive": "0x08596004",
+          "byteLength": 24,
+          "romSha256": "2a171c79962ce29395fd42d892070a3e13645cdb00edbba18066e2c4c7448c09"
+        },
+        "callback": {
+          "source": {
+            "sourcePath": "src/battle_anim_fight.c",
+            "sourceStart": 22470,
+            "sourceEndExclusive": 23147,
+            "sourceByteLength": 677,
+            "sourceSha256": "bbbbe350eab3fccebeddb07822bb628dc5fa029e331332d3ca622206ebaba1db"
+          },
+          "rom": {
+            "symbol": "AnimSuperpowerOrb",
+            "start": "0x0810d608",
+            "endExclusive": "0x0810d6a8",
+            "byteLength": 160,
+            "romSha256": "8ca0487a42e6045d5c2bf56b83c44075e7466014592ec6012243e45515c74743"
+          }
+        },
+        "callbackStep": {
+          "source": {
+            "sourcePath": "src/battle_anim_fight.c",
+            "sourceStart": 23149,
+            "sourceEndExclusive": 23754,
+            "sourceByteLength": 605,
+            "sourceSha256": "d3cc4f2e03ee49edb6ea6f290339d68eaa7ede6429ae5a6c962004b5ff50e11c"
+          },
+          "rom": {
+            "symbol": "AnimSuperpowerOrb_Step",
+            "start": "0x0810d6a8",
+            "endExclusive": "0x0810d714",
+            "byteLength": 108,
+            "romSha256": "31bc5e6d36c74297255a04d0ed7a66cd5d0e0856f91f42811c55ddb579450d85"
+          }
+        },
+        "affine": {
+          "source": {
+            "sourcePath": "src/battle_anim_fight.c",
+            "sourceStart": 7434,
+            "sourceEndExclusive": 7703,
+            "sourceByteLength": 269,
+            "sourceSha256": "fd7ac431b0d196535f9416bb43c610ac074416f0ffd98a95c71ec79a4bbbc47b"
+          },
+          "rom": {
+            "symbol": "sAffineAnim_SuperpowerOrb",
+            "start": "0x08595fc0",
+            "endExclusive": "0x08595fe8",
+            "byteLength": 40,
+            "romSha256": "788d45550dc15b4d83e017eda3fbb2ee53d3cca394f15ab023b0aeee04cd32ec"
+          }
+        }
+      },
+      "rock": {
+        "source": {
+          "sourcePath": "src/battle_anim_fight.c",
+          "sourceStart": 8149,
+          "sourceEndExclusive": 8476,
+          "sourceByteLength": 327,
+          "sourceSha256": "25021e863e5d6953856a4683f3160f9ad8e3fea4e8fb488ab4eec94ff3c59584"
+        },
+        "rom": {
+          "symbol": "gSuperpowerRockSpriteTemplate",
+          "start": "0x08596004",
+          "endExclusive": "0x0859601c",
+          "byteLength": 24,
+          "romSha256": "c73a8c96b7be359a139d06fd59528e591c45f63af0dd42dfba3b92fb1b13012a"
+        },
+        "callback": {
+          "source": {
+            "sourcePath": "src/battle_anim_fight.c",
+            "sourceStart": 23826,
+            "sourceEndExclusive": 24213,
+            "sourceByteLength": 387,
+            "sourceSha256": "c17bd6ba1f902ee0a512825586528d7ecc393da3f550fdcb741f1c1a4ac97c61"
+          },
+          "rom": {
+            "symbol": "AnimSuperpowerRock",
+            "start": "0x0810d714",
+            "endExclusive": "0x0810d770",
+            "byteLength": 92,
+            "romSha256": "63433ec1dc904cde4782597091acc8019764e4f215db14bb52f964802a06b8fb"
+          }
+        },
+        "step1": {
+          "source": {
+            "sourcePath": "src/battle_anim_fight.c",
+            "sourceStart": 24215,
+            "sourceEndExclusive": 25286,
+            "sourceByteLength": 1071,
+            "sourceSha256": "bc1eb05548dd941cd1257c15a0de2f904e520b26f072d9baf8481420d2a00586"
+          },
+          "rom": {
+            "symbol": "AnimSuperpowerRock_Step1",
+            "start": "0x0810d770",
+            "endExclusive": "0x0810d830",
+            "byteLength": 192,
+            "romSha256": "2fcf8d1ac3ffcfce37f53ea658399e0a758f92a4d5e1f7e6f07ee6ae00ac7046"
+          }
+        },
+        "step2": {
+          "source": {
+            "sourcePath": "src/battle_anim_fight.c",
+            "sourceStart": 25288,
+            "sourceEndExclusive": 25644,
+            "sourceByteLength": 356,
+            "sourceSha256": "e00650c64bdc623c6ea021b72ab241e391b402f0f613e74ebe344d5b97a9f10c"
+          },
+          "rom": {
+            "symbol": "AnimSuperpowerRock_Step2",
+            "start": "0x0810d830",
+            "endExclusive": "0x0810d874",
+            "byteLength": 68,
+            "romSha256": "d607aa287f48ebed3aafe6fc15cfbaef0196d67e0a3ffc4e655046ccccc45489"
+          }
+        }
+      },
+      "fireball": {
+        "source": {
+          "sourcePath": "src/battle_anim_fight.c",
+          "sourceStart": 8476,
+          "sourceEndExclusive": 8805,
+          "sourceByteLength": 329,
+          "sourceSha256": "59923b266c73ca05971dae34c5c2c5f52dfd171be6556f8259e5456f1648c3af"
+        },
+        "rom": {
+          "symbol": "gSuperpowerFireballSpriteTemplate",
+          "start": "0x0859601c",
+          "endExclusive": "0x08596034",
+          "byteLength": 24,
+          "romSha256": "29b2f20bb7883ee04423c072c4657900b1c220d0a35abae618296c7cd3b949b6"
+        },
+        "callback": {
+          "source": {
+            "sourcePath": "src/battle_anim_fight.c",
+            "sourceStart": 25646,
+            "sourceEndExclusive": 26797,
+            "sourceByteLength": 1151,
+            "sourceSha256": "4c5492294872774a2bd6efe2cb36cc1aea364567d2a0e0bf971bd6bfc535ab66"
+          },
+          "rom": {
+            "symbol": "AnimSuperpowerFireball",
+            "start": "0x0810d874",
+            "endExclusive": "0x0810d960",
+            "byteLength": 236,
+            "romSha256": "92f2b039f339af0a08017658e58fd476fe7e396503f6f43600ad3c0eada99756"
+          }
+        }
+      }
+    },
+    "tasks": {
+      "shakeMon2": {
+        "body": {
+          "source": {
+            "sourcePath": "src/battle_anim_mon_movement.c",
+            "sourceStart": 4847,
+            "sourceEndExclusive": 6513,
+            "sourceByteLength": 1666,
+            "sourceSha256": "70cb520c7783bead6d242f1888fa72e5b3c834e7d08803117694ec8bd1b0805f"
+          },
+          "rom": {
+            "symbol": "AnimTask_ShakeMon2",
+            "start": "0x080d52d0",
+            "endExclusive": "0x080d53bc",
+            "byteLength": 236,
+            "romSha256": "18a0c6aae46b12981db295ebeb4044da2baa1a09931abc75afca5eded2b89d66"
+          }
+        },
+        "step": {
+          "source": {
+            "sourcePath": "src/battle_anim_mon_movement.c",
+            "sourceStart": 6515,
+            "sourceEndExclusive": 7434,
+            "sourceByteLength": 919,
+            "sourceSha256": "6a88196e0a7a2c83d309e6a12b105500a74668027796d1ae5e9b4c5c94bebf06"
+          },
+          "rom": {
+            "symbol": "AnimTask_ShakeMon2_Step",
+            "start": "0x080d53bc",
+            "endExclusive": "0x080d5482",
+            "byteLength": 198,
+            "romSha256": "a111144966665c81a13dc63a5c5c3ac90379c2a0f0eea81bb970140818cb3d42"
+          }
+        }
+      },
+      "soundSE2": {
+        "source": {
+          "sourcePath": "src/battle_anim_sound_tasks.c",
+          "sourceStart": 10227,
+          "sourceEndExclusive": 10443,
+          "sourceByteLength": 216,
+          "sourceSha256": "103fa7cc64ff7f528682b7113f7c14b9e67099641deccabd9497f1a02afa32e3"
+        },
+        "rom": {
+          "symbol": "SoundTask_PlaySE2WithPanning",
+          "start": "0x08159244",
+          "endExclusive": "0x08159278",
+          "byteLength": 52,
+          "romSha256": "6e760c2c12469f723082e65be3a542e9e9b1550d5c82b18d433c691f576532eb"
+        }
+      },
+      "shakeBgY": {
+        "template": {
+          "symbol": "gShakeMonOrPlatformSpriteTemplate",
+          "start": "0x085972d8",
+          "endExclusive": "0x085972f0",
+          "byteLength": 24,
+          "romSha256": "0b9a61a09c674f0d5230fa7ee158bae3dc21c1cccab5d3ec8a80174310fe0189"
+        },
+        "callback": {
+          "source": {
+            "sourcePath": "src/battle_anim_normal.c",
+            "sourceStart": 25224,
+            "sourceEndExclusive": 26347,
+            "sourceByteLength": 1123,
+            "sourceSha256": "4f6465a28b5c9d82c9728fc3f9f5626142acb2a2a199f504157322ecf8250a7c"
+          },
+          "rom": {
+            "symbol": "AnimShakeMonOrBattlePlatforms",
+            "start": "0x081160a4",
+            "endExclusive": "0x08116148",
+            "byteLength": 164,
+            "romSha256": "d4a1c0acd47445d08ebc01cca9b22d4903998fefa62fe02c9467c3ab63325f2b"
+          }
+        },
+        "step": {
+          "source": {
+            "sourcePath": "src/battle_anim_normal.c",
+            "sourceStart": 26349,
+            "sourceEndExclusive": 27212,
+            "sourceByteLength": 863,
+            "sourceSha256": "94c0fd1d253d673a53adb1d414a145c9fdac312e2c09e5757bb267bcaa2c6367"
+          },
+          "rom": {
+            "symbol": "AnimShakeMonOrBattlePlatforms_Step",
+            "start": "0x08116148",
+            "endExclusive": "0x081161f4",
+            "byteLength": 172,
+            "romSha256": "37dbb935b8179385f1794d31b2f1d47b3af3d7e677a261f0469695498edb67d4"
+          }
+        }
+      }
+    },
+    "resources": {
+      "tags": {
+        "circleOfLight": 10212,
+        "meteor": 10256,
+        "flatRock": 10257
+      },
+      "gfx": {
+        "circleOfLight": "graphics/battle_anims/sprites/circle_of_light.png",
+        "meteor": "graphics/battle_anims/sprites/meteor.png",
+        "flatRock": "graphics/battle_anims/sprites/flat_rock.png"
+      },
+      "allocations": {
+        "circleOfLight": "0x0800",
+        "meteor": "0x0800",
+        "flatRock": "0x0280"
+      },
+      "palette": {
+        "circleOfLight": "gBattleAnimSpritePal_ElectricOrbs",
+        "meteor": "gBattleAnimSpritePal_Meteor",
+        "flatRock": "gBattleAnimSpritePal_FlatRock"
+      }
+    }
+  },
+  "graph": {
+    "blocks": [
+      "Move_SUPERPOWER"
+    ],
+    "componentCount": 14,
+    "components": [
+      "asset:ANIM_TAG_CIRCLE_OF_LIGHT",
+      "asset:ANIM_TAG_FLAT_ROCK",
+      "asset:ANIM_TAG_METEOR",
+      "sprite:gSuperpowerFireballSpriteTemplate",
+      "sprite:gSuperpowerOrbSpriteTemplate",
+      "sprite:gSuperpowerRockSpriteTemplate",
+      "task:AnimTask_ShakeMon2",
+      "task:SoundTask_PlaySE2WithPanning",
+      "visualCommand:blendoff",
+      "visualCommand:clearmonbg",
+      "visualCommand:monbg",
+      "visualCommand:setalpha",
+      "visualCommand:shake_mon_or_platform",
+      "visualCommand:splitbgprio"
+    ],
+    "novelComponents": [
+      "asset:ANIM_TAG_FLAT_ROCK",
+      "asset:ANIM_TAG_METEOR",
+      "sprite:gSuperpowerFireballSpriteTemplate",
+      "sprite:gSuperpowerOrbSpriteTemplate",
+      "sprite:gSuperpowerRockSpriteTemplate"
+    ]
+  },
+  "behavior": {
+    "attackerOrb": {
+      "affine": [
+        32,
+        4,
+        -6,
+        6
+      ],
+      "blend": [
+        12,
+        8
+      ],
+      "start": "attacker coordinate via target-relative template"
+    },
+    "shakeBgY": {
+      "velocity": 4,
+      "timer": 1,
+      "duration": 180,
+      "type": "SHAKE_BG_Y",
+      "storage": "gBattle_BG3_Y"
+    },
+    "rocks": [
+      [
+        200,
+        96,
+        1,
+        120
+      ],
+      [
+        20,
+        248,
+        4,
+        112
+      ],
+      [
+        130,
+        160,
+        2,
+        104
+      ],
+      [
+        160,
+        192,
+        0,
+        96
+      ],
+      [
+        60,
+        288,
+        3,
+        88
+      ]
+    ],
+    "fireball": {
+      "flips": {
+        "playerTarget": [
+          "HFLIP",
+          "VFLIP"
+        ],
+        "opponentTarget": []
+      },
+      "duration": 16
+    },
+    "targetShake": [
+      8,
+      0,
+      16,
+      1
+    ],
+    "cleanup": [
+      "clearmonbg ANIM_ATK_PARTNER",
+      "blendoff",
+      "delay 1",
+      "end"
+    ]
+  },
+  "resources": {
+    "audio": [
+      {
+        "sound": "SE_M_MEGA_KICK",
+        "id": 140,
+        "pan": "SOUND_PAN_ATTACKER"
+      },
+      {
+        "sound": "SE_M_EARTHQUAKE",
+        "id": 234,
+        "pan": 0
+      },
+      {
+        "sound": "SE_M_SWAGGER",
+        "id": 193,
+        "pan": "SOUND_PAN_ATTACKER"
+      },
+      {
+        "sound": "SE_M_MEGA_KICK2",
+        "id": 141,
+        "pan": "SOUND_PAN_TARGET"
+      }
+    ]
+  },
+  "carriers": {
+    "factoryCount": 3,
+    "level50Count": 3,
+    "allFactory": [
+      {
+        "index": 701,
+        "label": "FRONTIER_MON_NIDOQUEEN_4",
+        "species": "SPECIES_NIDOQUEEN",
+        "moves": [
+          "MOVE_SUPERPOWER",
+          "MOVE_SLUDGE_BOMB",
+          "MOVE_EARTHQUAKE",
+          "MOVE_SHADOW_BALL"
+        ],
+        "itemName": "BATTLE_FRONTIER_ITEM_WHITE_HERB",
+        "nature": "NATURE_ADAMANT"
+      },
+      {
+        "index": 762,
+        "label": "FRONTIER_MON_REGIROCK_1",
+        "species": "SPECIES_REGIROCK",
+        "moves": [
+          "MOVE_SUPERPOWER",
+          "MOVE_EARTHQUAKE",
+          "MOVE_ROCK_SLIDE",
+          "MOVE_EXPLOSION"
+        ],
+        "itemName": "BATTLE_FRONTIER_ITEM_WHITE_HERB",
+        "nature": "NATURE_ADAMANT"
+      },
+      {
+        "index": 841,
+        "label": "FRONTIER_MON_REGISTEEL_6",
+        "species": "SPECIES_REGISTEEL",
+        "moves": [
+          "MOVE_SUPERPOWER",
+          "MOVE_AERIAL_ACE",
+          "MOVE_SWAGGER",
+          "MOVE_PSYCH_UP"
+        ],
+        "itemName": "BATTLE_FRONTIER_ITEM_WHITE_HERB",
+        "nature": "NATURE_ADAMANT"
+      }
+    ]
+  },
+  "controls": {
+    "named": {
+      "MOVE_TAIL_GLOW": "exact",
+      "MOVE_SHOCK_WAVE": "exact",
+      "MOVE_SNORE": "exact",
+      "MOVE_ANCIENT_POWER": "exact"
+    },
+    "transferCredit": false
+  },
+  "checkpoint": {
+    "sourceAudit": true,
+    "completePointerOwnedRoot": true,
+    "completeReachableVisualGraph": true,
+    "directSpriteTaskResourceBodies": true,
+    "fullFactoryCarrierCensus": true,
+    "legalBilateralPartyOnlyStaging": true,
+    "denseWindowCaptured": true,
+    "rawRgbRetained": true,
+    "normalizedMaps": true,
+    "latchMeasured": true,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "actualCoreFramebufferAcceptance": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "gameplayStateOwned": false,
+    "boundaryOrBarrierChanged": false,
+    "unsupportedNoCreditBoundary": true
+  },
+  "remainder": "Keep MOVE_SUPERPOWER staged/unsupported and the five-component superpower-rock-orb-fireball track unfulfilled until the source-relative reducer, narrow typed seam, generic compositor, material control, and twice-fresh actual-core zero-residual proof exist."
+}
