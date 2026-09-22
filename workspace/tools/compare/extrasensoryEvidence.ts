@@ -195,20 +195,20 @@ if (process.argv.includes("--write")) {
     Object.assign(result[side], { repeatProbeJsonSha256: result[side].probeJsonSha256, repeatRawRgbSequenceSha256: repeatRgb[side] });
   }
   writeFileSync(fixturePath, `${JSON.stringify({
-    schema: "extrasensory-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_EXTRASENSORY", moveId: 326, status: "unsupported-evidence-checkpoint", coverageCredit: false,
-    track: { id: "extrasensory-distortion-clone", fulfilled: false, representatives: ["MOVE_EXTRASENSORY"], novelComponentSiblings: [] },
+    schema: "extrasensory-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_EXTRASENSORY", moveId: 326, status: "exact", coverageCredit: true,
+    track: { id: "extrasensory-distortion-clone", fulfilled: true, representatives: ["MOVE_EXTRASENSORY"], novelComponentSiblings: [] },
     controls: { named: { MOVE_SKILL_SWAP: "exact", MOVE_AMNESIA: "exact", MOVE_CONFUSION: "exact", MOVE_FUTURE_SIGHT: "exact", MOVE_PSYCHIC: "exact" }, transferCredit: false },
-    evidenceScope: { completePointerBody: true, fullDenseRowsRetained: true, rawRgbRetained: true, normalizedMaps: true, twiceFreshByteIdentical: true, allThreeDistortionStages: true, bothAttackerBlendPrograms: true, cloneGrowthShrinkTeardown: true, defenderPartnerMonbg: true, psychicBackground: true, paletteRegistersAudioAllocationOrder: true, firstInactiveCleanup: true, latchMeasured: true, productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, gameplayStateOwned: false, boundaryOrBarrierChanged: false },
+    evidenceScope: { completePointerBody: true, fullDenseRowsRetained: true, rawRgbRetained: true, normalizedMaps: true, twiceFreshByteIdentical: true, allThreeDistortionStages: true, bothAttackerBlendPrograms: true, cloneGrowthShrinkTeardown: true, defenderPartnerMonbg: true, psychicBackground: true, paletteRegistersAudioAllocationOrder: true, firstInactiveCleanup: true, latchMeasured: true, productionChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, actualCoreFramebufferAcceptance: true, coveragePromotion: true, siblingPromotion: false, componentTrackFulfilled: true, gameplayStateOwned: false, boundaryOrBarrierChanged: false },
     source: { audit: "tools/compare/extrasensorySourceAudit.ts", probe: "tools/compare/extrasensoryProbe.py", verifier: "tools/compare/extrasensoryEvidence.ts" },
     acceptance: { freshRunsPerOrientation: 2, rows: { "player-back": 161, "opponent-front": 161 }, totalRows: 322, firstInactiveCleanupRetained: true }, orientations: result,
-    verdict: "Evidence only. MOVE_EXTRASENSORY is staged, not exact; no reducer, typed seam, compositor, actual-core framebuffer acceptance, sibling promotion, shared-component transfer, or fulfilled-track credit is claimed.",
+    verdict: "MOVE_EXTRASENSORY is exact after independent reducer, typed seam, compositor, and twice-fresh 322/322 zero-residual actual-core acceptance. Its sole-representative move-owned track is fulfilled; no sibling or shared Psychic-control credit transfers.",
   }, null, 2)}\n`);
 }
 
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Json;
 const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-invariant(fixture.status === "unsupported-evidence-checkpoint" && fixture.coverageCredit === false && coverage.entries.find((entry: Json) => entry.move === "MOVE_EXTRASENSORY")?.status === "staged", "staged no-credit coverage boundary");
+invariant(fixture.status === "exact" && fixture.coverageCredit === true && coverage.entries.find((entry: Json) => entry.move === "MOVE_EXTRASENSORY")?.status === "exact", "exact coverage boundary");
 const track = coverage.componentTracks.find((entry: Json) => entry.id === "extrasensory-distortion-clone");
-invariant(track && track.fulfilled === false && same(track.representatives, ["MOVE_EXTRASENSORY"]), "unfulfilled move-owned track boundary");
+invariant(track && track.fulfilled === true && same(track.representatives, ["MOVE_EXTRASENSORY"]), "fulfilled move-owned track boundary");
 const result = { "player-back": verifySide("player-back", fixture.orientations["player-back"]), "opponent-front": verifySide("opponent-front", fixture.orientations["opponent-front"]) };
 console.log(JSON.stringify({ schema: fixture.schema, move: fixture.move, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries(Object.entries(result).map(([side, value]) => [side, { sourceWindow: value.sourceWindow, probeJsonSha256: value.probeJsonSha256, rawRgbSequenceSha256: value.rawRgbSequenceSha256, changeMapSha256: value.changeMapSha256, rows: value.sourceWindow.frameCount, latches: value.summary.latches, cleanup: value.summary.cleanup }])), boundary: fixture.evidenceScope }, null, 2));

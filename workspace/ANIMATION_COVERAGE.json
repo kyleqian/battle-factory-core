@@ -3,13 +3,14 @@
  "entries": [
   {
    "move": "MOVE_EXTRASENSORY",
-   "status": "staged",
+   "status": "exact",
    "covered": [
     "the complete source-audited Move_EXTRASENSORY body and exact fifteen-component identity, with independent task-body audits for AnimTask_ExtrasensoryDistortion and AnimTask_TransparentCloneGrowAndShrink",
     "complete legal bilateral Nuzleaf/Shuckle Battle Scene ON evidence retains player-back frames 80..240 and opponent-front frames 84..244, 161 rows each through first inactive cleanup; two fresh processes per orientation are byte-identical",
     "Extrasensory's own normalized maps retain all three distortion programs and scanline activation/display/cleanup, both attacker BlendMonInAndOut programs, clone growth/shrink/allocation/teardown, defender-partner monbg, Psychic BG VRAM/fades, palettes, registers, audio, allocation/order, gameplay-state opacity, and cleanup",
-    "the move-owned evidence resolves distortion scanline display as RAM+1 and clone affine mutation as RAM+2 while ordinary OAM is predecessor-buffered and palette is predecessor-buffered except the same-row monbg setup; these findings do not generalize beyond Extrasensory",
-    "this is an unsupported evidence checkpoint only: no reducer, typed Scene-ON seam, compositor, production framebuffer acceptance, exact promotion, fulfilled-track credit, sibling promotion, or shared Psychic-control transfer is claimed"
+    "the move-owned evidence resolves ordinary OAM as predecessor-buffered, clone affine mutation as RAM+2, and distortion scanout as current generated banks with the player-back third-stage 0..28 DMA handoff retaining the preceding bank; palette is predecessor-buffered except same-row monbg setup",
+    "the source-relative reducer, narrow typed Scene-ON seam, generic live hardware-buffer display plan and production compositor pass 322/322 component, seam, chronological raw-RGB, and shared framebuffer rows twice with zero residual pixels",
+    "a material CROBAT/BLISSEY side, geometry, allocation/order, register, audio, and presentation-RNG control changes the live output while gameplay state/RNG remain opaque and unchanged; no sibling or shared Psychic-control credit transfers"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-extrasensory-player-nuzleaf-opponent-shuckle.json",
@@ -17,6 +18,8 @@
     "tools/compare/extrasensorySourceAudit.ts",
     "tools/compare/extrasensoryProbe.py",
     "tools/compare/extrasensoryEvidence.ts",
+    "tools/compare/verifyExtrasensoryReducer.ts",
+    "tools/compare/extrasensoryActualCore.ts",
     "tools/compare/fixtures/extrasensory-evidence.json",
     "tools/compare/evidence/extrasensory-player-dense-state.json.gz",
     "tools/compare/evidence/extrasensory-opponent-dense-state.json.gz",
@@ -26,9 +29,15 @@
     "tools/compare/evidence/extrasensory-changemap-opponent.json",
     "tests/animation/extrasensorySourceStaging.test.ts",
     "tests/animation/extrasensoryEvidenceCheckpoint.test.ts",
+    "tests/animation/extrasensoryReducer.test.ts",
+    "tests/animation/extrasensoryActualCore.test.ts",
+    "src/animation/extrasensory.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
     "ANIMATION_LATCHES.md"
    ],
-   "remaining": "Add a complete source-relative reducer, narrow typed Scene-ON seam, generic compositor/live dispatch, and twice-fresh 322/322 actual-core framebuffer acceptance before exact promotion. No sibling or shared-component credit transfers from this staged checkpoint."
+   "acceptance": "Two independent actual-core verifier processes each pass 322/322 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest 266a4d2193b420a1cf898b9ffedb0428de2582f5d7fd277e20cb7230176ade59; player/opponent RGB sequences 54456d0178c6c6a449246ca719009f45ce38ac4bae7f6c8eec31b181f6f8ac30 / ffd4644e668ca148ced1f5f8f5828f78a3add4ac5d3fa6a13a0f8ca6ca0562db."
   },
   {
    "move": "MOVE_PURSUIT",
@@ -7905,11 +7914,13 @@
     "task:AnimTask_TransparentCloneGrowAndShrink"
    ],
    "representatives": ["MOVE_EXTRASENSORY"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/extrasensorySourceAudit.ts",
     "tools/compare/extrasensoryProbe.py",
     "tools/compare/extrasensoryEvidence.ts",
+    "tools/compare/verifyExtrasensoryReducer.ts",
+    "tools/compare/extrasensoryActualCore.ts",
     "tools/compare/fixtures/extrasensory-evidence.json",
     "tools/compare/evidence/extrasensory-player-dense-state.json.gz",
     "tools/compare/evidence/extrasensory-opponent-dense-state.json.gz",
@@ -7918,9 +7929,12 @@
     "tools/compare/evidence/extrasensory-changemap-player.json",
     "tools/compare/evidence/extrasensory-changemap-opponent.json",
     "tests/animation/extrasensoryEvidenceCheckpoint.test.ts",
+    "tests/animation/extrasensoryReducer.test.ts",
+    "tests/animation/extrasensoryActualCore.test.ts",
+    "src/animation/extrasensory.ts",
     "ANIMATION_LATCHES.md"
    ],
-   "goal": "UNFULFILLED. MOVE_EXTRASENSORY alone supplies complete bilateral source, dense semantic, retained-RGB, and latch evidence for the two novel tasks, but no production reducer, typed Scene-ON seam, compositor, or actual-core framebuffer acceptance exists. The novel tasks have no siblings; shared Psychic controls remain independent exact moves and receive no transferred credit."
+   "goal": "FULFILLED after MOVE_EXTRASENSORY alone supplies complete bilateral source, dense semantic, retained-RGB, latch, reducer, typed-seam, generic compositor, altered-control, and 322/322 twice-fresh zero-residual actual-core framebuffer acceptance for both novel tasks through cleanup. The novel tasks have no siblings; Skill Swap, Amnesia, Confusion, Future Sight, and Psychic remain independent exact controls and receive no transferred credit."
   },
   {
    "id": "mach-punch-source-relative-body",

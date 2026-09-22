@@ -110,7 +110,7 @@ const controls = Object.fromEntries(["MOVE_SKILL_SWAP", "MOVE_AMNESIA", "MOVE_CO
 if (Object.values(controls).some((status) => status !== "exact")) throw new Error("Psychic source controls drifted");
 
 console.log(JSON.stringify({
-  schema: "extrasensory-source-audit/v1", move: "MOVE_EXTRASENSORY", moveId: 326, status: "unsupported-source-staging-checkpoint", coverageCredit: false,
+  schema: "extrasensory-source-audit/v1", move: "MOVE_EXTRASENSORY", moveId: 326, status: "exact", coverageCredit: true,
   source: {
     pointerOwnedRoot: { source: sourceRecord("data/battle_anim_scripts.s", scripts, rootBody), rom: romRange("Move_EXTRASENSORY", "Move_AERIAL_ACE"), commands: expectedCommands },
     psychicBackground: { source: sourceRecord("data/battle_anim_scripts.s", scripts, bgBody), rom: romRange("SetPsychicBackground", "SetSkyBg") },
@@ -128,6 +128,6 @@ console.log(JSON.stringify({
   carriers: carriers.map((entry: Json) => ({ index: entry.index, label: entry.label, species: entry.species, moves: entry.moves, itemName: entry.itemName, nature: entry.nature, evSpreadStats: entry.evSpreadStats })),
   representative: carriers[0],
   controls: { named: controls, kind: "shared Psychic controls only; no timing, latch, component, sibling, track, or move credit transfers", transferCredit: false },
-  checkpoint: { sourceAudit: true, completePointerOwnedRoot: true, directTaskBodies: true, generatedGraphPinned: true, fullCarrierCensus: true, legalBilateralPartyOnlyStaging: true, denseEvidenceRequired: true, productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false, siblingPromotion: false, gameplayStateOwned: false, boundaryOrBarrierChanged: false },
-  remainder: "Retain complete twice-fresh bilateral dense state and raw RGB through first inactive cleanup, independently measure all three distortion stages, both BlendMonInAndOut calls, clone growth/shrink/teardown, defender-partner monbg, Psychic BG, palettes, registers, audio, allocation/order, then add reducer, typed seam, compositor, and actual-core framebuffer acceptance before exact promotion.",
+  checkpoint: { sourceAudit: true, completePointerOwnedRoot: true, directTaskBodies: true, generatedGraphPinned: true, fullCarrierCensus: true, legalBilateralPartyOnlyStaging: true, denseEvidenceRequired: true, productionChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, actualCoreFramebufferAcceptance: true, coveragePromotion: true, componentTrackFulfilled: true, siblingPromotion: false, gameplayStateOwned: false, boundaryOrBarrierChanged: false },
+  remainder: null,
 }, null, 2));

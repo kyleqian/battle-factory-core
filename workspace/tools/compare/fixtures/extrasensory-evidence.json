@@ -3,11 +3,11 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_EXTRASENSORY",
   "moveId": 326,
-  "status": "unsupported-evidence-checkpoint",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "track": {
     "id": "extrasensory-distortion-clone",
-    "fulfilled": false,
+    "fulfilled": true,
     "representatives": [
       "MOVE_EXTRASENSORY"
     ],
@@ -37,14 +37,14 @@
     "paletteRegistersAudioAllocationOrder": true,
     "firstInactiveCleanup": true,
     "latchMeasured": true,
-    "productionChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
-    "actualCoreFramebufferAcceptance": false,
-    "coveragePromotion": false,
+    "productionChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "actualCoreFramebufferAcceptance": true,
+    "coveragePromotion": true,
     "siblingPromotion": false,
-    "componentTrackFulfilled": false,
+    "componentTrackFulfilled": true,
     "gameplayStateOwned": false,
     "boundaryOrBarrierChanged": false
   },
@@ -2778,5 +2778,5 @@
       "repeatRawRgbSequenceSha256": "ffd4644e668ca148ced1f5f8f5828f78a3add4ac5d3fa6a13a0f8ca6ca0562db"
     }
   },
-  "verdict": "Evidence only. MOVE_EXTRASENSORY is staged, not exact; no reducer, typed seam, compositor, actual-core framebuffer acceptance, sibling promotion, shared-component transfer, or fulfilled-track credit is claimed."
+  "verdict": "MOVE_EXTRASENSORY is exact after independent reducer, typed seam, compositor, and twice-fresh 322/322 zero-residual actual-core acceptance. Its sole-representative move-owned track is fulfilled; no sibling or shared Psychic-control credit transfers."
 }

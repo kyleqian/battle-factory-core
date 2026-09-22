@@ -11,13 +11,13 @@ const fixture = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/ex
 const sha = (path: string): string => createHash("sha256").update(readFileSync(resolve(root, path))).digest("hex");
 const run = (): string => execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/extrasensoryEvidence.ts"], { cwd: root, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
 
-describe("MOVE_EXTRASENSORY unsupported evidence checkpoint", () => {
+describe("MOVE_EXTRASENSORY exact bilateral evidence", () => {
   it("retains complete twice-fresh bilateral state, raw RGB, and normalized maps", () => {
     expect(fixture).toMatchObject({
       schema: "extrasensory-bilateral-evidence/v1", oracleProfile: "battle-scene-on", move: "MOVE_EXTRASENSORY", moveId: 326,
-      status: "unsupported-evidence-checkpoint", coverageCredit: false,
+      status: "exact", coverageCredit: true,
       acceptance: { freshRunsPerOrientation: 2, rows: { "player-back": 161, "opponent-front": 161 }, totalRows: 322, firstInactiveCleanupRetained: true },
-      evidenceScope: { completePointerBody: true, fullDenseRowsRetained: true, rawRgbRetained: true, normalizedMaps: true, twiceFreshByteIdentical: true, allThreeDistortionStages: true, bothAttackerBlendPrograms: true, cloneGrowthShrinkTeardown: true, defenderPartnerMonbg: true, psychicBackground: true, paletteRegistersAudioAllocationOrder: true, firstInactiveCleanup: true, latchMeasured: true, productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, gameplayStateOwned: false, boundaryOrBarrierChanged: false },
+      evidenceScope: { completePointerBody: true, fullDenseRowsRetained: true, rawRgbRetained: true, normalizedMaps: true, twiceFreshByteIdentical: true, allThreeDistortionStages: true, bothAttackerBlendPrograms: true, cloneGrowthShrinkTeardown: true, defenderPartnerMonbg: true, psychicBackground: true, paletteRegistersAudioAllocationOrder: true, firstInactiveCleanup: true, latchMeasured: true, productionChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, actualCoreFramebufferAcceptance: true, coveragePromotion: true, siblingPromotion: false, componentTrackFulfilled: true, gameplayStateOwned: false, boundaryOrBarrierChanged: false },
     });
     for (const [side, hashes] of Object.entries({
       "player-back": { scenario: "93c95bfee5259c67eef019f306a6b7d1ac0ca9e25d1fb3e27f7d092a50b20228", dense: "71fe9212bceb13a998668c451db40915e41215881fda4a22d745a9235b390886", probe: "40519f5f249c10f178d5c5b287eff3fdeef9090e0b349ba3c7888ca25f8971d2", archive: "6f42739e672b3f47c4b2a11d27592527a1cabe1dc594d30b1b0d5ab9ec6d9fa8", rgb: "54456d0178c6c6a449246ca719009f45ce38ac4bae7f6c8eec31b181f6f8ac30", map: "70a55e952da0fa262780f24ffec1b16fc79a54d62ed25ba21431968d5c1bf89b" },
@@ -35,17 +35,17 @@ describe("MOVE_EXTRASENSORY unsupported evidence checkpoint", () => {
     }
   });
 
-  it("replays all move-owned latches deterministically without granting production credit", () => {
+  it("replays all move-owned latches deterministically with exact production credit", () => {
     const first = run();
     expect(run()).toBe(first);
-    expect(createHash("sha256").update(first).digest("hex")).toBe("2e9452be249ef7d35caf8bb408c1c429132cce7196cb5787fe5ec9f85666fa2c");
-    expect(JSON.parse(first)).toMatchObject({ move: "MOVE_EXTRASENSORY", status: "unsupported-evidence-checkpoint", coverageCredit: false, boundary: { productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, gameplayStateOwned: false, boundaryOrBarrierChanged: false } });
+    expect(createHash("sha256").update(first).digest("hex")).toBe("90adf2b67b3f21939ac9598402ed3c46d8e5cf1347360de3cc7c4a230dc6831b");
+    expect(JSON.parse(first)).toMatchObject({ move: "MOVE_EXTRASENSORY", status: "exact", coverageCredit: true, boundary: { productionChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, actualCoreFramebufferAcceptance: true, coveragePromotion: true, siblingPromotion: false, componentTrackFulfilled: true, gameplayStateOwned: false, boundaryOrBarrierChanged: false } });
   });
 
-  it("keeps the move staged, its novel track unfulfilled, and shared Psychic controls independent", () => {
+  it("promotes only the move and its novel track while shared Psychic controls stay independent", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_EXTRASENSORY")).toMatchObject({ status: "staged" });
-    expect(coverage.componentTracks.find((track: Json) => track.id === "extrasensory-distortion-clone")).toMatchObject({ components: ["task:AnimTask_ExtrasensoryDistortion", "task:AnimTask_TransparentCloneGrowAndShrink"], representatives: ["MOVE_EXTRASENSORY"], fulfilled: false });
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_EXTRASENSORY")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "extrasensory-distortion-clone")).toMatchObject({ components: ["task:AnimTask_ExtrasensoryDistortion", "task:AnimTask_TransparentCloneGrowAndShrink"], representatives: ["MOVE_EXTRASENSORY"], fulfilled: true });
     for (const move of ["MOVE_SKILL_SWAP", "MOVE_AMNESIA", "MOVE_CONFUSION", "MOVE_FUTURE_SIGHT", "MOVE_PSYCHIC"]) expect(coverage.entries.find((entry: Json) => entry.move === move)).toMatchObject({ status: "exact" });
     expect(fixture.controls).toEqual({ named: { MOVE_SKILL_SWAP: "exact", MOVE_AMNESIA: "exact", MOVE_CONFUSION: "exact", MOVE_FUTURE_SIGHT: "exact", MOVE_PSYCHIC: "exact" }, transferCredit: false });
   });
