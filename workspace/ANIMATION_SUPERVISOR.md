@@ -49,8 +49,10 @@ substitutions:
    tooling/test/evidence-only delta with its scoped gates.
 3. Orient: `ANIMATION_PROGRESS.md` top entry, `npm run animation:coverage`,
    `git log` since your last session. The report derives the work queue from all
-   unfinished Level 50 moves. Its manual priority list is not an authorization
-   boundary. Dispatch a bounded ready move even when that list is empty.
+   unfinished Factory moves: Level 50 first, then Open-only Outrage. Blocked
+   Level 50 moves do not prevent dispatching Outrage. Its manual priority list
+   is not an authorization boundary. Dispatch a bounded ready move even when
+   that list is empty.
 4. Check the report's explicit blocker reasons and resume conditions. A missing
    component track is not a blocker: create a bounded move-owned track after
    source classification. Every unfinished move must be ready or explicitly

@@ -56,9 +56,12 @@ source, asset, lifecycle, latch, or framebuffer assertions to satisfy this rule.
 
 ## Work exhaustion is an explicit accounting result
 
-`animationWorkPlan()` derives all non-exact Level 50 moves from the inventory.
-Each must appear either in `ready` or in `blocked`, with reason, evidence, and
+`animationWorkPlan()` derives all non-exact Factory moves from the inventory:
+Level 50 first, then Open-only Outrage (added by the user on 2026-09-22).
+Blocked Level 50 moves do not prevent dispatching ready Open-only work.
+Each unfinished Factory move must appear either in `ready` or in `blocked`, with reason, evidence, and
 resume condition. `ANIMATION_COVERAGE.json.queue` only sets priority; an empty
 manual list never means the remaining moves are unauthorized or exhausted.
 `state: blocked` differs from `state: complete`. Component reuse and dormant
 contest-only track obligations never waive move acceptance or hide ready moves.
+The 77 moves outside the Factory are outside this campaign scope.

@@ -4,6 +4,7 @@ import coverageJson from "../../ANIMATION_COVERAGE.json" with { type: "json" };
 
 export type AnimationCoverageStatus = "staged" | "partial" | "exact";
 export type AnimationTier = "level50" | "openOnly" | "outsideFactory";
+export type FactoryAnimationTier = Exclude<AnimationTier, "outsideFactory">;
 
 interface InventoryMove {
   readonly move: string;
@@ -21,6 +22,7 @@ export interface AnimationWorkBlocker {
 }
 
 export interface AnimationWorkItem extends InventoryMove {
+  readonly tier: FactoryAnimationTier;
   readonly status: AnimationCoverageStatus | "unsupported";
   readonly componentCount: number;
   readonly unprovenComponentCount: number;
@@ -109,6 +111,7 @@ const componentInventory = componentJson as {
 };
 
 const statuses = new Set<AnimationCoverageStatus>(["staged", "partial", "exact"]);
+const factoryTiers: readonly FactoryAnimationTier[] = ["level50", "openOnly"];
 const tiers = Object.entries(inventory.tiers) as Array<
   [AnimationTier, { moveCount: number; moves: InventoryMove[] }]
 >;
@@ -148,16 +151,16 @@ export function validateAnimationCoverage(ledger: AnimationCoverageLedger = cove
   for (const move of coverage.queue) {
     if (queue.has(move)) throw new Error(`duplicate queue move ${move}`);
     queue.add(move);
-    if (tierByMove.get(move) !== "level50") {
-      throw new Error(`queue move ${move} is not in the Level 50 priority tier`);
+    if (!factoryTiers.some((tier) => tier === tierByMove.get(move))) {
+      throw new Error(`queue move ${move} is not in a Factory priority tier`);
     }
   }
   const blocked = new Set<string>();
   for (const blocker of coverage.blockers ?? []) {
     if (blocked.has(blocker.move)) throw new Error(`duplicate blocker ${blocker.move}`);
     blocked.add(blocker.move);
-    if (tierByMove.get(blocker.move) !== "level50") {
-      throw new Error(`blocked move ${blocker.move} is not in the Level 50 priority tier`);
+    if (!factoryTiers.some((tier) => tier === tierByMove.get(blocker.move))) {
+      throw new Error(`blocked move ${blocker.move} is not in a Factory priority tier`);
     }
     if (coverage.entries.some((entry) => entry.move === blocker.move && entry.status === "exact")) {
       throw new Error(`exact move ${blocker.move} cannot remain blocked`);
@@ -188,8 +191,8 @@ export function validateAnimationCoverage(ledger: AnimationCoverageLedger = cove
       }
     }
     for (const move of track.representatives) {
-      if (tierByMove.get(move) !== "level50") {
-        throw new Error(`${track.id} representative ${move} is not a Level 50 move`);
+      if (!factoryTiers.some((tier) => tier === tierByMove.get(move))) {
+        throw new Error(`${track.id} representative ${move} is not a Factory move`);
       }
       const dependencies = componentsByMove.get(move)!;
       if (!track.components.some((component) => dependencies.has(component))) {
@@ -317,8 +320,9 @@ export function animationCoverageSummary(): CoverageSummary[] {
   });
 }
 
-/** Every unfinished Level 50 move is either ready for investigation or explicitly blocked.
- * The manual queue only overrides priority; it never limits the authorized backlog.
+/** Every unfinished Factory move is either ready for investigation or explicitly blocked.
+ * Level 50 precedes Open-only; manual priority applies within each tier.
+ * The manual queue never limits the authorized backlog.
  * Component reuse ranks work, but grants no animation acceptance or timing facts.
  */
 export function animationWorkPlan(ledger: AnimationCoverageLedger = coverage): {
@@ -335,7 +339,7 @@ export function animationWorkPlan(ledger: AnimationCoverageLedger = coverage): {
     .flatMap((move) => move.componentIds));
   const blockers = new Map((ledger.blockers ?? []).map((blocker) => [blocker.move, blocker]));
   const priority = new Map(ledger.queue.map((move, index) => [move, index]));
-  const remaining = inventory.tiers.level50.moves
+  const remaining = factoryTiers.flatMap((tier) => inventory.tiers[tier].moves.map((move) => ({ ...move, tier })))
     .filter((move) => statusByMove.get(move.move) !== "exact")
     .map((move): AnimationWorkItem => {
       const components = componentsByMove.get(move.move)!;
@@ -347,7 +351,8 @@ export function animationWorkPlan(ledger: AnimationCoverageLedger = coverage): {
       };
     });
   const ready = remaining.filter((move) => !blockers.has(move.move)).sort((a, b) =>
-    (priority.get(a.move) ?? Number.MAX_SAFE_INTEGER) - (priority.get(b.move) ?? Number.MAX_SAFE_INTEGER)
+    factoryTiers.indexOf(a.tier) - factoryTiers.indexOf(b.tier)
+    || (priority.get(a.move) ?? Number.MAX_SAFE_INTEGER) - (priority.get(b.move) ?? Number.MAX_SAFE_INTEGER)
     || a.unprovenComponentCount - b.unprovenComponentCount
     || a.componentCount - b.componentCount
     || b.frontierMonCount - a.frontierMonCount

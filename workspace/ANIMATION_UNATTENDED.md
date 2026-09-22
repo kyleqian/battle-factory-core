@@ -27,10 +27,17 @@ This file is campaign policy for `animation-main` only. It must not be added to
 
 ## Continuation and resource discipline
 
-- Continue unfinished Level 50 moves surfaced by the derived work plan
-  (nine ready at the September 22 repair). Start with the current ranked ready move (initially Extrasensory),
-  and keep advancing as moves become exact. Do not restart accepted moves.
+- Continue unfinished Factory moves surfaced by the derived work plan:
+  nine ready Level 50 moves, followed by Open-only Outrage (explicitly added
+  by the user on September 22). Start with the current ranked ready move
+  (initially Extrasensory), and keep advancing as moves become exact.
+  Do not restart accepted moves.
   An empty manual priority list is not completion or an authorization boundary.
+  Outrage may proceed when only blocked Level 50 work remains. Stage it with
+  a legal Open-level Factory carrier (`FRONTIER_MON_DRAGONITE_5`); do not
+  invent a Level 50 carrier or waive both-orientation dense acceptance.
+  The 77 moves outside the Factory remain outside this campaign scope.
+  Open-level species geometry is a separate audit, not credit from adding Outrage.
 - Helping Hand alone has a recorded move blocker: its success body needs legal
   doubles staging, while the current profile is singles-only. Keep its success
   animation unsupported until that condition changes. Nightmare's contest-only

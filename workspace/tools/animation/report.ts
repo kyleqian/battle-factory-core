@@ -27,11 +27,11 @@ console.log(
 );
 
 const work = animationWorkPlan();
-console.log(`\nLevel 50 work: ${work.ready.length} ready for investigation, ${work.blocked.length} explicitly blocked, ${work.remaining} unfinished (${work.state})`);
-console.log("Move acceptance queue (manual priorities + derived unfinished moves):");
+console.log(`\nFactory work: ${work.ready.length} ready for investigation, ${work.blocked.length} explicitly blocked, ${work.remaining} unfinished (${work.state})`);
+console.log("Move acceptance queue (Level 50 before Open-only; manual priorities within each tier):");
 for (const [index, move] of work.ready.entries()) {
   console.log(
-    `${index + 1}. ${move.move} (${move.name}) — ${move.status}; ` +
+    `${index + 1}. ${move.move} (${move.name}) — ${tierNames[move.tier]}; ${move.status}; ` +
     `${move.frontierMonCount} Factory sets; ${move.unprovenComponentCount}/${move.componentCount} components without an exact representative; ${move.animationScript}`,
   );
 }
@@ -40,8 +40,8 @@ console.log("\nBlocked moves (remain unsupported; no acceptance credit):");
 for (const move of work.blocked) {
   console.log(`- ${move.move}: ${move.reason} Resume when: ${move.resumeWhen} Evidence: ${move.evidence.join(", ")}`);
 }
-if (work.state === "blocked") console.log("No dispatchable Level 50 work; review the explicit blockers. This is not complete coverage.");
-if (work.state === "complete") console.log("All Level 50 moves are exact.");
+if (work.state === "blocked") console.log("No dispatchable Factory work; review the explicit blockers. This is not complete coverage.");
+if (work.state === "complete") console.log("All Factory moves are exact; Open-level species geometry remains a separate audit.");
 
 const unfinished = new Set([...work.ready, ...work.blocked].map((move) => move.move));
 console.log("\nExisting component tracks touching unfinished moves:");

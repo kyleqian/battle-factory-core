@@ -92,12 +92,13 @@ describe("animation coverage ledger", () => {
     ]);
   });
 
-  it("keeps the derived acceptance queue inside unfinished Level 50 coverage", () => {
+  it("queues unfinished Level 50 moves before Open-only Outrage", () => {
     const queue = queuedAnimationMoves();
     expect(queue.map(({ move }) => move)).toEqual([
       "MOVE_EXTRASENSORY", "MOVE_WILL_O_WISP", "MOVE_MEGAHORN",
       "MOVE_SUPERPOWER", "MOVE_REVENGE", "MOVE_SPIT_UP",
       "MOVE_FURY_CUTTER", "MOVE_CURSE", "MOVE_ICE_BALL",
+      "MOVE_OUTRAGE",
     ]);
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
