@@ -3,12 +3,14 @@
  "entries": [
   {
    "move": "MOVE_MEGAHORN",
-   "status": "staged",
+   "status": "exact",
    "covered": [
     "the complete source-audited Move_MEGAHORN pointer-owned body, including the battle BG_DRILL path, contest-only MegahornInContest -> MegahornContinue identity, gMegahornHornSpriteTemplate / AnimMegahornHorn affine programs, attacker ShakeMon and slides, horn visual command, hitsplat, target ShakeMonInPlace, complex palette blend, defender-partner monbg, audio/resources, restore, and cleanup",
     "the sole novel ANIM_TAG_HORN_HIT_2 production-asset prerequisite is source-extracted byte-for-byte: the 32x16 4bpp eight-tile horn_hit_2 sheet and palette, static dummy frame, affine-double 32x16 OAM, and battle/player/contest rotations are pinned to source, PNG, ELF symbols, and ROM bytes; this prerequisite alone conveys no component, track, sibling, or move credit",
     "complete legal bilateral SEAKING/ONIX Level-50 Factory parties constrain a real Megahorn hit in both player-back and opponent-front orientations; dense Scene-ON semantic state and chronological raw RGB retain every visible source-owned row through first inactive cleanup, twice fresh per orientation",
-    "move-owned normalized maps independently measure OAM, affine matrices, faded/hardware palettes and changed banks, BG software/register/VRAM, resource allocator/tag lifetimes, audio, sprite/task liveness, battler axes, opaque gameplay state/RNG, and teardown; no sibling latch or acceptance credit transfers"
+    "move-owned normalized maps independently measure OAM, affine matrices, faded/hardware palettes and changed banks, BG software/register/VRAM, resource allocator/tag lifetimes, audio, sprite/task liveness, battler axes, opaque gameplay state/RNG, and teardown; no sibling latch or acceptance credit transfers",
+    "the battle-only source-relative reducer retains the dormant MegahornInContest -> MegahornContinue identity without inventing a legal contest execution; its narrow typed Scene-ON seam and generic live hardware-buffer compositor pass all 353 retained component, seam, chronological raw-RGB, and shared framebuffer rows twice with zero residual pixels",
+    "a material CROBAT/BLISSEY side, species-art, geometry, allocation/order, and presentation-RNG control changes live output while gameplay state and RNG remain opaque and unchanged; no sibling or shared-component credit transfers"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-megahorn-player-seaking-opponent-onix.json",
@@ -28,9 +30,17 @@
     "tests/animation/megaHornAssets.test.ts",
     "tests/animation/megaHornEvidenceCheckpoint.test.ts",
     "src/animation/assets/mega-horn-horn-hit-2.json",
+    "src/animation/megaHorn.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tools/compare/verifyMegaHornReducer.ts",
+    "tools/compare/megaHornActualCore.ts",
+    "tests/animation/megaHornReducer.test.ts",
+    "tests/animation/megaHornActualCore.test.ts",
     "ANIMATION_LATCHES.md"
    ],
-   "remaining": "The source-derived Horn Hit 2 asset prerequisite is available, but add a source-relative reducer, narrow typed Scene-ON seam, generic live compositor, material altered control, and twice-fresh actual-core zero-residual proof before exact promotion."
+   "acceptance": "Two independent actual-core verifier processes each pass all 353 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest 39a56550ff8a655b678247fc3b4df55f148834a3eb56dbe536c1859cd9f54ca0; player/opponent RGB sequences cc5965f816ce5cf48cbf183dbf1677630e424c50bdf55c4800a892dd14f9345d / a1bfc221b7d61a905bac87b0a8e798e5f6657a4534936a8d8366b5578619b246."
   },
   {
    "move": "MOVE_WILL_O_WISP",
@@ -10575,7 +10585,7 @@
     "visualCommand:create_megahorn_horn_sprite"
    ],
    "representatives": ["MOVE_MEGAHORN"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/megaHornSourceAudit.ts",
     "tools/compare/extractMegaHornAssets.ts",
@@ -10586,9 +10596,14 @@
     "tests/animation/megaHornAssets.test.ts",
     "tests/animation/megaHornEvidenceCheckpoint.test.ts",
     "src/animation/assets/mega-horn-horn-hit-2.json",
+    "src/animation/megaHorn.ts",
+    "tools/compare/verifyMegaHornReducer.ts",
+    "tools/compare/megaHornActualCore.ts",
+    "tests/animation/megaHornReducer.test.ts",
+    "tests/animation/megaHornActualCore.test.ts",
     "ANIMATION_LATCHES.md"
    ],
-   "goal": "UNFULFILLED: MOVE_MEGAHORN is the sole representative of the Horn Hit 2 asset, battle/contest continuation identity, and create_megahorn_horn_sprite. Its source-derived Horn Hit 2 prerequisite is available, but source and bilateral dense evidence remain staged only; reducer, typed seam, generic compositor, material altered control, and actual-core proof remain required."
+   "goal": "FULFILLED by MOVE_MEGAHORN alone after complete source, exact Horn Hit 2 extraction, legal bilateral dense semantic/raw-RGB evidence, move-owned latches, battle-only source-relative reducer, typed seam, generic compositor, material altered control, and twice-fresh 353/353 zero-residual actual-core acceptance through cleanup. The contest-only MegahornInContest branch remains represented by source identity and its join into MegahornContinue without inventing a legal battle execution. No sibling or unrelated component receives transferred credit."
   }
  ],
  "variantAudits": {

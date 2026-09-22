@@ -27,10 +27,10 @@ describe("MOVE_MEGAHORN complete bilateral Scene-ON evidence", () => {
     }
   });
 
-  it("keeps exact promotion and the four-component track bounded", () => {
+  it("keeps the historical evidence receipt isolated after exact promotion", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_MEGAHORN")).toMatchObject({ status: "staged" });
-    expect(coverage.componentTracks.find((track: Json) => track.id === "megahorn-horn-control-flow")).toMatchObject({ components: ["asset:ANIM_TAG_HORN_HIT_2", "subroutine:MegahornContinue", "subroutine:MegahornInContest", "visualCommand:create_megahorn_horn_sprite"], representatives: ["MOVE_MEGAHORN"], fulfilled: false });
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_MEGAHORN")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "megahorn-horn-control-flow")).toMatchObject({ components: ["asset:ANIM_TAG_HORN_HIT_2", "subroutine:MegahornContinue", "subroutine:MegahornInContest", "visualCommand:create_megahorn_horn_sprite"], representatives: ["MOVE_MEGAHORN"], fulfilled: true });
     expect(fixture.source.novelComponents).toEqual(["asset:ANIM_TAG_HORN_HIT_2", "subroutine:MegahornContinue", "subroutine:MegahornInContest", "visualCommand:create_megahorn_horn_sprite"]);
     expect(fixture.controls.transferCredit).toBe(false);
   });
