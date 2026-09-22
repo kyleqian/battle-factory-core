@@ -25,13 +25,13 @@
   asset is tag **10153**: exact **32x16**, 4bpp, **4x2/8-tile** sheet +
   16-color palette, static dummy frame, affine-double normal OAM, and
   template rotations **30/-99/94**, all source/PNG/ELF/ROM-pinned.
-- **Verification / next:** Evidence commit `007d988b8`; probe/RGB/map digests
-  are player `7c1a63d9… / cc5965f8… / ae98a9fa…` and opponent
-  `77c709bd… / a1bfc221… / 934485e9…`; fixture digest is
-  `5b12e234…`. Focused source/evidence/inventory tests pass **3 files / 11
-  tests** before this asset checkpoint. The isolated asset contract
-  re-extracts byte-for-byte; final production-asset gates are pending this
-  session. Next is a separately bounded source-relative reducer, narrow seam,
+- **Verification / next:** On tested code ec45326d8, the asset/source/evidence/
+  boundary/inventory union passes **5 files / 16 tests**; the extractor's
+  byte-for-byte check passes; smoke passes **8 files / 448 tests**. Full
+  npm test completed successfully in **1,762 s** and npm run build passes
+  **824 modules** (only the inherited chunk-size warning). Coverage remains
+  **268/276 exact, 1 staged, 7 unsupported**; animation audit and diff checks
+  pass. Next is a separately bounded source-relative reducer, narrow seam,
   generic compositor, material altered control, and actual-core zero-residual
   proof; keep MegaHorn staged and its sole novel-component track unfulfilled
   until every gate is real.
