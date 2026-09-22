@@ -987,6 +987,7 @@ import {
   type ExtrasensoryLiveInputs,
   type ExtrasensoryState,
 } from "./extrasensory.ts";
+import { willOWispAtAge, type WillOWispLiveInputs, type WillOWispState } from "./willOWisp.ts";
 import {
   returnDisplayPlan,
   returnAtAge,
@@ -2854,6 +2855,17 @@ export interface SceneOnExtrasensoryConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/** Narrow Scene-ON seam for MOVE_WILL_O_WISP presentation only. */
+export interface SceneOnWillOWispConfig {
+  readonly move: "WILL_O_WISP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<WillOWispLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /**
  * Narrow Scene-ON seam for MOVE_RETURN. The caller carries the live
  * friendship-selected presentation snapshot; damage, Return power, gameplay
@@ -4409,6 +4421,7 @@ export type SceneOnMoveConfig =
   | SceneOnPursuitConfig
   | SceneOnPsywaveConfig
   | SceneOnExtrasensoryConfig
+  | SceneOnWillOWispConfig
   | SceneOnReturnConfig
   | SceneOnFlatterConfig
   | SceneOnRazorWindConfig
@@ -4785,6 +4798,8 @@ export type SceneOnPsywavePresentationState =
   SceneOnMovePresentationState<SceneOnPsywaveConfig>;
 export type SceneOnExtrasensoryPresentationState =
   SceneOnMovePresentationState<SceneOnExtrasensoryConfig>;
+export type SceneOnWillOWispPresentationState =
+  SceneOnMovePresentationState<SceneOnWillOWispConfig>;
 export type SceneOnReturnPresentationState =
   SceneOnMovePresentationState<SceneOnReturnConfig>;
 export type SceneOnFlatterPresentationState =
@@ -5241,6 +5256,10 @@ export interface SceneOnPsywaveView extends PsywaveState {
 }
 
 export interface SceneOnExtrasensoryView extends ExtrasensoryState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+export interface SceneOnWillOWispView extends WillOWispState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8999,6 +9018,21 @@ export function sceneOnExtrasensoryView(
     attacker,
     target,
   };
+}
+
+/** `age=0` is MOVE_WILL_O_WISP's first resource-command row. */
+export function sceneOnWillOWispView(
+  state: SceneOnWillOWispPresentationState,
+): SceneOnWillOWispView {
+  if (state.config.move !== "WILL_O_WISP") {
+    throw new Error(`expected WILL_O_WISP presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return { ...willOWispAtAge(state.age, { ...animationInputs,
+    attackerSide: attacker.geometry.side, targetSide: target.geometry.side,
+    attackerSpecies: attacker.species, targetSpecies: target.species,
+    attackerCenter: attacker.geometry.animationCenter,
+    targetCenter: target.geometry.animationCenter }), attacker, target };
 }
 
 /** `age=0` is MOVE_RETURN's root resource-command source row. */

@@ -197,6 +197,7 @@ import {
   type SceneOnSkillSwapConfig,
   type SceneOnPsywaveConfig,
   type SceneOnExtrasensoryConfig,
+  type SceneOnWillOWispConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -384,6 +385,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "EXTRASENSORY") {
     const extrasensoryPresentation = presentation as SceneOnMovePresentationState<SceneOnExtrasensoryConfig>;
     renderSceneOnMovePresentation(framebuffer, extrasensoryPresentation);
+    return;
+  }
+  if (presentation.config.move === "WILL_O_WISP") {
+    const willOWispPresentation = presentation as SceneOnMovePresentationState<SceneOnWillOWispConfig>;
+    renderSceneOnMovePresentation(framebuffer, willOWispPresentation);
     return;
   }
   if (presentation.config.move === "PURSUIT") {
