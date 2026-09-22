@@ -704,6 +704,7 @@ import rapidSpinAsset from "../animation/assets/rapid-spin.json" with { type: "j
 import foresightAsset from "../animation/assets/foresight.json" with { type: "json" };
 import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
 import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
+import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
@@ -1002,6 +1003,7 @@ import {
   sceneOnPsywaveView,
   sceneOnExtrasensoryView,
   sceneOnWillOWispView,
+  sceneOnMegaHornView,
   sceneOnPursuitView,
   sceneOnPursuitDisplayPlan,
   sceneOnReturnView,
@@ -1282,6 +1284,7 @@ import {
   type SceneOnPsywaveConfig,
   type SceneOnExtrasensoryConfig,
   type SceneOnWillOWispConfig,
+  type SceneOnMegaHornConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -1377,6 +1380,7 @@ import { skillSwapDisplayPlan } from "../animation/skillSwap.ts";
 import { psywaveDisplayPlan } from "../animation/psywave.ts";
 import { extrasensoryDisplayPlan } from "../animation/extrasensory.ts";
 import { willOWispDisplayPlan } from "../animation/willOWisp.ts";
+import { megaHornDisplayPlan } from "../animation/megaHorn.ts";
 import {
   hypnosisBgPaletteRowAtAge,
   HYPNOSIS_TARGET_BLEND_COLOR,
@@ -2542,6 +2546,9 @@ const battleAnimPsychicBg = battleAnimPsychicBgAsset as { tileset: Tileset; pale
 const willOWispArt = willOWispAsset as unknown as {
   orb: { tileset: Tileset; palette: RgbColor[] };
   fire: { tileset: Tileset; palette: RgbColor[] };
+};
+const megaHornArt = megaHornAsset as unknown as {
+  hornHit2: { tileset: Tileset; palette: RgbColor[] };
 };
 const skillSwapOrbArt = (skillSwapOrbAsset as {
   orb: { tileset: Tileset; palette: RgbColor[] };
@@ -24377,6 +24384,71 @@ export function renderSceneOnMovePresentation(
         ? `${view.battlers.attacker.art.displaySpecies} used`
         : `Foe ${view.battlers.attacker.art.displaySpecies} used`,
       "PSYWAVE!", 99);
+    return;
+  }
+
+  if (state.config.move === "MEGAHORN") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnMegaHornConfig>;
+    const view = sceneOnMegaHornView(moveState), plan = megaHornDisplayPlan(view);
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker, displaySpecies: string): BattlerArt => {
+      const found = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[displaySpecies]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[displaySpecies];
+      if (!found) throw new Error(`MEGAHORN missing live battler art ${displaySpecies}`);
+      return found;
+    };
+    const tilesFor = (art: BattlerArt, side: "player"|"opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word:number):RgbColor => { const packed=mgbaColorFromBgr555(word);
+      return {r:packed&0xff,g:packed>>>8&0xff,b:packed>>>16&0xff}; };
+    const paletteBank=(bank:number):RgbColor[]=>view.palette.hardware.slice(bank*16,bank*16+16).map(rgb555);
+    const fieldBank=(bank:number):RgbColor[]=>paletteBank(bank).map(color=>{const packed=mgbaDarkenColor(
+      color.r|(color.g<<8)|(color.b<<16),view.registers.bldy??0);return{r:packed&0xff,g:packed>>>8&0xff,b:packed>>>16&0xff};});
+    const signed=(value:number)=>{const raw=value&0x1ff;return raw>=256?raw-512:raw;};
+    const top=(attr:readonly[number,number,number])=>({x:signed(attr[1]),y:(attr[0]&0xff)>=160?(attr[0]&0xff)-256:attr[0]&0xff});
+    const attackerArt=artFor(view.attacker,view.battlers.attacker.art.displaySpecies);
+    const targetArt=artFor(view.target,view.battlers.target.art.displaySpecies);
+    const drillActive=(view.registers.bg3cnt??0)===14859;
+    if(drillActive)drawScrolledTileBg(fb,hornDrillArt.drill.tileset,hornDrillArt.drill.tilemap,
+      [fieldBank(2)],view.registers.bg3hofs??0,view.registers.bg3vofs??0);
+    else drawTileBg(fb,battleBg.static.tileset,battleBg.static.tilemap,[2,3,4].map(fieldBank));
+    const disabled=(attr:readonly[number,number,number])=>(attr[0]&0x300)===0x200;
+    const targetDisabled=!plan.target||disabled(plan.target.attr);
+    if(view.monbg.active&&targetDisabled){
+      const x=-signed(view.registers[view.monbg.selected==="bg1"?"bg1hofs":"bg2hofs"]??0);
+      const y=-signed(view.registers[view.monbg.selected==="bg1"?"bg1vofs":"bg2vofs"]??0);
+      drawSpriteSheet(fb,tilesFor(targetArt,view.target.geometry.side),paletteBank(view.monbg.paletteBank),x,y);
+    }
+    const nonObjTarget2=fb.slice();
+    const entries=[plan.attacker,...(plan.target&&!targetDisabled?[plan.target]:[]),...plan.horns,...plan.impacts]
+      .sort((a,b)=>b.oamIndex-a.oamIndex);
+    for(const object of entries){
+      if(disabled(object.attr))continue;
+      const tile=object.attr[2]&0x3ff,bank=16+(object.attr[2]>>>12&0xf),corner=top(object.attr);
+      if(tile>=view.resources.hornTileBase&&tile<view.resources.hornTileBase+8){
+        drawSpriteSheetAffineRotate(fb,megaHornArt.hornHit2.tileset,paletteBank(bank),corner.x+32,corner.y+16,
+          object.matrix[0],object.matrix[1],object.matrix[2],object.matrix[3]);continue;
+      }
+      if(tile>=view.resources.impactTileBase&&tile<view.resources.impactTileBase+16){
+        drawSpriteSheetAffineRotateBlendedOverFb(fb,nonObjTarget2,battleAnimHitsplat.tileset,paletteBank(bank),
+          corner.x+16,corner.y+16,object.matrix[0],object.matrix[1],object.matrix[2],object.matrix[3],12,8,false);continue;
+      }
+      const attacker=object.oamIndex===plan.attacker.oamIndex;
+      const battler=attacker?view.attacker:view.target,art=attacker?attackerArt:targetArt;
+      drawSpriteSheet(fb,tilesFor(art,battler.geometry.side),paletteBank(bank),corner.x,corner.y);
+    }
+    const playerSpecies=view.attacker.geometry.side==="player"?view.battlers.attacker.art.displaySpecies:view.battlers.target.art.displaySpecies;
+    const opponentSpecies=view.attacker.geometry.side==="opponent"?view.battlers.attacker.art.displaySpecies:view.battlers.target.art.displaySpecies;
+    const profile=moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb,0,composeOpponentHealthbox(healthboxAssemblyAssets,{name:opponentSpecies,level:50,
+      gender:profile.opponentGender??"male",hpFraction:profile.opponentHp/profile.opponentMaxHp,status:profile.opponentStatus??"none"}));
+    drawComposedPlayerHealthbox(fb,composePlayerHealthbox(playerHealthboxAssets,{name:playerSpecies,level:50,
+      gender:profile.playerGender??"male",hpFraction:profile.playerHp/profile.playerMaxHp,status:profile.playerStatus??"none",
+      currentHp:profile.playerHp,maxHp:profile.playerMaxHp}));
+    drawTileBg(fb,battleWindow.tileset,battleWindow.tilemap,battleWindow.palette);
+    drawMessageTextLines(fb,view.attacker.geometry.side==="player"?`${view.battlers.attacker.art.displaySpecies} used`:
+      `Foe ${view.battlers.attacker.art.displaySpecies} used`,"MEGAHORN!",99);
     return;
   }
 

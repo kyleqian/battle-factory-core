@@ -112,6 +112,7 @@ import {
   type HornDrillProfile,
   type HornDrillState,
 } from "./hornDrill.ts";
+import { megaHornAtAge, type MegaHornLiveInputs, type MegaHornState } from "./megaHorn.ts";
 import {
   auroraBeamAtAge,
   type AuroraBeamGeometry,
@@ -2866,6 +2867,16 @@ export interface SceneOnWillOWispConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/** Narrow battle-only Scene-ON seam for MOVE_MEGAHORN. */
+export interface SceneOnMegaHornConfig {
+  readonly move: "MEGAHORN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<MegaHornLiveInputs,
+    "attackerSide"|"targetSide"|"attackerSpecies"|"targetSpecies"|"attackerCenter"|"targetCenter">>;
+}
+
 /**
  * Narrow Scene-ON seam for MOVE_RETURN. The caller carries the live
  * friendship-selected presentation snapshot; damage, Return power, gameplay
@@ -4422,6 +4433,7 @@ export type SceneOnMoveConfig =
   | SceneOnPsywaveConfig
   | SceneOnExtrasensoryConfig
   | SceneOnWillOWispConfig
+  | SceneOnMegaHornConfig
   | SceneOnReturnConfig
   | SceneOnFlatterConfig
   | SceneOnRazorWindConfig
@@ -4800,6 +4812,8 @@ export type SceneOnExtrasensoryPresentationState =
   SceneOnMovePresentationState<SceneOnExtrasensoryConfig>;
 export type SceneOnWillOWispPresentationState =
   SceneOnMovePresentationState<SceneOnWillOWispConfig>;
+export type SceneOnMegaHornPresentationState =
+  SceneOnMovePresentationState<SceneOnMegaHornConfig>;
 export type SceneOnReturnPresentationState =
   SceneOnMovePresentationState<SceneOnReturnConfig>;
 export type SceneOnFlatterPresentationState =
@@ -5260,6 +5274,10 @@ export interface SceneOnExtrasensoryView extends ExtrasensoryState {
   readonly target: SceneOnPresentationBattler;
 }
 export interface SceneOnWillOWispView extends WillOWispState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+export interface SceneOnMegaHornView extends MegaHornState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -9033,6 +9051,17 @@ export function sceneOnWillOWispView(
     attackerSpecies: attacker.species, targetSpecies: target.species,
     attackerCenter: attacker.geometry.animationCenter,
     targetCenter: target.geometry.animationCenter }), attacker, target };
+}
+
+/** `age=0` is MOVE_MEGAHORN's first battle resource-command row. */
+export function sceneOnMegaHornView(state: SceneOnMegaHornPresentationState): SceneOnMegaHornView {
+  if (state.config.move !== "MEGAHORN") throw new Error(`expected MEGAHORN presentation, got ${state.config.move}`);
+  const { attacker, target, animationInputs } = state.config;
+  return { ...megaHornAtAge(state.age, { ...animationInputs,
+    attackerSide: attacker.geometry.side, targetSide: target.geometry.side,
+    attackerSpecies: attacker.species, targetSpecies: target.species,
+    attackerCenter: attacker.geometry.animationCenter, targetCenter: target.geometry.animationCenter }),
+    attacker, target };
 }
 
 /** `age=0` is MOVE_RETURN's root resource-command source row. */

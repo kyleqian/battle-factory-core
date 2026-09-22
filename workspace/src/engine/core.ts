@@ -198,6 +198,7 @@ import {
   type SceneOnPsywaveConfig,
   type SceneOnExtrasensoryConfig,
   type SceneOnWillOWispConfig,
+  type SceneOnMegaHornConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -390,6 +391,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "WILL_O_WISP") {
     const willOWispPresentation = presentation as SceneOnMovePresentationState<SceneOnWillOWispConfig>;
     renderSceneOnMovePresentation(framebuffer, willOWispPresentation);
+    return;
+  }
+  if (presentation.config.move === "MEGAHORN") {
+    const megaHornPresentation = presentation as SceneOnMovePresentationState<SceneOnMegaHornConfig>;
+    renderSceneOnMovePresentation(framebuffer, megaHornPresentation);
     return;
   }
   if (presentation.config.move === "PURSUIT") {
