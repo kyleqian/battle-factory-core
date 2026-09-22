@@ -1,3 +1,30 @@
+# Animation maintenance — include Open-only Outrage (2026-09-22)
+
+- **State:** Level 50 remains **266/276 exact**, Open-only **0/1 exact**.
+  The campaign accounts for **10 ready + 1 blocked** Factory moves: nine
+  ready Level 50 moves, then Outrage. Helping Hand's doubles blocker remains.
+- **Did:** `4a359de1b` extends derived work selection, queue/blocker/track
+  validation, report, and launch policy to Factory tiers. Level 50 ready work
+  always precedes Open-only; blocked Level 50 work cannot strand Outrage.
+  No move receives new acceptance credit. The user reaffirmed finishing the
+  current approach; consider a bounded shared-runtime comparison before any
+  future non-Factory expansion, not a rewrite during this campaign.
+- **Verification:** Local and Hetzner scoped gates on `4a359de1b` passed:
+  **5 files / 18 tests**, typecheck, autonomy wrapper checks, launcher syntax,
+  coverage, asset audit, and diff checks. Hetzner Scene-ON oracle is healthy.
+  Remote receipts: `/var/lib/pokebench-autonomy/maintenance/20260922-outrage/`.
+  Production code/assets/dependencies/configuration remain unchanged from
+  `056e9978f`'s **1,411 files / 11,451 tests** and **821-module build** receipt.
+  Reuse that baseline plus these scoped gates; only campaign/ledger docs follow.
+- **Next:** Resume Extrasensory source + legal bilateral staging + dense
+  evidence, then advance the ranked queue through Outrage. Use legal Open-level
+  `FRONTIER_MON_DRAGONITE_5` for Outrage and preserve the existing acceptance
+  bar. Open-level species geometry remains separate; the 77 outside-Factory
+  moves are outside this campaign. The interrupted Extrasensory worker was
+  clean at `f5df34bb2`, with no code/evidence to recover; its research log and
+  a maintenance note are retained on Hetzner. Campaign end, cadence, provider
+  routing, and paused Rust lane are unchanged.
+
 # Animation supervisor wind-down — queue exhausted, same-code baseline reconfirmed (2026-09-21 supervisor)
 
 - **State / orient:** Performed the required `git merge --no-edit master` (already up to date at `3f76b234d`), confirmed no open animation deferrals or leftover worker worktrees/branches, and reused the recorded same-code startup baseline because the production tree remains exactly `971233d80` and only animation ledger docs changed afterward. Battle Scene ON oracle profile v5 answers. Level 50 remains **266/276 exact**, **0 partial / 0 staged**, and **10 unsupported**; the authoritative move queue is empty, so no worker was dispatched and no production, evidence, coverage, boundary, barrier, or main-program file changed.
