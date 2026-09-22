@@ -92,9 +92,13 @@ describe("animation coverage ledger", () => {
     ]);
   });
 
-  it("keeps the manual acceptance queue inside Level 50 coverage", () => {
+  it("keeps the derived acceptance queue inside unfinished Level 50 coverage", () => {
     const queue = queuedAnimationMoves();
-    expect(queue.map(({ move }) => move)).toEqual([]);
+    expect(queue.map(({ move }) => move)).toEqual([
+      "MOVE_EXTRASENSORY", "MOVE_WILL_O_WISP", "MOVE_MEGAHORN",
+      "MOVE_SUPERPOWER", "MOVE_REVENGE", "MOVE_SPIT_UP",
+      "MOVE_FURY_CUTTER", "MOVE_CURSE", "MOVE_ICE_BALL",
+    ]);
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
       species: 8,

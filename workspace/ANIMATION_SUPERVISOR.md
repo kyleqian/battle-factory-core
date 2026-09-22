@@ -44,10 +44,20 @@ substitutions:
    means the boundary leaked — abort the merge, record it in
    `ANIMATION_DEFERRED.md`, and work from the unmerged tree.
 2. Follow `ANIMATION_VERIFICATION.md` for baseline reuse and scope-based gates.
-   Install dependencies when needed; run the full baseline if the current code
-   or relevant environment lacks a recorded green receipt.
+   Install dependencies when needed; run the full baseline if the production
+   tree or relevant environment lacks a recorded green receipt. Validate any
+   tooling/test/evidence-only delta with its scoped gates.
 3. Orient: `ANIMATION_PROGRESS.md` top entry, `npm run animation:coverage`,
-   `git log` since your last session.
+   `git log` since your last session. The report derives the work queue from all
+   unfinished Level 50 moves. Its manual priority list is not an authorization
+   boundary. Dispatch a bounded ready move even when that list is empty.
+4. Check the report's explicit blocker reasons and resume conditions. A missing
+   component track is not a blocker: create a bounded move-owned track after
+   source classification. Every unfinished move must be ready or explicitly
+   blocked; never infer "nothing to do" from fulfilled tracks or an empty list.
+   Respect existing open user deferrals. If no ready work remains, follow the
+   unchanged-idle exit rule in `ANIMATION_VERIFICATION.md`; do not repeat full
+   gates or write another no-change checkpoint.
 
 ## The loop, adjusted
 
@@ -57,8 +67,9 @@ substitutions:
   animation lane only — probes/scouts happen inside the worker's own step,
   and the old stacked-chain pattern is unnecessary now that you merge each
   verified step into `animation-main` before briefing the next.
-- **Brief** one bounded, non-exclusive component track from
-  `ANIMATION_COVERAGE.json`: name the components, one representative, and
+- **Brief** one bounded ready move from the derived work queue and its
+  non-exclusive component track (existing or newly source-classified): name
+  the components, one representative, and
   the sibling moves to batch-check. A move is the acceptance unit; shared
   code never promotes siblings without their own dense evidence. Require
   both animation ledgers updated; a canonical window alone stays `partial`.
@@ -100,8 +111,9 @@ substitutions:
   worktree — the cwd self-merge trap). Follow `ANIMATION_VERIFICATION.md`:
   independently check the central claim and use focused/smoke verification
   between steps, reusing a valid same-code worker full-suite/build receipt.
-  Run full union gates when code changes invalidate that receipt and once at
-  wind-down, then remove the worker worktree and branch.
+  Run full union gates when production changes invalidate that receipt; apply
+  the scope and idle exceptions at wind-down, then remove the worker worktree
+  and branch.
 - **Oracle:** Battle Scene ON at `POKEBENCH_ORACLE_URL` (the launcher
   ensures it). `./tools/check-oracle-freshness.sh` before staging anything
   if the service might predate the harness commit.

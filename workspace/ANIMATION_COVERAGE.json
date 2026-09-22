@@ -7860,6 +7860,14 @@
   }
  ],
  "queue": [],
+ "blockers": [
+  {
+   "move": "MOVE_HELPING_HAND",
+   "reason": "The current MechanicLab profile is singles-only. Legal Helping Hand fails before its success animation; the clap body cannot be captured through this profile.",
+   "resumeWhen": "A legal doubles Scene-ON staging profile can execute Helping Hand's success body through cleanup.",
+   "evidence": ["tools/compare/fixtures/helping-hand-evidence.json", "tests/animation/helpingHandEvidence.test.ts"]
+  }
+ ],
  "componentTracks": [
   {
    "id": "mach-punch-source-relative-body",

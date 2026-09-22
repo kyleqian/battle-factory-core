@@ -1,9 +1,9 @@
 import {
   animationComponentLeverage,
   animationCoverageSummary,
+  animationWorkPlan,
   openLevelVariantAudit,
   queuedAnimationComponentTracks,
-  queuedAnimationMoves,
   relatedAnimationMoves,
 } from "./coverage.ts";
 
@@ -26,20 +26,28 @@ console.log(
   `${openAudit.monSets} sets and ${openAudit.overlappingMoves} overlapping moves`,
 );
 
-console.log("\nComponent work tracks (non-exclusive):");
-for (const [index, track] of queuedAnimationComponentTracks().entries()) {
+const work = animationWorkPlan();
+console.log(`\nLevel 50 work: ${work.ready.length} ready for investigation, ${work.blocked.length} explicitly blocked, ${work.remaining} unfinished (${work.state})`);
+console.log("Move acceptance queue (manual priorities + derived unfinished moves):");
+for (const [index, move] of work.ready.entries()) {
   console.log(
-    `${index + 1}. ${track.id} — ${track.representatives.join(", ")}; ` +
-    `${track.components.length} source components`,
+    `${index + 1}. ${move.move} (${move.name}) — ${move.status}; ` +
+    `${move.frontierMonCount} Factory sets; ${move.unprovenComponentCount}/${move.componentCount} components without an exact representative; ${move.animationScript}`,
   );
 }
 
-console.log("\nMove acceptance queue:");
-for (const [index, move] of queuedAnimationMoves().entries()) {
-  console.log(
-    `${index + 1}. ${move.move} (${move.name}) — ${move.status}; ` +
-    `${move.frontierMonCount} Factory sets; ${move.animationScript}`,
-  );
+console.log("\nBlocked moves (remain unsupported; no acceptance credit):");
+for (const move of work.blocked) {
+  console.log(`- ${move.move}: ${move.reason} Resume when: ${move.resumeWhen} Evidence: ${move.evidence.join(", ")}`);
+}
+if (work.state === "blocked") console.log("No dispatchable Level 50 work; review the explicit blockers. This is not complete coverage.");
+if (work.state === "complete") console.log("All Level 50 moves are exact.");
+
+const unfinished = new Set([...work.ready, ...work.blocked].map((move) => move.move));
+console.log("\nExisting component tracks touching unfinished moves:");
+for (const track of queuedAnimationComponentTracks().filter((track) =>
+  track.representatives.some((move) => unfinished.has(move)))) {
+  console.log(`- ${track.id} — ${track.representatives.join(", ")}; ${track.components.length} source components`);
 }
 
 const leverage = animationComponentLeverage();
@@ -55,7 +63,7 @@ for (const item of leverage.unproven.slice(0, 6)) {
   console.log(`- ${item.component}: ${item.remainingMoves.length} Level 50 moves`);
 }
 
-const firstQueued = queuedAnimationMoves()[0];
+const firstQueued = work.ready[0];
 if (firstQueued) {
   console.log(`\nSource neighbors for ${firstQueued.move}:`);
   for (const related of relatedAnimationMoves(firstQueued.move, 5)) {

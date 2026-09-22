@@ -1,7 +1,7 @@
 # Animation verification contract
 
 Shared by animation supervisors and workers. Updated by the user-authorized
-2026-09-19 maintenance pass. For animation work this overrides blanket
+2026-09-19 and 2026-09-22 maintenance passes. For animation work this overrides blanket
 full-suite-at-every-commit requirements in AGENTS.md and older launch briefs.
 Dense, twice-fresh, both-orientation, actual-core framebuffer acceptance and
 all required variants remain unchanged.
@@ -12,9 +12,9 @@ all required variants remain unchanged.
   verifier and test, the animation boundary and inventory checks, coverage,
   animation audit, and `git diff --check`. Run typecheck when TypeScript test
   interfaces change. No full game suite or production build is required when
-  no production module, asset, dependency, configuration, or shared helper
-  changes. A docs-only checkpoint requires only diff and ledger checks.
-- **Production animation, assets, engine seam, dependencies, or configuration:**
+  no production module, asset, dependency, production configuration, or shared
+  production helper changes. A docs-only checkpoint requires only diff and ledger checks.
+- **Production animation, assets, engine seam, dependencies, or production configuration:**
   run the affected semantic/framebuffer tests, applicable shared-component
   controls, smoke tests, full `npm test`, and `npm run build` once before the
   worker handoff. Preserve the unchanged dense acceptance bar.
@@ -30,18 +30,35 @@ checks plus smoke rather than repeating both full gates. Resolve conflicts,
 new master code, failed gates, production repairs, or missing receipts with a
 fresh full suite/build on the actual union. Serialize heavyweight commands.
 
-Run one independent complete suite/build at session wind-down; a full pair
-already run by the supervisor on the final code counts. At session start,
-reuse a recorded green baseline only if the code tree and relevant environment
-are unchanged; otherwise run the full baseline before dispatch. Documentation
-alone does not invalidate a code receipt. Never invent or assume a green result.
+Run one independent complete suite/build at session wind-down when production
+code changed during that session; a full pair already run by the supervisor on
+the final code counts. Evidence/test/tooling-only sessions use their scoped
+gates above. An unchanged idle session with a valid green baseline must not
+repeat full tests/builds or create a ledger-only commit merely because the timer
+fired. Check the derived work plan, tree/receipt identity, and blocker conditions,
+then exit if there is truly no dispatchable work. This idle exception overrides
+older unconditional wind-down wording. At session start,
+reuse a recorded green baseline when the production tree and relevant
+environment are unchanged. Tooling/test/evidence deltas need their recorded
+scoped gates before dispatch; production/dependency/configuration deltas or a
+missing production receipt need a full baseline. Documentation alone does not
+invalidate a code receipt. Never invent or assume a green result.
 
 ## Keep move checks local
 
-Global totals and the manual queue are checked centrally in
+Global totals, work-plan accounting, and queue priority are checked centrally in
 `tests/animation/factoryAnimationInventory.test.ts`. A move test/audit checks
 that move and its real source/component dependencies, not the total number of
 accepted moves or unrelated queue members. Stable evidence hashes must exclude
 global counts and unrelated queue state. Adding another accepted move must not
 rewrite old ROM, semantic, or framebuffer receipts. Do not weaken per-move
 source, asset, lifecycle, latch, or framebuffer assertions to satisfy this rule.
+
+## Work exhaustion is an explicit accounting result
+
+`animationWorkPlan()` derives all non-exact Level 50 moves from the inventory.
+Each must appear either in `ready` or in `blocked`, with reason, evidence, and
+resume condition. `ANIMATION_COVERAGE.json.queue` only sets priority; an empty
+manual list never means the remaining moves are unauthorized or exhausted.
+`state: blocked` differs from `state: complete`. Component reuse and dormant
+contest-only track obligations never waive move acceptance or hide ready moves.

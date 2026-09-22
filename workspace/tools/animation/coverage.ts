@@ -13,6 +13,19 @@ interface InventoryMove {
   readonly animationScript: string;
 }
 
+export interface AnimationWorkBlocker {
+  readonly move: string;
+  readonly reason: string;
+  readonly resumeWhen: string;
+  readonly evidence: readonly string[];
+}
+
+export interface AnimationWorkItem extends InventoryMove {
+  readonly status: AnimationCoverageStatus | "unsupported";
+  readonly componentCount: number;
+  readonly unprovenComponentCount: number;
+}
+
 interface CoverageEntry {
   readonly move: string;
   readonly status: AnimationCoverageStatus;
@@ -74,10 +87,11 @@ const inventory = inventoryJson as {
     };
   };
 };
-const coverage = coverageJson as {
+export interface AnimationCoverageLedger {
   schema: string;
   entries: CoverageEntry[];
   queue: string[];
+  blockers?: AnimationWorkBlocker[];
   componentTracks: ComponentTrack[];
   variantAudits: {
     openLevelSpecies: Array<{
@@ -86,7 +100,8 @@ const coverage = coverageJson as {
       notes: string;
     }>;
   };
-};
+}
+const coverage = coverageJson as AnimationCoverageLedger;
 const componentInventory = componentJson as {
   schema: string;
   moves: AnimationMoveComposition[];
@@ -105,7 +120,8 @@ for (const [tier, data] of tiers) {
   }
 }
 
-export function validateAnimationCoverage(): void {
+export function validateAnimationCoverage(ledger: AnimationCoverageLedger = coverage): void {
+  const coverage = ledger;
   if (coverage.schema !== "factory-animation-coverage/v1") {
     throw new Error(`unsupported coverage schema ${coverage.schema}`);
   }
@@ -134,6 +150,21 @@ export function validateAnimationCoverage(): void {
     queue.add(move);
     if (tierByMove.get(move) !== "level50") {
       throw new Error(`queue move ${move} is not in the Level 50 priority tier`);
+    }
+  }
+  const blocked = new Set<string>();
+  for (const blocker of coverage.blockers ?? []) {
+    if (blocked.has(blocker.move)) throw new Error(`duplicate blocker ${blocker.move}`);
+    blocked.add(blocker.move);
+    if (tierByMove.get(blocker.move) !== "level50") {
+      throw new Error(`blocked move ${blocker.move} is not in the Level 50 priority tier`);
+    }
+    if (coverage.entries.some((entry) => entry.move === blocker.move && entry.status === "exact")) {
+      throw new Error(`exact move ${blocker.move} cannot remain blocked`);
+    }
+    if (!blocker.reason.trim() || !blocker.resumeWhen.trim() || blocker.evidence.length === 0
+      || blocker.evidence.some((item) => !item.trim())) {
+      throw new Error(`${blocker.move} needs a blocker reason, resume condition, and evidence`);
     }
   }
   const componentIds = new Set(
@@ -286,16 +317,53 @@ export function animationCoverageSummary(): CoverageSummary[] {
   });
 }
 
-export function queuedAnimationMoves(): Array<InventoryMove & { status: AnimationCoverageStatus | "unsupported" }> {
-  validateAnimationCoverage();
-  const moves = new Map(
-    tiers.flatMap(([, data]) => data.moves).map((move) => [move.move, move]),
-  );
-  const statusByMove = new Map(coverage.entries.map((entry) => [entry.move, entry.status]));
-  return coverage.queue.map((label) => ({
-    ...moves.get(label)!,
-    status: statusByMove.get(label) ?? "unsupported",
-  }));
+/** Every unfinished Level 50 move is either ready for investigation or explicitly blocked.
+ * The manual queue only overrides priority; it never limits the authorized backlog.
+ * Component reuse ranks work, but grants no animation acceptance or timing facts.
+ */
+export function animationWorkPlan(ledger: AnimationCoverageLedger = coverage): {
+  state: "ready" | "blocked" | "complete";
+  remaining: number;
+  ready: AnimationWorkItem[];
+  blocked: Array<AnimationWorkItem & AnimationWorkBlocker>;
+} {
+  validateAnimationCoverage(ledger);
+  const statusByMove = new Map(ledger.entries.map((entry) => [entry.move, entry.status]));
+  const componentsByMove = new Map(componentInventory.moves.map((move) => [move.move, move.componentIds]));
+  const proven = new Set(componentInventory.moves
+    .filter((move) => statusByMove.get(move.move) === "exact")
+    .flatMap((move) => move.componentIds));
+  const blockers = new Map((ledger.blockers ?? []).map((blocker) => [blocker.move, blocker]));
+  const priority = new Map(ledger.queue.map((move, index) => [move, index]));
+  const remaining = inventory.tiers.level50.moves
+    .filter((move) => statusByMove.get(move.move) !== "exact")
+    .map((move): AnimationWorkItem => {
+      const components = componentsByMove.get(move.move)!;
+      return {
+        ...move,
+        status: statusByMove.get(move.move) ?? "unsupported",
+        componentCount: components.length,
+        unprovenComponentCount: components.filter((component) => !proven.has(component)).length,
+      };
+    });
+  const ready = remaining.filter((move) => !blockers.has(move.move)).sort((a, b) =>
+    (priority.get(a.move) ?? Number.MAX_SAFE_INTEGER) - (priority.get(b.move) ?? Number.MAX_SAFE_INTEGER)
+    || a.unprovenComponentCount - b.unprovenComponentCount
+    || a.componentCount - b.componentCount
+    || b.frontierMonCount - a.frontierMonCount
+    || a.id - b.id);
+  const blocked = remaining.filter((move) => blockers.has(move.move))
+    .map((move) => ({ ...move, ...blockers.get(move.move)! }));
+  return {
+    state: ready.length > 0 ? "ready" : blocked.length > 0 ? "blocked" : "complete",
+    remaining: remaining.length,
+    ready,
+    blocked,
+  };
+}
+
+export function queuedAnimationMoves(): AnimationWorkItem[] {
+  return animationWorkPlan().ready;
 }
 
 export function openLevelVariantAudit(): {

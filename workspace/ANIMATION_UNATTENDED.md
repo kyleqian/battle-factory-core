@@ -27,13 +27,19 @@ This file is campaign policy for `animation-main` only. It must not be added to
 
 ## Continuation and resource discipline
 
-- Silver Wind fade checkpoint `2eec5d465` was independently reviewed and merged
-  in `8e7c8706e`. Continue its BUG/sparkle remainder from the latest ledger;
-  do not recreate the closed source/evidence/reducer/fade work.
+- Continue unfinished Level 50 moves surfaced by the derived work plan
+  (nine ready at the September 22 repair). Start with the current ranked ready move (initially Extrasensory),
+  and keep advancing as moves become exact. Do not restart accepted moves.
+  An empty manual priority list is not completion or an authorization boundary.
+- Helping Hand alone has a recorded move blocker: its success body needs legal
+  doubles staging, while the current profile is singles-only. Keep its success
+  animation unsupported until that condition changes. Nightmare's contest-only
+  track arm is outside legal battle execution and does not block other moves.
 - Follow `ANIMATION_VERIFICATION.md` for scope-based worker gates, same-code
-  receipt reuse, and one independent full suite/build at wind-down. The service
-  supplies the portable tar wrapper, one Vitest worker, and an 8 GiB Node heap
-  for both TypeScript and Vite; do not bypass those settings.
+  receipt reuse, and conditional wind-down checks. Unchanged idle runs exit
+  without a full suite/build or a new ledger-only commit. The service supplies
+  the portable tar wrapper, one Vitest worker, and an 8 GiB Node heap for both
+  TypeScript and Vite; do not bypass those settings.
 - Run only one heavyweight local gate at a time across the supervisor and its
   worker. In particular, never overlap `npm test`, typecheck/build, an mGBA
   capture, or a batch comparator with another heavyweight command. Wait for
