@@ -1,3 +1,31 @@
+# Animation worker closure — MOVE_SUPERPOWER exact (2026-09-22)
+
+- **State / scope:** `MOVE_SUPERPOWER` is **exact**, so Level 50 is **270/276
+  exact, 0 partial, 0 staged, 6 unsupported**; Open-only remains **0/1 exact**.
+  Added its pure source-relative reducer, narrow typed Scene-ON seam, and live
+  shared-core compositor/dispatch. Only the five-component
+  `superpower-rock-orb-fire` track is fulfilled; no sibling/shared-component,
+  boundary/barrier, gameplay/RNG, facility, or main-program ownership moved.
+- **Proof:** Legal player-back frames **79..326 / 248 rows** and opponent-front
+  **81..328 / 248 rows** pass component, typed-seam, chronological raw-RGB,
+  and actual shared-core framebuffer comparison **496/496** with **0 residual
+  pixels**, reproduced in two independent fresh processes through age-247
+  first-inactive cleanup. Verdict
+  `bfa61d58bf15a4909fe3d49b0e21f4f687b57ddd2cf7d7fcc507f1377f73b3b0`;
+  RGB sequences `69d70845cc2e2d7b0d82d490db9365c7bfc467eb65325fe0be80ee729c91c580`
+  / `b1aa859dc305a11257c5e01b701bf234ebda29087c5103fad9871d149eb3bf9c`.
+  A material CROBAT/BLISSEY control changes species art, side/orientation,
+  geometry, allocation/order/matrices, and framebuffer while opaque gameplay
+  state and gameplay RNG remain the same references.
+- **Verification / next:** Production commit `dfd6ec9f4`; tested tree
+  `ad017d8461ed08bd2dfc6294ffe51cfa8b569cf4`. The affected source/assets/
+  evidence/reducer/actual-core/boundary/inventory union passes **7 files / 20
+  tests**; focused exact tests pass **3 / 5**, typecheck, coverage, audit, diff,
+  and smoke (**8 / 448**) are green. Full `npm test` passes **1,431 files /
+  11,497 tests**, with **44 files / 223 tests skipped**, in **1,736.15s**;
+  `npm run build` passes **828 modules** with only the inherited chunk warning.
+  Next ranked work is `MOVE_REVENGE`; it was not started in this step.
+
 # Animation supervisor checkpoint — MOVE_SUPERPOWER asset prerequisite (2026-09-22)
 
 - **State / scope:** `MOVE_SUPERPOWER` remains **staged/unsupported**, so Level
