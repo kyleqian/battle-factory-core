@@ -29,8 +29,16 @@ export function extractPrograms(roots: string[]) {
       const pc = pending.pop()!;
       if (commands[pc]) continue;
       if (Object.keys(commands).length > 500) throw new Error('extraction instruction limit');
-      const opcode = u8(pc); let command: Command;
+      // Decoding an instruction is not a claim the experimental VM executes it.
+      const opcode = u8(pc); let command: Command & {tag?:number;template?:string;subpriority?:number};
       switch (opcode) {
+        case 0: command={op:'loadspritegfx',next:pc+3,tag:u16(pc+1)}; break;
+        case 2: {
+          const template=reverse.get(u32(pc+1));
+          if (!template) throw new Error('unknown sprite template address');
+          const count=u8(pc+6);
+          command={op:'createsprite',next:pc+7+count*2,template,subpriority:u8(pc+5),args:Array.from({length:count},(_,i)=>signed(u16(pc+7+i*2),16))}; break;
+        }
         case 3: {
           const callback = reverse.get(u32(pc+1) & ~1);
           if (!callback) throw new Error('unknown task address');
@@ -44,6 +52,7 @@ export function extractPrograms(roots: string[]) {
         case 15: command={op:'return',next:pc+1}; break;
         case 25: command={op:'playsewithpan',next:pc+4,song:u16(pc+1),pan:signed(u8(pc+3),8)}; break;
         case 28: command={op:'loopsewithpan',next:pc+6,song:u16(pc+1),pan:signed(u8(pc+3),8),interval:u8(pc+4),plays:u8(pc+5)}; break;
+        case 29: command={op:'waitplaysewithpan',next:pc+5,song:u16(pc+1),pan:signed(u8(pc+3),8),frames:u8(pc+4)}; break;
         default: throw new Error(`unsupported opcode 0x${opcode.toString(16)} at 0x${pc.toString(16)} (${root})`);
       }
       commands[pc]=command;
@@ -55,7 +64,7 @@ export function extractPrograms(roots: string[]) {
   const sineAddress = symbols.get('gSineTable')!;
   const sine = Array.from({length:256}, (_,i)=>signed(u16(sineAddress+i*2),16));
   const affinePrograms: Record<string, AffineProgram> = {};
-  if (roots.includes('Move_SPLASH')) {
+  if (Object.values(programs).some(program=>Object.values(program.commands).some(command=>command.callback==='AnimTask_Splash'))) {
     const address = symbols.get('gSplashEffectAffineAnimCmds')!;
     const commands = [];
     for (let index=0; index<64; index++) {

@@ -56,3 +56,32 @@ commands and 4-byte MonCoords records; the probe/decoder respects that ABI.
 `receipt.json` covers all six control/new cases. `splash-repeat-receipt.json`
 records the second fresh Splash run and canonical per-case hashes, with equality
 to the first capture explicitly checked. These receipts grant no move acceptance.
+
+## Forward decision evidence
+
+The completed comparison uses the unchanged production WindUpLunge helper for
+Snatch and the unchanged experimental Splash callback for Mud Sport's task.
+The Mud Sport comparison supplies the observed creation boundary once and
+executes a synthetic task-only harness; it does not execute the full move.
+Neither case is a pixel/production acceptance. See `forward-receipt.json` for
+the precise exclusions and the investigation report for the recommendation.
+
+```sh
+node --experimental-strip-types tools/animation/runtime-spike/compare-forward.ts tools/animation/runtime-spike/forward-observations.json.gz /tmp/runtime-forward-receipt.json
+node --experimental-strip-types tools/animation/runtime-spike/extract.ts /tmp/runtime-forward-programs.json Move_SNATCH Move_MUD_SPORT
+cmp /tmp/runtime-forward-programs.json tools/animation/runtime-spike/forward-programs.json
+python3 tools/animation/runtime-spike/audit-forward.py > /tmp/runtime-forward-graphics-audit.json
+cmp /tmp/runtime-forward-graphics-audit.json tools/animation/runtime-spike/forward-graphics-audit.json
+POKEBENCH_VITEST_MAX_WORKERS=1 npm test -- tests/animation/animationRuntimeForwardComparison.test.ts
+```
+
+Fresh captures use the same wrapper/capture command above, replacing the two
+Splash fixture paths with `snatch-player-fixture.json`,
+`snatch-opponent-fixture.json`, `mud-sport-player-fixture.json`, and
+`mud-sport-opponent-fixture.json`, all in this directory. Supply a new output
+path, then run `compare-forward.ts` on that JSON. The probe performs no runtime
+state injection beyond the existing MechanicLab scenario preparation.
+
+The source decoder now recognizes three additional commands for inspection:
+loadspritegfx, createsprite and waitplaysewithpan. The runtime still rejects
+them. Affine resources are selected by callback demand rather than a move name.
