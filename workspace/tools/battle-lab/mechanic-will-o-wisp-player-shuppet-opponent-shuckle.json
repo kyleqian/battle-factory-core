@@ -6,8 +6,8 @@
   "challengeNum": 0,
   "battleNum": 0,
   "trainerId": 50,
-  "playerSetIds": [62, 63, 65],
-  "opponentSetIds": [349, 339, 327],
+  "playerSetIds": [149, 156, 180],
+  "opponentSetIds": [179, 188, 184],
   "seed": 305419897,
   "overrides": {"parties": {
     "player": [
