@@ -1,0 +1,5075 @@
+{
+  "schema": "mega-horn-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_MEGAHORN",
+  "moveId": 224,
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "sourceAudit": true,
+    "completePointerBody": true,
+    "completeBattleAndContestGraph": true,
+    "fullDenseRowsRetained": true,
+    "rawRgbRetained": true,
+    "normalizedBankedMaps": true,
+    "twiceFreshByteIdentical": true,
+    "legalBilateralParties": true,
+    "hitLegallyConstrained": true,
+    "hornTemplateCallbackAffinePrograms": true,
+    "attackerShakeAndSlides": true,
+    "hitsplat": true,
+    "targetShakeMonInPlace": true,
+    "complexPaletteBlend": true,
+    "defenderPartnerMonbg": true,
+    "backgroundRestoreAndFade": true,
+    "audioAndResources": true,
+    "firstInactiveCleanup": true,
+    "latchMeasured": true,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "actualCoreFramebufferAcceptance": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "gameplayStateOwned": false,
+    "boundaryOrBarrierChanged": false
+  },
+  "source": {
+    "rootStart": "0x082d1924",
+    "rootEndExclusive": "0x082d1a11",
+    "components": 21,
+    "novelComponents": [
+      "asset:ANIM_TAG_HORN_HIT_2",
+      "subroutine:MegahornContinue",
+      "subroutine:MegahornInContest",
+      "visualCommand:create_megahorn_horn_sprite"
+    ],
+    "audit": "tools/compare/megaHornSourceAudit.ts",
+    "probe": "tools/compare/megaHornProbe.py",
+    "verifier": "tools/compare/megaHornEvidence.ts"
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "rows": {
+      "player-back": 177,
+      "opponent-front": 176
+    },
+    "totalRows": 353,
+    "firstInactiveCleanupRetained": true,
+    "productionFramebufferCompared": false
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-megahorn-player-seaking-opponent-onix.json",
+      "scenarioSha256": "12671b1fc1a69f670fa0fecead7c8b5e001b741c6750e16078c46066677b2582",
+      "denseState": "tools/compare/evidence/mega-horn-player-dense-state.json.gz",
+      "denseStateSha256": "e19f9572d2d081d98b88f3339e345bda2ad39c625d34bf3f8ca67648ae9b6e0c",
+      "probeJsonSha256": "7c1a63d915e1d0d0b2ea2c3b2cb8f198cd59a9fc2ad397e23a1ed622417d140c",
+      "rawRgbArchive": "tools/compare/evidence/mega-horn-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "65661fa9ba142572e328b01eff296bb60910f464ae4a3a0edf3ac259b84210ae",
+      "rawRgbSequenceSha256": "cc5965f816ce5cf48cbf183dbf1677630e424c50bdf55c4800a892dd14f9345d",
+      "changeMap": "tools/compare/evidence/mega-horn-changemap-player.json",
+      "changeMapSha256": "ae98a9faf178075b196e5c231d17268a5c343f6f29abdb5e48316584f4daa32a",
+      "sourceWindow": {
+        "startFrame": 211,
+        "endFrame": 387,
+        "frameCount": 177,
+        "sourceFrameCount": 177
+      },
+      "summary": {
+        "latches": {
+          "hardwareOamEqualsPrecedingSoftware": "176/176",
+          "hardwareMatricesEqualsPrecedingSoftware": "176/176",
+          "hardwarePaletteEqualsPrecedingFaded": "175/176",
+          "oamExceptions": [],
+          "matrixExceptions": [],
+          "paletteExceptions": [
+            7
+          ],
+          "changedPaletteBanks": [
+            1,
+            2,
+            3,
+            8,
+            16,
+            17,
+            23,
+            24
+          ],
+          "selectedMonbgBank": 8,
+          "selectedBg": "bg1",
+          "paletteBankTransitions": {
+            "1": {
+              "faded": [
+                110,
+                115
+              ],
+              "hardware": [
+                111,
+                116
+              ]
+            },
+            "2": {
+              "faded": [
+                29,
+                110,
+                115,
+                157
+              ],
+              "hardware": [
+                30,
+                111,
+                116,
+                158
+              ]
+            },
+            "3": {
+              "faded": [
+                110,
+                115
+              ],
+              "hardware": [
+                111,
+                116
+              ]
+            },
+            "8": {
+              "faded": [
+                7,
+                110,
+                115
+              ],
+              "hardware": [
+                7,
+                111,
+                116
+              ]
+            },
+            "16": {
+              "faded": [
+                110,
+                115
+              ],
+              "hardware": [
+                111,
+                116
+              ]
+            },
+            "17": {
+              "faded": [
+                110,
+                115
+              ],
+              "hardware": [
+                111,
+                116
+              ]
+            },
+            "23": {
+              "faded": [
+                1
+              ],
+              "hardware": [
+                2
+              ]
+            },
+            "24": {
+              "faded": [
+                4
+              ],
+              "hardware": [
+                5
+              ]
+            }
+          }
+        },
+        "lifecycle": {
+          "sprites": [
+            {
+              "id": "3:gSlideMonToOffsetSpriteTemplate",
+              "start": 89,
+              "end": 95,
+              "first": {
+                "slot": 3,
+                "template": "gSlideMonToOffsetSpriteTemplate",
+                "callback": "TranslateSpriteLinearByIdFixedPoint",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  5,
+                  1024,
+                  0,
+                  1024,
+                  0,
+                  6,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 28,
+                "persistentOrder": 8
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  1024,
+                  0,
+                  6144,
+                  0,
+                  6,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  189,
+                  -171,
+                  171,
+                  189
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "4:gMegahornHornSpriteTemplate",
+              "start": 94,
+              "end": 100,
+              "first": {
+                "slot": 4,
+                "template": "gMegahornHornSpriteTemplate",
+                "callback": "AnimTranslateLinear_WithFollowup",
+                "x": 134,
+                "y": 67,
+                "x2": 7,
+                "y2": -4,
+                "data": [
+                  5,
+                  1792,
+                  1067,
+                  1792,
+                  1067,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  189,
+                  -171,
+                  171,
+                  189
+                ],
+                "attr": [
+                  17199,
+                  32877,
+                  31025
+                ],
+                "subpriority": 27,
+                "persistentOrder": 6
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x": 134,
+                "y": 67,
+                "x2": 42,
+                "y2": -25,
+                "data": [
+                  0,
+                  1792,
+                  1067,
+                  10752,
+                  6402,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  189,
+                  -171,
+                  171,
+                  189
+                ],
+                "attr": [
+                  17178,
+                  32912,
+                  31025
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "5:gSlideMonToOffsetSpriteTemplate",
+              "start": 100,
+              "end": 104,
+              "first": {
+                "slot": 5,
+                "template": "gSlideMonToOffsetSpriteTemplate",
+                "callback": "TranslateSpriteLinearByIdFixedPoint",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  3,
+                  1024,
+                  -256,
+                  1024,
+                  -256,
+                  8,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  189,
+                  -171,
+                  171,
+                  189
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 28,
+                "persistentOrder": 10
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  1024,
+                  -256,
+                  4096,
+                  -1024,
+                  8,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "3:gBasicHitSplatSpriteTemplate",
+              "start": 100,
+              "end": 108,
+              "first": {
+                "slot": 3,
+                "template": "gBasicHitSplatSpriteTemplate",
+                "callback": "RunStoredCallbackWhenAffineAnimEnds",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  1306,
+                  34464,
+                  35129
+                ],
+                "subpriority": 28,
+                "persistentOrder": 7
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  1306,
+                  34464,
+                  35129
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "3:gComplexPaletteBlendSpriteTemplate",
+              "start": 110,
+              "end": 121,
+              "first": {
+                "slot": 3,
+                "template": "gComplexPaletteBlendSpriteTemplate",
+                "callback": "AnimComplexPaletteBlend_Step1",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  4,
+                  5,
+                  1,
+                  32767,
+                  10,
+                  0,
+                  0,
+                  7
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 28,
+                "persistentOrder": 8
+              },
+              "last": {
+                "callback": "AnimComplexPaletteBlend_Step2",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  261,
+                  0,
+                  32767,
+                  10,
+                  0,
+                  0,
+                  7
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "4:gSlideMonToOriginalPosSpriteTemplate",
+              "start": 122,
+              "end": 132,
+              "first": {
+                "slot": 4,
+                "template": "gSlideMonToOriginalPosSpriteTemplate",
+                "callback": "SlideMonToOriginalPos_Step",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  10,
+                  -558,
+                  0,
+                  -558,
+                  0,
+                  24,
+                  0,
+                  1536
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 28,
+                "persistentOrder": 8
+              },
+              "last": {
+                "callback": "SlideMonToOriginalPos_Step",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  -558,
+                  0,
+                  -6138,
+                  0,
+                  24,
+                  0,
+                  1536
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "3:gSlideMonToOriginalPosSpriteTemplate",
+              "start": 127,
+              "end": 133,
+              "first": {
+                "slot": 3,
+                "template": "gSlideMonToOriginalPosSpriteTemplate",
+                "callback": "SlideMonToOriginalPos_Step",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  6,
+                  -731,
+                  182,
+                  -731,
+                  182,
+                  20,
+                  -5,
+                  2048
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 28,
+                "persistentOrder": 9
+              },
+              "last": {
+                "callback": "SlideMonToOriginalPos_Step",
+                "x": 176,
+                "y": 42,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  -731,
+                  182,
+                  -5117,
+                  1274,
+                  20,
+                  -5,
+                  2048
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            }
+          ],
+          "tasks": [
+            {
+              "id": "0:Task_FadeToBg",
+              "start": 10,
+              "end": 46,
+              "first": {
+                "slot": 0,
+                "func": "Task_FadeToBg",
+                "data": [
+                  7,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  7,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  3,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:AnimTask_ShakeMon_Step",
+              "start": 48,
+              "end": 75,
+              "first": {
+                "slot": 0,
+                "func": "AnimTask_ShakeMon_Step",
+                "data": [
+                  6,
+                  14,
+                  1,
+                  1,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  6,
+                  1,
+                  1,
+                  0,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:AnimTask_ShakeMonInPlace_Step",
+              "start": 110,
+              "end": 130,
+              "first": {
+                "slot": 0,
+                "func": "AnimTask_ShakeMonInPlace_Step",
+                "data": [
+                  8,
+                  1,
+                  12,
+                  0,
+                  1,
+                  -8,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  8,
+                  11,
+                  12,
+                  0,
+                  1,
+                  -8,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "1:Task_UpdateMonBg",
+              "start": 7,
+              "end": 137,
+              "first": {
+                "slot": 1,
+                "func": "Task_UpdateMonBg",
+                "data": [
+                  8,
+                  177,
+                  42,
+                  -145,
+                  -10,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  8,
+                  177,
+                  42,
+                  -145,
+                  -10,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:Task_ClearMonBg",
+              "start": 135,
+              "end": 137,
+              "first": {
+                "slot": 0,
+                "func": "Task_ClearMonBg",
+                "data": [
+                  0,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  0,
+                  2,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "3:AnimTask_UpdateSlidingBg",
+              "start": 29,
+              "end": 155,
+              "first": {
+                "slot": 3,
+                "func": "AnimTask_UpdateSlidingBg",
+                "data": [
+                  1,
+                  -2304,
+                  768,
+                  -1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  1,
+                  -2304,
+                  768,
+                  -1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "2:Task_FadeToBg",
+              "start": 135,
+              "end": 174,
+              "first": {
+                "slot": 2,
+                "func": "Task_FadeToBg",
+                "data": [
+                  -1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  -1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  3,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            }
+          ]
+        },
+        "transitions": {
+          "registers": {
+            "bg1cnt": [
+              8
+            ],
+            "bg3cnt": [
+              29,
+              157
+            ],
+            "bg1hofs": [
+              8,
+              101,
+              102,
+              103,
+              104,
+              111,
+              112,
+              114,
+              116,
+              118,
+              120,
+              122,
+              124,
+              126,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              139
+            ],
+            "bg1vofs": [
+              8,
+              101,
+              102,
+              103,
+              104,
+              111,
+              112,
+              114,
+              116,
+              118,
+              120,
+              122,
+              124,
+              126,
+              128,
+              129,
+              130,
+              131,
+              132,
+              135,
+              139
+            ],
+            "bg3hofs": [
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              92,
+              93,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              117,
+              118,
+              119,
+              120,
+              121,
+              122,
+              123,
+              124,
+              125,
+              126,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              135,
+              136,
+              137,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156,
+              157
+            ],
+            "bg3vofs": [
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              92,
+              93,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              117,
+              118,
+              119,
+              120,
+              121,
+              122,
+              123,
+              124,
+              125,
+              126,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              135,
+              136,
+              137,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156,
+              157
+            ],
+            "bldcnt": [
+              11,
+              47,
+              48,
+              135,
+              136,
+              175
+            ],
+            "bldalpha": [
+              48,
+              135
+            ],
+            "bldy": [
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              137,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              159,
+              160,
+              161,
+              162,
+              163,
+              164,
+              165,
+              166,
+              167,
+              168,
+              169,
+              170,
+              171,
+              172,
+              173,
+              174
+            ]
+          },
+          "softwareBg": {
+            "gBattle_BG1_X": [
+              7,
+              100,
+              101,
+              102,
+              103,
+              110,
+              111,
+              113,
+              115,
+              117,
+              119,
+              121,
+              123,
+              125,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              138
+            ],
+            "gBattle_BG1_Y": [
+              7,
+              100,
+              101,
+              102,
+              103,
+              110,
+              111,
+              113,
+              115,
+              117,
+              119,
+              121,
+              123,
+              125,
+              127,
+              128,
+              129,
+              130,
+              131,
+              134,
+              138
+            ],
+            "gBattle_BG3_X": [
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              92,
+              93,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              117,
+              118,
+              119,
+              120,
+              121,
+              122,
+              123,
+              124,
+              125,
+              126,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              135,
+              136,
+              139,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156
+            ],
+            "gBattle_BG3_Y": [
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              92,
+              93,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              117,
+              118,
+              119,
+              120,
+              121,
+              122,
+              123,
+              124,
+              125,
+              126,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              135,
+              136,
+              139,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156
+            ]
+          },
+          "bgVram": [
+            8,
+            29,
+            137,
+            139,
+            156
+          ],
+          "resourceAllocators": {
+            "paletteTags": [
+              1,
+              4,
+              176
+            ],
+            "tileTags": [
+              1,
+              4,
+              176
+            ],
+            "tileRanges": [
+              1,
+              4
+            ],
+            "tileBitmap": [
+              1,
+              4,
+              176
+            ],
+            "matrixBitmap": [
+              94,
+              100,
+              101,
+              109
+            ]
+          },
+          "audio": [
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119
+          ],
+          "animationRng": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176
+          ],
+          "gameplayRng": [],
+          "attackerAxes": [
+            [
+              0,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              50,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              52,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              54,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              56,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              58,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              60,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              62,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              64,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              66,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              68,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              70,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              72,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              74,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              76,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              89,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              90,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              91,
+              [
+                12,
+                0
+              ]
+            ],
+            [
+              92,
+              [
+                16,
+                0
+              ]
+            ],
+            [
+              93,
+              [
+                20,
+                0
+              ]
+            ],
+            [
+              94,
+              [
+                24,
+                0
+              ]
+            ],
+            [
+              122,
+              [
+                21,
+                0
+              ]
+            ],
+            [
+              123,
+              [
+                19,
+                0
+              ]
+            ],
+            [
+              124,
+              [
+                17,
+                0
+              ]
+            ],
+            [
+              125,
+              [
+                15,
+                0
+              ]
+            ],
+            [
+              126,
+              [
+                13,
+                0
+              ]
+            ],
+            [
+              127,
+              [
+                10,
+                0
+              ]
+            ],
+            [
+              128,
+              [
+                8,
+                0
+              ]
+            ],
+            [
+              129,
+              [
+                6,
+                0
+              ]
+            ],
+            [
+              130,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              131,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              132,
+              [
+                0,
+                0
+              ]
+            ]
+          ],
+          "targetAxes": [
+            [
+              0,
+              [
+                1,
+                0
+              ]
+            ],
+            [
+              100,
+              [
+                4,
+                -1
+              ]
+            ],
+            [
+              101,
+              [
+                8,
+                -2
+              ]
+            ],
+            [
+              102,
+              [
+                12,
+                -3
+              ]
+            ],
+            [
+              103,
+              [
+                16,
+                -4
+              ]
+            ],
+            [
+              110,
+              [
+                20,
+                -5
+              ]
+            ],
+            [
+              111,
+              [
+                12,
+                -3
+              ]
+            ],
+            [
+              113,
+              [
+                20,
+                -5
+              ]
+            ],
+            [
+              115,
+              [
+                12,
+                -3
+              ]
+            ],
+            [
+              117,
+              [
+                20,
+                -5
+              ]
+            ],
+            [
+              119,
+              [
+                12,
+                -3
+              ]
+            ],
+            [
+              121,
+              [
+                20,
+                -5
+              ]
+            ],
+            [
+              123,
+              [
+                12,
+                -3
+              ]
+            ],
+            [
+              125,
+              [
+                20,
+                -5
+              ]
+            ],
+            [
+              127,
+              [
+                9,
+                -3
+              ]
+            ],
+            [
+              128,
+              [
+                14,
+                -4
+              ]
+            ],
+            [
+              129,
+              [
+                19,
+                -5
+              ]
+            ],
+            [
+              130,
+              [
+                8,
+                -3
+              ]
+            ],
+            [
+              131,
+              [
+                1,
+                -1
+              ]
+            ],
+            [
+              132,
+              [
+                2,
+                -1
+              ]
+            ],
+            [
+              133,
+              [
+                0,
+                -1
+              ]
+            ],
+            [
+              134,
+              [
+                0,
+                0
+              ]
+            ]
+          ]
+        },
+        "resources": {
+          "horn": {
+            "tag": 10153,
+            "tile": {
+              "first": 1,
+              "last": 175,
+              "count": 175
+            },
+            "palette": {
+              "first": 1,
+              "last": 175,
+              "count": 175
+            }
+          },
+          "impact": {
+            "tag": 10135,
+            "tile": {
+              "first": 4,
+              "last": 175,
+              "count": 172
+            },
+            "palette": {
+              "first": 4,
+              "last": 175,
+              "count": 172
+            }
+          }
+        },
+        "audio": {
+          "transitions": [
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119
+          ]
+        },
+        "state": {
+          "attacker": 0,
+          "target": 1,
+          "partiesStable": true,
+          "battlersStable": true,
+          "engineStable": true,
+          "immutableStable": true,
+          "rawBattleStateStable": true,
+          "gameplayRngTransitions": []
+        },
+        "cleanup": {
+          "age": 176,
+          "frame": 387,
+          "active": false,
+          "visualTasks": 0,
+          "soundTasks": 0,
+          "ownedSprites": 0,
+          "ownedTasks": 0,
+          "hornTag": {
+            "first": 1,
+            "last": 175,
+            "count": 175
+          },
+          "impactTag": {
+            "first": 4,
+            "last": 175,
+            "count": 172
+          }
+        }
+      },
+      "repeatProbeJsonSha256": "7c1a63d915e1d0d0b2ea2c3b2cb8f198cd59a9fc2ad397e23a1ed622417d140c",
+      "repeatRawRgbSequenceSha256": "cc5965f816ce5cf48cbf183dbf1677630e424c50bdf55c4800a892dd14f9345d"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-megahorn-opponent-seaking-player-onix.json",
+      "scenarioSha256": "d40cd9c58eb3fcfba6b81e524387b5e30e43954c7fdf56a934ce5134eb604721",
+      "denseState": "tools/compare/evidence/mega-horn-opponent-dense-state.json.gz",
+      "denseStateSha256": "3a735093f761821eb0fb0408ff017eb931ef7e3a219cd6ee2bda6e2f11e863ca",
+      "probeJsonSha256": "77c709bd84f95c83db124119d66a9b605438d28044f3812d8437f13eaec171ad",
+      "rawRgbArchive": "tools/compare/evidence/mega-horn-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "e96dd2fe8de2be0bdacb0156c2d4566f08062ee7cd0c9fd0b1e42cd0fc43ee68",
+      "rawRgbSequenceSha256": "a1bfc221b7d61a905bac87b0a8e798e5f6657a4534936a8d8366b5578619b246",
+      "changeMap": "tools/compare/evidence/mega-horn-changemap-opponent.json",
+      "changeMapSha256": "934485e9c2c5bf3276ac436c6e3e4fb66f1b7f9acd0827922cab90cc5fb2ccd9",
+      "sourceWindow": {
+        "startFrame": 212,
+        "endFrame": 387,
+        "frameCount": 176,
+        "sourceFrameCount": 176
+      },
+      "summary": {
+        "latches": {
+          "hardwareOamEqualsPrecedingSoftware": "175/175",
+          "hardwareMatricesEqualsPrecedingSoftware": "175/175",
+          "hardwarePaletteEqualsPrecedingFaded": "174/175",
+          "oamExceptions": [],
+          "matrixExceptions": [],
+          "paletteExceptions": [
+            7
+          ],
+          "changedPaletteBanks": [
+            1,
+            2,
+            3,
+            9,
+            16,
+            17,
+            23,
+            24
+          ],
+          "selectedMonbgBank": 9,
+          "selectedBg": "bg2",
+          "paletteBankTransitions": {
+            "1": {
+              "faded": [
+                110,
+                115
+              ],
+              "hardware": [
+                111,
+                116
+              ]
+            },
+            "2": {
+              "faded": [
+                29,
+                110,
+                115,
+                156
+              ],
+              "hardware": [
+                30,
+                111,
+                116,
+                157
+              ]
+            },
+            "3": {
+              "faded": [
+                110,
+                115
+              ],
+              "hardware": [
+                111,
+                116
+              ]
+            },
+            "9": {
+              "faded": [
+                7,
+                110,
+                115
+              ],
+              "hardware": [
+                7,
+                111,
+                116
+              ]
+            },
+            "16": {
+              "faded": [
+                110,
+                115
+              ],
+              "hardware": [
+                111,
+                116
+              ]
+            },
+            "17": {
+              "faded": [
+                110,
+                115
+              ],
+              "hardware": [
+                111,
+                116
+              ]
+            },
+            "23": {
+              "faded": [
+                1
+              ],
+              "hardware": [
+                2
+              ]
+            },
+            "24": {
+              "faded": [
+                4
+              ],
+              "hardware": [
+                5
+              ]
+            }
+          }
+        },
+        "lifecycle": {
+          "sprites": [
+            {
+              "id": "3:gSlideMonToOffsetSpriteTemplate",
+              "start": 89,
+              "end": 95,
+              "first": {
+                "slot": 3,
+                "template": "gSlideMonToOffsetSpriteTemplate",
+                "callback": "TranslateSpriteLinearByIdFixedPoint",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  5,
+                  -1024,
+                  0,
+                  -1024,
+                  0,
+                  8,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 38,
+                "persistentOrder": 8
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  -1024,
+                  0,
+                  -6144,
+                  0,
+                  8,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  -193,
+                  167,
+                  -167,
+                  -193
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "4:gMegahornHornSpriteTemplate",
+              "start": 94,
+              "end": 100,
+              "first": {
+                "slot": 4,
+                "template": "gMegahornHornSpriteTemplate",
+                "callback": "AnimTranslateLinear_WithFollowup",
+                "x": 114,
+                "y": 63,
+                "x2": -7,
+                "y2": 4,
+                "data": [
+                  5,
+                  1793,
+                  1066,
+                  1793,
+                  1066,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  -193,
+                  167,
+                  -167,
+                  -193
+                ],
+                "attr": [
+                  17203,
+                  32843,
+                  31025
+                ],
+                "subpriority": 37,
+                "persistentOrder": 7
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x": 114,
+                "y": 63,
+                "x2": -42,
+                "y2": 24,
+                "data": [
+                  0,
+                  1793,
+                  1066,
+                  10758,
+                  6396,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  -193,
+                  167,
+                  -167,
+                  -193
+                ],
+                "attr": [
+                  17223,
+                  32808,
+                  31025
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "5:gSlideMonToOffsetSpriteTemplate",
+              "start": 100,
+              "end": 104,
+              "first": {
+                "slot": 5,
+                "template": "gSlideMonToOffsetSpriteTemplate",
+                "callback": "TranslateSpriteLinearByIdFixedPoint",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  3,
+                  -1024,
+                  256,
+                  -1024,
+                  256,
+                  6,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  -193,
+                  167,
+                  -167,
+                  -193
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 38,
+                "persistentOrder": 10
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  -1024,
+                  256,
+                  -4096,
+                  1024,
+                  6,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "3:gBasicHitSplatSpriteTemplate",
+              "start": 100,
+              "end": 108,
+              "first": {
+                "slot": 3,
+                "template": "gBasicHitSplatSpriteTemplate",
+                "callback": "RunStoredCallbackWhenAffineAnimEnds",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  1352,
+                  34360,
+                  35129
+                ],
+                "subpriority": 38,
+                "persistentOrder": 8
+              },
+              "last": {
+                "callback": "DestroyAnimSprite",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  15357,
+                  2058
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  1352,
+                  34360,
+                  35129
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "3:gComplexPaletteBlendSpriteTemplate",
+              "start": 110,
+              "end": 121,
+              "first": {
+                "slot": 3,
+                "template": "gComplexPaletteBlendSpriteTemplate",
+                "callback": "AnimComplexPaletteBlend_Step1",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  4,
+                  5,
+                  1,
+                  32767,
+                  10,
+                  0,
+                  0,
+                  7
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 38,
+                "persistentOrder": 8
+              },
+              "last": {
+                "callback": "AnimComplexPaletteBlend_Step2",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  261,
+                  0,
+                  32767,
+                  10,
+                  0,
+                  0,
+                  7
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "4:gSlideMonToOriginalPosSpriteTemplate",
+              "start": 122,
+              "end": 132,
+              "first": {
+                "slot": 4,
+                "template": "gSlideMonToOriginalPosSpriteTemplate",
+                "callback": "SlideMonToOriginalPos_Step",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  10,
+                  558,
+                  0,
+                  558,
+                  0,
+                  -24,
+                  0,
+                  2048
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 38,
+                "persistentOrder": 8
+              },
+              "last": {
+                "callback": "SlideMonToOriginalPos_Step",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  558,
+                  0,
+                  6138,
+                  0,
+                  -24,
+                  0,
+                  2048
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "3:gSlideMonToOriginalPosSpriteTemplate",
+              "start": 127,
+              "end": 133,
+              "first": {
+                "slot": 3,
+                "template": "gSlideMonToOriginalPosSpriteTemplate",
+                "callback": "SlideMonToOriginalPos_Step",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  6,
+                  438,
+                  -109,
+                  438,
+                  -109,
+                  -12,
+                  3,
+                  1536
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "subpriority": 38,
+                "persistentOrder": 9
+              },
+              "last": {
+                "callback": "SlideMonToOriginalPos_Step",
+                "x": 72,
+                "y": 88,
+                "x2": 0,
+                "y2": 0,
+                "data": [
+                  0,
+                  438,
+                  -109,
+                  3066,
+                  -763,
+                  -12,
+                  3,
+                  1536
+                ],
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "attr": [
+                  160,
+                  304,
+                  65535
+                ],
+                "invisible": true
+              }
+            }
+          ],
+          "tasks": [
+            {
+              "id": "0:Task_FadeToBg",
+              "start": 10,
+              "end": 46,
+              "first": {
+                "slot": 0,
+                "func": "Task_FadeToBg",
+                "data": [
+                  7,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  7,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  3,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:AnimTask_ShakeMon_Step",
+              "start": 48,
+              "end": 75,
+              "first": {
+                "slot": 0,
+                "func": "AnimTask_ShakeMon_Step",
+                "data": [
+                  8,
+                  14,
+                  1,
+                  1,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  8,
+                  1,
+                  1,
+                  0,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:AnimTask_ShakeMonInPlace_Step",
+              "start": 110,
+              "end": 130,
+              "first": {
+                "slot": 0,
+                "func": "AnimTask_ShakeMonInPlace_Step",
+                "data": [
+                  6,
+                  1,
+                  12,
+                  0,
+                  1,
+                  -8,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  6,
+                  11,
+                  12,
+                  0,
+                  1,
+                  -8,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "1:Task_UpdateMonBg",
+              "start": 7,
+              "end": 137,
+              "first": {
+                "slot": 1,
+                "func": "Task_UpdateMonBg",
+                "data": [
+                  6,
+                  72,
+                  80,
+                  -40,
+                  -48,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  6,
+                  72,
+                  80,
+                  -40,
+                  -48,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:Task_ClearMonBg",
+              "start": 135,
+              "end": 137,
+              "first": {
+                "slot": 0,
+                "func": "Task_ClearMonBg",
+                "data": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  0,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "3:AnimTask_UpdateSlidingBg",
+              "start": 29,
+              "end": 155,
+              "first": {
+                "slot": 3,
+                "func": "AnimTask_UpdateSlidingBg",
+                "data": [
+                  1,
+                  2304,
+                  -768,
+                  -1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  1,
+                  2304,
+                  -768,
+                  -1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "2:Task_FadeToBg",
+              "start": 135,
+              "end": 173,
+              "first": {
+                "slot": 2,
+                "func": "Task_FadeToBg",
+                "data": [
+                  -1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  -1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  3,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            }
+          ]
+        },
+        "transitions": {
+          "registers": {
+            "bg2cnt": [
+              8
+            ],
+            "bg3cnt": [
+              29,
+              157
+            ],
+            "bg2hofs": [
+              8,
+              101,
+              102,
+              103,
+              104,
+              111,
+              112,
+              114,
+              116,
+              118,
+              120,
+              122,
+              124,
+              126,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              135,
+              139
+            ],
+            "bg2vofs": [
+              8,
+              101,
+              102,
+              103,
+              104,
+              111,
+              112,
+              114,
+              116,
+              118,
+              120,
+              122,
+              124,
+              126,
+              128,
+              129,
+              130,
+              131,
+              133,
+              139
+            ],
+            "bg3hofs": [
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              92,
+              93,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              117,
+              118,
+              119,
+              120,
+              121,
+              122,
+              123,
+              124,
+              125,
+              126,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              135,
+              136,
+              137,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156,
+              157
+            ],
+            "bg3vofs": [
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              92,
+              93,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              117,
+              118,
+              119,
+              120,
+              121,
+              122,
+              123,
+              124,
+              125,
+              126,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              135,
+              136,
+              137,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156,
+              157
+            ],
+            "bldcnt": [
+              11,
+              47,
+              48,
+              135,
+              136,
+              174
+            ],
+            "bldalpha": [
+              48,
+              135
+            ],
+            "bldy": [
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              137,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              158,
+              159,
+              160,
+              161,
+              162,
+              163,
+              164,
+              165,
+              166,
+              167,
+              168,
+              169,
+              170,
+              171,
+              172,
+              173
+            ]
+          },
+          "softwareBg": {
+            "gBattle_BG2_X": [
+              7,
+              100,
+              101,
+              102,
+              103,
+              110,
+              111,
+              113,
+              115,
+              117,
+              119,
+              121,
+              123,
+              125,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              138
+            ],
+            "gBattle_BG2_Y": [
+              7,
+              100,
+              101,
+              102,
+              103,
+              110,
+              111,
+              113,
+              115,
+              117,
+              119,
+              121,
+              123,
+              125,
+              127,
+              128,
+              129,
+              130,
+              132,
+              138
+            ],
+            "gBattle_BG3_X": [
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              92,
+              93,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              117,
+              118,
+              119,
+              120,
+              121,
+              122,
+              123,
+              124,
+              125,
+              126,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              135,
+              136,
+              139,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156
+            ],
+            "gBattle_BG3_Y": [
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              92,
+              93,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              117,
+              118,
+              119,
+              120,
+              121,
+              122,
+              123,
+              124,
+              125,
+              126,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              135,
+              136,
+              139,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156
+            ]
+          },
+          "bgVram": [
+            8,
+            29,
+            137,
+            139,
+            156
+          ],
+          "resourceAllocators": {
+            "paletteTags": [
+              1,
+              4,
+              175
+            ],
+            "tileTags": [
+              1,
+              4,
+              175
+            ],
+            "tileRanges": [
+              1,
+              4
+            ],
+            "tileBitmap": [
+              1,
+              4,
+              175
+            ],
+            "matrixBitmap": [
+              94,
+              100,
+              101,
+              109
+            ]
+          },
+          "audio": [
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119
+          ],
+          "animationRng": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175
+          ],
+          "gameplayRng": [],
+          "attackerAxes": [
+            [
+              0,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              50,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              52,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              54,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              56,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              58,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              60,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              62,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              64,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              66,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              68,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              70,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              72,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              74,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              76,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              89,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              90,
+              [
+                -8,
+                0
+              ]
+            ],
+            [
+              91,
+              [
+                -12,
+                0
+              ]
+            ],
+            [
+              92,
+              [
+                -16,
+                0
+              ]
+            ],
+            [
+              93,
+              [
+                -20,
+                0
+              ]
+            ],
+            [
+              94,
+              [
+                -24,
+                0
+              ]
+            ],
+            [
+              122,
+              [
+                -22,
+                0
+              ]
+            ],
+            [
+              123,
+              [
+                -20,
+                0
+              ]
+            ],
+            [
+              124,
+              [
+                -18,
+                0
+              ]
+            ],
+            [
+              125,
+              [
+                -16,
+                0
+              ]
+            ],
+            [
+              126,
+              [
+                -14,
+                0
+              ]
+            ],
+            [
+              127,
+              [
+                -11,
+                0
+              ]
+            ],
+            [
+              128,
+              [
+                -9,
+                0
+              ]
+            ],
+            [
+              129,
+              [
+                -7,
+                0
+              ]
+            ],
+            [
+              130,
+              [
+                -5,
+                0
+              ]
+            ],
+            [
+              131,
+              [
+                -3,
+                0
+              ]
+            ],
+            [
+              132,
+              [
+                -1,
+                0
+              ]
+            ],
+            [
+              133,
+              [
+                0,
+                0
+              ]
+            ]
+          ],
+          "targetAxes": [
+            [
+              0,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              100,
+              [
+                -4,
+                1
+              ]
+            ],
+            [
+              101,
+              [
+                -8,
+                2
+              ]
+            ],
+            [
+              102,
+              [
+                -12,
+                3
+              ]
+            ],
+            [
+              103,
+              [
+                -16,
+                4
+              ]
+            ],
+            [
+              110,
+              [
+                -12,
+                3
+              ]
+            ],
+            [
+              111,
+              [
+                -20,
+                5
+              ]
+            ],
+            [
+              113,
+              [
+                -12,
+                3
+              ]
+            ],
+            [
+              115,
+              [
+                -20,
+                5
+              ]
+            ],
+            [
+              117,
+              [
+                -12,
+                3
+              ]
+            ],
+            [
+              119,
+              [
+                -20,
+                5
+              ]
+            ],
+            [
+              121,
+              [
+                -12,
+                3
+              ]
+            ],
+            [
+              123,
+              [
+                -20,
+                5
+              ]
+            ],
+            [
+              125,
+              [
+                -12,
+                3
+              ]
+            ],
+            [
+              127,
+              [
+                -19,
+                4
+              ]
+            ],
+            [
+              128,
+              [
+                -9,
+                2
+              ]
+            ],
+            [
+              129,
+              [
+                1,
+                -1
+              ]
+            ],
+            [
+              130,
+              [
+                -6,
+                1
+              ]
+            ],
+            [
+              131,
+              [
+                -8,
+                1
+              ]
+            ],
+            [
+              132,
+              [
+                -2,
+                0
+              ]
+            ],
+            [
+              133,
+              [
+                -1,
+                0
+              ]
+            ],
+            [
+              134,
+              [
+                0,
+                0
+              ]
+            ]
+          ]
+        },
+        "resources": {
+          "horn": {
+            "tag": 10153,
+            "tile": {
+              "first": 1,
+              "last": 174,
+              "count": 174
+            },
+            "palette": {
+              "first": 1,
+              "last": 174,
+              "count": 174
+            }
+          },
+          "impact": {
+            "tag": 10135,
+            "tile": {
+              "first": 4,
+              "last": 174,
+              "count": 171
+            },
+            "palette": {
+              "first": 4,
+              "last": 174,
+              "count": 171
+            }
+          }
+        },
+        "audio": {
+          "transitions": [
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119
+          ]
+        },
+        "state": {
+          "attacker": 1,
+          "target": 0,
+          "partiesStable": true,
+          "battlersStable": true,
+          "engineStable": true,
+          "immutableStable": true,
+          "rawBattleStateStable": true,
+          "gameplayRngTransitions": []
+        },
+        "cleanup": {
+          "age": 175,
+          "frame": 387,
+          "active": false,
+          "visualTasks": 0,
+          "soundTasks": 0,
+          "ownedSprites": 0,
+          "ownedTasks": 0,
+          "hornTag": {
+            "first": 1,
+            "last": 174,
+            "count": 174
+          },
+          "impactTag": {
+            "first": 4,
+            "last": 174,
+            "count": 171
+          }
+        }
+      },
+      "repeatProbeJsonSha256": "77c709bd84f95c83db124119d66a9b605438d28044f3812d8437f13eaec171ad",
+      "repeatRawRgbSequenceSha256": "a1bfc221b7d61a905bac87b0a8e798e5f6657a4534936a8d8366b5578619b246"
+    }
+  },
+  "controls": {
+    "named": {
+      "MOVE_HORN_DRILL": "exact",
+      "MOVE_SKY_UPPERCUT": "exact",
+      "MOVE_TAKE_DOWN": "exact",
+      "MOVE_MACH_PUNCH": "exact"
+    },
+    "transferCredit": false
+  },
+  "acceptanceVerdict": "Evidence only: MOVE_MEGAHORN remains staged/unsupported and megahorn-horn-control-flow remains unfulfilled; no reducer, typed seam, compositor, actual-core framebuffer acceptance, exact promotion, sibling, or shared-component credit is claimed."
+}

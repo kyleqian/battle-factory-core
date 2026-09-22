@@ -2,6 +2,33 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_MEGAHORN",
+   "status": "staged",
+   "covered": [
+    "the complete source-audited Move_MEGAHORN pointer-owned body, including the battle BG_DRILL path, contest-only MegahornInContest -> MegahornContinue identity, gMegahornHornSpriteTemplate / AnimMegahornHorn affine programs, attacker ShakeMon and slides, horn visual command, hitsplat, target ShakeMonInPlace, complex palette blend, defender-partner monbg, audio/resources, restore, and cleanup",
+    "complete legal bilateral SEAKING/ONIX Level-50 Factory parties constrain a real Megahorn hit in both player-back and opponent-front orientations; dense Scene-ON semantic state and chronological raw RGB retain every visible source-owned row through first inactive cleanup, twice fresh per orientation",
+    "move-owned normalized maps independently measure OAM, affine matrices, faded/hardware palettes and changed banks, BG software/register/VRAM, resource allocator/tag lifetimes, audio, sprite/task liveness, battler axes, opaque gameplay state/RNG, and teardown; no sibling latch or acceptance credit transfers"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-megahorn-player-seaking-opponent-onix.json",
+    "tools/battle-lab/mechanic-megahorn-opponent-seaking-player-onix.json",
+    "tools/compare/megaHornSourceAudit.ts",
+    "tools/compare/megaHornProbe.py",
+    "tools/compare/megaHornEvidence.ts",
+    "tools/compare/fixtures/mega-horn-evidence.json",
+    "tools/compare/evidence/mega-horn-player-dense-state.json.gz",
+    "tools/compare/evidence/mega-horn-opponent-dense-state.json.gz",
+    "tools/compare/evidence/mega-horn-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/mega-horn-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/mega-horn-changemap-player.json",
+    "tools/compare/evidence/mega-horn-changemap-opponent.json",
+    "tests/animation/megaHornSourceStaging.test.ts",
+    "tests/animation/megaHornEvidenceCheckpoint.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "remaining": "Add a source-relative reducer, narrow typed Scene-ON seam, generic live compositor, material altered control, and twice-fresh actual-core zero-residual proof before exact promotion."
+  },
+  {
    "move": "MOVE_WILL_O_WISP",
       "status": "exact",
    "covered": [
@@ -10534,6 +10561,27 @@
     "ANIMATION_LATCHES.md"
    ],
     "goal": "FULFILLED by MOVE_PURSUIT alone: its complete source-relative reducer, narrow typed Scene-ON seam, generic live hardware-buffer display plan, and production compositor pass all 309 retained normal player-back, normal opponent-front, and legal switch-interception opponent-front rows twice through age-102 inactive cleanup with zero residual pixels at verdict digest e6fda4b30fad52a1cd97b51927df9bf68aafe3861ad67709d949e3a6d7c837e1. Pursuit's own maps retain both selected affine branches, allocation-history IMPACT banks, whole OAM/matrix/palette predecessor latches, DARK/monbg/BG/register timing, resources, audio, power shake, presentation RNG, and cleanup. The material CROBAT/BLISSEY control changes sides/species/geometry, branch, allocations/order/buffers/palettes/registers/audio/power/presentation RNG while gameplay state and RNG remain opaque and unchanged. No sibling or unrelated component receives transferred credit."
+  },
+  {
+   "id": "megahorn-horn-control-flow",
+   "components": [
+    "asset:ANIM_TAG_HORN_HIT_2",
+    "subroutine:MegahornContinue",
+    "subroutine:MegahornInContest",
+    "visualCommand:create_megahorn_horn_sprite"
+   ],
+   "representatives": ["MOVE_MEGAHORN"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/megaHornSourceAudit.ts",
+    "tools/compare/megaHornProbe.py",
+    "tools/compare/megaHornEvidence.ts",
+    "tools/compare/fixtures/mega-horn-evidence.json",
+    "tests/animation/megaHornSourceStaging.test.ts",
+    "tests/animation/megaHornEvidenceCheckpoint.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "goal": "UNFULFILLED: MOVE_MEGAHORN is the sole representative of the Horn Hit 2 asset, battle/contest continuation identity, and create_megahorn_horn_sprite. Source and bilateral dense evidence are staged only; reducer, typed seam, generic compositor, material altered control, and actual-core proof remain required."
   }
  ],
  "variantAudits": {
