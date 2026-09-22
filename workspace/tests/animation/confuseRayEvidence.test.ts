@@ -93,7 +93,7 @@ describe("MOVE_CONFUSE_RAY dense unsupported checkpoint", () => {
     expect(changeMap).toContain("static 268-269");
   });
 
-  it("records orientation-specific panning without promoting Will-O-Wisp", () => {
+  it("records orientation-specific panning without granting Will-O-Wisp exact credit", () => {
     expect(receipt.status).toBe("unsupported");
     expect(receipt.denseEvidence.twiceFresh).toBe(true);
     expect(receipt.denseEvidence.orientationDifferences).toMatchObject({ absoluteFrameShift: 4 });
@@ -107,7 +107,7 @@ describe("MOVE_CONFUSE_RAY dense unsupported checkpoint", () => {
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_CONFUSE_RAY"))
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_WILL_O_WISP"))
-      .toBeUndefined();
+      .toMatchObject({ status: "staged" });
   });
 
   it("ratchets only the independently receipted AdjustPanningVar component track", () => {
@@ -120,6 +120,6 @@ describe("MOVE_CONFUSE_RAY dense unsupported checkpoint", () => {
     });
     expect(coverage.componentTracks.find((track: { id: string }) =>
       track.id === "adjust-panning-var-confuse-ray").goal)
-      .toContain("MOVE_WILL_O_WISP remains audit/control only");
+      .toContain("MOVE_WILL_O_WISP now has independent complete dense evidence");
   });
 });
