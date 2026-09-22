@@ -48,6 +48,20 @@ launched by this audit.
   capture, then injects `sceneOnPresentation` into `core.render()`. This proves
   the production move rendering path, not ordinary battle-to-animation wiring.
   Production must construct equivalent inputs from live presentation state.
+- Some earlier accepted render branches remain staged-pair-specific. Local
+  `battleScene.ts:20390–20408` rejects Tail Whip except Ponyta→Onix (either
+  orientation), and `:20438` onward embeds their HUD identity. Dragon Rage at
+  `:48858–48873` similarly requires Charmeleon→Onix. General battler-art/HUD
+  adaptation is therefore real integration work, not just event wiring.
+- Some later generic renderers require substantial per-frame host state.
+  `PsywaveLiveInputs` (`src/animation/psywave.ts:57–120`) includes current
+  palette/OBJ buffers, graphics resources and shared task data. Its verifier
+  supplies those from each current oracle row
+  (`tools/compare/verifyPsywaveReducer.ts:104–193`), and its actual-core test
+  constructs a new input snapshot per age (`psywaveActualCore.ts:40–43`).
+  Those proofs must not be described as evidence that the live game already
+  produces all that state. Inventory and implement the missing host adapters
+  before claiming all accepted animations work in arbitrary playable battles.
 
 Local source references above use animation snapshot `899b3c034`; the key route,
 command, and ownership facts were separately confirmed on hcloud `9efa9d232`.
@@ -71,6 +85,10 @@ future integration as impossible or require the new experimental runtime.
    faint order, and return to input. Compare rules outcomes/RNG ownership across
    presentation modes. This can be file-disjoint from animation implementations
    once the integration request/completion contract is fixed.
+   A parallel readiness inventory should classify each accepted move by
+   fixture-specific identity restrictions, required host state, and availability
+   of a production state provider. This is more useful than treating the exact
+   count as the playable count, and can guide cheap generalization batches.
 3. **Fold and playable preview.** Bring a verified animation snapshot into the
    integration build, prove the union, expose a build-stamped playable preview,
    and make errors export the existing replayable session trace. Do not assume
