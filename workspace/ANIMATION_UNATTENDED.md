@@ -10,6 +10,11 @@ This file is campaign policy for `animation-main` only. It must not be added to
   write or push `master`, `rust-main`, or canonical GitHub branches.
 - Continue one bounded Animation acceptance unit at a time under
   `ANIMATION_SUPERVISOR.md`. Do not invent work outside that program.
+- The user reaffirmed the current implementation approach on 2026-09-22:
+  finish this Factory campaign, including Outrage, without a runtime rewrite.
+  Before any future non-Factory expansion, reassess a shared animation-runtime
+  port with a bounded comparison; successful per-move acceptance alone does
+  not establish that the current architecture is the most efficient approach.
 
 ## Durable checkpoints
 
