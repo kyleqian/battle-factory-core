@@ -41,10 +41,23 @@ User requested reusable animation machinery now, tested on unfinished non-Factor
   are assertions; only initial state and the explicitly unported audio-host
   busy signal are inputs. Mutation test proves later particle data is not
   consumed as a trajectory.
-- Green scoped gates on the final pre-handoff tree: focused runtime/control/
-  sprite-order/compositor/boundary/inventory pack 7 files / 41 tests;
-  `npm run typecheck`; `npm run animation:coverage` (unchanged 266/276 Level 50,
-  0/77 outside Factory); `npm run animation:audit`; `git diff --check`.
+- Green scoped gates on implementation commit `b9ecb3bfa`: focused runtime/
+  control/sprite-order/compositor/boundary/inventory pack 7 files / 41 tests;
+  smoke 8 files / 448 tests; `npm run typecheck`; `npm run animation:coverage`
+  (unchanged 266/276 Level 50, 0/77 outside Factory);
+  `npm run animation:audit`; `git diff --check`; and `npm run build`. The six
+  native-runtime tests also passed inside the complete repository run.
+- Full-suite receipt on that commit: 1,385 files / 10,561 tests passed, 25 files
+  / 37 tests failed, with no native-runtime failure. The disposable worktree
+  initially lacked ignored `artifacts/wasm/factory_wasm.wasm`; after rebuilding
+  it with `core-rs/build-wasm.sh`, all ten affected Factory AI parity files pass
+  (134/134). The remaining failures are pre-existing committed raw-RGB archives
+  containing AppleDouble `._*.rgb` members and two Vitest worker RPC timeouts
+  under the one-worker/full-corpus run; both timed-out files pass focused
+  (2 files / 17 tests). For example, the committed Spikes blob lists
+  `./._00133.rgb` beside `./00133.rgb`, so GNU tar doubles the filtered RGB
+  member count and concatenates metadata into the byte stream. This slice does
+  not rewrite unrelated accepted-move evidence archives or their readers.
 - Honesty boundary: neither move is accepted or promoted. This receipt excludes
   ambient/full OAM (including healthbox subsprites and EnemyShadow), actual
   battleScene/core integration, and dense bilateral framebuffers. Next adapter
@@ -52,5 +65,4 @@ User requested reusable animation machinery now, tested on unfinished non-Factor
   its rasters with ambient scene OBJ/BG state, and pass the repository's twice-
   fresh actual-core full-frame bar before changing coverage. Bone Club/Rush is
   the next graphics-family consumer after that seam, not part of this slice.
-- Full production gates remain to run on the committed code: smoke, full
-  `npm test`, and `npm run build`. No Factory ledger/coverage files changed.
+- No Factory ledger/coverage files changed.
