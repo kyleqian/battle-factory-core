@@ -14,11 +14,15 @@
   Verdict `26da45f3…`; RGB sequences `e02e1c81… / 3977ab50…`. A material
   CROBAT/BLISSEY side/species-art/geometry/allocation control changes output while
   opaque gameplay state and RNG remain unchanged.
-- **Verification / next:** Production commits `f1dfe92ee` / `10bf3f636`; affected
-  Will-O-Wisp source/evidence/assets/reducer/framebuffer plus boundary/inventory,
-  smoke, full suite/build, coverage/audit/diff gates are recorded in the worker
-  handoff. Next ranked move is `MOVE_MEGAHORN`; Helping Hand remains blocked on
-  legal doubles staging.
+- **Verification / next:** Production commits `f1dfe92ee` / `10bf3f636`; test-only
+  receipt correction `7daa6576e` updates the two stale Confuse Ray assertions without
+  changing production, evidence, or credit boundaries. On that tested code, the affected
+  union passes **10 files / 30 tests**, the twice-fresh actual-core verdict remains
+  **427/427** with zero residual pixels at `26da45f3…`, smoke passes **8 / 448**, the
+  full suite passes **1,421 files / 11,477 tests** with **223 skipped**, and build
+  passes **824 modules**. Coverage (**268/276 exact**), animation audit, and diff checks
+  are green. Next ranked move is `MOVE_MEGAHORN`; Helping Hand remains blocked on legal
+  doubles staging.
 
 # Animation supervisor verification — MOVE_EXTRASENSORY exact closure (2026-09-22 supervisor)
 
