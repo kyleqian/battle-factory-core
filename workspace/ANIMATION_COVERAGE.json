@@ -2,6 +2,35 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_EXTRASENSORY",
+   "status": "staged",
+   "covered": [
+    "the complete source-audited Move_EXTRASENSORY body and exact fifteen-component identity, with independent task-body audits for AnimTask_ExtrasensoryDistortion and AnimTask_TransparentCloneGrowAndShrink",
+    "complete legal bilateral Nuzleaf/Shuckle Battle Scene ON evidence retains player-back frames 80..240 and opponent-front frames 84..244, 161 rows each through first inactive cleanup; two fresh processes per orientation are byte-identical",
+    "Extrasensory's own normalized maps retain all three distortion programs and scanline activation/display/cleanup, both attacker BlendMonInAndOut programs, clone growth/shrink/allocation/teardown, defender-partner monbg, Psychic BG VRAM/fades, palettes, registers, audio, allocation/order, gameplay-state opacity, and cleanup",
+    "the move-owned evidence resolves distortion scanline display as RAM+1 and clone affine mutation as RAM+2 while ordinary OAM is predecessor-buffered and palette is predecessor-buffered except the same-row monbg setup; these findings do not generalize beyond Extrasensory",
+    "this is an unsupported evidence checkpoint only: no reducer, typed Scene-ON seam, compositor, production framebuffer acceptance, exact promotion, fulfilled-track credit, sibling promotion, or shared Psychic-control transfer is claimed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-extrasensory-player-nuzleaf-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-extrasensory-opponent-nuzleaf-player-shuckle.json",
+    "tools/compare/extrasensorySourceAudit.ts",
+    "tools/compare/extrasensoryProbe.py",
+    "tools/compare/extrasensoryEvidence.ts",
+    "tools/compare/fixtures/extrasensory-evidence.json",
+    "tools/compare/evidence/extrasensory-player-dense-state.json.gz",
+    "tools/compare/evidence/extrasensory-opponent-dense-state.json.gz",
+    "tools/compare/evidence/extrasensory-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/extrasensory-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/extrasensory-changemap-player.json",
+    "tools/compare/evidence/extrasensory-changemap-opponent.json",
+    "tests/animation/extrasensorySourceStaging.test.ts",
+    "tests/animation/extrasensoryEvidenceCheckpoint.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "remaining": "Add a complete source-relative reducer, narrow typed Scene-ON seam, generic compositor/live dispatch, and twice-fresh 322/322 actual-core framebuffer acceptance before exact promotion. No sibling or shared-component credit transfers from this staged checkpoint."
+  },
+  {
    "move": "MOVE_PURSUIT",
    "status": "exact",
    "covered": [
@@ -7869,6 +7898,30 @@
   }
  ],
  "componentTracks": [
+  {
+   "id": "extrasensory-distortion-clone",
+   "components": [
+    "task:AnimTask_ExtrasensoryDistortion",
+    "task:AnimTask_TransparentCloneGrowAndShrink"
+   ],
+   "representatives": ["MOVE_EXTRASENSORY"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/extrasensorySourceAudit.ts",
+    "tools/compare/extrasensoryProbe.py",
+    "tools/compare/extrasensoryEvidence.ts",
+    "tools/compare/fixtures/extrasensory-evidence.json",
+    "tools/compare/evidence/extrasensory-player-dense-state.json.gz",
+    "tools/compare/evidence/extrasensory-opponent-dense-state.json.gz",
+    "tools/compare/evidence/extrasensory-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/extrasensory-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/extrasensory-changemap-player.json",
+    "tools/compare/evidence/extrasensory-changemap-opponent.json",
+    "tests/animation/extrasensoryEvidenceCheckpoint.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "goal": "UNFULFILLED. MOVE_EXTRASENSORY alone supplies complete bilateral source, dense semantic, retained-RGB, and latch evidence for the two novel tasks, but no production reducer, typed Scene-ON seam, compositor, or actual-core framebuffer acceptance exists. The novel tasks have no siblings; shared Psychic controls remain independent exact moves and receive no transferred credit."
+  },
   {
    "id": "mach-punch-source-relative-body",
    "components": [

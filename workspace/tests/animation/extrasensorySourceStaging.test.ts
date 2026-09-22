@@ -49,7 +49,7 @@ describe("MOVE_EXTRASENSORY source classification and legal bilateral staging", 
         for (const key of ["hp", "status", "stages", "statStages", "weather", "sideConditions", "outcome", "volatile"]) expect(mon).not.toHaveProperty(key);
       }
     }
-    expect(stage.overrides.parties[attacker][0]).toMatchObject({ species: 274, level: 50, moves: [326, 326, 326, 326], abilitySlot: 0 });
+    expect(stage.overrides.parties[attacker][0]).toMatchObject({ species: 299, level: 50, moves: [326, 326, 326, 326], abilitySlot: 0 });
     expect(stage.overrides.parties[target][0]).toMatchObject({ species: 213, level: 50, moves: [150, 150, 150, 150], abilitySlot: 0 });
   });
 });
