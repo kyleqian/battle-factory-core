@@ -11,12 +11,12 @@
   observable host geometry/allocation at component creation and replays all
   **145 + 145 = 290** retained Scene-ON ages through first inactive cleanup.
   It checks the source-audited purple small/big frame programs, side flips and
-  positions, attacker red blend cycle, 6×4 lunge, target ShakeMon2, both
+  positions, target monbg/alpha lifecycle, attacker red blend cycle, 6×4 lunge, target ShakeMon2, both
   persistent hitsplats, resource/audio lifetimes, resource allocations,
   sprite order/subpriorities, matrices, and predecessor OAM/matrix latches.
   It consumes the existing source audit, purple asset receipt, dense states,
   raw-RGB/map receipt hashes, and fails on any evidence drift.
-- **Verification / next:** Tested code commit/tree `363d4bdec`; the focused source/assets/evidence/reducer/boundary/
+- **Verification / next:** Tested code commits/tree `363d4bdec` + `a983a8544`; the focused source/assets/evidence/reducer/boundary/
   inventory union passes **6 files / 19 tests**; the reducer is byte-identical
   in two fresh processes (**290/290**). `npm run typecheck`, coverage
   (**270/276 exact, 6 unsupported**), animation audit, and `git diff --check`
