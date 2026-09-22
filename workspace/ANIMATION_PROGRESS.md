@@ -1,12 +1,14 @@
-# Animation worker checkpoint — MOVE_MEGAHORN dense/source evidence (2026-09-22)
+# Animation worker checkpoint — MOVE_MEGAHORN HORN_HIT_2 asset prerequisite (2026-09-22)
 
 - **State / scope:** `MOVE_MEGAHORN` is **staged/unsupported**, so Level 50 is
   **268/276 exact, 0 partial, 1 staged, 7 unsupported**. Added only the
   source audit, complete legal bilateral Factory carriers, Battle Scene ON
-  dense/raw-RGB receipts, normalized banked latch maps, verifier, and tests.
-  No reducer, typed seam, compositor, production/core, framebuffer acceptance,
+  dense/raw-RGB receipts, normalized banked latch maps, and the generated
+  production horn_hit_2 asset plus reproducible extractor/contract tests.
+  No reducer, typed seam, compositor/core, framebuffer acceptance,
   exact/track/sibling/shared-component credit, boundary/barrier, or gameplay
-  ownership changed. The four novel/unproved components are
+  ownership changed. The source-extracted asset is only a prerequisite; the
+  four novel/unproved components remain
   `asset:ANIM_TAG_HORN_HIT_2`, `subroutine:MegahornContinue`,
   `subroutine:MegahornInContest`, and
   `visualCommand:create_megahorn_horn_sprite`.
@@ -19,14 +21,20 @@
   retained twice per orientation through first inactive cleanup. OAM/matrices
   are predecessor-transfer **176/176** and **175/175**; palettes are
   **175/176** and **174/175** with only age 7 exceptional. Selected monbg is
-  BG1/BG2 bank 8/9; BG/VRAM edges are `[8,29,137,139,156]`.
+  BG1/BG2 bank 8/9; BG/VRAM edges are [8,29,137,139,156]. The only new
+  asset is tag **10153**: exact **32x16**, 4bpp, **4x2/8-tile** sheet +
+  16-color palette, static dummy frame, affine-double normal OAM, and
+  template rotations **30/-99/94**, all source/PNG/ELF/ROM-pinned.
 - **Verification / next:** Evidence commit `007d988b8`; probe/RGB/map digests
   are player `7c1a63d9… / cc5965f8… / ae98a9fa…` and opponent
   `77c709bd… / a1bfc221… / 934485e9…`; fixture digest is
   `5b12e234…`. Focused source/evidence/inventory tests pass **3 files / 11
-  tests**. Next is a separately bounded source-relative reducer, narrow seam,
+  tests** before this asset checkpoint. The isolated asset contract
+  re-extracts byte-for-byte; final production-asset gates are pending this
+  session. Next is a separately bounded source-relative reducer, narrow seam,
   generic compositor, material altered control, and actual-core zero-residual
-  proof; keep MegaHorn staged until every gate is real.
+  proof; keep MegaHorn staged and its sole novel-component track unfulfilled
+  until every gate is real.
 
 # Animation worker closure — MOVE_WILL_O_WISP exact (2026-09-22)
 

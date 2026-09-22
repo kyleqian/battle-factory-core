@@ -6,6 +6,7 @@
    "status": "staged",
    "covered": [
     "the complete source-audited Move_MEGAHORN pointer-owned body, including the battle BG_DRILL path, contest-only MegahornInContest -> MegahornContinue identity, gMegahornHornSpriteTemplate / AnimMegahornHorn affine programs, attacker ShakeMon and slides, horn visual command, hitsplat, target ShakeMonInPlace, complex palette blend, defender-partner monbg, audio/resources, restore, and cleanup",
+    "the sole novel ANIM_TAG_HORN_HIT_2 production-asset prerequisite is source-extracted byte-for-byte: the 32x16 4bpp eight-tile horn_hit_2 sheet and palette, static dummy frame, affine-double 32x16 OAM, and battle/player/contest rotations are pinned to source, PNG, ELF symbols, and ROM bytes; this prerequisite alone conveys no component, track, sibling, or move credit",
     "complete legal bilateral SEAKING/ONIX Level-50 Factory parties constrain a real Megahorn hit in both player-back and opponent-front orientations; dense Scene-ON semantic state and chronological raw RGB retain every visible source-owned row through first inactive cleanup, twice fresh per orientation",
     "move-owned normalized maps independently measure OAM, affine matrices, faded/hardware palettes and changed banks, BG software/register/VRAM, resource allocator/tag lifetimes, audio, sprite/task liveness, battler axes, opaque gameplay state/RNG, and teardown; no sibling latch or acceptance credit transfers"
    ],
@@ -13,6 +14,7 @@
     "tools/battle-lab/mechanic-megahorn-player-seaking-opponent-onix.json",
     "tools/battle-lab/mechanic-megahorn-opponent-seaking-player-onix.json",
     "tools/compare/megaHornSourceAudit.ts",
+    "tools/compare/extractMegaHornAssets.ts",
     "tools/compare/megaHornProbe.py",
     "tools/compare/megaHornEvidence.ts",
     "tools/compare/fixtures/mega-horn-evidence.json",
@@ -23,10 +25,12 @@
     "tools/compare/evidence/mega-horn-changemap-player.json",
     "tools/compare/evidence/mega-horn-changemap-opponent.json",
     "tests/animation/megaHornSourceStaging.test.ts",
+    "tests/animation/megaHornAssets.test.ts",
     "tests/animation/megaHornEvidenceCheckpoint.test.ts",
+    "src/animation/assets/mega-horn-horn-hit-2.json",
     "ANIMATION_LATCHES.md"
    ],
-   "remaining": "Add a source-relative reducer, narrow typed Scene-ON seam, generic live compositor, material altered control, and twice-fresh actual-core zero-residual proof before exact promotion."
+   "remaining": "The source-derived Horn Hit 2 asset prerequisite is available, but add a source-relative reducer, narrow typed Scene-ON seam, generic live compositor, material altered control, and twice-fresh actual-core zero-residual proof before exact promotion."
   },
   {
    "move": "MOVE_WILL_O_WISP",
@@ -10574,14 +10578,17 @@
    "fulfilled": false,
    "evidence": [
     "tools/compare/megaHornSourceAudit.ts",
+    "tools/compare/extractMegaHornAssets.ts",
     "tools/compare/megaHornProbe.py",
     "tools/compare/megaHornEvidence.ts",
     "tools/compare/fixtures/mega-horn-evidence.json",
     "tests/animation/megaHornSourceStaging.test.ts",
+    "tests/animation/megaHornAssets.test.ts",
     "tests/animation/megaHornEvidenceCheckpoint.test.ts",
+    "src/animation/assets/mega-horn-horn-hit-2.json",
     "ANIMATION_LATCHES.md"
    ],
-   "goal": "UNFULFILLED: MOVE_MEGAHORN is the sole representative of the Horn Hit 2 asset, battle/contest continuation identity, and create_megahorn_horn_sprite. Source and bilateral dense evidence are staged only; reducer, typed seam, generic compositor, material altered control, and actual-core proof remain required."
+   "goal": "UNFULFILLED: MOVE_MEGAHORN is the sole representative of the Horn Hit 2 asset, battle/contest continuation identity, and create_megahorn_horn_sprite. Its source-derived Horn Hit 2 prerequisite is available, but source and bilateral dense evidence remain staged only; reducer, typed seam, generic compositor, material altered control, and actual-core proof remain required."
   }
  ],
  "variantAudits": {
