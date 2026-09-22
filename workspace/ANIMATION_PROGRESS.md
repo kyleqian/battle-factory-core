@@ -1,3 +1,34 @@
+# Animation worker closure — MOVE_MEGAHORN exact (2026-09-22)
+
+- **State / scope:** `MOVE_MEGAHORN` is **exact**, so Level 50 is **269/276
+  exact, 0 partial, 0 staged, 7 unsupported**. Added its battle-only
+  source-relative reducer, narrow typed Scene-ON seam, and generic live
+  compositor. The battle path retains `BG_DRILL`; the dormant contest-only
+  `MegahornInContest` identity retains `BG_DRILL_CONTESTS` and its distinct
+  slide parameters without inventing a legal battle execution. Only the
+  four-component `megahorn-horn-control-flow` track is fulfilled; no sibling,
+  shared-component, boundary/barrier, gameplay/RNG, or facility credit moved.
+- **Proof:** Legal player-back frames **211..387 (177 rows)** and opponent-front
+  **212..387 (176 rows)** pass reducer, typed seam, chronological raw-RGB, and
+  shared-core framebuffer comparison **353/353** with **0 residual pixels**,
+  reproduced twice in independent fresh verifier processes. Verdict
+  `39a56550ff8a655b678247fc3b4df55f148834a3eb56dbe536c1859cd9f54ca0`;
+  RGB sequences `cc5965f816ce5cf48cbf183dbf1677630e424c50bdf55c4800a892dd14f9345d`
+  / `a1bfc221b7d61a905bac87b0a8e798e5f6657a4534936a8d8366b5578619b246`.
+  A material CROBAT/BLISSEY species/side/geometry/allocation control changes
+  presentation output while opaque gameplay state and gameplay RNG remain the
+  same references. No latch ledger change was needed: the two banked maps
+  independently confirmed all supplied move-owned facts.
+- **Verification / next:** Production commit `f2c2799b0`; coverage commit
+  `22b0af8cf`; tested code/tree `22b0af8cf4f9ab7ba1cbec97424ca1bf9e90d055` /
+  `857d8cf444df0b5d0cb25807d791d7bc6d9be325`. The affected exact/boundary/
+  inventory union passes **5 files / 13 tests**; asset/source/evidence controls,
+  typecheck, animation audit, coverage, diff checks, and curated smoke are
+  green. Full `npm test` passes **1,426 files / 11,486 tests** with **44 files /
+  223 tests skipped** in **1,739.51s**; `npm run build` passes **826 modules**
+  with only the inherited chunk-size warning. Next ranked work is
+  `MOVE_SUPERPOWER`; do not infer Megahorn credit for any sibling.
+
 # Animation worker checkpoint — MOVE_MEGAHORN HORN_HIT_2 asset prerequisite (2026-09-22)
 
 - **State / scope:** `MOVE_MEGAHORN` is **staged/unsupported**, so Level 50 is
