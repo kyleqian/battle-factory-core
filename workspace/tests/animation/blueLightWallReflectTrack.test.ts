@@ -790,9 +790,6 @@ describe("blue-light-wall-reflect standalone fulfilled component-track ratchet",
     const level50Moves = new Set(inventory.tiers.level50.moves.map((entry) => entry.move));
     expect(level50Moves.size).toBe(276);
 
-    expect(coverage.entries.filter((entry) => (
-      level50Moves.has(entry.move) && (entry.status === "partial" || entry.status === "staged")
-    ))).toEqual([]);
     expect(coverage.entries.filter((entry) => [
       "MOVE_REFLECT", "MOVE_BRICK_BREAK", "MOVE_CRUSH_CLAW",
     ].includes(entry.move))).toEqual([

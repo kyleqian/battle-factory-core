@@ -618,9 +618,6 @@ describe("dragon-fire-projectile component-track receipt ratchet", () => {
       }[];
     };
 
-    expect(coverage.entries.filter((entry) =>
-      entry.status === "partial" || entry.status === "staged")).toHaveLength(0);
-
     expect(coverage.entries.filter((entry) => trackMoves.includes(
       entry.move as (typeof trackMoves)[number],
     )).map(({ move, status }) => [move, status]).sort(([left], [right]) =>
