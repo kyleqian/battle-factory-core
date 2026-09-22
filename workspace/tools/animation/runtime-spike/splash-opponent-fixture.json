@@ -1,0 +1,5 @@
+{
+  "move": "SPLASH",
+  "scenario": "tools/animation/runtime-spike/splash-opponent-scenario.json",
+  "notes": "Standalone native-runtime experiment; legal Magikarp Splash loadout in MechanicLab; no move acceptance credit."
+}

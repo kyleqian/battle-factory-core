@@ -1,0 +1,88 @@
+{
+  "schema": "animation-runtime-spike-verification/v1",
+  "captureSha256": "9d5bd6f261b122f594f7e2de2f539aead41c5c55e67ffb6a816660510e9372fb",
+  "romSha256": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+  "scope": "Source/task/battler and selected OBJ transfer checks only; audio busy is an external host input; no full framebuffer, new sprites, palettes or backgrounds.",
+  "reports": [
+    {
+      "fixture": "tools/compare/fixtures/tail-whip-player-ponyta-opponent-onix.json",
+      "move": "TAIL_WHIP",
+      "rows": 77,
+      "sourceRows": 77,
+      "softwareRows": 76,
+      "hardwareRows": 76,
+      "callbacks": [
+        "AnimTask_TranslateMonEllipticalRespectSide"
+      ],
+      "mismatchCounts": {},
+      "examples": []
+    },
+    {
+      "fixture": "tools/compare/fixtures/tail-whip-opponent-ponyta-player-onix.json",
+      "move": "TAIL_WHIP",
+      "rows": 77,
+      "sourceRows": 77,
+      "softwareRows": 76,
+      "hardwareRows": 76,
+      "callbacks": [
+        "AnimTask_TranslateMonEllipticalRespectSide"
+      ],
+      "mismatchCounts": {},
+      "examples": []
+    },
+    {
+      "fixture": "tools/compare/fixtures/bind-player-onix-opponent-murkrow.json",
+      "move": "BIND",
+      "rows": 42,
+      "sourceRows": 42,
+      "softwareRows": 41,
+      "hardwareRows": 41,
+      "callbacks": [
+        "AnimTask_SwayMon",
+        "AnimTask_ScaleMonAndRestore"
+      ],
+      "mismatchCounts": {},
+      "examples": []
+    },
+    {
+      "fixture": "tools/compare/fixtures/bind-opponent-onix-player-murkrow.json",
+      "move": "BIND",
+      "rows": 42,
+      "sourceRows": 42,
+      "softwareRows": 41,
+      "hardwareRows": 41,
+      "callbacks": [
+        "AnimTask_SwayMon",
+        "AnimTask_ScaleMonAndRestore"
+      ],
+      "mismatchCounts": {},
+      "examples": []
+    },
+    {
+      "fixture": "tools/animation/runtime-spike/splash-player-fixture.json",
+      "move": "SPLASH",
+      "rows": 116,
+      "sourceRows": 116,
+      "softwareRows": 115,
+      "hardwareRows": 115,
+      "callbacks": [
+        "AnimTask_Splash"
+      ],
+      "mismatchCounts": {},
+      "examples": []
+    },
+    {
+      "fixture": "tools/animation/runtime-spike/splash-opponent-fixture.json",
+      "move": "SPLASH",
+      "rows": 116,
+      "sourceRows": 116,
+      "softwareRows": 115,
+      "hardwareRows": 115,
+      "callbacks": [
+        "AnimTask_Splash"
+      ],
+      "mismatchCounts": {},
+      "examples": []
+    }
+  ]
+}
