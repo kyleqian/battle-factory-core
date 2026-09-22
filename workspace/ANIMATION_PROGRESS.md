@@ -1,3 +1,30 @@
+# Animation supervisor checkpoint — MOVE_SUPERPOWER asset prerequisite (2026-09-22)
+
+- **State / scope:** `MOVE_SUPERPOWER` remains **staged/unsupported**, so Level
+  50 remains **269/276 exact, 0 partial, 1 staged, 6 unsupported** and Open-only
+  remains **0/1 exact**. Added only reproducible production assets for the
+  five-component `superpower-rock-orb-fire` track; the track remains
+  **unfulfilled**. No reducer, typed seam, compositor/core dispatch,
+  framebuffer acceptance, sibling/shared credit, boundary/barrier,
+  gameplay/RNG, facility, or main-program owner moved.
+- **Assets / proof:** The source extractor byte-pins `ANIM_TAG_CIRCLE_OF_LIGHT`
+  **10212** (64x64 / 64 tiles / `0x800`, reusing its existing sheet with the
+  ElectricOrbs palette), `ANIM_TAG_METEOR` **10256** (64x64 / 64 tiles /
+  `0x800`), and `ANIM_TAG_FLAT_ROCK` **10257** (16x80 / 20 tiles / `0x280`,
+  five 16x16 variants selected by arg 2). PNG, 4bpp, GBA LZ77, ELF, ROM,
+  template/callback/OAM identities, and the orb affine `32,+4,-6,+6` program
+  are independently pinned. Commit `ed99c1335` contains the asset checkpoint.
+- **Verification / next:** The extractor check and affected asset/source/
+  evidence/boundary/inventory union pass **5 files / 18 tests**; all twenty
+  fulfilled-track ratchets now remain move-local instead of forbidding an
+  unrelated staged campaign move (**20 files / 104 tests**). Smoke passes **8
+  files / 448 tests**. Tested tree `5690f1325` passes full `npm test`: **1,429
+  files / 11,495 tests**, with **44 files / 223 tests skipped**, in
+  **1,733.88s**; `npm run build` passes **826 modules** with only the inherited
+  chunk warning. Next add Superpower's source-relative reducer, narrow typed
+  seam, generic compositor/core dispatch, material control, and twice-fresh
+  **496/496** zero-residual actual-core proof; do not begin `MOVE_REVENGE`.
+
 # Animation worker checkpoint — MOVE_SUPERPOWER source/evidence staging (2026-09-22)
 
 - **State / scope:** `MOVE_SUPERPOWER` is **staged/unsupported**, so Level 50 is
@@ -63,44 +90,6 @@
   223 tests skipped** in **1,739.51s**; `npm run build` passes **826 modules**
   with only the inherited chunk-size warning. Next ranked work is
   `MOVE_SUPERPOWER`; do not infer Megahorn credit for any sibling.
-
-# Animation worker checkpoint — MOVE_MEGAHORN HORN_HIT_2 asset prerequisite (2026-09-22)
-
-- **State / scope:** `MOVE_MEGAHORN` is **staged/unsupported**, so Level 50 is
-  **268/276 exact, 0 partial, 1 staged, 7 unsupported**. Added only the
-  source audit, complete legal bilateral Factory carriers, Battle Scene ON
-  dense/raw-RGB receipts, normalized banked latch maps, and the generated
-  production horn_hit_2 asset plus reproducible extractor/contract tests.
-  No reducer, typed seam, compositor/core, framebuffer acceptance,
-  exact/track/sibling/shared-component credit, boundary/barrier, or gameplay
-  ownership changed. The source-extracted asset is only a prerequisite; the
-  four novel/unproved components remain
-  `asset:ANIM_TAG_HORN_HIT_2`, `subroutine:MegahornContinue`,
-  `subroutine:MegahornInContest`, and
-  `visualCommand:create_megahorn_horn_sprite`.
-- **Evidence:** The 237-byte `Move_MEGAHORN` root and all **21** graph
-  components include the battle `BG_DRILL` path, contest-only branch, actual
-  horn template/callback/affine programs, attacker ShakeMon/lunge, hitsplat,
-  target ShakeMonInPlace, complex palette blend, defender-partner monbg,
-  restore/fade, audio/resources, and cleanup. Fresh legal player-back frames
-  **211..387 (177 rows)** and opponent-front **212..387 (176 rows)** were
-  retained twice per orientation through first inactive cleanup. OAM/matrices
-  are predecessor-transfer **176/176** and **175/175**; palettes are
-  **175/176** and **174/175** with only age 7 exceptional. Selected monbg is
-  BG1/BG2 bank 8/9; BG/VRAM edges are [8,29,137,139,156]. The only new
-  asset is tag **10153**: exact **32x16**, 4bpp, **4x2/8-tile** sheet +
-  16-color palette, static dummy frame, affine-double normal OAM, and
-  template rotations **30/-99/94**, all source/PNG/ELF/ROM-pinned.
-- **Verification / next:** On tested code ec45326d8, the asset/source/evidence/
-  boundary/inventory union passes **5 files / 16 tests**; the extractor's
-  byte-for-byte check passes; smoke passes **8 files / 448 tests**. Full
-  npm test completed successfully in **1,762 s** and npm run build passes
-  **824 modules** (only the inherited chunk-size warning). Coverage remains
-  **268/276 exact, 1 staged, 7 unsupported**; animation audit and diff checks
-  pass. Next is a separately bounded source-relative reducer, narrow seam,
-  generic compositor, material altered control, and actual-core zero-residual
-  proof; keep MegaHorn staged and its sole novel-component track unfulfilled
-  until every gate is real.
 
 # Animation worker closure — MOVE_WILL_O_WISP exact (2026-09-22)
 

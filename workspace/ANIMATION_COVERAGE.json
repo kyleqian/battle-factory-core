@@ -7989,8 +7989,8 @@
     "this is an evidence-only checkpoint: no production reducer, typed seam, compositor, actual-core framebuffer acceptance, promotion, sibling, shared-component, or gameplay-state credit is claimed"
    ],
    "evidence": [
-   "tools/compare/superpowerSourceAudit.ts",
-   "tools/compare/evidence/superpower-source-audit.json",
+    "tools/compare/superpowerSourceAudit.ts",
+    "tools/compare/evidence/superpower-source-audit.json",
     "tools/compare/extractSuperpowerAssets.ts",
     "src/animation/assets/superpower-rock-orb-fire.json",
     "tests/animation/superpowerAssets.test.ts",
@@ -10651,12 +10651,12 @@
    "representatives": ["MOVE_SUPERPOWER"],
    "fulfilled": false,
    "evidence": [
-   "tools/compare/superpowerSourceAudit.ts",
-   "tools/compare/evidence/superpower-source-audit.json",
+    "tools/compare/superpowerSourceAudit.ts",
+    "tools/compare/evidence/superpower-source-audit.json",
     "tools/compare/extractSuperpowerAssets.ts",
     "src/animation/assets/superpower-rock-orb-fire.json",
     "tests/animation/superpowerAssets.test.ts",
-   "tools/compare/superpowerEvidence.ts",
+    "tools/compare/superpowerEvidence.ts",
     "tools/compare/fixtures/superpower-evidence.json",
     "ANIMATION_LATCHES.md"
    ],
