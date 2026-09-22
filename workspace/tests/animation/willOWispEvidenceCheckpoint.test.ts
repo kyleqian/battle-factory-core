@@ -42,9 +42,9 @@ describe("MOVE_WILL_O_WISP unsupported dense evidence checkpoint", () => {
     expect(JSON.parse(first)).toMatchObject({ move: "MOVE_WILL_O_WISP", status: "unsupported-evidence-checkpoint", coverageCredit: false, boundary: { productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, gameplayStateOwned: false, boundaryOrBarrierChanged: false } });
   });
 
-  it("keeps Will-O-Wisp staged and its exclusive component track unfulfilled", () => {
+  it("keeps the historical evidence receipt isolated after exact promotion", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_WILL_O_WISP")).toMatchObject({ status: "staged" });
-    expect(coverage.componentTracks.find((track: Json) => track.id === "will-o-wisp-orb-fire")).toMatchObject({ components: ["asset:ANIM_TAG_WISP_FIRE", "asset:ANIM_TAG_WISP_ORB", "sprite:gWillOWispFireSpriteTemplate", "sprite:gWillOWispOrbSpriteTemplate"], representatives: ["MOVE_WILL_O_WISP"], fulfilled: false });
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_WILL_O_WISP")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "will-o-wisp-orb-fire")).toMatchObject({ components: ["asset:ANIM_TAG_WISP_FIRE", "asset:ANIM_TAG_WISP_ORB", "sprite:gWillOWispFireSpriteTemplate", "sprite:gWillOWispOrbSpriteTemplate"], representatives: ["MOVE_WILL_O_WISP"], fulfilled: true });
   });
 });

@@ -107,6 +107,10 @@ if (process.argv.includes("--write")) {
 }
 
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Json, coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-invariant(fixture.status === "unsupported-evidence-checkpoint" && fixture.coverageCredit === false && coverage.entries.find((entry: Json) => entry.move === "MOVE_WILL_O_WISP")?.status === "staged", "honest coverage boundary");
+invariant(fixture.status === "unsupported-evidence-checkpoint" && fixture.coverageCredit === false
+  && coverage.entries.find((entry: Json) => entry.move === "MOVE_WILL_O_WISP")?.status === "exact",
+"historical evidence checkpoint and later exact coverage boundary");
+invariant(coverage.componentTracks.find((entry: Json) => entry.id === "will-o-wisp-orb-fire")?.fulfilled === true,
+  "fulfilled Will-O-Wisp-only track boundary");
 const result = { "player-back": verifySide("player-back", fixture.orientations["player-back"]), "opponent-front": verifySide("opponent-front", fixture.orientations["opponent-front"]) };
 console.log(JSON.stringify({ schema: fixture.schema, move: fixture.move, status: fixture.status, coverageCredit: fixture.coverageCredit, orientations: Object.fromEntries(Object.entries(result).map(([side, value]) => [side, { rows: value.summary.frameCount, probeJsonSha256: value.probeJsonSha256, rawRgbSequenceSha256: value.rawRgbSequenceSha256, changeMapSha256: value.changeMapSha256, latches: value.summary.latches, cleanup: value.summary.cleanup }])), boundary: { productionChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, siblingPromotion: false, componentTrackFulfilled: false, gameplayStateOwned: false, boundaryOrBarrierChanged: false } }, null, 2));

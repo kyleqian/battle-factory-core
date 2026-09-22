@@ -1,28 +1,24 @@
-# Animation worker checkpoint — MOVE_WILL_O_WISP dense/latch evidence (2026-09-22)
+# Animation worker closure — MOVE_WILL_O_WISP exact (2026-09-22)
 
-- **State / scope:** `MOVE_WILL_O_WISP` is now **staged**, so Level 50 is
-  **267/276 exact, 0 partial, 1 staged, 8 unsupported**. Its exclusive
-  `will-o-wisp-orb-fire` track remains unfulfilled. Added source/carrier audits,
-  complete legal bilateral staging, retained dense state/RGB, normalized banked
-  maps, verifier/tests, and move-owned latch records only. No reducer, typed
-  seam, compositor, production/core code, actual-core framebuffer acceptance,
-  sibling/track credit, boundary/barrier, or gameplay state changed.
-- **Evidence:** Legal Shuppet/Shuckle Scene-ON windows retain player-back frames
-  **76..289 (214 rows)** and opponent-front **80..292 (213 rows)** through first
-  inactive cleanup, twice in fresh local mGBA processes and byte-identical.
-  Probe/RGB/map digests are player `3f2ecd8f… / e02e1c81… / 5601f0dd…` and
-  opponent `d7c131a0… / 3977ab50… / 1d4a7f51…`. Will-O-Wisp's own maps pin all
-  four orb and six fire lives, panning, both split-priority phases, resources,
-  OAM/matrix/palette banks, defender-partner monbg, and `ShakeMon2(4,0,13,1)`;
-  no Smog, Hyper Voice, Snore, Silver Wind, Confuse Ray, or sibling latch was
-  inherited.
-- **Verification / next:** Source commits `c05b63b31` / `a4629c2e2`, evidence
-  commit `c07f6bf9d`; affected Will-O-Wisp + Confuse Ray + boundary/inventory
-  union passes **6 files / 24 tests**, deterministic source/evidence verifiers,
-  coverage, animation audit, and diff checks. Next add a complete source-relative
-  reducer, narrow typed Scene-ON seam, generic live compositor/core wiring, a
-  material altered control, and twice-fresh **427/427** zero-residual actual-core
-  acceptance before exact promotion; do not transfer sibling/component credit.
+- **State / scope:** `MOVE_WILL_O_WISP` is **exact**, so Level 50 is **268/276
+  exact, 0 partial, 0 staged, 8 unsupported**. Its sole-representative
+  `will-o-wisp-orb-fire` track is fulfilled; no sibling or shared split-priority
+  track receives credit. Added source-extracted Wisp assets, a source-relative
+  reducer, narrow typed Scene-ON seam, and generic live compositor only; gameplay
+  state/RNG, facility ownership, boundary lists, and unsupported barriers did not move.
+- **Proof:** The retained legal Shuppet gameplay state uses the already-created
+  Plusle carrier presentation sprite against Shuckle. Player-back frames **76..289
+  (214 rows)** and opponent-front **80..292 (213 rows)** pass component, typed-seam,
+  chronological raw-RGB, and shared-core framebuffer comparison **427/427** with
+  **0 residual pixels**, reproduced twice in independent verifier processes.
+  Verdict `26da45f3…`; RGB sequences `e02e1c81… / 3977ab50…`. A material
+  CROBAT/BLISSEY side/species-art/geometry/allocation control changes output while
+  opaque gameplay state and RNG remain unchanged.
+- **Verification / next:** Production commits `f1dfe92ee` / `10bf3f636`; affected
+  Will-O-Wisp source/evidence/assets/reducer/framebuffer plus boundary/inventory,
+  smoke, full suite/build, coverage/audit/diff gates are recorded in the worker
+  handoff. Next ranked move is `MOVE_MEGAHORN`; Helping Hand remains blocked on
+  legal doubles staging.
 
 # Animation supervisor verification — MOVE_EXTRASENSORY exact closure (2026-09-22 supervisor)
 

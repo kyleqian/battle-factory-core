@@ -3,13 +3,14 @@
  "entries": [
   {
    "move": "MOVE_WILL_O_WISP",
-   "status": "staged",
+      "status": "exact",
    "covered": [
     "the complete source-audited 190-byte Move_WILL_O_WISP body and exact ten-component identity, including ANIM_TAG_WISP_ORB/ANIM_TAG_WISP_FIRE, both sprite templates and callbacks, splitbgprio_foes/all, SoundTask_AdjustPanningVar, and AnimTask_ShakeMon2(4,0,13,1)",
     "complete legal bilateral Shuppet/Shuckle Battle Scene ON evidence retains player-back frames 76..289 (214 rows) and opponent-front frames 80..292 (213 rows), through first inactive cleanup; two fresh local mGBA processes per orientation are byte-identical",
     "Will-O-Wisp's own normalized banked maps retain all four orb lives, all six fire lives, OAM/matrix/palette/resource lifetimes, orientation-specific panning, both split-BG priority phases, defender-partner monbg setup/shake/cleanup, audio, raw RGB, opaque gameplay state/RNG, and cleanup",
     "the move-owned maps independently resolve whole OAM and matrices to the preceding software row, hardware palettes to the preceding faded row except same-row monbg setup at age 7, WISP_FIRE/ORB palette loads at RAM+1, and selected monbg ShakeMon2 scroll at RAM+1; no Smog, Hyper Voice, Snore, Silver Wind, or sibling latch conclusion is inherited",
-    "this is an evidence-only checkpoint: no reducer, typed Scene-ON seam, compositor, actual-core framebuffer comparison, exact promotion, sibling promotion, or fulfilled-track credit is claimed"
+        "the source-relative reducer, narrow typed Scene-ON seam, and generic live hardware-buffer compositor pass every retained component, seam, chronological raw-RGB, and shared framebuffer row twice fresh with zero residual pixels",
+        "a material CROBAT/BLISSEY side, species-art, geometry, allocation/order, and presentation-RNG control changes live output while gameplay state and RNG remain opaque; no sibling or shared split-priority track credit transfers"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-will-o-wisp-player-shuppet-opponent-shuckle.json",
@@ -25,10 +26,21 @@
     "tools/compare/evidence/will-o-wisp-changemap-player.json",
     "tools/compare/evidence/will-o-wisp-changemap-opponent.json",
     "tests/animation/willOWispSourceStaging.test.ts",
-    "tests/animation/willOWispEvidenceCheckpoint.test.ts",
-    "ANIMATION_LATCHES.md"
-   ],
-   "remaining": "Add a complete source-relative reducer for the orb/fire/panning/shake/split-priority/monbg body, a narrow typed Scene-ON seam, generic live compositor/core wiring, a material altered control, and twice-fresh 427/427 zero-residual actual-core framebuffer acceptance before exact promotion. No sibling or shared-component credit transfers from this staged checkpoint."
+        "tests/animation/willOWispEvidenceCheckpoint.test.ts",
+        "tools/compare/extractWillOWispAssets.ts",
+        "tools/compare/verifyWillOWispReducer.ts",
+        "tools/compare/willOWispActualCore.ts",
+        "src/animation/assets/will-o-wisp.json",
+        "src/animation/willOWisp.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "src/engine/core.ts",
+        "tests/animation/willOWispAssets.test.ts",
+        "tests/animation/willOWispReducer.test.ts",
+        "tests/animation/willOWispActualCore.test.ts",
+        "ANIMATION_LATCHES.md"
+      ],
+      "acceptance": "Two independent actual-core verifier processes each pass all 427 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest 26da45f38fd2e450d86caca531dc2c1e1b705fc70f76f2d014f970547d6384b7; player/opponent RGB sequences e02e1c81b629475536610c72641d866785ee3a04ce742d2708f02ea7a64e1e27 / 3977ab502a73dadbf522feb694b3d612602e30dd5e3756d55ba43bfd1d5ad5b5."
   },
   {
    "move": "MOVE_EXTRASENSORY",
@@ -1991,7 +2003,7 @@
     "complete legal Level-50 set-116 CHINCHOU player-back and opponent-front Scene-ON windows pass 270/270 source reducer, typed seam, task/sprite, software and hardware OAM/matrix/palette/tag/register/audio/immutable-state, raw-RGB/change-map, and production framebuffer rows through first inactive cleanup twice fresh",
     "source-relative YELLOW_BALL bounce ages 46..120 and spiral ages 166..224; one-display OAM/matrix transfer; opaque affine bounce painter; OBJ_BLEND 8:8 spiral painter; BlendColorCycleByTag hardware-palette transfer; BG_GHOST fade/restore; monbg lifecycle; and cleanup are exact bilaterally",
     "SoundTask_AdjustPanningVar is orientation-specific: player-back retains 62 captured rows from -64 toward +63 and opponent-front 61 from +63 toward -63; the component is proved only for Confuse Ray",
-    "MOVE_WILL_O_WISP now has its own complete bilateral dense evidence for WISP_FIRE/WISP_ORB, splitbgprio_foes/all, ShakeMon2, and the distinct script body, but remains staged pending independent reducer/seam/compositor/actual-core acceptance; no Confuse Ray credit transfers"
+    "MOVE_WILL_O_WISP now independently passes its complete bilateral reducer/seam/compositor/actual-core acceptance for WISP_FIRE/WISP_ORB, splitbgprio_foes/all, ShakeMon2, and the distinct script body; no Confuse Ray or sibling credit transfers"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-confuse-ray-player-chinchou-opponent-onix.json",
@@ -7945,7 +7957,7 @@
     "sprite:gWillOWispOrbSpriteTemplate"
    ],
    "representatives": ["MOVE_WILL_O_WISP"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/willOWispSourceAudit.ts",
     "tools/compare/willOWispProbe.py",
@@ -7958,9 +7970,17 @@
     "tools/compare/evidence/will-o-wisp-changemap-player.json",
     "tools/compare/evidence/will-o-wisp-changemap-opponent.json",
     "tests/animation/willOWispEvidenceCheckpoint.test.ts",
+    "tools/compare/extractWillOWispAssets.ts",
+    "tools/compare/verifyWillOWispReducer.ts",
+    "tools/compare/willOWispActualCore.ts",
+    "src/animation/assets/will-o-wisp.json",
+    "src/animation/willOWisp.ts",
+    "tests/animation/willOWispAssets.test.ts",
+    "tests/animation/willOWispReducer.test.ts",
+    "tests/animation/willOWispActualCore.test.ts",
     "ANIMATION_LATCHES.md"
    ],
-   "goal": "UNFULFILLED. MOVE_WILL_O_WISP independently supplies complete bilateral source, dense semantic, retained-RGB, normalized banked-map, and move-owned latch evidence for all four WISP_ORB and six WISP_FIRE lives through cleanup, but no production reducer, typed Scene-ON seam, compositor, material altered control, or actual-core framebuffer acceptance exists. Smog, Hyper Voice, Snore, Silver Wind, Confuse Ray, and every sibling receive no transferred timing, latch, component, track, or move credit."
+   "goal": "FULFILLED by MOVE_WILL_O_WISP alone after complete bilateral source, dense semantic, retained-RGB, move-owned latch, source-relative reducer, typed seam, generic compositor, material altered control, and twice-fresh 427/427 zero-residual actual-core acceptance through cleanup. Smog, Hyper Voice, Snore, Silver Wind, Confuse Ray, and every sibling receive no transferred timing, latch, component, track, or move credit."
   },
   {
    "id": "extrasensory-distortion-clone",
@@ -8697,7 +8717,7 @@
     "MOVE_CONFUSE_RAY"
    ],
    "fulfilled": true,
-   "goal": "FULFILLED: MOVE_CONFUSE_RAY independently proves its complete 12-component YELLOW_BALL/GHOST-BG/blend body, orientation-specific SoundTask_AdjustPanningVar schedule, semantic state, predecessor OAM/matrix/palette latches, registers/resources/audio, raw RGB, and actual-core framebuffer cleanup in both orientations at 270/270 frames twice fresh. The retained player-back semantic/raw receipts are 2a9fde46e5db7349e3f54bab6721aa94306b5c0bc77b8a2dd0c9e443ebf66492/17183f79551b7ca80f34e8dcbcafa0974d5e90f8751f7cd301c3ffa058ba9e20 and opponent-front receipts are 83d95bef62a0c7a7eead116a517bfe881279fc0aea0168a453c05f7ede14dd3a/e97f8c9d762c7c7d924497af86a453423eb5f6b8297e932ab16b7b7684770760. MOVE_WILL_O_WISP now has independent complete dense evidence for its distinct ten-component body, but remains staged pending reducer/seam/compositor/actual-core acceptance; neither move transfers panning timing, latch, component, track, or move credit to the other."
+   "goal": "FULFILLED: MOVE_CONFUSE_RAY independently proves its complete 12-component YELLOW_BALL/GHOST-BG/blend body, orientation-specific SoundTask_AdjustPanningVar schedule, semantic state, predecessor OAM/matrix/palette latches, registers/resources/audio, raw RGB, and actual-core framebuffer cleanup in both orientations at 270/270 frames twice fresh. The retained player-back semantic/raw receipts are 2a9fde46e5db7349e3f54bab6721aa94306b5c0bc77b8a2dd0c9e443ebf66492/17183f79551b7ca80f34e8dcbcafa0974d5e90f8751f7cd301c3ffa058ba9e20 and opponent-front receipts are 83d95bef62a0c7a7eead116a517bfe881279fc0aea0168a453c05f7ede14dd3a/e97f8c9d762c7c7d924497af86a453423eb5f6b8297e932ab16b7b7684770760. MOVE_WILL_O_WISP now independently proves its distinct ten-component body through complete bilateral actual-core cleanup acceptance; neither move transfers panning timing, latch, component, track, or move credit to the other."
   },
   {
    "id": "blend-battle-anim-palette-exclude",
