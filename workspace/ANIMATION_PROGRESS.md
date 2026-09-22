@@ -1,3 +1,33 @@
+# Animation worker checkpoint — MOVE_MEGAHORN dense/source evidence (2026-09-22)
+
+- **State / scope:** `MOVE_MEGAHORN` is **staged/unsupported**, so Level 50 is
+  **268/276 exact, 0 partial, 1 staged, 7 unsupported**. Added only the
+  source audit, complete legal bilateral Factory carriers, Battle Scene ON
+  dense/raw-RGB receipts, normalized banked latch maps, verifier, and tests.
+  No reducer, typed seam, compositor, production/core, framebuffer acceptance,
+  exact/track/sibling/shared-component credit, boundary/barrier, or gameplay
+  ownership changed. The four novel/unproved components are
+  `asset:ANIM_TAG_HORN_HIT_2`, `subroutine:MegahornContinue`,
+  `subroutine:MegahornInContest`, and
+  `visualCommand:create_megahorn_horn_sprite`.
+- **Evidence:** The 237-byte `Move_MEGAHORN` root and all **21** graph
+  components include the battle `BG_DRILL` path, contest-only branch, actual
+  horn template/callback/affine programs, attacker ShakeMon/lunge, hitsplat,
+  target ShakeMonInPlace, complex palette blend, defender-partner monbg,
+  restore/fade, audio/resources, and cleanup. Fresh legal player-back frames
+  **211..387 (177 rows)** and opponent-front **212..387 (176 rows)** were
+  retained twice per orientation through first inactive cleanup. OAM/matrices
+  are predecessor-transfer **176/176** and **175/175**; palettes are
+  **175/176** and **174/175** with only age 7 exceptional. Selected monbg is
+  BG1/BG2 bank 8/9; BG/VRAM edges are `[8,29,137,139,156]`.
+- **Verification / next:** Evidence commit `007d988b8`; probe/RGB/map digests
+  are player `7c1a63d9… / cc5965f8… / ae98a9fa…` and opponent
+  `77c709bd… / a1bfc221… / 934485e9…`; fixture digest is
+  `5b12e234…`. Focused source/evidence/inventory tests pass **3 files / 11
+  tests**. Next is a separately bounded source-relative reducer, narrow seam,
+  generic compositor, material altered control, and actual-core zero-residual
+  proof; keep MegaHorn staged until every gate is real.
+
 # Animation worker closure — MOVE_WILL_O_WISP exact (2026-09-22)
 
 - **State / scope:** `MOVE_WILL_O_WISP` is **exact**, so Level 50 is **268/276
@@ -46,31 +76,3 @@
   source/carrier classification, legal bilateral staging, dense evidence, and
   its own latch maps; Helping Hand remains blocked on legal doubles staging.
   **For the main program:** nothing blocking.
-
-# Animation worker checkpoint — MOVE_EXTRASENSORY dense/latch evidence (2026-09-22)
-
-- **State / scope:** `MOVE_EXTRASENSORY` is now **staged**, so Level 50 is
-  **266/276 exact, 0 partial, 1 staged, 9 unsupported**. The move-owned
-  `extrasensory-distortion-clone` track remains unfulfilled. Added source and
-  carrier audits, complete legal bilateral staging, retained dense state/RGB,
-  normalized maps, verifier/tests, and latch records only. No reducer, typed
-  seam, compositor, production/core code, framebuffer acceptance, sibling or
-  shared-Psychic credit, boundary list, unsupported barrier, or gameplay state
-  changed.
-- **Evidence:** Legal Nuzleaf/Shuckle Scene-ON windows retain player-back
-  frames **80..240** and opponent-front **84..244**, **161+161 = 322** rows
-  through first inactive cleanup, twice in fresh processes and byte-identical.
-  Probe/RGB/map digests are player `40519f5f… / 54456d01… / 70a55e95…` and
-  opponent `b1de1329… / ffd4644e… / 1a2eab6f…`. Extrasensory's own maps pin
-  distortion source lives **42..66 / 68..92 / 94..118** and RAM+1 display,
-  clone source **94..117**, OAM RAM+1 and task-owned affine RAM+2, both attacker
-  palette programs, Psychic BG/monbg/register/audio/allocation order, stable
-  opaque gameplay state/RNG, and clean age-160 teardown.
-- **Verification / next:** Evidence code commit `6f0cabf8c` / tested tree
-  `7b0e1d441e8686c88e809c625ec1b810c107e704` passes the complete affected
-  Extrasensory + five Psychic-control + boundary/inventory union (**10 files /
-  69 tests**), deterministic source/evidence verification, typecheck, coverage,
-  animation audit, and diff checks. Next add a complete source-relative reducer,
-  narrow typed Scene-ON seam, generic live compositor/core dispatch, altered
-  control, and twice-fresh **322/322** zero-residual actual-core acceptance
-  before exact promotion; do not transfer shared-component or sibling credit.
