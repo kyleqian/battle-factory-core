@@ -1,3 +1,23 @@
+# Animation worker checkpoint — MOVE_REVENGE purple asset audit (2026-09-22)
+
+- **State / scope:** `MOVE_REVENGE` remains **unsupported** with no exact,
+  partial, staged, component, sibling, or shared credit. Added only the
+  dev-time `tools/compare/extractRevengeAssets.ts` proof, its pinned
+  `tools/compare/evidence/revenge-assets.json` receipt, and
+  `tests/animation/revengeAssets.test.ts`; no `src/` or coverage status moved.
+- **Asset checkpoint:** The extractor pins source PNGs, palettes, registry/tag
+  declarations, ELF/ROM symbols, GBA-LZ77 streams, decoded 4bpp bytes, tiles,
+  frames, OAM/template identities, animation tables, and `AnimRevengeScratch`.
+  PURPLE_SCRATCH is 32x96 / 48 tiles / 0x600 decoded bytes with 3x 32x32
+  frames; PURPLE_SWIPE is 64x128 / 128 tiles / 0x1000 with 2x 64x64 frames;
+  both use `gBattleAnimSpritePal_PurpleScratch`.
+- **Verification / resume:** Focused asset tests pass **3/3**, including two
+  fresh byte-identical regenerations; extractor output is clean and source/ELF/
+  ROM LZ77 comparisons pass. Resume only with a source-relative Revenge
+  reducer, narrow seam, generic compositor, material control, and twice-fresh
+  **290/290** zero-residual actual-core proof; keep the component track
+  unfulfilled and do not start `MOVE_SPIT_UP`.
+
 # Animation worker checkpoint — MOVE_REVENGE source + dense evidence (2026-09-22)
 
 - **State / scope:** `MOVE_REVENGE` remains **unsupported** with no exact,
