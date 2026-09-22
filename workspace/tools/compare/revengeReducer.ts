@@ -43,6 +43,9 @@ export type RevengeFrame = Readonly<{
   scratchTag: "PURPLE_SCRATCH" | "PURPLE_SWIPE" | "IMPACT" | null;
   blendY: number | null;
   audio: "SE_M_TAKE_DOWN" | "SE_M_SWAGGER" | "SE_M_VITAL_THROW2" | "SE_M_MEGA_KICK2" | null;
+  monbg: boolean;
+  clearingMonbg: boolean;
+  alpha: readonly [number, number];
   components: readonly RevengeComponent[];
   cleanup: boolean;
   hardwareUsesPreviousSoftware: boolean;
@@ -121,5 +124,5 @@ export function replayRevenge(age: number, geometry: RevengeGeometry): RevengeFr
   const scratchTag = age >= 1 && age <= 72 ? "PURPLE_SCRATCH" : age >= 73 && age <= 95 ? "PURPLE_SWIPE" : age >= 96 && age <= 143 ? "IMPACT" : null;
   const blendY = age < 21 || age > 71 ? null : Math.max(0, 3 - Math.floor(Math.max(0, age - 22) / 12));
   const audio = age < 7 ? null : age < 82 ? "SE_M_TAKE_DOWN" : age < 99 ? "SE_M_SWAGGER" : age < 109 ? "SE_M_VITAL_THROW2" : "SE_M_MEGA_KICK2";
-  return { age, active: age < 144, scratchTag, blendY, audio, components, cleanup: age === 144, hardwareUsesPreviousSoftware: age > 0 };
+  return { age, active: age < 144, scratchTag, blendY, audio, monbg: age >= 4 && age <= 130, clearingMonbg: age >= 128 && age <= 130, alpha: age >= 7 && age <= 127 ? [12, 8] : [0, 0], components, cleanup: age === 144, hardwareUsesPreviousSoftware: age > 0 };
 }

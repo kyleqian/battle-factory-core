@@ -73,6 +73,8 @@ function verifySide(side: RevengeSide): Json {
     expect(audio(row) === expected.audio, `${side} age ${age} audio`);
     const blend = row.tasks.find((task: Json) => task.func?.symbol === "AnimTask_BlendColorCycleLoop");
     expect((blend?.data[2] ?? null) === expected.blendY, `${side} age ${age} attacker blend`);
+    expect(Boolean(row.tasks.find((task: Json) => task.func?.symbol === "Task_UpdateMonBg")) === expected.monbg && Boolean(row.tasks.find((task: Json) => task.func?.symbol === "Task_ClearMonBg")) === expected.clearingMonbg, `${side} age ${age} monbg lifecycle`);
+    expect(same([row.registers.bldcnt, row.registers.bldalpha], expected.alpha[0] === 12 ? [16192, 2060] : [0, 0]), `${side} age ${age} alpha lifecycle`);
     const small = optionalSprite(row, "gRevengeSmallScratchSpriteTemplate");
     const big = optionalSprite(row, "gRevengeBigScratchSpriteTemplate");
     const lunge = optionalSprite(row, "gHorizontalLungeSpriteTemplate");
