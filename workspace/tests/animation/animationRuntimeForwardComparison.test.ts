@@ -31,9 +31,9 @@ describe('forward comparison on unfinished animation components',()=>{
     expect(verifyForwardCases([mud],resources)[0].mismatchCounts).toEqual({taskData:1});
   });
 
-  it('still rejects the full Mud Sport script rather than treating omitted graphics as implemented',()=>{
+  it('requires an explicit host resource registry for the full Mud Sport script',()=>{
     const mud=capture.cases.find(c=>c.move==='MUD_SPORT')!;
     const runtime=new AnimationRuntime(resources.programs.Move_MUD_SPORT,mud.frames[0],resources.sine,resources.affinePrograms);
-    expect(()=>runtime.tick(false)).toThrow('unsupported command loadspritegfx');
+    expect(()=>runtime.tick(false)).toThrow('unsupported sprite resource tag 10074');
   });
 });

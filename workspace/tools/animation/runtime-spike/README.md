@@ -82,6 +82,41 @@ Splash fixture paths with `snatch-player-fixture.json`,
 path, then run `compare-forward.ts` on that JSON. The probe performs no runtime
 state injection beyond the existing MechanicLab scenario preparation.
 
-The source decoder now recognizes three additional commands for inspection:
-loadspritegfx, createsprite and waitplaysewithpan. The runtime still rejects
-them. Affine resources are selected by callback demand rather than a move name.
+At the experiment checkpoint, the source decoder recognized three additional
+commands for inspection—loadspritegfx, createsprite and waitplaysewithpan—while
+the spike runtime still rejected them. Affine resources were selected by
+callback demand rather than a move name. The follow-on status is below.
+
+## Native production slice
+
+The follow-on implementation moved the reusable executor to
+`src/animation/nativeAnimationRuntime.ts`; this directory's `runtime.ts` is now
+only a compatibility re-export. A host registry supplies extracted programs,
+resource metadata, sprite templates, live battler geometry/subpriorities, fixed
+slot occupancy, persistent order, and the external audio-busy input. The
+runtime itself remains independent of this tooling, captures, mGBA, and ROMs.
+
+The production slice executes complete Splash and Mud Sport scripts. It adds
+MUD_SAND tile/palette allocation and cleanup, fixed sprite slots, rising and
+falling dirt callbacks, delayed sound tasks, source-order software/hardware OBJ
+buffers, and a host renderer that feeds the existing GBA OBJ compositor. The
+retained dense receipt covers both orientations: Splash 116/116 rows each and
+Mud Sport 233/233 rows each, including 16 particle births, ten delayed sound
+tasks, 13 emitted sound commands, all task/sprite fields and flags, resource
+state, art transfers, and runtime-owned OBJ transfers.
+
+```sh
+node --experimental-strip-types tools/animation/runtime-spike/verify-native.ts \
+  tools/animation/runtime-spike/native-observations.json.gz /tmp/native-receipt.json
+cmp /tmp/native-receipt.json tools/animation/runtime-spike/native-receipt.json
+POKEBENCH_VITEST_MAX_WORKERS=1 npm test -- \
+  tests/animation/nativeAnimationRuntime.test.ts \
+  tests/animation/animationRuntimeSpike.test.ts \
+  tests/animation/animationRuntimeForwardComparison.test.ts
+```
+
+`native-repeat-receipt.json` records two byte-identical fresh direct-local-mGBA
+captures. This is complete source/runtime-owned semantic evidence, not move
+acceptance: ambient sprites/healthbox subsprites, the EnemyShadow callback, the
+actual battleScene/core seam, and dense full framebuffers remain outside the
+receipt. Splash and Mud Sport therefore remain unsupported in coverage.
