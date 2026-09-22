@@ -10678,6 +10678,36 @@
     "ANIMATION_LATCHES.md"
    ],
    "goal": "FULFILLED by MOVE_SUPERPOWER alone after complete source classification, source-extracted CIRCLE_OF_LIGHT/METEOR/FLAT_ROCK assets, legal bilateral dense evidence, a source-relative reducer, typed Scene-ON seam, generic live compositor, material altered control, and twice-fresh 496/496 zero-residual actual-core acceptance through cleanup. No sibling or shared-component credit is transferred."
+  },
+  {
+   "id": "revenge-purple-scratch-persist-hit",
+   "components": [
+    "asset:ANIM_TAG_PURPLE_SCRATCH",
+    "asset:ANIM_TAG_PURPLE_SWIPE",
+    "sprite:gRevengeBigScratchSpriteTemplate",
+    "sprite:gRevengeSmallScratchSpriteTemplate",
+    "visualCommand:create_persist_hitsplat_sprite"
+   ],
+   "representatives": ["MOVE_REVENGE"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/revengeSourceAudit.ts",
+    "tools/compare/evidence/revenge-source-audit.json",
+    "tools/compare/revengeProbe.py",
+    "tools/compare/revengeEvidence.ts",
+    "tools/compare/fixtures/revenge-evidence.json",
+    "tools/compare/evidence/revenge-player-dense-state.json.gz",
+    "tools/compare/evidence/revenge-opponent-dense-state.json.gz",
+    "tools/compare/evidence/revenge-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/revenge-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/revenge-changemap-player.json",
+    "tools/compare/evidence/revenge-changemap-opponent.json",
+    "tools/battle-lab/mechanic-revenge-player-machamp-opponent-shuckle.json",
+    "tools/battle-lab/mechanic-revenge-opponent-qwilfish-player-shuckle.json",
+    "tests/animation/revengeSourceStaging.test.ts",
+    "tests/animation/revengeEvidenceCheckpoint.test.ts"
+   ],
+   "goal": "UNFULFILLED evidence-only checkpoint for MOVE_REVENGE: complete source, legal bilateral staging, and twice-fresh dense retained state/RGB/latch maps through cleanup are pinned, but reducer, typed seam, compositor, actual-core acceptance, exact promotion, and all component credit remain outstanding."
   }
  ],
  "variantAudits": {
