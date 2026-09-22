@@ -7983,13 +7983,17 @@
    "status": "staged",
    "covered": [
     "source classification confirms the exact 14-component Move_SUPERPOWER graph and the five sole unrepresented components: FLAT_ROCK, METEOR, gSuperpowerFireballSpriteTemplate, gSuperpowerOrbSpriteTemplate, and gSuperpowerRockSpriteTemplate",
+    "a reproducible production asset byte-pins CIRCLE_OF_LIGHT tag 10212 with its ElectricOrbs palette, METEOR tag 10256, and FLAT_ROCK tag 10257 from source PNG through 4bpp tile packing and GBA LZ77 ROM decompression; it also pins the three OAM/template/callback bodies and the orb affine 32,+4,-6,+6 program",
     "legal bilateral Battle Scene ON staging retains 248 dense semantic and raw-RGB rows per player-back and opponent-front orientation through first inactive cleanup, with two fresh byte-identical runs per orientation",
     "move-owned maps measure orb affine allocation, five rock lifetimes and trajectories, fireball translation/flips, attacker monbg and alpha, BG-Y shake, target ShakeMon2, audio, resources, predecessor display latches, opaque gameplay state/RNG, and teardown",
     "this is an evidence-only checkpoint: no production reducer, typed seam, compositor, actual-core framebuffer acceptance, promotion, sibling, shared-component, or gameplay-state credit is claimed"
    ],
    "evidence": [
-    "tools/compare/superpowerSourceAudit.ts",
-    "tools/compare/evidence/superpower-source-audit.json",
+   "tools/compare/superpowerSourceAudit.ts",
+   "tools/compare/evidence/superpower-source-audit.json",
+    "tools/compare/extractSuperpowerAssets.ts",
+    "src/animation/assets/superpower-rock-orb-fire.json",
+    "tests/animation/superpowerAssets.test.ts",
     "tools/battle-lab/mechanic-superpower-player-nidoqueen-opponent-onix.json",
     "tools/battle-lab/mechanic-superpower-opponent-registeel-player-regirock.json",
     "tools/compare/superpowerProbe.py",
@@ -10647,9 +10651,12 @@
    "representatives": ["MOVE_SUPERPOWER"],
    "fulfilled": false,
    "evidence": [
-    "tools/compare/superpowerSourceAudit.ts",
-    "tools/compare/evidence/superpower-source-audit.json",
-    "tools/compare/superpowerEvidence.ts",
+   "tools/compare/superpowerSourceAudit.ts",
+   "tools/compare/evidence/superpower-source-audit.json",
+    "tools/compare/extractSuperpowerAssets.ts",
+    "src/animation/assets/superpower-rock-orb-fire.json",
+    "tests/animation/superpowerAssets.test.ts",
+   "tools/compare/superpowerEvidence.ts",
     "tools/compare/fixtures/superpower-evidence.json",
     "ANIMATION_LATCHES.md"
    ],
