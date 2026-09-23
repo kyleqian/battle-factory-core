@@ -45,6 +45,22 @@ describe("persistent live move palette inputs", () => {
       .not.toEqual(expected.traceScratchUnfadedPalette);
   });
 
+  it("keeps musical-note rainbow writes out of later Shadow Punch unfaded input", () => {
+    for (const moveId of [47, 320]) {
+      const initial = createLiveMovePaletteHost();
+      const after = prepareLiveMovePalette(initial, request(moveId));
+      expect(after.next.historyKnown).toBe(true);
+      expect(after.next.memory.tags.slice(7)).toEqual(Array(9).fill(0xffff));
+      const offset = 256 + 9 * 16;
+      expect(after.next.memory.unfaded.slice(offset, offset + 16))
+        .toEqual(initial.memory.unfaded.slice(offset, offset + 16));
+      expect(after.next.memory.faded.slice(offset + 1, offset + 6))
+        .not.toEqual(initial.memory.faded.slice(offset + 1, offset + 6));
+      expect(prepareLiveMovePalette(after.next, request(325)).input)
+        .toEqual(prepareLiveMovePalette(initial, request(325)).input);
+    }
+  });
+
   it("does not claim complete palette history after unknown resources or switching", () => {
     const initial = createLiveMovePaletteHost();
     const unknown = prepareLiveMovePalette(initial, request(1)).next;

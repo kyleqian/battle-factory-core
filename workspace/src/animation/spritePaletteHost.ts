@@ -77,6 +77,18 @@ export function loadPalette(
   return retain(host.reservedCount, host.tags, unfaded, faded);
 }
 
+/** Direct gPlttBufferFaded writes retain the original unfaded source colors. */
+export function writeFadedPalette(
+  host: SpritePaletteHost, offset: number, colors: readonly number[],
+): SpritePaletteHost {
+  integerIn(offset, 0, 512, "offset");
+  if (offset + colors.length > 512) throw new Error("palette write exceeds color RAM");
+  for (const color of colors) integerIn(color, 0, 0xffff, "color");
+  const faded = [...host.faded];
+  for (let i = 0; i < colors.length; i++) faded[offset + i] = colors[i]!;
+  return retain(host.reservedCount, host.tags, host.unfaded, faded);
+}
+
 /** LoadSpritePalette reuses a live tag without loading its payload a second time. */
 export function loadSpritePalette(
   host: SpritePaletteHost, tag: number, colors: readonly number[],

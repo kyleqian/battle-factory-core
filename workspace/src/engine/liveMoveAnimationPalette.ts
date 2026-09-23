@@ -1,7 +1,7 @@
 import data from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import {
   allocSpritePalette, createSpritePaletteHost, freeSpritePaletteByTag,
-  loadPalette, loadSpritePalette, type SpritePaletteHost,
+  indexOfSpritePaletteTag, loadPalette, loadSpritePalette, writeFadedPalette, type SpritePaletteHost,
 } from "../animation/spritePaletteHost.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 
@@ -14,7 +14,7 @@ export interface LiveMovePaletteHost {
   readonly historyKnown: boolean;
 }
 interface PaletteResource { readonly tag: number; readonly colors: readonly number[]; }
-interface PalettePlan { readonly loads: readonly string[]; readonly taskLoads?: readonly string[]; }
+interface PalettePlan { readonly loads: readonly string[]; readonly taskLoads?: readonly string[]; readonly rainbowNotes?: boolean; }
 const resources: Readonly<Record<string, PaletteResource>> = data.resources;
 const plans: Readonly<Record<string, PalettePlan>> = data.plans;
 
@@ -61,6 +61,21 @@ export function prepareLiveMovePalette(
     if (result.index === 0xff) throw new Error("live animation exhausted OBJ palette banks");
     memory = result.host;
     loaded.push(resource.tag);
+  }
+  if (plan.rainbowNotes) {
+    // AnimTask_MusicNotesRainbowBlend finds the loaded first tag, then
+    // AllocSpritePalette reserves the three remaining rows without loading.
+    // Every task write targets only faded color indexes 1..5.
+    for (const [rowIndex, row] of data.rainbowNotes.entries()) {
+      const allocated = rowIndex === 0
+        ? { host: memory, index: indexOfSpritePaletteTag(memory, row.tag) }
+        : allocSpritePalette(memory, row.tag);
+      memory = allocated.host;
+      if (allocated.index !== 0xff) {
+        memory = writeFadedPalette(memory, 256 + allocated.index * 16 + 1, row.colors);
+        if (rowIndex !== 0) loaded.push(row.tag);
+      }
+    }
   }
   let input: LiveMovePaletteInput = Object.freeze({ historyKnown: host.historyKnown });
   if (request.moveId === 325) {

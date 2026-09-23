@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   allocSpritePalette, blendPalette, copyUnfadedToFaded, createSpritePaletteHost,
   freeAllSpritePalettes, freeSpritePaletteByTag, indexOfSpritePaletteTag,
-  loadPalette, loadSpritePalette, SPRITE_PALETTE_NOT_FOUND,
+  loadPalette, loadSpritePalette, writeFadedPalette, SPRITE_PALETTE_NOT_FOUND,
 } from "../../src/animation/spritePaletteHost.ts";
 
 describe("source sprite-palette ownership and stale color memory", () => {
@@ -20,6 +20,15 @@ describe("source sprite-palette ownership and stale color memory", () => {
     expect(blended.unfaded.slice(320, 336)).toEqual(red);
     expect(original.tags[4]).toBe(0xffff);
     expect(original.unfaded.slice(320, 336)).toEqual(Array(16).fill(0));
+  });
+
+  it("writes only selected faded colors without clearing stale unfaded RAM", () => {
+    const original = loadPalette(createSpritePaletteHost(4), 400, Array(16).fill(0x1234));
+    const written = writeFadedPalette(original, 401, [0x7fff, 0x1f, 0x3e0, 0x7c00, 0]);
+    expect(written.unfaded.slice(400, 416)).toEqual(Array(16).fill(0x1234));
+    expect(written.faded.slice(400, 407)).toEqual([0x1234, 0x7fff, 0x1f, 0x3e0, 0x7c00, 0, 0x1234]);
+    expect(original.faded.slice(400, 416)).toEqual(Array(16).fill(0x1234));
+    expect(() => writeFadedPalette(original, 511, [1, 2])).toThrow("exceeds color RAM");
   });
 
   it("distinguishes load's existing-tag reuse from alloc's duplicate-tag reservation", () => {

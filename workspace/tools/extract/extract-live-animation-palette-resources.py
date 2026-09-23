@@ -40,7 +40,7 @@ for line in script.splitlines():
     match=re.match(r'^(\w+)::?$',line)
     if match:label=match[1];blocks[label]=[]
     elif label:blocks[label].append(line.strip())
-ids={2,5,11,14,21,23,25,27,29,39,41,44,67,93,94,97,101,103,108,109,122,131,136,154,158,163,210,211,223,231,242,246,247,264,280,305,306,325,337,342,347}
+ids={2,5,11,14,21,23,25,27,29,39,41,44,47,48,67,78,79,92,93,94,95,97,101,103,108,109,122,131,136,147,154,158,163,210,211,223,231,242,246,247,264,280,305,306,320,325,336,337,342,347}
 components=json.loads((ROOT/'src/data/gen/battle-animation-components.json').read_text())
 plans={}
 used=set()
@@ -65,11 +65,22 @@ plans['108']['taskLoads']=['TAG_SMOKESCREEN'];used.add('TAG_SMOKESCREEN')
 # Confusion/Psychic rotate only BG faded rows; Night Shade changes sprite
 # affine/blend state; Shadow Ball loads its one script-owned OBJ row. None
 # of their task callbacks writes or allocates extra OBJ unfaded palettes.
-source_files=['src/battle_anim_effects_1.c','src/battle_anim_effects_2.c','src/battle_anim_ghost.c','src/battle_anim_psychic.c','src/battle_anim_effects_3.c','include/constants/battle_anim.h','src/data/battle_anim.h','data/battle_anim_scripts.s','src/battle_anim_smokescreen.c','src/sprite.c','src/battle_anim_mons.c','src/link_rfu_3.c']
+# Rainbow notes allocate three additional tags and write only five faded
+# colors per row. The table is ROM source data, never a battle capture.
+notes_offset=symbols['gParticlesColorBlendTable']-0x08000000
+rainbow=[]
+for i in range(4):
+    row=struct.unpack_from('<6H',ROM,notes_offset+i*12)
+    rainbow.append({'tag':row[0],'colors':list(row[1:])})
+assert rainbow[0]['tag']==tags['ANIM_TAG_MUSIC_NOTES']
+for move_id in ['47','320']:plans[move_id]['rainbowNotes']=True
+# Powder/poison/ring/spore/noise callbacks do not allocate additional OBJ
+# palettes or alter unfaded OBJ colors; Hypnosis' color cycle is faded-only.
+source_files=['src/battle_anim_poison.c','src/battle_anim_sound_tasks.c','src/battle_anim_effects_1.c','src/battle_anim_effects_2.c','src/battle_anim_ghost.c','src/battle_anim_psychic.c','src/battle_anim_effects_3.c','include/constants/battle_anim.h','src/data/battle_anim.h','data/battle_anim_scripts.s','src/battle_anim_smokescreen.c','src/sprite.c','src/battle_anim_mons.c','src/link_rfu_3.c']
 out={
  'schema':'live-animation-palette-resources/v1',
  'sourceSha256':{name:hashlib.sha256((REF/name).read_bytes()).hexdigest() for name in source_files},
- 'plans':plans,'resources':{name:resources[name] for name in sorted(used)},
+ 'rainbowNotes':rainbow,'plans':plans,'resources':{name:resources[name] for name in sorted(used)},
  'bentSpoonTag':tags['ANIM_TAG_BENT_SPOON'],
  'initial':{
   'wirelessTag':0xD432,'healthboxTag':0xD6FF,'healthbarTag':0xD704,
