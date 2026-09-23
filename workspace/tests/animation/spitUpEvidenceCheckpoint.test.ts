@@ -2,12 +2,11 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
 type Json = Record<string, any>;
-const root = resolve(".");
 const sha = (value: Uint8Array | string): string => createHash("sha256").update(value).digest("hex");
 const matrix = JSON.parse(readFileSync(
   "tools/compare/fixtures/spit-up-evidence-matrix.json", "utf8",
