@@ -15,22 +15,34 @@ import {
 import { AGILITY_FRAME_COUNT } from "../animation/agility.ts";
 import { SWORDS_DANCE_FRAME_COUNT } from "../animation/swordsDance.ts";
 import { CALM_MIND_CLEANUP_AGE } from "../animation/calmMind.ts";
+import { FURY_SWIPES_LAST_BODY_AGE } from "../animation/furySwipes.ts";
+import { KARATE_CHOP_FRAME_COUNT } from "../animation/karateChop.ts";
+import { STOMP_FRAME_COUNT } from "../animation/stomp.ts";
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
-  14, 29, 39, 44, 97, 103, 108, 109, 246, 264, 280, 325, 347,
+  2, 14, 23, 29, 39, 41, 44, 97, 103, 108, 109, 131, 154, 158, 163,
+  242, 246, 264, 280, 305, 306, 325, 337, 347,
 ] as const);
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
   switch (request.moveId) {
+    case 2: return KARATE_CHOP_FRAME_COUNT;
     case 14: return SWORDS_DANCE_FRAME_COUNT;
+    case 23: return STOMP_FRAME_COUNT;
     case 29: return 48; // headbuttAtAge: active through 46, then cleanup.
     case 39: return TAIL_WHIP_FRAME_COUNT;
+    case 41: return 37; // Twineedle's two stingers through clearmonbg cleanup.
     case 44: return 26; // First sharp-teeth row through inactive cleanup.
     case 97: return AGILITY_FRAME_COUNT;
     case 103: return SCREECH_FIRST_INACTIVE_AGE + 1;
     case 108: return 125; // smokescreenAtAge: active through 123.
     case 109: return CONFUSE_RAY_FRAME_COUNT;
+    case 131: return 84; // Spike Cannon pointer body through inactive cleanup.
+    case 154: return FURY_SWIPES_LAST_BODY_AGE + 1;
+    case 158: return 107; // Hyper Fang restorebg fade through cleanup.
+    case 163: return 46; // Slash body through final source-owned shake row.
+    case 242: return 142; // Crunch dark-background body through cleanup.
     case 246: return 128; // ancientPowerAtAge: active through 126, cleanup at 127.
     case 264:
       return FOCUS_PUNCH_FIRST_INACTIVE_AGE[
@@ -40,8 +52,11 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
       return request.turn === 0
         ? BRICK_BREAK_NORMAL_FRAME_COUNT
         : BRICK_BREAK_SHATTERED_FRAME_COUNT;
+    case 305: return 104; // Poison Fang body through blend/monbg cleanup.
+    case 306: return 69; // Crush Claw body through inactive cleanup.
     // Source restorebg fade, then inactive display. Both orientations restore.
     case 325: return request.attacker === 0 ? 106 : 105;
+    case 337: return 137; // Dragon Claw palette restoration through cleanup.
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -85,7 +100,9 @@ export function liveMoveAnimationPresentation(
   };
   let config: SceneOnMoveConfig;
   switch (request.moveId) {
+    case 2: config = { move: "KARATE_CHOP", attacker, target, fieldProfile }; break;
     case 14: config = { move: "SWORDS_DANCE", attacker, target, fieldProfile }; break;
+    case 23: config = { move: "STOMP", attacker, target, fieldProfile }; break;
     case 29:
       // BowMon's affine center is the existing OBJ center; its hitsplat
       // independently uses the target picture-offset coordinate.
@@ -96,11 +113,17 @@ export function liveMoveAnimationPresentation(
       } }, target, fieldProfile };
       break;
     case 39: config = { move: "TAIL_WHIP", attacker, target, fieldProfile }; break;
+    case 41: config = { move: "TWINEEDLE", attacker, target, fieldProfile }; break;
     case 44: config = { move: "BITE", attacker, target, fieldProfile }; break;
     case 97: config = { move: "AGILITY", attacker, target, fieldProfile }; break;
     case 103: config = { move: "SCREECH", attacker, target, fieldProfile }; break;
     case 108: config = { move: "SMOKESCREEN", attacker, target, fieldProfile }; break;
     case 109: config = { move: "CONFUSE_RAY", attacker, target, fieldProfile }; break;
+    case 131: config = { move: "SPIKE_CANNON", attacker, target, fieldProfile }; break;
+    case 154: config = { move: "FURY_SWIPES", attacker, target, fieldProfile }; break;
+    case 158: config = { move: "HYPER_FANG", attacker, target, fieldProfile }; break;
+    case 163: config = { move: "SLASH", attacker, target, fieldProfile }; break;
+    case 242: config = { move: "CRUNCH", attacker, target, fieldProfile }; break;
     case 246: config = { move: "ANCIENT_POWER", attacker, target, fieldProfile }; break;
     case 264: config = { move: "FOCUS_PUNCH", attacker, target, fieldProfile }; break;
     case 280:
@@ -110,6 +133,8 @@ export function liveMoveAnimationPresentation(
         attacker, target, fieldProfile,
       };
       break;
+    case 305: config = { move: "POISON_FANG", attacker, target, fieldProfile }; break;
+    case 306: config = { move: "CRUSH_CLAW", attacker, target, fieldProfile }; break;
     case 325:
       config = {
         move: "SHADOW_PUNCH", attacker, target,
@@ -119,6 +144,7 @@ export function liveMoveAnimationPresentation(
         attackerSubpriority: request.attacker === 0 ? 30 : 40,
       };
       break;
+    case 337: config = { move: "DRAGON_CLAW", attacker, target, fieldProfile }; break;
     case 347: config = { move: "CALM_MIND", attacker, target, fieldProfile }; break;
     default: return null;
   }
