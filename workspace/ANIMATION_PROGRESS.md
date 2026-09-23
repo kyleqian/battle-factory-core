@@ -15,12 +15,12 @@
   its retained ROM, semantic, RGB/framebuffer, and change-map hashes did not
   change.
 - **Gates / next:** Supervisor focused union passes **17 files / 53 tests**;
-  coverage, animation audit, JSON, and diff checks pass. The worker's same-code
-  serialized full suite passes **1,458 files / 11,546 tests** with **44 files /
-  223 tests skipped**; build passes **837 modules** with only the inherited
-  chunk warning. A final independent supervisor suite/build is due at session
-  wind-down. Next ready campaign work is Open-only **MOVE_OUTRAGE**; dispatch it
-  only if the remaining deadline safely permits verification and cleanup.
+  coverage, animation audit, JSON, and diff checks pass. The final independent
+  serialized supervisor suite passes **1,458 files / 11,546 tests** with **44
+  files / 223 tests skipped** in **1,861.48s**; `npm run build` passes **837
+  modules** with only the inherited chunk warning. Next dispatch a bounded
+  source/legal dense-evidence step for Open-only **MOVE_OUTRAGE**, using legal
+  carrier `FRONTIER_MON_DRAGONITE_5`; Helping Hand remains separately blocked.
   **For the main program:** nothing blocking.
 
 # Animation worker checkpoint — MOVE_ICE_BALL exact production (2026-09-23)
