@@ -1,3 +1,44 @@
+# Animation worker checkpoint — MOVE_OUTRAGE unsupported dense evidence (2026-09-23)
+
+- **State / commits:** `032f9f682` and `0909b2615` retain an unsupported Scene-ON evidence
+  checkpoint only. No reducer, typed seam, renderer/compositor, production
+  asset, coverage entry, component-track fulfillment, sibling credit, or
+  gameplay/facility ownership was added.
+- **Source / legal staging:** The complete pointer-owned `Move_OUTRAGE`
+  interval is `0x082cb908..0x082cbaa3` (411 bytes), including the 148-byte
+  `OutrageFlames` body and all six graph components. The source census pins
+  the sole Open carrier `FRONTIER_MON_DRAGONITE_5` (index 854, set 854;
+  Outrage/Double-Edge/Thunder Wave/Roar, Lum Berry, Docile). Complete,
+  transient-free party fixtures are Scene-ON valid in both player-back and
+  opponent-front orientations; the opponent fixture repeats Outrage in all
+  four move slots solely to constrain legal Factory AI selection.
+- **Dense proof:** Two fresh runs per orientation retain every pointer-owned
+  row through first inactive cleanup: player-back frames **76..195** and
+  opponent-front **80..199**, **120 + 120 = 240** rows. Probe JSON digests are
+  `ec368bdf…` / `1ddc124c…`; chronological raw-RGB sequence digests are
+  `b2d5b37c…` / `b201257a…`; full state/RGB archives and normalized maps are
+  committed and independently rechecked byte-identically.
+- **Measured behavior:** 23 `gOutrageFlameSpriteTemplate` allocations each
+  live 30 ticks with slot reuse; `Task_LoopAndPlaySE` is 4..20,
+  `AnimTask_TranslateMonElliptical_Step` 4..81,
+  `AnimTask_ShakeMon2_Step` 14..91, and
+  `AnimTask_BlendColorCycleLoop` 4..92. The attacker ellipse reverses x
+  velocity by side (+12 player / −12 opponent) and returns neutral at age 82;
+  target ShakeMon2 reaches x2 ±2 and returns neutral at age 92. Palette banks
+  1/2/3/16/17/23 change with the recorded faded→hardware schedules; OAM,
+  matrices, and hardware palette equal the preceding software/faded row
+  **119/119**, with no exceptions. Small Ember tile/palette tags live 1..118,
+  audio is `SE_M_DRAGON_RAGE` with attacker pan −64/+63, presentation RNG
+  changes on 119 rows, gameplay RNG and immutable battle state do not change,
+  and owned resources/tasks/sprites are zero at cleanup.
+- **Gates / next:** Focused source/staging and dense-evidence tests pass **5/5**;
+  the full scoped animation union (source/evidence, boundary, inventory, and
+  work-plan) passes **21/21**. Source audit and evidence verifier are stable
+  across reruns; `npm run animation:coverage`, `npm run animation:audit`,
+  `npm run typecheck`, JSON/gzip/tar validation, and `git diff --check` pass.
+  Supervisor verification must keep Outrage unsupported and Helping Hand
+  blocked; no production suite/build was required for this evidence-only delta.
+
 # Animation supervisor verification — MOVE_ICE_BALL exact merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded verified worker commits `3f7f4b904` through
