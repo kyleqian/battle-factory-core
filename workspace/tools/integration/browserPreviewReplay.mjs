@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { PNG } from "pngjs";
 const [url, evidencePath, outputDir = ".integration/browser-evidence"] = process.argv.slice(2);
 if (!url || !evidencePath) throw new Error("usage: browserPreviewReplay.mjs <preview-url> <evidence.json> [output-dir]");
 const { chromium } = await import(pathToFileURL(resolve(".integration/browser/node_modules/playwright/index.mjs")).href);
@@ -13,10 +14,19 @@ mkdirSync(outputDir, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage({ viewport: { width: 900, height: 700 } });
+  const manifestResponse = await page.request.get(new URL("build.json", url).toString());
+  assert(manifestResponse.ok(), "preview manifest is served");
+  const manifest = await manifestResponse.json();
+  assert.equal(manifest.branch, "codex/animation-integration");
+  assert.equal(manifest.build, evidence.build);
+  assert.equal(manifest.commit.slice(0, evidence.build.split(" ")[0].length), evidence.build.split(" ")[0]);
   const errors = [];
   page.on("pageerror", e => errors.push(String(e)));
   // Hold browser time fixed; every engine step comes from the public input ABI.
   await page.clock.install({ time: new Date("2026-09-23T00:00:00Z") });
+  // Installing a clock does not stop rAF. Pause before loading the app so
+  // locator screenshots retain the same frame as the synchronous ABI read.
+  await page.clock.pauseAt(new Date("2026-09-23T00:00:01Z"));
   const benchUrl = new URL(url);
   benchUrl.searchParams.set("pokebench", "1");
   benchUrl.searchParams.set("battleScene", trace.battleScene);
@@ -53,7 +63,12 @@ try {
     assert.equal(result.crash, false);
     const image = resolve(outputDir, sample.label + ".png");
     await page.locator('[data-testid="game-surface"]').screenshot({ path: image });
-    samples.push({ ...sample, browserSha256: sha256, image });
+    const png = PNG.sync.read(readFileSync(image));
+    const screenshotSha256 = createHash("sha256").update(png.data).digest("hex");
+    assert.equal(png.width, 240);
+    assert.equal(png.height, 160);
+    assert.equal(screenshotSha256, sha256, "saved screenshot retains the verified frame");
+    samples.push({ ...sample, browserSha256: sha256, screenshotSha256, image });
     if (sample.label === "command-prompt") {
       assert.deepEqual(result.trace.segments, trace.segments, "browser export preserves full input");
       writeFileSync(resolve(outputDir, "session.json"), JSON.stringify(result.trace, null, 2) + "\n");
@@ -69,7 +84,7 @@ try {
   await page.waitForURL(/battleScene=off/);
   assert.equal(await page.evaluate(() => window.__POKEBENCH_SESSION__().battleScene), "off");
   assert.deepEqual(errors, []);
-  writeFileSync(resolve(outputDir, "receipt.json"), JSON.stringify({ url, build: evidence.build, samples, errors, modeControl: "passed", sessionExport: "passed" }, null, 2) + "\n");
+  writeFileSync(resolve(outputDir, "receipt.json"), JSON.stringify({ url, build: evidence.build, branch: manifest.branch, commit: manifest.commit, samples, errors, modeControl: "passed", sessionExport: "passed" }, null, 2) + "\n");
   console.log(JSON.stringify({ build: evidence.build, samples: samples.length, modeControl: "passed", sessionExport: "passed" }));
 } finally {
   await browser.close();

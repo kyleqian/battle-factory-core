@@ -267,8 +267,6 @@
     "real command lifecycle tests for repeated/multi-hit/two-turn/miss/immunity/switch/KO; 40 generated seeds / 470 decisions preserve logical outcomes and RNG"
   ],
   "pending": [
-    "final full test/build gates",
-    "build-stamped isolated preview and browser E2E",
     "reusable basic/derived/variant/graphics/random adapters for the remaining accepted moves",
     "one-way fold of later supervisor-verified Factory commits including Outrage when available"
   ],
@@ -280,5 +278,14 @@
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {
     "MOVE_HOWL": "Current narrow config requires immutable Attack stage 7 and reducer fixes Loudred inhale picture height/cry species. Generalize from source/current battler inputs; do not fabricate fixture values."
+  },
+  "verifiedPreview": {
+    "commit": "82544f434a081d5b63f5ff944eca21610454239b",
+    "build": "82544f434 2026-09-23",
+    "url": "http://127.0.0.1:5190/",
+    "fullTest": "1452 files / 11586 tests passed; 44 files / 223 tests skipped",
+    "buildModules": 835,
+    "browser": "four pixel-identical canvas/PNG samples; ordinary trace and export; Scene ON/OFF control; no page errors",
+    "receipt": "../tools/integration/fixtures/playable-preview-82544f434-receipt.json"
   }
 }
