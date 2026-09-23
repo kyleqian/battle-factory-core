@@ -86,11 +86,12 @@ export const OUTRAGE_RESOURCE_TAGS = { smallEmber: 10029 } as const;
 const IDENTITY: OutrageMatrix = [256, 0, 0, 256];
 const ZERO_ARGS = [0, 0, 0, 0, 0, 0, 0, 0] as const;
 const BLEND_COLOR = 430; // RGB(14, 13, 0), as passed to BeginNormalPaletteFade.
+const TARGET_SHAKE_AMPLITUDE = 2;
 const FLAME_BIRTHS = [6, 8, 10, 12, 14, 16, 18, 20, 22, 27, 29, 31, 33, 35, 37, 39, 44, 46, 48, 50, 52, 54, 56] as const;
 const FLAME_VELOCITIES = [
   [5, 0], [-5, 0], [0, 5], [0, -5], [5, 3], [-5, 3], [5, -3], [-5, -3],
   [5, 0], [-5, 0], [0, 5], [0, -5], [5, 3], [-5, 3], [5, -3], [-5, -3],
-  [5, 0], [-5, 0], [0, 5], [0, -5], [5, 3], [-5, 3], [5, -3],
+  [-5, 0], [0, 5], [0, -5], [5, 3], [-5, 3], [5, -3], [-5, -3],
 ] as const;
 const FLAME_SLOTS = [3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 3, 4, 5, 7, 9, 10, 11, 12] as const;
 
@@ -126,6 +127,9 @@ function blendBank(source: readonly number[], target: number, coefficient: numbe
 function signedOamY(value: number): number {
   const byte = value & 0xff;
   return byte >= 160 ? byte - 256 : byte;
+}
+function signed16(value: number): number {
+  return (value << 16) >> 16;
 }
 function u32(value: number): number { return value >>> 0; }
 function nextAnimationRng(value: number): number {
@@ -273,6 +277,26 @@ function flameInvisible(localAge: number): boolean {
 function flameFrame(localAge: number): { readonly index: number; readonly delay: number } {
   return { index: Math.floor((localAge + 1) / 4) % 5, delay: ((2 - localAge) % 4 + 4) % 4 };
 }
+function flameOamPosition(
+  localAge: number,
+  velocity: readonly [number, number],
+  input: Readonly<OutrageLiveInputs>,
+): readonly [number, number] {
+  // UpdateOamCoords deliberately leaves a sprite's previous OAM x/y in
+  // place while `invisible` is set.  The callback still advances x2/y2 and
+  // the animation frame, so position and tile are separate source latches.
+  let visibleX2 = 0;
+  let visibleY2 = 0;
+  for (let tick = 0; tick <= Math.min(localAge, 29); tick += 1) {
+    if (!flameInvisible(tick)) {
+      visibleX2 = signed16(velocity[0] * tick * 256) >> 8;
+      visibleY2 = signed16(velocity[1] * tick * 256) >> 8;
+    }
+  }
+  const y = input.attackerPictureOrigin.y;
+  const x = input.attackerPictureOrigin.x;
+  return [y - 16 + visibleY2, x - 16 + visibleX2];
+}
 function flameAt(age: number, index: number, input: Readonly<OutrageLiveInputs>): OutrageFlameSprite | null {
   const birthAge = FLAME_BIRTHS[index]!;
   const localAge = age - birthAge;
@@ -282,14 +306,16 @@ function flameAt(age: number, index: number, input: Readonly<OutrageLiveInputs>)
   const velocity: readonly [number, number] = [sourceX * direction, sourceY * direction];
   const x = input.attackerPictureOrigin.x;
   const y = input.attackerPictureOrigin.y;
-  const x2 = velocity[0] * localAge;
-  const y2 = velocity[1] * localAge;
+  const positionAge = Math.min(localAge, 29);
+  const x2 = signed16(velocity[0] * positionAge * 256) >> 8;
+  const y2 = signed16(velocity[1] * positionAge * 256) >> 8;
   const animation = flameFrame(localAge);
+  const [oamY, oamX] = flameOamPosition(localAge, velocity, input);
   const attr: OutrageOam = localAge < 2
     ? input.oam.flame
     : [
-      (input.oam.flame[0] & ~0xff) | ((y - 16 + y2) & 0xff),
-      (input.oam.flame[1] & ~0x1ff) | ((x - 16 + x2) & 0x1ff),
+      (input.oam.flame[0] & ~0xff) | (oamY & 0xff),
+      (input.oam.flame[1] & ~0x1ff) | (oamX & 0x1ff),
       (input.oam.flame[2] & ~0x3ff) | ((input.oam.flame[2] + animation.index * 16) & 0x3ff),
     ];
   const invisible = flameInvisible(localAge);
@@ -300,7 +326,7 @@ function flameAt(age: number, index: number, input: Readonly<OutrageLiveInputs>)
     subpriority: input.targetSprite.subpriority - 2,
     oamPriority: ((input.oam.flame[2] >>> 10) & 3) as 0 | 1 | 2 | 3,
     matrixNum: 0, matrix: IDENTITY, flags: invisible ? 5 : 1,
-    data: spriteWords(Math.max(0, 29 - localAge), velocity[0] * 256, velocity[0] * (localAge + 1) * 256, velocity[1] * 256, velocity[1] * (localAge + 1) * 256, 3, 26445, 2058),
+    data: spriteWords(Math.max(0, 29 - localAge), velocity[0] * 256, signed16(velocity[0] * Math.min(localAge + 1, 30) * 256), velocity[1] * 256, signed16(velocity[1] * Math.min(localAge + 1, 30) * 256), 3, 26445, 2058),
     animNum: 0, animCmdIndex: animation.index, animDelayCounter: animation.delay,
     sourceCreationOrder: index,
   };
@@ -319,7 +345,7 @@ function tasksAt(age: number, input: Readonly<OutrageLiveInputs>): readonly Outr
   }
   if (age >= 4 && age <= 92) {
     const numBlends = age < 25 ? 4 : age < 43 ? 3 : age < 61 ? 2 : age < 79 ? 1 : 0;
-    tasks.push({ slot: input.taskSlots.blendColorCycle, callback: "AnimTask_BlendColorCycleLoop", role: "blend-color-cycle", data: words(7, 2, numBlends, 3, 8, BLEND_COLOR, 0, 0, 1) });
+    tasks.push({ slot: input.taskSlots.blendColorCycle, callback: "AnimTask_BlendColorCycleLoop", role: "blend-color-cycle", data: words(7, 2, numBlends, 3, 8, BLEND_COLOR, 0, 0, numBlends % 2 === 0 ? 1 : 0) });
   }
   if (age >= 4 && age <= 81) {
     const angle = ((age - 2) * 16) & 0xff;
@@ -327,7 +353,7 @@ function tasksAt(age: number, input: Readonly<OutrageLiveInputs>): readonly Outr
   }
   if (age >= 14 && age <= 91) {
     const local = age - 14;
-    tasks.push({ slot: input.taskSlots.shakeMon2, callback: "AnimTask_ShakeMon2_Step", role: "shake-mon2", data: words(input.targetSprite.slot, 39 - Math.floor(local / 2), 1, local % 2 === 0 ? 1 : 0, 2, 0) });
+    tasks.push({ slot: input.taskSlots.shakeMon2, callback: "AnimTask_ShakeMon2_Step", role: "shake-mon2", data: words(input.targetSprite.slot, 39 - Math.floor(local / 2), 1, local % 2 === 0 ? 1 : 0, TARGET_SHAKE_AMPLITUDE, 0) });
   }
   return tasks.sort((left, right) => left.slot - right.slot || left.callback.localeCompare(right.callback));
 }
@@ -354,7 +380,11 @@ function paletteAtAge(age: number, input: Readonly<OutrageLiveInputs>): Omit<Out
   const unfaded = input.palettes.unfaded.slice();
   const faded = input.palettes.faded.slice();
   const resource = input.resources.smallEmber;
-  if (age >= 1 && age < OUTRAGE_FIRST_INACTIVE_AGE && resource.palette) {
+  // FreeSpritePaletteByTag releases the allocator entry on the first
+  // inactive row, but the caller-visible palette memory is not restored.
+  // Retain the loaded Small Ember bank through that cleanup row so the
+  // software palette/resource trace remains source-relative.
+  if (age >= 1 && resource.palette) {
     putBank(unfaded, resource.hardwarePaletteBank, resource.palette);
     putBank(faded, resource.hardwarePaletteBank, resource.palette);
   }
@@ -383,8 +413,8 @@ function paletteStateAtAge(age: number, input: Readonly<OutrageLiveInputs>): Out
 function targetShakeAtAge(age: number, input: Readonly<OutrageLiveInputs>): OutragePoint {
   if (age < 14) return { x: input.targetSprite.x2, y: input.targetSprite.y2 };
   if (age >= 92) return { x: 0, y: 0 };
-  const local = age - 14 + 1;
-  return { x: local % 4 < 2 ? -2 : 2, y: 0 };
+  const local = age - 14;
+  return { x: Math.floor(local / 2) % 2 === 0 ? -TARGET_SHAKE_AMPLITUDE : TARGET_SHAKE_AMPLITUDE, y: 0 };
 }
 function attackerEllipseAtAge(age: number, input: Readonly<OutrageLiveInputs>): OutragePoint {
   if (age < 4 || age > 81) return { x: 0, y: 0 };
@@ -405,7 +435,9 @@ function battlersAtAge(age: number, input: Readonly<OutrageLiveInputs>) {
   const attackerOffset = attackerEllipseAtAge(age, input);
   const targetOffset = targetShakeAtAge(age, input);
   const previousAttacker = attackerEllipseAtAge(age - 1, input);
-  const previousTarget = targetShakeAtAge(age - 1, input);
+  const previousTarget = age === 14
+    ? { x: TARGET_SHAKE_AMPLITUDE, y: 0 }
+    : targetShakeAtAge(age - 1, input);
   return {
     attacker: { ...input.attackerSprite, x2: attackerOffset.x, y2: attackerOffset.y, attr: age === 0 ? input.attackerSprite.attr : battlerAttr(input.attackerSprite, attackerOffset, previousAttacker) },
     target: { ...input.targetSprite, x2: targetOffset.x, y2: targetOffset.y, attr: age === 0 ? input.targetSprite.attr : battlerAttr(input.targetSprite, targetOffset, previousTarget) },
@@ -464,6 +496,14 @@ export function outrageAtAge(age: number, input: Readonly<OutrageLiveInputs>): O
   const tasks = tasksAt(age, input);
   const palette = paletteStateAtAge(age, input);
   const visualTasks = sprites.length + tasks.filter((task) => task.role !== "sound").length;
+  const registers = { ...input.registers };
+  if (age >= 1) {
+    // The animation controller closes the initial full-screen window after
+    // the first source row; this is a register-side effect, not a BG/scene
+    // transition and is independent of the battle outcome.
+    if ("win0h" in registers) registers.win0h = 0;
+    if ("win0v" in registers) registers.win0v = 0;
+  }
   return {
     age, active: source.active, source, animArgs: argsAtAge(age, input.attackerSide),
     battlers: {
@@ -472,7 +512,7 @@ export function outrageAtAge(age: number, input: Readonly<OutrageLiveInputs>): O
     },
     sprites, tasks,
     resources: { tags: { smallEmber: { ...input.resources.smallEmber, loaded: age >= 1 && age < OUTRAGE_FIRST_INACTIVE_AGE } }, matrixBitmap: input.allocator.initialMatrixBitmap },
-    palette, registers: { ...input.registers }, painterOrder: painterOrderAtAge(age, input),
+    palette, registers, painterOrder: painterOrderAtAge(age, input),
     audio: age === 4 ? [{ sound: "se_m_dragon_rage", pan: input.attackerSide === "player" ? -64 : 63 }] : [],
     rng: { animation: animationRngAtAge(input.animationRngSeed, age), sourceDraws: age, gameplay: input.gameplayRng, gameplayState: input.gameplayState, gameplayUnchanged: true },
     latches: { oamAndMatrices: age === 0 ? "initial" : "preceding-software", palette: age === 0 ? "initial" : "preceding-faded", registers: age === 0 ? "initial" : "preceding-software" },
