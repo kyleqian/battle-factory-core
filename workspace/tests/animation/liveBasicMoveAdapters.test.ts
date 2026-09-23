@@ -22,16 +22,20 @@ const field = {
   },
 } as unknown as BattleResolutionDisplayedField;
 
-function request(moveId: number, attacker: 0 | 1): BattleMoveAnimationRequest {
+function request(
+  moveId: number, attacker: 0 | 1, turn = 0,
+): BattleMoveAnimationRequest {
   return {
     moveId, attacker, target: attacker === 0 ? 1 : 0,
-    turn: 0, power: moveId === 264 ? 150 : 0,
+    turn, power: moveId === 264 ? 150 : 0,
     damage: moveId === 264 ? 42 : 0, friendship: 70, multihit: 0,
   };
 }
 
-function renderHash(moveId: number, attacker: 0 | 1, age: number): string {
-  const state = liveMoveAnimationPresentation(request(moveId, attacker), field, age);
+function renderHash(
+  moveId: number, attacker: 0 | 1, age: number, turn = 0,
+): string {
+  const state = liveMoveAnimationPresentation(request(moveId, attacker, turn), field, age);
   expect(state).not.toBeNull();
   const framebuffer = new Uint8Array(240 * 160 * 3);
   renderSceneOnMovePresentation(framebuffer, state!, true);
@@ -52,6 +56,25 @@ describe("live BASIC move adapters", () => {
       .toMatchObject({ move: "SCREECH", attacker: { species: "GROVYLE" }, target: { species: "HAUNTER" } });
   });
 
+  it("routes the low-derived siblings and preserves Brick Break's controller branch", () => {
+    expect(LIVE_MOVE_ANIMATION_IDS).toEqual(expect.arrayContaining([
+      14, 44, 97, 246, 280, 347,
+    ]));
+    expect([
+      liveMoveAnimationDuration(request(14, 0)),
+      liveMoveAnimationDuration(request(44, 0)),
+      liveMoveAnimationDuration(request(97, 0)),
+      liveMoveAnimationDuration(request(246, 0)),
+      liveMoveAnimationDuration(request(347, 0)),
+    ]).toEqual([70, 26, 87, 128, 101]);
+    expect(liveMoveAnimationDuration(request(280, 0, 0))).toBe(151);
+    expect(liveMoveAnimationDuration(request(280, 0, 1))).toBe(192);
+    expect(liveMoveAnimationPresentation(request(280, 0, 0), field, 0)?.config)
+      .toMatchObject({ move: "BRICK_BREAK", body: "normal" });
+    expect(liveMoveAnimationPresentation(request(280, 1, 1), field, 0)?.config)
+      .toMatchObject({ move: "BRICK_BREAK", body: "shattered-wall" });
+  });
+
   it.each([
     [264, 0, 64], [264, 1, 64], [103, 0, 12], [103, 1, 12],
   ] as const)("renders arbitrary current species for move %i attacker %i", (moveId, attacker, effectAge) => {
@@ -60,4 +83,22 @@ describe("live BASIC move adapters", () => {
     const cleanup = renderHash(moveId, attacker, liveMoveAnimationDuration(request(moveId, attacker))! - 1);
     expect(new Set([first, effect, cleanup]).size).toBeGreaterThan(1);
   });
+
+  it.each([
+    [14, 0, 32, 0], [14, 1, 32, 0],
+    [44, 0, 12, 0], [44, 1, 12, 0],
+    [97, 0, 24, 0], [97, 1, 24, 0],
+    [246, 0, 78, 0], [246, 1, 78, 0],
+    [280, 0, 127, 1], [280, 1, 127, 1],
+    [347, 0, 36, 0], [347, 1, 36, 0],
+  ] as const)(
+    "renders sibling move %i attacker %i from current field art",
+    (moveId, attacker, effectAge, turn) => {
+      const duration = liveMoveAnimationDuration(request(moveId, attacker, turn))!;
+      const first = renderHash(moveId, attacker, 0, turn);
+      const effect = renderHash(moveId, attacker, effectAge, turn);
+      const cleanup = renderHash(moveId, attacker, duration - 1, turn);
+      expect(new Set([first, effect, cleanup]).size).toBeGreaterThan(1);
+    },
+  );
 });
