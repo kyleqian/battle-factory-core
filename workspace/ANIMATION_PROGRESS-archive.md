@@ -16665,6 +16665,37 @@ track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
   or sibling receipt grants animation credit. **For the main program:** nothing
   blocking.
 
+# Animation worker checkpoint — MOVE_CURSE exact palette-scanout closure (2026-09-23)
+
+- **State / commits:** `48acbced8` banks direct palette-transfer timing,
+  `8c1f3a4a8` threads the generic typed scanout segment through the Curse
+  reducer/Scene-ON seam/compositor, and `e80041780` promotes **MOVE_CURSE
+  exact** plus only `curse-ghost-nail-stat-lines`. Level 50 is now **274/276
+  exact, 0 partial, 0 staged, 2 unsupported**; no sibling, gameplay/RNG/
+  facility, import-boundary, or unsupported-barrier credit moved.
+- **Direct timing proof:** An instruction-stepped mGBA probe captures the exact
+  first-Step2 `BeginNormalPaletteFade` `CpuSet(gPlttBufferFaded, PLTT,
+  PLTT_SIZE)` without reading framebuffer pixels or mismatch bounds. Player-
+  back is **VCOUNT 17 in HBlank** and opponent-front is **VCOUNT 14 in
+  HDraw**, twice fresh per orientation at process SHA-256 `2e26552b…` /
+  `5661f83a…`; the generic first-post-transfer rule is `VCOUNT + (HBlank ? 1
+  : 0)`, yielding rows **18 / 14**.
+- **Exact acceptance:** Two fresh actual-core processes are byte-identical
+  (`cce965f3…`) and pass all **1,098/1,098** component, typed-seam,
+  chronological raw-RGB, and shared-framebuffer rows with **zero residual
+  pixels** at verdict digest `9ccbe049…`. Ghost player/opponent are each
+  **373/373** and stat player/opponent each **176/176**. The material CROBAT/
+  BLISSEY control changes output while gameplay state/RNG remain opaque and
+  unchanged.
+- **Gates:** On tested code commit `e80041780`, the focused Curse timing/source/
+  evidence/production/actual-core/boundary/inventory union passes **8 files /
+  18 tests**; standalone timing/source/evidence/production/actual-core
+  verifiers, coverage, animation audit, typecheck, smoke (**8 files / 448
+  tests**), and diff/JSON checks pass. Full `npm test` passes **1,453 files /
+  11,534 tests**, with **44 files / 223 tests skipped**, in **1,849.94s**;
+  `npm run build` passes **835 modules** with only the inherited chunk-size
+  warning. **For the main program:** nothing blocking.
+
 # Animation supervisor verification — MOVE_CURSE production partial merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded verified worker commits `a337c727a`,

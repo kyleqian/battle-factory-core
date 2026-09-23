@@ -1,3 +1,26 @@
+# Animation supervisor verification — MOVE_ICE_BALL evidence merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commit `639a1e1f7`.
+  `MOVE_ICE_BALL` remains **unsupported** and the 20-component
+  `ice-ball-five-counter-bg-shards` track remains **unfulfilled**; Level 50
+  stays **274/276 exact, 0 partial, 0 staged, 2 unsupported**. No production,
+  move, sibling, component, gameplay/RNG/facility, import-boundary, or
+  unsupported-barrier credit moved.
+- **Independent proof:** Fresh supervisor player-back and opponent-front
+  direct-mGBA probes reproduce the retained **436-row** dense digests
+  `278737a3…` / `6acb3416…` and raw-RGB sequence digests `03238c1f…` /
+  `f4432d82…` exactly. Each natural chain reaches counter maxima **0..4**
+  with complete **76/76/76/76/132** windows through cleanup; the retained
+  compact maps regenerate byte-identically and keep the measured bilateral
+  OAM/matrix/palette/BG/audio/RNG latches without production input.
+- **Gates / next:** Supervisor focused source/evidence/boundary/inventory union
+  passes **4 files / 17 tests**; coverage, animation audit, JSON, and diff
+  checks pass. The recorded green production baseline remains reusable because
+  this merge changed only evidence, tests, tooling, and animation ledgers.
+  Next dispatch a bounded production implementation/acceptance step for Ice
+  Ball; Open-only `MOVE_OUTRAGE` follows when Level-50 ready work is exhausted.
+  **For the main program:** nothing blocking.
+
 # Animation worker checkpoint — MOVE_ICE_BALL source/legal dense evidence (2026-09-23)
 
 - **State / credit:** Source and legal staging are complete, but
@@ -59,34 +82,3 @@
   lock clears; its boundary is the 20-component, five-counter-branch script
   with legal Level-50 carriers SPHEAL, DELIBIRD, and SEALEO_1. This is an
   operational scheduling boundary, not an animation acceptance blocker.
-
-# Animation worker checkpoint — MOVE_CURSE exact palette-scanout closure (2026-09-23)
-
-- **State / commits:** `48acbced8` banks direct palette-transfer timing,
-  `8c1f3a4a8` threads the generic typed scanout segment through the Curse
-  reducer/Scene-ON seam/compositor, and `e80041780` promotes **MOVE_CURSE
-  exact** plus only `curse-ghost-nail-stat-lines`. Level 50 is now **274/276
-  exact, 0 partial, 0 staged, 2 unsupported**; no sibling, gameplay/RNG/
-  facility, import-boundary, or unsupported-barrier credit moved.
-- **Direct timing proof:** An instruction-stepped mGBA probe captures the exact
-  first-Step2 `BeginNormalPaletteFade` `CpuSet(gPlttBufferFaded, PLTT,
-  PLTT_SIZE)` without reading framebuffer pixels or mismatch bounds. Player-
-  back is **VCOUNT 17 in HBlank** and opponent-front is **VCOUNT 14 in
-  HDraw**, twice fresh per orientation at process SHA-256 `2e26552b…` /
-  `5661f83a…`; the generic first-post-transfer rule is `VCOUNT + (HBlank ? 1
-  : 0)`, yielding rows **18 / 14**.
-- **Exact acceptance:** Two fresh actual-core processes are byte-identical
-  (`cce965f3…`) and pass all **1,098/1,098** component, typed-seam,
-  chronological raw-RGB, and shared-framebuffer rows with **zero residual
-  pixels** at verdict digest `9ccbe049…`. Ghost player/opponent are each
-  **373/373** and stat player/opponent each **176/176**. The material CROBAT/
-  BLISSEY control changes output while gameplay state/RNG remain opaque and
-  unchanged.
-- **Gates:** On tested code commit `e80041780`, the focused Curse timing/source/
-  evidence/production/actual-core/boundary/inventory union passes **8 files /
-  18 tests**; standalone timing/source/evidence/production/actual-core
-  verifiers, coverage, animation audit, typecheck, smoke (**8 files / 448
-  tests**), and diff/JSON checks pass. Full `npm test` passes **1,453 files /
-  11,534 tests**, with **44 files / 223 tests skipped**, in **1,849.94s**;
-  `npm run build` passes **835 modules** with only the inherited chunk-size
-  warning. **For the main program:** nothing blocking.
