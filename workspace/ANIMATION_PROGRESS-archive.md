@@ -16722,3 +16722,35 @@ track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
   warning. Next dispatch a narrow evidence-only palette-transfer timing probe
   for the first Step2 row in both orientations; never infer the split from the
   known framebuffer bounds. **For the main program:** nothing blocking.
+# Animation supervisor verification — MOVE_CURSE exact merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded worker commits `48acbced8`, `8c1f3a4a8`,
+  `e80041780`, and `967de69e8`. `MOVE_CURSE` and only the
+  `curse-ghost-nail-stat-lines` track are now **exact**; Level 50 is **274/276
+  exact, 0 partial, 0 staged, 2 unsupported**. No sibling, gameplay/RNG/
+  facility, import-boundary, or unsupported-barrier credit moved.
+- **Independent proof:** Two fresh supervisor timing-verifier runs are
+  byte-identical (`15081d3a…`) and pin the first-Step2 palette transfer at
+  player-back **VCOUNT 17 in HBlank** / first post-transfer row **18**, and
+  opponent-front **VCOUNT 14 in HDraw** / first post-transfer row **14**,
+  without framebuffer-derived input. Two fresh actual-core processes are
+  byte-identical (`cce965f3…`) and pass all **1,098/1,098** component,
+  typed-seam, chronological raw-RGB, and shared-framebuffer rows with **zero
+  residual pixels** at verdict digest `9ccbe049…`. The material CROBAT/
+  BLISSEY control changes output while gameplay state/RNG remain unchanged.
+- **Gates / next:** Supervisor focused union passes **8 files / 18 tests** and
+  smoke passes **8 files / 448 tests**; coverage and animation audit pass.
+  The final independent `npm test` passes **1,453 files / 11,534 tests**, with
+  **44 files / 223 tests skipped**, in **1,883.21s**; `npm run build` passes
+  **835 modules** with only the inherited chunk-size warning. Next ranked
+  ready work is Level-50 `MOVE_ICE_BALL`, then Open-only `MOVE_OUTRAGE`;
+  `MOVE_HELPING_HAND` remains evidence-blocked. **For the main program:**
+  nothing blocking.
+- **Session boundary:** Ice Ball source/census scope was prepared, but no
+  worker was dispatched: the repository-wide animation lane remained occupied
+  by `worker/animation-20260923-103841`, which entered its required full suite
+  at 11:39 UTC and could not release early enough for a separately verified
+  checkpoint before the 12:18 hard deadline. Resume Ice Ball after that lane
+  lock clears; its boundary is the 20-component, five-counter-branch script
+  with legal Level-50 carriers SPHEAL, DELIBIRD, and SEALEO_1. This is an
+  operational scheduling boundary, not an animation acceptance blocker.
