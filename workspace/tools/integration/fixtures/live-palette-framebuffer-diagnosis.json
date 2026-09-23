@@ -1,0 +1,331 @@
+{
+  "schema": "live-palette-framebuffer-diagnosis/v1",
+  "verdict": "partial",
+  "claim": "Complete source-owned Shadow Punch fade/body/controller-cleanup windows; excludes script resource preload and subsequent hit/HP presentation. Remaining framebuffer residuals are retained, not discarded.",
+  "receipts": [
+    {
+      "scenario": "tools/integration/fixtures/shadow-after-smoke-palette-history.json",
+      "attacker": 0,
+      "freshRun": 0,
+      "sourceDigest": "fe39a060a916713fa3fe29f3339e52e65b26ffcbea63fb746718f5cfb9567013",
+      "bodies": [
+        {
+          "index": 0,
+          "frames": 102,
+          "sourceStart": 85,
+          "sourceEnd": 186,
+          "exactFrames": 85,
+          "residualPixels": 291656,
+          "withoutHistoryPixels": 291656,
+          "digest": "d78c1cdaab7d41b4620ab772d56b7dd3f08e10c4149f98dde2a8ffe8a68347aa",
+          "firstResiduals": [
+            {
+              "age": 83,
+              "frame": 168,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 15,
+              "productionBldy": 16,
+              "source": "69acad4469d4fc68bee42d9c4aaf6ce5ce553afbe755b68e0d8f6c4fbc18af46",
+              "live": "05ecdeb069025123c0d18bc017ef4202f2d0086a7c85be99c4fe337a0b54241d"
+            },
+            {
+              "age": 84,
+              "frame": 169,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 14,
+              "productionBldy": 15,
+              "source": "1d84d7ca13822b1e4dc23abefe2bc5d05fadc0ef483084a315d39317a79805cc",
+              "live": "7eb9e76c01422e43bf437a677cadde1711526489847aaf5e8fc2b5359f426904"
+            },
+            {
+              "age": 85,
+              "frame": 170,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 13,
+              "productionBldy": 14,
+              "source": "eb41775a617bccb6cc1195e3e90e63801f1559ce19f9f26f091aa5cdc7f8c40f",
+              "live": "522b5f5830df70bc48552b1d20234926c93bb151e377cd03dd45b1ccfdda02b5"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "frames": 102,
+          "sourceStart": 719,
+          "sourceEnd": 820,
+          "exactFrames": 85,
+          "residualPixels": 291656,
+          "withoutHistoryPixels": 312410,
+          "digest": "b77efbe3e6e5716499a9127ccdf559833fc516da189372e511dddd81ea9f0401",
+          "firstResiduals": [
+            {
+              "age": 83,
+              "frame": 802,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 15,
+              "productionBldy": 16,
+              "source": "767844c56a75570cf5fad378c5e90a330def957d11800eb52bae1797b05c08f4",
+              "live": "7d5c8e24e6d66af38159a3e9cce84ae4dbb792101bc89a06f57a2fd10ba6344d"
+            },
+            {
+              "age": 84,
+              "frame": 803,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 14,
+              "productionBldy": 15,
+              "source": "a5b44bc58677d4e448981c3a0f7b668171a13a9677b04bdc06fa09559131b244",
+              "live": "36aaa2e34afd2fdf2ce4b71cfa4dc1c99b9480171eeaac5756f03e1948ca325d"
+            },
+            {
+              "age": 85,
+              "frame": 804,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 13,
+              "productionBldy": 14,
+              "source": "88013f3c8d58074fe785356dc0344fd7cb2ab800fc2040ae79ae90644a42f20b",
+              "live": "aa3a7b351056bcc7fd4eb933b4fb986a6c0f3bdb0989ac127006ed94f48dd7d8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": "tools/integration/fixtures/shadow-after-smoke-palette-history.json",
+      "attacker": 0,
+      "freshRun": 1,
+      "sourceDigest": "fe39a060a916713fa3fe29f3339e52e65b26ffcbea63fb746718f5cfb9567013",
+      "bodies": [
+        {
+          "index": 0,
+          "frames": 102,
+          "sourceStart": 85,
+          "sourceEnd": 186,
+          "exactFrames": 85,
+          "residualPixels": 291656,
+          "withoutHistoryPixels": 291656,
+          "digest": "d78c1cdaab7d41b4620ab772d56b7dd3f08e10c4149f98dde2a8ffe8a68347aa",
+          "firstResiduals": [
+            {
+              "age": 83,
+              "frame": 168,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 15,
+              "productionBldy": 16,
+              "source": "69acad4469d4fc68bee42d9c4aaf6ce5ce553afbe755b68e0d8f6c4fbc18af46",
+              "live": "05ecdeb069025123c0d18bc017ef4202f2d0086a7c85be99c4fe337a0b54241d"
+            },
+            {
+              "age": 84,
+              "frame": 169,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 14,
+              "productionBldy": 15,
+              "source": "1d84d7ca13822b1e4dc23abefe2bc5d05fadc0ef483084a315d39317a79805cc",
+              "live": "7eb9e76c01422e43bf437a677cadde1711526489847aaf5e8fc2b5359f426904"
+            },
+            {
+              "age": 85,
+              "frame": 170,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 13,
+              "productionBldy": 14,
+              "source": "eb41775a617bccb6cc1195e3e90e63801f1559ce19f9f26f091aa5cdc7f8c40f",
+              "live": "522b5f5830df70bc48552b1d20234926c93bb151e377cd03dd45b1ccfdda02b5"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "frames": 102,
+          "sourceStart": 719,
+          "sourceEnd": 820,
+          "exactFrames": 85,
+          "residualPixels": 291656,
+          "withoutHistoryPixels": 312410,
+          "digest": "b77efbe3e6e5716499a9127ccdf559833fc516da189372e511dddd81ea9f0401",
+          "firstResiduals": [
+            {
+              "age": 83,
+              "frame": 802,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 15,
+              "productionBldy": 16,
+              "source": "767844c56a75570cf5fad378c5e90a330def957d11800eb52bae1797b05c08f4",
+              "live": "7d5c8e24e6d66af38159a3e9cce84ae4dbb792101bc89a06f57a2fd10ba6344d"
+            },
+            {
+              "age": 84,
+              "frame": 803,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 14,
+              "productionBldy": 15,
+              "source": "a5b44bc58677d4e448981c3a0f7b668171a13a9677b04bdc06fa09559131b244",
+              "live": "36aaa2e34afd2fdf2ce4b71cfa4dc1c99b9480171eeaac5756f03e1948ca325d"
+            },
+            {
+              "age": 85,
+              "frame": 804,
+              "residualPixels": 18216,
+              "withoutHistoryPixels": 18216,
+              "chromePixels": 0,
+              "sourceBldy": 13,
+              "productionBldy": 14,
+              "source": "88013f3c8d58074fe785356dc0344fd7cb2ab800fc2040ae79ae90644a42f20b",
+              "live": "aa3a7b351056bcc7fd4eb933b4fb986a6c0f3bdb0989ac127006ed94f48dd7d8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": "tools/integration/fixtures/shadow-after-smoke-palette-history-opponent.json",
+      "attacker": 1,
+      "freshRun": 0,
+      "sourceDigest": "7ad6db9839df6a1799aceb83395f5034794b15d7f595918d97a7bdb3290e0f10",
+      "bodies": [
+        {
+          "index": 0,
+          "frames": 102,
+          "sourceStart": 89,
+          "sourceEnd": 190,
+          "exactFrames": 102,
+          "residualPixels": 0,
+          "withoutHistoryPixels": 0,
+          "digest": "3b8cf72be1ba658aa4481eb6b042a6d059eb4ebd92182ce1a5dfdae07f3e5c8b",
+          "firstResiduals": []
+        },
+        {
+          "index": 2,
+          "frames": 103,
+          "sourceStart": 723,
+          "sourceEnd": 825,
+          "exactFrames": 86,
+          "residualPixels": 288392,
+          "withoutHistoryPixels": 328492,
+          "digest": "a92ce2fb851fb0ce80d0fb25567a53bd2426593ce9f78f2b936543f67164c678",
+          "firstResiduals": [
+            {
+              "age": 83,
+              "frame": 806,
+              "residualPixels": 18012,
+              "withoutHistoryPixels": 18012,
+              "chromePixels": 0,
+              "sourceBldy": 16,
+              "productionBldy": 15,
+              "source": "b76f4026db6d7c79a73b180377ab6148eecc58bd1b5744d6c75fcf1e3d4efbbe",
+              "live": "565cb67831412dccb24d6a8bd5c79c254417f21a5d778158dec8ce9cbe61880b"
+            },
+            {
+              "age": 84,
+              "frame": 807,
+              "residualPixels": 18012,
+              "withoutHistoryPixels": 18012,
+              "chromePixels": 0,
+              "sourceBldy": 15,
+              "productionBldy": 14,
+              "source": "0e76569e3b472f1d3169b10f27621e9e5c43f39c438fcb0384d44ac4bb49e9ed",
+              "live": "f0899d6256d73f96a429d0b2633f3f4241d061eae4e74a07b5d32b735349b660"
+            },
+            {
+              "age": 85,
+              "frame": 808,
+              "residualPixels": 18012,
+              "withoutHistoryPixels": 18012,
+              "chromePixels": 0,
+              "sourceBldy": 14,
+              "productionBldy": 13,
+              "source": "54fd517e80e86084d07e17d8aa2e5724fca30fbfba520d5f5faab7b3cc405b22",
+              "live": "5723c4f76e78c571b8a48c4912f6add0dfc483c67276d6663b9aa5af7e4360da"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": "tools/integration/fixtures/shadow-after-smoke-palette-history-opponent.json",
+      "attacker": 1,
+      "freshRun": 1,
+      "sourceDigest": "7ad6db9839df6a1799aceb83395f5034794b15d7f595918d97a7bdb3290e0f10",
+      "bodies": [
+        {
+          "index": 0,
+          "frames": 102,
+          "sourceStart": 89,
+          "sourceEnd": 190,
+          "exactFrames": 102,
+          "residualPixels": 0,
+          "withoutHistoryPixels": 0,
+          "digest": "3b8cf72be1ba658aa4481eb6b042a6d059eb4ebd92182ce1a5dfdae07f3e5c8b",
+          "firstResiduals": []
+        },
+        {
+          "index": 2,
+          "frames": 103,
+          "sourceStart": 723,
+          "sourceEnd": 825,
+          "exactFrames": 86,
+          "residualPixels": 288392,
+          "withoutHistoryPixels": 328492,
+          "digest": "a92ce2fb851fb0ce80d0fb25567a53bd2426593ce9f78f2b936543f67164c678",
+          "firstResiduals": [
+            {
+              "age": 83,
+              "frame": 806,
+              "residualPixels": 18012,
+              "withoutHistoryPixels": 18012,
+              "chromePixels": 0,
+              "sourceBldy": 16,
+              "productionBldy": 15,
+              "source": "b76f4026db6d7c79a73b180377ab6148eecc58bd1b5744d6c75fcf1e3d4efbbe",
+              "live": "565cb67831412dccb24d6a8bd5c79c254417f21a5d778158dec8ce9cbe61880b"
+            },
+            {
+              "age": 84,
+              "frame": 807,
+              "residualPixels": 18012,
+              "withoutHistoryPixels": 18012,
+              "chromePixels": 0,
+              "sourceBldy": 15,
+              "productionBldy": 14,
+              "source": "0e76569e3b472f1d3169b10f27621e9e5c43f39c438fcb0384d44ac4bb49e9ed",
+              "live": "f0899d6256d73f96a429d0b2633f3f4241d061eae4e74a07b5d32b735349b660"
+            },
+            {
+              "age": 85,
+              "frame": 808,
+              "residualPixels": 18012,
+              "withoutHistoryPixels": 18012,
+              "chromePixels": 0,
+              "sourceBldy": 14,
+              "productionBldy": 13,
+              "source": "54fd517e80e86084d07e17d8aa2e5724fca30fbfba520d5f5faab7b3cc405b22",
+              "live": "5723c4f76e78c571b8a48c4912f6add0dfc483c67276d6663b9aa5af7e4360da"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
