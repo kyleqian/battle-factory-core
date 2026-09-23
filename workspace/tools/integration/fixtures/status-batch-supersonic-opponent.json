@@ -1,0 +1,1 @@
+{"schema":"live-adapter-status-batch/v1","sourceFixture":"tools/compare/fixtures/supersonic-opponent-loudred-player-onix.json","move":"SUPERSONIC","probe":"tools/integration/statusBatchSupersonicProbe.py"}

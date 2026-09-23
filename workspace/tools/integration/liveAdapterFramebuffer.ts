@@ -64,7 +64,9 @@ function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderVi
     name: mon.name, level: mon.level, gender: mon.gender, status: mon.status,
     hpFraction: mon.hp / mon.maxHP, currentHp: mon.hp, maxHp: mon.maxHP,
   });
-  const name = f.move === "ANCIENT_POWER" ? "ANCIENTPOWER" : f.move.replaceAll("_", " ");
+  const name = f.move === "ANCIENT_POWER" || f.move === "GRASS_WHISTLE"
+    ? f.move.replaceAll("_", "")
+    : f.move.replaceAll("_", " ");
   return {
     field, fieldArt: createBattleCommandFieldArtView(field),
     healthboxes: { player: healthbox(field.player), opponent: healthbox(field.opponent) },

@@ -1,0 +1,69 @@
+{
+  "schema": "live-adapter-status-batch-receipt/v1",
+  "oracleProfile": "battle-scene-on",
+  "verifier": "tools/integration/liveAdapterFramebuffer.ts",
+  "freshRunsPerOrientation": 2,
+  "source": "Each wrapper supplies a legal source scenario, source-owned complete window, static initial field profile, and move ID only; it does not supply captured per-frame host state.",
+  "results": [
+    {
+      "move": "HYPNOSIS",
+      "player": { "fixture": "status-batch-hypnosis-player.json", "frames": 169, "digest": "b0c5d4e524313a39170bca649d76bc0c57d55acba4b2d992325010e08b68734f" },
+      "opponent": { "fixture": "status-batch-hypnosis-opponent.json", "frames": 168, "digest": "856e3aede886820681ea8cd9efbce1ec985859cc6d818a15aeca3e5e9f491e3d" }
+    },
+    {
+      "move": "SUPERSONIC",
+      "player": { "fixture": "status-batch-supersonic-player.json", "frames": 51, "digest": "89204c98fb8318d36c708627a51ac4e76ae799541ca2638077970ba0185f4d2d" },
+      "opponent": { "fixture": "status-batch-supersonic-opponent.json", "frames": 51, "digest": "20b77fe919d90fb4ecc818640daa8c87a7a583309adb30fa26b7f522c3ae3883" }
+    },
+    {
+      "move": "SING",
+      "player": { "fixture": "status-batch-sing-player.json", "frames": 245, "digest": "ef568c734dc3cf1cd9dbf6697c19b12df81a7e46afd13c319b49bea210ab72ce" },
+      "opponent": { "fixture": "status-batch-sing-opponent.json", "frames": 248, "digest": "f2320be06ccd4505c78a7c6dbc854d610a031f73c1ec5d85bdec981d0fc2efa3" }
+    },
+    {
+      "move": "GRASS_WHISTLE",
+      "player": { "fixture": "status-batch-grass-whistle-player.json", "frames": 225, "digest": "bbcd9b13ebe47b4a01d9427d3bfd229d7d3f74c849a6f37f1d93e79942df1d4f" },
+      "opponent": { "fixture": "status-batch-grass-whistle-opponent.json", "frames": 225, "digest": "1e5e7704955c68a021750a5d8682dfb4e55393075db6d303a64e2e014593c15c" }
+    },
+    {
+      "move": "SLEEP_POWDER",
+      "player": { "fixture": "status-batch-sleep-powder-player.json", "frames": 194, "digest": "8ea494519f5b872cac311913804ff601e1af6be05e415dd3bfb65032701a49f1" },
+      "opponent": { "fixture": "status-batch-sleep-powder-opponent.json", "frames": 194, "digest": "22e0dc36b66e0f742023212a5fafb9eef6904f23df07ed3beddce279a929ba94" }
+    },
+    {
+      "move": "STUN_SPORE",
+      "player": { "fixture": "status-batch-stun-spore-player.json", "frames": 194, "digest": "8656a6f2ee0652a6a49f538ca549cfb278c3be1718939140828567b17855a424" },
+      "opponent": { "fixture": "status-batch-stun-spore-opponent.json", "frames": 194, "digest": "ebb36acbcfdb6c0f82263c1b310ac08636f1fc7db4bae726740f161b84744445" }
+    },
+    {
+      "move": "SPORE",
+      "player": { "fixture": "status-batch-spore-player.json", "frames": 207, "digest": "b43dc4abfb888f94911ec6141192f472dad293d9fb3a0ec1306462bc798cbf45" },
+      "opponent": { "fixture": "status-batch-spore-opponent.json", "frames": 207, "digest": "76b1a2aba91368a0356c7ad26209c9937b2235fc50c88326c439b8a9e4bddf2c" }
+    },
+    {
+      "move": "TOXIC",
+      "player": { "fixture": "status-batch-toxic-player.json", "frames": 219, "digest": "188f8667f2ac1e77c1082873b47c2d98d1dffa26d759d36a39cef0f63443cdc5" },
+      "opponent": { "fixture": "status-batch-toxic-opponent.json", "frames": 219, "digest": "5997ea58c462b95cfec6c1374211921ed7fe0f333134897ff621aeef3227f51a" }
+    },
+    {
+      "move": "CONFUSION",
+      "player": { "fixture": "status-batch-confusion-player.json", "frames": 140, "digest": "2be9d4763b68226c919d324db709d40cb58bde6a3f14e1ca5c13d12c6901cbd3" },
+      "opponent": { "fixture": "status-batch-confusion-opponent.json", "frames": 140, "digest": "a3bb13956936e40487717aaefbb16a3551ee3fb037089424a47ded35a584dd59" }
+    },
+    {
+      "move": "PSYCHIC",
+      "player": { "fixture": "status-batch-psychic-player.json", "frames": 140, "digest": "e1ed16109321a1c215752385118aae45073c87081eeab3a1d83bc8d8fdca88b0" },
+      "opponent": { "fixture": "status-batch-psychic-opponent.json", "frames": 140, "digest": "7a2e3467dae15166c6b3afca3945373df02b834f9e4f183930da99c1b4b3d528" }
+    },
+    {
+      "move": "SHADOW_BALL",
+      "player": { "fixture": "status-batch-shadow-ball-player.json", "frames": 148, "digest": "cdd9742e25549d55ee434092a9c889dded593efbb8e9436bdf752b78b0fac9f1" },
+      "opponent": { "fixture": "status-batch-shadow-ball-opponent.json", "frames": 148, "digest": "92e99f7fe64004ecaba00b0ee97a1e1660781729acd94d5dabeeceacecc2b9fc" }
+    },
+    {
+      "move": "NIGHT_SHADE",
+      "player": { "fixture": "status-batch-night-shade-player.json", "frames": 228, "digest": "20226677b3748d065c64f8f4ae2f8c54b6062980f5ba0312d1112e5f37369816" },
+      "opponent": { "fixture": "status-batch-night-shade-opponent.json", "frames": 228, "digest": "f9668c69ea803d8094fc73f359a6aeeb39f32e2fc84c6b4b924a744aa729799a" }
+    }
+  ]
+}

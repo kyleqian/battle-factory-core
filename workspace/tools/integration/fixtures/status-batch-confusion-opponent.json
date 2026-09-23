@@ -1,0 +1,1 @@
+{"schema":"live-adapter-status-batch/v1","sourceFixture":"tools/compare/fixtures/confusion-opponent-kadabra-player-onix.json","move":"CONFUSION","fieldProfile":{"playerHp":110,"playerMaxHp":110,"opponentHp":115,"opponentMaxHp":115,"playerGender":"male","opponentGender":"male"}}
