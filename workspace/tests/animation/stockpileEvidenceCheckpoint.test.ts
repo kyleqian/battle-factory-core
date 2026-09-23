@@ -89,7 +89,7 @@ describe("MOVE_STOCKPILE bounded bilateral evidence checkpoint", () => {
     });
     expect(status("MOVE_STOCKPILE")).toBe("exact");
     expect(status("MOVE_SWALLOW")).toBe("exact");
-    expect(status("MOVE_SPIT_UP")).toBe("unsupported");
+    expect(status("MOVE_SPIT_UP")).toBe("exact");
     expect([status("MOVE_SAFEGUARD"), status("MOVE_CONFUSE_RAY"), status("MOVE_SOFT_BOILED")]).toEqual(["exact", "exact", "exact"]);
     expect(readFileSync(resolve(root, "src/animation/assets/stockpile-gray-orb.json"))).toHaveLength(915);
   });
