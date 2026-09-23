@@ -1,0 +1,366 @@
+{
+  "schema": "outrage-source-audit/v1",
+  "move": "MOVE_OUTRAGE",
+  "moveId": 200,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "pointerOwnedRoot": {
+      "symbol": "Move_OUTRAGE",
+      "nextDispatchLabel": "Move_SPARK",
+      "blocks": [
+        "Move_OUTRAGE",
+        "OutrageFlames"
+      ],
+      "commands": [
+        "loadspritegfx ANIM_TAG_SMALL_EMBER",
+        "loopsewithpan SE_M_DRAGON_RAGE, SOUND_PAN_ATTACKER, 8, 3",
+        "blend_color_cycle priority=2, selector=F_PAL_BG | F_PAL_ATTACKER | F_PAL_TARGET, delay=2, num_blends=5, initial_blend_y=3, target_blend_y=8, color=RGB(14, 13, 0)",
+        "createvisualtask AnimTask_TranslateMonEllipticalRespectSide, 2, ANIM_ATTACKER, 12, 6, 5, 4",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=5, y_velocity=0, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=-5, y_velocity=0, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=0, y_velocity=5, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=0, y_velocity=-5, flicker_duration=3",
+        "delay 0",
+        "createvisualtask AnimTask_ShakeMon2, 2, ANIM_TARGET, 2, 0, 40, 1",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=5, y_velocity=3, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=-5, y_velocity=3, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=5, y_velocity=-3, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=-5, y_velocity=-3, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=5, y_velocity=0, flicker_duration=3",
+        "call OutrageFlames",
+        "call OutrageFlames",
+        "waitforvisualfinish",
+        "end"
+      ],
+      "source": {
+        "sourcePath": "data/battle_anim_scripts.s",
+        "sourceStart": 74273,
+        "sourceEndExclusive": 75890,
+        "sourceByteLength": 1617,
+        "sourceSha256": "d04d2a083bed476655e0391161ec492bb310f3025a7c8949576eb304e589dbff"
+      },
+      "rom": {
+        "symbol": "Move_OUTRAGE",
+        "start": "0x082cb908",
+        "endExclusive": "0x082cbaa3",
+        "byteLength": 411,
+        "romSha256": "bfe7a0c314332bc005f1b89c354e557e701e9fd4762cb2403074e64329a66845"
+      }
+    },
+    "pointerOwnedSubroutine": {
+      "symbol": "OutrageFlames",
+      "nextDispatchLabel": "Move_SPARK",
+      "commands": [
+        "delay 3",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=-5, y_velocity=0, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=0, y_velocity=5, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=0, y_velocity=-5, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=5, y_velocity=3, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=-5, y_velocity=3, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=5, y_velocity=-3, flicker_duration=3",
+        "delay 0",
+        "create_outrage_flame_sprite ANIM_TARGET, 2, x=0, y=0, duration=30, x_velocity=-5, y_velocity=-3, flicker_duration=3",
+        "return"
+      ],
+      "source": {
+        "sourcePath": "data/battle_anim_scripts.s",
+        "sourceStart": 75890,
+        "sourceEndExclusive": 76788,
+        "sourceByteLength": 898,
+        "sourceSha256": "e96ebfc383240fad82f56cc398b7a7d7a3efe18c5c853eca68e842d08f48bb6f"
+      },
+      "rom": {
+        "symbol": "OutrageFlames",
+        "start": "0x082cba0f",
+        "endExclusive": "0x082cbaa3",
+        "byteLength": 148,
+        "romSha256": "676636bed13d90652c20f17a18a9aa76416e576b418786f92ef939053485e3d1"
+      }
+    },
+    "template": {
+      "source": {
+        "sourcePath": "src/battle_anim_dragon.c",
+        "sourceStart": 1011,
+        "sourceEndExclusive": 1343,
+        "sourceByteLength": 332,
+        "sourceSha256": "7ac8b912dac54bbbddf963cc3e461279f722b371cd4b5a6852e01772d9205e28"
+      },
+      "rom": {
+        "symbol": "gOutrageFlameSpriteTemplate",
+        "start": "0x08596e7c",
+        "endExclusive": "0x08596e94",
+        "byteLength": 24,
+        "romSha256": "4b62212d5259881e5a3183b39844ee6fd27e6b9a64623252bd22d9a43ab737d2"
+      },
+      "animation": {
+        "source": {
+          "sourcePath": "src/battle_anim_dragon.c",
+          "sourceStart": 692,
+          "sourceEndExclusive": 907,
+          "sourceByteLength": 215,
+          "sourceSha256": "784711a236fb4e8ec973280b102a187491bb572cc25de56748ec60ee231cbff4"
+        },
+        "rom": {
+          "symbol": "sAnim_OutrageOverheatFire_0",
+          "start": "0x08596e60",
+          "endExclusive": "0x08596e78",
+          "byteLength": 24,
+          "romSha256": "7a5c9f0c9e26141547cab712e2ad077c6986fbdbc8590809dc45280c07939233"
+        }
+      }
+    },
+    "callbacks": {
+      "outrageFlame": {
+        "source": {
+          "sourcePath": "src/battle_anim_dragon.c",
+          "sourceStart": 5106,
+          "sourceEndExclusive": 5968,
+          "sourceByteLength": 862,
+          "sourceSha256": "b8942ab2e29b38f2a370c02ea5616d762c7b3c44b5a91176c68b4c163ee8f5b8"
+        },
+        "rom": {
+          "symbol": "AnimOutrageFlame",
+          "start": "0x08113064",
+          "endExclusive": "0x08113100",
+          "byteLength": 156,
+          "romSha256": "1e08b85d96d8145333b61bb5b06b47c620de241a004b4c30daae13ab0d30b0c4"
+        }
+      },
+      "ellipse": {
+        "source": {
+          "sourcePath": "src/battle_anim_mon_movement.c",
+          "sourceStart": 12775,
+          "sourceEndExclusive": 12995,
+          "sourceByteLength": 220,
+          "sourceSha256": "4fcf08260b0419d30be36e7c5be39b9ea7f24863b2237a3ecd536ee2bbdc0d28"
+        },
+        "rom": {
+          "symbol": "AnimTask_TranslateMonEllipticalRespectSide",
+          "start": "0x080d5830",
+          "endExclusive": "0x080d5860",
+          "byteLength": 48,
+          "romSha256": "e327274d53f5c88dbd4aa70968c3b379d93ab520668be5ab529dec63d7e84e18"
+        }
+      },
+      "shakeMon2": {
+        "source": {
+          "sourcePath": "src/battle_anim_mon_movement.c",
+          "sourceStart": 4847,
+          "sourceEndExclusive": 6513,
+          "sourceByteLength": 1666,
+          "sourceSha256": "70cb520c7783bead6d242f1888fa72e5b3c834e7d08803117694ec8bd1b0805f"
+        },
+        "rom": {
+          "symbol": "AnimTask_ShakeMon2",
+          "start": "0x080d52d0",
+          "endExclusive": "0x080d53bc",
+          "byteLength": 236,
+          "romSha256": "18a0c6aae46b12981db295ebeb4044da2baa1a09931abc75afca5eded2b89d66"
+        }
+      },
+      "blendColorCycle": {
+        "source": {
+          "sourcePath": "src/battle_anim_normal.c",
+          "sourceStart": 13297,
+          "sourceEndExclusive": 13872,
+          "sourceByteLength": 575,
+          "sourceSha256": "2766838e36836e9442c11a33ddc8fc2afdea517c39eb2a6badf777886403d602"
+        },
+        "rom": {
+          "symbol": "AnimTask_BlendColorCycle",
+          "start": "0x08115a04",
+          "endExclusive": "0x08115a54",
+          "byteLength": 80,
+          "romSha256": "1bb6b7c9ad4a45b7289f8964d25a0fc874f1725b64bb16ecf0ce100549dc2ebf"
+        }
+      },
+      "blendColorCycleLoop": {
+        "source": {
+          "sourcePath": "src/battle_anim_normal.c",
+          "sourceStart": 14295,
+          "sourceEndExclusive": 15215,
+          "sourceByteLength": 920,
+          "sourceSha256": "b00cb434227e8d6f3b896bc5cfd63b6348c291ea0d05333ca804c32246a79887"
+        },
+        "rom": {
+          "symbol": "AnimTask_BlendColorCycleLoop",
+          "start": "0x08115aa4",
+          "endExclusive": "0x08115b0c",
+          "byteLength": 104,
+          "romSha256": "9c86f90a75ba1bd2fe205b31eba7bd820695a2d9f70d250b84925c2e0d61a3ce"
+        }
+      }
+    },
+    "commandMacro": {
+      "sourcePath": "asm/macros/battle_anim_script.inc",
+      "sourceSha256": "577744b5c7c8920108a870dece1aa569c83c276bab1f98a7dc2a2c0da38b794c"
+    }
+  },
+  "graph": {
+    "blocks": [
+      "Move_OUTRAGE",
+      "OutrageFlames"
+    ],
+    "componentCount": 6,
+    "components": [
+      "asset:ANIM_TAG_SMALL_EMBER",
+      "subroutine:OutrageFlames",
+      "task:AnimTask_ShakeMon2",
+      "task:AnimTask_TranslateMonEllipticalRespectSide",
+      "visualCommand:blend_color_cycle",
+      "visualCommand:create_outrage_flame_sprite"
+    ],
+    "novelComponents": [
+      "subroutine:OutrageFlames",
+      "visualCommand:create_outrage_flame_sprite"
+    ]
+  },
+  "behavior": {
+    "ellipse": {
+      "args": [
+        12,
+        6,
+        5,
+        4
+      ],
+      "playerXVelocity": 12,
+      "opponentXVelocity": -12,
+      "wavePeriod": 16
+    },
+    "flames": {
+      "count": 23,
+      "duration": 30,
+      "flickerDuration": 3,
+      "velocities": [
+        [
+          5,
+          0
+        ],
+        [
+          -5,
+          0
+        ],
+        [
+          0,
+          5
+        ],
+        [
+          0,
+          -5
+        ],
+        [
+          5,
+          3
+        ],
+        [
+          -5,
+          3
+        ],
+        [
+          5,
+          -3
+        ],
+        [
+          -5,
+          -3
+        ],
+        [
+          5,
+          0
+        ]
+      ],
+      "repeatedSubroutineBodies": 2
+    },
+    "targetShakeMon2": [
+      2,
+      0,
+      40,
+      1
+    ],
+    "blendColorCycle": {
+      "selector": "F_PAL_BG | F_PAL_ATTACKER | F_PAL_TARGET",
+      "delay": 2,
+      "numBlends": 5,
+      "initialBlendY": 3,
+      "targetBlendY": 8,
+      "color": [
+        14,
+        13,
+        0
+      ]
+    },
+    "cleanup": [
+      "waitforvisualfinish",
+      "end"
+    ]
+  },
+  "resources": {
+    "smallEmber": {
+      "tag": "ANIM_TAG_SMALL_EMBER",
+      "value": 10029,
+      "gfx": "graphics/battle_anims/sprites/small_ember.png",
+      "tileBytes": 2560
+    },
+    "audio": {
+      "sound": "SE_M_DRAGON_RAGE",
+      "id": 171,
+      "pan": "SOUND_PAN_ATTACKER"
+    }
+  },
+  "carriers": {
+    "factoryCount": 1,
+    "level50Count": 1,
+    "representative": {
+      "index": 854,
+      "label": "FRONTIER_MON_DRAGONITE_5",
+      "species": "SPECIES_DRAGONITE",
+      "moves": [
+        "MOVE_OUTRAGE",
+        "MOVE_DOUBLE_EDGE",
+        "MOVE_THUNDER_WAVE",
+        "MOVE_ROAR"
+      ],
+      "itemTableId": 41,
+      "itemName": "BATTLE_FRONTIER_ITEM_LUM_BERRY",
+      "evSpread": 18,
+      "nature": "NATURE_DOCILE"
+    }
+  },
+  "checkpoint": {
+    "sourceAudit": true,
+    "completePointerOwnedRoot": true,
+    "completeReachableVisualGraph": true,
+    "directSpriteTaskResourceBodies": true,
+    "fullFactoryCarrierCensus": true,
+    "legalBilateralPartyOnlyStaging": true,
+    "denseWindowCaptured": true,
+    "rawRgbRetained": true,
+    "normalizedMaps": true,
+    "latchMeasured": true,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "actualCoreFramebufferAcceptance": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "gameplayStateOwned": false,
+    "boundaryOrBarrierChanged": false,
+    "unsupportedNoCreditBoundary": true
+  },
+  "remainder": "Keep MOVE_OUTRAGE and the outrage-flame track unsupported until a source-relative reducer, typed Scene-ON seam, generic compositor, material control, and twice-fresh actual-core zero-residual proof exist."
+}
