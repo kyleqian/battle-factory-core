@@ -1,3 +1,26 @@
+# Animation supervisor verification — MOVE_OUTRAGE exact merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commits `0828c75fd` through
+  `e73ef9458`; Open-only **MOVE_OUTRAGE is exact** and only its
+  `outrage-flame-source-relative` track is fulfilled. Level 50 remains
+  **275/276 exact** and Open-only is now **1/1 exact**. Helping Hand remains
+  the sole blocked Factory move; no sibling, gameplay/RNG/facility,
+  import-boundary, unsupported-barrier, or Open-level geometry credit moved.
+- **Independent proof:** Two fresh supervisor actual-core processes each pass
+  all **240/240** component, typed-seam, chronological raw-RGB, and shared
+  framebuffer rows with **zero residual pixels**. The material control is
+  stable (`8f79f6a9…` canonical versus `d6ef014e…` CROBAT/BLISSEY altered)
+  while gameplay state/RNG remain opaque and unchanged. Focused Outrage tests
+  pass **4 files / 7 tests**; boundary/inventory/work-plan plus the refreshed
+  Overheat identity controls pass **5 files / 20 tests**.
+- **Gates / next:** Coverage and animation audit pass; supervisor smoke passes
+  **8 files / 448 tests**. Reused the worker's same-code serialized full-suite
+  receipt (**1,462 files / 11,553 tests**, **44 files / 223 tests skipped**, in
+  **2,164.86s**) and build receipt (**838 modules**, inherited chunk warning
+  only), plus passing typecheck. The derived plan has **0 ready**, **1 blocked**:
+  do not dispatch again unless legal doubles Scene-ON staging unblocks Helping
+  Hand or campaign scope changes. **For the main program:** nothing blocking.
+
 # Animation worker exact promotion — MOVE_OUTRAGE (2026-09-23)
 
 - **State / tested tree:** Production promotion landed in `f902dc4b0` and the
@@ -59,44 +82,3 @@
   reducer/seam/compositor/actual-core acceptance step; Helping Hand remains
   blocked pending legal doubles Scene-ON staging. **For the main program:**
   nothing blocking.
-
-# Animation worker checkpoint — MOVE_OUTRAGE unsupported dense evidence (2026-09-23)
-
-- **State / commits:** `032f9f682` and `0909b2615` retain an unsupported Scene-ON evidence
-  checkpoint only. No reducer, typed seam, renderer/compositor, production
-  asset, coverage entry, component-track fulfillment, sibling credit, or
-  gameplay/facility ownership was added.
-- **Source / legal staging:** The complete pointer-owned `Move_OUTRAGE`
-  interval is `0x082cb908..0x082cbaa3` (411 bytes), including the 148-byte
-  `OutrageFlames` body and all six graph components. The source census pins
-  the sole Open carrier `FRONTIER_MON_DRAGONITE_5` (index 854, set 854;
-  Outrage/Double-Edge/Thunder Wave/Roar, Lum Berry, Docile). Complete,
-  transient-free party fixtures are Scene-ON valid in both player-back and
-  opponent-front orientations; the opponent fixture repeats Outrage in all
-  four move slots solely to constrain legal Factory AI selection.
-- **Dense proof:** Two fresh runs per orientation retain every pointer-owned
-  row through first inactive cleanup: player-back frames **76..195** and
-  opponent-front **80..199**, **120 + 120 = 240** rows. Probe JSON digests are
-  `ec368bdf…` / `1ddc124c…`; chronological raw-RGB sequence digests are
-  `b2d5b37c…` / `b201257a…`; full state/RGB archives and normalized maps are
-  committed and independently rechecked byte-identically.
-- **Measured behavior:** 23 `gOutrageFlameSpriteTemplate` allocations each
-  live 30 ticks with slot reuse; `Task_LoopAndPlaySE` is 4..20,
-  `AnimTask_TranslateMonElliptical_Step` 4..81,
-  `AnimTask_ShakeMon2_Step` 14..91, and
-  `AnimTask_BlendColorCycleLoop` 4..92. The attacker ellipse reverses x
-  velocity by side (+12 player / −12 opponent) and returns neutral at age 82;
-  target ShakeMon2 reaches x2 ±2 and returns neutral at age 92. Palette banks
-  1/2/3/16/17/23 change with the recorded faded→hardware schedules; OAM,
-  matrices, and hardware palette equal the preceding software/faded row
-  **119/119**, with no exceptions. Small Ember tile/palette tags live 1..118,
-  audio is `SE_M_DRAGON_RAGE` with attacker pan −64/+63, presentation RNG
-  changes on 119 rows, gameplay RNG and immutable battle state do not change,
-  and owned resources/tasks/sprites are zero at cleanup.
-- **Gates / next:** Focused source/staging and dense-evidence tests pass **5/5**;
-  the full scoped animation union (source/evidence, boundary, inventory, and
-  work-plan) passes **21/21**. Source audit and evidence verifier are stable
-  across reruns; `npm run animation:coverage`, `npm run animation:audit`,
-  `npm run typecheck`, JSON/gzip/tar validation, and `git diff --check` pass.
-  Supervisor verification must keep Outrage unsupported and Helping Hand
-  blocked; no production suite/build was required for this evidence-only delta.
