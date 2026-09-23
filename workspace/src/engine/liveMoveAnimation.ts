@@ -18,30 +18,43 @@ import { CALM_MIND_CLEANUP_AGE } from "../animation/calmMind.ts";
 import { FURY_SWIPES_LAST_BODY_AGE } from "../animation/furySwipes.ts";
 import { KARATE_CHOP_FRAME_COUNT } from "../animation/karateChop.ts";
 import { STOMP_FRAME_COUNT } from "../animation/stomp.ts";
+import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
-  2, 14, 23, 29, 39, 41, 44, 97, 103, 108, 109, 131, 154, 158, 163,
-  242, 246, 264, 280, 305, 306, 325, 337, 347,
+  2, 5, 11, 14, 21, 23, 25, 27, 29, 39, 41, 44, 67, 97, 103, 108,
+  109, 122, 131, 136, 154, 158, 163, 211, 223, 231, 242, 246, 264,
+  280, 305, 306, 325, 337, 342, 347,
 ] as const);
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
   switch (request.moveId) {
     case 2: return KARATE_CHOP_FRAME_COUNT;
+    case 5: return 160; // Mega Punch source body through first inactive row.
+    case 11: return 42; // Vice Grip source body through first inactive row.
     case 14: return SWORDS_DANCE_FRAME_COUNT;
+    case 21: return 54; // Slam source body through first inactive row.
     case 23: return STOMP_FRAME_COUNT;
+    case 25: return 160; // Mega Kick source body through first inactive row.
+    case 27: return 55; // Rolling Kick source body through first inactive row.
     case 29: return 48; // headbuttAtAge: active through 46, then cleanup.
     case 39: return TAIL_WHIP_FRAME_COUNT;
     case 41: return 37; // Twineedle's two stingers through clearmonbg cleanup.
     case 44: return 26; // First sharp-teeth row through inactive cleanup.
+    case 67: return 33; // Low Kick source body through first inactive row.
     case 97: return AGILITY_FRAME_COUNT;
     case 103: return SCREECH_FIRST_INACTIVE_AGE + 1;
     case 108: return 125; // smokescreenAtAge: active through 123.
     case 109: return CONFUSE_RAY_FRAME_COUNT;
+    case 122: return 73; // Lick source body through first inactive row.
     case 131: return 84; // Spike Cannon pointer body through inactive cleanup.
+    case 136: return 91; // Hi Jump Kick source body through first inactive row.
     case 154: return FURY_SWIPES_LAST_BODY_AGE + 1;
     case 158: return 107; // Hyper Fang restorebg fade through cleanup.
     case 163: return 46; // Slash body through final source-owned shake row.
+    case 211: return 197; // Steel Wing source body through first inactive row.
+    case 223: return 75; // Dynamic Punch source body through first inactive row.
+    case 231: return 135; // Iron Tail source body through first inactive row.
     case 242: return 142; // Crunch dark-background body through cleanup.
     case 246: return 128; // ancientPowerAtAge: active through 126, cleanup at 127.
     case 264:
@@ -57,6 +70,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // Source restorebg fade, then inactive display. Both orientations restore.
     case 325: return request.attacker === 0 ? 106 : 105;
     case 337: return 137; // Dragon Claw palette restoration through cleanup.
+    case 342: return 187; // Poison Tail source body through first inactive row.
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -93,6 +107,19 @@ export function liveMoveAnimationPresentation(
   // These move bodies draw the whole field. A self-targeting move's effect
   // adapter must separately retain its semantic target when one is added.
   const target = battler(request.attacker === 0 ? "opponent" : "player");
+  // Effect pictures use Y_PIC_OFFSET (the player-side +8/clamp above), while
+  // affine battler centers use the unshifted OBJ center. Keep that selector
+  // explicit at the live seam instead of inheriting fixture coordinates.
+  const affineCenterBattler = (battler: SceneOnPresentationBattler): SceneOnPresentationBattler => ({
+    ...battler,
+    geometry: {
+      ...battler.geometry,
+      animationCenter: {
+        x: battler.geometry.spriteCorner.x + 32,
+        y: battler.geometry.spriteCorner.y + 32,
+      },
+    },
+  });
   const fieldProfile = {
     playerHp: field.player.hp, playerMaxHp: field.player.maxHP,
     opponentHp: field.opponent.hp, opponentMaxHp: field.opponent.maxHP,
@@ -101,8 +128,13 @@ export function liveMoveAnimationPresentation(
   let config: SceneOnMoveConfig;
   switch (request.moveId) {
     case 2: config = { move: "KARATE_CHOP", attacker, target, fieldProfile }; break;
+    case 5: config = { move: "MEGA_PUNCH", attacker, target, fieldProfile }; break;
+    case 11: config = { move: "VICE_GRIP", attacker, target, fieldProfile }; break;
     case 14: config = { move: "SWORDS_DANCE", attacker, target, fieldProfile }; break;
+    case 21: config = { move: "SLAM", attacker, target, fieldProfile }; break;
     case 23: config = { move: "STOMP", attacker, target, fieldProfile }; break;
+    case 25: config = { move: "MEGA_KICK", attacker, target, fieldProfile }; break;
+    case 27: config = { move: "ROLLING_KICK", attacker, target, fieldProfile }; break;
     case 29:
       // BowMon's affine center is the existing OBJ center; its hitsplat
       // independently uses the target picture-offset coordinate.
@@ -115,14 +147,41 @@ export function liveMoveAnimationPresentation(
     case 39: config = { move: "TAIL_WHIP", attacker, target, fieldProfile }; break;
     case 41: config = { move: "TWINEEDLE", attacker, target, fieldProfile }; break;
     case 44: config = { move: "BITE", attacker, target, fieldProfile }; break;
+    case 67: config = { move: "LOW_KICK", attacker, target, fieldProfile }; break;
     case 97: config = { move: "AGILITY", attacker, target, fieldProfile }; break;
     case 103: config = { move: "SCREECH", attacker, target, fieldProfile }; break;
     case 108: config = { move: "SMOKESCREEN", attacker, target, fieldProfile }; break;
     case 109: config = { move: "CONFUSE_RAY", attacker, target, fieldProfile }; break;
+    case 122: config = { move: "LICK", attacker, target, fieldProfile }; break;
     case 131: config = { move: "SPIKE_CANNON", attacker, target, fieldProfile }; break;
+    case 136:
+      config = {
+        move: "HI_JUMP_KICK", attacker, target, fieldProfile,
+        targetInitialX2: target.geometry.side === "opponent"
+          ? speciesFrontIdleRestOffsetOrZero(target.species).x2
+          : 0,
+      };
+      break;
     case 154: config = { move: "FURY_SWIPES", attacker, target, fieldProfile }; break;
     case 158: config = { move: "HYPER_FANG", attacker, target, fieldProfile }; break;
     case 163: config = { move: "SLASH", attacker, target, fieldProfile }; break;
+    case 211:
+      config = {
+        move: "STEEL_WING",
+        attacker: affineCenterBattler(attacker),
+        target: affineCenterBattler(target),
+        fieldProfile,
+      };
+      break;
+    case 223: config = { move: "DYNAMIC_PUNCH", attacker, target, fieldProfile }; break;
+    case 231:
+      config = {
+        move: "IRON_TAIL",
+        attacker: affineCenterBattler(attacker),
+        target: affineCenterBattler(target),
+        fieldProfile,
+      };
+      break;
     case 242: config = { move: "CRUNCH", attacker, target, fieldProfile }; break;
     case 246: config = { move: "ANCIENT_POWER", attacker, target, fieldProfile }; break;
     case 264: config = { move: "FOCUS_PUNCH", attacker, target, fieldProfile }; break;
@@ -145,6 +204,14 @@ export function liveMoveAnimationPresentation(
       };
       break;
     case 337: config = { move: "DRAGON_CLAW", attacker, target, fieldProfile }; break;
+    case 342:
+      config = {
+        move: "POISON_TAIL",
+        attacker: affineCenterBattler(attacker),
+        target,
+        fieldProfile,
+      };
+      break;
     case 347: config = { move: "CALM_MIND", attacker, target, fieldProfile }; break;
     default: return null;
   }

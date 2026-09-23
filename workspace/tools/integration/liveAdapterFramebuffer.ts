@@ -35,6 +35,7 @@ interface Fixture {
 interface Probe { frames: { frame: number; sha256: string }[]; }
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const ids = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.id]));
+const names = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.name]));
 const hash = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
 function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
@@ -64,7 +65,9 @@ function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderVi
     name: mon.name, level: mon.level, gender: mon.gender, status: mon.status,
     hpFraction: mon.hp / mon.maxHP, currentHp: mon.hp, maxHp: mon.maxHP,
   });
-  const name = f.move === "ANCIENT_POWER" ? "ANCIENTPOWER" : f.move.replaceAll("_", " ");
+  // Battle text uses the source's display spelling (for example VICEGRIP,
+  // not a synthesized "VICE GRIP"). This remains fixture-independent.
+  const name = names[f.move] ?? f.move.replaceAll("_", " ");
   return {
     field, fieldArt: createBattleCommandFieldArtView(field),
     healthboxes: { player: healthbox(field.player), opponent: healthbox(field.opponent) },

@@ -1,0 +1,6 @@
+{
+  "schema": "physical-batch-live-adapter/v1",
+  "sourceFixture": "tools/compare/fixtures/iron-tail-opponent-azumarill-player-onix.json",
+  "move": "IRON_TAIL",
+  "probeMoveId": 231
+}
