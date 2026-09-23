@@ -587,6 +587,7 @@ import screechAsset from "../animation/assets/screech.json" with { type: "json" 
 import safeguardAsset from "../animation/assets/safeguard.json" with { type: "json" };
 import stockpileAsset from "../animation/assets/stockpile-gray-orb.json" with { type: "json" };
 import spitUpAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
+import curseAsset from "../animation/assets/curse.json" with { type: "json" };
 import purpleFlameAsset from "../animation/assets/purple-flame.json" with { type: "json" };
 import hiddenPowerRedOrbAsset from "../animation/assets/hidden-power-red-orb.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
@@ -1012,6 +1013,7 @@ import {
   sceneOnRevengeView,
   sceneOnSpitUpView,
   sceneOnFuryCutterView,
+  sceneOnCurseView,
   sceneOnPursuitView,
   sceneOnPursuitDisplayPlan,
   sceneOnReturnView,
@@ -1297,6 +1299,7 @@ import {
   type SceneOnRevengeConfig,
   type SceneOnSpitUpConfig,
   type SceneOnFuryCutterConfig,
+  type SceneOnCurseConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -1397,6 +1400,7 @@ import { superpowerDisplayPlan } from "../animation/superpower.ts";
 import { revengeDisplayPlan } from "../animation/revenge.ts";
 import { spitUpDisplayPlan } from "../animation/spitUp.ts";
 import { furyCutterDisplayPlan } from "../animation/furyCutter.ts";
+import { curseDisplayPlan } from "../animation/curse.ts";
 import {
   hypnosisBgPaletteRowAtAge,
   HYPNOSIS_TARGET_BLEND_COLOR,
@@ -2596,6 +2600,11 @@ const spitUpSourceArt = spitUpAsset as unknown as {
   art: { tileset: Tileset; palette: RgbColor[] };
 };
 const spitUpRedOrbArt = spitUpSourceArt.art;
+const curseArt = curseAsset as unknown as {
+  nail: { tileset: Tileset; palette: RgbColor[] };
+  ghost: { tileset: Tileset; palette: RgbColor[] };
+  fallingLines: { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
+};
 const skillSwapOrbArt = (skillSwapOrbAsset as {
   orb: { tileset: Tileset; palette: RgbColor[] };
 }).orb;
@@ -24701,6 +24710,158 @@ export function renderSceneOnMovePresentation(
     drawMessageTextLines(fb, view.attacker.geometry.side === "player"
       ? `${view.battlers.attacker.art.displaySpecies} used`
       : `Foe ${view.battlers.attacker.art.displaySpecies} used`, "FURY CUTTER!", 99);
+    return;
+  }
+
+  if (state.config.move === "CURSE") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnCurseConfig>;
+    const view = sceneOnCurseView(moveState), plan = curseDisplayPlan(view);
+    if (view.attacker.geometry.side === view.target.geometry.side) throw new Error("CURSE requires opposite field sides");
+    const renderPass = (fb: Uint8Array, hardwarePalette: readonly number[]): void => {
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker, species: string): BattlerArt => {
+      const found = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[species];
+      if (!found) throw new Error(`CURSE missing live battler art ${species}`); return found;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => { const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff }; };
+    const paletteBank = (bank: number): RgbColor[] =>
+      hardwarePalette.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const signed = (value: number): number => { const raw = value & 0x1ff; return raw >= 256 ? raw - 512 : raw; };
+    const top = (attr: readonly [number, number, number]) => ({ x: signed(attr[1]),
+      y: (attr[0] & 0xff) >= 160 ? (attr[0] & 0xff) - 256 : attr[0] & 0xff });
+    const disabled = (attr: readonly [number, number, number]): boolean => (attr[0] & 0x300) === 0x200;
+    drawExtractedTileBg(fb, { tileset: battleBg.static.tileset, tilemap: battleBg.static.tilemap,
+      subpalettes: [2, 3, 4].map(paletteBank) });
+    // CurseStretchingBlackBg targets BG3 only inside WIN0. The live hardware
+    // rectangle and BLDY are authoritative; this is the source task's window,
+    // not a move-age approximation.
+    if ((view.registers.bldcnt & 0xc0) === 0xc0 && view.registers.bldy) {
+      let left = view.registers.win0h >>> 8 & 0xff, right = view.registers.win0h & 0xff;
+      let upper = view.registers.win0v >>> 8 & 0xff, lower = view.registers.win0v & 0xff;
+      for (let y = upper; y < Math.min(160, lower); y += 1) for (let x = left; x < Math.min(240, right); x += 1) {
+        const offset = (y * 240 + x) * 4;
+        const packed = mgbaDarkenColor(fb[offset]! | fb[offset + 1]! << 8 | fb[offset + 2]! << 16,
+          view.registers.bldy); fb[offset] = packed & 0xff; fb[offset + 1] = packed >>> 8 & 0xff;
+        fb[offset + 2] = packed >>> 16 & 0xff;
+      }
+    }
+    const attackerArt = artFor(view.attacker, view.battlers.attacker.art.displaySpecies);
+    const defenderArt = artFor(view.target, view.battlers.defender.art.displaySpecies);
+    const drawMonBg = (battler: typeof view.attacker, art: BattlerArt): void => {
+      const opponent = battler.geometry.side === "opponent";
+      const hofs = view.registers[opponent ? "bg1hofs" : "bg2hofs"] ?? 0;
+      const vofs = view.registers[opponent ? "bg1vofs" : "bg2vofs"] ?? 0;
+      drawSpriteSheet(fb, tilesFor(art, battler.geometry.side), paletteBank(opponent ? 8 : 9),
+        hofs ? 512 - hofs : battler.geometry.spriteCorner.x,
+        vofs ? 512 - vofs : battler.geometry.spriteCorner.y);
+    };
+    if (!plan.attacker) drawMonBg(view.attacker, attackerArt);
+    if (!plan.defender) drawMonBg(view.target, defenderArt);
+    if (moveState.age === 0) {
+      const opponent = view.attacker.geometry.side === "opponent"
+        ? { battler: view.attacker, object: plan.attacker, species: view.battlers.attacker.art.displaySpecies }
+        : { battler: view.target, object: plan.defender, species: view.battlers.defender.art.displaySpecies };
+      if (opponent.object) { const offset = (opponent.object.attr[0] & 0xff) - 8;
+        drawSourceOpponentEnemyShadow(fb, opponent.species, { x: opponent.battler.geometry.battlePositionCenter.x,
+          y: opponent.battler.geometry.battlePositionCenter.y - offset }); }
+    }
+    const beforeObj = fb.slice();
+    const entries = [...(plan.attacker ? [plan.attacker] : []), ...(plan.defender ? [plan.defender] : []),
+      ...plan.nails, ...plan.ghosts]
+      .filter((object, index, all) => all.findIndex((item) => item.oamIndex === object.oamIndex) === index)
+      .sort((left, right) => right.oamIndex - left.oamIndex);
+    for (const object of entries) {
+      if (disabled(object.attr)) continue;
+      const tile = object.attr[2] & 0x3ff, bank = 16 + (object.attr[2] >>> 12 & 0xf), corner = top(object.attr);
+      const eva = view.registers.bldalpha & 0x1f, evb = view.registers.bldalpha >>> 8 & 0x1f;
+      if (view.resources.nailLoaded && tile >= view.resources.nailTileBase
+        && tile < view.resources.nailTileBase + 32) {
+        const frame = Math.floor((tile - view.resources.nailTileBase) / 8);
+        const nail = subTileset(curseArt.nail.tileset, frame * 2, 2);
+        if ((view.registers.bldcnt & 0xc0) === 0x40) {
+          drawSpriteSheetFlippedBlendedOverTarget(fb, beforeObj, nail, paletteBank(bank), corner.x, corner.y,
+            (object.attr[1] & 0x1000) !== 0, (object.attr[1] & 0x2000) !== 0, eva, evb);
+        } else {
+          drawSpriteSheetFlipped(fb, nail, paletteBank(bank), corner.x, corner.y,
+            (object.attr[1] & 0x1000) !== 0, (object.attr[1] & 0x2000) !== 0);
+        }
+        continue;
+      }
+      if (view.resources.ghostLoaded && tile >= view.resources.ghostTileBase
+        && tile < view.resources.ghostTileBase + 16) {
+        drawSpriteSheetFlippedBlendedOverTarget(fb, beforeObj, curseArt.ghost.tileset,
+          paletteBank(bank), corner.x, corner.y, (object.attr[1] & 0x1000) !== 0,
+          (object.attr[1] & 0x2000) !== 0, eva, evb); continue;
+      }
+      const isAttacker = object.attr[2] === view.battlers.attacker.art.attr[2];
+      const battler = isAttacker ? view.attacker : view.target;
+      drawSpriteSheet(fb, tilesFor(isAttacker ? attackerArt : defenderArt, battler.geometry.side),
+        paletteBank(bank), corner.x, corner.y);
+    }
+    // The non-Ghost branch loads the source Curse mask on BG1 and gates it
+    // with an OBJ-window copy of the attacker. Derive both the scrolling mask
+    // and silhouette from live register/OAM/species inputs.
+    if (view.tasks.some((task) => task.callback === "AnimTask_DrawFallingWhiteLinesOnAttacker_Step"
+      && task.data[11]! < 4)
+      && (view.registers.dispcnt & 0x8000) !== 0 && plan.attacker) {
+      const object = plan.attacker, corner = top(object.attr), tiles = tilesFor(attackerArt, view.attacker.geometry.side);
+      const width = tiles.columns * 8, height = tiles.rows * 8;
+      for (let y = Math.max(0, corner.y); y < Math.min(160, corner.y + height); y += 1) {
+        for (let x = Math.max(0, corner.x); x < Math.min(240, corner.x + width); x += 1) {
+          const sx = x - corner.x, sy = y - corner.y;
+          const monTile = tiles.tiles[Math.floor(sy / 8) * tiles.columns + Math.floor(sx / 8)];
+          if (!(monTile?.[(sy % 8) * 8 + sx % 8])) continue;
+          const mx = (x + (view.registers.bg1hofs ?? 0)) & 0xff;
+          const my = (y + (view.registers.bg1vofs ?? 0)) & 0xff;
+          const entry = curseArt.fallingLines.tilemap.entries[
+            Math.floor(my / 8) * curseArt.fallingLines.tilemap.width + Math.floor(mx / 8)];
+          const maskTile = entry && curseArt.fallingLines.tileset.tiles[entry.tile];
+          const px = entry?.hFlip ? 7 - mx % 8 : mx % 8, py = entry?.vFlip ? 7 - my % 8 : my % 8;
+          if (!maskTile?.[py * 8 + px]) continue;
+          const offset = (y * 240 + x) * 4, eva = view.registers.bldalpha & 0x1f,
+            evb = view.registers.bldalpha >>> 8 & 0x1f;
+          fb[offset] = blendChannel(255, fb[offset]!, eva, evb);
+          fb[offset + 1] = blendChannel(255, fb[offset + 1]!, eva, evb);
+          fb[offset + 2] = blendChannel(255, fb[offset + 2]!, eva, evb);
+        }
+      }
+    }
+    const playerSpecies = view.attacker.geometry.side === "player"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.defender.art.displaySpecies;
+    const opponentSpecies = view.attacker.geometry.side === "opponent"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.defender.art.displaySpecies;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none" }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, view.attacker.geometry.side === "player"
+      ? `${view.battlers.attacker.art.displaySpecies} used`
+      : `Foe ${view.battlers.attacker.art.displaySpecies} used`, "CURSE!", 99);
+    };
+    const transfer = view.paletteScanoutTransfer;
+    if (transfer) {
+      if (transfer.beforeHardware.length !== view.palette.hardware.length
+        || transfer.firstPostTransferScanline !== transfer.vcount + (transfer.inHBlank ? 1 : 0)
+        || transfer.firstPostTransferScanline < 0 || transfer.firstPostTransferScanline > 160) {
+        throw new Error("CURSE invalid palette scanout transfer");
+      }
+      const initial = fb.slice(), before = initial.slice();
+      renderPass(before, transfer.beforeHardware);
+      fb.set(initial); renderPass(fb, view.palette.hardware);
+      fb.set(before.subarray(0, transfer.firstPostTransferScanline * 240 * 4), 0);
+    } else {
+      renderPass(fb, view.palette.hardware);
+    }
     return;
   }
 

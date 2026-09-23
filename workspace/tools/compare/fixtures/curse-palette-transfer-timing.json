@@ -1,0 +1,55 @@
+{
+  "schema": "curse-palette-transfer-timing/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_CURSE",
+  "captureMethod": "fresh source-state discovery followed by instruction stepping; no framebuffer or pixel data read",
+  "source": {
+    "taskStep1": "AnimTask_CurseStretchingBlackBg_Step1",
+    "taskStep2": "AnimTask_CurseStretchingBlackBg_Step2",
+    "beginNormalPaletteFade": "0x080a1ad4",
+    "cpuSetCall": "0x080a1bce",
+    "cpuSetSwi": "0x082e7084",
+    "arguments": {
+      "source": "0x02037b14",
+      "destination": "0x05000000",
+      "control": "0x04000100"
+    },
+    "firstPostTransferScanlineRule": "REG_VCOUNT + (DISPSTAT.HBlank ? 1 : 0)"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-curse-ghost-player-haunter-opponent-magikarp.json",
+      "firstStep2TraceFrame": 97,
+      "taskSlot": 0,
+      "vcount": 17,
+      "dispstat": "0x962a",
+      "inHBlank": true,
+      "inVBlank": false,
+      "firstPostTransferScanline": 18,
+      "freshProcessSha256": [
+        "2e26552bac62fad068f2de1c60367d01b3824e9bd23de1ebae1efe6948aad492",
+        "2e26552bac62fad068f2de1c60367d01b3824e9bd23de1ebae1efe6948aad492"
+      ]
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-curse-ghost-opponent-haunter-player-magikarp.json",
+      "firstStep2TraceFrame": 101,
+      "taskSlot": 0,
+      "vcount": 14,
+      "dispstat": "0x9628",
+      "inHBlank": false,
+      "inVBlank": false,
+      "firstPostTransferScanline": 14,
+      "freshProcessSha256": [
+        "5661f83a7eb6e167c6e3905c1388a2f4b22f1b5a7976bdbcd45c6f4773f0ae99",
+        "5661f83a7eb6e167c6e3905c1388a2f4b22f1b5a7976bdbcd45c6f4773f0ae99"
+      ]
+    }
+  },
+  "guard": {
+    "framebufferRead": false,
+    "pixelDataRead": false,
+    "mismatchBoundsRead": false,
+    "coordinateOrColorFit": false
+  }
+}

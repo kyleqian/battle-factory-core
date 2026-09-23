@@ -1,0 +1,342 @@
+{
+  "schema": "ice-ball-source-audit/v1",
+  "move": "MOVE_ICE_BALL",
+  "moveId": 301,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "pointerOwnedRoot": {
+      "symbol": "Move_ICE_BALL",
+      "start": "0x82d72a4",
+      "endExclusive": "0x82d7473",
+      "byteLength": 463,
+      "sha256": "1cb982eca1ff656816497bf6322fead55cf310df8f4498c832f61a8c5d46531c"
+    },
+    "text": {
+      "byteLength": 2584,
+      "sha256": "69c325be1e217118022ec491d83711ec1a7142a16737cc1b631db46f84c7b491"
+    },
+    "script": [
+      "loadspritegfx ANIM_TAG_ICE_CHUNK",
+      "loadspritegfx ANIM_TAG_ICE_CRYSTALS",
+      "createvisualtask AnimTask_GetIceBallCounter, 5, 0",
+      "jumpargeq 0, 4, IceBallSetIceBg",
+      "IceBallContinue:",
+      "playsewithpan SE_M_ICY_WIND, SOUND_PAN_ATTACKER",
+      "createsprite gIceBallChunkSpriteTemplate, ANIM_TARGET, 2, 15, 0, -12, -16, 30, -40",
+      "delay 28",
+      "playsewithpan SE_M_BRICK_BREAK, SOUND_PAN_TARGET",
+      "createvisualtask AnimTask_GetIceBallCounter, 5, 0",
+      "jumpargeq 0, 0, IceBallWeakest",
+      "jumpargeq 0, 1, IceBallWeak",
+      "jumpargeq 0, 2, IceBallMediun",
+      "jumpargeq 0, 3, IceBallStrong",
+      "jumpargeq 0, 4, IceBallStrongest",
+      "IceBallContinue2:",
+      "createvisualtask AnimTask_GetIceBallCounter, 5, 0",
+      "jumpargeq 0, 4, IceBallUnsetIceBg",
+      "IceBallEnd:",
+      "end",
+      "IceBallSetIceBg:",
+      "fadetobg BG_ICE",
+      "goto IceBallContinue",
+      "IceBallUnsetIceBg:",
+      "waitbgfadein",
+      "delay 45",
+      "restorebg",
+      "waitbgfadein",
+      "goto IceBallEnd",
+      "IceBallWeakest:",
+      "createvisualtask AnimTask_ShakeTargetBasedOnMovePowerOrDmg, 2, FALSE, 1, 8, 1, 0",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "goto IceBallContinue2",
+      "IceBallWeak:",
+      "createvisualtask AnimTask_ShakeTargetBasedOnMovePowerOrDmg, 2, FALSE, 1, 10, 1, 0",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "goto IceBallContinue2",
+      "IceBallMediun:",
+      "createvisualtask AnimTask_ShakeTargetBasedOnMovePowerOrDmg, 2, FALSE, 1, 14, 1, 0",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "goto IceBallContinue2",
+      "IceBallStrong:",
+      "createvisualtask AnimTask_ShakeTargetBasedOnMovePowerOrDmg, 2, FALSE, 1, 18, 1, 0",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "goto IceBallContinue2",
+      "IceBallStrongest:",
+      "createvisualtask AnimTask_ShakeTargetBasedOnMovePowerOrDmg, 2, FALSE, 1, 30, 1, 0",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "call IceBallImpactShard",
+      "goto IceBallContinue2",
+      "IceBallImpactShard:",
+      "createsprite gIceBallImpactShardSpriteTemplate, ANIM_TARGET, 4, -12, -16",
+      "return"
+    ],
+    "blocks": [
+      "Move_ICE_BALL",
+      "IceBallSetIceBg",
+      "IceBallContinue",
+      "IceBallWeakest",
+      "IceBallWeak",
+      "IceBallMediun",
+      "IceBallStrong",
+      "IceBallStrongest",
+      "IceBallImpactShard",
+      "IceBallContinue2",
+      "IceBallUnsetIceBg",
+      "IceBallEnd"
+    ],
+    "callbacks": [
+      {
+        "symbol": "InitIceBallAnim",
+        "start": "0x810cc88",
+        "endExclusive": "0x810cd1c",
+        "byteLength": 148,
+        "sha256": "472492e8bfed6debf90fb61e83ce5e85c348fcb2f5e1de0a29f225585bcc754b"
+      },
+      {
+        "symbol": "AnimThrowIceBall",
+        "start": "0x810cd1c",
+        "endExclusive": "0x810cd4c",
+        "byteLength": 48,
+        "sha256": "cda1a5daae1cbc6d8cb5f33eee9c368377482d715e818af1545130e629fa90e1"
+      },
+      {
+        "symbol": "InitIceBallParticle",
+        "start": "0x810cd4c",
+        "endExclusive": "0x810cdb0",
+        "byteLength": 100,
+        "sha256": "e8619f0e5207f67933c777ff22dd26abfa372f49796ad46e98ad60fbef72dd19"
+      },
+      {
+        "symbol": "AnimIceBallParticle",
+        "start": "0x810cdb0",
+        "endExclusive": "0x810cdfc",
+        "byteLength": 76,
+        "sha256": "0f4163c89991f370402152f7ca637b04c7b9de148352f9ebe539f3e9c5e5db1e"
+      },
+      {
+        "symbol": "AnimTask_GetIceBallCounter",
+        "start": "0x810cdfc",
+        "endExclusive": "0x810ce2c",
+        "byteLength": 48,
+        "sha256": "68af3e48e3fca7121221effe2faf73c8535770595c5991ab75ce80bab9d77733"
+      },
+      {
+        "symbol": "AnimTask_ShakeTargetBasedOnMovePowerOrDmg",
+        "start": "0x80d6388",
+        "endExclusive": "0x80d646c",
+        "byteLength": 228,
+        "sha256": "c5cb44d3c8ea5ac00d8f4111dd63fbd6437d36d6b39f161a55334c890bc32688"
+      }
+    ],
+    "affineScales": [
+      224,
+      280,
+      336,
+      384,
+      448
+    ]
+  },
+  "graph": {
+    "blockCount": 12,
+    "componentCount": 20,
+    "components": [
+      "asset:ANIM_TAG_ICE_CHUNK",
+      "asset:ANIM_TAG_ICE_CRYSTALS",
+      "sprite:gIceBallChunkSpriteTemplate",
+      "sprite:gIceBallImpactShardSpriteTemplate",
+      "subroutine:IceBallContinue",
+      "subroutine:IceBallContinue2",
+      "subroutine:IceBallEnd",
+      "subroutine:IceBallImpactShard",
+      "subroutine:IceBallMediun",
+      "subroutine:IceBallSetIceBg",
+      "subroutine:IceBallStrong",
+      "subroutine:IceBallStrongest",
+      "subroutine:IceBallUnsetIceBg",
+      "subroutine:IceBallWeak",
+      "subroutine:IceBallWeakest",
+      "task:AnimTask_GetIceBallCounter",
+      "task:AnimTask_ShakeTargetBasedOnMovePowerOrDmg",
+      "visualCommand:fadetobg",
+      "visualCommand:restorebg",
+      "visualCommand:waitbgfadein"
+    ],
+    "novelTrackComponents": [
+      "asset:ANIM_TAG_ICE_CHUNK",
+      "sprite:gIceBallChunkSpriteTemplate",
+      "sprite:gIceBallImpactShardSpriteTemplate",
+      "subroutine:IceBallContinue",
+      "subroutine:IceBallContinue2",
+      "subroutine:IceBallEnd",
+      "subroutine:IceBallImpactShard",
+      "subroutine:IceBallMediun",
+      "subroutine:IceBallSetIceBg",
+      "subroutine:IceBallStrong",
+      "subroutine:IceBallStrongest",
+      "subroutine:IceBallUnsetIceBg",
+      "subroutine:IceBallWeak",
+      "subroutine:IceBallWeakest",
+      "task:AnimTask_GetIceBallCounter",
+      "task:AnimTask_ShakeTargetBasedOnMovePowerOrDmg",
+      "visualCommand:fadetobg",
+      "visualCommand:restorebg",
+      "visualCommand:waitbgfadein"
+    ]
+  },
+  "branches": {
+    "counters": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "shardCounts": [
+      5,
+      7,
+      9,
+      10,
+      10
+    ],
+    "shakeDurations": [
+      8,
+      10,
+      14,
+      18,
+      30
+    ],
+    "shardLife": 21,
+    "arcDuration": 30
+  },
+  "carrier": {
+    "factoryCount": 3,
+    "level50Count": 3,
+    "inventoryFactoryCount": 2,
+    "entries": [
+      {
+        "index": 59,
+        "label": "FRONTIER_MON_SPHEAL",
+        "species": "SPECIES_SPHEAL",
+        "moves": [
+          "MOVE_ICE_BALL",
+          "MOVE_WATER_PULSE",
+          "MOVE_HAIL",
+          "MOVE_MUD_SLAP"
+        ]
+      },
+      {
+        "index": 118,
+        "label": "FRONTIER_MON_DELIBIRD",
+        "species": "SPECIES_DELIBIRD",
+        "moves": [
+          "MOVE_PRESENT",
+          "MOVE_ICE_BALL",
+          "MOVE_AERIAL_ACE",
+          "MOVE_HAIL"
+        ]
+      },
+      {
+        "index": 196,
+        "label": "FRONTIER_MON_SEALEO_1",
+        "species": "SPECIES_SEALEO",
+        "moves": [
+          "MOVE_ICE_BALL",
+          "MOVE_HAIL",
+          "MOVE_SNORE",
+          "MOVE_REST"
+        ]
+      }
+    ],
+    "preferred": {
+      "index": 59,
+      "label": "FRONTIER_MON_SPHEAL",
+      "species": "SPECIES_SPHEAL"
+    },
+    "sourceControls": [
+      {
+        "index": 118,
+        "label": "FRONTIER_MON_DELIBIRD"
+      },
+      {
+        "index": 196,
+        "label": "FRONTIER_MON_SEALEO_1"
+      }
+    ]
+  },
+  "controls": {
+    "exactShared": [
+      "asset:ANIM_TAG_ICE_CRYSTALS",
+      "task:AnimTask_ShakeTargetBasedOnMovePowerOrDmg",
+      "visualCommand:fadetobg",
+      "visualCommand:restorebg",
+      "visualCommand:waitbgfadein"
+    ],
+    "siblingMoves": {
+      "MOVE_ROLLOUT": "exact",
+      "MOVE_ICE_BEAM": "exact",
+      "MOVE_HAIL": "exact",
+      "MOVE_BLIZZARD": "exact",
+      "MOVE_SHEER_COLD": "exact"
+    },
+    "noTransferCredit": true
+  },
+  "checkpoint": {
+    "sourceAudit": true,
+    "completePointerOwnedRoot": true,
+    "completeReachableVisualGraph": true,
+    "directTemplateAndTaskBodies": true,
+    "fullFactoryCarrierCensus": true,
+    "legalBilateralPartyOnlyStaging": true,
+    "denseSemanticAndRawRgbEvidence": true,
+    "normalizedBankedMaps": true,
+    "twiceFreshByteIdentical": true,
+    "firstInactiveCleanup": true,
+    "latchMeasured": true,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSceneOnSeam": false,
+    "compositorAdded": false,
+    "actualCoreFramebufferAcceptance": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "gameplayStateOwned": false,
+    "boundaryOrBarrierChanged": false,
+    "unsupportedNoCreditBoundary": true
+  }
+}

@@ -204,6 +204,7 @@ import {
   type SceneOnRevengeConfig,
   type SceneOnSpitUpConfig,
   type SceneOnFuryCutterConfig,
+  type SceneOnCurseConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -421,6 +422,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "FURY_CUTTER") {
     const furyCutterPresentation = presentation as SceneOnMovePresentationState<SceneOnFuryCutterConfig>;
     renderSceneOnMovePresentation(framebuffer, furyCutterPresentation);
+    return;
+  }
+  if (presentation.config.move === "CURSE") {
+    const cursePresentation = presentation as SceneOnMovePresentationState<SceneOnCurseConfig>;
+    renderSceneOnMovePresentation(framebuffer, cursePresentation);
     return;
   }
   if (presentation.config.move === "PURSUIT") {

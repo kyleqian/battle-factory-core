@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        unsupported: 3,
+        unsupported: 2,
         staged: 0,
         partial: 0,
-        exact: 273,
+        exact: 274,
       },
       {
         tier: "openOnly",
@@ -95,7 +95,7 @@ describe("animation coverage ledger", () => {
   it("queues unfinished Level 50 moves before Open-only Outrage", () => {
     const queue = queuedAnimationMoves();
     expect(queue.map(({ move }) => move)).toEqual([
-      "MOVE_CURSE", "MOVE_ICE_BALL", "MOVE_OUTRAGE",
+      "MOVE_ICE_BALL", "MOVE_OUTRAGE",
     ]);
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
@@ -202,8 +202,9 @@ describe("animation coverage ledger", () => {
 
     const leverage = animationComponentLeverage();
     expect(leverage.proven.some((item) =>
-      item.provenBy.includes("MOVE_FIRE_PUNCH") &&
-      item.provenBy.includes("MOVE_ICE_PUNCH")
+      item.component === "task:AnimTask_ShakeMon2" &&
+      item.provenBy.includes("MOVE_CURSE") &&
+      item.remainingMoves.includes("MOVE_HELPING_HAND")
     )).toBe(true);
     expect(leverage.unproven).toHaveLength(0);
   });

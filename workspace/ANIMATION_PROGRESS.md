@@ -1,74 +1,84 @@
-# Animation supervisor verification — MOVE_FURY_CUTTER exact merge (2026-09-23)
+# Animation supervisor verification — MOVE_ICE_BALL evidence merge (2026-09-23)
 
-- **State / merge:** Fast-forwarded worker commits `79fe16154` and `72fafc0ab`.
-  `MOVE_FURY_CUTTER` and only its nine-component
-  `fury-cutter-counter-power-branches` track are exact/fulfilled; Level 50 is
-  now **273/276 exact, 0 partial, 0 staged, 3 unsupported**. Helping Hand
-  remains blocked/unfulfilled; no sibling, gameplay/RNG/facility, boundary,
-  or barrier owner moved.
-- **Independent proof:** Two fresh supervisor actual-core processes are
-  byte-identical (`10c0da63…`) and pass all **344/344** component, typed-seam,
-  chronological raw-RGB, and shared-core framebuffer rows with **0 residual
-  pixels** at verdict `824abcb1…`. The material CROBAT/GROVYLE side/species/
-  geometry/allocation/order control changes live output while opaque gameplay
-  state/RNG remain unchanged. The repair uses live Grovyle/Blissey display
-  identity, side-selected target monbg, and normal flipped CUT ObjBlend OAM;
-  it adds no screenshot, coordinate/color fit, or absolute-tick branch.
-- **Gates / next:** On final production tree `72fafc0ab`, the focused Fury/
-  source/evidence/production/diagnosis/boundary/inventory union passes **7
-  files / 17 tests**; smoke passes **8 files / 448 tests**; coverage, animation
-  audit, and diff checks are green. Independent `npm test` passes **1,447 files
-  / 11,525 tests**, with **44 files / 223 tests skipped**, in **1,920.71s**;
-  `npm run build` passes **833 modules** with only the inherited chunk warning.
-  Next dispatch `MOVE_CURSE` for source classification, a move-owned component
-  track, and complete legal bilateral evidence; no existing Curse mechanics
-  or sibling receipt grants animation credit. **For the main program:** nothing
-  blocking.
+- **State / merge:** Fast-forwarded verified worker commit `639a1e1f7`.
+  `MOVE_ICE_BALL` remains **unsupported** and the 20-component
+  `ice-ball-five-counter-bg-shards` track remains **unfulfilled**; Level 50
+  stays **274/276 exact, 0 partial, 0 staged, 2 unsupported**. No production,
+  move, sibling, component, gameplay/RNG/facility, import-boundary, or
+  unsupported-barrier credit moved.
+- **Independent proof:** Fresh supervisor player-back and opponent-front
+  direct-mGBA probes reproduce the retained **436-row** dense digests
+  `278737a3…` / `6acb3416…` and raw-RGB sequence digests `03238c1f…` /
+  `f4432d82…` exactly. Each natural chain reaches counter maxima **0..4**
+  with complete **76/76/76/76/132** windows through cleanup; the retained
+  compact maps regenerate byte-identically and keep the measured bilateral
+  OAM/matrix/palette/BG/audio/RNG latches without production input.
+- **Gates / next:** Supervisor focused source/evidence/boundary/inventory union
+  passes **4 files / 17 tests**; coverage, animation audit, JSON, and diff
+  checks pass. The recorded green production baseline remains reusable because
+  this merge changed only evidence, tests, tooling, and animation ledgers.
+  Next dispatch a bounded production implementation/acceptance step for Ice
+  Ball; Open-only `MOVE_OUTRAGE` follows when Level-50 ready work is exhausted.
+  **For the main program:** nothing blocking.
 
-# Animation supervisor verification — MOVE_FURY_CUTTER residual diagnosis merge (2026-09-23)
+# Animation worker checkpoint — MOVE_ICE_BALL source/legal dense evidence (2026-09-23)
 
-- **State / merge:** Fast-forwarded verified tooling-only worker commit
-  `5a7efb1a9`. `MOVE_FURY_CUTTER` remains **unsupported** and its track remains
-  **unfulfilled**; Level 50 stays **272/276 exact, 0 partial, 0 staged, 4
-  unsupported**. No production, coverage, sibling, gameplay/RNG/facility,
-  boundary, or barrier credit moved.
-- **Independent proof:** Two fresh supervisor diagnosis processes are
-  byte-identical (`d64a6c3d…`) and account for all **1,225,822** residual
-  pixels. The source-quiet mask is identical across **44 rows per orientation**
-  (**2,359** player / **2,306** opponent pixels) and is a subset of every
-  active row: **802,380** accumulated pixels are invariant static
-  field/battler/chrome composition, while **423,442** are active scanout
-  (**30,072** monbg transition, **210,120** CUT OBJ+alpha, **30,310**
-  monbg+alpha, **152,940** CUT OBJ+palette). Classification uses live source
-  latches, not coordinates, RGB fitting, screenshots, or absolute ticks.
-- **Gates / next:** The final scoped Fury/source/evidence/production/diagnosis/
-  boundary/inventory union passes **6 files / 16 tests**; coverage, animation
-  audit, typecheck, and diff checks are green. This is tooling/tests only, so
-  the same-production full-suite/build receipt from `e3af4883c` remains valid.
-  Resume by fixing the invariant static composition first, then the four
-  active scanout phases; require zero residuals and a material altered control
-  before promotion. **For the main program:** nothing blocking.
+- **State / credit:** Source and legal staging are complete, but
+  MOVE_ICE_BALL remains **unsupported** and
+  ice-ball-five-counter-bg-shards remains **unfulfilled**. Coverage stays
+  **274/276 exact, 0 partial, 0 staged, 2 unsupported**; no production,
+  seam, compositor, actual-core, move, sibling, or component credit moved.
+- **Did:** Audited the complete 20-component Move_ICE_BALL root
+  (0x082d72a4..0x082d7473, 463 bytes), including Ice Ball callbacks,
+  affine scales, arc, shard lives, counter branches, target shakes, assets,
+  sounds, and strongest-only BG_ICE cleanup. Legal Level-50 party-only
+  Scene-ON fixtures use ROM SPHEAL=341 against genderless REGISTEEL=403
+  with seed 305420103; the source census retains SPHEAL, DELIBIRD, and
+  SEALEO_1.
+- **Evidence:** Player-back and opponent-front each retain **436 rows**
+  (76/76/76/76/132) through first inactive cleanup. Two fresh probes per
+  orientation are byte-identical: dense/RGB sequence digests are
+  278737a3…/03238c1f… and 6acb3416…/f4432d82…. Maps measure counters
+  0..4, shards 5/7/9/10/10, shake 8/10/14/18/30, logical shard life
+  21, 30-tick arcs, predecessor OAM/matrix/palette latches, the one
+  player-back counter-3 OAM exception, side-specific BG_ICE, audio, opaque
+  state/RNG, and zero-owned cleanup.
+  Compact maps are 100K each with SHA-256 prefixes 9e6cd041…/5af2dea6…;
+  full dense rows remain in the compressed fixtures.
+- **Gates / next:** Source/evidence tests pass **8/8**, boundary/inventory
+  ratchets pass **9/9**, coverage and animation audit pass. The exact next
+  step is a separately authorized production implementation/acceptance
+  dispatch; this checkpoint intentionally makes no such claim.
 
-# Animation supervisor verification — MOVE_FURY_CUTTER production partial merge (2026-09-23)
+# Animation supervisor verification — MOVE_CURSE exact merge (2026-09-23)
 
-- **State / merge:** Fast-forwarded verified worker commits `74e9970ed` and
-  `e3af4883c`. `MOVE_FURY_CUTTER` remains **unsupported** and
-  `fury-cutter-counter-power-branches` remains **unfulfilled**; Level 50 stays
-  **272/276 exact, 0 partial, 0 staged, 4 unsupported**. No coverage, sibling,
-  gameplay/RNG/facility, boundary, or barrier credit moved.
-- **Independent proof:** Two fresh supervisor reducer/seam processes are
-  byte-identical (`f1bedee4…`) across all eight **43-row** bilateral counter
-  bodies. Two fresh actual-core processes are also byte-identical
-  (`f6d168f3…`) and reproduce the honest blocker: **0/344 exact** framebuffer
-  rows and **1,225,822** residual pixels. The retained implementation is one
-  source-relative, direction/counter-generic reducer, typed seam, dispatch,
-  and CUT/battler/monbg compositor; it adds no screenshot lookup, absolute
-  battle tick, coordinate/RGB fit, or gameplay ownership.
-- **Gates / next:** On final code `e3af4883c`, independent `npm test` passes
-  **1,445 files / 11,523 tests**, with **44 files / 223 tests skipped**, in
-  **1,792.93s**; `npm run build` passes **833 modules** with only the inherited
-  chunk warning. Focused Fury/source/evidence/boundary/inventory tests,
-  typecheck, coverage, animation audit, and diff checks are green. Resume by
-  reconciling generic background/monbg/OBJ scanout and palette composition,
-  then require twice-fresh zero residuals plus a material altered control
-  before promotion. **For the main program:** nothing blocking.
+- **State / merge:** Fast-forwarded worker commits `48acbced8`, `8c1f3a4a8`,
+  `e80041780`, and `967de69e8`. `MOVE_CURSE` and only the
+  `curse-ghost-nail-stat-lines` track are now **exact**; Level 50 is **274/276
+  exact, 0 partial, 0 staged, 2 unsupported**. No sibling, gameplay/RNG/
+  facility, import-boundary, or unsupported-barrier credit moved.
+- **Independent proof:** Two fresh supervisor timing-verifier runs are
+  byte-identical (`15081d3a…`) and pin the first-Step2 palette transfer at
+  player-back **VCOUNT 17 in HBlank** / first post-transfer row **18**, and
+  opponent-front **VCOUNT 14 in HDraw** / first post-transfer row **14**,
+  without framebuffer-derived input. Two fresh actual-core processes are
+  byte-identical (`cce965f3…`) and pass all **1,098/1,098** component,
+  typed-seam, chronological raw-RGB, and shared-framebuffer rows with **zero
+  residual pixels** at verdict digest `9ccbe049…`. The material CROBAT/
+  BLISSEY control changes output while gameplay state/RNG remain unchanged.
+- **Gates / next:** Supervisor focused union passes **8 files / 18 tests** and
+  smoke passes **8 files / 448 tests**; coverage and animation audit pass.
+  The final independent `npm test` passes **1,453 files / 11,534 tests**, with
+  **44 files / 223 tests skipped**, in **1,883.21s**; `npm run build` passes
+  **835 modules** with only the inherited chunk-size warning. Next ranked
+  ready work is Level-50 `MOVE_ICE_BALL`, then Open-only `MOVE_OUTRAGE`;
+  `MOVE_HELPING_HAND` remains evidence-blocked. **For the main program:**
+  nothing blocking.
+- **Session boundary:** Ice Ball source/census scope was prepared, but no
+  worker was dispatched: the repository-wide animation lane remained occupied
+  by `worker/animation-20260923-103841`, which entered its required full suite
+  at 11:39 UTC and could not release early enough for a separately verified
+  checkpoint before the 12:18 hard deadline. Resume Ice Ball after that lane
+  lock clears; its boundary is the 20-component, five-counter-branch script
+  with legal Level-50 carriers SPHEAL, DELIBIRD, and SEALEO_1. This is an
+  operational scheduling boundary, not an animation acceptance blocker.

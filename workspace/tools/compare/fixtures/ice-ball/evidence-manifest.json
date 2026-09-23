@@ -1,0 +1,61 @@
+{
+  "schema": "ice-ball-evidence-manifest/v1",
+  "move": "MOVE_ICE_BALL",
+  "profile": "battle-scene-on",
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "seed": 305420103,
+  "partyContract": {
+    "carrier": "FRONTIER_MON_SPHEAL",
+    "attackerSpecies": 341,
+    "targetSpecies": 403,
+    "level": 50,
+    "partyRecordsPerSide": 3,
+    "transientOverrides": false
+  },
+  "freshRuns": {
+    "player-back": [
+      {
+        "run": 1,
+        "denseJsonSha256": "278737a324a2371f446a1f48484c48cdecf3d27f946a32801e44b933587713b7",
+        "rawRgbSequenceSha256": "03238c1f4c4c5b22ef14ef7996b817906b2c836521e1a958af0e2a63240e9608",
+        "rows": [76, 76, 76, 76, 132]
+      },
+      {
+        "run": 2,
+        "denseJsonSha256": "278737a324a2371f446a1f48484c48cdecf3d27f946a32801e44b933587713b7",
+        "rawRgbSequenceSha256": "03238c1f4c4c5b22ef14ef7996b817906b2c836521e1a958af0e2a63240e9608",
+        "rows": [76, 76, 76, 76, 132]
+      }
+    ],
+    "opponent-front": [
+      {
+        "run": 1,
+        "denseJsonSha256": "6acb3416ef6725de71e5d175e1aa2a7793a1e2a1be7b1c7b20efed4fa5ffdc54",
+        "rawRgbSequenceSha256": "f4432d8222e8246ef15ef5091bcc82cf5578aefb2862b815c0970c3916cf4008",
+        "rows": [76, 76, 76, 76, 132]
+      },
+      {
+        "run": 2,
+        "denseJsonSha256": "6acb3416ef6725de71e5d175e1aa2a7793a1e2a1be7b1c7b20efed4fa5ffdc54",
+        "rawRgbSequenceSha256": "f4432d8222e8246ef15ef5091bcc82cf5578aefb2862b815c0970c3916cf4008",
+        "rows": [76, 76, 76, 76, 132]
+      }
+    ]
+  },
+  "bodyContract": {
+    "counters": [0, 1, 2, 3, 4],
+    "shards": [5, 7, 9, 10, 10],
+    "shakeDurations": [8, 10, 14, 18, 30],
+    "shardLogicalLifetimeTicks": 21,
+    "arcDurationTicks": 30,
+    "strongestCleanupDelayTicks": 45
+  },
+  "checkpoint": {
+    "productionReducer": false,
+    "typedSceneOnSeam": false,
+    "compositor": false,
+    "actualCoreFramebufferAcceptance": false,
+    "trackFulfilled": false
+  }
+}
