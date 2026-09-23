@@ -21,7 +21,23 @@ request=validate_request(json.loads(Path(sys.argv[1]).read_text()),'battle-scene
 setup=lab.prepare(request)
 rgb_dir=Path(sys.argv[3]);rgb_dir.mkdir(parents=True,exist_ok=True)
 bounds={325:(names['Move_SHADOW_PUNCH'],names['Move_EXTRASENSORY']),108:(names['Move_SMOKESCREEN'],names['Move_CONVERSION'])}
-windows=[];current=None;frame=0
+windows=[];current=None;frame=0;pending_events=[]
+event_pcs={names['BattleMainCB2']+2:'battle-main',names['UpdatePaletteFade']+2:'update-fade',names['RunTasks']+2:'run-tasks',names['TransferPlttBuffer']+2:'transfer-palette'}
+sound=names['gSoundInfo']
+def source_event(kind):
+ return {'kind':kind,'vcount':oracle.read_u8(0x04000006),'bldcnt':oracle.read_u8(0x04000050)|(oracle.read_u8(0x04000051)<<8),'bldy':oracle.read_u8(0x04000054),'bufferedBldy':oracle.read_u8(0x03000818+0x54),'paletteFade':''.join(f'{oracle.read_u8(names["gPaletteFade"]+i):02x}' for i in range(16)),'pcmDmaCounter':oracle.read_u8(sound+4),'pcmDmaPeriod':oracle.read_u8(sound+11),'c15':oracle.read_u8(sound+10)}
+def advance(buttons):
+ global frame,pending_events
+ if current is None:
+  oracle.advance(buttons);frame+=1;pending_events=[];return
+ oracle._set_buttons(buttons)
+ start=oracle.core.frame_counter;events=[];steps=0
+ while oracle.core.frame_counter==start:
+  kind=event_pcs.get(int(oracle.core.cpu.pc))
+  if kind:events.append(source_event(kind))
+  oracle.core.step();steps+=1
+  if steps>20_000_000:raise RuntimeError('source frame did not finish')
+ oracle._screen_stale=False;oracle.frame+=1;frame+=1;pending_events=events
 def capture():
  global current
  pointer=oracle.read_u32(names['sBattleAnimScriptPtr'])
@@ -33,12 +49,12 @@ def capture():
  if current is None:return
  rgb=oracle.screen_rgb()
  (rgb_dir/f'{frame:05d}.rgb').write_bytes(rgb)
- current['rows'].append({'frame':frame,'sha256':hashlib.sha256(rgb).hexdigest(),'scriptActive':active,'scriptPointer':pointer,'bldcnt':oracle.read_u8(0x04000050)|(oracle.read_u8(0x04000051)<<8),'bldy':oracle.read_u8(0x04000054),'controllerFlags':oracle.read_u32(names['gBattleControllerExecFlags'])})
+ current['rows'].append({'frame':frame,'sha256':hashlib.sha256(rgb).hexdigest(),'scriptActive':active,'scriptPointer':pointer,'bldcnt':oracle.read_u8(0x04000050)|(oracle.read_u8(0x04000051)<<8),'bldy':oracle.read_u8(0x04000054),'controllerFlags':oracle.read_u32(names['gBattleControllerExecFlags']),'intervalEvents':pending_events})
  if not active and not (oracle.read_u32(names['gBattleControllerExecFlags']) & (1 << current['attacker'])):current=None
 capture()
 for segment in request['trace']['segments']:
  for _ in range(segment['frames']):
-  oracle.advance(segment.get('buttons',[]));frame+=1;capture()
+  advance(segment.get('buttons',[]));capture()
 if current is not None:raise RuntimeError('trace ended before complete source cleanup')
 Path(sys.argv[2]).write_text(json.dumps({'schema':'live-palette-framebuffer-source/v1','setup':setup,'windows':windows},separators=(',',':')))
 print('complete source windows',[(w['moveId'],len(w['rows']),w['rows'][0]['frame'],w['rows'][-1]['frame']) for w in windows])

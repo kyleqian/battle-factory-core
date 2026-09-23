@@ -1410,6 +1410,7 @@ import {
   SHADOW_PUNCH_TRACE_ALPHA,
   SHADOW_PUNCH_TRACE_BLEND_COEFF,
 } from "../animation/shadowPunch.ts";
+import { shadowPunchLiveBackgroundBldy } from "../animation/shadowPunchFadeHost.ts";
 import {
   speciesFrontIdleRestOffset,
   speciesFrontIdleRestOffsetOrZero,
@@ -49845,6 +49846,12 @@ export function renderSceneOnMovePresentation(
 
   if (state.config.move === "SHADOW_PUNCH") {
     const view = sceneOnShadowPunchView(state);
+    // Live fields use the source callback clock.  The accepted staged move
+    // keeps its historical RAM-probed timing contract in `shadowPunch.ts`;
+    // neither path infers fade timing from attacker side.
+    const displayedBackgroundBldy = liveField
+      ? shadowPunchLiveBackgroundBldy(view.animationAge)
+      : view.backgroundBldy;
     // The live callback state and final `gMain.oamBuffer` photographed by
     // the shared framebuffer are distinct epochs for the moving BG/trace
     // stack. Newly-created fist/hitsplat sprites already occupy that buffer
@@ -49891,7 +49898,7 @@ export function renderSceneOnMovePresentation(
       palette.map((color) => {
         const packed = mgbaDarkenColor(
           color.r | (color.g << 8) | (color.b << 16),
-          view.backgroundBldy,
+          displayedBackgroundBldy,
         );
         return {
           r: packed & 0xff,
