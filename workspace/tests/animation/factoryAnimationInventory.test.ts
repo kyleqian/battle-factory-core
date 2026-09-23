@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        unsupported: 2,
+        unsupported: 1,
         staged: 0,
         partial: 0,
-        exact: 274,
+        exact: 275,
       },
       {
         tier: "openOnly",
@@ -94,9 +94,7 @@ describe("animation coverage ledger", () => {
 
   it("queues unfinished Level 50 moves before Open-only Outrage", () => {
     const queue = queuedAnimationMoves();
-    expect(queue.map(({ move }) => move)).toEqual([
-      "MOVE_ICE_BALL", "MOVE_OUTRAGE",
-    ]);
+    expect(queue.map(({ move }) => move)).toEqual(["MOVE_OUTRAGE"]);
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
       species: 8,

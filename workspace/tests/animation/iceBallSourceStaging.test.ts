@@ -64,9 +64,9 @@ describe("MOVE_ICE_BALL source and legal Scene-ON staging checkpoint", () => {
     expect(stage.trace.segments).toEqual(expect.arrayContaining([{ frames: 2, buttons: ["A"] }, { frames: 30, buttons: [] }]));
   });
 
-  it("keeps MOVE_ICE_BALL unsupported and its sole non-exclusive track unfulfilled", () => {
+  it("promotes only MOVE_ICE_BALL and its sole non-exclusive track after production acceptance", () => {
     const coverage = readJson("ANIMATION_COVERAGE.json");
-    expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_ICE_BALL")).toBe(false);
-    expect(coverage.componentTracks.find((track: Json) => track.id === "ice-ball-five-counter-bg-shards")).toMatchObject({ components: graph, representatives: ["MOVE_ICE_BALL"], fulfilled: false });
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_ICE_BALL")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "ice-ball-five-counter-bg-shards")).toMatchObject({ components: graph, representatives: ["MOVE_ICE_BALL"], fulfilled: true });
   });
 });
