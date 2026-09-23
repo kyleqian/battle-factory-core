@@ -117,6 +117,7 @@ import { superpowerAtAge, type SuperpowerLiveInputs, type SuperpowerState } from
 import { revengeAtAge, type RevengeLiveInputs, type RevengeState } from "./revenge.ts";
 import { spitUpAtAge, type SpitUpLiveInputs, type SpitUpState } from "./spitUp.ts";
 import { furyCutterAtAge, type FuryCutterLiveInputs, type FuryCutterState } from "./furyCutter.ts";
+import { iceBallAtAge, type IceBallLiveInputs, type IceBallState } from "./iceBall.ts";
 import { curseAtAge, type CurseLiveInputs, type CurseState } from "./curse.ts";
 import {
   auroraBeamAtAge,
@@ -2924,6 +2925,17 @@ export interface SceneOnFuryCutterConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/** Narrow Scene-ON presentation seam for MOVE_ICE_BALL's five live counter branches. */
+export interface SceneOnIceBallConfig {
+  readonly move: "ICE_BALL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<IceBallLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerPictureOffset" | "targetPictureOffset">>;
+}
+
 /** Narrow Scene-ON presentation seam for MOVE_CURSE's natural type branch. */
 export interface SceneOnCurseConfig {
   readonly move: "CURSE";
@@ -4496,6 +4508,7 @@ export type SceneOnMoveConfig =
   | SceneOnRevengeConfig
   | SceneOnSpitUpConfig
   | SceneOnFuryCutterConfig
+  | SceneOnIceBallConfig
   | SceneOnCurseConfig
   | SceneOnReturnConfig
   | SceneOnFlatterConfig
@@ -4885,6 +4898,8 @@ export type SceneOnSpitUpPresentationState =
   SceneOnMovePresentationState<SceneOnSpitUpConfig>;
 export type SceneOnFuryCutterPresentationState =
   SceneOnMovePresentationState<SceneOnFuryCutterConfig>;
+export type SceneOnIceBallPresentationState =
+  SceneOnMovePresentationState<SceneOnIceBallConfig>;
 export type SceneOnCursePresentationState =
   SceneOnMovePresentationState<SceneOnCurseConfig>;
 export type SceneOnReturnPresentationState =
@@ -5367,6 +5382,10 @@ export interface SceneOnSpitUpView extends SpitUpState {
   readonly target: SceneOnPresentationBattler;
 }
 export interface SceneOnFuryCutterView extends FuryCutterState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+export interface SceneOnIceBallView extends IceBallState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -9203,6 +9222,21 @@ export function sceneOnFuryCutterView(
     attackerSpecies: attacker.species, targetSpecies: target.species,
     attackerCenter: attacker.geometry.animationCenter,
     targetCenter: target.geometry.animationCenter }), attacker, target };
+}
+
+/** `age=0` is MOVE_ICE_BALL's first ICE_CHUNK resource-command row. */
+export function sceneOnIceBallView(
+  state: SceneOnIceBallPresentationState,
+): SceneOnIceBallView {
+  if (state.config.move !== "ICE_BALL") {
+    throw new Error(`expected ICE_BALL presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return { ...iceBallAtAge(state.age, { ...animationInputs,
+    attackerSide: attacker.geometry.side, targetSide: target.geometry.side,
+    attackerSpecies: attacker.species, targetSpecies: target.species,
+    attackerPictureOffset: attacker.geometry.animationCenter,
+    targetPictureOffset: target.geometry.animationCenter }), attacker, target };
 }
 
 /** `age=0` is MOVE_CURSE's branch-selection source row. */
