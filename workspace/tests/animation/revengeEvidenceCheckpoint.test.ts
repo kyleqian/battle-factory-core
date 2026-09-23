@@ -13,10 +13,10 @@ describe("MOVE_REVENGE complete bilateral Scene-ON evidence checkpoint", () => {
     expect(fixture.acceptance).toEqual({ freshRunsPerOrientation: 2, rows: { "player-back": 145, "opponent-front": 145 }, totalRows: 290, firstInactiveCleanupRetained: true, productionFramebufferCompared: false });
   });
 
-  it("keeps the move unsupported and the isolated component track unfulfilled", () => {
-    expect(coverage.entries.find((entry) => entry.move === "MOVE_REVENGE")).toBeUndefined();
+  it("keeps the historical evidence receipt isolated after exact promotion", () => {
+    expect(coverage.entries.find((entry) => entry.move === "MOVE_REVENGE")).toMatchObject({ status: "exact" });
     expect(coverage.queue).not.toContain("MOVE_REVENGE");
-    expect(coverage.componentTracks.find((track) => track.id === "revenge-purple-scratch-persist-hit")).toMatchObject({ representatives: ["MOVE_REVENGE"], fulfilled: false });
+    expect(coverage.componentTracks.find((track) => track.id === "revenge-purple-scratch-persist-hit")).toMatchObject({ representatives: ["MOVE_REVENGE"], fulfilled: true });
     expect(fixture.status).toBe("unsupported-evidence"); expect(fixture.coverageCredit).toBe(false);
   });
 });

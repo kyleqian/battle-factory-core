@@ -34,10 +34,10 @@ describe("MOVE_REVENGE source and legal bilateral staging checkpoint", () => {
     expect(mons.every((mon: Json) => mon.level === 50 && mon.moves.length === 4)).toBe(true);
   });
 
-  it("records only an unfulfilled non-exclusive component track and grants no move credit", () => {
+  it("keeps the source checkpoint isolated after exact move-local promotion", () => {
     const coverage = readJson("ANIMATION_COVERAGE.json");
-    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_REVENGE")).toBeUndefined();
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_REVENGE")).toMatchObject({ status: "exact" });
     expect(coverage.queue).not.toContain("MOVE_REVENGE");
-    expect(coverage.componentTracks.find((track: Json) => track.id === "revenge-purple-scratch-persist-hit")).toMatchObject({ components: ["asset:ANIM_TAG_PURPLE_SCRATCH", "asset:ANIM_TAG_PURPLE_SWIPE", "sprite:gRevengeBigScratchSpriteTemplate", "sprite:gRevengeSmallScratchSpriteTemplate", "visualCommand:create_persist_hitsplat_sprite"], representatives: ["MOVE_REVENGE"], fulfilled: false });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "revenge-purple-scratch-persist-hit")).toMatchObject({ components: ["asset:ANIM_TAG_PURPLE_SCRATCH", "asset:ANIM_TAG_PURPLE_SWIPE", "sprite:gRevengeBigScratchSpriteTemplate", "sprite:gRevengeSmallScratchSpriteTemplate", "visualCommand:create_persist_hitsplat_sprite"], representatives: ["MOVE_REVENGE"], fulfilled: true });
   });
 });

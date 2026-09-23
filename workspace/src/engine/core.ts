@@ -200,6 +200,7 @@ import {
   type SceneOnWillOWispConfig,
   type SceneOnMegaHornConfig,
   type SceneOnSuperpowerConfig,
+  type SceneOnRevengeConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -402,6 +403,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "SUPERPOWER") {
     const superpowerPresentation=presentation as SceneOnMovePresentationState<SceneOnSuperpowerConfig>;
     renderSceneOnMovePresentation(framebuffer,superpowerPresentation);
+    return;
+  }
+  if (presentation.config.move === "REVENGE") {
+    const revengePresentation=presentation as SceneOnMovePresentationState<SceneOnRevengeConfig>;
+    renderSceneOnMovePresentation(framebuffer,revengePresentation);
     return;
   }
   if (presentation.config.move === "PURSUIT") {

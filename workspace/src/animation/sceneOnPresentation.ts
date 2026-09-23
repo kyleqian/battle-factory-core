@@ -114,6 +114,7 @@ import {
 } from "./hornDrill.ts";
 import { megaHornAtAge, type MegaHornLiveInputs, type MegaHornState } from "./megaHorn.ts";
 import { superpowerAtAge, type SuperpowerLiveInputs, type SuperpowerState } from "./superpower.ts";
+import { revengeAtAge, type RevengeLiveInputs, type RevengeState } from "./revenge.ts";
 import {
   auroraBeamAtAge,
   type AuroraBeamGeometry,
@@ -2888,6 +2889,16 @@ export interface SceneOnSuperpowerConfig {
     "attackerSide"|"targetSide"|"attackerSpecies"|"targetSpecies"|"attackerCenter"|"targetCenter">>;
 }
 
+/** Narrow Scene-ON presentation seam for MOVE_REVENGE. */
+export interface SceneOnRevengeConfig {
+  readonly move: "REVENGE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<RevengeLiveInputs,
+    "attackerSide"|"targetSide"|"attackerSpecies"|"targetSpecies"|"attackerCenter"|"targetCenter">>;
+}
+
 /**
  * Narrow Scene-ON seam for MOVE_RETURN. The caller carries the live
  * friendship-selected presentation snapshot; damage, Return power, gameplay
@@ -4446,6 +4457,7 @@ export type SceneOnMoveConfig =
   | SceneOnWillOWispConfig
   | SceneOnMegaHornConfig
   | SceneOnSuperpowerConfig
+  | SceneOnRevengeConfig
   | SceneOnReturnConfig
   | SceneOnFlatterConfig
   | SceneOnRazorWindConfig
@@ -4828,6 +4840,8 @@ export type SceneOnMegaHornPresentationState =
   SceneOnMovePresentationState<SceneOnMegaHornConfig>;
 export type SceneOnSuperpowerPresentationState =
   SceneOnMovePresentationState<SceneOnSuperpowerConfig>;
+export type SceneOnRevengePresentationState =
+  SceneOnMovePresentationState<SceneOnRevengeConfig>;
 export type SceneOnReturnPresentationState =
   SceneOnMovePresentationState<SceneOnReturnConfig>;
 export type SceneOnFlatterPresentationState =
@@ -5296,6 +5310,10 @@ export interface SceneOnMegaHornView extends MegaHornState {
   readonly target: SceneOnPresentationBattler;
 }
 export interface SceneOnSuperpowerView extends SuperpowerState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+export interface SceneOnRevengeView extends RevengeState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -9087,6 +9105,16 @@ export function sceneOnSuperpowerView(state: SceneOnSuperpowerPresentationState)
   if(state.config.move!=="SUPERPOWER")throw new Error(`expected SUPERPOWER presentation, got ${state.config.move}`);
   const{attacker,target,animationInputs}=state.config;
   return{...superpowerAtAge(state.age,{...animationInputs,
+    attackerSide:attacker.geometry.side,targetSide:target.geometry.side,
+    attackerSpecies:attacker.species,targetSpecies:target.species,
+    attackerCenter:attacker.geometry.animationCenter,targetCenter:target.geometry.animationCenter}),attacker,target};
+}
+
+/** `age=0` is MOVE_REVENGE's first resource-command row. */
+export function sceneOnRevengeView(state: SceneOnRevengePresentationState): SceneOnRevengeView {
+  if(state.config.move!=="REVENGE")throw new Error(`expected REVENGE presentation, got ${state.config.move}`);
+  const{attacker,target,animationInputs}=state.config;
+  return{...revengeAtAge(state.age,{...animationInputs,
     attackerSide:attacker.geometry.side,targetSide:target.geometry.side,
     attackerSpecies:attacker.species,targetSpecies:target.species,
     attackerCenter:attacker.geometry.animationCenter,targetCenter:target.geometry.animationCenter}),attacker,target};

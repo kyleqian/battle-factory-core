@@ -8020,6 +8020,43 @@
     "ANIMATION_LATCHES.md"
    ],
    "acceptance": "Two independent actual-core verifier processes each pass all 496 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest bfa61d58bf15a4909fe3d49b0e21f4f687b57ddd2cf7d7fcc507f1377f73b3b0; player/opponent RGB sequences 69d70845cc2e2d7b0d82d490db9365c7bfc467eb65325fe0be80ee729c91c580 / b1aa859dc305a11257c5e01b701bf234ebda29087c5103fad9871d149eb3bf9c."
+  },
+  {
+   "move": "MOVE_REVENGE",
+   "status": "exact",
+   "covered": [
+    "the complete 151-byte Move_REVENGE source body and all 14 components are independently accepted, including both purple scratch resources/templates, attacker blend cycle, horizontal lunge, target ShakeMon2, two persistent hitsplats, target monbg/alpha, audio, resource allocation, and cleanup",
+    "complete legal bilateral MACHAMP/SHUCKLE and QWILFISH/SHUCKLE Scene-ON evidence retains 145 dense semantic and chronological raw-RGB rows per orientation through age-144 first-inactive cleanup, twice fresh",
+    "Revenge's own normalized maps confirm whole hardware OAM and matrices equal preceding software on all 144 comparable ages per orientation; hardware palette equals preceding faded except the age-4 same-row target-monbg setup; the supplied scratch, lunge, shake, persistent-hit, resource, monbg, alpha, and cleanup lifetimes are all move-owned and bilateral",
+    "the pure source-relative production reducer and narrow typed Scene-ON seam consume live sides, species, geometry, art, buffers, palettes, registers, allocation/order, audio, presentation RNG, and opaque gameplay state/RNG without owning battle resolution",
+    "the generic resource-loaded compositor uses source-extracted PURPLE_SCRATCH/PURPLE_SWIPE art plus shared IMPACT art; two fresh actual-core processes pass all 290 component, seam, chronological raw-RGB, and shared framebuffer rows with zero residual pixels",
+    "a material CROBAT/BLISSEY side/species/geometry/allocation/matrix/presentation-RNG control changes live output while gameplay state and gameplay RNG remain opaque and unchanged; no sibling or shared-component credit transfers"
+   ],
+   "evidence": [
+    "tools/compare/revengeSourceAudit.ts",
+    "tools/compare/evidence/revenge-source-audit.json",
+    "tools/compare/extractRevengeAssets.ts",
+    "tools/compare/evidence/revenge-assets.json",
+    "src/animation/assets/revenge-purple-scratch-swipe.json",
+    "tools/compare/revengeEvidence.ts",
+    "tools/compare/fixtures/revenge-evidence.json",
+    "tools/compare/evidence/revenge-player-dense-state.json.gz",
+    "tools/compare/evidence/revenge-opponent-dense-state.json.gz",
+    "tools/compare/evidence/revenge-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/revenge-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/revenge-changemap-player.json",
+    "tools/compare/evidence/revenge-changemap-opponent.json",
+    "src/animation/revenge.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tools/compare/revengeProduction.ts",
+    "tools/compare/revengeActualCore.ts",
+    "tests/animation/revengeProduction.test.ts",
+    "tests/animation/revengeActualCore.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "acceptance": "Two independent actual-core verifier processes each pass all 290 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest f555b06392ea1bf4d14774223c60243909d2aaffdcce75eea66a196f643ba440; player/opponent RGB sequences 1fcf5f5601a2c0ddf800dda02306188add5daed373a6dd797eae2aaa9ab8633e / 47e7b19f93c49574783388d9e0c71827d7412c3eede51b61d0fb5172029674f8."
   }
  ],
  "queue": [],
@@ -10689,7 +10726,7 @@
     "visualCommand:create_persist_hitsplat_sprite"
    ],
    "representatives": ["MOVE_REVENGE"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/revengeSourceAudit.ts",
     "tools/compare/evidence/revenge-source-audit.json",
@@ -10705,9 +10742,19 @@
     "tools/battle-lab/mechanic-revenge-player-machamp-opponent-shuckle.json",
     "tools/battle-lab/mechanic-revenge-opponent-qwilfish-player-shuckle.json",
     "tests/animation/revengeSourceStaging.test.ts",
-    "tests/animation/revengeEvidenceCheckpoint.test.ts"
+    "tests/animation/revengeEvidenceCheckpoint.test.ts",
+    "src/animation/assets/revenge-purple-scratch-swipe.json",
+    "src/animation/revenge.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tools/compare/revengeProduction.ts",
+    "tools/compare/revengeActualCore.ts",
+    "tests/animation/revengeProduction.test.ts",
+    "tests/animation/revengeActualCore.test.ts",
+    "ANIMATION_LATCHES.md"
    ],
-   "goal": "UNFULFILLED evidence-only checkpoint for MOVE_REVENGE: complete source, legal bilateral staging, and twice-fresh dense retained state/RGB/latch maps through cleanup are pinned, but reducer, typed seam, compositor, actual-core acceptance, exact promotion, and all component credit remain outstanding."
+   "goal": "FULFILLED by MOVE_REVENGE alone after complete source classification, source-extracted PURPLE_SCRATCH/PURPLE_SWIPE assets, legal bilateral dense evidence, source-relative production reducer, narrow typed Scene-ON seam, generic live compositor, material altered control, and twice-fresh 290/290 zero-residual actual-core acceptance through age-144 cleanup. No sibling or shared-component credit transfers."
   }
  ],
  "variantAudits": {

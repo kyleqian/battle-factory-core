@@ -315,6 +315,10 @@ const asset = {
 };
 
 const serialized = JSON.stringify(asset, null, 2) + "\n";
+const productionFlag = process.argv.indexOf("--production-out");
+const productionOutput = productionFlag >= 0 && process.argv[productionFlag + 1]
+  ? resolve(process.argv[productionFlag + 1]!)
+  : null;
 if (process.argv.includes("--check")) {
   if (!existsSync(output) || readFileSync(output, "utf8") !== serialized) throw new Error(`Revenge scratch asset differs from pinned source: ${output}`);
   console.log("Revenge scratch asset matches authoritative source PNGs, ELF, and ROM");
@@ -322,4 +326,17 @@ if (process.argv.includes("--check")) {
   mkdirSync(resolve(output, ".."), { recursive: true });
   writeFileSync(output, serialized);
   console.log(`wrote ${output}`);
+}
+if (productionOutput) {
+  const productionAsset = {
+    schema: "revenge-purple-scratch-swipe-production-assets/v1",
+    sourceReceipt: "tools/compare/evidence/revenge-assets.json",
+    purpleScratch: { columns: resources.purpleScratch.layout.tiles.columns,
+      rows: resources.purpleScratch.layout.tiles.rows, ...resources.purpleScratch.art },
+    purpleSwipe: { columns: resources.purpleSwipe.layout.tiles.columns,
+      rows: resources.purpleSwipe.layout.tiles.rows, ...resources.purpleSwipe.art },
+  };
+  mkdirSync(resolve(productionOutput, ".."), { recursive: true });
+  writeFileSync(productionOutput, JSON.stringify(productionAsset) + "\n");
+  console.log(`wrote ${productionOutput}`);
 }
