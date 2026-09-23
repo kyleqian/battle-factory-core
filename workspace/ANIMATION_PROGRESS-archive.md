@@ -16664,3 +16664,30 @@ track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
   track, and complete legal bilateral evidence; no existing Curse mechanics
   or sibling receipt grants animation credit. **For the main program:** nothing
   blocking.
+
+# Animation supervisor verification — MOVE_CURSE production partial merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commits `a337c727a`,
+  `692957182`, and `8dfec8f28`. `MOVE_CURSE` remains **unsupported** and the
+  ten-component `curse-ghost-nail-stat-lines` track remains **unfulfilled**;
+  Level 50 stays **273/276 exact, 0 partial, 0 staged, 3 unsupported**. No
+  sibling, gameplay/RNG/facility, unsupported-barrier, or coverage credit moved.
+- **Independent proof:** Two fresh supervisor actual-core processes are
+  byte-identical (`c925e284…`) and reproduce verdict `4eed06f8…`: all
+  **1,098/1,098** component, typed-seam, and chronological raw-RGB rows pass;
+  both stat windows are **176/176** framebuffer exact and each Ghost window is
+  **372/373**, for **1,096/1,098** exact overall. The sole residual is first
+  `CurseStretchingBlackBg` Step2 at age 26: player **720 pixels** through
+  scanline 17 and opponent **660** through scanline 13. The retained post-frame
+  hardware palette is already black, so exact closure requires source-timed
+  palette-transfer VCOUNT/scanline evidence rather than a coordinate fit. The
+  material CROBAT/BLISSEY control changes output while gameplay state/RNG stay
+  opaque and unchanged.
+- **Gates / next:** Supervisor focused union passes **7 files / 17 tests** and
+  smoke passes **8 files / 448 tests**; coverage, animation audit, and diff
+  checks are green. Reused worker same-code receipts: full `npm test` passes
+  **1,452 files / 11,533 tests**, with **44 files / 223 tests skipped**, in
+  **1,855.79s**; build passes **835 modules** with only the inherited chunk
+  warning. Next dispatch a narrow evidence-only palette-transfer timing probe
+  for the first Step2 row in both orientations; never infer the split from the
+  known framebuffer bounds. **For the main program:** nothing blocking.

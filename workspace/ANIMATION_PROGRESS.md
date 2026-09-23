@@ -1,3 +1,32 @@
+# Animation worker checkpoint — MOVE_ICE_BALL source/legal dense evidence (2026-09-23)
+
+- **State / credit:** Source and legal staging are complete, but
+  MOVE_ICE_BALL remains **unsupported** and
+  ice-ball-five-counter-bg-shards remains **unfulfilled**. Coverage stays
+  **274/276 exact, 0 partial, 0 staged, 2 unsupported**; no production,
+  seam, compositor, actual-core, move, sibling, or component credit moved.
+- **Did:** Audited the complete 20-component Move_ICE_BALL root
+  (0x082d72a4..0x082d7473, 463 bytes), including Ice Ball callbacks,
+  affine scales, arc, shard lives, counter branches, target shakes, assets,
+  sounds, and strongest-only BG_ICE cleanup. Legal Level-50 party-only
+  Scene-ON fixtures use ROM SPHEAL=341 against genderless REGISTEEL=403
+  with seed 305420103; the source census retains SPHEAL, DELIBIRD, and
+  SEALEO_1.
+- **Evidence:** Player-back and opponent-front each retain **436 rows**
+  (76/76/76/76/132) through first inactive cleanup. Two fresh probes per
+  orientation are byte-identical: dense/RGB sequence digests are
+  278737a3…/03238c1f… and 6acb3416…/f4432d82…. Maps measure counters
+  0..4, shards 5/7/9/10/10, shake 8/10/14/18/30, logical shard life
+  21, 30-tick arcs, predecessor OAM/matrix/palette latches, the one
+  player-back counter-3 OAM exception, side-specific BG_ICE, audio, opaque
+  state/RNG, and zero-owned cleanup.
+  Compact maps are 100K each with SHA-256 prefixes 9e6cd041…/5af2dea6…;
+  full dense rows remain in the compressed fixtures.
+- **Gates / next:** Source/evidence tests pass **8/8**, boundary/inventory
+  ratchets pass **9/9**, coverage and animation audit pass. The exact next
+  step is a separately authorized production implementation/acceptance
+  dispatch; this checkpoint intentionally makes no such claim.
+
 # Animation supervisor verification — MOVE_CURSE exact merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded worker commits `48acbced8`, `8c1f3a4a8`,
@@ -61,30 +90,3 @@
   11,534 tests**, with **44 files / 223 tests skipped**, in **1,849.94s**;
   `npm run build` passes **835 modules** with only the inherited chunk-size
   warning. **For the main program:** nothing blocking.
-
-# Animation supervisor verification — MOVE_CURSE production partial merge (2026-09-23)
-
-- **State / merge:** Fast-forwarded verified worker commits `a337c727a`,
-  `692957182`, and `8dfec8f28`. `MOVE_CURSE` remains **unsupported** and the
-  ten-component `curse-ghost-nail-stat-lines` track remains **unfulfilled**;
-  Level 50 stays **273/276 exact, 0 partial, 0 staged, 3 unsupported**. No
-  sibling, gameplay/RNG/facility, unsupported-barrier, or coverage credit moved.
-- **Independent proof:** Two fresh supervisor actual-core processes are
-  byte-identical (`c925e284…`) and reproduce verdict `4eed06f8…`: all
-  **1,098/1,098** component, typed-seam, and chronological raw-RGB rows pass;
-  both stat windows are **176/176** framebuffer exact and each Ghost window is
-  **372/373**, for **1,096/1,098** exact overall. The sole residual is first
-  `CurseStretchingBlackBg` Step2 at age 26: player **720 pixels** through
-  scanline 17 and opponent **660** through scanline 13. The retained post-frame
-  hardware palette is already black, so exact closure requires source-timed
-  palette-transfer VCOUNT/scanline evidence rather than a coordinate fit. The
-  material CROBAT/BLISSEY control changes output while gameplay state/RNG stay
-  opaque and unchanged.
-- **Gates / next:** Supervisor focused union passes **7 files / 17 tests** and
-  smoke passes **8 files / 448 tests**; coverage, animation audit, and diff
-  checks are green. Reused worker same-code receipts: full `npm test` passes
-  **1,452 files / 11,533 tests**, with **44 files / 223 tests skipped**, in
-  **1,855.79s**; build passes **835 modules** with only the inherited chunk
-  warning. Next dispatch a narrow evidence-only palette-transfer timing probe
-  for the first Step2 row in both orientations; never infer the split from the
-  known framebuffer bounds. **For the main program:** nothing blocking.

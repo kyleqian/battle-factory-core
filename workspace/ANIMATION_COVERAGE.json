@@ -11045,6 +11045,53 @@
     "ANIMATION_LATCHES.md"
    ],
    "goal": "FULFILLED by MOVE_CURSE alone after complete source classification, four legal natural branch/orientation windows, source-extracted assets, direct twice-fresh VCOUNT/HBlank palette-transfer timing, one branch-generic reducer, narrow typed Scene-ON seam, generic palette-scanout compositor, material altered control, and twice-fresh 1,098/1,098 zero-residual actual-core acceptance through cleanup. Tickle, Attract, Screech, Sleep Talk, Bind, and every sibling receive no credit."
+  },
+  {
+   "id": "ice-ball-five-counter-bg-shards",
+   "components": [
+    "asset:ANIM_TAG_ICE_CHUNK",
+    "asset:ANIM_TAG_ICE_CRYSTALS",
+    "sprite:gIceBallChunkSpriteTemplate",
+    "sprite:gIceBallImpactShardSpriteTemplate",
+    "subroutine:IceBallContinue",
+    "subroutine:IceBallContinue2",
+    "subroutine:IceBallEnd",
+    "subroutine:IceBallImpactShard",
+    "subroutine:IceBallMediun",
+    "subroutine:IceBallSetIceBg",
+    "subroutine:IceBallStrong",
+    "subroutine:IceBallStrongest",
+    "subroutine:IceBallUnsetIceBg",
+    "subroutine:IceBallWeak",
+    "subroutine:IceBallWeakest",
+    "task:AnimTask_GetIceBallCounter",
+    "task:AnimTask_ShakeTargetBasedOnMovePowerOrDmg",
+    "visualCommand:fadetobg",
+    "visualCommand:restorebg",
+    "visualCommand:waitbgfadein"
+   ],
+   "representatives": ["MOVE_ICE_BALL"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/iceBallSourceAudit.ts",
+    "tools/compare/iceBallProbe.py",
+    "tools/compare/iceBallSeedProbe.py",
+    "tools/compare/iceBallEvidence.ts",
+    "tools/compare/fixtures/ice-ball/source-audit.json",
+    "tools/compare/fixtures/ice-ball/player-dense.json.gz",
+    "tools/compare/fixtures/ice-ball/opponent-dense.json.gz",
+    "tools/compare/fixtures/ice-ball/player-rgb.tar.gz",
+    "tools/compare/fixtures/ice-ball/opponent-rgb.tar.gz",
+    "tools/compare/fixtures/ice-ball/player-map.json",
+    "tools/compare/fixtures/ice-ball/opponent-map.json",
+    "tools/compare/fixtures/ice-ball/evidence-manifest.json",
+    "tools/battle-lab/mechanic-ice-ball-player-spheal-opponent-onix.json",
+    "tools/battle-lab/mechanic-ice-ball-opponent-spheal-player-onix.json",
+    "tests/animation/iceBallSourceStaging.test.ts",
+    "tests/animation/iceBallEvidenceCheckpoint.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "goal": "UNFULFILLED: source and legal bilateral dense evidence only. MOVE_ICE_BALL remains unsupported until its production reducer, typed Scene-ON seam, compositor, and actual-core framebuffer acceptance are independently implemented; no move or shared component credit is granted by this checkpoint."
   }
  ],
  "variantAudits": {
