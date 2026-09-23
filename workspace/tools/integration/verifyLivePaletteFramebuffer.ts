@@ -75,6 +75,11 @@ for(const attacker of [0,1] as const) {
    assert(firstRun);
    assert.deepEqual(bodies,firstRun.bodies,"fresh production comparisons agree");
   }
+  assert.deepEqual(
+   bodies.map(b=>b.missedRestoreSetupCallbackAges),
+   attacker===1?[[],[82]]:[[],[]],
+   "only the repeated opponent cast misses the restore-setup main callback",
+  );
   receipts.push({scenario,attacker,freshRun,sourceDigest:digest,bodies});
   console.log(JSON.stringify({attacker,freshRun,bodies:bodies.map(b=>({frames:b.frames,residualPixels:b.residualPixels,withoutHistoryPixels:b.withoutHistoryPixels}))}));
  }

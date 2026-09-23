@@ -49850,7 +49850,7 @@ export function renderSceneOnMovePresentation(
     // keeps its historical RAM-probed timing contract in `shadowPunch.ts`;
     // neither path infers fade timing from attacker side.
     const displayedBackgroundBldy = liveField
-      ? shadowPunchLiveBackgroundBldy(view.animationAge)
+      ? shadowPunchLiveBackgroundBldy(view.animationAge, state.config.liveFadeHost)
       : view.backgroundBldy;
     // The live callback state and final `gMain.oamBuffer` photographed by
     // the shared framebuffer are distinct epochs for the moving BG/trace

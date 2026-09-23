@@ -1135,6 +1135,7 @@ import {
   SHADOW_PUNCH_PUNCH_TASK_FIRST_AGE,
   type ShadowPunchClone,
 } from "./shadowPunch.ts";
+import type { ShadowPunchFadeHostInput } from "./shadowPunchFadeHost.ts";
 import { shakeMonOffsetAtTick } from "./shakeMon.ts";
 import {
   knockOffBodyAtAge,
@@ -1723,6 +1724,8 @@ export interface SceneOnShadowPunchConfig {
   readonly attackerSubpriority: number;
   /** Source-owned persistent OBJ scratch colors, when the live host has complete history. */
   readonly traceScratchUnfadedPalette?: readonly Readonly<{ r: number; g: number; b: number }>[];
+  /** Source callback progress supplied by a live CPU/audio scheduler; absent means uninterrupted callbacks. */
+  readonly liveFadeHost?: ShadowPunchFadeHostInput;
   readonly animationAgeOffset?: number;
 }
 
