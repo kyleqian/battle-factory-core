@@ -323,7 +323,7 @@
   },
   "carriers": {
     "factoryCount": 1,
-    "level50Count": 1,
+    "openOnlyCount": 1,
     "representative": {
       "index": 854,
       "label": "FRONTIER_MON_DRAGONITE_5",

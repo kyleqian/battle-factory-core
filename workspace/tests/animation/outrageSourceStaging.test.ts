@@ -65,7 +65,7 @@ describe("MOVE_OUTRAGE source and legal bilateral staging checkpoint", () => {
       resources: { smallEmber: { tag: "ANIM_TAG_SMALL_EMBER", value: 10029, tileBytes: 2560 }, audio: { sound: "SE_M_DRAGON_RAGE", id: 171, pan: "SOUND_PAN_ATTACKER" } },
       carriers: {
         factoryCount: 1,
-        level50Count: 1,
+        openOnlyCount: 1,
         representative: { index: 854, label: "FRONTIER_MON_DRAGONITE_5", species: "SPECIES_DRAGONITE", moves: ["MOVE_OUTRAGE", "MOVE_DOUBLE_EDGE", "MOVE_THUNDER_WAVE", "MOVE_ROAR"], itemTableId: 41, nature: "NATURE_DOCILE" },
       },
       checkpoint: {
