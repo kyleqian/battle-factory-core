@@ -1686,7 +1686,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
 };
 
 export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
-  let state = createInitialState({ appRoute: trace.appRoute });
+  let state = createInitialState({ appRoute: trace.appRoute, battleScene: trace.battleScene });
   const captureFrames = new Set(trace.captureFrames ?? []);
   const captures: AppCapture[] = [];
   let frame = 0;

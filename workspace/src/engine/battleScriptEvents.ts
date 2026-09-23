@@ -289,6 +289,7 @@ export type BattleScriptSemanticEventPayload =
     kind: "animation";
     animationId: string;
     battler: number | null;
+    target?: number;
     arguments: readonly string[];
   }>
   | Readonly<{

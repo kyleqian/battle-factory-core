@@ -18,7 +18,8 @@ const BUILD_STAMP: string =
   typeof __POKEBENCH_BUILD_STAMP__ === "string" ? __POKEBENCH_BUILD_STAMP__ : "dev";
 
 const held = new Set<GbaButton>();
-let state = createInitialState();
+const battleScene = new URLSearchParams(location.search).get("battleScene") === "off" ? "off" : "on";
+let state = createInitialState({ battleScene });
 const recorder = new SessionRecorder();
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
@@ -40,6 +41,13 @@ if (!benchMode) {
   stamp.textContent = `build ${BUILD_STAMP}`;
   stamp.style.cssText = "font:11px monospace;color:#888;margin-top:4px;user-select:text;";
   app.appendChild(stamp);
+  const modeLink = document.createElement("a");
+  const modeUrl = new URL(location.href);
+  modeUrl.searchParams.set("battleScene", battleScene === "on" ? "off" : "on");
+  modeLink.href = modeUrl.toString();
+  modeLink.textContent = `Battle Scene ${battleScene.toUpperCase()} · restart with ${battleScene === "on" ? "OFF" : "ON"}`;
+  modeLink.style.cssText = "display:block;font:12px monospace;color:#aaa;margin-top:8px;";
+  app.appendChild(modeLink);
 }
 
 function draw(): void {
@@ -55,7 +63,7 @@ function tick(buttons: ReadonlySet<GbaButton>): void {
 draw();
 
 function currentSessionTrace(error?: unknown): SessionTrace {
-  return recorder.toTrace({ appRoute: state.appRoute, build: BUILD_STAMP, error });
+  return recorder.toTrace({ appRoute: state.appRoute, battleScene, build: BUILD_STAMP, error });
 }
 
 // The session trace is always exportable, not just on a crash: when a played
@@ -148,7 +156,7 @@ requestAnimationFrame(loop);
 if (benchMode) {
   (window as unknown as Record<string, unknown>).__POKEBENCH__ = {
     reset(): void {
-      state = createInitialState();
+      state = createInitialState({ battleScene });
       held.clear();
       recorder.reset();
       draw();

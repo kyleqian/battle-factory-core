@@ -1,3 +1,4 @@
+import { battleMoveAnimationRequest, type BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import {
   battleCommandFieldBattlerFromPartyMember,
   createBattleCommandDisplayedField,
@@ -124,6 +125,7 @@ export type BattleResolutionPresentationCommand =
     }>
   | Readonly<{
       type: "move-animation";
+      animation?: BattleMoveAnimationRequest;
       eventSequence: number;
       battler: 0 | 1;
       timing: BattleMoveAnimationTiming;
@@ -3340,6 +3342,18 @@ export function projectBattleResolutionCommands(
       )
     ) {
       const battler = singlesBattler(payload.battler ?? -1, "attack pause");
+      if (payload.animationId === "MOVE_ANIMATION") {
+        commands.push(Object.freeze({
+          type: "move-animation",
+          eventSequence: event.sequence,
+          battler,
+          animation: battleMoveAnimationRequest(battler, payload.target, payload.arguments),
+          // An unadapted move retains a bounded pause, explicitly reported by
+          // the readiness registry. No substitute effect receives exact credit.
+          timing: Object.freeze({ minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES }),
+        }));
+        continue;
+      }
       const hit = nextHitAnimation(events, index);
       if (usedMoveInstructionExecution === null || hit === null) {
         // An attack receipt without a hit receipt has no target hit/drain

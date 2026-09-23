@@ -1,5 +1,6 @@
 export type AppTraceMetadata = Readonly<{
   appRoute?: "generated-orchestrator" | "canonical-recorded";
+  battleScene?: "on" | "off";
   appStage?: unknown;
   oracleBattleLab?: unknown;
 }>;
@@ -10,6 +11,7 @@ export function stripAppTraceMetadata<T extends AppTraceMetadata>(
 ): Omit<T, keyof AppTraceMetadata> {
   const {
     appRoute: _appRoute,
+    battleScene: _battleScene,
     appStage: _appStage,
     oracleBattleLab: _oracleBattleLab,
     ...oracleTrace

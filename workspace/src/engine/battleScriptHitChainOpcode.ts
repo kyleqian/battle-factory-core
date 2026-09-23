@@ -2278,6 +2278,7 @@ function createAttackanimationOpcodeHandler(
             kind: "animation" as const,
             animationId: "MOVE_ANIMATION",
             battler: attacker,
+            target,
             arguments: Object.freeze([
               String(move),
               String(rulesContext.animTurn),

@@ -14,6 +14,7 @@ export interface Trace {
   captureFrames?: number[];
   /** App-only battle owner selection; never sent to the ROM oracle. */
   appRoute?: "generated-orchestrator" | "canonical-recorded";
+  battleScene?: "on" | "off";
   /**
    * Existing traces predate profiles and therefore default to Battle Scene ON.
    * New main/round-loop traces must opt into battle-scene-off explicitly.

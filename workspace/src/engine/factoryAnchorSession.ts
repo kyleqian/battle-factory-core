@@ -91,6 +91,7 @@ const ANCHOR_SELECTION_LEDGER: readonly FactoryOpponentDrawLedgerEntry[] =
   ]);
 
 export type FactoryAnchorSessionInput = Readonly<{
+  battleScene?: "on" | "off";
   playerRentalRecords: FactoryRentalParty;
   savedRentalRecords: readonly FactoryRentalRecord[];
   roomTrainer: FactoryTrainerPresentation;
@@ -135,6 +136,7 @@ export function createFactoryAnchorSession(
     constructionRngValues: input.constructionRngValues,
   });
   const state = createFactoryRoundBattleOrchestrator({
+    battleScene: input.battleScene,
     id: "interactive-anchor-factory-round",
     rngValue: ANCHOR_BATTLE_1_SELECTION_RNG_VALUE,
     factoryWinStreak: ANCHOR_FACTORY_METADATA.factoryWinStreak,

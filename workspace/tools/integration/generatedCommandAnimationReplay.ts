@@ -1,0 +1,69 @@
+import {
+  createFactoryRoundBattleOrchestrator, beginFactoryRoundBattleStartIntro,
+  advanceFactoryRoundBattleStartIntro, advanceFactoryRoundBattleCommand,
+  advanceFactoryRoundBattleResolution,
+} from "../../src/engine/factoryRoundBattleOrchestrator.ts";
+import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
+import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
+import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
+import type { GbaButton } from "../../src/input.ts";
+
+/** Legal generated rentals/opponent; only ordinary command input follows generation. */
+export function generatedCommandAnimationReplay(
+  seed: number, battleScene: "on" | "off", moveSlots: readonly (0 | 1 | 2 | 3)[],
+) {
+  let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
+    id: `live-animation-generated-${seed}`, rngValue: seed, battleScene,
+    factoryWinStreak: 0, playerTrainerId: 416049562,
+    battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
+    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+  }));
+  const animations: Array<{ moveId: number; attacker: number; player: string; opponent: string; ages: number[] }> = [];
+  const boundaries = [];
+  let frame = 0;
+  let key = "";
+  const step = (buttons: readonly GbaButton[] = []) => {
+    if (++frame > 30000) throw new Error(`generated command replay exceeded budget at seed ${seed}`);
+    if (state.battleStartIntro) state = advanceFactoryRoundBattleStartIntro(state, new Set(buttons));
+    else if (state.battleResolutionPresentation) state = advanceFactoryRoundBattleResolution(state, new Set(buttons));
+    else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons));
+    else throw new Error(`generated command replay lost battle ownership at seed ${seed}`);
+    const r = state.battleResolutionPresentation;
+    if (r?.lifecycle.phase !== "presenting") return;
+    const command = r.segments[r.segmentIndex]!.commands[r.commandIndex];
+    if (command?.type !== "move-animation" || !command.animation || liveMoveAnimationDuration(command.animation) === null) return;
+    const current = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
+    const view = createBattleResolutionPresentationRenderView(r);
+    if (key !== current) {
+      key = current;
+      animations.push({ moveId: command.animation.moveId, attacker: command.animation.attacker,
+        player: view.field.player.name, opponent: view.field.opponent.name, ages: [] });
+    }
+    renderBattleResolutionLiveView(new Uint8Array(240 * 160 * 4), view);
+    animations.at(-1)!.ages.push(r.lifecycle.phaseElapsed);
+  };
+  const phase = () => state.battleCommandPresentation?.lifecycle.phase;
+  const until = (predicate: () => boolean) => {
+    while (!predicate()) step(
+      (state.battleStartIntro && frame % 16 === 0)
+      || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && frame % 2 === 0)
+        ? ["A"] : []);
+  };
+  const pulse = (button: GbaButton) => { step(); step([button]); step(); };
+  until(() => phase() === "action-menu");
+  boundaries.push(state.battle!);
+  for (const slot of moveSlots) {
+    pulse("A");
+    until(() => phase() === "fight-menu");
+    for (let i=0; i<4; i++) {
+      const cursor = state.battleCommandPresentation!.fightCursor;
+      if (cursor === slot) break;
+      pulse((cursor & 1) !== (slot & 1) ? "RIGHT" : "DOWN");
+    }
+    pulse("A");
+    until(() => !state.battleCommandPresentation);
+    until(() => phase() === "action-menu");
+    boundaries.push(state.battle!);
+  }
+  return { state, boundaries, animations, frame };
+}

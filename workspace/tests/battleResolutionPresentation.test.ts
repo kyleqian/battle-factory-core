@@ -711,7 +711,7 @@ describe("battle resolution presentation receipt ownership", () => {
     expect(firstBlink.visibility.opponent.sprite).toBe(false);
   });
 
-  it("keeps controller MOVE_ANIMATION on the same source-derived no-op hold", () => {
+  it("preserves controller MOVE_ANIMATION parameters and delegates its duration", () => {
     const resolution = createBattleResolutionPresentation(inputFor([
       event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, 2),
       event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }, 3),
@@ -719,7 +719,8 @@ describe("battle resolution presentation receipt ownership", () => {
         kind: "animation",
         animationId: "MOVE_ANIMATION",
         battler: 0,
-        arguments: [],
+        target: 1,
+        arguments: ["29", "0", "70", "17", "90", "0"],
       }, 14),
       event(3, {
         kind: "animation",
@@ -733,10 +734,12 @@ describe("battle resolution presentation receipt ownership", () => {
 
     expect(resolution.segments[0]!.commands.slice(0, 4)).toMatchObject([
       { type: "message" },
-      { type: "move-animation", eventSequence: 2, timing: { minimumFrames: 48 } },
+      { type: "move-animation", eventSequence: 2,
+        animation: { moveId: 29, attacker: 0, target: 1, turn: 0, power: 70, damage: 17, friendship: 90, multihit: 0 } },
       { type: "hit-animation", eventSequence: 3 },
       { type: "hp", eventSequence: 4 },
     ]);
+    expect(battleResolutionCommandDuration(resolution.segments[0]!.commands[1]!, resolution.field)).toBe(48);
   });
 
   it("projects typed sprite visibility receipts with relative duration and persistent render state", () => {

@@ -14,7 +14,8 @@ export interface RecordedSegment {
 
 export interface SessionTrace {
   appRoute: string;
-  oracleProfile: "battle-scene-off";
+  oracleProfile: "battle-scene-off" | "battle-scene-on";
+  battleScene?: "on" | "off";
   build: string;
   frame: number;
   error?: { name: string; message: string; stack?: string };
@@ -65,10 +66,11 @@ export class SessionRecorder {
     this.truncated = false;
   }
 
-  toTrace(options: { appRoute: string; build: string; error?: unknown }): SessionTrace {
+  toTrace(options: { appRoute: string; build: string; battleScene?: "on" | "off"; error?: unknown }): SessionTrace {
     const trace: SessionTrace = {
       appRoute: options.appRoute,
-      oracleProfile: "battle-scene-off",
+      oracleProfile: options.battleScene === "on" ? "battle-scene-on" : "battle-scene-off",
+      ...(options.battleScene ? { battleScene: options.battleScene } : {}),
       build: options.build,
       frame: this.frames,
       segments: this.segments.map((segment) => ({

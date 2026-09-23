@@ -1,3 +1,4 @@
+import { renderBattleResolutionLiveView } from "./battleScene.ts";
 // Pure engine core: no DOM, no timers, no Math.random. tick() advances game
 // state by exactly one frame given the held buttons; render() draws the
 // current state into a 240x160 RGBA buffer. The browser shell (src/main.ts)
@@ -735,6 +736,7 @@ export interface EngineState {
   frame: number;
   /** Immutable owner choice, consulted only at the battle-room handoff. */
   appRoute: InteractiveBattleRoute;
+  battleSceneMode: "on" | "off";
   /** Live cursors at each Battle-1 personality-construction burst. */
   battle1OpponentConstructionRngValues: readonly number[];
   draftScreen: DraftScreenState;
@@ -802,6 +804,7 @@ export const BATTLE_IN_BATTLE_FIRST_ELAPSED = 5;
 export interface InitialEngineStateOptions {
   readonly battleScenario?: BattleScenario;
   readonly appRoute?: InteractiveBattleRoute;
+  readonly battleScene?: "on" | "off";
 }
 
 type FactoryTerminalCommand =
@@ -852,6 +855,7 @@ export function createInitialState(
   return {
     frame: 0,
     appRoute: options.appRoute ?? "generated-orchestrator",
+    battleSceneMode: options.battleScene ?? "off",
     battle1OpponentConstructionRngValues: Object.freeze([]),
     draftScreen: createDraftScreenStateFromRentalRecords(ANCHOR_DRAFT_RENTAL_RECORDS),
     keyRepeat: INITIAL_KEY_REPEAT_STATE,
@@ -2305,6 +2309,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
             battleSetup: null,
             factoryRoundBattleOrchestrator: beginFactoryRoundBattleStartIntro(
               createFactoryRoundBattleOrchestrator({
+                battleScene: state.battleSceneMode,
                 id: `generated-round-streak-${pending.carry.factoryWinStreak}`,
                 rngValue: pending.rngValueBefore,
                 factoryWinStreak: pending.carry.factoryWinStreak,
@@ -2349,6 +2354,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
             battleSetup: null,
             factoryRoundBattleOrchestrator: beginFactoryRoundBattleStartIntro(
               createFactoryAnchorSession({
+                battleScene: state.battleSceneMode,
                 playerRentalRecords,
                 savedRentalRecords,
                 roomTrainer,
@@ -3417,7 +3423,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       renderBattleResolutionPresentation(
         fb,
         resolution,
-        { drawScene: renderBattleResolutionSceneOffView },
+        { drawScene: renderBattleResolutionLiveView },
       );
     }
     return fb;

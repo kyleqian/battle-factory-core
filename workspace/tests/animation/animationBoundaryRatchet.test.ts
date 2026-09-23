@@ -75,6 +75,9 @@ describe("animation/engine boundary ratchet", () => {
     const allowedConsumers = new Set([
       join("src", "engine", "battleScene.ts"),
       join("src", "engine", "core.ts"),
+      // ANIMATION_INTEGRATION_BRIEF: typed live field -> animation adapter;
+      // immutable inputs only, never imported by battle rules or AI.
+      join("src", "engine", "liveMoveAnimation.ts"),
     ]);
     const violations: string[] = [];
     for (const file of collectTsFiles("src")) {

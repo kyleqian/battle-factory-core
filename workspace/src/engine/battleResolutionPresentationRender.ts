@@ -1,3 +1,5 @@
+import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
+import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import {
   BATTLE_COMMAND_ACTION_ENTER_DELAY,
   type BattleCommandFieldBattler,
@@ -548,6 +550,7 @@ function sendInWhiteCoefficientAtFrame(frame: number): number {
 }
 
 export type BattleResolutionRenderEffect =
+  | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number }>
   | Readonly<{
       type: "hit";
       battler: 0 | 1;
@@ -809,6 +812,9 @@ export function battleResolutionCommandDuration(
         battleStringPrintableLength(command.lines),
       ) + command.timing.holdFrames;
     case "move-animation":
+      return command.animation
+        ? liveMoveAnimationDuration(command.animation) ?? command.timing.minimumFrames
+        : command.timing.minimumFrames;
     case "hit-animation":
       return command.timing.minimumFrames;
     case "hp": {
@@ -1117,6 +1123,8 @@ export function createBattleResolutionPresentationRenderView(
         ),
       );
       hpTarget = Object.freeze({ battler: command.battler, to: command.to });
+    } else if (command.type === "move-animation" && command.animation) {
+      effect = Object.freeze({ type: "move", request: command.animation, age: state.lifecycle.phaseElapsed });
     } else if (command.type === "hit-animation") {
       effect = Object.freeze({
         type: "hit",

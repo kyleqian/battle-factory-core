@@ -231,6 +231,8 @@ export function markFactoryBrainSpeechHeard(
 }
 
 export type FactoryRoundBattleOrchestratorConfig = Readonly<{
+  /** Presentation timing only; the battle kernel retains exclusive RNG ownership. */
+  battleScene?: "on" | "off";
   id: string;
   rngValue: number;
   /**
@@ -982,9 +984,7 @@ function startCurrentBattle(
   const started = createFreshFactoryBattle({
     requestId: state.nextBattleRequestId,
     rngSeed: state.round.rules.rngValue,
-    // The production Factory round route is the Battle Scene OFF contract.
-    // Standalone fresh-kernel callers choose their own explicit option.
-    battleScene: "off",
+    battleScene: state.config.battleScene ?? "off",
     preCommandRngCalls: state.pendingBattlePreCommandRngCalls,
     playerParty: asBattleScriptParty(player),
     opponentParty: asBattleScriptParty(asKernelParty(opponentRecords)),
