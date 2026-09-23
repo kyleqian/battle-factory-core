@@ -1,3 +1,28 @@
+# Animation supervisor verification — MOVE_CURSE evidence merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commits `e8fc0a00a` through
+  `68e46c8fe`. `MOVE_CURSE` remains **unsupported** and the ten-component
+  `curse-ghost-nail-stat-lines` track remains **unfulfilled**; Level 50 stays
+  **273/276 exact, 0 partial, 0 staged, 3 unsupported**. No production,
+  promotion, sibling, gameplay/RNG/facility, boundary, or barrier credit moved.
+- **Independent proof:** Two fresh source-audit processes are byte-identical
+  (`5b7b347e…`) and two fresh four-map verifier processes are byte-identical
+  (`e389e0c1…`). Legal bilateral Ghost windows retain **373+373 rows** and
+  non-Ghost stat windows **176+176 rows**, including first-inactive cleanup.
+  Ghost OAM/matrices transfer on **372/372** comparable rows and stat on
+  **175/175**; orientation-specific palette exceptions remain pinned in
+  `ANIMATION_LATCHES.md`. The complete 18-set Level-50 carrier census, five
+  source blocks, 16-component graph, four legal party scenarios, chronological
+  RGB hashes, and no-credit boundary all replay hermetically.
+- **Gates / next:** The focused source/evidence/boundary/inventory union passes
+  **4 files / 13 tests**; coverage, animation audit, typecheck, and diff checks
+  are green. This is evidence/tooling-only, so the same-production full
+  `npm test` / build receipt from the verified Fury Cutter tree remains valid.
+  Next dispatch a bounded Curse reducer/typed-seam/compositor phase covering
+  both natural branches and both orientations; require honest actual-core
+  residual accounting and no promotion without twice-fresh zero-residual proof
+  plus a material altered control. **For the main program:** nothing blocking.
+
 # Animation supervisor verification — MOVE_FURY_CUTTER residual diagnosis merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded verified tooling-only worker commit
