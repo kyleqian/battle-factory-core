@@ -49928,7 +49928,7 @@ export function renderSceneOnMovePresentation(
     if (opponentToPlayer) drawMonBg();
     const cloneBackdrop = fb.slice();
     const clonePalette = blendPaletteToward(
-      battleAnimGhostBg.traceScratchUnfadedPalette,
+      state.config.traceScratchUnfadedPalette ?? battleAnimGhostBg.traceScratchUnfadedPalette,
       { r: 0, g: 0, b: 0 },
       SHADOW_PUNCH_TRACE_BLEND_COEFF,
     );
@@ -53537,7 +53537,7 @@ export function renderBattleResolutionLiveView(
 ): void {
   const effect = view.effect;
   const presentation = effect?.type === "move"
-    ? liveMoveAnimationPresentation(effect.request, view.field, effect.age)
+    ? liveMoveAnimationPresentation(effect.request, view.field, effect.age, effect.paletteInput)
     : null;
   if (!presentation) {
     renderBattleResolutionSceneOffView(fb, view);

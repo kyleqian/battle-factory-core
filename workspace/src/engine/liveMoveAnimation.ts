@@ -1,3 +1,4 @@
+import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
@@ -93,6 +94,7 @@ export function liveMoveAnimationPresentation(
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
   age: number,
+  paletteInput?: LiveMovePaletteInput,
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request) === null) return null;
   const art = createBattleCommandFieldArtView(field);
@@ -176,6 +178,7 @@ export function liveMoveAnimationPresentation(
     case 325:
       config = {
         move: "SHADOW_PUNCH", attacker, target,
+        traceScratchUnfadedPalette: paletteInput?.traceScratchUnfadedPalette,
         fieldProfile: { ...fieldProfile, playerStatus: "none" },
         attackerSpriteId: request.attacker === 0 ? 6 : 8,
         attackerMoveSpeed: request.attacker === 0 ? 8 : -8,

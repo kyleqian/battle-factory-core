@@ -1,0 +1,87 @@
+import data from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
+import {
+  allocSpritePalette, createSpritePaletteHost, freeSpritePaletteByTag,
+  loadPalette, loadSpritePalette, type SpritePaletteHost,
+} from "../animation/spritePaletteHost.ts";
+import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
+
+export interface LiveMovePaletteInput {
+  readonly historyKnown: boolean;
+  readonly traceScratchUnfadedPalette?: readonly Readonly<{ r: number; g: number; b: number }>[];
+}
+export interface LiveMovePaletteHost {
+  readonly memory: SpritePaletteHost;
+  readonly historyKnown: boolean;
+}
+interface PaletteResource { readonly tag: number; readonly colors: readonly number[]; }
+interface PalettePlan { readonly loads: readonly string[]; readonly taskLoads?: readonly string[]; }
+const resources: Readonly<Record<string, PaletteResource>> = data.resources;
+const plans: Readonly<Record<string, PalettePlan>> = data.plans;
+
+/**
+ * Source Factory startup retains wireless UI / healthbox tags in banks 4..6.
+ * The first party-summary balls used bank 9, then freed the tag. Its HP-bar
+ * colors remain there. Verified from normal draft/controller input as well
+ * as the isolated mechanic route. Unmodeled rows remain private: this host
+ * currently supplies only Shadow Punch's allocated scratch row.
+ */
+export function createLiveMovePaletteHost(): LiveMovePaletteHost {
+  let memory = createSpritePaletteHost(4);
+  memory = loadSpritePalette(memory, data.initial.wirelessTag, data.initial.wireless).host;
+  memory = loadSpritePalette(memory, data.initial.healthboxTag, data.initial.healthbox).host;
+  memory = loadSpritePalette(memory, data.initial.healthbarTag, data.initial.healthbar).host;
+  memory = loadPalette(memory, 256 + 9 * 16, data.initial.healthbar);
+  return Object.freeze({ memory, historyKnown: true });
+}
+
+export function invalidateLiveMovePaletteHost(host: LiveMovePaletteHost): LiveMovePaletteHost {
+  return host.historyKnown ? Object.freeze({ ...host, historyKnown: false }) : host;
+}
+
+/**
+ * Apply one audited source body's resource lifetime. The returned input is
+ * immutable for the active body; only the separate next host is retained for
+ * later commands. Rendering cannot mutate memory or advance battle RNG.
+ * Unknown bodies/switches invalidate the history claim, never synthesize
+ * source values. Their graphics providers remain explicit follow-up work.
+ */
+export function prepareLiveMovePalette(
+  host: LiveMovePaletteHost, request: BattleMoveAnimationRequest,
+): Readonly<{ next: LiveMovePaletteHost; input: LiveMovePaletteInput }> {
+  const plan = plans[String(request.moveId)];
+  if (!plan) return Object.freeze({
+    next: invalidateLiveMovePaletteHost(host), input: Object.freeze({ historyKnown: false }),
+  });
+  let memory = host.memory;
+  const loaded: number[] = [];
+  for (const name of [...plan.loads, ...(plan.taskLoads ?? [])]) {
+    const resource = resources[name];
+    if (!resource) throw new Error(`missing source palette resource ${name}`);
+    const result = loadSpritePalette(memory, resource.tag, resource.colors);
+    if (result.index === 0xff) throw new Error("live animation exhausted OBJ palette banks");
+    memory = result.host;
+    loaded.push(resource.tag);
+  }
+  let input: LiveMovePaletteInput = Object.freeze({ historyKnown: host.historyKnown });
+  if (request.moveId === 325) {
+    const trace = allocSpritePalette(memory, data.bentSpoonTag);
+    if (trace.index === 0xff) throw new Error("Shadow Punch exhausted OBJ palette banks");
+    // Its faded-only attacker copy is overwritten by BlendPalette's read
+    // from this same destination unfaded row (battle_anim_mons.c).
+    if (host.historyKnown) {
+      const expand = (v: number) => (v << 3) | (v >> 2);
+      const row = trace.host.unfaded.slice(256 + trace.index * 16, 256 + (trace.index + 1) * 16);
+      input = Object.freeze({
+        historyKnown: true,
+        traceScratchUnfadedPalette: Object.freeze(row.map(color => Object.freeze({
+          r: expand(color & 31), g: expand((color >> 5) & 31), b: expand((color >> 10) & 31),
+        }))),
+      });
+    }
+    memory = freeSpritePaletteByTag(trace.host, data.bentSpoonTag);
+  }
+  for (const tag of loaded) memory = freeSpritePaletteByTag(memory, tag);
+  return Object.freeze({
+    next: Object.freeze({ memory, historyKnown: host.historyKnown }), input,
+  });
+}

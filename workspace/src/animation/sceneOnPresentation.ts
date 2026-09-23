@@ -1721,6 +1721,8 @@ export interface SceneOnShadowPunchConfig {
   readonly attackerSpriteId: number;
   readonly attackerMoveSpeed: number;
   readonly attackerSubpriority: number;
+  /** Source-owned persistent OBJ scratch colors, when the live host has complete history. */
+  readonly traceScratchUnfadedPalette?: readonly Readonly<{ r: number; g: number; b: number }>[];
   readonly animationAgeOffset?: number;
 }
 

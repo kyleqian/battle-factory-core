@@ -78,6 +78,8 @@ describe("animation/engine boundary ratchet", () => {
       // ANIMATION_INTEGRATION_BRIEF: typed live field -> animation adapter;
       // immutable inputs only, never imported by battle rules or AI.
       join("src", "engine", "liveMoveAnimation.ts"),
+      // Integration-owned persistent palette inputs; presentation only.
+      join("src", "engine", "liveMoveAnimationPalette.ts"),
     ]);
     const violations: string[] = [];
     for (const file of collectTsFiles("src")) {

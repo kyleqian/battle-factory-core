@@ -1,3 +1,4 @@
+import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import {
@@ -550,7 +551,7 @@ function sendInWhiteCoefficientAtFrame(frame: number): number {
 }
 
 export type BattleResolutionRenderEffect =
-  | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number }>
+  | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput }>
   | Readonly<{
       type: "hit";
       battler: 0 | 1;
@@ -1124,7 +1125,7 @@ export function createBattleResolutionPresentationRenderView(
       );
       hpTarget = Object.freeze({ battler: command.battler, to: command.to });
     } else if (command.type === "move-animation" && command.animation) {
-      effect = Object.freeze({ type: "move", request: command.animation, age: state.lifecycle.phaseElapsed });
+      effect = Object.freeze({ type: "move", request: command.animation, age: state.lifecycle.phaseElapsed, paletteInput: state.liveMovePaletteInput });
     } else if (command.type === "hit-animation") {
       effect = Object.freeze({
         type: "hit",

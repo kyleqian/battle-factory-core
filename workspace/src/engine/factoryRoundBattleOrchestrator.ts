@@ -1,3 +1,7 @@
+import {
+  createLiveMovePaletteHost, invalidateLiveMovePaletteHost, prepareLiveMovePalette,
+  type LiveMovePaletteHost, type LiveMovePaletteInput,
+} from "./liveMoveAnimationPalette.ts";
 /**
  * Production-shaped owner of the generated Factory opponent -> fresh battle
  * -> terminal adapter -> round-controller seam.
@@ -388,6 +392,12 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   battleCommandPresentation: BattleCommandPresentationState | null;
   /** Submitted command lifecycle, retained until its visible resolution ends. */
   battleResolutionPresentation: BattleResolutionPresentationState | null;
+  /** Presentation memory survives resolution recreation, scoped to one battle. */
+  liveMovePaletteHost?: Readonly<{
+    battleCallStart: number | null;
+    commandKey: string;
+    host: LiveMovePaletteHost;
+  }>;
   /**
    * An opposing locked action may outlive its charge presentation while the
    * player owns a real intervening command request. Its battler/move/slot
@@ -1951,7 +1961,65 @@ function retainedLockedActionOwnerAtCommandBoundary(
  * kernel boundary remains immutable, and the next command UI does not exist
  * until the six displayed blank handoff frames have completed.
  */
+function prepareResolutionPalette(
+  state: FactoryRoundBattleOrchestratorState,
+): FactoryRoundBattleOrchestratorState {
+  if (state.config.battleScene !== "on") return state;
+  const resolution = state.battleResolutionPresentation;
+  if (resolution?.lifecycle.phase === "presenting-switch-in") {
+    const retained = state.liveMovePaletteHost;
+    if (!retained?.host.historyKnown) return state;
+    return Object.freeze({
+      ...state,
+      liveMovePaletteHost: Object.freeze({
+        ...retained, host: invalidateLiveMovePaletteHost(retained.host),
+      }),
+      battleResolutionPresentation: Object.freeze({
+        ...resolution, liveMovePaletteInput: undefined,
+      }),
+    });
+  }
+  if (resolution?.lifecycle.phase !== "presenting") return state;
+  const command = resolution.segments[resolution.segmentIndex]?.commands[resolution.commandIndex];
+  if (!command) return state;
+  const commandKey = `${resolution.resolutionId.requestId}:${resolution.segmentIndex}:${resolution.commandIndex}`;
+  const retained = state.liveMovePaletteHost?.battleCallStart === state.activeBattleCallStart
+    ? state.liveMovePaletteHost : undefined;
+  if (retained?.commandKey === commandKey) return state;
+  let host = retained?.host ?? createLiveMovePaletteHost();
+  let input: LiveMovePaletteInput | undefined;
+  if (command.type === "move-animation" && command.animation) {
+    const prepared = prepareLiveMovePalette(host, command.animation);
+    host = prepared.next;
+    input = prepared.input;
+  } else if (command.type === "move-animation" || command.type === "switch-out"
+    || command.type === "switch-in" || command.type === "party-summary"
+    || command.type === "trainer-slide"
+    || (command.type === "sprite-visibility" && command.recall)) {
+    // Ball/summary callbacks need their own persistent palette providers.
+    host = invalidateLiveMovePaletteHost(host);
+  }
+  return Object.freeze({
+    ...state,
+    liveMovePaletteHost: Object.freeze({
+      battleCallStart: state.activeBattleCallStart, commandKey, host,
+    }),
+    battleResolutionPresentation: Object.freeze({
+      ...resolution, liveMovePaletteInput: input,
+    }),
+  });
+}
+
 export function advanceFactoryRoundBattleResolution(
+  state: FactoryRoundBattleOrchestratorState,
+  newKeys: ReadonlySet<GbaButton> = new Set(),
+): FactoryRoundBattleOrchestratorState {
+  return prepareResolutionPalette(
+    advanceFactoryRoundBattleResolutionCore(prepareResolutionPalette(state), newKeys),
+  );
+}
+
+function advanceFactoryRoundBattleResolutionCore(
   state: FactoryRoundBattleOrchestratorState,
   newKeys: ReadonlySet<GbaButton> = new Set(),
 ): FactoryRoundBattleOrchestratorState {
