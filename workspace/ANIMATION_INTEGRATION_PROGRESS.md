@@ -1,5 +1,35 @@
 # Animation integration progress
 
+## 2026-09-23 — 49 adapters / 50 palette plans; combined gates pending
+
+- State: physical batch and live Howl folded; source palette plans now cover
+  all 49 adapters plus palette-only Fury Cutter. Imported supervisor-verified
+  Factory 33bc8bbed one-way (Curse accepted; Ice Ball evidence only): 274 exact
+  Factory moves remains separate from zero whole-playable exact claims.
+- Source: physical 2,608 rows/run including alternate Wobbuffet, twice fresh,
+  zero residuals; parent independently repeats 660 rows/run for Hi Jump Kick,
+  Steel Wing and altered Vice Grip. Howl 408 rows/run (Loudred and Mightyena,
+  both directions), twice fresh exact; ordinary seed 8 repeats with stages
+  6 -> 7 -> 8 and identical ON/OFF outcomes/RNG.
+- Palette: 50 source resource plans; Smokescreen/Confusion/Dynamic Punch
+  histories each prove eight Shadow scratch allocations. Sing/Grass Whistle
+  both directions twice prove four-slot allocation, faded-only writes through
+  cleanup and unchanged unfaded scratch. Complete-body Shadow diagnosis stays
+  partial: restore timing diverges at age 83 under changed history; no
+  empirical offset or capture input was added.
+- Verified preview: http://127.0.0.1:5191/ at cf3e5009e, 36 adapters.
+  Full fa1404db5 passes 1,455 files / 11,610 tests; type-only replay request
+  annotation repair passes 19 affected tests, build 838 modules. Production
+  source is unchanged between those two commits. Browser four canvas/PNG
+  hashes, export, mode switch and no-error checks pass. Receipt:
+  tools/integration/fixtures/playable-preview-cf3e5009e-receipt.json.
+- Next: run typecheck, affected/semantic/shared controls, smoke and final full
+  suite/build on this combined 49-adapter production tree. Prior child gate
+  queues were stopped while waiting to consolidate checks here. Isolated
+  support worker side-20260923-144936 owns sixteen more bodies; separate
+  Sol/high Shadow fade worker starts from verified cf3e5009e plus diagnostic
+  bc550ae26. Continue supervising and folding; preview is only a checkpoint.
+
 ## 2026-09-23 — 36 adapters and persistent palette input, union gates running
 
 - State: status batch folded as a77f93644/bedf905cf; palette provider folded
@@ -44,24 +74,3 @@
   Shadow Punch/Smokescreen/Shadow Punch sequence confirms persistent stale
   palette rows. Production provider and tests are being finished there.
   Preview remains pinned while this work continues; do not stop at this milestone.
-
-## 2026-09-23 — 24 live adapters; contact source and ordinary-route checks
-
-- State: worker contact batch folded as d250a0c3e/b213948ca. Eleven adapters
-  added; Howl retains explicit stage/picture-height/cry input debt.
-- Checks: all 22 contact orientations, **1,780 frames per fresh run**, compared
-  twice against source through the production live-field path. Fixed extra
-  first-frame shadows in Dragon Claw, Poison Fang and Twineedle; complete
-  source windows now have zero residuals. Receipt:
-  tools/integration/fixtures/live-contact-source-field-receipt.json.
-- Ordinary input: repeated Crunch/Slash; three Fury Swipes hits; Twineedle
-  through two hits, KO/replacement and two hits on the incoming target.
-  Focused union **8 files / 86 tests** and smoke **8 files / 448 tests** pass.
-- Worker full: **11,580 passed / 2 failed**, both older parent expectations
-  already fixed here and green in the focused union. Worker build passes.
-  Spike Cannon's old semantic JSON digest drifts although both raw RGB and
-  new production full-frame comparison pass; archives remain unchanged.
-- Next: full test/build on the committed union, immutable stamped preview
-  and browser replay/session verification. Continue status/psychic adapters
-  in an isolated bounded worker while parent owns persistent source hosts.
-  24 implemented does not mean 24 arbitrary-history/whole-battle exact.

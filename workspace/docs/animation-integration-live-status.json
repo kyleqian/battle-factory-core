@@ -14,6 +14,26 @@
       ]
     },
     {
+      "move": "MOVE_MEGA_PUNCH",
+      "id": 5,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_VICE_GRIP",
+      "id": 11,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_SWORDS_DANCE",
       "id": 14,
       "liveEvidence": [
@@ -25,6 +45,16 @@
       ]
     },
     {
+      "move": "MOVE_SLAM",
+      "id": 21,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_STOMP",
       "id": 23,
       "liveEvidence": [
@@ -33,6 +63,26 @@
       "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_MEGA_KICK",
+      "id": 25,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_ROLLING_KICK",
+      "id": 27,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
       ]
     },
     {
@@ -95,6 +145,17 @@
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
         "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_LOW_KICK",
+      "id": 67,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [
+        "seed 14 player LOW_KICK twice; Scene ON/OFF outcomes and RNG equal"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison"
       ]
     },
     {
@@ -214,10 +275,30 @@
       ]
     },
     {
+      "move": "MOVE_LICK",
+      "id": 122,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_SPIKE_CANNON",
       "id": 131,
       "liveEvidence": [],
       "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_HI_JUMP_KICK",
+      "id": 136,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
         "ordinary command-input replay"
@@ -263,6 +344,36 @@
       "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_STEEL_WING",
+      "id": 211,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_DYNAMIC_PUNCH",
+      "id": 223,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_IRON_TAIL",
+      "id": 231,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
       ]
     },
     {
@@ -353,17 +464,40 @@
         "generated seed 54 command input: HAUNTER -> WAILMER"
       ],
       "remaining": [
-        "independent arbitrary-species framebuffer comparison",
-        "persistent sprite/palette allocation through switch and unknown move graphics",
-        "whole-body source comparison after prior palette-changing moves"
+        "source BG restore / VBlank timing and final cleanup under changed battle history",
+        "persistent palette/resource allocation through switch and unknown graphics",
+        "whole-playable arbitrary-history source comparison"
       ],
-      "paletteHistoryEvidence": "../tools/integration/fixtures/live-palette-history-receipt.json"
+      "paletteHistoryEvidence": "../tools/integration/fixtures/live-palette-history-receipt.json",
+      "framebufferDiagnosis": "../tools/integration/fixtures/live-palette-framebuffer-diagnosis.json"
+    },
+    {
+      "move": "MOVE_HOWL",
+      "id": 336,
+      "sourceFieldEvidence": "../tools/integration/fixtures/howl-live-adapter-receipt.json",
+      "liveEvidence": [
+        "seed 8 LOUDRED -> VOLTORB twice; Attack stages 6 -> 7 -> 8; Scene ON/OFF outcomes and RNG equal",
+        "complete legal MIGHTYENA -> MACHOP source bodies both orientations, twice fresh"
+      ],
+      "remaining": [
+        "independent arbitrary-history/controller timing comparison"
+      ]
     },
     {
       "move": "MOVE_DRAGON_CLAW",
       "id": 337,
       "liveEvidence": [],
       "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_POISON_TAIL",
+      "id": 342,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
         "ordinary command-input replay"
@@ -394,30 +528,35 @@
     "reusable basic/derived/variant/graphics/random adapters for the remaining accepted moves",
     "one-way fold of later supervisor-verified Factory commits including Outrage when available"
   ],
-  "foldedVerifiedSnapshot": "88cd3bc80",
-  "currentAcceptedFactoryMoves": 273,
+  "foldedVerifiedSnapshot": "33bc8bbed",
+  "currentAcceptedFactoryMoves": 274,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 36,
+  "implementedCount": 49,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
-  "unadaptedNotes": {
-    "MOVE_HOWL": "Current narrow config requires immutable Attack stage 7 and reducer fixes Loudred inhale picture height/cry species. Generalize from source/current battler inputs; do not fabricate fixture values."
-  },
+  "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "82544f434a081d5b63f5ff944eca21610454239b",
-    "build": "82544f434 2026-09-23",
-    "url": "http://127.0.0.1:5190/",
-    "fullTest": "1452 files / 11586 tests passed; 44 files / 223 tests skipped",
-    "buildModules": 835,
-    "browser": "four pixel-identical canvas/PNG samples; ordinary trace and export; Scene ON/OFF control; no page errors",
-    "receipt": "../tools/integration/fixtures/playable-preview-82544f434-receipt.json"
+    "commit": "cf3e5009e9261f856c112afe9beb6cc44e00b305",
+    "build": "cf3e5009e 2026-09-23",
+    "url": "http://127.0.0.1:5191/",
+    "implementedAdapters": 36,
+    "fullTest": "1455 files / 11610 tests at fa1404db5; production tree unchanged; type-only replay helper repair passes 19 affected tests",
+    "buildModules": 838,
+    "browser": "four identical canvas/PNG samples; ordinary input/session export; Scene ON/OFF restart; no page errors",
+    "receipt": "../tools/integration/fixtures/playable-preview-cf3e5009e-receipt.json"
   },
   "productionProviders": {
     "spritePaletteHistory": {
-      "sourceCommit": "dec7ced85",
-      "auditedMovePlans": 25,
-      "claim": "Only retained Shadow Punch scratch input is supplied. Source palette/cleanup proof covers Shadow Punch, Smokescreen, Shadow Punch in both orientations twice. Unknown bodies and switch graphics invalidate history; full OAM/VRAM/scanout providers remain pending.",
-      "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json"
+      "sourceCommit": "a6c61a781",
+      "auditedMovePlans": 50,
+      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, including all 49 implemented adapters. Musical-note task allocations write only faded colors and retain unfaded rows. Unknown bodies and switch graphics invalidate history; complete OAM/VRAM/scanout providers remain pending.",
+      "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json",
+      "receipts": [
+        "../tools/integration/fixtures/live-palette-history-receipt.json",
+        "../tools/integration/fixtures/live-palette-confusion-history-receipt.json",
+        "../tools/integration/fixtures/live-palette-dynamic-punch-history-receipt.json",
+        "../tools/integration/fixtures/music-notes-palette-receipt.json"
+      ]
     }
   }
 }

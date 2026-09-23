@@ -1,10 +1,10 @@
 {
   "schema": "playable-animation-readiness-delta/v1",
-  "verifiedFactorySnapshot": "88cd3bc80",
+  "verifiedFactorySnapshot": "33bc8bbed",
   "extends": "animation-integration-readiness.json",
   "baselineAccepted": 267,
-  "additionalAccepted": 6,
-  "totalAccepted": 273,
+  "additionalAccepted": 7,
+  "totalAccepted": 274,
   "availableCommonProviders": [
     "typed MOVE_ANIMATION request",
     "current field/art/source geometry/HUD",
@@ -188,10 +188,34 @@
         "persistent source callback/graphics host provider; retained oracle rows are verifier-only",
         "typed live adapter and ordinary-route acceptance"
       ]
+    },
+    {
+      "move": "MOVE_CURSE",
+      "exactAcceptance": "exact",
+      "playableReadiness": "blocked",
+      "entryPoints": {
+        "config": "SceneOnCurseConfig",
+        "reducer": "src/animation/curse.ts",
+        "render": "renderSceneOnMovePresentation"
+      },
+      "hostClass": [
+        "H_BUFFER",
+        "H_VARIANT"
+      ],
+      "requiredHostState": [
+        "resolved Ghost/stat body",
+        "current battler geometry/art",
+        "production CPU/VBlank palette-transfer schedule; source verifier VCOUNT inputs cannot enter production"
+      ],
+      "productionHostProvider": false,
+      "blockers": [
+        "typed ordinary queue adapter",
+        "production palette-transfer timing provider",
+        "ordinary-route source comparison"
+      ]
     }
   ],
   "remainingUnaccepted": [
-    "MOVE_CURSE",
     "MOVE_ICE_BALL",
     "MOVE_HELPING_HAND",
     "MOVE_OUTRAGE"
