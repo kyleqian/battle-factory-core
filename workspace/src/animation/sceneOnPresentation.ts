@@ -116,6 +116,7 @@ import { megaHornAtAge, type MegaHornLiveInputs, type MegaHornState } from "./me
 import { superpowerAtAge, type SuperpowerLiveInputs, type SuperpowerState } from "./superpower.ts";
 import { revengeAtAge, type RevengeLiveInputs, type RevengeState } from "./revenge.ts";
 import { spitUpAtAge, type SpitUpLiveInputs, type SpitUpState } from "./spitUp.ts";
+import { furyCutterAtAge, type FuryCutterLiveInputs, type FuryCutterState } from "./furyCutter.ts";
 import {
   auroraBeamAtAge,
   type AuroraBeamGeometry,
@@ -2911,6 +2912,17 @@ export interface SceneOnSpitUpConfig {
       | "attackerCenter" | "targetCenter">>;
 }
 
+/** Narrow Scene-ON presentation seam for MOVE_FURY_CUTTER's live counter branch. */
+export interface SceneOnFuryCutterConfig {
+  readonly move: "FURY_CUTTER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<FuryCutterLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /**
  * Narrow Scene-ON seam for MOVE_RETURN. The caller carries the live
  * friendship-selected presentation snapshot; damage, Return power, gameplay
@@ -4471,6 +4483,7 @@ export type SceneOnMoveConfig =
   | SceneOnSuperpowerConfig
   | SceneOnRevengeConfig
   | SceneOnSpitUpConfig
+  | SceneOnFuryCutterConfig
   | SceneOnReturnConfig
   | SceneOnFlatterConfig
   | SceneOnRazorWindConfig
@@ -4857,6 +4870,8 @@ export type SceneOnRevengePresentationState =
   SceneOnMovePresentationState<SceneOnRevengeConfig>;
 export type SceneOnSpitUpPresentationState =
   SceneOnMovePresentationState<SceneOnSpitUpConfig>;
+export type SceneOnFuryCutterPresentationState =
+  SceneOnMovePresentationState<SceneOnFuryCutterConfig>;
 export type SceneOnReturnPresentationState =
   SceneOnMovePresentationState<SceneOnReturnConfig>;
 export type SceneOnFlatterPresentationState =
@@ -5333,6 +5348,10 @@ export interface SceneOnRevengeView extends RevengeState {
   readonly target: SceneOnPresentationBattler;
 }
 export interface SceneOnSpitUpView extends SpitUpState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+export interface SceneOnFuryCutterView extends FuryCutterState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -9146,6 +9165,21 @@ export function sceneOnSpitUpView(state: SceneOnSpitUpPresentationState): SceneO
   }
   const { attacker, target, animationInputs } = state.config;
   return { ...spitUpAtAge(state.age, { ...animationInputs,
+    attackerSide: attacker.geometry.side, targetSide: target.geometry.side,
+    attackerSpecies: attacker.species, targetSpecies: target.species,
+    attackerCenter: attacker.geometry.animationCenter,
+    targetCenter: target.geometry.animationCenter }), attacker, target };
+}
+
+/** `age=0` is MOVE_FURY_CUTTER's first CUT resource-command row. */
+export function sceneOnFuryCutterView(
+  state: SceneOnFuryCutterPresentationState,
+): SceneOnFuryCutterView {
+  if (state.config.move !== "FURY_CUTTER") {
+    throw new Error(`expected FURY_CUTTER presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return { ...furyCutterAtAge(state.age, { ...animationInputs,
     attackerSide: attacker.geometry.side, targetSide: target.geometry.side,
     attackerSpecies: attacker.species, targetSpecies: target.species,
     attackerCenter: attacker.geometry.animationCenter,
