@@ -169,10 +169,11 @@ describe("live physical move adapters", () => {
     for (let index = 0; index < on.boundaries.length; index++) {
       const onBattle = on.boundaries[index]!.rules;
       const offBattle = off.boundaries[index]!.rules;
-      const { hitMarker: _onMarker, ...onRules } = onBattle.rulesContext;
-      const { hitMarker: _offMarker, ...offRules } = offBattle.rulesContext;
+      const { hitMarker: onMarker, ...onRules } = onBattle.rulesContext;
+      const { hitMarker: offMarker, ...offRules } = offBattle.rulesContext;
       expect(onRules).toEqual(offRules);
       expect(onBattle.rng).toEqual(offBattle.rng);
+      expect(onMarker ^ offMarker).toBe(0x80);
     }
   }, 60000);
 });
