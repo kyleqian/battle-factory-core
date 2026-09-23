@@ -22,8 +22,8 @@ function validateStage(path: string) {
   return spawnSync("python3", ["-c", "import json,sys\nsys.path.insert(0,sys.argv[1])\nfrom battle_lab import validate_request\nvalidate_request(json.load(open(sys.argv[2],encoding='utf-8')),'battle-scene-on')", oracleDir(), resolve(root, path)], { cwd: root, encoding: "utf8" });
 }
 
-describe("MOVE_OUTRAGE source and legal bilateral staging checkpoint", () => {
-  it("pins the complete pointer-owned graph, all six components, and the Open carrier without credit", () => {
+describe("MOVE_OUTRAGE exact source and legal bilateral staging", () => {
+  it("pins the complete pointer-owned graph, all six components, and the Open carrier", () => {
     const text = runAudit();
     expect(runAudit()).toBe(text);
     expect(readFileSync(resolve(root, "tools/compare/evidence/outrage-source-audit.json"), "utf8")).toBe(text);
@@ -32,8 +32,8 @@ describe("MOVE_OUTRAGE source and legal bilateral staging checkpoint", () => {
       schema: "outrage-source-audit/v1",
       move: "MOVE_OUTRAGE",
       moveId: 200,
-      status: "unsupported-source-staging-checkpoint",
-      coverageCredit: false,
+      status: "exact",
+      coverageCredit: true,
       source: {
         pointerOwnedRoot: {
           symbol: "Move_OUTRAGE",
@@ -79,16 +79,16 @@ describe("MOVE_OUTRAGE source and legal bilateral staging checkpoint", () => {
         rawRgbRetained: true,
         normalizedMaps: true,
         latchMeasured: true,
-        productionChanged: false,
-        reducerAdded: false,
-        typedSeamAdded: false,
-        compositorAdded: false,
-        actualCoreFramebufferAcceptance: false,
-        coveragePromotion: false,
-        componentTrackFulfilled: false,
+        productionChanged: true,
+        reducerAdded: true,
+        typedSeamAdded: true,
+        compositorAdded: true,
+        actualCoreFramebufferAcceptance: true,
+        coveragePromotion: true,
+        componentTrackFulfilled: true,
         gameplayStateOwned: false,
         boundaryOrBarrierChanged: false,
-        unsupportedNoCreditBoundary: true,
+        unsupportedNoCreditBoundary: false,
       },
     });
     expect(audit.source.pointerOwnedRoot.commands).toHaveLength(27);

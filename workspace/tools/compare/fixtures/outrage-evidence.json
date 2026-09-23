@@ -3,8 +3,8 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_OUTRAGE",
   "moveId": 200,
-  "status": "unsupported-evidence",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "evidenceScope": {
     "sourceAudit": true,
     "completePointerBody": true,
@@ -24,13 +24,13 @@
     "hardwareOamMatrixPaletteTransfer": true,
     "firstInactiveCleanup": true,
     "immutableGameplayStateAndRng": true,
-    "productionChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
-    "actualCoreFramebufferAcceptance": false,
-    "coveragePromotion": false,
-    "componentTrackFulfilled": false,
+    "productionChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "actualCoreFramebufferAcceptance": true,
+    "coveragePromotion": true,
+    "componentTrackFulfilled": true,
     "gameplayStateOwned": false,
     "boundaryOrBarrierChanged": false
   },
@@ -41,7 +41,8 @@
     "receipt": "tools/compare/evidence/outrage-source-audit.json",
     "audit": "tools/compare/outrageSourceAudit.ts",
     "probe": "tools/compare/outrageProbe.py",
-    "verifier": "tools/compare/outrageEvidence.ts"
+    "verifier": "tools/compare/outrageEvidence.ts",
+    "actualCore": "tools/compare/outrageActualCore.ts"
   },
   "acceptance": {
     "freshRunsPerOrientation": 2,
@@ -51,7 +52,12 @@
     },
     "totalRows": 240,
     "firstInactiveCleanupRetained": true,
-    "productionFramebufferCompared": false
+    "productionFramebufferCompared": true,
+    "productionFramebufferRows": {
+      "player-back": 120,
+      "opponent-front": 120
+    },
+    "productionFramebufferResidualPixels": 0
   },
   "orientations": {
     "player-back": {
@@ -5917,10 +5923,10 @@
   },
   "controls": {
     "named": {
-      "MOVE_OUTRAGE": "unsupported-evidence",
+      "MOVE_OUTRAGE": "exact",
       "MOVE_HELPING_HAND": "blocked"
     },
     "transferCredit": false
   },
-  "acceptanceVerdict": "Evidence only: MOVE_OUTRAGE remains unsupported and outrage-flame remains unfulfilled; no reducer, typed seam, compositor, actual-core framebuffer acceptance, exact/partial promotion, sibling, shared-component, gameplay, RNG, or facility credit is claimed."
+  "acceptanceVerdict": "Exact: MOVE_OUTRAGE alone passes complete bilateral source/component, typed-seam, chronological raw-RGB, and twice-fresh actual-core framebuffer acceptance through cleanup with zero residual pixels; no sibling, shared-component, gameplay, RNG, or facility credit is claimed."
 }

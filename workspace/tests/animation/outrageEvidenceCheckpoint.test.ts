@@ -20,23 +20,23 @@ const expectedLatePaletteTransitions = {
   hardware: [9, 13, 17, 21, 31, 35, 39, 49, 53, 57, 67, 71, 75, 85, 89],
 };
 
-describe("MOVE_OUTRAGE complete bilateral Scene-ON evidence checkpoint", () => {
+describe("MOVE_OUTRAGE complete bilateral Scene-ON exact acceptance", () => {
   it("retains dense RGB/state evidence and independently proves both orientations", () => {
     const result = JSON.parse(run()) as Json;
     expect(run()).toBe(JSON.stringify(result, null, 2) + "\n");
     expect(result).toMatchObject({
       schema: "outrage-bilateral-evidence/v1",
       move: "MOVE_OUTRAGE",
-      status: "unsupported-evidence",
-      coverageCredit: false,
+      status: "exact",
+      coverageCredit: true,
       boundary: {
-        productionChanged: false,
-        reducerAdded: false,
-        typedSeamAdded: false,
-        compositorAdded: false,
-        actualCoreFramebufferAcceptance: false,
-        coveragePromotion: false,
-        componentTrackFulfilled: false,
+        productionChanged: true,
+        reducerAdded: true,
+        typedSeamAdded: true,
+        compositorAdded: true,
+        actualCoreFramebufferAcceptance: true,
+        coveragePromotion: true,
+        componentTrackFulfilled: true,
         boundaryOrBarrierChanged: false,
       },
     });
@@ -45,10 +45,10 @@ describe("MOVE_OUTRAGE complete bilateral Scene-ON evidence checkpoint", () => {
       oracleProfile: "battle-scene-on",
       move: "MOVE_OUTRAGE",
       moveId: 200,
-      status: "unsupported-evidence",
-      coverageCredit: false,
+      status: "exact",
+      coverageCredit: true,
       source: { rootStart: "0x082cb908", rootEndExclusive: "0x082cbaa3", components: 6 },
-      acceptance: { freshRunsPerOrientation: 2, rows: { "player-back": 120, "opponent-front": 120 }, totalRows: 240, firstInactiveCleanupRetained: true, productionFramebufferCompared: false },
+      acceptance: { freshRunsPerOrientation: 2, rows: { "player-back": 120, "opponent-front": 120 }, totalRows: 240, firstInactiveCleanupRetained: true, productionFramebufferCompared: true, productionFramebufferRows: { "player-back": 120, "opponent-front": 120 }, productionFramebufferResidualPixels: 0 },
       evidenceScope: {
         sourceAudit: true,
         completePointerBody: true,
@@ -68,10 +68,10 @@ describe("MOVE_OUTRAGE complete bilateral Scene-ON evidence checkpoint", () => {
         hardwareOamMatrixPaletteTransfer: true,
         firstInactiveCleanup: true,
         immutableGameplayStateAndRng: true,
-        productionChanged: false,
-        actualCoreFramebufferAcceptance: false,
-        coveragePromotion: false,
-        componentTrackFulfilled: false,
+        productionChanged: true,
+        actualCoreFramebufferAcceptance: true,
+        coveragePromotion: true,
+        componentTrackFulfilled: true,
         gameplayStateOwned: false,
         boundaryOrBarrierChanged: false,
       },
@@ -139,13 +139,13 @@ describe("MOVE_OUTRAGE complete bilateral Scene-ON evidence checkpoint", () => {
     }
   });
 
-  it("keeps Outrage unsupported, Outrage-flame unfulfilled, and Helping Hand blocked", () => {
+  it("promotes only Outrage and its move-owned track while Helping Hand stays blocked", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
-    expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_OUTRAGE")).toBe(false);
-    expect(coverage.componentTracks.some((track: Json) => track.representatives?.includes("MOVE_OUTRAGE") || track.moves?.includes("MOVE_OUTRAGE"))).toBe(false);
+    expect(coverage.entries.find((entry: Json) => entry.move === "MOVE_OUTRAGE")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: Json) => track.id === "outrage-flame-source-relative")).toMatchObject({ representatives: ["MOVE_OUTRAGE"], fulfilled: true, sourceComponents: ["subroutine:OutrageFlames", "sprite:gOutrageFlameSpriteTemplate", "callback:AnimOutrageFlame", "task:AnimTask_TranslateMonEllipticalRespectSide", "task:AnimTask_ShakeMon2", "visualCommand:blend_color_cycle"] });
     const work = animationWorkPlan(coverage as AnimationCoverageLedger);
-    expect(work.ready.find((entry) => entry.move === "MOVE_OUTRAGE")).toMatchObject({ move: "MOVE_OUTRAGE", tier: "openOnly" });
+    expect(work.ready.find((entry) => entry.move === "MOVE_OUTRAGE")).toBeUndefined();
     expect(work.blocked.map((entry) => entry.move)).toEqual(["MOVE_HELPING_HAND"]);
-    expect(fixture.controls).toEqual({ named: { MOVE_OUTRAGE: "unsupported-evidence", MOVE_HELPING_HAND: "blocked" }, transferCredit: false });
+    expect(fixture.controls).toEqual({ named: { MOVE_OUTRAGE: "exact", MOVE_HELPING_HAND: "blocked" }, transferCredit: false });
   });
 });

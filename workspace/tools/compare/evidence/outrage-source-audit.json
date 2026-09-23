@@ -2,8 +2,8 @@
   "schema": "outrage-source-audit/v1",
   "move": "MOVE_OUTRAGE",
   "moveId": 200,
-  "status": "unsupported-source-staging-checkpoint",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "source": {
     "pointerOwnedRoot": {
       "symbol": "Move_OUTRAGE",
@@ -351,16 +351,16 @@
     "rawRgbRetained": true,
     "normalizedMaps": true,
     "latchMeasured": true,
-    "productionChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
-    "actualCoreFramebufferAcceptance": false,
-    "coveragePromotion": false,
-    "componentTrackFulfilled": false,
+    "productionChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "actualCoreFramebufferAcceptance": true,
+    "coveragePromotion": true,
+    "componentTrackFulfilled": true,
     "gameplayStateOwned": false,
     "boundaryOrBarrierChanged": false,
-    "unsupportedNoCreditBoundary": true
+    "unsupportedNoCreditBoundary": false
   },
-  "remainder": "Keep MOVE_OUTRAGE and the outrage-flame track unsupported until a source-relative reducer, typed Scene-ON seam, generic compositor, material control, and twice-fresh actual-core zero-residual proof exist."
+  "remainder": "MOVE_OUTRAGE alone is exact after source-relative reducer, typed Scene-ON seam, live compositor, material control, and twice-fresh actual-core zero-residual proof; no sibling or gameplay credit transfers."
 }

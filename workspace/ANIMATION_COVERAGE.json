@@ -7669,7 +7669,7 @@
     "Overheat's own latch maps prove whole OAM/matrices predecessor RAM+1 on 229/229 comparable rows, hardware palette predecessor-faded on 228/229 with only age-7 monbg same-row, backup alloc 26, copies 29/135, restores 167/205, free 229, target hidden-BG shake transfer, attacker OAM shakes, and direct alpha edges 10/186",
     "two independent actual-core processes are byte-identical at digest c3f97944df41f2e834ebb4cf289c2a18b4997194dcad091a24c9c602ad21f4e1 and each passes all 460 component, typed-seam, chronological raw-RGB, and shared-framebuffer rows with zero residual pixels through age-229 cleanup",
     "a material reversed-side CROBAT/BLISSEY live control changes species, geometry, allocation/order, palettes, presentation RNG, typed seam output, and framebuffer while gameplay state/RNG remains opaque and unchanged",
-    "MOVE_OVERHEAT alone is exact; MOVE_OUTRAGE, MOVE_FIRE_PUNCH, MOVE_BLAST_BURN, MOVE_PSYCHO_BOOST, and every source/component sibling remain identity-only controls with no transferred timing, body, latch, move, component, or track credit"
+    "MOVE_OVERHEAT alone is exact; MOVE_OUTRAGE retains its independent exact acceptance, while MOVE_FIRE_PUNCH, MOVE_BLAST_BURN, MOVE_PSYCHO_BOOST, and every source/component sibling receive no transferred timing, body, latch, move, component, or track credit"
    ],
    "evidence": [
     "tools/compare/overheatSourceAudit.ts",
@@ -8237,6 +8237,51 @@
     "ANIMATION_LATCHES.md"
    ],
    "acceptance": "Two independent fresh actual-core verifier processes each pass all 872 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest 92954a696f106e98f3162d183c1c2e6b582c253543bddc4bef6b5459e716c1bf; player counter 1/2/3/4/5 RGB sequences d61558c1e048227490d798df75e987e805eec6ec6599f29e68ab15120c411ce3 / 5facbb19f0358b0d99266ca062043f6dde7b7c87d0cb5f880fb3aadb2de6391b / 9434d40ba9980bb1098606c193e0aaeb8aa06e7bab340dff52d6d30c5620bd1d / 5591ada23bf0052ffc81b6cb26879f8e2960b1b6ddb1f97194c4c4829f51a32b / be310f32acf4313406e6ac8558bda669ee2cd319cacab888d5105c2ae99c8f44; opponent counter 1/2/3/4/5 RGB sequences e1bc38f683e53cf2f75c77a9b2d4191b7fe5374a15446f0095ffac4ad9278659 / 93e3e3eb0822274d9c43173233b41eed828733a5941a9e5079a550b4907b73f5 / fb427c825d60e61c083a343ceed2b44a56e67447eeb7e44ab3c06a5d170237fa / 7c77bbb64470a6416b1989c41a2bb6eda42cc87c6c2a760236c805597a7dd74e / 1a697bbd78ea349e0a5ab253b500ffdfe4f31941bb28e872fb72d3e2e8cce065."
+  },
+  {
+   "move": "MOVE_OUTRAGE",
+   "status": "exact",
+   "covered": [
+    "the complete source-audited 411-byte Move_OUTRAGE pointer interval and six generated graph components, plus the move-owned gOutrageFlameSpriteTemplate and AnimOutrageFlame source bodies",
+    "the sole Open-only FRONTIER_MON_DRAGONITE_5 carrier is staged as complete legal bilateral Scene-ON parties; player-back and opponent-front retain all 120 source-owned rows through first inactive cleanup",
+    "Outrage's maps independently retain 23 thirty-tick Small Ember lives, Task_LoopAndPlaySE 4..20, TranslateMonElliptical 4..81, target ShakeMon2 14..91, BlendColorCycleLoop 4..92, side-dependent ellipse and target axes, audio/palette/resource lifetimes, predecessor OAM/matrix/palette latches, opaque gameplay state/RNG, and zero-owned cleanup",
+    "the source-relative reducer and typed Scene-ON seam pass all 240 source/component and seam rows; two independent fresh actual-core processes pass all 240 chronological raw-RGB and shared production framebuffer rows with zero residual pixels",
+    "a material CROBAT/BLISSEY reversed-side geometry, allocation, palette, painter-order, and presentation-RNG control changes the live seam and framebuffer while gameplay state and RNG remain opaque and unchanged; Helping Hand, the 77 non-Factory moves, and every Outrage sibling receive no credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-outrage-player-dragonite-opponent-onix.json",
+    "tools/battle-lab/mechanic-outrage-opponent-dragonite-player-onix.json",
+    "tools/compare/outrageSourceAudit.ts",
+    "tools/compare/evidence/outrage-source-audit.json",
+    "tools/compare/outrageEvidence.ts",
+    "tools/compare/fixtures/outrage-evidence.json",
+    "tools/compare/evidence/outrage-player-dense-state.json.gz",
+    "tools/compare/evidence/outrage-opponent-dense-state.json.gz",
+    "tools/compare/evidence/outrage-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/outrage-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/outrage-changemap-player.json",
+    "tools/compare/evidence/outrage-changemap-opponent.json",
+    "src/animation/outrage.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tools/compare/verifyOutrageReducer.ts",
+    "tools/compare/outrageActualCore.ts",
+    "tests/animation/outrageSourceStaging.test.ts",
+    "tests/animation/outrageEvidenceCheckpoint.test.ts",
+    "tests/animation/outrageReducer.test.ts",
+    "tests/animation/outrageActualCore.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "acceptance": "Two independent fresh actual-core verifier processes each pass all 240 source/component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. The canonical rows are player-back 76..195 and opponent-front 80..199; altered CROBAT/BLISSEY live control changes the output without changing opaque gameplay state/RNG.",
+   "sourceComponents": [
+    "subroutine:OutrageFlames",
+    "sprite:gOutrageFlameSpriteTemplate",
+    "callback:AnimOutrageFlame",
+    "task:AnimTask_TranslateMonEllipticalRespectSide",
+    "task:AnimTask_ShakeMon2",
+    "visualCommand:blend_color_cycle"
+   ]
   }
  ],
  "queue": [],
@@ -11146,6 +11191,40 @@
     "ANIMATION_LATCHES.md"
    ],
    "goal": "FULFILLED by MOVE_ICE_BALL alone after complete source classification, ten legal natural counter/orientation windows, source-extracted ICE_CHUNK art with reused source-extracted ICE_CRYSTALS, one counter-generic source-relative reducer, narrow typed Scene-ON seam, live hardware-buffer compositor preserving the measured predecessor latches and counter-3 OAM exception, material altered control, and twice-fresh 872/872 zero-residual actual-core acceptance through cleanup. Rollout, Rapid Spin, Sheer Cold, and every sibling receive no credit."
+  },
+  {
+   "id": "outrage-flame-source-relative",
+   "components": [
+    "asset:ANIM_TAG_SMALL_EMBER",
+    "subroutine:OutrageFlames",
+    "task:AnimTask_ShakeMon2",
+    "task:AnimTask_TranslateMonEllipticalRespectSide",
+    "visualCommand:blend_color_cycle",
+    "visualCommand:create_outrage_flame_sprite"
+   ],
+   "sourceComponents": [
+    "subroutine:OutrageFlames",
+    "sprite:gOutrageFlameSpriteTemplate",
+    "callback:AnimOutrageFlame",
+    "task:AnimTask_TranslateMonEllipticalRespectSide",
+    "task:AnimTask_ShakeMon2",
+    "visualCommand:blend_color_cycle"
+   ],
+   "representatives": ["MOVE_OUTRAGE"],
+   "fulfilled": true,
+   "evidence": [
+    "tools/compare/outrageSourceAudit.ts",
+    "tools/compare/outrageEvidence.ts",
+    "tools/compare/verifyOutrageReducer.ts",
+    "tools/compare/outrageActualCore.ts",
+    "tests/animation/outrageSourceStaging.test.ts",
+    "tests/animation/outrageEvidenceCheckpoint.test.ts",
+    "tests/animation/outrageReducer.test.ts",
+    "tests/animation/outrageActualCore.test.ts",
+    "src/animation/outrage.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "goal": "FULFILLED by MOVE_OUTRAGE alone after complete source/component, gOutrageFlameSpriteTemplate and AnimOutrageFlame, dense bilateral, source-relative reducer, typed seam, live compositor, altered-control, and twice-fresh zero-residual actual-core acceptance. No Small Ember sibling, Outrage sibling, or shared task receives transferred move credit."
   }
  ],
  "variantAudits": {
