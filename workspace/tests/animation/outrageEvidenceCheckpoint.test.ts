@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { animationWorkPlan } from "../../tools/animation/coverage.ts";
+import { animationWorkPlan, type AnimationCoverageLedger } from "../../tools/animation/coverage.ts";
 
 type Json = Record<string, any>;
 const root = resolve(import.meta.dirname, "../..");
@@ -143,7 +143,7 @@ describe("MOVE_OUTRAGE complete bilateral Scene-ON evidence checkpoint", () => {
     const coverage = JSON.parse(readFileSync(resolve(root, "ANIMATION_COVERAGE.json"), "utf8")) as Json;
     expect(coverage.entries.some((entry: Json) => entry.move === "MOVE_OUTRAGE")).toBe(false);
     expect(coverage.componentTracks.some((track: Json) => track.representatives?.includes("MOVE_OUTRAGE") || track.moves?.includes("MOVE_OUTRAGE"))).toBe(false);
-    const work = animationWorkPlan(coverage);
+    const work = animationWorkPlan(coverage as AnimationCoverageLedger);
     expect(work.ready.find((entry) => entry.move === "MOVE_OUTRAGE")).toMatchObject({ move: "MOVE_OUTRAGE", tier: "openOnly" });
     expect(work.blocked.map((entry) => entry.move)).toEqual(["MOVE_HELPING_HAND"]);
     expect(fixture.controls).toEqual({ named: { MOVE_OUTRAGE: "unsupported-evidence", MOVE_HELPING_HAND: "blocked" }, transferCredit: false });
