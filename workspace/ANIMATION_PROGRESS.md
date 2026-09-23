@@ -1,3 +1,28 @@
+# Animation supervisor verification — MOVE_CURSE evidence merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commits `e8fc0a00a` through
+  `68e46c8fe`. `MOVE_CURSE` remains **unsupported** and the ten-component
+  `curse-ghost-nail-stat-lines` track remains **unfulfilled**; Level 50 stays
+  **273/276 exact, 0 partial, 0 staged, 3 unsupported**. No production,
+  promotion, sibling, gameplay/RNG/facility, boundary, or barrier credit moved.
+- **Independent proof:** Two fresh source-audit processes are byte-identical
+  (`5b7b347e…`) and two fresh four-map verifier processes are byte-identical
+  (`e389e0c1…`). Legal bilateral Ghost windows retain **373+373 rows** and
+  non-Ghost stat windows **176+176 rows**, including first-inactive cleanup.
+  Ghost OAM/matrices transfer on **372/372** comparable rows and stat on
+  **175/175**; orientation-specific palette exceptions remain pinned in
+  `ANIMATION_LATCHES.md`. The complete 18-set Level-50 carrier census, five
+  source blocks, 16-component graph, four legal party scenarios, chronological
+  RGB hashes, and no-credit boundary all replay hermetically.
+- **Gates / next:** The focused source/evidence/boundary/inventory union passes
+  **4 files / 13 tests**; coverage, animation audit, typecheck, and diff checks
+  are green. This is evidence/tooling-only, so the same-production full
+  `npm test` / build receipt from the verified Fury Cutter tree remains valid.
+  Next dispatch a bounded Curse reducer/typed-seam/compositor phase covering
+  both natural branches and both orientations; require honest actual-core
+  residual accounting and no promotion without twice-fresh zero-residual proof
+  plus a material altered control. **For the main program:** nothing blocking.
+
 # Animation worker checkpoint — MOVE_CURSE source/evidence boundary (2026-09-23)
 
 - **State:** Source classification and legal Scene-ON evidence are complete as
@@ -68,51 +93,3 @@
   track, and complete legal bilateral evidence; no existing Curse mechanics
   or sibling receipt grants animation credit. **For the main program:** nothing
   blocking.
-
-# Animation supervisor verification — MOVE_FURY_CUTTER residual diagnosis merge (2026-09-23)
-
-- **State / merge:** Fast-forwarded verified tooling-only worker commit
-  `5a7efb1a9`. `MOVE_FURY_CUTTER` remains **unsupported** and its track remains
-  **unfulfilled**; Level 50 stays **272/276 exact, 0 partial, 0 staged, 4
-  unsupported**. No production, coverage, sibling, gameplay/RNG/facility,
-  boundary, or barrier credit moved.
-- **Independent proof:** Two fresh supervisor diagnosis processes are
-  byte-identical (`d64a6c3d…`) and account for all **1,225,822** residual
-  pixels. The source-quiet mask is identical across **44 rows per orientation**
-  (**2,359** player / **2,306** opponent pixels) and is a subset of every
-  active row: **802,380** accumulated pixels are invariant static
-  field/battler/chrome composition, while **423,442** are active scanout
-  (**30,072** monbg transition, **210,120** CUT OBJ+alpha, **30,310**
-  monbg+alpha, **152,940** CUT OBJ+palette). Classification uses live source
-  latches, not coordinates, RGB fitting, screenshots, or absolute ticks.
-- **Gates / next:** The final scoped Fury/source/evidence/production/diagnosis/
-  boundary/inventory union passes **6 files / 16 tests**; coverage, animation
-  audit, typecheck, and diff checks are green. This is tooling/tests only, so
-  the same-production full-suite/build receipt from `e3af4883c` remains valid.
-  Resume by fixing the invariant static composition first, then the four
-  active scanout phases; require zero residuals and a material altered control
-  before promotion. **For the main program:** nothing blocking.
-
-# Animation supervisor verification — MOVE_FURY_CUTTER production partial merge (2026-09-23)
-
-- **State / merge:** Fast-forwarded verified worker commits `74e9970ed` and
-  `e3af4883c`. `MOVE_FURY_CUTTER` remains **unsupported** and
-  `fury-cutter-counter-power-branches` remains **unfulfilled**; Level 50 stays
-  **272/276 exact, 0 partial, 0 staged, 4 unsupported**. No coverage, sibling,
-  gameplay/RNG/facility, boundary, or barrier credit moved.
-- **Independent proof:** Two fresh supervisor reducer/seam processes are
-  byte-identical (`f1bedee4…`) across all eight **43-row** bilateral counter
-  bodies. Two fresh actual-core processes are also byte-identical
-  (`f6d168f3…`) and reproduce the honest blocker: **0/344 exact** framebuffer
-  rows and **1,225,822** residual pixels. The retained implementation is one
-  source-relative, direction/counter-generic reducer, typed seam, dispatch,
-  and CUT/battler/monbg compositor; it adds no screenshot lookup, absolute
-  battle tick, coordinate/RGB fit, or gameplay ownership.
-- **Gates / next:** On final code `e3af4883c`, independent `npm test` passes
-  **1,445 files / 11,523 tests**, with **44 files / 223 tests skipped**, in
-  **1,792.93s**; `npm run build` passes **833 modules** with only the inherited
-  chunk warning. Focused Fury/source/evidence/boundary/inventory tests,
-  typecheck, coverage, animation audit, and diff checks are green. Resume by
-  reconciling generic background/monbg/OBJ scanout and palette composition,
-  then require twice-fresh zero residuals plus a material altered control
-  before promotion. **For the main program:** nothing blocking.
