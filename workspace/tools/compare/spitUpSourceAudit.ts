@@ -148,7 +148,7 @@ const result = {
     callbacks: {
       orbStep: addressSpan("AnimSpitUpOrb_Step", "AnimSpitUpOrb"),
       orb: addressSpan("AnimSpitUpOrb", "AnimEyeSparkle_Step"),
-      deform: addressSpan("AnimTask_SpitUpDeformMon", "AnimTask_StockpileDeformMon"),
+      deform: addressSpan("AnimTask_SpitUpDeformMon", "AnimSwallowBlueOrb"),
     },
     template: { symbol: "gSpitUpOrbSpriteTemplate", start: "0x08593a50", byteLength: 24 },
   },

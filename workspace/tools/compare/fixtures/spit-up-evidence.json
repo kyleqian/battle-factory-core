@@ -1,0 +1,127 @@
+{
+  "schema": "spit-up-evidence-checkpoint/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SPIT_UP",
+  "status": "unsupported",
+  "coverageCredit": false,
+  "sourceAudit": "tools/compare/spitUpSourceAudit.ts",
+  "graphComponents": 10,
+  "novelTrackComponents": [
+    "asset:ANIM_TAG_RED_ORB_2",
+    "sprite:gSpitUpOrbSpriteTemplate",
+    "subroutine:SpitUpContinue",
+    "subroutine:SpitUpStrong",
+    "subroutine:SpitUpStrongest",
+    "task:AnimTask_SpitUpDeformMon"
+  ],
+  "representatives": [
+    "MOVE_SPIT_UP"
+  ],
+  "controlsOnly": [
+    "MOVE_STOCKPILE",
+    "MOVE_SWALLOW",
+    "MOVE_FLAIL",
+    "MOVE_RAPID_SPIN",
+    "MOVE_ENDEAVOR",
+    "MOVE_HORN_DRILL"
+  ],
+  "noProductionClaim": true,
+  "branches": [
+    {
+      "orientation": "player-back",
+      "stockpiles": 1,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-player-1.json",
+      "changeMapSha256": "2e5d62311a9368ab7c3fec0b607579fb03b23fc589035954873eda8552fd6e95",
+      "sourceWindow": {
+        "endFrame": 1386,
+        "frameCount": 108,
+        "rgbSequenceSha256": "fc836e7ee617f0518867ffdc3cdd21b53c4eca5814f9f174c536cbba35d3bce6",
+        "sourceFrameCount": 108,
+        "startFrame": 1279
+      },
+      "rawRgbSequenceSha256": "fc836e7ee617f0518867ffdc3cdd21b53c4eca5814f9f174c536cbba35d3bce6",
+      "repeatRawRgbSequenceSha256": "fc836e7ee617f0518867ffdc3cdd21b53c4eca5814f9f174c536cbba35d3bce6",
+      "twiceFreshByteIdentity": true
+    },
+    {
+      "orientation": "player-back",
+      "stockpiles": 2,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-player-2.json",
+      "changeMapSha256": "322637ab557ff1c1b38c480264eecd3d7069c1dcd307d371cbd66d110dcde091",
+      "sourceWindow": {
+        "endFrame": 2320,
+        "frameCount": 108,
+        "rgbSequenceSha256": "ba880b6547ca40e638a24630031711ff2dba5f243c4df47182c0789870d205a3",
+        "sourceFrameCount": 108,
+        "startFrame": 2213
+      },
+      "rawRgbSequenceSha256": "ba880b6547ca40e638a24630031711ff2dba5f243c4df47182c0789870d205a3",
+      "repeatRawRgbSequenceSha256": "ba880b6547ca40e638a24630031711ff2dba5f243c4df47182c0789870d205a3",
+      "twiceFreshByteIdentity": true
+    },
+    {
+      "orientation": "player-back",
+      "stockpiles": 3,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-player-3.json",
+      "changeMapSha256": "3cf077c431911b9d40ff2010902b38fd28590bd6176719aa53038bde19561a88",
+      "sourceWindow": {
+        "endFrame": 3255,
+        "frameCount": 109,
+        "rgbSequenceSha256": "74da95c2299b8257cc7baaa0cda670c948964ef3f2c6c18a3bd91d1fc96af568",
+        "sourceFrameCount": 109,
+        "startFrame": 3147
+      },
+      "rawRgbSequenceSha256": "74da95c2299b8257cc7baaa0cda670c948964ef3f2c6c18a3bd91d1fc96af568",
+      "repeatRawRgbSequenceSha256": "74da95c2299b8257cc7baaa0cda670c948964ef3f2c6c18a3bd91d1fc96af568",
+      "twiceFreshByteIdentity": true
+    },
+    {
+      "orientation": "opponent-front",
+      "stockpiles": 1,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-opponent-1.json",
+      "changeMapSha256": "3888e4a50ca2d124e34a968a69e89622783cbc79d96666697b3f9c0962b721a6",
+      "sourceWindow": {
+        "endFrame": 2332,
+        "frameCount": 108,
+        "rgbSequenceSha256": "7c482a1af6b67a1fc015d44869eeac842544788cd1e5975bbfef97fb6cfdde3d",
+        "sourceFrameCount": 108,
+        "startFrame": 2225
+      },
+      "rawRgbSequenceSha256": "7c482a1af6b67a1fc015d44869eeac842544788cd1e5975bbfef97fb6cfdde3d",
+      "repeatRawRgbSequenceSha256": "7c482a1af6b67a1fc015d44869eeac842544788cd1e5975bbfef97fb6cfdde3d",
+      "twiceFreshByteIdentity": true
+    },
+    {
+      "orientation": "opponent-front",
+      "stockpiles": 2,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-opponent-2.json",
+      "changeMapSha256": "b43fb6d01d1884dea85da7ff9e40ac987c3f3269b23c36dcb6db1f1197398b01",
+      "sourceWindow": {
+        "endFrame": 4328,
+        "frameCount": 108,
+        "rgbSequenceSha256": "dc21849ba4d7a34f6f1e3954957454cdad8f524ab3229690b70bdd69542c3dd4",
+        "sourceFrameCount": 108,
+        "startFrame": 4221
+      },
+      "rawRgbSequenceSha256": "dc21849ba4d7a34f6f1e3954957454cdad8f524ab3229690b70bdd69542c3dd4",
+      "repeatRawRgbSequenceSha256": "dc21849ba4d7a34f6f1e3954957454cdad8f524ab3229690b70bdd69542c3dd4",
+      "twiceFreshByteIdentity": true
+    },
+    {
+      "orientation": "opponent-front",
+      "stockpiles": 3,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-opponent-3.json",
+      "changeMapSha256": "c111b57dc4192a99835a91d88b073496803aa5f49dc6fea1adda5aade654ccf6",
+      "sourceWindow": {
+        "endFrame": 3363,
+        "frameCount": 109,
+        "rgbSequenceSha256": "c1d00c0b1acb3885c6eddf936e3298bbdb1cf7770210778d6d682020e7afcf77",
+        "sourceFrameCount": 109,
+        "startFrame": 3255
+      },
+      "rawRgbSequenceSha256": "c1d00c0b1acb3885c6eddf936e3298bbdb1cf7770210778d6d682020e7afcf77",
+      "repeatRawRgbSequenceSha256": "c1d00c0b1acb3885c6eddf936e3298bbdb1cf7770210778d6d682020e7afcf77",
+      "twiceFreshByteIdentity": true
+    }
+  ]
+}
