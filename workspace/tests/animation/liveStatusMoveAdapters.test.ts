@@ -36,7 +36,7 @@ const alternateField = {
     spriteCorner: { x: 40, y: 56 },
   },
   opponent: {
-    species: 262, speciesSymbol: "MIGHTYENA", name: "MIGHTYENA", level: 50,
+    species: 287, speciesSymbol: "MIGHTYENA", name: "MIGHTYENA", level: 50,
     hp: 139, maxHP: 139, gender: "female", status: "none",
     spriteCorner: { x: 144, y: 16 },
   },
