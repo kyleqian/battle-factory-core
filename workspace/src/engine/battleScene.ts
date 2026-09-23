@@ -1386,8 +1386,8 @@ import {
 } from "../animation/extremeSpeed.ts";
 import { minimizeDisplayedClonesAtAge } from "../animation/minimize.ts";
 import { futureSightBgPaletteRowAtAge } from "../animation/futureSight.ts";
-import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE, confusionTargetEffectAtAge } from "../animation/confusion.ts";
-import { psychicBgPaletteRowAtAge, PSYCHIC_WINDOW2_START_AGE, psychicTargetEffectAtAge, PSYCHIC_BLEND_TINT_COLOR } from "../animation/psychic.ts";
+import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW1_START_AGE, CONFUSION_WINDOW2_START_AGE, confusionTargetEffectAtAge } from "../animation/confusion.ts";
+import { psychicBgPaletteRowAtAge, PSYCHIC_WINDOW1_START_AGE, PSYCHIC_WINDOW2_START_AGE, psychicTargetEffectAtAge, PSYCHIC_BLEND_TINT_COLOR } from "../animation/psychic.ts";
 import { skillSwapDisplayPlan } from "../animation/skillSwap.ts";
 import { psywaveDisplayPlan } from "../animation/psywave.ts";
 import { extrasensoryDisplayPlan } from "../animation/extrasensory.ts";
@@ -28483,13 +28483,13 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "NIGHT_SHADE") {
     const nightState = state as SceneOnNightShadePresentationState;
     const view = sceneOnNightShadeView(nightState);
-    const playerToOpponent = view.attacker.species === "ARIADOS"
+    const playerToOpponent = (liveField || view.attacker.species === "ARIADOS")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "ARIADOS"
+    const opponentToPlayer = (liveField || view.attacker.species === "ARIADOS")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(`unsupported staged NIGHT_SHADE pair ${view.attacker.species}->${view.target.species}`);
@@ -28514,15 +28514,19 @@ export function renderSceneOnMovePresentation(
         subpalettes: battleBg.palette.map(gpuDarken),
       });
     }
-    const attackerSource = playerToOpponent ? ariadosBackSprite : ariadosFrontSprite;
-    const attacker = playerToOpponent
+    const attackerSource = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? ariadosBackSprite : ariadosFrontSprite;
+    const attacker = liveField || playerToOpponent
       ? attackerSource
       : { ...attackerSource, tileset: subTileset(attackerSource.tileset, 0, 8) };
-    const targetSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const target = playerToOpponent
+    const targetSource = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const target = liveField || playerToOpponent
       ? { ...targetSource, tileset: subTileset(targetSource.tileset, 0, 8) }
       : targetSource;
-    const targetIdleX2 = playerToOpponent && view.age < 128
+    const targetIdleX2 = view.target.geometry.side === "opponent" && view.age < 128
       ? speciesFrontIdleRestOffsetOrZero(view.target.species).x2
       : 0;
     const targetPalette = blendPaletteToward(
@@ -30022,33 +30026,40 @@ export function renderSceneOnMovePresentation(
     // Sprite RAM is copied into hardware OAM on the following VBlank.
     const displayed = sceneOnToxicView({ ...state, age: state.age - 1 });
     const playerToOpponent =
-      view.attacker.species === "CLAMPERL"
+      (liveField || view.attacker.species === "CLAMPERL")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "CLAMPERL"
+      (liveField || view.attacker.species === "CLAMPERL")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged TOXIC pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const clamperlSource = playerToOpponent
+    const clamperlSource = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? toxicArt.clamperlBack
       : toxicArt.clamperlFront;
-    const clamperlSprite = playerToOpponent ? clamperlSource : {
+    const clamperlSprite = liveField || playerToOpponent ? clamperlSource : {
       ...clamperlSource,
       tileset: {
         columns: 8, rows: 8, tiles: clamperlSource.tileset.tiles.slice(0, 64),
       },
     };
-    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onixSprite = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    const targetIdle = playerToOpponent
+    const targetIdle = view.target.geometry.side === "opponent"
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
       : { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
@@ -30061,8 +30072,8 @@ export function renderSceneOnMovePresentation(
       fb,
       clamperlSprite.tileset,
       clamperlSprite.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     for (const sprite of displayed.sprites) {
       if (sprite.kind === "toxicBubble") {
@@ -34482,14 +34493,14 @@ export function renderSceneOnMovePresentation(
       age: sporeState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "PARASECT"
+      (liveField || view.attacker.species === "PARASECT")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "PARASECT"
+      (liveField || view.attacker.species === "PARASECT")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -34497,27 +34508,34 @@ export function renderSceneOnMovePresentation(
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const parasectSource = playerToOpponent
+    const parasectSource = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? sporeArt.parasectBack : sporeArt.parasectFront;
-    const parasect = playerToOpponent
+    const parasect = liveField || playerToOpponent
       ? parasectSource
       : {
           ...parasectSource,
           tileset: subTileset(parasectSource.tileset, 0, 8),
         };
-    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onixSource = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField || playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
-    const onixIdle = playerToOpponent
+    const onixIdle = view.target.geometry.side === "opponent"
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
       : { x2: 0, y2: 0 };
     const drawAttacker = (buffer = fb) => drawSpriteSheet(
       buffer,
       parasect.tileset,
       parasect.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     const drawTarget = (buffer = fb) => drawSpriteSheet(
       buffer,
@@ -34767,14 +34785,14 @@ export function renderSceneOnMovePresentation(
           age: powderState.age - 1,
         });
     const playerToOpponent =
-      view.attacker.species === "HOPPIP"
+      (liveField || view.attacker.species === "HOPPIP")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "HOPPIP"
+      (liveField || view.attacker.species === "HOPPIP")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -34782,19 +34800,23 @@ export function renderSceneOnMovePresentation(
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const hoppipSource = playerToOpponent
+    const hoppipSource = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? hoppipBackSprite
       : hoppipFrontSprite;
-    const hoppip = playerToOpponent
+    const hoppip = liveField || playerToOpponent
       ? hoppipSource
       : { ...hoppipSource, tileset: subTileset(hoppipSource.tileset, 0, 8) };
-    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onixSource = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField || playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
-    const opponentIdle = playerToOpponent
-      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
-      : speciesFrontIdleRestOffsetOrZero(view.attacker.species);
+    const opponentIdle = speciesFrontIdleRestOffsetOrZero(
+      playerToOpponent ? view.target.species : view.attacker.species,
+    );
     // BuildOamBuffer orders these same-priority OBJ entries by descending
     // latched OAM Y, retaining the source's creation order for ties. The
     // displayed reducer state is the previous source age, so its fixed-point
@@ -34847,17 +34869,24 @@ export function renderSceneOnMovePresentation(
         : view.attacker.geometry.spriteCorner.y + opponentIdle.y2,
     );
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    if (opponentToPlayer && view.age === 0
-      && elevatedEnemyShadowSpecies.has("SPECIES_HOPPIP")) {
-      const shadowX = 176 - battleEnemyShadow.width / 2;
-      const shadowY = 40 + 29 - battleEnemyShadow.height / 2;
-      for (const pixel of battleEnemyShadow.mask) {
-        setPixel(
+    if (opponentToPlayer && view.age === 0) {
+      if (liveField) {
+        drawSourceOpponentEnemyShadow(
           fb,
-          shadowX + pixel % battleEnemyShadow.width,
-          shadowY + Math.floor(pixel / battleEnemyShadow.width),
-          battleEnemyShadow.color,
+          view.attacker.species,
+          view.attacker.geometry.battlePositionCenter,
         );
+      } else if (elevatedEnemyShadowSpecies.has("SPECIES_HOPPIP")) {
+        const shadowX = 176 - battleEnemyShadow.width / 2;
+        const shadowY = 40 + 29 - battleEnemyShadow.height / 2;
+        for (const pixel of battleEnemyShadow.mask) {
+          setPixel(
+            fb,
+            shadowX + pixel % battleEnemyShadow.width,
+            shadowY + Math.floor(pixel / battleEnemyShadow.width),
+            battleEnemyShadow.color,
+          );
+        }
       }
     }
     // The source transfers the two battler OAM entries first, then appends
@@ -36446,14 +36475,14 @@ export function renderSceneOnMovePresentation(
     // hardware OAM/palette transfer. The displayed rings and target tint
     // therefore consume the preceding reducer age.
     const playerToOpponent =
-      view.attacker.species === "POLITOED"
+      (liveField || view.attacker.species === "POLITOED")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "POLITOED"
+      (liveField || view.attacker.species === "POLITOED")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -36461,17 +36490,21 @@ export function renderSceneOnMovePresentation(
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const politoedSource = playerToOpponent
+    const politoedSource = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? hypnosisArt.politoedBack
       : hypnosisArt.politoedFront;
-    const politoed = playerToOpponent
+    const politoed = liveField || playerToOpponent
       ? politoedSource
       : {
           ...politoedSource,
           tileset: subTileset(politoedSource.tileset, 0, 8),
         };
-    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onixSource = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField || playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const gpuDarken = (palette: readonly RgbColor[]) =>
@@ -36506,8 +36539,11 @@ export function renderSceneOnMovePresentation(
     }
     // The opponent front sprite retains its settled send-out residual until
     // a battler task owns it. Hypnosis never moves either battler.
-    const onixIdle = playerToOpponent
+    const onixIdle = view.target.geometry.side === "opponent"
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
       : { x2: 0, y2: 0 };
     const targetPalette = blendPaletteToward(
       onix.palette,
@@ -36518,8 +36554,8 @@ export function renderSceneOnMovePresentation(
       fb,
       politoed.tileset,
       politoed.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     const drawTarget = () => drawSpriteSheet(
       fb,
@@ -40507,24 +40543,26 @@ export function renderSceneOnMovePresentation(
       ? { x2: 0, y2: 0 }
       : displayed.attackerOffset;
     const playerToOpponent =
-      view.attacker.species === "DUSTOX"
+      (liveField || view.attacker.species === "DUSTOX")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "DUSTOX"
+      (liveField || view.attacker.species === "DUSTOX")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged SUPERSONIC pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const dustoxSource = playerToOpponent
+    const dustoxSource = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? supersonicArt.dustoxBack
       : supersonicArt.dustoxFront;
-    const dustoxSprite = playerToOpponent
+    const dustoxSprite = liveField || playerToOpponent
       ? dustoxSource
       : {
           ...dustoxSource,
@@ -40534,7 +40572,9 @@ export function renderSceneOnMovePresentation(
             tiles: dustoxSource.tileset.tiles.slice(0, 64),
           },
         };
-    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onixSprite = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -40581,12 +40621,15 @@ export function renderSceneOnMovePresentation(
         view.attacker.geometry.spriteCorner.y + displayedAttackerOffset.y2,
       );
     } else {
+      const attackerIdle = liveField && state.age === 0
+        ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
+        : { x2: 0, y2: 0 };
       drawSpriteSheet(
         fb,
         dustoxSprite.tileset,
         dustoxSprite.palette,
-        view.attacker.geometry.spriteCorner.x + displayedAttackerOffset.x2,
-        view.attacker.geometry.spriteCorner.y + displayedAttackerOffset.y2,
+        view.attacker.geometry.spriteCorner.x + attackerIdle.x2 + displayedAttackerOffset.x2,
+        view.attacker.geometry.spriteCorner.y + attackerIdle.y2 + displayedAttackerOffset.y2,
       );
       drawSpriteSheet(
         fb,
@@ -42231,23 +42274,25 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnSingView(state);
     const displayed = sceneOnSingView({ ...state, age: state.age - 1 });
     const playerToOpponent =
-      view.attacker.species === "AZURILL"
+      (liveField || view.attacker.species === "AZURILL")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "AZURILL"
+      (liveField || view.attacker.species === "AZURILL")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged SING pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const azurillSource = playerToOpponent
+    const azurillSource = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? singArt.azurillBack : singArt.azurillFront;
-    const azurill = playerToOpponent
+    const azurill = liveField || playerToOpponent
       ? azurillSource
       : {
           ...azurillSource,
@@ -42257,15 +42302,20 @@ export function renderSceneOnMovePresentation(
             tiles: azurillSource.tileset.tiles.slice(0, 64),
           },
         };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(
       fb,
       battleBg.static.tileset,
       battleBg.static.tilemap,
       battleBg.palette,
     );
-    const onixIdle = playerToOpponent
+    const onixIdle = view.target.geometry.side === "opponent"
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
       : { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
@@ -42332,8 +42382,8 @@ export function renderSceneOnMovePresentation(
       },
       {
         oamIndex: 9, priority: 2, mode: "normal", declaredWidth: 64,
-        x: view.attacker.geometry.spriteCorner.x,
-        y: view.attacker.geometry.spriteCorner.y,
+        x: view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+        y: view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
         ...spriteSheetRaster(azurill.tileset, azurill.palette),
       },
     ];
@@ -42409,24 +42459,26 @@ export function renderSceneOnMovePresentation(
     // included) synchronously.
     const displayed = sceneOnGrassWhistleView({ ...state, age: state.age - 1 });
     const playerToOpponent =
-      view.attacker.species === "ROSELIA"
+      (liveField || view.attacker.species === "ROSELIA")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "ROSELIA"
+      (liveField || view.attacker.species === "ROSELIA")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged GRASS_WHISTLE pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const roseliaSource = playerToOpponent
+    const roseliaSource = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ROSELIA!
       : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ROSELIA!;
-    const roseliaSprite = playerToOpponent
+    const roseliaSprite = liveField || playerToOpponent
       ? roseliaSource
       : {
           ...roseliaSource,
@@ -42436,7 +42488,9 @@ export function renderSceneOnMovePresentation(
             tiles: roseliaSource.tileset.tiles.slice(0, 64),
           },
         };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     // Source RGB(18,31,12) (5-bit) expanded with mGBA's 15->24-bit curve.
     const greenTarget = { r: 148, g: 255, b: 99 };
     drawTileBg(
@@ -42449,7 +42503,7 @@ export function renderSceneOnMovePresentation(
         view.greenBlendCoeff,
       ),
     );
-    const onixIdle = playerToOpponent
+    const onixIdle = view.target.geometry.side === "opponent"
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // No monbg: the target OBJ stays visible for the whole move.
@@ -42487,8 +42541,11 @@ export function renderSceneOnMovePresentation(
     // ROSELIA before them; the target ONIX is always behind the notes.
     const onixX = view.target.geometry.spriteCorner.x + onixIdle.x2;
     const onixY = view.target.geometry.spriteCorner.y + onixIdle.y2;
-    const roseliaX = view.attacker.geometry.spriteCorner.x;
-    const roseliaY = view.attacker.geometry.spriteCorner.y;
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
+      : { x2: 0, y2: 0 };
+    const roseliaX = view.attacker.geometry.spriteCorner.x + attackerIdle.x2;
+    const roseliaY = view.attacker.geometry.spriteCorner.y + attackerIdle.y2;
     if (playerToOpponent) {
       drawSpriteSheet(fb, onix.tileset, onix.palette, onixX, onixY);
       drawNotes();
@@ -42535,24 +42592,26 @@ export function renderSceneOnMovePresentation(
     const displayed = sceneOnShadowBallView({ ...state, age: state.age - 1 });
     const displayedTarget = view.displayedTargetOffset;
     const playerToOpponent =
-      view.attacker.species === "SABLEYE"
+      (liveField || view.attacker.species === "SABLEYE")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "SABLEYE"
+      (liveField || view.attacker.species === "SABLEYE")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged SHADOW_BALL pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const sableyeSource = playerToOpponent
+    const sableyeSource = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? shadowBallArt.sableyeBack
       : shadowBallArt.sableyeFront;
-    const sableyeSprite = playerToOpponent
+    const sableyeSprite = liveField || playerToOpponent
       ? sableyeSource
       : {
           ...sableyeSource,
@@ -42562,7 +42621,9 @@ export function renderSceneOnMovePresentation(
             tiles: sableyeSource.tileset.tiles.slice(0, 64),
           },
         };
-    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onixSprite = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const gpuDarken = (palette: readonly RgbColor[]) =>
       palette.map((color) => {
         const packed = mgbaDarkenColor(
@@ -42643,8 +42704,12 @@ export function renderSceneOnMovePresentation(
       fb,
       sableyeSprite.tileset,
       sableyeSprite.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x
+        + (liveField && view.attacker.geometry.side === "opponent"
+          ? speciesFrontIdleRestOffsetOrZero(view.attacker.species).x2 : 0),
+      view.attacker.geometry.spriteCorner.y
+        + (liveField && view.attacker.geometry.side === "opponent"
+          ? speciesFrontIdleRestOffsetOrZero(view.attacker.species).y2 : 0),
     );
     drawSpriteSheet(
       fb,
@@ -46147,22 +46212,26 @@ export function renderSceneOnMovePresentation(
     // clears every interior window-2 tick).
     const monbgTargetX2 = confusionTargetEffectAtAge(state.age - 1).targetX2;
     const playerToOpponent =
-      view.attacker.species === "KADABRA"
+      (liveField || view.attacker.species === "KADABRA")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "KADABRA"
+      (liveField || view.attacker.species === "KADABRA")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged CONFUSION pair ${view.attacker.species}(${view.attacker.geometry.side})->${view.target.species}(${view.target.geometry.side})`,
       );
     }
-    const attackerSprite = playerToOpponent ? kadabraBackSprite : kadabraFrontSprite;
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerSprite = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? kadabraBackSprite : kadabraFrontSprite;
+    const targetSprite = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const gpuDarken = (palette: readonly RgbColor[]) =>
       palette.map((color) => {
         const packed = mgbaDarkenColor(
@@ -46204,6 +46273,11 @@ export function renderSceneOnMovePresentation(
     // zeroed x2 instead of the idle offset still bleeding through the lag
     // (dense-swept this session).
     const targetTouched = view.age >= CONFUSION_WINDOW2_START_AGE + 1;
+    const attackerIdle = liveField
+      && view.attacker.geometry.side === "opponent"
+      && view.age <= CONFUSION_WINDOW1_START_AGE
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
+      : { x2: 0, y2: 0 };
     if (view.targetBlendActive) {
       // Same defect-A mechanism as FUTURE_SIGHT's attacker (see its own
       // comment above): `monbg ANIM_DEF_PARTNER`'s frozen copy tracks the
@@ -46265,8 +46339,8 @@ export function renderSceneOnMovePresentation(
       fb,
       attackerSprite.tileset,
       attackerSprite.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
       256,
       256,
       0,
@@ -46323,22 +46397,26 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnPsychicView(state);
     const monbgTargetX2 = psychicTargetEffectAtAge(state.age - 1).targetX2;
     const playerToOpponent =
-      view.attacker.species === "KADABRA"
+      (liveField || view.attacker.species === "KADABRA")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "KADABRA"
+      (liveField || view.attacker.species === "KADABRA")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged PSYCHIC pair ${view.attacker.species}(${view.attacker.geometry.side})->${view.target.species}(${view.target.geometry.side})`,
       );
     }
-    const attackerSprite = playerToOpponent ? kadabraBackSprite : kadabraFrontSprite;
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerSprite = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? kadabraBackSprite : kadabraFrontSprite;
+    const targetSprite = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const gpuDarken = (palette: readonly RgbColor[]) =>
       palette.map((color) => {
         const packed = mgbaDarkenColor(
@@ -46378,6 +46456,11 @@ export function renderSceneOnMovePresentation(
     // display-lagged by 2 ticks, so the hand-off away from the pre-window
     // idle offset has to happen one tick later too.
     const targetTouched = view.age >= PSYCHIC_WINDOW2_START_AGE + 1;
+    const attackerIdle = liveField
+      && view.attacker.geometry.side === "opponent"
+      && view.age <= PSYCHIC_WINDOW1_START_AGE
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
+      : { x2: 0, y2: 0 };
     if (view.targetBlendActive) {
       // Same defect-A mechanism as CONFUSION's own target (see its own
       // comment above): monbg ANIM_DEF_PARTNER's frozen copy tracks the
@@ -46435,8 +46518,8 @@ export function renderSceneOnMovePresentation(
       fb,
       attackerSprite.tileset,
       attackerSprite.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
       256,
       256,
       0,

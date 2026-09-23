@@ -1954,14 +1954,8 @@ export interface SceneOnMementoConfig {
 
 export interface SceneOnNightShadeConfig {
   readonly move: "NIGHT_SHADE";
-  readonly attacker: Readonly<{
-    species: "ARIADOS";
-    geometry: SceneOnBattlerGeometry;
-  }>;
-  readonly target: Readonly<{
-    species: "ONIX";
-    geometry: SceneOnBattlerGeometry;
-  }>;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
