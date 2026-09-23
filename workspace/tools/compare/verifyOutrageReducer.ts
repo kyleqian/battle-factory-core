@@ -140,22 +140,29 @@ export function outrageConfigFor(
     attackerSide, targetSide, attackerSpecies, targetSpecies,
     attackerPictureOrigin, targetPictureOrigin, ...animationInputs
   } = input;
-  const player = attackerSide === "player" ? input.attackerSprite : input.targetSprite;
-  const opponent = attackerSide === "opponent" ? input.attackerSprite : input.targetSprite;
+  const shadow = rows[0]!.sprites.find(
+    (entry: Json) => entry.template?.symbol === "gSpriteTemplate_EnemyShadow",
+  );
+  invariant(shadow, `${orientation}: enemy shadow setup sprite`);
+  const opponentBattlePositionCenter = { x: shadow.x, y: shadow.y - 29 };
   return {
     move: "OUTRAGE",
     attacker: {
       species: attackerSpecies as "DRAGONITE",
       geometry: {
         side: attackerSide, spriteCorner: { x: input.attackerSprite.x - 32, y: input.attackerSprite.y - 32 },
-        animationCenter: attackerPictureOrigin, battlePositionCenter: attackerPictureOrigin,
+        animationCenter: attackerPictureOrigin,
+        battlePositionCenter: attackerSide === "opponent"
+          ? opponentBattlePositionCenter : attackerPictureOrigin,
       },
     },
     target: {
       species: targetSpecies as "ONIX",
       geometry: {
         side: targetSide, spriteCorner: { x: input.targetSprite.x - 32, y: input.targetSprite.y - 32 },
-        animationCenter: targetPictureOrigin, battlePositionCenter: targetPictureOrigin,
+        animationCenter: targetPictureOrigin,
+        battlePositionCenter: targetSide === "opponent"
+          ? opponentBattlePositionCenter : targetPictureOrigin,
       },
     },
     fieldProfile: {

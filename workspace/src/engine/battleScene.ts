@@ -26065,6 +26065,14 @@ export function renderSceneOnMovePresentation(
     const attackerBank = 16 + (input.attackerSprite.attr[2] >>> 12 & 0xf);
     const targetBank = 16 + (input.targetSprite.attr[2] >>> 12 & 0xf);
     const flameBank = input.resources.smallEmber.hardwarePaletteBank;
+    const oamTopLeft = (attr: readonly [number, number, number]): { x: number; y: number } => {
+      const rawX = attr[1] & 0x1ff;
+      const rawY = attr[0] & 0xff;
+      return {
+        x: rawX >= 240 ? rawX - 512 : rawX,
+        y: rawY >= 160 ? rawY - 256 : rawY,
+      };
+    };
 
     drawExtractedTileBg(fb, {
       tileset: battleBg.static.tileset,
@@ -26079,10 +26087,12 @@ export function renderSceneOnMovePresentation(
       ? view.attacker : view.target;
     const opponentShadowOffset = view.attacker.geometry.side === "opponent"
       ? displayed.battlers.attacker.sprite.x2 : 0;
-    drawSourceOpponentEnemyShadow(fb, opponent.species, {
-      x: opponent.geometry.battlePositionCenter.x + opponentShadowOffset,
-      y: opponent.geometry.battlePositionCenter.y,
-    });
+    if (moveState.age === 0) {
+      drawSourceOpponentEnemyShadow(fb, opponent.species, {
+        x: opponent.geometry.battlePositionCenter.x + opponentShadowOffset,
+        y: opponent.geometry.battlePositionCenter.y,
+      });
+    }
 
     const orderOf = (slot: number): number => {
       const rank = displayed.painterOrder.indexOf(slot);
@@ -26101,26 +26111,22 @@ export function renderSceneOnMovePresentation(
         subpriority: displayed.battlers.attacker.sprite.subpriority,
         y: displayed.battlers.attacker.sprite.y,
         order: orderOf(displayed.battlers.attacker.sprite.slot),
-        draw: () => drawSpriteSheet(
-          fb,
-          tilesFor(attackerArt, view.attacker.geometry.side),
-          paletteBank(attackerBank),
-          view.attacker.geometry.spriteCorner.x + displayed.battlers.attacker.sprite.x2,
-          view.attacker.geometry.spriteCorner.y + displayed.battlers.attacker.sprite.y2,
-        ),
+        draw: () => {
+          const topLeft = oamTopLeft(displayed.battlers.attacker.sprite.attr);
+          drawSpriteSheet(fb, tilesFor(attackerArt, view.attacker.geometry.side),
+            paletteBank(attackerBank), topLeft.x, topLeft.y);
+        },
       },
       {
         slot: displayed.battlers.target.sprite.slot,
         subpriority: displayed.battlers.target.sprite.subpriority,
         y: displayed.battlers.target.sprite.y,
         order: orderOf(displayed.battlers.target.sprite.slot),
-        draw: () => drawSpriteSheet(
-          fb,
-          tilesFor(targetArt, view.target.geometry.side),
-          paletteBank(targetBank),
-          view.target.geometry.spriteCorner.x + displayed.battlers.target.sprite.x2,
-          view.target.geometry.spriteCorner.y + displayed.battlers.target.sprite.y2,
-        ),
+        draw: () => {
+          const topLeft = oamTopLeft(displayed.battlers.target.sprite.attr);
+          drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+            paletteBank(targetBank), topLeft.x, topLeft.y);
+        },
       },
     ];
     const flameFrame = (attr: readonly [number, number, number]): 0 | 1 | 2 | 3 | 4 =>
