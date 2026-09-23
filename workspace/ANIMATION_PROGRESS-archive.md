@@ -1,3 +1,23 @@
+# Animation supervisor verification — MOVE_SPIT_UP evidence merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded worker commits `3e5301c1f`, `3127b9717`,
+  and `7b3561d86`, plus supervisor test-only repair `299df1021` after catching
+  an unused test constant in the handoff. `MOVE_SPIT_UP` and its six-component
+  track remain unsupported/unfulfilled with no production or acceptance credit;
+  Level 50 remains **271/276 exact, 0 partial, 0 staged, 5 unsupported**.
+- **Independent proof:** Replayed the source and evidence verifiers on the
+  final tree. The complete graph has **10 components** and sole Level-50 carrier
+  `FRONTIER_MON_SWALOT_1` (248). All six natural Stockpile 1/2/3 windows retain
+  **108/108/109 rows** per orientation, **8/12/16** red-orb births, two impacts,
+  deform and both shakes, stable opaque gameplay state/RNG, zero-owned cleanup,
+  and their pinned twice-fresh RGB digests.
+- **Gates / next:** On final code `299df1021`, the affected source/evidence/
+  boundary/inventory union passes **4 files / 13 tests**; typecheck, coverage,
+  animation audit, and diff checks are green. This is tooling/evidence/tests
+  only, so the recorded Revenge production full-suite/build receipt remains
+  valid. Resume `MOVE_SPIT_UP` with its source-relative reducer/seam/compositor
+  and complete twice-fresh zero-residual actual-core proof; do not infer credit.
+
 # Animation supervisor verification — MOVE_REVENGE exact merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded verified worker commits `6d9c2fc11` and

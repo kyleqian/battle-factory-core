@@ -1,3 +1,25 @@
+# Animation supervisor verification — MOVE_FURY_CUTTER evidence merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commit `6666ffa04`.
+  `MOVE_FURY_CUTTER` remains unsupported and its nine-component
+  `fury-cutter-counter-power-branches` track remains unfulfilled; Level 50
+  stays **272/276 exact, 0 partial, 0 staged, 4 unsupported**. No production,
+  move, sibling, gameplay/RNG/facility, boundary, or barrier credit moved.
+- **Independent proof:** Two fresh supervisor source-audit processes and two
+  dense-evidence verifier processes are respectively byte-identical. Both legal
+  orientations retain four natural **43-row** counter bodies at powers
+  **10/20/40/80** (**344 total rows**), right/left/right/left direction, own
+  palette/monbg/slice/task/resource/audio latches, stable opaque gameplay/RNG,
+  and zero-owned first-inactive cleanup. Player state/RGB digests are
+  `742f4850…` / `62a0e272…`; opponent digests are `e6016063…` / `5341500d…`.
+- **Gates / next:** On evidence tree `6666ffa04`, the source/evidence/boundary/
+  inventory union passes **4 files / 13 tests**; worker typecheck, coverage,
+  animation audit, and diff checks pass. This is evidence/tests/tooling only,
+  so the same-production supervisor full-suite/build receipt from `831a16866`
+  remains valid. Resume Fury Cutter with one source-relative reducer, typed
+  seam, generic compositor, material control, and twice-fresh actual-core proof;
+  do not start `MOVE_CURSE` first.
+
 # Animation worker checkpoint — MOVE_FURY_CUTTER source/evidence only (2026-09-23)
 
 - **State / scope:** `MOVE_FURY_CUTTER` remains **unsupported** with no move,
@@ -45,23 +67,3 @@
   passes **832 modules** with only the inherited chunk warning. Next dispatch
   `MOVE_FURY_CUTTER` for source classification and complete legal bilateral
   evidence; do not infer credit.
-
-# Animation supervisor verification — MOVE_SPIT_UP evidence merge (2026-09-23)
-
-- **State / merge:** Fast-forwarded worker commits `3e5301c1f`, `3127b9717`,
-  and `7b3561d86`, plus supervisor test-only repair `299df1021` after catching
-  an unused test constant in the handoff. `MOVE_SPIT_UP` and its six-component
-  track remain unsupported/unfulfilled with no production or acceptance credit;
-  Level 50 remains **271/276 exact, 0 partial, 0 staged, 5 unsupported**.
-- **Independent proof:** Replayed the source and evidence verifiers on the
-  final tree. The complete graph has **10 components** and sole Level-50 carrier
-  `FRONTIER_MON_SWALOT_1` (248). All six natural Stockpile 1/2/3 windows retain
-  **108/108/109 rows** per orientation, **8/12/16** red-orb births, two impacts,
-  deform and both shakes, stable opaque gameplay state/RNG, zero-owned cleanup,
-  and their pinned twice-fresh RGB digests.
-- **Gates / next:** On final code `299df1021`, the affected source/evidence/
-  boundary/inventory union passes **4 files / 13 tests**; typecheck, coverage,
-  animation audit, and diff checks are green. This is tooling/evidence/tests
-  only, so the recorded Revenge production full-suite/build receipt remains
-  valid. Resume `MOVE_SPIT_UP` with its source-relative reducer/seam/compositor
-  and complete twice-fresh zero-residual actual-core proof; do not infer credit.
