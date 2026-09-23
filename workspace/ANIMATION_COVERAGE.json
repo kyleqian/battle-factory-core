@@ -8103,6 +8103,52 @@
     "ANIMATION_LATCHES.md"
    ],
    "acceptance": "Two independent fresh actual-core verifier processes each pass all 650 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest 50222df85b982b147dec9ac812e88f215ac08401737a9949b40f8b52260a8101; player 1/2/3 RGB sequences fc836e7ee617f0518867ffdc3cdd21b53c4eca5814f9f174c536cbba35d3bce6 / ba880b6547ca40e638a24630031711ff2dba5f243c4df47182c0789870d205a3 / 74da95c2299b8257cc7baaa0cda670c948964ef3f2c6c18a3bd91d1fc96af568; opponent 1/2/3 RGB sequences 7c482a1af6b67a1fc015d44869eeac842544788cd1e5975bbfef97fb6cfdde3d / dc21849ba4d7a34f6f1e3954957454cdad8f524ab3229690b70bdd69542c3dd4 / c1d00c0b1acb3885c6eddf936e3298bbdb1cf7770210778d6d682020e7afcf77."
+  },
+  {
+   "move": "MOVE_FURY_CUTTER",
+   "status": "exact",
+   "covered": [
+    "the complete source-audited 207-byte Move_FURY_CUTTER graph and all 17 components are independently accepted, including the natural counter 1/2/3/4 direction and power branches, CUT slice, target ShakeMon, complex palette blend, defender-partner monbg, alpha, audio, resources, and cleanup",
+    "legal bilateral Grovyle/Blissey party-before-init Scene-ON evidence retains four 43-row bodies per orientation at natural powers 10/20/40/80 through age-42 inactive cleanup, with all 344 semantic and chronological raw-RGB rows byte-identical twice fresh",
+    "Fury Cutter's own eight normalized maps independently prove whole hardware OAM/matrices at RAM+1, hardware palette at RAM+1 except the measured body-1 setup edge, CUT ages 1..41, slice source ages 7..30, monbg and ShakeMon task lives, counter-dependent palette-task lives, audio pans, allocation/order, opaque gameplay/RNG, and cleanup",
+    "the direction/counter-generic source-relative reducer, narrow typed Scene-ON seam, and live hardware-buffer compositor derive the target monbg from side-selected BG registers and CUT from normal flipped ObjBlend OAM without screenshots, fitted coordinates/colors, or absolute battle ticks",
+    "two independent fresh actual-core processes each pass all 344 component, seam, chronological raw-RGB, and shared framebuffer rows with zero residual pixels; the prior 1,225,822-pixel residual closes across the invariant and all four source-latched phases",
+    "a material CROBAT/GROVYLE side/species/geometry/allocation/order/presentation-RNG control changes output while gameplay state/RNG remains opaque and unchanged; Aerial Ace, Guillotine, Vice Grip, Air Cutter, Cross Chop, and every sibling receive no credit"
+   ],
+   "evidence": [
+    "tools/compare/furyCutterSourceAudit.ts",
+    "tools/compare/furyCutterProbe.py",
+    "tools/compare/furyCutterEvidence.ts",
+    "tools/compare/fixtures/fury-cutter-evidence.json",
+    "tools/battle-lab/mechanic-fury-cutter-player-grovyle-opponent-blissey.json",
+    "tools/battle-lab/mechanic-fury-cutter-opponent-grovyle-player-blissey.json",
+    "tools/compare/evidence/fury-cutter-player-dense-state.json.gz",
+    "tools/compare/evidence/fury-cutter-opponent-dense-state.json.gz",
+    "tools/compare/evidence/fury-cutter-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/fury-cutter-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/fury-cutter-changemap-player-body-1.json",
+    "tools/compare/evidence/fury-cutter-changemap-player-body-2.json",
+    "tools/compare/evidence/fury-cutter-changemap-player-body-3.json",
+    "tools/compare/evidence/fury-cutter-changemap-player-body-4.json",
+    "tools/compare/evidence/fury-cutter-changemap-opponent-body-1.json",
+    "tools/compare/evidence/fury-cutter-changemap-opponent-body-2.json",
+    "tools/compare/evidence/fury-cutter-changemap-opponent-body-3.json",
+    "tools/compare/evidence/fury-cutter-changemap-opponent-body-4.json",
+    "src/animation/furyCutter.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tools/compare/furyCutterProduction.ts",
+    "tools/compare/furyCutterActualCore.ts",
+    "tools/compare/furyCutterResidualDiagnosis.ts",
+    "tests/animation/furyCutterSourceStaging.test.ts",
+    "tests/animation/furyCutterEvidenceCheckpoint.test.ts",
+    "tests/animation/furyCutterProduction.test.ts",
+    "tests/animation/furyCutterActualCore.test.ts",
+    "tests/animation/furyCutterResidualDiagnosis.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "acceptance": "Two independent fresh actual-core verifier processes each pass all 344 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest 824abcb1c33013cb187be5a75c5ea326bc833b2fc0fdaa1977042de2d24bc233; player counter 1/2/3/4 RGB sequences c2160defc69ff468e2b4223b7c17f0f52119f4c38f29c8dd67d7c3af20fc84d8 / af0dd8a6e4d9a16f85e151c724c862e6274b9819d5b4a3df3d45bc898875e58c / 8b80a06797d11ef317486076fadba2800be5debe82b23e11520b2e4347a90529 / dfcc7376112597e999bd49fbd866a0637e6e3415cb0b92cfd5986c16678f17a1; opponent counter 1/2/3/4 RGB sequences 639101f60fefd335b5e375dd7d2aa668ae545fafc94da938889ce99022a36ed3 / dede5e3d8d2bb2ff133001c5a12ac2ba82f8b35d9dd9db933a85a48657f25929 / 2631330b7f44fc66180a9fe76ef4331d12c4ebe3db72acaaff95c396b1111e67 / b525a01e4f6e69db137be9081d68aab94bb0a73aa4f57a92ffc9c5f307d9a91e."
   }
  ],
  "queue": [],
@@ -10869,7 +10915,7 @@
     "task:AnimTask_IsFuryCutterHitRight"
    ],
    "representatives": ["MOVE_FURY_CUTTER"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/furyCutterSourceAudit.ts",
     "tools/compare/furyCutterProbe.py",
@@ -10891,9 +10937,19 @@
     "tools/compare/evidence/fury-cutter-changemap-opponent-body-4.json",
     "tests/animation/furyCutterSourceStaging.test.ts",
     "tests/animation/furyCutterEvidenceCheckpoint.test.ts",
+    "src/animation/furyCutter.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tools/compare/furyCutterProduction.ts",
+    "tools/compare/furyCutterActualCore.ts",
+    "tools/compare/furyCutterResidualDiagnosis.ts",
+    "tests/animation/furyCutterProduction.test.ts",
+    "tests/animation/furyCutterActualCore.test.ts",
+    "tests/animation/furyCutterResidualDiagnosis.test.ts",
     "ANIMATION_LATCHES.md"
    ],
-   "goal": "UNFULFILLED evidence checkpoint only: MOVE_FURY_CUTTER remains unsupported; the nine counter/power-branch components have no production, reducer, typed seam, compositor, core, exact/partial/staged move credit, sibling/shared credit, gameplay/RNG/facility ownership, or boundary/barrier ownership."
+   "goal": "FULFILLED by MOVE_FURY_CUTTER alone after complete source classification, eight legal natural counter/orientation windows, direction/counter-generic reducer, narrow typed Scene-ON seam, generic live monbg/normal-ObjBlend CUT compositor, material altered control, and twice-fresh 344/344 zero-residual actual-core acceptance through cleanup. Aerial Ace, Guillotine, Vice Grip, Air Cutter, Cross Chop, and all other siblings receive no credit."
   }
  ],
  "variantAudits": {

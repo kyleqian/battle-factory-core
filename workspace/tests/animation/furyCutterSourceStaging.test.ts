@@ -14,7 +14,7 @@ const scenarios = [
   ["opponent-front", "tools/battle-lab/mechanic-fury-cutter-opponent-grovyle-player-blissey.json"],
 ] as const;
 const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as {
-  entries: Array<{ move: string }>;
+  entries: Array<{ move: string; status: string }>;
   componentTracks: Array<{ id: string; components: string[]; representatives: string[]; fulfilled: boolean }>;
 };
 
@@ -81,10 +81,11 @@ describe("MOVE_FURY_CUTTER source and legal staging checkpoint", () => {
     });
   });
 
-  it("adds only an unfulfilled non-exclusive track and no move credit", () => {
-    expect(coverage.entries.find((entry) => entry.move === "MOVE_FURY_CUTTER")).toBeUndefined();
+  it("promotes only Fury Cutter and its non-exclusive counter track", () => {
+    expect(coverage.entries.find((entry) => entry.move === "MOVE_FURY_CUTTER"))
+      .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((entry) => entry.id === "fury-cutter-counter-power-branches"))
-      .toMatchObject({ components: novel, representatives: ["MOVE_FURY_CUTTER"], fulfilled: false });
+      .toMatchObject({ components: novel, representatives: ["MOVE_FURY_CUTTER"], fulfilled: true });
   });
 
   it("uses complete legal party-before-init scenarios in both orientations", () => {
