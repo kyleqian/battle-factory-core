@@ -39,11 +39,18 @@ function compare(window: CurseWindow): Json {
     `tools/compare/evidence/curse-${window}-raw-rgb.tar.gz`), "-C", scratch]);
   let framebufferMatched = 0, residualPixels = 0; const failures: string[] = [];
   const failureDetails: Json[] = [];
+  const paletteScanoutTransfers: Json[] = [];
   const sequence = createHash("sha256");
   for (const [age, row] of rows.entries()) {
     const raw = readFileSync(findRgb(scratch, `${String(row.frame).padStart(5, "0")}.rgb`));
     if (sha(raw) !== row.sha256) throw new Error(`${window}/${age}: RGB drift`); sequence.update(raw);
-    const stage = createSceneOnMovePresentation(curseConfigFor(window, rows, age));
+    const config = curseConfigFor(window, rows, age);
+    if (config.animationInputs.paletteScanoutTransfer) paletteScanoutTransfers.push({ age,
+      vcount: config.animationInputs.paletteScanoutTransfer.vcount,
+      inHBlank: config.animationInputs.paletteScanoutTransfer.inHBlank,
+      firstPostTransferScanline:
+        config.animationInputs.paletteScanoutTransfer.firstPostTransferScanline });
+    const stage = createSceneOnMovePresentation(config);
     const app = render({ ...createInitialState(), rngMode: "frontierBattle",
       sceneOnPresentation: { ...stage, age } });
     const difference = residual(app, raw); residualPixels += difference;
@@ -54,7 +61,8 @@ function compare(window: CurseWindow): Json {
   }
   return { window, rows: rows.length, componentMatched: rows.length, seamMatched: rows.length,
     rawRgbMatched: rows.length, framebufferMatched, residualPixels,
-    chronologicalRawRgbSha256: sequence.digest("hex"), failures, failureDetails };
+    chronologicalRawRgbSha256: sequence.digest("hex"), paletteScanoutTransfers,
+    failures, failureDetails };
 }
 function alteredControl(): Json {
   const window: CurseWindow = "ghost-player", rows = curseRowsFor(window), age = 300;
@@ -89,11 +97,10 @@ export function curseActualCoreVerdict(): Json {
     move: "MOVE_CURSE", rows: 1098, componentMatched: 1098, seamMatched: 1098,
     rawRgbMatched: 1098, framebufferMatched: windows.reduce((sum, item) => sum + item.framebufferMatched, 0),
     residualPixels: windows.reduce((sum, item) => sum + item.residualPixels, 0), windows,
-    alteredLiveControl: alteredControl(), residualDiagnosis: {
+    alteredLiveControl: alteredControl(), closure: {
       exactRows: windows.reduce((sum, item) => sum + item.framebufferMatched, 0), totalRows: 1098,
-      class: "first-CurseStretchingBlackBg-Step2 mid-scanout palette-transfer tear",
-      retainedHardwareSnapshotInsufficient: true,
-      resumeCondition: "Retain the palette-transfer VCOUNT/scanline split for the first Step2 row in both orientations; do not infer it from framebuffer coordinates.",
+      sourceTimedPaletteScanout: true, coordinateOrColorFit: false,
+      directTimingFixture: "tools/compare/fixtures/curse-palette-transfer-timing.json",
     } };
   return { ...stable, digest: sha(JSON.stringify(stable)) };
 }

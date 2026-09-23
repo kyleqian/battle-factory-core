@@ -24653,6 +24653,7 @@ export function renderSceneOnMovePresentation(
     const moveState = state as SceneOnMovePresentationState<SceneOnCurseConfig>;
     const view = sceneOnCurseView(moveState), plan = curseDisplayPlan(view);
     if (view.attacker.geometry.side === view.target.geometry.side) throw new Error("CURSE requires opposite field sides");
+    const renderPass = (fb: Uint8Array, hardwarePalette: readonly number[]): void => {
     type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
     const artFor = (battler: typeof view.attacker, species: string): BattlerArt => {
       const found = battler.geometry.side === "player"
@@ -24665,7 +24666,7 @@ export function renderSceneOnMovePresentation(
     const rgb555 = (word: number): RgbColor => { const packed = mgbaColorFromBgr555(word);
       return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff }; };
     const paletteBank = (bank: number): RgbColor[] =>
-      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map(rgb555);
+      hardwarePalette.slice(bank * 16, bank * 16 + 16).map(rgb555);
     const signed = (value: number): number => { const raw = value & 0x1ff; return raw >= 256 ? raw - 512 : raw; };
     const top = (attr: readonly [number, number, number]) => ({ x: signed(attr[1]),
       y: (attr[0] & 0xff) >= 160 ? (attr[0] & 0xff) - 256 : attr[0] & 0xff });
@@ -24782,6 +24783,21 @@ export function renderSceneOnMovePresentation(
     drawMessageTextLines(fb, view.attacker.geometry.side === "player"
       ? `${view.battlers.attacker.art.displaySpecies} used`
       : `Foe ${view.battlers.attacker.art.displaySpecies} used`, "CURSE!", 99);
+    };
+    const transfer = view.paletteScanoutTransfer;
+    if (transfer) {
+      if (transfer.beforeHardware.length !== view.palette.hardware.length
+        || transfer.firstPostTransferScanline !== transfer.vcount + (transfer.inHBlank ? 1 : 0)
+        || transfer.firstPostTransferScanline < 0 || transfer.firstPostTransferScanline > 160) {
+        throw new Error("CURSE invalid palette scanout transfer");
+      }
+      const initial = fb.slice(), before = initial.slice();
+      renderPass(before, transfer.beforeHardware);
+      fb.set(initial); renderPass(fb, view.palette.hardware);
+      fb.set(before.subarray(0, transfer.firstPostTransferScanline * 240 * 4), 0);
+    } else {
+      renderPass(fb, view.palette.hardware);
+    }
     return;
   }
 

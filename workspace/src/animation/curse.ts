@@ -10,6 +10,14 @@ export interface CurseArt { readonly displaySpecies: string; readonly slot: numb
 export interface CurseSprite { readonly slot: number; readonly template: string;
   readonly callback: string; readonly attr: CurseOam; readonly matrix: CurseMatrix;
   readonly matrixNum: number; readonly data: readonly number[]; readonly invisible: boolean; }
+/** A hardware palette write during active display, expressed as a scanout segment. */
+export interface PaletteScanoutTransfer {
+  readonly beforeHardware: readonly number[];
+  readonly vcount: number;
+  readonly inHBlank: boolean;
+  /** First scanline rendered after the transfer under the GBA HDraw/HBlank rule. */
+  readonly firstPostTransferScanline: number;
+}
 export interface CurseLiveInputs {
   readonly branch: CurseBranch;
   readonly attackerSide: CurseSide; readonly defenderSide: CurseSide;
@@ -26,6 +34,7 @@ export interface CurseLiveInputs {
     scanlineBuffers: readonly unknown[] }>;
   readonly palette: Readonly<{ unfaded: readonly number[]; faded: readonly number[];
     hardware: readonly number[] }>;
+  readonly paletteScanoutTransfer: PaletteScanoutTransfer | null;
   readonly registers: Readonly<Record<string, number>>;
   readonly battleBg: Readonly<Record<string, number>>;
   readonly resources: Readonly<{ nailTileBase: number; ghostTileBase: number;
@@ -46,6 +55,7 @@ export interface CurseState {
     animationTargetArt: CurseArt }>;
   readonly sprites: readonly CurseSprite[]; readonly tasks: CurseLiveInputs["liveTasks"];
   readonly buffers: CurseLiveInputs["buffers"]; readonly palette: CurseLiveInputs["palette"];
+  readonly paletteScanoutTransfer: PaletteScanoutTransfer | null;
   readonly registers: CurseLiveInputs["registers"]; readonly battleBg: CurseLiveInputs["battleBg"];
   readonly resources: CurseLiveInputs["resources"]; readonly order: readonly number[];
   readonly audio: unknown;
@@ -90,6 +100,7 @@ export function curseAtAge(age: number, input: Readonly<CurseLiveInputs>): Curse
     animationTargetArt: input.animationTargetArt },
     sprites: input.ownedSprites, tasks: input.liveTasks, buffers: input.buffers,
     palette: input.palette, registers: input.registers, battleBg: input.battleBg,
+    paletteScanoutTransfer: input.paletteScanoutTransfer,
     resources: input.resources, order: input.order, audio: input.audio,
     rng: { animation: input.animationRng, gameplay: input.gameplayRng, gameplayUnchanged: true },
     gameplay: input.gameplayState,

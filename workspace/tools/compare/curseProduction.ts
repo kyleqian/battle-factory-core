@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
 import { curseAtAge, type CurseLiveInputs, type CurseSprite } from "../../src/animation/curse.ts";
 import { sceneOnCurseView, type SceneOnCurseConfig } from "../../src/animation/sceneOnPresentation.ts";
+import timingFixture from "./fixtures/curse-palette-transfer-timing.json" with { type: "json" };
 
 type Json = Record<string, any>;
 export type CurseWindow = "ghost-player" | "ghost-opponent" | "stats-player" | "stats-opponent";
@@ -43,6 +44,13 @@ export function curseInputsFor(window: CurseWindow, rows = curseRowsFor(window),
   const species = speciesFor(window);
   const nailIndex = row.tileTags.slice(0, 64).indexOf(10199);
   const ghostIndex = row.tileTags.slice(0, 64).indexOf(10200);
+  const previousTasks = rows[age - 1]?.tasks ?? [];
+  const firstStep2 = row.tasks.some((task: Json) => task.func?.symbol === "AnimTask_CurseStretchingBlackBg_Step2")
+    && previousTasks.some((task: Json) => task.func?.symbol === "AnimTask_CurseStretchingBlackBg_Step1");
+  const timingSide = attackerSide === "player" ? "player-back" : "opponent-front";
+  const timing = (timingFixture.orientations as Json)[timingSide];
+  if (firstStep2) invariant(row.frame === timing.firstStep2TraceFrame,
+    `${window}/${age}: direct timing frame`);
   return { branch, attackerSide, defenderSide: attackerSide === "player" ? "opponent" : "player",
     attackerSpecies: species.attacker, defenderSpecies: species.defender,
     attackerCenter: center(attackerSprite), defenderCenter: center(defenderSprite),
@@ -60,6 +68,9 @@ export function curseInputsFor(window: CurseWindow, rows = curseRowsFor(window),
       scanlineBuffers: row.scanlineBuffers },
     palette: { unfaded: row.unfadedPalette, faded: row.fadedPalette,
       hardware: row.hardwarePalette },
+    paletteScanoutTransfer: firstStep2 ? { beforeHardware: rows[age - 1]!.hardwarePalette,
+      vcount: timing.vcount, inHBlank: timing.inHBlank,
+      firstPostTransferScanline: timing.firstPostTransferScanline } : null,
     registers: row.registers, battleBg: row.battleBg,
     resources: { nailTileBase: nailIndex < 0 ? 0 : row.resourceAllocators.tileRanges[nailIndex][0],
       ghostTileBase: ghostIndex < 0 ? 0 : row.resourceAllocators.tileRanges[ghostIndex][0],
