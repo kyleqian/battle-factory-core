@@ -3300,8 +3300,8 @@ export interface SceneOnSleepTalkConfig {
 }
 
 export interface SceneOnHowlFieldProfile extends SceneOnDragonRageFieldProfile {
-  /** Immutable result of Howl's source stat-change opcode. */
-  readonly attackerAttackStage: 7;
+  /** Legacy fixture outcome; Move_HOWL itself does not read or change stages. */
+  readonly attackerAttackStage?: 7;
 }
 
 export interface SceneOnHowlConfig {
@@ -3309,6 +3309,7 @@ export interface SceneOnHowlConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnHowlFieldProfile>;
+  readonly battlerInput?: import("./howl.ts").HowlBattlerInput;
 }
 
 /** Narrow Scene-ON seam for Yawn's bilateral Togetic/Gengar body. */
@@ -10016,6 +10017,7 @@ export function sceneOnHowlView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,
+      state.config.battlerInput,
     ),
   };
 }

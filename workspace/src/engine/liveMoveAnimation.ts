@@ -5,6 +5,7 @@ import type { BattleResolutionDisplayedField } from "./battleResolutionPresentat
 import type {
   SceneOnMovePresentationState, SceneOnMoveConfig, SceneOnPresentationBattler,
 } from "../animation/sceneOnPresentation.ts";
+import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
 import { TAIL_WHIP_FRAME_COUNT } from "../animation/tailWhip.ts";
 import { CONFUSE_RAY_FRAME_COUNT } from "../animation/confuseRay.ts";
 import { FOCUS_PUNCH_FIRST_INACTIVE_AGE } from "../animation/focusPunch.ts";
@@ -33,7 +34,7 @@ import { GRASS_WHISTLE_WINDOW_FRAMES } from "../animation/grassWhistle.ts";
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 14, 23, 29, 39, 41, 44, 47, 48, 78, 79, 92, 93, 94, 95, 97, 101,
   103, 108, 109, 131, 147, 154, 158, 163, 242, 246, 247, 264, 280, 305,
-  306, 320, 325, 337, 347,
+  306, 320, 325, 336, 337, 347,
 ] as const);
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
@@ -83,6 +84,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 320: return GRASS_WHISTLE_WINDOW_FRAMES;
     // Source restorebg fade, then inactive display. Both orientations restore.
     case 325: return request.attacker === 0 ? 106 : 105;
+    case 336: return HOWL_FRAME_COUNT;
     case 337: return 137; // Dragon Claw palette restoration through cleanup.
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
@@ -183,6 +185,15 @@ export function liveMoveAnimationPresentation(
         attackerSpriteId: request.attacker === 0 ? 6 : 8,
         attackerMoveSpeed: request.attacker === 0 ? 8 : -8,
         attackerSubpriority: request.attacker === 0 ? 30 : 40,
+      };
+      break;
+    case 336:
+      config = {
+        move: "HOWL", attacker, target, fieldProfile,
+        battlerInput: {
+          pictureHeight: 64 - 2 * art[request.attacker === 0 ? "player" : "opponent"].coords.yOffset,
+          species: attacker.species,
+        },
       };
       break;
     case 337: config = { move: "DRAGON_CLAW", attacker, target, fieldProfile }; break;

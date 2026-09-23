@@ -37235,14 +37235,14 @@ export function renderSceneOnMovePresentation(
       age: howlState.age - 2,
     });
     const playerToOpponent =
-      view.attacker.species === "LOUDRED"
+      (liveField || view.attacker.species === "LOUDRED")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "LOUDRED"
+      (liveField || view.attacker.species === "LOUDRED")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -37250,16 +37250,16 @@ export function renderSceneOnMovePresentation(
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    if (howlState.config.fieldProfile.attackerAttackStage !== 7) {
+    if (!liveField && howlState.config.fieldProfile.attackerAttackStage !== 7) {
       throw new Error("HOWL presentation requires immutable Attack stage 7");
     }
     const loudredSource = playerToOpponent
       ? howlArt.loudredBack : howlArt.loudredFront;
-    const loudred = playerToOpponent
+    const loudred = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? loudredSource
       : { ...loudredSource, tileset: subTileset(loudredSource.tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const onixIdle = playerToOpponent
@@ -37319,6 +37319,7 @@ export function renderSceneOnMovePresentation(
         line.vFlip,
       );
     }
+    if (!liveField) {
     const profile = howlState.config.fieldProfile;
     drawSendOutHealthbox(
       fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
@@ -37347,6 +37348,7 @@ export function renderSceneOnMovePresentation(
       "HOWL!",
       99,
     );
+    }
     return;
   }
 

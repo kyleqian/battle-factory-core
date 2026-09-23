@@ -27,6 +27,12 @@ export interface HowlNoiseLine {
   readonly callback: "AnimRoarNoiseLine_Step";
 }
 
+/** Source GetBattlerYDeltaFromSpriteId and current party cry identity. */
+export interface HowlBattlerInput {
+  readonly pictureHeight: number;
+  readonly species: string;
+}
+
 export interface HowlState {
   readonly active: boolean;
   readonly noiseLineLoaded: boolean;
@@ -35,7 +41,7 @@ export interface HowlState {
   readonly noiseLines: readonly HowlNoiseLine[];
   readonly cry:
     | Readonly<{
-        species: "LOUDRED";
+        species: string;
         mode: "CRY_MODE_HIGH_PITCH";
         panSide: HowlSide;
       }>
@@ -106,8 +112,11 @@ export function deepInhaleTransformAtAge(
 function attackerTransformAtAge(
   age: number,
   side: HowlSide,
+  battler?: HowlBattlerInput,
 ): HowlAttackerTransform {
-  return deepInhaleTransformAtAge(age, 64 - (side === "player" ? 9 : 3) * 2);
+  return deepInhaleTransformAtAge(
+    age, battler?.pictureHeight ?? 64 - (side === "player" ? 9 : 3) * 2,
+  );
 }
 
 function noiseWaveAtAge(
@@ -152,19 +161,20 @@ export function howlAtAge(
   age: number,
   side: HowlSide,
   attackerCoord: Readonly<{ x: number; y: number }>,
+  battler?: HowlBattlerInput,
 ): HowlState {
   return {
     active: age >= 0 && age < HOWL_FRAME_COUNT - 1,
     noiseLineLoaded: age >= 1 && age < HOWL_FRAME_COUNT - 1,
     scriptOffset: scriptOffsetAtAge(age),
-    attackerTransform: attackerTransformAtAge(age, side),
+    attackerTransform: attackerTransformAtAge(age, side, battler),
     noiseLines: [
       ...noiseWaveAtAge(age, 0, side, attackerCoord),
       ...noiseWaveAtAge(age, 1, side, attackerCoord),
     ],
     cry: age === HOWL_SECOND_WAVE_AGE
       ? {
-          species: "LOUDRED",
+          species: battler?.species ?? "LOUDRED",
           mode: "CRY_MODE_HIGH_PITCH",
           panSide: side,
         }
