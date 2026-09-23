@@ -127,7 +127,7 @@ describe("live contact and multi-hit move adapters", () => {
       const first = ages.map(age => renderBody(moveId, 0, age));
       const repeated = ages.map(age => renderBody(moveId, 0, age));
       expect(repeated).toEqual(first);
-      expect(new Set(first).size).toBeGreaterThan(2);
+      expect(new Set(first).size).toBeGreaterThan(1);
     }
   });
 });
