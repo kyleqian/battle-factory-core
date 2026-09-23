@@ -16830,3 +16830,21 @@ track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
   lock clears; its boundary is the 20-component, five-counter-branch script
   with legal Level-50 carriers SPHEAL, DELIBIRD, and SEALEO_1. This is an
   operational scheduling boundary, not an animation acceptance blocker.
+
+# Archived live checkpoint — MOVE_ICE_BALL exact merge (2026-09-23)
+
+- **State / merge:** Verified worker commits `3f7f4b904` through `924b2f31e`
+  made `MOVE_ICE_BALL` exact with only its
+  `ice-ball-five-counter-bg-shards` track fulfilled. Level 50 was
+  **275/276 exact, 0 partial, 0 staged, 1 unsupported**; Helping Hand remained
+  evidence-blocked and no sibling, gameplay/RNG/facility, import-boundary, or
+  unsupported-barrier credit moved.
+- **Independent proof:** Two actual-core runs passed **872/872** source, seam,
+  chronological raw-RGB, and framebuffer rows with **zero residual pixels**;
+  verdict digest `92954a69…`. A material CROBAT/BLISSEY control changed the
+  rendered digest while gameplay state/RNG remained unchanged. The retained
+  Rapid Spin receipt hashes were unchanged.
+- **Gates:** Focused union passed **17 files / 53 tests**; coverage, animation
+  audit, JSON, and diff checks passed. The final serialized suite passed
+  **1,458 files / 11,546 tests** with **44 files / 223 tests skipped** and the
+  build passed **837 modules** with only the inherited chunk warning.

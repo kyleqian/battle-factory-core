@@ -1,3 +1,41 @@
+# Animation worker exact promotion — MOVE_OUTRAGE (2026-09-23)
+
+- **State / tested tree:** Production promotion landed in `f902dc4b0` and the
+  final production/evidence tree tested below is `068eab7c4` on
+  `worker/animation-20260923-180321`. The only new coverage entry and
+  fulfilled component track are Outrage-owned; `MOVE_HELPING_HAND` remains
+  blocked, the 77 non-Factory moves remain out of scope, and no
+  gameplay/RNG/turn/facility or unsupported-barrier ownership moved.
+  `ANIMATION_LATCHES.md` required no refinement.
+- **Production / proof:** `src/animation/outrage.ts`, typed Scene-ON seam,
+  and live `battleScene.ts`/`core.ts` wiring now reduce and composite the
+  source-relative Small Ember, ellipse, ShakeMon2, blend cycle, audio, palette,
+  OAM/matrix, resource, and cleanup lifecycles. The source/component and seam
+  verifier passes **480/480** rows across both orientations (240 retained rows
+  checked twice); the actual shared-core verifier passes **240/240** rows in
+  each of two fresh processes with **zero residual pixels**. The CROBAT/BLISSEY
+  reversed-side geometry/allocation/palette/order/RNG control changes output
+  while opaque gameplay state/RNG remain unchanged.
+- **Gates / exact commands:** `npx vitest run
+  tests/animation/outrageSourceStaging.test.ts
+  tests/animation/outrageEvidenceCheckpoint.test.ts
+  tests/animation/outrageReducer.test.ts
+  tests/animation/outrageActualCore.test.ts` passes **4 files / 7 tests**;
+  both actual-core processes pass all **240/240** rows with zero residual
+  pixels. `npx vitest run tests/animation/animationBoundaryRatchet.test.ts
+  tests/animation/factoryAnimationInventory.test.ts
+  tests/animation/animationWorkPlan.test.ts` passes **3 files / 16 tests**.
+  `npm run animation:coverage` reports Level 50 **275/276 exact** and Open-only
+  **1/1 exact**, with Helping Hand the sole blocker; `npm run animation:audit`
+  is exact. `npm run typecheck` passes; `npm run test:smoke` passes **8 files /
+  448 tests** in **76.32s**; serialized `npm test` passes **1,462 files / 11,553
+  tests**, with **44 files / 223 tests skipped**, in **2,164.86s**; and
+  `npm run build` passes (**838 modules**, inherited chunk-size warning only).
+  `git diff --check` passes. The narrow Overheat no-credit receipt refresh in
+  `068eab7c4` only updates its derived audit hashes after Outrage coverage
+  promotion; Overheat receives no credit. Resume only for supervisor merge;
+  the final ledger commit is documentation-only.
+
 # Animation supervisor verification — MOVE_OUTRAGE evidence merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded verified worker commits `032f9f682` through
@@ -62,28 +100,3 @@
   `npm run typecheck`, JSON/gzip/tar validation, and `git diff --check` pass.
   Supervisor verification must keep Outrage unsupported and Helping Hand
   blocked; no production suite/build was required for this evidence-only delta.
-
-# Animation supervisor verification — MOVE_ICE_BALL exact merge (2026-09-23)
-
-- **State / merge:** Fast-forwarded verified worker commits `3f7f4b904` through
-  `924b2f31e`; **MOVE_ICE_BALL is exact** and only its
-  `ice-ball-five-counter-bg-shards` track is fulfilled. Level 50 is now
-  **275/276 exact, 0 partial, 0 staged, 1 unsupported**. Helping Hand remains
-  evidence-blocked; no sibling, gameplay/RNG/facility, import-boundary, or
-  unsupported-barrier credit moved.
-- **Independent proof:** Ran the actual-core verifier twice from the worker
-  tree with byte-identical reports: **872/872** source, seam, chronological
-  raw-RGB, and actual-framebuffer rows, **zero residual pixels**, verdict digest
-  `92954a69…`. A material CROBAT/BLISSEY control changes the rendered digest
-  (`b9453bcd…` → `cb8dc58f…`) while gameplay state/RNG remain unchanged. The
-  Rapid Spin receipt update is limited to its explicit Ice Ball source control;
-  its retained ROM, semantic, RGB/framebuffer, and change-map hashes did not
-  change.
-- **Gates / next:** Supervisor focused union passes **17 files / 53 tests**;
-  coverage, animation audit, JSON, and diff checks pass. The final independent
-  serialized supervisor suite passes **1,458 files / 11,546 tests** with **44
-  files / 223 tests skipped** in **1,861.48s**; `npm run build` passes **837
-  modules** with only the inherited chunk warning. Next dispatch a bounded
-  source/legal dense-evidence step for Open-only **MOVE_OUTRAGE**, using legal
-  carrier `FRONTIER_MON_DRAGONITE_5`; Helping Hand remains separately blocked.
-  **For the main program:** nothing blocking.
