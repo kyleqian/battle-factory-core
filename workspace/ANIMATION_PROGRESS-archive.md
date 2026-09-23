@@ -16542,3 +16542,29 @@ track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
   source/evidence verifiers, coverage (**271/276 exact, 5 unsupported**),
   animation audit, diff check, and typecheck are green. `MOVE_SPIT_UP` gets no
   production or coverage promotion; do not start `MOVE_FURY_CUTTER`.
+# Animation supervisor verification — MOVE_FURY_CUTTER exact merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded worker commits `79fe16154` and `72fafc0ab`.
+  `MOVE_FURY_CUTTER` and only its nine-component
+  `fury-cutter-counter-power-branches` track are exact/fulfilled; Level 50 is
+  now **273/276 exact, 0 partial, 0 staged, 3 unsupported**. Helping Hand
+  remains blocked/unfulfilled; no sibling, gameplay/RNG/facility, boundary,
+  or barrier owner moved.
+- **Independent proof:** Two fresh supervisor actual-core processes are
+  byte-identical (`10c0da63…`) and pass all **344/344** component, typed-seam,
+  chronological raw-RGB, and shared-core framebuffer rows with **0 residual
+  pixels** at verdict `824abcb1…`. The material CROBAT/GROVYLE side/species/
+  geometry/allocation/order control changes live output while opaque gameplay
+  state/RNG remain unchanged. The repair uses live Grovyle/Blissey display
+  identity, side-selected target monbg, and normal flipped CUT ObjBlend OAM;
+  it adds no screenshot, coordinate/color fit, or absolute-tick branch.
+- **Gates / next:** On final production tree `72fafc0ab`, the focused Fury/
+  source/evidence/production/diagnosis/boundary/inventory union passes **7
+  files / 17 tests**; smoke passes **8 files / 448 tests**; coverage, animation
+  audit, and diff checks are green. Independent `npm test` passes **1,447 files
+  / 11,525 tests**, with **44 files / 223 tests skipped**, in **1,920.71s**;
+  `npm run build` passes **833 modules** with only the inherited chunk warning.
+  Next dispatch `MOVE_CURSE` for source classification, a move-owned component
+  track, and complete legal bilateral evidence; no existing Curse mechanics
+  or sibling receipt grants animation credit. **For the main program:** nothing
+  blocking.

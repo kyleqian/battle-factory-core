@@ -10972,11 +10972,30 @@
     "tools/compare/curseProbe.py",
     "tools/compare/curseEvidence.ts",
     "tools/compare/fixtures/curse-evidence.json",
+    "tools/compare/evidence/curse-ghost-player-dense-state.json.gz",
+    "tools/compare/evidence/curse-ghost-opponent-dense-state.json.gz",
+    "tools/compare/evidence/curse-stats-player-dense-state.json.gz",
+    "tools/compare/evidence/curse-stats-opponent-dense-state.json.gz",
+    "tools/compare/evidence/curse-ghost-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/curse-ghost-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/curse-stats-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/curse-stats-opponent-raw-rgb.tar.gz",
+    "tools/compare/extractCurseAssets.ts",
+    "src/animation/assets/curse.json",
+    "src/animation/curse.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tools/compare/curseProduction.ts",
+    "tools/compare/curseActualCore.ts",
     "tests/animation/curseSourceStaging.test.ts",
     "tests/animation/curseEvidenceCheckpoint.test.ts",
+    "tests/animation/curseAssets.test.ts",
+    "tests/animation/curseProduction.test.ts",
+    "tests/animation/curseActualCore.test.ts",
     "ANIMATION_LATCHES.md"
    ],
-   "goal": "UNFULFILLED evidence checkpoint only: MOVE_CURSE alone owns the ten novel asset/template/subroutine/task components. Complete legal three-mon pre-init Scene-ON Ghost and non-Ghost Curse branches are retained in both player-back and opponent-front orientations with move-owned latches and compact normalized maps, but no reducer, seam, compositor, promotion, or sibling credit exists yet. Tickle, Attract, Screech, Sleep Talk, and Bind are controls only."
+   "goal": "UNFULFILLED production partial: MOVE_CURSE alone owns the ten novel components. Its source-derived branch-generic reducer, typed Scene-ON seam, assets, shared-core dispatch, and live compositor pass all 1,098 component/seam/raw-RGB rows; both 176-row stat windows and 372/373 Ghost rows per orientation are framebuffer-exact. The sole two-row remainder is the first CurseStretchingBlackBg Step2 mid-scanout palette-transfer tear (720/660 pixels); exact closure requires retained VCOUNT/scanline timing, not coordinate fitting. MOVE_CURSE stays unsupported and Tickle, Attract, Screech, Sleep Talk, and Bind receive no credit."
   }
  ],
  "variantAudits": {
