@@ -1,3 +1,24 @@
+# Animation supervisor verification — MOVE_REVENGE exact merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commits `6d9c2fc11` and
+  `eab8c2a43`. `MOVE_REVENGE` and only its five-component
+  `revenge-purple-scratch-persist-hit` track are exact/fulfilled; Level 50 is
+  **271/276 exact, 0 partial, 0 staged, 5 unsupported**. Helping Hand remains
+  blocked/unfulfilled, and no sibling, gameplay/RNG, facility, boundary, or
+  barrier owner moved.
+- **Independent proof:** Two fresh supervisor actual-core processes each pass
+  all **290/290** component, typed-seam, chronological raw-RGB, and shared-core
+  framebuffer rows with **0 residual pixels**, digest `f555b063…`, through
+  bilateral age-144 cleanup. The material CROBAT/BLISSEY control changes live
+  presentation while opaque gameplay state/RNG remain unchanged.
+- **Gates / next:** On final tree `205d0c4e2942b775c4dd512a49fcece327141b64`,
+  the affected union passes **8 files / 21 tests** and smoke passes **8 / 448**.
+  Reused the same-code worker full receipt: `npm test` **1,437 files / 11,509
+  tests**, **44 / 223 skipped**, and `npm run build` **830 modules**. Coverage,
+  audit, typecheck, and diff checks are green. Next dispatch `MOVE_SPIT_UP` for
+  source classification, legal bilateral staging, dense evidence, and its own
+  latch maps. **For the main program:** nothing blocking.
+
 # Animation worker closure — MOVE_REVENGE exact (2026-09-23)
 
 - **State / scope:** `MOVE_REVENGE` is **exact**, advancing Level 50 to
@@ -59,23 +80,3 @@
   control, and twice-fresh **290/290** zero-residual actual-core framebuffer
   proof; keep this move and track unsupported until then, and do not start
   `MOVE_SPIT_UP`.
-
-# Animation worker checkpoint — MOVE_REVENGE purple asset audit (2026-09-22)
-
-- **State / scope:** `MOVE_REVENGE` remains **unsupported** with no exact,
-  partial, staged, component, sibling, or shared credit. Added only the
-  dev-time `tools/compare/extractRevengeAssets.ts` proof, its pinned
-  `tools/compare/evidence/revenge-assets.json` receipt, and
-  `tests/animation/revengeAssets.test.ts`; no `src/` or coverage status moved.
-- **Asset checkpoint:** The extractor pins source PNGs, palettes, registry/tag
-  declarations, ELF/ROM symbols, GBA-LZ77 streams, decoded 4bpp bytes, tiles,
-  frames, OAM/template identities, animation tables, and `AnimRevengeScratch`.
-  PURPLE_SCRATCH is 32x96 / 48 tiles / 0x600 decoded bytes with 3x 32x32
-  frames; PURPLE_SWIPE is 64x128 / 128 tiles / 0x1000 with 2x 64x64 frames;
-  both use `gBattleAnimSpritePal_PurpleScratch`.
-- **Verification / resume:** Focused asset tests pass **3/3**, including two
-  fresh byte-identical regenerations; extractor output is clean and source/ELF/
-  ROM LZ77 comparisons pass. Resume only with a source-relative Revenge
-  reducer, narrow seam, generic compositor, material control, and twice-fresh
-  **290/290** zero-residual actual-core proof; keep the component track
-  unfulfilled and do not start `MOVE_SPIT_UP`.
