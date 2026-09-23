@@ -1,3 +1,30 @@
+# Animation supervisor verification — MOVE_FURY_CUTTER exact merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded worker commits `79fe16154` and `72fafc0ab`.
+  `MOVE_FURY_CUTTER` and only its nine-component
+  `fury-cutter-counter-power-branches` track are exact/fulfilled; Level 50 is
+  now **273/276 exact, 0 partial, 0 staged, 3 unsupported**. Helping Hand
+  remains blocked/unfulfilled; no sibling, gameplay/RNG/facility, boundary,
+  or barrier owner moved.
+- **Independent proof:** Two fresh supervisor actual-core processes are
+  byte-identical (`10c0da63…`) and pass all **344/344** component, typed-seam,
+  chronological raw-RGB, and shared-core framebuffer rows with **0 residual
+  pixels** at verdict `824abcb1…`. The material CROBAT/GROVYLE side/species/
+  geometry/allocation/order control changes live output while opaque gameplay
+  state/RNG remain unchanged. The repair uses live Grovyle/Blissey display
+  identity, side-selected target monbg, and normal flipped CUT ObjBlend OAM;
+  it adds no screenshot, coordinate/color fit, or absolute-tick branch.
+- **Gates / next:** On final production tree `72fafc0ab`, the focused Fury/
+  source/evidence/production/diagnosis/boundary/inventory union passes **7
+  files / 17 tests**; smoke passes **8 files / 448 tests**; coverage, animation
+  audit, and diff checks are green. Independent `npm test` passes **1,447 files
+  / 11,525 tests**, with **44 files / 223 tests skipped**, in **1,920.71s**;
+  `npm run build` passes **833 modules** with only the inherited chunk warning.
+  Next dispatch `MOVE_CURSE` for source classification, a move-owned component
+  track, and complete legal bilateral evidence; no existing Curse mechanics
+  or sibling receipt grants animation credit. **For the main program:** nothing
+  blocking.
+
 # Animation supervisor verification — MOVE_FURY_CUTTER residual diagnosis merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded verified tooling-only worker commit
@@ -45,9 +72,3 @@
   reconciling generic background/monbg/OBJ scanout and palette composition,
   then require twice-fresh zero residuals plus a material altered control
   before promotion. **For the main program:** nothing blocking.
-
-# Animation worker checkpoint — MOVE_FURY_CUTTER reducer/seam/compositor partial (2026-09-23)
-
-- **State / scope:** `MOVE_FURY_CUTTER` remains **unsupported** and `fury-cutter-counter-power-branches` remains **unfulfilled**. No move, sibling, shared-component, gameplay/RNG/facility, boundary, or barrier credit moved.
-- **Production:** Added one direction/counter-generic, source-relative 43-row reducer consuming retained live OAM/matrix/palette/register/resource/audio/task/gameplay snapshots, its narrow typed Scene-ON seam, shared-core dispatch, and a generic CUT/battler/monbg compositor. All eight bilateral counter bodies replay twice through the reducer/seam with powers 10/20/40/80, right/left/right/left, and 0/1/3/3 blend repetitions.
-- **Exact blocker:** The actual-core raw-RGB attempt is honestly non-exact: **0/344** framebuffer rows, **1,225,822** aggregate residual pixels (about 2.3k-4.4k/frame). It is retained only as a bounded production partial; no coordinate/RGB fitting, screenshots, absolute ticks, or gameplay ownership were introduced. Resume by reconciling the generic background/monbg/OBJ scanout and palette composition, then add the twice-fresh material-control exact test before any promotion.

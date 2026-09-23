@@ -1,3 +1,9 @@
+# Animation worker checkpoint — MOVE_FURY_CUTTER reducer/seam/compositor partial (2026-09-23)
+
+- **State / scope:** `MOVE_FURY_CUTTER` remains **unsupported** and `fury-cutter-counter-power-branches` remains **unfulfilled**. No move, sibling, shared-component, gameplay/RNG/facility, boundary, or barrier credit moved.
+- **Production:** Added one direction/counter-generic, source-relative 43-row reducer consuming retained live OAM/matrix/palette/register/resource/audio/task/gameplay snapshots, its narrow typed Scene-ON seam, shared-core dispatch, and a generic CUT/battler/monbg compositor. All eight bilateral counter bodies replay twice through the reducer/seam with powers 10/20/40/80, right/left/right/left, and 0/1/3/3 blend repetitions.
+- **Exact blocker:** The actual-core raw-RGB attempt is honestly non-exact: **0/344** framebuffer rows, **1,225,822** aggregate residual pixels (about 2.3k-4.4k/frame). It is retained only as a bounded production partial; no coordinate/RGB fitting, screenshots, absolute ticks, or gameplay ownership were introduced. Resume by reconciling the generic background/monbg/OBJ scanout and palette composition, then add the twice-fresh material-control exact test before any promotion.
+
 # Animation supervisor verification — MOVE_FURY_CUTTER evidence merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded verified worker commit `6666ffa04`.
