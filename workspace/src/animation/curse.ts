@@ -103,7 +103,8 @@ export function curseDisplayPlan(state: Readonly<CurseState>): CurseDisplayPlan 
     state.buffers.hardwareMatrices, IDENTITY);
   const tile = (object: GbaHardwareOamObject<CurseMatrix>): number => object.attr[2] & 0x3ff;
   const find = (art: CurseArt): GbaHardwareOamObject<CurseMatrix> | null =>
-    objects.find((object) => object.attr[2] === art.attr[2]) ?? null;
+    objects.find((object) => object.attr[2] === art.attr[2]
+      && (object.attr[0] & 0xc00) !== 0x800 && (object.attr[0] & 0x300) !== 0x200) ?? null;
   return { attacker: find(state.battlers.attacker.art), defender: find(state.battlers.defender.art),
     nails: state.resources.nailLoaded ? objects.filter((object) => tile(object) >= state.resources.nailTileBase
       && tile(object) < state.resources.nailTileBase + 32) : [],
