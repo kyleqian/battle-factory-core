@@ -1,3 +1,35 @@
+# Animation worker checkpoint — MOVE_CURSE production partial (2026-09-23)
+
+- **State:** `MOVE_CURSE` remains **unsupported** and
+  `curse-ghost-nail-stat-lines` remains **unfulfilled**. Commits `a337c727a`
+  and `692957182` add source-extracted Nail/Ghost/mask assets, one branch-
+  generic reducer, the narrow typed Scene-ON seam, shared-core dispatch, and
+  the live bilateral compositor without taking gameplay/RNG/facility state.
+- **Proof:** Two fresh actual-core processes cover all **1,098/1,098**
+  component/seam/chronological raw-RGB rows. Both stat windows are exact
+  **176/176**; Ghost player/opponent are **372/373** each, for **1,096/1,098**
+  framebuffer rows exact. The sole residual is Ghost age 26, the first
+  `AnimTask_CurseStretchingBlackBg_Step2` row: player **720 pixels**, bounds
+  `[0,0,239,17]`; opponent **660**, `[0,0,239,13]`. The post-frame hardware
+  palette is already black while retained RGB preserves the pre-transfer
+  palette above the orientation-specific scanline, so the committed snapshot
+  lacks the palette-transfer VCOUNT/scanline split. Resume only with that
+  source-timed field; do not infer it from framebuffer coordinates.
+- **Boundary / next:** The material CROBAT/BLISSEY side/species/geometry/
+  allocation/order/presentation-RNG control changes output while gameplay
+  state/RNG stay opaque and unchanged. No screenshot lookup, absolute tick,
+  unsupported barrier, sibling credit, promotion, or track fulfillment moved.
+  Supervisor should retain this green production partial and dispatch a narrow
+  palette-transfer timing evidence phase if exact closure remains worthwhile.
+- **Gates:** On production commit `692957182`, the focused Curse source/
+  evidence/production/actual-core/boundary/inventory union passes **7 files /
+  17 tests**; smoke passes **8 files / 448 tests**; coverage remains **273/276
+  exact, 3 unsupported**; animation audit, typecheck, and diff checks pass.
+  Full `npm test` passes **1,452 files / 11,533 tests** with **44 files / 223
+  tests skipped** in **1,855.79s**; `npm run build` passes **835 modules** with
+  only the inherited chunk-size warning. Final actual-core verdict digest is
+  `4eed06f8...`.
+
 # Animation supervisor verification — MOVE_CURSE evidence merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded verified worker commits `e8fc0a00a` through
