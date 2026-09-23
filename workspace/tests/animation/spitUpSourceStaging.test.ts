@@ -44,14 +44,14 @@ describe("MOVE_SPIT_UP source and legal staging checkpoint", () => {
     });
   });
 
-  it("keeps MOVE_SPIT_UP unsupported and the red-orb track unfulfilled", () => {
+  it("promotes only MOVE_SPIT_UP and its red-orb track after production acceptance", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SPIT_UP"))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
     const track = coverage.componentTracks.find(
       (entry: { id: string }) => entry.id === "spit-up-red-orb-power-branches",
     );
-    expect(track).toMatchObject({ representatives: ["MOVE_SPIT_UP"], fulfilled: false });
+    expect(track).toMatchObject({ representatives: ["MOVE_SPIT_UP"], fulfilled: true });
     expect(track.components).toEqual([
       "asset:ANIM_TAG_RED_ORB_2", "sprite:gSpitUpOrbSpriteTemplate",
       "subroutine:SpitUpContinue", "subroutine:SpitUpStrong",

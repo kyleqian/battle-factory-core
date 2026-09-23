@@ -8057,6 +8057,52 @@
     "ANIMATION_LATCHES.md"
    ],
    "acceptance": "Two independent actual-core verifier processes each pass all 290 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest f555b06392ea1bf4d14774223c60243909d2aaffdcce75eea66a196f643ba440; player/opponent RGB sequences 1fcf5f5601a2c0ddf800dda02306188add5daed373a6dd797eae2aaa9ab8633e / 47e7b19f93c49574783388d9e0c71827d7412c3eede51b61d0fb5172029674f8."
+  },
+  {
+   "move": "MOVE_SPIT_UP",
+   "status": "exact",
+   "covered": [
+    "the complete ten-component Move_SPIT_UP source graph is independently accepted, including RED_ORB_2, gSpitUpOrbSpriteTemplate, SpitUpContinue/Strong/Strongest, AnimTask_SpitUpDeformMon, attacker ShakeMon2, visible-target power shake, two flashing IMPACT hits, audio, resources, and cleanup",
+    "six legal natural Stockpile 1/2/3 Scene-ON windows in player-back and opponent-front orientations retain 108/108/109 dense semantic and chronological raw-RGB rows apiece through first inactive cleanup, twice fresh",
+    "Spit Up's own maps independently prove 8/12/16 affine-double red-orb births, two impacts per branch, whole hardware OAM/palette predecessor transfer, branch-specific affine state, resource/allocation/order/register/audio lifetimes, stable opaque gameplay state/RNG, and zero-owned cleanup",
+    "the source-extracted gray-orb tiles plus independent RED_ORB_2 palette, one direction-generic branch reducer, narrow typed Scene-ON seam, and generic live hardware-buffer compositor consume retained display identity, geometry, OAM, matrices, palettes, registers, resources, and order without owning gameplay",
+    "two independent fresh actual-core processes each pass all 650 component, seam, chronological raw-RGB, and shared framebuffer rows with zero residual pixels; a material CROBAT/GROVYLE species/side/geometry/allocation/matrix/order control changes output while gameplay state/RNG stays opaque and unchanged",
+    "only spit-up-red-orb-power-branches is fulfilled; Stockpile, Swallow, Flail, Rapid Spin, Endeavor, Horn Drill, and every sibling receive no credit"
+   ],
+   "evidence": [
+    "tools/compare/spitUpSourceAudit.ts",
+    "tools/compare/spitUpProbe.py",
+    "tools/compare/spitUpEvidence.ts",
+    "tools/compare/fixtures/spit-up-evidence.json",
+    "tools/compare/fixtures/spit-up-evidence-matrix.json",
+    "tools/compare/evidence/spit-up-player-1-dense.json.gz",
+    "tools/compare/evidence/spit-up-player-2-dense.json.gz",
+    "tools/compare/evidence/spit-up-player-3-dense.json.gz",
+    "tools/compare/evidence/spit-up-opponent-1-dense.json.gz",
+    "tools/compare/evidence/spit-up-opponent-2-dense.json.gz",
+    "tools/compare/evidence/spit-up-opponent-3-dense.json.gz",
+    "tools/compare/evidence/spit-up-player-1-rgb.tar.gz",
+    "tools/compare/evidence/spit-up-player-2-rgb.tar.gz",
+    "tools/compare/evidence/spit-up-player-3-rgb.tar.gz",
+    "tools/compare/evidence/spit-up-opponent-1-rgb.tar.gz",
+    "tools/compare/evidence/spit-up-opponent-2-rgb.tar.gz",
+    "tools/compare/evidence/spit-up-opponent-3-rgb.tar.gz",
+    "tests/animation/spitUpSourceStaging.test.ts",
+    "tests/animation/spitUpEvidenceCheckpoint.test.ts",
+    "tools/compare/extractSpitUpAssets.ts",
+    "src/animation/assets/spit-up-red-orb.json",
+    "src/animation/spitUp.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tools/compare/spitUpProduction.ts",
+    "tools/compare/spitUpActualCore.ts",
+    "tests/animation/spitUpAssets.test.ts",
+    "tests/animation/spitUpProduction.test.ts",
+    "tests/animation/spitUpActualCore.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "acceptance": "Two independent fresh actual-core verifier processes each pass all 650 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest 50222df85b982b147dec9ac812e88f215ac08401737a9949b40f8b52260a8101; player 1/2/3 RGB sequences fc836e7ee617f0518867ffdc3cdd21b53c4eca5814f9f174c536cbba35d3bce6 / ba880b6547ca40e638a24630031711ff2dba5f243c4df47182c0789870d205a3 / 74da95c2299b8257cc7baaa0cda670c948964ef3f2c6c18a3bd91d1fc96af568; opponent 1/2/3 RGB sequences 7c482a1af6b67a1fc015d44869eeac842544788cd1e5975bbfef97fb6cfdde3d / dc21849ba4d7a34f6f1e3954957454cdad8f524ab3229690b70bdd69542c3dd4 / c1d00c0b1acb3885c6eddf936e3298bbdb1cf7770210778d6d682020e7afcf77."
   }
  ],
  "queue": [],
@@ -10767,7 +10813,7 @@
     "task:AnimTask_SpitUpDeformMon"
    ],
    "representatives": ["MOVE_SPIT_UP"],
-   "fulfilled": false,
+   "fulfilled": true,
    "evidence": [
     "tools/compare/spitUpSourceAudit.ts",
     "tools/compare/spitUpProbe.py",
@@ -10794,9 +10840,20 @@
     "tools/compare/evidence/spit-up-changemap-opponent-3.json",
     "tests/animation/spitUpSourceStaging.test.ts",
     "tests/animation/spitUpEvidenceCheckpoint.test.ts",
+    "tools/compare/extractSpitUpAssets.ts",
+    "src/animation/assets/spit-up-red-orb.json",
+    "src/animation/spitUp.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "src/engine/core.ts",
+    "tools/compare/spitUpProduction.ts",
+    "tools/compare/spitUpActualCore.ts",
+    "tests/animation/spitUpAssets.test.ts",
+    "tests/animation/spitUpProduction.test.ts",
+    "tests/animation/spitUpActualCore.test.ts",
     "ANIMATION_LATCHES.md"
    ],
-   "goal": "UNFULFILLED evidence checkpoint only: MOVE_SPIT_UP owns the complete ten-component Move_SPIT_UP/SpitUpStrong/SpitUpStrongest/SpitUpContinue pointer graph, but only RED_ORB_2, gSpitUpOrbSpriteTemplate, the three Spit Up branch bodies, and SpitUpDeformMon are in this non-exclusive track. Complete legal Level-50 FRONTIER_MON_SWALOT_1 parties stage one, two, and three natural Stockpile counts in both player-back and opponent-front orientations through first inactive cleanup, retaining dense semantic state, chronological raw RGB, normalized maps, latches, allocators, palettes, registers, audio, resources, task/sprite lifetimes, opaque gameplay state/RNG, and twice-fresh identity. MOVE_SPIT_UP remains unsupported with no move-level credit; Stockpile and Swallow are exact family controls only, while Flail, Rapid Spin, Endeavor, and Horn Drill are shared-task/hitsplat controls only. No reducer, typed seam, compositor, production asset, engine wiring, boundary/barrier, gameplay, damage, RNG, or sibling credit is implied."
+   "goal": "FULFILLED by MOVE_SPIT_UP alone after complete source classification, six legal natural power/orientation windows, source-extracted RED_ORB_2 art, one direction-generic source-relative reducer, narrow typed Scene-ON seam, generic live hardware-buffer compositor, material altered control, and twice-fresh 650/650 zero-residual actual-core acceptance through cleanup. No sibling or shared-component credit transfers."
   }
  ],
  "variantAudits": {
