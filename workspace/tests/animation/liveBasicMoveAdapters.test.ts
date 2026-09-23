@@ -42,7 +42,7 @@ function renderHash(
 ): string {
   const state = liveMoveAnimationPresentation(request(moveId, attacker, turn), field, age);
   expect(state).not.toBeNull();
-  const framebuffer = new Uint8Array(240 * 160 * 3);
+  const framebuffer = new Uint8Array(240 * 160 * 4);
   renderSceneOnMovePresentation(framebuffer, state!, true);
   return createHash("sha256").update(framebuffer).digest("hex");
 }
@@ -50,7 +50,7 @@ function renderHash(
 function routeHash(
   moveId: number, attacker: 0 | 1, age: number, turn = 0,
 ): string {
-  const framebuffer = new Uint8Array(240 * 160 * 3);
+  const framebuffer = new Uint8Array(240 * 160 * 4);
   const view = {
     field,
     fieldArt: createBattleCommandFieldArtView(field),

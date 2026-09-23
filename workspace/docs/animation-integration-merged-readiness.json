@@ -1,0 +1,200 @@
+{
+  "schema": "playable-animation-readiness-delta/v1",
+  "verifiedFactorySnapshot": "88cd3bc80",
+  "extends": "animation-integration-readiness.json",
+  "baselineAccepted": 267,
+  "additionalAccepted": 6,
+  "totalAccepted": 273,
+  "availableCommonProviders": [
+    "typed MOVE_ANIMATION request",
+    "current field/art/source geometry/HUD",
+    "finite queue age/cleanup/resumption"
+  ],
+  "acceptedMoves": [
+    {
+      "move": "MOVE_WILL_O_WISP",
+      "exactAcceptance": "exact",
+      "playableReadiness": "blocked",
+      "entryPoints": {
+        "config": "SceneOnWillOWispConfig",
+        "reducer": "src/animation/willOWisp.ts",
+        "render": "renderSceneOnMovePresentation"
+      },
+      "identity": "generic compositor with altered-species control",
+      "hostClass": [
+        "H_BUFFER"
+      ],
+      "requiredHostState": [
+        "battler art slots/OAM/subpriority",
+        "software/hardware OAM and affine buffers",
+        "unfaded/faded/hardware palettes",
+        "registers/background",
+        "resource allocator/tag lifetimes",
+        "sprite ordering, tasks and audio",
+        "presentation RNG"
+      ],
+      "productionHostProvider": false,
+      "completion": "source-relative active/firstInactive exists; live queue not wired",
+      "blockers": [
+        "persistent source callback/graphics host provider; retained oracle rows are verifier-only",
+        "typed live adapter and ordinary-route acceptance"
+      ]
+    },
+    {
+      "move": "MOVE_MEGAHORN",
+      "exactAcceptance": "exact",
+      "playableReadiness": "blocked",
+      "entryPoints": {
+        "config": "SceneOnMegaHornConfig",
+        "reducer": "src/animation/megaHorn.ts",
+        "render": "renderSceneOnMovePresentation"
+      },
+      "identity": "generic compositor with altered-species control",
+      "hostClass": [
+        "H_BUFFER"
+      ],
+      "requiredHostState": [
+        "battler art slots/OAM/subpriority",
+        "software/hardware OAM and affine buffers",
+        "unfaded/faded/hardware palettes",
+        "registers/background",
+        "resource allocator/tag lifetimes",
+        "sprite ordering, tasks and audio",
+        "presentation RNG"
+      ],
+      "productionHostProvider": false,
+      "completion": "source-relative active/firstInactive exists; live queue not wired",
+      "blockers": [
+        "persistent source callback/graphics host provider; retained oracle rows are verifier-only",
+        "typed live adapter and ordinary-route acceptance"
+      ]
+    },
+    {
+      "move": "MOVE_SUPERPOWER",
+      "exactAcceptance": "exact",
+      "playableReadiness": "blocked",
+      "entryPoints": {
+        "config": "SceneOnSuperpowerConfig",
+        "reducer": "src/animation/superpower.ts",
+        "render": "renderSceneOnMovePresentation"
+      },
+      "identity": "generic compositor with altered-species control",
+      "hostClass": [
+        "H_BUFFER"
+      ],
+      "requiredHostState": [
+        "battler art slots/OAM/subpriority",
+        "software/hardware OAM and affine buffers",
+        "unfaded/faded/hardware palettes",
+        "registers/background",
+        "resource allocator/tag lifetimes",
+        "sprite ordering, tasks and audio",
+        "presentation RNG"
+      ],
+      "productionHostProvider": false,
+      "completion": "source-relative active/firstInactive exists; live queue not wired",
+      "blockers": [
+        "persistent source callback/graphics host provider; retained oracle rows are verifier-only",
+        "typed live adapter and ordinary-route acceptance"
+      ]
+    },
+    {
+      "move": "MOVE_REVENGE",
+      "exactAcceptance": "exact",
+      "playableReadiness": "blocked",
+      "entryPoints": {
+        "config": "SceneOnRevengeConfig",
+        "reducer": "src/animation/revenge.ts",
+        "render": "renderSceneOnMovePresentation"
+      },
+      "identity": "generic compositor with altered-species control",
+      "hostClass": [
+        "H_BUFFER"
+      ],
+      "requiredHostState": [
+        "battler art slots/OAM/subpriority",
+        "software/hardware OAM and affine buffers",
+        "unfaded/faded/hardware palettes",
+        "registers/background",
+        "resource allocator/tag lifetimes",
+        "sprite ordering, tasks and audio",
+        "presentation RNG"
+      ],
+      "productionHostProvider": false,
+      "completion": "source-relative active/firstInactive exists; live queue not wired",
+      "blockers": [
+        "persistent source callback/graphics host provider; retained oracle rows are verifier-only",
+        "typed live adapter and ordinary-route acceptance"
+      ]
+    },
+    {
+      "move": "MOVE_SPIT_UP",
+      "exactAcceptance": "exact",
+      "playableReadiness": "blocked",
+      "entryPoints": {
+        "config": "SceneOnSpitUpConfig",
+        "reducer": "src/animation/spitUp.ts",
+        "render": "renderSceneOnMovePresentation"
+      },
+      "identity": "generic compositor with altered-species control",
+      "hostClass": [
+        "H_BUFFER",
+        "H_VARIANT"
+      ],
+      "requiredHostState": [
+        "battler art slots/OAM/subpriority",
+        "software/hardware OAM and affine buffers",
+        "unfaded/faded/hardware palettes",
+        "registers/background",
+        "resource allocator/tag lifetimes",
+        "sprite ordering, tasks and audio",
+        "presentation RNG",
+        "resolved stockpile/power body"
+      ],
+      "productionHostProvider": false,
+      "completion": "source-relative active/firstInactive exists; live queue not wired",
+      "blockers": [
+        "persistent source callback/graphics host provider; retained oracle rows are verifier-only",
+        "typed live adapter and ordinary-route acceptance"
+      ]
+    },
+    {
+      "move": "MOVE_FURY_CUTTER",
+      "exactAcceptance": "exact",
+      "playableReadiness": "blocked",
+      "entryPoints": {
+        "config": "SceneOnFuryCutterConfig",
+        "reducer": "src/animation/furyCutter.ts",
+        "render": "renderSceneOnMovePresentation"
+      },
+      "identity": "generic compositor with altered-species control",
+      "hostClass": [
+        "H_BUFFER",
+        "H_VARIANT"
+      ],
+      "requiredHostState": [
+        "battler art slots/OAM/subpriority",
+        "software/hardware OAM and affine buffers",
+        "unfaded/faded/hardware palettes",
+        "registers/background",
+        "resource allocator/tag lifetimes",
+        "sprite ordering, tasks and audio",
+        "presentation RNG",
+        "resolved consecutive-hit counter"
+      ],
+      "productionHostProvider": false,
+      "completion": "source-relative active/firstInactive exists; live queue not wired",
+      "blockers": [
+        "persistent source callback/graphics host provider; retained oracle rows are verifier-only",
+        "typed live adapter and ordinary-route acceptance"
+      ]
+    }
+  ],
+  "remainingUnaccepted": [
+    "MOVE_CURSE",
+    "MOVE_ICE_BALL",
+    "MOVE_HELPING_HAND",
+    "MOVE_OUTRAGE"
+  ],
+  "remainingUnacceptedNote": "Import only later supervisor-verified Factory commits; a worker branch does not grant live integration credit."
+}

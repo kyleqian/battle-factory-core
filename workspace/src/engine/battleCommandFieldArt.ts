@@ -1,3 +1,4 @@
+import enemyElevations from "../data/gen/enemy-mon-elevations.json" with { type: "json" };
 import backSpritesData from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import frontSpritesData from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "json" };
@@ -27,7 +28,7 @@ export type BattleCommandFieldArtBattler = Readonly<{
   speciesSymbol: string;
   pic: BattleCommandMonPic;
   coords: BattleCommandMonPicCoords;
-  /** Resting top-left of the source 64×64 OBJ canvas. */
+  /** Unelevated canvas origin; use battleCommandFieldSpriteOrigin for scanout. */
   origin: Readonly<{ x: number; y: number }>;
 }>;
 
@@ -100,4 +101,20 @@ export function createBattleCommandFieldArtView(
     player: fieldArtBattler(field.player.species, "player"),
     opponent: fieldArtBattler(field.opponent.species, "opponent"),
   });
+}
+
+/** Source GetBattlerSpriteFinal_Y(..., FALSE), converted from center to corner.
+ * Existing Scene OFF renderers already subtract this elevation at scanout.
+ * Live move adapters use the same rule before constructing their geometry.
+ */
+export function battleCommandFieldSpriteOrigin(
+  battler: BattleCommandFieldArtBattler,
+  side: "player" | "opponent",
+): Readonly<{ x: number; y: number }> {
+  return {
+    x: battler.origin.x,
+    y: battler.origin.y - (side === "opponent"
+      ? (enemyElevations as Readonly<Record<string, number>>)[battler.speciesSymbol] ?? 0
+      : 0),
+  };
 }

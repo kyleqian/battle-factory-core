@@ -99,7 +99,7 @@ function stageCanonicalKernelTurn() {
 }
 
 describe("Battle Scene OFF full-turn kernel portability", () => {
-  it("deeply preserves the canonical receipt identity, projection, field boundary, and next request", () => {
+  it("preserves kernel receipt identity, typed animation requests, field boundary, and next request", () => {
     const source = stageCanonicalKernelTurn();
     const staged = advanceStagedBattleTurn(source, true);
     const initial = source.kernel!.initialState;
@@ -161,7 +161,9 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         type: "move-animation",
         eventSequence: 2,
         battler: 0,
-        timing: { minimumFrames: 42 },
+        animation: { moveId: 157, attacker: 0, target: 1, turn: 0,
+          power: 75, damage: 28, friendship: 0, multihit: 0 },
+        timing: { minimumFrames: 32 },
       },
       {
         type: "hit-animation",
@@ -210,6 +212,14 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         from: 6,
         to: 5,
         timing: { minimumFrames: 2 },
+      },
+      {
+        type: "move-animation",
+        eventSequence: 12,
+        battler: 1,
+        animation: { moveId: 28, attacker: 1, target: 0, turn: 0,
+          power: 0, damage: 0, friendship: 0, multihit: 0 },
+        timing: { minimumFrames: 32 },
       },
       {
         type: "message",

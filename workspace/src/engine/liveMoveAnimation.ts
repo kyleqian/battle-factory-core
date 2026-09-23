@@ -1,6 +1,5 @@
-import enemyElevations from "../data/gen/enemy-mon-elevations.json" with { type: "json" };
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
-import { createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
+import { battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
 import type {
   SceneOnMovePresentationState, SceneOnMoveConfig, SceneOnPresentationBattler,
@@ -56,18 +55,25 @@ export function liveMoveAnimationPresentation(
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request) === null) return null;
   const art = createBattleCommandFieldArtView(field);
-  const battler = (side: "player" | "opponent"): SceneOnPresentationBattler => ({
-    species: art[side].speciesSymbol,
-    geometry: {
-      side, spriteCorner: art[side].origin,
-      // GetBattlerSpriteFinal_Y(..., TRUE): player effects add 8 and
-      // clamp to 104; opponent effects subtract species elevation.
-      animationCenter: { x: art[side].origin.x + 32, y: Math.min(104,
-        art[side].origin.y + 32 + (side === "player" ? 8 :
-          -((enemyElevations as Readonly<Record<string, number>>)[art[side].speciesSymbol] ?? 0))) },
-      battlePositionCenter: { x: side === "player" ? 72 : 176, y: side === "player" ? 80 : 40 },
-    },
-  });
+  const battler = (side: "player" | "opponent"): SceneOnPresentationBattler => {
+    const origin = battleCommandFieldSpriteOrigin(art[side], side);
+    return {
+      species: art[side].speciesSymbol,
+      geometry: {
+        side, spriteCorner: origin,
+        // GetBattlerSpriteFinal_Y(..., TRUE): player effects add 8 and
+        // clamp to 104; the field origin already includes opponent elevation.
+        animationCenter: {
+          x: origin.x + 32,
+          y: Math.min(104, origin.y + 32 + (side === "player" ? 8 : 0)),
+        },
+        battlePositionCenter: {
+          x: side === "player" ? 72 : 176,
+          y: side === "player" ? 80 : 40,
+        },
+      },
+    };
+  };
   const attacker = battler(request.attacker === 0 ? "player" : "opponent");
   // These move bodies draw the whole field. A self-targeting move's effect
   // adapter must separately retain its semantic target when one is added.

@@ -22783,13 +22783,16 @@ export function renderSceneOnMovePresentation(
     );
     // The enemy-shadow callback observes the active-script flag one display
     // after this source window begins, leaving one source-relative latch.
-    if (opponentToPlayer && view.age === 0) {
+    if (view.age === 0 && (liveField
+      ? enemyMonElevation(opponentToPlayer ? view.attacker.species : view.target.species) > 0
+      : opponentToPlayer)) {
+      const shadowBattler = opponentToPlayer ? view.attacker : view.target;
       drawSpriteSheet(
         fb,
         sonicBoomArt.enemyShadow.tileset,
         sonicBoomArt.enemyShadow.palette,
-        view.attacker.geometry.animationCenter.x - 16,
-        view.attacker.geometry.battlePositionCenter.y + 25,
+        shadowBattler.geometry.animationCenter.x - 16,
+        shadowBattler.geometry.battlePositionCenter.y + 25,
       );
     }
     const ball = displayed.sprites.find(
@@ -49751,7 +49754,7 @@ export function renderSceneOnMovePresentation(
     if (opponentToPlayer) drawMonBg();
     const cloneBackdrop = fb.slice();
     const clonePalette = blendPaletteToward(
-      liveField ? attackerSprite.palette : battleAnimGhostBg.traceScratchUnfadedPalette,
+      battleAnimGhostBg.traceScratchUnfadedPalette,
       { r: 0, g: 0, b: 0 },
       SHADOW_PUNCH_TRACE_BLEND_COEFF,
     );

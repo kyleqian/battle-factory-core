@@ -4,16 +4,77 @@
   "inventory": "animation-integration-readiness.json",
   "implementedAdapters": [
     {
-      "move": "MOVE_SHADOW_PUNCH",
-      "id": 325,
+      "move": "MOVE_SWORDS_DANCE",
+      "id": 14,
       "liveEvidence": [
-        "opening-draft input: HAUNTER -> GROVYLE",
-        "generated seed 54 command input: HAUNTER -> WAILMER"
+        "seed 36 player CHARMELEON -> PHANPY twice",
+        "seed 23 opponent FARFETCHD -> LOMBRE"
       ],
       "remaining": [
+        "independent arbitrary-species framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_HEADBUTT",
+      "id": 29,
+      "liveEvidence": [
+        "seed 19 player DROWZEE -> LUVDISC twice"
+      ],
+      "remaining": [
+        "opponent ordinary command-input replay",
+        "independent arbitrary-species framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_TAIL_WHIP",
+      "id": 39,
+      "liveEvidence": [
+        "seed 146 player PONYTA -> ARIADOS twice"
+      ],
+      "remaining": [
+        "opponent ordinary command-input replay",
+        "independent arbitrary-species framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_BITE",
+      "id": 44,
+      "liveEvidence": [],
+      "remaining": [
         "independent arbitrary-species framebuffer comparison",
-        "persistent sprite allocation after every switch variant",
-        "source AllocSpritePalette/BlendPalette uses stale destination unfaded palette; live attacker-palette substitution must be removed and replaced with persistent source allocator state"
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_AGILITY",
+      "id": 97,
+      "liveEvidence": [
+        "seed 46 player GROWLITHE -> PLUSLE twice",
+        "seed 26 opponent PORYGON -> LILEEP twice"
+      ],
+      "remaining": [
+        "independent arbitrary-species framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_SCREECH",
+      "id": 103,
+      "liveEvidence": [
+        "seed 2 player VOLTORB -> PLUSLE"
+      ],
+      "remaining": [
+        "independent arbitrary-species framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_SMOKESCREEN",
+      "id": 108,
+      "liveEvidence": [
+        "generated command input seeds 143/283/287, opponent-side",
+        "seed 4 player KOFFING -> BUTTERFREE twice"
+      ],
+      "remaining": [
+        "independent arbitrary-species framebuffer comparison"
       ]
     },
     {
@@ -29,32 +90,54 @@
       ]
     },
     {
-      "move": "MOVE_SMOKESCREEN",
-      "id": 108,
+      "move": "MOVE_ANCIENT_POWER",
+      "id": 246,
       "liveEvidence": [
-        "generated command input seeds 143/283/287, opponent-side"
+        "seed 26 player LILEEP -> PORYGON twice"
       ],
       "remaining": [
-        "player-side normal-route replay",
         "independent arbitrary-species framebuffer comparison"
       ]
     },
     {
-      "move": "MOVE_HEADBUTT",
-      "id": 29,
+      "move": "MOVE_FOCUS_PUNCH",
+      "id": 264,
       "liveEvidence": [],
       "remaining": [
-        "both-orientation normal-route replay",
+        "independent arbitrary-species framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_BRICK_BREAK",
+      "id": 280,
+      "liveEvidence": [
+        "seed 23 player LOMBRE -> FARFETCHD twice"
+      ],
+      "remaining": [
         "independent arbitrary-species framebuffer comparison"
       ]
     },
     {
-      "move": "MOVE_TAIL_WHIP",
-      "id": 39,
+      "move": "MOVE_SHADOW_PUNCH",
+      "id": 325,
+      "liveEvidence": [
+        "opening-draft input: HAUNTER -> GROVYLE",
+        "generated seed 54 command input: HAUNTER -> WAILMER"
+      ],
+      "remaining": [
+        "independent arbitrary-species framebuffer comparison",
+        "persistent sprite allocation after every switch variant",
+        "persistent stale destination unfaded palette/allocator across arbitrary prior moves/switches; initial HP-bar source palette restored, attacker-palette substitution removed"
+      ]
+    },
+    {
+      "move": "MOVE_CALM_MIND",
+      "id": 347,
       "liveEvidence": [],
       "remaining": [
-        "both-orientation normal-route replay",
-        "independent arbitrary-species framebuffer comparison"
+        "independent arbitrary-species framebuffer comparison",
+        "ordinary command-input replay"
       ]
     }
   ],
@@ -73,5 +156,11 @@
     "build-stamped isolated preview and browser E2E",
     "reusable basic/derived/variant/graphics/random adapters for the remaining accepted moves",
     "one-way fold of later supervisor-verified Factory commits including Outrage when available"
-  ]
+  ],
+  "foldedVerifiedSnapshot": "88cd3bc80",
+  "currentAcceptedFactoryMoves": 273,
+  "newSnapshotReadiness": "animation-integration-merged-readiness.json",
+  "implementedCount": 13,
+  "playableExactCount": 0,
+  "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness."
 }
