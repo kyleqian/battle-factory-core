@@ -1,3 +1,30 @@
+# Animation supervisor verification — MOVE_CURSE production partial merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commits `a337c727a`,
+  `692957182`, and `8dfec8f28`. `MOVE_CURSE` remains **unsupported** and the
+  ten-component `curse-ghost-nail-stat-lines` track remains **unfulfilled**;
+  Level 50 stays **273/276 exact, 0 partial, 0 staged, 3 unsupported**. No
+  sibling, gameplay/RNG/facility, unsupported-barrier, or coverage credit moved.
+- **Independent proof:** Two fresh supervisor actual-core processes are
+  byte-identical (`c925e284…`) and reproduce verdict `4eed06f8…`: all
+  **1,098/1,098** component, typed-seam, and chronological raw-RGB rows pass;
+  both stat windows are **176/176** framebuffer exact and each Ghost window is
+  **372/373**, for **1,096/1,098** exact overall. The sole residual is first
+  `CurseStretchingBlackBg` Step2 at age 26: player **720 pixels** through
+  scanline 17 and opponent **660** through scanline 13. The retained post-frame
+  hardware palette is already black, so exact closure requires source-timed
+  palette-transfer VCOUNT/scanline evidence rather than a coordinate fit. The
+  material CROBAT/BLISSEY control changes output while gameplay state/RNG stay
+  opaque and unchanged.
+- **Gates / next:** Supervisor focused union passes **7 files / 17 tests** and
+  smoke passes **8 files / 448 tests**; coverage, animation audit, and diff
+  checks are green. Reused worker same-code receipts: full `npm test` passes
+  **1,452 files / 11,533 tests**, with **44 files / 223 tests skipped**, in
+  **1,855.79s**; build passes **835 modules** with only the inherited chunk
+  warning. Next dispatch a narrow evidence-only palette-transfer timing probe
+  for the first Step2 row in both orientations; never infer the split from the
+  known framebuffer bounds. **For the main program:** nothing blocking.
+
 # Animation worker checkpoint — MOVE_CURSE production partial (2026-09-23)
 
 - **State:** `MOVE_CURSE` remains **unsupported** and
@@ -54,47 +81,3 @@
   both natural branches and both orientations; require honest actual-core
   residual accounting and no promotion without twice-fresh zero-residual proof
   plus a material altered control. **For the main program:** nothing blocking.
-
-# Animation worker checkpoint — MOVE_CURSE source/evidence boundary (2026-09-23)
-
-- **State:** Source classification and legal Scene-ON evidence are complete as
-  an unsupported checkpoint. `MOVE_CURSE` stays unsupported; the
-  `curse-ghost-nail-stat-lines` ten-component track is unfulfilled.
-- **Did:** `e8fc0a00a` pins the half-open source/ELF/ROM graph, all 16
-  components, 18 Level-50 Factory carriers, both natural branches, and
-  non-transfer controls. `fa3d59717` banks four complete legal three-mon
-  party-before-init scenarios, dense semantic maps, chronological raw RGB,
-  hermetic verification, and first-inactive cleanup. Ghost player/opponent
-  are **373 rows** (`71..443` / `75..447`); stat player/opponent are **176**
-  (`312..487` / `312..487`).
-- **Notes:** Two fresh runs are byte-identical for every JSON/RGB sequence.
-  Map/dense/RGB SHA-256 triples are: Ghost-P
-  `aad1921df0bf90c1df1f7b5b1296b26bef7dd9db79df9f6a40235956c4bc57ba` /
-  `6d546ec6be0f4d725ebfbc81a7c52786b784e762f1612e16d803326291733cd5` /
-  `159bf7f39abdf5a9e309d7f5f53e313680645e3654cd0e8c64025967edcae4e9`;
-  Ghost-O
-  `8ee4addc695e1a769e55305a43ab5142765d63aa97c9776ef4ed726990ed2a7b` /
-  `2e0ca250cb479ca1a8976fa4c74d881fd74cf91daf2af21739aa1605a2503443` /
-  `c0f7efdb83684af1db99aceb3cd5c9a52e758a6e6c2cfa4db034953e79f922d1`;
-  Stat-P
-  `11a0f3b84688a2b023d9c92ebfa96400c85391da08ca140120e5a552bfe6b515` /
-  `b906b07eb3f271c9df50ed77ca4d09a96320db1745a913e4f6c8679af9f17a9c` /
-  `1ce1af42ace6c750499bf28bd95c18d1b22d42da8cc909c8122a69c61348391f`;
-  Stat-O
-  `75d295e0f16c6197dda8729d76ad1338de560e8b5dca5a4d812ad159bb061538` /
-  `42ee5c620e7f1c1b7dfd3d2e0d988eb692121da8ff5ed46f93a9db39978dd8a3` /
-  `a84fd4999898cce6219d6f565c4c5337c76a05fe3f9907cbdaa4eb24feb0dd58`;
-  complete values are pinned in `tools/compare/fixtures/curse-evidence.json`.
-  Hardware OAM/matrices are
-  predecessor-transfer **372/372** Ghost and **175/175** stat; palette
-  exceptions are measured per orientation in `ANIMATION_LATCHES.md`. No
-  reducer, typed seam, compositor, framebuffer acceptance, promotion,
-  gameplay ownership, or Tickle/Attract/Screech/Sleep Talk/Bind credit.
-- **Next:** Supervisor review of this evidence boundary. A future production
-  phase needs a new bounded dispatch for source-derived reducer/seam/
-  compositor work; none was started here.
-- **Gates:** Final code commit `24af84cab` passed the scoped union (**4 files,
-  13 tests**), `npm run animation:coverage`, `npm run animation:audit`,
-  `npm run typecheck`, and `git diff --check`. No production/assets/config/
-  dependency files changed, so the verification contract does not require
-  `npm test` or `npm run build` for this evidence-only step.
