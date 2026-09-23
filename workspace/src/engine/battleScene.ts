@@ -587,6 +587,7 @@ import safeguardAsset from "../animation/assets/safeguard.json" with { type: "js
 import stockpileAsset from "../animation/assets/stockpile-gray-orb.json" with { type: "json" };
 import spitUpAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import curseAsset from "../animation/assets/curse.json" with { type: "json" };
+import iceBallAsset from "../animation/assets/ice-ball.json" with { type: "json" };
 import purpleFlameAsset from "../animation/assets/purple-flame.json" with { type: "json" };
 import hiddenPowerRedOrbAsset from "../animation/assets/hidden-power-red-orb.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
@@ -1012,6 +1013,7 @@ import {
   sceneOnRevengeView,
   sceneOnSpitUpView,
   sceneOnFuryCutterView,
+  sceneOnIceBallView,
   sceneOnCurseView,
   sceneOnPursuitView,
   sceneOnPursuitDisplayPlan,
@@ -1298,6 +1300,7 @@ import {
   type SceneOnRevengeConfig,
   type SceneOnSpitUpConfig,
   type SceneOnFuryCutterConfig,
+  type SceneOnIceBallConfig,
   type SceneOnCurseConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
@@ -1399,6 +1402,7 @@ import { superpowerDisplayPlan } from "../animation/superpower.ts";
 import { revengeDisplayPlan } from "../animation/revenge.ts";
 import { spitUpDisplayPlan } from "../animation/spitUp.ts";
 import { furyCutterDisplayPlan } from "../animation/furyCutter.ts";
+import { iceBallDisplayPlan } from "../animation/iceBall.ts";
 import { curseDisplayPlan } from "../animation/curse.ts";
 import {
   hypnosisBgPaletteRowAtAge,
@@ -2601,6 +2605,9 @@ const curseArt = curseAsset as unknown as {
   ghost: { tileset: Tileset; palette: RgbColor[] };
   fallingLines: { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
 };
+const iceBallArt = (iceBallAsset as unknown as {
+  chunk: { tileset: Tileset; palette: RgbColor[]; frames: readonly number[] };
+}).chunk;
 const skillSwapOrbArt = (skillSwapOrbAsset as {
   orb: { tileset: Tileset; palette: RgbColor[] };
 }).orb;
@@ -24646,6 +24653,106 @@ export function renderSceneOnMovePresentation(
     drawMessageTextLines(fb, view.attacker.geometry.side === "player"
       ? `${view.battlers.attacker.art.displaySpecies} used`
       : `Foe ${view.battlers.attacker.art.displaySpecies} used`, "FURY CUTTER!", 99);
+    return;
+  }
+
+  if (state.config.move === "ICE_BALL") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnIceBallConfig>;
+    const view = sceneOnIceBallView(moveState), plan = iceBallDisplayPlan(view);
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("ICE_BALL requires opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker, species: string): BattlerArt => {
+      const found = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[species];
+      if (!found) throw new Error(`ICE_BALL missing live battler art ${species}`);
+      return found;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => { const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff }; };
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const darken = (palette: readonly RgbColor[]): RgbColor[] => palette.map((color) => {
+      const packed = mgbaDarkenColor(color.r | color.g << 8 | color.b << 16,
+        view.registers.bldy ?? 0);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    });
+    if (view.background.phase === "ice") {
+      drawExtractedTileBg(fb, { tileset: icyWindArt.background.tileset,
+        tilemap: icyWindArt.background.tilemap,
+        subpalettes: [darken(paletteBank(2))] });
+    } else {
+      drawExtractedTileBg(fb, { tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: [2, 3, 4].map((bank) => darken(paletteBank(bank))) });
+    }
+    const attackerArt = artFor(view.attacker, view.battlers.attacker.art.displaySpecies);
+    const targetArt = artFor(view.target, view.battlers.target.art.displaySpecies);
+    if (moveState.age === 0) {
+      const opponent = view.attacker.geometry.side === "opponent"
+        ? { battler: view.attacker, object: plan.attacker,
+          species: view.battlers.attacker.art.displaySpecies }
+        : { battler: view.target, object: plan.target,
+          species: view.battlers.target.art.displaySpecies };
+      if (opponent.object) {
+        const offset = (opponent.object.attr[0] & 0xff) - 8;
+        drawSourceOpponentEnemyShadow(fb, opponent.species, {
+          x: opponent.battler.geometry.battlePositionCenter.x,
+          y: opponent.battler.geometry.battlePositionCenter.y - offset });
+      }
+    }
+    const signedX = (value: number): number => { const raw = value & 0x1ff;
+      return raw >= 240 ? raw - 512 : raw; };
+    const signedY = (value: number): number => { const raw = value & 0xff;
+      return raw >= 160 ? raw - 256 : raw; };
+    const top = (attr: readonly [number, number, number]) => ({ x: signedX(attr[1]), y: signedY(attr[0]) });
+    const disabled = (attr: readonly [number, number, number]): boolean => (attr[0] & 0x300) === 0x200;
+    const chunks = new Set(plan.chunks.map((object) => object.oamIndex));
+    const shards = new Set(plan.shards.map((object) => object.oamIndex));
+    const entries = [...(plan.attacker ? [plan.attacker] : []), ...(plan.target ? [plan.target] : []),
+      ...plan.chunks, ...plan.shards]
+      .filter((object, index, all) => all.findIndex((item) => item.oamIndex === object.oamIndex) === index)
+      .sort((left, right) => right.oamIndex - left.oamIndex);
+    for (const object of entries) {
+      if (disabled(object.attr)) continue;
+      const corner = top(object.attr), tile = object.attr[2] & 0x3ff;
+      const palette = paletteBank(16 + (object.attr[2] >>> 12 & 0xf));
+      if (chunks.has(object.oamIndex)) {
+        const frame = Math.max(0, Math.min(4,
+          Math.floor((tile - view.resources.chunkTileBase) / 16)));
+        const selected = subTileset(iceBallArt.tileset, frame * 4, 4);
+        drawSpriteSheetAffineRotate(fb, selected, palette, corner.x + 32, corner.y + 32,
+          object.matrix[0], object.matrix[1], object.matrix[2], object.matrix[3], undefined, true);
+      } else if (shards.has(object.oamIndex)) {
+        drawSpriteSheet(fb, battleAnimIceCrystalSmall, palette, corner.x, corner.y);
+      } else {
+        const attacker = object.attr[2] === view.battlers.attacker.art.attr[2];
+        const battler = attacker ? view.attacker : view.target;
+        drawSpriteSheet(fb, tilesFor(attacker ? attackerArt : targetArt, battler.geometry.side),
+          palette, corner.x, corner.y);
+      }
+    }
+    const playerSpecies = view.attacker.geometry.side === "player"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const opponentSpecies = view.attacker.geometry.side === "opponent"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: profile.opponentStatus ?? "none" }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, view.attacker.geometry.side === "player"
+      ? `${view.battlers.attacker.art.displaySpecies} used`
+      : `Foe ${view.battlers.attacker.art.displaySpecies} used`, "ICE BALL!", 99);
     return;
   }
 

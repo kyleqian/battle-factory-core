@@ -203,6 +203,7 @@ import {
   type SceneOnRevengeConfig,
   type SceneOnSpitUpConfig,
   type SceneOnFuryCutterConfig,
+  type SceneOnIceBallConfig,
   type SceneOnCurseConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
@@ -421,6 +422,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "FURY_CUTTER") {
     const furyCutterPresentation = presentation as SceneOnMovePresentationState<SceneOnFuryCutterConfig>;
     renderSceneOnMovePresentation(framebuffer, furyCutterPresentation);
+    return;
+  }
+  if (presentation.config.move === "ICE_BALL") {
+    const iceBallPresentation = presentation as SceneOnMovePresentationState<SceneOnIceBallConfig>;
+    renderSceneOnMovePresentation(framebuffer, iceBallPresentation);
     return;
   }
   if (presentation.config.move === "CURSE") {
