@@ -2379,6 +2379,8 @@ export interface SceneOnHiJumpKickConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Settled front-sprite x2 before HJK's target movement task takes ownership. */
+  readonly targetInitialX2?: number;
 }
 
 export interface SceneOnRollingKickConfig {
@@ -8250,6 +8252,7 @@ export function sceneOnHiJumpKickView(
       state.config.attacker.geometry.side,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+      state.config.targetInitialX2,
     ),
   };
 }

@@ -152,6 +152,7 @@ export function hiJumpKickAtAge(
   attackerSide: HiJumpKickSide,
   targetSide: HiJumpKickSide,
   targetCenter: Readonly<{ x: number; y: number }>,
+  targetInitialX2 = targetIdleX2(targetSide),
 ): HiJumpKickState {
   const attackerSignedOffset = sideSign(attackerSide) * -24;
   let attackerOffset: Readonly<{ x2: number; y2: number }> = IDENTITY;
@@ -175,7 +176,7 @@ export function hiJumpKickAtAge(
   }
 
   const pushHold = targetPushHold(targetSide);
-  let targetX2 = targetIdleX2(targetSide);
+  let targetX2 = targetInitialX2;
   if (age >= HI_JUMP_KICK_CONTACT_AGE
     && age < HI_JUMP_KICK_SHAKE_FIRST_AGE) {
     targetX2 = targetPushAtAge(age, targetSide);

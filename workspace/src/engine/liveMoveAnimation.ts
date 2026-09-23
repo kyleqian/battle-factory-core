@@ -29,19 +29,26 @@ import { SPORE_FRAME_COUNT } from "../animation/spore.ts";
 import { STOMP_FRAME_COUNT } from "../animation/stomp.ts";
 import { STUN_SPORE_FRAME_COUNT } from "../animation/stunSpore.ts";
 import { GRASS_WHISTLE_WINDOW_FRAMES } from "../animation/grassWhistle.ts";
+import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
-  2, 14, 23, 29, 39, 41, 44, 47, 48, 78, 79, 92, 93, 94, 95, 97, 101,
-  103, 108, 109, 131, 147, 154, 158, 163, 242, 246, 247, 264, 280, 305,
-  306, 320, 325, 336, 337, 347,
+  2, 5, 11, 14, 21, 23, 25, 27, 29, 39, 41, 44, 47, 48, 67, 78,
+  79, 92, 93, 94, 95, 97, 101, 103, 108, 109, 122, 131, 136, 147, 154, 158,
+  163, 211, 223, 231, 242, 246, 247, 264, 280, 305, 306, 320, 325, 336, 337, 342,
+  347,
 ] as const);
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
   switch (request.moveId) {
     case 2: return KARATE_CHOP_FRAME_COUNT;
+    case 5: return 160; // Mega Punch source body through first inactive row.
+    case 11: return 42; // Vice Grip source body through first inactive row.
     case 14: return SWORDS_DANCE_FRAME_COUNT;
+    case 21: return 54; // Slam source body through first inactive row.
     case 23: return STOMP_FRAME_COUNT;
+    case 25: return 160; // Mega Kick source body through first inactive row.
+    case 27: return 55; // Rolling Kick source body through first inactive row.
     case 29: return 48; // headbuttAtAge: active through 46, then cleanup.
     case 39: return TAIL_WHIP_FRAME_COUNT;
     case 41: return 37; // Twineedle's two stingers through clearmonbg cleanup.
@@ -49,6 +56,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // Full source-script body, including the target-monbg / palette cleanup.
     case 47: return request.attacker === 0 ? 245 : 248;
     case 48: return 51; // First Supersonic ring through the final inactive row.
+    case 67: return 33; // Low Kick source body through first inactive row.
     case 78:
     case 79: return STUN_SPORE_FRAME_COUNT;
     case 92: return 219; // Toxic's bubbles through the source-owned cleanup.
@@ -63,11 +71,16 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 103: return SCREECH_FIRST_INACTIVE_AGE + 1;
     case 108: return 125; // smokescreenAtAge: active through 123.
     case 109: return CONFUSE_RAY_FRAME_COUNT;
+    case 122: return 73; // Lick source body through first inactive row.
     case 131: return 84; // Spike Cannon pointer body through inactive cleanup.
+    case 136: return 91; // Hi Jump Kick source body through first inactive row.
     case 147: return SPORE_FRAME_COUNT;
     case 154: return FURY_SWIPES_LAST_BODY_AGE + 1;
     case 158: return 107; // Hyper Fang restorebg fade through cleanup.
     case 163: return 46; // Slash body through final source-owned shake row.
+    case 211: return 197; // Steel Wing source body through first inactive row.
+    case 223: return 75; // Dynamic Punch source body through first inactive row.
+    case 231: return 135; // Iron Tail source body through first inactive row.
     case 242: return 142; // Crunch dark-background body through cleanup.
     case 246: return 128; // ancientPowerAtAge: active through 126, cleanup at 127.
     case 247: return SHADOW_BALL_END_AGE + 1;
@@ -86,6 +99,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 325: return request.attacker === 0 ? 106 : 105;
     case 336: return HOWL_FRAME_COUNT;
     case 337: return 137; // Dragon Claw palette restoration through cleanup.
+    case 342: return 187; // Poison Tail source body through first inactive row.
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -123,6 +137,19 @@ export function liveMoveAnimationPresentation(
   // These move bodies draw the whole field. A self-targeting move's effect
   // adapter must separately retain its semantic target when one is added.
   const target = battler(request.attacker === 0 ? "opponent" : "player");
+  // Effect pictures use Y_PIC_OFFSET (the player-side +8/clamp above), while
+  // affine battler centers use the unshifted OBJ center. Keep that selector
+  // explicit at the live seam instead of inheriting fixture coordinates.
+  const affineCenterBattler = (battler: SceneOnPresentationBattler): SceneOnPresentationBattler => ({
+    ...battler,
+    geometry: {
+      ...battler.geometry,
+      animationCenter: {
+        x: battler.geometry.spriteCorner.x + 32,
+        y: battler.geometry.spriteCorner.y + 32,
+      },
+    },
+  });
   const fieldProfile = {
     playerHp: field.player.hp, playerMaxHp: field.player.maxHP,
     opponentHp: field.opponent.hp, opponentMaxHp: field.opponent.maxHP,
@@ -131,8 +158,13 @@ export function liveMoveAnimationPresentation(
   let config: SceneOnMoveConfig;
   switch (request.moveId) {
     case 2: config = { move: "KARATE_CHOP", attacker, target, fieldProfile }; break;
+    case 5: config = { move: "MEGA_PUNCH", attacker, target, fieldProfile }; break;
+    case 11: config = { move: "VICE_GRIP", attacker, target, fieldProfile }; break;
     case 14: config = { move: "SWORDS_DANCE", attacker, target, fieldProfile }; break;
+    case 21: config = { move: "SLAM", attacker, target, fieldProfile }; break;
     case 23: config = { move: "STOMP", attacker, target, fieldProfile }; break;
+    case 25: config = { move: "MEGA_KICK", attacker, target, fieldProfile }; break;
+    case 27: config = { move: "ROLLING_KICK", attacker, target, fieldProfile }; break;
     case 29:
       // BowMon's affine center is the existing OBJ center; its hitsplat
       // independently uses the target picture-offset coordinate.
@@ -147,6 +179,7 @@ export function liveMoveAnimationPresentation(
     case 44: config = { move: "BITE", attacker, target, fieldProfile }; break;
     case 47: config = { move: "SING", attacker, target, fieldProfile }; break;
     case 48: config = { move: "SUPERSONIC", attacker, target, fieldProfile }; break;
+    case 67: config = { move: "LOW_KICK", attacker, target, fieldProfile }; break;
     case 78: config = { move: "STUN_SPORE", attacker, target, fieldProfile }; break;
     case 79: config = { move: "SLEEP_POWDER", attacker, target, fieldProfile }; break;
     case 92: config = { move: "TOXIC", attacker, target, fieldProfile }; break;
@@ -158,11 +191,37 @@ export function liveMoveAnimationPresentation(
     case 103: config = { move: "SCREECH", attacker, target, fieldProfile }; break;
     case 108: config = { move: "SMOKESCREEN", attacker, target, fieldProfile }; break;
     case 109: config = { move: "CONFUSE_RAY", attacker, target, fieldProfile }; break;
+    case 122: config = { move: "LICK", attacker, target, fieldProfile }; break;
     case 131: config = { move: "SPIKE_CANNON", attacker, target, fieldProfile }; break;
+    case 136:
+      config = {
+        move: "HI_JUMP_KICK", attacker, target, fieldProfile,
+        targetInitialX2: target.geometry.side === "opponent"
+          ? speciesFrontIdleRestOffsetOrZero(target.species).x2
+          : 0,
+      };
+      break;
     case 147: config = { move: "SPORE", attacker, target, fieldProfile }; break;
     case 154: config = { move: "FURY_SWIPES", attacker, target, fieldProfile }; break;
     case 158: config = { move: "HYPER_FANG", attacker, target, fieldProfile }; break;
     case 163: config = { move: "SLASH", attacker, target, fieldProfile }; break;
+    case 211:
+      config = {
+        move: "STEEL_WING",
+        attacker: affineCenterBattler(attacker),
+        target: affineCenterBattler(target),
+        fieldProfile,
+      };
+      break;
+    case 223: config = { move: "DYNAMIC_PUNCH", attacker, target, fieldProfile }; break;
+    case 231:
+      config = {
+        move: "IRON_TAIL",
+        attacker: affineCenterBattler(attacker),
+        target: affineCenterBattler(target),
+        fieldProfile,
+      };
+      break;
     case 242: config = { move: "CRUNCH", attacker, target, fieldProfile }; break;
     case 246: config = { move: "ANCIENT_POWER", attacker, target, fieldProfile }; break;
     case 247: config = { move: "SHADOW_BALL", attacker, target, fieldProfile }; break;
@@ -197,6 +256,14 @@ export function liveMoveAnimationPresentation(
       };
       break;
     case 337: config = { move: "DRAGON_CLAW", attacker, target, fieldProfile }; break;
+    case 342:
+      config = {
+        move: "POISON_TAIL",
+        attacker: affineCenterBattler(attacker),
+        target,
+        fieldProfile,
+      };
+      break;
     case 347: config = { move: "CALM_MIND", attacker, target, fieldProfile }; break;
     default: return null;
   }

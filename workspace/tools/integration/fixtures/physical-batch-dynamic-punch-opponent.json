@@ -1,0 +1,5 @@
+{
+  "schema": "physical-batch-live-adapter/v1",
+  "sourceFixture": "tools/compare/fixtures/dynamic-punch-opponent-hitmonchan-player-shuckle.json",
+  "move": "DYNAMIC_PUNCH"
+}
