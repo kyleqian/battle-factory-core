@@ -26029,6 +26029,150 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "OUTRAGE") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnOutrageConfig>;
+    const view = sceneOnOutrageView(moveState);
+    // Scene-ON scanout observes the OAM/palette upload from the preceding
+    // source row.  The reducer keeps that hardware predecessor explicit;
+    // rendering the displayed view also preserves the first-inactive cleanup
+    // row's last live flame hardware without consulting a framebuffer.
+    const displayed = sceneOnOutrageView({
+      ...moveState,
+      age: Math.max(0, moveState.age - 1),
+    });
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("OUTRAGE presentation requires battlers on opposite sides");
+    }
+
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker): BattlerArt => {
+      const art = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+      if (!art) throw new Error(`OUTRAGE missing live battler art ${battler.species}`);
+      return art;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map((word) => {
+        const packed = mgbaColorFromBgr555(word);
+        return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+      });
+    const input = moveState.config.animationInputs;
+    const attackerArt = artFor(view.attacker);
+    const targetArt = artFor(view.target);
+    const attackerBank = 16 + (input.attackerSprite.attr[2] >>> 12 & 0xf);
+    const targetBank = 16 + (input.targetSprite.attr[2] >>> 12 & 0xf);
+    const flameBank = input.resources.smallEmber.hardwarePaletteBank;
+
+    drawExtractedTileBg(fb, {
+      tileset: battleBg.static.tileset,
+      tilemap: battleBg.static.tilemap,
+      subpalettes: [2, 3, 4].map(paletteBank),
+    });
+
+    // The enemy shadow is an independently allocated source sprite.  Its
+    // callback follows an attacking front mon one OAM row behind the ellipse;
+    // a shaken target does not move its shadow.
+    const opponent = view.attacker.geometry.side === "opponent"
+      ? view.attacker : view.target;
+    const opponentShadowOffset = view.attacker.geometry.side === "opponent"
+      ? displayed.battlers.attacker.sprite.x2 : 0;
+    drawSourceOpponentEnemyShadow(fb, opponent.species, {
+      x: opponent.geometry.battlePositionCenter.x + opponentShadowOffset,
+      y: opponent.geometry.battlePositionCenter.y,
+    });
+
+    const orderOf = (slot: number): number => {
+      const rank = displayed.painterOrder.indexOf(slot);
+      return rank < 0 ? Number.MAX_SAFE_INTEGER : rank;
+    };
+    type Entry = Readonly<{
+      slot: number;
+      subpriority: number;
+      y: number;
+      order: number;
+      draw: () => void;
+    }>;
+    const entries: Entry[] = [
+      {
+        slot: displayed.battlers.attacker.sprite.slot,
+        subpriority: displayed.battlers.attacker.sprite.subpriority,
+        y: displayed.battlers.attacker.sprite.y,
+        order: orderOf(displayed.battlers.attacker.sprite.slot),
+        draw: () => drawSpriteSheet(
+          fb,
+          tilesFor(attackerArt, view.attacker.geometry.side),
+          paletteBank(attackerBank),
+          view.attacker.geometry.spriteCorner.x + displayed.battlers.attacker.sprite.x2,
+          view.attacker.geometry.spriteCorner.y + displayed.battlers.attacker.sprite.y2,
+        ),
+      },
+      {
+        slot: displayed.battlers.target.sprite.slot,
+        subpriority: displayed.battlers.target.sprite.subpriority,
+        y: displayed.battlers.target.sprite.y,
+        order: orderOf(displayed.battlers.target.sprite.slot),
+        draw: () => drawSpriteSheet(
+          fb,
+          tilesFor(targetArt, view.target.geometry.side),
+          paletteBank(targetBank),
+          view.target.geometry.spriteCorner.x + displayed.battlers.target.sprite.x2,
+          view.target.geometry.spriteCorner.y + displayed.battlers.target.sprite.y2,
+        ),
+      },
+    ];
+    const flameFrame = (attr: readonly [number, number, number]): 0 | 1 | 2 | 3 | 4 =>
+      Math.max(0, Math.min(4, Math.floor(
+        ((((attr[2] & 0x3ff) - (input.oam.flame[2] & 0x3ff) + 0x400) & 0x3ff) / 16),
+      ))) as 0 | 1 | 2 | 3 | 4;
+    for (const flame of displayed.sprites) {
+      // `flags & 4` is the source's invisible OAM bit.  Do not use the
+      // reducer's logical x/y for this draw: affine 32x32 OAM stores the
+      // top-left coordinate in attr0/attr1, including the hardware wrap.
+      if ((flame.flags & 4) !== 0 || flame.kind !== "flame") continue;
+      const rawX = flame.attr[1] & 0x1ff;
+      const rawY = flame.attr[0] & 0xff;
+      const x = rawX >= 240 ? rawX - 512 : rawX;
+      const y = rawY >= 160 ? rawY - 256 : rawY;
+      entries.push({
+        slot: flame.slot,
+        subpriority: flame.subpriority,
+        y: flame.y + flame.y2,
+        order: orderOf(flame.slot),
+        draw: () => drawSpriteSheet(
+          fb,
+          subTileset(battleAnimSmallEmber.tileset, flameFrame(flame.attr) * 4, 4),
+          paletteBank(flameBank),
+          x,
+          y,
+        ),
+      });
+    }
+    entries.sort((left, right) => right.subpriority - left.subpriority
+      || left.y - right.y || right.order - left.order || right.slot - left.slot);
+    for (const entry of entries) entry.draw();
+
+    const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: player.species, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb,
+      view.attacker.geometry.side === "player"
+        ? `${view.attacker.species} used` : `Foe ${view.attacker.species} used`,
+      "OUTRAGE!", 99);
+    return;
+  }
+
   if (state.config.move === "HYPER_VOICE") {
     const moveState = state as SceneOnMovePresentationState<SceneOnHyperVoiceConfig>;
     const view = sceneOnHyperVoiceView(moveState);
