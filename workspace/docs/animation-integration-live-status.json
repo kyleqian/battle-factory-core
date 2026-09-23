@@ -78,6 +78,87 @@
       ]
     },
     {
+      "move": "MOVE_SING",
+      "id": 47,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_SUPERSONIC",
+      "id": 48,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_STUN_SPORE",
+      "id": 78,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_SLEEP_POWDER",
+      "id": 79,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_TOXIC",
+      "id": 92,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_CONFUSION",
+      "id": 93,
+      "liveEvidence": [
+        "seed 19 DROWZEE -> LUVDISC repeated Confusion"
+      ],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_PSYCHIC",
+      "id": 94,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_HYPNOSIS",
+      "id": 95,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_AGILITY",
       "id": 97,
       "liveEvidence": [
@@ -87,6 +168,17 @@
       "remaining": [
         "independent arbitrary-species framebuffer comparison"
       ]
+    },
+    {
+      "move": "MOVE_NIGHT_SHADE",
+      "id": 101,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+      "remaining": [
+        "arbitrary prior-history framebuffer comparison",
+        "ordinary command-input replay"
+      ],
+      "alternateSourceEvidence": "../tools/integration/fixtures/status-alternate-night-shade-receipt.json"
     },
     {
       "move": "MOVE_SCREECH",
@@ -126,6 +218,16 @@
       "id": 131,
       "liveEvidence": [],
       "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_SPORE",
+      "id": 147,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
         "ordinary command-input replay"
@@ -185,6 +287,16 @@
       ]
     },
     {
+      "move": "MOVE_SHADOW_BALL",
+      "id": 247,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_FOCUS_PUNCH",
       "id": 264,
       "liveEvidence": [],
@@ -224,6 +336,16 @@
       ]
     },
     {
+      "move": "MOVE_GRASS_WHISTLE",
+      "id": 320,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_SHADOW_PUNCH",
       "id": 325,
       "liveEvidence": [
@@ -232,9 +354,10 @@
       ],
       "remaining": [
         "independent arbitrary-species framebuffer comparison",
-        "persistent sprite allocation after every switch variant",
-        "persistent stale destination unfaded palette/allocator across arbitrary prior moves/switches; initial HP-bar source palette restored, attacker-palette substitution removed"
-      ]
+        "persistent sprite/palette allocation through switch and unknown move graphics",
+        "whole-body source comparison after prior palette-changing moves"
+      ],
+      "paletteHistoryEvidence": "../tools/integration/fixtures/live-palette-history-receipt.json"
     },
     {
       "move": "MOVE_DRAGON_CLAW",
@@ -264,7 +387,8 @@
     "normal hit/HP/message/menu queue resumption",
     "current displayed battler art and HUD",
     "Scene ON/OFF session trace metadata and replay",
-    "real command lifecycle tests for repeated/multi-hit/two-turn/miss/immunity/switch/KO; 40 generated seeds / 470 decisions preserve logical outcomes and RNG"
+    "real command lifecycle tests for repeated/multi-hit/two-turn/miss/immunity/switch/KO; 40 generated seeds / 470 decisions preserve logical outcomes and RNG",
+    "persistent source OBJ palette allocation/load/free semantics; Shadow Punch receives retained unfaded scratch colors across audited move history"
   ],
   "pending": [
     "reusable basic/derived/variant/graphics/random adapters for the remaining accepted moves",
@@ -273,7 +397,7 @@
   "foldedVerifiedSnapshot": "88cd3bc80",
   "currentAcceptedFactoryMoves": 273,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 24,
+  "implementedCount": 36,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {
@@ -287,5 +411,13 @@
     "buildModules": 835,
     "browser": "four pixel-identical canvas/PNG samples; ordinary trace and export; Scene ON/OFF control; no page errors",
     "receipt": "../tools/integration/fixtures/playable-preview-82544f434-receipt.json"
+  },
+  "productionProviders": {
+    "spritePaletteHistory": {
+      "sourceCommit": "dec7ced85",
+      "auditedMovePlans": 25,
+      "claim": "Only retained Shadow Punch scratch input is supplied. Source palette/cleanup proof covers Shadow Punch, Smokescreen, Shadow Punch in both orientations twice. Unknown bodies and switch graphics invalidate history; full OAM/VRAM/scanout providers remain pending.",
+      "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json"
+    }
   }
 }
