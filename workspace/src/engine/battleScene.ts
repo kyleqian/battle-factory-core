@@ -30696,6 +30696,7 @@ export function renderSceneOnMovePresentation(
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = focusState.config.fieldProfile;
+    if (!liveField) {
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species,
       level: 50,
@@ -30721,6 +30722,7 @@ export function renderSceneOnMovePresentation(
       "FOCUS PUNCH!",
       99,
     );
+    }
     return;
   }
 
@@ -40249,6 +40251,7 @@ export function renderSceneOnMovePresentation(
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
     const profile = screechState.config.fieldProfile;
+    if (!liveField) {
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(
       healthboxAssemblyAssets,
       {
@@ -40278,6 +40281,7 @@ export function renderSceneOnMovePresentation(
       "SCREECH!",
       99,
     );
+    }
     return;
   }
 

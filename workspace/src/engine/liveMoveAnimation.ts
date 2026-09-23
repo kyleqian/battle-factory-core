@@ -7,16 +7,25 @@ import type {
 } from "../animation/sceneOnPresentation.ts";
 import { TAIL_WHIP_FRAME_COUNT } from "../animation/tailWhip.ts";
 import { CONFUSE_RAY_FRAME_COUNT } from "../animation/confuseRay.ts";
+import { FOCUS_PUNCH_FIRST_INACTIVE_AGE } from "../animation/focusPunch.ts";
+import { SCREECH_FIRST_INACTIVE_AGE } from "../animation/screech.ts";
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
-export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([29, 39, 108, 109, 325] as const);
+export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
+  29, 39, 103, 108, 109, 264, 325,
+] as const);
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
   switch (request.moveId) {
     case 29: return 48; // headbuttAtAge: active through 46, then cleanup.
     case 39: return TAIL_WHIP_FRAME_COUNT;
+    case 103: return SCREECH_FIRST_INACTIVE_AGE + 1;
     case 108: return 125; // smokescreenAtAge: active through 123.
     case 109: return CONFUSE_RAY_FRAME_COUNT;
+    case 264:
+      return FOCUS_PUNCH_FIRST_INACTIVE_AGE[
+        request.target === 0 ? "player" : "opponent"
+      ] + 1;
     // Source restorebg fade, then inactive display. Both orientations restore.
     case 325: return request.attacker === 0 ? 106 : 105;
     default: return null;
@@ -64,8 +73,10 @@ export function liveMoveAnimationPresentation(
       } }, target, fieldProfile };
       break;
     case 39: config = { move: "TAIL_WHIP", attacker, target, fieldProfile }; break;
+    case 103: config = { move: "SCREECH", attacker, target, fieldProfile }; break;
     case 108: config = { move: "SMOKESCREEN", attacker, target, fieldProfile }; break;
     case 109: config = { move: "CONFUSE_RAY", attacker, target, fieldProfile }; break;
+    case 264: config = { move: "FOCUS_PUNCH", attacker, target, fieldProfile }; break;
     case 325:
       config = {
         move: "SHADOW_PUNCH", attacker, target,
