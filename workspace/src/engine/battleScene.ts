@@ -586,6 +586,7 @@ import metalSoundAsset from "../animation/assets/metal-sound.json" with { type: 
 import screechAsset from "../animation/assets/screech.json" with { type: "json" };
 import safeguardAsset from "../animation/assets/safeguard.json" with { type: "json" };
 import stockpileAsset from "../animation/assets/stockpile-gray-orb.json" with { type: "json" };
+import spitUpAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import purpleFlameAsset from "../animation/assets/purple-flame.json" with { type: "json" };
 import hiddenPowerRedOrbAsset from "../animation/assets/hidden-power-red-orb.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
@@ -704,6 +705,10 @@ import uproarAsset from "../animation/assets/uproar.json" with { type: "json" };
 import rapidSpinAsset from "../animation/assets/rapid-spin.json" with { type: "json" };
 import foresightAsset from "../animation/assets/foresight.json" with { type: "json" };
 import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
+import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
+import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
+import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
+import revengeAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
@@ -1001,6 +1006,12 @@ import {
   sceneOnSkillSwapView,
   sceneOnPsywaveView,
   sceneOnExtrasensoryView,
+  sceneOnWillOWispView,
+  sceneOnMegaHornView,
+  sceneOnSuperpowerView,
+  sceneOnRevengeView,
+  sceneOnSpitUpView,
+  sceneOnFuryCutterView,
   sceneOnPursuitView,
   sceneOnPursuitDisplayPlan,
   sceneOnReturnView,
@@ -1280,6 +1291,12 @@ import {
   type SceneOnSkillSwapConfig,
   type SceneOnPsywaveConfig,
   type SceneOnExtrasensoryConfig,
+  type SceneOnWillOWispConfig,
+  type SceneOnMegaHornConfig,
+  type SceneOnSuperpowerConfig,
+  type SceneOnRevengeConfig,
+  type SceneOnSpitUpConfig,
+  type SceneOnFuryCutterConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -1374,6 +1391,12 @@ import { psychicBgPaletteRowAtAge, PSYCHIC_WINDOW2_START_AGE, psychicTargetEffec
 import { skillSwapDisplayPlan } from "../animation/skillSwap.ts";
 import { psywaveDisplayPlan } from "../animation/psywave.ts";
 import { extrasensoryDisplayPlan } from "../animation/extrasensory.ts";
+import { willOWispDisplayPlan } from "../animation/willOWisp.ts";
+import { megaHornDisplayPlan } from "../animation/megaHorn.ts";
+import { superpowerDisplayPlan } from "../animation/superpower.ts";
+import { revengeDisplayPlan } from "../animation/revenge.ts";
+import { spitUpDisplayPlan } from "../animation/spitUp.ts";
+import { furyCutterDisplayPlan } from "../animation/furyCutter.ts";
 import {
   hypnosisBgPaletteRowAtAge,
   HYPNOSIS_TARGET_BLEND_COLOR,
@@ -2536,6 +2559,40 @@ const hiddenPowerRedOrbArt = hiddenPowerRedOrbAsset as {
   };
 };
 const battleAnimPsychicBg = battleAnimPsychicBgAsset as { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
+const willOWispArt = willOWispAsset as unknown as {
+  orb: { tileset: Tileset; palette: RgbColor[] };
+  fire: { tileset: Tileset; palette: RgbColor[] };
+};
+const megaHornArt = megaHornAsset as unknown as {
+  hornHit2: { tileset: Tileset; palette: RgbColor[] };
+};
+const superpowerSourceArt = superpowerAsset as unknown as { resources: {
+  circleOfLight: { art: { tiles: Tileset["tiles"]; palette: RgbColor[] } };
+  meteor: { art: { tiles: Tileset["tiles"]; palette: RgbColor[] } };
+  flatRock: { art: { tiles: Tileset["tiles"]; palette: RgbColor[] } };
+} };
+const superpowerArt = {
+  orb: { tileset: { columns: 8, rows: 8, tiles: superpowerSourceArt.resources.circleOfLight.art.tiles } as Tileset,
+    palette: superpowerSourceArt.resources.circleOfLight.art.palette },
+  meteor: { tileset: { columns: 8, rows: 8, tiles: superpowerSourceArt.resources.meteor.art.tiles } as Tileset,
+    palette: superpowerSourceArt.resources.meteor.art.palette },
+  rock: { tileset: { columns: 2, rows: 10, tiles: superpowerSourceArt.resources.flatRock.art.tiles } as Tileset,
+    palette: superpowerSourceArt.resources.flatRock.art.palette },
+};
+const revengeSourceArt = revengeAsset as unknown as {
+  purpleScratch: { columns:number;rows:number;tiles:Tileset["tiles"];palette:RgbColor[] };
+  purpleSwipe: { columns:number;rows:number;tiles:Tileset["tiles"];palette:RgbColor[] };
+};
+const revengeArt = {
+  scratch:{tileset:{columns:revengeSourceArt.purpleScratch.columns,rows:revengeSourceArt.purpleScratch.rows,
+    tiles:revengeSourceArt.purpleScratch.tiles} as Tileset,palette:revengeSourceArt.purpleScratch.palette},
+  swipe:{tileset:{columns:revengeSourceArt.purpleSwipe.columns,rows:revengeSourceArt.purpleSwipe.rows,
+    tiles:revengeSourceArt.purpleSwipe.tiles} as Tileset,palette:revengeSourceArt.purpleSwipe.palette},
+};
+const spitUpSourceArt = spitUpAsset as unknown as {
+  art: { tileset: Tileset; palette: RgbColor[] };
+};
+const spitUpRedOrbArt = spitUpSourceArt.art;
 const skillSwapOrbArt = (skillSwapOrbAsset as {
   orb: { tileset: Tileset; palette: RgbColor[] };
 }).orb;
@@ -24388,6 +24445,474 @@ export function renderSceneOnMovePresentation(
         ? `${view.battlers.attacker.art.displaySpecies} used`
         : `Foe ${view.battlers.attacker.art.displaySpecies} used`,
       "PSYWAVE!", 99);
+    return;
+  }
+
+  if (state.config.move === "SPIT_UP") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnSpitUpConfig>;
+    const view = sceneOnSpitUpView(moveState), plan = spitUpDisplayPlan(view);
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("SPIT_UP requires opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker, displaySpecies: string): BattlerArt => {
+      const found = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[displaySpecies]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[displaySpecies];
+      if (!found) throw new Error(`SPIT_UP missing live battler art ${displaySpecies}`);
+      return found;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => {
+      const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff };
+    };
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const signed = (value: number): number => {
+      const raw = value & 0x1ff; return raw >= 240 ? raw - 512 : raw;
+    };
+    const top = (attr: readonly [number, number, number]) => ({
+      x: signed(attr[1]), y: (attr[0] & 0xff) >= 160 ? (attr[0] & 0xff) - 256 : attr[0] & 0xff,
+    });
+    const disabled = (attr: readonly [number, number, number]): boolean => (attr[0] & 0x300) === 0x200;
+    drawExtractedTileBg(fb, { tileset: battleBg.static.tileset, tilemap: battleBg.static.tilemap,
+      subpalettes: [2, 3, 4].map(paletteBank) });
+    const attackerArt = artFor(view.attacker, view.battlers.attacker.art.displaySpecies);
+    const targetArt = artFor(view.target, view.battlers.target.art.displaySpecies);
+    if (moveState.age === 0) {
+      const opponent = view.attacker.geometry.side === "opponent"
+        ? { battler: view.attacker, object: plan.attacker,
+          species: view.battlers.attacker.art.displaySpecies }
+        : { battler: view.target, object: plan.target,
+          species: view.battlers.target.art.displaySpecies };
+      if (opponent.object) {
+        const offset = (opponent.object.attr[0] & 0xff) - 8;
+        drawSourceOpponentEnemyShadow(fb, opponent.species, {
+          x: opponent.battler.geometry.battlePositionCenter.x,
+          y: opponent.battler.geometry.battlePositionCenter.y - offset,
+        });
+      }
+    }
+    const entries = [...(plan.attacker ? [plan.attacker] : []), ...(plan.target ? [plan.target] : []),
+      ...plan.redOrbs, ...plan.impacts]
+      .filter((object, index, all) => all.findIndex((candidate) => candidate.oamIndex === object.oamIndex) === index)
+      .sort((left, right) => right.oamIndex - left.oamIndex);
+    for (const object of entries) {
+      if (disabled(object.attr)) continue;
+      const tile = object.attr[2] & 0x3ff;
+      const bank = 16 + (object.attr[2] >>> 12 & 0xf);
+      const corner = top(object.attr);
+      if (view.resources.redOrbLoaded && tile >= view.resources.redOrbTileBase
+        && tile < view.resources.redOrbTileBase + 3) {
+        const selected = subTileset(spitUpRedOrbArt.tileset, tile - view.resources.redOrbTileBase, 1);
+        drawSpriteSheetAffineRotate(fb, selected, paletteBank(bank), corner.x + 8, corner.y + 8,
+          object.matrix[0], object.matrix[1], object.matrix[2], object.matrix[3], undefined, true);
+        continue;
+      }
+      if (view.resources.impactLoaded && tile >= view.resources.impactTileBase
+        && tile < view.resources.impactTileBase + 16) {
+        drawSpriteSheetAffineRotate(fb, battleAnimHitsplat.tileset, paletteBank(bank),
+          corner.x + 16, corner.y + 16, object.matrix[0], object.matrix[1],
+          object.matrix[2], object.matrix[3], undefined, false);
+        continue;
+      }
+      const attacker = object.attr[2] === view.battlers.attacker.art.attr[2];
+      const battler = attacker ? view.attacker : view.target;
+      const art = attacker ? attackerArt : targetArt;
+      const affine = (object.attr[0] & 0x100) !== 0;
+      if (affine) {
+        const double = (object.attr[0] & 0x200) !== 0;
+        const radius = double ? 64 : 32;
+        drawSpriteSheetAffineRotate(fb, tilesFor(art, battler.geometry.side), paletteBank(bank),
+          corner.x + radius, corner.y + radius, object.matrix[0], object.matrix[1],
+          object.matrix[2], object.matrix[3], undefined, double);
+      } else {
+        drawSpriteSheet(fb, tilesFor(art, battler.geometry.side), paletteBank(bank), corner.x, corner.y);
+      }
+    }
+    const playerSpecies = view.attacker.geometry.side === "player"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const opponentSpecies = view.attacker.geometry.side === "opponent"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, view.attacker.geometry.side === "player"
+      ? `${view.battlers.attacker.art.displaySpecies} used`
+      : `Foe ${view.battlers.attacker.art.displaySpecies} used`, "SPIT UP!", 99);
+    return;
+  }
+
+  if (state.config.move === "FURY_CUTTER") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnFuryCutterConfig>;
+    const view = sceneOnFuryCutterView(moveState), plan = furyCutterDisplayPlan(view);
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("FURY_CUTTER requires opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker, species: string): BattlerArt => {
+      const found = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[species];
+      if (!found) throw new Error(`FURY_CUTTER missing live battler art ${species}`);
+      return found;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => { const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff }; };
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const signed = (value: number): number => { const raw = value & 0x1ff;
+      return raw >= 240 ? raw - 512 : raw; };
+    const top = (attr: readonly [number, number, number]) => ({ x: signed(attr[1]),
+      y: (attr[0] & 0xff) >= 160 ? (attr[0] & 0xff) - 256 : attr[0] & 0xff });
+    const disabled = (attr: readonly [number, number, number]): boolean =>
+      (attr[0] & 0x300) === 0x200;
+    drawExtractedTileBg(fb, { tileset: battleBg.static.tileset, tilemap: battleBg.static.tilemap,
+      subpalettes: [2, 3, 4].map(paletteBank) });
+    const attackerArt = artFor(view.attacker, view.battlers.attacker.art.displaySpecies);
+    const targetArt = artFor(view.target, view.battlers.target.art.displaySpecies);
+    const targetObject = plan.target;
+    // MoveBattlerSpriteToBG removes the target from hardware OAM once the
+    // copied tiles scan out.  The selected BG is side-dependent in singles:
+    // opponent targets occupy BG1/palette 8, player targets BG2/palette 9.
+    // Read that live absence and the hardware scroll instead of keying this
+    // phase to a move age or a staged coordinate.
+    if (!targetObject) {
+      const targetIsOpponent = view.target.geometry.side === "opponent";
+      const hofs = view.registers[targetIsOpponent ? "bg1hofs" : "bg2hofs"] ?? 0;
+      const vofs = view.registers[targetIsOpponent ? "bg1vofs" : "bg2vofs"] ?? 0;
+      const x = hofs ? 512 - hofs : view.target.geometry.spriteCorner.x;
+      const y = vofs ? 512 - vofs : view.target.geometry.spriteCorner.y;
+      drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+        paletteBank(targetIsOpponent ? 8 : 9), x, y);
+    }
+    if (moveState.age === 0) {
+      const opponent = view.attacker.geometry.side === "opponent"
+        ? { battler: view.attacker, object: plan.attacker,
+          species: view.battlers.attacker.art.displaySpecies }
+        : { battler: view.target, object: plan.target,
+          species: view.battlers.target.art.displaySpecies };
+      if (opponent.object) {
+        const offset = (opponent.object.attr[0] & 0xff) - 8;
+        drawSourceOpponentEnemyShadow(fb, opponent.species, {
+          x: opponent.battler.geometry.battlePositionCenter.x,
+          y: opponent.battler.geometry.battlePositionCenter.y - offset });
+      }
+    }
+    const beforeObj = fb.slice();
+    const entries = [...(plan.attacker ? [plan.attacker] : []),
+      ...(plan.target ? [plan.target] : []), ...plan.slices]
+      .filter((object, index, all) => all.findIndex((item) => item.oamIndex === object.oamIndex) === index)
+      .sort((left, right) => right.oamIndex - left.oamIndex);
+    for (const object of entries) {
+      if (disabled(object.attr)) continue;
+      const tile = object.attr[2] & 0x3ff; const bank = 16 + (object.attr[2] >>> 12 & 0xf);
+      const corner = top(object.attr);
+      if (view.resources.cutLoaded && tile >= view.resources.cutTileBase
+        && tile < view.resources.cutTileBase + 64) {
+        const frame = Math.floor((tile - view.resources.cutTileBase) / 16);
+        const selected = cuttingSliceFrameTileset(frame);
+        const eva = view.registers.bldalpha & 0x1f;
+        const evb = view.registers.bldalpha >>> 8 & 0x1f;
+        // CUT is a normal 32x32 ObjBlend sprite here (attr0 affine bit clear),
+        // so attr1's flip flags and the OAM top-left corner are authoritative.
+        // Treating its 32x32 size bits as an affine double-size box shifts the
+        // slice by (-4,+16) despite using the right live OAM record.
+        drawSpriteSheetFlippedBlendedOverTarget(fb, beforeObj, selected, paletteBank(bank),
+          corner.x, corner.y, (object.attr[1] & 0x1000) !== 0,
+          (object.attr[1] & 0x2000) !== 0, eva, evb);
+        continue;
+      }
+      const attacker = object.attr[2] === view.battlers.attacker.art.attr[2];
+      const battler = attacker ? view.attacker : view.target;
+      drawSpriteSheet(fb, tilesFor(attacker ? attackerArt : targetArt, battler.geometry.side),
+        paletteBank(bank), corner.x, corner.y);
+    }
+    const playerSpecies = view.attacker.geometry.side === "player"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const opponentSpecies = view.attacker.geometry.side === "opponent"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none" }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, view.attacker.geometry.side === "player"
+      ? `${view.battlers.attacker.art.displaySpecies} used`
+      : `Foe ${view.battlers.attacker.art.displaySpecies} used`, "FURY CUTTER!", 99);
+    return;
+  }
+
+  if (state.config.move === "REVENGE") {
+    const moveState=state as SceneOnMovePresentationState<SceneOnRevengeConfig>;
+    const view=sceneOnRevengeView(moveState),plan=revengeDisplayPlan(view);
+    if(view.attacker.geometry.side===view.target.geometry.side)throw new Error("REVENGE requires opposite sides");
+    type BattlerArt=BattleBackSpriteAsset|OpponentFrontSpriteAsset;
+    const artFor=(battler:typeof view.attacker,displaySpecies:string):BattlerArt=>{const found=battler.geometry.side==="player"?
+      (battleBackSpritesAsset as Record<string,BattleBackSpriteAsset>)[displaySpecies]:
+      (opponentFrontSpritesAsset as Record<string,OpponentFrontSpriteAsset>)[displaySpecies];
+      if(!found)throw new Error(`REVENGE missing live battler art ${displaySpecies}`);return found;};
+    const tilesFor=(art:BattlerArt,side:"player"|"opponent"):Tileset=>side==="player"?art.tileset:subTileset(art.tileset,0,8);
+    const rgb555=(word:number):RgbColor=>{const packed=mgbaColorFromBgr555(word);return{r:packed&0xff,g:packed>>>8&0xff,b:packed>>>16&0xff};};
+    const paletteBank=(bank:number):RgbColor[]=>view.palette.hardware.slice(bank*16,bank*16+16).map(rgb555);
+    const monbgPaletteBank=(bank:number):RgbColor[]=>(moveState.age===4?view.palette.faded:view.palette.hardware)
+      .slice(bank*16,bank*16+16).map(rgb555);
+    const signed=(value:number)=>{const raw=value&0x1ff;return raw>=256?raw-512:raw;};
+    const top=(attr:readonly[number,number,number])=>({x:signed(attr[1]),y:(attr[0]&0xff)>=160?(attr[0]&0xff)-256:attr[0]&0xff});
+    drawExtractedTileBg(fb,{tileset:battleBg.static.tileset,tilemap:battleBg.static.tilemap,
+      subpalettes:[2,3,4].map(paletteBank)});
+    const attackerArt=artFor(view.attacker,view.battlers.attacker.art.displaySpecies);
+    const targetArt=artFor(view.target,view.battlers.target.art.displaySpecies);
+    if(view.monbg.active&&(view.monbg.scroll.x!==0||view.monbg.scroll.y!==0))drawSpriteSheet(fb,tilesFor(targetArt,view.target.geometry.side),monbgPaletteBank(view.monbg.paletteBank),
+      -view.monbg.scroll.x,-view.monbg.scroll.y);
+    if(moveState.age===0){const opponent=view.attacker.geometry.side==="opponent"?
+      {battler:view.attacker,object:plan.attacker,species:view.battlers.attacker.art.displaySpecies}:
+      {battler:view.target,object:plan.target,species:view.battlers.target.art.displaySpecies};
+      if(opponent.object){const offset=(opponent.object.attr[0]&0xff)-8;drawSourceOpponentEnemyShadow(fb,opponent.species,
+        {x:opponent.battler.geometry.battlePositionCenter.x,y:opponent.battler.geometry.battlePositionCenter.y-offset});}}
+    const nonObjTarget2=fb.slice(),disabled=(attr:readonly[number,number,number])=>(attr[0]&0x300)===0x200;
+    const entries=[...(plan.attacker?[plan.attacker]:[]),...(plan.target?[plan.target]:[]),...plan.scratches,...plan.swipes,...plan.impacts]
+      .filter((object,index,array)=>array.findIndex(candidate=>candidate.oamIndex===object.oamIndex)===index)
+      .sort((left,right)=>right.oamIndex-left.oamIndex);
+    for(const object of entries){if(disabled(object.attr))continue;const tile=object.attr[2]&0x3ff,bank=16+(object.attr[2]>>>12&0xf),corner=top(object.attr);
+      if(view.resources.scratchLoaded&&tile>=view.resources.scratchTileBase&&tile<view.resources.scratchTileBase+48){const offset=tile-view.resources.scratchTileBase;
+        drawSpriteSheetFlipped(fb,subTileset(revengeArt.scratch.tileset,Math.floor(offset/4),4),paletteBank(bank),corner.x,corner.y,
+          (object.attr[1]&0x1000)!==0,(object.attr[1]&0x2000)!==0);continue;}
+      if(view.resources.swipeLoaded&&tile>=view.resources.swipeTileBase&&tile<view.resources.swipeTileBase+128){const offset=tile-view.resources.swipeTileBase;
+        drawSpriteSheetFlipped(fb,subTileset(revengeArt.swipe.tileset,Math.floor(offset/8),8),paletteBank(bank),corner.x,corner.y,
+          (object.attr[1]&0x1000)!==0,(object.attr[1]&0x2000)!==0);continue;}
+      if(view.resources.impactLoaded&&tile>=view.resources.impactTileBase&&tile<view.resources.impactTileBase+16){
+        drawSpriteSheetAffineRotateBlendedOverFb(fb,nonObjTarget2,battleAnimHitsplat.tileset,paletteBank(bank),corner.x+16,corner.y+16,
+          object.matrix[0],object.matrix[1],object.matrix[2],object.matrix[3],view.alpha.eva,view.alpha.evb,false);continue;}
+      const attacker=object.attr[2]===view.battlers.attacker.art.attr[2],battler=attacker?view.attacker:view.target;
+      drawSpriteSheet(fb,tilesFor(attacker?attackerArt:targetArt,battler.geometry.side),paletteBank(bank),corner.x,corner.y);
+    }
+    const playerSpecies=view.attacker.geometry.side==="player"?view.battlers.attacker.art.displaySpecies:view.battlers.target.art.displaySpecies;
+    const opponentSpecies=view.attacker.geometry.side==="opponent"?view.battlers.attacker.art.displaySpecies:view.battlers.target.art.displaySpecies;
+    const profile=moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb,0,composeOpponentHealthbox(healthboxAssemblyAssets,{name:opponentSpecies,level:50,
+      gender:profile.opponentGender??"male",hpFraction:profile.opponentHp/profile.opponentMaxHp,status:profile.opponentStatus??"none"}));
+    drawComposedPlayerHealthbox(fb,composePlayerHealthbox(playerHealthboxAssets,{name:playerSpecies,level:50,
+      gender:profile.playerGender??"male",hpFraction:profile.playerHp/profile.playerMaxHp,status:profile.playerStatus??"none",
+      currentHp:profile.playerHp,maxHp:profile.playerMaxHp}));
+    drawTileBg(fb,battleWindow.tileset,battleWindow.tilemap,battleWindow.palette);
+    drawMessageTextLines(fb,view.attacker.geometry.side==="player"?`${view.battlers.attacker.art.displaySpecies} used`:
+      `Foe ${view.battlers.attacker.art.displaySpecies} used`,"REVENGE!",99);return;
+  }
+
+  if (state.config.move === "SUPERPOWER") {
+    const moveState=state as SceneOnMovePresentationState<SceneOnSuperpowerConfig>;
+    const view=sceneOnSuperpowerView(moveState),plan=superpowerDisplayPlan(view);
+    if(view.attacker.geometry.side===view.target.geometry.side)throw new Error("SUPERPOWER requires opposite sides");
+    type BattlerArt=BattleBackSpriteAsset|OpponentFrontSpriteAsset;
+    const artFor=(battler:typeof view.attacker,displaySpecies:string):BattlerArt=>{const found=battler.geometry.side==="player"?
+      (battleBackSpritesAsset as Record<string,BattleBackSpriteAsset>)[displaySpecies]:
+      (opponentFrontSpritesAsset as Record<string,OpponentFrontSpriteAsset>)[displaySpecies];
+      if(!found)throw new Error(`SUPERPOWER missing live battler art ${displaySpecies}`);return found;};
+    const tilesFor=(art:BattlerArt,side:"player"|"opponent"):Tileset=>side==="player"?art.tileset:subTileset(art.tileset,0,8);
+    const rgb555=(word:number):RgbColor=>{const packed=mgbaColorFromBgr555(word);return{r:packed&0xff,g:packed>>>8&0xff,b:packed>>>16&0xff};};
+    const paletteBank=(bank:number):RgbColor[]=>view.palette.hardware.slice(bank*16,bank*16+16).map(rgb555);
+    const signed=(value:number)=>{const raw=value&0x1ff;return raw>=256?raw-512:raw;};
+    const top=(attr:readonly[number,number,number])=>({x:signed(attr[1]),y:(attr[0]&0xff)>=160?(attr[0]&0xff)-256:attr[0]&0xff});
+    drawScrolledTileBg(fb,battleBg.static.tileset,battleBg.static.tilemap,[2,3,4].map(paletteBank),
+      view.registers.bg3hofs??0,view.registers.bg3vofs??0);
+    const attackerArt=artFor(view.attacker,view.battlers.attacker.art.displaySpecies);
+    const targetArt=artFor(view.target,view.battlers.target.art.displaySpecies);
+    if(moveState.age===0){const opponent=view.attacker.geometry.side==="opponent"?
+      {battler:view.attacker,object:plan.attacker,species:view.battlers.attacker.art.displaySpecies}:
+      {battler:view.target,object:plan.target,species:view.battlers.target.art.displaySpecies};
+      if(opponent.object){const offset=(opponent.object.attr[0]&0xff)-8;drawSourceOpponentEnemyShadow(fb,opponent.species,
+        {x:opponent.battler.geometry.battlePositionCenter.x,y:opponent.battler.geometry.battlePositionCenter.y-offset});}}
+    if(view.monbg.active){const x=-signed(view.registers[view.monbg.selected==="bg1"?"bg1hofs":"bg2hofs"]??0);
+      const y=-signed(view.registers[view.monbg.selected==="bg1"?"bg1vofs":"bg2vofs"]??0);
+      drawSpriteSheet(fb,tilesFor(attackerArt,view.attacker.geometry.side),paletteBank(view.monbg.paletteBank),x,y);}
+    const nonObjTarget2=fb.slice(),disabled=(attr:readonly[number,number,number])=>(attr[0]&0x300)===0x200;
+    const entries=[...(plan.attacker?[plan.attacker]:[]),...(plan.target?[plan.target]:[]),...plan.orbs,...plan.rocks,...plan.meteors]
+      .filter((object,index,array)=>array.findIndex(candidate=>candidate.oamIndex===object.oamIndex)===index)
+      .sort((left,right)=>right.oamIndex-left.oamIndex);
+    for(const object of entries){if(disabled(object.attr))continue;const tile=object.attr[2]&0x3ff;
+      const bank=16+(object.attr[2]>>>12&0xf),corner=top(object.attr);
+      if(tile>=view.resources.orbTileBase&&tile<view.resources.orbTileBase+64){
+        if(view.alpha.active)drawSpriteSheetAffineRotateBlendedOverFb(fb,nonObjTarget2,superpowerArt.orb.tileset,paletteBank(bank),
+          corner.x+64,corner.y+64,object.matrix[0],object.matrix[1],object.matrix[2],object.matrix[3],view.alpha.eva,view.alpha.evb,true);
+        else drawSpriteSheetAffineRotate(fb,superpowerArt.orb.tileset,paletteBank(bank),corner.x+64,corner.y+64,
+          object.matrix[0],object.matrix[1],object.matrix[2],object.matrix[3],undefined,true);continue;}
+      if(tile>=view.resources.rockTileBase&&tile<view.resources.rockTileBase+20){const offset=tile-view.resources.rockTileBase;
+        drawSpriteSheet(fb,subTileset(superpowerArt.rock.tileset,Math.floor(offset/2),2),paletteBank(bank),corner.x,corner.y);continue;}
+      if(tile>=view.resources.meteorTileBase&&tile<view.resources.meteorTileBase+64){
+        drawSpriteSheetFlipped(fb,superpowerArt.meteor.tileset,paletteBank(bank),corner.x,corner.y,
+          (object.attr[1]&0x1000)!==0,(object.attr[1]&0x2000)!==0);continue;}
+      const attacker=object.attr[2]===view.battlers.attacker.art.attr[2],battler=attacker?view.attacker:view.target;
+      drawSpriteSheet(fb,tilesFor(attacker?attackerArt:targetArt,battler.geometry.side),paletteBank(bank),corner.x,corner.y);
+    }
+    const playerSpecies=view.attacker.geometry.side==="player"?view.battlers.attacker.art.displaySpecies:view.battlers.target.art.displaySpecies;
+    const opponentSpecies=view.attacker.geometry.side==="opponent"?view.battlers.attacker.art.displaySpecies:view.battlers.target.art.displaySpecies;
+    const profile=moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb,0,composeOpponentHealthbox(healthboxAssemblyAssets,{name:opponentSpecies,level:50,
+      gender:profile.opponentGender??"male",hpFraction:profile.opponentHp/profile.opponentMaxHp,status:profile.opponentStatus??"none"}));
+    drawComposedPlayerHealthbox(fb,composePlayerHealthbox(playerHealthboxAssets,{name:playerSpecies,level:50,
+      gender:profile.playerGender??"male",hpFraction:profile.playerHp/profile.playerMaxHp,status:profile.playerStatus??"none",
+      currentHp:profile.playerHp,maxHp:profile.playerMaxHp}));
+    drawTileBg(fb,battleWindow.tileset,battleWindow.tilemap,battleWindow.palette);
+    drawMessageTextLines(fb,view.attacker.geometry.side==="player"?`${view.battlers.attacker.art.displaySpecies} used`:
+      `Foe ${view.battlers.attacker.art.displaySpecies} used`,"SUPERPOWER!",99);return;
+  }
+
+  if (state.config.move === "MEGAHORN") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnMegaHornConfig>;
+    const view = sceneOnMegaHornView(moveState), plan = megaHornDisplayPlan(view);
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker, displaySpecies: string): BattlerArt => {
+      const found = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[displaySpecies]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[displaySpecies];
+      if (!found) throw new Error(`MEGAHORN missing live battler art ${displaySpecies}`);
+      return found;
+    };
+    const tilesFor = (art: BattlerArt, side: "player"|"opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word:number):RgbColor => { const packed=mgbaColorFromBgr555(word);
+      return {r:packed&0xff,g:packed>>>8&0xff,b:packed>>>16&0xff}; };
+    const paletteBank=(bank:number):RgbColor[]=>view.palette.hardware.slice(bank*16,bank*16+16).map(rgb555);
+    const fieldBank=(bank:number):RgbColor[]=>paletteBank(bank).map(color=>{const packed=mgbaDarkenColor(
+      color.r|(color.g<<8)|(color.b<<16),view.registers.bldy??0);return{r:packed&0xff,g:packed>>>8&0xff,b:packed>>>16&0xff};});
+    const signed=(value:number)=>{const raw=value&0x1ff;return raw>=256?raw-512:raw;};
+    const top=(attr:readonly[number,number,number])=>({x:signed(attr[1]),y:(attr[0]&0xff)>=160?(attr[0]&0xff)-256:attr[0]&0xff});
+    const attackerArt=artFor(view.attacker,view.battlers.attacker.art.displaySpecies);
+    const targetArt=artFor(view.target,view.battlers.target.art.displaySpecies);
+    const drillActive=(view.registers.bg3cnt??0)===14859;
+    if(drillActive)drawScrolledTileBg(fb,hornDrillArt.drill.tileset,hornDrillArt.drill.tilemap,
+      [fieldBank(2)],view.registers.bg3hofs??0,view.registers.bg3vofs??0);
+    else drawTileBg(fb,battleBg.static.tileset,battleBg.static.tilemap,[2,3,4].map(fieldBank));
+    const disabled=(attr:readonly[number,number,number])=>(attr[0]&0x300)===0x200;
+    const targetDisabled=!plan.target||disabled(plan.target.attr);
+    if(view.monbg.active&&targetDisabled){
+      const x=-signed(view.registers[view.monbg.selected==="bg1"?"bg1hofs":"bg2hofs"]??0);
+      const y=-signed(view.registers[view.monbg.selected==="bg1"?"bg1vofs":"bg2vofs"]??0);
+      drawSpriteSheet(fb,tilesFor(targetArt,view.target.geometry.side),paletteBank(view.monbg.paletteBank),x,y);
+    }
+    const nonObjTarget2=fb.slice();
+    const entries=[plan.attacker,...(plan.target&&!targetDisabled?[plan.target]:[]),...plan.horns,...plan.impacts]
+      .sort((a,b)=>b.oamIndex-a.oamIndex);
+    for(const object of entries){
+      if(disabled(object.attr))continue;
+      const tile=object.attr[2]&0x3ff,bank=16+(object.attr[2]>>>12&0xf),corner=top(object.attr);
+      if(tile>=view.resources.hornTileBase&&tile<view.resources.hornTileBase+8){
+        drawSpriteSheetAffineRotate(fb,megaHornArt.hornHit2.tileset,paletteBank(bank),corner.x+32,corner.y+16,
+          object.matrix[0],object.matrix[1],object.matrix[2],object.matrix[3]);continue;
+      }
+      if(tile>=view.resources.impactTileBase&&tile<view.resources.impactTileBase+16){
+        drawSpriteSheetAffineRotateBlendedOverFb(fb,nonObjTarget2,battleAnimHitsplat.tileset,paletteBank(bank),
+          corner.x+16,corner.y+16,object.matrix[0],object.matrix[1],object.matrix[2],object.matrix[3],12,8,false);continue;
+      }
+      const attacker=object.oamIndex===plan.attacker.oamIndex;
+      const battler=attacker?view.attacker:view.target,art=attacker?attackerArt:targetArt;
+      drawSpriteSheet(fb,tilesFor(art,battler.geometry.side),paletteBank(bank),corner.x,corner.y);
+    }
+    const playerSpecies=view.attacker.geometry.side==="player"?view.battlers.attacker.art.displaySpecies:view.battlers.target.art.displaySpecies;
+    const opponentSpecies=view.attacker.geometry.side==="opponent"?view.battlers.attacker.art.displaySpecies:view.battlers.target.art.displaySpecies;
+    const profile=moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb,0,composeOpponentHealthbox(healthboxAssemblyAssets,{name:opponentSpecies,level:50,
+      gender:profile.opponentGender??"male",hpFraction:profile.opponentHp/profile.opponentMaxHp,status:profile.opponentStatus??"none"}));
+    drawComposedPlayerHealthbox(fb,composePlayerHealthbox(playerHealthboxAssets,{name:playerSpecies,level:50,
+      gender:profile.playerGender??"male",hpFraction:profile.playerHp/profile.playerMaxHp,status:profile.playerStatus??"none",
+      currentHp:profile.playerHp,maxHp:profile.playerMaxHp}));
+    drawTileBg(fb,battleWindow.tileset,battleWindow.tilemap,battleWindow.palette);
+    drawMessageTextLines(fb,view.attacker.geometry.side==="player"?`${view.battlers.attacker.art.displaySpecies} used`:
+      `Foe ${view.battlers.attacker.art.displaySpecies} used`,"MEGAHORN!",99);
+    return;
+  }
+
+  if (state.config.move === "WILL_O_WISP") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnWillOWispConfig>;
+    const view = sceneOnWillOWispView(moveState), plan = willOWispDisplayPlan(view);
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker, displaySpecies: string): BattlerArt => {
+      const found = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[displaySpecies]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[displaySpecies];
+      if (!found) throw new Error(`WILL_O_WISP missing live battler art ${displaySpecies}`);
+      return found;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => { const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff }; };
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const top = (attr: readonly [number, number, number]) => { const rx = attr[1] & 0x1ff, ry = attr[0] & 0xff;
+      return { x: rx >= 240 ? rx - 512 : rx, y: ry >= 160 ? ry - 256 : ry }; };
+    drawExtractedTileBg(fb, { tileset: battleBg.static.tileset, tilemap: battleBg.static.tilemap,
+      subpalettes: [2, 3, 4].map(paletteBank) });
+    const attackerArt = artFor(view.attacker, view.battlers.attacker.art.displaySpecies);
+    const targetArt = artFor(view.target, view.battlers.target.art.displaySpecies);
+    if (moveState.age === 0 && view.attacker.geometry.side === "opponent") {
+      drawSourceOpponentEnemyShadow(fb, view.battlers.attacker.art.displaySpecies,
+        view.attacker.geometry.battlePositionCenter);
+    }
+    const monbgDisplayed = view.monbg.active && moveState.age !== 7;
+    const entries = [plan.attacker, ...(!monbgDisplayed && plan.target ? [plan.target] : []), ...plan.orbs, ...plan.fires];
+    const bgPriority = (view.registers[`${view.monbg.selected}cnt`] ?? 0) & 3;
+    const drawObject = (object: typeof plan.attacker): void => {
+      const attr = object.attr, tile = attr[2] & 0x3ff, corner = top(attr);
+      if (tile >= view.resources.orbTileBase && tile < view.resources.orbTileBase + 28) {
+        const offset = tile - view.resources.orbTileBase;
+        drawSpriteSheet(fb, subTileset(willOWispArt.orb.tileset, Math.floor(offset / 2), 2),
+          paletteBank(16 + (attr[2] >>> 12 & 0xf)), corner.x, corner.y); return;
+      }
+      if (tile >= view.resources.fireTileBase && tile < view.resources.fireTileBase + 64) {
+        const offset = tile - view.resources.fireTileBase;
+        drawSpriteSheet(fb, subTileset(willOWispArt.fire.tileset, Math.floor(offset / 4), 4),
+          paletteBank(16 + (attr[2] >>> 12 & 0xf)), corner.x, corner.y); return;
+      }
+      const attacker = attr[2] === view.battlers.attacker.art.attr[2];
+      const battler = attacker ? view.attacker : view.target, art = attacker ? attackerArt : targetArt;
+      drawSpriteSheet(fb, tilesFor(art, battler.geometry.side),
+        paletteBank(16 + (attr[2] >>> 12 & 0xf)), corner.x, corner.y);
+    };
+    for (const object of entries.filter((entry) => ((entry.attr[2] >>> 10) & 3) > bgPriority)
+      .sort((a, b) => b.oamIndex - a.oamIndex)) drawObject(object);
+    if (monbgDisplayed) {
+      const signed = (value: number) => { const raw = value & 0x1ff; return raw >= 256 ? raw - 512 : raw; };
+      const x = -signed(view.monbg.selected === "bg1" ? view.registers.bg1hofs : view.registers.bg2hofs);
+      const y = -signed(view.monbg.selected === "bg1" ? view.registers.bg1vofs : view.registers.bg2vofs);
+      drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+        paletteBank(view.monbg.paletteBank), x, y);
+    }
+    for (const object of entries.filter((entry) => ((entry.attr[2] >>> 10) & 3) <= bgPriority)
+      .sort((a, b) => b.oamIndex - a.oamIndex)) drawObject(object);
+    const playerSpecies = view.attacker.geometry.side === "player"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const opponentSpecies = view.attacker.geometry.side === "opponent"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none" }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, view.attacker.geometry.side === "player"
+      ? `${view.battlers.attacker.art.displaySpecies} used`
+      : `Foe ${view.battlers.attacker.art.displaySpecies} used`, "WILL-O-WISP!", 99);
     return;
   }
 

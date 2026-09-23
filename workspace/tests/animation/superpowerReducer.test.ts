@@ -1,0 +1,3 @@
+import{execFileSync}from"node:child_process";import{resolve}from"node:path";import{describe,expect,it}from"vitest";
+const root=resolve(import.meta.dirname,"../..");const run=()=>JSON.parse(execFileSync(process.execPath,["--experimental-strip-types","tools/compare/verifySuperpowerReducer.ts"],{cwd:root,encoding:"utf8",maxBuffer:16*1024*1024}));
+describe("MOVE_SUPERPOWER source-relative reducer",()=>{it("replays both complete component and typed-seam windows twice",()=>{const result=run();expect(result["player-back"]).toMatchObject({rows:248,passes:2,componentRows:496,seamRows:496});expect(result["opponent-front"]).toMatchObject({rows:248,passes:2,componentRows:496,seamRows:496});});});

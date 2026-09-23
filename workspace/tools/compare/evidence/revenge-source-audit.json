@@ -1,0 +1,317 @@
+{
+  "schema": "revenge-source-audit/v1",
+  "move": "MOVE_REVENGE",
+  "moveId": 279,
+  "status": "unsupported-source-staging-checkpoint",
+  "coverageCredit": false,
+  "source": {
+    "pointerOwnedRoot": {
+      "symbol": "Move_REVENGE",
+      "nextDispatchLabel": "Move_POISON_FANG",
+      "blocks": [
+        "Move_REVENGE"
+      ],
+      "commands": [
+        "loadspritegfx ANIM_TAG_PURPLE_SCRATCH",
+        "monbg ANIM_TARGET",
+        "setalpha 12, 8",
+        "playsewithpan SE_M_TAKE_DOWN, SOUND_PAN_ATTACKER",
+        "createsprite gRevengeSmallScratchSpriteTemplate, ANIM_ATTACKER, 2, 10, -10",
+        "waitforvisualfinish",
+        "blend_color_cycle priority=2, selector=F_PAL_ATTACKER, delay=0, num_blends=4, initial_blend_y=2, target_blend_y=8, color=RGB_RED",
+        "waitforvisualfinish",
+        "unloadspritegfx ANIM_TAG_PURPLE_SCRATCH",
+        "loadspritegfx ANIM_TAG_PURPLE_SWIPE",
+        "createsprite gHorizontalLungeSpriteTemplate, ANIM_ATTACKER, 2, 6, 4",
+        "delay 4",
+        "playsewithpan SE_M_SWAGGER, SOUND_PAN_TARGET",
+        "createsprite gRevengeBigScratchSpriteTemplate, ANIM_TARGET, 2, 10, -10",
+        "waitforvisualfinish",
+        "unloadspritegfx ANIM_TAG_PURPLE_SWIPE",
+        "loadspritegfx ANIM_TAG_IMPACT",
+        "createvisualtask AnimTask_ShakeMon2, 2, ANIM_TARGET, 3, 0, 10, 1",
+        "create_persist_hitsplat_sprite ANIM_TARGET, 3, x=-10, y=-8, relative_to=ANIM_TARGET, animation=1, duration=8",
+        "playsewithpan SE_M_VITAL_THROW2, SOUND_PAN_TARGET",
+        "delay 8",
+        "create_persist_hitsplat_sprite ANIM_TARGET, 3, x=10, y=8, relative_to=ANIM_TARGET, animation=1, duration=8",
+        "playsewithpan SE_M_MEGA_KICK2, SOUND_PAN_TARGET",
+        "waitforvisualfinish",
+        "clearmonbg ANIM_TARGET",
+        "blendoff",
+        "end"
+      ],
+      "source": {
+        "path": "data/battle_anim_scripts.s",
+        "start": 337524,
+        "endExclusive": 338729,
+        "byteLength": 1205,
+        "sha256": "98915dfd07997768fc16a482f0ead7e25f2854d3794dc3ff77c52755997ea331"
+      },
+      "rom": {
+        "symbol": "Move_REVENGE",
+        "start": "0x082d5731",
+        "endExclusive": "0x082d57c8",
+        "byteLength": 151,
+        "romSha256": "5d9a78a63375f0dd17184c0ba1124e2aee8cfe3b2661ea5da35d062eea6a1c00"
+      }
+    },
+    "templates": {
+      "small": {
+        "source": {
+          "path": "src/battle_anim_fight.c",
+          "start": 9137,
+          "endExclusive": 10221,
+          "byteLength": 1084,
+          "sha256": "8d125597266251de856a51c58ed155e00961cea062391ea075904cb2e13cf700"
+        },
+        "rom": {
+          "symbol": "gRevengeSmallScratchSpriteTemplate",
+          "start": "0x08596088",
+          "endExclusive": "0x085960a0",
+          "byteLength": 24,
+          "romSha256": "b06bf572af14ea57d2c9f024c94c76e8b25dad386b14098c1f60c8fd85721e13"
+        }
+      },
+      "big": {
+        "source": {
+          "path": "src/battle_anim_fight.c",
+          "start": 10221,
+          "endExclusive": 11205,
+          "byteLength": 984,
+          "sha256": "a980bf406a8a09c4c26587e45545215d7dc331f55206145f5fd13a2de0da834f"
+        },
+        "rom": {
+          "symbol": "gRevengeBigScratchSpriteTemplate",
+          "start": "0x085960d0",
+          "endExclusive": "0x085960e8",
+          "byteLength": 24,
+          "romSha256": "cc03ec3180a12338f5acb381927559fa7e817f29469352dc390c202c271bed6b"
+        }
+      },
+      "callback": {
+        "source": {
+          "path": "src/battle_anim_fight.c",
+          "start": 27732,
+          "endExclusive": 28244,
+          "byteLength": 512,
+          "sha256": "f570cd9d4a7e2191fc513cde07ed4918d7cbf2fcb9f5dea627ba7fc014052acc"
+        },
+        "rom": {
+          "symbol": "AnimRevengeScratch",
+          "start": "0x0810da10",
+          "endExclusive": "0x0810da7c",
+          "byteLength": 108,
+          "romSha256": "90bd334bfbb568d6138ee09f0d1f10a61f8b03167b56da5f36208691aef332a1"
+        }
+      },
+      "persist": {
+        "template": {
+          "symbol": "gPersistHitSplatSpriteTemplate",
+          "start": "0x08597400",
+          "endExclusive": "0x08597418",
+          "byteLength": 24,
+          "romSha256": "acb9796de4344978f079f1baf7b745f552a89a6e6a7182a61ed35f2c92045bf7"
+        },
+        "callback": {
+          "source": {
+            "path": "src/battle_anim_normal.c",
+            "start": 30281,
+            "endExclusive": 30765,
+            "byteLength": 484,
+            "sha256": "f91083563bdacbd5fdbb581de98564b6ac70afcd13bc361989656c5dd8d82381"
+          },
+          "rom": {
+            "symbol": "AnimHitSplatPersistent",
+            "start": "0x081163d0",
+            "endExclusive": "0x08116420",
+            "byteLength": 80,
+            "romSha256": "eae7053270d17be05b06a128b884aafa5b667e6961eb8a405dbdd44a7227b016"
+          }
+        }
+      }
+    }
+  },
+  "graph": {
+    "blocks": [
+      "Move_REVENGE"
+    ],
+    "componentCount": 14,
+    "components": [
+      "asset:ANIM_TAG_IMPACT",
+      "asset:ANIM_TAG_PURPLE_SCRATCH",
+      "asset:ANIM_TAG_PURPLE_SWIPE",
+      "sprite:gHorizontalLungeSpriteTemplate",
+      "sprite:gRevengeBigScratchSpriteTemplate",
+      "sprite:gRevengeSmallScratchSpriteTemplate",
+      "task:AnimTask_ShakeMon2",
+      "visualCommand:blend_color_cycle",
+      "visualCommand:blendoff",
+      "visualCommand:clearmonbg",
+      "visualCommand:create_persist_hitsplat_sprite",
+      "visualCommand:monbg",
+      "visualCommand:setalpha",
+      "visualCommand:unloadspritegfx"
+    ],
+    "novelComponents": [
+      "asset:ANIM_TAG_PURPLE_SCRATCH",
+      "asset:ANIM_TAG_PURPLE_SWIPE",
+      "sprite:gRevengeBigScratchSpriteTemplate",
+      "sprite:gRevengeSmallScratchSpriteTemplate",
+      "visualCommand:create_persist_hitsplat_sprite"
+    ]
+  },
+  "behavior": {
+    "smallScratch": {
+      "frames": [
+        [
+          0,
+          4
+        ],
+        [
+          16,
+          4
+        ],
+        [
+          32,
+          4
+        ]
+      ],
+      "attackerSideAnim": {
+        "player": 0,
+        "opponent": 1
+      }
+    },
+    "bigScratch": {
+      "frames": [
+        [
+          0,
+          6
+        ],
+        [
+          64,
+          6
+        ]
+      ],
+      "attackerSideAnim": {
+        "player": 0,
+        "opponent": 1
+      }
+    },
+    "attackerBlend": {
+      "selector": "F_PAL_ATTACKER",
+      "delay": 0,
+      "blends": 4,
+      "from": 2,
+      "to": 8,
+      "color": "RGB_RED"
+    },
+    "lunge": [
+      6,
+      4
+    ],
+    "targetShake": [
+      3,
+      0,
+      10,
+      1
+    ],
+    "persistentHits": [
+      [
+        -10,
+        -8,
+        1,
+        8
+      ],
+      [
+        10,
+        8,
+        1,
+        8
+      ]
+    ],
+    "alpha": [
+      12,
+      8
+    ]
+  },
+  "resources": {
+    "tags": {
+      "purpleScratch": 10245,
+      "purpleSwipe": 10246,
+      "impact": 10135
+    },
+    "allocations": {
+      "purpleScratch": "0x0600",
+      "purpleSwipe": "0x1000"
+    },
+    "sharedPalette": "gBattleAnimSpritePal_PurpleScratch"
+  },
+  "carriers": {
+    "factoryCount": 3,
+    "allSourceIndices": [
+      82,
+      264,
+      316,
+      811
+    ],
+    "level50": [
+      {
+        "index": 264,
+        "label": "FRONTIER_MON_PINSIR_1",
+        "species": "SPECIES_PINSIR",
+        "moves": [
+          "MOVE_SUBMISSION",
+          "MOVE_FOCUS_ENERGY",
+          "MOVE_SWORDS_DANCE",
+          "MOVE_REVENGE"
+        ]
+      },
+      {
+        "index": 316,
+        "label": "FRONTIER_MON_QWILFISH_2",
+        "species": "SPECIES_QWILFISH",
+        "moves": [
+          "MOVE_REVENGE",
+          "MOVE_SLUDGE_BOMB",
+          "MOVE_SHADOW_BALL",
+          "MOVE_DESTINY_BOND"
+        ]
+      },
+      {
+        "index": 811,
+        "label": "FRONTIER_MON_MACHAMP_8",
+        "species": "SPECIES_MACHAMP",
+        "moves": [
+          "MOVE_REVENGE",
+          "MOVE_ROCK_SLIDE",
+          "MOVE_FACADE",
+          "MOVE_COUNTER"
+        ]
+      }
+    ],
+    "excludedOutsideLevel50": [
+      82
+    ]
+  },
+  "checkpoint": {
+    "sourceAudit": true,
+    "completePointerOwnedRoot": true,
+    "completeReachableVisualGraph": true,
+    "directSpriteTaskResourceBodies": true,
+    "fullFactoryCarrierCensus": true,
+    "legalBilateralPartyOnlyStaging": true,
+    "denseWindowCaptured": false,
+    "rawRgbRetained": false,
+    "normalizedMaps": false,
+    "latchMeasured": false,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "actualCoreFramebufferAcceptance": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "gameplayStateOwned": false,
+    "boundaryOrBarrierChanged": false
+  }
+}

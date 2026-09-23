@@ -1,3 +1,431 @@
+# Animation worker checkpoint — MOVE_FURY_CUTTER reducer/seam/compositor partial (2026-09-23)
+
+- **State / scope:** `MOVE_FURY_CUTTER` remains **unsupported** and `fury-cutter-counter-power-branches` remains **unfulfilled**. No move, sibling, shared-component, gameplay/RNG/facility, boundary, or barrier credit moved.
+- **Production:** Added one direction/counter-generic, source-relative 43-row reducer consuming retained live OAM/matrix/palette/register/resource/audio/task/gameplay snapshots, its narrow typed Scene-ON seam, shared-core dispatch, and a generic CUT/battler/monbg compositor. All eight bilateral counter bodies replay twice through the reducer/seam with powers 10/20/40/80, right/left/right/left, and 0/1/3/3 blend repetitions.
+- **Exact blocker:** The actual-core raw-RGB attempt is honestly non-exact: **0/344** framebuffer rows, **1,225,822** aggregate residual pixels (about 2.3k-4.4k/frame). It is retained only as a bounded production partial; no coordinate/RGB fitting, screenshots, absolute ticks, or gameplay ownership were introduced. Resume by reconciling the generic background/monbg/OBJ scanout and palette composition, then add the twice-fresh material-control exact test before any promotion.
+
+# Animation supervisor verification — MOVE_FURY_CUTTER evidence merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commit `6666ffa04`.
+  `MOVE_FURY_CUTTER` remains unsupported and its nine-component
+  `fury-cutter-counter-power-branches` track remains unfulfilled; Level 50
+  stays **272/276 exact, 0 partial, 0 staged, 4 unsupported**. No production,
+  move, sibling, gameplay/RNG/facility, boundary, or barrier credit moved.
+- **Independent proof:** Two fresh supervisor source-audit processes and two
+  dense-evidence verifier processes are respectively byte-identical. Both legal
+  orientations retain four natural **43-row** counter bodies at powers
+  **10/20/40/80** (**344 total rows**), right/left/right/left direction, own
+  palette/monbg/slice/task/resource/audio latches, stable opaque gameplay/RNG,
+  and zero-owned first-inactive cleanup. Player state/RGB digests are
+  `742f4850…` / `62a0e272…`; opponent digests are `e6016063…` / `5341500d…`.
+- **Gates / next:** On evidence tree `6666ffa04`, the source/evidence/boundary/
+  inventory union passes **4 files / 13 tests**; worker typecheck, coverage,
+  animation audit, and diff checks pass. This is evidence/tests/tooling only,
+  so the same-production supervisor full-suite/build receipt from `831a16866`
+  remains valid. Resume Fury Cutter with one source-relative reducer, typed
+  seam, generic compositor, material control, and twice-fresh actual-core proof;
+  do not start `MOVE_CURSE` first.
+
+# Animation worker checkpoint — MOVE_FURY_CUTTER source/evidence only (2026-09-23)
+
+- **State / scope:** `MOVE_FURY_CUTTER` remains **unsupported** with no move,
+  sibling, shared, gameplay/RNG/facility, boundary, or barrier credit. The
+  non-exclusive `fury-cutter-counter-power-branches` track is present and
+  **unfulfilled** for the nine still-unrepresented counter/power components;
+  no `src/`, production asset, reducer, typed seam, compositor, or core case
+  changed.
+- **Source/staging:** The pointer-owned `Move_FURY_CUTTER` root is 207 bytes
+  and reaches all eight script blocks and 17 generated graph components. The
+  complete Level-50 Factory census is five legal carriers (141, 174, 188, 261,
+  263). Complete legal three-mon parties stage the source carrier in player-
+  back and opponent-front Scene-ON orientations without transient injection.
+- **Evidence:** Four natural counters/powers 1..4 (10/20/40/80) retain 43
+  dense semantic and chronological raw-RGB rows per body, 172 per orientation,
+  through first inactive cleanup. Directions are right/left/right/left;
+  predecessor OAM/matrix, palette, CUT tag 10138, slice/blend/task/audio/
+  register/allocator/order latches, opaque gameplay state/RNG, normalized maps,
+  and zero-owned cleanup are pinned. Both orientations replay byte-identically
+  in two fresh processes; no exact, partial, staged, sibling, or shared credit.
+- **Verification / next:** Source audit, evidence verifier, strict source/
+  staging/evidence tests, animation boundary/inventory/coverage/audit, diff
+  check, and typecheck are the required finish gates. Resume only with a
+  separately bounded source-relative implementation and actual-core proof;
+  do not promote this evidence checkpoint or begin `MOVE_CURSE`.
+
+# Animation supervisor verification — MOVE_SPIT_UP exact merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commits `9ee13120a`,
+  `e7e053b21`, and `831a16866`. `MOVE_SPIT_UP` and only its six-component
+  `spit-up-red-orb-power-branches` track are exact/fulfilled; Level 50 is now
+  **272/276 exact, 0 partial, 0 staged, 4 unsupported**. Helping Hand remains
+  blocked/unfulfilled, and no sibling, gameplay/RNG, facility, boundary, or
+  barrier owner moved.
+- **Independent proof:** Two fresh supervisor verifier processes are
+  byte-identical and pass all **650/650** component, typed-seam, chronological
+  raw-RGB, and shared-core framebuffer rows with **0 residual pixels** through
+  all six Stockpile-power/orientation cleanups, digest `50222df8…`. The material
+  CROBAT/GROVYLE control changes live output while opaque gameplay state/RNG
+  remain unchanged.
+- **Gates / next:** On merged production tree `831a16866`, the affected union
+  passes **7 files / 17 tests**; typecheck, coverage, animation audit, and diff
+  checks pass. Independent `npm test` passes **1,442 files / 11,517 tests**,
+  with **44 files / 223 tests skipped**, in **1,822.95s**; `npm run build`
+  passes **832 modules** with only the inherited chunk warning. Next dispatch
+  `MOVE_FURY_CUTTER` for source classification and complete legal bilateral
+  evidence; do not infer credit.
+
+# Animation supervisor verification — MOVE_SPIT_UP evidence merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded worker commits `3e5301c1f`, `3127b9717`,
+  and `7b3561d86`, plus supervisor test-only repair `299df1021` after catching
+  an unused test constant in the handoff. `MOVE_SPIT_UP` and its six-component
+  track remain unsupported/unfulfilled with no production or acceptance credit;
+  Level 50 remains **271/276 exact, 0 partial, 0 staged, 5 unsupported**.
+- **Independent proof:** Replayed the source and evidence verifiers on the
+  final tree. The complete graph has **10 components** and sole Level-50 carrier
+  `FRONTIER_MON_SWALOT_1` (248). All six natural Stockpile 1/2/3 windows retain
+  **108/108/109 rows** per orientation, **8/12/16** red-orb births, two impacts,
+  deform and both shakes, stable opaque gameplay state/RNG, zero-owned cleanup,
+  and their pinned twice-fresh RGB digests.
+- **Gates / next:** On final code `299df1021`, the affected source/evidence/
+  boundary/inventory union passes **4 files / 13 tests**; typecheck, coverage,
+  animation audit, and diff checks are green. This is tooling/evidence/tests
+  only, so the recorded Revenge production full-suite/build receipt remains
+  valid. Resume `MOVE_SPIT_UP` with its source-relative reducer/seam/compositor
+  and complete twice-fresh zero-residual actual-core proof; do not infer credit.
+
+# Animation supervisor verification — MOVE_REVENGE exact merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commits `6d9c2fc11` and
+  `eab8c2a43`. `MOVE_REVENGE` and only its five-component
+  `revenge-purple-scratch-persist-hit` track are exact/fulfilled; Level 50 is
+  **271/276 exact, 0 partial, 0 staged, 5 unsupported**. Helping Hand remains
+  blocked/unfulfilled, and no sibling, gameplay/RNG, facility, boundary, or
+  barrier owner moved.
+- **Independent proof:** Two fresh supervisor actual-core processes each pass
+  all **290/290** component, typed-seam, chronological raw-RGB, and shared-core
+  framebuffer rows with **0 residual pixels**, digest `f555b063…`, through
+  bilateral age-144 cleanup. The material CROBAT/BLISSEY control changes live
+  presentation while opaque gameplay state/RNG remain unchanged.
+- **Gates / next:** On final tree `205d0c4e2942b775c4dd512a49fcece327141b64`,
+  the affected union passes **8 files / 21 tests** and smoke passes **8 / 448**.
+  Reused the same-code worker full receipt: `npm test` **1,437 files / 11,509
+  tests**, **44 / 223 skipped**, and `npm run build` **830 modules**. Coverage,
+  audit, typecheck, and diff checks are green. Next dispatch `MOVE_SPIT_UP` for
+  source classification, legal bilateral staging, dense evidence, and its own
+  latch maps. **For the main program:** nothing blocking.
+
+# Animation worker closure — MOVE_REVENGE exact (2026-09-23)
+
+- **State / scope:** `MOVE_REVENGE` is **exact**, advancing Level 50 to
+  **271/276 exact, 0 partial, 0 staged, 5 unsupported**. Added its compact
+  source-derived PURPLE_SCRATCH/PURPLE_SWIPE asset, pure source-relative
+  reducer, narrow typed Scene-ON seam, and shared-core compositor/dispatch.
+  Only `revenge-purple-scratch-persist-hit` is fulfilled; no sibling/shared
+  credit, boundary/barrier allowance, gameplay/RNG, turn, or facility owner
+  moved, and `MOVE_SPIT_UP` was not started.
+- **Proof:** Both legal orientations reproduce all **145 + 145 = 290** dense
+  ages through age-144 first-inactive cleanup twice fresh with **0 residual
+  pixels**. RGB digests are `1fcf5f5601a2c0ddf800dda02306188add5daed373a6dd797eae2aaa9ab8633e`
+  / `47e7b19f93c49574783388d9e0c71827d7412c3eede51b61d0fb5172029674f8`;
+  verdict `f555b06392ea1bf4d14774223c60243909d2aaffdcce75eea66a196f643ba440`.
+  A material CROBAT/BLISSEY control changes live species art, side, geometry,
+  allocation, matrices, and framebuffer while opaque gameplay state/RNG stay
+  unchanged. Both move-owned maps independently confirm every supplied OAM,
+  matrix, palette, sprite/task/resource, alpha, and cleanup latch; no latch
+  correction was required.
+- **Verification / next:** Production commit `6d9c2fc11`, tested tree
+  `bcd32da664f5a6ed0bb74f718a2aea9e6d246410`. The affected source/assets/
+  evidence/reducer/actual-core/boundary/inventory union passes **8 files / 21
+  tests**; typecheck, coverage, audit, diff check, and smoke (**8 files / 448
+  tests**) pass. Full `npm test` passes **1,437 files / 11,509 tests**, with
+  **44 files / 223 tests skipped**, in **1,786.41s**; `npm run build` passes
+  **830 modules** with only the inherited chunk warning. Next ranked work is
+  `MOVE_SPIT_UP`; it remains untouched.
+
+# Animation worker checkpoint — MOVE_REVENGE reference reducer contract (2026-09-22)
+
+- **State / scope:** `MOVE_REVENGE` remains **unsupported** with no exact,
+  partial, staged, component, sibling, or shared credit; the
+  `revenge-purple-scratch-persist-hit` track remains **unfulfilled**. Added
+  only the dev-time, source-relative `tools/compare/revengeReducer.ts`, its
+  bilateral verifier, and focused test. No `src/`, production assets, typed
+  seam, compositor/core dispatch, actual-core framebuffer comparison,
+  gameplay/RNG, boundary/barrier, coverage, or inventory changed.
+- **Contract / proof:** A single direction-generic program is seeded from the
+  observable host geometry/allocation at component creation and replays all
+  **145 + 145 = 290** retained Scene-ON ages through first inactive cleanup.
+  It checks the source-audited purple small/big frame programs, side flips and
+  positions, target monbg/alpha lifecycle, attacker red blend cycle, 6×4
+  lunge, target ShakeMon2, both persistent hitsplats, resource/audio
+  lifetimes, resource allocations,
+  sprite order/subpriorities, matrices, and predecessor OAM/matrix latches.
+  It consumes the existing source audit, purple asset receipt, dense states,
+  raw-RGB/map receipt hashes, and fails on any evidence drift.
+- **Verification / next:** Tested tree `11088ff73c29a7fa70b8521d7860c4d16b8b1d8f`;
+  the focused source/assets/evidence/reducer/boundary/inventory union passes
+  **6 files / 19 tests**; the reducer is byte-identical in two fresh processes
+  (**290/290**). `npm run typecheck`, coverage (**270/276 exact, 6
+  unsupported**), animation audit, and `git diff --check` pass. The supervisor
+  independently established the reusable production baseline on `884ef4236`:
+  full `npm test` passes **1,431 files / 11,497 tests**, with **44 files / 223
+  tests skipped**, in **1,717.06s**; `npm run build` passes **828 modules**
+  with only the inherited chunk warning. All later Revenge deltas are confined
+  to tooling, evidence, tests, coverage metadata, and this ledger. Resume only
+  with a narrow typed Scene-ON seam, generic production compositor/material
+  control, and twice-fresh **290/290** zero-residual actual-core framebuffer
+  proof; keep this move and track unsupported until then, and do not start
+  `MOVE_SPIT_UP`.
+
+# Animation worker checkpoint — MOVE_REVENGE purple asset audit (2026-09-22)
+
+- **State / scope:** `MOVE_REVENGE` remains **unsupported** with no exact,
+  partial, staged, component, sibling, or shared credit. Added only the
+  dev-time `tools/compare/extractRevengeAssets.ts` proof, its pinned
+  `tools/compare/evidence/revenge-assets.json` receipt, and
+  `tests/animation/revengeAssets.test.ts`; no `src/` or coverage status moved.
+- **Asset checkpoint:** The extractor pins source PNGs, palettes, registry/tag
+  declarations, ELF/ROM symbols, GBA-LZ77 streams, decoded 4bpp bytes, tiles,
+  frames, OAM/template identities, animation tables, and `AnimRevengeScratch`.
+  PURPLE_SCRATCH is 32x96 / 48 tiles / 0x600 decoded bytes with 3x 32x32
+  frames; PURPLE_SWIPE is 64x128 / 128 tiles / 0x1000 with 2x 64x64 frames;
+  both use `gBattleAnimSpritePal_PurpleScratch`.
+- **Verification / resume:** Focused asset tests pass **3/3**, including two
+  fresh byte-identical regenerations; extractor output is clean and source/ELF/
+  ROM LZ77 comparisons pass. Resume only with a source-relative Revenge
+  reducer, narrow seam, generic compositor, material control, and twice-fresh
+  **290/290** zero-residual actual-core proof; keep the component track
+  unfulfilled and do not start `MOVE_SPIT_UP`.
+
+# Animation worker checkpoint — MOVE_REVENGE source + dense evidence (2026-09-22)
+
+- **State / scope:** `MOVE_REVENGE` remains **unsupported** with no exact,
+  partial, or staged credit, so Level 50 remains **270/276 exact, 0 partial, 0
+  staged, 6 unsupported**. Source classification pins all 14 components and
+  isolates the five-component `revenge-purple-scratch-persist-hit` track as
+  explicitly **unfulfilled**. No reducer, typed seam, production compositor,
+  core dispatch, framebuffer acceptance, sibling/shared credit, gameplay/RNG,
+  facility, boundary, or barrier ownership moved.
+- **Evidence:** Complete legal party-before-init Scene-ON staging retains every
+  dense semantic and raw RGB row through first inactive cleanup twice fresh:
+  player-back MACHAMP frames **238..382 / 145 rows** and opponent-front
+  QWILFISH frames **235..379 / 145 rows**. Semantic hashes are
+  `5b432fa8…` / `b41abed8…`; chronological RGB sequences are `1fcf5f56…` /
+  `47e7b19f…`; normalized maps are `3202d7fa…` / `749c863d…`. Both maps pin
+  the side-relative small/big scratch animation, attacker red blend cycle,
+  horizontal lunge, target ShakeMon2, two persistent hitsplats, resource/audio
+  lifetimes, OAM/matrix RAM+1, the age-4 same-row monbg palette exception,
+  opaque stable battle state/gameplay RNG, and zero-owned age-144 cleanup.
+- **Verification / next:** Evidence commit `3113f7965`; source and evidence
+  verifiers each reproduce twice deterministically. The affected source /
+  evidence / boundary / inventory union passes **4 files / 15 tests**;
+  typecheck, coverage, animation audit, and `git diff --check` pass. The
+  requested `npm run animation:diff-check` alias does not exist on this tree;
+  `ANIMATION_VERIFICATION.md` names `git diff --check`, which was run directly.
+  No production/configuration file changed, so the recorded supervisor full
+  suite/build baseline remains applicable. Resume `MOVE_REVENGE` only with
+  source-extracted PURPLE_SCRATCH/PURPLE_SWIPE assets, a source-relative
+  reducer, narrow seam, generic compositor, material control, and twice-fresh
+  **290/290** zero-residual actual-core proof. Do not infer sibling credit or
+  start `MOVE_SPIT_UP`.
+
+# Animation worker closure — MOVE_SUPERPOWER exact (2026-09-22)
+
+- **State / scope:** `MOVE_SUPERPOWER` is **exact**, so Level 50 is **270/276
+  exact, 0 partial, 0 staged, 6 unsupported**; Open-only remains **0/1 exact**.
+  Added its pure source-relative reducer, narrow typed Scene-ON seam, and live
+  shared-core compositor/dispatch. Only the five-component
+  `superpower-rock-orb-fire` track is fulfilled; no sibling/shared-component,
+  boundary/barrier, gameplay/RNG, facility, or main-program ownership moved.
+- **Proof:** Legal player-back frames **79..326 / 248 rows** and opponent-front
+  **81..328 / 248 rows** pass component, typed-seam, chronological raw-RGB,
+  and actual shared-core framebuffer comparison **496/496** with **0 residual
+  pixels**, reproduced in two independent fresh processes through age-247
+  first-inactive cleanup. Verdict
+  `bfa61d58bf15a4909fe3d49b0e21f4f687b57ddd2cf7d7fcc507f1377f73b3b0`;
+  RGB sequences `69d70845cc2e2d7b0d82d490db9365c7bfc467eb65325fe0be80ee729c91c580`
+  / `b1aa859dc305a11257c5e01b701bf234ebda29087c5103fad9871d149eb3bf9c`.
+  A material CROBAT/BLISSEY control changes species art, side/orientation,
+  geometry, allocation/order/matrices, and framebuffer while opaque gameplay
+  state and gameplay RNG remain the same references.
+- **Verification / next:** Production commit `dfd6ec9f4`; tested tree
+  `ad017d8461ed08bd2dfc6294ffe51cfa8b569cf4`. The affected source/assets/
+  evidence/reducer/actual-core/boundary/inventory union passes **7 files / 20
+  tests**; focused exact tests pass **3 / 5**, typecheck, coverage, audit, diff,
+  and smoke (**8 / 448**) are green. Full `npm test` passes **1,431 files /
+  11,497 tests**, with **44 files / 223 tests skipped**, in **1,736.15s**;
+  `npm run build` passes **828 modules** with only the inherited chunk warning.
+  Next ranked work is `MOVE_REVENGE`; it was not started in this step.
+
+# Animation supervisor checkpoint — MOVE_SUPERPOWER asset prerequisite (2026-09-22)
+
+- **State / scope:** `MOVE_SUPERPOWER` remains **staged/unsupported**, so Level
+  50 remains **269/276 exact, 0 partial, 1 staged, 6 unsupported** and Open-only
+  remains **0/1 exact**. Added only reproducible production assets for the
+  five-component `superpower-rock-orb-fire` track; the track remains
+  **unfulfilled**. No reducer, typed seam, compositor/core dispatch,
+  framebuffer acceptance, sibling/shared credit, boundary/barrier,
+  gameplay/RNG, facility, or main-program owner moved.
+- **Assets / proof:** The source extractor byte-pins `ANIM_TAG_CIRCLE_OF_LIGHT`
+  **10212** (64x64 / 64 tiles / `0x800`, reusing its existing sheet with the
+  ElectricOrbs palette), `ANIM_TAG_METEOR` **10256** (64x64 / 64 tiles /
+  `0x800`), and `ANIM_TAG_FLAT_ROCK` **10257** (16x80 / 20 tiles / `0x280`,
+  five 16x16 variants selected by arg 2). PNG, 4bpp, GBA LZ77, ELF, ROM,
+  template/callback/OAM identities, and the orb affine `32,+4,-6,+6` program
+  are independently pinned. Commit `ed99c1335` contains the asset checkpoint.
+- **Verification / next:** The extractor check and affected asset/source/
+  evidence/boundary/inventory union pass **5 files / 18 tests**; all twenty
+  fulfilled-track ratchets now remain move-local instead of forbidding an
+  unrelated staged campaign move (**20 files / 104 tests**). Smoke passes **8
+  files / 448 tests**. Tested tree `5690f1325` passes full `npm test`: **1,429
+  files / 11,495 tests**, with **44 files / 223 tests skipped**, in
+  **1,733.88s**; `npm run build` passes **826 modules** with only the inherited
+  chunk warning. Next add Superpower's source-relative reducer, narrow typed
+  seam, generic compositor/core dispatch, material control, and twice-fresh
+  **496/496** zero-residual actual-core proof; do not begin `MOVE_REVENGE`.
+
+# Animation worker checkpoint — MOVE_SUPERPOWER source/evidence staging (2026-09-22)
+
+- **State / scope:** `MOVE_SUPERPOWER` is **staged/unsupported**, so Level 50 is
+  **269/276 exact, 0 partial, 1 staged, 6 unsupported**; Open-only remains
+  **0/1 exact**. Source classification confirms 14 components and creates the
+  sole-representative, precisely five-component
+  `superpower-rock-orb-fire` track, which remains **unfulfilled**. No reducer,
+  typed seam, compositor, actual-core framebuffer acceptance, promotion,
+  sibling/shared credit, gameplay/RNG, facility, or boundary credit moved.
+- **Evidence:** Legal Scene-ON MechanicLab parties retain complete dense state
+  and every raw RGB frame through cleanup: player-back **79..326 / 248 rows**
+  and opponent-front **81..328 / 248 rows**, with two fresh byte-identical
+  runs per orientation. Player hashes are dense
+  `6a8950947ea4f16d5e70162e676e5ca64b92486751e35a77b888a5051f7e4a8b`,
+  probe `b9ded455e88f6f01c9fe05b3bcc8143f733013fadfa0cf49dd7ff3cd92ef06ec`,
+  RGB sequence `69d70845cc2e2d7b0d82d490db9365c7bfc467eb65325fe0be80ee729c91c580`,
+  map `ac78be9e9040db45a1ad7e330dba3c8897ebd65ac030dc72c9d7c317eb5c9ba4`;
+  opponent hashes are dense
+  `8c9ac82a2863c6eb4d03b92462e91d491628062f66f8db919eb05ef47cc8715f`,
+  probe `b8a3a06431970e197a2584c53edd9e4b414ad02c7bcb764a479e8162f6a4cbba`,
+  RGB sequence `b1aa859dc305a11257c5e01b701bf234ebda29087c5103fad9871d149eb3bf9c`,
+  map `0641f09f9af2f5a4e5321006498c969252e381833145674ce1cfec51a4550c4f`.
+  The source audit receipt is
+  `066cbc1291900aa3e47b85cc5adb7112a0f0b05bfbab91dc4ef2dcc6b0d2c03b`.
+  Both maps independently measure orb/rock/fireball lifetimes and flips,
+  target ShakeMon2 RAM+2 axes, BG-Y/monbg/alpha timing, audio, allocators,
+  opaque gameplay state/RNG, predecessor OAM/matrix latches, the age-10 sole
+  palette exception, and zero-owned cleanup at age 247.
+- **Verification / next:** `superpowerSourceStaging.test.ts` and
+  `superpowerEvidenceCheckpoint.test.ts` pass **6/6**; the strict source and
+  evidence verifiers, legal-party validators, coverage/track boundary, and
+  receipt hashes are green. Resume only when a source-relative live reducer,
+  narrow seam, generic compositor, material control, and actual-core
+  zero-residual proof can be implemented; do not begin MOVE_REVENGE.
+
+# Animation worker closure — MOVE_MEGAHORN exact (2026-09-22)
+
+- **State / scope:** `MOVE_MEGAHORN` is **exact**, so Level 50 is **269/276
+  exact, 0 partial, 0 staged, 7 unsupported**. Added its battle-only
+  source-relative reducer, narrow typed Scene-ON seam, and generic live
+  compositor. The battle path retains `BG_DRILL`; the dormant contest-only
+  `MegahornInContest` identity retains `BG_DRILL_CONTESTS` and its distinct
+  slide parameters without inventing a legal battle execution. Only the
+  four-component `megahorn-horn-control-flow` track is fulfilled; no sibling,
+  shared-component, boundary/barrier, gameplay/RNG, or facility credit moved.
+- **Proof:** Legal player-back frames **211..387 (177 rows)** and opponent-front
+  **212..387 (176 rows)** pass reducer, typed seam, chronological raw-RGB, and
+  shared-core framebuffer comparison **353/353** with **0 residual pixels**,
+  reproduced twice in independent fresh verifier processes. Verdict
+  `39a56550ff8a655b678247fc3b4df55f148834a3eb56dbe536c1859cd9f54ca0`;
+  RGB sequences `cc5965f816ce5cf48cbf183dbf1677630e424c50bdf55c4800a892dd14f9345d`
+  / `a1bfc221b7d61a905bac87b0a8e798e5f6657a4534936a8d8366b5578619b246`.
+  A material CROBAT/BLISSEY species/side/geometry/allocation control changes
+  presentation output while opaque gameplay state and gameplay RNG remain the
+  same references. No latch ledger change was needed: the two banked maps
+  independently confirmed all supplied move-owned facts.
+- **Verification / next:** Production commit `f2c2799b0`; coverage commit
+  `22b0af8cf`; tested code/tree `22b0af8cf4f9ab7ba1cbec97424ca1bf9e90d055` /
+  `857d8cf444df0b5d0cb25807d791d7bc6d9be325`. The affected exact/boundary/
+  inventory union passes **5 files / 13 tests**; asset/source/evidence controls,
+  typecheck, animation audit, coverage, diff checks, and curated smoke are
+  green. Full `npm test` passes **1,426 files / 11,486 tests** with **44 files /
+  223 tests skipped** in **1,739.51s**; `npm run build` passes **826 modules**
+  with only the inherited chunk-size warning. Next ranked work is
+  `MOVE_SUPERPOWER`; do not infer Megahorn credit for any sibling.
+
+# Animation worker closure — MOVE_WILL_O_WISP exact (2026-09-22)
+
+- **State / scope:** `MOVE_WILL_O_WISP` is **exact**, so Level 50 is **268/276
+  exact, 0 partial, 0 staged, 8 unsupported**. Its sole-representative
+  `will-o-wisp-orb-fire` track is fulfilled; no sibling or shared split-priority
+  track receives credit. Added source-extracted Wisp assets, a source-relative
+  reducer, narrow typed Scene-ON seam, and generic live compositor only; gameplay
+  state/RNG, facility ownership, boundary lists, and unsupported barriers did not move.
+- **Proof:** The retained legal Shuppet gameplay state uses the already-created
+  Plusle carrier presentation sprite against Shuckle. Player-back frames **76..289
+  (214 rows)** and opponent-front **80..292 (213 rows)** pass component, typed-seam,
+  chronological raw-RGB, and shared-core framebuffer comparison **427/427** with
+  **0 residual pixels**, reproduced twice in independent verifier processes.
+  Verdict `26da45f3…`; RGB sequences `e02e1c81… / 3977ab50…`. A material
+  CROBAT/BLISSEY side/species-art/geometry/allocation control changes output while
+  opaque gameplay state and RNG remain unchanged.
+- **Verification / next:** Production commits `f1dfe92ee` / `10bf3f636`; test-only
+  receipt correction `7daa6576e` updates the two stale Confuse Ray assertions without
+  changing production, evidence, or credit boundaries. On that tested code, the affected
+  union passes **10 files / 30 tests**, the twice-fresh actual-core verdict remains
+  **427/427** with zero residual pixels at `26da45f3…`, smoke passes **8 / 448**, the
+  full suite passes **1,421 files / 11,477 tests** with **223 skipped**, and build
+  passes **824 modules**. Coverage (**268/276 exact**), animation audit, and diff checks
+  are green. Next ranked move is `MOVE_MEGAHORN`; Helping Hand remains blocked on legal
+  doubles staging.
+
+# Animation supervisor verification — MOVE_EXTRASENSORY exact closure (2026-09-22 supervisor)
+
+- **State / merge:** Recovered, independently reviewed, and fast-forwarded the
+  completed Sol/high worker commits `ca3edcb0d`..`1becd7511`, then landed the
+  move-local receipt repair `ca8944465`. `MOVE_EXTRASENSORY` and its sole
+  `extrasensory-distortion-clone` track are exact; Level 50 is **267/276 exact,
+  0 partial / 0 staged, 9 unsupported**. Open-only remains **0/1 exact**. No
+  sibling/shared-Psychic credit, boundary/barrier, or gameplay/RNG owner moved.
+- **Independent proof:** Two fresh supervisor actual-core processes each pass
+  all **322/322** component, typed-seam, chronological raw-RGB, and shared-core
+  framebuffer rows with **0 residual pixels**, digest `266a4d21…`, through
+  bilateral age-160 cleanup. The altered CROBAT/BLISSEY control changes live
+  presentation output while opaque gameplay state/RNG remain unchanged.
+- **Gates / next:** Affected Extrasensory + Psychic controls + boundary/inventory
+  pass **11 files / 65 tests**; smoke passes **8 / 448**. The final repaired tree
+  passes full `npm test` **1,416 files / 11,468 tests** with **44 / 223 skipped**
+  in **1,752.28s**, and `npm run build` passes **822 modules** with only the
+  inherited chunk warning. Coverage reports **9 ready + 1 blocked**; animation
+  audit and diff checks pass. Next dispatch `MOVE_WILL_O_WISP` for complete
+  source/carrier classification, legal bilateral staging, dense evidence, and
+  its own latch maps; Helping Hand remains blocked on legal doubles staging.
+  **For the main program:** nothing blocking.
+
+# Animation maintenance — include Open-only Outrage (2026-09-22)
+
+- **State:** Level 50 remains **266/276 exact**, Open-only **0/1 exact**.
+  The campaign accounts for **10 ready + 1 blocked** Factory moves: nine
+  ready Level 50 moves, then Outrage. Helping Hand's doubles blocker remains.
+- **Did:** `4a359de1b` extends derived work selection, queue/blocker/track
+  validation, report, and launch policy to Factory tiers. Level 50 ready work
+  always precedes Open-only; blocked Level 50 work cannot strand Outrage.
+  No move receives new acceptance credit. The user reaffirmed finishing the
+  current approach; consider a bounded shared-runtime comparison before any
+  future non-Factory expansion, not a rewrite during this campaign.
+- **Verification:** Local and Hetzner scoped gates on `4a359de1b` passed:
+  **5 files / 18 tests**, typecheck, autonomy wrapper checks, launcher syntax,
+  coverage, asset audit, and diff checks. Hetzner Scene-ON oracle is healthy.
+  Remote receipts: `/var/lib/pokebench-autonomy/maintenance/20260922-outrage/`.
+  Production code/assets/dependencies/configuration remain unchanged from
+  `056e9978f`'s **1,411 files / 11,451 tests** and **821-module build** receipt.
+  Reuse that baseline plus these scoped gates; only campaign/ledger docs follow.
+- **Next:** Resume Extrasensory source + legal bilateral staging + dense
+  evidence, then advance the ranked queue through Outrage. Use legal Open-level
+  `FRONTIER_MON_DRAGONITE_5` for Outrage and preserve the existing acceptance
+  bar. Open-level species geometry remains separate; the 77 outside-Factory
+  moves are outside this campaign. The interrupted Extrasensory worker was
+  clean at `f5df34bb2`, with no code/evidence to recover; its research log and
+  a maintenance note are retained on Hetzner. Campaign end, cadence, provider
+  routing, and paused Rust lane are unchanged.
+
 # Animation supervisor wind-down — queue exhausted, same-code baseline reconfirmed (2026-09-21 supervisor)
 
 - **State / orient:** Performed the required `git merge --no-edit master` (already up to date at `3f76b234d`), confirmed no open animation deferrals or leftover worker worktrees/branches, and reused the recorded same-code startup baseline because the production tree remains exactly `971233d80` and only animation ledger docs changed afterward. Battle Scene ON oracle profile v5 answers. Level 50 remains **266/276 exact**, **0 partial / 0 staged**, and **10 unsupported**; the authoritative move queue is empty, so no worker was dispatched and no production, evidence, coverage, boundary, barrier, or main-program file changed.
@@ -15980,3 +16408,89 @@ track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
   success body unsupported until legal doubles staging exists. Nightmare's
   contest-only arm does not block singles moves. Existing campaign end,
   cadence, provider routing, and paused Rust lane remain unchanged.
+
+# Animation worker checkpoint — MOVE_EXTRASENSORY dense/latch evidence (2026-09-22)
+
+- **State / scope:** `MOVE_EXTRASENSORY` is now **staged**, so Level 50 is
+  **266/276 exact, 0 partial, 1 staged, 9 unsupported**. The move-owned
+  `extrasensory-distortion-clone` track remains unfulfilled. Added source and
+  carrier audits, complete legal bilateral staging, retained dense state/RGB,
+  normalized maps, verifier/tests, and latch records only. No reducer, typed
+  seam, compositor, production/core code, framebuffer acceptance, sibling or
+  shared-Psychic credit, boundary list, unsupported barrier, or gameplay state
+  changed.
+- **Evidence:** Legal Nuzleaf/Shuckle Scene-ON windows retain player-back
+  frames **80..240** and opponent-front **84..244**, **161+161 = 322** rows
+  through first inactive cleanup, twice in fresh processes and byte-identical.
+  Probe/RGB/map digests are player `40519f5f… / 54456d01… / 70a55e95…` and
+  opponent `b1de1329… / ffd4644e… / 1a2eab6f…`. Extrasensory's own maps pin
+  distortion source lives **42..66 / 68..92 / 94..118** and RAM+1 display,
+  clone source **94..117**, OAM RAM+1 and task-owned affine RAM+2, both attacker
+  palette programs, Psychic BG/monbg/register/audio/allocation order, stable
+  opaque gameplay state/RNG, and clean age-160 teardown.
+- **Verification / next:** Evidence code commit `6f0cabf8c` / tested tree
+  `7b0e1d441e8686c88e809c625ec1b810c107e704` passes the complete affected
+  Extrasensory + five Psychic-control + boundary/inventory union (**10 files /
+  69 tests**), deterministic source/evidence verification, typecheck, coverage,
+  animation audit, and diff checks. Next add a complete source-relative reducer,
+  narrow typed Scene-ON seam, generic live compositor/core dispatch, altered
+  control, and twice-fresh **322/322** zero-residual actual-core acceptance
+  before exact promotion; do not transfer shared-component or sibling credit.
+# Animation worker checkpoint — MOVE_MEGAHORN HORN_HIT_2 asset prerequisite (2026-09-22)
+
+- **State / scope:** `MOVE_MEGAHORN` is **staged/unsupported**, so Level 50 is
+  **268/276 exact, 0 partial, 1 staged, 7 unsupported**. Added only the
+  source audit, complete legal bilateral Factory carriers, Battle Scene ON
+  dense/raw-RGB receipts, normalized banked latch maps, and the generated
+  production horn_hit_2 asset plus reproducible extractor/contract tests.
+  No reducer, typed seam, compositor/core, framebuffer acceptance,
+  exact/track/sibling/shared-component credit, boundary/barrier, or gameplay
+  ownership changed. The source-extracted asset is only a prerequisite; the
+  four novel/unproved components remain
+  `asset:ANIM_TAG_HORN_HIT_2`, `subroutine:MegahornContinue`,
+  `subroutine:MegahornInContest`, and
+  `visualCommand:create_megahorn_horn_sprite`.
+- **Evidence:** The 237-byte `Move_MEGAHORN` root and all **21** graph
+  components include the battle `BG_DRILL` path, contest-only branch, actual
+  horn template/callback/affine programs, attacker ShakeMon/lunge, hitsplat,
+  target ShakeMonInPlace, complex palette blend, defender-partner monbg,
+  restore/fade, audio/resources, and cleanup. Fresh legal player-back frames
+  **211..387 (177 rows)** and opponent-front **212..387 (176 rows)** were
+  retained twice per orientation through first inactive cleanup. OAM/matrices
+  are predecessor-transfer **176/176** and **175/175**; palettes are
+  **175/176** and **174/175** with only age 7 exceptional. Selected monbg is
+  BG1/BG2 bank 8/9; BG/VRAM edges are [8,29,137,139,156]. The only new
+  asset is tag **10153**: exact **32x16**, 4bpp, **4x2/8-tile** sheet +
+  16-color palette, static dummy frame, affine-double normal OAM, and
+  template rotations **30/-99/94**, all source/PNG/ELF/ROM-pinned.
+- **Verification / next:** On tested code ec45326d8, the asset/source/evidence/
+  boundary/inventory union passes **5 files / 16 tests**; the extractor's
+  byte-for-byte check passes; smoke passes **8 files / 448 tests**. Full
+  npm test completed successfully in **1,762 s** and npm run build passes
+  **824 modules** (only the inherited chunk-size warning). Coverage remains
+  **268/276 exact, 1 staged, 7 unsupported**; animation audit and diff checks
+  pass. Next is a separately bounded source-relative reducer, narrow seam,
+  generic compositor, material altered control, and actual-core zero-residual
+  proof; keep MegaHorn staged and its sole novel-component track unfulfilled
+  until every gate is real.
+
+# Animation worker checkpoint — MOVE_SPIT_UP source/evidence only (2026-09-23)
+
+- **State / scope:** `MOVE_SPIT_UP` remains **unsupported** with no move,
+  sibling, shared, or component-track credit. The non-exclusive
+  `spit-up-red-orb-power-branches` track is present and **unfulfilled** for
+  six components; no `src/`, production asset, seam, compositor, gameplay,
+  RNG, facility, boundary, or barrier ownership changed.
+- **Evidence:** The source audit pins the complete 10-component
+  `Move_SPIT_UP`/`SpitUpStrong`/`SpitUpStrongest`/`SpitUpContinue` graph and
+  sole Level-50 carrier `FRONTIER_MON_SWALOT_1` (index 248). Six legal
+  party-before-init Scene-ON windows cover Stockpile 1/2/3 in player-back and
+  opponent-front orientations (108/108/109 rows); dense semantic state,
+  chronological RGB888, normalized bank maps, per-slot orb latches, audio,
+  allocators, registers, opaque gameplay state/RNG, and zero-owned cleanup are
+  retained. Every window is byte-identical in two fresh runs.
+- **Verification / next:** Evidence commit `3127b9717`; affected source,
+  staging, evidence, boundary, and inventory checks pass **13 tests**;
+  source/evidence verifiers, coverage (**271/276 exact, 5 unsupported**),
+  animation audit, diff check, and typecheck are green. `MOVE_SPIT_UP` gets no
+  production or coverage promotion; do not start `MOVE_FURY_CUTTER`.

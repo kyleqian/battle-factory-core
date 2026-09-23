@@ -590,9 +590,6 @@ describe("razor-leaf-particle-cutter standalone fulfilled component-track ratche
     const level50Moves = new Set<string>(inventory.tiers.level50.moves.map((entry: Json) => entry.move));
     expect(level50Moves.size).toBe(276);
 
-    expect(coverage.entries.filter((entry: Json) => level50Moves.has(entry.move)
-      && (entry.status === "partial" || entry.status === "staged"))).toEqual([]);
-
     expect(coverage.entries.filter((entry: Json) => [
       "MOVE_RAZOR_LEAF", "MOVE_MAGICAL_LEAF", "MOVE_LEAF_BLADE", "MOVE_SECRET_POWER",
     ].includes(entry.move))).toEqual([

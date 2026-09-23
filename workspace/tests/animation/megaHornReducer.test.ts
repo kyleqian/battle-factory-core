@@ -1,0 +1,3 @@
+import{execFileSync}from"node:child_process";import{resolve}from"node:path";import{describe,expect,it}from"vitest";
+const root=resolve(import.meta.dirname,"../..");const run=()=>JSON.parse(execFileSync(process.execPath,["--experimental-strip-types","tools/compare/verifyMegaHornReducer.ts"],{cwd:root,encoding:"utf8",maxBuffer:16*1024*1024}));
+describe("MOVE_MEGAHORN source-relative reducer",()=>{it("replays both complete battle windows twice",()=>{const r=run();expect(r["player-back"]).toMatchObject({rows:177,passes:2,componentRows:354});expect(r["opponent-front"]).toMatchObject({rows:176,passes:2,componentRows:352});});});

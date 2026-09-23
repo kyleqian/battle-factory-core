@@ -1,77 +1,74 @@
-# Animation supervisor verification — MOVE_EXTRASENSORY exact closure (2026-09-22 supervisor)
+# Animation supervisor verification — MOVE_FURY_CUTTER exact merge (2026-09-23)
 
-- **State / merge:** Recovered, independently reviewed, and fast-forwarded the
-  completed Sol/high worker commits `ca3edcb0d`..`1becd7511`, then landed the
-  move-local receipt repair `ca8944465`. `MOVE_EXTRASENSORY` and its sole
-  `extrasensory-distortion-clone` track are exact; Level 50 is **267/276 exact,
-  0 partial / 0 staged, 9 unsupported**. Open-only remains **0/1 exact**. No
-  sibling/shared-Psychic credit, boundary/barrier, or gameplay/RNG owner moved.
-- **Independent proof:** Two fresh supervisor actual-core processes each pass
-  all **322/322** component, typed-seam, chronological raw-RGB, and shared-core
-  framebuffer rows with **0 residual pixels**, digest `266a4d21…`, through
-  bilateral age-160 cleanup. The altered CROBAT/BLISSEY control changes live
-  presentation output while opaque gameplay state/RNG remain unchanged.
-- **Gates / next:** Affected Extrasensory + Psychic controls + boundary/inventory
-  pass **11 files / 65 tests**; smoke passes **8 / 448**. The final repaired tree
-  passes full `npm test` **1,416 files / 11,468 tests** with **44 / 223 skipped**
-  in **1,752.28s**, and `npm run build` passes **822 modules** with only the
-  inherited chunk warning. Coverage reports **9 ready + 1 blocked**; animation
-  audit and diff checks pass. Next dispatch `MOVE_WILL_O_WISP` for complete
-  source/carrier classification, legal bilateral staging, dense evidence, and
-  its own latch maps; Helping Hand remains blocked on legal doubles staging.
-  **For the main program:** nothing blocking.
+- **State / merge:** Fast-forwarded worker commits `79fe16154` and `72fafc0ab`.
+  `MOVE_FURY_CUTTER` and only its nine-component
+  `fury-cutter-counter-power-branches` track are exact/fulfilled; Level 50 is
+  now **273/276 exact, 0 partial, 0 staged, 3 unsupported**. Helping Hand
+  remains blocked/unfulfilled; no sibling, gameplay/RNG/facility, boundary,
+  or barrier owner moved.
+- **Independent proof:** Two fresh supervisor actual-core processes are
+  byte-identical (`10c0da63…`) and pass all **344/344** component, typed-seam,
+  chronological raw-RGB, and shared-core framebuffer rows with **0 residual
+  pixels** at verdict `824abcb1…`. The material CROBAT/GROVYLE side/species/
+  geometry/allocation/order control changes live output while opaque gameplay
+  state/RNG remain unchanged. The repair uses live Grovyle/Blissey display
+  identity, side-selected target monbg, and normal flipped CUT ObjBlend OAM;
+  it adds no screenshot, coordinate/color fit, or absolute-tick branch.
+- **Gates / next:** On final production tree `72fafc0ab`, the focused Fury/
+  source/evidence/production/diagnosis/boundary/inventory union passes **7
+  files / 17 tests**; smoke passes **8 files / 448 tests**; coverage, animation
+  audit, and diff checks are green. Independent `npm test` passes **1,447 files
+  / 11,525 tests**, with **44 files / 223 tests skipped**, in **1,920.71s**;
+  `npm run build` passes **833 modules** with only the inherited chunk warning.
+  Next dispatch `MOVE_CURSE` for source classification, a move-owned component
+  track, and complete legal bilateral evidence; no existing Curse mechanics
+  or sibling receipt grants animation credit. **For the main program:** nothing
+  blocking.
 
-# Animation worker checkpoint — MOVE_EXTRASENSORY dense/latch evidence (2026-09-22)
+# Animation supervisor verification — MOVE_FURY_CUTTER residual diagnosis merge (2026-09-23)
 
-- **State / scope:** `MOVE_EXTRASENSORY` is now **staged**, so Level 50 is
-  **266/276 exact, 0 partial, 1 staged, 9 unsupported**. The move-owned
-  `extrasensory-distortion-clone` track remains unfulfilled. Added source and
-  carrier audits, complete legal bilateral staging, retained dense state/RGB,
-  normalized maps, verifier/tests, and latch records only. No reducer, typed
-  seam, compositor, production/core code, framebuffer acceptance, sibling or
-  shared-Psychic credit, boundary list, unsupported barrier, or gameplay state
-  changed.
-- **Evidence:** Legal Nuzleaf/Shuckle Scene-ON windows retain player-back
-  frames **80..240** and opponent-front **84..244**, **161+161 = 322** rows
-  through first inactive cleanup, twice in fresh processes and byte-identical.
-  Probe/RGB/map digests are player `40519f5f… / 54456d01… / 70a55e95…` and
-  opponent `b1de1329… / ffd4644e… / 1a2eab6f…`. Extrasensory's own maps pin
-  distortion source lives **42..66 / 68..92 / 94..118** and RAM+1 display,
-  clone source **94..117**, OAM RAM+1 and task-owned affine RAM+2, both attacker
-  palette programs, Psychic BG/monbg/register/audio/allocation order, stable
-  opaque gameplay state/RNG, and clean age-160 teardown.
-- **Verification / next:** Evidence code commit `6f0cabf8c` / tested tree
-  `7b0e1d441e8686c88e809c625ec1b810c107e704` passes the complete affected
-  Extrasensory + five Psychic-control + boundary/inventory union (**10 files /
-  69 tests**), deterministic source/evidence verification, typecheck, coverage,
-  animation audit, and diff checks. Next add a complete source-relative reducer,
-  narrow typed Scene-ON seam, generic live compositor/core dispatch, altered
-  control, and twice-fresh **322/322** zero-residual actual-core acceptance
-  before exact promotion; do not transfer shared-component or sibling credit.
+- **State / merge:** Fast-forwarded verified tooling-only worker commit
+  `5a7efb1a9`. `MOVE_FURY_CUTTER` remains **unsupported** and its track remains
+  **unfulfilled**; Level 50 stays **272/276 exact, 0 partial, 0 staged, 4
+  unsupported**. No production, coverage, sibling, gameplay/RNG/facility,
+  boundary, or barrier credit moved.
+- **Independent proof:** Two fresh supervisor diagnosis processes are
+  byte-identical (`d64a6c3d…`) and account for all **1,225,822** residual
+  pixels. The source-quiet mask is identical across **44 rows per orientation**
+  (**2,359** player / **2,306** opponent pixels) and is a subset of every
+  active row: **802,380** accumulated pixels are invariant static
+  field/battler/chrome composition, while **423,442** are active scanout
+  (**30,072** monbg transition, **210,120** CUT OBJ+alpha, **30,310**
+  monbg+alpha, **152,940** CUT OBJ+palette). Classification uses live source
+  latches, not coordinates, RGB fitting, screenshots, or absolute ticks.
+- **Gates / next:** The final scoped Fury/source/evidence/production/diagnosis/
+  boundary/inventory union passes **6 files / 16 tests**; coverage, animation
+  audit, typecheck, and diff checks are green. This is tooling/tests only, so
+  the same-production full-suite/build receipt from `e3af4883c` remains valid.
+  Resume by fixing the invariant static composition first, then the four
+  active scanout phases; require zero residuals and a material altered control
+  before promotion. **For the main program:** nothing blocking.
 
-# Animation maintenance — include Open-only Outrage (2026-09-22)
+# Animation supervisor verification — MOVE_FURY_CUTTER production partial merge (2026-09-23)
 
-- **State:** Level 50 remains **266/276 exact**, Open-only **0/1 exact**.
-  The campaign accounts for **10 ready + 1 blocked** Factory moves: nine
-  ready Level 50 moves, then Outrage. Helping Hand's doubles blocker remains.
-- **Did:** `4a359de1b` extends derived work selection, queue/blocker/track
-  validation, report, and launch policy to Factory tiers. Level 50 ready work
-  always precedes Open-only; blocked Level 50 work cannot strand Outrage.
-  No move receives new acceptance credit. The user reaffirmed finishing the
-  current approach; consider a bounded shared-runtime comparison before any
-  future non-Factory expansion, not a rewrite during this campaign.
-- **Verification:** Local and Hetzner scoped gates on `4a359de1b` passed:
-  **5 files / 18 tests**, typecheck, autonomy wrapper checks, launcher syntax,
-  coverage, asset audit, and diff checks. Hetzner Scene-ON oracle is healthy.
-  Remote receipts: `/var/lib/pokebench-autonomy/maintenance/20260922-outrage/`.
-  Production code/assets/dependencies/configuration remain unchanged from
-  `056e9978f`'s **1,411 files / 11,451 tests** and **821-module build** receipt.
-  Reuse that baseline plus these scoped gates; only campaign/ledger docs follow.
-- **Next:** Resume Extrasensory source + legal bilateral staging + dense
-  evidence, then advance the ranked queue through Outrage. Use legal Open-level
-  `FRONTIER_MON_DRAGONITE_5` for Outrage and preserve the existing acceptance
-  bar. Open-level species geometry remains separate; the 77 outside-Factory
-  moves are outside this campaign. The interrupted Extrasensory worker was
-  clean at `f5df34bb2`, with no code/evidence to recover; its research log and
-  a maintenance note are retained on Hetzner. Campaign end, cadence, provider
-  routing, and paused Rust lane are unchanged.
+- **State / merge:** Fast-forwarded verified worker commits `74e9970ed` and
+  `e3af4883c`. `MOVE_FURY_CUTTER` remains **unsupported** and
+  `fury-cutter-counter-power-branches` remains **unfulfilled**; Level 50 stays
+  **272/276 exact, 0 partial, 0 staged, 4 unsupported**. No coverage, sibling,
+  gameplay/RNG/facility, boundary, or barrier credit moved.
+- **Independent proof:** Two fresh supervisor reducer/seam processes are
+  byte-identical (`f1bedee4…`) across all eight **43-row** bilateral counter
+  bodies. Two fresh actual-core processes are also byte-identical
+  (`f6d168f3…`) and reproduce the honest blocker: **0/344 exact** framebuffer
+  rows and **1,225,822** residual pixels. The retained implementation is one
+  source-relative, direction/counter-generic reducer, typed seam, dispatch,
+  and CUT/battler/monbg compositor; it adds no screenshot lookup, absolute
+  battle tick, coordinate/RGB fit, or gameplay ownership.
+- **Gates / next:** On final code `e3af4883c`, independent `npm test` passes
+  **1,445 files / 11,523 tests**, with **44 files / 223 tests skipped**, in
+  **1,792.93s**; `npm run build` passes **833 modules** with only the inherited
+  chunk warning. Focused Fury/source/evidence/boundary/inventory tests,
+  typecheck, coverage, animation audit, and diff checks are green. Resume by
+  reconciling generic background/monbg/OBJ scanout and palette composition,
+  then require twice-fresh zero residuals plus a material altered control
+  before promotion. **For the main program:** nothing blocking.

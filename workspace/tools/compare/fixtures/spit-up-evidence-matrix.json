@@ -1,0 +1,416 @@
+{
+  "schema": "spit-up-natural-evidence-matrix/v1",
+  "oracleProfile": "battle-scene-on",
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "branches": [
+    {
+      "orientation": "player-back",
+      "stockpiles": 1,
+      "scenario": "tools/battle-lab/mechanic-spit-up-player-swalot-one-stockpile.json",
+      "scenarioSha256": "089a8ca1474372ab066774cea4911fd04e5b76ce957b3ad7e2b6759ee7ee4338",
+      "denseState": "tools/compare/evidence/spit-up-player-1-dense.json.gz",
+      "denseArchiveSha256": "93e84eac6c40d91efe8d4c59188a73a3e0aaff66594636f20cf0d4becaea2b32",
+      "denseJsonSha256": "b57d1a970739886cd30be0f30baba4a72f0ee38ca65f36e9c4dc77c7a32a8d02",
+      "rawRgbArchive": "tools/compare/evidence/spit-up-player-1-rgb.tar.gz",
+      "rawArchiveSha256": "2819e6388bc2121cc4bf9c90b0c380d7f7c0a053229af6a4f7bb441421aaa6d5",
+      "rawRgbSequenceSha256": "fc836e7ee617f0518867ffdc3cdd21b53c4eca5814f9f174c536cbba35d3bce6",
+      "repeatDenseJsonSha256": "b57d1a970739886cd30be0f30baba4a72f0ee38ca65f36e9c4dc77c7a32a8d02",
+      "repeatRawRgbSequenceSha256": "fc836e7ee617f0518867ffdc3cdd21b53c4eca5814f9f174c536cbba35d3bce6",
+      "twiceFreshByteIdentity": true,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-player-1.json",
+      "changeMapSha256": "2e5d62311a9368ab7c3fec0b607579fb03b23fc589035954873eda8552fd6e95",
+      "sourceWindow": {
+        "endFrame": 1386,
+        "frameCount": 108,
+        "rgbSequenceSha256": "fc836e7ee617f0518867ffdc3cdd21b53c4eca5814f9f174c536cbba35d3bce6",
+        "sourceFrameCount": 108,
+        "startFrame": 1279
+      },
+      "branch": {
+        "animTurn": 1,
+        "attackerBattler": 0,
+        "orbWaves": 1,
+        "stockpiles": 1,
+        "targetBattler": 1
+      },
+      "lifecycleCounts": {
+        "attackerShake": 1,
+        "deform": 1,
+        "impact": 2,
+        "redOrb": 8,
+        "targetPowerShake": 1
+      },
+      "tagPresence": {
+        "redOrb": {
+          "paletteFrames": 106,
+          "tileFrames": 106,
+          "absentAfterCleanup": true
+        },
+        "impact": {
+          "paletteFrames": 103,
+          "tileFrames": 103,
+          "absentAfterCleanup": true
+        }
+      },
+      "stableState": {
+        "partiesStable": true,
+        "battlersStable": true,
+        "engineStable": true,
+        "immutableStable": true,
+        "gameplayRngStable": true,
+        "animationRngTransitions": 106
+      },
+      "cleanup": {
+        "age": 107,
+        "active": 0,
+        "visualTasks": 0,
+        "soundTasks": 0,
+        "ownedSprites": 0,
+        "ownedTasks": 0,
+        "redOrbTagged": false,
+        "impactTagged": false
+      }
+    },
+    {
+      "orientation": "player-back",
+      "stockpiles": 2,
+      "scenario": "tools/battle-lab/mechanic-spit-up-player-swalot-two-stockpile.json",
+      "scenarioSha256": "ae91b2625767ae02665bb9d9e928050cf4087e3b6bcbd6ba41d1c794f0498136",
+      "denseState": "tools/compare/evidence/spit-up-player-2-dense.json.gz",
+      "denseArchiveSha256": "2ca4202203701982d1491e79ede15823550c89842e206587e964c493aded3ed0",
+      "denseJsonSha256": "17a5f882d78877e1322c5e2c2646b7b324f0f8eb60b718a4b4504fedc3e1e6dc",
+      "rawRgbArchive": "tools/compare/evidence/spit-up-player-2-rgb.tar.gz",
+      "rawArchiveSha256": "8cc627faf1b304f532bb04cbb12af69ac6259c1d32a2d6be0089810046ac2e73",
+      "rawRgbSequenceSha256": "ba880b6547ca40e638a24630031711ff2dba5f243c4df47182c0789870d205a3",
+      "repeatDenseJsonSha256": "17a5f882d78877e1322c5e2c2646b7b324f0f8eb60b718a4b4504fedc3e1e6dc",
+      "repeatRawRgbSequenceSha256": "ba880b6547ca40e638a24630031711ff2dba5f243c4df47182c0789870d205a3",
+      "twiceFreshByteIdentity": true,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-player-2.json",
+      "changeMapSha256": "322637ab557ff1c1b38c480264eecd3d7069c1dcd307d371cbd66d110dcde091",
+      "sourceWindow": {
+        "endFrame": 2320,
+        "frameCount": 108,
+        "rgbSequenceSha256": "ba880b6547ca40e638a24630031711ff2dba5f243c4df47182c0789870d205a3",
+        "sourceFrameCount": 108,
+        "startFrame": 2213
+      },
+      "branch": {
+        "animTurn": 2,
+        "attackerBattler": 0,
+        "orbWaves": 2,
+        "stockpiles": 2,
+        "targetBattler": 1
+      },
+      "lifecycleCounts": {
+        "attackerShake": 1,
+        "deform": 1,
+        "impact": 2,
+        "redOrb": 12,
+        "targetPowerShake": 1
+      },
+      "tagPresence": {
+        "redOrb": {
+          "paletteFrames": 106,
+          "tileFrames": 106,
+          "absentAfterCleanup": true
+        },
+        "impact": {
+          "paletteFrames": 103,
+          "tileFrames": 103,
+          "absentAfterCleanup": true
+        }
+      },
+      "stableState": {
+        "partiesStable": true,
+        "battlersStable": true,
+        "engineStable": true,
+        "immutableStable": true,
+        "gameplayRngStable": true,
+        "animationRngTransitions": 106
+      },
+      "cleanup": {
+        "age": 107,
+        "active": 0,
+        "visualTasks": 0,
+        "soundTasks": 0,
+        "ownedSprites": 0,
+        "ownedTasks": 0,
+        "redOrbTagged": false,
+        "impactTagged": false
+      }
+    },
+    {
+      "orientation": "player-back",
+      "stockpiles": 3,
+      "scenario": "tools/battle-lab/mechanic-spit-up-player-swalot-three-stockpile.json",
+      "scenarioSha256": "f63b3eb544e6c6f0d47aff6b9ad3e25f58d61117e028379bffc0ee3e51121f89",
+      "denseState": "tools/compare/evidence/spit-up-player-3-dense.json.gz",
+      "denseArchiveSha256": "633049ee1e0940cf8e83750cb6231ac83d1990aa2438c75f85b0e5f6258bad74",
+      "denseJsonSha256": "cd34f3227310b564ac2675f3cb9e5e5bd5157fbac5572ddce827884a577a9b7d",
+      "rawRgbArchive": "tools/compare/evidence/spit-up-player-3-rgb.tar.gz",
+      "rawArchiveSha256": "62c3878e327c5825178d718c6108c2003e4ace96cd3204eabefc2b1fd6342a00",
+      "rawRgbSequenceSha256": "74da95c2299b8257cc7baaa0cda670c948964ef3f2c6c18a3bd91d1fc96af568",
+      "repeatDenseJsonSha256": "cd34f3227310b564ac2675f3cb9e5e5bd5157fbac5572ddce827884a577a9b7d",
+      "repeatRawRgbSequenceSha256": "74da95c2299b8257cc7baaa0cda670c948964ef3f2c6c18a3bd91d1fc96af568",
+      "twiceFreshByteIdentity": true,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-player-3.json",
+      "changeMapSha256": "3cf077c431911b9d40ff2010902b38fd28590bd6176719aa53038bde19561a88",
+      "sourceWindow": {
+        "endFrame": 3255,
+        "frameCount": 109,
+        "rgbSequenceSha256": "74da95c2299b8257cc7baaa0cda670c948964ef3f2c6c18a3bd91d1fc96af568",
+        "sourceFrameCount": 109,
+        "startFrame": 3147
+      },
+      "branch": {
+        "animTurn": 3,
+        "attackerBattler": 0,
+        "orbWaves": 3,
+        "stockpiles": 3,
+        "targetBattler": 1
+      },
+      "lifecycleCounts": {
+        "attackerShake": 1,
+        "deform": 1,
+        "impact": 2,
+        "redOrb": 16,
+        "targetPowerShake": 1
+      },
+      "tagPresence": {
+        "redOrb": {
+          "paletteFrames": 107,
+          "tileFrames": 107,
+          "absentAfterCleanup": true
+        },
+        "impact": {
+          "paletteFrames": 104,
+          "tileFrames": 104,
+          "absentAfterCleanup": true
+        }
+      },
+      "stableState": {
+        "partiesStable": true,
+        "battlersStable": true,
+        "engineStable": true,
+        "immutableStable": true,
+        "gameplayRngStable": true,
+        "animationRngTransitions": 106
+      },
+      "cleanup": {
+        "age": 108,
+        "active": 0,
+        "visualTasks": 0,
+        "soundTasks": 0,
+        "ownedSprites": 0,
+        "ownedTasks": 0,
+        "redOrbTagged": false,
+        "impactTagged": false
+      }
+    },
+    {
+      "orientation": "opponent-front",
+      "stockpiles": 1,
+      "scenario": "tools/battle-lab/mechanic-spit-up-opponent-swalot-one-stockpile.json",
+      "scenarioSha256": "fd5ca68f417680bfb91f9abd85b1fe36cc531baf6cbb36052e078b23ad8f3863",
+      "denseState": "tools/compare/evidence/spit-up-opponent-1-dense.json.gz",
+      "denseArchiveSha256": "3478f3fc6f3a22ed2007e298a52701a889a825a65121220b02fa924017cd56b9",
+      "denseJsonSha256": "1f91a9b4471430c33a08bcc10a2a274fe7a5bf251ed389146c7f455a43a6f4ec",
+      "rawRgbArchive": "tools/compare/evidence/spit-up-opponent-1-rgb.tar.gz",
+      "rawArchiveSha256": "460db300700378303dae8a5d2c1c05f9888389ece3bac306ff62c4ea5e19c5b9",
+      "rawRgbSequenceSha256": "7c482a1af6b67a1fc015d44869eeac842544788cd1e5975bbfef97fb6cfdde3d",
+      "repeatDenseJsonSha256": "1f91a9b4471430c33a08bcc10a2a274fe7a5bf251ed389146c7f455a43a6f4ec",
+      "repeatRawRgbSequenceSha256": "7c482a1af6b67a1fc015d44869eeac842544788cd1e5975bbfef97fb6cfdde3d",
+      "twiceFreshByteIdentity": true,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-opponent-1.json",
+      "changeMapSha256": "3888e4a50ca2d124e34a968a69e89622783cbc79d96666697b3f9c0962b721a6",
+      "sourceWindow": {
+        "endFrame": 2332,
+        "frameCount": 108,
+        "rgbSequenceSha256": "7c482a1af6b67a1fc015d44869eeac842544788cd1e5975bbfef97fb6cfdde3d",
+        "sourceFrameCount": 108,
+        "startFrame": 2225
+      },
+      "branch": {
+        "animTurn": 1,
+        "attackerBattler": 1,
+        "orbWaves": 1,
+        "stockpiles": 1,
+        "targetBattler": 0
+      },
+      "lifecycleCounts": {
+        "attackerShake": 1,
+        "deform": 1,
+        "impact": 2,
+        "redOrb": 8,
+        "targetPowerShake": 1
+      },
+      "tagPresence": {
+        "redOrb": {
+          "paletteFrames": 106,
+          "tileFrames": 106,
+          "absentAfterCleanup": true
+        },
+        "impact": {
+          "paletteFrames": 103,
+          "tileFrames": 103,
+          "absentAfterCleanup": true
+        }
+      },
+      "stableState": {
+        "partiesStable": true,
+        "battlersStable": true,
+        "engineStable": true,
+        "immutableStable": true,
+        "gameplayRngStable": true,
+        "animationRngTransitions": 106
+      },
+      "cleanup": {
+        "age": 107,
+        "active": 0,
+        "visualTasks": 0,
+        "soundTasks": 0,
+        "ownedSprites": 0,
+        "ownedTasks": 0,
+        "redOrbTagged": false,
+        "impactTagged": false
+      }
+    },
+    {
+      "orientation": "opponent-front",
+      "stockpiles": 2,
+      "scenario": "tools/battle-lab/mechanic-spit-up-opponent-swalot-two-stockpile.json",
+      "scenarioSha256": "ffdeb54f33a22efabe67dc3d1b18b3adf21f22dafb9c801da3d6a0c3363791bb",
+      "denseState": "tools/compare/evidence/spit-up-opponent-2-dense.json.gz",
+      "denseArchiveSha256": "ffa221fd6cec4cd3dfdb2e297bfca21690f09c68961fc5762d97c31646862b58",
+      "denseJsonSha256": "25b78d49ad34157befdfc580259a4c354082b05b9c8b257d9f7aaa48e689bd7b",
+      "rawRgbArchive": "tools/compare/evidence/spit-up-opponent-2-rgb.tar.gz",
+      "rawArchiveSha256": "8473054cdef458d321b9b5f9c9112d8568c7ed6d422588f6e96590490c8dabe3",
+      "rawRgbSequenceSha256": "dc21849ba4d7a34f6f1e3954957454cdad8f524ab3229690b70bdd69542c3dd4",
+      "repeatDenseJsonSha256": "25b78d49ad34157befdfc580259a4c354082b05b9c8b257d9f7aaa48e689bd7b",
+      "repeatRawRgbSequenceSha256": "dc21849ba4d7a34f6f1e3954957454cdad8f524ab3229690b70bdd69542c3dd4",
+      "twiceFreshByteIdentity": true,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-opponent-2.json",
+      "changeMapSha256": "b43fb6d01d1884dea85da7ff9e40ac987c3f3269b23c36dcb6db1f1197398b01",
+      "sourceWindow": {
+        "endFrame": 4328,
+        "frameCount": 108,
+        "rgbSequenceSha256": "dc21849ba4d7a34f6f1e3954957454cdad8f524ab3229690b70bdd69542c3dd4",
+        "sourceFrameCount": 108,
+        "startFrame": 4221
+      },
+      "branch": {
+        "animTurn": 2,
+        "attackerBattler": 1,
+        "orbWaves": 2,
+        "stockpiles": 2,
+        "targetBattler": 0
+      },
+      "lifecycleCounts": {
+        "attackerShake": 1,
+        "deform": 1,
+        "impact": 2,
+        "redOrb": 12,
+        "targetPowerShake": 1
+      },
+      "tagPresence": {
+        "redOrb": {
+          "paletteFrames": 106,
+          "tileFrames": 106,
+          "absentAfterCleanup": true
+        },
+        "impact": {
+          "paletteFrames": 103,
+          "tileFrames": 103,
+          "absentAfterCleanup": true
+        }
+      },
+      "stableState": {
+        "partiesStable": true,
+        "battlersStable": true,
+        "engineStable": true,
+        "immutableStable": true,
+        "gameplayRngStable": true,
+        "animationRngTransitions": 106
+      },
+      "cleanup": {
+        "age": 107,
+        "active": 0,
+        "visualTasks": 0,
+        "soundTasks": 0,
+        "ownedSprites": 0,
+        "ownedTasks": 0,
+        "redOrbTagged": false,
+        "impactTagged": false
+      }
+    },
+    {
+      "orientation": "opponent-front",
+      "stockpiles": 3,
+      "scenario": "tools/battle-lab/mechanic-spit-up-opponent-swalot-three-stockpile.json",
+      "scenarioSha256": "6efafea20adf49c6ed479575df64604a39fe3a7f0df5de6fb589b63943f93e62",
+      "denseState": "tools/compare/evidence/spit-up-opponent-3-dense.json.gz",
+      "denseArchiveSha256": "6af4e4b2c2826a0570e30ad497eac837902d211408b130cffe0cfefd7a44d46c",
+      "denseJsonSha256": "634b5c1b69f534bb6cf3e0f9ad866a0b00b0c225bf6b5d3948678ff116064faf",
+      "rawRgbArchive": "tools/compare/evidence/spit-up-opponent-3-rgb.tar.gz",
+      "rawArchiveSha256": "d385be50d3792e84f04845166ae41c704ce8b1d7b556c88f70840fba16730958",
+      "rawRgbSequenceSha256": "c1d00c0b1acb3885c6eddf936e3298bbdb1cf7770210778d6d682020e7afcf77",
+      "repeatDenseJsonSha256": "634b5c1b69f534bb6cf3e0f9ad866a0b00b0c225bf6b5d3948678ff116064faf",
+      "repeatRawRgbSequenceSha256": "c1d00c0b1acb3885c6eddf936e3298bbdb1cf7770210778d6d682020e7afcf77",
+      "twiceFreshByteIdentity": true,
+      "changeMap": "tools/compare/evidence/spit-up-changemap-opponent-3.json",
+      "changeMapSha256": "c111b57dc4192a99835a91d88b073496803aa5f49dc6fea1adda5aade654ccf6",
+      "sourceWindow": {
+        "endFrame": 3363,
+        "frameCount": 109,
+        "rgbSequenceSha256": "c1d00c0b1acb3885c6eddf936e3298bbdb1cf7770210778d6d682020e7afcf77",
+        "sourceFrameCount": 109,
+        "startFrame": 3255
+      },
+      "branch": {
+        "animTurn": 3,
+        "attackerBattler": 1,
+        "orbWaves": 3,
+        "stockpiles": 3,
+        "targetBattler": 0
+      },
+      "lifecycleCounts": {
+        "attackerShake": 1,
+        "deform": 1,
+        "impact": 2,
+        "redOrb": 16,
+        "targetPowerShake": 1
+      },
+      "tagPresence": {
+        "redOrb": {
+          "paletteFrames": 107,
+          "tileFrames": 107,
+          "absentAfterCleanup": true
+        },
+        "impact": {
+          "paletteFrames": 104,
+          "tileFrames": 104,
+          "absentAfterCleanup": true
+        }
+      },
+      "stableState": {
+        "partiesStable": true,
+        "battlersStable": true,
+        "engineStable": true,
+        "immutableStable": true,
+        "gameplayRngStable": true,
+        "animationRngTransitions": 106
+      },
+      "cleanup": {
+        "age": 108,
+        "active": 0,
+        "visualTasks": 0,
+        "soundTasks": 0,
+        "ownedSprites": 0,
+        "ownedTasks": 0,
+        "redOrbTagged": false,
+        "impactTagged": false
+      }
+    }
+  ]
+}

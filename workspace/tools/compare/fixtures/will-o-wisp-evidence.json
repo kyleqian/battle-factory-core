@@ -1,0 +1,2874 @@
+{
+  "schema": "will-o-wisp-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_WILL_O_WISP",
+  "moveId": 261,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "completePointerBody": true,
+    "fullDenseRowsRetained": true,
+    "rawRgbRetained": true,
+    "normalizedBankedMaps": true,
+    "twiceFreshByteIdentical": true,
+    "orbAndFireCallbacks": true,
+    "shakeMon2Literal": [
+      4,
+      0,
+      13,
+      1
+    ],
+    "splitBgPriorityBothPhases": true,
+    "panning": true,
+    "oamMatrixPaletteResourceLifetimes": true,
+    "firstInactiveCleanup": true,
+    "latchMeasured": true,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "actualCoreFramebufferAcceptance": false,
+    "coveragePromotion": false,
+    "siblingPromotion": false,
+    "componentTrackFulfilled": false,
+    "gameplayStateOwned": false,
+    "boundaryOrBarrierChanged": false
+  },
+  "source": {
+    "rootStart": "0x082d4709",
+    "rootEndExclusive": "0x082d47c7",
+    "audit": "tools/compare/willOWispSourceAudit.ts",
+    "probe": "tools/compare/willOWispProbe.py",
+    "verifier": "tools/compare/willOWispEvidence.ts"
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "rows": {
+      "player-back": 214,
+      "opponent-front": 213
+    },
+    "totalRows": 427,
+    "firstInactiveCleanupRetained": true
+  },
+  "controls": {
+    "inheritedLatchConclusions": [],
+    "identityOnly": [
+      "MOVE_SMOG",
+      "MOVE_HYPER_VOICE",
+      "MOVE_SNORE",
+      "MOVE_SILVER_WIND"
+    ],
+    "transferCredit": false
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-will-o-wisp-player-shuppet-opponent-shuckle.json",
+      "scenarioSha256": "fb3129c73121b03e5183eef20ce9464eeecedaf248305a6e07e38ed8cff17a02",
+      "denseState": "tools/compare/evidence/will-o-wisp-player-dense-state.json.gz",
+      "denseStateSha256": "577ef2c7cd9a196b03db9c137dcb7a95068b03dbd119b361aee1e53a9d828e52",
+      "probeJsonSha256": "3f2ecd8f20984260d3256fe8a6550f8c97105ec2e6ef5928aee04f382949131f",
+      "rawRgbArchive": "tools/compare/evidence/will-o-wisp-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "5f175cba5bd2e27928351f72f71768f05d23ac62fd7ad78e251734fb962743d0",
+      "rawRgbSequenceSha256": "e02e1c81b629475536610c72641d866785ee3a04ce742d2708f02ea7a64e1e27",
+      "changeMap": "tools/compare/evidence/will-o-wisp-changemap-player.json",
+      "changeMapSha256": "5601f0dd1d8d62f581822c915d831cba3df3040625aac4f596e13bb900e75d6c",
+      "sourceWindow": {
+        "startFrame": 76,
+        "endFrame": 289,
+        "frameCount": 214,
+        "sourceFrameCount": 214
+      },
+      "summary": {
+        "frameCount": 214,
+        "lifecycle": {
+          "sprites": [
+            {
+              "id": "3:gWillOWispOrbSpriteTemplate",
+              "start": 10,
+              "end": 146,
+              "first": {
+                "callback": "AnimWillOWispOrb",
+                "x": 72,
+                "y": 80,
+                "x2": 0,
+                "y2": 0,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  2,
+                  192,
+                  4,
+                  0,
+                  -4,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispOrb_Step",
+                "x": 71,
+                "y": 80,
+                "x2": 93,
+                "y2": -30,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  0,
+                  256,
+                  75,
+                  26880,
+                  7875,
+                  164,
+                  0,
+                  0
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "4:gWillOWispOrbSpriteTemplate",
+              "start": 15,
+              "end": 151,
+              "first": {
+                "callback": "AnimWillOWispOrb",
+                "x": 72,
+                "y": 80,
+                "x2": 0,
+                "y2": 0,
+                "anim": 1,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  2,
+                  192,
+                  4,
+                  0,
+                  -4,
+                  0,
+                  0,
+                  1
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispOrb_Step",
+                "x": 71,
+                "y": 80,
+                "x2": 93,
+                "y2": -30,
+                "anim": 1,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  0,
+                  256,
+                  75,
+                  26880,
+                  7875,
+                  164,
+                  0,
+                  1
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "5:gWillOWispOrbSpriteTemplate",
+              "start": 20,
+              "end": 156,
+              "first": {
+                "callback": "AnimWillOWispOrb",
+                "x": 72,
+                "y": 80,
+                "x2": 0,
+                "y2": 0,
+                "anim": 2,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  2,
+                  192,
+                  4,
+                  0,
+                  -4,
+                  0,
+                  0,
+                  2
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispOrb_Step",
+                "x": 71,
+                "y": 80,
+                "x2": 93,
+                "y2": -30,
+                "anim": 2,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  0,
+                  256,
+                  75,
+                  26880,
+                  7875,
+                  164,
+                  0,
+                  2
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "7:gWillOWispOrbSpriteTemplate",
+              "start": 25,
+              "end": 161,
+              "first": {
+                "callback": "AnimWillOWispOrb",
+                "x": 72,
+                "y": 80,
+                "x2": 0,
+                "y2": 0,
+                "anim": 3,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  2,
+                  192,
+                  4,
+                  0,
+                  -4,
+                  0,
+                  0,
+                  3
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispOrb_Step",
+                "x": 71,
+                "y": 80,
+                "x2": 93,
+                "y2": -30,
+                "anim": 3,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  0,
+                  256,
+                  75,
+                  26880,
+                  7875,
+                  164,
+                  0,
+                  3
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "3:gWillOWispFireSpriteTemplate",
+              "start": 163,
+              "end": 190,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": 0,
+                "y2": 0,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  14,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": -43,
+                "y2": 1,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  203,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "4:gWillOWispFireSpriteTemplate",
+              "start": 163,
+              "end": 190,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": 2,
+                "y2": 0,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  56,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": -19,
+                "y2": 16,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  245,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "5:gWillOWispFireSpriteTemplate",
+              "start": 163,
+              "end": 190,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": 2,
+                "y2": -1,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  98,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": 23,
+                "y2": 14,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  31,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "7:gWillOWispFireSpriteTemplate",
+              "start": 163,
+              "end": 190,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": -1,
+                "y2": -1,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  140,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": 42,
+                "y2": -1,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  73,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "9:gWillOWispFireSpriteTemplate",
+              "start": 163,
+              "end": 190,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": -3,
+                "y2": -1,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  182,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": 20,
+                "y2": -16,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  115,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "10:gWillOWispFireSpriteTemplate",
+              "start": 163,
+              "end": 190,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": -3,
+                "y2": 0,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  224,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 176,
+                "y": 49,
+                "x2": -23,
+                "y2": -16,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  157,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            }
+          ],
+          "tasks": [
+            {
+              "id": "0:SoundTask_AdjustPanningVar_Step",
+              "start": 67,
+              "end": 128,
+              "first": {
+                "data": [
+                  0,
+                  -64,
+                  63,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  -60,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  0,
+                  -64,
+                  63,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  62,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:AnimTask_ShakeMon2_Step",
+              "start": 163,
+              "end": 186,
+              "first": {
+                "data": [
+                  8,
+                  12,
+                  1,
+                  1,
+                  4,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  8,
+                  1,
+                  1,
+                  0,
+                  4,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "1:Task_UpdateMonBg",
+              "start": 7,
+              "end": 194,
+              "first": {
+                "data": [
+                  8,
+                  176,
+                  49,
+                  -144,
+                  -17,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  8,
+                  176,
+                  49,
+                  -144,
+                  -17,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:Task_ClearMonBg",
+              "start": 192,
+              "end": 194,
+              "first": {
+                "data": [
+                  0,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  0,
+                  2,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            }
+          ]
+        },
+        "latches": {
+          "hardwareOamEqualsPrecedingSoftware": "213/213",
+          "hardwareMatricesEqualPrecedingSoftware": "213/213",
+          "hardwarePaletteEqualsPrecedingFaded": "212/213",
+          "oamExceptions": [],
+          "matrixExceptions": [],
+          "paletteExceptions": [
+            7
+          ],
+          "changedPaletteBanks": [
+            8,
+            23,
+            24
+          ],
+          "selectedMonbgBank": 8,
+          "selectedBg": "bg1"
+        },
+        "transitions": {
+          "registers": {
+            "bg1cnt": [
+              8,
+              163
+            ],
+            "bg2cnt": [
+              163
+            ],
+            "bg1hofs": [
+              8,
+              164,
+              166,
+              168,
+              170,
+              172,
+              174,
+              176,
+              178,
+              180,
+              182,
+              184,
+              186,
+              188,
+              196
+            ],
+            "bg1vofs": [
+              8,
+              196
+            ],
+            "win0h": [
+              1
+            ],
+            "win0v": [
+              1
+            ]
+          },
+          "softwareBg": {
+            "gBattle_BG1_X": [
+              7,
+              163,
+              165,
+              167,
+              169,
+              171,
+              173,
+              175,
+              177,
+              179,
+              181,
+              183,
+              185,
+              187,
+              195
+            ],
+            "gBattle_BG1_Y": [
+              7,
+              195
+            ]
+          },
+          "bgVram": [
+            8,
+            194,
+            196
+          ],
+          "fadedBanks": {
+            "8": [
+              7
+            ],
+            "23": [
+              1
+            ],
+            "24": [
+              4
+            ]
+          },
+          "hardwareBanks": {
+            "8": [
+              7
+            ],
+            "23": [
+              2
+            ],
+            "24": [
+              5
+            ]
+          },
+          "targetAxes": [
+            [
+              0,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              163,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              165,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              167,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              169,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              171,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              173,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              175,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              177,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              179,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              181,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              183,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              185,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              187,
+              [
+                0,
+                0
+              ]
+            ]
+          ],
+          "audio": [
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212,
+            213
+          ],
+          "animationRng": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212,
+            213
+          ],
+          "gameplayRng": []
+        },
+        "resources": {
+          "wispFire": {
+            "tag": 10232,
+            "tile": {
+              "first": 1,
+              "last": 212,
+              "count": 212
+            },
+            "palette": {
+              "first": 1,
+              "last": 212,
+              "count": 212
+            }
+          },
+          "wispOrb": {
+            "tag": 10231,
+            "tile": {
+              "first": 4,
+              "last": 212,
+              "count": 209
+            },
+            "palette": {
+              "first": 4,
+              "last": 212,
+              "count": 209
+            }
+          }
+        },
+        "state": {
+          "partiesStable": true,
+          "battlersStable": true,
+          "engineStable": true,
+          "immutableStable": true,
+          "rawBattleStateStable": true,
+          "gameplayRngStable": true
+        },
+        "cleanup": {
+          "age": 213,
+          "frame": 289,
+          "active": false,
+          "visualTasks": 0,
+          "soundTasks": 0,
+          "ownedTasks": 0,
+          "ownedSprites": 0,
+          "resourcesFreed": true
+        }
+      },
+      "repeatProbeJsonSha256": "3f2ecd8f20984260d3256fe8a6550f8c97105ec2e6ef5928aee04f382949131f",
+      "repeatRawRgbSequenceSha256": "e02e1c81b629475536610c72641d866785ee3a04ce742d2708f02ea7a64e1e27"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-will-o-wisp-opponent-shuppet-player-shuckle.json",
+      "scenarioSha256": "288ccbbed444f41c5d51b64fee770557a83c6daead89545b106b8c4eadf2210e",
+      "denseState": "tools/compare/evidence/will-o-wisp-opponent-dense-state.json.gz",
+      "denseStateSha256": "3de287538ef17d75842e6d16f7ffc519f0d5e006c0f9a57f0c69017ac2be40ab",
+      "probeJsonSha256": "d7c131a032e6805861d44d1005200127b15e4f1cf5436cbc1c1236c414794a81",
+      "rawRgbArchive": "tools/compare/evidence/will-o-wisp-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "2a7531e49a47f81ca468b0b7d89001b136dfccf146b70407379955758a83c0c4",
+      "rawRgbSequenceSha256": "3977ab502a73dadbf522feb694b3d612602e30dd5e3756d55ba43bfd1d5ad5b5",
+      "changeMap": "tools/compare/evidence/will-o-wisp-changemap-opponent.json",
+      "changeMapSha256": "1d4a7f515f7e37514fe5c53a47ce3f3b1cb13ea0d99cba8ef45656e2b71d8c2e",
+      "sourceWindow": {
+        "startFrame": 80,
+        "endFrame": 292,
+        "frameCount": 213,
+        "sourceFrameCount": 213
+      },
+      "summary": {
+        "frameCount": 213,
+        "lifecycle": {
+          "sprites": [
+            {
+              "id": "3:gWillOWispOrbSpriteTemplate",
+              "start": 10,
+              "end": 145,
+              "first": {
+                "callback": "AnimWillOWispOrb",
+                "x": 176,
+                "y": 40,
+                "x2": 0,
+                "y2": 0,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  2,
+                  192,
+                  4,
+                  0,
+                  4,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispOrb_Step",
+                "x": 176,
+                "y": 40,
+                "x2": -115,
+                "y2": 58,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  0,
+                  257,
+                  144,
+                  26728,
+                  14976,
+                  160,
+                  0,
+                  0
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "4:gWillOWispOrbSpriteTemplate",
+              "start": 15,
+              "end": 150,
+              "first": {
+                "callback": "AnimWillOWispOrb",
+                "x": 176,
+                "y": 40,
+                "x2": 0,
+                "y2": 0,
+                "anim": 1,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  2,
+                  192,
+                  4,
+                  0,
+                  4,
+                  0,
+                  0,
+                  1
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispOrb_Step",
+                "x": 176,
+                "y": 40,
+                "x2": -115,
+                "y2": 58,
+                "anim": 1,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  0,
+                  257,
+                  144,
+                  26728,
+                  14976,
+                  160,
+                  0,
+                  1
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "5:gWillOWispOrbSpriteTemplate",
+              "start": 20,
+              "end": 155,
+              "first": {
+                "callback": "AnimWillOWispOrb",
+                "x": 176,
+                "y": 40,
+                "x2": 0,
+                "y2": 0,
+                "anim": 2,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  2,
+                  192,
+                  4,
+                  0,
+                  4,
+                  0,
+                  0,
+                  2
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispOrb_Step",
+                "x": 176,
+                "y": 40,
+                "x2": -115,
+                "y2": 58,
+                "anim": 2,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  0,
+                  257,
+                  144,
+                  26728,
+                  14976,
+                  160,
+                  0,
+                  2
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "7:gWillOWispOrbSpriteTemplate",
+              "start": 25,
+              "end": 160,
+              "first": {
+                "callback": "AnimWillOWispOrb",
+                "x": 176,
+                "y": 40,
+                "x2": 0,
+                "y2": 0,
+                "anim": 3,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  2,
+                  192,
+                  4,
+                  0,
+                  4,
+                  0,
+                  0,
+                  3
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispOrb_Step",
+                "x": 176,
+                "y": 40,
+                "x2": -115,
+                "y2": 58,
+                "anim": 3,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  0,
+                  257,
+                  144,
+                  26728,
+                  14976,
+                  160,
+                  0,
+                  3
+                ],
+                "invisible": false
+              }
+            },
+            {
+              "id": "3:gWillOWispFireSpriteTemplate",
+              "start": 162,
+              "end": 189,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": 0,
+                "y2": 0,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  14,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": -43,
+                "y2": 1,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  203,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "4:gWillOWispFireSpriteTemplate",
+              "start": 162,
+              "end": 189,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": 2,
+                "y2": 0,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  56,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": -19,
+                "y2": 16,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  245,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "5:gWillOWispFireSpriteTemplate",
+              "start": 162,
+              "end": 189,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": 2,
+                "y2": -1,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  98,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": 23,
+                "y2": 14,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  31,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "7:gWillOWispFireSpriteTemplate",
+              "start": 162,
+              "end": 189,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": -1,
+                "y2": -1,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  140,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": 42,
+                "y2": -1,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  73,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "9:gWillOWispFireSpriteTemplate",
+              "start": 162,
+              "end": 189,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": -3,
+                "y2": -1,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  182,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": 20,
+                "y2": -16,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  115,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            },
+            {
+              "id": "10:gWillOWispFireSpriteTemplate",
+              "start": 162,
+              "end": 189,
+              "first": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": -3,
+                "y2": 0,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  224,
+                  2,
+                  768,
+                  320,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "callback": "AnimWillOWispFire",
+                "x": 72,
+                "y": 99,
+                "x2": -23,
+                "y2": -16,
+                "anim": 0,
+                "priority": 0,
+                "matrix": [
+                  256,
+                  0,
+                  0,
+                  256
+                ],
+                "data": [
+                  1,
+                  157,
+                  29,
+                  11136,
+                  4640,
+                  0,
+                  0,
+                  0
+                ],
+                "invisible": true
+              }
+            }
+          ],
+          "tasks": [
+            {
+              "id": "0:SoundTask_AdjustPanningVar_Step",
+              "start": 67,
+              "end": 127,
+              "first": {
+                "data": [
+                  0,
+                  63,
+                  -63,
+                  -2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  59,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  0,
+                  63,
+                  -63,
+                  -2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  -61,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:AnimTask_ShakeMon2_Step",
+              "start": 162,
+              "end": 185,
+              "first": {
+                "data": [
+                  6,
+                  12,
+                  1,
+                  1,
+                  4,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  6,
+                  1,
+                  1,
+                  0,
+                  4,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "1:Task_UpdateMonBg",
+              "start": 7,
+              "end": 193,
+              "first": {
+                "data": [
+                  6,
+                  72,
+                  91,
+                  -40,
+                  -59,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  6,
+                  72,
+                  91,
+                  -40,
+                  -59,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "id": "0:Task_ClearMonBg",
+              "start": 191,
+              "end": 193,
+              "first": {
+                "data": [
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "last": {
+                "data": [
+                  0,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            }
+          ]
+        },
+        "latches": {
+          "hardwareOamEqualsPrecedingSoftware": "212/212",
+          "hardwareMatricesEqualPrecedingSoftware": "212/212",
+          "hardwarePaletteEqualsPrecedingFaded": "211/212",
+          "oamExceptions": [],
+          "matrixExceptions": [],
+          "paletteExceptions": [
+            7
+          ],
+          "changedPaletteBanks": [
+            9,
+            23,
+            24
+          ],
+          "selectedMonbgBank": 9,
+          "selectedBg": "bg2"
+        },
+        "transitions": {
+          "registers": {
+            "bg1cnt": [
+              10
+            ],
+            "bg2cnt": [
+              8
+            ],
+            "bg2hofs": [
+              8,
+              163,
+              165,
+              167,
+              169,
+              171,
+              173,
+              175,
+              177,
+              179,
+              181,
+              183,
+              185,
+              187,
+              195
+            ],
+            "bg2vofs": [
+              8,
+              195
+            ],
+            "win0h": [
+              1
+            ],
+            "win0v": [
+              1
+            ]
+          },
+          "softwareBg": {
+            "gBattle_BG2_X": [
+              7,
+              162,
+              164,
+              166,
+              168,
+              170,
+              172,
+              174,
+              176,
+              178,
+              180,
+              182,
+              184,
+              186,
+              194
+            ],
+            "gBattle_BG2_Y": [
+              7,
+              194
+            ]
+          },
+          "bgVram": [
+            8,
+            193,
+            195
+          ],
+          "fadedBanks": {
+            "9": [
+              7
+            ],
+            "23": [
+              1
+            ],
+            "24": [
+              4
+            ]
+          },
+          "hardwareBanks": {
+            "9": [
+              7
+            ],
+            "23": [
+              2
+            ],
+            "24": [
+              5
+            ]
+          },
+          "targetAxes": [
+            [
+              0,
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              162,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              164,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              166,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              168,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              170,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              172,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              174,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              176,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              178,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              180,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              182,
+              [
+                -4,
+                0
+              ]
+            ],
+            [
+              184,
+              [
+                4,
+                0
+              ]
+            ],
+            [
+              186,
+              [
+                0,
+                0
+              ]
+            ]
+          ],
+          "audio": [
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212
+          ],
+          "animationRng": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200,
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212
+          ],
+          "gameplayRng": []
+        },
+        "resources": {
+          "wispFire": {
+            "tag": 10232,
+            "tile": {
+              "first": 1,
+              "last": 211,
+              "count": 211
+            },
+            "palette": {
+              "first": 1,
+              "last": 211,
+              "count": 211
+            }
+          },
+          "wispOrb": {
+            "tag": 10231,
+            "tile": {
+              "first": 4,
+              "last": 211,
+              "count": 208
+            },
+            "palette": {
+              "first": 4,
+              "last": 211,
+              "count": 208
+            }
+          }
+        },
+        "state": {
+          "partiesStable": true,
+          "battlersStable": true,
+          "engineStable": true,
+          "immutableStable": true,
+          "rawBattleStateStable": true,
+          "gameplayRngStable": true
+        },
+        "cleanup": {
+          "age": 212,
+          "frame": 292,
+          "active": false,
+          "visualTasks": 0,
+          "soundTasks": 0,
+          "ownedTasks": 0,
+          "ownedSprites": 0,
+          "resourcesFreed": true
+        }
+      },
+      "repeatProbeJsonSha256": "d7c131a032e6805861d44d1005200127b15e4f1cf5436cbc1c1236c414794a81",
+      "repeatRawRgbSequenceSha256": "3977ab502a73dadbf522feb694b3d612602e30dd5e3756d55ba43bfd1d5ad5b5"
+    }
+  },
+  "verdict": "Evidence only. MOVE_WILL_O_WISP stays staged/unsupported for exact acceptance; no reducer, seam, compositor, actual-core framebuffer, move, sibling, or fulfilled-track credit is claimed."
+}

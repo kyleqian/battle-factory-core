@@ -69,7 +69,7 @@ describe("MOVE_STOCKPILE source presentation and actual-core compositor", () => 
     })).toHaveLength(240 * 160 * 4);
   });
 
-  it("promotes Stockpile alone and leaves Swallow and Spit Up as controls", () => {
+  it("preserves Stockpile credit after independent Swallow and Spit Up promotion", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_STOCKPILE"))
       .toMatchObject({ status: "exact" });
@@ -78,6 +78,6 @@ describe("MOVE_STOCKPILE source presentation and actual-core compositor", () => 
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SWALLOW"))
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SPIT_UP"))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
   });
 });

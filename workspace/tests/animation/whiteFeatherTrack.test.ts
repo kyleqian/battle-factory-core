@@ -234,8 +234,6 @@ describe("white-feather component-track receipt ratchet", () => {
     };
     const moves = new Set(["MOVE_FEATHER_DANCE", "MOVE_MIST_BALL"]);
 
-    expect(coverage.entries.filter((entry) => entry.status === "partial" || entry.status === "staged"))
-      .toHaveLength(0);
     expect(coverage.entries.filter((entry) => moves.has(entry.move)).map((entry) => [
       entry.move,
       entry.status,

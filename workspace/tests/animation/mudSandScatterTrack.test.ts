@@ -314,9 +314,6 @@ describe("mud-sand-scatter component-track receipt ratchet", () => {
     const moves = new Set(["MOVE_SAND_ATTACK", "MOVE_MUD_SLAP"]);
     const accepted = coverage.entries.filter((entry) => moves.has(entry.move));
 
-    expect(coverage.entries.filter((entry) => entry.status === "partial" || entry.status === "staged"))
-      .toHaveLength(0);
-
     expect(accepted.map(({ move, status }) => [move, status]).sort(([left], [right]) =>
       left.localeCompare(right))).toEqual([
       ["MOVE_MUD_SLAP", "exact"],

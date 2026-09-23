@@ -198,6 +198,12 @@ import {
   type SceneOnSkillSwapConfig,
   type SceneOnPsywaveConfig,
   type SceneOnExtrasensoryConfig,
+  type SceneOnWillOWispConfig,
+  type SceneOnMegaHornConfig,
+  type SceneOnSuperpowerConfig,
+  type SceneOnRevengeConfig,
+  type SceneOnSpitUpConfig,
+  type SceneOnFuryCutterConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -385,6 +391,36 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "EXTRASENSORY") {
     const extrasensoryPresentation = presentation as SceneOnMovePresentationState<SceneOnExtrasensoryConfig>;
     renderSceneOnMovePresentation(framebuffer, extrasensoryPresentation);
+    return;
+  }
+  if (presentation.config.move === "WILL_O_WISP") {
+    const willOWispPresentation = presentation as SceneOnMovePresentationState<SceneOnWillOWispConfig>;
+    renderSceneOnMovePresentation(framebuffer, willOWispPresentation);
+    return;
+  }
+  if (presentation.config.move === "MEGAHORN") {
+    const megaHornPresentation = presentation as SceneOnMovePresentationState<SceneOnMegaHornConfig>;
+    renderSceneOnMovePresentation(framebuffer, megaHornPresentation);
+    return;
+  }
+  if (presentation.config.move === "SUPERPOWER") {
+    const superpowerPresentation=presentation as SceneOnMovePresentationState<SceneOnSuperpowerConfig>;
+    renderSceneOnMovePresentation(framebuffer,superpowerPresentation);
+    return;
+  }
+  if (presentation.config.move === "REVENGE") {
+    const revengePresentation=presentation as SceneOnMovePresentationState<SceneOnRevengeConfig>;
+    renderSceneOnMovePresentation(framebuffer,revengePresentation);
+    return;
+  }
+  if (presentation.config.move === "SPIT_UP") {
+    const spitUpPresentation = presentation as SceneOnMovePresentationState<SceneOnSpitUpConfig>;
+    renderSceneOnMovePresentation(framebuffer, spitUpPresentation);
+    return;
+  }
+  if (presentation.config.move === "FURY_CUTTER") {
+    const furyCutterPresentation = presentation as SceneOnMovePresentationState<SceneOnFuryCutterConfig>;
+    renderSceneOnMovePresentation(framebuffer, furyCutterPresentation);
     return;
   }
   if (presentation.config.move === "PURSUIT") {

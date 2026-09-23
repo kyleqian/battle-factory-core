@@ -300,7 +300,7 @@ const controlMoves = ["MOVE_ROLLOUT", "MOVE_FLAIL", "MOVE_REVERSAL", "MOVE_ENDEA
 const controls = Object.fromEntries(controlMoves.map((move) => {
   const entry = graph.moves.find((candidate: Json) => candidate.move === move);
   if (!entry) throw new Error(`missing generated control ${move}`);
-  const isExact = ["MOVE_ROLLOUT", "MOVE_FLAIL", "MOVE_REVERSAL", "MOVE_ENDEAVOR", "MOVE_PURSUIT"].includes(move);
+  const isExact = ["MOVE_ROLLOUT", "MOVE_FLAIL", "MOVE_REVERSAL", "MOVE_ENDEAVOR", "MOVE_PURSUIT", "MOVE_SPIT_UP"].includes(move);
   if ((isExact && coverageStatus(move) !== "exact") || (!isExact && coverageStatus(move) !== "unsupported-absent")) {
     throw new Error(`Rapid Spin control coverage changed for ${move}`);
   }
@@ -398,8 +398,8 @@ console.log(JSON.stringify({
     lowestLegalRoute: { challengeNum: 2, level50Range: [267, 371], trainerId: 110, regularTrainerRange: [110, 119] },
   },
   controls: {
-    exact: ["MOVE_ROLLOUT", "MOVE_FLAIL", "MOVE_REVERSAL", "MOVE_ENDEAVOR", "MOVE_PURSUIT"],
-    unsupported: ["MOVE_SPIT_UP", "MOVE_ICE_BALL"],
+    exact: ["MOVE_ROLLOUT", "MOVE_FLAIL", "MOVE_REVERSAL", "MOVE_ENDEAVOR", "MOVE_PURSUIT", "MOVE_SPIT_UP"],
+    unsupported: ["MOVE_ICE_BALL"],
     entries: controls,
     independence: "Exact controls and unsupported siblings remain independent. Rapid Spin transfers no component, timing, latch, reducer, compositor, or acceptance credit to them.",
   },

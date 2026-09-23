@@ -1,0 +1,75 @@
+{
+  "schema": "revenge-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_REVENGE",
+  "moveId": 279,
+  "status": "unsupported-evidence",
+  "coverageCredit": false,
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "rows": {
+      "player-back": 145,
+      "opponent-front": 145
+    },
+    "totalRows": 290,
+    "firstInactiveCleanupRetained": true,
+    "productionFramebufferCompared": false
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-revenge-player-machamp-opponent-shuckle.json",
+      "scenarioSha256": "b49d1d4e6caf9f8d7eb1889db2d339db2a529afb533c5ab4fe7931bccdcf0dc0",
+      "denseState": "tools/compare/evidence/revenge-player-dense-state.json.gz",
+      "denseStateSha256": "3ce5de002d4ee0e032399b358dfa53d4ad2d6757c80f64d419492a0ade4a3e96",
+      "probeJsonSha256": "5b432fa8db00fcf7f38fedd46b92909a1725c803ec72abed78beea1827048a52",
+      "repeatProbeJsonSha256": "5b432fa8db00fcf7f38fedd46b92909a1725c803ec72abed78beea1827048a52",
+      "rawRgbArchive": "tools/compare/evidence/revenge-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "f9be4f3a125bf6f91b0716296258fd7645e0de55ecfc9bd45aa98eb6c69736e6",
+      "rawRgbSequenceSha256": "1fcf5f5601a2c0ddf800dda02306188add5daed373a6dd797eae2aaa9ab8633e",
+      "repeatRawRgbSequenceSha256": "1fcf5f5601a2c0ddf800dda02306188add5daed373a6dd797eae2aaa9ab8633e",
+      "changeMap": "tools/compare/evidence/revenge-changemap-player.json",
+      "changeMapSha256": "3202d7fa26264e89fc45ad5949a252b11adbfe043a8332ce02ba132eb7769183"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-revenge-opponent-qwilfish-player-shuckle.json",
+      "scenarioSha256": "1d953bfc686e5cca89dff9347203f06d5d820eea5b5ec31323b0fc337de2f1f1",
+      "denseState": "tools/compare/evidence/revenge-opponent-dense-state.json.gz",
+      "denseStateSha256": "5fac971a83c0050c8c16e8cc76f0e79c450a782732c751857ea1261d0eee9238",
+      "probeJsonSha256": "b41abed8b8f49f238a87c1e678522fe0314f9bc9ef2a7b22957d86eb7d871638",
+      "repeatProbeJsonSha256": "b41abed8b8f49f238a87c1e678522fe0314f9bc9ef2a7b22957d86eb7d871638",
+      "rawRgbArchive": "tools/compare/evidence/revenge-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "0d9122d6121dc3857127e4050833cdac563ab1b87447ec03c909c76d44b526d3",
+      "rawRgbSequenceSha256": "47e7b19f93c49574783388d9e0c71827d7412c3eede51b61d0fb5172029674f8",
+      "repeatRawRgbSequenceSha256": "47e7b19f93c49574783388d9e0c71827d7412c3eede51b61d0fb5172029674f8",
+      "changeMap": "tools/compare/evidence/revenge-changemap-opponent.json",
+      "changeMapSha256": "749c863d6af41520b1dc3e8865fd8cfd570b1684f982a61a15b2bbe48913d1f4"
+    }
+  },
+  "scope": {
+    "sourceAudit": true,
+    "completePointerBody": true,
+    "fullDenseRowsRetained": true,
+    "rawRgbRetained": true,
+    "normalizedBankedMaps": true,
+    "twiceFreshByteIdentical": true,
+    "legalBilateralParties": true,
+    "smallAndBigScratchVariants": true,
+    "attackerBlendCycle": true,
+    "horizontalLunge": true,
+    "targetShakeMon2": true,
+    "persistentHits": true,
+    "audioAndResources": true,
+    "firstInactiveCleanup": true,
+    "latchMeasured": true,
+    "productionChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "actualCoreFramebufferAcceptance": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "siblingCredit": false,
+    "gameplayStateOwned": false,
+    "boundaryOrBarrierChanged": false
+  }
+}

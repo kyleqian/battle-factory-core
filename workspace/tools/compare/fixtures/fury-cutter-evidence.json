@@ -1,0 +1,203 @@
+{
+  "schema": "fury-cutter-evidence-checkpoint/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_FURY_CUTTER",
+  "moveId": 210,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "sourceAudit": "tools/compare/furyCutterSourceAudit.ts",
+  "graphComponents": 17,
+  "novelTrackComponents": [
+    "subroutine:FuryCutterContinue",
+    "subroutine:FuryCutterContinue2",
+    "subroutine:FuryCutterLeft",
+    "subroutine:FuryCutterMedium",
+    "subroutine:FuryCutterRight",
+    "subroutine:FuryCutterStrong",
+    "subroutine:FuryCutterStrongest",
+    "task:AnimTask_GetFuryCutterHitCount",
+    "task:AnimTask_IsFuryCutterHitRight"
+  ],
+  "representatives": [
+    "MOVE_FURY_CUTTER"
+  ],
+  "controlsOnly": [
+    "MOVE_VICE_GRIP",
+    "MOVE_GUILLOTINE",
+    "MOVE_AIR_CUTTER",
+    "MOVE_AERIAL_ACE"
+  ],
+  "noProductionClaim": false,
+  "branches": [
+    {
+      "side": "player-back",
+      "scenario": "tools/battle-lab/mechanic-fury-cutter-player-grovyle-opponent-blissey.json",
+      "scenarioSha256": "136cb945bc72da904d43d78696eac3444f84691447849b9dbe2a547d57e8525b",
+      "denseState": "tools/compare/evidence/fury-cutter-player-dense-state.json.gz",
+      "denseArchiveSha256": "a78aed1f80528365a4c4543634aa2d8f64e61c542a3839f1b2e814f51aad6593",
+      "denseJsonSha256": "9d4cf345bedd2e654ebe749e648ee2c2864ce6765ce3da73aa1b5d1c47ddead1",
+      "rawRgbArchive": "tools/compare/evidence/fury-cutter-player-raw-rgb.tar.gz",
+      "rawArchiveSha256": "edeb42109817a18fd307ae03113c163fd0c351659897175a24ababb1fd34bc16",
+      "rawRgbSequenceSha256": "62a0e272e117a286b4054e0aea2ad3352ffc8da3c7e5c1e39454d24d35d326b4",
+      "sourceWindow": {
+        "startFrame": 78,
+        "endFrame": 2022,
+        "frameCount": 172,
+        "sourceFrameCount": 172
+      },
+      "bodyWindows": [
+        {
+          "bodyIndex": 0,
+          "startFrame": 78,
+          "endFrame": 120,
+          "frameCount": 43
+        },
+        {
+          "bodyIndex": 1,
+          "startFrame": 712,
+          "endFrame": 754,
+          "frameCount": 43
+        },
+        {
+          "bodyIndex": 2,
+          "startFrame": 1346,
+          "endFrame": 1388,
+          "frameCount": 43
+        },
+        {
+          "bodyIndex": 3,
+          "startFrame": 1980,
+          "endFrame": 2022,
+          "frameCount": 43
+        }
+      ],
+      "powers": [
+        10,
+        20,
+        40,
+        80
+      ],
+      "directions": [
+        "right",
+        "left",
+        "right",
+        "left"
+      ],
+      "maps": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "mapDigests": [
+        "eaad992d29996dc4db22351d076a01b66255e16c18535ecba69d3f5b0aa48407",
+        "ab632dacbf924dfdc63286f6a69bc63dc002ea9e9132591b1c000de7c4959cee",
+        "34740b41d21d74c25a683c73ddd150169e286116f787e542434ce825610f957c",
+        "354d5d61e9d0a4ee4b38afd0cad627f119f907fc50ac2d66a852328d57e3db58"
+      ],
+      "denseRows": 172,
+      "rawRgbRows": 172,
+      "firstInactiveCleanup": true,
+      "twiceFreshByteIdentity": true,
+      "repeatProbeSha256": "742f4850c517a0060b7bf93b03f2d01181d0bd5b0b10f17a98332f700e567012",
+      "repeatRawRgbSequenceSha256": "62a0e272e117a286b4054e0aea2ad3352ffc8da3c7e5c1e39454d24d35d326b4",
+      "mapFiles": [
+        "tools/compare/evidence/fury-cutter-changemap-player-body-1.json",
+        "tools/compare/evidence/fury-cutter-changemap-player-body-2.json",
+        "tools/compare/evidence/fury-cutter-changemap-player-body-3.json",
+        "tools/compare/evidence/fury-cutter-changemap-player-body-4.json"
+      ],
+      "probeSha256": "742f4850c517a0060b7bf93b03f2d01181d0bd5b0b10f17a98332f700e567012"
+    },
+    {
+      "side": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-fury-cutter-opponent-grovyle-player-blissey.json",
+      "scenarioSha256": "dd2ac3ec90f4e9ac43e90718b1023e4ba01fcbccd0417bdc0a7db05b85694f26",
+      "denseState": "tools/compare/evidence/fury-cutter-opponent-dense-state.json.gz",
+      "denseArchiveSha256": "20eb9c2395d85b6e8bc4656710019a761cc47317eaf6ad765bb111849e1e59fe",
+      "denseJsonSha256": "992cb69212cec9c5796c62cc2c1682db29a88834dd877210c6c468439d8f7d67",
+      "rawRgbArchive": "tools/compare/evidence/fury-cutter-opponent-raw-rgb.tar.gz",
+      "rawArchiveSha256": "b3a31fcebd63e56e5ab52cd82b8dc210437a4919d65554334286f23b385c6c2e",
+      "rawRgbSequenceSha256": "5341500de480fe1c451f5a610a109bc92249e76e7a7ad704451806af95badf6e",
+      "sourceWindow": {
+        "startFrame": 82,
+        "endFrame": 2026,
+        "frameCount": 172,
+        "sourceFrameCount": 172
+      },
+      "bodyWindows": [
+        {
+          "bodyIndex": 0,
+          "startFrame": 82,
+          "endFrame": 124,
+          "frameCount": 43
+        },
+        {
+          "bodyIndex": 1,
+          "startFrame": 716,
+          "endFrame": 758,
+          "frameCount": 43
+        },
+        {
+          "bodyIndex": 2,
+          "startFrame": 1350,
+          "endFrame": 1392,
+          "frameCount": 43
+        },
+        {
+          "bodyIndex": 3,
+          "startFrame": 1984,
+          "endFrame": 2026,
+          "frameCount": 43
+        }
+      ],
+      "powers": [
+        10,
+        20,
+        40,
+        80
+      ],
+      "directions": [
+        "right",
+        "left",
+        "right",
+        "left"
+      ],
+      "maps": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "mapDigests": [
+        "2137a6f018d25d50a03c4a665eaa2af0e2ae3843d0b0c9d7e0f88305d26881f7",
+        "6579413f9c3851dec249caf4883f7ad97cdf7291f25e1642b6204d3349af8a50",
+        "f15bb60cf8463456ca1d53e1f41d1983cb821773ae663883b8f032e906a9e01b",
+        "bd2d9b8185c5c6146cd3ec39a60987545b739165bd1dbaaf399149c07b642d31"
+      ],
+      "denseRows": 172,
+      "rawRgbRows": 172,
+      "firstInactiveCleanup": true,
+      "twiceFreshByteIdentity": true,
+      "repeatProbeSha256": "e6016063420fc429232f93d87579b6dbc84a55f6b955220678f47117e32e216a",
+      "repeatRawRgbSequenceSha256": "5341500de480fe1c451f5a610a109bc92249e76e7a7ad704451806af95badf6e",
+      "mapFiles": [
+        "tools/compare/evidence/fury-cutter-changemap-opponent-body-1.json",
+        "tools/compare/evidence/fury-cutter-changemap-opponent-body-2.json",
+        "tools/compare/evidence/fury-cutter-changemap-opponent-body-3.json",
+        "tools/compare/evidence/fury-cutter-changemap-opponent-body-4.json"
+      ],
+      "probeSha256": "e6016063420fc429232f93d87579b6dbc84a55f6b955220678f47117e32e216a"
+    }
+  ],
+  "boundary": {
+    "productionChanged": true,
+    "reducerAdded": true,
+    "typedSceneOnSeam": true,
+    "compositorAdded": true,
+    "actualCoreFramebufferAcceptance": false,
+    "coveragePromotion": false,
+    "componentTrackFulfilled": false,
+    "boundaryOrBarrierChanged": false
+  }
+}
