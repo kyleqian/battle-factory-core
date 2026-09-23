@@ -1,3 +1,25 @@
+# Animation supervisor verification — MOVE_FURY_CUTTER evidence merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commit `6666ffa04`.
+  `MOVE_FURY_CUTTER` remains unsupported and its nine-component
+  `fury-cutter-counter-power-branches` track remains unfulfilled; Level 50
+  stays **272/276 exact, 0 partial, 0 staged, 4 unsupported**. No production,
+  move, sibling, gameplay/RNG/facility, boundary, or barrier credit moved.
+- **Independent proof:** Two fresh supervisor source-audit processes and two
+  dense-evidence verifier processes are respectively byte-identical. Both legal
+  orientations retain four natural **43-row** counter bodies at powers
+  **10/20/40/80** (**344 total rows**), right/left/right/left direction, own
+  palette/monbg/slice/task/resource/audio latches, stable opaque gameplay/RNG,
+  and zero-owned first-inactive cleanup. Player state/RGB digests are
+  `742f4850…` / `62a0e272…`; opponent digests are `e6016063…` / `5341500d…`.
+- **Gates / next:** On evidence tree `6666ffa04`, the source/evidence/boundary/
+  inventory union passes **4 files / 13 tests**; worker typecheck, coverage,
+  animation audit, and diff checks pass. This is evidence/tests/tooling only,
+  so the same-production supervisor full-suite/build receipt from `831a16866`
+  remains valid. Resume Fury Cutter with one source-relative reducer, typed
+  seam, generic compositor, material control, and twice-fresh actual-core proof;
+  do not start `MOVE_CURSE` first.
+
 # Animation worker checkpoint — MOVE_FURY_CUTTER source/evidence only (2026-09-23)
 
 - **State / scope:** `MOVE_FURY_CUTTER` remains **unsupported** with no move,
