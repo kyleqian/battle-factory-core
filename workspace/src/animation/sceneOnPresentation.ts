@@ -611,6 +611,11 @@ import {
   type OverheatState,
 } from "./overheat.ts";
 import {
+  outrageAtAge,
+  type OutrageLiveInputs,
+  type OutrageState,
+} from "./outrage.ts";
+import {
   silverWindAtAge,
   silverWindDisplayPlanAtAge,
   type SilverWindLiveInputs,
@@ -1438,6 +1443,7 @@ export interface SceneOnPresentationBattler {
     | "FEAROW"
     | "HOPPIP"
     | "DRAGONAIR"
+    | "DRAGONITE"
     | "GLIGAR"
     | "METANG"
     | "MISDREAVUS"
@@ -2481,6 +2487,21 @@ export interface SceneOnOverheatConfig {
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   readonly animationInputs: Readonly<Omit<OverheatLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+    | "attackerPictureOrigin" | "targetPictureOrigin">>;
+}
+
+/**
+ * Narrow Scene-ON seam for MOVE_OUTRAGE's source-relative flame body.  The
+ * scene supplies live geometry/allocation/palette facts; battle resolution,
+ * gameplay RNG and facility state remain opaque to the animation reducer.
+ */
+export interface SceneOnOutrageConfig {
+  readonly move: "OUTRAGE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<OutrageLiveInputs,
     "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
     | "attackerPictureOrigin" | "targetPictureOrigin">>;
 }
@@ -4466,6 +4487,7 @@ export type SceneOnMoveConfig =
   | SceneOnSkyAttackConfig
   | SceneOnShockWaveConfig
   | SceneOnOverheatConfig
+  | SceneOnOutrageConfig
   | SceneOnSilverWindConfig
   | SceneOnSolarBeamConfig
   | SceneOnHiJumpKickConfig
@@ -4872,6 +4894,8 @@ export type SceneOnShockWavePresentationState =
   SceneOnMovePresentationState<SceneOnShockWaveConfig>;
 export type SceneOnOverheatPresentationState =
   SceneOnMovePresentationState<SceneOnOverheatConfig>;
+export type SceneOnOutragePresentationState =
+  SceneOnMovePresentationState<SceneOnOutrageConfig>;
 export type SceneOnSilverWindPresentationState =
   SceneOnMovePresentationState<SceneOnSilverWindConfig>;
 export type SceneOnSignalBeamPresentationState =
@@ -5116,6 +5140,11 @@ export interface SceneOnShockWaveView extends ShockWaveState {
 }
 
 export interface SceneOnOverheatView extends OverheatState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnOutrageView extends OutrageState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -8351,6 +8380,29 @@ export function sceneOnOverheatView(
   const { attacker, target, animationInputs } = state.config;
   return {
     ...overheatAtAge(state.age, {
+      ...animationInputs,
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      attackerSpecies: attacker.species,
+      targetSpecies: target.species,
+      attackerPictureOrigin: attacker.geometry.animationCenter,
+      targetPictureOrigin: target.geometry.animationCenter,
+    }),
+    attacker,
+    target,
+  };
+}
+
+/** `age=0` is MOVE_OUTRAGE's first `loadspritegfx SMALL_EMBER` source row. */
+export function sceneOnOutrageView(
+  state: SceneOnOutragePresentationState,
+): SceneOnOutrageView {
+  if (state.config.move !== "OUTRAGE") {
+    throw new Error(`expected OUTRAGE presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return {
+    ...outrageAtAge(state.age, {
       ...animationInputs,
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
