@@ -46,10 +46,12 @@ export function furyCutterInputsFor(
   const tagIndex = row.tileTags.slice(0, 64).indexOf(10138);
   return { counter: counterOf(window), attackerSide: attackerIsPlayer ? "player" : "opponent",
     targetSide: attackerIsPlayer ? "opponent" : "player",
-    // MechanicLab replaces party data after the canonical display art is loaded.
-    attackerSpecies: "KECLEON", targetSpecies: "BLISSEY",
+    // This party-before-init fixture loads the legal Grovyle/Blissey display
+    // art before the move starts; keep the typed seam aligned with that live
+    // OAM species identity instead of inheriting another fixture's carrier.
+    attackerSpecies: "GROVYLE", targetSpecies: "BLISSEY",
     attackerCenter: center(attackerSprite), targetCenter: center(targetSprite),
-    attackerArt: art(attackerSprite, "KECLEON"), targetArt: art(targetSprite, "BLISSEY"),
+    attackerArt: art(attackerSprite, "GROVYLE"), targetArt: art(targetSprite, "BLISSEY"),
     ownedSprites: row.sprites.filter((sprite: Json) => OWNED.has(sprite.template?.symbol)).map(semantic),
     liveTasks: row.tasks.map((task: Json) => ({ slot: task.slot,
       callback: task.func?.symbol ?? "", data: task.data })),

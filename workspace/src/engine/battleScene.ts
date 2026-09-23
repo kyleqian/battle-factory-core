@@ -24565,13 +24565,19 @@ export function renderSceneOnMovePresentation(
     const attackerArt = artFor(view.attacker, view.battlers.attacker.art.displaySpecies);
     const targetArt = artFor(view.target, view.battlers.target.art.displaySpecies);
     const targetObject = plan.target;
-    if (targetObject && disabled(targetObject.attr)) {
-      const x = view.registers.bg1hofs ? 512 - view.registers.bg1hofs :
-        view.target.geometry.spriteCorner.x;
-      const y = view.registers.bg1vofs ? 512 - view.registers.bg1vofs :
-        view.target.geometry.spriteCorner.y;
+    // MoveBattlerSpriteToBG removes the target from hardware OAM once the
+    // copied tiles scan out.  The selected BG is side-dependent in singles:
+    // opponent targets occupy BG1/palette 8, player targets BG2/palette 9.
+    // Read that live absence and the hardware scroll instead of keying this
+    // phase to a move age or a staged coordinate.
+    if (!targetObject) {
+      const targetIsOpponent = view.target.geometry.side === "opponent";
+      const hofs = view.registers[targetIsOpponent ? "bg1hofs" : "bg2hofs"] ?? 0;
+      const vofs = view.registers[targetIsOpponent ? "bg1vofs" : "bg2vofs"] ?? 0;
+      const x = hofs ? 512 - hofs : view.target.geometry.spriteCorner.x;
+      const y = vofs ? 512 - vofs : view.target.geometry.spriteCorner.y;
       drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
-        paletteBank(16 + (view.battlers.target.art.attr[2] >>> 12 & 0xf)), x, y);
+        paletteBank(targetIsOpponent ? 8 : 9), x, y);
     }
     if (moveState.age === 0) {
       const opponent = view.attacker.geometry.side === "opponent"
@@ -24601,9 +24607,13 @@ export function renderSceneOnMovePresentation(
         const selected = cuttingSliceFrameTileset(frame);
         const eva = view.registers.bldalpha & 0x1f;
         const evb = view.registers.bldalpha >>> 8 & 0x1f;
-        drawSpriteSheetAffineRotateBlendedOverFb(fb, beforeObj, selected, paletteBank(bank),
-          corner.x + 32, corner.y + 32, object.matrix[0], object.matrix[1], object.matrix[2],
-          object.matrix[3], eva, evb, true);
+        // CUT is a normal 32x32 ObjBlend sprite here (attr0 affine bit clear),
+        // so attr1's flip flags and the OAM top-left corner are authoritative.
+        // Treating its 32x32 size bits as an affine double-size box shifts the
+        // slice by (-4,+16) despite using the right live OAM record.
+        drawSpriteSheetFlippedBlendedOverTarget(fb, beforeObj, selected, paletteBank(bank),
+          corner.x, corner.y, (object.attr[1] & 0x1000) !== 0,
+          (object.attr[1] & 0x2000) !== 0, eva, evb);
         continue;
       }
       const attacker = object.attr[2] === view.battlers.attacker.art.attr[2];

@@ -1,9 +1,8 @@
 /**
- * Temporal/provenance diagnosis for MOVE_FURY_CUTTER's retained actual-core
- * residual. This is tooling only: it neither feeds the live renderer nor
- * changes coverage. It derives the static mask from source-quiet corpus rows,
- * rather than coordinates or RGB values, then accounts for every other
- * mismatch by the live CUT/monbg/OBJ/palette state on that row.
+ * Closure check for MOVE_FURY_CUTTER's retained actual-core residual. It
+ * reruns the original temporal/provenance classification after the generic
+ * compositor repair and proves that every prior phase now has an empty mask.
+ * This remains verifier-only and never feeds the live renderer.
  */
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -147,13 +146,13 @@ export function furyCutterResidualDiagnosis(): Json {
       total + orientation.phases["cut-obj-palette"].activePixels, 0),
   };
   const activePixels = Object.values(active).reduce((total, value) => total + value, 0);
-  invariant(actualCore.rows === 344 && actualCore.framebufferMatched === 0,
-    "actual-core comparison changed unexpectedly");
+  invariant(actualCore.rows === 344 && actualCore.framebufferMatched === 344,
+    "actual-core comparison is not exact");
   invariant(actualCore.residualPixels === residualPixels && staticPixels + activePixels === residualPixels,
     "actual-core residual accounting drift");
   return {
-    schema: "fury-cutter-residual-diagnosis/v1", oracleProfile: "battle-scene-on",
-    move: "MOVE_FURY_CUTTER", status: "unsupported-diagnostic", coverageCredit: false,
+    schema: "fury-cutter-residual-closure/v1", oracleProfile: "battle-scene-on",
+    move: "MOVE_FURY_CUTTER", status: "exact-closed", coverageCredit: true,
     actualCore: { rows: actualCore.rows, framebufferMatched: actualCore.framebufferMatched,
       residualPixels: actualCore.residualPixels },
     method: {
@@ -163,10 +162,12 @@ export function furyCutterResidualDiagnosis(): Json {
       noCoordinateOrRgbFitting: true,
       runtimeOrCoverageUse: false,
     },
+    resolvedFrom: { residualPixels: 1_225_822, staticFieldBattlerChromePixels: 802_380,
+      activePixels: 423_442, repair: "live display identity, target monbg, normal CUT ObjBlend" },
     residualPixels, staticFieldBattlerChromePixels: staticPixels,
     activePixels, active, orientations,
-    boundary: { productionChanged: false, coveragePromotion: false,
-      componentTrackFulfilled: false, gameplayStateOwned: false,
+    boundary: { productionChanged: true, coveragePromotion: true,
+      componentTrackFulfilled: true, gameplayStateOwned: false,
       boundaryOrBarrierChanged: false },
   };
 }

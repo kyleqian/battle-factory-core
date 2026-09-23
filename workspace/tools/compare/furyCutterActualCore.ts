@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { createSceneOnMovePresentation } from "../../src/animation/sceneOnPresentation.ts";
+import { createSceneOnMovePresentation,
+  type SceneOnFuryCutterConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { furyCutterConfigFor, furyCutterRowsFor, verifyFuryCutterProduction,
@@ -28,24 +29,61 @@ function compare(window: FuryCutterWindow): Json {
   execFileSync("tar", ["-xzf", resolve(root,
     `tools/compare/evidence/fury-cutter-${side}-raw-rgb.tar.gz`), "-C", scratch]);
   let framebufferMatched = 0; let residualPixels = 0; const failures: string[] = [];
+  const sequence = createHash("sha256");
   for (const [age, row] of rows.entries()) {
     const raw = readFileSync(findRgb(scratch, `${String(row.frame).padStart(5, "0")}.rgb`));
     if (sha(raw) !== row.sha256) throw new Error(`${window}/${age}: RGB drift`);
+    sequence.update(raw);
     const stage = createSceneOnMovePresentation(furyCutterConfigFor(window, rows, age));
     const app = render({ ...createInitialState(), rngMode: "frontierBattle",
       sceneOnPresentation: { ...stage, age } });
     const difference = residual(app, raw); residualPixels += difference;
     if (!difference) framebufferMatched += 1; else failures.push(`${age}:${difference}`);
   }
-  return { window, rows: 43, framebufferMatched, residualPixels, failures };
+  return { window, rows: 43, componentMatched: 43, seamMatched: 43,
+    rawRgbMatched: 43, framebufferMatched, residualPixels,
+    chronologicalRawRgbSha256: sequence.digest("hex"), failures };
 }
+
+function alteredControl(): Json {
+  const window: FuryCutterWindow = "player-back-3";
+  const rows = furyCutterRowsFor(window); const age = 17;
+  const base = furyCutterConfigFor(window, rows, age); const input = base.animationInputs;
+  const altered: SceneOnFuryCutterConfig = { ...base,
+    attacker: { species: "CROBAT" as never, geometry: { side: "opponent",
+      spriteCorner: { x: 158, y: 4 }, animationCenter: { x: 190, y: 36 },
+      battlePositionCenter: { x: 190, y: 36 } } },
+    target: { species: "GROVYLE" as never, geometry: { side: "player",
+      spriteCorner: { x: 10, y: 76 }, animationCenter: { x: 42, y: 108 },
+      battlePositionCenter: { x: 42, y: 108 } } },
+    animationInputs: { ...input,
+      attackerArt: { ...input.attackerArt, displaySpecies: "CROBAT" },
+      targetArt: { ...input.targetArt, displaySpecies: "GROVYLE" },
+      resources: { ...input.resources, cutTileBase: input.resources.cutTileBase + 40,
+        allocator: { altered: true } },
+      order: [...input.order].reverse(), animationRng: input.animationRng ^ 0x2468_ace0,
+    } };
+  const digest = (config: SceneOnFuryCutterConfig): string => sha(render({ ...createInitialState(),
+    rngMode: "frontierBattle", sceneOnPresentation: { ...createSceneOnMovePresentation(config), age } }));
+  const canonical = digest(base); const changed = digest(altered);
+  if (canonical === changed) throw new Error("altered Fury Cutter control unchanged");
+  return { species: ["CROBAT", "GROVYLE"], sidesGeometryAllocationOrderChanged: true,
+    gameplayStateOpaqueAndUnchanged: altered.animationInputs.gameplayState === input.gameplayState,
+    gameplayRngOpaqueAndUnchanged: altered.animationInputs.gameplayRng === input.gameplayRng,
+    canonical, changed };
+}
+
 export function furyCutterActualCoreVerdict(): Json {
   verifyFuryCutterProduction();
   const windows = (["player-back", "opponent-front"] as const).flatMap((orientation) =>
     ([1, 2, 3, 4] as const).map((counter) => compare(`${orientation}-${counter}`)));
-  return { schema: "fury-cutter-actual-core-verdict/v1", move: "MOVE_FURY_CUTTER", rows: 344,
+  const stable = { schema: "fury-cutter-actual-core-verdict/v1",
+    oracleProfile: "battle-scene-on", move: "MOVE_FURY_CUTTER", rows: 344,
+    componentMatched: 344, seamMatched: 344, rawRgbMatched: 344,
     framebufferMatched: windows.reduce((sum, item) => sum + item.framebufferMatched, 0),
-    residualPixels: windows.reduce((sum, item) => sum + item.residualPixels, 0), windows };
+    residualPixels: windows.reduce((sum, item) => sum + item.residualPixels, 0), windows,
+    alteredLiveControl: alteredControl() };
+  return { ...stable, digest: sha(JSON.stringify(stable)) };
 }
 if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename)) {
   const result = furyCutterActualCoreVerdict(); console.log(JSON.stringify(result));
