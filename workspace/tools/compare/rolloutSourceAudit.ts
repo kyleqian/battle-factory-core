@@ -363,7 +363,7 @@ console.log(JSON.stringify({
   sharedControls: {
     sandAttack: "MOVE_SAND_ATTACK is independently exact and shares only ANIM_TAG_MUD_SAND with Rollout; its dirt subroutine/slides and its coverage do not prove the Rollout task or callback.",
     ancientPower: "MOVE_ANCIENT_POWER is independently exact and shares ANIM_TAG_ROCKS plus ANIM_TAG_IMPACT; its ten raising-rock callbacks and ShakeMon2 body are not Rollout's counter/power path.",
-    iceBall: "MOVE_ICE_BALL is an unsupported escalating-move control: it shares AnimTask_ShakeTargetBasedOnMovePowerOrDmg but has its own IceBall counter, ice BG, chunk/shard templates, subroutines, and no Rollout acceptance credit.",
+    iceBall: "MOVE_ICE_BALL is an independently exact escalating-move control: it shares AnimTask_ShakeTargetBasedOnMovePowerOrDmg but has its own IceBall counter, ice BG, chunk/shard templates, subroutines, and no Rollout acceptance credit.",
   },
   ownership: { gameplayState: false, rng: false, controller: false, renderer: false },
 }, null, 2));

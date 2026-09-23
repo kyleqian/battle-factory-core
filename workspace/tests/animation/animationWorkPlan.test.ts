@@ -30,6 +30,7 @@ describe("animation work selection", () => {
 
   it("uses manual priority without hiding unlisted work and drops accepted moves automatically", () => {
     const ledger = freshLedger();
+    ledger.entries = ledger.entries.filter((entry) => entry.move !== "MOVE_ICE_BALL");
     const before = animationWorkPlan(ledger);
     const preferred = before.ready.filter((move) => move.tier === "level50").at(-1)!.move;
     ledger.queue = [preferred];

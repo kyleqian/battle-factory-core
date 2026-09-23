@@ -58,7 +58,7 @@ describe("MOVE_RAPID_SPIN source/classification and legal Scene-ON staging check
     const second = sourceAuditText();
     expect(second).toBe(first);
     expect(createHash("sha256").update(first).digest("hex")).toBe(
-      "bd74f24bbac6307be0711618fbf9c20b2228830161cd401c9e252ee08e04e41c",
+      "a7aaf8791dd9351faeb7966a3260fe46a47760b04e461133e801b1bd2bf767cd",
     );
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
@@ -126,13 +126,13 @@ describe("MOVE_RAPID_SPIN source/classification and legal Scene-ON staging check
       lowestLegalRoute: { challengeNum: 2, level50Range: [267, 371], trainerId: 110, regularTrainerRange: [110, 119] },
     });
     expect(audit.controls).toMatchObject({
-      exact: ["MOVE_ROLLOUT", "MOVE_FLAIL", "MOVE_REVERSAL", "MOVE_ENDEAVOR", "MOVE_PURSUIT", "MOVE_SPIT_UP"],
-      unsupported: ["MOVE_ICE_BALL"],
+      exact: ["MOVE_ROLLOUT", "MOVE_FLAIL", "MOVE_REVERSAL", "MOVE_ENDEAVOR", "MOVE_PURSUIT", "MOVE_SPIT_UP", "MOVE_ICE_BALL"],
+      unsupported: [],
       entries: {
         MOVE_ROLLOUT: { status: "exact" }, MOVE_FLAIL: { status: "exact" },
         MOVE_REVERSAL: { status: "exact" }, MOVE_ENDEAVOR: { status: "exact" },
         MOVE_PURSUIT: { status: "exact" }, MOVE_SPIT_UP: { status: "exact" },
-        MOVE_ICE_BALL: { status: "unsupported-absent" },
+        MOVE_ICE_BALL: { status: "exact" },
       },
     });
     expect(audit.checkpoint).toEqual({
