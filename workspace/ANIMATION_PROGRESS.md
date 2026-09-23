@@ -1,3 +1,42 @@
+# Animation worker checkpoint — MOVE_CURSE source/evidence boundary (2026-09-23)
+
+- **State:** Source classification and legal Scene-ON evidence are complete as
+  an unsupported checkpoint. `MOVE_CURSE` stays unsupported; the
+  `curse-ghost-nail-stat-lines` ten-component track is unfulfilled.
+- **Did:** `e8fc0a00a` pins the half-open source/ELF/ROM graph, all 16
+  components, 18 Level-50 Factory carriers, both natural branches, and
+  non-transfer controls. `fa3d59717` banks four complete legal three-mon
+  party-before-init scenarios, dense semantic maps, chronological raw RGB,
+  hermetic verification, and first-inactive cleanup. Ghost player/opponent
+  are **373 rows** (`71..443` / `75..447`); stat player/opponent are **176**
+  (`312..487` / `312..487`).
+- **Notes:** Two fresh runs are byte-identical for every JSON/RGB sequence.
+  Map/dense/RGB SHA-256 triples are: Ghost-P
+  `aad1921df0bf90c1df1f7b5b1296b26bef7dd9db79df9f6a40235956c4bc57ba` /
+  `6d546ec6be0f4d725ebfbc81a7c52786b784e762f1612e16d803326291733cd5` /
+  `159bf7f39abdf5a9e309d7f5f53e313680645e3654cd0e8c64025967edcae4e9`;
+  Ghost-O
+  `8ee4addc695e1a769e55305a43ab5142765d63aa97c9776ef4ed726990ed2a7b` /
+  `2e0ca250cb479ca1a8976fa4c74d881fd74cf91daf2af21739aa1605a2503443` /
+  `c0f7efdb83684af1db99aceb3cd5c9a52e758a6e6c2cfa4db034953e79f922d1`;
+  Stat-P
+  `11a0f3b84688a2b023d9c92ebfa96400c85391da08ca140120e5a552bfe6b515` /
+  `b906b07eb3f271c9df50ed77ca4d09a96320db1745a913e4f6c8679af9f17a9c` /
+  `1ce1af42ace6c750499bf28bd95c18d1b22d42da8cc909c8122a69c61348391f`;
+  Stat-O
+  `75d295e0f16c6197dda8729d76ad1338de560e8b5dca5a4d812ad159bb061538` /
+  `42ee5c620e7f1c1b7dfd3d2e0d988eb692121da8ff5ed46f93a9db39978dd8a3` /
+  `a84fd4999898cce6219d6f565c4c5337c76a05fe3f9907cbdaa4eb24feb0dd58`;
+  complete values are pinned in `tools/compare/fixtures/curse-evidence.json`.
+  Hardware OAM/matrices are
+  predecessor-transfer **372/372** Ghost and **175/175** stat; palette
+  exceptions are measured per orientation in `ANIMATION_LATCHES.md`. No
+  reducer, typed seam, compositor, framebuffer acceptance, promotion,
+  gameplay ownership, or Tickle/Attract/Screech/Sleep Talk/Bind credit.
+- **Next:** Supervisor review of this evidence boundary. A future production
+  phase needs a new bounded dispatch for source-derived reducer/seam/
+  compositor work; none was started here.
+
 # Animation supervisor verification — MOVE_FURY_CUTTER exact merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded worker commits `79fe16154` and `72fafc0ab`.
