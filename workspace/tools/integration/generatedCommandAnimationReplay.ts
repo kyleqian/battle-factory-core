@@ -7,6 +7,7 @@ import { createBattleResolutionPresentationRenderView } from "../../src/engine/b
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 import type { GbaButton } from "../../src/input.ts";
+import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 
 /** Legal generated rentals/opponent; only ordinary command input follows generation. */
 export function generatedCommandAnimationReplay(
@@ -21,7 +22,7 @@ export function generatedCommandAnimationReplay(
   const animations: Array<{ moveId: number; attacker: number; player: string; opponent: string; ages: number[] }> = [];
   const boundaries = [];
   const commands: Array<{ type: string; frame: number; command: unknown }> = [];
-  const requests: Array<{ moveId: number; attacker: number; turn: number; multihit: number; frame: number }> = [];
+  const requests: Array<BattleMoveAnimationRequest & { frame: number }> = [];
   let commandKey = "";
   let frame = 0;
   let key = "";
