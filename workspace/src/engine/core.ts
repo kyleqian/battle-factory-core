@@ -202,6 +202,7 @@ import {
   type SceneOnSuperpowerConfig,
   type SceneOnRevengeConfig,
   type SceneOnSpitUpConfig,
+  type SceneOnFuryCutterConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -414,6 +415,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "SPIT_UP") {
     const spitUpPresentation = presentation as SceneOnMovePresentationState<SceneOnSpitUpConfig>;
     renderSceneOnMovePresentation(framebuffer, spitUpPresentation);
+    return;
+  }
+  if (presentation.config.move === "FURY_CUTTER") {
+    const furyCutterPresentation = presentation as SceneOnMovePresentationState<SceneOnFuryCutterConfig>;
+    renderSceneOnMovePresentation(framebuffer, furyCutterPresentation);
     return;
   }
   if (presentation.config.move === "PURSUIT") {

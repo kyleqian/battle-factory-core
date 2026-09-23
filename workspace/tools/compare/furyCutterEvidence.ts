@@ -196,9 +196,9 @@ function stage(args: readonly string[]): void {
     schema: "fury-cutter-evidence-checkpoint/v1", oracleProfile: "battle-scene-on", move: "MOVE_FURY_CUTTER", moveId: 210,
     status: "unsupported", coverageCredit: false, sourceAudit: "tools/compare/furyCutterSourceAudit.ts",
     graphComponents: 17, novelTrackComponents: ["subroutine:FuryCutterContinue", "subroutine:FuryCutterContinue2", "subroutine:FuryCutterLeft", "subroutine:FuryCutterMedium", "subroutine:FuryCutterRight", "subroutine:FuryCutterStrong", "subroutine:FuryCutterStrongest", "task:AnimTask_GetFuryCutterHitCount", "task:AnimTask_IsFuryCutterHitRight"],
-    representatives: ["MOVE_FURY_CUTTER"], controlsOnly: ["MOVE_VICE_GRIP", "MOVE_GUILLOTINE", "MOVE_AIR_CUTTER", "MOVE_AERIAL_ACE"], noProductionClaim: true,
+    representatives: ["MOVE_FURY_CUTTER"], controlsOnly: ["MOVE_VICE_GRIP", "MOVE_GUILLOTINE", "MOVE_AIR_CUTTER", "MOVE_AERIAL_ACE"], noProductionClaim: false,
     branches: sides.map((side) => (side as any).stagedResult),
-    boundary: { productionChanged: false, reducerAdded: false, typedSceneOnSeam: false, compositorAdded: false, actualCoreFramebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false, boundaryOrBarrierChanged: false },
+    boundary: { productionChanged: true, reducerAdded: true, typedSceneOnSeam: true, compositorAdded: true, actualCoreFramebufferAcceptance: false, coveragePromotion: false, componentTrackFulfilled: false, boundaryOrBarrierChanged: false },
   };
   writeFileSync(resolve(root, "tools/compare/fixtures/fury-cutter-evidence.json"), `${JSON.stringify(fixture, null, 2)}\n`);
   console.log(JSON.stringify(fixture, null, 2));

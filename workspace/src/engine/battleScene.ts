@@ -1010,6 +1010,7 @@ import {
   sceneOnSuperpowerView,
   sceneOnRevengeView,
   sceneOnSpitUpView,
+  sceneOnFuryCutterView,
   sceneOnPursuitView,
   sceneOnPursuitDisplayPlan,
   sceneOnReturnView,
@@ -1294,6 +1295,7 @@ import {
   type SceneOnSuperpowerConfig,
   type SceneOnRevengeConfig,
   type SceneOnSpitUpConfig,
+  type SceneOnFuryCutterConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
@@ -1393,6 +1395,7 @@ import { megaHornDisplayPlan } from "../animation/megaHorn.ts";
 import { superpowerDisplayPlan } from "../animation/superpower.ts";
 import { revengeDisplayPlan } from "../animation/revenge.ts";
 import { spitUpDisplayPlan } from "../animation/spitUp.ts";
+import { furyCutterDisplayPlan } from "../animation/furyCutter.ts";
 import {
   hypnosisBgPaletteRowAtAge,
   HYPNOSIS_TARGET_BLEND_COLOR,
@@ -24528,6 +24531,102 @@ export function renderSceneOnMovePresentation(
     drawMessageTextLines(fb, view.attacker.geometry.side === "player"
       ? `${view.battlers.attacker.art.displaySpecies} used`
       : `Foe ${view.battlers.attacker.art.displaySpecies} used`, "SPIT UP!", 99);
+    return;
+  }
+
+  if (state.config.move === "FURY_CUTTER") {
+    const moveState = state as SceneOnMovePresentationState<SceneOnFuryCutterConfig>;
+    const view = sceneOnFuryCutterView(moveState), plan = furyCutterDisplayPlan(view);
+    if (view.attacker.geometry.side === view.target.geometry.side) {
+      throw new Error("FURY_CUTTER requires opposite sides");
+    }
+    type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+    const artFor = (battler: typeof view.attacker, species: string): BattlerArt => {
+      const found = battler.geometry.side === "player"
+        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[species]
+        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[species];
+      if (!found) throw new Error(`FURY_CUTTER missing live battler art ${species}`);
+      return found;
+    };
+    const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset =>
+      side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+    const rgb555 = (word: number): RgbColor => { const packed = mgbaColorFromBgr555(word);
+      return { r: packed & 0xff, g: packed >>> 8 & 0xff, b: packed >>> 16 & 0xff }; };
+    const paletteBank = (bank: number): RgbColor[] =>
+      view.palette.hardware.slice(bank * 16, bank * 16 + 16).map(rgb555);
+    const signed = (value: number): number => { const raw = value & 0x1ff;
+      return raw >= 240 ? raw - 512 : raw; };
+    const top = (attr: readonly [number, number, number]) => ({ x: signed(attr[1]),
+      y: (attr[0] & 0xff) >= 160 ? (attr[0] & 0xff) - 256 : attr[0] & 0xff });
+    const disabled = (attr: readonly [number, number, number]): boolean =>
+      (attr[0] & 0x300) === 0x200;
+    drawExtractedTileBg(fb, { tileset: battleBg.static.tileset, tilemap: battleBg.static.tilemap,
+      subpalettes: [2, 3, 4].map(paletteBank) });
+    const attackerArt = artFor(view.attacker, view.battlers.attacker.art.displaySpecies);
+    const targetArt = artFor(view.target, view.battlers.target.art.displaySpecies);
+    const targetObject = plan.target;
+    if (targetObject && disabled(targetObject.attr)) {
+      const x = view.registers.bg1hofs ? 512 - view.registers.bg1hofs :
+        view.target.geometry.spriteCorner.x;
+      const y = view.registers.bg1vofs ? 512 - view.registers.bg1vofs :
+        view.target.geometry.spriteCorner.y;
+      drawSpriteSheet(fb, tilesFor(targetArt, view.target.geometry.side),
+        paletteBank(16 + (view.battlers.target.art.attr[2] >>> 12 & 0xf)), x, y);
+    }
+    if (moveState.age === 0) {
+      const opponent = view.attacker.geometry.side === "opponent"
+        ? { battler: view.attacker, object: plan.attacker,
+          species: view.battlers.attacker.art.displaySpecies }
+        : { battler: view.target, object: plan.target,
+          species: view.battlers.target.art.displaySpecies };
+      if (opponent.object) {
+        const offset = (opponent.object.attr[0] & 0xff) - 8;
+        drawSourceOpponentEnemyShadow(fb, opponent.species, {
+          x: opponent.battler.geometry.battlePositionCenter.x,
+          y: opponent.battler.geometry.battlePositionCenter.y - offset });
+      }
+    }
+    const beforeObj = fb.slice();
+    const entries = [...(plan.attacker ? [plan.attacker] : []),
+      ...(plan.target ? [plan.target] : []), ...plan.slices]
+      .filter((object, index, all) => all.findIndex((item) => item.oamIndex === object.oamIndex) === index)
+      .sort((left, right) => right.oamIndex - left.oamIndex);
+    for (const object of entries) {
+      if (disabled(object.attr)) continue;
+      const tile = object.attr[2] & 0x3ff; const bank = 16 + (object.attr[2] >>> 12 & 0xf);
+      const corner = top(object.attr);
+      if (view.resources.cutLoaded && tile >= view.resources.cutTileBase
+        && tile < view.resources.cutTileBase + 64) {
+        const frame = Math.floor((tile - view.resources.cutTileBase) / 16);
+        const selected = cuttingSliceFrameTileset(frame);
+        const eva = view.registers.bldalpha & 0x1f;
+        const evb = view.registers.bldalpha >>> 8 & 0x1f;
+        drawSpriteSheetAffineRotateBlendedOverFb(fb, beforeObj, selected, paletteBank(bank),
+          corner.x + 32, corner.y + 32, object.matrix[0], object.matrix[1], object.matrix[2],
+          object.matrix[3], eva, evb, true);
+        continue;
+      }
+      const attacker = object.attr[2] === view.battlers.attacker.art.attr[2];
+      const battler = attacker ? view.attacker : view.target;
+      drawSpriteSheet(fb, tilesFor(attacker ? attackerArt : targetArt, battler.geometry.side),
+        paletteBank(bank), corner.x, corner.y);
+    }
+    const playerSpecies = view.attacker.geometry.side === "player"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const opponentSpecies = view.attacker.geometry.side === "opponent"
+      ? view.battlers.attacker.art.displaySpecies : view.battlers.target.art.displaySpecies;
+    const profile = moveState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies, level: 50, gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none" }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies, level: 50, gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: profile.playerStatus ?? "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, view.attacker.geometry.side === "player"
+      ? `${view.battlers.attacker.art.displaySpecies} used`
+      : `Foe ${view.battlers.attacker.art.displaySpecies} used`, "FURY CUTTER!", 99);
     return;
   }
 

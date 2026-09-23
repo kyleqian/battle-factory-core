@@ -14,14 +14,14 @@ describe("MOVE_FURY_CUTTER dense evidence checkpoint", () => {
     ], { encoding: "utf8" });
     expect(JSON.parse(output)).toMatchObject({
       schema: "fury-cutter-evidence-checkpoint/v1",
-      status: "unsupported", coverageCredit: false, noProductionClaim: true,
+      status: "unsupported", coverageCredit: false, noProductionClaim: false,
       graphComponents: 17, representatives: ["MOVE_FURY_CUTTER"],
       novelTrackComponents: expect.arrayContaining([
         "subroutine:FuryCutterContinue", "task:AnimTask_GetFuryCutterHitCount",
       ]),
       boundary: {
-        productionChanged: false, reducerAdded: false, typedSceneOnSeam: false,
-        compositorAdded: false, actualCoreFramebufferAcceptance: false,
+        productionChanged: true, reducerAdded: true, typedSceneOnSeam: true,
+        compositorAdded: true, actualCoreFramebufferAcceptance: false,
         coveragePromotion: false, componentTrackFulfilled: false,
         boundaryOrBarrierChanged: false,
       },
@@ -30,7 +30,7 @@ describe("MOVE_FURY_CUTTER dense evidence checkpoint", () => {
       schema: "fury-cutter-evidence-checkpoint/v1",
       oracleProfile: "battle-scene-on", move: "MOVE_FURY_CUTTER",
       status: "unsupported", coverageCredit: false, graphComponents: 17,
-      noProductionClaim: true,
+      noProductionClaim: false,
     });
     expect(fixture.branches).toHaveLength(2);
     const seen = new Set<string>();

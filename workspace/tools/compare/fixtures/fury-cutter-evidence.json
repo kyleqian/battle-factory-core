@@ -27,7 +27,7 @@
     "MOVE_AIR_CUTTER",
     "MOVE_AERIAL_ACE"
   ],
-  "noProductionClaim": true,
+  "noProductionClaim": false,
   "branches": [
     {
       "side": "player-back",
@@ -191,10 +191,10 @@
     }
   ],
   "boundary": {
-    "productionChanged": false,
-    "reducerAdded": false,
-    "typedSceneOnSeam": false,
-    "compositorAdded": false,
+    "productionChanged": true,
+    "reducerAdded": true,
+    "typedSceneOnSeam": true,
+    "compositorAdded": true,
     "actualCoreFramebufferAcceptance": false,
     "coveragePromotion": false,
     "componentTrackFulfilled": false,
