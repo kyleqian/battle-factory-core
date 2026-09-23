@@ -8149,6 +8149,33 @@
     "ANIMATION_LATCHES.md"
    ],
    "acceptance": "Two independent fresh actual-core verifier processes each pass all 344 component, typed-seam, chronological raw-RGB, and shared production framebuffer rows with zero residual pixels. Verdict digest 824abcb1c33013cb187be5a75c5ea326bc833b2fc0fdaa1977042de2d24bc233; player counter 1/2/3/4 RGB sequences c2160defc69ff468e2b4223b7c17f0f52119f4c38f29c8dd67d7c3af20fc84d8 / af0dd8a6e4d9a16f85e151c724c862e6274b9819d5b4a3df3d45bc898875e58c / 8b80a06797d11ef317486076fadba2800be5debe82b23e11520b2e4347a90529 / dfcc7376112597e999bd49fbd866a0637e6e3415cb0b92cfd5986c16678f17a1; opponent counter 1/2/3/4 RGB sequences 639101f60fefd335b5e375dd7d2aa668ae545fafc94da938889ce99022a36ed3 / dede5e3d8d2bb2ff133001c5a12ac2ba82f8b35d9dd9db933a85a48657f25929 / 2631330b7f44fc66180a9fe76ef4331d12c4ebe3db72acaaff95c396b1111e67 / b525a01e4f6e69db137be9081d68aab94bb0a73aa4f57a92ffc9c5f307d9a91e."
+  },
+  {
+   "id": "curse-ghost-nail-stat-lines",
+   "components": [
+    "asset:ANIM_TAG_GHOSTLY_SPIRIT",
+    "asset:ANIM_TAG_NAIL",
+    "sprite:gCurseGhostSpriteTemplate",
+    "sprite:gCurseNailSpriteTemplate",
+    "subroutine:CurseGhost",
+    "subroutine:CurseGhostShakeFromNail",
+    "subroutine:CurseStats",
+    "subroutine:CurseStats1",
+    "task:AnimTask_CurseStretchingBlackBg",
+    "task:AnimTask_DrawFallingWhiteLinesOnAttacker"
+   ],
+   "representatives": ["MOVE_CURSE"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/curseSourceAudit.ts",
+    "tools/compare/curseProbe.py",
+    "tools/compare/curseEvidence.ts",
+    "tools/compare/fixtures/curse-evidence.json",
+    "tests/animation/curseSourceStaging.test.ts",
+    "tests/animation/curseEvidenceCheckpoint.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "goal": "UNFULFILLED evidence checkpoint only: MOVE_CURSE alone owns the ten novel asset/template/subroutine/task components. Complete legal three-mon pre-init Scene-ON Ghost and non-Ghost Curse branches are retained in both player-back and opponent-front orientations with move-owned latches and compact normalized maps, but no reducer, seam, compositor, promotion, or sibling credit exists yet. Tickle, Attract, Screech, Sleep Talk, and Bind are controls only."
   }
  ],
  "queue": [],
