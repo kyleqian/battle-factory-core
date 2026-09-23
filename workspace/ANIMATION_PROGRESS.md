@@ -1,3 +1,28 @@
+# Animation supervisor verification — MOVE_ICE_BALL exact merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commits `3f7f4b904` through
+  `924b2f31e`; **MOVE_ICE_BALL is exact** and only its
+  `ice-ball-five-counter-bg-shards` track is fulfilled. Level 50 is now
+  **275/276 exact, 0 partial, 0 staged, 1 unsupported**. Helping Hand remains
+  evidence-blocked; no sibling, gameplay/RNG/facility, import-boundary, or
+  unsupported-barrier credit moved.
+- **Independent proof:** Ran the actual-core verifier twice from the worker
+  tree with byte-identical reports: **872/872** source, seam, chronological
+  raw-RGB, and actual-framebuffer rows, **zero residual pixels**, verdict digest
+  `92954a69…`. A material CROBAT/BLISSEY control changes the rendered digest
+  (`b9453bcd…` → `cb8dc58f…`) while gameplay state/RNG remain unchanged. The
+  Rapid Spin receipt update is limited to its explicit Ice Ball source control;
+  its retained ROM, semantic, RGB/framebuffer, and change-map hashes did not
+  change.
+- **Gates / next:** Supervisor focused union passes **17 files / 53 tests**;
+  coverage, animation audit, JSON, and diff checks pass. The worker's same-code
+  serialized full suite passes **1,458 files / 11,546 tests** with **44 files /
+  223 tests skipped**; build passes **837 modules** with only the inherited
+  chunk warning. A final independent supervisor suite/build is due at session
+  wind-down. Next ready campaign work is Open-only **MOVE_OUTRAGE**; dispatch it
+  only if the remaining deadline safely permits verification and cleanup.
+  **For the main program:** nothing blocking.
+
 # Animation worker checkpoint — MOVE_ICE_BALL exact production (2026-09-23)
 
 - **State / commits:** `3f7f4b904`, `d90589a52`, `9889b78b6`, `49119ed5e`,
@@ -44,32 +69,3 @@
   Next dispatch a bounded production implementation/acceptance step for Ice
   Ball; Open-only `MOVE_OUTRAGE` follows when Level-50 ready work is exhausted.
   **For the main program:** nothing blocking.
-
-# Animation worker checkpoint — MOVE_ICE_BALL source/legal dense evidence (2026-09-23)
-
-- **State / credit:** Source and legal staging are complete, but
-  MOVE_ICE_BALL remains **unsupported** and
-  ice-ball-five-counter-bg-shards remains **unfulfilled**. Coverage stays
-  **274/276 exact, 0 partial, 0 staged, 2 unsupported**; no production,
-  seam, compositor, actual-core, move, sibling, or component credit moved.
-- **Did:** Audited the complete 20-component Move_ICE_BALL root
-  (0x082d72a4..0x082d7473, 463 bytes), including Ice Ball callbacks,
-  affine scales, arc, shard lives, counter branches, target shakes, assets,
-  sounds, and strongest-only BG_ICE cleanup. Legal Level-50 party-only
-  Scene-ON fixtures use ROM SPHEAL=341 against genderless REGISTEEL=403
-  with seed 305420103; the source census retains SPHEAL, DELIBIRD, and
-  SEALEO_1.
-- **Evidence:** Player-back and opponent-front each retain **436 rows**
-  (76/76/76/76/132) through first inactive cleanup. Two fresh probes per
-  orientation are byte-identical: dense/RGB sequence digests are
-  278737a3…/03238c1f… and 6acb3416…/f4432d82…. Maps measure counters
-  0..4, shards 5/7/9/10/10, shake 8/10/14/18/30, logical shard life
-  21, 30-tick arcs, predecessor OAM/matrix/palette latches, the one
-  player-back counter-3 OAM exception, side-specific BG_ICE, audio, opaque
-  state/RNG, and zero-owned cleanup.
-  Compact maps are 100K each with SHA-256 prefixes 9e6cd041…/5af2dea6…;
-  full dense rows remain in the compressed fixtures.
-- **Gates / next:** Source/evidence tests pass **8/8**, boundary/inventory
-  ratchets pass **9/9**, coverage and animation audit pass. The exact next
-  step is a separately authorized production implementation/acceptance
-  dispatch; this checkpoint intentionally makes no such claim.
