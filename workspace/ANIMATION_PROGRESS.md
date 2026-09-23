@@ -36,6 +36,11 @@
 - **Next:** Supervisor review of this evidence boundary. A future production
   phase needs a new bounded dispatch for source-derived reducer/seam/
   compositor work; none was started here.
+- **Gates:** Final code commit `24af84cab` passed the scoped union (**4 files,
+  13 tests**), `npm run animation:coverage`, `npm run animation:audit`,
+  `npm run typecheck`, and `git diff --check`. No production/assets/config/
+  dependency files changed, so the verification contract does not require
+  `npm test` or `npm run build` for this evidence-only step.
 
 # Animation supervisor verification — MOVE_FURY_CUTTER exact merge (2026-09-23)
 
