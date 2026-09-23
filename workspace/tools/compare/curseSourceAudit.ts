@@ -1,9 +1,8 @@
-/** Authoritative source/component/carrier audit for MOVE_CURSE.
+/** Authoritative source/component/carrier and exact-coverage audit for MOVE_CURSE.
  *
- * This checkpoint deliberately stops at source classification and evidence
- * staging. It does not add a reducer, Scene-ON seam, compositor, or coverage
- * credit. Pointer intervals are half-open and checked against the pinned
- * ELF/ROM image as well as the generated source graph and Factory census.
+ * Pointer intervals are half-open and checked against the pinned ELF/ROM image,
+ * generated source graph, Factory census, and the independently promoted
+ * coverage/component-track records.
  */
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -138,6 +137,8 @@ const novelTrackComponents = [
 const sharedComponents = expectedComponents.filter((component) => !novelTrackComponents.includes(component as never));
 const graphEntry = graph.moves.find((entry: Json) => entry.move === "MOVE_CURSE");
 const inventoryEntry = inventory.tiers.level50.moves.find((entry: Json) => entry.move === "MOVE_CURSE");
+const coverageEntry = coverage.entries.find((entry: Json) => entry.move === "MOVE_CURSE");
+const componentTrack = coverage.componentTracks.find((entry: Json) => entry.id === "curse-ghost-nail-stat-lines");
 const level50Ranges = policy.rentalSelection.ranges.level50 as readonly { start: number; end: number }[];
 const inLevel50 = (entry: Json): boolean => level50Ranges.some((range) => entry.index >= range.start && entry.index <= range.end);
 const allCarriers = frontier.entries.filter((entry: Json) => entry.moves.includes("MOVE_CURSE"));
@@ -206,7 +207,8 @@ const contractFailures = [
     458, 471, 516, 525, 534, 540, 543, 548, 556, 578, 580, 666, 699, 748, 764, 784, 826, 838,
   ])],
   ["carrier labels", allCarriers.some((entry: Json) => !frontierConstants.includes(entry.label) || !frontierSource.includes(entry.label))],
-  ["coverage entry", coverage.entries.some((entry: Json) => entry.move === "MOVE_CURSE")],
+  ["coverage entry", !coverageEntry || coverageEntry.status !== "exact"],
+  ["component track", !componentTrack || componentTrack.fulfilled !== true],
 ] as const;
 if (contractFailures.some(([, failed]) => failed)) throw new Error(`MOVE_CURSE source/graph/carrier contract changed: ${contractFailures.filter(([, failed]) => failed).map(([name]) => name).join(", ")}`);
 
@@ -238,7 +240,7 @@ const directBodies = {
 
 const result = {
   schema: "curse-source-audit/v1", move: "MOVE_CURSE", moveId: 174,
-  status: "unsupported-evidence-checkpoint", coverageCredit: false,
+  status: "exact", coverageCredit: true,
   source: {
     pointerOwnedRoot: {
       symbol: "Move_CURSE", nextDispatchLabel: "Move_SOFT_BOILED", ...romRange("Move_CURSE", "Move_SOFT_BOILED"),
@@ -274,10 +276,10 @@ const result = {
     fullFactoryCarrierCensus: true, completeLevel50CarrierCensus: true,
     naturalGhostAndStatBranches: true, legalBilateralPartyOnlyStaging: true,
     denseSemanticAndRawRgbEvidence: true, normalizedBankedMaps: true, twiceFreshByteIdentical: true,
-    firstInactiveCleanup: true, latchMeasured: true, productionChanged: false, reducerAdded: false,
-    typedSceneOnSeam: false, compositorAdded: false, actualCoreFramebufferAcceptance: false,
-    coveragePromotion: false, componentTrackFulfilled: false, gameplayStateOwned: false,
-    boundaryOrBarrierChanged: false, unsupportedNoCreditBoundary: true,
+    firstInactiveCleanup: true, latchMeasured: true, productionChanged: true, reducerAdded: true,
+    typedSceneOnSeam: true, compositorAdded: true, actualCoreFramebufferAcceptance: true,
+    coveragePromotion: true, componentTrackFulfilled: true, gameplayStateOwned: false,
+    boundaryOrBarrierChanged: false, unsupportedNoCreditBoundary: false,
   },
 };
 

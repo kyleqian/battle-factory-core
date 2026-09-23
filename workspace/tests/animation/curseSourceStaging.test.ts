@@ -8,13 +8,13 @@ const audit = (): Json => JSON.parse(execFileSync(
   { encoding: "utf8", maxBuffer: 32 << 20 },
 )) as Json;
 
-describe("MOVE_CURSE source classification checkpoint", () => {
+describe("MOVE_CURSE source classification and exact coverage", () => {
   it("pins the half-open source/ELF/ROM root, all five blocks, and direct bodies", () => {
     const first = audit();
     expect(audit()).toEqual(first);
     expect(first).toMatchObject({
       schema: "curse-source-audit/v1", move: "MOVE_CURSE", moveId: 174,
-      status: "unsupported-evidence-checkpoint", coverageCredit: false,
+      status: "exact", coverageCredit: true,
       source: {
         pointerOwnedRoot: {
           symbol: "Move_CURSE", nextDispatchLabel: "Move_SOFT_BOILED",
@@ -67,9 +67,9 @@ describe("MOVE_CURSE source classification checkpoint", () => {
     expect(result.checkpoint).toMatchObject({
       sourceAudit: true, completePointerOwnedRoot: true, completeReachableVisualGraph: true,
       halfOpenSourceElfRomIntervals: true, fullFactoryCarrierCensus: true, completeLevel50CarrierCensus: true,
-      naturalGhostAndStatBranches: true, productionChanged: false, reducerAdded: false,
-      typedSceneOnSeam: false, compositorAdded: false, coveragePromotion: false,
-      componentTrackFulfilled: false, gameplayStateOwned: false, unsupportedNoCreditBoundary: true,
+      naturalGhostAndStatBranches: true, productionChanged: true, reducerAdded: true,
+      typedSceneOnSeam: true, compositorAdded: true, coveragePromotion: true,
+      componentTrackFulfilled: true, gameplayStateOwned: false, unsupportedNoCreditBoundary: false,
     });
   });
 });
