@@ -1,3 +1,25 @@
+# Animation supervisor verification — MOVE_SPIT_UP exact merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commits `9ee13120a`,
+  `e7e053b21`, and `831a16866`. `MOVE_SPIT_UP` and only its six-component
+  `spit-up-red-orb-power-branches` track are exact/fulfilled; Level 50 is now
+  **272/276 exact, 0 partial, 0 staged, 4 unsupported**. Helping Hand remains
+  blocked/unfulfilled, and no sibling, gameplay/RNG, facility, boundary, or
+  barrier owner moved.
+- **Independent proof:** Two fresh supervisor verifier processes are
+  byte-identical and pass all **650/650** component, typed-seam, chronological
+  raw-RGB, and shared-core framebuffer rows with **0 residual pixels** through
+  all six Stockpile-power/orientation cleanups, digest `50222df8…`. The material
+  CROBAT/GROVYLE control changes live output while opaque gameplay state/RNG
+  remain unchanged.
+- **Gates / next:** On merged production tree `831a16866`, the affected union
+  passes **7 files / 17 tests**; typecheck, coverage, animation audit, and diff
+  checks pass. Independent `npm test` passes **1,442 files / 11,517 tests**,
+  with **44 files / 223 tests skipped**, in **1,822.95s**; `npm run build`
+  passes **832 modules** with only the inherited chunk warning. Next dispatch
+  `MOVE_FURY_CUTTER` for source classification and complete legal bilateral
+  evidence; do not infer credit.
+
 # Animation supervisor verification — MOVE_SPIT_UP evidence merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded worker commits `3e5301c1f`, `3127b9717`,
@@ -38,24 +60,3 @@
   source/evidence verifiers, coverage (**271/276 exact, 5 unsupported**),
   animation audit, diff check, and typecheck are green. `MOVE_SPIT_UP` gets no
   production or coverage promotion; do not start `MOVE_FURY_CUTTER`.
-
-# Animation supervisor verification — MOVE_REVENGE exact merge (2026-09-23)
-
-- **State / merge:** Fast-forwarded verified worker commits `6d9c2fc11` and
-  `eab8c2a43`. `MOVE_REVENGE` and only its five-component
-  `revenge-purple-scratch-persist-hit` track are exact/fulfilled; Level 50 is
-  **271/276 exact, 0 partial, 0 staged, 5 unsupported**. Helping Hand remains
-  blocked/unfulfilled, and no sibling, gameplay/RNG, facility, boundary, or
-  barrier owner moved.
-- **Independent proof:** Two fresh supervisor actual-core processes each pass
-  all **290/290** component, typed-seam, chronological raw-RGB, and shared-core
-  framebuffer rows with **0 residual pixels**, digest `f555b063…`, through
-  bilateral age-144 cleanup. The material CROBAT/BLISSEY control changes live
-  presentation while opaque gameplay state/RNG remain unchanged.
-- **Gates / next:** On final tree `205d0c4e2942b775c4dd512a49fcece327141b64`,
-  the affected union passes **8 files / 21 tests** and smoke passes **8 / 448**.
-  Reused the same-code worker full receipt: `npm test` **1,437 files / 11,509
-  tests**, **44 / 223 skipped**, and `npm run build` **830 modules**. Coverage,
-  audit, typecheck, and diff checks are green. Next dispatch `MOVE_SPIT_UP` for
-  source classification, legal bilateral staging, dense evidence, and its own
-  latch maps. **For the main program:** nothing blocking.

@@ -1,3 +1,24 @@
+# Animation supervisor verification — MOVE_REVENGE exact merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commits `6d9c2fc11` and
+  `eab8c2a43`. `MOVE_REVENGE` and only its five-component
+  `revenge-purple-scratch-persist-hit` track are exact/fulfilled; Level 50 is
+  **271/276 exact, 0 partial, 0 staged, 5 unsupported**. Helping Hand remains
+  blocked/unfulfilled, and no sibling, gameplay/RNG, facility, boundary, or
+  barrier owner moved.
+- **Independent proof:** Two fresh supervisor actual-core processes each pass
+  all **290/290** component, typed-seam, chronological raw-RGB, and shared-core
+  framebuffer rows with **0 residual pixels**, digest `f555b063…`, through
+  bilateral age-144 cleanup. The material CROBAT/BLISSEY control changes live
+  presentation while opaque gameplay state/RNG remain unchanged.
+- **Gates / next:** On final tree `205d0c4e2942b775c4dd512a49fcece327141b64`,
+  the affected union passes **8 files / 21 tests** and smoke passes **8 / 448**.
+  Reused the same-code worker full receipt: `npm test` **1,437 files / 11,509
+  tests**, **44 / 223 skipped**, and `npm run build` **830 modules**. Coverage,
+  audit, typecheck, and diff checks are green. Next dispatch `MOVE_SPIT_UP` for
+  source classification, legal bilateral staging, dense evidence, and its own
+  latch maps. **For the main program:** nothing blocking.
+
 # Animation worker closure — MOVE_REVENGE exact (2026-09-23)
 
 - **State / scope:** `MOVE_REVENGE` is **exact**, advancing Level 50 to
