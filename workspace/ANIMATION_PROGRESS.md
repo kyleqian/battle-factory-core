@@ -22,6 +22,14 @@
   ready work is Level-50 `MOVE_ICE_BALL`, then Open-only `MOVE_OUTRAGE`;
   `MOVE_HELPING_HAND` remains evidence-blocked. **For the main program:**
   nothing blocking.
+- **Session boundary:** Ice Ball source/census scope was prepared, but no
+  worker was dispatched: the repository-wide animation lane remained occupied
+  by `worker/animation-20260923-103841`, which entered its required full suite
+  at 11:39 UTC and could not release early enough for a separately verified
+  checkpoint before the 12:18 hard deadline. Resume Ice Ball after that lane
+  lock clears; its boundary is the 20-component, five-counter-branch script
+  with legal Level-50 carriers SPHEAL, DELIBIRD, and SEALEO_1. This is an
+  operational scheduling boundary, not an animation acceptance blocker.
 
 # Animation worker checkpoint — MOVE_CURSE exact palette-scanout closure (2026-09-23)
 
