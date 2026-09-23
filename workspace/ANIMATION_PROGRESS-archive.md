@@ -1,3 +1,37 @@
+# Animation worker checkpoint — MOVE_REVENGE reference reducer contract (2026-09-22)
+
+- **State / scope:** `MOVE_REVENGE` remains **unsupported** with no exact,
+  partial, staged, component, sibling, or shared credit; the
+  `revenge-purple-scratch-persist-hit` track remains **unfulfilled**. Added
+  only the dev-time, source-relative `tools/compare/revengeReducer.ts`, its
+  bilateral verifier, and focused test. No `src/`, production assets, typed
+  seam, compositor/core dispatch, actual-core framebuffer comparison,
+  gameplay/RNG, boundary/barrier, coverage, or inventory changed.
+- **Contract / proof:** A single direction-generic program is seeded from the
+  observable host geometry/allocation at component creation and replays all
+  **145 + 145 = 290** retained Scene-ON ages through first inactive cleanup.
+  It checks the source-audited purple small/big frame programs, side flips and
+  positions, target monbg/alpha lifecycle, attacker red blend cycle, 6×4
+  lunge, target ShakeMon2, both persistent hitsplats, resource/audio
+  lifetimes, resource allocations,
+  sprite order/subpriorities, matrices, and predecessor OAM/matrix latches.
+  It consumes the existing source audit, purple asset receipt, dense states,
+  raw-RGB/map receipt hashes, and fails on any evidence drift.
+- **Verification / next:** Tested tree `11088ff73c29a7fa70b8521d7860c4d16b8b1d8f`;
+  the focused source/assets/evidence/reducer/boundary/inventory union passes
+  **6 files / 19 tests**; the reducer is byte-identical in two fresh processes
+  (**290/290**). `npm run typecheck`, coverage (**270/276 exact, 6
+  unsupported**), animation audit, and `git diff --check` pass. The supervisor
+  independently established the reusable production baseline on `884ef4236`:
+  full `npm test` passes **1,431 files / 11,497 tests**, with **44 files / 223
+  tests skipped**, in **1,717.06s**; `npm run build` passes **828 modules**
+  with only the inherited chunk warning. All later Revenge deltas are confined
+  to tooling, evidence, tests, coverage metadata, and this ledger. Resume only
+  with a narrow typed Scene-ON seam, generic production compositor/material
+  control, and twice-fresh **290/290** zero-residual actual-core framebuffer
+  proof; keep this move and track unsupported until then, and do not start
+  `MOVE_SPIT_UP`.
+
 # Animation worker checkpoint — MOVE_REVENGE purple asset audit (2026-09-22)
 
 - **State / scope:** `MOVE_REVENGE` remains **unsupported** with no exact,

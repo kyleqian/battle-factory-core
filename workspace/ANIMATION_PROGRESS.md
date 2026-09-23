@@ -1,3 +1,24 @@
+# Animation worker checkpoint — MOVE_SPIT_UP source/evidence only (2026-09-23)
+
+- **State / scope:** `MOVE_SPIT_UP` remains **unsupported** with no move,
+  sibling, shared, or component-track credit. The non-exclusive
+  `spit-up-red-orb-power-branches` track is present and **unfulfilled** for
+  six components; no `src/`, production asset, seam, compositor, gameplay,
+  RNG, facility, boundary, or barrier ownership changed.
+- **Evidence:** The source audit pins the complete 10-component
+  `Move_SPIT_UP`/`SpitUpStrong`/`SpitUpStrongest`/`SpitUpContinue` graph and
+  sole Level-50 carrier `FRONTIER_MON_SWALOT_1` (index 248). Six legal
+  party-before-init Scene-ON windows cover Stockpile 1/2/3 in player-back and
+  opponent-front orientations (108/108/109 rows); dense semantic state,
+  chronological RGB888, normalized bank maps, per-slot orb latches, audio,
+  allocators, registers, opaque gameplay state/RNG, and zero-owned cleanup are
+  retained. Every window is byte-identical in two fresh runs.
+- **Verification / next:** Evidence commit `3127b9717`; affected source,
+  staging, evidence, boundary, and inventory checks pass **13 tests**;
+  source/evidence verifiers, coverage (**271/276 exact, 5 unsupported**),
+  animation audit, diff check, and typecheck are green. `MOVE_SPIT_UP` gets no
+  production or coverage promotion; do not start `MOVE_FURY_CUTTER`.
+
 # Animation supervisor verification — MOVE_REVENGE exact merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded verified worker commits `6d9c2fc11` and
@@ -46,37 +67,3 @@
   **44 files / 223 tests skipped**, in **1,786.41s**; `npm run build` passes
   **830 modules** with only the inherited chunk warning. Next ranked work is
   `MOVE_SPIT_UP`; it remains untouched.
-
-# Animation worker checkpoint — MOVE_REVENGE reference reducer contract (2026-09-22)
-
-- **State / scope:** `MOVE_REVENGE` remains **unsupported** with no exact,
-  partial, staged, component, sibling, or shared credit; the
-  `revenge-purple-scratch-persist-hit` track remains **unfulfilled**. Added
-  only the dev-time, source-relative `tools/compare/revengeReducer.ts`, its
-  bilateral verifier, and focused test. No `src/`, production assets, typed
-  seam, compositor/core dispatch, actual-core framebuffer comparison,
-  gameplay/RNG, boundary/barrier, coverage, or inventory changed.
-- **Contract / proof:** A single direction-generic program is seeded from the
-  observable host geometry/allocation at component creation and replays all
-  **145 + 145 = 290** retained Scene-ON ages through first inactive cleanup.
-  It checks the source-audited purple small/big frame programs, side flips and
-  positions, target monbg/alpha lifecycle, attacker red blend cycle, 6×4
-  lunge, target ShakeMon2, both persistent hitsplats, resource/audio
-  lifetimes, resource allocations,
-  sprite order/subpriorities, matrices, and predecessor OAM/matrix latches.
-  It consumes the existing source audit, purple asset receipt, dense states,
-  raw-RGB/map receipt hashes, and fails on any evidence drift.
-- **Verification / next:** Tested tree `11088ff73c29a7fa70b8521d7860c4d16b8b1d8f`;
-  the focused source/assets/evidence/reducer/boundary/inventory union passes
-  **6 files / 19 tests**; the reducer is byte-identical in two fresh processes
-  (**290/290**). `npm run typecheck`, coverage (**270/276 exact, 6
-  unsupported**), animation audit, and `git diff --check` pass. The supervisor
-  independently established the reusable production baseline on `884ef4236`:
-  full `npm test` passes **1,431 files / 11,497 tests**, with **44 files / 223
-  tests skipped**, in **1,717.06s**; `npm run build` passes **828 modules**
-  with only the inherited chunk warning. All later Revenge deltas are confined
-  to tooling, evidence, tests, coverage metadata, and this ledger. Resume only
-  with a narrow typed Scene-ON seam, generic production compositor/material
-  control, and twice-fresh **290/290** zero-residual actual-core framebuffer
-  proof; keep this move and track unsupported until then, and do not start
-  `MOVE_SPIT_UP`.
