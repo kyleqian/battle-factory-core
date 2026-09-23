@@ -93,7 +93,6 @@ const FLAME_VELOCITIES = [
   [5, 0], [-5, 0], [0, 5], [0, -5], [5, 3], [-5, 3], [5, -3], [-5, -3],
   [-5, 0], [0, 5], [0, -5], [5, 3], [-5, 3], [5, -3], [-5, -3],
 ] as const;
-const FLAME_SLOTS = [3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 3, 4, 5, 7, 9, 10, 11, 12] as const;
 
 function assertAge(age: number): void {
   if (!Number.isInteger(age) || age < 0 || age > OUTRAGE_FIRST_INACTIVE_AGE) {
@@ -422,7 +421,7 @@ function attackerEllipseAtAge(age: number, input: Readonly<OutrageLiveInputs>): 
   const width = input.attackerSide === "player" ? 12 : -12;
   return { x: gbaSin(angle, width), y: -gbaSin(angle + 64, 6) + 6 };
 }
-function battlerAttr(base: Readonly<OutrageBattlerSprite>, current: Readonly<OutragePoint>, previous: Readonly<OutragePoint>): OutrageOam {
+function battlerAttr(base: Readonly<OutrageBattlerSprite>, previous: Readonly<OutragePoint>): OutrageOam {
   const x2 = previous.x - base.x2;
   const y2 = previous.y - base.y2;
   return [
@@ -439,8 +438,8 @@ function battlersAtAge(age: number, input: Readonly<OutrageLiveInputs>) {
     ? { x: TARGET_SHAKE_AMPLITUDE, y: 0 }
     : targetShakeAtAge(age - 1, input);
   return {
-    attacker: { ...input.attackerSprite, x2: attackerOffset.x, y2: attackerOffset.y, attr: age === 0 ? input.attackerSprite.attr : battlerAttr(input.attackerSprite, attackerOffset, previousAttacker) },
-    target: { ...input.targetSprite, x2: targetOffset.x, y2: targetOffset.y, attr: age === 0 ? input.targetSprite.attr : battlerAttr(input.targetSprite, targetOffset, previousTarget) },
+    attacker: { ...input.attackerSprite, x2: attackerOffset.x, y2: attackerOffset.y, attr: age === 0 ? input.attackerSprite.attr : battlerAttr(input.attackerSprite, previousAttacker) },
+    target: { ...input.targetSprite, x2: targetOffset.x, y2: targetOffset.y, attr: age === 0 ? input.targetSprite.attr : battlerAttr(input.targetSprite, previousTarget) },
     attackerOffset, targetOffset,
   };
 }
