@@ -40,7 +40,7 @@ for line in script.splitlines():
     match=re.match(r'^(\w+)::?$',line)
     if match:label=match[1];blocks[label]=[]
     elif label:blocks[label].append(line.strip())
-ids={2,14,23,29,39,41,44,97,103,108,109,131,154,158,163,210,242,246,264,280,305,306,325,337,347}
+ids={2,5,11,14,21,23,25,27,29,39,41,44,67,93,94,97,101,103,108,109,122,131,136,154,158,163,210,211,223,231,242,246,247,264,280,305,306,325,337,342,347}
 components=json.loads((ROOT/'src/data/gen/battle-animation-components.json').read_text())
 plans={}
 used=set()
@@ -60,7 +60,12 @@ assert tag_match
 tag=int(tag_match[1],0)
 resources['TAG_SMOKESCREEN']={'tag':tag,'symbol':'gSmokescreenImpactPalette','colors':palette('gSmokescreenImpactPalette')}
 plans['108']['taskLoads']=['TAG_SMOKESCREEN'];used.add('TAG_SMOKESCREEN')
-source_files=['include/constants/battle_anim.h','src/data/battle_anim.h','data/battle_anim_scripts.s','src/battle_anim_smokescreen.c','src/sprite.c','src/battle_anim_mons.c','src/link_rfu_3.c']
+# The physical batch uses script-owned loads; Steel Wing rotates only faded
+# GUST colors. Dynamic Punch intentionally loads four rows before its body.
+# Confusion/Psychic rotate only BG faded rows; Night Shade changes sprite
+# affine/blend state; Shadow Ball loads its one script-owned OBJ row. None
+# of their task callbacks writes or allocates extra OBJ unfaded palettes.
+source_files=['src/battle_anim_effects_1.c','src/battle_anim_effects_2.c','src/battle_anim_ghost.c','src/battle_anim_psychic.c','src/battle_anim_effects_3.c','include/constants/battle_anim.h','src/data/battle_anim.h','data/battle_anim_scripts.s','src/battle_anim_smokescreen.c','src/sprite.c','src/battle_anim_mons.c','src/link_rfu_3.c']
 out={
  'schema':'live-animation-palette-resources/v1',
  'sourceSha256':{name:hashlib.sha256((REF/name).read_bytes()).hexdigest() for name in source_files},

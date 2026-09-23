@@ -24,6 +24,27 @@ describe("persistent live move palette inputs", () => {
     expect(prepareLiveMovePalette(initial, request(325)).input).toEqual(first.input);
   });
 
+  it("keeps scratch history through audited psychic/ghost bodies with no extra OBJ unfaded writes", () => {
+    const initial = createLiveMovePaletteHost();
+    const expected = prepareLiveMovePalette(initial, request(325)).input;
+    let host = initial;
+    for (const moveId of [93, 94, 101, 247]) {
+      host = prepareLiveMovePalette(host, request(moveId)).next;
+      expect(host.historyKnown).toBe(true);
+      expect(prepareLiveMovePalette(host, request(325)).input).toEqual(expected);
+    }
+  });
+
+  it("retains the third and fourth loaded rows from Dynamic Punch for later traces", () => {
+    const initial = createLiveMovePaletteHost();
+    const expected = prepareLiveMovePalette(initial, request(325)).input;
+    const after = prepareLiveMovePalette(initial, request(223));
+    expect(after.next.historyKnown).toBe(true);
+    expect(after.next.memory.tags.slice(7)).toEqual(Array(9).fill(0xffff));
+    expect(prepareLiveMovePalette(after.next, request(325)).input.traceScratchUnfadedPalette)
+      .not.toEqual(expected.traceScratchUnfadedPalette);
+  });
+
   it("does not claim complete palette history after unknown resources or switching", () => {
     const initial = createLiveMovePaletteHost();
     const unknown = prepareLiveMovePalette(initial, request(1)).next;

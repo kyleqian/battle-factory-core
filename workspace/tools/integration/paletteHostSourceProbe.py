@@ -21,8 +21,16 @@ lab=BattleLab(oracle,'battle-scene-on')
 def u16(a):return oracle.read_u8(a)|(oracle.read_u8(a+1)<<8)
 def words(a,n):return [u16(a+i*2) for i in range(n)]
 rows=[];tick=0;last=None
+move_events=[];last_move_active=False
+include_move_events='--move-events' in sys.argv[3:]
 def capture(phase):
- global last
+ global last, last_move_active
+ if include_move_events:
+  active=bool(oracle.read_u8(names['gAnimScriptActive']))
+  if active and not last_move_active and phase=='move':
+   move_id=u16(names['sAnimMoveIndex'])
+   if move_id:move_events.append({'tick':tick,'moveId':move_id,'attacker':oracle.read_u8(names['gBattleAnimAttacker'])})
+  last_move_active=active
  tags=words(names['sSpritePaletteTags'],16)
  unfaded=words(names['gPlttBufferUnfaded']+256*2,256)
  key=(tags,unfaded)
@@ -41,5 +49,5 @@ capture('ready')
 phase='move'
 for segment in request['trace']['segments']:
  for _ in range(segment['frames']):oracle.advance(segment.get('buttons',[]))
-Path(sys.argv[2]).write_text(json.dumps({'setup':setup,'rows':rows},separators=(',',':')))
+Path(sys.argv[2]).write_text(json.dumps({'setup':setup,'rows':rows,**({'moveEvents':move_events} if include_move_events else {})},separators=(',',':')))
 print('palette change rows',len(rows),'ticks',tick)
