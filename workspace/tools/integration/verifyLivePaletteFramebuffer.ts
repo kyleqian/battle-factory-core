@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 import species from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createLiveMovePaletteHost, prepareLiveMovePalette } from "../../src/engine/liveMoveAnimationPalette.ts";
-import { shadowPunchBackgroundBldy } from "../../src/animation/shadowPunch.ts";
+import { shadowPunchLiveBackgroundBldy } from "../../src/animation/shadowPunchFadeHost.ts";
 import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 const root=resolve(dirname(fileURLToPath(import.meta.url)),"../..");
@@ -63,7 +63,7 @@ for(const attacker of [0,1] as const) {
      if(rgb[p*3]!==rgba[p*4]||rgb[p*3+1]!==rgba[p*4+1]||rgb[p*3+2]!==rgba[p*4+2]){residualPixels++;if(p>=240*112)chromePixels++;}
      if(rgb[p*3]!==control[p*4]||rgb[p*3+1]!==control[p*4+1]||rgb[p*3+2]!==control[p*4+2])withoutHistoryPixels++;
     }
-    comparisons.push({age,frame:row.frame,residualPixels,withoutHistoryPixels,chromePixels,sourceBldy:row.bldy,productionBldy:shadowPunchBackgroundBldy(age,side),mainCallbackRan:row.intervalEvents.some(e=>e.kind==="battle-main"),source:row.sha256,live:hash(rgba)});
+    comparisons.push({age,frame:row.frame,residualPixels,withoutHistoryPixels,chromePixels,sourceBldy:row.bldy,productionBldy:shadowPunchLiveBackgroundBldy(age),mainCallbackRan:row.intervalEvents.some(e=>e.kind==="battle-main"),source:row.sha256,live:hash(rgba)});
    }
    writeFileSync(join(scratch,"comparison-"+index+".json"),JSON.stringify(comparisons,null,2)+"\n");
    const residuals=comparisons.filter(r=>r.residualPixels>0);
