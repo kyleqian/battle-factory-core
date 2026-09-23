@@ -19,7 +19,7 @@ import type { BattleResolutionPresentationRenderView } from "../../src/engine/ba
 import type { SceneOnDragonRageFieldProfile } from "../../src/animation/sceneOnPresentation.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
-interface Fixture {
+export interface Fixture {
   sourceFixture?: string;
   move: string;
   denseWindow?: { startFrame: number; endFrame: number };
@@ -37,7 +37,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const ids = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.id]));
 const hash = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
-function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
+export function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
   const profile = f.fieldProfile;
   const makeBattler = (side: "player" | "opponent") => {
     const mon = f.attacker.geometry.side === side ? f.attacker : f.target;
