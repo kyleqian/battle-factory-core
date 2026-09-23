@@ -10,7 +10,7 @@ import type { GbaButton } from "../../src/input.ts";
 
 /** Legal generated rentals/opponent; only ordinary command input follows generation. */
 export function generatedCommandAnimationReplay(
-  seed: number, battleScene: "on" | "off", moveSlots: readonly (0 | 1 | 2 | 3)[],
+  seed: number, battleScene: "on" | "off", moveSlots: readonly (0 | 1 | 2 | 3 | { switch: 1 | 2 })[],
 ) {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
     id: `live-animation-generated-${seed}`, rngValue: seed, battleScene,
@@ -20,6 +20,9 @@ export function generatedCommandAnimationReplay(
   }));
   const animations: Array<{ moveId: number; attacker: number; player: string; opponent: string; ages: number[] }> = [];
   const boundaries = [];
+  const commands: Array<{ type: string; frame: number; command: unknown }> = [];
+  const requests: Array<{ moveId: number; attacker: number; turn: number; multihit: number; frame: number }> = [];
+  let commandKey = "";
   let frame = 0;
   let key = "";
   const step = (buttons: readonly GbaButton[] = []) => {
@@ -31,6 +34,14 @@ export function generatedCommandAnimationReplay(
     const r = state.battleResolutionPresentation;
     if (r?.lifecycle.phase !== "presenting") return;
     const command = r.segments[r.segmentIndex]!.commands[r.commandIndex];
+    if (command) {
+      const currentCommand = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
+      if (currentCommand !== commandKey) {
+        commandKey = currentCommand;
+        commands.push({ type: command.type, frame, command });
+        if (command.type === "move-animation" && command.animation) requests.push({ ...command.animation, frame });
+      }
+    }
     if (command?.type !== "move-animation" || !command.animation || liveMoveAnimationDuration(command.animation) === null) return;
     const current = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
     const view = createBattleResolutionPresentationRenderView(r);
@@ -53,17 +64,29 @@ export function generatedCommandAnimationReplay(
   until(() => phase() === "action-menu");
   boundaries.push(state.battle!);
   for (const slot of moveSlots) {
+    if (typeof slot === "object") {
+      pulse("DOWN"); // FIGHT -> POKéMON on the ordinary action menu.
+      pulse("A");
+      until(() => (state.battlePartySelect?.openElapsed ?? -1) >= 62);
+      while (state.battlePartySelect!.cursor !== slot.switch) pulse("DOWN");
+      pulse("A"); // SEND OUT submenu.
+      pulse("A");
+      until(() => !state.battleCommandPresentation);
+      until(() => phase() === "action-menu");
+      boundaries.push(state.battle!);
+      continue;
+    }
     pulse("A");
     until(() => phase() === "fight-menu");
     for (let i=0; i<4; i++) {
       const cursor = state.battleCommandPresentation!.fightCursor;
       if (cursor === slot) break;
-      pulse((cursor & 1) !== (slot & 1) ? "RIGHT" : "DOWN");
+      pulse((cursor & 1) !== (slot & 1) ? ((slot & 1) ? "RIGHT" : "LEFT") : ((slot & 2) ? "DOWN" : "UP"));
     }
     pulse("A");
     until(() => !state.battleCommandPresentation);
     until(() => phase() === "action-menu");
     boundaries.push(state.battle!);
   }
-  return { state, boundaries, animations, frame };
+  return { state, boundaries, animations, requests, commands, frame };
 }

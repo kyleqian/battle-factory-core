@@ -25,12 +25,21 @@ export function playableAnimationReplay(
   const recorder = new SessionRecorder();
   const observations: LiveAnimationObservation[] = [];
   const boundaries: EngineState[] = [];
+  const commands: Array<{ type: string; command: unknown }> = [];
+  let commandKey = "";
   let animationKey = "";
   const step = (buttons: readonly GbaButton[] = []) => {
     recorder.recordTick(new Set(buttons));
     state = tick(state, new Set(buttons));
     const r = state.factoryRoundBattleOrchestrator?.battleResolutionPresentation;
     const command = r?.segments[r.segmentIndex]?.commands[r.commandIndex];
+    if (r?.lifecycle.phase === "presenting" && command) {
+      const current = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
+      if (current !== commandKey) {
+        commandKey = current;
+        commands.push({ type: command.type, command });
+      }
+    }
     if (r?.lifecycle.phase === "presenting" && command?.type === "move-animation" && command.animation) {
       const key = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
       if (key !== animationKey) {
@@ -79,7 +88,7 @@ export function playableAnimationReplay(
     for (let i=0; i<4; i++) {
       const cursor = state.factoryRoundBattleOrchestrator!.battleCommandPresentation!.fightCursor;
       if (cursor === slot) break;
-      pulse((cursor & 1) !== (slot & 1) ? "RIGHT" : "DOWN");
+      pulse((cursor & 1) !== (slot & 1) ? ((slot & 1) ? "RIGHT" : "LEFT") : ((slot & 2) ? "DOWN" : "UP"));
     }
     pulse("A");
     until(() => !state.factoryRoundBattleOrchestrator?.battleCommandPresentation);
@@ -88,7 +97,7 @@ export function playableAnimationReplay(
     boundaries.push(state);
   }
   return {
-    state, boundaries, observations,
+    state, boundaries, observations, commands,
     trace: recorder.toTrace({ appRoute: state.appRoute, battleScene, build: "integration-replay" }),
   };
 }

@@ -1,5 +1,24 @@
 # Animation integration progress
 
+## 2026-09-23 — lifecycle matrix and typecheck green
+
+- State: production integration remains in progress; no release-ready claim.
+- Did: corrected the replay driver's directional menu navigation so repeated
+  Shadow Punch is actually selected, retained every typed multi-hit/two-turn
+  selector, and added ordinary switch/KO/miss/immunity lifecycle coverage.
+  Missing targets and unsafe numeric controller fields now fail explicitly.
+- Checks: `npm run typecheck` passed. Focused request/ordinary-route/lifecycle
+  suite passed **3 files / 46 tests**; 40 generated seeds / **470 decisions**
+  preserve rules and RNG between modes. See `.integration/lifecycle-tests.log`.
+- Next: fold the bounded basic adapter batch after review and its checks,
+  one-way merge supervisor-verified Factory snapshot `88cd3bc80`, validate the
+  actual union, and build the isolated stamped preview. Continue remaining
+  reusable adapter/host work after that checkpoint.
+- Precise gap: Shadow Punch's source trace blends a stale allocated unfaded
+  OBJ palette. The current live attacker-palette substitution is not exact;
+  replace it with a source-derived persistent palette allocator. Existing
+  fixture exactness and functional ordinary queue evidence remain separate.
+
 ## 2026-09-23 — ordinary battle queue implemented; validation/adaptation in progress
 
 - State: isolated hcloud integration worktree. The Factory service, timer,
@@ -21,9 +40,8 @@
 - Checks: initial affected set 69 passed / 1 obsolete no-op expectation failed;
   updated request expectation + real-route/replay/state parity tests then
   **3 files / 44 tests passed**. Later source-coordinate correction replayed
-  cleanly. Added opponent-orientation test awaits next focused run. Typecheck
-  is queued in .integration/typecheck-when-idle.sh, yielding priority to other
-  worktrees' heavyweight checks. Full suite/build still required on final code.
+  cleanly. Added opponent-orientation test awaits next focused run. The queued typecheck was later replaced by a completed green run;
+  see the newer checkpoint. Full suite/build still required on final code.
   Logs/artifacts are isolated under .integration/ (gitignored).
 - Inventory: bounded worker 0c0ff43f8 folded as ac5f7be68, documenting every one
   of the pinned baseline's 267 exact Factory moves, 196 fixture-bound renderer

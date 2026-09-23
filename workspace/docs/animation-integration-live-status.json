@@ -3,13 +3,75 @@
   "exactAcceptanceBaseline": "689d475cd",
   "inventory": "animation-integration-readiness.json",
   "implementedAdapters": [
-    { "move": "MOVE_SHADOW_PUNCH", "id": 325, "liveEvidence": ["opening-draft input: HAUNTER -> GROVYLE", "generated seed 54 command input: HAUNTER -> WAILMER"], "remaining": ["independent arbitrary-species framebuffer comparison", "persistent sprite allocation after every switch variant"] },
-    { "move": "MOVE_CONFUSE_RAY", "id": 109, "liveEvidence": ["opening-draft input: HAUNTER -> GROVYLE", "generated seed 54 command input: HAUNTER -> WAILMER", "generated seed 65: MAGBY -> TENTACOOL"], "remaining": ["independent arbitrary-species framebuffer comparison"] },
-    { "move": "MOVE_SMOKESCREEN", "id": 108, "liveEvidence": ["generated command input seeds 143/283/287, opponent-side"], "remaining": ["player-side normal-route replay", "independent arbitrary-species framebuffer comparison"] },
-    { "move": "MOVE_HEADBUTT", "id": 29, "liveEvidence": [], "remaining": ["both-orientation normal-route replay", "independent arbitrary-species framebuffer comparison"] },
-    { "move": "MOVE_TAIL_WHIP", "id": 39, "liveEvidence": [], "remaining": ["both-orientation normal-route replay", "independent arbitrary-species framebuffer comparison"] }
+    {
+      "move": "MOVE_SHADOW_PUNCH",
+      "id": 325,
+      "liveEvidence": [
+        "opening-draft input: HAUNTER -> GROVYLE",
+        "generated seed 54 command input: HAUNTER -> WAILMER"
+      ],
+      "remaining": [
+        "independent arbitrary-species framebuffer comparison",
+        "persistent sprite allocation after every switch variant",
+        "source AllocSpritePalette/BlendPalette uses stale destination unfaded palette; live attacker-palette substitution must be removed and replaced with persistent source allocator state"
+      ]
+    },
+    {
+      "move": "MOVE_CONFUSE_RAY",
+      "id": 109,
+      "liveEvidence": [
+        "opening-draft input: HAUNTER -> GROVYLE",
+        "generated seed 54 command input: HAUNTER -> WAILMER",
+        "generated seed 65: MAGBY -> TENTACOOL"
+      ],
+      "remaining": [
+        "independent arbitrary-species framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_SMOKESCREEN",
+      "id": 108,
+      "liveEvidence": [
+        "generated command input seeds 143/283/287, opponent-side"
+      ],
+      "remaining": [
+        "player-side normal-route replay",
+        "independent arbitrary-species framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_HEADBUTT",
+      "id": 29,
+      "liveEvidence": [],
+      "remaining": [
+        "both-orientation normal-route replay",
+        "independent arbitrary-species framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_TAIL_WHIP",
+      "id": 39,
+      "liveEvidence": [],
+      "remaining": [
+        "both-orientation normal-route replay",
+        "independent arbitrary-species framebuffer comparison"
+      ]
+    }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
-  "completedContracts": ["typed emit-time move/target/turn/power/damage/friendship/multihit request", "source-relative animation age", "finite move duration with cleanup display", "normal hit/HP/message/menu queue resumption", "current displayed battler art and HUD", "Scene ON/OFF session trace metadata and replay"],
-  "pending": ["final full test/build gates", "build-stamped isolated preview and browser E2E", "repeated/multi-hit/two-turn/miss/switch/KO lifecycle matrix", "reusable basic/derived/variant/graphics/random adapters for the remaining accepted moves", "one-way fold of later supervisor-verified Factory commits including Outrage when available"]
+  "completedContracts": [
+    "typed emit-time move/target/turn/power/damage/friendship/multihit request",
+    "source-relative animation age",
+    "finite move duration with cleanup display",
+    "normal hit/HP/message/menu queue resumption",
+    "current displayed battler art and HUD",
+    "Scene ON/OFF session trace metadata and replay",
+    "real command lifecycle tests for repeated/multi-hit/two-turn/miss/immunity/switch/KO; 40 generated seeds / 470 decisions preserve logical outcomes and RNG"
+  ],
+  "pending": [
+    "final full test/build gates",
+    "build-stamped isolated preview and browser E2E",
+    "reusable basic/derived/variant/graphics/random adapters for the remaining accepted moves",
+    "one-way fold of later supervisor-verified Factory commits including Outrage when available"
+  ]
 }

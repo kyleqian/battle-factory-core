@@ -22,6 +22,7 @@ describe("ordinary playable animation queue", () => {
       expect(a.boundary).toEqual(b.boundary);
       expect(on.boundaries[index]!.sceneOnPresentation).toBeNull();
     }
+    expect(on.observations.filter(o => o.moveId === 325)).toHaveLength(2);
     const damaging = on.observations.find(o => o.moveId === 325)!;
     const status = on.observations.find(o => o.moveId === 109)!;
     expect(damaging).toMatchObject({ player: "HAUNTER", opponent: "GROVYLE", attacker: 0 });
@@ -64,6 +65,8 @@ describe("ordinary playable animation queue", () => {
       moveId: 29, attacker: 1, target: 0, turn: 1, power: 70, damage: -31, friendship: 200, multihit: 3,
     });
     expect(() => battleMoveAnimationRequest(0, 1, [])).toThrow("six integer");
+    expect(() => battleMoveAnimationRequest(0, undefined, ["29", "0", "70", "17", "90", "0"])).toThrow("singles target");
+    expect(() => battleMoveAnimationRequest(0, 1, ["9999999999999999999", "0", "70", "17", "90", "0"])).toThrow("safe integers");
     expect(liveMoveAnimationDuration(battleMoveAnimationRequest(0, 1, ["210","0","10","1","0","0"]))).toBeNull();
   });
 });
