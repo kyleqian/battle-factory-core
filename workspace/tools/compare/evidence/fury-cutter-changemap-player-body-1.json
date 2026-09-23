@@ -1,0 +1,8639 @@
+{
+  "schema": "fury-cutter-normalized-change-map/v1",
+  "oracleProfile": "battle-scene-on",
+  "side": "player-back",
+  "bodyIndex": 1,
+  "sourceWindow": {
+    "bodyIndex": 0,
+    "startFrame": 78,
+    "endFrame": 120,
+    "frameCount": 43
+  },
+  "sourceRows": [
+    {
+      "age": 0,
+      "frame": 78,
+      "pointer": 137145674,
+      "pointerParity": 0,
+      "offset": 0,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 39936,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 0,
+        "bg1vofs": 0,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 240,
+        "win0v": 161,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 1,
+      "frame": 79,
+      "pointer": 137145677,
+      "pointerParity": 1,
+      "offset": 3,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 39936,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 0,
+        "bg1vofs": 0,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 2,
+      "frame": 80,
+      "pointer": 137145677,
+      "pointerParity": 1,
+      "offset": 3,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 39936,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 0,
+        "bg1vofs": 0,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 3,
+      "frame": 81,
+      "pointer": 137145677,
+      "pointerParity": 1,
+      "offset": 3,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 39936,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 0,
+        "bg1vofs": 0,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 4,
+      "frame": 82,
+      "pointer": 137145679,
+      "pointerParity": 1,
+      "offset": 5,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 39936,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 0,
+        "bg1vofs": 0,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 5,
+      "frame": 83,
+      "pointer": 137145679,
+      "pointerParity": 1,
+      "offset": 5,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 6,
+      "frame": 84,
+      "pointer": 137145679,
+      "pointerParity": 1,
+      "offset": 5,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 7,
+      "frame": 85,
+      "pointer": 137145744,
+      "pointerParity": 0,
+      "offset": 70,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 4,
+          "y2": 4,
+          "attr": [
+            1276,
+            36988,
+            31025
+          ],
+          "data": [
+            1,
+            1000,
+            1000,
+            1024,
+            1024,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 8,
+      "frame": 86,
+      "pointer": 137145744,
+      "pointerParity": 0,
+      "offset": 70,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 7,
+          "y2": 7,
+          "attr": [
+            1279,
+            36991,
+            31025
+          ],
+          "data": [
+            2,
+            976,
+            976,
+            2024,
+            2024,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "1b0552259c1c38128e45b7f891ad53aaaceaae8575da8cf292d31f6e4695b8e2",
+      "changedPixels": 65,
+      "bounds": [
+        144,
+        16,
+        155,
+        27
+      ]
+    },
+    {
+      "age": 9,
+      "frame": 87,
+      "pointer": 137145744,
+      "pointerParity": 0,
+      "offset": 70,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 11,
+          "y2": 11,
+          "attr": [
+            1027,
+            36995,
+            31025
+          ],
+          "data": [
+            3,
+            952,
+            952,
+            3000,
+            3000,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "13971baac0fe9a5110a93a9def77bb69bad265f7e9190bc6f97b2bacf092230e",
+      "changedPixels": 77,
+      "bounds": [
+        144,
+        16,
+        158,
+        30
+      ]
+    },
+    {
+      "age": 10,
+      "frame": 88,
+      "pointer": 137145744,
+      "pointerParity": 0,
+      "offset": 70,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 15,
+          "y2": 15,
+          "attr": [
+            1031,
+            36999,
+            31025
+          ],
+          "data": [
+            4,
+            928,
+            928,
+            3952,
+            3952,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "0b323d554aa4252522c5817111c087557edf457d062e7db7c72d2e25d48fb65e",
+      "changedPixels": 94,
+      "bounds": [
+        147,
+        19,
+        162,
+        34
+      ]
+    },
+    {
+      "age": 11,
+      "frame": 89,
+      "pointer": 137145744,
+      "pointerParity": 0,
+      "offset": 70,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 19,
+          "y2": 19,
+          "attr": [
+            1035,
+            37003,
+            31041
+          ],
+          "data": [
+            5,
+            904,
+            904,
+            4880,
+            4880,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "27c069b4d3706b5283406045c9f93ef6ae65ef38aa59498e732b890d21cf548b",
+      "changedPixels": 96,
+      "bounds": [
+        151,
+        23,
+        166,
+        38
+      ]
+    },
+    {
+      "age": 12,
+      "frame": 90,
+      "pointer": 137145744,
+      "pointerParity": 0,
+      "offset": 70,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 22,
+          "y2": 22,
+          "attr": [
+            1038,
+            37006,
+            31041
+          ],
+          "data": [
+            6,
+            880,
+            880,
+            5784,
+            5784,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "d31695f879c6e54f2743c7dad2edb8c40cbc96d5b8c0722a690085d1dd666dc5",
+      "changedPixels": 91,
+      "bounds": [
+        153,
+        25,
+        170,
+        42
+      ]
+    },
+    {
+      "age": 13,
+      "frame": 91,
+      "pointer": 137145744,
+      "pointerParity": 0,
+      "offset": 70,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 26,
+          "y2": 26,
+          "attr": [
+            1042,
+            37010,
+            31041
+          ],
+          "data": [
+            7,
+            856,
+            856,
+            6664,
+            6664,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "e4fc21aca0a8667c2068c295584b8b72019a3338121cf3ba34afca7be6da2199",
+      "changedPixels": 81,
+      "bounds": [
+        153,
+        25,
+        173,
+        45
+      ]
+    },
+    {
+      "age": 14,
+      "frame": 92,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 29,
+          "y2": 29,
+          "attr": [
+            1045,
+            37013,
+            31041
+          ],
+          "data": [
+            8,
+            832,
+            832,
+            7520,
+            7520,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            9,
+            1,
+            1,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "43421a35934c40704e59d2906823ee4d1c963659bc854645876109681a488963",
+      "changedPixels": 98,
+      "bounds": [
+        156,
+        28,
+        177,
+        49
+      ]
+    },
+    {
+      "age": 15,
+      "frame": 93,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 32,
+          "y2": 32,
+          "attr": [
+            1048,
+            37016,
+            31041
+          ],
+          "data": [
+            9,
+            808,
+            808,
+            8352,
+            8352,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            9,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "fd77fded03cdd78696cf28ccc8dee797cc9352eb707cee2b1efcdd3a37b2a037",
+      "changedPixels": 80,
+      "bounds": [
+        160,
+        32,
+        180,
+        52
+      ]
+    },
+    {
+      "age": 16,
+      "frame": 94,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 35,
+          "y2": 35,
+          "attr": [
+            1051,
+            37019,
+            31057
+          ],
+          "data": [
+            10,
+            784,
+            784,
+            9160,
+            9160,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            8,
+            1,
+            1,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000300e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 3,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "8518b54348dd2b138a7704b866d0b6447f0842939b1f2ae8f7a99c0cb4a34020",
+      "changedPixels": 81,
+      "bounds": [
+        163,
+        35,
+        183,
+        55
+      ]
+    },
+    {
+      "age": 17,
+      "frame": 95,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 38,
+          "y2": 38,
+          "attr": [
+            1054,
+            37022,
+            31057
+          ],
+          "data": [
+            11,
+            760,
+            760,
+            9944,
+            9944,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            8,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 495,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000300e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 3,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "feead5c6872d46c93f29efdb14e20132be09a622e303bf74679d56316350412a",
+      "changedPixels": 1532,
+      "bounds": [
+        150,
+        21,
+        201,
+        73
+      ]
+    },
+    {
+      "age": 18,
+      "frame": 96,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 41,
+          "y2": 41,
+          "attr": [
+            1057,
+            37025,
+            31057
+          ],
+          "data": [
+            12,
+            736,
+            736,
+            10704,
+            10704,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            7,
+            1,
+            1,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 495,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "bd4b40923657c98a3f13518b08db9aa96479d6465ae27e5e6be2e88c2efa1530",
+      "changedPixels": 109,
+      "bounds": [
+        161,
+        33,
+        189,
+        61
+      ]
+    },
+    {
+      "age": 19,
+      "frame": 97,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 44,
+          "y2": 44,
+          "attr": [
+            1060,
+            37028,
+            31057
+          ],
+          "data": [
+            13,
+            712,
+            712,
+            11440,
+            11440,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            7,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "71f0e53c9fe4c9c9b4f7c24d6099a4df1df0b8d667f8a5b7fc806484e67db028",
+      "changedPixels": 1523,
+      "bounds": [
+        150,
+        21,
+        201,
+        73
+      ]
+    },
+    {
+      "age": 20,
+      "frame": 98,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 47,
+          "y2": 47,
+          "attr": [
+            1063,
+            37031,
+            31057
+          ],
+          "data": [
+            14,
+            688,
+            688,
+            12152,
+            12152,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            6,
+            1,
+            1,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000300e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 3,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "5d74b900b58ba26a7948c81d229fecb9137618e82e6550842a5c8e6be9d850ff",
+      "changedPixels": 109,
+      "bounds": [
+        167,
+        39,
+        195,
+        67
+      ]
+    },
+    {
+      "age": 21,
+      "frame": 99,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 50,
+          "y2": 50,
+          "attr": [
+            1066,
+            37034,
+            31073
+          ],
+          "data": [
+            15,
+            664,
+            664,
+            12840,
+            12840,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            6,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 495,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000300e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 3,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "fabca6d4e7f2efad05451ebf3168c4ef0ec66a716125cc862cabf15729af7e9b",
+      "changedPixels": 1537,
+      "bounds": [
+        150,
+        21,
+        201,
+        73
+      ]
+    },
+    {
+      "age": 22,
+      "frame": 100,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 52,
+          "y2": 52,
+          "attr": [
+            1068,
+            37036,
+            31073
+          ],
+          "data": [
+            16,
+            640,
+            640,
+            13504,
+            13504,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            5,
+            1,
+            1,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 495,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "e32f44bfedf8b50b66eab12451b1b7597bb41e1a53cb68bca63dffac283805fd",
+      "changedPixels": 112,
+      "bounds": [
+        170,
+        42,
+        201,
+        73
+      ]
+    },
+    {
+      "age": 23,
+      "frame": 101,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 55,
+          "y2": 55,
+          "attr": [
+            1071,
+            37039,
+            31073
+          ],
+          "data": [
+            17,
+            616,
+            616,
+            14144,
+            14144,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            5,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "4cd647614760e2daffe0d3a2cd04e81b10cd6e51731a21d52c98f94f4f6cd551",
+      "changedPixels": 1535,
+      "bounds": [
+        150,
+        21,
+        203,
+        73
+      ]
+    },
+    {
+      "age": 24,
+      "frame": 102,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 57,
+          "y2": 57,
+          "attr": [
+            1073,
+            37041,
+            31073
+          ],
+          "data": [
+            18,
+            592,
+            592,
+            14760,
+            14760,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            4,
+            1,
+            1,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000300e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 3,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "8efe48c3f6128571a18dee06f63a613f41a02c1503c64f56fca5d0e4d03acc26",
+      "changedPixels": 85,
+      "bounds": [
+        172,
+        44,
+        205,
+        73
+      ]
+    },
+    {
+      "age": 25,
+      "frame": 103,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "AnimSlice_Step",
+          "x": 136,
+          "y": 8,
+          "x2": 59,
+          "y2": 59,
+          "attr": [
+            1075,
+            37043,
+            31073
+          ],
+          "data": [
+            19,
+            568,
+            568,
+            15352,
+            15352,
+            1,
+            0,
+            0
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            4,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 495,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000300e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 3,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "96b68ca7e92b9d01a4e673879751bea47b05d7ddc2d31543914dc668b4a2804a",
+      "changedPixels": 1499,
+      "bounds": [
+        150,
+        21,
+        206,
+        73
+      ]
+    },
+    {
+      "age": 26,
+      "frame": 104,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "WaitAnimForDuration",
+          "x": 136,
+          "y": 8,
+          "x2": 62,
+          "y2": 62,
+          "attr": [
+            1078,
+            37046,
+            31073
+          ],
+          "data": [
+            3,
+            544,
+            544,
+            15920,
+            15920,
+            1,
+            15357,
+            2058
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            3,
+            1,
+            1,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 495,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "7415a4be2e8c0d25c5d872ccf6fc2165c952ff01a78fdf32746cc8ee3c69d179",
+      "changedPixels": 52,
+      "bounds": [
+        177,
+        49,
+        206,
+        73
+      ]
+    },
+    {
+      "age": 27,
+      "frame": 105,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "WaitAnimForDuration",
+          "x": 136,
+          "y": 8,
+          "x2": 62,
+          "y2": 62,
+          "attr": [
+            1078,
+            37046,
+            31073
+          ],
+          "data": [
+            2,
+            544,
+            544,
+            15920,
+            15920,
+            1,
+            15357,
+            2058
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            3,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "29314987cecadbd7c7a5039bfef1f00fd3f9cd5dcfa68576967bc1edfa628ea2",
+      "changedPixels": 1500,
+      "bounds": [
+        150,
+        21,
+        204,
+        73
+      ]
+    },
+    {
+      "age": 28,
+      "frame": 106,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "WaitAnimForDuration",
+          "x": 136,
+          "y": 8,
+          "x2": 62,
+          "y2": 62,
+          "attr": [
+            1078,
+            37046,
+            31073
+          ],
+          "data": [
+            1,
+            544,
+            544,
+            15920,
+            15920,
+            1,
+            15357,
+            2058
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            2,
+            1,
+            1,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000300e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 3,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "29314987cecadbd7c7a5039bfef1f00fd3f9cd5dcfa68576967bc1edfa628ea2",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 29,
+      "frame": 107,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "WaitAnimForDuration",
+          "x": 136,
+          "y": 8,
+          "x2": 62,
+          "y2": 62,
+          "attr": [
+            1078,
+            37046,
+            31073
+          ],
+          "data": [
+            0,
+            544,
+            544,
+            15920,
+            15920,
+            1,
+            15357,
+            2058
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            2,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 495,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000300e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 3,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "6ae63de4250add9920c1578b052d7e71b44c255c79658e783147676c2b9743ce",
+      "changedPixels": 1463,
+      "bounds": [
+        150,
+        21,
+        201,
+        73
+      ]
+    },
+    {
+      "age": 30,
+      "frame": 108,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [
+        {
+          "slot": 3,
+          "template": "gCuttingSliceSpriteTemplate",
+          "callback": "DestroyAnimSprite",
+          "x": 136,
+          "y": 8,
+          "x2": 62,
+          "y2": 62,
+          "attr": [
+            1078,
+            37046,
+            31073
+          ],
+          "data": [
+            0,
+            544,
+            544,
+            15920,
+            15920,
+            1,
+            15357,
+            2058
+          ],
+          "matrixNum": 8,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "invisible": false
+        }
+      ],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            1,
+            1,
+            1,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 495,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "6ae63de4250add9920c1578b052d7e71b44c255c79658e783147676c2b9743ce",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 31,
+      "frame": 109,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "AnimTask_ShakeMon_Step",
+          "data": [
+            8,
+            1,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "29314987cecadbd7c7a5039bfef1f00fd3f9cd5dcfa68576967bc1edfa628ea2",
+      "changedPixels": 1463,
+      "bounds": [
+        150,
+        21,
+        201,
+        73
+      ]
+    },
+    {
+      "age": 32,
+      "frame": 110,
+      "pointer": 137145761,
+      "pointerParity": 1,
+      "offset": 87,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 16192,
+        "bldalpha": 2060,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000051000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 5,
+          "invisible": true,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 68,
+      "bounds": [
+        182,
+        54,
+        203,
+        73
+      ]
+    },
+    {
+      "age": 33,
+      "frame": 111,
+      "pointer": 137145766,
+      "pointerParity": 0,
+      "offset": 92,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "Task_ClearMonBg",
+          "data": [
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 34,
+      "frame": 112,
+      "pointer": 137145766,
+      "pointerParity": 0,
+      "offset": 92,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "Task_ClearMonBg",
+          "data": [
+            0,
+            2,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 35,
+      "frame": 113,
+      "pointer": 137145766,
+      "pointerParity": 0,
+      "offset": 92,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [
+        {
+          "slot": 0,
+          "function": "Task_ClearMonBg",
+          "data": [
+            0,
+            2,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "slot": 1,
+          "function": "Task_UpdateMonBg",
+          "data": [
+            8,
+            176,
+            46,
+            -144,
+            -14,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 36,
+      "frame": 114,
+      "pointer": 137145766,
+      "pointerParity": 0,
+      "offset": 92,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 368,
+        "bg1vofs": 498,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 37,
+      "frame": 115,
+      "pointer": 137145766,
+      "pointerParity": 0,
+      "offset": 92,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 0,
+        "bg1vofs": 0,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 38,
+      "frame": 116,
+      "pointer": 137145766,
+      "pointerParity": 0,
+      "offset": 92,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 0,
+        "bg1vofs": 0,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 39,
+      "frame": 117,
+      "pointer": 137145766,
+      "pointerParity": 0,
+      "offset": 92,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 0,
+        "bg1vofs": 0,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 40,
+      "frame": 118,
+      "pointer": 137145766,
+      "pointerParity": 0,
+      "offset": 92,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 0,
+        "bg1vofs": 0,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 41,
+      "frame": 119,
+      "pointer": 137145766,
+      "pointerParity": 0,
+      "offset": 92,
+      "active": true,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 0,
+        "bg1vofs": 0,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380028c0710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            56,
+            49192,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0090c0d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            14,
+            49296,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 0,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 42,
+      "frame": 120,
+      "pointer": 137145766,
+      "pointerParity": 0,
+      "offset": 92,
+      "active": false,
+      "power": 10,
+      "damage": 35,
+      "direction": "right",
+      "ownedSprites": [],
+      "ownedTasks": [],
+      "registers": {
+        "dispcnt": 48960,
+        "bg0cnt": 38912,
+        "bg1cnt": 23554,
+        "bg2cnt": 24064,
+        "bg3cnt": 23051,
+        "bg0hofs": 0,
+        "bg0vofs": 0,
+        "bg1hofs": 0,
+        "bg1vofs": 0,
+        "bg2hofs": 0,
+        "bg2vofs": 0,
+        "bg3hofs": 0,
+        "bg3vofs": 0,
+        "win0h": 0,
+        "win0v": 0,
+        "winin": 16191,
+        "winout": 16191,
+        "mosaic": 0,
+        "bldcnt": 0,
+        "bldalpha": 0,
+        "bldy": 0
+      },
+      "battlerSprites": {
+        "attacker": {
+          "slot": 6,
+          "raw": "380128c2710900000cf72f08c056000268ad60089c49020200000000297400084800580000000000e0e0000080000000000016010c0002000c000800070001100000001e",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            312,
+            49704,
+            2417
+          ],
+          "x": 72,
+          "y": 88,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 0,
+          "animCmdIndex": 0,
+          "animDelayCounter": 128,
+          "subpriority": 30,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 1,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            0,
+            0,
+            278,
+            12,
+            2,
+            12,
+            8,
+            7
+          ]
+        },
+        "target": {
+          "slot": 8,
+          "raw": "0e0190c4d9190000e0943008e056000268ad60089c4902020000000029740008b0002e0000000000e0e00101800001000000f20078008800000000000000011000000028",
+          "template": {
+            "address": 33704348,
+            "symbol": "gMultiuseSpriteTemplate"
+          },
+          "callback": {
+            "address": 134247465,
+            "symbol": "SpriteCallbackDummy"
+          },
+          "attr": [
+            270,
+            50320,
+            6617
+          ],
+          "x": 176,
+          "y": 46,
+          "x2": 0,
+          "y2": 0,
+          "animNum": 1,
+          "animCmdIndex": 1,
+          "animDelayCounter": 128,
+          "subpriority": 40,
+          "flags": 1,
+          "invisible": false,
+          "matrixNum": 2,
+          "matrix": [
+            256,
+            0,
+            0,
+            256
+          ],
+          "data": [
+            1,
+            0,
+            242,
+            120,
+            136,
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rgbSha256": "22f412301c9aa9b70cba51aff6615d20de9043a5cbcaa253497578c05872d8f0",
+      "changedPixels": 0,
+      "bounds": null
+    }
+  ],
+  "sprites": {
+    "cuttingSlice": [
+      {
+        "slot": 3,
+        "start": 7,
+        "end": 30,
+        "states": [
+          {
+            "age": 7,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 4,
+            "y2": 4,
+            "attr": [
+              1276,
+              36988,
+              31025
+            ],
+            "data": [
+              1,
+              1000,
+              1000,
+              1024,
+              1024,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 8,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 7,
+            "y2": 7,
+            "attr": [
+              1279,
+              36991,
+              31025
+            ],
+            "data": [
+              2,
+              976,
+              976,
+              2024,
+              2024,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 9,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 11,
+            "y2": 11,
+            "attr": [
+              1027,
+              36995,
+              31025
+            ],
+            "data": [
+              3,
+              952,
+              952,
+              3000,
+              3000,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 10,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 15,
+            "y2": 15,
+            "attr": [
+              1031,
+              36999,
+              31025
+            ],
+            "data": [
+              4,
+              928,
+              928,
+              3952,
+              3952,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 11,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 19,
+            "y2": 19,
+            "attr": [
+              1035,
+              37003,
+              31041
+            ],
+            "data": [
+              5,
+              904,
+              904,
+              4880,
+              4880,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 12,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 22,
+            "y2": 22,
+            "attr": [
+              1038,
+              37006,
+              31041
+            ],
+            "data": [
+              6,
+              880,
+              880,
+              5784,
+              5784,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 13,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 26,
+            "y2": 26,
+            "attr": [
+              1042,
+              37010,
+              31041
+            ],
+            "data": [
+              7,
+              856,
+              856,
+              6664,
+              6664,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 14,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 29,
+            "y2": 29,
+            "attr": [
+              1045,
+              37013,
+              31041
+            ],
+            "data": [
+              8,
+              832,
+              832,
+              7520,
+              7520,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 15,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 32,
+            "y2": 32,
+            "attr": [
+              1048,
+              37016,
+              31041
+            ],
+            "data": [
+              9,
+              808,
+              808,
+              8352,
+              8352,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 16,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 35,
+            "y2": 35,
+            "attr": [
+              1051,
+              37019,
+              31057
+            ],
+            "data": [
+              10,
+              784,
+              784,
+              9160,
+              9160,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 17,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 38,
+            "y2": 38,
+            "attr": [
+              1054,
+              37022,
+              31057
+            ],
+            "data": [
+              11,
+              760,
+              760,
+              9944,
+              9944,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 18,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 41,
+            "y2": 41,
+            "attr": [
+              1057,
+              37025,
+              31057
+            ],
+            "data": [
+              12,
+              736,
+              736,
+              10704,
+              10704,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 19,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 44,
+            "y2": 44,
+            "attr": [
+              1060,
+              37028,
+              31057
+            ],
+            "data": [
+              13,
+              712,
+              712,
+              11440,
+              11440,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 20,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 47,
+            "y2": 47,
+            "attr": [
+              1063,
+              37031,
+              31057
+            ],
+            "data": [
+              14,
+              688,
+              688,
+              12152,
+              12152,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 21,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 50,
+            "y2": 50,
+            "attr": [
+              1066,
+              37034,
+              31073
+            ],
+            "data": [
+              15,
+              664,
+              664,
+              12840,
+              12840,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 22,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 52,
+            "y2": 52,
+            "attr": [
+              1068,
+              37036,
+              31073
+            ],
+            "data": [
+              16,
+              640,
+              640,
+              13504,
+              13504,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 23,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 55,
+            "y2": 55,
+            "attr": [
+              1071,
+              37039,
+              31073
+            ],
+            "data": [
+              17,
+              616,
+              616,
+              14144,
+              14144,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 24,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 57,
+            "y2": 57,
+            "attr": [
+              1073,
+              37041,
+              31073
+            ],
+            "data": [
+              18,
+              592,
+              592,
+              14760,
+              14760,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 25,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "AnimSlice_Step",
+            "x": 136,
+            "y": 8,
+            "x2": 59,
+            "y2": 59,
+            "attr": [
+              1075,
+              37043,
+              31073
+            ],
+            "data": [
+              19,
+              568,
+              568,
+              15352,
+              15352,
+              1,
+              0,
+              0
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 26,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "WaitAnimForDuration",
+            "x": 136,
+            "y": 8,
+            "x2": 62,
+            "y2": 62,
+            "attr": [
+              1078,
+              37046,
+              31073
+            ],
+            "data": [
+              3,
+              544,
+              544,
+              15920,
+              15920,
+              1,
+              15357,
+              2058
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 27,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "WaitAnimForDuration",
+            "x": 136,
+            "y": 8,
+            "x2": 62,
+            "y2": 62,
+            "attr": [
+              1078,
+              37046,
+              31073
+            ],
+            "data": [
+              2,
+              544,
+              544,
+              15920,
+              15920,
+              1,
+              15357,
+              2058
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 28,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "WaitAnimForDuration",
+            "x": 136,
+            "y": 8,
+            "x2": 62,
+            "y2": 62,
+            "attr": [
+              1078,
+              37046,
+              31073
+            ],
+            "data": [
+              1,
+              544,
+              544,
+              15920,
+              15920,
+              1,
+              15357,
+              2058
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 29,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "WaitAnimForDuration",
+            "x": 136,
+            "y": 8,
+            "x2": 62,
+            "y2": 62,
+            "attr": [
+              1078,
+              37046,
+              31073
+            ],
+            "data": [
+              0,
+              544,
+              544,
+              15920,
+              15920,
+              1,
+              15357,
+              2058
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          },
+          {
+            "age": 30,
+            "slot": 3,
+            "template": "gCuttingSliceSpriteTemplate",
+            "callback": "DestroyAnimSprite",
+            "x": 136,
+            "y": 8,
+            "x2": 62,
+            "y2": 62,
+            "attr": [
+              1078,
+              37046,
+              31073
+            ],
+            "data": [
+              0,
+              544,
+              544,
+              15920,
+              15920,
+              1,
+              15357,
+              2058
+            ],
+            "matrixNum": 8,
+            "matrix": [
+              256,
+              0,
+              0,
+              256
+            ],
+            "invisible": false
+          }
+        ]
+      }
+    ],
+    "complexPaletteBlend": []
+  },
+  "tasks": {
+    "AnimTask_ShakeMon_Step": [
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "Task_UpdateMonBg": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35
+    ],
+    "Task_ClearMonBg": [
+      33,
+      34,
+      35
+    ]
+  },
+  "resources": {
+    "cutTag": {
+      "tag": 10138,
+      "first": 1,
+      "last": 41,
+      "count": 41,
+      "absentAfterCleanup": true
+    }
+  },
+  "audio": [
+    {
+      "age": 0,
+      "symbol": "se_ball_open",
+      "panX": 0
+    },
+    {
+      "age": 7,
+      "symbol": "se_m_razor_wind",
+      "panX": 63
+    }
+  ],
+  "latches": {
+    "hardwareOamEqualsPrecedingSoftware": "42/42",
+    "hardwareMatricesEqualsPrecedingSoftware": "42/42",
+    "hardwarePaletteEqualsPrecedingFaded": "41/42",
+    "sourceSliceMatrixAndOam": [
+      {
+        "slot": 3,
+        "start": 7,
+        "end": 30,
+        "matrix": [
+          256,
+          0,
+          0,
+          256
+        ],
+        "data": [
+          1,
+          1000,
+          1000,
+          1024,
+          1024,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "independentNormalizedBankMaps": true
+  },
+  "state": {
+    "partiesStable": true,
+    "battlersStable": true,
+    "engineStable": true,
+    "immutableStable": true,
+    "gameplayRngTransitions": [],
+    "animationRngTransitions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42
+    ]
+  },
+  "cleanup": {
+    "age": 42,
+    "active": false,
+    "visualTasks": 0,
+    "soundTasks": 0,
+    "ownedSprites": 0,
+    "ownedTasks": 0,
+    "cutTag": 41
+  }
+}

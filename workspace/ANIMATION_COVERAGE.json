@@ -10854,8 +10854,48 @@
     "ANIMATION_LATCHES.md"
    ],
    "goal": "FULFILLED by MOVE_SPIT_UP alone after complete source classification, six legal natural power/orientation windows, source-extracted RED_ORB_2 art, one direction-generic source-relative reducer, narrow typed Scene-ON seam, generic live hardware-buffer compositor, material altered control, and twice-fresh 650/650 zero-residual actual-core acceptance through cleanup. No sibling or shared-component credit transfers."
+  },
+  {
+   "id": "fury-cutter-counter-power-branches",
+   "components": [
+    "subroutine:FuryCutterContinue",
+    "subroutine:FuryCutterContinue2",
+    "subroutine:FuryCutterLeft",
+    "subroutine:FuryCutterMedium",
+    "subroutine:FuryCutterRight",
+    "subroutine:FuryCutterStrong",
+    "subroutine:FuryCutterStrongest",
+    "task:AnimTask_GetFuryCutterHitCount",
+    "task:AnimTask_IsFuryCutterHitRight"
+   ],
+   "representatives": ["MOVE_FURY_CUTTER"],
+   "fulfilled": false,
+   "evidence": [
+    "tools/compare/furyCutterSourceAudit.ts",
+    "tools/compare/furyCutterProbe.py",
+    "tools/compare/furyCutterEvidence.ts",
+    "tools/compare/fixtures/fury-cutter-evidence.json",
+    "tools/battle-lab/mechanic-fury-cutter-player-grovyle-opponent-blissey.json",
+    "tools/battle-lab/mechanic-fury-cutter-opponent-grovyle-player-blissey.json",
+    "tools/compare/evidence/fury-cutter-player-dense-state.json.gz",
+    "tools/compare/evidence/fury-cutter-opponent-dense-state.json.gz",
+    "tools/compare/evidence/fury-cutter-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/fury-cutter-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/fury-cutter-changemap-player-body-1.json",
+    "tools/compare/evidence/fury-cutter-changemap-player-body-2.json",
+    "tools/compare/evidence/fury-cutter-changemap-player-body-3.json",
+    "tools/compare/evidence/fury-cutter-changemap-player-body-4.json",
+    "tools/compare/evidence/fury-cutter-changemap-opponent-body-1.json",
+    "tools/compare/evidence/fury-cutter-changemap-opponent-body-2.json",
+    "tools/compare/evidence/fury-cutter-changemap-opponent-body-3.json",
+    "tools/compare/evidence/fury-cutter-changemap-opponent-body-4.json",
+    "tests/animation/furyCutterSourceStaging.test.ts",
+    "tests/animation/furyCutterEvidenceCheckpoint.test.ts",
+    "ANIMATION_LATCHES.md"
+   ],
+   "goal": "UNFULFILLED evidence checkpoint only: MOVE_FURY_CUTTER remains unsupported; the nine counter/power-branch components have no production, reducer, typed seam, compositor, core, exact/partial/staged move credit, sibling/shared credit, gameplay/RNG/facility ownership, or boundary/barrier ownership."
   }
- ],
+],
  "variantAudits": {
   "openLevelSpecies": []
  }

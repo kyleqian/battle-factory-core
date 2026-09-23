@@ -16377,3 +16377,24 @@ track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
   generic compositor, material altered control, and actual-core zero-residual
   proof; keep MegaHorn staged and its sole novel-component track unfulfilled
   until every gate is real.
+
+# Animation worker checkpoint — MOVE_SPIT_UP source/evidence only (2026-09-23)
+
+- **State / scope:** `MOVE_SPIT_UP` remains **unsupported** with no move,
+  sibling, shared, or component-track credit. The non-exclusive
+  `spit-up-red-orb-power-branches` track is present and **unfulfilled** for
+  six components; no `src/`, production asset, seam, compositor, gameplay,
+  RNG, facility, boundary, or barrier ownership changed.
+- **Evidence:** The source audit pins the complete 10-component
+  `Move_SPIT_UP`/`SpitUpStrong`/`SpitUpStrongest`/`SpitUpContinue` graph and
+  sole Level-50 carrier `FRONTIER_MON_SWALOT_1` (index 248). Six legal
+  party-before-init Scene-ON windows cover Stockpile 1/2/3 in player-back and
+  opponent-front orientations (108/108/109 rows); dense semantic state,
+  chronological RGB888, normalized bank maps, per-slot orb latches, audio,
+  allocators, registers, opaque gameplay state/RNG, and zero-owned cleanup are
+  retained. Every window is byte-identical in two fresh runs.
+- **Verification / next:** Evidence commit `3127b9717`; affected source,
+  staging, evidence, boundary, and inventory checks pass **13 tests**;
+  source/evidence verifiers, coverage (**271/276 exact, 5 unsupported**),
+  animation audit, diff check, and typecheck are green. `MOVE_SPIT_UP` gets no
+  production or coverage promotion; do not start `MOVE_FURY_CUTTER`.

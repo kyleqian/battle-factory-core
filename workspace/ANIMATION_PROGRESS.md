@@ -1,3 +1,29 @@
+# Animation worker checkpoint — MOVE_FURY_CUTTER source/evidence only (2026-09-23)
+
+- **State / scope:** `MOVE_FURY_CUTTER` remains **unsupported** with no move,
+  sibling, shared, gameplay/RNG/facility, boundary, or barrier credit. The
+  non-exclusive `fury-cutter-counter-power-branches` track is present and
+  **unfulfilled** for the nine still-unrepresented counter/power components;
+  no `src/`, production asset, reducer, typed seam, compositor, or core case
+  changed.
+- **Source/staging:** The pointer-owned `Move_FURY_CUTTER` root is 207 bytes
+  and reaches all eight script blocks and 17 generated graph components. The
+  complete Level-50 Factory census is five legal carriers (141, 174, 188, 261,
+  263). Complete legal three-mon parties stage the source carrier in player-
+  back and opponent-front Scene-ON orientations without transient injection.
+- **Evidence:** Four natural counters/powers 1..4 (10/20/40/80) retain 43
+  dense semantic and chronological raw-RGB rows per body, 172 per orientation,
+  through first inactive cleanup. Directions are right/left/right/left;
+  predecessor OAM/matrix, palette, CUT tag 10138, slice/blend/task/audio/
+  register/allocator/order latches, opaque gameplay state/RNG, normalized maps,
+  and zero-owned cleanup are pinned. Both orientations replay byte-identically
+  in two fresh processes; no exact, partial, staged, sibling, or shared credit.
+- **Verification / next:** Source audit, evidence verifier, strict source/
+  staging/evidence tests, animation boundary/inventory/coverage/audit, diff
+  check, and typecheck are the required finish gates. Resume only with a
+  separately bounded source-relative implementation and actual-core proof;
+  do not promote this evidence checkpoint or begin `MOVE_CURSE`.
+
 # Animation supervisor verification — MOVE_SPIT_UP exact merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded verified worker commits `9ee13120a`,
@@ -39,24 +65,3 @@
   only, so the recorded Revenge production full-suite/build receipt remains
   valid. Resume `MOVE_SPIT_UP` with its source-relative reducer/seam/compositor
   and complete twice-fresh zero-residual actual-core proof; do not infer credit.
-
-# Animation worker checkpoint — MOVE_SPIT_UP source/evidence only (2026-09-23)
-
-- **State / scope:** `MOVE_SPIT_UP` remains **unsupported** with no move,
-  sibling, shared, or component-track credit. The non-exclusive
-  `spit-up-red-orb-power-branches` track is present and **unfulfilled** for
-  six components; no `src/`, production asset, seam, compositor, gameplay,
-  RNG, facility, boundary, or barrier ownership changed.
-- **Evidence:** The source audit pins the complete 10-component
-  `Move_SPIT_UP`/`SpitUpStrong`/`SpitUpStrongest`/`SpitUpContinue` graph and
-  sole Level-50 carrier `FRONTIER_MON_SWALOT_1` (index 248). Six legal
-  party-before-init Scene-ON windows cover Stockpile 1/2/3 in player-back and
-  opponent-front orientations (108/108/109 rows); dense semantic state,
-  chronological RGB888, normalized bank maps, per-slot orb latches, audio,
-  allocators, registers, opaque gameplay state/RNG, and zero-owned cleanup are
-  retained. Every window is byte-identical in two fresh runs.
-- **Verification / next:** Evidence commit `3127b9717`; affected source,
-  staging, evidence, boundary, and inventory checks pass **13 tests**;
-  source/evidence verifiers, coverage (**271/276 exact, 5 unsupported**),
-  animation audit, diff check, and typecheck are green. `MOVE_SPIT_UP` gets no
-  production or coverage promotion; do not start `MOVE_FURY_CUTTER`.
