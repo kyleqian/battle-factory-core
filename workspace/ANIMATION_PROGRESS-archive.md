@@ -1,3 +1,31 @@
+# Animation worker closure — MOVE_REVENGE exact (2026-09-23)
+
+- **State / scope:** `MOVE_REVENGE` is **exact**, advancing Level 50 to
+  **271/276 exact, 0 partial, 0 staged, 5 unsupported**. Added its compact
+  source-derived PURPLE_SCRATCH/PURPLE_SWIPE asset, pure source-relative
+  reducer, narrow typed Scene-ON seam, and shared-core compositor/dispatch.
+  Only `revenge-purple-scratch-persist-hit` is fulfilled; no sibling/shared
+  credit, boundary/barrier allowance, gameplay/RNG, turn, or facility owner
+  moved, and `MOVE_SPIT_UP` was not started.
+- **Proof:** Both legal orientations reproduce all **145 + 145 = 290** dense
+  ages through age-144 first-inactive cleanup twice fresh with **0 residual
+  pixels**. RGB digests are `1fcf5f5601a2c0ddf800dda02306188add5daed373a6dd797eae2aaa9ab8633e`
+  / `47e7b19f93c49574783388d9e0c71827d7412c3eede51b61d0fb5172029674f8`;
+  verdict `f555b06392ea1bf4d14774223c60243909d2aaffdcce75eea66a196f643ba440`.
+  A material CROBAT/BLISSEY control changes live species art, side, geometry,
+  allocation, matrices, and framebuffer while opaque gameplay state/RNG stay
+  unchanged. Both move-owned maps independently confirm every supplied OAM,
+  matrix, palette, sprite/task/resource, alpha, and cleanup latch; no latch
+  correction was required.
+- **Verification / next:** Production commit `6d9c2fc11`, tested tree
+  `bcd32da664f5a6ed0bb74f718a2aea9e6d246410`. The affected source/assets/
+  evidence/reducer/actual-core/boundary/inventory union passes **8 files / 21
+  tests**; typecheck, coverage, audit, diff check, and smoke (**8 files / 448
+  tests**) pass. Full `npm test` passes **1,437 files / 11,509 tests**, with
+  **44 files / 223 tests skipped**, in **1,786.41s**; `npm run build` passes
+  **830 modules** with only the inherited chunk warning. Next ranked work is
+  `MOVE_SPIT_UP`; it remains untouched.
+
 # Animation worker checkpoint — MOVE_REVENGE reference reducer contract (2026-09-22)
 
 - **State / scope:** `MOVE_REVENGE` remains **unsupported** with no exact,

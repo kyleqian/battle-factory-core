@@ -1,3 +1,23 @@
+# Animation supervisor verification — MOVE_SPIT_UP evidence merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded worker commits `3e5301c1f`, `3127b9717`,
+  and `7b3561d86`, plus supervisor test-only repair `299df1021` after catching
+  an unused test constant in the handoff. `MOVE_SPIT_UP` and its six-component
+  track remain unsupported/unfulfilled with no production or acceptance credit;
+  Level 50 remains **271/276 exact, 0 partial, 0 staged, 5 unsupported**.
+- **Independent proof:** Replayed the source and evidence verifiers on the
+  final tree. The complete graph has **10 components** and sole Level-50 carrier
+  `FRONTIER_MON_SWALOT_1` (248). All six natural Stockpile 1/2/3 windows retain
+  **108/108/109 rows** per orientation, **8/12/16** red-orb births, two impacts,
+  deform and both shakes, stable opaque gameplay state/RNG, zero-owned cleanup,
+  and their pinned twice-fresh RGB digests.
+- **Gates / next:** On final code `299df1021`, the affected source/evidence/
+  boundary/inventory union passes **4 files / 13 tests**; typecheck, coverage,
+  animation audit, and diff checks are green. This is tooling/evidence/tests
+  only, so the recorded Revenge production full-suite/build receipt remains
+  valid. Resume `MOVE_SPIT_UP` with its source-relative reducer/seam/compositor
+  and complete twice-fresh zero-residual actual-core proof; do not infer credit.
+
 # Animation worker checkpoint — MOVE_SPIT_UP source/evidence only (2026-09-23)
 
 - **State / scope:** `MOVE_SPIT_UP` remains **unsupported** with no move,
@@ -39,31 +59,3 @@
   audit, typecheck, and diff checks are green. Next dispatch `MOVE_SPIT_UP` for
   source classification, legal bilateral staging, dense evidence, and its own
   latch maps. **For the main program:** nothing blocking.
-
-# Animation worker closure — MOVE_REVENGE exact (2026-09-23)
-
-- **State / scope:** `MOVE_REVENGE` is **exact**, advancing Level 50 to
-  **271/276 exact, 0 partial, 0 staged, 5 unsupported**. Added its compact
-  source-derived PURPLE_SCRATCH/PURPLE_SWIPE asset, pure source-relative
-  reducer, narrow typed Scene-ON seam, and shared-core compositor/dispatch.
-  Only `revenge-purple-scratch-persist-hit` is fulfilled; no sibling/shared
-  credit, boundary/barrier allowance, gameplay/RNG, turn, or facility owner
-  moved, and `MOVE_SPIT_UP` was not started.
-- **Proof:** Both legal orientations reproduce all **145 + 145 = 290** dense
-  ages through age-144 first-inactive cleanup twice fresh with **0 residual
-  pixels**. RGB digests are `1fcf5f5601a2c0ddf800dda02306188add5daed373a6dd797eae2aaa9ab8633e`
-  / `47e7b19f93c49574783388d9e0c71827d7412c3eede51b61d0fb5172029674f8`;
-  verdict `f555b06392ea1bf4d14774223c60243909d2aaffdcce75eea66a196f643ba440`.
-  A material CROBAT/BLISSEY control changes live species art, side, geometry,
-  allocation, matrices, and framebuffer while opaque gameplay state/RNG stay
-  unchanged. Both move-owned maps independently confirm every supplied OAM,
-  matrix, palette, sprite/task/resource, alpha, and cleanup latch; no latch
-  correction was required.
-- **Verification / next:** Production commit `6d9c2fc11`, tested tree
-  `bcd32da664f5a6ed0bb74f718a2aea9e6d246410`. The affected source/assets/
-  evidence/reducer/actual-core/boundary/inventory union passes **8 files / 21
-  tests**; typecheck, coverage, audit, diff check, and smoke (**8 files / 448
-  tests**) pass. Full `npm test` passes **1,437 files / 11,509 tests**, with
-  **44 files / 223 tests skipped**, in **1,786.41s**; `npm run build` passes
-  **830 modules** with only the inherited chunk warning. Next ranked work is
-  `MOVE_SPIT_UP`; it remains untouched.
