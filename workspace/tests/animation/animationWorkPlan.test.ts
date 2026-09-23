@@ -19,7 +19,7 @@ describe("animation work selection", () => {
     const unfinished = [...inventory.tiers.level50.moves, ...inventory.tiers.openOnly.moves]
       .filter((move) => !exact.has(move.move)).map((move) => move.move);
     const accounted = [...work.ready, ...work.blocked].map((move) => move.move);
-    expect(work.state).toBe("ready");
+    expect(work.state).toBe("blocked");
     expect(work.remaining).toBe(unfinished.length);
     expect(accounted.sort()).toEqual(unfinished.sort());
     expect(new Set(accounted).size).toBe(accounted.length);
@@ -45,21 +45,21 @@ describe("animation work selection", () => {
     expect(after.blocked).toEqual(before.blocked);
   });
 
-  it("keeps Outrage after ready Level 50 work but does not wait for blocked moves", () => {
+  it("does not wait for a blocked move after Outrage is exact", () => {
     const ledger = freshLedger();
-    ledger.queue = ["MOVE_OUTRAGE"];
     const work = animationWorkPlan(ledger);
-    expect(work.ready.at(-1)).toMatchObject({ move: "MOVE_OUTRAGE", tier: "openOnly" });
-    expect(work.ready.slice(0, -1).every((move) => move.tier === "level50")).toBe(true);
-    for (const move of work.ready.filter((move) => move.tier === "level50")) promote(ledger, move.move);
+    expect(work.ready).toEqual([]);
+    expect(work.blocked.map((move) => move.move)).toEqual(["MOVE_HELPING_HAND"]);
+    ledger.blockers = [];
     const next = animationWorkPlan(ledger);
-    expect(next.state).toBe("ready");
-    expect(next.ready.map((move) => move.move)).toEqual(["MOVE_OUTRAGE"]);
-    expect(next.blocked.map((move) => move.move)).toEqual(["MOVE_HELPING_HAND"]);
+    expect(next).toMatchObject({ state: "ready", remaining: 1, ready: [expect.objectContaining({ move: "MOVE_HELPING_HAND" })], blocked: [] });
+    promote(ledger, "MOVE_HELPING_HAND");
+    expect(animationWorkPlan(ledger)).toMatchObject({ state: "complete", remaining: 0, ready: [], blocked: [] });
   });
 
   it("supports documented Open-only blockers and component tracks", () => {
     const ledger = freshLedger();
+    ledger.entries = ledger.entries.filter((entry) => entry.move !== "MOVE_OUTRAGE");
     ledger.componentTracks.push({
       id: "test-outrage",
       components: [components.moves.find((move) => move.move === "MOVE_OUTRAGE")!.componentIds[0]],
@@ -74,6 +74,7 @@ describe("animation work selection", () => {
 
   it("keeps partial implementations dispatchable", () => {
     const ledger = freshLedger();
+    ledger.entries = ledger.entries.filter((entry) => entry.move !== "MOVE_OUTRAGE");
     const move = animationWorkPlan(ledger).ready[0].move;
     ledger.entries = ledger.entries.filter((entry) => entry.move !== move);
     ledger.entries.push({ move, status: "partial", covered: ["test-only"], evidence: ["test-only"], remaining: "Complete dense acceptance" });
