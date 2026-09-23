@@ -4,6 +4,16 @@
   "inventory": "animation-integration-readiness.json",
   "implementedAdapters": [
     {
+      "move": "MOVE_KARATE_CHOP",
+      "id": 2,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_SWORDS_DANCE",
       "id": 14,
       "liveEvidence": [
@@ -12,6 +22,17 @@
       ],
       "remaining": [
         "independent arbitrary-species framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_STOMP",
+      "id": 23,
+      "liveEvidence": [
+        "seed 6 LOUDRED -> DUSTOX"
+      ],
+      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison"
       ]
     },
     {
@@ -34,6 +55,17 @@
       "remaining": [
         "opponent ordinary command-input replay",
         "independent arbitrary-species framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_TWINEEDLE",
+      "id": 41,
+      "liveEvidence": [
+        "seed 52 BEEDRILL: two hits -> CACNEA KO/replacement -> two hits on PONYTA"
+      ],
+      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison"
       ]
     },
     {
@@ -90,6 +122,59 @@
       ]
     },
     {
+      "move": "MOVE_SPIKE_CANNON",
+      "id": 131,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_FURY_SWIPES",
+      "id": 154,
+      "liveEvidence": [
+        "seed 71 AIPOM -> SEALEO, three hit bodies and remaining counters 3/2/1"
+      ],
+      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_HYPER_FANG",
+      "id": 158,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_SLASH",
+      "id": 163,
+      "liveEvidence": [
+        "seed 36 CHARMELEON -> PHANPY twice"
+      ],
+      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_CRUNCH",
+      "id": 242,
+      "liveEvidence": [
+        "seed 7 MAWILE -> VOLBEAT twice"
+      ],
+      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
       "move": "MOVE_ANCIENT_POWER",
       "id": 246,
       "liveEvidence": [
@@ -119,6 +204,26 @@
       ]
     },
     {
+      "move": "MOVE_POISON_FANG",
+      "id": 305,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_CRUSH_CLAW",
+      "id": 306,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_SHADOW_PUNCH",
       "id": 325,
       "liveEvidence": [
@@ -129,6 +234,16 @@
         "independent arbitrary-species framebuffer comparison",
         "persistent sprite allocation after every switch variant",
         "persistent stale destination unfaded palette/allocator across arbitrary prior moves/switches; initial HP-bar source palette restored, attacker-palette substitution removed"
+      ]
+    },
+    {
+      "move": "MOVE_DRAGON_CLAW",
+      "id": 337,
+      "liveEvidence": [],
+      "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
       ]
     },
     {
@@ -160,7 +275,10 @@
   "foldedVerifiedSnapshot": "88cd3bc80",
   "currentAcceptedFactoryMoves": 273,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 13,
+  "implementedCount": 24,
   "playableExactCount": 0,
-  "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness."
+  "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
+  "unadaptedNotes": {
+    "MOVE_HOWL": "Current narrow config requires immutable Attack stage 7 and reducer fixes Loudred inhale picture height/cry species. Generalize from source/current battler inputs; do not fabricate fixture values."
+  }
 }

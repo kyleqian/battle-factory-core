@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import moveData from "../../src/data/gen/moves.json" with { type: "json" };
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
@@ -33,11 +34,7 @@ interface Fixture {
 }
 interface Probe { frames: { frame: number; sha256: string }[]; }
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const ids: Record<string, number> = {
-  HEADBUTT: 29, TAIL_WHIP: 39, BITE: 44, AGILITY: 97, SCREECH: 103,
-  SMOKESCREEN: 108, CONFUSE_RAY: 109, ANCIENT_POWER: 246, FOCUS_PUNCH: 264,
-  BRICK_BREAK: 280, SHADOW_PUNCH: 325, CALM_MIND: 347, SWORDS_DANCE: 14,
-};
+const ids = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.id]));
 const hash = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
 function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
@@ -85,6 +82,13 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
   const fixture: Fixture = source.sourceFixture
     ? { ...JSON.parse(readFileSync(resolve(root, source.sourceFixture), "utf8")), ...source }
     : source;
+  // These shared source probes require the selected move as a CLI argument.
+  const moveArgumentProbes = [
+    "tools/compare/poisonFangProbe.py", "tools/compare/crunchProbe.py",
+    "tools/compare/crushClawProbe.py",
+  ];
+  const probeMoveId = fixture.probeMoveId
+    ?? (moveArgumentProbes.includes(fixture.probe) ? ids[fixture.move] : undefined);
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
   const results = [];
   for (let run = 0; run < freshRuns; run++) {
@@ -94,7 +98,7 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
       join(root, "tools/run-mgba-probe.py"), output, "--",
       join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe),
       resolve(root, fixture.scenario), output, rgbDir,
-      ...(fixture.probeMoveId === undefined ? [] : [String(fixture.probeMoveId)]),
+      ...(probeMoveId === undefined ? [] : [String(probeMoveId)]),
     ], { cwd: root, encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
     if (probeRun.status !== 0) throw new Error(probeRun.stderr || probeRun.stdout);
     const probe = JSON.parse(readFileSync(output, "utf8")) as Probe;

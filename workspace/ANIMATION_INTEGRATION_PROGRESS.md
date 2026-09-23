@@ -1,5 +1,26 @@
 # Animation integration progress
 
+## 2026-09-23 — 24 live adapters; contact source and ordinary-route checks
+
+- State: worker contact batch folded as d250a0c3e/b213948ca. Eleven adapters
+  added; Howl retains explicit stage/picture-height/cry input debt.
+- Checks: all 22 contact orientations, **1,780 frames per fresh run**, compared
+  twice against source through the production live-field path. Fixed extra
+  first-frame shadows in Dragon Claw, Poison Fang and Twineedle; complete
+  source windows now have zero residuals. Receipt:
+  tools/integration/fixtures/live-contact-source-field-receipt.json.
+- Ordinary input: repeated Crunch/Slash; three Fury Swipes hits; Twineedle
+  through two hits, KO/replacement and two hits on the incoming target.
+  Focused union **8 files / 86 tests** and smoke **8 files / 448 tests** pass.
+- Worker full: **11,580 passed / 2 failed**, both older parent expectations
+  already fixed here and green in the focused union. Worker build passes.
+  Spike Cannon's old semantic JSON digest drifts although both raw RGB and
+  new production full-frame comparison pass; archives remain unchanged.
+- Next: full test/build on the committed union, immutable stamped preview
+  and browser replay/session verification. Continue status/psychic adapters
+  in an isolated bounded worker while parent owns persistent source hosts.
+  24 implemented does not mean 24 arbitrary-history/whole-battle exact.
+
 ## 2026-09-23 — verified Factory union, 13 adapters, live-field checks
 
 - State: supervisor-verified Factory snapshot `88cd3bc80` merged one-way as

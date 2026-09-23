@@ -21074,10 +21074,7 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette,
     );
-    if (liveField && state.age === 0) {
-      const opponent = playerToOpponent ? view.target : view.attacker;
-      drawSourceOpponentEnemyShadow(fb, opponent.species, opponent.geometry.battlePositionCenter);
-    }
+    // The first pointer-owned Twineedle row follows the shadow-hide scanout.
     const attackerIdle = liveField && opponentToPlayer
       ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
       : { x2: 0, y2: 0 };
@@ -39935,10 +39932,8 @@ export function renderSceneOnMovePresentation(
       ? liveSceneOnBattlerArt(view.target)
       : playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    if (liveField && state.age === 0) {
-      const opponent = playerToOpponent ? view.target : view.attacker;
-      drawSourceOpponentEnemyShadow(fb, opponent.species, opponent.geometry.battlePositionCenter);
-    }
+    // The controller has hidden the enemy shadow before this body's first
+    // scanout, including elevated species such as the accepted Zubat control.
     const targetIdle = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
@@ -50302,10 +50297,8 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette,
     );
-    if (liveField && state.age === 0) {
-      const opponent = playerToOpponent ? view.target : view.attacker;
-      drawSourceOpponentEnemyShadow(fb, opponent.species, opponent.geometry.battlePositionCenter);
-    }
+    // This complete body starts after the controller's shadow-hide scanout:
+    // the source shadow OBJ is already invisible on age 0.
     const drawAltaria = () => drawSpriteSheet(
       fb,
       altaria.tileset,
