@@ -115,6 +115,7 @@ import {
 import { megaHornAtAge, type MegaHornLiveInputs, type MegaHornState } from "./megaHorn.ts";
 import { superpowerAtAge, type SuperpowerLiveInputs, type SuperpowerState } from "./superpower.ts";
 import { revengeAtAge, type RevengeLiveInputs, type RevengeState } from "./revenge.ts";
+import { spitUpAtAge, type SpitUpLiveInputs, type SpitUpState } from "./spitUp.ts";
 import {
   auroraBeamAtAge,
   type AuroraBeamGeometry,
@@ -2899,6 +2900,17 @@ export interface SceneOnRevengeConfig {
     "attackerSide"|"targetSide"|"attackerSpecies"|"targetSpecies"|"attackerCenter"|"targetCenter">>;
 }
 
+/** Narrow Scene-ON presentation seam for MOVE_SPIT_UP's resolved power branch. */
+export interface SceneOnSpitUpConfig {
+  readonly move: "SPIT_UP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationInputs: Readonly<Omit<SpitUpLiveInputs,
+    "attackerSide" | "targetSide" | "attackerSpecies" | "targetSpecies"
+      | "attackerCenter" | "targetCenter">>;
+}
+
 /**
  * Narrow Scene-ON seam for MOVE_RETURN. The caller carries the live
  * friendship-selected presentation snapshot; damage, Return power, gameplay
@@ -4458,6 +4470,7 @@ export type SceneOnMoveConfig =
   | SceneOnMegaHornConfig
   | SceneOnSuperpowerConfig
   | SceneOnRevengeConfig
+  | SceneOnSpitUpConfig
   | SceneOnReturnConfig
   | SceneOnFlatterConfig
   | SceneOnRazorWindConfig
@@ -4842,6 +4855,8 @@ export type SceneOnSuperpowerPresentationState =
   SceneOnMovePresentationState<SceneOnSuperpowerConfig>;
 export type SceneOnRevengePresentationState =
   SceneOnMovePresentationState<SceneOnRevengeConfig>;
+export type SceneOnSpitUpPresentationState =
+  SceneOnMovePresentationState<SceneOnSpitUpConfig>;
 export type SceneOnReturnPresentationState =
   SceneOnMovePresentationState<SceneOnReturnConfig>;
 export type SceneOnFlatterPresentationState =
@@ -5314,6 +5329,10 @@ export interface SceneOnSuperpowerView extends SuperpowerState {
   readonly target: SceneOnPresentationBattler;
 }
 export interface SceneOnRevengeView extends RevengeState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+export interface SceneOnSpitUpView extends SpitUpState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -9118,6 +9137,19 @@ export function sceneOnRevengeView(state: SceneOnRevengePresentationState): Scen
     attackerSide:attacker.geometry.side,targetSide:target.geometry.side,
     attackerSpecies:attacker.species,targetSpecies:target.species,
     attackerCenter:attacker.geometry.animationCenter,targetCenter:target.geometry.animationCenter}),attacker,target};
+}
+
+/** `age=0` is MOVE_SPIT_UP's first RED_ORB_2 resource-command row. */
+export function sceneOnSpitUpView(state: SceneOnSpitUpPresentationState): SceneOnSpitUpView {
+  if (state.config.move !== "SPIT_UP") {
+    throw new Error(`expected SPIT_UP presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationInputs } = state.config;
+  return { ...spitUpAtAge(state.age, { ...animationInputs,
+    attackerSide: attacker.geometry.side, targetSide: target.geometry.side,
+    attackerSpecies: attacker.species, targetSpecies: target.species,
+    attackerCenter: attacker.geometry.animationCenter,
+    targetCenter: target.geometry.animationCenter }), attacker, target };
 }
 
 /** `age=0` is MOVE_RETURN's root resource-command source row. */
