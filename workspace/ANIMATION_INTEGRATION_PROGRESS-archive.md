@@ -99,3 +99,25 @@
   and browser replay/session verification. Continue status/psychic adapters
   in an isolated bounded worker while parent owns persistent source hosts.
   24 implemented does not mean 24 arbitrary-history/whole-battle exact.
+
+## 2026-09-23 — verified playable checkpoint 82544f434
+
+- Full union passes: **1,452 files / 11,586 tests**, 44 files / 223 tests
+  skipped; production build **835 modules**. Actual tested/built commit:
+  82544f434a081d5b63f5ff944eca21610454239b, clean tree.
+- Isolated immutable preview: http://127.0.0.1:5190/ (local SSH forward to
+  hcloud 8190), build stamp 82544f434 2026-09-23. Manifest at /build.json and
+  ordinary input trace at /replay.json. Own service:
+  pokebench-integration-preview-82544f434.service. Factory services untouched.
+- Browser verification passes: three mid-body frames plus command prompt;
+  canvas and saved PNG RGBA hashes match engine evidence; exported input is
+  unchanged; branch/commit/stamp and Scene ON/OFF restart control verified;
+  no page errors. Browser clock now pauses before load so screenshots retain
+  the verified frame. Receipt is tools/integration/fixtures/playable-preview-82544f434-receipt.json.
+- Continue: 24 live adapters, zero whole-battle/arbitrary-history exact claims.
+  Status/psychic worker runs from 82544f434. Parent palette-host implementation
+  lives on codex/animation-palette-host in .worktrees/live-palette-host.
+  Source startup was checked through ordinary draft input, and the source
+  Shadow Punch/Smokescreen/Shadow Punch sequence confirms persistent stale
+  palette rows. Production provider and tests are being finished there.
+  Preview remains pinned while this work continues; do not stop at this milestone.

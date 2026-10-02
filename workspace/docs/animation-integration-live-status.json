@@ -119,6 +119,16 @@
       ]
     },
     {
+      "move": "MOVE_LEER",
+      "id": 43,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_BITE",
       "id": 44,
       "liveEvidence": [],
@@ -148,6 +158,16 @@
       ]
     },
     {
+      "move": "MOVE_DISABLE",
+      "id": 50,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_LOW_KICK",
       "id": 67,
       "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
@@ -156,6 +176,16 @@
       ],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_GROWTH",
+      "id": 74,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
       ]
     },
     {
@@ -252,6 +282,16 @@
       ]
     },
     {
+      "move": "MOVE_RECOVER",
+      "id": 105,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_SMOKESCREEN",
       "id": 108,
       "liveEvidence": [
@@ -272,6 +312,16 @@
       ],
       "remaining": [
         "independent arbitrary-species framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_HAZE",
+      "id": 114,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
       ]
     },
     {
@@ -315,6 +365,17 @@
       ]
     },
     {
+      "move": "MOVE_ACID_ARMOR",
+      "id": 151,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [
+        "seed 0 GRIMER -> VIBRAVA: Acid Armor twice, equal ON/OFF rules and RNG"
+      ],
+      "remaining": [
+        "independent arbitrary-history comparison"
+      ]
+    },
+    {
       "move": "MOVE_FURY_SWIPES",
       "id": 154,
       "liveEvidence": [
@@ -323,6 +384,16 @@
       "sourceFieldEvidence": "../tools/integration/fixtures/live-contact-source-field-receipt.json",
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_REST",
+      "id": 156,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
       ]
     },
     {
@@ -347,6 +418,36 @@
       ]
     },
     {
+      "move": "MOVE_COTTON_SPORE",
+      "id": 178,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_SWEET_KISS",
+      "id": 186,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_CHARM",
+      "id": 204,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_STEEL_WING",
       "id": 211,
       "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
@@ -357,12 +458,32 @@
       ]
     },
     {
+      "move": "MOVE_ATTRACT",
+      "id": 213,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_DYNAMIC_PUNCH",
       "id": 223,
       "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
       "liveEvidence": [],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_ENCORE",
+      "id": 227,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
         "ordinary command-input replay"
       ]
     },
@@ -427,6 +548,26 @@
       ]
     },
     {
+      "move": "MOVE_YAWN",
+      "id": 281,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_REFRESH",
+      "id": 287,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_POISON_FANG",
       "id": 305,
       "liveEvidence": [],
@@ -447,12 +588,32 @@
       ]
     },
     {
+      "move": "MOVE_METAL_SOUND",
+      "id": 319,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_GRASS_WHISTLE",
       "id": 320,
       "liveEvidence": [],
       "sourceFieldEvidence": "../tools/integration/fixtures/status-batch-live-framebuffer-receipt.json",
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_TICKLE",
+      "id": 321,
+      "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
+      "liveEvidence": [],
+      "remaining": [
+        "independent arbitrary-species/history comparison",
         "ordinary command-input replay"
       ]
     },
@@ -531,7 +692,7 @@
   "foldedVerifiedSnapshot": "33bc8bbed",
   "currentAcceptedFactoryMoves": 274,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 49,
+  "implementedCount": 65,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
@@ -549,7 +710,7 @@
     "spritePaletteHistory": {
       "sourceCommit": "a6c61a781",
       "auditedMovePlans": 50,
-      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, including all 49 implemented adapters. Musical-note task allocations write only faded colors and retain unfaded rows. Unknown bodies and switch graphics invalidate history; complete OAM/VRAM/scanout providers remain pending.",
+      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, covering 49 of the 65 implemented adapters. The support batch and unknown bodies invalidate palette history; switch and party-menu graphics still need a provider.",
       "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json",
       "receipts": [
         "../tools/integration/fixtures/live-palette-history-receipt.json",
@@ -558,5 +719,12 @@
         "../tools/integration/fixtures/music-notes-palette-receipt.json"
       ]
     }
+  },
+  "validationCheckpoint": {
+    "state": "scoped-passed-full-build-pending",
+    "typecheck": "passed",
+    "focused": "18 files / 154 tests",
+    "independentSource": "1898 support rows per fresh run, both directions, twice; zero residual pixels",
+    "shadowFade": "player first/repeat 200 residual pixels each; opponent first zero, repeat 288392; partial"
   }
 }

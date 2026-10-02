@@ -101,11 +101,6 @@ describe("live contact and multi-hit move adapters", () => {
     }
   });
 
-  it("does not fabricate Howl's missing live post-opcode Attack stage", () => {
-    expect(liveMoveAnimationDuration(request(336, 0))).toBeNull();
-    expect(liveMoveAnimationPresentation(request(336, 0), field, 0)).toBeNull();
-  });
-
   it.each(cases)("renders $move with current species in both orientations", (row) => {
     for (const attacker of [0, 1] as const) {
       const body = [

@@ -1,5 +1,9 @@
 # Playable animation integration lane
 
+## Current user mandate — 2026-10-02
+
+Consolidate all remote code, branches, worktree changes, chat/agent logs and required assets onto the user’s Mac. Merge verified animation work into local master, preserve unfinished and experimental work in recoverable branches/archives, and verify local operation before deleting the hcloud server and associated paid resources. Continue subsequent implementation locally. This supersedes the hcloud-only execution and remote-service isolation requirements below for this controlled migration. No new remote workers or scheduled runs.
+
 ## User mandate — 2026-09-22
 
 The user requested a separate Codex task and separate worktree doing all the

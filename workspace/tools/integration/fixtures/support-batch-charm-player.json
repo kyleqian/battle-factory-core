@@ -1,0 +1,5 @@
+{
+  "sourceFixture": "tools/compare/fixtures/charm-player-minun-opponent-shuckle.json",
+  "move": "CHARM",
+  "sourceWindow": { "startFrame": 72, "endFrame": 164 }
+}

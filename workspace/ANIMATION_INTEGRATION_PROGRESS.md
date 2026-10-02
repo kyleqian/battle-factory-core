@@ -1,5 +1,12 @@
 # Animation integration progress
 
+## 2026-10-02 — 65 adapters scoped checks passed; migrating to local master
+
+- State: folded sixteen support adapters and the source-derived live Shadow Punch fade clock. Repaired support type errors and two stale integration test expectations. Typecheck and 18 focused files / 154 tests pass.
+- Independent source: Haze with alternate Gengar, Encore, Yawn, Rest and Refresh reproduce 1,898 complete source rows per fresh run, both directions and twice, zero residual pixels. Shadow’s bounded fix reproduces player first/repeat 200 pixels each, opponent first zero/repeat 288,392; arbitrary-history exactness remains unclaimed.
+- Current user mandate: consolidate hcloud code/worktrees/logs/assets onto the Mac, verify local master, then delete the server and continue locally. Workers and restart timer stopped. New physical2 worker has uncommitted work to preserve; derived worker was interrupted during initial inspection.
+- Next: import supervisor-verified Factory 8fb2afbc1 (276 accepted), run final full suite/build locally on the consolidated tree, refresh the preview, and resume remaining adapters. Also fix party-menu cancellation retaining the initial palette-history claim: source resets palette ownership even when no switch occurs. Full union/build gates have not run yet.
+
 ## 2026-09-23 — 49 adapters / 50 palette plans; combined gates pending
 
 - State: physical batch and live Howl folded; source palette plans now cover
@@ -53,24 +60,3 @@
   from verified 82544f434, isolated from parent and Factory. Never stop at
   the first preview; no whole-playable exact credit has been added.
 
-## 2026-09-23 — verified playable checkpoint 82544f434
-
-- Full union passes: **1,452 files / 11,586 tests**, 44 files / 223 tests
-  skipped; production build **835 modules**. Actual tested/built commit:
-  82544f434a081d5b63f5ff944eca21610454239b, clean tree.
-- Isolated immutable preview: http://127.0.0.1:5190/ (local SSH forward to
-  hcloud 8190), build stamp 82544f434 2026-09-23. Manifest at /build.json and
-  ordinary input trace at /replay.json. Own service:
-  pokebench-integration-preview-82544f434.service. Factory services untouched.
-- Browser verification passes: three mid-body frames plus command prompt;
-  canvas and saved PNG RGBA hashes match engine evidence; exported input is
-  unchanged; branch/commit/stamp and Scene ON/OFF restart control verified;
-  no page errors. Browser clock now pauses before load so screenshots retain
-  the verified frame. Receipt is tools/integration/fixtures/playable-preview-82544f434-receipt.json.
-- Continue: 24 live adapters, zero whole-battle/arbitrary-history exact claims.
-  Status/psychic worker runs from 82544f434. Parent palette-host implementation
-  lives on codex/animation-palette-host in .worktrees/live-palette-host.
-  Source startup was checked through ordinary draft input, and the source
-  Shadow Punch/Smokescreen/Shadow Punch sequence confirms persistent stale
-  palette rows. Production provider and tests are being finished there.
-  Preview remains pinned while this work continues; do not stop at this milestone.

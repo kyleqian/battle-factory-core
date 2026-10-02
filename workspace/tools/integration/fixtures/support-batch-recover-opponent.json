@@ -1,0 +1,5 @@
+{
+  "sourceFixture": "tools/compare/fixtures/recover-opponent-kadabra-player-onix.json",
+  "move": "RECOVER",
+  "probeMoveId": 615
+}

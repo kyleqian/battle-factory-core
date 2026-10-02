@@ -11,13 +11,14 @@ import { fileURLToPath } from "node:url";
 import species from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createLiveMovePaletteHost, prepareLiveMovePalette } from "../../src/engine/liveMoveAnimationPalette.ts";
-import { shadowPunchBackgroundBldy } from "../../src/animation/shadowPunch.ts";
+import { shadowPunchLiveBackgroundBldy } from "../../src/animation/shadowPunchFadeHost.ts";
 import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 const root=resolve(dirname(fileURLToPath(import.meta.url)),"../..");
 const vendor=dirname(realpathSync(join(root,"reference/pokeemerald")));
 const hash=(bytes:Uint8Array|string)=>createHash("sha256").update(bytes).digest("hex");
-interface Row {frame:number;sha256:string;scriptActive:boolean;bldcnt:number;bldy:number;controllerFlags:number;}
+interface SourceEvent {kind:"battle-main"|"update-fade"|"run-tasks"|"transfer-palette";vcount:number;pcmDmaCounter:number;pcmDmaPeriod:number;c15:number;}
+interface Row {frame:number;sha256:string;scriptActive:boolean;bldcnt:number;bldy:number;controllerFlags:number;intervalEvents:SourceEvent[];}
 interface Mon {species:number;hp:number;maxHp:number;}
 interface Window {moveId:number;attacker:0|1;target:0|1;initial:{battlers:{player:Mon;opponent:Mon}};rows:Row[];}
 const receipts=[];
@@ -62,17 +63,23 @@ for(const attacker of [0,1] as const) {
      if(rgb[p*3]!==rgba[p*4]||rgb[p*3+1]!==rgba[p*4+1]||rgb[p*3+2]!==rgba[p*4+2]){residualPixels++;if(p>=240*112)chromePixels++;}
      if(rgb[p*3]!==control[p*4]||rgb[p*3+1]!==control[p*4+1]||rgb[p*3+2]!==control[p*4+2])withoutHistoryPixels++;
     }
-    comparisons.push({age,frame:row.frame,residualPixels,withoutHistoryPixels,chromePixels,sourceBldy:row.bldy,productionBldy:shadowPunchBackgroundBldy(age,side),source:row.sha256,live:hash(rgba)});
+    comparisons.push({age,frame:row.frame,residualPixels,withoutHistoryPixels,chromePixels,sourceBldy:row.bldy,productionBldy:shadowPunchLiveBackgroundBldy(age),mainCallbackRan:row.intervalEvents.some(e=>e.kind==="battle-main"),source:row.sha256,live:hash(rgba)});
    }
    writeFileSync(join(scratch,"comparison-"+index+".json"),JSON.stringify(comparisons,null,2)+"\n");
    const residuals=comparisons.filter(r=>r.residualPixels>0);
-   bodies.push({index,frames:comparisons.length,sourceStart:comparisons[0]!.frame,sourceEnd:comparisons.at(-1)!.frame,exactFrames:comparisons.filter(r=>r.residualPixels===0).length,residualPixels:comparisons.reduce((a,r)=>a+r.residualPixels,0),withoutHistoryPixels:comparisons.reduce((a,r)=>a+r.withoutHistoryPixels,0),digest:hash(JSON.stringify(comparisons)),firstResiduals:residuals.slice(0,3)});
+   const missedRestoreSetupCallbackAges=comparisons.filter(r=>r.age>=80&&r.age<=83&&!r.mainCallbackRan).map(r=>r.age);
+   bodies.push({index,frames:comparisons.length,sourceStart:comparisons[0]!.frame,sourceEnd:comparisons.at(-1)!.frame,exactFrames:comparisons.filter(r=>r.residualPixels===0).length,residualPixels:comparisons.reduce((a,r)=>a+r.residualPixels,0),withoutHistoryPixels:comparisons.reduce((a,r)=>a+r.withoutHistoryPixels,0),missedRestoreSetupCallbackAges,digest:hash(JSON.stringify(comparisons)),firstResiduals:residuals.slice(0,3)});
   }
   if(freshRun===1) {
    const firstRun=receipts.find(r=>r.attacker===attacker && r.freshRun===0);
    assert(firstRun);
    assert.deepEqual(bodies,firstRun.bodies,"fresh production comparisons agree");
   }
+  assert.deepEqual(
+   bodies.map(b=>b.missedRestoreSetupCallbackAges),
+   attacker===1?[[],[82]]:[[],[]],
+   "only the repeated opponent cast misses the restore-setup main callback",
+  );
   receipts.push({scenario,attacker,freshRun,sourceDigest:digest,bodies});
   console.log(JSON.stringify({attacker,freshRun,bodies:bodies.map(b=>({frames:b.frames,residualPixels:b.residualPixels,withoutHistoryPixels:b.withoutHistoryPixels}))}));
  }

@@ -29,6 +29,20 @@ export interface YawnState {
   readonly sound: "SE_M_YAWN" | "SE_M_SPIT_UP" | null;
 }
 
+/**
+ * Current battler facts consumed by Move_YAWN's two DeepInhale tasks.
+ *
+ * The source obtains the scale anchor from `MON_PIC_HEIGHT - 2 * yDelta`
+ * and sends clouds between the live picture-offset coordinates.  Fixture
+ * callers omit this input to retain their measured Togetic/Gengar staging.
+ */
+export interface YawnBattlerInput {
+  readonly attackerPictureHeight: number;
+  readonly targetPictureHeight: number;
+  readonly attackerEffectCenter: Readonly<{ x: number; y: number }>;
+  readonly targetEffectCenter: Readonly<{ x: number; y: number }>;
+}
+
 export const YAWN_FIRST_CLOUD_AGE = 69;
 export const YAWN_SECOND_CLOUD_AGE = 75;
 export const YAWN_THIRD_CLOUD_AGE = 81;
@@ -112,6 +126,7 @@ export function yawnAtAge(
   attackerSide: YawnSide,
   attackerCenter: Readonly<{ x: number; y: number }>,
   targetCenter: Readonly<{ x: number; y: number }>,
+  battlerInput?: Readonly<YawnBattlerInput>,
 ): YawnState {
   const active = age >= 0 && age < YAWN_CLEANUP_AGE;
   // Yawn's InitYawnCloudPosition uses the battler picture-offset pair rather
@@ -119,12 +134,14 @@ export function yawnAtAge(
   // player attacker and 49 -> 97 for an opponent attacker; the battler
   // animation centers remain their art anchors at the typed seam.
   const cloudFrom = {
-    x: attackerCenter.x,
-    y: attackerSide === "player" ? 96 : 49,
+    x: battlerInput?.attackerEffectCenter.x ?? attackerCenter.x,
+    y: battlerInput?.attackerEffectCenter.y
+      ?? (attackerSide === "player" ? 96 : 49),
   };
   const cloudTo = {
-    x: targetCenter.x,
-    y: attackerSide === "player" ? 48 : 97,
+    x: battlerInput?.targetEffectCenter.x ?? targetCenter.x,
+    y: battlerInput?.targetEffectCenter.y
+      ?? (attackerSide === "player" ? 48 : 97),
   };
   const clouds = active
     ? CLOUD_STARTS.flatMap((entry) => {
@@ -140,10 +157,20 @@ export function yawnAtAge(
       })
     : [];
   const attackerTransform = active
-    ? inhaleAtAge(age, 4, attackerSide === "player" ? 48 : 46)
+    ? inhaleAtAge(
+      age,
+      4,
+      battlerInput?.attackerPictureHeight
+        ?? (attackerSide === "player" ? 48 : 46),
+    )
     : inactiveTransform();
   const targetTransform = active
-    ? inhaleAtAge(age, YAWN_SECOND_INHALE_AGE, attackerSide === "player" ? 54 : 46)
+    ? inhaleAtAge(
+      age,
+      YAWN_SECOND_INHALE_AGE,
+      battlerInput?.targetPictureHeight
+        ?? (attackerSide === "player" ? 54 : 46),
+    )
     : inactiveTransform();
   return {
     active,

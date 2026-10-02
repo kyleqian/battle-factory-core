@@ -119,9 +119,13 @@ describe("live physical move adapters", () => {
   });
 
   it("selects effect-picture and affine centers independently from live art", () => {
-    const effectCenter = (battler: { geometry: { spriteCorner: { x: number; y: number } } }) => ({
+    const effectCenter = (battler: { geometry: {
+      side: "player" | "opponent"; spriteCorner: { x: number; y: number };
+    } }) => ({
       x: battler.geometry.spriteCorner.x + 32,
-      y: Math.min(104, battler.geometry.spriteCorner.y + 40),
+      // GetBattlerSpriteFinal_Y adds eight only for the player back picture.
+      y: Math.min(104, battler.geometry.spriteCorner.y + 32
+        + (battler.geometry.side === "player" ? 8 : 0)),
     });
     const affineCenter = (battler: { geometry: { spriteCorner: { x: number; y: number } } }) => ({
       x: battler.geometry.spriteCorner.x + 32,

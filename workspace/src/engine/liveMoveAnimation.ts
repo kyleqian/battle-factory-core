@@ -31,11 +31,25 @@ import { STUN_SPORE_FRAME_COUNT } from "../animation/stunSpore.ts";
 import { GRASS_WHISTLE_WINDOW_FRAMES } from "../animation/grassWhistle.ts";
 import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
 
+import { ACID_ARMOR_FIRST_INACTIVE_AGE } from "../animation/acidArmor.ts";
+import { ATTRACT_FRAME_COUNT } from "../animation/attract.ts";
+import { CHARM_BODY_FRAME_COUNT } from "../animation/charm.ts";
+import { COTTON_SPORE_FRAME_COUNT } from "../animation/cottonSpore.ts";
+import { DISABLE_WINDOW_FRAMES } from "../animation/disable.ts";
+import { ENCORE_END_AGE } from "../animation/encore.ts";
+import { REFRESH_FRAME_COUNT } from "../animation/refresh.ts";
+import { REST_FRAME_COUNT } from "../animation/rest.ts";
+import { SWEET_KISS_FRAME_COUNT } from "../animation/sweetKiss.ts";
+import { TICKLE_FRAME_COUNT } from "../animation/tickle.ts";
+import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
+
+
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
-  2, 5, 11, 14, 21, 23, 25, 27, 29, 39, 41, 44, 47, 48, 67, 78,
-  79, 92, 93, 94, 95, 97, 101, 103, 108, 109, 122, 131, 136, 147, 154, 158,
-  163, 211, 223, 231, 242, 246, 247, 264, 280, 305, 306, 320, 325, 336, 337, 342,
+  2, 5, 11, 14, 21, 23, 25, 27, 29, 39, 41, 43, 44, 47, 48, 50,
+  67, 74, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 114, 122,
+  131, 136, 147, 151, 154, 156, 158, 163, 178, 186, 204, 211, 213, 223, 227, 231,
+  242, 246, 247, 264, 280, 281, 287, 305, 306, 319, 320, 321, 325, 336, 337, 342,
   347,
 ] as const);
 
@@ -52,6 +66,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 29: return 48; // headbuttAtAge: active through 46, then cleanup.
     case 39: return TAIL_WHIP_FRAME_COUNT;
     case 41: return 37; // Twineedle's two stingers through clearmonbg cleanup.
+    case 43: return 70; // Leer source body through its last ShakeMon2 row.
     case 44: return 26; // First sharp-teeth row through inactive cleanup.
     // Full source-script body, including the target-monbg / palette cleanup.
     case 47: return request.attacker === 0 ? 245 : 248;
@@ -66,21 +81,32 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
       return request.attacker === 0
         ? HYPNOSIS_PLAYER_FRAME_COUNT
         : HYPNOSIS_OPPONENT_FRAME_COUNT;
+    case 50: return DISABLE_WINDOW_FRAMES;
+    case 74: return 63; // Growth's second ScaleMonAndRestore through cleanup.
     case 97: return AGILITY_FRAME_COUNT;
     case 101: return NIGHT_SHADE_FRAME_COUNT;
     case 103: return SCREECH_FIRST_INACTIVE_AGE + 1;
+    case 105: return 169; // Recover's final blend/star source-owned row.
     case 108: return 125; // smokescreenAtAge: active through 123.
     case 109: return CONFUSE_RAY_FRAME_COUNT;
     case 122: return 73; // Lick source body through first inactive row.
     case 131: return 84; // Spike Cannon pointer body through inactive cleanup.
     case 136: return 91; // Hi Jump Kick source body through first inactive row.
     case 147: return SPORE_FRAME_COUNT;
+    case 114: return 202; // Haze's FadeToBg/fog restore through cleanup.
+    case 151: return ACID_ARMOR_FIRST_INACTIVE_AGE + 1;
     case 154: return FURY_SWIPES_LAST_BODY_AGE + 1;
+    case 156: return REST_FRAME_COUNT;
     case 158: return 107; // Hyper Fang restorebg fade through cleanup.
     case 163: return 46; // Slash body through final source-owned shake row.
     case 211: return 197; // Steel Wing source body through first inactive row.
     case 223: return 75; // Dynamic Punch source body through first inactive row.
     case 231: return 135; // Iron Tail source body through first inactive row.
+    case 178: return COTTON_SPORE_FRAME_COUNT;
+    case 186: return SWEET_KISS_FRAME_COUNT;
+    case 204: return CHARM_BODY_FRAME_COUNT;
+    case 213: return ATTRACT_FRAME_COUNT;
+    case 227: return ENCORE_END_AGE + 1;
     case 242: return 142; // Crunch dark-background body through cleanup.
     case 246: return 128; // ancientPowerAtAge: active through 126, cleanup at 127.
     case 247: return SHADOW_BALL_END_AGE + 1;
@@ -92,9 +118,14 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
       return request.turn === 0
         ? BRICK_BREAK_NORMAL_FRAME_COUNT
         : BRICK_BREAK_SHATTERED_FRAME_COUNT;
+    case 281: return YAWN_CLEANUP_AGE + 1;
+    case 287: return REFRESH_FRAME_COUNT;
     case 305: return 104; // Poison Fang body through blend/monbg cleanup.
     case 306: return 69; // Crush Claw body through inactive cleanup.
     case 320: return GRASS_WHISTLE_WINDOW_FRAMES;
+    // The opponent-front script drops its final wave one source row earlier.
+    case 319: return request.attacker === 0 ? 86 : 85;
+    case 321: return TICKLE_FRAME_COUNT;
     // Source restorebg fade, then inactive display. Both orientations restore.
     case 325: return request.attacker === 0 ? 106 : 105;
     case 336: return HOWL_FRAME_COUNT;
@@ -150,6 +181,8 @@ export function liveMoveAnimationPresentation(
       },
     },
   });
+  const pictureHeight = (side: "player" | "opponent") =>
+    64 - 2 * art[side].coords.yOffset;
   const fieldProfile = {
     playerHp: field.player.hp, playerMaxHp: field.player.maxHP,
     opponentHp: field.opponent.hp, opponentMaxHp: field.opponent.maxHP,
@@ -176,6 +209,7 @@ export function liveMoveAnimationPresentation(
       break;
     case 39: config = { move: "TAIL_WHIP", attacker, target, fieldProfile }; break;
     case 41: config = { move: "TWINEEDLE", attacker, target, fieldProfile }; break;
+    case 43: config = { move: "LEER", attacker, target, fieldProfile }; break;
     case 44: config = { move: "BITE", attacker, target, fieldProfile }; break;
     case 47: config = { move: "SING", attacker, target, fieldProfile }; break;
     case 48: config = { move: "SUPERSONIC", attacker, target, fieldProfile }; break;
@@ -186,9 +220,33 @@ export function liveMoveAnimationPresentation(
     case 93: config = { move: "CONFUSION", attacker, target, fieldProfile }; break;
     case 94: config = { move: "PSYCHIC", attacker, target, fieldProfile }; break;
     case 95: config = { move: "HYPNOSIS", attacker, target, fieldProfile }; break;
+    case 50:
+      // `AnimSpinningSparkle` starts from Y_PIC_OFFSET and its established
+      // reducer applies the player-side remaining -8 itself.  Keep that
+      // source convention at the adapter boundary rather than double-raising
+      // the player back sprite.
+      config = {
+        move: "DISABLE",
+        attacker: {
+          ...attacker,
+          geometry: {
+            ...attacker.geometry,
+            animationCenter: {
+              x: attacker.geometry.animationCenter.x,
+              y: attacker.geometry.animationCenter.y
+                - (attacker.geometry.side === "player" ? 8 : 0),
+            },
+          },
+        },
+        target,
+        fieldProfile,
+      };
+      break;
+    case 74: config = { move: "GROWTH", attacker, target, fieldProfile }; break;
     case 97: config = { move: "AGILITY", attacker, target, fieldProfile }; break;
     case 101: config = { move: "NIGHT_SHADE", attacker, target, fieldProfile }; break;
     case 103: config = { move: "SCREECH", attacker, target, fieldProfile }; break;
+    case 105: config = { move: "RECOVER", attacker, target, fieldProfile }; break;
     case 108: config = { move: "SMOKESCREEN", attacker, target, fieldProfile }; break;
     case 109: config = { move: "CONFUSE_RAY", attacker, target, fieldProfile }; break;
     case 122: config = { move: "LICK", attacker, target, fieldProfile }; break;
@@ -202,7 +260,30 @@ export function liveMoveAnimationPresentation(
       };
       break;
     case 147: config = { move: "SPORE", attacker, target, fieldProfile }; break;
+    case 114: config = { move: "HAZE", attacker, target, fieldProfile }; break;
+    case 151: config = { move: "ACID_ARMOR", attacker, target, fieldProfile }; break;
     case 154: config = { move: "FURY_SWIPES", attacker, target, fieldProfile }; break;
+    case 156:
+      // Rest's player-side Letter-Z renderer carries the affine OAM center
+      // correction at scanout (`screenCenterYOffset: 16`), so its reducer
+      // input is the source picture point minus that already-applied amount.
+      config = {
+        move: "REST",
+        attacker: {
+          ...attacker,
+          geometry: {
+            ...attacker.geometry,
+            animationCenter: {
+              x: attacker.geometry.animationCenter.x,
+              y: attacker.geometry.animationCenter.y
+                - (attacker.geometry.side === "player" ? 16 : 0),
+            },
+          },
+        },
+        target,
+        fieldProfile,
+      };
+      break;
     case 158: config = { move: "HYPER_FANG", attacker, target, fieldProfile }; break;
     case 163: config = { move: "SLASH", attacker, target, fieldProfile }; break;
     case 211:
@@ -222,6 +303,11 @@ export function liveMoveAnimationPresentation(
         fieldProfile,
       };
       break;
+    case 178: config = { move: "COTTON_SPORE", attacker, target, fieldProfile }; break;
+    case 186: config = { move: "SWEET_KISS", attacker, target, fieldProfile }; break;
+    case 204: config = { move: "CHARM", attacker, target, fieldProfile }; break;
+    case 213: config = { move: "ATTRACT", attacker, target, fieldProfile }; break;
+    case 227: config = { move: "ENCORE", attacker, target, fieldProfile }; break;
     case 242: config = { move: "CRUNCH", attacker, target, fieldProfile }; break;
     case 246: config = { move: "ANCIENT_POWER", attacker, target, fieldProfile }; break;
     case 247: config = { move: "SHADOW_BALL", attacker, target, fieldProfile }; break;
@@ -233,9 +319,51 @@ export function liveMoveAnimationPresentation(
         attacker, target, fieldProfile,
       };
       break;
+    case 281:
+      config = {
+        move: "YAWN", attacker, target, fieldProfile,
+        battlerInput: {
+          attackerPictureHeight: pictureHeight(attacker.geometry.side),
+          targetPictureHeight: pictureHeight(target.geometry.side),
+          attackerEffectCenter: attacker.geometry.animationCenter,
+          targetEffectCenter: target.geometry.animationCenter,
+        },
+      };
+      break;
+    case 287: config = { move: "REFRESH", attacker, target, fieldProfile }; break;
     case 305: config = { move: "POISON_FANG", attacker, target, fieldProfile }; break;
     case 306: config = { move: "CRUSH_CLAW", attacker, target, fieldProfile }; break;
     case 320: config = { move: "GRASS_WHISTLE", attacker, target, fieldProfile }; break;
+    case 319: config = { move: "METAL_SOUND", attacker, target, fieldProfile }; break;
+    case 321:
+      // `AnimEyeSparkle` starts from the effect-picture coordinate, then the
+      // Move_TICKLE script supplies y=-8. `RockMonBackAndForth` instead
+      // rotates the target battler OBJ around its unraised sprite center.
+      config = {
+        move: "TICKLE",
+        attacker: {
+          ...attacker,
+          geometry: {
+            ...attacker.geometry,
+            animationCenter: {
+              x: attacker.geometry.animationCenter.x,
+              y: attacker.geometry.animationCenter.y - 8,
+            },
+          },
+        },
+        target: {
+          ...target,
+          geometry: {
+            ...target.geometry,
+            animationCenter: {
+              x: target.geometry.spriteCorner.x + 32,
+              y: target.geometry.spriteCorner.y + 32,
+            },
+          },
+        },
+        fieldProfile,
+      };
+      break;
     case 325:
       config = {
         move: "SHADOW_PUNCH", attacker, target,

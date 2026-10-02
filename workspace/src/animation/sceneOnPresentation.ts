@@ -750,6 +750,7 @@ import {
 } from "./howl.ts";
 import {
   yawnAtAge,
+  type YawnBattlerInput,
   type YawnState,
 } from "./yawn.ts";
 import {
@@ -1136,6 +1137,7 @@ import {
   SHADOW_PUNCH_PUNCH_TASK_FIRST_AGE,
   type ShadowPunchClone,
 } from "./shadowPunch.ts";
+import type { ShadowPunchFadeHostInput } from "./shadowPunchFadeHost.ts";
 import { shakeMonOffsetAtTick } from "./shakeMon.ts";
 import {
   knockOffBodyAtAge,
@@ -1724,6 +1726,8 @@ export interface SceneOnShadowPunchConfig {
   readonly attackerSubpriority: number;
   /** Source-owned persistent OBJ scratch colors, when the live host has complete history. */
   readonly traceScratchUnfadedPalette?: readonly Readonly<{ r: number; g: number; b: number }>[];
+  /** Source callback progress supplied by a live CPU/audio scheduler; absent means uninterrupted callbacks. */
+  readonly liveFadeHost?: ShadowPunchFadeHostInput;
   readonly animationAgeOffset?: number;
 }
 
@@ -3289,10 +3293,11 @@ export interface SceneOnFollowMeConfig {
 }
 
 export interface SceneOnRestFieldProfile extends SceneOnDragonRageFieldProfile {
-  readonly playerStatus: "none" | "sleep";
-  readonly opponentStatus: "none" | "sleep";
-  /** Immutable `trysetrest` result; the animation never applies the heal. */
-  readonly pendingHeal: Readonly<{
+  /**
+   * Fixture evidence may carry the immutable `trysetrest` result. Live
+   * presentation deliberately does not invent a heal or status outcome.
+   */
+  readonly pendingHeal?: Readonly<{
     readonly battler: "attacker";
     readonly fromHp: number;
     readonly toHp: number;
@@ -3326,12 +3331,14 @@ export interface SceneOnHowlConfig {
   readonly battlerInput?: import("./howl.ts").HowlBattlerInput;
 }
 
-/** Narrow Scene-ON seam for Yawn's bilateral Togetic/Gengar body. */
+/** Scene-ON seam for Yawn's source-derived bilateral inhale body. */
 export interface SceneOnYawnConfig {
   readonly move: "YAWN";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Current source picture heights/centers; absent for retained fixtures. */
+  readonly battlerInput?: Readonly<YawnBattlerInput>;
 }
 
 export interface SceneOnRoarConfig {
@@ -10071,6 +10078,7 @@ export function sceneOnYawnView(
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
+      state.config.battlerInput,
     ),
   };
 }
