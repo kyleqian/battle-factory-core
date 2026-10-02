@@ -5,6 +5,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+
+## 2026-10-02 — Local consolidation and hcloud retirement
+
+- **State:** canonical primary checkout `/Users/kyle/Developer/pokebench/pokeemerald-factory-core`, `master`; all verified animation/integration/Rust branches and runtime research consolidated. Factory **276/277 accepted**, **65 playable adapters**, 211 accepted bodies still need wiring. Only one Git worktree remains.
+- **Did:** all 407 remote refs verified and archived locally; full server filesystem, ignored evidence, unfinished work and retired local worktrees preserved. Searchable export of **4,625** Codex/Claude transcripts. Server **164080634**, both primary IPs and dedicated firewall deleted; post-delete resource lists empty. Archive: `/Users/kyle/Developer/pokebench/hcloud-archive-20261002` (private, outside Git).
+- **Local fixes / checks:** ordinary party entry/cancel invalidates stale palette ownership; two duplicate-symbol source audits now select animation Cmd_end portably. Production checkpoint **b4befb4f7** passes typecheck/build, **1,477 files / 11,708 JS tests**, **1,832 Rust tests**, rebuilt WASM, both local oracles and fresh Rest/source controls. Local browser preview **http://127.0.0.1:5191/** passes four screenshot hashes, replay/export and scene-mode restart after server deletion.
+- **Next:** continue locally from `ANIMATION_INTEGRATION_PROGRESS.md`; review recovered physical2 work, implement remaining live adapters and complete graphics ownership across party/switch histories. `LOCAL_SETUP.md` has startup/recovery instructions. Historical hcloud-only requirements are superseded. This migration adds no whole-playable exactness claim; prior mechanics issues below remain separate backlog.
+
+---
+
 ## 1404 — [supervisor wind-down, 2026-08-26 ~04:10] **Lifecycle-audit day 2: three ordering audits (switch lifecycle 141 rows, faint replacement 116, turn machinery 133) → #134-#140 FOUND, six of the seven FIXED SAME SESSION with stock-ROM receipts (#134 switchineffects clears, #135 Pursuit ×2, #136 protectUses on switch-in, #137 AI_CV_Protect rungs + core-rs lockstep, #138 Encore-before-Struggle, #140 GetMoveTarget draw loop on 3 of 4 branches); Shell Bell live KO-heal arm; Gate-6 registry +8 receipted rows; animation-main folded (11); all five gates green on the final engine tree**
 
 - **Final gates on THIS tree (engine-final `f23ded2e` = `3db45ea3` minus the docs/tooling manifest flip `3a4c0251`, which the soak does not load; supervisor's own runs, all `--parallel` per the pinned commands):** vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60** (carry ≥28 6/60), winning-swap 0:60 **60/60** (carry ≥28 2/60); fifth gate — winning `--vary-rng --first-round` carry 0 **100/100**, carry 14 **100/100**, carry 28 **100/100**, winning-swap carry 0 **100/100** — **`budget` 0 on all four**. Full `npm test` on `3db45ea3` **1,163 files / 10,683 passed / 223 skipped** (03:10-03:15, concurrent with the gates); `npm run build` green; `cargo test` 696/0 in factory-core. DEFERRED.md: no open entries. Gate timing: 03:02-04:03 (61 min, eight sweeps concurrent under `nohup`, load 14-46; the animation Codex supervisor was live 00:24-06:24). The vanilla canary's TRAJECTORY moved by design (#140's forced-Struggle draws, #134/#136 switch-in state); the gate is the count.

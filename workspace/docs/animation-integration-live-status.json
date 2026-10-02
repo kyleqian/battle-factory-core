@@ -687,8 +687,8 @@
   ],
   "pending": [
     "production adapters/providers for the remaining 211 accepted Factory moves",
-    "final consolidated local full-suite/build and browser validation",
-    "party-menu cancellation palette-history invalidation"
+    "complete graphics palette ownership across party-menu returns, switches and unmodeled move histories",
+    "review and complete the locally recovered physical2 worker changes"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
@@ -698,21 +698,21 @@
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "cf3e5009e9261f856c112afe9beb6cc44e00b305",
-    "build": "cf3e5009e 2026-09-23",
+    "commit": "b4befb4f7c376566c98d0fe489cafebeb242afaa",
+    "build": "b4befb4f7 2026-10-02",
     "url": "http://127.0.0.1:5191/",
-    "implementedAdapters": 36,
-    "fullTest": "1455 files / 11610 tests at fa1404db5; production tree unchanged; type-only replay helper repair passes 19 affected tests",
-    "buildModules": 838,
-    "browser": "four identical canvas/PNG samples; ordinary input/session export; Scene ON/OFF restart; no page errors",
-    "receipt": "../tools/integration/fixtures/playable-preview-cf3e5009e-receipt.json",
-    "availability": "Remote preview stopped for migration; local replacement pending."
+    "implementedAdapters": 65,
+    "fullTest": "1477 files / 11708 tests passed; 44 files / 223 tests skipped; final consolidated production tree b4befb4f7",
+    "buildModules": 844,
+    "browser": "four identical canvas/PNG samples; ordinary input/session export; Scene ON/OFF restart; no page errors; verified after hcloud deletion",
+    "receipt": "../tools/integration/fixtures/playable-preview-b4befb4f7-receipt.json",
+    "availability": "Local Mac service on 127.0.0.1:5191; restart with tools/integration/start-local-preview.sh. hcloud retired."
   },
   "productionProviders": {
     "spritePaletteHistory": {
       "sourceCommit": "a6c61a781",
       "auditedMovePlans": 50,
-      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, covering 49 of the 65 implemented adapters. The support batch and unknown bodies invalidate palette history; switch and party-menu graphics still need a provider.",
+      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, covering 49 of the 65 implemented adapters. Support/unknown bodies, switches, and all party-menu entry (including cancellation before the first move) invalidate palette history. Complete returning graphics ownership still needs a provider.",
       "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json",
       "receipts": [
         "../tools/integration/fixtures/live-palette-history-receipt.json",

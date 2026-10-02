@@ -1,5 +1,12 @@
 # pokeemerald-factory-core workspace — agent guide
 
+> **2026-10-02 user-directed consolidation:** work locally on the primary
+> `master` checkout at `/Users/kyle/Developer/pokebench/pokeemerald-factory-core/workspace`.
+> hcloud has been deleted after verified backup and local validation. Old
+> hcloud-only guidance is historical. Read `LOCAL_SETUP.md` and the current
+> `ANIMATION_INTEGRATION_PROGRESS.md` before continuing. Archived refs/logs and
+> unfinished work are local; do not recreate a server or remote workers.
+
 A native-TypeScript browser reproduction of **Pokémon Emerald's Battle
 Factory**: the rental-draft + 7-battle challenge loop of the Battle Frontier
 facility, matching the real game's pixels and behavior frame-by-frame. This

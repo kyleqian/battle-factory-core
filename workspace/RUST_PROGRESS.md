@@ -3,6 +3,11 @@
 Newest entry on top. Keep only ~3 entries here; archive the rest to
 `RUST_PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
+**Local consolidation, 2026-10-02:** verified Rust tip `5691a4ef4` (through R100 / M97)
+is merged into primary local master. WASM rebuild and all 1,832 native Rust tests
+pass on the Mac. Retired worktree/history and original refs are archived locally;
+hcloud is deleted. Resume from the R100 next action below using `LOCAL_SETUP.md`.
+
 ---
 
 

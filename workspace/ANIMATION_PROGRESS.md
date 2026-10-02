@@ -1,3 +1,12 @@
+# Local consolidation update — 2026-10-02
+
+Factory checkpoint `8fb2afbc1` is merged into local master: **276/277 accepted**
+(275/276 Level 50 plus 1/1 Open-only). This acceptance inventory is unchanged.
+hcloud is deleted; the previous worker/source history and all evidence are
+archived locally. The current effort is playable integration: 65 adapters,
+211 accepted bodies still to wire. See `ANIMATION_INTEGRATION_PROGRESS.md` and
+`LOCAL_SETUP.md`; Helping Hand remains blocked on legal doubles staging.
+
 # Animation supervisor verification — MOVE_OUTRAGE exact merge (2026-09-23)
 
 - **State / merge:** Fast-forwarded verified worker commits `0828c75fd` through
