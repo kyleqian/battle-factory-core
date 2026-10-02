@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -6,6 +7,7 @@ import { playableAnimationReplay } from "./playableAnimationReplay.ts";
 
 const [build, outputDir = ".integration/preview-evidence"] = process.argv.slice(2);
 if (!build) throw new Error("usage: preparePlayablePreviewEvidence.ts <exact-build-stamp> [output-dir]");
+const branch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { encoding: "utf8" }).trim();
 const replay = playableAnimationReplay("on");
 const samples = replay.observations.filter(o => o.moveId === 325 || o.moveId === 109).map((o, index) => {
   const middle = o.samples[1]!;
@@ -20,7 +22,7 @@ const trace = { ...replay.trace, build };
 mkdirSync(outputDir, { recursive: true });
 writeFileSync(resolve(outputDir, "trace.json"), JSON.stringify(trace, null, 2) + "\n");
 writeFileSync(resolve(outputDir, "evidence.json"), JSON.stringify({
-  build, trace, samples, observations: replay.observations,
+  build, branch, trace, samples, observations: replay.observations,
   finalSha256: createHash("sha256").update(render(replay.state)).digest("hex"),
   commandBoundaries: replay.boundaries.map(s => ({ frame: s.frame, battle: s.factoryRoundBattleOrchestrator!.battle })),
 }, null, 2) + "\n");

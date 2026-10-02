@@ -686,11 +686,12 @@
     "persistent source OBJ palette allocation/load/free semantics; Shadow Punch receives retained unfaded scratch colors across audited move history"
   ],
   "pending": [
-    "reusable basic/derived/variant/graphics/random adapters for the remaining accepted moves",
-    "one-way fold of later supervisor-verified Factory commits including Outrage when available"
+    "production adapters/providers for the remaining 211 accepted Factory moves",
+    "final consolidated local full-suite/build and browser validation",
+    "party-menu cancellation palette-history invalidation"
   ],
-  "foldedVerifiedSnapshot": "33bc8bbed",
-  "currentAcceptedFactoryMoves": 274,
+  "foldedVerifiedSnapshot": "8fb2afbc1",
+  "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
   "implementedCount": 65,
   "playableExactCount": 0,
@@ -704,7 +705,8 @@
     "fullTest": "1455 files / 11610 tests at fa1404db5; production tree unchanged; type-only replay helper repair passes 19 affected tests",
     "buildModules": 838,
     "browser": "four identical canvas/PNG samples; ordinary input/session export; Scene ON/OFF restart; no page errors",
-    "receipt": "../tools/integration/fixtures/playable-preview-cf3e5009e-receipt.json"
+    "receipt": "../tools/integration/fixtures/playable-preview-cf3e5009e-receipt.json",
+    "availability": "Remote preview stopped for migration; local replacement pending."
   },
   "productionProviders": {
     "spritePaletteHistory": {

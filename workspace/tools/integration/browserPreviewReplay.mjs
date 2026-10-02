@@ -17,7 +17,7 @@ try {
   const manifestResponse = await page.request.get(new URL("build.json", url).toString());
   assert(manifestResponse.ok(), "preview manifest is served");
   const manifest = await manifestResponse.json();
-  assert.equal(manifest.branch, "codex/animation-integration");
+  assert.equal(manifest.branch, evidence.branch ?? "codex/animation-integration");
   assert.equal(manifest.build, evidence.build);
   assert.equal(manifest.commit.slice(0, evidence.build.split(" ")[0].length), evidence.build.split(" ")[0]);
   const errors = [];

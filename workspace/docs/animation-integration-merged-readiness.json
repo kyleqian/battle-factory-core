@@ -1,10 +1,10 @@
 {
   "schema": "playable-animation-readiness-delta/v1",
-  "verifiedFactorySnapshot": "33bc8bbed",
+  "verifiedFactorySnapshot": "8fb2afbc1",
   "extends": "animation-integration-readiness.json",
   "baselineAccepted": 267,
-  "additionalAccepted": 7,
-  "totalAccepted": 274,
+  "additionalAccepted": 9,
+  "totalAccepted": 276,
   "availableCommonProviders": [
     "typed MOVE_ANIMATION request",
     "current field/art/source geometry/HUD",
@@ -213,12 +213,59 @@
         "production palette-transfer timing provider",
         "ordinary-route source comparison"
       ]
+    },
+    {
+      "move": "MOVE_ICE_BALL",
+      "exactAcceptance": "exact",
+      "playableReadiness": "blocked",
+      "entryPoints": {
+        "config": "SceneOnIceBallConfig",
+        "reducer": "src/animation/iceBall.ts",
+        "render": "renderSceneOnMovePresentation"
+      },
+      "hostClass": [
+        "H_BUFFER",
+        "H_VARIANT"
+      ],
+      "requiredHostState": [
+        "current battler art and source geometry",
+        "persistent OAM, affine, palette, resource and callback state",
+        "resolved consecutive-use counter and independent presentation RNG"
+      ],
+      "productionHostProvider": false,
+      "blockers": [
+        "typed ordinary queue adapter",
+        "production graphics host inputs",
+        "ordinary-route source comparison"
+      ]
+    },
+    {
+      "move": "MOVE_OUTRAGE",
+      "exactAcceptance": "exact",
+      "playableReadiness": "blocked",
+      "entryPoints": {
+        "config": "SceneOnOutrageConfig",
+        "reducer": "src/animation/outrage.ts",
+        "render": "renderSceneOnMovePresentation"
+      },
+      "hostClass": [
+        "H_BUFFER"
+      ],
+      "requiredHostState": [
+        "current battler art and source geometry",
+        "persistent OAM, affine, palette, resource and callback state",
+        "persistent source sprite/task/resource allocation and palette buffers"
+      ],
+      "productionHostProvider": false,
+      "blockers": [
+        "typed ordinary queue adapter",
+        "production graphics host inputs",
+        "ordinary-route source comparison"
+      ]
     }
   ],
   "remainingUnaccepted": [
-    "MOVE_ICE_BALL",
-    "MOVE_HELPING_HAND",
-    "MOVE_OUTRAGE"
+    "MOVE_HELPING_HAND"
   ],
-  "remainingUnacceptedNote": "Import only later supervisor-verified Factory commits; a worker branch does not grant live integration credit."
+  "remainingUnacceptedNote": "Helping Hand remains blocked on legal doubles Scene-ON staging; the other 276 Factory moves are source-accepted."
 }
