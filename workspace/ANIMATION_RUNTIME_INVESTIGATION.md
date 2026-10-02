@@ -200,6 +200,29 @@ campaign, rewriting its accepted moves, or promising a particular speedup.
 
 ## Verification and handoff
 
+### Subsequent user-authorized implementation on hcloud
+
+The user subsequently asked to build this now using spare capacity and clarified
+that execution should be on hcloud. On 2026-09-22 at 05:25 UTC, a separate bounded
+implementation run was launched as `pokebench-animation-runtime.service` on
+95.216.222.140. Its parent branch is `codex/animation-runtime-hcloud`, setup
+commit `32f423c09`, based on this research's `d7c8493bb`.
+
+Remote parent workspace:
+`/srv/pokebench/pokeemerald-factory-core/workspace/.worktrees/animation-runtime/workspace`.
+Read its `NATIVE_ANIMATION_BRIEF.md` and `NATIVE_ANIMATION_PROGRESS.md` for scope
+and handoff. The standard animation worker launcher creates a disposable child
+worktree; review its committed output before merging into the isolated parent.
+The first assignment is a reusable full-script Splash/Mud Sport runtime with
+sprite/resource lifecycle and mud particles, dense bilateral validation and
+rendering integration toward full pixel acceptance. The worker is Sol/high
+under the repository's novel-integration routing, with a 180-minute cap,
+7 GiB service memory limit and two CPUs. There is no recurring timer.
+
+This records dispatch, not completion. The existing Factory supervisor remained
+active and unchanged. No automatic merge into Factory or master is authorized
+by this setup, and no move acceptance is implied by the research receipts below.
+
 - Focused tests: 25 tests across runtime, forward comparison, boundary and inventory.
 - Fresh local mGBA: all rows in both tables pass; Splash repeats identically.
 - Coverage, existing asset audit and diff checks pass; full production tests and
