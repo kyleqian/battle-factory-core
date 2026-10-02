@@ -13,7 +13,7 @@ describe("MOVE_WATER_PULSE source/classification checkpoint", () => {
   it("regenerates its complete pointer-owned root, nine generated components, and every source-owned callback/task byte-identically", () => {
     const first = auditText();
     expect(auditText()).toBe(first);
-    expect(sha(first)).toBe("9e33953c5ee1804a3b12eb96598c60372c964c0e6bff2997e87688c8ff67dffb");
+    expect(sha(first)).toBe("7ea11b57647851582a680baf0b7dd67bca80af5d2db5a21e95c2309eb4642dd4");
     const audit = JSON.parse(first) as Json;
     expect(audit).toMatchObject({
       schema: "water-pulse-source-audit/v1", move: "MOVE_WATER_PULSE", moveId: 352,

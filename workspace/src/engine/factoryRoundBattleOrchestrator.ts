@@ -2497,8 +2497,20 @@ export function advanceFactoryRoundBattleCommand(
       advanced.lifecycle.phase === "party-handoff"
       && presentation.lifecycle.phase !== "party-handoff"
     ) {
+      // Party-menu startup frees/reloads OBJ palettes even if the player
+      // cancels. Its return-to-battle allocation differs from battle startup,
+      // so invalidate before the first move as well as after retained moves.
+      const retained = state.liveMovePaletteHost?.battleCallStart === state.activeBattleCallStart
+        ? state.liveMovePaletteHost : undefined;
       return Object.freeze({
         ...state,
+        liveMovePaletteHost: state.config.battleScene === "on"
+          ? Object.freeze({
+              battleCallStart: state.activeBattleCallStart,
+              commandKey: retained?.commandKey ?? "",
+              host: invalidateLiveMovePaletteHost(retained?.host ?? createLiveMovePaletteHost()),
+            })
+          : state.liveMovePaletteHost,
         battleCommandPresentation: advanced,
         battlePartySelect: createBattlePartySelectState(
           advanced.request,

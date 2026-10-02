@@ -6,7 +6,7 @@
   "status": "unsupported-source-staging-checkpoint",
   "coverageCredit": false,
   "source": {
-    "auditRunSha256": "9e33953c5ee1804a3b12eb96598c60372c964c0e6bff2997e87688c8ff67dffb",
+    "auditRunSha256": "7ea11b57647851582a680baf0b7dd67bca80af5d2db5a21e95c2309eb4642dd4",
     "pointerOwnedRoot": {"start": "0x082d6c7a", "endExclusive": "0x082d6d6f"},
     "probe": "tools/compare/waterPulseStagingProbe.py",
     "probeSha256": "7223406c3dedc8ec2a9b2c21400191b9a96b507e0e9f60ea95349a365f0eb696"

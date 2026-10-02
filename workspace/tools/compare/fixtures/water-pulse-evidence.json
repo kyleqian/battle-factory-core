@@ -7,14 +7,14 @@
   "coverageCredit": false,
   "source": {
     "audit": "tools/compare/waterPulseSourceAudit.ts",
-    "auditSha256": "f1c26fc37b19ef520e278cbc54415bab4a2df8b2c80623d7f12dba509dcff184",
-    "auditRunSha256": "9e33953c5ee1804a3b12eb96598c60372c964c0e6bff2997e87688c8ff67dffb",
+    "auditSha256": "15fbe7b3bb94f487259490292256d68e35f1dba22efcae1a8f5fe93b72395d6d",
+    "auditRunSha256": "7ea11b57647851582a680baf0b7dd67bca80af5d2db5a21e95c2309eb4642dd4",
     "probe": "tools/compare/waterPulseProbe.py",
     "probeSha256": "12f8e4fefe5b11b340011c1ce8ca517281ee2cb9afec710ff87820b5e110d420",
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/water-pulse-staging-receipt.json",
-    "stagingReceiptSha256": "2547d672570134235abe04bb119a9258a1f09abd12c55edddb55bba954f30c70",
+    "stagingReceiptSha256": "8a089c169b7d1ec018ff9b0400066556be5d459eb0f0c68ad348d668eb076c06",
     "pointerOwnedRoot": {
       "start": "0x082d6c7a",
       "endExclusive": "0x082d6d6f",

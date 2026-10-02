@@ -69,7 +69,7 @@ describe("MOVE_WATER_PULSE legal Scene-ON source-staging checkpoint", () => {
     expect(receipt).toMatchObject({
       schema: "water-pulse-compact-staging-receipt/v1", oracleProfile: "battle-scene-on", move: "MOVE_WATER_PULSE", moveId: 352,
       status: "unsupported-source-staging-checkpoint", coverageCredit: false,
-      source: { auditRunSha256: "9e33953c5ee1804a3b12eb96598c60372c964c0e6bff2997e87688c8ff67dffb", pointerOwnedRoot: { start: "0x082d6c7a", endExclusive: "0x082d6d6f" } },
+      source: { auditRunSha256: "7ea11b57647851582a680baf0b7dd67bca80af5d2db5a21e95c2309eb4642dd4", pointerOwnedRoot: { start: "0x082d6c7a", endExclusive: "0x082d6d6f" } },
       scope: { framebuffersRetained: false, rawRgbRetained: false, denseWindowCaptured: false, semanticFramesRetained: false, latchMeasured: false, productionChanged: false, reducerAdded: false, typedSceneOnSeam: false, compositorAdded: false, coveragePromotion: false, componentTrackFulfilled: false, transientOverrides: [], battleStateInjected: false, entryHooksSkipped: false, noTimingOrLatchTransfer: true },
     });
     expect(receipt.source.probeSha256).toBe(sha(readFileSync(resolve(root, receipt.source.probe))));

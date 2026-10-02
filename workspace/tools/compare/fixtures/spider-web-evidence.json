@@ -34,8 +34,8 @@
   },
   "source": {
     "audit": "tools/compare/spiderWebSourceAudit.ts",
-    "auditSha256": "2a88e584dc828897fd058b6393ac6364a5ca132b1952ec2760c6afe77b7d386a",
-    "auditRunSha256": "c102d2f3191144adf8dfdac1e836bd1572318023ecd8380b502ff94b03930b59",
+    "auditSha256": "ad8d8cd7dc2b03457e9c9f82a39010001a1bd1bbcaae8e2c92563a8719bfc32e",
+    "auditRunSha256": "6fefa6351ddf1cda249d05c42f0b4812c9409eea868d09c5fc62c3a5ac93c644",
     "probe": "tools/compare/spiderWebProbe.py",
     "probeSha256": "40a17e1a884cd783b7ddafa144488def58f46120da36652c53d5aecdeb11e3a6",
     "sharedProbe": "tools/compare/sweetScentProbe.py",

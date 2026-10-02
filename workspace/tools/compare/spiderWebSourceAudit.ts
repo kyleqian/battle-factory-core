@@ -121,6 +121,10 @@ const symbols = new Map<string, Symbol>();
 for (const line of nm.split("\n")) {
   const fields = line.trim().split(/\s+/u);
   if (fields.length >= 4 && /^[0-9a-f]+$/iu.test(fields[0]!) && /^[0-9a-f]+$/iu.test(fields[1]!)) {
+    // Three translation units define static Cmd_end. Pin the animation
+    // runtime body (battle_anim.o in the linker map), independent of nm's
+    // ordering of duplicate names on macOS versus Linux.
+    if (fields.at(-1) === "Cmd_end" && Number.parseInt(fields[0]!, 16) !== 0x080a3fc4) continue;
     symbols.set(fields.at(-1)!, { address: Number.parseInt(fields[0]!, 16), size: Number.parseInt(fields[1]!, 16) });
   } else if (fields.length === 3 && /^[0-9a-f]+$/iu.test(fields[0]!)) {
     symbols.set(fields[2]!, { address: Number.parseInt(fields[0]!, 16), size: 0 });

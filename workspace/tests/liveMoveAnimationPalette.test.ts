@@ -5,6 +5,7 @@ import {
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 import { playableAnimationReplay } from "../tools/integration/playableAnimationReplay.ts";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
+import { advanceFactoryRoundBattleCommand } from "../src/engine/factoryRoundBattleOrchestrator.ts";
 
 const request = (moveId: number): BattleMoveAnimationRequest => ({
   moveId, attacker: 0, target: 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0,
@@ -87,5 +88,36 @@ describe("persistent live move palette inputs", () => {
     const replay = generatedCommandAnimationReplay(54, "on", [{ switch: 1 }, 0]);
     expect(replay.state.liveMovePaletteHost?.host.historyKnown).toBe(false);
     expect(replay.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+  }, 60000);
+
+  it("invalidates palette ownership on party entry even when cancelling before the first move", () => {
+    for (const mode of ["on", "off"] as const) {
+      const replay = playableAnimationReplay(mode);
+      // Cover both lazy initialization and an already retained, known host.
+      for (const boundary of replay.boundaries.slice(0, 2)) {
+        const initial = boundary.factoryRoundBattleOrchestrator!;
+        let state = initial;
+        const step = (...buttons: ("A" | "B" | "DOWN")[]) => {
+          state = advanceFactoryRoundBattleCommand(state, new Set(buttons));
+        };
+        step("DOWN");
+        step();
+        step("A");
+        for (let ticks = 0; ticks < 100 && (state.battlePartySelect?.openElapsed ?? -1) < 62; ticks++) step();
+        expect(state.battlePartySelect).not.toBeNull();
+        expect(state.liveMovePaletteHost?.host.historyKnown).toBe(mode === "on" ? false : undefined);
+        step("B");
+        for (let ticks = 0; ticks < 100 && state.battlePartySelect !== null; ticks++) step();
+        expect(state.battlePartySelect).toBeNull();
+        expect(state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+        expect(state.battle).toBe(initial.battle);
+        expect(state.aiHistory).toBe(initial.aiHistory);
+        if (mode === "on") {
+          expect(state.liveMovePaletteHost?.battleCallStart).toBe(state.activeBattleCallStart);
+          expect(prepareLiveMovePalette(state.liveMovePaletteHost!.host, request(325)).input)
+            .toEqual({ historyKnown: false });
+        } else expect(state.liveMovePaletteHost).toBeUndefined();
+      }
+    }
   }, 60000);
 });
