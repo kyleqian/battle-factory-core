@@ -1,0 +1,45 @@
+{
+  "schema": "animation-runtime-spike-verification/v1",
+  "captureSha256": "e83d07e0d8b20f4c61e126594f7ac0f03d97514423db3b67e291574638ffe93d",
+  "romSha256": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+  "scope": "Source/task/battler and selected OBJ transfer checks only; audio busy is an external host input; no full framebuffer, new sprites, palettes or backgrounds.",
+  "reports": [
+    {
+      "fixture": "tools/animation/runtime-spike/splash-player-fixture.json",
+      "move": "SPLASH",
+      "rows": 116,
+      "sourceRows": 116,
+      "softwareRows": 115,
+      "hardwareRows": 115,
+      "callbacks": [
+        "AnimTask_Splash"
+      ],
+      "mismatchCounts": {},
+      "examples": []
+    },
+    {
+      "fixture": "tools/animation/runtime-spike/splash-opponent-fixture.json",
+      "move": "SPLASH",
+      "rows": 116,
+      "sourceRows": 116,
+      "softwareRows": 115,
+      "hardwareRows": 115,
+      "callbacks": [
+        "AnimTask_Splash"
+      ],
+      "mismatchCounts": {},
+      "examples": []
+    }
+  ],
+  "identicalToFirstCapture": true,
+  "caseHashes": [
+    {
+      "fixture": "tools/animation/runtime-spike/splash-player-fixture.json",
+      "sha256": "e4de50356168abc6158b1a653b207707440221d2138b9d3eef2a087997f0cac2"
+    },
+    {
+      "fixture": "tools/animation/runtime-spike/splash-opponent-fixture.json",
+      "sha256": "8411fa2bb3da813cca97e1d31b917d456afc812d2c2c5fc9771a4ea4d0b92525"
+    }
+  ]
+}

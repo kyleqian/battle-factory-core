@@ -1,0 +1,20 @@
+{
+  "schema": "native-animation-runtime-repeat-receipt/v1",
+  "capturedAtUtc": "2026-09-22",
+  "captureA": {
+    "sha256": "ab57db134aad778a486d20cbdedf7ded491a580f83e2137a16a5ef916e120958",
+    "receiptSha256": "7d399778ab19f84c09f22c8d4775acafba8600da4214abf09039df97081e4814"
+  },
+  "captureB": {
+    "sha256": "ab57db134aad778a486d20cbdedf7ded491a580f83e2137a16a5ef916e120958",
+    "receiptSha256": "7d399778ab19f84c09f22c8d4775acafba8600da4214abf09039df97081e4814"
+  },
+  "byteIdentical": true,
+  "cases": [
+    "SPLASH/player/116",
+    "SPLASH/opponent/116",
+    "MUD_SPORT/player/233",
+    "MUD_SPORT/opponent/233"
+  ],
+  "scope": "Two fresh direct-local-mGBA captures. Complete source/runtime-owned semantic and OBJ-transfer evidence only; not full OAM or framebuffer acceptance."
+}

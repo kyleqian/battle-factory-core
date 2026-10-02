@@ -1,0 +1,5 @@
+{
+  "move": "SNATCH",
+  "scenario": "tools/animation/runtime-spike/snatch-player-scenario.json",
+  "notes": "Local MechanicLab research only; 23 learns this move in the source learnset. Duplicate move slots constrain AI, as in existing fixtures. No move acceptance credit."
+}

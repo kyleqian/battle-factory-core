@@ -1,0 +1,682 @@
+{
+  "affinePrograms": {
+    "gSplashEffectAffineAnimCmds": {
+      "address": 140064232,
+      "commands": [
+        {
+          "type": -6,
+          "x": -6,
+          "y": 4,
+          "rotation": 0,
+          "duration": 8
+        },
+        {
+          "type": 10,
+          "x": 10,
+          "y": -10,
+          "rotation": 0,
+          "duration": 8
+        },
+        {
+          "type": -4,
+          "x": -4,
+          "y": 6,
+          "rotation": 0,
+          "duration": 8
+        },
+        {
+          "type": 32767,
+          "x": 32767,
+          "y": 0,
+          "rotation": 0,
+          "duration": 0
+        }
+      ]
+    }
+  },
+  "schema": "animation-runtime-spike-programs/v1",
+  "romSha256": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+  "programs": {
+    "Move_SNATCH": {
+      "entry": 137192739,
+      "commands": {
+        "137192739": {
+          "op": "playsewithpan",
+          "next": 137192743,
+          "song": 152,
+          "pan": -64
+        },
+        "137192743": {
+          "op": "createvisualtask",
+          "next": 137192764,
+          "callback": "AnimTask_WindUpLunge",
+          "priority": 5,
+          "args": [
+            0,
+            -12,
+            4,
+            10,
+            10,
+            12,
+            6
+          ]
+        },
+        "137192764": {
+          "op": "end",
+          "next": 137192765
+        }
+      }
+    },
+    "Move_MUD_SPORT": {
+      "entry": 137160696,
+      "commands": {
+        "137160696": {
+          "op": "loadspritegfx",
+          "next": 137160699,
+          "tag": 10074
+        },
+        "137160699": {
+          "op": "createvisualtask",
+          "next": 137160710,
+          "callback": "AnimTask_Splash",
+          "priority": 2,
+          "args": [
+            0,
+            6
+          ]
+        },
+        "137160710": {
+          "op": "delay",
+          "next": 137160712,
+          "frames": 24
+        },
+        "137160712": {
+          "op": "createsprite",
+          "next": 137160725,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            0,
+            -4,
+            -16
+          ]
+        },
+        "137160725": {
+          "op": "createsprite",
+          "next": 137160738,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            0,
+            4,
+            -12
+          ]
+        },
+        "137160738": {
+          "op": "playsewithpan",
+          "next": 137160742,
+          "song": 175,
+          "pan": -64
+        },
+        "137160742": {
+          "op": "delay",
+          "next": 137160744,
+          "frames": 32
+        },
+        "137160744": {
+          "op": "createsprite",
+          "next": 137160757,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            0,
+            -3,
+            -12
+          ]
+        },
+        "137160757": {
+          "op": "createsprite",
+          "next": 137160770,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            0,
+            5,
+            -14
+          ]
+        },
+        "137160770": {
+          "op": "playsewithpan",
+          "next": 137160774,
+          "song": 175,
+          "pan": -64
+        },
+        "137160774": {
+          "op": "delay",
+          "next": 137160776,
+          "frames": 32
+        },
+        "137160776": {
+          "op": "createsprite",
+          "next": 137160789,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            0,
+            -5,
+            -18
+          ]
+        },
+        "137160789": {
+          "op": "createsprite",
+          "next": 137160802,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            0,
+            3,
+            -14
+          ]
+        },
+        "137160802": {
+          "op": "playsewithpan",
+          "next": 137160806,
+          "song": 175,
+          "pan": -64
+        },
+        "137160806": {
+          "op": "delay",
+          "next": 137160808,
+          "frames": 16
+        },
+        "137160808": {
+          "op": "createsprite",
+          "next": 137160821,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            1,
+            220,
+            60
+          ]
+        },
+        "137160821": {
+          "op": "waitplaysewithpan",
+          "next": 137160826,
+          "song": 125,
+          "pan": 0,
+          "frames": 15
+        },
+        "137160826": {
+          "op": "delay",
+          "next": 137160828,
+          "frames": 2
+        },
+        "137160828": {
+          "op": "createsprite",
+          "next": 137160841,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            1,
+            60,
+            100
+          ]
+        },
+        "137160841": {
+          "op": "waitplaysewithpan",
+          "next": 137160846,
+          "song": 125,
+          "pan": 0,
+          "frames": 25
+        },
+        "137160846": {
+          "op": "delay",
+          "next": 137160848,
+          "frames": 2
+        },
+        "137160848": {
+          "op": "createsprite",
+          "next": 137160861,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            1,
+            140,
+            55
+          ]
+        },
+        "137160861": {
+          "op": "waitplaysewithpan",
+          "next": 137160866,
+          "song": 125,
+          "pan": 0,
+          "frames": 14
+        },
+        "137160866": {
+          "op": "delay",
+          "next": 137160868,
+          "frames": 2
+        },
+        "137160868": {
+          "op": "createsprite",
+          "next": 137160881,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            1,
+            180,
+            50
+          ]
+        },
+        "137160881": {
+          "op": "waitplaysewithpan",
+          "next": 137160886,
+          "song": 125,
+          "pan": 0,
+          "frames": 10
+        },
+        "137160886": {
+          "op": "delay",
+          "next": 137160888,
+          "frames": 2
+        },
+        "137160888": {
+          "op": "createsprite",
+          "next": 137160901,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            1,
+            20,
+            90
+          ]
+        },
+        "137160901": {
+          "op": "waitplaysewithpan",
+          "next": 137160906,
+          "song": 125,
+          "pan": 0,
+          "frames": 22
+        },
+        "137160906": {
+          "op": "delay",
+          "next": 137160908,
+          "frames": 2
+        },
+        "137160908": {
+          "op": "createsprite",
+          "next": 137160921,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            1,
+            90,
+            90
+          ]
+        },
+        "137160921": {
+          "op": "waitplaysewithpan",
+          "next": 137160926,
+          "song": 125,
+          "pan": 0,
+          "frames": 22
+        },
+        "137160926": {
+          "op": "delay",
+          "next": 137160928,
+          "frames": 2
+        },
+        "137160928": {
+          "op": "createsprite",
+          "next": 137160941,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            1,
+            160,
+            60
+          ]
+        },
+        "137160941": {
+          "op": "waitplaysewithpan",
+          "next": 137160946,
+          "song": 125,
+          "pan": 0,
+          "frames": 15
+        },
+        "137160946": {
+          "op": "delay",
+          "next": 137160948,
+          "frames": 2
+        },
+        "137160948": {
+          "op": "createsprite",
+          "next": 137160961,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            1,
+            30,
+            90
+          ]
+        },
+        "137160961": {
+          "op": "waitplaysewithpan",
+          "next": 137160966,
+          "song": 125,
+          "pan": 0,
+          "frames": 22
+        },
+        "137160966": {
+          "op": "delay",
+          "next": 137160968,
+          "frames": 2
+        },
+        "137160968": {
+          "op": "createsprite",
+          "next": 137160981,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            1,
+            120,
+            60
+          ]
+        },
+        "137160981": {
+          "op": "waitplaysewithpan",
+          "next": 137160986,
+          "song": 125,
+          "pan": 0,
+          "frames": 15
+        },
+        "137160986": {
+          "op": "delay",
+          "next": 137160988,
+          "frames": 2
+        },
+        "137160988": {
+          "op": "createsprite",
+          "next": 137161001,
+          "template": "gMudsportMudSpriteTemplate",
+          "subpriority": 130,
+          "args": [
+            1,
+            200,
+            40
+          ]
+        },
+        "137161001": {
+          "op": "waitplaysewithpan",
+          "next": 137161006,
+          "song": 125,
+          "pan": 0,
+          "frames": 10
+        },
+        "137161006": {
+          "op": "end",
+          "next": 137161007
+        }
+      }
+    }
+  },
+  "sine": [
+    0,
+    6,
+    12,
+    18,
+    25,
+    31,
+    37,
+    43,
+    49,
+    56,
+    62,
+    68,
+    74,
+    80,
+    86,
+    92,
+    97,
+    103,
+    109,
+    115,
+    120,
+    126,
+    131,
+    136,
+    142,
+    147,
+    152,
+    157,
+    162,
+    167,
+    171,
+    176,
+    181,
+    185,
+    189,
+    193,
+    197,
+    201,
+    205,
+    209,
+    212,
+    216,
+    219,
+    222,
+    225,
+    228,
+    231,
+    234,
+    236,
+    238,
+    241,
+    243,
+    244,
+    246,
+    248,
+    249,
+    251,
+    252,
+    253,
+    254,
+    254,
+    255,
+    255,
+    255,
+    256,
+    255,
+    255,
+    255,
+    254,
+    254,
+    253,
+    252,
+    251,
+    249,
+    248,
+    246,
+    244,
+    243,
+    241,
+    238,
+    236,
+    234,
+    231,
+    228,
+    225,
+    222,
+    219,
+    216,
+    212,
+    209,
+    205,
+    201,
+    197,
+    193,
+    189,
+    185,
+    181,
+    176,
+    171,
+    167,
+    162,
+    157,
+    152,
+    147,
+    142,
+    136,
+    131,
+    126,
+    120,
+    115,
+    109,
+    103,
+    97,
+    92,
+    86,
+    80,
+    74,
+    68,
+    62,
+    56,
+    49,
+    43,
+    37,
+    31,
+    25,
+    18,
+    12,
+    6,
+    0,
+    -6,
+    -12,
+    -18,
+    -25,
+    -31,
+    -37,
+    -43,
+    -49,
+    -56,
+    -62,
+    -68,
+    -74,
+    -80,
+    -86,
+    -92,
+    -97,
+    -103,
+    -109,
+    -115,
+    -120,
+    -126,
+    -131,
+    -136,
+    -142,
+    -147,
+    -152,
+    -157,
+    -162,
+    -167,
+    -171,
+    -176,
+    -181,
+    -185,
+    -189,
+    -193,
+    -197,
+    -201,
+    -205,
+    -209,
+    -212,
+    -216,
+    -219,
+    -222,
+    -225,
+    -228,
+    -231,
+    -234,
+    -236,
+    -238,
+    -241,
+    -243,
+    -244,
+    -246,
+    -248,
+    -249,
+    -251,
+    -252,
+    -253,
+    -254,
+    -254,
+    -255,
+    -255,
+    -255,
+    -256,
+    -255,
+    -255,
+    -255,
+    -254,
+    -254,
+    -253,
+    -252,
+    -251,
+    -249,
+    -248,
+    -246,
+    -244,
+    -243,
+    -241,
+    -238,
+    -236,
+    -234,
+    -231,
+    -228,
+    -225,
+    -222,
+    -219,
+    -216,
+    -212,
+    -209,
+    -205,
+    -201,
+    -197,
+    -193,
+    -189,
+    -185,
+    -181,
+    -176,
+    -171,
+    -167,
+    -162,
+    -157,
+    -152,
+    -147,
+    -142,
+    -136,
+    -131,
+    -126,
+    -120,
+    -115,
+    -109,
+    -103,
+    -97,
+    -92,
+    -86,
+    -80,
+    -74,
+    -68,
+    -62,
+    -56,
+    -49,
+    -43,
+    -37,
+    -31,
+    -25,
+    -18,
+    -12,
+    -6
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "move": "MUD_SPORT",
+  "scenario": "tools/animation/runtime-spike/mud-sport-player-scenario.json",
+  "notes": "Local MechanicLab research only; 74 learns this move in the source learnset. Duplicate move slots constrain AI, as in existing fixtures. No move acceptance credit."
+}

@@ -1,0 +1,56 @@
+{
+  "schema": "animation-runtime-forward-component-comparison/v1",
+  "romSha256": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+  "captureSha256": "75435b929a9952d7a04cbfe79da0122888e6112b1dca4bd16dedf82e8a7110ea",
+  "scope": "Component source and selected transfer checks only. Snatch: unchanged helper, offsets/lifetime/phase and selected battler coordinates. Mud Sport: unchanged Splash task, all task data except external task links, battler state and selected OBJ/matrix transfers; observed creation boundary supplied once. No full script/audio/sprite effects, framebuffer, browser integration or acceptance.",
+  "reports": [
+    {
+      "fixture": "tools/animation/runtime-spike/snatch-player-fixture.json",
+      "move": "SNATCH",
+      "capturedRows": 52,
+      "startAge": 0,
+      "comparedRows": 52,
+      "sourceRows": 52,
+      "softwareRows": 51,
+      "hardwareRows": 51,
+      "mismatchCounts": {},
+      "examples": []
+    },
+    {
+      "fixture": "tools/animation/runtime-spike/snatch-opponent-fixture.json",
+      "move": "SNATCH",
+      "capturedRows": 52,
+      "startAge": 0,
+      "comparedRows": 52,
+      "sourceRows": 52,
+      "softwareRows": 51,
+      "hardwareRows": 51,
+      "mismatchCounts": {},
+      "examples": []
+    },
+    {
+      "fixture": "tools/animation/runtime-spike/mud-sport-player-fixture.json",
+      "move": "MUD_SPORT",
+      "capturedRows": 233,
+      "startAge": 4,
+      "comparedRows": 228,
+      "sourceRows": 228,
+      "softwareRows": 228,
+      "hardwareRows": 228,
+      "mismatchCounts": {},
+      "examples": []
+    },
+    {
+      "fixture": "tools/animation/runtime-spike/mud-sport-opponent-fixture.json",
+      "move": "MUD_SPORT",
+      "capturedRows": 233,
+      "startAge": 4,
+      "comparedRows": 228,
+      "sourceRows": 228,
+      "softwareRows": 228,
+      "hardwareRows": 228,
+      "mismatchCounts": {},
+      "examples": []
+    }
+  ]
+}
