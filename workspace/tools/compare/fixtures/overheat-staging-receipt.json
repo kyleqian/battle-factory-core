@@ -8,7 +8,7 @@
   "source": {
     "audit": "tools/compare/overheatSourceAudit.ts",
     "auditSha256": "a6e1ea82d2957068ae4f8437de74bbe3084b00e43fa050e0a21190e6d39f1c69",
-    "auditRunSha256": "880d9dc00b58ae294967aa6979d26eb51f6ed89455d6d0acf9f0403d4f46051f",
+    "auditRunSha256": "9606a89401c9e0d80fdd2c5e6e23325c19751d11e20be8a1f207173af0d0fca5",
     "probe": "tools/compare/overheatStagingProbe.py",
     "probeSha256": "c11254587a2461c7a68c70a048c7a53c6fd3ccad2109fa53a9f413b94f2c9f62",
     "pointerOwnedRoot": {

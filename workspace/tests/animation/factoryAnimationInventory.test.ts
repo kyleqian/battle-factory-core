@@ -62,24 +62,24 @@ describe("Factory animation inventory", () => {
 });
 
 describe("animation coverage ledger", () => {
-  it("is internally valid and reports exact Level 50 coverage honestly", () => {
+  it("is internally valid and reports exact Factory coverage honestly", () => {
     expect(validateAnimationCoverage).not.toThrow();
     expect(animationCoverageSummary()).toEqual([
       {
         tier: "level50",
         total: 276,
-        unsupported: 2,
+        unsupported: 1,
         staged: 0,
         partial: 0,
-        exact: 274,
+        exact: 275,
       },
       {
         tier: "openOnly",
         total: 1,
-        unsupported: 1,
+        unsupported: 0,
         staged: 0,
         partial: 0,
-        exact: 0,
+        exact: 1,
       },
       {
         tier: "outsideFactory",
@@ -92,11 +92,9 @@ describe("animation coverage ledger", () => {
     ]);
   });
 
-  it("queues unfinished Level 50 moves before Open-only Outrage", () => {
+  it("does not queue the exact Open-only Outrage", () => {
     const queue = queuedAnimationMoves();
-    expect(queue.map(({ move }) => move)).toEqual([
-      "MOVE_ICE_BALL", "MOVE_OUTRAGE",
-    ]);
+    expect(queue.map(({ move }) => move)).toEqual([]);
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
       species: 8,

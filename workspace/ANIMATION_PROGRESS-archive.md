@@ -1,3 +1,79 @@
+# Animation worker checkpoint — MOVE_ICE_BALL exact production (2026-09-23)
+
+- **State / commits:** `3f7f4b904`, `d90589a52`, `9889b78b6`, `49119ed5e`,
+  and `87838a4e3` promote **MOVE_ICE_BALL exact** and only
+  `ice-ball-five-counter-bg-shards` fulfilled. Level 50 is now **275/276
+  exact, 0 partial, 0 staged, 1 unsupported**. No sibling, gameplay/RNG/
+  facility, import-boundary, or unsupported-barrier credit moved.
+- **Implementation / proof:** Source-extracted ICE_CHUNK plus the existing
+  ICE_CRYSTALS asset feed one counter-generic reducer, typed Scene-ON seam,
+  and live shared-core renderer. It preserves predecessor transfer and the
+  player-back counter-3 age-38 OAM exception. Both orientations and all five
+  natural bodies pass **872/872** semantic, seam, chronological raw-RGB, and
+  actual-framebuffer rows twice fresh, with **zero residual pixels** at digest
+  `92954a69…`; lengths are 76/76/76/76/132 per orientation. A material
+  CROBAT/BLISSEY side/species/geometry/presentation-RNG/allocation control
+  changes output while gameplay state/RNG remain opaque and unchanged.
+- **Gates / next:** Tested code commit `87838a4e3`. Focused Ice Ball,
+  Rollout, Rapid Spin, Sheer Cold, Ice Beam, boundary, inventory, coverage,
+  audit, typecheck, and smoke (**8 files / 448 tests**) pass. Final serialized
+  `npm test` passes **1,458 files / 11,546 tests**, with **44 files / 223 tests
+  skipped**, in **1,859.60s**; `npm run build` passes **837 modules** with only
+  the inherited chunk-size warning. Next ready move is Open-only
+  `MOVE_OUTRAGE`; `MOVE_HELPING_HAND` remains evidence-blocked.
+
+# Animation supervisor verification — MOVE_ICE_BALL evidence merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded verified worker commit `639a1e1f7`.
+  `MOVE_ICE_BALL` remains **unsupported** and the 20-component
+  `ice-ball-five-counter-bg-shards` track remains **unfulfilled**; Level 50
+  stays **274/276 exact, 0 partial, 0 staged, 2 unsupported**. No production,
+  move, sibling, component, gameplay/RNG/facility, import-boundary, or
+  unsupported-barrier credit moved.
+- **Independent proof:** Fresh supervisor player-back and opponent-front
+  direct-mGBA probes reproduce the retained **436-row** dense digests
+  `278737a3…` / `6acb3416…` and raw-RGB sequence digests `03238c1f…` /
+  `f4432d82…` exactly. Each natural chain reaches counter maxima **0..4**
+  with complete **76/76/76/76/132** windows through cleanup; the retained
+  compact maps regenerate byte-identically and keep the measured bilateral
+  OAM/matrix/palette/BG/audio/RNG latches without production input.
+- **Gates / next:** Supervisor focused source/evidence/boundary/inventory union
+  passes **4 files / 17 tests**; coverage, animation audit, JSON, and diff
+  checks pass. The recorded green production baseline remains reusable because
+  this merge changed only evidence, tests, tooling, and animation ledgers.
+  Next dispatch a bounded production implementation/acceptance step for Ice
+  Ball; Open-only `MOVE_OUTRAGE` follows when Level-50 ready work is exhausted.
+  **For the main program:** nothing blocking.
+
+# Animation worker checkpoint — MOVE_ICE_BALL source/legal dense evidence (2026-09-23)
+
+- **State / credit:** Source and legal staging are complete, but
+  MOVE_ICE_BALL remains **unsupported** and
+  ice-ball-five-counter-bg-shards remains **unfulfilled**. Coverage stays
+  **274/276 exact, 0 partial, 0 staged, 2 unsupported**; no production,
+  seam, compositor, actual-core, move, sibling, or component credit moved.
+- **Did:** Audited the complete 20-component Move_ICE_BALL root
+  (0x082d72a4..0x082d7473, 463 bytes), including Ice Ball callbacks,
+  affine scales, arc, shard lives, counter branches, target shakes, assets,
+  sounds, and strongest-only BG_ICE cleanup. Legal Level-50 party-only
+  Scene-ON fixtures use ROM SPHEAL=341 against genderless REGISTEEL=403
+  with seed 305420103; the source census retains SPHEAL, DELIBIRD, and
+  SEALEO_1.
+- **Evidence:** Player-back and opponent-front each retain **436 rows**
+  (76/76/76/76/132) through first inactive cleanup. Two fresh probes per
+  orientation are byte-identical: dense/RGB sequence digests are
+  278737a3…/03238c1f… and 6acb3416…/f4432d82…. Maps measure counters
+  0..4, shards 5/7/9/10/10, shake 8/10/14/18/30, logical shard life
+  21, 30-tick arcs, predecessor OAM/matrix/palette latches, the one
+  player-back counter-3 OAM exception, side-specific BG_ICE, audio, opaque
+  state/RNG, and zero-owned cleanup.
+  Compact maps are 100K each with SHA-256 prefixes 9e6cd041…/5af2dea6…;
+  full dense rows remain in the compressed fixtures.
+- **Gates / next:** Source/evidence tests pass **8/8**, boundary/inventory
+  ratchets pass **9/9**, coverage and animation audit pass. The exact next
+  step is a separately authorized production implementation/acceptance
+  dispatch; this checkpoint intentionally makes no such claim.
+
 # Animation worker checkpoint — MOVE_CURSE production partial (2026-09-23)
 
 - **State:** `MOVE_CURSE` remains **unsupported** and
@@ -16722,3 +16798,94 @@ track: `slam-hit-slide-shake` (`MOVE_SECRET_POWER` independently unsupported).
   warning. Next dispatch a narrow evidence-only palette-transfer timing probe
   for the first Step2 row in both orientations; never infer the split from the
   known framebuffer bounds. **For the main program:** nothing blocking.
+# Animation supervisor verification — MOVE_CURSE exact merge (2026-09-23)
+
+- **State / merge:** Fast-forwarded worker commits `48acbced8`, `8c1f3a4a8`,
+  `e80041780`, and `967de69e8`. `MOVE_CURSE` and only the
+  `curse-ghost-nail-stat-lines` track are now **exact**; Level 50 is **274/276
+  exact, 0 partial, 0 staged, 2 unsupported**. No sibling, gameplay/RNG/
+  facility, import-boundary, or unsupported-barrier credit moved.
+- **Independent proof:** Two fresh supervisor timing-verifier runs are
+  byte-identical (`15081d3a…`) and pin the first-Step2 palette transfer at
+  player-back **VCOUNT 17 in HBlank** / first post-transfer row **18**, and
+  opponent-front **VCOUNT 14 in HDraw** / first post-transfer row **14**,
+  without framebuffer-derived input. Two fresh actual-core processes are
+  byte-identical (`cce965f3…`) and pass all **1,098/1,098** component,
+  typed-seam, chronological raw-RGB, and shared-framebuffer rows with **zero
+  residual pixels** at verdict digest `9ccbe049…`. The material CROBAT/
+  BLISSEY control changes output while gameplay state/RNG remain unchanged.
+- **Gates / next:** Supervisor focused union passes **8 files / 18 tests** and
+  smoke passes **8 files / 448 tests**; coverage and animation audit pass.
+  The final independent `npm test` passes **1,453 files / 11,534 tests**, with
+  **44 files / 223 tests skipped**, in **1,883.21s**; `npm run build` passes
+  **835 modules** with only the inherited chunk-size warning. Next ranked
+  ready work is Level-50 `MOVE_ICE_BALL`, then Open-only `MOVE_OUTRAGE`;
+  `MOVE_HELPING_HAND` remains evidence-blocked. **For the main program:**
+  nothing blocking.
+- **Session boundary:** Ice Ball source/census scope was prepared, but no
+  worker was dispatched: the repository-wide animation lane remained occupied
+  by `worker/animation-20260923-103841`, which entered its required full suite
+  at 11:39 UTC and could not release early enough for a separately verified
+  checkpoint before the 12:18 hard deadline. Resume Ice Ball after that lane
+  lock clears; its boundary is the 20-component, five-counter-branch script
+  with legal Level-50 carriers SPHEAL, DELIBIRD, and SEALEO_1. This is an
+  operational scheduling boundary, not an animation acceptance blocker.
+
+# Archived live checkpoint — MOVE_ICE_BALL exact merge (2026-09-23)
+
+- **State / merge:** Verified worker commits `3f7f4b904` through `924b2f31e`
+  made `MOVE_ICE_BALL` exact with only its
+  `ice-ball-five-counter-bg-shards` track fulfilled. Level 50 was
+  **275/276 exact, 0 partial, 0 staged, 1 unsupported**; Helping Hand remained
+  evidence-blocked and no sibling, gameplay/RNG/facility, import-boundary, or
+  unsupported-barrier credit moved.
+- **Independent proof:** Two actual-core runs passed **872/872** source, seam,
+  chronological raw-RGB, and framebuffer rows with **zero residual pixels**;
+  verdict digest `92954a69…`. A material CROBAT/BLISSEY control changed the
+  rendered digest while gameplay state/RNG remained unchanged. The retained
+  Rapid Spin receipt hashes were unchanged.
+- **Gates:** Focused union passed **17 files / 53 tests**; coverage, animation
+  audit, JSON, and diff checks passed. The final serialized suite passed
+  **1,458 files / 11,546 tests** with **44 files / 223 tests skipped** and the
+  build passed **837 modules** with only the inherited chunk warning.
+
+# Archived live checkpoint — MOVE_OUTRAGE unsupported dense evidence (2026-09-23)
+
+- **State / commits:** `032f9f682` and `0909b2615` retain an unsupported Scene-ON evidence
+  checkpoint only. No reducer, typed seam, renderer/compositor, production
+  asset, coverage entry, component-track fulfillment, sibling credit, or
+  gameplay/facility ownership was added.
+- **Source / legal staging:** The complete pointer-owned `Move_OUTRAGE`
+  interval is `0x082cb908..0x082cbaa3` (411 bytes), including the 148-byte
+  `OutrageFlames` body and all six graph components. The source census pins
+  the sole Open carrier `FRONTIER_MON_DRAGONITE_5` (index 854, set 854;
+  Outrage/Double-Edge/Thunder Wave/Roar, Lum Berry, Docile). Complete,
+  transient-free party fixtures are Scene-ON valid in both player-back and
+  opponent-front orientations; the opponent fixture repeats Outrage in all
+  four move slots solely to constrain legal Factory AI selection.
+- **Dense proof:** Two fresh runs per orientation retain every pointer-owned
+  row through first inactive cleanup: player-back frames **76..195** and
+  opponent-front **80..199**, **120 + 120 = 240** rows. Probe JSON digests are
+  `ec368bdf…` / `1ddc124c…`; chronological raw-RGB sequence digests are
+  `b2d5b37c…` / `b201257a…`; full state/RGB archives and normalized maps are
+  committed and independently rechecked byte-identically.
+- **Measured behavior:** 23 `gOutrageFlameSpriteTemplate` allocations each
+  live 30 ticks with slot reuse; `Task_LoopAndPlaySE` is 4..20,
+  `AnimTask_TranslateMonElliptical_Step` 4..81,
+  `AnimTask_ShakeMon2_Step` 14..91, and
+  `AnimTask_BlendColorCycleLoop` 4..92. The attacker ellipse reverses x
+  velocity by side (+12 player / −12 opponent) and returns neutral at age 82;
+  target ShakeMon2 reaches x2 ±2 and returns neutral at age 92. Palette banks
+  1/2/3/16/17/23 change with the recorded faded→hardware schedules; OAM,
+  matrices, and hardware palette equal the preceding software/faded row
+  **119/119**, with no exceptions. Small Ember tile/palette tags live 1..118,
+  audio is `SE_M_DRAGON_RAGE` with attacker pan −64/+63, presentation RNG
+  changes on 119 rows, gameplay RNG and immutable battle state do not change,
+  and owned resources/tasks/sprites are zero at cleanup.
+- **Gates / next:** Focused source/staging and dense-evidence tests pass **5/5**;
+  the full scoped animation union (source/evidence, boundary, inventory, and
+  work-plan) passes **21/21**. Source audit and evidence verifier are stable
+  across reruns; `npm run animation:coverage`, `npm run animation:audit`,
+  `npm run typecheck`, JSON/gzip/tar validation, and `git diff --check` pass.
+  Supervisor verification must keep Outrage unsupported and Helping Hand
+  blocked; no production suite/build was required for this evidence-only delta.

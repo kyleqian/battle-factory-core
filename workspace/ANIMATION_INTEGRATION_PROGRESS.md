@@ -59,4 +59,3 @@
   adapters/providers. Physical batch worker animation-20260923-134749 runs
   from verified 82544f434, isolated from parent and Factory. Never stop at
   the first preview; no whole-playable exact credit has been added.
-

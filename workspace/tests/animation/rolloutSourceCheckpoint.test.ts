@@ -97,13 +97,13 @@ describe("MOVE_ROLLOUT authoritative-source staging checkpoint", () => {
     expect(componentsFor("MOVE_ANCIENT_POWER")).toEqual(expect.arrayContaining([
       "asset:ANIM_TAG_ROCKS", "asset:ANIM_TAG_IMPACT",
     ]));
-    expect(coverageFor("MOVE_ICE_BALL")).toBeUndefined();
+    expect(coverageFor("MOVE_ICE_BALL")).toMatchObject({ status: "exact" });
     expect(componentsFor("MOVE_ICE_BALL")).toEqual(expect.arrayContaining([
       "task:AnimTask_GetIceBallCounter", "task:AnimTask_ShakeTargetBasedOnMovePowerOrDmg",
     ]));
     expect(componentsFor("MOVE_ICE_BALL")).not.toContain("task:AnimTask_Rollout");
-    // The source-staging checkpoint remains historical; exact credit lives
-    // in the complete bilateral rollout-evidence fixture and coverage entry.
+    // Rollout's source-staging checkpoint remains historical; both moves earn
+    // exact credit only from their own complete bilateral production evidence.
     expect(fixture.coverageCredit).toBe(false);
   });
 

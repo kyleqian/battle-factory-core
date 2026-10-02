@@ -204,11 +204,13 @@ import {
   type SceneOnRevengeConfig,
   type SceneOnSpitUpConfig,
   type SceneOnFuryCutterConfig,
+  type SceneOnIceBallConfig,
   type SceneOnCurseConfig,
   type SceneOnPursuitConfig,
   type SceneOnReturnConfig,
   type SceneOnFlatterConfig,
   type SceneOnOverheatConfig,
+  type SceneOnOutrageConfig,
   type SceneOnSilverWindConfig,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
@@ -424,6 +426,11 @@ function renderSceneOnPresentationFrame(
     renderSceneOnMovePresentation(framebuffer, furyCutterPresentation);
     return;
   }
+  if (presentation.config.move === "ICE_BALL") {
+    const iceBallPresentation = presentation as SceneOnMovePresentationState<SceneOnIceBallConfig>;
+    renderSceneOnMovePresentation(framebuffer, iceBallPresentation);
+    return;
+  }
   if (presentation.config.move === "CURSE") {
     const cursePresentation = presentation as SceneOnMovePresentationState<SceneOnCurseConfig>;
     renderSceneOnMovePresentation(framebuffer, cursePresentation);
@@ -447,6 +454,11 @@ function renderSceneOnPresentationFrame(
   if (presentation.config.move === "OVERHEAT") {
     const overheatPresentation = presentation as SceneOnMovePresentationState<SceneOnOverheatConfig>;
     renderSceneOnMovePresentation(framebuffer, overheatPresentation);
+    return;
+  }
+  if (presentation.config.move === "OUTRAGE") {
+    const outragePresentation = presentation as SceneOnMovePresentationState<SceneOnOutrageConfig>;
+    renderSceneOnMovePresentation(framebuffer, outragePresentation);
     return;
   }
   if (presentation.config.move === "SILVER_WIND") {
