@@ -35,7 +35,7 @@ describe("persistent live move palette inputs", () => {
     for (const [moveId, loads] of expectedLoads) {
       const plan = paletteData.plans[String(moveId) as keyof typeof paletteData.plans];
       expect(plan.loads).toEqual(loads);
-      expect(plan.callbackAudit).toMatchObject({ objUnfaded: "unchanged" });
+      expect(plan).toMatchObject({ callbackAudit: { objUnfaded: "unchanged" } });
       const after = prepareLiveMovePalette(initial, request(moveId));
       expect(after.next.historyKnown).toBe(true);
       expect(after.next.memory.tags.slice(7)).toEqual(Array(9).fill(0xffff));
