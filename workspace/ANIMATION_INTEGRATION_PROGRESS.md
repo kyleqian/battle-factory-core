@@ -21,9 +21,12 @@
   same-code worker full pair reused. Evidence/logs retained in primary
   `.integration/validation/worker-integration-20261002-171137` and `.codex-logs/`;
   independent receipt: `tools/integration/fixtures/physical2a-supervisor-receipt.json`.
-- Next: refresh/verify the 69-adapter local preview, retire the accepted worker
-  worktree, then dispatch Thunder Punch, Pin Missile, Razor Leaf, Secret Power
-  and Needle Arm. Palette/party-return/switch and arbitrary-history limits remain.
+- Preview: <http://127.0.0.1:5191/> served `6569b50bd`, **69 adapters**; four
+  canvas/PNG hashes, session export, ON -> OFF -> ON restart, no console/page
+  errors. Receipt: `tools/integration/fixtures/playable-preview-6569b50bd-receipt.json`.
+  Accepted temporary worktree removed; worker ref and all needed evidence retained.
+- Next: dispatch Thunder Punch, Pin Missile, Razor Leaf, Secret Power and
+  Needle Arm. Palette/party-return/switch and arbitrary-history limits remain.
 
 
 ## 2026-10-02 — local integration supervisor configured on Sol 6.1

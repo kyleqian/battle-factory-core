@@ -745,15 +745,15 @@
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "b4befb4f7c376566c98d0fe489cafebeb242afaa",
-    "build": "b4befb4f7 2026-10-02",
+    "commit": "6569b50bd8badc48e2d740a035dab79ef6ed7a6e",
+    "build": "6569b50bd 2026-10-02",
     "url": "http://127.0.0.1:5191/",
-    "implementedAdapters": 65,
-    "fullTest": "1477 files / 11708 tests passed; 44 files / 223 tests skipped; final consolidated production tree b4befb4f7",
+    "implementedAdapters": 69,
+    "fullTest": "1478 files / 11720 tests passed; 44 files / 223 tests skipped at f4a847729; production unchanged through preview commit",
     "buildModules": 844,
-    "browser": "four identical canvas/PNG samples; ordinary input/session export; Scene ON/OFF restart; no page errors; verified after hcloud deletion",
-    "receipt": "../tools/integration/fixtures/playable-preview-b4befb4f7-receipt.json",
-    "availability": "Local Mac service on 127.0.0.1:5191; restart with tools/integration/start-local-preview.sh. hcloud retired."
+    "browser": "four canvas/PNG hashes exact; ordinary input/session export; ON -> OFF -> ON restart; no console/page errors",
+    "receipt": "../tools/integration/fixtures/playable-preview-6569b50bd-receipt.json",
+    "availability": "Local Mac service on 127.0.0.1:5191; managed preview session; hcloud retired."
   },
   "productionProviders": {
     "spritePaletteHistory": {
