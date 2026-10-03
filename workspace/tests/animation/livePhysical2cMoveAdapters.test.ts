@@ -116,4 +116,19 @@ describe("live physical2c move adapters", () => {
     expect(target.hp).toBe(158);
     expect(request?.damage).toBe(Math.ceil(target.hp / 2));
   });
+
+  it("restarts Super Fang and Covet through complete fresh bodies on consecutive commands", () => {
+    for (const row of cases.filter(({ id }) => id === 162 || id === 343)) {
+      const replay = generatedCommandAnimationReplay(
+        row.route.seed, "on", [row.route.slot, row.route.slot], row.route.streak,
+      );
+      const bodies = replay.animations.filter(animation => animation.moveId === row.id);
+      expect(bodies).toHaveLength(2);
+      for (const body of bodies) {
+        expect(body.ages).toEqual(Array.from({ length: row.duration }, (_, age) => age));
+      }
+      expect(replay.boundaries).toHaveLength(3);
+      expect(replay.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    }
+  });
 });
