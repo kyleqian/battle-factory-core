@@ -17,6 +17,9 @@
 - Gates: independent14files/476smoke+affected; worker FINAL277834353 full
   1,483files/11,761tests (223skipped), build844; scoped source/coverage/audit/diff pass.
   Clean fast-forward reuses same-code full/build under verification contract.
+- Preview: <http://127.0.0.1:5191/> serves `e3f60734c`; ordinary input, four
+  exact canvas/saved PNG hashes, export, ON-to-OFF restart and no page errors.
+  `playable-preview-e3f60734c-receipt.json`; no adapter/source-body credit added.
 - Next: immediate provider consumer is Light Screen. Correct activation/wall
   clock and text ownership; dense full script-load/body/cleanup/following display
   bilateral twice and Slowpoke complete; ordinary repeats/prompts and full mode

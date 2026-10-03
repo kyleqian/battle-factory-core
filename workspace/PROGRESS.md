@@ -19,7 +19,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   clocks, preserve completed text; full body/cleanup/following display twice
   bilateral plus complete Slowpoke, real routes and ON/OFF parity.
 - **Notes:** unknown later entry/status/switch/summary histories stay unknown.
-  Raw pass/failure evidence, worker ref/logs preserved. No deferred decision.
+  Preview `e3f60734c` verified: four canvas/PNG hashes, replay/export/mode restart,
+  no errors. Raw evidence, worker ref/logs preserved. No deferred decision.
 
 ---
 
