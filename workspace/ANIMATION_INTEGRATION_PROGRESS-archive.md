@@ -183,3 +183,25 @@
 - Gates: typecheck/build (844 modules), full suite **1,477 files / 11,708 tests passed**, 44 files / 223 tests skipped; rebuilt WASM and **1,832 Rust tests passed**. Both local oracle profiles respond; anchor matches 1/1 after server deletion. Local fresh Rest windows pass both directions twice, 220 rows/run, zero pixels. Earlier support source proof remains 1,898 rows/run twice. Shadow Punch's partial-history residuals remain unchanged and explicitly unclaimed.
 - Preview: <http://127.0.0.1:5191/> at **b4befb4f7**, 65 adapters. Post-deletion browser validation passes all four canvas/PNG hashes, session export, ON/OFF restart and no-error checks; receipt `tools/integration/fixtures/playable-preview-b4befb4f7-receipt.json`.
 - Next: review `codex/recovered-physical2-20261002` (unfinished tracked snapshot, not accepted), then continue the remaining **211 accepted moves' live adapters/providers locally**. Complete party-return/switch palette ownership and arbitrary-history rendering; no whole-playable exactness credit. Helping Hand alone remains blocked on legal doubles staging.
+
+## 2026-10-02 — local integration supervisor configured on Sol 6.1
+
+- State: `run-supervisor.sh --lane integration` now supervises primary local
+  master using `gpt-6.1-sol/high`. Temporary integration workers use the ON
+  oracle and retain the existing Terra/Luna/Sol model routing. No production
+  code changed; the 65-adapter production receipt at `b4befb4f7` remains valid.
+- Did: added a dedicated integration supervisor guide and worker contract,
+  removed obsolete cloud execution directions from the active brief, and
+  documented local startup, verification, cleanup and log retention.
+- Gates: shell syntax, typecheck, 4 affected test files / 72 tests, animation
+  boundary/inventory, coverage, asset audit and diff check pass. Real launcher
+  print-config resolves Sol 6.1/high, integration guide and ON profile; Codex
+  CLI is logged in using ChatGPT. Full production gates reused unchanged.
+- Runtime: CLI 0.146.0 rejected Sol 6.1 for ChatGPT sign-in. Updated using
+  `codex update` to 0.160.0; a read-only `gpt-6.1-sol/high` execution now returns
+  READY successfully and the fresh model catalog lists Sol 6.1. No fallback
+  model or API credential was used.
+- Next: start the six-hour local headless run, review the recovered physical2
+  snapshot, then verify and fold bounded adapter/provider batches to master.
+  Preserve explicit arbitrary-history limitations and refresh the local preview
+  only at green production checkpoints.

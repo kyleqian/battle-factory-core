@@ -1,5 +1,30 @@
 # Animation integration progress
 
+## 2026-10-02 — physical2c accepted locally; 78 live adapters
+
+- State: clean-folded production `cf212c63a` plus test-only follow-ups:
+  Guillotine, Counter, Super Fang and Covet. Factory stays 276/277;
+  198 accepted bodies need adapters. Gameplay/RNG/damage/progression intact.
+- Proof: independently repeated **1,133 rows/run**, eight complete bilateral
+  windows, twice fresh, **zero pixels**. Ordinary routes reach next commands;
+  Guillotine KO/replacement and failure, Counter success/failure, repeated
+  Super Fang/Covet and all ON/OFF logical state/RNG pass (scene bit excluded).
+  Source integer-half damage is pinned at 158 -> 79 and 87 -> 43.
+- Gates: worker **1,480 files / 11,743 tests** (223 skipped), build **844
+  modules**, typecheck; final test-only follow-ups use scoped checks. Supervisor
+  39 affected tests, final 21 test/boundary/inventory checks and 448 smoke pass;
+  same-production full pair reused. Independent receipt:
+  `tools/integration/fixtures/physical2c-supervisor-receipt.json`; raw evidence,
+  failed Drill Peck windows and worker logs preserved in primary validation.
+- Withheld: Drill Peck player-back remains **108,889 pixels/run**, 91 rows,
+  despite source-correct Fearow max HP 140; opponent-front is exact. Resume with
+  source affine OBJ center/retained pose proof and alternate back geometry.
+- Preview: refresh pending at the accepted checkpoint. Whole-playable exact
+  count remains zero; palette plans cover 49/78 adapters, with party-return,
+  switch, unknown-history and Shadow Punch framebuffer limits explicit.
+- Next: bounded Drill Peck geometry proof, then physical palette ownership;
+  no material user decision deferred. Accepted worktree retires after cleanup.
+
 ## 2026-10-02 — physical2b accepted locally; 74 live adapters
 
 - State: clean-folded `612520093`: Thunder Punch, Pin Missile, Razor Leaf,
@@ -53,25 +78,3 @@
   Accepted temporary worktree removed; worker ref and all needed evidence retained.
 - Next: dispatch Thunder Punch, Pin Missile, Razor Leaf, Secret Power and
   Needle Arm. Palette/party-return/switch and arbitrary-history limits remain.
-
-## 2026-10-02 — local integration supervisor configured on Sol 6.1
-
-- State: `run-supervisor.sh --lane integration` now supervises primary local
-  master using `gpt-6.1-sol/high`. Temporary integration workers use the ON
-  oracle and retain the existing Terra/Luna/Sol model routing. No production
-  code changed; the 65-adapter production receipt at `b4befb4f7` remains valid.
-- Did: added a dedicated integration supervisor guide and worker contract,
-  removed obsolete cloud execution directions from the active brief, and
-  documented local startup, verification, cleanup and log retention.
-- Gates: shell syntax, typecheck, 4 affected test files / 72 tests, animation
-  boundary/inventory, coverage, asset audit and diff check pass. Real launcher
-  print-config resolves Sol 6.1/high, integration guide and ON profile; Codex
-  CLI is logged in using ChatGPT. Full production gates reused unchanged.
-- Runtime: CLI 0.146.0 rejected Sol 6.1 for ChatGPT sign-in. Updated using
-  `codex update` to 0.160.0; a read-only `gpt-6.1-sol/high` execution now returns
-  READY successfully and the fresh model catalog lists Sol 6.1. No fallback
-  model or API credential was used.
-- Next: start the six-hour local headless run, review the recovered physical2
-  snapshot, then verify and fold bounded adapter/provider batches to master.
-  Preserve explicit arbitrary-history limitations and refresh the local preview
-  only at green production checkpoints.

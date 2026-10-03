@@ -47,6 +47,18 @@
       ]
     },
     {
+      "move": "MOVE_GUILLOTINE",
+      "id": 12,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2c-supervisor-receipt.json",
+      "liveEvidence": [
+        "seed 32 / streak 14: GLIGAR -> MANTINE; 1 ordinary command(s), 1 complete bodies; ON/OFF state/RNG exact"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_SWORDS_DANCE",
       "id": 14,
       "liveEvidence": [
@@ -248,6 +260,18 @@
       ],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_COUNTER",
+      "id": 68,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2c-supervisor-receipt.json",
+      "liveEvidence": [
+        "seed 272 / streak 0: WOBBUFFET -> DELIBIRD; 1 ordinary command(s), 1 complete bodies; ON/OFF state/RNG exact"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
       ]
     },
     {
@@ -488,6 +512,18 @@
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
         "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_SUPER_FANG",
+      "id": 162,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2c-supervisor-receipt.json",
+      "liveEvidence": [
+        "seed 62 / streak 14: RATICATE -> MANTINE; 2 ordinary command(s), 2 complete bodies; ON/OFF state/RNG exact"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
       ]
     },
     {
@@ -773,6 +809,18 @@
       ]
     },
     {
+      "move": "MOVE_COVET",
+      "id": 343,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2c-supervisor-receipt.json",
+      "liveEvidence": [
+        "seed 87 / streak 7: LINOONE -> PORYGON; 2 ordinary command(s), 2 complete bodies; ON/OFF state/RNG exact"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_CALM_MIND",
       "id": 347,
       "liveEvidence": [],
@@ -794,14 +842,14 @@
     "persistent source OBJ palette allocation/load/free semantics; Shadow Punch receives retained unfaded scratch colors across audited move history"
   ],
   "pending": [
-    "production adapters/providers for the remaining 202 accepted Factory moves",
+    "production adapters/providers for the remaining 198 accepted Factory moves",
     "complete graphics palette ownership across party-menu returns, switches and unmodeled move histories",
-    "complete the five remaining recovered physical2 adapters after independent proof"
+    "complete recovered Drill Peck after independently proving its source-owned back-sprite pose"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 74,
+  "implementedCount": 78,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
@@ -820,7 +868,7 @@
     "spritePaletteHistory": {
       "sourceCommit": "a6c61a781",
       "auditedMovePlans": 50,
-      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, covering 49 of the 74 implemented adapters. Support/unknown bodies, switches, and all party-menu entry (including cancellation before the first move) invalidate palette history. Complete returning graphics ownership still needs a provider.",
+      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, covering 49 of the 78 implemented adapters. Support/unknown bodies, switches, and all party-menu entry (including cancellation before the first move) invalidate palette history. Complete returning graphics ownership still needs a provider.",
       "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json",
       "receipts": [
         "../tools/integration/fixtures/live-palette-history-receipt.json",
@@ -832,13 +880,13 @@
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "612520093d34abe8289674b6e79a3272e3e8130e",
+    "productionCodeCommit": "cf212c63a3043fcc9006a329af73689e8d79348b",
     "typecheck": "passed",
-    "workerFullTest": "1479 files / 11732 tests passed; 44 files / 223 tests skipped",
+    "workerFullTest": "1480 files / 11743 tests passed; 44 files / 223 tests skipped",
     "buildModules": 844,
-    "supervisorAffected": "8 files / 41 tests passed; smoke 8 files / 448 tests passed",
-    "independentSource": "1092 rows per fresh run, both orientations, twice; zero residual pixels",
-    "sourceReceipt": "../tools/integration/fixtures/physical2b-supervisor-receipt.json",
+    "supervisorAffected": "4 files / 39 tests plus corrected source-bit/odd-HP and boundary checks; smoke 8 files / 448 tests",
+    "independentSource": "1133 rows per fresh run, both orientations, twice; zero residual pixels",
+    "sourceReceipt": "../tools/integration/fixtures/physical2c-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed"
   }
 }
