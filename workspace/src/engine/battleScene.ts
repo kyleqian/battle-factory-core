@@ -47758,9 +47758,10 @@ export function renderSceneOnMovePresentation(
     const targetIdle = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
-    const attackerIdle = liveField && opponentToPlayer
-      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
-      : { x2: 0, y2: 0 };
+    // The accepted opponent window starts after Faint Attack clears the
+    // attacker's send-out offsets. This neutral body geometry does not own
+    // retained front-sprite poses across arbitrary earlier move histories.
+    const attackerIdle = { x2: 0, y2: 0 };
     const black = { r: 0, g: 0, b: 0 };
     const invertPalette = (palette: readonly RgbColor[]): RgbColor[] =>
       palette.map((color) => displayedPalette.inverted
