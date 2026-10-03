@@ -84,5 +84,6 @@ adding accepted or playable coverage credit.
 
 Continue from `ANIMATION_INTEGRATION_PROGRESS.md`. Next work is the remaining
 live adapters and source graphics ownership across party/switch histories.
-Party entry now invalidates the bounded palette-history claim even on cancel;
-implementing the complete returning palette allocator remains separate work.
+Known-entry ordinary party/B-cancel now restores the audited return allocator.
+Unknown entry, actual status animations and switches still invalidate history;
+summaries, forced replacement and other unmodeled histories remain open.

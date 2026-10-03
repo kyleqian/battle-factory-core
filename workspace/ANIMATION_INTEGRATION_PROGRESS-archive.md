@@ -336,3 +336,29 @@
   worker ref/logs and all needed raw evidence retained.
 - Next: source-owned ordinary party/B-cancel return, with unknown status/history
   invalidation. Twenty-two live palette plans remain. No material decision deferred.
+
+
+## 2026-10-02 — actual status graphics invalidate retained palette history
+
+- State: clean-folded `d1bbca89c`; adapters 79, plans 58 (57/79 live),
+  Factory 276/277 and 197 awaiting integration unchanged. A presentation-only
+  cursor consumes unprojected status-animation receipts between commands and
+  at segment tails. Current-body input stays immutable; no gameplay changes.
+- Proof: independent seed549 two-turn Lick route: first body known, actual
+  paralysis event15, next body unknown; three full ON/OFF rules/RNG boundaries
+  equal (only scene bit excluded), next prompt. Separate real-receipt trailing
+  projection regression keeps current input and battle object unchanged.
+- Source: eight fresh controller-input conditional runs: Thunder Punch9 and
+  Secret Power290, both orientations, twice. Stock Status_Paralysis allocates
+  SPARK_2 in bank7. Those move plans remain excluded; status rendering unclaimed.
+- Gates: worker 1,481 files / 11,750 tests (223 skipped), typecheck and build
+  844 modules; supervisor 25 affected + one test-only tail regression, 448
+  smoke and typecheck pass. Same-production full pair reused. Receipt
+  `tools/integration/fixtures/status-palette-supervisor-receipt.json`; all
+  source/gate/log evidence copied into primary validation.
+- Preview: <http://127.0.0.1:5191/> serves `fe47c9afb`: eight canvas/PNG
+  hashes, exports, ON -> OFF -> ON and no browser/console errors pass.
+  Receipt `playable-preview-fe47c9afb-receipt.json`. Accepted worktree removed;
+  worker ref/logs and all needed raw evidence retained.
+- Next: source-owned ordinary party/B-cancel return from this corrected base.
+  Initial unknown/status histories must stay unknown. No material choice deferred.

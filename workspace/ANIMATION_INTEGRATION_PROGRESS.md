@@ -1,6 +1,30 @@
 # Animation integration progress
 
 
+
+## 2026-10-02 — confusion source checkpoint and independent final production gates
+
+- State: accepted tooling/source `8aefa52bb`; production `695e10751` unchanged.
+  Adapters79, plans58 (57/79 live), Factory276/277, remaining197, whole exact0.
+  Actual status graphics remain unknown; no palette provider promoted.
+- Source: supervisor four fresh legal Golbat/Haunter runs, bilateral twice:
+  eight Status_Confusion lifetimes, DUCK bank7 load/free after99ticks, affected
+  attacker/target, real following Shadow Punch scratch9/faded dependency.
+  Reference ROM/ELF/map and tool/source hashes retained. Source-only claim.
+- Gates: independent final full1,482files /11,754tests pass (223skipped),
+  build844; unchanged src tree `a5ceb566190019a2cbdd29ea24c9c88318374664`.
+  Source checkpoint verifier, boundary/inventory9, coverage/audit/diff pass.
+  `final-supervisor-gates-20261002.json`, `status-confusion-supervisor-receipt.json`.
+- Preview: <http://127.0.0.1:5191/> refreshed at `4815edf58`; eleven exact
+  canvas/PNG samples, ordinary party-cancel and Razor Leaf routes, eleven
+  full ON/OFF rules/RNG boundaries, exports/restarts and no browser errors.
+  `playable-preview-4815edf58-receipt.json`. Retired worker worktrees removed;
+  refs/logs and all fresh pass/failure raw evidence preserved in primary.
+- Next: bounded Light Screen source load/text-clock audit, then handoff.
+  Light Screen candidate stays unmerged; do not register Reflect by copying
+  its allocator. Future confusion provider requires a semantic event lifecycle,
+  source allocator and non-Shadow follow-up proof. No material choice deferred.
+
 ## 2026-10-02 — Light Screen candidate withheld after independent seam review
 
 - State: master remains green accepted production `695e10751`; adapters79,
@@ -15,12 +39,12 @@
   text with raw body age; six actual routes supply fully printed messages
   but candidate displays one character at entry. Slowpoke only proves ages40..114.
 - Resume: derive ordinary sprite allocations and history bounds from source;
-  attach the script-load phase to a owned live event clock without reprinting
+  attach the script-load phase to an owned live event clock without reprinting
   controller text; prove the complete alternate load/body/cleanup window.
   `tools/integration/fixtures/light-screen-supervisor-review.json` records
   independent evidence and precise limits. No adapter credit or Factory changes.
 - Worker full11755/build844 passed on candidate; independent final full pair
-  is running on accepted master. Preview `ae925089c` remains verified. Preserve
+  passed on accepted master. Preview `ae925089c` remains verified. Preserve
   candidate ref/logs/raw evidence; continue bounded status source checkpoint.
   No material user decision deferred.
 
@@ -49,28 +73,3 @@
   Receipt `playable-preview-ae925089c-receipt.json`. Worktree retired after
   evidence preservation; worker ref/logs retained. Next: bounded Light Screen
   adapter, then independent final full pair. No material user decision deferred.
-
-## 2026-10-02 — actual status graphics invalidate retained palette history
-
-- State: clean-folded `d1bbca89c`; adapters 79, plans 58 (57/79 live),
-  Factory 276/277 and 197 awaiting integration unchanged. A presentation-only
-  cursor consumes unprojected status-animation receipts between commands and
-  at segment tails. Current-body input stays immutable; no gameplay changes.
-- Proof: independent seed549 two-turn Lick route: first body known, actual
-  paralysis event15, next body unknown; three full ON/OFF rules/RNG boundaries
-  equal (only scene bit excluded), next prompt. Separate real-receipt trailing
-  projection regression keeps current input and battle object unchanged.
-- Source: eight fresh controller-input conditional runs: Thunder Punch9 and
-  Secret Power290, both orientations, twice. Stock Status_Paralysis allocates
-  SPARK_2 in bank7. Those move plans remain excluded; status rendering unclaimed.
-- Gates: worker 1,481 files / 11,750 tests (223 skipped), typecheck and build
-  844 modules; supervisor 25 affected + one test-only tail regression, 448
-  smoke and typecheck pass. Same-production full pair reused. Receipt
-  `tools/integration/fixtures/status-palette-supervisor-receipt.json`; all
-  source/gate/log evidence copied into primary validation.
-- Preview: <http://127.0.0.1:5191/> serves `fe47c9afb`: eight canvas/PNG
-  hashes, exports, ON -> OFF -> ON and no browser/console errors pass.
-  Receipt `playable-preview-fe47c9afb-receipt.json`. Accepted worktree removed;
-  worker ref/logs and all needed raw evidence retained.
-- Next: source-owned ordinary party/B-cancel return from this corrected base.
-  Initial unknown/status histories must stay unknown. No material choice deferred.

@@ -867,14 +867,14 @@
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "ae925089c0cfc43abe52ee7ebb860028f2222dc0",
-    "build": "ae925089c 2026-10-02",
+    "commit": "4815edf5859b29b0f43905f19a7fc88578b2cd7e",
+    "build": "4815edf58 2026-10-02",
     "url": "http://127.0.0.1:5191/",
     "implementedAdapters": 79,
-    "fullTest": "1482 files / 11754 tests passed at 695e10751; production unchanged through preview",
+    "fullTest": "Independent supervisor1482 files /11754 tests passed; production695e10751 unchanged",
     "buildModules": 844,
-    "browser": "eleven canvas and saved PNG hashes: actual initial/after-status party cancellations and Razor Leaf; session export; ON -> OFF -> ON; no console/page errors",
-    "receipt": "../tools/integration/fixtures/playable-preview-ae925089c-receipt.json",
+    "browser": "Eleven canvas and saved PNG hashes: actual initial/after-status party cancellations and Razor Leaf; export; ON -> OFF -> ON; no console/page errors",
+    "receipt": "../tools/integration/fixtures/playable-preview-4815edf58-receipt.json",
     "availability": "Local Mac service on 127.0.0.1:5191; managed preview session; hcloud retired."
   },
   "productionProviders": {
@@ -909,6 +909,7 @@
     "supervisorAffected": "29 affected/provider/tail/boundary/inventory tests and 448 smoke passed",
     "independentSource": "Eight fresh menu source runs, bilateral startup/after-Smokescreen twice: rows4..9, twelve following scratch8 allocations/faded blends and cleanup exact. Eighteen ON/OFF logical boundaries cover known/unknown/status/switch cancellation.",
     "sourceReceipt": "../tools/integration/fixtures/party-cancel-supervisor-receipt.json",
-    "shadowFade": "prior residuals remain partial and unclaimed"
+    "shadowFade": "prior residuals remain partial and unclaimed",
+    "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261002.json"
   }
 }

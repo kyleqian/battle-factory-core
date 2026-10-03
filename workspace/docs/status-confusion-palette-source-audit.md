@@ -39,7 +39,7 @@ A input across two stock turns. Run it via `tools/run-mgba-probe.py`, followed
 by `tools/integration/verifyConfusionStatusSource.py`.
 
 Fresh evidence directory:
-`.integration/validation/status-confusion-source-Ohxk56/` (four raw JSON files,
+`.integration/validation/worker-integration-20261002-223212/status-confusion-source-Ohxk56/` (four raw JSON files,
 four wrapper logs, and `receipt.json`). Both fresh runs have byte-identical raw
 output per orientation. The verifier proves:
 
