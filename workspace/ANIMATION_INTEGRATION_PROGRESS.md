@@ -3,6 +3,35 @@
 
 
 
+
+## 2026-10-02 — local integration session wind-down; 79 verified adapters
+
+- State: all14 recovered physical adapters accepted (65→79); eight palette
+  plans added (58total,57/79live), actual status-event guard and known-entry
+  party/B-cancel return provider accepted. Factory276/277, remaining197,
+  whole-playable exact0. Production `695e10751`, src tree `a5ceb566190019a2cbdd29ea24c9c88318374664`.
+- Source: Burn tooling `78c85cb3e` independently verified bilateral twice,
+  twelve Small Ember bank7 load/free lifetimes38ticks, real Shadow scratch9.
+  Confusion non-Shadow Lick control also passes4fresh runs/eight lifetimes.
+  Semantic subject is script attacker/target; transient activeBattler2 is
+  bookkeeping. No status provider promoted; all actual status history unknown.
+- Gates: final independent1,482files /11,754tests pass (223skipped), build844;
+  full ON/OFF rules/RNG at eleven actual draft boundaries equal (scene bit
+  only excluded). Last source tools pass verifier, boundary/inventory9,
+  coverage/audit/source-audit/diff; no production change since final full pair.
+- Evidence: `final-supervisor-gates-20261002.json`, Burn/Confusion-Lick source
+  supervisor receipts. All refs/logs and fresh pass/failure raw evidence kept
+  in primary; no temporary worker worktrees or active workers. No material
+  choice deferred. Preview currently verified `4815edf58`; final refresh follows.
+- Next: Light Screen `d12db7f0b` remains unmerged. Derive intro/sendout/summary
+  allocator ownership; actual clock303..388(player)/213..298(opponent), preserve
+  completed text and extend full framebuffer proof through cleanup/following
+  display, both sides twice and complete Slowpoke. See clock/review receipts.
+  Then source-owned semantic status provider may use audited Duck/Small Ember
+  resources with event subject/priority, lifecycle and real follow-up proof.
+  Unknown entry/switch/summary/substitute/transform ownership stays open;
+  keep outcomes/RNG/damage/order/progression intact. Factory/Rust not dispatched.
+
 ## 2026-10-02 — Light Screen source clock separated from prior controller text
 
 - State: source/tool `c3ccc8cd3` accepted; runtime `695e10751` unchanged.
@@ -50,26 +79,3 @@
   Light Screen candidate stays unmerged; do not register Reflect by copying
   its allocator. Future confusion provider requires a semantic event lifecycle,
   source allocator and non-Shadow follow-up proof. No material choice deferred.
-
-## 2026-10-02 — Light Screen candidate withheld after independent seam review
-
-- State: master remains green accepted production `695e10751`; adapters79,
-  plans58 (57/79 live), Factory276/277, remaining197, whole exact0. Candidate
-  `d12db7f0b` stays on `worker/integration-20261002-221128`, unmerged.
-- Proof: supervisor repeats player115/opponent119 and Slowpoke wall75 rows,
-  twice fresh: 618 exact rows, zero pixels. Six ordinary seeds render690 ages,
-  success then already-active failure, next prompt, eighteen ON/OFF full
-  rules/RNG boundaries exact (only scene bit excluded), semantic self-target0.
-- Blocker: source occupancy `[0,1,2,6,8,60,61,62,63]` is copied into production
-  without a lifecycle recipe. Renderer also overrides completed controller
-  text with raw body age; six actual routes supply fully printed messages
-  but candidate displays one character at entry. Slowpoke only proves ages40..114.
-- Resume: derive ordinary sprite allocations and history bounds from source;
-  attach the script-load phase to an owned live event clock without reprinting
-  controller text; prove the complete alternate load/body/cleanup window.
-  `tools/integration/fixtures/light-screen-supervisor-review.json` records
-  independent evidence and precise limits. No adapter credit or Factory changes.
-- Worker full11755/build844 passed on candidate; independent final full pair
-  passed on accepted master. Preview `ae925089c` remains verified. Preserve
-  candidate ref/logs/raw evidence; continue bounded status source checkpoint.
-  No material user decision deferred.

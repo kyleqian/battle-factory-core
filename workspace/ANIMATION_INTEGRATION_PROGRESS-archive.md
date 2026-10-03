@@ -389,3 +389,27 @@
   Receipt `playable-preview-ae925089c-receipt.json`. Worktree retired after
   evidence preservation; worker ref/logs retained. Next: bounded Light Screen
   adapter, then independent final full pair. No material user decision deferred.
+
+
+## 2026-10-02 — Light Screen candidate withheld after independent seam review
+
+- State: master remains green accepted production `695e10751`; adapters79,
+  plans58 (57/79 live), Factory276/277, remaining197, whole exact0. Candidate
+  `d12db7f0b` stays on `worker/integration-20261002-221128`, unmerged.
+- Proof: supervisor repeats player115/opponent119 and Slowpoke wall75 rows,
+  twice fresh: 618 exact rows, zero pixels. Six ordinary seeds render690 ages,
+  success then already-active failure, next prompt, eighteen ON/OFF full
+  rules/RNG boundaries exact (only scene bit excluded), semantic self-target0.
+- Blocker: source occupancy `[0,1,2,6,8,60,61,62,63]` is copied into production
+  without a lifecycle recipe. Renderer also overrides completed controller
+  text with raw body age; six actual routes supply fully printed messages
+  but candidate displays one character at entry. Slowpoke only proves ages40..114.
+- Resume: derive ordinary sprite allocations and history bounds from source;
+  attach the script-load phase to an owned live event clock without reprinting
+  controller text; prove the complete alternate load/body/cleanup window.
+  `tools/integration/fixtures/light-screen-supervisor-review.json` records
+  independent evidence and precise limits. No adapter credit or Factory changes.
+- Worker full11755/build844 passed on candidate; independent final full pair
+  passed on accepted master. Preview `ae925089c` remains verified. Preserve
+  candidate ref/logs/raw evidence; continue bounded status source checkpoint.
+  No material user decision deferred.
