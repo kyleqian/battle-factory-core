@@ -45,6 +45,13 @@ def main() -> None:
             raise RuntimeError(f"{name}: schema")
         if row["toolSha256"] != probe_sha:
             raise RuntimeError(f"{name}: stale probe identity")
+        ref = ROOT / "reference/pokeemerald"
+        for filename, expected_sha in row["referenceSha256"].items():
+            if digest(ref / filename) != expected_sha:
+                raise RuntimeError(f"{name}: stale reference {filename}")
+        for filename, expected_sha in row["sourceSha256"].items():
+            if digest(ref / filename) != expected_sha:
+                raise RuntimeError(f"{name}: stale source {filename}")
         side = ("opponent" if name.startswith("opponent") else
                 "slowpoke" if "slowpoke" in name else "player")
         allocation_side = "player" if side == "slowpoke" else side
@@ -97,6 +104,8 @@ def main() -> None:
         "runs": summaries,
         "historyBound": next(iter(rows.values()))["historyBound"],
         "verdict": "fresh BattleLab ordinary-singles entry is deterministic through ResetSpriteData, healthboxes, shadow, intro party summaries/sendout, command-cursor destruction, and first legal Light Screen cleanup; unknown entry/switch/summary/substitute/transform histories remain unknown",
+        "providerPromoted": False,
+        "unresolvedProviderStep": "dense once-per-VBlank diffs still coalesce same-frame DestroySprite/CreateSprite replacements during trainer/battler sendout (notably dynamic gMultiuseSpriteTemplate and ball-particle reuse); exact in-frame source call order must be ported before a runtime recipe is honest",
     }
     RECEIPT.parent.mkdir(parents=True, exist_ok=True)
     RECEIPT.write_text(json.dumps(receipt, indent=2) + "\n")
