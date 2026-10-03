@@ -1,5 +1,28 @@
 # Animation integration progress
 
+## 2026-10-02 — eight palette plans accepted; 57/79 live ownership
+
+- State: clean-folded `c8f2a79e9` production plus scoped test/tool follow-ups.
+  Pin Missile, Drill Peck, Growth, Razor Leaf, Haze, Acid Armor, Needle Arm,
+  Metal Sound bring plans to 58, live coverage 57/79. Adapters stay 79;
+  Factory stays 276/277; 197 bodies still need adapters. No gameplay changes.
+- Proof: supervisor independently repeated 32 source runs (eight plans,
+  bilateral, twice fresh): allocation/tags, retained unfaded rows, cleanup,
+  following Shadow Punch scratch and actual faded blends exact. RAM ownership
+  claim only; arbitrary-history framebuffer exact stays zero.
+- Corrections: legal native Emerald Cacnea344/Aron382 carriers; excluded
+  Thunder Punch9 and Secret Power290 because conditional paralysis allocates
+  unowned SPARK_2. No-status seeds cannot establish that history.
+- Gates: worker 1,481 files / 11,749 tests (223 skipped), typecheck, build
+  844 modules; supervisor 21 affected plus 3 boundary and 448 smoke pass.
+  Same-code full pair reused. Independent receipt:
+  `tools/integration/fixtures/live-palette-batch-supervisor-receipt.json`;
+  all source pass/failure/gate evidence retained in primary validation.
+- Preview: refresh and ordinary browser verification next; previous green
+  service `da75f10e6` still available at <http://127.0.0.1:5191/>.
+- Next: source-owned ordinary party/B-cancel return, with unknown status/history
+  invalidation. Twenty-two live palette plans remain. No material decision deferred.
+
 ## 2026-10-02 — Drill Peck accepted locally; 79 live adapters
 
 - State: source repair `4488f34e2` clean-folded; all fourteen recovered
@@ -50,30 +73,3 @@
   exact stays zero; palette covers 49/78 with party/switch/history limits.
 - Next: bounded Drill Peck geometry proof, then physical palette ownership;
   no material user decision deferred. Accepted worktree removed; refs/logs/raw evidence retained.
-
-## 2026-10-02 — physical2b accepted locally; 74 live adapters
-
-- State: clean-folded `612520093`: Thunder Punch, Pin Missile, Razor Leaf,
-  Factory-indoor Secret Power and Needle Arm. Factory remains 276/277;
-  202 accepted bodies need adapters. No rules/RNG/damage/progression changes.
-- Proof: independently repeated **1,092 rows/run**, ten complete windows,
-  twice fresh, **zero pixels**. Found/repaired Thunder Punch's false send-out
-  offset; supervisor corrected verifier maximum HP (117, current HP 72).
-  Neutral opponent pose after Faint Attack is bounded, not retained-history proof.
-- Routes: all five repeat through full ages and next commands with ON/OFF
-  state/RNG exact (only hit-marker scene bit excluded). Pin Missile has four
-  complete hit bodies across two commands; explicit miss has no body. Normal
-  Bayleef draft reaches a 139-age Razor Leaf after misses, five parity checkpoints.
-- Gates: worker typecheck, **1,479 files / 11,732 tests** (223 skipped), build
-  **844 modules** on final code. Supervisor 41 affected tests and 448 smoke pass;
-  same-code full pair reused. Independent receipt:
-  `tools/integration/fixtures/physical2b-supervisor-receipt.json`; raw passes,
-  failures and worker evidence retained in primary `.integration/validation/`.
-- Preview: <http://127.0.0.1:5191/> served `4b0d82b7e`, **74 adapters**; eight
-  canvas/PNG hashes (including Razor Leaf ages 0/69/138), session export,
-  ON -> OFF -> ON restart and no console/page errors pass. Receipt:
-  `tools/integration/fixtures/playable-preview-4b0d82b7e-receipt.json`. Accepted
-  worktree removed; worker ref, logs and raw pass/failure evidence retained.
-- Next: Guillotine, Drill Peck, Counter, Super Fang and Covet; then bounded
-  palette ownership. Party-return/switch/unknown-history and Shadow Punch
-  framebuffer limits remain explicit. No material user decision deferred.

@@ -856,7 +856,7 @@
   "pending": [
     "production adapters/providers for the remaining 197 accepted Factory moves",
     "complete graphics palette ownership across party-menu returns, switches and unmodeled move histories",
-    "source palette resource plans for 30 implemented adapters without audited ownership"
+    "source palette resource plans for 22 implemented adapters without audited ownership"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
@@ -878,27 +878,28 @@
   },
   "productionProviders": {
     "spritePaletteHistory": {
-      "sourceCommit": "a6c61a781",
-      "auditedMovePlans": 50,
-      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, covering 49 of the 79 implemented adapters. Support/unknown bodies, switches, and all party-menu entry (including cancellation before the first move) invalidate palette history. Complete returning graphics ownership still needs a provider.",
+      "sourceCommit": "c8f2a79e9",
+      "auditedMovePlans": 58,
+      "claim": "Retained Shadow Punch scratch input across 58 audited move resource plans, covering 57 of 79 implemented adapters. Unknown graphics, switches and party entry remain invalidated. Thunder Punch and Secret Power conditional paralysis resources remain unowned.",
       "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json",
       "receipts": [
         "../tools/integration/fixtures/live-palette-history-receipt.json",
         "../tools/integration/fixtures/live-palette-confusion-history-receipt.json",
         "../tools/integration/fixtures/live-palette-dynamic-punch-history-receipt.json",
-        "../tools/integration/fixtures/music-notes-palette-receipt.json"
+        "../tools/integration/fixtures/music-notes-palette-receipt.json",
+        "../tools/integration/fixtures/live-palette-batch-supervisor-receipt.json"
       ]
     }
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "4488f34e2112544676063fc5d23f5938f50b8b72",
+    "productionCodeCommit": "c8f2a79e9f67be7e10fb5a5828f5d8feff86161d",
     "typecheck": "passed",
-    "workerFullTest": "1481 files / 11747 tests passed; 44 files / 223 tests skipped",
+    "workerFullTest": "1481 files / 11749 tests passed; 44 files / 223 tests skipped",
     "buildModules": 844,
-    "supervisorAffected": "32 affected/source-audit tests; 448 smoke tests passed",
-    "independentSource": "273 rows per fresh run, bilateral Fearow plus Dodrio geometry, twice; zero residual pixels",
-    "sourceReceipt": "../tools/integration/fixtures/physical2d-drill-supervisor-receipt.json",
+    "supervisorAffected": "21 palette/host/inventory tests, 3 boundary checks and 448 smoke tests passed",
+    "independentSource": "8 plans \u00d7 both orientations \u00d7 twice fresh: 32 source runs; ownership, retained unfaded rows, cleanup, following scratch and actual faded blend exact; no pixel claim",
+    "sourceReceipt": "../tools/integration/fixtures/live-palette-batch-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed"
   }
 }

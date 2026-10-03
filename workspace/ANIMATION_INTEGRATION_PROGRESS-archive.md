@@ -232,3 +232,30 @@
   Accepted temporary worktree removed; worker ref and all needed evidence retained.
 - Next: dispatch Thunder Punch, Pin Missile, Razor Leaf, Secret Power and
   Needle Arm. Palette/party-return/switch and arbitrary-history limits remain.
+
+## 2026-10-02 — physical2b accepted locally; 74 live adapters
+
+- State: clean-folded `612520093`: Thunder Punch, Pin Missile, Razor Leaf,
+  Factory-indoor Secret Power and Needle Arm. Factory remains 276/277;
+  202 accepted bodies need adapters. No rules/RNG/damage/progression changes.
+- Proof: independently repeated **1,092 rows/run**, ten complete windows,
+  twice fresh, **zero pixels**. Found/repaired Thunder Punch's false send-out
+  offset; supervisor corrected verifier maximum HP (117, current HP 72).
+  Neutral opponent pose after Faint Attack is bounded, not retained-history proof.
+- Routes: all five repeat through full ages and next commands with ON/OFF
+  state/RNG exact (only hit-marker scene bit excluded). Pin Missile has four
+  complete hit bodies across two commands; explicit miss has no body. Normal
+  Bayleef draft reaches a 139-age Razor Leaf after misses, five parity checkpoints.
+- Gates: worker typecheck, **1,479 files / 11,732 tests** (223 skipped), build
+  **844 modules** on final code. Supervisor 41 affected tests and 448 smoke pass;
+  same-code full pair reused. Independent receipt:
+  `tools/integration/fixtures/physical2b-supervisor-receipt.json`; raw passes,
+  failures and worker evidence retained in primary `.integration/validation/`.
+- Preview: <http://127.0.0.1:5191/> served `4b0d82b7e`, **74 adapters**; eight
+  canvas/PNG hashes (including Razor Leaf ages 0/69/138), session export,
+  ON -> OFF -> ON restart and no console/page errors pass. Receipt:
+  `tools/integration/fixtures/playable-preview-4b0d82b7e-receipt.json`. Accepted
+  worktree removed; worker ref, logs and raw pass/failure evidence retained.
+- Next: Guillotine, Drill Peck, Counter, Super Fang and Covet; then bounded
+  palette ownership. Party-return/switch/unknown-history and Shadow Punch
+  framebuffer limits remain explicit. No material user decision deferred.
