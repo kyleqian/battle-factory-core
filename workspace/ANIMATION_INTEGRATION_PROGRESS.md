@@ -19,11 +19,12 @@
 - Withheld: Drill Peck player-back remains **108,889 pixels/run**, 91 rows,
   despite source-correct Fearow max HP 140; opponent-front is exact. Resume with
   source affine OBJ center/retained pose proof and alternate back geometry.
-- Preview: refresh pending at the accepted checkpoint. Whole-playable exact
-  count remains zero; palette plans cover 49/78 adapters, with party-return,
-  switch, unknown-history and Shadow Punch framebuffer limits explicit.
+- Preview: <http://127.0.0.1:5191/> serves `2a0465df9`, **78 adapters**; eight
+  canvas/PNG hashes, session export, ON -> OFF -> ON and no browser/console
+  errors pass. Receipt: `playable-preview-2a0465df9-receipt.json`. Whole-playable
+  exact stays zero; palette covers 49/78 with party/switch/history limits.
 - Next: bounded Drill Peck geometry proof, then physical palette ownership;
-  no material user decision deferred. Accepted worktree retires after cleanup.
+  no material user decision deferred. Accepted worktree removed; refs/logs/raw evidence retained.
 
 ## 2026-10-02 — physical2b accepted locally; 74 live adapters
 
