@@ -19826,14 +19826,14 @@ export function renderSceneOnMovePresentation(
       age: drillPeckState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "FEAROW"
+      (liveField || view.attacker.species === "FEAROW")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "FEAROW"
+      (liveField || view.attacker.species === "FEAROW")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -19841,8 +19841,12 @@ export function renderSceneOnMovePresentation(
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const fearow = playerToOpponent ? fearowBackSprite : fearowFrontSprite;
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const fearow = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? fearowBackSprite : fearowFrontSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent && displayed.age < 28
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
@@ -19863,15 +19867,23 @@ export function renderSceneOnMovePresentation(
     // Scene-ON scanout while the source callback has already marked the
     // shadow sprite invisible. It clears on the next source-relative age.
     if (opponentToPlayer && state.age === 0) {
-      const shadowX = 176 - battleEnemyShadow.width / 2;
-      const shadowY = 40 + 29 - battleEnemyShadow.height / 2;
-      for (const pixel of battleEnemyShadow.mask) {
-        setPixel(
+      if (liveField) {
+        drawSourceOpponentEnemyShadow(
           fb,
-          shadowX + pixel % battleEnemyShadow.width,
-          shadowY + Math.floor(pixel / battleEnemyShadow.width),
-          battleEnemyShadow.color,
+          view.attacker.species,
+          view.attacker.geometry.battlePositionCenter,
         );
+      } else {
+        const shadowX = 176 - battleEnemyShadow.width / 2;
+        const shadowY = 40 + 29 - battleEnemyShadow.height / 2;
+        for (const pixel of battleEnemyShadow.mask) {
+          setPixel(
+            fb,
+            shadowX + pixel % battleEnemyShadow.width,
+            shadowY + Math.floor(pixel / battleEnemyShadow.width),
+            battleEnemyShadow.color,
+          );
+        }
       }
     }
     drawSpriteSheet(
@@ -19923,6 +19935,7 @@ export function renderSceneOnMovePresentation(
         false,
       );
     }
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -19960,6 +19973,7 @@ export function renderSceneOnMovePresentation(
       "DRILL PECK!",
       99,
     );
+    }
     return;
   }
 

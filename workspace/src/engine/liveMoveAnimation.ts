@@ -56,7 +56,7 @@ import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 50,
-  66, 67, 68, 74, 75, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 114, 122,
+  65, 66, 67, 68, 74, 75, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 114, 122,
   131, 136, 147, 151, 154, 156, 158, 162, 163, 178, 186, 204, 211, 213, 223, 227, 231,
   242, 246, 247, 264, 280, 281, 287, 290, 302, 305, 306, 319, 320, 321, 325, 336, 337, 342,
   343, 347,
@@ -89,6 +89,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // Full source-script body, including the target-monbg / palette cleanup.
     case 47: return request.attacker === 0 ? 245 : 248;
     case 48: return 51; // First Supersonic ring through the final inactive row.
+    case 65: return 91; // Drill Peck's full BowMon/impact/cleanup body.
     case 66: return 124; // Submission source body through monbg cleanup.
     case 67: return 33; // Low Kick source body through first inactive row.
     case 68: return 88; // Counter's source body through final clear display.
@@ -255,6 +256,17 @@ export function liveMoveAnimationPresentation(
     case 44: config = { move: "BITE", attacker, target, fieldProfile }; break;
     case 47: config = { move: "SING", attacker, target, fieldProfile }; break;
     case 48: config = { move: "SUPERSONIC", attacker, target, fieldProfile }; break;
+    case 65:
+      // BowMon affines the battler OBJ around its unshifted sprite center.
+      // The impact sprites independently retain the target's picture-offset
+      // coordinate, so only the attacker takes the affine-center selector.
+      config = {
+        move: "DRILL_PECK",
+        attacker: affineCenterBattler(attacker),
+        target,
+        fieldProfile,
+      };
+      break;
     case 66: config = { move: "SUBMISSION", attacker, target, fieldProfile }; break;
     case 67: config = { move: "LOW_KICK", attacker, target, fieldProfile }; break;
     case 68: config = { move: "COUNTER", attacker, target, fieldProfile }; break;
