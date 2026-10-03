@@ -851,11 +851,12 @@
     "current displayed battler art and HUD",
     "Scene ON/OFF session trace metadata and replay",
     "real command lifecycle tests for repeated/multi-hit/two-turn/miss/immunity/switch/KO; 40 generated seeds / 470 decisions preserve logical outcomes and RNG",
-    "persistent source OBJ palette allocation/load/free semantics; Shadow Punch receives retained unfaded scratch colors across audited move history"
+    "persistent source OBJ palette allocation/load/free semantics; Shadow Punch receives retained unfaded scratch colors across audited move history",
+    "source-derived ordinary singles party/B-cancel palette return with explicit known entry provenance; unknown histories and actual switches remain invalidated"
   ],
   "pending": [
     "production adapters/providers for the remaining 197 accepted Factory moves",
-    "complete graphics palette ownership across party-menu returns, switches and unmodeled move histories",
+    "complete graphics ownership across actual switches, forced replacement, summaries, substitute/transform and unmodeled histories",
     "source palette resource plans for 22 implemented adapters without audited ownership"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
@@ -880,7 +881,7 @@
     "spritePaletteHistory": {
       "sourceCommit": "c8f2a79e9",
       "auditedMovePlans": 58,
-      "claim": "Retained Shadow Punch scratch input across 58 audited move plans (57/79 adapters), before unknown graphics. Actual semantic status-animation events, switches and party entry invalidate retained history. Current body input remains immutable; Thunder Punch9 and Secret Power290 conditional paralysis ownership remains unmodeled.",
+      "claim": "Retained Shadow Punch scratch input across 58 audited move plans (57/79 adapters), and ordinary singles B-cancel from a known entry. Menu entry is unknown; cancellation alone consumes explicit entry provenance and source menu/return allocations. Actual status-animation, switches and unmodeled history remain invalidated; no arbitrary-history/framebuffer ownership claim.",
       "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json",
       "receipts": [
         "../tools/integration/fixtures/live-palette-history-receipt.json",
@@ -888,19 +889,26 @@
         "../tools/integration/fixtures/live-palette-dynamic-punch-history-receipt.json",
         "../tools/integration/fixtures/music-notes-palette-receipt.json",
         "../tools/integration/fixtures/live-palette-batch-supervisor-receipt.json",
-        "../tools/integration/fixtures/status-palette-supervisor-receipt.json"
-      ]
+        "../tools/integration/fixtures/status-palette-supervisor-receipt.json",
+        "../tools/integration/fixtures/party-cancel-supervisor-receipt.json"
+      ],
+      "ordinaryPartyCancel": {
+        "sourceCommit": "695e10751",
+        "referenceRomSha256": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+        "receipt": "../tools/integration/fixtures/party-cancel-supervisor-receipt.json",
+        "claim": "Known entry only; source return reserves0..3, healthbox/bar4..5, no wireless, retained icon row8 supplies following Shadow Punch scratch. Unknown entry and actual switch stay unknown; private0..3 and full menu/framebuffer timing unclaimed."
+      }
     }
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "d1bbca89c7d4732c09fadcabba41178b34306d87",
+    "productionCodeCommit": "695e10751cee1949ebd716ebfcda0541ab3a8d26",
     "typecheck": "passed",
-    "workerFullTest": "1481 files / 11750 tests passed; 44 files / 223 tests skipped; supervisor tail regression test-only follow-up uses scoped gates",
+    "workerFullTest": "1482 files / 11754 tests passed; 44 files / 223 tests skipped",
     "buildModules": 844,
-    "supervisorAffected": "25 affected tests, 1 trailing-event regression, 448 smoke and typecheck passed",
-    "independentSource": "Eight fresh conditional paralysis source runs: both moves9/290, both orientations, twice; extra SPARK_2 bank7. Ordinary seed549 first/next Lick known->unknown; full three-boundary ON/OFF rules/RNG parity.",
-    "sourceReceipt": "../tools/integration/fixtures/status-palette-supervisor-receipt.json",
+    "supervisorAffected": "29 affected/provider/tail/boundary/inventory tests and 448 smoke passed",
+    "independentSource": "Eight fresh menu source runs, bilateral startup/after-Smokescreen twice: rows4..9, twelve following scratch8 allocations/faded blends and cleanup exact. Eighteen ON/OFF logical boundaries cover known/unknown/status/switch cancellation.",
+    "sourceReceipt": "../tools/integration/fixtures/party-cancel-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed"
   }
 }

@@ -1,5 +1,28 @@
 # Animation integration progress
 
+## 2026-10-02 — ordinary party/B-cancel palette ownership restored
+
+- State: clean-folded `695e10751`. Known entry retained as explicit pending
+  provenance; menu stays unknown; B-cancel applies source load/free/return
+  sequence. Unknown entry and actual switches stay unknown. Adapters79,
+  plans58 (57/79 live), Factory276/277 and 197 awaiting integration unchanged.
+- Proof: supervisor fresh bilateral startup/after-Smokescreen runs, twice:
+  eight runs, source callbacks/tags, unfaded rows4..9, twelve later scratch8
+  allocations/faded blends and cleanup exact. Source loads all six icon-table
+  rows, including three ROM-adjacent entries; return has no wireless palette.
+- Routes: initial/repeated known cancellation, unknown Water Gun, actual
+  paralysis and real-switch negatives: eighteen full ON/OFF rules/RNG
+  boundaries exact (only scene marker excluded), complete ages and next prompts.
+- Gates: worker 1,482 files / 11,754 tests (223 skipped), typecheck, build844;
+  supervisor29 affected plus448 smoke pass. Same-code full pair reused.
+  `tools/integration/fixtures/party-cancel-supervisor-receipt.json`; all
+  worker/source/gate/log evidence retained in primary validation.
+- Limits: private rows0..3, menu timing/framebuffer, summaries, forced switch,
+  substitute/transform and unknown-history recovery unclaimed; whole exact0.
+- Preview: refreshing ordinary cancellation browser proof next; previous
+  verified service `fe47c9afb` recorded. Next: one bounded Light Screen adapter
+  batch, then independent final full pair. No material user decision deferred.
+
 ## 2026-10-02 — actual status graphics invalidate retained palette history
 
 - State: clean-folded `d1bbca89c`; adapters 79, plans 58 (57/79 live),
@@ -49,28 +72,3 @@
   worker ref/logs and all needed raw evidence retained.
 - Next: source-owned ordinary party/B-cancel return, with unknown status/history
   invalidation. Twenty-two live palette plans remain. No material decision deferred.
-
-## 2026-10-02 — Drill Peck accepted locally; 79 live adapters
-
-- State: source repair `4488f34e2` clean-folded; all fourteen recovered
-  physical2 bodies now have verified adapters. Factory remains 276/277;
-  197 accepted bodies need adapters. Gameplay, RNG and progression intact.
-- Proof: independently repeated **273 rows/run**, bilateral Fearow plus
-  separate complete-party Dodrio back geometry, twice fresh, **zero pixels**.
-  BowMon uses affine OBJ center (Fearow 85, Dodrio 81); effects keep picture
-  offset. Source-correct HP maxima 140/135/110. Prior failed evidence retained.
-- Route: seed 20 / streak 21 ordinary switch into Fearow then two 91-age
-  bodies against Slaking; next prompt and four ON/OFF rules/HP/PP/RNG
-  boundaries exact, excluding only scene marker bit.
-- Gates: worker typecheck, **1,481 files / 11,747 tests** (223 skipped), build
-  **844 modules**. Supervisor 32 affected/source-audit tests and 448 smoke
-  pass; same-code full pair reused. Independent receipt:
-  `tools/integration/fixtures/physical2d-drill-supervisor-receipt.json`;
-  primary validation retains all fresh source runs and worker gate logs.
-- Preview: <http://127.0.0.1:5191/> serves `da75f10e6`, **79 adapters**; eight
-  canvas/PNG hashes, session export, ON -> OFF -> ON, no console/page errors
-  pass (`playable-preview-da75f10e6-receipt.json`). Whole-playable exact stays
-  zero; palette stays 49/79 (50 plans), with party/switch/history limits.
-- Next: bounded missing palette plans, then ordinary party cancellation
-  provider. Supervisor source cancellation reconnaissance is preserved. No
-  material user decision deferred; accepted worktree removed; worker ref/logs/raw evidence retained.
