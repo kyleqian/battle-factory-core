@@ -40,19 +40,49 @@ for line in script.splitlines():
     match=re.match(r'^(\w+)::?$',line)
     if match:label=match[1];blocks[label]=[]
     elif label:blocks[label].append(line.strip())
-ids={2,5,11,14,21,23,25,27,29,39,41,44,47,48,67,78,79,92,93,94,95,97,101,103,108,109,122,131,136,147,154,158,163,210,211,223,231,242,246,247,264,280,305,306,320,325,336,337,342,347}
+ids={2,5,11,14,21,23,25,27,29,39,41,42,44,47,48,65,67,74,75,78,79,92,93,94,95,97,101,103,108,109,114,122,131,136,147,151,154,158,163,210,211,223,231,242,246,247,264,280,302,305,306,319,320,325,336,337,342,347}
 components=json.loads((ROOT/'src/data/gen/battle-animation-components.json').read_text())
 plans={}
 used=set()
 for move in components['moves']:
     if move['id'] not in ids:continue
     loads=[]
-    for block in move['blocks']:
+    # Factory battles are BATTLE_ENVIRONMENT_BUILDING, so Secret Power's
+    # source dispatch reaches only Move_STRENGTH. Loading the extracted union
+    # of its nine unreachable terrain bodies would corrupt retained rows.
+    move_blocks=move['blocks']
+    for block in move_blocks:
         for line in blocks[block]:
             match=re.match(r'loadspritegfx (ANIM_TAG_\w+)$',line)
             if match:loads.append(match[1]);used.add(match[1])
             assert not line.startswith('unloadspritegfx '),move['move']
     plans[str(move['id'])]={'move':move['move'],'loads':loads}
+# This bounded batch was audited beyond the script-level loads above. The
+# listed task/template callbacks were followed through their complete source
+# bodies and helpers. None allocates an OBJ palette or writes OBJ unfaded
+# memory. Growth palette cycles, Haze's battler blend, and
+# screen inversion write faded memory only. Haze's sole LoadPalette targets a
+# BG palette. Acid Armor's monbg setup copies the battler OBJ row into BG
+# memory. The remaining callbacks only move sprites/tasks or touch OAM/GPU
+# state. Keep the audit in generated data so a plan cannot silently gain
+# historyKnown merely because a new loadspritegfx grep happened to be empty.
+# Supervisor source review: omit Thunder Punch9 and Secret Power290.
+# Secret Power building/default has MOVE_EFFECT_PARALYSIS in
+# Cmd_getsecretpowereffect; status presentation does not own its OBJ palette
+# transition yet. A no-status seed cannot prove a conditional lifetime.
+callback_audits={
+ '42': {'callbacks':['AnimTask_ShakeMon2','gPinMissileSpriteTemplate','gBasicHitSplatSpriteTemplate'],'objUnfaded':'unchanged'},
+ '65': {'callbacks':['AnimTask_DrillPeckHitSplats','AnimTask_ShakeMon2','gBowMonSpriteTemplate','gSlideMonToOriginalPosSpriteTemplate','gFlashingHitSplatSpriteTemplate'],'objUnfaded':'unchanged'},
+ '74': {'callbacks':['AnimTask_BlendColorCycle','AnimTask_ScaleMonAndRestore'],'objUnfaded':'unchanged','fadedOnly':True},
+ '75': {'callbacks':['AnimTask_ShakeMon2','gRazorLeafParticleSpriteTemplate','gRazorLeafCutterSpriteTemplate'],'objUnfaded':'unchanged'},
+ '114': {'callbacks':['AnimTask_HazeScrollingFog','AnimTask_BlendBattleAnimPal'],'objUnfaded':'unchanged','bgPaletteOnly':True},
+ '151': {'callbacks':['AnimTask_AcidArmor'],'objUnfaded':'unchanged','monbgCopiesObjToBgOnly':True},
+ '302': {'callbacks':['AnimTask_ShakeMon2','gNeedleArmSpikeSpriteTemplate','gBasicHitSplatSpriteTemplate','gFistFootSpriteTemplate'],'objUnfaded':'unchanged'},
+ '319': {'callbacks':['AnimTask_ShakeMon2','gMetalSoundSpriteTemplate'],'objUnfaded':'unchanged'},
+}
+for move_id,audit in callback_audits.items():
+    assert move_id in plans
+    plans[move_id]['callbackAudit']=audit
 # SmokescreenImpact loads a separate source resource from its task callback.
 smoke=(REF/'src/battle_anim_smokescreen.c').read_text()
 tag_match=re.search(r'#define TAG_SMOKESCREEN\s+(\w+)',smoke)
@@ -76,7 +106,7 @@ assert rainbow[0]['tag']==tags['ANIM_TAG_MUSIC_NOTES']
 for move_id in ['47','320']:plans[move_id]['rainbowNotes']=True
 # Powder/poison/ring/spore/noise callbacks do not allocate additional OBJ
 # palettes or alter unfaded OBJ colors; Hypnosis' color cycle is faded-only.
-source_files=['src/battle_anim_poison.c','src/battle_anim_sound_tasks.c','src/battle_anim_effects_1.c','src/battle_anim_effects_2.c','src/battle_anim_ghost.c','src/battle_anim_psychic.c','src/battle_anim_effects_3.c','include/constants/battle_anim.h','src/data/battle_anim.h','data/battle_anim_scripts.s','src/battle_anim_smokescreen.c','src/sprite.c','src/battle_anim_mons.c','src/link_rfu_3.c']
+source_files=['src/battle_anim_poison.c','src/battle_anim_sound_tasks.c','src/battle_anim_effects_1.c','src/battle_anim_effects_2.c','src/battle_anim_ghost.c','src/battle_anim_psychic.c','src/battle_anim_effects_3.c','src/battle_anim_electric.c','src/battle_anim_flying.c','src/battle_anim_ice.c','src/battle_anim_normal.c','src/battle_anim_mon_movement.c','src/battle_anim_utility_funcs.c','include/constants/battle_anim.h','src/data/battle_anim.h','data/battle_anim_scripts.s','src/battle_anim_smokescreen.c','src/sprite.c','src/battle_anim_mons.c','src/link_rfu_3.c']
 out={
  'schema':'live-animation-palette-resources/v1',
  'sourceSha256':{name:hashlib.sha256((REF/name).read_bytes()).hexdigest() for name in source_files},

@@ -6,12 +6,43 @@ import { generatedCommandAnimationReplay } from "../tools/integration/generatedC
 import { playableAnimationReplay } from "../tools/integration/playableAnimationReplay.ts";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import { advanceFactoryRoundBattleCommand } from "../src/engine/factoryRoundBattleOrchestrator.ts";
+import paletteData from "../src/data/gen/live-animation-palette-resources.json" with { type: "json" };
 
 const request = (moveId: number): BattleMoveAnimationRequest => ({
   moveId, attacker: 0, target: 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0,
 });
 
 describe("persistent live move palette inputs", () => {
+  it("keeps conditional paralysis moves unknown until status palette ownership is modeled", () => {
+    for (const moveId of [9, 290]) {
+      const prepared = prepareLiveMovePalette(createLiveMovePaletteHost(), request(moveId));
+      expect(prepared.input.historyKnown).toBe(false);
+      expect(prepared.next.historyKnown).toBe(false);
+    }
+  });
+  it("models the audited physical/support batch through cleanup and later scratch allocation", () => {
+    const expectedLoads = new Map<number, readonly string[]>([
+      [42, ["ANIM_TAG_NEEDLE", "ANIM_TAG_IMPACT"]],
+      [65, ["ANIM_TAG_IMPACT", "ANIM_TAG_WHIRLWIND_LINES"]],
+      [74, []],
+      [75, ["ANIM_TAG_LEAF", "ANIM_TAG_RAZOR_LEAF", "ANIM_TAG_IMPACT"]],
+      [114, []],
+      [151, []],
+      [302, ["ANIM_TAG_GREEN_SPIKE", "ANIM_TAG_IMPACT", "ANIM_TAG_HANDS_AND_FEET"]],
+      [319, ["ANIM_TAG_METAL_SOUND_WAVES"]],
+    ]);
+    const initial = createLiveMovePaletteHost();
+    for (const [moveId, loads] of expectedLoads) {
+      const plan = paletteData.plans[String(moveId) as keyof typeof paletteData.plans];
+      expect(plan.loads).toEqual(loads);
+      expect(plan.callbackAudit).toMatchObject({ objUnfaded: "unchanged" });
+      const after = prepareLiveMovePalette(initial, request(moveId));
+      expect(after.next.historyKnown).toBe(true);
+      expect(after.next.memory.tags.slice(7)).toEqual(Array(9).fill(0xffff));
+      expect(prepareLiveMovePalette(after.next, request(325)).input).toMatchObject({ historyKnown: true });
+    }
+  });
+
   it("keeps initial/repeated traces stable but retains Smokescreen's task palette on the next move", () => {
     const initial = createLiveMovePaletteHost();
     const first = prepareLiveMovePalette(initial, request(325));
