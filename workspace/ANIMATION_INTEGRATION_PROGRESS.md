@@ -19,9 +19,12 @@
   worker/source/gate/log evidence retained in primary validation.
 - Limits: private rows0..3, menu timing/framebuffer, summaries, forced switch,
   substitute/transform and unknown-history recovery unclaimed; whole exact0.
-- Preview: refreshing ordinary cancellation browser proof next; previous
-  verified service `fe47c9afb` recorded. Next: one bounded Light Screen adapter
-  batch, then independent final full pair. No material user decision deferred.
+- Preview: <http://127.0.0.1:5191/> serves `ae925089c`: eleven canvas/PNG
+  hashes (party cancellation bodies plus Razor Leaf), six draft logical
+  boundaries, export, ON -> OFF -> ON and no browser/console errors pass.
+  Receipt `playable-preview-ae925089c-receipt.json`. Worktree retired after
+  evidence preservation; worker ref/logs retained. Next: bounded Light Screen
+  adapter, then independent final full pair. No material user decision deferred.
 
 ## 2026-10-02 — actual status graphics invalidate retained palette history
 
