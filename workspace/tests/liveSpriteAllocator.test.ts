@@ -43,7 +43,7 @@ describe("known ordinary-singles entry sprite provider", () => {
     const request = {
       moveId: 113, attacker: 0, target: 0, turn: 0, power: 0,
       damage: 0, friendship: 0, multihit: 0,
-    };
+    } as const;
     const prepared = prepareLiveMoveSpriteAllocator(provider.firstMove, request);
     expect(prepared.input).toEqual({
       historyKnown: true, wall: 3, sparkles: [4, 5, 7, 4, 5, 7],
