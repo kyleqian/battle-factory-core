@@ -22,8 +22,20 @@ export function generatedCommandAnimationReplay(
   }));
   const animations: Array<{ moveId: number; attacker: number; player: string; opponent: string; ages: number[] }> = [];
   const boundaries = [];
-  const commands: Array<{ type: string; frame: number; command: unknown }> = [];
+  const commands: Array<{
+    type: string;
+    frame: number;
+    command: unknown;
+    paletteInputHistoryKnown: boolean | undefined;
+    retainedPaletteHistoryKnown: boolean | undefined;
+  }> = [];
   const requests: Array<BattleMoveAnimationRequest & { frame: number }> = [];
+  const semanticEvents: Array<{
+    requestId: number;
+    segmentIndex: number;
+    event: unknown;
+  }> = [];
+  const observedSegments = new Set<string>();
   let commandKey = "";
   let frame = 0;
   let key = "";
@@ -34,13 +46,27 @@ export function generatedCommandAnimationReplay(
     else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons));
     else throw new Error(`generated command replay lost battle ownership at seed ${seed}`);
     const r = state.battleResolutionPresentation;
+    if (r) for (let segmentIndex = 0; segmentIndex < r.segments.length; segmentIndex += 1) {
+      const segmentKey = `${r.resolutionId.requestId}:${segmentIndex}`;
+      if (observedSegments.has(segmentKey)) continue;
+      observedSegments.add(segmentKey);
+      for (const event of r.segments[segmentIndex]!.events) {
+        semanticEvents.push({ requestId: r.resolutionId.requestId, segmentIndex, event });
+      }
+    }
     if (r?.lifecycle.phase !== "presenting") return;
     const command = r.segments[r.segmentIndex]!.commands[r.commandIndex];
     if (command) {
       const currentCommand = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
       if (currentCommand !== commandKey) {
         commandKey = currentCommand;
-        commands.push({ type: command.type, frame, command });
+        commands.push({
+          type: command.type,
+          frame,
+          command,
+          paletteInputHistoryKnown: r.liveMovePaletteInput?.historyKnown,
+          retainedPaletteHistoryKnown: state.liveMovePaletteHost?.host.historyKnown,
+        });
         if (command.type === "move-animation" && command.animation) requests.push({ ...command.animation, frame });
       }
     }
@@ -90,5 +116,5 @@ export function generatedCommandAnimationReplay(
     until(() => phase() === "action-menu");
     boundaries.push(state.battle!);
   }
-  return { state, boundaries, animations, requests, commands, frame };
+  return { state, boundaries, animations, requests, commands, semanticEvents, frame };
 }

@@ -26,12 +26,26 @@ export function playableAnimationReplay(
   const observations: LiveAnimationObservation[] = [];
   const boundaries: EngineState[] = [];
   const commands: Array<{ type: string; command: unknown }> = [];
+  const semanticEvents: Array<{
+    requestId: number;
+    segmentIndex: number;
+    event: unknown;
+  }> = [];
+  const observedSegments = new Set<object>();
   let commandKey = "";
   let animationKey = "";
   const step = (buttons: readonly GbaButton[] = []) => {
     recorder.recordTick(new Set(buttons));
     state = tick(state, new Set(buttons));
     const r = state.factoryRoundBattleOrchestrator?.battleResolutionPresentation;
+    if (r) for (let segmentIndex = 0; segmentIndex < r.segments.length; segmentIndex += 1) {
+      const segment = r.segments[segmentIndex]!;
+      if (observedSegments.has(segment)) continue;
+      observedSegments.add(segment);
+      for (const event of segment.events) {
+        semanticEvents.push({ requestId: r.resolutionId.requestId, segmentIndex, event });
+      }
+    }
     const command = r?.segments[r.segmentIndex]?.commands[r.commandIndex];
     if (r?.lifecycle.phase === "presenting" && command) {
       const current = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
@@ -97,7 +111,7 @@ export function playableAnimationReplay(
     boundaries.push(state);
   }
   return {
-    state, boundaries, observations, commands,
+    state, boundaries, observations, commands, semanticEvents,
     trace: recorder.toTrace({ appRoute: state.appRoute, battleScene, build: "integration-replay" }),
   };
 }

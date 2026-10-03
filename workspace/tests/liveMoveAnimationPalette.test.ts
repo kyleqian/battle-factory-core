@@ -106,9 +106,13 @@ describe("persistent live move palette inputs", () => {
     const off = playableAnimationReplay("off");
     expect(on.boundaries.slice(1, 3).map(s =>
       s.factoryRoundBattleOrchestrator!.liveMovePaletteHost?.host.historyKnown,
-    )).toEqual([true, true]);
-    // The third turn KOs Grovyle and sends in Murkrow, invalidating this
-    // bounded provider until the switch graphics allocator is implemented.
+    )).toEqual([true, false]);
+    expect(on.semanticEvents.some(({ event }) =>
+      (event as { payload?: { kind?: string } }).payload?.kind === "status-animation"
+    )).toBe(true);
+    // The second boundary crossed a real status-animation event, and the
+    // third turn also KOs Grovyle and sends in Murkrow. Both graphics paths
+    // remain outside this bounded provider.
     expect(on.state.factoryRoundBattleOrchestrator!.liveMovePaletteHost?.host.historyKnown).toBe(false);
     expect(off.state.factoryRoundBattleOrchestrator!.liveMovePaletteHost).toBeUndefined();
     expect(on.boundaries).toHaveLength(4);
@@ -119,6 +123,48 @@ describe("persistent live move palette inputs", () => {
     const replay = generatedCommandAnimationReplay(54, "on", [{ switch: 1 }, 0]);
     expect(replay.state.liveMovePaletteHost?.host.historyKnown).toBe(false);
     expect(replay.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+  }, 60000);
+
+  it("invalidates retained history at an actual unmodeled status-animation event", () => {
+    const on = generatedCommandAnimationReplay(549, "on", [2]);
+    const off = generatedCommandAnimationReplay(549, "off", [2]);
+    const statusAnimations = on.semanticEvents.filter(({ event }) =>
+      (event as { payload?: { kind?: string } }).payload?.kind === "status-animation"
+    );
+    expect(on.requests.some(({ moveId, attacker }) => moveId === 122 && attacker === 0)).toBe(true);
+    expect(on.commands.find(({ command }) =>
+      (command as { type?: string; animation?: { moveId?: number } }).type === "move-animation"
+      && (command as { animation?: { moveId?: number } }).animation?.moveId === 122
+    )).toMatchObject({
+      paletteInputHistoryKnown: true,
+      retainedPaletteHistoryKnown: true,
+    });
+    expect(statusAnimations).toHaveLength(1);
+    expect(statusAnimations[0]!.event).toMatchObject({
+      sequence: 15,
+      payload: { kind: "status-animation", battler: 1, isStatus2: 0, status: 64 },
+      provenance: { opcodeName: "B_SCR_OP_STATUSANIMATION" },
+    });
+    expect(on.commands.find(({ type }) => type === "status")).toMatchObject({
+      command: { eventSequence: 14, battler: 1, before: 0, after: 64 },
+      retainedPaletteHistoryKnown: true,
+    });
+    expect(on.commands.find(({ command }) =>
+      (command as { eventSequence?: number }).eventSequence === 16
+    )).toMatchObject({ retainedPaletteHistoryKnown: false });
+    expect(on.state.battle?.rules.rulesContext.battlers[1]!.status1).toBe(64);
+    expect(on.state.liveMovePaletteHost?.host.historyKnown).toBe(false);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(off.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(on.boundaries).toHaveLength(2);
+    expect(off.boundaries).toHaveLength(2);
+    for (let index = 0; index < on.boundaries.length; index += 1) {
+      const { hitMarker: onMarker, ...onRules } = on.boundaries[index]!.rules.rulesContext;
+      const { hitMarker: offMarker, ...offRules } = off.boundaries[index]!.rules.rulesContext;
+      expect(onRules).toEqual(offRules);
+      expect(on.boundaries[index]!.rng).toEqual(off.boundaries[index]!.rng);
+      expect(onMarker ^ offMarker).toBe(0x80);
+    }
   }, 60000);
 
   it("invalidates palette ownership on party entry even when cancelling before the first move", () => {

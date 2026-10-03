@@ -397,6 +397,17 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
     battleCallStart: number | null;
     commandKey: string;
     host: LiveMovePaletteHost;
+    /**
+     * Presentation-only cursor through the immutable semantic receipt. Some
+     * controller graphics transitions (notably status-animation) deliberately
+     * have no projected presentation command, so commandIndex alone cannot
+     * prove that palette ownership survived the events between two bodies.
+     */
+    eventCursor?: Readonly<{
+      requestId: number;
+      segmentIndex: number;
+      nextEventIndex: number;
+    }>;
   }>;
   /**
    * An opposing locked action may outlive its charge presentation while the
@@ -1980,29 +1991,77 @@ function prepareResolutionPalette(
     });
   }
   if (resolution?.lifecycle.phase !== "presenting") return state;
-  const command = resolution.segments[resolution.segmentIndex]?.commands[resolution.commandIndex];
-  if (!command) return state;
-  const commandKey = `${resolution.resolutionId.requestId}:${resolution.segmentIndex}:${resolution.commandIndex}`;
+  const segment = resolution.segments[resolution.segmentIndex];
+  if (!segment) return state;
+  const command = segment.commands[resolution.commandIndex];
+  const commandKey = `${resolution.resolutionId.requestId}:${resolution.segmentIndex}:${
+    command === undefined ? "end" : resolution.commandIndex
+  }`;
   const retained = state.liveMovePaletteHost?.battleCallStart === state.activeBattleCallStart
     ? state.liveMovePaletteHost : undefined;
-  if (retained?.commandKey === commandKey) return state;
   let host = retained?.host ?? createLiveMovePaletteHost();
+  const cursor = retained?.eventCursor;
+  const nextEventIndex = cursor?.requestId === resolution.resolutionId.requestId
+      && cursor.segmentIndex === resolution.segmentIndex
+    ? cursor.nextEventIndex
+    : 0;
+  const commandSequence = command !== undefined && "eventSequence" in command
+    ? command.eventSequence
+    : Number.POSITIVE_INFINITY;
+  let scannedEventIndex = nextEventIndex;
+  const scanThrough = (throughSequence: number): boolean => {
+    let crossedUnknownGraphics = false;
+    while (
+      scannedEventIndex < segment.events.length
+      && segment.events[scannedEventIndex]!.sequence <= throughSequence
+    ) {
+      if (segment.events[scannedEventIndex]!.payload.kind === "status-animation") {
+        crossedUnknownGraphics = true;
+      }
+      scannedEventIndex += 1;
+    }
+    return crossedUnknownGraphics;
+  };
+  if (scanThrough(commandSequence)) host = invalidateLiveMovePaletteHost(host);
+  const isFinalCommand = command === undefined
+    || resolution.commandIndex === segment.commands.length - 1;
+  const hasTrailingUnknownGraphics = isFinalCommand
+    ? scanThrough(Number.POSITIVE_INFINITY)
+    : false;
+  const eventCursor = Object.freeze({
+    requestId: resolution.resolutionId.requestId,
+    segmentIndex: resolution.segmentIndex,
+    nextEventIndex: scannedEventIndex,
+  });
+  if (
+    retained?.commandKey === commandKey
+    && retained.eventCursor?.requestId === resolution.resolutionId.requestId
+    && retained.eventCursor.segmentIndex === resolution.segmentIndex
+    && retained.eventCursor.nextEventIndex === scannedEventIndex
+    && host === retained.host
+  ) return state;
   let input: LiveMovePaletteInput | undefined;
-  if (command.type === "move-animation" && command.animation) {
+  if (command?.type === "move-animation" && command.animation) {
     const prepared = prepareLiveMovePalette(host, command.animation);
     host = prepared.next;
     input = prepared.input;
-  } else if (command.type === "move-animation" || command.type === "switch-out"
-    || command.type === "switch-in" || command.type === "party-summary"
-    || command.type === "trainer-slide"
-    || (command.type === "sprite-visibility" && command.recall)) {
+  } else if (command !== undefined && (command.type === "move-animation"
+    || command.type === "switch-out" || command.type === "switch-in"
+    || command.type === "party-summary" || command.type === "trainer-slide"
+    || (command.type === "sprite-visibility" && command.recall))) {
     // Ball/summary callbacks need their own persistent palette providers.
+    host = invalidateLiveMovePaletteHost(host);
+  }
+  // The active command's palette input was captured above. Any unprojected
+  // graphics events after the segment's final command affect only the
+  // separately retained next host, never the current move body.
+  if (hasTrailingUnknownGraphics) {
     host = invalidateLiveMovePaletteHost(host);
   }
   return Object.freeze({
     ...state,
     liveMovePaletteHost: Object.freeze({
-      battleCallStart: state.activeBattleCallStart, commandKey, host,
+      battleCallStart: state.activeBattleCallStart, commandKey, host, eventCursor,
     }),
     battleResolutionPresentation: Object.freeze({
       ...resolution, liveMovePaletteInput: input,
@@ -2506,6 +2565,7 @@ export function advanceFactoryRoundBattleCommand(
         ...state,
         liveMovePaletteHost: state.config.battleScene === "on"
           ? Object.freeze({
+              ...retained,
               battleCallStart: state.activeBattleCallStart,
               commandKey: retained?.commandKey ?? "",
               host: invalidateLiveMovePaletteHost(retained?.host ?? createLiveMovePaletteHost()),
