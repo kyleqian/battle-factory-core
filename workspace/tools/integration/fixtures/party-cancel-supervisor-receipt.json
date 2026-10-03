@@ -311,6 +311,11 @@
         ],
         "boundaries": 5,
         "moveId": 325,
+        "actualPlayerRequests": [
+          325,
+          325
+        ],
+        "retainedHistoryKnown": true,
         "inputHistoryKnown": [
           true,
           true
@@ -331,6 +336,11 @@
         ],
         "boundaries": 5,
         "moveId": 325,
+        "actualPlayerRequests": [
+          325,
+          325
+        ],
+        "retainedHistoryKnown": false,
         "inputHistoryKnown": [
           true,
           false
@@ -350,6 +360,11 @@
         ],
         "boundaries": 4,
         "moveId": 122,
+        "actualPlayerRequests": [
+          122,
+          122
+        ],
+        "retainedHistoryKnown": false,
         "inputHistoryKnown": [
           true,
           false
@@ -358,6 +373,22 @@
           73,
           73
         ],
+        "nextPrompt": "action-menu"
+      },
+      {
+        "seed": 54,
+        "commands": [
+          {
+            "switch": 1
+          },
+          "cancel-party",
+          0
+        ],
+        "boundaries": 4,
+        "moveId": null,
+        "actualPlayerRequests": [],
+        "retainedHistoryKnown": false,
+        "fullAges": [],
         "nextPrompt": "action-menu"
       }
     ]
