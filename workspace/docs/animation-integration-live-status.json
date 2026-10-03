@@ -97,6 +97,41 @@
       ]
     },
     {
+      "move": "MOVE_BODY_SLAM",
+      "id": 34,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2a-live-adapter-receipt.json",
+      "liveEvidence": [
+        "seed 4 / streak 14: MAGCARGO -> WAILMER, both ordinary orientations; second command fully paralyzed; ON/OFF rules and RNG equal"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison"
+      ]
+    },
+    {
+      "move": "MOVE_TAKE_DOWN",
+      "id": 36,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2a-live-adapter-receipt.json",
+      "liveEvidence": [
+        "seed 105 / streak 0: CHINCHOU -> PONYTA KO -> OMANYTE, twice through cleanup; ON/OFF rules and RNG equal"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_DOUBLE_EDGE",
+      "id": 38,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2a-live-adapter-receipt.json",
+      "liveEvidence": [
+        "seed 11 / streak 14: HITMONTOP -> WIGGLYTUFF; recoil queue completion and ON/OFF parity"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_TAIL_WHIP",
       "id": 39,
       "liveEvidence": [
@@ -165,6 +200,18 @@
       "remaining": [
         "independent arbitrary-species/history comparison",
         "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_SUBMISSION",
+      "id": 66,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2a-live-adapter-receipt.json",
+      "liveEvidence": [
+        "seed 18 / streak 7: POLIWRATH -> GLIGAR; recoil queue completion and ON/OFF parity"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
       ]
     },
     {
@@ -686,14 +733,14 @@
     "persistent source OBJ palette allocation/load/free semantics; Shadow Punch receives retained unfaded scratch colors across audited move history"
   ],
   "pending": [
-    "production adapters/providers for the remaining 211 accepted Factory moves",
+    "production adapters/providers for the remaining 207 accepted Factory moves",
     "complete graphics palette ownership across party-menu returns, switches and unmodeled move histories",
-    "review and complete the locally recovered physical2 worker changes"
+    "complete the ten remaining recovered physical2 adapters after independent proof"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 65,
+  "implementedCount": 69,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
@@ -723,10 +770,14 @@
     }
   },
   "validationCheckpoint": {
-    "state": "scoped-passed-full-build-pending",
+    "state": "passed",
+    "productionCodeCommit": "f4a84772915bdbe8e040f87217e5da0db6ac0335",
     "typecheck": "passed",
-    "focused": "18 files / 154 tests",
-    "independentSource": "1898 support rows per fresh run, both directions, twice; zero residual pixels",
-    "shadowFade": "player first/repeat 200 residual pixels each; opponent first zero, repeat 288392; partial"
+    "workerFullTest": "1478 files / 11720 tests passed; 44 files / 223 tests skipped",
+    "buildModules": 844,
+    "supervisorAffected": "6 files / 59 tests passed; smoke 8 files / 448 tests passed",
+    "independentSource": "939 rows per fresh run, both orientations, twice; zero residual pixels",
+    "sourceReceipt": "../tools/integration/fixtures/physical2a-supervisor-receipt.json",
+    "shadowFade": "prior residuals remain partial and unclaimed"
   }
 }
