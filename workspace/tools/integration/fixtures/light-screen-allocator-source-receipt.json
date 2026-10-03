@@ -1,9 +1,9 @@
 {
   "schema": "light-screen-allocator-verification/v1",
-  "testedCommit": "d2399266cc8507b2dd8dc80d58d0f5929b85b43d",
-  "testedTree": "c1c36568e40f53340ce512660d1045d388a5a8d5",
+  "testedCommit": "e14228ed0ff4b432a15c881301fe5c9b6c3873af",
+  "testedTree": "31957027ca1fe652f5d4f27407f77ae43b0c2611",
   "probeSha256": "e9158c6393cfc34950ec4fb20326f65376a8c926d4db3cadf15c2056ee077815",
-  "verifierSha256": "f7784291dc0e2d8fe0f3636b5927a062ea63c20f6c102f80fa13ada72bd7b1c7",
+  "verifierSha256": "b352633a82f1c6ba7342afb0f60ec2e6d53731975990bfad20236335471cde2b",
   "referenceSha256": {
     "pokeemerald.gba": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
     "pokeemerald.elf": "3a8aa584d7985c5a74ab10bb6eebd0c41b7c314ba8e423266727563c37f7727b",
@@ -377,5 +377,7 @@
     }
   ],
   "historyBound": "fresh BattleLab route from new_session through first action menu and first legal move; no switch, in-battle summary, substitute, transform, or unknown entry",
-  "verdict": "fresh BattleLab ordinary-singles entry is deterministic through ResetSpriteData, healthboxes, shadow, intro party summaries/sendout, command-cursor destruction, and first legal Light Screen cleanup; unknown entry/switch/summary/substitute/transform histories remain unknown"
+  "verdict": "fresh BattleLab ordinary-singles entry is deterministic through ResetSpriteData, healthboxes, shadow, intro party summaries/sendout, command-cursor destruction, and first legal Light Screen cleanup; unknown entry/switch/summary/substitute/transform histories remain unknown",
+  "providerPromoted": false,
+  "unresolvedProviderStep": "dense once-per-VBlank diffs still coalesce same-frame DestroySprite/CreateSprite replacements during trainer/battler sendout (notably dynamic gMultiuseSpriteTemplate and ball-particle reuse); exact in-frame source call order must be ported before a runtime recipe is honest"
 }
