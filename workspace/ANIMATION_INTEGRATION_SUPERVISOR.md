@@ -1,23 +1,24 @@
-# Local playable animation supervisor
+# Playable animation stage — main supervisor detail
 
-The user's 2026-10-02 instruction authorizes this local supervisor to continue
-integration through `./run-supervisor.sh --lane integration`. Read `AGENTS.md`,
+The user's 2026-10-03 direction makes integration the next main roadmap stage,
+run through the normal `./run-supervisor.sh`. This file details S10A for the main
+supervisor; it is not an independent supervisor program. Read `AGENTS.md`,
 `LOCAL_SETUP.md`, `ANIMATION_INTEGRATION_BRIEF.md`, the latest integration
 progress, and `ANIMATION_VERIFICATION.md`. The latter controls scoped gates.
-The mechanics mission in `SUPERVISOR.md` is not this lane's work queue.
+Follow `SUPERVISOR.md` for the common supervision/model-routing workflow;
+S10A's mission and scoped acceptance policy control this stage's work queue.
 
 ## Ownership and starting point
 
-- Supervise primary local `master`. Only one supervisor may write this checkout;
-  do not start a concurrent main or integration supervisor.
-- Production receipt `b4befb4f7` covers 65 live adapters, 276 accepted Factory
-  bodies and 211 accepted moves still needing integration. Reuse its recorded
+- Supervise primary local `master`. Only one main supervisor may write this
+  checkout. Start from the latest integration progress and exact tested tree.
+- The 2026-10-02 session verified and folded all fourteen recovered physical
+  adapters (65 to 79). Do not repeat that recovery. Reuse the latest recorded
   local full-suite/build receipt when production and environment are unchanged,
   with scoped checks for subsequent tooling changes.
-- First review `codex/recovered-physical2-20261002`: an interrupted, unverified
-  fourteen-move snapshot from an older base. Adapt useful changes to current
-  master; never merge blindly or count unverified adapters. Pick a bounded
-  subset when proof for all fourteen will not fit a worker step.
+- Resume the latest ledger's next executable step: the unmerged Light Screen
+  candidate needs source allocator/intro ownership and complete displayed-frame
+  proof. Pick bounded batches rather than promoting unverified candidates.
 - Continue accepted-move adapters and source-derived host providers. Preserve
   gameplay outcomes, RNG ownership, damage, turn order and facility state.
   Helping Hand's doubles blocker does not block accepted moves. No new Factory
@@ -37,9 +38,8 @@ claim, required variants and finish gates. Launch from a clean verified base:
 ```
 
 The supervisor defaults to `gpt-6.1-sol/high`. Ordinary Codex workers retain
-`gpt-5.6-terra/max` for source reconnaissance, `gpt-5.6-luna/max` for bounded
-established work, and `gpt-5.6-sol/high` for novel diagnosis or implementation.
-Choose the smallest suitable role; use Sol for unresolved host-state ownership.
+`gpt-5.6-terra/max`, `gpt-5.6-luna/max`, and `gpt-5.6-sol/high` according to
+the routing rubric in `SUPERVISOR.md`. Use Sol for unresolved host-state ownership.
 Workers use fresh worktrees and the Battle Scene ON oracle; OFF is the logical
 parity control. Workers do not edit supervisor progress or Factory ledgers.
 
@@ -86,7 +86,8 @@ them through existing helpers. Do not mutate shared HTTP staging for source
 probes; use independent direct mGBA runs. There is no hcloud resource to contact.
 
 Keep truthful progress with tested commit IDs, fresh evidence, remaining gaps
-and the next executable step. Use `ANIMATION_INTEGRATION_DEFERRED.md` only for
+and the next executable step. Update `PROGRESS.md` at checkpoints and wind-down,
+with detailed evidence in the integration ledger. Use `DEFERRED.md` only for
 material user decisions; technical unknowns belong in progress with a specific
 resume condition. Continue in-scope until the launcher deadline, then leave
 clean committed master with a handoff. Do not stop after dispatch or the first

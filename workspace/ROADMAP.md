@@ -14,6 +14,22 @@ battles, and the open-level rule set (until the single-battle loop is solid).
 later milestone — stage S11 below (user decision, 2026-07-28). No earlier
 stage's acceptance includes audio.
 
+## Current execution priority — 2026-10-03
+
+The next main stage is **S10A: playable animation integration**, described below.
+Run the normal `./run-supervisor.sh`; the roadmap determines its mission.
+Integration is local master work, with bounded temporary worker checkouts and
+the existing model routing. There is no separate integration supervisor program.
+This user-directed priority supersedes historical optional-animation and
+Scene-ON-selector deferrals below. Keep unresolved mechanics debt recorded;
+do not rerun earlier campaigns or schedule audio ahead of this stage.
+
+Read `ANIMATION_INTEGRATION_PROGRESS.md` for the exact latest production receipt
+and next step, and `ANIMATION_INTEGRATION_SUPERVISOR.md` for detailed execution
+and verification. Update `PROGRESS.md` at meaningful checkpoints and wind-down;
+retain detailed source/rendering evidence in the integration progress record.
+`ANIMATION_VERIFICATION.md` controls scoped checks and unchanged-code reuse.
+
 ## Operational notes
 
 - **Log backup (2026-08-10):** Codex/DeepSeek session logs (`.codex-logs/`,
@@ -2177,6 +2193,45 @@ targets: each is either implemented source-completely or carries a proof it
 cannot occur in any legal singles battle. `mechanicLab overrides.parties` is
 the staging surface. Doubles remains out of scope (supervisor-stated
 interpretation, user-uncorrected 2026-08-05).
+
+### [ ] S10A — Playable animation integration (current main stage)
+
+Starting checkpoint: 79 verified live adapters out of 276 accepted Factory
+animation bodies; 197 accepted bodies still need integration. The recovered
+fourteen-move physical batch is verified and folded. Helping Hand remains
+unaccepted pending legal doubles staging. No whole-playable arbitrary-history
+framebuffer exactness is claimed.
+
+Next: review the unmerged Light Screen candidate `d12db7f0b` against the fresh
+source clock and allocator evidence. Derive intro/sendout/summary ownership,
+preserve completed text, and prove the complete body, cleanup and following
+display in both orientations twice, including the complete Slowpoke variant.
+Then continue reusable host providers and remaining accepted move adapters.
+Latest progress supersedes this starting checkpoint as verified work lands.
+
+Acceptance:
+
+- Each newly integrated body has complete dense source/framebuffer proof through
+  the production live renderer, both orientations, twice fresh, and every
+  evidence-required variant. Use the existing per-move integration verifiers;
+  name their exact commands and tested trees in each receipt. Never consume
+  capture rows in production or credit generic fallback effects as exact.
+- Ordinary real command input reaches subsequent valid prompts through the
+  relevant repeated/status/miss/multi-hit/two-turn/switch/KO cases. Scene ON/OFF
+  controls preserve logical outcomes, RNG ownership and facility progression.
+- Inventory `docs/animation-integration-live-status.json` names each accepted
+  move's live provider and remaining blocker. Adapters, Factory acceptance and
+  stronger rendering-history claims remain separate. Do not expand into the
+  77 non-Factory animations or conceal unknown ownership behind a count.
+- Follow `ANIMATION_VERIFICATION.md`: affected controls, smoke, full
+  `npm test` / `npm run build` for changed production, independent central
+  reproduction and an independent final full pair at session wind-down.
+  Reuse same-code receipts where that contract allows; serialize heavy gates.
+- Publish each green checkpoint locally with
+  `bash tools/integration/start-local-preview.sh`, then verify ordinary-input
+  replay, canvas/PNG hashes, session export, mode restart and browser errors
+  with the existing integration replay tools. Record the served revision and
+  browser receipt. A first preview does not finish the remaining adapters.
 
 ### [ ] S11 — Audio (separate milestone, user-directed 2026-07-28)
 

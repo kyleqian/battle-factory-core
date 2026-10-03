@@ -21,15 +21,16 @@ server nor the ROM/oracle at runtime. There are 79 live move adapters; the
 Helping Hand is the sole unaccepted Factory move, pending legal doubles staging.
 Whole-playable arbitrary-history framebuffer exactness remains unclaimed.
 
-Resume supervised integration from this workspace with:
+Resume the current main roadmap stage from this workspace with:
 
 ```sh
-./run-supervisor.sh --lane integration --headless
+./run-supervisor.sh
 ```
 
 The repository supervisor defaults to Codex `gpt-6.1-sol/high`; workers retain
-the established Terra/Luna/Sol routing. Omit `--headless` for an interactive
-supervisor. The default cap is six hours. `--print-config` checks the selected
+the established Terra/Luna/Sol routing. The default is an interactive supervisor;
+add `--headless` for unattended execution with streamed output and saved logs.
+Both follow `ROADMAP.md` and have a six-hour default cap. `--print-config` checks the selected
 profile without starting a run. See `ANIMATION_INTEGRATION_SUPERVISOR.md` for
 worker verification, master ownership, preview refresh and local log retention.
 Codex CLI 0.160.0 is installed and verified with ChatGPT sign-in for Sol 6.1;

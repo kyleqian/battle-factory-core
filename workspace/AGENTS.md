@@ -40,10 +40,11 @@ cap (`--help` lists the flags).
 **Supervised alternative:** **`./run-supervisor.sh`** runs the two-level flow:
 a supervisor plans one increment at a time, delegates it to a capped
 disposable worker via `tools/run-subagent.sh`, and verifies the result between
-steps. The repo default is Codex `gpt-6.1-sol/high`. For playable animation
-integration use `./run-supervisor.sh --lane integration` and read
-`ANIMATION_INTEGRATION_SUPERVISOR.md`; it owns local master and uses temporary
-integration worker worktrees. Select the two roles independently: `-S` / `--supervisor` accepts
+steps. The repo default is Codex `gpt-6.1-sol/high`. The normal command follows
+the current stage in `ROADMAP.md`; playable integration needs no supervisor lane
+flag. For S10A read `ANIMATION_INTEGRATION_SUPERVISOR.md`; the main supervisor
+owns local master and uses temporary integration worker worktrees. Select the
+two roles independently: `-S` / `--supervisor` accepts
 Claude or Codex, while `-s` / `--sub-agent` accepts Claude, Codex, or
 DeepSeek. Omitting the sub-agent makes it follow the supervisor; DeepSeek is
 not currently a valid supervisor. Codex workers use the Terra/Luna/Sol routing

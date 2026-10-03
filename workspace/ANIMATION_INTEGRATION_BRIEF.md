@@ -4,7 +4,9 @@
 
 The user consolidated all remote code, recovered work, required assets and chat
 history onto this Mac, then authorized continued integration using the repository
-supervisor with Sol 6.1. hcloud was deleted after backup and local validation.
+supervisor with Sol 6.1. On 2026-10-03 the user directed integration to be the
+next main roadmap stage, with no separate supervisor lane. hcloud was deleted
+after backup and local validation.
 Historical remote-only instructions and isolated cloud branches are superseded.
 
 Canonical checkout: `/Users/kyle/Developer/pokebench/pokeemerald-factory-core`,
@@ -12,10 +14,11 @@ branch `master`; run commands in `workspace/`. Read `LOCAL_SETUP.md` and
 `ANIMATION_INTEGRATION_PROGRESS.md`. Launch this lane with:
 
 ```sh
-./run-supervisor.sh --lane integration --headless
+./run-supervisor.sh
 ```
 
-The supervisor follows `ANIMATION_INTEGRATION_SUPERVISOR.md` on primary master;
+The main supervisor follows `ROADMAP.md` and its S10A detail in
+`ANIMATION_INTEGRATION_SUPERVISOR.md` on primary master;
 bounded workers use `tools/run-subagent.sh --lane integration --base <green-ref>`
 in temporary worktrees. Only one supervisor writes primary master. Keep logs,
 evidence and unfinished refs locally before cleaning up worker worktrees.
@@ -28,19 +31,18 @@ Document deliberate module-boundary changes; never silently widen ratchets.
 
 ## Established baseline and remaining work
 
-Production `b4befb4f7` has 65 live adapters, ordinary Scene ON/OFF selection,
-typed move requests/completion, queue resume, real-route regression tests and
-a verified local preview at <http://127.0.0.1:5191/>. Its local receipt records
-1,477 files / 11,708 tests passed, typecheck and build (844 modules), 1,832 Rust
-tests, fresh source checks and browser replay. Later migration/tooling/docs
-commits do not invalidate unchanged production receipts.
+The latest production receipt and preview revision are in
+`ANIMATION_INTEGRATION_PROGRESS.md`. The verified local session reached 79 live
+adapters out of 276 accepted Factory bodies, leaving 197 needing integration.
+The established path includes ordinary Scene ON/OFF selection, typed requests
+and completion, queue resume, real-route regressions and browser verification.
+Reuse recorded same-code full-suite/build receipts under the verification policy.
 
-Factory bodies are separately 276/277 accepted; 211 accepted moves still need
-live integration. Helping Hand is blocked on legal doubles staging. A live
-adapter is not whole-playable arbitrary-history framebuffer exactness. Current
-palette providers remain bounded, and switch/party-return ownership and Shadow
-Punch history residuals are explicit gaps. Read the latest progress before
-repeating earlier investigations.
+Helping Hand remains blocked on legal doubles staging. A live adapter is not
+whole-playable arbitrary-history framebuffer exactness. Unknown status, entry,
+switch, summary, substitute and transform ownership remain explicit gaps;
+known-entry party/B-cancel return is bounded. Read latest progress before
+repeating earlier investigations or counting any unmerged candidate.
 
 `PLAYABLE_ANIMATION_INTEGRATION_AUDIT.md` documents the original pre-integration
 seam problems; many have since been implemented. Treat it as historical design
@@ -48,9 +50,9 @@ context, not a fresh list of missing features. Production must supply current
 species, geometry, graphics and per-frame host state; never import capture rows
 or fixture builders into gameplay or substitute generic effects as exact moves.
 
-First review `codex/recovered-physical2-20261002`, the interrupted fourteen-move
-snapshot. Adapt only useful changes to current master and verify independently;
-its older base and unverified contents prohibit blind merging or count credit.
+The recovered physical2 batch is now verified and folded. Resume the latest
+ledger's next step: Light Screen allocator/intro ownership and full source-clock
+presentation proof; candidate `d12db7f0b` remains unmerged.
 
 ## Deliverables
 

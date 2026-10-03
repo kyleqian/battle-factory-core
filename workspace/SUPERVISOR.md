@@ -14,7 +14,8 @@ the session's compute. You run rarely and think hard when you do.
 
 The launcher selects the two agent roles independently:
 
-- `./run-supervisor.sh` — Claude Fable supervisor with Claude Sonnet workers;
+- `./run-supervisor.sh` — Codex Sol 6.1/high supervisor with tiered Codex workers,
+  following the current main roadmap stage;
 - `./run-supervisor.sh -S codex` — Codex Sol 6.1/high supervisor with
   tiered Codex workers;
 - `./run-supervisor.sh -S claude -s codex` — Claude Fable supervisor,
@@ -32,11 +33,21 @@ sub-agents are always V4 Flash; do not pass worker model or effort overrides.
 `--max-mode` remains the special all-Codex profile and rejects either role
 being set to anything else.
 
-Read `AGENTS.md`, the authoritative reset at the start of ROADMAP Stage 8, and
-S10's **Executable-frontier reset** (the current stage's ordered next steps and
-its opcode-registration policy) first. Everything they say about this run — commit
+Read `AGENTS.md`, the latest `PROGRESS.md`, and `ROADMAP.md`'s **Current execution
+priority** first. The current stage and its linked detailed guide determine the
+mission and acceptance gates. S10A uses `ANIMATION_INTEGRATION_SUPERVISOR.md`
+and `ANIMATION_VERIFICATION.md`; their scoped baseline/fold/wind-down policy
+supersedes historical blanket full gates and mechanics soak schedules below
+for integration work. Stage 8 and S10's **Executable-frontier reset** remain
+reference context for work on those mechanics. Everything they say about this run — commit
 discipline, test tiers, oracle profiles, and lane ownership — applies to you,
 and you are its enforcer for the workers.
+
+`--headless` runs the supervisor non-interactively, streaming progress and saving
+event logs. Without it the supervisor uses the interactive terminal interface
+where the user can steer it. Both modes use the same mission, worker routing,
+permissions and six-hour default cap. Headless mode is still local and does not
+detach the launcher from its terminal or managed execution session.
 
 ## Fresh run: bootstrap your own plan (iteration 0)
 

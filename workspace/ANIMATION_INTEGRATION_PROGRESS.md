@@ -1,5 +1,17 @@
 # Animation integration progress
 
+## 2026-10-03 — Continuation uses the main roadmap
+
+- Setup: integration is S10A in `ROADMAP.md`; normal `./run-supervisor.sh` reads
+  the current roadmap instead of a hardcoded mechanics mission. The previous
+  supervisor integration flag remains an alias; worker contracts are unchanged.
+- Checks: shell syntax, 73 affected tests, boundary/inventory, coverage/audit
+  and diff checks pass. Production is unchanged; the final session receipt and
+  next Light Screen step below remain the current implementation checkpoint.
+- Run mode: default interactive terminal; optional `--headless` streams output
+  and keeps logs without the chat interface. Both use Sol 6.1/high and the same
+  worker routing/cap. No new supervisor session started for this setup change.
+
 
 
 

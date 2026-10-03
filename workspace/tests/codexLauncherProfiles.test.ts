@@ -78,25 +78,28 @@ afterAll(() => {
 });
 
 describe("Supervisor and worker launcher profiles", () => {
-  it("routes integration to its own guide and ON oracle without creating a worktree", () => {
+  it("keeps integration in the main supervisor while isolating ON workers", () => {
     const before = spawnSync("git", ["worktree", "list", "--porcelain"], {
       cwd: RUN_ROOT, encoding: "utf8",
     });
     const supervisor = runLauncher("run-supervisor.sh", [
       "--lane", "integration", "--print-config",
     ]);
+    const main = runLauncher("run-supervisor.sh", ["--print-config"]);
     const worker = runLauncher("tools/run-subagent.sh", [
       "--lane", "integration", "--sub-agent", "codex", "--print-config",
     ]);
     expect(supervisor.status).toBe(0);
     expect(configFrom(supervisor.stdout)).toMatchObject({
-      supervisor_lane: "integration",
-      supervisor_guide: "ANIMATION_INTEGRATION_SUPERVISOR.md",
-      oracle_profile: "battle-scene-on",
+      supervisor_lane: "ts",
+      supervisor_guide: "SUPERVISOR.md",
+      oracle_profile: "battle-scene-off",
       supervisor_model: "gpt-6.1-sol",
       supervisor_effort: "high",
       worker_routing: "tiered",
     });
+    expect(main.status).toBe(0);
+    expect(configFrom(supervisor.stdout)).toEqual(configFrom(main.stdout));
     expect(worker.status).toBe(0);
     expect(configFrom(worker.stdout)).toMatchObject({
       worker_lane: "integration",
@@ -109,6 +112,17 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(before.status).toBe(0);
     expect(after.status).toBe(0);
     expect(after.stdout).toBe(before.stdout);
+  });
+
+  it("changes only the supervisor interface when headless is selected", () => {
+    const interactive = runLauncher("run-supervisor.sh", ["--print-config"]);
+    const headless = runLauncher("run-supervisor.sh", ["--headless", "--print-config"]);
+    expect(interactive.status).toBe(0);
+    expect(headless.status).toBe(0);
+    expect(configFrom(interactive.stdout).supervisor_mode).toBe("interactive");
+    expect(configFrom(headless.stdout)).toEqual({
+      ...configFrom(interactive.stdout), supervisor_mode: "headless",
+    });
   });
 
   it("keeps explicit Claude supervision available", () => {

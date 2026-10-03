@@ -23,8 +23,6 @@
 #   ./run-supervisor.sh               # interactive supervisor, 6h hard cap
 #   ./run-supervisor.sh -c 4          # different cap          (--cap-hours 4)
 #   ./run-supervisor.sh --headless    # unattended, stream view like run-agent.sh
-#   ./run-supervisor.sh --lane integration
-#                                      # local master, playable animation integration
 #   ./run-supervisor.sh -S codex      # Sol 6.1/high + tiered Codex workers
 #   ./run-supervisor.sh -S claude -s codex
 #                                      # Fable supervisor + tiered Codex workers
@@ -57,16 +55,16 @@ Usage: ./run-supervisor.sh [options]
       (no options)      interactive supervisor session, hard-capped at 6h
   -c, --cap-hours N     hard cap in hours (default 6)
       --headless        unattended run (stream view, like run-agent.sh)
-  -l, --lane NAME       ts (default), integration, animation, or rust ("main" is accepted
+  -l, --lane NAME       ts (default), animation, or rust ("main" is accepted
                         as a legacy alias for ts). The ts lane is the main
                         TypeScript program supervisor in the shared tree. The
                         animation and rust lanes run their separate program
                         supervisors (ANIMATION_SUPERVISOR.md /
                         RUST_SUPERVISOR.md) inside a persistent
                         .worktrees/<lane>-main worktree on the single-writer
-                        branch <lane>-main. Integration runs on local master with
-                        temporary workers and folds playable animation batches.
-                        Do not run ts and integration supervisors concurrently.
+                        branch <lane>-main. The main supervisor follows ROADMAP.md;
+                        integration needs no separate supervisor lane. The old
+                        "integration" spelling remains an alias for ts.
   -S, --supervisor NAME codex (default, gpt-6.1-sol/high), claude, or a Claude model alias
                         (opus, sonnet, fable, haiku) that selects Claude and
                         that exact model in one step. DeepSeek cannot
@@ -123,7 +121,7 @@ while [[ $# -gt 0 ]]; do
     --headless)       HEADLESS=1; shift ;;
     -c|--cap-hours)   CAP_HOURS="${2:?--cap-hours needs a number}"; shift 2 ;;
     --cap-hours=*)    CAP_HOURS="${1#*=}"; shift ;;
-    -l|--lane)        LANE="${2:?--lane needs ts, integration, animation, or rust}"; shift 2 ;;
+    -l|--lane)        LANE="${2:?--lane needs ts, animation, or rust}"; shift 2 ;;
     --lane=*)         LANE="${1#*=}"; shift ;;
     -S|--supervisor)  PROVIDER="${2:?--supervisor needs a name}"; SUPERVISOR_SELECTION_SET=1; shift 2 ;;
     --supervisor=*)   PROVIDER="${1#*=}"; SUPERVISOR_SELECTION_SET=1; shift ;;
@@ -226,9 +224,10 @@ if [[ ! "$WORKER_PROVIDER" =~ ^(claude|codex|deepseek)$ ]]; then
 fi
 # "main" survives as a legacy alias from before the Rust lane existed, when
 # the TypeScript program supervisor was the unqualified "main" lane.
-[[ "$LANE" == "main" ]] && LANE="ts"
-if [[ ! "$LANE" =~ ^(ts|integration|animation|rust)$ ]]; then
-  echo "run-supervisor: unsupported lane '$LANE' (expected ts, integration, animation, or rust)" >&2
+# Integration is main-roadmap work; retain the previous flag as a compatibility alias.
+[[ "$LANE" == "main" || "$LANE" == "integration" ]] && LANE="ts"
+if [[ ! "$LANE" =~ ^(ts|animation|rust)$ ]]; then
+  echo "run-supervisor: unsupported lane '$LANE' (expected ts, animation, or rust)" >&2
   exit 2
 fi
 REQUIRE_LANE_UNATTENDED_INSTRUCTIONS="${POKEBENCH_REQUIRE_LANE_UNATTENDED_INSTRUCTIONS:-0}"
@@ -277,14 +276,13 @@ if [[ "$LANE" =~ ^(animation|rust)$ && "$PRINT_CONFIG" != "1" \
   fi
 fi
 
-if [[ "$LANE" == "integration" && "$PRINT_CONFIG" != "1" \
+if [[ "$LANE" == "ts" && "$PRINT_CONFIG" != "1" \
       && "$(git rev-parse --abbrev-ref HEAD)" != "master" ]]; then
-  echo "run-supervisor: integration must run from the primary local master checkout" >&2
+  echo "run-supervisor: main must run from the primary local master checkout" >&2
   exit 2
 fi
 
 DEFERRED_FILE="DEFERRED.md"
-[[ "$LANE" == "integration" ]] && DEFERRED_FILE="ANIMATION_INTEGRATION_DEFERRED.md"
 [[ "$LANE" == "animation" ]] && DEFERRED_FILE="ANIMATION_DEFERRED.md"
 [[ "$LANE" == "rust" ]] && DEFERRED_FILE="RUST_DEFERRED.md"
 DEFERRED_POLICY="${POKEBENCH_UNATTENDED_DEFERRED_POLICY:-block}"
@@ -353,7 +351,7 @@ esac
 # deliberately enter disposable worker worktrees while verifying them, so make
 # every later Bash call start from this supervisor's launch directory again.
 # For the animation/rust lanes that launch directory is the lane worktree; for
-# the ts/integration lanes it is this workspace root.
+# the ts lane it is this workspace root.
 SUPERVISOR_SHELL_CWD_POLICY=per-command
 if [[ "$PROVIDER" == "claude" ]]; then
   export CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR=1
@@ -439,13 +437,17 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
     WORKER_ROUTING=fixed
   fi
   echo "supervisor_lane=$LANE"
+  if [[ "$HEADLESS" == "1" ]]; then
+    echo "supervisor_mode=headless"
+  else
+    echo "supervisor_mode=interactive"
+  fi
   case "$LANE" in
-    integration) echo "supervisor_guide=ANIMATION_INTEGRATION_SUPERVISOR.md" ;;
     animation) echo "supervisor_guide=ANIMATION_SUPERVISOR.md" ;;
     rust) echo "supervisor_guide=RUST_SUPERVISOR.md" ;;
     *) echo "supervisor_guide=SUPERVISOR.md" ;;
   esac
-  if [[ "$LANE" == "animation" || "$LANE" == "integration" ]]; then
+  if [[ "$LANE" == "animation" ]]; then
     echo "oracle_profile=battle-scene-on"
   else
     echo "oracle_profile=battle-scene-off"
@@ -493,7 +495,7 @@ ANIMATION_ORACLE_URL="${POKEBENCH_ANIMATION_ORACLE_URL:-http://127.0.0.1:8012}"
 # is safe. The animation supervisor never needs the OFF profile; the rust
 # supervisor never needs the ON profile (its differential targets are the
 # OFF-path fixtures).
-if [[ "$LANE" == "ts" || "$LANE" == "integration" || "$LANE" == "rust" ]]; then
+if [[ "$LANE" == "ts" || "$LANE" == "rust" ]]; then
   pokebench_ensure_oracle_profile \
     "$HARNESS_ROOT" battle-scene-off "$MAIN_ORACLE_URL" \
     /tmp/emerald-factory-oracle-off.log
@@ -507,7 +509,7 @@ if [[ "$LANE" != "rust" ]]; then
 fi
 export POKEBENCH_MAIN_ORACLE_URL="$MAIN_ORACLE_URL"
 export POKEBENCH_ANIMATION_ORACLE_URL="$ANIMATION_ORACLE_URL"
-if [[ "$LANE" == "animation" || "$LANE" == "integration" ]]; then
+if [[ "$LANE" == "animation" ]]; then
   # The animation supervisor's own bin/oracle/probe calls default to the ON
   # profile it verifies against.
   export POKEBENCH_ORACLE_URL="$ANIMATION_ORACLE_URL"
@@ -549,18 +551,16 @@ if [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
   WORKER_LAUNCH_NOTE+=" When invoking the launcher from Claude's Bash tool, disable that tool's host sandbox so OpenCode can read its credential store; OpenCode itself runs headlessly with --auto inside the selected worker lane/worktree."
 fi
 
-if [[ "$LANE" == "integration" ]]; then
-  DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE}"
-  PROMPT="You are the PLAYABLE ANIMATION INTEGRATION supervisor for this repo, running locally on master. Read ANIMATION_INTEGRATION_SUPERVISOR.md, AGENTS.md, LOCAL_SETUP.md, ANIMATION_VERIFICATION.md, and ANIMATION_INTEGRATION_PROGRESS.md before dispatching anything. Establish the baseline under ANIMATION_VERIFICATION.md, reusing the recorded production receipt when code and environment are unchanged. First review the unfinished codex/recovered-physical2-20261002 snapshot, then drive bounded integration batches via ./tools/run-subagent.sh --lane integration --base HEAD from this tree, one worker at a time. Independently verify each central source/framebuffer claim, merge only green worker changes into master, preserve logs/evidence and remove retired temporary worktrees after acceptance. Keep outcomes, RNG, damage, turn order and facility progression intact. Refresh and verify the local browser preview after accepted batches. Your ledger is ANIMATION_INTEGRATION_PROGRESS.md; your deferral file is ANIMATION_INTEGRATION_DEFERRED.md. Do not dispatch the exhausted Factory acceptance campaign or the separate Rust rewrite. hcloud has been deleted; all implementation and heavy execution belong on this Mac. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with master committed and green. ${CONTINUITY_NOTE}"
-elif [[ "$LANE" == "rust" ]]; then
+if [[ "$LANE" == "rust" ]]; then
   DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE}"
   PROMPT="You are the RUST-REWRITE supervisor for this repo. Read RUST_SUPERVISOR.md, AGENTS.md, and RUST_PROGRESS.md before dispatching anything. ${LANE_UNATTENDED_NOTE} You are in the persistent rust-main worktree and you are that branch's only writer: begin by merging master in (git merge --no-edit master), rerun cargo test and the wasm32 release build (see core-rs/README.md for the explicit toolchain PATH — cargo is not on the login PATH) as your baseline, then drive one bounded port step at a time via ./tools/run-subagent.sh --lane rust from this tree — one worker at a time, rust lane only, verify each result yourself, merge each verified worker branch into rust-main from this tree, and never write master or another lane's docs (PROGRESS.md/ISSUES.md/ROADMAP.md/DEFERRED.md/ANIMATION_*). Your territory is core-rs/ plus only the adapter files RUST_SUPERVISOR.md milestone M2 allows; the TypeScript engine stays canonical — never edit src/ or tests/ outside that allowance, and rerun npm test and npm run build before any fold that touches them. Your ledger is RUST_PROGRESS.md; your deferral file is RUST_DEFERRED.md. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with rust-main committed and green so the main supervisor's fold stays boring. ${CONTINUITY_NOTE}"
 elif [[ "$LANE" == "animation" ]]; then
   DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE}"
   PROMPT="You are the ANIMATION supervisor for this run. Read ANIMATION_SUPERVISOR.md, AGENTS.md, ANIMATION_VERIFICATION.md, and the current ANIMATION_PROGRESS.md checkpoint before dispatching anything. ${LANE_UNATTENDED_NOTE} You are in the persistent animation-main worktree and you are that branch's only writer: begin by merging master in (git merge --no-edit master), establish the baseline under ANIMATION_VERIFICATION.md (reuse a recorded green production baseline plus scoped receipts for tooling/evidence-only deltas; run full gates if production code or relevant environment changed), then drive one bounded animation coverage step at a time via ./tools/run-subagent.sh --lane animation from this tree — one worker at a time, animation lane only, verify each result yourself, merge each verified worker branch into animation-main from this tree, and never write master or the main program's docs (PROGRESS.md/ISSUES.md/ROADMAP.md/DEFERRED.md). Your ledger is ANIMATION_PROGRESS.md; your deferral file is ANIMATION_DEFERRED.md. The coverage report derives ready work from every unfinished Factory move: Level 50 first, then Open-only Outrage, which the user explicitly added to this campaign. Blocked Level 50 moves do not prevent dispatching ready Outrage work; the 77 outside-Factory moves are outside this campaign scope. The manual queue only sets priority within a tier and an empty manual list is not an authorization boundary. Dispatch ranked ready work, recording any genuine blocker with evidence and a resume condition. Only when no ready work remains may an unchanged session exit under ANIMATION_VERIFICATION.md without repeating full gates or writing a no-change ledger commit. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with animation-main committed and green so the main supervisor's fold stays boring. ${CONTINUITY_NOTE}"
 else
-  DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE} The launcher offers the shared-tree ts lane and side-worktree lanes; use parallel lanes when their ownership is genuinely disjoint. The animation program belongs to the separate animation supervisor (ANIMATION_SUPERVISOR.md) and the Rust rewrite belongs to the separate rust supervisor (RUST_SUPERVISOR.md) — never brief or launch animation- or rust-lane workers from this session."
-  PROMPT="You are the supervisor for this run. Read SUPERVISOR.md, AGENTS.md, and the authoritative reset at the top of ROADMAP S8 before dispatching anything. The old canonical Battle-2 turn march is stopped: drive the generic seven-battle round controller and presentation seam against the Battle Scene OFF oracle. ANIMATION_UNATTENDED.md and RUST_UNATTENDED.md are temporary campaign policy: when folding a lane, exclude/remove those files from the merge result so they never land on master. During your orient step, if branch animation-main or rust-main has commits master lacks (git log --oneline master..animation-main; git log --oneline master..rust-main), fold each: merge the lane branch into master from the main tree, rerun npm test and npm run build on the union (when rust-main is folded, also per core-rs/README.md: cargo test, rebuild the wasm artifact with core-rs/build-wasm.sh, and rerun the parity suites with POKEBENCH_ENGINE=wasm — they silently skip their wasm half when the artifact is missing, so a green npm test alone does not exercise the wasm boundary), and record the fold in your PROGRESS.md entry. Delegate bounded steps via ./tools/run-subagent.sh, verify each result yourself, and continue, fix, or defer a genuinely unresolved decision without interrupting the session. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${CONTINUITY_NOTE}"
+  DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE} Choose a worker lane from the ownership contract and active roadmap stage. Integration workers use --lane integration for temporary worktree isolation and Battle Scene ON validation; this is an internal worker contract, not a separate supervisor program. Do not dispatch independent Factory or Rust campaigns unless the current roadmap explicitly calls for them."
+  PROMPT="You are the main supervisor for this repo, running locally on master. Read SUPERVISOR.md, AGENTS.md, LOCAL_SETUP.md, the latest PROGRESS.md, and ROADMAP.md's current execution priority before dispatching. Let the current roadmap stage determine the work, its linked detailed guide, progress records, and acceptance criteria; do not substitute a historical hardcoded mission. Reuse valid unchanged production receipts under the stage's verification policy. Delegate bounded steps via ./tools/run-subagent.sh, independently verify the central claims, fold only green changes into master, and continue useful in-scope work. Keep gameplay outcomes, RNG, damage, turn order and facility progression intact. Preserve logs/evidence before removing temporary worker worktrees. All work is local; hcloud has been deleted. Your main handoff is PROGRESS.md; retain stage-specific evidence and progress where the roadmap directs. Material user decisions go in DEFERRED.md. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with master committed and green. ${CONTINUITY_NOTE}"
+
 fi
 
 if [[ "$HEADLESS" == "1" ]]; then
