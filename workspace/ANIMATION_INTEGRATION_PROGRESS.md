@@ -18,7 +18,10 @@
   smoke and typecheck pass. Same-production full pair reused. Receipt
   `tools/integration/fixtures/status-palette-supervisor-receipt.json`; all
   source/gate/log evidence copied into primary validation.
-- Preview: refreshing next; last verified service `f3531d7b3` remains recorded.
+- Preview: <http://127.0.0.1:5191/> serves `fe47c9afb`: eight canvas/PNG
+  hashes, exports, ON -> OFF -> ON and no browser/console errors pass.
+  Receipt `playable-preview-fe47c9afb-receipt.json`. Accepted worktree removed;
+  worker ref/logs and all needed raw evidence retained.
 - Next: source-owned ordinary party/B-cancel return from this corrected base.
   Initial unknown/status histories must stay unknown. No material choice deferred.
 
