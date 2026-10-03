@@ -1,0 +1,160 @@
+{
+  "schema": "known-entry-sprite-allocator-provider-verification/v1",
+  "testedCommit": "611f9f48799c566f6ac2d9ad55de09e174da1ad9",
+  "testedTree": "30c7decd9aec0529fac4264d80b55f3416346204",
+  "probeSha256": "0b4ce615c54d72bba3d3c5da5d441aee9c0a9eb3442faee11826446ae7461cd5",
+  "verifierSha256": "be2bc79b131ace9ee89d4ed73b661442c555fcfce06ed386fbc4827689e0cf0b",
+  "referenceSha256": {
+    "pokeemerald.gba": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+    "pokeemerald.elf": "3a8aa584d7985c5a74ab10bb6eebd0c41b7c314ba8e423266727563c37f7727b",
+    "pokeemerald.map": "5c83d750d3a26480b849bc6af9c0d2382b5c31dc2a16d5eccf8096c4ac58e051"
+  },
+  "sourceSha256": {
+    "src/sprite.c": "795084634d44883629dd78ed4e3b90f07b2bf5b6cd5f312f14f121ea76f380ce",
+    "src/battle_interface.c": "f10584462a2538d9023928dead78f1acd647037bacd5841be885a014a34af32d",
+    "src/battle_gfx_sfx_util.c": "510be3aa641aff55b336842230247e0eac19934842fece92cd05f3f223dba7fe",
+    "src/battle_controller_player.c": "c4234153a31d54bd97beb6432ee3ff398fa7b3f12ae94a3453e4ef2d662192d9",
+    "src/battle_controller_opponent.c": "6cb600e2c78dbbbe223bab43124ecece2de502d3bee70388864b1d45633f5932",
+    "src/pokeball.c": "f57f6692f821aa2e871ea68138157f3a665d3a204b6966b43dc9691448845d8d",
+    "src/util.c": "fb069e79a4b376299016e78d252a8d039efe612a797f9f0e67dceffa7a734496"
+  },
+  "runs": [
+    {
+      "name": "player-exeggcute-a",
+      "rawSha256": "80aad38d8b2374431188f5064abed72748a4a216689e7080b8d08718a3a35f52",
+      "calls": 82,
+      "cursorStep": 2041
+    },
+    {
+      "name": "player-exeggcute-b",
+      "rawSha256": "80aad38d8b2374431188f5064abed72748a4a216689e7080b8d08718a3a35f52",
+      "calls": 82,
+      "cursorStep": 2041
+    },
+    {
+      "name": "opponent-exeggcute-a",
+      "rawSha256": "b438c3c7d80c2617db7658cb8b87b963900cf679598a6bb4977e4429a487e079",
+      "calls": 82,
+      "cursorStep": 2041
+    },
+    {
+      "name": "opponent-exeggcute-b",
+      "rawSha256": "b438c3c7d80c2617db7658cb8b87b963900cf679598a6bb4977e4429a487e079",
+      "calls": 82,
+      "cursorStep": 2041
+    },
+    {
+      "name": "player-slowpoke-a",
+      "rawSha256": "513694f0806f360564ca8723d804be35ecd54700910b444d31a06c004767c818",
+      "calls": 84,
+      "cursorStep": 2041
+    },
+    {
+      "name": "player-slowpoke-b",
+      "rawSha256": "513694f0806f360564ca8723d804be35ecd54700910b444d31a06c004767c818",
+      "calls": 84,
+      "cursorStep": 2041
+    }
+  ],
+  "provider": {
+    "route": "battle-lab-ordinary-singles",
+    "commandPromptSlots": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+    ],
+    "firstMoveSlots": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+    ],
+    "owners": [
+      {
+        "slot": 0,
+        "owner": {
+          "kind": "healthbox-main",
+          "side": "player"
+        }
+      },
+      {
+        "slot": 1,
+        "owner": {
+          "kind": "healthbox-main",
+          "side": "opponent"
+        }
+      },
+      {
+        "slot": 2,
+        "owner": {
+          "kind": "enemy-shadow",
+          "side": "opponent"
+        }
+      },
+      {
+        "slot": 6,
+        "owner": {
+          "kind": "battler",
+          "side": "player"
+        }
+      },
+      {
+        "slot": 8,
+        "owner": {
+          "kind": "battler",
+          "side": "opponent"
+        }
+      },
+      {
+        "slot": 60,
+        "owner": {
+          "kind": "healthbar",
+          "side": "opponent"
+        }
+      },
+      {
+        "slot": 61,
+        "owner": {
+          "kind": "healthbox-other",
+          "side": "opponent"
+        }
+      },
+      {
+        "slot": 62,
+        "owner": {
+          "kind": "healthbar",
+          "side": "player"
+        }
+      },
+      {
+        "slot": 63,
+        "owner": {
+          "kind": "healthbox-other",
+          "side": "player"
+        }
+      }
+    ]
+  },
+  "historyBound": "fresh ordinary BattleLab singles entry before first legal move; unknown switch, summary, substitute, transform, and alternate entry paths excluded",
+  "verdict": "six fresh stock-ROM runs reproduce exact allocator call order and the pure known-entry provider topology before the first legal move",
+  "unsupported": [
+    "unknown entry",
+    "switch",
+    "in-battle summary",
+    "substitute",
+    "transform"
+  ]
+}

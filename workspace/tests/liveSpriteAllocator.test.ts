@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import {
   allocateEndLiveSprite, allocateFirstLiveSprite, createLiveSpriteAllocatorHost,
   destroyLiveSprite, invalidateLiveSpriteAllocatorHost, liveSpriteSlotForOwner,
@@ -76,5 +78,30 @@ describe("known ordinary-singles entry sprite provider", () => {
     expect(liveSpriteSlotForOwner(firstMove, { kind: "trainer", side: "player" })).toBeUndefined();
     expect(firstMove.occupants.some(({ owner }) => owner.kind === "ball-particle")).toBe(false);
     expect(firstMove.occupants.some(({ owner }) => owner.kind === "controller")).toBe(false);
+  });
+
+  it("pins the six-run exact-call receipt and source identities", () => {
+    const receipt = JSON.parse(readFileSync(
+      "tools/integration/fixtures/known-entry-sprite-allocator-provider-receipt.json", "utf8",
+    ));
+    const sha = (path: string) => createHash("sha256").update(readFileSync(path)).digest("hex");
+    expect(receipt.schema).toBe("known-entry-sprite-allocator-provider-verification/v1");
+    expect(receipt.runs).toHaveLength(6);
+    expect(receipt.runs.map((run: { calls: number }) => run.calls)).toEqual([82, 82, 82, 82, 84, 84]);
+    expect(receipt.probeSha256).toBe(sha("tools/compare/lightScreenAllocatorCallProbe.py"));
+    expect(receipt.verifierSha256).toBe(sha("tools/integration/verifyKnownEntrySpriteAllocator.ts"));
+    for (const [filename, digest] of Object.entries(receipt.referenceSha256)) {
+      expect(sha(`reference/pokeemerald/${filename}`)).toBe(digest);
+    }
+    for (const [filename, digest] of Object.entries(receipt.sourceSha256)) {
+      expect(sha(`reference/pokeemerald/${filename}`)).toBe(digest);
+    }
+    const provider = createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles");
+    expect(receipt.provider.commandPromptSlots).toEqual(provider.commandPrompt.occupants.map(({ slot }) => slot));
+    expect(receipt.provider.firstMoveSlots).toEqual(provider.firstMove.occupants.map(({ slot }) => slot));
+    expect(receipt.provider.owners).toEqual(provider.firstMove.occupants);
+    expect(receipt.unsupported).toEqual([
+      "unknown entry", "switch", "in-battle summary", "substitute", "transform",
+    ]);
   });
 });
