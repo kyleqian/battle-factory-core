@@ -15,6 +15,10 @@ let fakeBin = "";
 const PROFILE_ENV_KEYS = [
   "MODEL",
   "SUPERVISOR_AGENT",
+  "SUPERVISOR_LANE",
+  "WORKER_LANE",
+  "WORKTREE",
+  "HEADLESS",
   "SUB_AGENT",
   "SUPERVISOR_MODEL",
   "SUPERVISOR_REASONING_EFFORT",
@@ -74,25 +78,87 @@ afterAll(() => {
 });
 
 describe("Supervisor and worker launcher profiles", () => {
-  it("keeps the default Claude-only profile unchanged", () => {
-    const result = runLauncher("run-supervisor.sh", ["--print-config"]);
+  it("routes integration to its own guide and ON oracle without creating a worktree", () => {
+    const before = spawnSync("git", ["worktree", "list", "--porcelain"], {
+      cwd: RUN_ROOT, encoding: "utf8",
+    });
+    const supervisor = runLauncher("run-supervisor.sh", [
+      "--lane", "integration", "--print-config",
+    ]);
+    const worker = runLauncher("tools/run-subagent.sh", [
+      "--lane", "integration", "--sub-agent", "codex", "--print-config",
+    ]);
+    expect(supervisor.status).toBe(0);
+    expect(configFrom(supervisor.stdout)).toMatchObject({
+      supervisor_lane: "integration",
+      supervisor_guide: "ANIMATION_INTEGRATION_SUPERVISOR.md",
+      oracle_profile: "battle-scene-on",
+      supervisor_model: "gpt-6.1-sol",
+      supervisor_effort: "high",
+      worker_routing: "tiered",
+    });
+    expect(worker.status).toBe(0);
+    expect(configFrom(worker.stdout)).toMatchObject({
+      worker_lane: "integration",
+      oracle_profile: "battle-scene-on",
+      worker_model: "gpt-5.6-sol",
+    });
+    const after = spawnSync("git", ["worktree", "list", "--porcelain"], {
+      cwd: RUN_ROOT, encoding: "utf8",
+    });
+    expect(before.status).toBe(0);
+    expect(after.status).toBe(0);
+    expect(after.stdout).toBe(before.stdout);
+  });
 
+  it("keeps explicit Claude supervision available", () => {
+    const result = runLauncher("run-supervisor.sh", [
+      "--supervisor", "claude", "--print-config",
+    ]);
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
       supervisor: "claude",
       supervisor_model: "claude-fable-5",
-      supervisor_effort: "n/a",
-      supervisor_shell_cwd: "project-root-reset",
-      max_mode: "0",
       sub_agent: "claude",
-      worker_launch_mode: "background",
-      worker_routing: "fixed",
       worker_model: "claude-sonnet-5",
-      worker_effort: "n/a",
     });
   });
 
-  it("keeps the ordinary Codex supervisor profile unchanged", () => {
+  it("scopes the Sol 6.1 upgrade to supervisors and permits explicit legacy supervisors", () => {
+    const legacy = runLauncher("run-supervisor.sh", [
+      "--model", "gpt-5.6-sol", "--print-config",
+    ]);
+    const worker = runLauncher("tools/run-subagent.sh", [
+      "--sub-agent", "codex", "--model", "gpt-6.1-sol", "--print-config",
+    ]);
+    expect(legacy.status).toBe(0);
+    expect(configFrom(legacy.stdout)).toMatchObject({
+      supervisor_model: "gpt-5.6-sol",
+      supervisor_effort: "high",
+    });
+    expect(worker.status).toBe(2);
+    expect(worker.stderr).toContain("unsupported ordinary Codex worker model");
+  });
+
+  it("defaults to a Sol 6.1 supervisor and preserves tiered worker routing", () => {
+    const result = runLauncher("run-supervisor.sh", ["--print-config"]);
+
+    expect(result.status).toBe(0);
+    expect(configFrom(result.stdout)).toMatchObject({
+      supervisor: "codex",
+      supervisor_model: "gpt-6.1-sol",
+      supervisor_effort: "high",
+      supervisor_shell_cwd: "per-command",
+      max_mode: "0",
+      sub_agent: "codex",
+      worker_launch_mode: "managed",
+      worker_routing: "tiered",
+      worker_model: "gpt-5.6-sol",
+      worker_effort: "high",
+    });
+  });
+
+  it("uses Sol 6.1 when Codex is explicitly selected", () => {
     const result = runLauncher("run-supervisor.sh", [
       "--supervisor",
       "Codex",
@@ -102,7 +168,7 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
       supervisor: "codex",
-      supervisor_model: "gpt-5.6-sol",
+      supervisor_model: "gpt-6.1-sol",
       supervisor_effort: "high",
       supervisor_shell_cwd: "per-command",
       max_mode: "0",
@@ -154,6 +220,8 @@ describe("Supervisor and worker launcher profiles", () => {
     "resolves the '%s' Claude model alias on --sub-agent to fixed claude/%s workers",
     (alias, model) => {
       const result = runLauncher("run-supervisor.sh", [
+        "-S",
+        "claude",
         "-s",
         alias,
         "--print-config",
@@ -395,7 +463,7 @@ describe("Supervisor and worker launcher profiles", () => {
   });
 
   it.each([
-    ["short flag", ["-s", "DeepSeek"]],
+    ["short flag", ["-S", "Claude", "-s", "DeepSeek"]],
     ["long flag", ["--supervisor", "claude", "--sub-agent", "deepseek"]],
   ])(
     "%s selects a Fable supervisor with fixed DeepSeek V4 Flash/OpenCode workers",
@@ -428,7 +496,7 @@ describe("Supervisor and worker launcher profiles", () => {
     const result = runLauncher(
       "run-supervisor.sh",
       ["--print-config"],
-      { SUB_AGENT: "DeepSeek" },
+      { SUPERVISOR_AGENT: "Claude", SUB_AGENT: "DeepSeek" },
     );
 
     expect(result.status).toBe(0);
@@ -461,7 +529,7 @@ describe("Supervisor and worker launcher profiles", () => {
   it("forces Claude's Bash tool back to the supervisor root between calls", () => {
     const result = runLauncher(
       "run-supervisor.sh",
-      ["--print-config"],
+      ["--supervisor", "claude", "--print-config"],
       { CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR: "0" },
     );
 
@@ -482,7 +550,7 @@ describe("Supervisor and worker launcher profiles", () => {
       expect(result.status).toBe(0);
       expect(configFrom(result.stdout)).toMatchObject({
         supervisor: "codex",
-        supervisor_model: "gpt-5.6-sol",
+        supervisor_model: "gpt-6.1-sol",
         supervisor_effort: "ultra",
         max_mode: "1",
         sub_agent: "codex",
@@ -603,7 +671,7 @@ describe("Supervisor and worker launcher profiles", () => {
     );
     expect(codexSupervisor.status).toBe(2);
     expect(codexSupervisor.stderr).toContain(
-      "ordinary Codex model 'gpt-5.6-sol' requires effort 'high'",
+      "ordinary Codex model 'gpt-6.1-sol' requires effort 'high'",
     );
     expect(mixedWorkerOverride.status).toBe(2);
     expect(mixedWorkerOverride.stderr).toContain(
@@ -809,7 +877,7 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(configFrom(result.stdout)).toMatchObject({
       supervisor: "codex",
       sub_agent: "deepseek",
-      supervisor_model: "gpt-5.6-sol",
+      supervisor_model: "gpt-6.1-sol",
       worker_model: "deepseek/deepseek-v4-flash",
       worker_runtime: "opencode",
     });

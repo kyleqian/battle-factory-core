@@ -27,15 +27,15 @@
 #     -w, --worktree        alias for --lane side
 #         --animation-worktree
 #                           alias for --lane animation
-#         --lane NAME       ts, side, animation, or rust
+#         --lane NAME       ts, side, animation, integration, or rust
 #         --log FILE        agent event log path
 #         --brief-file FILE read the step brief verbatim from a file
 #         --read-only       audit only; require a clean tree but no commit
 #     -h, --help            show this help
 #
-# Concurrency is capped at THREE workers, mechanically: main, side, and
-# animation. Side and animation each use a fresh worktree. Main and side use
-# the Battle Scene OFF oracle; animation uses the Battle Scene ON oracle. Each
+# Each lane permits one worker mechanically. Non-main lanes use fresh
+# worktrees. Main/side/rust use Battle Scene OFF; animation/integration use
+# Battle Scene ON. The integration supervisor serializes its workers. Each
 # lane is a pidfile in /tmp/pokebench-worker-lanes-<run>/; a second launch into
 # a live lane is refused (exit 4). Worktree workers are contract-bound NOT to
 # touch PROGRESS.md/ISSUES.md — the supervisor folds docs into each merge. The
@@ -82,7 +82,7 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -w, --worktree        alias for --lane side (also --side-worktree)
       --animation-worktree
                         alias for --lane animation
-  -l, --lane NAME       ts, side, animation, or rust ("main" is a legacy
+  -l, --lane NAME       ts, side, animation, integration, or rust ("main" is a legacy
                         alias for ts, the shared tree). Non-ts lanes use
                         fresh worktrees and must not touch shared docs. A
                         trailing "-worktree"/"-lane" is accepted and stripped.
@@ -103,8 +103,7 @@ POKEBENCH_CODEX_MAX_MODE, OPENCODE_BIN. Legacy MODEL remains supported for
 direct worker launches; supervisors pass their selection internally.
 Exits with the worker's status; 42 means an account usage/rate limit stopped it
 (either this worker's own, or a sibling's — a 42 in one lane cancels the others).
-Exit 4 means the requested lane already has a live worker (max 4 concurrent:
-one each in ts, side, animation, and rust).
+Exit 4 means the requested lane already has a live worker (one per lane).
 Exit 5 means a Codex worker violated its postflight contract (clean and
 committed for implementation work; clean and uncommitted for read-only work).
 EOF
@@ -136,7 +135,7 @@ while [[ $# -gt 0 ]]; do
     --cap-minutes=*)  CAP_MINUTES="${1#*=}"; shift ;;
     -w|--worktree|--side-worktree|--side-lane) LANE="side"; shift ;;
     --animation-worktree|--animation-lane) LANE="animation"; shift ;;
-    -l|--lane)        LANE="${2:?--lane needs ts, side, animation, or rust}"; shift 2 ;;
+    -l|--lane)        LANE="${2:?--lane needs ts, side, animation, integration, or rust}"; shift 2 ;;
     --lane=*)         LANE="${1#*=}"; shift ;;
     --base)           WT_BASE_REF="${2:?--base needs a git ref}"; shift 2 ;;
     --base=*)         WT_BASE_REF="${1#*=}"; shift ;;
@@ -252,12 +251,12 @@ if [[ ! "$PROVIDER" =~ ^(claude|codex|deepseek)$ ]]; then
   echo "run-subagent: unsupported sub-agent '$PROVIDER' (expected claude, codex, or deepseek)" >&2
   exit 2
 fi
-if [[ ! "$LANE" =~ ^(ts|side|animation|rust)$ ]]; then
-  echo "run-subagent: unsupported lane '$LANE' (expected ts, side, animation, or rust)" >&2
+if [[ ! "$LANE" =~ ^(ts|side|animation|integration|rust)$ ]]; then
+  echo "run-subagent: unsupported lane '$LANE' (expected ts, side, animation, integration, or rust)" >&2
   exit 2
 fi
 if [[ -n "$WT_BASE_REF" && "$LANE" == "ts" ]]; then
-  echo "run-subagent: --base only applies to worktree lanes (side/animation/rust); the ts lane runs in the shared tree at HEAD" >&2
+  echo "run-subagent: --base only applies to worktree lanes (side/animation/integration/rust); the ts lane runs in the shared tree at HEAD" >&2
   exit 2
 fi
 case "$PROVIDER" in
@@ -357,7 +356,7 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
   else
     echo "worker_mode=implementation"
   fi
-  if [[ "$LANE" == "animation" ]]; then
+  if [[ "$LANE" == "animation" || "$LANE" == "integration" ]]; then
     echo "oracle_profile=battle-scene-on"
   else
     echo "oracle_profile=battle-scene-off"
@@ -381,7 +380,7 @@ LANE_FILE="$LANE_DIR/$LANE.pid"
 if [[ -f "$LANE_FILE" ]]; then
   read -r other_launcher _other_agent < "$LANE_FILE" || true
   if [[ -n "${other_launcher:-}" ]] && kill -0 "$other_launcher" 2>/dev/null; then
-    echo "run-subagent: the $LANE lane already has a live worker (launcher pid $other_launcher) — max 3 concurrent workers, one per lane. Wait for it or use another lane." >&2
+    echo "run-subagent: the $LANE lane already has a live worker (launcher pid $other_launcher) — one per lane. Wait for it or use another lane." >&2
     exit 4
   fi
 fi
@@ -482,7 +481,7 @@ HARNESS_ROOT="$(pokebench_resolve_harness_root)"
 export POKEBENCH_HARNESS_ROOT="$HARNESS_ROOT"
 MAIN_ORACLE_URL="${POKEBENCH_MAIN_ORACLE_URL:-http://127.0.0.1:8014}"
 ANIMATION_ORACLE_URL="${POKEBENCH_ANIMATION_ORACLE_URL:-http://127.0.0.1:8012}"
-if [[ "$LANE" == "animation" ]]; then
+if [[ "$LANE" == "animation" || "$LANE" == "integration" ]]; then
   ORACLE_URL="$ANIMATION_ORACLE_URL"
   ORACLE_PROFILE="battle-scene-on"
 else
@@ -544,7 +543,7 @@ else
     # The Rust supervisor prompt separately requires npm test/build before a
     # fold that actually touches its narrowly allowed adapter surface.
     WORKTREE_FINISH_REQUIREMENT="Before finishing: cargo test and cargo build -p factory-wasm --target wasm32-unknown-unknown --release green, work committed on ${WT_BRANCH}."
-  elif [[ "$LANE" == "animation" ]]; then
+  elif [[ "$LANE" == "animation" || "$LANE" == "integration" ]]; then
     WORKTREE_FINISH_REQUIREMENT="Before finishing: follow ANIMATION_VERIFICATION.md. Evidence/test/tooling-only steps use all affected verifier/test and boundary/inventory gates; production/configuration changes additionally require full npm test and npm run build. Record the tested code commit/tree and outcomes, and commit on ${WT_BRANCH}. Docs-only steps need diff/ledger checks."
   else
     WORKTREE_FINISH_REQUIREMENT="Before finishing: npm test and npm run build green, work committed on ${WT_BRANCH}."
@@ -555,6 +554,8 @@ fi
 if [[ "$IS_WORKTREE" == "1" ]]; then
   if [[ "$READ_ONLY" == "1" ]]; then
     LANE_CONTRACT="Use the selected ${ORACLE_PROFILE} oracle only for read-only validation relevant to the assigned audit."
+  elif [[ "$LANE" == "integration" ]]; then
+    LANE_CONTRACT="This is the playable animation integration lane. Read ANIMATION_INTEGRATION_BRIEF.md, ANIMATION_INTEGRATION_PROGRESS.md and ANIMATION_VERIFICATION.md. The current local migration mandate supersedes historical hcloud-only instructions. Work only on the assigned live renderer, adapter, presentation seam, fixtures and tests; necessary src/engine changes are authorized by the integration brief. Preserve gameplay outcomes, RNG, damage, turn order and facility state. Use the Battle Scene ON oracle; named OFF service is available for logical parity controls. Do not edit Factory acceptance ledgers (ANIMATION_PROGRESS.md / ANIMATION_COVERAGE.json), integration supervisor ledgers, or other program ledgers. A live adapter is not whole-playable arbitrary-history exactness. Return complete proof and commit/tree identities to the supervisor."
   elif [[ "$LANE" == "animation" ]]; then
     LANE_CONTRACT="This is the animation/presentation lane. Read the current ANIMATION_PROGRESS.md entry and ANIMATION_VERIFICATION.md, and run npm run animation:coverage before changing code. Work the assigned non-exclusive component track behind the battle presentation seam: prove one representative, reuse the source-derived components, and batch-check the named siblings. Moves remain independent acceptance units; shared code alone never promotes coverage. Do not own facility progression or shared battle state. Use the Battle Scene ON oracle. You own ANIMATION_PROGRESS.md, ANIMATION_COVERAGE.json, src/animation/**, and tests/animation/** (plus the animation comparators/fixtures under tools/compare/); the only engine files you may touch are battleScene.ts and core.ts, and only their animation draw/wiring cases — tests/animation/animationBoundaryRatchet.test.ts pins the import boundary and widening its lists needs brief-level justification. A canonical window alone is partial; exact requires a complete dense window through the shared seam and every evidence-required variant."
   else

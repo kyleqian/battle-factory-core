@@ -15,7 +15,7 @@ the session's compute. You run rarely and think hard when you do.
 The launcher selects the two agent roles independently:
 
 - `./run-supervisor.sh` — Claude Fable supervisor with Claude Sonnet workers;
-- `./run-supervisor.sh -S codex` — Codex Sol/high supervisor with
+- `./run-supervisor.sh -S codex` — Codex Sol 6.1/high supervisor with
   tiered Codex workers;
 - `./run-supervisor.sh -S claude -s codex` — Claude Fable supervisor,
   available through Claude Remote Control in interactive mode, with tiered
@@ -93,9 +93,9 @@ edit.
      work on 2026-08-02; there is no availability probe, so treat it as
      available and fall back only on an actual launch error);
    - `gpt-5.6-sol` / `high` (launcher default).
-   No other ordinary Codex model or effort pairing is allowed. In particular,
+   No other ordinary Codex worker model or effort pairing is allowed. In particular,
    never lower Terra or Luna below max, and never raise Sol above high.
-   A Codex supervisor defaults to Sol/high; a Claude supervisor stays at
+   A Codex supervisor defaults to `gpt-6.1-sol/high`; a Claude supervisor stays at
    Claude Fable while retaining this worker routing.
    `./run-supervisor.sh --max-mode` remains the separate all-Sol
    profile: the supervisor runs Sol/ultra, every worker is locked to Sol, and

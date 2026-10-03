@@ -9,3 +9,11 @@ pokebench_codex_ordinary_effort() {
     *) return 1 ;;
   esac
 }
+
+# Supervisor upgrades are independent of the established worker matrix.
+pokebench_codex_supervisor_effort() {
+  case "$1" in
+    gpt-6.1-sol) printf '%s\n' high ;;
+    *) pokebench_codex_ordinary_effort "$1" ;;
+  esac
+}

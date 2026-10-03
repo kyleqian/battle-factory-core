@@ -21,6 +21,18 @@ server nor the ROM/oracle at runtime. There are 65 live move adapters; the
 Helping Hand is the sole unaccepted Factory move, pending legal doubles staging.
 Whole-playable arbitrary-history framebuffer exactness remains unclaimed.
 
+Resume supervised integration from this workspace with:
+
+```sh
+./run-supervisor.sh --lane integration --headless
+```
+
+The repository supervisor defaults to Codex `gpt-6.1-sol/high`; workers retain
+the established Terra/Luna/Sol routing. Omit `--headless` for an interactive
+supervisor. The default cap is six hours. `--print-config` checks the selected
+profile without starting a run. See `ANIMATION_INTEGRATION_SUPERVISOR.md` for
+worker verification, master ownership, preview refresh and local log retention.
+
 ## Validation and reference services
 
 Node 22, dependencies, the native Rust toolchain, and the wasm32 target are

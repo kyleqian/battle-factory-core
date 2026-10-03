@@ -40,7 +40,10 @@ cap (`--help` lists the flags).
 **Supervised alternative:** **`./run-supervisor.sh`** runs the two-level flow:
 a supervisor plans one increment at a time, delegates it to a capped
 disposable worker via `tools/run-subagent.sh`, and verifies the result between
-steps. Select the two roles independently: `-S` / `--supervisor` accepts
+steps. The repo default is Codex `gpt-6.1-sol/high`. For playable animation
+integration use `./run-supervisor.sh --lane integration` and read
+`ANIMATION_INTEGRATION_SUPERVISOR.md`; it owns local master and uses temporary
+integration worker worktrees. Select the two roles independently: `-S` / `--supervisor` accepts
 Claude or Codex, while `-s` / `--sub-agent` accepts Claude, Codex, or
 DeepSeek. Omitting the sub-agent makes it follow the supervisor; DeepSeek is
 not currently a valid supervisor. Codex workers use the Terra/Luna/Sol routing
@@ -62,6 +65,7 @@ This is the stable ownership contract; current state remains in `PROGRESS.md`.
 | **Main** | Battle Scene OFF | `BattleScenario`, round/battle core, facility progression, presentation seam | Another canonical Battle 2 turn/window after tick 33331 |
 | **Side** | Battle Scene OFF | Source extraction, generated data, staged fixtures, file-disjoint tests | Shared controller interfaces or supervisor ledgers |
 | **Animation** | Battle Scene ON | Move timelines, particles, sprites, presentation assets and traces | Damage, RNG, turn order, round advancement, or facility state |
+| **Integration** | Battle Scene ON | Assigned live adapters, host providers, presentation seam and real-route tests | Gameplay/RNG changes, Factory acceptance or supervisor ledgers |
 
 - Main defines shared interfaces before another lane depends on them.
 - Scene mode may change presentation timing, never logical outcomes or RNG.

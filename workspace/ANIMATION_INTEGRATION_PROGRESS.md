@@ -1,5 +1,23 @@
 # Animation integration progress
 
+## 2026-10-02 — local integration supervisor configured on Sol 6.1
+
+- State: `run-supervisor.sh --lane integration` now supervises primary local
+  master using `gpt-6.1-sol/high`. Temporary integration workers use the ON
+  oracle and retain the existing Terra/Luna/Sol model routing. No production
+  code changed; the 65-adapter production receipt at `b4befb4f7` remains valid.
+- Did: added a dedicated integration supervisor guide and worker contract,
+  removed obsolete cloud execution directions from the active brief, and
+  documented local startup, verification, cleanup and log retention.
+- Gates: shell syntax, typecheck, 4 affected test files / 72 tests, animation
+  boundary/inventory, coverage, asset audit and diff check pass. Real launcher
+  print-config resolves Sol 6.1/high, integration guide and ON profile; Codex
+  CLI is logged in using ChatGPT. Full production gates reused unchanged.
+- Next: start the six-hour local headless run, review the recovered physical2
+  snapshot, then verify and fold bounded adapter/provider batches to master.
+  Preserve explicit arbitrary-history limitations and refresh the local preview
+  only at green production checkpoints.
+
 ## 2026-10-02 — local consolidation complete; hcloud deleted; 65-adapter preview verified
 
 - State: local `master` contains Factory `8fb2afbc1` (276/277 accepted), the 65-adapter integration checkpoint, Rust `5691a4ef4`, the experimental native runtime and local audit research. Production checkpoint `b4befb4f7`; later migration receipts/docs do not alter production. All 407 remote refs and interrupted physical2 edits are recoverable locally. Only the primary checkout remains.
