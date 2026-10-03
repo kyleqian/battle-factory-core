@@ -1,6 +1,6 @@
 import data from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import {
-  allocSpritePalette, createSpritePaletteHost, freeSpritePaletteByTag,
+  allocSpritePalette, createSpritePaletteHost, freeAllSpritePalettes, freeSpritePaletteByTag,
   indexOfSpritePaletteTag, loadPalette, loadSpritePalette, writeFadedPalette, type SpritePaletteHost,
 } from "../animation/spritePaletteHost.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
@@ -15,8 +15,14 @@ export interface LiveMovePaletteHost {
 }
 interface PaletteResource { readonly tag: number; readonly colors: readonly number[]; }
 interface PalettePlan { readonly loads: readonly string[]; readonly taskLoads?: readonly string[]; readonly rainbowNotes?: boolean; }
+interface PartyPaletteLifecycle {
+  readonly menuLoads: readonly PaletteResource[];
+  readonly returnReservedCount: number;
+  readonly returnLoads: readonly PaletteResource[];
+}
 const resources: Readonly<Record<string, PaletteResource>> = data.resources;
 const plans: Readonly<Record<string, PalettePlan>> = data.plans;
+const ordinaryPartyCancel: PartyPaletteLifecycle = data.ordinaryPartyCancel;
 
 /**
  * Source Factory startup retains wireless UI / healthbox tags in banks 4..6.
@@ -36,6 +42,43 @@ export function createLiveMovePaletteHost(): LiveMovePaletteHost {
 
 export function invalidateLiveMovePaletteHost(host: LiveMovePaletteHost): LiveMovePaletteHost {
   return host.historyKnown ? Object.freeze({ ...host, historyKnown: false }) : host;
+}
+
+/**
+ * Replays only the OBJ-palette ownership of ordinary singles party entry and
+ * B-cancel return. ShowPartyMenu frees every tag, then loads held-item,
+ * Pokeball, ailment, and all six icon-table rows. ReshowBattleScreenAfterMenu
+ * frees them again, reserves private battler rows 0..3, and loads healthbox
+ * and bar rows 4..5. Local Factory is not a wireless/link battle, so its
+ * conditional wireless allocation is absent. Private battler reloads do not
+ * touch the retained allocatable rows used by audited move plans.
+ *
+ * An unknown entry remains unknown: this bounded provider proves a transition
+ * from an owned entry host, not recovery of arbitrary preceding graphics.
+ */
+export function returnLiveMovePaletteHostAfterOrdinaryPartyCancel(
+  entry: LiveMovePaletteHost,
+): LiveMovePaletteHost {
+  if (!entry.historyKnown) return invalidateLiveMovePaletteHost(entry);
+  let memory = freeAllSpritePalettes(entry.memory);
+  for (const resource of ordinaryPartyCancel.menuLoads) {
+    const loaded = loadSpritePalette(memory, resource.tag, resource.colors);
+    if (loaded.index === 0xff) throw new Error("party menu exhausted OBJ palette banks");
+    memory = loaded.host;
+  }
+  memory = freeAllSpritePalettes(memory);
+  memory = createSpritePaletteHost(
+    ordinaryPartyCancel.returnReservedCount,
+    memory.tags,
+    memory.unfaded,
+    memory.faded,
+  );
+  for (const resource of ordinaryPartyCancel.returnLoads) {
+    const loaded = loadSpritePalette(memory, resource.tag, resource.colors);
+    if (loaded.index === 0xff) throw new Error("battle return exhausted OBJ palette banks");
+    memory = loaded.host;
+  }
+  return Object.freeze({ memory, historyKnown: true });
 }
 
 /**

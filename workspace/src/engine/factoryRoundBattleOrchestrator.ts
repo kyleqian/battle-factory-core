@@ -1,5 +1,6 @@
 import {
   createLiveMovePaletteHost, invalidateLiveMovePaletteHost, prepareLiveMovePalette,
+  returnLiveMovePaletteHostAfterOrdinaryPartyCancel,
   type LiveMovePaletteHost, type LiveMovePaletteInput,
 } from "./liveMoveAnimationPalette.ts";
 /**
@@ -408,6 +409,12 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
       segmentIndex: number;
       nextEventIndex: number;
     }>;
+    /**
+     * Known entry ownership held only across the ordinary singles party menu.
+     * The active host remains invalid while that menu owns OBJ palettes; only
+     * its B-cancel return may consume this immutable snapshot.
+     */
+    pendingPartyCancelEntryHost?: LiveMovePaletteHost;
   }>;
   /**
    * An opposing locked action may outlive its charge presentation while the
@@ -2493,10 +2500,20 @@ export function advanceFactoryRoundBattleCommand(
       return Object.freeze({ ...state, battlePartySelect: selector });
     }
     if (selector.outcome.kind === "cancel") {
+      const retained = state.liveMovePaletteHost;
+      let liveMovePaletteHost = retained;
+      if (retained?.pendingPartyCancelEntryHost !== undefined) {
+        const { pendingPartyCancelEntryHost, ...withoutPending } = retained;
+        liveMovePaletteHost = Object.freeze({
+          ...withoutPending,
+          host: returnLiveMovePaletteHostAfterOrdinaryPartyCancel(pendingPartyCancelEntryHost),
+        });
+      }
       return Object.freeze({
         ...state,
         battleCommandPresentation: cancelBattleCommandPartySelection(presentation),
         battlePartySelect: null,
+        liveMovePaletteHost,
       });
     }
     // ISSUES #78 close cadence: after the SEND OUT confirm (fixture 963) the
@@ -2527,7 +2544,16 @@ export function advanceFactoryRoundBattleCommand(
     if (transition === null) {
       return fail("legal voluntary party selection did not submit");
     }
-    const cleared = Object.freeze({ ...state, battlePartySelect: null });
+    const retained = state.liveMovePaletteHost;
+    const liveMovePaletteHost = retained?.pendingPartyCancelEntryHost === undefined
+      ? retained
+      : (() => {
+          const { pendingPartyCancelEntryHost: _discarded, ...withoutPending } = retained;
+          return Object.freeze(withoutPending);
+        })();
+    const cleared = Object.freeze({
+      ...state, battlePartySelect: null, liveMovePaletteHost,
+    });
     return beginCommandResolution(cleared, returned, transition, history);
   }
   const advanced = advanceBattleCommandPresentation(presentation, newKeys);
@@ -2561,6 +2587,7 @@ export function advanceFactoryRoundBattleCommand(
       // so invalidate before the first move as well as after retained moves.
       const retained = state.liveMovePaletteHost?.battleCallStart === state.activeBattleCallStart
         ? state.liveMovePaletteHost : undefined;
+      const entryHost = retained?.host ?? createLiveMovePaletteHost();
       return Object.freeze({
         ...state,
         liveMovePaletteHost: state.config.battleScene === "on"
@@ -2568,7 +2595,10 @@ export function advanceFactoryRoundBattleCommand(
               ...retained,
               battleCallStart: state.activeBattleCallStart,
               commandKey: retained?.commandKey ?? "",
-              host: invalidateLiveMovePaletteHost(retained?.host ?? createLiveMovePaletteHost()),
+              host: invalidateLiveMovePaletteHost(entryHost),
+              ...(entryHost.historyKnown
+                ? { pendingPartyCancelEntryHost: entryHost }
+                : {}),
             })
           : state.liveMovePaletteHost,
         battleCommandPresentation: advanced,

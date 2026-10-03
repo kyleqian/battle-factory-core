@@ -11,7 +11,8 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 
 /** Legal generated rentals/opponent; only ordinary command input follows generation. */
 export function generatedCommandAnimationReplay(
-  seed: number, battleScene: "on" | "off", moveSlots: readonly (0 | 1 | 2 | 3 | { switch: 1 | 2 })[],
+  seed: number, battleScene: "on" | "off",
+  moveSlots: readonly (0 | 1 | 2 | 3 | "cancel-party" | { switch: 1 | 2 })[],
   factoryWinStreak = 0,
 ) {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
@@ -92,6 +93,16 @@ export function generatedCommandAnimationReplay(
   until(() => phase() === "action-menu");
   boundaries.push(state.battle!);
   for (const slot of moveSlots) {
+    if (slot === "cancel-party") {
+      pulse("DOWN");
+      pulse("A");
+      until(() => (state.battlePartySelect?.openElapsed ?? -1) >= 62);
+      pulse("B");
+      until(() => phase() === "action-menu");
+      pulse("UP");
+      boundaries.push(state.battle!);
+      continue;
+    }
     if (typeof slot === "object") {
       pulse("DOWN"); // FIGHT -> POKéMON on the ordinary action menu.
       pulse("A");

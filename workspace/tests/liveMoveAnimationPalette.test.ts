@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createLiveMovePaletteHost, invalidateLiveMovePaletteHost, prepareLiveMovePalette,
+  returnLiveMovePaletteHostAfterOrdinaryPartyCancel,
 } from "../src/engine/liveMoveAnimationPalette.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 import { playableAnimationReplay } from "../tools/integration/playableAnimationReplay.ts";
@@ -101,6 +102,26 @@ describe("persistent live move palette inputs", () => {
       .toEqual({ historyKnown: false });
   });
 
+  it("models ordinary party entry/cancel allocation and retains the sixth icon row for Shadow Punch", () => {
+    const returned = returnLiveMovePaletteHostAfterOrdinaryPartyCancel(createLiveMovePaletteHost());
+    expect(returned.historyKnown).toBe(true);
+    expect(returned.memory.reservedCount).toBe(4);
+    expect(returned.memory.tags).toEqual([
+      0xffff, 0xffff, 0xffff, 0xffff, 55039, 55044,
+      0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
+    ]);
+    const row = paletteData.ordinaryPartyCancel.menuLoads[8]!.colors;
+    expect(returned.memory.unfaded.slice(256 + 8 * 16, 256 + 9 * 16)).toEqual(row);
+    const expand = (value: number) => (value << 3) | (value >> 2);
+    expect(prepareLiveMovePalette(returned, request(325)).input.traceScratchUnfadedPalette)
+      .toEqual(row.map((color) => ({
+        r: expand(color & 31), g: expand((color >> 5) & 31), b: expand((color >> 10) & 31),
+      })));
+    expect(returnLiveMovePaletteHostAfterOrdinaryPartyCancel(
+      invalidateLiveMovePaletteHost(createLiveMovePaletteHost()),
+    ).historyKnown).toBe(false);
+  });
+
   it("retains one owned host across real draft input and subsequent command resolutions", () => {
     const on = playableAnimationReplay("on");
     const off = playableAnimationReplay("off");
@@ -167,7 +188,7 @@ describe("persistent live move palette inputs", () => {
     }
   }, 60000);
 
-  it("invalidates palette ownership on party entry even when cancelling before the first move", () => {
+  it("restores proved ownership only after ordinary party cancellation", () => {
     for (const mode of ["on", "off"] as const) {
       const replay = playableAnimationReplay(mode);
       // Cover both lazy initialization and an already retained, known host.
@@ -183,6 +204,8 @@ describe("persistent live move palette inputs", () => {
         for (let ticks = 0; ticks < 100 && (state.battlePartySelect?.openElapsed ?? -1) < 62; ticks++) step();
         expect(state.battlePartySelect).not.toBeNull();
         expect(state.liveMovePaletteHost?.host.historyKnown).toBe(mode === "on" ? false : undefined);
+        expect(state.liveMovePaletteHost?.pendingPartyCancelEntryHost?.historyKnown)
+          .toBe(mode === "on" ? true : undefined);
         step("B");
         for (let ticks = 0; ticks < 100 && state.battlePartySelect !== null; ticks++) step();
         expect(state.battlePartySelect).toBeNull();
@@ -191,10 +214,60 @@ describe("persistent live move palette inputs", () => {
         expect(state.aiHistory).toBe(initial.aiHistory);
         if (mode === "on") {
           expect(state.liveMovePaletteHost?.battleCallStart).toBe(state.activeBattleCallStart);
+          expect(state.liveMovePaletteHost?.pendingPartyCancelEntryHost).toBeUndefined();
           expect(prepareLiveMovePalette(state.liveMovePaletteHost!.host, request(325)).input)
-            .toEqual({ historyKnown: false });
+            .toMatchObject({ historyKnown: true });
         } else expect(state.liveMovePaletteHost).toBeUndefined();
       }
     }
   }, 60000);
+
+  it("does not promote unknown history through ordinary party cancellation", () => {
+    let state = playableAnimationReplay("on").boundaries[0]!.factoryRoundBattleOrchestrator!;
+    state = Object.freeze({
+      ...state,
+      liveMovePaletteHost: Object.freeze({
+        battleCallStart: state.activeBattleCallStart,
+        commandKey: "unknown-control",
+        host: invalidateLiveMovePaletteHost(createLiveMovePaletteHost()),
+      }),
+    });
+    const step = (...buttons: ("A" | "B" | "DOWN")[]) => {
+      state = advanceFactoryRoundBattleCommand(state, new Set(buttons));
+    };
+    step("DOWN"); step(); step("A");
+    for (let ticks = 0; ticks < 100 && (state.battlePartySelect?.openElapsed ?? -1) < 62; ticks++) step();
+    expect(state.liveMovePaletteHost?.host.historyKnown).toBe(false);
+    expect(state.liveMovePaletteHost?.pendingPartyCancelEntryHost).toBeUndefined();
+    step("B");
+    for (let ticks = 0; ticks < 100 && state.battlePartySelect !== null; ticks++) step();
+    expect(state.liveMovePaletteHost?.host.historyKnown).toBe(false);
+    expect(prepareLiveMovePalette(state.liveMovePaletteHost!.host, request(325)).input)
+      .toEqual({ historyKnown: false });
+  }, 60000);
+
+  it("keeps generated ordinary cancellation truthful across known and unknown move histories", () => {
+    for (const seed of [808, 316]) {
+      const on = generatedCommandAnimationReplay(seed, "on", ["cancel-party", 0, "cancel-party", 0]);
+      const off = generatedCommandAnimationReplay(seed, "off", ["cancel-party", 0, "cancel-party", 0]);
+      expect(on.boundaries).toHaveLength(5);
+      expect(off.boundaries).toHaveLength(5);
+      for (let index = 0; index < on.boundaries.length; index += 1) {
+        const { hitMarker: onMarker, ...onRules } = on.boundaries[index]!.rules.rulesContext;
+        const { hitMarker: offMarker, ...offRules } = off.boundaries[index]!.rules.rulesContext;
+        expect(onRules).toEqual(offRules);
+        expect(on.boundaries[index]!.rng).toEqual(off.boundaries[index]!.rng);
+        expect(onMarker ^ offMarker).toBe(0x80);
+      }
+      const playerMoves = on.commands.filter(({ command }) =>
+        (command as { type?: string; animation?: { attacker?: number } }).type === "move-animation"
+        && (command as { animation?: { attacker?: number } }).animation?.attacker === 0);
+      expect(playerMoves).toHaveLength(2);
+      expect(playerMoves[0]).toMatchObject({ paletteInputHistoryKnown: true });
+      expect(playerMoves[1]).toMatchObject({
+        paletteInputHistoryKnown: seed === 808 ? true : false,
+      });
+      expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    }
+  }, 120000);
 });

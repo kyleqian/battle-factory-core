@@ -30,6 +30,9 @@ def palette(symbol, compressed=True):
     assert len(data)>=32,(symbol,len(data))
     # LoadSpritePalette always copies one 4bpp row, even for larger assets.
     return list(struct.unpack('<16H',data[:32]))
+def palette_at(address):
+    off=address-0x08000000
+    return list(struct.unpack_from('<16H',ROM,off))
 header=(REF/'include/constants/battle_anim.h').read_text()
 tags={name:10000+int(offset) for name,offset in re.findall(r'#define (ANIM_TAG_\w+)\s+\(ANIM_SPRITES_START \+ (\d+)\)',header)}
 table=(REF/'src/data/battle_anim.h').read_text().split('const struct CompressedSpritePalette gBattleAnimPaletteTable[] =',1)[1].split('};',1)[0]
@@ -103,10 +106,11 @@ assert rainbow[0]['tag']==tags['ANIM_TAG_MUSIC_NOTES']
 for move_id in ['47','320']:plans[move_id]['rainbowNotes']=True
 # Powder/poison/ring/spore/noise callbacks do not allocate additional OBJ
 # palettes or alter unfaded OBJ colors; Hypnosis' color cycle is faded-only.
-source_files=['src/battle_anim_poison.c','src/battle_anim_sound_tasks.c','src/battle_anim_effects_1.c','src/battle_anim_effects_2.c','src/battle_anim_ghost.c','src/battle_anim_psychic.c','src/battle_anim_effects_3.c','src/battle_anim_electric.c','src/battle_anim_flying.c','src/battle_anim_ice.c','src/battle_anim_normal.c','src/battle_anim_mon_movement.c','src/battle_anim_utility_funcs.c','include/constants/battle_anim.h','src/data/battle_anim.h','data/battle_anim_scripts.s','src/battle_anim_smokescreen.c','src/sprite.c','src/battle_anim_mons.c','src/link_rfu_3.c']
+source_files=['src/battle_anim_poison.c','src/battle_anim_sound_tasks.c','src/battle_anim_effects_1.c','src/battle_anim_effects_2.c','src/battle_anim_ghost.c','src/battle_anim_psychic.c','src/battle_anim_effects_3.c','src/battle_anim_electric.c','src/battle_anim_flying.c','src/battle_anim_ice.c','src/battle_anim_normal.c','src/battle_anim_mon_movement.c','src/battle_anim_utility_funcs.c','include/constants/battle_anim.h','src/data/battle_anim.h','data/battle_anim_scripts.s','src/battle_anim_smokescreen.c','src/sprite.c','src/battle_anim_mons.c','src/link_rfu_3.c','src/party_menu.c','src/data/party_menu.h','src/pokemon_icon.c','src/graphics.c','src/reshow_battle_screen.c','src/battle_interface.c']
 out={
  'schema':'live-animation-palette-resources/v1',
  'sourceSha256':{name:hashlib.sha256((REF/name).read_bytes()).hexdigest() for name in source_files},
+ 'referenceRomSha256':hashlib.sha256(ROM).hexdigest(),
  'rainbowNotes':rainbow,'plans':plans,'resources':{name:resources[name] for name in sorted(used)},
  'bentSpoonTag':tags['ANIM_TAG_BENT_SPOON'],
  'initial':{
@@ -114,6 +118,33 @@ out={
   'wireless':palette('sWirelessLinkIconPalette',False),
   'healthbox':palette('gBattleInterface_BallStatusBarPal',False),
   'healthbar':palette('gBattleInterface_BallDisplayPal',False),
+ },
+ 'ordinaryPartyCancel':{
+  # ShowPartyMenu states 4 and 11..14: FreeAllSpritePalettes, then these
+  # nine allocations in order. gMonIconPaletteTable deliberately contains
+  # six rows; its last three source pointers read the fixed ROM data directly
+  # following the three real icon palettes.
+  'menuLoads':[
+   {'tag':55120,'symbol':'sHeldItemPalette','colors':palette('sHeldItemPalette',False)},
+   {'tag':1200,'symbol':'gPartyMenuPokeball_Pal','colors':palette('gPartyMenuPokeball_Pal')},
+   {'tag':1202,'symbol':'gStatusPal_Icons','colors':palette('gStatusPal_Icons')},
+   *[
+    {'tag':struct.unpack_from('<H',ROM,symbols['gMonIconPaletteTable']-0x08000000+i*8+4)[0],
+     'symbol':f'gMonIconPaletteTable[{i}]',
+     'colors':palette_at(struct.unpack_from('<I',ROM,symbols['gMonIconPaletteTable']-0x08000000+i*8)[0])}
+    for i in range(6)
+   ],
+  ],
+  # CB2_ReshowBattleScreenAfterMenu state 4 frees every tag and reserves the
+  # four private battler rows. BattleLoadAllHealthBoxesGfx then owns 4 and 5.
+  # Local singles Factory has neither wireless comms nor received link
+  # players, so state 19 does not reload the wireless tag.
+  'returnReservedCount':4,
+  'returnLoads':[
+   {'tag':0xD6FF,'symbol':'gBattleInterface_BallStatusBarPal','colors':palette('gBattleInterface_BallStatusBarPal',False)},
+   {'tag':0xD704,'symbol':'gBattleInterface_BallDisplayPal','colors':palette('gBattleInterface_BallDisplayPal',False)},
+  ],
+  'wirelessReloadCondition':'gWirelessCommType != 0 && gReceivedRemoteLinkPlayers',
  }
 }
 path=ROOT/'src/data/gen/live-animation-palette-resources.json'
