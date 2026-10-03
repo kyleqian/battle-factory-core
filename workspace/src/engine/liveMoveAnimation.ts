@@ -31,6 +31,9 @@ import { STUN_SPORE_FRAME_COUNT } from "../animation/stunSpore.ts";
 import { GRASS_WHISTLE_WINDOW_FRAMES } from "../animation/grassWhistle.ts";
 import { DOUBLE_EDGE_FRAME_COUNT } from "../animation/doubleEdge.ts";
 import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
+import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
+import { THUNDER_PUNCH_MOVE_BODY_LAST_AGE } from "../animation/thunderPunch.ts";
+import { NEEDLE_ARM_FRAME_COUNT } from "../animation/needleArm.ts";
 
 import { ACID_ARMOR_FIRST_INACTIVE_AGE } from "../animation/acidArmor.ts";
 import { ATTRACT_FRAME_COUNT } from "../animation/attract.ts";
@@ -47,16 +50,17 @@ import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
-  2, 5, 11, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 43, 44, 47, 48, 50,
-  66, 67, 74, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 114, 122,
+  2, 5, 9, 11, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 50,
+  66, 67, 74, 75, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 114, 122,
   131, 136, 147, 151, 154, 156, 158, 163, 178, 186, 204, 211, 213, 223, 227, 231,
-  242, 246, 247, 264, 280, 281, 287, 305, 306, 319, 320, 321, 325, 336, 337, 342,
+  242, 246, 247, 264, 280, 281, 287, 290, 302, 305, 306, 319, 320, 321, 325, 336, 337, 342,
   347,
 ] as const);
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
   switch (request.moveId) {
     case 2: return KARATE_CHOP_FRAME_COUNT;
+    case 9: return THUNDER_PUNCH_MOVE_BODY_LAST_AGE + 1;
     case 5: return 160; // Mega Punch source body through first inactive row.
     case 11: return 42; // Vice Grip source body through first inactive row.
     case 14: return SWORDS_DANCE_FRAME_COUNT;
@@ -70,6 +74,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 38: return DOUBLE_EDGE_FRAME_COUNT;
     case 39: return TAIL_WHIP_FRAME_COUNT;
     case 41: return 37; // Twineedle's two stingers through clearmonbg cleanup.
+    case 42: return 93; // Pin Missile's complete source pointer body.
     case 43: return 70; // Leer source body through its last ShakeMon2 row.
     case 44: return 26; // First sharp-teeth row through inactive cleanup.
     // Full source-script body, including the target-monbg / palette cleanup.
@@ -88,6 +93,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
         : HYPNOSIS_OPPONENT_FRAME_COUNT;
     case 50: return DISABLE_WINDOW_FRAMES;
     case 74: return 63; // Growth's second ScaleMonAndRestore through cleanup.
+    case 75: return RAZOR_LEAF_BODY_LAST_AGE + 1;
     case 97: return AGILITY_FRAME_COUNT;
     case 101: return NIGHT_SHADE_FRAME_COUNT;
     case 103: return SCREECH_FIRST_INACTIVE_AGE + 1;
@@ -123,6 +129,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
       return request.turn === 0
         ? BRICK_BREAK_NORMAL_FRAME_COUNT
         : BRICK_BREAK_SHATTERED_FRAME_COUNT;
+    case 290: return 102; // Factory Secret Power -> Strength complete body.
+    case 302: return NEEDLE_ARM_FRAME_COUNT;
     case 281: return YAWN_CLEANUP_AGE + 1;
     case 287: return REFRESH_FRAME_COUNT;
     case 305: return 104; // Poison Fang body through blend/monbg cleanup.
@@ -196,6 +204,18 @@ export function liveMoveAnimationPresentation(
   let config: SceneOnMoveConfig;
   switch (request.moveId) {
     case 2: config = { move: "KARATE_CHOP", attacker, target, fieldProfile }; break;
+    case 9:
+      config = {
+        move: "THUNDER_PUNCH", attacker, target,
+        // Thunder Punch's legacy fixture config requires the narrow
+        // faint-attack status shape. Preserve the live burn bit when it is
+        // present; the live queue still owns the complete current HUD/status.
+        fieldProfile: {
+          ...fieldProfile,
+          playerStatus: field.player.status === "burn" ? "burn" : "none",
+        },
+      };
+      break;
     case 5: config = { move: "MEGA_PUNCH", attacker, target, fieldProfile }; break;
     case 11: config = { move: "VICE_GRIP", attacker, target, fieldProfile }; break;
     case 14: config = { move: "SWORDS_DANCE", attacker, target, fieldProfile }; break;
@@ -217,6 +237,7 @@ export function liveMoveAnimationPresentation(
     case 38: config = { move: "DOUBLE_EDGE", attacker, target, fieldProfile }; break;
     case 39: config = { move: "TAIL_WHIP", attacker, target, fieldProfile }; break;
     case 41: config = { move: "TWINEEDLE", attacker, target, fieldProfile }; break;
+    case 42: config = { move: "PIN_MISSILE", attacker, target, fieldProfile }; break;
     case 43: config = { move: "LEER", attacker, target, fieldProfile }; break;
     case 44: config = { move: "BITE", attacker, target, fieldProfile }; break;
     case 47: config = { move: "SING", attacker, target, fieldProfile }; break;
@@ -252,6 +273,7 @@ export function liveMoveAnimationPresentation(
       };
       break;
     case 74: config = { move: "GROWTH", attacker, target, fieldProfile }; break;
+    case 75: config = { move: "RAZOR_LEAF", attacker, target, fieldProfile }; break;
     case 97: config = { move: "AGILITY", attacker, target, fieldProfile }; break;
     case 101: config = { move: "NIGHT_SHADE", attacker, target, fieldProfile }; break;
     case 103: config = { move: "SCREECH", attacker, target, fieldProfile }; break;
@@ -328,6 +350,8 @@ export function liveMoveAnimationPresentation(
         attacker, target, fieldProfile,
       };
       break;
+    case 290: config = { move: "SECRET_POWER", attacker, target, fieldProfile }; break;
+    case 302: config = { move: "NEEDLE_ARM", attacker, target, fieldProfile }; break;
     case 281:
       config = {
         move: "YAWN", attacker, target, fieldProfile,
