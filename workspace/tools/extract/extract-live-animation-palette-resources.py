@@ -47,9 +47,6 @@ used=set()
 for move in components['moves']:
     if move['id'] not in ids:continue
     loads=[]
-    # Factory battles are BATTLE_ENVIRONMENT_BUILDING, so Secret Power's
-    # source dispatch reaches only Move_STRENGTH. Loading the extracted union
-    # of its nine unreachable terrain bodies would corrupt retained rows.
     move_blocks=move['blocks']
     for block in move_blocks:
         for line in blocks[block]:
