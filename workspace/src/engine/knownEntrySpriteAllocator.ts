@@ -123,4 +123,3 @@ export function createKnownEntrySpriteAllocatorProvider(
   host = destroyLiveSprite(host, owner.cursor(1));
   return Object.freeze({ route, commandPrompt, firstMove: host });
 }
-

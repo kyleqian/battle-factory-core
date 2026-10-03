@@ -126,4 +126,3 @@ export function liveSpriteSlotForOwner(
   const key = ownerKey(owner);
   return host.occupants.find(occupant => ownerKey(occupant.owner) === key)?.slot;
 }
-
