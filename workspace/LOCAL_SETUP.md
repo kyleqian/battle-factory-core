@@ -32,6 +32,8 @@ the established Terra/Luna/Sol routing. Omit `--headless` for an interactive
 supervisor. The default cap is six hours. `--print-config` checks the selected
 profile without starting a run. See `ANIMATION_INTEGRATION_SUPERVISOR.md` for
 worker verification, master ownership, preview refresh and local log retention.
+Codex CLI 0.160.0 is installed and verified with ChatGPT sign-in for Sol 6.1;
+0.146.0 rejected that model. Use `codex update` if restoring an older CLI.
 
 ## Validation and reference services
 

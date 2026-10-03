@@ -13,6 +13,10 @@
   boundary/inventory, coverage, asset audit and diff check pass. Real launcher
   print-config resolves Sol 6.1/high, integration guide and ON profile; Codex
   CLI is logged in using ChatGPT. Full production gates reused unchanged.
+- Runtime: CLI 0.146.0 rejected Sol 6.1 for ChatGPT sign-in. Updated using
+  `codex update` to 0.160.0; a read-only `gpt-6.1-sol/high` execution now returns
+  READY successfully and the fresh model catalog lists Sol 6.1. No fallback
+  model or API credential was used.
 - Next: start the six-hour local headless run, review the recovered physical2
   snapshot, then verify and fold bounded adapter/provider batches to master.
   Preserve explicit arbitrary-history limitations and refresh the local preview
