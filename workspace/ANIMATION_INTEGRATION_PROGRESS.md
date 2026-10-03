@@ -1,5 +1,29 @@
 # Animation integration progress
 
+## 2026-10-02 — Drill Peck accepted locally; 79 live adapters
+
+- State: source repair `4488f34e2` clean-folded; all fourteen recovered
+  physical2 bodies now have verified adapters. Factory remains 276/277;
+  197 accepted bodies need adapters. Gameplay, RNG and progression intact.
+- Proof: independently repeated **273 rows/run**, bilateral Fearow plus
+  separate complete-party Dodrio back geometry, twice fresh, **zero pixels**.
+  BowMon uses affine OBJ center (Fearow 85, Dodrio 81); effects keep picture
+  offset. Source-correct HP maxima 140/135/110. Prior failed evidence retained.
+- Route: seed 20 / streak 21 ordinary switch into Fearow then two 91-age
+  bodies against Slaking; next prompt and four ON/OFF rules/HP/PP/RNG
+  boundaries exact, excluding only scene marker bit.
+- Gates: worker typecheck, **1,481 files / 11,747 tests** (223 skipped), build
+  **844 modules**. Supervisor 32 affected/source-audit tests and 448 smoke
+  pass; same-code full pair reused. Independent receipt:
+  `tools/integration/fixtures/physical2d-drill-supervisor-receipt.json`;
+  primary validation retains all fresh source runs and worker gate logs.
+- Preview: refresh pending at this checkpoint. Whole-playable exact remains
+  zero; source palette coverage stays 49/79 (50 plans). Party-return/switch/
+  unknown-history and Shadow Punch framebuffer limits remain explicit.
+- Next: bounded missing palette plans, then ordinary party cancellation
+  provider. Supervisor source cancellation reconnaissance is preserved. No
+  material user decision deferred; retired worktree/ref cleanup follows proof.
+
 ## 2026-10-02 — physical2c accepted locally; 78 live adapters
 
 - State: clean-folded production `cf212c63a` plus test-only follow-ups:
@@ -52,30 +76,3 @@
 - Next: Guillotine, Drill Peck, Counter, Super Fang and Covet; then bounded
   palette ownership. Party-return/switch/unknown-history and Shadow Punch
   framebuffer limits remain explicit. No material user decision deferred.
-
-## 2026-10-02 — physical2a accepted locally; 69 live adapters
-
-- State: worker `f4a847729` clean-folded to master: Body Slam, Take Down,
-  Double-Edge and Submission. Factory remains 276/277; 207 accepted bodies
-  need adapters. No gameplay/RNG code or acceptance ledger changed.
-- Baseline/recovery: reused unchanged `b4befb4f7` production receipt after
-  70 launcher/boundary/inventory tests, coverage/audit and 470-decision ON/OFF
-  control. Reviewed recovered snapshot; avoided registry omissions, stale
-  adapter replacement and hard-coded Thunder Punch status. Ten recovered
-  bodies remain for later bounded batches.
-- Proof: independently repeated **939 rows/run**, both orientations, twice
-  fresh, **zero pixels** on exact worker code. Take Down opponent ages 1–97
-  are its complete source body; prior shadow teardown at age 0 is unclaimed.
-  Ordinary Body Slam covers both sides/paralysis/no-hit; Take Down repeats
-  through KO/replacement; recoil queues and ON/OFF logical state/RNG agree.
-- Gates: worker typecheck, **1,478 files / 11,720 tests** (223 skipped), build
-  **844 modules**. Supervisor 59 affected tests and 448 smoke tests pass;
-  same-code worker full pair reused. Evidence/logs retained in primary
-  `.integration/validation/worker-integration-20261002-171137` and `.codex-logs/`;
-  independent receipt: `tools/integration/fixtures/physical2a-supervisor-receipt.json`.
-- Preview: <http://127.0.0.1:5191/> served `6569b50bd`, **69 adapters**; four
-  canvas/PNG hashes, session export, ON -> OFF -> ON restart, no console/page
-  errors. Receipt: `tools/integration/fixtures/playable-preview-6569b50bd-receipt.json`.
-  Accepted temporary worktree removed; worker ref and all needed evidence retained.
-- Next: dispatch Thunder Punch, Pin Missile, Razor Leaf, Secret Power and
-  Needle Arm. Palette/party-return/switch and arbitrary-history limits remain.

@@ -205,3 +205,30 @@
   snapshot, then verify and fold bounded adapter/provider batches to master.
   Preserve explicit arbitrary-history limitations and refresh the local preview
   only at green production checkpoints.
+
+## 2026-10-02 — physical2a accepted locally; 69 live adapters
+
+- State: worker `f4a847729` clean-folded to master: Body Slam, Take Down,
+  Double-Edge and Submission. Factory remains 276/277; 207 accepted bodies
+  need adapters. No gameplay/RNG code or acceptance ledger changed.
+- Baseline/recovery: reused unchanged `b4befb4f7` production receipt after
+  70 launcher/boundary/inventory tests, coverage/audit and 470-decision ON/OFF
+  control. Reviewed recovered snapshot; avoided registry omissions, stale
+  adapter replacement and hard-coded Thunder Punch status. Ten recovered
+  bodies remain for later bounded batches.
+- Proof: independently repeated **939 rows/run**, both orientations, twice
+  fresh, **zero pixels** on exact worker code. Take Down opponent ages 1–97
+  are its complete source body; prior shadow teardown at age 0 is unclaimed.
+  Ordinary Body Slam covers both sides/paralysis/no-hit; Take Down repeats
+  through KO/replacement; recoil queues and ON/OFF logical state/RNG agree.
+- Gates: worker typecheck, **1,478 files / 11,720 tests** (223 skipped), build
+  **844 modules**. Supervisor 59 affected tests and 448 smoke tests pass;
+  same-code worker full pair reused. Evidence/logs retained in primary
+  `.integration/validation/worker-integration-20261002-171137` and `.codex-logs/`;
+  independent receipt: `tools/integration/fixtures/physical2a-supervisor-receipt.json`.
+- Preview: <http://127.0.0.1:5191/> served `6569b50bd`, **69 adapters**; four
+  canvas/PNG hashes, session export, ON -> OFF -> ON restart, no console/page
+  errors. Receipt: `tools/integration/fixtures/playable-preview-6569b50bd-receipt.json`.
+  Accepted temporary worktree removed; worker ref and all needed evidence retained.
+- Next: dispatch Thunder Punch, Pin Missile, Razor Leaf, Secret Power and
+  Needle Arm. Palette/party-return/switch and arbitrary-history limits remain.

@@ -240,6 +240,18 @@
       ]
     },
     {
+      "move": "MOVE_DRILL_PECK",
+      "id": 65,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2d-drill-supervisor-receipt.json",
+      "liveEvidence": [
+        "seed 20 / streak 21: ordinary switch into FEAROW -> SLAKING, two complete 91-age bodies, four ON/OFF rules/RNG boundaries exact"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_SUBMISSION",
       "id": 66,
       "sourceFieldEvidence": "../tools/integration/fixtures/physical2a-live-adapter-receipt.json",
@@ -842,14 +854,14 @@
     "persistent source OBJ palette allocation/load/free semantics; Shadow Punch receives retained unfaded scratch colors across audited move history"
   ],
   "pending": [
-    "production adapters/providers for the remaining 198 accepted Factory moves",
+    "production adapters/providers for the remaining 197 accepted Factory moves",
     "complete graphics palette ownership across party-menu returns, switches and unmodeled move histories",
-    "complete recovered Drill Peck after independently proving its source-owned back-sprite pose"
+    "source palette resource plans for 30 implemented adapters without audited ownership"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 78,
+  "implementedCount": 79,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
@@ -868,7 +880,7 @@
     "spritePaletteHistory": {
       "sourceCommit": "a6c61a781",
       "auditedMovePlans": 50,
-      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, covering 49 of the 78 implemented adapters. Support/unknown bodies, switches, and all party-menu entry (including cancellation before the first move) invalidate palette history. Complete returning graphics ownership still needs a provider.",
+      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, covering 49 of the 79 implemented adapters. Support/unknown bodies, switches, and all party-menu entry (including cancellation before the first move) invalidate palette history. Complete returning graphics ownership still needs a provider.",
       "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json",
       "receipts": [
         "../tools/integration/fixtures/live-palette-history-receipt.json",
@@ -880,13 +892,13 @@
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "cf212c63a3043fcc9006a329af73689e8d79348b",
+    "productionCodeCommit": "4488f34e2112544676063fc5d23f5938f50b8b72",
     "typecheck": "passed",
-    "workerFullTest": "1480 files / 11743 tests passed; 44 files / 223 tests skipped",
+    "workerFullTest": "1481 files / 11747 tests passed; 44 files / 223 tests skipped",
     "buildModules": 844,
-    "supervisorAffected": "4 files / 39 tests plus corrected source-bit/odd-HP and boundary checks; smoke 8 files / 448 tests",
-    "independentSource": "1133 rows per fresh run, both orientations, twice; zero residual pixels",
-    "sourceReceipt": "../tools/integration/fixtures/physical2c-supervisor-receipt.json",
+    "supervisorAffected": "32 affected/source-audit tests; 448 smoke tests passed",
+    "independentSource": "273 rows per fresh run, bilateral Fearow plus Dodrio geometry, twice; zero residual pixels",
+    "sourceReceipt": "../tools/integration/fixtures/physical2d-drill-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed"
   }
 }
