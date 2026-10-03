@@ -806,14 +806,14 @@
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "6569b50bd8badc48e2d740a035dab79ef6ed7a6e",
-    "build": "6569b50bd 2026-10-02",
+    "commit": "4b0d82b7e2e1fa0bc1eddd5b1d03d8dd635de73b",
+    "build": "4b0d82b7e 2026-10-02",
     "url": "http://127.0.0.1:5191/",
-    "implementedAdapters": 69,
-    "fullTest": "1478 files / 11720 tests passed; 44 files / 223 tests skipped at f4a847729; production unchanged through preview commit",
+    "implementedAdapters": 74,
+    "fullTest": "1479 files / 11732 tests passed; 44 files / 223 tests skipped at 612520093; production unchanged through preview commit",
     "buildModules": 844,
-    "browser": "four canvas/PNG hashes exact; ordinary input/session export; ON -> OFF -> ON restart; no console/page errors",
-    "receipt": "../tools/integration/fixtures/playable-preview-6569b50bd-receipt.json",
+    "browser": "eight canvas and saved PNG hashes; session export; ON -> OFF -> ON restart; no console/page errors",
+    "receipt": "../tools/integration/fixtures/playable-preview-4b0d82b7e-receipt.json",
     "availability": "Local Mac service on 127.0.0.1:5191; managed preview session; hcloud retired."
   },
   "productionProviders": {

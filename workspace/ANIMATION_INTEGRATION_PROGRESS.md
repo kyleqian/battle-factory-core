@@ -18,8 +18,11 @@
   same-code full pair reused. Independent receipt:
   `tools/integration/fixtures/physical2b-supervisor-receipt.json`; raw passes,
   failures and worker evidence retained in primary `.integration/validation/`.
-- Preview: accepted 74-adapter refresh/verification next; prior 69-adapter
-  service remains the recorded browser checkpoint until that completes.
+- Preview: <http://127.0.0.1:5191/> served `4b0d82b7e`, **74 adapters**; eight
+  canvas/PNG hashes (including Razor Leaf ages 0/69/138), session export,
+  ON -> OFF -> ON restart and no console/page errors pass. Receipt:
+  `tools/integration/fixtures/playable-preview-4b0d82b7e-receipt.json`. Accepted
+  worktree removed; worker ref, logs and raw pass/failure evidence retained.
 - Next: Guillotine, Drill Peck, Counter, Super Fang and Covet; then bounded
   palette ownership. Party-return/switch/unknown-history and Shadow Punch
   framebuffer limits remain explicit. No material user decision deferred.
