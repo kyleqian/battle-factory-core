@@ -438,6 +438,7 @@
       "move": "MOVE_LIGHT_SCREEN",
       "id": 113,
       "sourceFieldEvidence": [
+        "../tools/integration/fixtures/light-screen-live-adapter-receipt.json",
         "../tools/integration/fixtures/light-screen-live-player.json",
         "../tools/integration/fixtures/light-screen-live-opponent.json",
         "../tools/integration/fixtures/light-screen-live-slowpoke-player.json"
