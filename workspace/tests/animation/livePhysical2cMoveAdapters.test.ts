@@ -58,8 +58,8 @@ function render(moveId: number, attacker: 0 | 1, age: number): string {
 }
 
 function rulesWithoutSceneMarker(value: ReturnType<typeof generatedCommandAnimationReplay>["boundaries"][number]) {
-  const { hitMarker: _marker, ...rulesContext } = value.rules.rulesContext;
-  return { ...value.rules, rulesContext };
+  const rulesContext = value.rules.rulesContext;
+  return { ...value.rules, rulesContext: { ...rulesContext, hitMarker: rulesContext.hitMarker & ~0x80 } };
 }
 
 describe("live physical2c move adapters", () => {
@@ -110,11 +110,12 @@ describe("live physical2c move adapters", () => {
   });
 
   it("takes exactly half current HP for ordinary Super Fang before later turn effects", () => {
-    const replay = generatedCommandAnimationReplay(62, "on", [0], 14);
-    const request = replay.requests.find(moveRequest => moveRequest.moveId === 162);
-    const target = replay.boundaries[0]!.rules.rulesContext.battlers[1]!;
-    expect(target.hp).toBe(158);
-    expect(request?.damage).toBe(Math.ceil(target.hp / 2));
+    const replay = generatedCommandAnimationReplay(62, "on", [0, 0], 14);
+    const requests = replay.requests.filter(moveRequest => moveRequest.moveId === 162);
+    const targetHP = replay.boundaries.slice(0, 2).map(boundary => boundary.rules.rulesContext.battlers[1]!.hp);
+    expect(targetHP).toEqual([158, 87]);
+    expect(requests.map(request => request.damage)).toEqual([79, 43]);
+    expect(requests.map(request => request.damage)).toEqual(targetHP.map(hp => Math.max(1, Math.floor(hp / 2))));
   });
 
   it("restarts Super Fang and Covet through complete fresh bodies on consecutive commands", () => {
