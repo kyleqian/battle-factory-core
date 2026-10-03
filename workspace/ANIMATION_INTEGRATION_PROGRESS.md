@@ -17,12 +17,13 @@
   pass; same-code full pair reused. Independent receipt:
   `tools/integration/fixtures/physical2d-drill-supervisor-receipt.json`;
   primary validation retains all fresh source runs and worker gate logs.
-- Preview: refresh pending at this checkpoint. Whole-playable exact remains
-  zero; source palette coverage stays 49/79 (50 plans). Party-return/switch/
-  unknown-history and Shadow Punch framebuffer limits remain explicit.
+- Preview: <http://127.0.0.1:5191/> serves `da75f10e6`, **79 adapters**; eight
+  canvas/PNG hashes, session export, ON -> OFF -> ON, no console/page errors
+  pass (`playable-preview-da75f10e6-receipt.json`). Whole-playable exact stays
+  zero; palette stays 49/79 (50 plans), with party/switch/history limits.
 - Next: bounded missing palette plans, then ordinary party cancellation
   provider. Supervisor source cancellation reconnaissance is preserved. No
-  material user decision deferred; retired worktree/ref cleanup follows proof.
+  material user decision deferred; accepted worktree removed; worker ref/logs/raw evidence retained.
 
 ## 2026-10-02 — physical2c accepted locally; 78 live adapters
 
