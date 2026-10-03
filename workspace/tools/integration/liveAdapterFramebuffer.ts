@@ -32,7 +32,10 @@ export interface Fixture {
   fieldProfile: SceneOnDragonRageFieldProfile;
   body?: "normal" | "shattered-wall";
 }
-interface Probe { frames: { frame: number; sha256: string }[]; }
+interface Probe {
+  frames?: { frame: number; sha256: string }[];
+  rows?: { frame: number; sha256: string }[];
+}
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const ids = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.id]));
 const names = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.name]));
@@ -108,9 +111,11 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
     // Use the previously accepted complete source-owned window; some probes
     // also retain pre-body text and post-body stat banners. Never pick matching rows.
     const window = fixture.denseWindow ?? fixture.sourceWindow;
+    const probeFrames = probe.frames ?? probe.rows;
+    if (!probeFrames) throw new Error("Probe omitted framebuffer rows");
     const frames = window
-      ? probe.frames.filter(f => f.frame >= window.startFrame && f.frame <= window.endFrame)
-      : probe.frames;
+      ? probeFrames.filter(f => f.frame >= window.startFrame && f.frame <= window.endFrame)
+      : probeFrames;
     if (window && (frames.length !== window.endFrame - window.startFrame + 1
       || frames.some((f, i) => f.frame !== window.startFrame + i))) {
       throw new Error("Probe omitted part of the complete source window");

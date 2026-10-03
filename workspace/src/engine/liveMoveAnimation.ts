@@ -34,6 +34,11 @@ import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.t
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
 import { THUNDER_PUNCH_MOVE_BODY_LAST_AGE } from "../animation/thunderPunch.ts";
 import { NEEDLE_ARM_FRAME_COUNT } from "../animation/needleArm.ts";
+import { COVET_FRAME_COUNT } from "../animation/covet.ts";
+import {
+  GUILLOTINE_OPPONENT_FRAME_COUNT,
+  GUILLOTINE_PLAYER_FRAME_COUNT,
+} from "../animation/guillotine.ts";
 
 import { ACID_ARMOR_FIRST_INACTIVE_AGE } from "../animation/acidArmor.ts";
 import { ATTRACT_FRAME_COUNT } from "../animation/attract.ts";
@@ -50,11 +55,11 @@ import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
-  2, 5, 9, 11, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 50,
-  66, 67, 74, 75, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 114, 122,
-  131, 136, 147, 151, 154, 156, 158, 163, 178, 186, 204, 211, 213, 223, 227, 231,
+  2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 50,
+  66, 67, 68, 74, 75, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 114, 122,
+  131, 136, 147, 151, 154, 156, 158, 162, 163, 178, 186, 204, 211, 213, 223, 227, 231,
   242, 246, 247, 264, 280, 281, 287, 290, 302, 305, 306, 319, 320, 321, 325, 336, 337, 342,
-  347,
+  343, 347,
 ] as const);
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
@@ -63,6 +68,10 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 9: return THUNDER_PUNCH_MOVE_BODY_LAST_AGE + 1;
     case 5: return 160; // Mega Punch source body through first inactive row.
     case 11: return 42; // Vice Grip source body through first inactive row.
+    case 12:
+      return request.attacker === 0
+        ? GUILLOTINE_PLAYER_FRAME_COUNT
+        : GUILLOTINE_OPPONENT_FRAME_COUNT;
     case 14: return SWORDS_DANCE_FRAME_COUNT;
     case 21: return 54; // Slam source body through first inactive row.
     case 23: return STOMP_FRAME_COUNT;
@@ -82,6 +91,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 48: return 51; // First Supersonic ring through the final inactive row.
     case 66: return 124; // Submission source body through monbg cleanup.
     case 67: return 33; // Low Kick source body through first inactive row.
+    case 68: return 88; // Counter's source body through final clear display.
     case 78:
     case 79: return STUN_SPORE_FRAME_COUNT;
     case 92: return 219; // Toxic's bubbles through the source-owned cleanup.
@@ -109,6 +119,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 154: return FURY_SWIPES_LAST_BODY_AGE + 1;
     case 156: return REST_FRAME_COUNT;
     case 158: return 107; // Hyper Fang restorebg fade through cleanup.
+    case 162: return 200; // Super Fang's complete palette/return cleanup body.
     case 163: return 46; // Slash body through final source-owned shake row.
     case 211: return 197; // Steel Wing source body through first inactive row.
     case 223: return 75; // Dynamic Punch source body through first inactive row.
@@ -144,6 +155,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 336: return HOWL_FRAME_COUNT;
     case 337: return 137; // Dragon Claw palette restoration through cleanup.
     case 342: return 187; // Poison Tail source body through first inactive row.
+    case 343: return COVET_FRAME_COUNT;
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -218,6 +230,7 @@ export function liveMoveAnimationPresentation(
       break;
     case 5: config = { move: "MEGA_PUNCH", attacker, target, fieldProfile }; break;
     case 11: config = { move: "VICE_GRIP", attacker, target, fieldProfile }; break;
+    case 12: config = { move: "GUILLOTINE", attacker, target, fieldProfile }; break;
     case 14: config = { move: "SWORDS_DANCE", attacker, target, fieldProfile }; break;
     case 21: config = { move: "SLAM", attacker, target, fieldProfile }; break;
     case 23: config = { move: "STOMP", attacker, target, fieldProfile }; break;
@@ -244,6 +257,7 @@ export function liveMoveAnimationPresentation(
     case 48: config = { move: "SUPERSONIC", attacker, target, fieldProfile }; break;
     case 66: config = { move: "SUBMISSION", attacker, target, fieldProfile }; break;
     case 67: config = { move: "LOW_KICK", attacker, target, fieldProfile }; break;
+    case 68: config = { move: "COUNTER", attacker, target, fieldProfile }; break;
     case 78: config = { move: "STUN_SPORE", attacker, target, fieldProfile }; break;
     case 79: config = { move: "SLEEP_POWDER", attacker, target, fieldProfile }; break;
     case 92: config = { move: "TOXIC", attacker, target, fieldProfile }; break;
@@ -316,6 +330,7 @@ export function liveMoveAnimationPresentation(
       };
       break;
     case 158: config = { move: "HYPER_FANG", attacker, target, fieldProfile }; break;
+    case 162: config = { move: "SUPER_FANG", attacker, target, fieldProfile }; break;
     case 163: config = { move: "SLASH", attacker, target, fieldProfile }; break;
     case 211:
       config = {
@@ -425,6 +440,7 @@ export function liveMoveAnimationPresentation(
         fieldProfile,
       };
       break;
+    case 343: config = { move: "COVET", attacker, target, fieldProfile }; break;
     case 347: config = { move: "CALM_MIND", attacker, target, fieldProfile }; break;
     default: return null;
   }
