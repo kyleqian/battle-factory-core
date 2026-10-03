@@ -24,6 +24,19 @@
       ]
     },
     {
+      "move": "MOVE_THUNDER_PUNCH",
+      "id": 9,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2b-supervisor-receipt.json",
+      "liveEvidence": [
+        "seed 114 / streak 0: ELEKID -> ANORITH; two ordinary commands, 2 complete 104-age bodies; ON/OFF logical state/RNG exact"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay",
+        "retained front-sprite pose across earlier moves; accepted opponent window is neutral after Faint Attack"
+      ]
+    },
+    {
       "move": "MOVE_VICE_GRIP",
       "id": 11,
       "sourceFieldEvidence": "../tools/integration/fixtures/physical-batch-live-adapter-receipt.json",
@@ -154,6 +167,18 @@
       ]
     },
     {
+      "move": "MOVE_PIN_MISSILE",
+      "id": 42,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2b-supervisor-receipt.json",
+      "liveEvidence": [
+        "seed 170 / streak 7: QWILFISH -> PIDGEOT; two ordinary commands, 4 complete 93-age bodies; ON/OFF logical state/RNG exact"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_LEER",
       "id": 43,
       "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
@@ -233,6 +258,18 @@
       "remaining": [
         "independent arbitrary-species/history comparison",
         "ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_RAZOR_LEAF",
+      "id": 75,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2b-supervisor-receipt.json",
+      "liveEvidence": [
+        "seed 31 / streak 0: WEEPINBELL -> NUZLEAF; two ordinary commands, 2 complete 139-age bodies; ON/OFF logical state/RNG exact"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
       ]
     },
     {
@@ -615,6 +652,30 @@
       ]
     },
     {
+      "move": "MOVE_SECRET_POWER",
+      "id": 290,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2b-supervisor-receipt.json",
+      "liveEvidence": [
+        "seed 12 / streak 0: DELCATTY -> PARASECT; two ordinary commands, 2 complete 102-age bodies; ON/OFF logical state/RNG exact"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
+      ]
+    },
+    {
+      "move": "MOVE_NEEDLE_ARM",
+      "id": 302,
+      "sourceFieldEvidence": "../tools/integration/fixtures/physical2b-supervisor-receipt.json",
+      "liveEvidence": [
+        "seed 108 / streak 0: CACNEA -> PONYTA; two ordinary commands, 2 complete 108-age bodies; ON/OFF logical state/RNG exact"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "opponent ordinary command-input replay"
+      ]
+    },
+    {
       "move": "MOVE_POISON_FANG",
       "id": 305,
       "liveEvidence": [],
@@ -733,14 +794,14 @@
     "persistent source OBJ palette allocation/load/free semantics; Shadow Punch receives retained unfaded scratch colors across audited move history"
   ],
   "pending": [
-    "production adapters/providers for the remaining 207 accepted Factory moves",
+    "production adapters/providers for the remaining 202 accepted Factory moves",
     "complete graphics palette ownership across party-menu returns, switches and unmodeled move histories",
-    "complete the ten remaining recovered physical2 adapters after independent proof"
+    "complete the five remaining recovered physical2 adapters after independent proof"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 69,
+  "implementedCount": 74,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
@@ -759,7 +820,7 @@
     "spritePaletteHistory": {
       "sourceCommit": "a6c61a781",
       "auditedMovePlans": 50,
-      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, covering 49 of the 65 implemented adapters. Support/unknown bodies, switches, and all party-menu entry (including cancellation before the first move) invalidate palette history. Complete returning graphics ownership still needs a provider.",
+      "claim": "Retained Shadow Punch scratch input across 50 audited move resource plans, covering 49 of the 74 implemented adapters. Support/unknown bodies, switches, and all party-menu entry (including cancellation before the first move) invalidate palette history. Complete returning graphics ownership still needs a provider.",
       "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json",
       "receipts": [
         "../tools/integration/fixtures/live-palette-history-receipt.json",
@@ -771,13 +832,13 @@
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "f4a84772915bdbe8e040f87217e5da0db6ac0335",
+    "productionCodeCommit": "612520093d34abe8289674b6e79a3272e3e8130e",
     "typecheck": "passed",
-    "workerFullTest": "1478 files / 11720 tests passed; 44 files / 223 tests skipped",
+    "workerFullTest": "1479 files / 11732 tests passed; 44 files / 223 tests skipped",
     "buildModules": 844,
-    "supervisorAffected": "6 files / 59 tests passed; smoke 8 files / 448 tests passed",
-    "independentSource": "939 rows per fresh run, both orientations, twice; zero residual pixels",
-    "sourceReceipt": "../tools/integration/fixtures/physical2a-supervisor-receipt.json",
+    "supervisorAffected": "8 files / 41 tests passed; smoke 8 files / 448 tests passed",
+    "independentSource": "1092 rows per fresh run, both orientations, twice; zero residual pixels",
+    "sourceReceipt": "../tools/integration/fixtures/physical2b-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed"
   }
 }

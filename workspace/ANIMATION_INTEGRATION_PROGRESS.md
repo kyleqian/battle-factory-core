@@ -1,5 +1,28 @@
 # Animation integration progress
 
+## 2026-10-02 — physical2b accepted locally; 74 live adapters
+
+- State: clean-folded `612520093`: Thunder Punch, Pin Missile, Razor Leaf,
+  Factory-indoor Secret Power and Needle Arm. Factory remains 276/277;
+  202 accepted bodies need adapters. No rules/RNG/damage/progression changes.
+- Proof: independently repeated **1,092 rows/run**, ten complete windows,
+  twice fresh, **zero pixels**. Found/repaired Thunder Punch's false send-out
+  offset; supervisor corrected verifier maximum HP (117, current HP 72).
+  Neutral opponent pose after Faint Attack is bounded, not retained-history proof.
+- Routes: all five repeat through full ages and next commands with ON/OFF
+  state/RNG exact (only hit-marker scene bit excluded). Pin Missile has four
+  complete hit bodies across two commands; explicit miss has no body. Normal
+  Bayleef draft reaches a 139-age Razor Leaf after misses, five parity checkpoints.
+- Gates: worker typecheck, **1,479 files / 11,732 tests** (223 skipped), build
+  **844 modules** on final code. Supervisor 41 affected tests and 448 smoke pass;
+  same-code full pair reused. Independent receipt:
+  `tools/integration/fixtures/physical2b-supervisor-receipt.json`; raw passes,
+  failures and worker evidence retained in primary `.integration/validation/`.
+- Preview: accepted 74-adapter refresh/verification next; prior 69-adapter
+  service remains the recorded browser checkpoint until that completes.
+- Next: Guillotine, Drill Peck, Counter, Super Fang and Covet; then bounded
+  palette ownership. Party-return/switch/unknown-history and Shadow Punch
+  framebuffer limits remain explicit. No material user decision deferred.
 
 ## 2026-10-02 — physical2a accepted locally; 69 live adapters
 
@@ -28,7 +51,6 @@
 - Next: dispatch Thunder Punch, Pin Missile, Razor Leaf, Secret Power and
   Needle Arm. Palette/party-return/switch and arbitrary-history limits remain.
 
-
 ## 2026-10-02 — local integration supervisor configured on Sol 6.1
 
 - State: `run-supervisor.sh --lane integration` now supervises primary local
@@ -50,13 +72,3 @@
   snapshot, then verify and fold bounded adapter/provider batches to master.
   Preserve explicit arbitrary-history limitations and refresh the local preview
   only at green production checkpoints.
-
-
-## 2026-10-02 — local consolidation complete; hcloud deleted; 65-adapter preview verified
-
-- State: local `master` contains Factory `8fb2afbc1` (276/277 accepted), the 65-adapter integration checkpoint, Rust `5691a4ef4`, the experimental native runtime and local audit research. Production checkpoint `b4befb4f7`; later migration receipts/docs do not alter production. All 407 remote refs and interrupted physical2 edits are recoverable locally. Only the primary checkout remains.
-- Did: preserved the complete 13.2 GB server archive (SHA-256 and zstd/content checks passed), all old local worktrees, and 4,625 searchable Codex/Claude transcripts. Deleted server 164080634, both primary IPs and dedicated firewall; post-delete account inventories are empty. Recovery root: `/Users/kyle/Developer/pokebench/hcloud-archive-20261002`; startup: `LOCAL_SETUP.md`.
-- Local continuation: party-menu entry now invalidates the bounded palette-history claim even when cancelling before any move. Regression reproduced before the fix; ordinary-input before/after-first-move tests pass in both scene modes without changing battle state or AI history. Fixed two source audits choosing the wrong duplicate Cmd_end symbol on Linux; forward/reversed symbol orders now agree and receipt chains pin the actual animation runtime body.
-- Gates: typecheck/build (844 modules), full suite **1,477 files / 11,708 tests passed**, 44 files / 223 tests skipped; rebuilt WASM and **1,832 Rust tests passed**. Both local oracle profiles respond; anchor matches 1/1 after server deletion. Local fresh Rest windows pass both directions twice, 220 rows/run, zero pixels. Earlier support source proof remains 1,898 rows/run twice. Shadow Punch's partial-history residuals remain unchanged and explicitly unclaimed.
-- Preview: <http://127.0.0.1:5191/> at **b4befb4f7**, 65 adapters. Post-deletion browser validation passes all four canvas/PNG hashes, session export, ON/OFF restart and no-error checks; receipt `tools/integration/fixtures/playable-preview-b4befb4f7-receipt.json`.
-- Next: review `codex/recovered-physical2-20261002` (unfinished tracked snapshot, not accepted), then continue the remaining **211 accepted moves' live adapters/providers locally**. Complete party-return/switch palette ownership and arbitrary-history rendering; no whole-playable exactness credit. Helping Hand alone remains blocked on legal doubles staging.
