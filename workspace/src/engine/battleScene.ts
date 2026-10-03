@@ -29722,14 +29722,14 @@ export function renderSceneOnMovePresentation(
       ...lightScreenState, age: lightScreenState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "EXEGGCUTE"
+      (liveField || view.attacker.species === "EXEGGCUTE")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "EXEGGCUTE"
+      (liveField || view.attacker.species === "EXEGGCUTE")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -29739,14 +29739,18 @@ export function renderSceneOnMovePresentation(
     }
     const exeggcuteSource = playerToOpponent
       ? lightScreenArt.exeggcuteBack : lightScreenArt.exeggcuteFront;
-    const exeggcute = playerToOpponent
+    const exeggcute = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? exeggcuteSource
       : {
           ...exeggcuteSource,
           tileset: subTileset(exeggcuteSource.tileset, 0, 8),
         };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent
       ? {
           ...onixSource,
           tileset: subTileset(onixSource.tileset, 0, 8),
@@ -29807,7 +29811,10 @@ export function renderSceneOnMovePresentation(
     );
     // Lower OAM indexes win equal-priority overlaps. The three allocator
     // slots are reused by the second half of SpecialScreenSparkle.
-    for (const sparkle of displayed.sparkles.slice().reverse()) {
+    for (const sparkle of displayed.sparkles.slice().sort((left, right) =>
+      lightScreenState.config.allocatorProfile.sparkles[right.spawnIndex]!
+      - lightScreenState.config.allocatorProfile.sparkles[left.spawnIndex]!
+    )) {
       drawSpriteSheet(
         fb,
         subTileset(
@@ -54213,7 +54220,10 @@ export function renderBattleResolutionLiveView(
 ): void {
   const effect = view.effect;
   const presentation = effect?.type === "move"
-    ? liveMoveAnimationPresentation(effect.request, view.field, effect.age, effect.paletteInput)
+    ? liveMoveAnimationPresentation(
+        effect.request, view.field, effect.age, effect.paletteInput,
+        effect.spriteAllocatorInput,
+      )
     : null;
   if (!presentation) {
     renderBattleResolutionSceneOffView(fb, view);

@@ -5,7 +5,9 @@ import {
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
-import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
+import {
+  liveMoveAnimationDuration, liveMoveAnimationPresentation,
+} from "../../src/engine/liveMoveAnimation.ts";
 import type { GbaButton } from "../../src/input.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 
@@ -21,7 +23,11 @@ export function generatedCommandAnimationReplay(
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
     rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
   }));
-  const animations: Array<{ moveId: number; attacker: number; player: string; opponent: string; ages: number[] }> = [];
+  const animations: Array<{
+    moveId: number; attacker: number; player: string; opponent: string;
+    ages: number[]; adapterActive: boolean[];
+    entryMessage?: { lines: readonly string[]; visibleCharacters: number };
+  }> = [];
   const boundaries = [];
   const commands: Array<{
     type: string;
@@ -29,6 +35,7 @@ export function generatedCommandAnimationReplay(
     command: unknown;
     paletteInputHistoryKnown: boolean | undefined;
     retainedPaletteHistoryKnown: boolean | undefined;
+    retainedSpriteHistoryKnown: boolean | undefined;
   }> = [];
   const requests: Array<BattleMoveAnimationRequest & { frame: number }> = [];
   const semanticEvents: Array<{
@@ -67,6 +74,7 @@ export function generatedCommandAnimationReplay(
           command,
           paletteInputHistoryKnown: r.liveMovePaletteInput?.historyKnown,
           retainedPaletteHistoryKnown: state.liveMovePaletteHost?.host.historyKnown,
+          retainedSpriteHistoryKnown: state.liveMoveSpriteAllocatorHost?.host.historyKnown,
         });
         if (command.type === "move-animation" && command.animation) requests.push({ ...command.animation, frame });
       }
@@ -74,13 +82,22 @@ export function generatedCommandAnimationReplay(
     if (command?.type !== "move-animation" || !command.animation || liveMoveAnimationDuration(command.animation) === null) return;
     const current = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
     const view = createBattleResolutionPresentationRenderView(r);
+    const moveEffect = view.effect?.type === "move" ? view.effect : null;
+    const adapterActive = moveEffect !== null && liveMoveAnimationPresentation(
+      moveEffect.request, view.field, moveEffect.age, moveEffect.paletteInput,
+      moveEffect.spriteAllocatorInput,
+    ) !== null;
     if (key !== current) {
       key = current;
       animations.push({ moveId: command.animation.moveId, attacker: command.animation.attacker,
-        player: view.field.player.name, opponent: view.field.opponent.name, ages: [] });
+        player: view.field.player.name, opponent: view.field.opponent.name,
+        ages: [], adapterActive: [],
+        ...(view.message ? { entryMessage: view.message } : {}),
+      });
     }
     renderBattleResolutionLiveView(new Uint8Array(240 * 160 * 4), view);
     animations.at(-1)!.ages.push(r.lifecycle.phaseElapsed);
+    animations.at(-1)!.adapterActive.push(adapterActive);
   };
   const phase = () => state.battleCommandPresentation?.lifecycle.phase;
   const until = (predicate: () => boolean) => {

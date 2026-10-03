@@ -69,4 +69,35 @@ describe("ordinary playable animation queue", () => {
     expect(() => battleMoveAnimationRequest(0, 1, ["9999999999999999999", "0", "70", "17", "90", "0"])).toThrow("safe integers");
     expect(liveMoveAnimationDuration(battleMoveAnimationRequest(0, 1, ["210","0","10","1","0","0"]))).toBeNull();
   });
+
+  it("plays Light Screen from six generated rentals, preserves text/self-target, and resumes after repeat failure", () => {
+    for (const seed of [2, 27, 45, 59, 84, 114]) {
+      const on = generatedCommandAnimationReplay(seed, "on", [3, 3]);
+      const off = generatedCommandAnimationReplay(seed, "off", [3, 3]);
+      const body = on.animations.filter(animation => animation.moveId === 113);
+      expect(body).toHaveLength(1);
+      expect(body[0]!.ages).toEqual(Array.from({ length: 88 }, (_, age) => age));
+      expect(body[0]!.adapterActive).toEqual(Array(88).fill(true));
+      expect(body[0]!.entryMessage?.visibleCharacters)
+        .toBe(body[0]!.entryMessage?.lines.join("").length);
+      const requests = on.requests.filter(request => request.moveId === 113);
+      expect(requests).toHaveLength(1);
+      expect(requests[0]!.target).toBe(requests[0]!.attacker);
+      expect(on.commands.some(row => row.type === "message"
+        && JSON.stringify(row.command).includes("raised SP. DEF"))).toBe(true);
+      expect(on.commands.some(row => row.type === "message"
+        && JSON.stringify(row.command).includes("But it failed"))).toBe(true);
+      expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+      expect(on.boundaries).toHaveLength(3);
+      for (let index = 0; index < on.boundaries.length; index += 1) {
+        const a = on.boundaries[index]!, b = off.boundaries[index]!;
+        expect(a.rng).toEqual(b.rng);
+        const { hitMarker: am, ...ar } = a.rules.rulesContext;
+        const { hitMarker: bm, ...br } = b.rules.rulesContext;
+        expect(ar).toEqual(br);
+        expect(am ^ bm).toBe(0x80);
+        expect(a.boundary).toEqual(b.boundary);
+      }
+    }
+  }, 60000);
 });

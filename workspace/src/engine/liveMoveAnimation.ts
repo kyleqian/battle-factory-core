@@ -1,4 +1,5 @@
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
+import type { LiveMoveSpriteAllocatorInput } from "./liveMoveSpriteAllocator.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
@@ -56,7 +57,7 @@ import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 50,
-  65, 66, 67, 68, 74, 75, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 114, 122,
+  65, 66, 67, 68, 74, 75, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 113, 114, 122,
   131, 136, 147, 151, 154, 156, 158, 162, 163, 178, 186, 204, 211, 213, 223, 227, 231,
   242, 246, 247, 264, 280, 281, 287, 290, 302, 305, 306, 319, 320, 321, 325, 336, 337, 342,
   343, 347,
@@ -111,6 +112,9 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 105: return 169; // Recover's final blend/star source-owned row.
     case 108: return 125; // smokescreenAtAge: active through 123.
     case 109: return CONFUSE_RAY_FRAME_COUNT;
+    // Script activation through the two inactive controller displays after
+    // resource destruction. The following success printer starts next.
+    case 113: return 88;
     case 122: return 73; // Lick source body through first inactive row.
     case 131: return 84; // Spike Cannon pointer body through inactive cleanup.
     case 136: return 91; // Hi Jump Kick source body through first inactive row.
@@ -168,6 +172,7 @@ export function liveMoveAnimationPresentation(
   field: BattleResolutionDisplayedField,
   age: number,
   paletteInput?: LiveMovePaletteInput,
+  spriteAllocatorInput?: LiveMoveSpriteAllocatorInput,
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request) === null) return null;
   const art = createBattleCommandFieldArtView(field);
@@ -306,6 +311,16 @@ export function liveMoveAnimationPresentation(
     case 105: config = { move: "RECOVER", attacker, target, fieldProfile }; break;
     case 108: config = { move: "SMOKESCREEN", attacker, target, fieldProfile }; break;
     case 109: config = { move: "CONFUSE_RAY", attacker, target, fieldProfile }; break;
+    case 113:
+      if (!spriteAllocatorInput?.historyKnown) return null;
+      config = {
+        move: "LIGHT_SCREEN", attacker, target, fieldProfile,
+        allocatorProfile: {
+          wall: spriteAllocatorInput.wall,
+          sparkles: spriteAllocatorInput.sparkles,
+        },
+      };
+      break;
     case 122: config = { move: "LICK", attacker, target, fieldProfile }; break;
     case 131: config = { move: "SPIKE_CANNON", attacker, target, fieldProfile }; break;
     case 136:
@@ -456,5 +471,7 @@ export function liveMoveAnimationPresentation(
     case 347: config = { move: "CALM_MIND", attacker, target, fieldProfile }; break;
     default: return null;
   }
-  return { config, age };
+  // sceneOnLightScreenView/lightScreenAtAge are relative to wall creation;
+  // the controller-owned live command starts at animation-script activation.
+  return { config, age: request.moveId === 113 ? age - 7 : age };
 }

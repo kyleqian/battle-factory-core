@@ -7,6 +7,7 @@ import {
   type LiveSpriteOwner,
 } from "../src/engine/liveSpriteAllocator.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../src/engine/knownEntrySpriteAllocator.ts";
+import { prepareLiveMoveSpriteAllocator } from "../src/engine/liveMoveSpriteAllocator.ts";
 
 const move = (identity: string, index = 0): LiveSpriteOwner => ({ kind: "move", identity, index });
 
@@ -37,6 +38,22 @@ describe("live sprite allocator host", () => {
 });
 
 describe("known ordinary-singles entry sprite provider", () => {
+  it("prepares Light Screen from the provider and restores the exact host after cleanup", () => {
+    const provider = createKnownEntrySpriteAllocatorProvider("ordinary-factory");
+    const request = {
+      moveId: 113, attacker: 0, target: 0, turn: 0, power: 0,
+      damage: 0, friendship: 0, multihit: 0,
+    };
+    const prepared = prepareLiveMoveSpriteAllocator(provider.firstMove, request);
+    expect(prepared.input).toEqual({
+      historyKnown: true, wall: 3, sparkles: [4, 5, 7, 4, 5, 7],
+    });
+    expect(prepared.next).toEqual(provider.firstMove);
+    expect(prepareLiveMoveSpriteAllocator(
+      invalidateLiveSpriteAllocatorHost(provider.firstMove), request,
+    ).input).toBeUndefined();
+  });
+
   it.each(["ordinary-factory", "battle-lab-ordinary-singles"] as const)(
     "derives the bounded first-command and first-move topology for %s",
     route => {

@@ -3,6 +3,15 @@ import {
   returnLiveMovePaletteHostAfterOrdinaryPartyCancel,
   type LiveMovePaletteHost, type LiveMovePaletteInput,
 } from "./liveMoveAnimationPalette.ts";
+import { createKnownEntrySpriteAllocatorProvider } from "./knownEntrySpriteAllocator.ts";
+import {
+  prepareLiveMoveSpriteAllocator,
+  type LiveMoveSpriteAllocatorInput,
+} from "./liveMoveSpriteAllocator.ts";
+import {
+  invalidateLiveSpriteAllocatorHost,
+  type LiveSpriteAllocatorHost,
+} from "./liveSpriteAllocator.ts";
 /**
  * Production-shaped owner of the generated Factory opponent -> fresh battle
  * -> terminal adapter -> round-controller seam.
@@ -415,6 +424,12 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
      * its B-cancel return may consume this immutable snapshot.
      */
     pendingPartyCancelEntryHost?: LiveMovePaletteHost;
+  }>;
+  /** Presentation-only gSprites history, scoped to the current battle. */
+  liveMoveSpriteAllocatorHost?: Readonly<{
+    battleCallStart: number | null;
+    commandKey: string;
+    host: LiveSpriteAllocatorHost;
   }>;
   /**
    * An opposing locked action may outlive its charge presentation while the
@@ -1036,6 +1051,13 @@ function startCurrentBattle(
     battle: started,
     battleCommandPresentation,
     battleResolutionPresentation: null,
+    liveMoveSpriteAllocatorHost: state.config.battleScene === "on"
+      ? Object.freeze({
+          battleCallStart: callStart,
+          commandKey: "",
+          host: createKnownEntrySpriteAllocatorProvider("ordinary-factory").firstMove,
+        })
+      : undefined,
     retainedLockedActionPresentationOwner: null,
     battlePartySelect: null,
     battleForcedPartySelect: null,
@@ -1986,14 +2008,20 @@ function prepareResolutionPalette(
   const resolution = state.battleResolutionPresentation;
   if (resolution?.lifecycle.phase === "presenting-switch-in") {
     const retained = state.liveMovePaletteHost;
-    if (!retained?.host.historyKnown) return state;
+    const retainedSprites = state.liveMoveSpriteAllocatorHost;
+    if (!retained?.host.historyKnown && !retainedSprites?.host.historyKnown) return state;
     return Object.freeze({
       ...state,
-      liveMovePaletteHost: Object.freeze({
+      liveMovePaletteHost: retained ? Object.freeze({
         ...retained, host: invalidateLiveMovePaletteHost(retained.host),
-      }),
+      }) : undefined,
+      liveMoveSpriteAllocatorHost: retainedSprites ? Object.freeze({
+        ...retainedSprites,
+        host: invalidateLiveSpriteAllocatorHost(retainedSprites.host),
+      }) : undefined,
       battleResolutionPresentation: Object.freeze({
         ...resolution, liveMovePaletteInput: undefined,
+        liveMoveSpriteAllocatorInput: undefined,
       }),
     });
   }
@@ -2029,7 +2057,8 @@ function prepareResolutionPalette(
     }
     return crossedUnknownGraphics;
   };
-  if (scanThrough(commandSequence)) host = invalidateLiveMovePaletteHost(host);
+  const crossedUnknownGraphics = scanThrough(commandSequence);
+  if (crossedUnknownGraphics) host = invalidateLiveMovePaletteHost(host);
   const isFinalCommand = command === undefined
     || resolution.commandIndex === segment.commands.length - 1;
   const hasTrailingUnknownGraphics = isFinalCommand
@@ -2048,16 +2077,34 @@ function prepareResolutionPalette(
     && host === retained.host
   ) return state;
   let input: LiveMovePaletteInput | undefined;
+  let spriteInput: LiveMoveSpriteAllocatorInput | undefined;
+  const retainedSprites = state.liveMoveSpriteAllocatorHost?.battleCallStart
+      === state.activeBattleCallStart
+    ? state.liveMoveSpriteAllocatorHost : undefined;
+  let spriteHost = retainedSprites?.host;
   if (command?.type === "move-animation" && command.animation) {
     const prepared = prepareLiveMovePalette(host, command.animation);
     host = prepared.next;
     input = prepared.input;
+    if (spriteHost && retainedSprites?.commandKey !== commandKey) {
+      if (command.animation.moveId === 113) {
+        const spritePrepared = prepareLiveMoveSpriteAllocator(spriteHost, command.animation);
+        spriteHost = spritePrepared.next;
+        spriteInput = spritePrepared.input;
+      }
+    } else if (retainedSprites?.commandKey === commandKey) {
+      spriteInput = resolution.liveMoveSpriteAllocatorInput;
+    }
   } else if (command !== undefined && (command.type === "move-animation"
     || command.type === "switch-out" || command.type === "switch-in"
     || command.type === "party-summary" || command.type === "trainer-slide"
     || (command.type === "sprite-visibility" && command.recall))) {
     // Ball/summary callbacks need their own persistent palette providers.
     host = invalidateLiveMovePaletteHost(host);
+    if (spriteHost) spriteHost = invalidateLiveSpriteAllocatorHost(spriteHost);
+  }
+  if ((hasTrailingUnknownGraphics || crossedUnknownGraphics) && spriteHost) {
+    spriteHost = invalidateLiveSpriteAllocatorHost(spriteHost);
   }
   // The active command's palette input was captured above. Any unprojected
   // graphics events after the segment's final command affect only the
@@ -2070,8 +2117,12 @@ function prepareResolutionPalette(
     liveMovePaletteHost: Object.freeze({
       battleCallStart: state.activeBattleCallStart, commandKey, host, eventCursor,
     }),
+    liveMoveSpriteAllocatorHost: spriteHost === undefined ? undefined : Object.freeze({
+      battleCallStart: state.activeBattleCallStart, commandKey, host: spriteHost,
+    }),
     battleResolutionPresentation: Object.freeze({
       ...resolution, liveMovePaletteInput: input,
+      liveMoveSpriteAllocatorInput: spriteInput,
     }),
   });
 }
@@ -2588,6 +2639,9 @@ export function advanceFactoryRoundBattleCommand(
       const retained = state.liveMovePaletteHost?.battleCallStart === state.activeBattleCallStart
         ? state.liveMovePaletteHost : undefined;
       const entryHost = retained?.host ?? createLiveMovePaletteHost();
+      const retainedSprites = state.liveMoveSpriteAllocatorHost?.battleCallStart
+          === state.activeBattleCallStart
+        ? state.liveMoveSpriteAllocatorHost : undefined;
       return Object.freeze({
         ...state,
         liveMovePaletteHost: state.config.battleScene === "on"
@@ -2601,6 +2655,12 @@ export function advanceFactoryRoundBattleCommand(
                 : {}),
             })
           : state.liveMovePaletteHost,
+        liveMoveSpriteAllocatorHost: state.config.battleScene === "on" && retainedSprites
+          ? Object.freeze({
+              ...retainedSprites,
+              host: invalidateLiveSpriteAllocatorHost(retainedSprites.host),
+            })
+          : state.liveMoveSpriteAllocatorHost,
         battleCommandPresentation: advanced,
         battlePartySelect: createBattlePartySelectState(
           advanced.request,

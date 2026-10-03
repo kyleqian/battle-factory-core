@@ -435,6 +435,23 @@
       ]
     },
     {
+      "move": "MOVE_LIGHT_SCREEN",
+      "id": 113,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/light-screen-live-player.json",
+        "../tools/integration/fixtures/light-screen-live-opponent.json",
+        "../tools/integration/fixtures/light-screen-live-slowpoke-player.json"
+      ],
+      "liveEvidence": [
+        "dense script activation through inactive cleanup/following controller display, both Exeggcute orientations twice and complete Slowpoke twice",
+        "generated command seeds 2/27/45/59/84/114: success then already-active failure, self target, complete text/body and next prompt"
+      ],
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
       "move": "MOVE_HAZE",
       "id": 114,
       "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
@@ -855,14 +872,14 @@
     "source-derived ordinary singles party/B-cancel palette return with explicit known entry provenance; unknown histories and actual switches remain invalidated"
   ],
   "pending": [
-    "production adapters/providers for the remaining 197 accepted Factory moves",
+    "production adapters/providers for the remaining 196 accepted Factory moves",
     "complete graphics ownership across actual switches, forced replacement, summaries, substitute/transform and unmodeled histories",
     "source palette resource plans for 22 implemented adapters without audited ownership"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 79,
+  "implementedCount": 80,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
@@ -914,12 +931,11 @@
   },
   "spriteAllocatorHistory": {
     "availableProvider": "../src/engine/knownEntrySpriteAllocator.ts:createKnownEntrySpriteAllocatorProvider",
-    "liveConsumerRegistered": false,
-    "scope": "Fresh ordinary singles first prompt/first move source allocator helper; unknown later history remains unknown.",
+    "liveConsumerRegistered": true,
+    "scope": "Fresh ordinary singles first prompt/first move source allocator helper consumed by MOVE_LIGHT_SCREEN; complete move callbacks restore the command-field host. Unknown entry/status/switch/summary/substitute/transform history remains unknown.",
     "independentSourceEvidence": "../tools/integration/fixtures/known-entry-sprite-allocator-supervisor-receipt.json",
-    "nextConsumer": "MOVE_LIGHT_SCREEN",
+    "nextConsumer": null,
     "remaining": [
-      "live presentation seam consumer",
       "unknown entry",
       "status history",
       "switch",

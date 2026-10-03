@@ -1,4 +1,5 @@
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
+import type { LiveMoveSpriteAllocatorInput } from "./liveMoveSpriteAllocator.ts";
 import { battleMoveAnimationRequest, type BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import {
   battleCommandFieldBattlerFromPartyMember,
@@ -379,6 +380,7 @@ export type BattleResolutionOpponentTrainer = Readonly<{
 
 export type BattleResolutionPresentationState = Readonly<{
   liveMovePaletteInput?: LiveMovePaletteInput;
+  liveMoveSpriteAllocatorInput?: LiveMoveSpriteAllocatorInput;
   resolutionId: Readonly<{
     requestId: number;
     side: "player";

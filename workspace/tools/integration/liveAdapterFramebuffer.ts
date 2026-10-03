@@ -13,6 +13,8 @@ import speciesStats from "../../src/data/gen/species-stats.json" with { type: "j
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
 import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
+import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
+import { prepareLiveMoveSpriteAllocator } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
@@ -60,7 +62,8 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
   const field: BattleResolutionDisplayedField = { player: makeBattler("player"), opponent: makeBattler("opponent") };
   const attacker = f.attacker.geometry.side === "player" ? 0 : 1;
   const request: BattleMoveAnimationRequest = {
-    moveId: ids[f.move]!, attacker, target: attacker === 0 ? 1 : 0,
+    moveId: ids[f.move]!, attacker,
+    target: f.move === "LIGHT_SCREEN" ? attacker : attacker === 0 ? 1 : 0,
     turn: f.body === "shattered-wall" ? 1 : 0, power: 0, damage: 0, friendship: 70, multihit: 0,
   };
   if (liveMoveAnimationDuration(request) === null) throw new Error(`No live adapter for ${f.move}`);
@@ -75,7 +78,15 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
     field, fieldArt: createBattleCommandFieldArtView(field),
     healthboxes: { player: healthbox(field.player), opponent: healthbox(field.opponent) },
     message: { lines: [`${attacker === 1 ? "Foe " : ""}${f.attacker.species} used`, `${name}!`], visibleCharacters: 99 },
-    effect: { type: "move", request, age },
+    effect: {
+      type: "move", request, age,
+      ...(f.move === "LIGHT_SCREEN"
+        ? { spriteAllocatorInput: prepareLiveMoveSpriteAllocator(
+            createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles").firstMove,
+            request,
+          ).input }
+        : {}),
+    },
     visibility: { player: { sprite: true, healthbox: true }, opponent: { sprite: true, healthbox: true } },
     waitCursor: null, bottom: "message", confirmHandoff: null, switchIn: null,
     midBattleSwitchIn: null, switchOut: null, partySummary: null, midBattleSwitchFade: null,
