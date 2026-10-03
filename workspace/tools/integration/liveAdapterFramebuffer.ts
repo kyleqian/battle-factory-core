@@ -5,8 +5,8 @@
  */
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFileSync, realpathSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { cpSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import moveData from "../../src/data/gen/moves.json" with { type: "json" };
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
@@ -22,7 +22,7 @@ import { createScratchDir } from "../lib/scratch.ts";
 export interface Fixture {
   sourceFixture?: string;
   move: string;
-  denseWindow?: { startFrame: number; endFrame: number };
+  denseWindow?: { startFrame: number; endFrame: number; ageOffset?: number };
   sourceWindow?: { startFrame: number; endFrame: number };
   probeMoveId?: number;
   probe: string;
@@ -88,7 +88,7 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
   // These shared source probes require the selected move as a CLI argument.
   const moveArgumentProbes = [
     "tools/compare/poisonFangProbe.py", "tools/compare/crunchProbe.py",
-    "tools/compare/crushClawProbe.py",
+    "tools/compare/crushClawProbe.py", "tools/compare/takeDownProbe.py",
   ];
   const probeMoveId = fixture.probeMoveId
     ?? (moveArgumentProbes.includes(fixture.probe) ? ids[fixture.move] : undefined);
@@ -115,7 +115,9 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
       || frames.some((f, i) => f.frame !== window.startFrame + i))) {
       throw new Error("Probe omitted part of the complete source window");
     }
-    const rows = frames.map((frame, age) => {
+    const ageOffset = fixture.denseWindow?.ageOffset ?? 0;
+    const rows = frames.map((frame, rowIndex) => {
+      const age = rowIndex + ageOffset;
       const rgb = readFileSync(join(rgbDir, `${String(frame.frame).padStart(5, "0")}.rgb`));
       if (rgb.length !== 240 * 160 * 3 || hash(rgb) !== frame.sha256) throw new Error("Source RGB receipt drift");
       const rgba = new Uint8Array(240 * 160 * 4);
@@ -132,12 +134,20 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
     });
     const expectedDuration = liveMoveAnimationDuration((liveView(fixture, 0).effect as { request: BattleMoveAnimationRequest }).request);
     const receipt = {
-      fixture: path, run, scratch, expectedDuration, rows: rows.length,
+      fixture: path, run, scratch, expectedDuration, ageOffset, rows: rows.length,
       exactRows: rows.filter(r => r.residualPixels === 0).length,
       residualPixels: rows.reduce((a, r) => a + r.residualPixels, 0),
       digest: hash(Buffer.from(JSON.stringify(rows))), firstMismatches: rows.filter(r => r.residualPixels > 0).slice(0, 5),
     };
     writeFileSync(join(scratch, "live-comparison.json"), JSON.stringify({ ...receipt, comparisons: rows }, null, 2) + "\n");
+    const retainedRoot = process.env.POKEBENCH_LIVE_EVIDENCE_DIR;
+    if (retainedRoot) {
+      mkdirSync(retainedRoot, { recursive: true });
+      cpSync(scratch, join(retainedRoot, `${basename(path, ".json")}-run${run}`), {
+        recursive: true,
+        errorOnExist: true,
+      });
+    }
     results.push(receipt);
   }
   if (results.some(r => r.digest !== results[0]!.digest)) throw new Error("Fresh source/live results differ");
@@ -148,6 +158,6 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   for (const path of process.argv.slice(2)) {
     const results = verifyLiveAdapterFramebuffer(path);
     console.log(JSON.stringify(results, null, 2));
-    if (results.some(r => r.exactRows !== r.rows || r.expectedDuration !== r.rows)) process.exitCode = 1;
+    if (results.some(r => r.exactRows !== r.rows || r.expectedDuration !== r.rows + r.ageOffset)) process.exitCode = 1;
   }
 }

@@ -29,6 +29,7 @@ import { SPORE_FRAME_COUNT } from "../animation/spore.ts";
 import { STOMP_FRAME_COUNT } from "../animation/stomp.ts";
 import { STUN_SPORE_FRAME_COUNT } from "../animation/stunSpore.ts";
 import { GRASS_WHISTLE_WINDOW_FRAMES } from "../animation/grassWhistle.ts";
+import { DOUBLE_EDGE_FRAME_COUNT } from "../animation/doubleEdge.ts";
 import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
 
 import { ACID_ARMOR_FIRST_INACTIVE_AGE } from "../animation/acidArmor.ts";
@@ -46,8 +47,8 @@ import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
-  2, 5, 11, 14, 21, 23, 25, 27, 29, 39, 41, 43, 44, 47, 48, 50,
-  67, 74, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 114, 122,
+  2, 5, 11, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 43, 44, 47, 48, 50,
+  66, 67, 74, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 114, 122,
   131, 136, 147, 151, 154, 156, 158, 163, 178, 186, 204, 211, 213, 223, 227, 231,
   242, 246, 247, 264, 280, 281, 287, 305, 306, 319, 320, 321, 325, 336, 337, 342,
   347,
@@ -64,6 +65,9 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 25: return 160; // Mega Kick source body through first inactive row.
     case 27: return 55; // Rolling Kick source body through first inactive row.
     case 29: return 48; // headbuttAtAge: active through 46, then cleanup.
+    case 34: return 107; // Body Slam source body through final cleanup row.
+    case 36: return 98; // Take Down source body through final cleanup row.
+    case 38: return DOUBLE_EDGE_FRAME_COUNT;
     case 39: return TAIL_WHIP_FRAME_COUNT;
     case 41: return 37; // Twineedle's two stingers through clearmonbg cleanup.
     case 43: return 70; // Leer source body through its last ShakeMon2 row.
@@ -71,6 +75,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // Full source-script body, including the target-monbg / palette cleanup.
     case 47: return request.attacker === 0 ? 245 : 248;
     case 48: return 51; // First Supersonic ring through the final inactive row.
+    case 66: return 124; // Submission source body through monbg cleanup.
     case 67: return 33; // Low Kick source body through first inactive row.
     case 78:
     case 79: return STUN_SPORE_FRAME_COUNT;
@@ -207,12 +212,16 @@ export function liveMoveAnimationPresentation(
         },
       } }, target, fieldProfile };
       break;
+    case 34: config = { move: "BODY_SLAM", attacker, target, fieldProfile }; break;
+    case 36: config = { move: "TAKE_DOWN", attacker, target, fieldProfile }; break;
+    case 38: config = { move: "DOUBLE_EDGE", attacker, target, fieldProfile }; break;
     case 39: config = { move: "TAIL_WHIP", attacker, target, fieldProfile }; break;
     case 41: config = { move: "TWINEEDLE", attacker, target, fieldProfile }; break;
     case 43: config = { move: "LEER", attacker, target, fieldProfile }; break;
     case 44: config = { move: "BITE", attacker, target, fieldProfile }; break;
     case 47: config = { move: "SING", attacker, target, fieldProfile }; break;
     case 48: config = { move: "SUPERSONIC", attacker, target, fieldProfile }; break;
+    case 66: config = { move: "SUBMISSION", attacker, target, fieldProfile }; break;
     case 67: config = { move: "LOW_KICK", attacker, target, fieldProfile }; break;
     case 78: config = { move: "STUN_SPORE", attacker, target, fieldProfile }; break;
     case 79: config = { move: "SLEEP_POWDER", attacker, target, fieldProfile }; break;

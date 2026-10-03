@@ -1440,6 +1440,7 @@ import {
 import {
   SLIDE_BACK_ATTACKER_AGE,
   TARGET_PUSH_FIRST_STEP_AGE,
+  WIND_UP_FIRST_STEP_AGE,
 } from "../animation/takeDown.ts";
 import {
   BG_WHITE_RAMP_FIRST_AGE,
@@ -19406,14 +19407,14 @@ export function renderSceneOnMovePresentation(
       age: bodyState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "LICKITUNG"
+      (liveField || view.attacker.species === "LICKITUNG")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "LICKITUNG"
+      (liveField || view.attacker.species === "LICKITUNG")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -19424,13 +19425,17 @@ export function renderSceneOnMovePresentation(
     const lickitungSource = playerToOpponent
       ? bodySlamArt.lickitungBack
       : bodySlamArt.lickitungFront;
-    const lickitung = playerToOpponent
-      ? lickitungSource
-      : {
-          ...lickitungSource,
-          tileset: subTileset(lickitungSource.tileset, 0, 8),
-        };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const lickitung = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
+        ? lickitungSource
+        : {
+            ...lickitungSource,
+            tileset: subTileset(lickitungSource.tileset, 0, 8),
+          };
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -19491,6 +19496,7 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -19528,6 +19534,7 @@ export function renderSceneOnMovePresentation(
       "BODY SLAM!",
       99,
     );
+    }
     return;
   }
 
@@ -19549,14 +19556,14 @@ export function renderSceneOnMovePresentation(
       age: submissionState.age - 2,
     });
     const playerToOpponent =
-      view.attacker.species === "POLIWRATH"
+      (liveField || view.attacker.species === "POLIWRATH")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "LICKITUNG"
+      && (liveField || view.target.species === "LICKITUNG")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "POLIWRATH"
+      (liveField || view.attacker.species === "POLIWRATH")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "LICKITUNG"
+      && (liveField || view.target.species === "LICKITUNG")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -19564,8 +19571,12 @@ export function renderSceneOnMovePresentation(
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const poliwrath = playerToOpponent ? poliwrathBackSprite : poliwrathFrontSprite;
-    const lickitung = playerToOpponent ? lickitungFrontSprite : lickitungBackSprite;
+    const poliwrath = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? poliwrathBackSprite : poliwrathFrontSprite;
+    const lickitung = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? lickitungFrontSprite : lickitungBackSprite;
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -19612,6 +19623,7 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -19649,6 +19661,7 @@ export function renderSceneOnMovePresentation(
       "SUBMISSION!",
       99,
     );
+    }
     return;
   }
 
@@ -51492,14 +51505,14 @@ export function renderSceneOnMovePresentation(
     const windupDisplayed = sceneOnTakeDownView({ ...state, age: state.age - 2 });
     const displayedAge = displayed.age;
     const playerToOpponent =
-      view.attacker.species === "SWABLU"
+      (liveField || view.attacker.species === "SWABLU")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "SWABLU"
+      (liveField || view.attacker.species === "SWABLU")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -51507,19 +51520,27 @@ export function renderSceneOnMovePresentation(
       );
     }
     const attackerSource = playerToOpponent ? swabluBackSprite : swabluFrontSprite;
-    const attackerSprite = playerToOpponent
-      ? attackerSource
-      : {
-          ...attackerSource,
-          tileset: {
-            columns: 8,
-            rows: 8,
-            tiles: attackerSource.tileset.tiles.slice(0, 64),
-          },
-        };
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerSprite = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
+        ? attackerSource
+        : {
+            ...attackerSource,
+            tileset: {
+              columns: 8,
+              rows: 8,
+              tiles: attackerSource.tileset.tiles.slice(0, 64),
+            },
+          };
+    const targetSprite = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+      : { x2: 0, y2: 0 };
+    const attackerIdle = liveField && opponentToPlayer
+      && state.age < WIND_UP_FIRST_STEP_AGE + 2
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
       : { x2: 0, y2: 0 };
     const black = { r: 0, g: 0, b: 0 };
     const darken = displayed.blendDarken;
@@ -51549,8 +51570,8 @@ export function renderSceneOnMovePresentation(
       fb,
       attackerSprite.tileset,
       battlerPalette(attackerSprite.palette),
-      view.attacker.geometry.spriteCorner.x + attackerX2,
-      view.attacker.geometry.spriteCorner.y + attackerY2,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2 + attackerX2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2 + attackerY2,
     );
     const drawTarget = () => drawSpriteSheet(
       fb,
@@ -51582,6 +51603,7 @@ export function renderSceneOnMovePresentation(
         false,
       );
     }
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -51619,6 +51641,7 @@ export function renderSceneOnMovePresentation(
       "TAKE DOWN!",
       99,
     );
+    }
     return;
   }
 
@@ -52925,22 +52948,26 @@ export function renderSceneOnMovePresentation(
     const displayed = sceneOnDoubleEdgeView({ ...state, age: state.age - 1 });
     const task = sceneOnDoubleEdgeView({ ...state, age: state.age - 2 });
     const playerToOpponent =
-      view.attacker.species === "HITMONTOP"
+      (liveField || view.attacker.species === "HITMONTOP")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "HITMONTOP"
+      (liveField || view.attacker.species === "HITMONTOP")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged DOUBLE_EDGE pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const hitmontop = playerToOpponent ? hitmontopBackSprite : hitmontopFrontSprite;
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const hitmontop = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? hitmontopBackSprite : hitmontopFrontSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
@@ -53003,6 +53030,10 @@ export function renderSceneOnMovePresentation(
     const attackerY2 = attackerLungeActive || rotateY2Active
       ? task.attackerOffset.y2
       : displayed.attackerOffset.y2;
+    const attackerIdle = liveField && opponentToPlayer
+      && state.age < ELLIPSE_FIRST_AGE + 2
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
+      : { x2: 0, y2: 0 };
     // The target rests at its front-idle x2 (ONIX front x2=1) through the
     // move-owned hold (probe RAM ages 0-69, displayed 1-70); the -32 push
     // slide's tick-0 write (RAM 70) then displays at age 71. Opponent-front
@@ -53053,8 +53084,8 @@ export function renderSceneOnMovePresentation(
       attackerPalette,
       view.attacker.geometry.spriteCorner,
       task.attackerTransform,
-      attackerX2,
-      attackerY2,
+      attackerIdle.x2 + attackerX2,
+      attackerIdle.y2 + attackerY2,
     );
     drawBattler(
       onix.tileset,
@@ -53078,6 +53109,7 @@ export function renderSceneOnMovePresentation(
       );
     }
     const profile = state.config.fieldProfile;
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -53113,6 +53145,7 @@ export function renderSceneOnMovePresentation(
       "DOUBLE-EDGE!",
       99,
     );
+    }
     return;
   }
 

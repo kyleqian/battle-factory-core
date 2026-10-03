@@ -12,10 +12,11 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 /** Legal generated rentals/opponent; only ordinary command input follows generation. */
 export function generatedCommandAnimationReplay(
   seed: number, battleScene: "on" | "off", moveSlots: readonly (0 | 1 | 2 | 3 | { switch: 1 | 2 })[],
+  factoryWinStreak = 0,
 ) {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
     id: `live-animation-generated-${seed}`, rngValue: seed, battleScene,
-    factoryWinStreak: 0, playerTrainerId: 416049562,
+    factoryWinStreak, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
     rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
   }));
