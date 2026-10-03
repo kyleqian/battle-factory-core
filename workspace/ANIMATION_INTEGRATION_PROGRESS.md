@@ -1,5 +1,29 @@
 # Animation integration progress
 
+
+## 2026-10-02 — Light Screen candidate withheld after independent seam review
+
+- State: master remains green accepted production `695e10751`; adapters79,
+  plans58 (57/79 live), Factory276/277, remaining197, whole exact0. Candidate
+  `d12db7f0b` stays on `worker/integration-20261002-221128`, unmerged.
+- Proof: supervisor repeats player115/opponent119 and Slowpoke wall75 rows,
+  twice fresh: 618 exact rows, zero pixels. Six ordinary seeds render690 ages,
+  success then already-active failure, next prompt, eighteen ON/OFF full
+  rules/RNG boundaries exact (only scene bit excluded), semantic self-target0.
+- Blocker: source occupancy `[0,1,2,6,8,60,61,62,63]` is copied into production
+  without a lifecycle recipe. Renderer also overrides completed controller
+  text with raw body age; six actual routes supply fully printed messages
+  but candidate displays one character at entry. Slowpoke only proves ages40..114.
+- Resume: derive ordinary sprite allocations and history bounds from source;
+  attach the script-load phase to a owned live event clock without reprinting
+  controller text; prove the complete alternate load/body/cleanup window.
+  `tools/integration/fixtures/light-screen-supervisor-review.json` records
+  independent evidence and precise limits. No adapter credit or Factory changes.
+- Worker full11755/build844 passed on candidate; independent final full pair
+  is running on accepted master. Preview `ae925089c` remains verified. Preserve
+  candidate ref/logs/raw evidence; continue bounded status source checkpoint.
+  No material user decision deferred.
+
 ## 2026-10-02 — ordinary party/B-cancel palette ownership restored
 
 - State: clean-folded `695e10751`. Known entry retained as explicit pending
@@ -50,28 +74,3 @@
   worker ref/logs and all needed raw evidence retained.
 - Next: source-owned ordinary party/B-cancel return from this corrected base.
   Initial unknown/status histories must stay unknown. No material choice deferred.
-
-## 2026-10-02 — eight palette plans accepted; 57/79 live ownership
-
-- State: clean-folded `c8f2a79e9` production plus scoped test/tool follow-ups.
-  Pin Missile, Drill Peck, Growth, Razor Leaf, Haze, Acid Armor, Needle Arm,
-  Metal Sound bring plans to 58, live coverage 57/79. Adapters stay 79;
-  Factory stays 276/277; 197 bodies still need adapters. No gameplay changes.
-- Proof: supervisor independently repeated 32 source runs (eight plans,
-  bilateral, twice fresh): allocation/tags, retained unfaded rows, cleanup,
-  following Shadow Punch scratch and actual faded blends exact. RAM ownership
-  claim only; arbitrary-history framebuffer exact stays zero.
-- Corrections: legal native Emerald Cacnea344/Aron382 carriers; excluded
-  Thunder Punch9 and Secret Power290 because conditional paralysis allocates
-  unowned SPARK_2. No-status seeds cannot establish that history.
-- Gates: worker 1,481 files / 11,749 tests (223 skipped), typecheck, build
-  844 modules; supervisor 21 affected plus 3 boundary and 448 smoke pass.
-  Same-code full pair reused. Independent receipt:
-  `tools/integration/fixtures/live-palette-batch-supervisor-receipt.json`;
-  all source pass/failure/gate evidence retained in primary validation.
-- Preview: <http://127.0.0.1:5191/> serves `f3531d7b3`: eight canvas/PNG
-  hashes, export, ON -> OFF -> ON and no browser/console errors pass.
-  Receipt `playable-preview-f3531d7b3-receipt.json`. Accepted worktree removed;
-  worker ref/logs and all needed raw evidence retained.
-- Next: source-owned ordinary party/B-cancel return, with unknown status/history
-  invalidation. Twenty-two live palette plans remain. No material decision deferred.
