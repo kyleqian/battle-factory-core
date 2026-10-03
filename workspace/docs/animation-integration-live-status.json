@@ -911,5 +911,22 @@
     "sourceReceipt": "../tools/integration/fixtures/party-cancel-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed",
     "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261002.json"
+  },
+  "spriteAllocatorHistory": {
+    "availableProvider": "../src/engine/knownEntrySpriteAllocator.ts:createKnownEntrySpriteAllocatorProvider",
+    "liveConsumerRegistered": false,
+    "scope": "Fresh ordinary singles first prompt/first move source allocator helper; unknown later history remains unknown.",
+    "independentSourceEvidence": "../tools/integration/fixtures/known-entry-sprite-allocator-supervisor-receipt.json",
+    "nextConsumer": "MOVE_LIGHT_SCREEN",
+    "remaining": [
+      "live presentation seam consumer",
+      "unknown entry",
+      "status history",
+      "switch",
+      "in-battle summary",
+      "substitute",
+      "transform",
+      "arbitrary-history framebuffer parity"
+    ]
   }
 }

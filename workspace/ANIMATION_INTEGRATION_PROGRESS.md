@@ -1,5 +1,28 @@
 # Animation integration progress
 
+## 2026-10-03 — known-entry sprite allocator provider verified
+
+- Production helper `277834353`, tested tree `02b775a5d988d6884c722a48829c8b01931c8e64`;
+  adapters79, accepted276, remaining197. No move adapter promoted.
+- `createKnownEntrySpriteAllocatorProvider(route)` returns commandPrompt and
+  cursor-free firstMove hosts from ported source operations; semantic owners
+  distinguish mutable templates. Exact in-frame summary/ball destruction and
+  reuse traced, first/end allocator returns verified. No captured slot recipe.
+- Supervisor six fresh direct-mGBA runs: both Exeggcute sides twice (82 calls
+  each), complete Slowpoke twice (84 each), raw pairs identical. Canonical
+  ordinary-input first prompt agrees at1886; detailed call order is the Lab proof.
+- Receipt `tools/integration/fixtures/known-entry-sprite-allocator-supervisor-receipt.json`;
+  raw `.integration/validation/known-entry-provider-supervisor-9f98134ea/`.
+  Worker exploratory/failure and final folders copied to primary; ref/logs kept.
+- Gates: independent14files/476smoke+affected; worker FINAL277834353 full
+  1,483files/11,761tests (223skipped), build844; scoped source/coverage/audit/diff pass.
+  Clean fast-forward reuses same-code full/build under verification contract.
+- Next: immediate provider consumer is Light Screen. Correct activation/wall
+  clock and text ownership; dense full script-load/body/cleanup/following display
+  bilateral twice and Slowpoke complete; ordinary repeats/prompts and full mode
+  parity. Old `d12db7f0b` stays unmerged and uncounted. Later history remains
+  unknown; this helper adds no arbitrary-history framebuffer claim.
+
 ## 2026-10-03 — exact allocator lifecycle source checkpoint
 
 - Accepted tooling `f9bdab222`; production unchanged at `695e10751`, src tree
