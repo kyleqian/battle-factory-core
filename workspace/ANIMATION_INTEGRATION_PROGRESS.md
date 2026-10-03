@@ -18,8 +18,10 @@
   Same-code full pair reused. Independent receipt:
   `tools/integration/fixtures/live-palette-batch-supervisor-receipt.json`;
   all source pass/failure/gate evidence retained in primary validation.
-- Preview: refresh and ordinary browser verification next; previous green
-  service `da75f10e6` still available at <http://127.0.0.1:5191/>.
+- Preview: <http://127.0.0.1:5191/> serves `f3531d7b3`: eight canvas/PNG
+  hashes, export, ON -> OFF -> ON and no browser/console errors pass.
+  Receipt `playable-preview-f3531d7b3-receipt.json`. Accepted worktree removed;
+  worker ref/logs and all needed raw evidence retained.
 - Next: source-owned ordinary party/B-cancel return, with unknown status/history
   invalidation. Twenty-two live palette plans remain. No material decision deferred.
 
