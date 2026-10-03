@@ -965,9 +965,9 @@ Per entry:
   "(1 trace)" with a nonsense combined filename instead of erroring.
   Flagged by the 2026-08-03 typeref slice-2 worker; same zsh trap class
   as the 2026-08-01 session's word-splitting note.
-- **Hits:** 1 (as a worker-facing papercut; the trap class itself is
+- **Hits:** 2 (as a worker-facing papercut; the trap class itself is
   previously known).
-- **Cost each:** ~5 min.
+- **Cost each:** ~5 min; 2026-10-03 allocator worker lost ~1 min on a probe loop.
 - **Workaround:** `${=ARGS}` for explicit splitting, or arrays
   (`"${traces[@]}"`), or pass files via xargs.
 

@@ -1,5 +1,27 @@
 # Animation integration progress
 
+## 2026-10-03 — exact allocator lifecycle source checkpoint
+
+- Accepted tooling `f9bdab222`; production unchanged at `695e10751`, src tree
+  `a5ceb566190019a2cbdd29ea24c9c88318374664`. Adapters79, remaining197.
+- Independent six fresh direct-mGBA runs: both Exeggcute orientations twice
+  and Slowpoke twice, raw pairs identical. Player activation/cleanup303/388,
+  opponent213/298, Slowpoke306/391. Wall3, sparkle4/5/7/4/5/7.
+- Source reset, healthbox, shadow, intro/tray/sendout and command-cursor
+  destruction observed. VBlank deltas coalesce same-frame free/create calls;
+  no runtime recipe, adapter or complete displayed-frame acceptance.
+- Receipt: `tools/integration/fixtures/light-screen-allocator-supervisor-receipt.json`;
+  raw `.integration/validation/light-screen-allocator-supervisor-f9bdab222/`.
+  All worker pass/failure folders copied to primary before cleanup; refs/logs kept.
+- Gates: independent source6/6, focused19/19, Python compile; unchanged
+  boundary/inventory, coverage/audit/source-audit/diff pass. Prior final pair reused.
+- Next: instrument exact in-frame allocator calls and map source callers;
+  implement bounded known-entry provider, then fix Light Screen live activation
+  clock and completed text, prove full body/cleanup/following display twice
+  bilateral plus complete Slowpoke. Candidate `d12db7f0b` stays unmerged.
+- Correction: worker attributed Slowpoke +3 to a longer name. Name is shorter;
+  causal attribution is not accepted. No deferred material decision.
+
 ## 2026-10-03 — Continuation uses the main roadmap
 
 - Setup: integration is S10A in `ROADMAP.md`; normal `./run-supervisor.sh` reads
