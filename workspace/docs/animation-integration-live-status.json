@@ -880,26 +880,27 @@
     "spritePaletteHistory": {
       "sourceCommit": "c8f2a79e9",
       "auditedMovePlans": 58,
-      "claim": "Retained Shadow Punch scratch input across 58 audited move resource plans, covering 57 of 79 implemented adapters. Unknown graphics, switches and party entry remain invalidated. Thunder Punch and Secret Power conditional paralysis resources remain unowned.",
+      "claim": "Retained Shadow Punch scratch input across 58 audited move plans (57/79 adapters), before unknown graphics. Actual semantic status-animation events, switches and party entry invalidate retained history. Current body input remains immutable; Thunder Punch9 and Secret Power290 conditional paralysis ownership remains unmodeled.",
       "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json",
       "receipts": [
         "../tools/integration/fixtures/live-palette-history-receipt.json",
         "../tools/integration/fixtures/live-palette-confusion-history-receipt.json",
         "../tools/integration/fixtures/live-palette-dynamic-punch-history-receipt.json",
         "../tools/integration/fixtures/music-notes-palette-receipt.json",
-        "../tools/integration/fixtures/live-palette-batch-supervisor-receipt.json"
+        "../tools/integration/fixtures/live-palette-batch-supervisor-receipt.json",
+        "../tools/integration/fixtures/status-palette-supervisor-receipt.json"
       ]
     }
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "c8f2a79e9f67be7e10fb5a5828f5d8feff86161d",
+    "productionCodeCommit": "d1bbca89c7d4732c09fadcabba41178b34306d87",
     "typecheck": "passed",
-    "workerFullTest": "1481 files / 11749 tests passed; 44 files / 223 tests skipped",
+    "workerFullTest": "1481 files / 11750 tests passed; 44 files / 223 tests skipped; supervisor tail regression test-only follow-up uses scoped gates",
     "buildModules": 844,
-    "supervisorAffected": "21 palette/host/inventory tests, 3 boundary checks and 448 smoke tests passed",
-    "independentSource": "8 plans \u00d7 both orientations \u00d7 twice fresh: 32 source runs; ownership, retained unfaded rows, cleanup, following scratch and actual faded blend exact; no pixel claim",
-    "sourceReceipt": "../tools/integration/fixtures/live-palette-batch-supervisor-receipt.json",
+    "supervisorAffected": "25 affected tests, 1 trailing-event regression, 448 smoke and typecheck passed",
+    "independentSource": "Eight fresh conditional paralysis source runs: both moves9/290, both orientations, twice; extra SPARK_2 bank7. Ordinary seed549 first/next Lick known->unknown; full three-boundary ON/OFF rules/RNG parity.",
+    "sourceReceipt": "../tools/integration/fixtures/status-palette-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed"
   }
 }

@@ -259,3 +259,29 @@
 - Next: Guillotine, Drill Peck, Counter, Super Fang and Covet; then bounded
   palette ownership. Party-return/switch/unknown-history and Shadow Punch
   framebuffer limits remain explicit. No material user decision deferred.
+
+## 2026-10-02 — physical2c accepted locally; 78 live adapters
+
+- State: clean-folded production `cf212c63a` plus test-only follow-ups:
+  Guillotine, Counter, Super Fang and Covet. Factory stays 276/277;
+  198 accepted bodies need adapters. Gameplay/RNG/damage/progression intact.
+- Proof: independently repeated **1,133 rows/run**, eight complete bilateral
+  windows, twice fresh, **zero pixels**. Ordinary routes reach next commands;
+  Guillotine KO/replacement and failure, Counter success/failure, repeated
+  Super Fang/Covet and all ON/OFF logical state/RNG pass (scene bit excluded).
+  Source integer-half damage is pinned at 158 -> 79 and 87 -> 43.
+- Gates: worker **1,480 files / 11,743 tests** (223 skipped), build **844
+  modules**, typecheck; final test-only follow-ups use scoped checks. Supervisor
+  39 affected tests, final 21 test/boundary/inventory checks and 448 smoke pass;
+  same-production full pair reused. Independent receipt:
+  `tools/integration/fixtures/physical2c-supervisor-receipt.json`; raw evidence,
+  failed Drill Peck windows and worker logs preserved in primary validation.
+- Withheld: Drill Peck player-back remains **108,889 pixels/run**, 91 rows,
+  despite source-correct Fearow max HP 140; opponent-front is exact. Resume with
+  source affine OBJ center/retained pose proof and alternate back geometry.
+- Preview: <http://127.0.0.1:5191/> serves `2a0465df9`, **78 adapters**; eight
+  canvas/PNG hashes, session export, ON -> OFF -> ON and no browser/console
+  errors pass. Receipt: `playable-preview-2a0465df9-receipt.json`. Whole-playable
+  exact stays zero; palette covers 49/78 with party/switch/history limits.
+- Next: bounded Drill Peck geometry proof, then physical palette ownership;
+  no material user decision deferred. Accepted worktree removed; refs/logs/raw evidence retained.

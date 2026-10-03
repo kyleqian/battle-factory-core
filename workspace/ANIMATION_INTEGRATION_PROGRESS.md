@@ -1,5 +1,27 @@
 # Animation integration progress
 
+## 2026-10-02 — actual status graphics invalidate retained palette history
+
+- State: clean-folded `d1bbca89c`; adapters 79, plans 58 (57/79 live),
+  Factory 276/277 and 197 awaiting integration unchanged. A presentation-only
+  cursor consumes unprojected status-animation receipts between commands and
+  at segment tails. Current-body input stays immutable; no gameplay changes.
+- Proof: independent seed549 two-turn Lick route: first body known, actual
+  paralysis event15, next body unknown; three full ON/OFF rules/RNG boundaries
+  equal (only scene bit excluded), next prompt. Separate real-receipt trailing
+  projection regression keeps current input and battle object unchanged.
+- Source: eight fresh controller-input conditional runs: Thunder Punch9 and
+  Secret Power290, both orientations, twice. Stock Status_Paralysis allocates
+  SPARK_2 in bank7. Those move plans remain excluded; status rendering unclaimed.
+- Gates: worker 1,481 files / 11,750 tests (223 skipped), typecheck and build
+  844 modules; supervisor 25 affected + one test-only tail regression, 448
+  smoke and typecheck pass. Same-production full pair reused. Receipt
+  `tools/integration/fixtures/status-palette-supervisor-receipt.json`; all
+  source/gate/log evidence copied into primary validation.
+- Preview: refreshing next; last verified service `f3531d7b3` remains recorded.
+- Next: source-owned ordinary party/B-cancel return from this corrected base.
+  Initial unknown/status histories must stay unknown. No material choice deferred.
+
 ## 2026-10-02 — eight palette plans accepted; 57/79 live ownership
 
 - State: clean-folded `c8f2a79e9` production plus scoped test/tool follow-ups.
@@ -49,29 +71,3 @@
 - Next: bounded missing palette plans, then ordinary party cancellation
   provider. Supervisor source cancellation reconnaissance is preserved. No
   material user decision deferred; accepted worktree removed; worker ref/logs/raw evidence retained.
-
-## 2026-10-02 — physical2c accepted locally; 78 live adapters
-
-- State: clean-folded production `cf212c63a` plus test-only follow-ups:
-  Guillotine, Counter, Super Fang and Covet. Factory stays 276/277;
-  198 accepted bodies need adapters. Gameplay/RNG/damage/progression intact.
-- Proof: independently repeated **1,133 rows/run**, eight complete bilateral
-  windows, twice fresh, **zero pixels**. Ordinary routes reach next commands;
-  Guillotine KO/replacement and failure, Counter success/failure, repeated
-  Super Fang/Covet and all ON/OFF logical state/RNG pass (scene bit excluded).
-  Source integer-half damage is pinned at 158 -> 79 and 87 -> 43.
-- Gates: worker **1,480 files / 11,743 tests** (223 skipped), build **844
-  modules**, typecheck; final test-only follow-ups use scoped checks. Supervisor
-  39 affected tests, final 21 test/boundary/inventory checks and 448 smoke pass;
-  same-production full pair reused. Independent receipt:
-  `tools/integration/fixtures/physical2c-supervisor-receipt.json`; raw evidence,
-  failed Drill Peck windows and worker logs preserved in primary validation.
-- Withheld: Drill Peck player-back remains **108,889 pixels/run**, 91 rows,
-  despite source-correct Fearow max HP 140; opponent-front is exact. Resume with
-  source affine OBJ center/retained pose proof and alternate back geometry.
-- Preview: <http://127.0.0.1:5191/> serves `2a0465df9`, **78 adapters**; eight
-  canvas/PNG hashes, session export, ON -> OFF -> ON and no browser/console
-  errors pass. Receipt: `playable-preview-2a0465df9-receipt.json`. Whole-playable
-  exact stays zero; palette covers 49/78 with party/switch/history limits.
-- Next: bounded Drill Peck geometry proof, then physical palette ownership;
-  no material user decision deferred. Accepted worktree removed; refs/logs/raw evidence retained.
