@@ -2,6 +2,32 @@
 
 
 
+
+## 2026-10-02 — Light Screen source clock separated from prior controller text
+
+- State: source/tool `c3ccc8cd3` accepted; runtime `695e10751` unchanged.
+  Adapters79, plans58 (57/79 live), Factory276/277, remaining197, whole exact0.
+  Candidate `d12db7f0b` remains unmerged; no source allocator recipe claimed.
+- Proof: independent bilateral twice-fresh source clock, reference/tool/source
+  hashes pinned. Player printer269..296, script303, loads304/307, wall310,
+  cleanup388; opponent175..206, script213, loads214/217, wall220, cleanup298.
+  Old currentMove-selected image windows include prior text and end early.
+- Resume: derive intro/sendout/summary creation/destruction and slot ownership;
+  use actual controller activation without reprinting completed attack text;
+  extend dense framebuffer proof through actual script cleanup/following
+  display, including complete alternate Slowpoke, then real command/parity.
+  `light-screen-clock-supervisor-receipt.json` and withheld review retain limits.
+- Gates: source4runs, Python compile, boundary/inventory9, coverage/audit/diff
+  passed. Independent final1,482files /11,754tests and build844 remain valid
+  on unchanged production. Full rules/RNG draft parity at all11boundaries
+  reconfirmed; generated pixels identical to the verified browser artifacts.
+- Preview: <http://127.0.0.1:5191/> serves verified `4815edf58`, eleven exact
+  canvas/PNG samples, exports/restarts and no errors. Accepted worktrees
+  retired after all fresh pass/failure evidence preservation; refs/logs kept.
+- Next: bounded burn-status source witness if deadline permits, then clean
+  final handoff. Actual status histories remain unknown. No material decision
+  deferred; do not dispatch Factory acceptance or Rust work.
+
 ## 2026-10-02 — confusion source checkpoint and independent final production gates
 
 - State: accepted tooling/source `8aefa52bb`; production `695e10751` unchanged.
@@ -47,29 +73,3 @@
   passed on accepted master. Preview `ae925089c` remains verified. Preserve
   candidate ref/logs/raw evidence; continue bounded status source checkpoint.
   No material user decision deferred.
-
-## 2026-10-02 — ordinary party/B-cancel palette ownership restored
-
-- State: clean-folded `695e10751`. Known entry retained as explicit pending
-  provenance; menu stays unknown; B-cancel applies source load/free/return
-  sequence. Unknown entry and actual switches stay unknown. Adapters79,
-  plans58 (57/79 live), Factory276/277 and 197 awaiting integration unchanged.
-- Proof: supervisor fresh bilateral startup/after-Smokescreen runs, twice:
-  eight runs, source callbacks/tags, unfaded rows4..9, twelve later scratch8
-  allocations/faded blends and cleanup exact. Source loads all six icon-table
-  rows, including three ROM-adjacent entries; return has no wireless palette.
-- Routes: initial/repeated known cancellation, unknown Water Gun, actual
-  paralysis and real-switch negatives: eighteen full ON/OFF rules/RNG
-  boundaries exact (only scene marker excluded), complete ages and next prompts.
-- Gates: worker 1,482 files / 11,754 tests (223 skipped), typecheck, build844;
-  supervisor29 affected plus448 smoke pass. Same-code full pair reused.
-  `tools/integration/fixtures/party-cancel-supervisor-receipt.json`; all
-  worker/source/gate/log evidence retained in primary validation.
-- Limits: private rows0..3, menu timing/framebuffer, summaries, forced switch,
-  substitute/transform and unknown-history recovery unclaimed; whole exact0.
-- Preview: <http://127.0.0.1:5191/> serves `ae925089c`: eleven canvas/PNG
-  hashes (party cancellation bodies plus Razor Leaf), six draft logical
-  boundaries, export, ON -> OFF -> ON and no browser/console errors pass.
-  Receipt `playable-preview-ae925089c-receipt.json`. Worktree retired after
-  evidence preservation; worker ref/logs retained. Next: bounded Light Screen
-  adapter, then independent final full pair. No material user decision deferred.

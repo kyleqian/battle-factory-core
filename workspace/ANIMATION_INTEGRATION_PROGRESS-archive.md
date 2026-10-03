@@ -362,3 +362,30 @@
   worker ref/logs and all needed raw evidence retained.
 - Next: source-owned ordinary party/B-cancel return from this corrected base.
   Initial unknown/status histories must stay unknown. No material choice deferred.
+
+
+## 2026-10-02 — ordinary party/B-cancel palette ownership restored
+
+- State: clean-folded `695e10751`. Known entry retained as explicit pending
+  provenance; menu stays unknown; B-cancel applies source load/free/return
+  sequence. Unknown entry and actual switches stay unknown. Adapters79,
+  plans58 (57/79 live), Factory276/277 and 197 awaiting integration unchanged.
+- Proof: supervisor fresh bilateral startup/after-Smokescreen runs, twice:
+  eight runs, source callbacks/tags, unfaded rows4..9, twelve later scratch8
+  allocations/faded blends and cleanup exact. Source loads all six icon-table
+  rows, including three ROM-adjacent entries; return has no wireless palette.
+- Routes: initial/repeated known cancellation, unknown Water Gun, actual
+  paralysis and real-switch negatives: eighteen full ON/OFF rules/RNG
+  boundaries exact (only scene marker excluded), complete ages and next prompts.
+- Gates: worker 1,482 files / 11,754 tests (223 skipped), typecheck, build844;
+  supervisor29 affected plus448 smoke pass. Same-code full pair reused.
+  `tools/integration/fixtures/party-cancel-supervisor-receipt.json`; all
+  worker/source/gate/log evidence retained in primary validation.
+- Limits: private rows0..3, menu timing/framebuffer, summaries, forced switch,
+  substitute/transform and unknown-history recovery unclaimed; whole exact0.
+- Preview: <http://127.0.0.1:5191/> serves `ae925089c`: eleven canvas/PNG
+  hashes (party cancellation bodies plus Razor Leaf), six draft logical
+  boundaries, export, ON -> OFF -> ON and no browser/console errors pass.
+  Receipt `playable-preview-ae925089c-receipt.json`. Worktree retired after
+  evidence preservation; worker ref/logs retained. Next: bounded Light Screen
+  adapter, then independent final full pair. No material user decision deferred.

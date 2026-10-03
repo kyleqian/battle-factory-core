@@ -191,12 +191,14 @@
   "resumeConditions": [
     "Derive sprite allocator initial occupancy and history limits from source lifecycle; captured [0,1,2,6,8,60,61,62,63] is not a production source recipe.",
     "Preserve completed controller message printing; attach any script-load phase to an explicitly owned live event clock instead of overriding visibleCharacters from body age.",
-    "Prove complete source-owned load/body/cleanup window for alternate Slowpoke as well as both Exeggcute orientations. Current Slowpoke witness begins at wall age40 (75 rows)."
+    "Prove complete source-owned load/body/cleanup window for alternate Slowpoke as well as both Exeggcute orientations. Current Slowpoke witness begins at wall age40 (75 rows).",
+    "Independent actual animation script active at303/213, cleanup388/298. Older currentMove-selected image windows include preceding controller text and end before actual script cleanup; extend full integration proof."
   ],
   "countsUnchanged": {
     "adapters": 79,
     "awaitingIntegration": 197,
     "wholePlayableExact": 0
   },
-  "claim": "Exact bounded candidate framebuffer evidence and ordinary rules parity do not waive source ownership or controller seam requirements. Candidate deliberately withheld."
+  "claim": "Exact bounded candidate framebuffer evidence and ordinary rules parity do not waive source ownership or controller seam requirements. Candidate deliberately withheld.",
+  "sourceClockReceipt": "tools/integration/fixtures/light-screen-clock-supervisor-receipt.json"
 }
