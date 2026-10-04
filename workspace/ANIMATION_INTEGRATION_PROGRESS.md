@@ -1,5 +1,22 @@
 # Animation integration progress
 
+## 2026-10-04 — anchor3 batch (118 live), net-zero list 110, #142 scoped
+
+- Folded anchor3 `02d753d84` as `6faa70568` (src tree `dabce926b`): Endure,
+  Focus Energy, Facade, Minimize, Thunder, Thunder Wave, Swagger, Bulk Up
+  (fields mapped from `liveBattlerAnchors`; row-0 shadow and opponent idle
+  applied in these branches). Rung 0 widened the audited net-zero list to all
+  110 then-live ids: Light Screen now exact after Bubble Beam/Acid, Mirror Coat
+  after Bubble Beam. Adapters 118, remaining 158.
+- Supervisor: dense 16 fixtures twice fresh, 2,250 rows/run, zero residual;
+  routes 8/8 and eligibility 5/5. Worker full gate had one expected route
+  failure (fixed test-only), so the supervisor ran a fresh full suite and build
+  on `6faa70568`: 1,489 files / 11,884 tests passed, build 847 modules.
+  Receipt `anchor3-supervisor-receipt.json`.
+- #142 scope scan folded (`760b0cb04`): 101/110 live ids miss the elevated
+  row-0 shadow as target, 89 as attacker; draw order says insert right after
+  the battle background. Fix step queued after the selectors batch.
+
 ## 2026-10-04 — alternate-species dense proofs confirm ISSUES #142
 
 - Side-lane evidence `6a018f986` folded (new files only): twelve alternate-

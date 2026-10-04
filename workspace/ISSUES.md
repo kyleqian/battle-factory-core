@@ -38,6 +38,13 @@ gameplay unaffected.
    Hyper Fang with Rattata is correct. Heat Wave/Block/Mud Shot/Hydro Pump/Bubble Beam/Cross Chop/Sludge/
    Role Play/Spite have the same code shape but no legal Onix/Rattata carrier (untestable, not cleared).
 
+**Scope (2026-10-04 scan, `tools/integration/issue142Scan.ts`, `docs/issue142-scan.md`):** of 110 live
+ids, 101 miss the row-0 shadow with an elevated opponent target and 89 with an elevated opponent attacker; none
+draw it on row 1. Source draw order: shadow OBJ priority 3 (`battle_anim_smokescreen.c:144`), subpriority 0xC8
+(`battle_gfx_sfx_util.c:1186`), battlers priority 2 — the shadow is the rearmost OBJ, so it belongs right after
+each branch's battle background and before battlers/effects. The idle-x2 half only matters for moves ONIX or
+RATTATA can legally use in the Factory (compute from `src/data/gen/battle-frontier-mons.json`).
+
 **Fix shape:** one generic, source-cited live-path rule for the row-0 elevated-opponent shadow (draw order
 from the shadow OBJ's priority/subpriority, not an overlay guess) applied to every live branch, plus the
 opponent-attacker rest offset where the source applies it. **Acceptance:** all alt-species cases in

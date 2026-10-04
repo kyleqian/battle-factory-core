@@ -1609,13 +1609,13 @@
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "da5965fc2",
+    "productionCodeCommit": "6faa70568",
     "typecheck": "passed",
-    "workerFullTest": "1488 files / 11858 tests passed; 44 files / 223 tests skipped",
+    "workerFullTest": "supervisor full 1489 files / 11884 tests passed; 44 files / 223 tests skipped (fresh on the merged union)",
     "buildModules": 847,
-    "supervisorAffected": "7 affected files / 56 tests and 448 smoke passed (allocator history persistence)",
-    "independentSource": "allocator history persistence: 17 eligibility routes PASS; no renderer change (anchor2 2204, wall 1056, anchor 1692, glow 1496, fieldfx 1611 rows/run twice fresh earlier today)",
-    "sourceReceipt": "../tools/integration/fixtures/allocator-history-persistence-supervisor-receipt.json",
+    "supervisorAffected": "9 affected files / 96 tests and 448 smoke passed (anchor3)",
+    "independentSource": "anchor3 sixteen fixtures twice fresh, 2250 rows/run, zero residuals; 13 routes PASS",
+    "sourceReceipt": "../tools/integration/fixtures/anchor3-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed",
     "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261002.json"
   },
