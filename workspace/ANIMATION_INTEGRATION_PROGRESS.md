@@ -1,5 +1,17 @@
 # Animation integration progress
 
+## 2026-10-04 — net-zero audit extended to all 110 live ids
+
+- Side-lane evidence `fa3cefa22` folded (new files only): receipt
+  `tools/integration/fixtures/allocator-net-zero-audit-ext.json` (with a
+  `combined` section), doc `docs/allocator-net-zero-audit-ext.md`, new staged
+  scenarios for Twineedle, Bite, Hyper Fang, Super Fang and Shadow Punch.
+- 20 new rows (anchor + anchor2 batches, the five previously unaudited ids,
+  Fury Swipes opponent), twice fresh, all net-zero; combined 110/110 live ids
+  net-zero, none uncovered. Supervisor rerun of both Bite rows identical.
+- The in-flight history-persistence worker pins against the original receipt;
+  widening its constant to the combined list is a follow-up.
+
 ## 2026-10-04 — anchor2 batch: seven picture-anchor adapters (110 live)
 
 - Folded worker `66952b8fb` (tested code `26b46eff4`, src tree `08b2ac222`):
