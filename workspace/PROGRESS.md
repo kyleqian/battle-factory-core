@@ -5,11 +5,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-04 — Light Screen + six adapter batches folded (118 live)
+## 2026-10-04 — Light Screen + seven adapter batches folded (122 live)
 
-- **State:** S10A, local master; 118 live adapters, 158 accepted bodies
+- **State:** S10A, local master; 122 live adapters, 154 accepted bodies
   remain (Light Screen, fieldfx 6, glow 5, anchor 7, wall 5, anchor2 7,
-  anchor3 8). Supervisor full suite on `6faa70568`: 1,489 files / 11,884
+  anchor3 8, selectors 4). Supervisor full suite on `6faa70568`: 1,489 files / 11,884
   tests, build 847.
   Opus supervisor with Sonnet workers.
 - **Did:** repair worker cherry-picked withheld candidate `84f2e5264` and made
@@ -43,7 +43,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   decided by alternate-species dense proofs in the side lane.
 - **Also:** ISSUES #142 filed and scoped: most live bodies miss an elevated
   opponent's shadow on their first frame (alternate-species proofs + scan).
-- **Next:** selectors batch (running), then the #142 fix across all branches. Oracle freshness FAIL at orient was a false positive:
+- **Next:** #142 fix across all branches from the per-move shadow-row table. Oracle freshness FAIL at orient was a false positive:
   only workspace commits since service start; both services kept.
 - **Notes:** no material decision deferred.
 

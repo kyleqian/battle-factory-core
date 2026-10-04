@@ -1,5 +1,20 @@
 # Animation integration progress
 
+## 2026-10-04 — selectors batch: four request-selector adapters (122 live)
+
+- Folded worker `e6d6c056f` (tested code `786a17110`, src tree `379f96d40`):
+  Solar Beam (turn bit 0), Present (damage > 0), Moonlight (healing anchor),
+  Whirlpool main body. Adapters 122, remaining 154. Harness gained
+  requestFields/denseSegments/messageLines.
+- Dropped with blockers: Reversal (source shake +ceil/-floor of
+  clamp(power/12) vs accepted reducer A/0), Soft-Boiled (hard-coded Onix
+  corners), Double Slap/Comet Punch/Triple Kick (request.turn maps; per-hit
+  dense windows not built).
+- Supervisor dense: twelve fixtures + three older regression fixtures through
+  the new harness, twice fresh, 2,737 rows/run, zero residual; routes 4/4 incl.
+  both Solar Beam bodies and both Present branches. Worker full 1,490 files /
+  11,900 tests reused. Receipt `selectors-supervisor-receipt.json`.
+
 ## 2026-10-04 — #142 per-move shadow-row table banked
 
 - Side-lane evidence `9de65cf17` folded (new files only):
