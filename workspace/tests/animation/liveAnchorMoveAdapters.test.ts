@@ -18,19 +18,19 @@ import { generatedCommandAnimationReplay } from "../../tools/integration/generat
 type Anchor = "projectileOrigin" | "attackerSpriteCenter";
 const cases = [
   { id: 51, move: "ACID", fixture: "acid-%s-ekans-%s-onix", anchor: "projectileOrigin", duration: 131, effectAge: 60,
-    route: { seed: 100, slot: 0, streak: 0 } },
+    route: { seed: 26, slot: 1, streak: 0 } },
   { id: 124, move: "SLUDGE", fixture: "sludge-%s-grimer-%s-onix", anchor: "projectileOrigin", duration: 102, effectAge: 50,
-    route: { seed: 100, slot: 0, streak: 0 } },
+    route: { seed: 4, slot: 0, streak: 0 } },
   { id: 188, move: "SLUDGE_BOMB", fixture: "sludge-bomb-%s-weepinbell-%s-onix", anchor: "projectileOrigin", duration: 160, effectAge: 70,
-    route: { seed: 100, slot: 0, streak: 0 } },
+    route: { seed: 8, slot: 2, streak: 14 } },
   { id: 55, move: "WATER_GUN", fixture: "water-gun-%s-horsea-%s-onix", anchor: "projectileOrigin", duration: 111, effectAge: 50,
-    route: { seed: 100, slot: 0, streak: 0 } },
+    route: { seed: 91, slot: 1, streak: 0 } },
   { id: 106, move: "HARDEN", fixture: "harden-%s-relicanth-%s-onix", anchor: "attackerSpriteCenter", duration: 101, effectAge: 50,
-    route: { seed: 100, slot: 0, streak: 0 } },
+    route: { seed: 12, slot: 2, streak: 7 } },
   { id: 334, move: "IRON_DEFENSE", fixture: "iron-defense-%s-clamperl-%s-onix", anchor: "attackerSpriteCenter", duration: 101, effectAge: 50,
-    route: { seed: 100, slot: 0, streak: 0 } },
+    route: { seed: 7, slot: 2, streak: 0 } },
   { id: 232, move: "METAL_CLAW", fixture: "metal-claw-%s-charmander-%s-onix", anchor: "attackerSpriteCenter", duration: 140, effectAge: 110,
-    route: { seed: 100, slot: 0, streak: 0 } },
+    route: { seed: 130, slot: 0, streak: 0 } },
 ] as const satisfies readonly { anchor: Anchor }[];
 
 const field = {
