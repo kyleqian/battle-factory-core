@@ -1,0 +1,1532 @@
+{
+ "schema": "wall-family-source-receipt/v1",
+ "move": 243,
+ "name": "mirror-coat",
+ "referenceSha256": {
+  "pokeemerald.gba": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+  "pokeemerald.elf": "3a8aa584d7985c5a74ab10bb6eebd0c41b7c314ba8e423266727563c37f7727b",
+  "pokeemerald.map": "5c83d750d3a26480b849bc6af9c0d2382b5c31dc2a16d5eccf8096c4ac58e051"
+ },
+ "sourceSha256": {
+  "data/battle_anim_scripts.s": "76ad47e87abab7bf16f1606eb2cefb69fa39945d07458348623419f00404552d",
+  "data/battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+  "src/battle_anim.c": "57636179899de67c2c149bd44fe37bdb39cae837398fd18afd1e74bb238720cb",
+  "src/sprite.c": "795084634d44883629dd78ed4e3b90f07b2bf5b6cd5f312f14f121ea76f380ce",
+  "src/battle_anim_psychic.c": "931f1e540bb29544211a7207b51fa78800bba08e6b75dc178fea345b184ea1f2",
+  "src/battle_anim_effects_1.c": "79744f3e50c5749fd2478c83c4954feb8803a9bf923e65ab7d5c8cf32792e82e",
+  "src/battle_anim_effects_2.c": "8e427e4f09e8b65119e02ff49514ae5b268878bc228fa9de1ff29a9e7b31d012",
+  "src/battle_anim_effects_3.c": "fe195e2b1130502f2b954d5330c2fe827c4d768dfda47abdd0a0fc294f6d7e4e",
+  "src/battle_anim_mons.c": "93e653135430d35734763b640f7f5446bca2ce881f5781796b1f370fae213c9d",
+  "src/battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c"
+ },
+ "toolSha256": {
+  "wallFamilyClockProbe.py": "35774da437bac9c549407f709be370513e2206d60b72b5b763659e3b9438ab20",
+  "wallFamilyAllocatorCallProbe.py": "47f5adf917b2ac594a146417faec0616be77e700b493d24878b890e0ff500425",
+  "wallFamilyScenarios.py": "fdbf8004ae38ee7adcd3dc93ec38d9a383e7a4ef75b5fd97a50fd2a20f15e938",
+  "wallFamilyRunAll.sh": "9f9f7b3b37f11ec62d3676b2c82ae48e017728f357709eeb9a5e459ad909f592",
+  "lightScreenAllocatorCallProbe.py": "0b4ce615c54d72bba3d3c5da5d441aee9c0a9eb3442faee11826446ae7461cd5"
+ },
+ "profile": "battle-scene-on (same probe profile as the Light Screen receipts)",
+ "orientations": {
+  "player": {
+   "firstAnimationIsThisMove": false,
+   "animationActivations": [
+    {
+     "frame": 78,
+     "moveIndex": 93,
+     "lastActiveFrame": 78
+    },
+    {
+     "frame": 81,
+     "moveIndex": 93,
+     "lastActiveFrame": 177
+    },
+    {
+     "frame": 182,
+     "moveIndex": 93,
+     "lastActiveFrame": 220
+    },
+    {
+     "frame": 320,
+     "moveIndex": 243,
+     "lastActiveFrame": 320
+    },
+    {
+     "frame": 323,
+     "moveIndex": 243,
+     "lastActiveFrame": 323
+    },
+    {
+     "frame": 326,
+     "moveIndex": 243,
+     "lastActiveFrame": 335
+    },
+    {
+     "frame": 338,
+     "moveIndex": 243,
+     "lastActiveFrame": 343
+    },
+    {
+     "frame": 346,
+     "moveIndex": 243,
+     "lastActiveFrame": 350
+    },
+    {
+     "frame": 353,
+     "moveIndex": 243,
+     "lastActiveFrame": 359
+    },
+    {
+     "frame": 362,
+     "moveIndex": 243,
+     "lastActiveFrame": 367
+    },
+    {
+     "frame": 370,
+     "moveIndex": 243,
+     "lastActiveFrame": 375
+    },
+    {
+     "frame": 378,
+     "moveIndex": 243,
+     "lastActiveFrame": 401
+    }
+   ],
+   "scenario": "tools/integration/fixtures/wall-family-scenarios/wall-family-mirror-coat-player.json",
+   "activationFrame": 320,
+   "scriptEndCommandFrame": 401,
+   "cleanupFrame": 402,
+   "activeFlagStuckAtTraceEnd": false,
+   "scriptPointerTrace": [
+    {
+     "frame": 320,
+     "scriptOffset": 4,
+     "ptr": "0x82d007c"
+    },
+    {
+     "frame": 323,
+     "scriptOffset": 7,
+     "ptr": "0x82d007f"
+    },
+    {
+     "frame": 326,
+     "scriptOffset": 25,
+     "ptr": "0x82d0091"
+    },
+    {
+     "frame": 338,
+     "scriptOffset": -83,
+     "ptr": "0x82d0025"
+    },
+    {
+     "frame": 346,
+     "scriptOffset": -66,
+     "ptr": "0x82d0036"
+    },
+    {
+     "frame": 353,
+     "scriptOffset": -49,
+     "ptr": "0x82d0047"
+    },
+    {
+     "frame": 362,
+     "scriptOffset": -32,
+     "ptr": "0x82d0058"
+    },
+    {
+     "frame": 370,
+     "scriptOffset": -15,
+     "ptr": "0x82d0069"
+    },
+    {
+     "frame": 378,
+     "scriptOffset": 34,
+     "ptr": "0x82d009a"
+    },
+    {
+     "frame": 401,
+     "scriptOffset": 37,
+     "ptr": "0x82d009d"
+    }
+   ],
+   "liveAgeOffset": 6,
+   "wall": {
+    "slot": 3,
+    "template": "gMirrorCoatWallSpriteTemplate",
+    "callback": "AnimDefensiveWall_Step1",
+    "createFrame": 326,
+    "createAge": 6,
+    "destroyFrame": 390,
+    "destroyAge": 70,
+    "lifetime": 64,
+    "ageFromWall": 0
+   },
+   "scriptSprites": [
+    {
+     "slot": 3,
+     "template": "gMirrorCoatWallSpriteTemplate",
+     "callback": "AnimDefensiveWall_Step1",
+     "createFrame": 326,
+     "createAge": 6,
+     "destroyFrame": 390,
+     "destroyAge": 70,
+     "lifetime": 64,
+     "ageFromWall": 0
+    },
+    {
+     "slot": 4,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 338,
+     "createAge": 18,
+     "destroyFrame": 358,
+     "destroyAge": 38,
+     "lifetime": 20,
+     "ageFromWall": 12
+    },
+    {
+     "slot": 5,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 346,
+     "createAge": 26,
+     "destroyFrame": 366,
+     "destroyAge": 46,
+     "lifetime": 20,
+     "ageFromWall": 20
+    },
+    {
+     "slot": 7,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 353,
+     "createAge": 33,
+     "destroyFrame": 373,
+     "destroyAge": 53,
+     "lifetime": 20,
+     "ageFromWall": 27
+    },
+    {
+     "slot": 4,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 362,
+     "createAge": 42,
+     "destroyFrame": 382,
+     "destroyAge": 62,
+     "lifetime": 20,
+     "ageFromWall": 36
+    },
+    {
+     "slot": 5,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 370,
+     "createAge": 50,
+     "destroyFrame": 392,
+     "destroyAge": 72,
+     "lifetime": 22,
+     "ageFromWall": 44
+    },
+    {
+     "slot": 7,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 378,
+     "createAge": 58,
+     "destroyFrame": 400,
+     "destroyAge": 80,
+     "lifetime": 22,
+     "ageFromWall": 52
+    }
+   ],
+   "postScriptSprites": [],
+   "slotsReusedWithinScript": [
+    4,
+    5,
+    7
+   ],
+   "baselineOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "endOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "netZeroVsPreMoveBaseline": true,
+   "windowAllocatorCalls": [
+    {
+     "traceFrame": 326,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gMirrorCoatWallSpriteTemplate",
+     "slotArgument": 3,
+     "returnedSlot": 3,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 338,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 4,
+     "returnedSlot": 4,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 346,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 5,
+     "returnedSlot": 5,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 353,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 7,
+     "returnedSlot": 7,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 358,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 4,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 362,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 4,
+     "returnedSlot": 4,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 366,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 5,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 370,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 5,
+     "returnedSlot": 5,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 373,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 7,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 378,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 7,
+     "returnedSlot": 7,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 382,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 4,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 390,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 3,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 392,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 5,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 400,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 7,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    }
+   ],
+   "freshPairs": {
+    "clockPairIdentical": true,
+    "callsPairIdentical": true,
+    "clockSha256": [
+     "d66db6d874b19221a67234833d7841dbba1c2ec1cb981c2ffc8e160c6238eef2",
+     "d66db6d874b19221a67234833d7841dbba1c2ec1cb981c2ffc8e160c6238eef2"
+    ],
+    "callsSha256": [
+     "224fdaa2cc2c287b66e2912428a64c81d628d2b612e6275abaa84259423327dc",
+     "224fdaa2cc2c287b66e2912428a64c81d628d2b612e6275abaa84259423327dc"
+    ]
+   }
+  },
+  "opponent": {
+   "firstAnimationIsThisMove": false,
+   "animationActivations": [
+    {
+     "frame": 74,
+     "moveIndex": 93,
+     "lastActiveFrame": 74
+    },
+    {
+     "frame": 77,
+     "moveIndex": 93,
+     "lastActiveFrame": 173
+    },
+    {
+     "frame": 178,
+     "moveIndex": 93,
+     "lastActiveFrame": 216
+    },
+    {
+     "frame": 322,
+     "moveIndex": 243,
+     "lastActiveFrame": 322
+    },
+    {
+     "frame": 325,
+     "moveIndex": 243,
+     "lastActiveFrame": 325
+    },
+    {
+     "frame": 328,
+     "moveIndex": 243,
+     "lastActiveFrame": 337
+    },
+    {
+     "frame": 340,
+     "moveIndex": 243,
+     "lastActiveFrame": 345
+    },
+    {
+     "frame": 348,
+     "moveIndex": 243,
+     "lastActiveFrame": 352
+    },
+    {
+     "frame": 355,
+     "moveIndex": 243,
+     "lastActiveFrame": 361
+    },
+    {
+     "frame": 364,
+     "moveIndex": 243,
+     "lastActiveFrame": 369
+    },
+    {
+     "frame": 372,
+     "moveIndex": 243,
+     "lastActiveFrame": 377
+    },
+    {
+     "frame": 380,
+     "moveIndex": 243,
+     "lastActiveFrame": 403
+    }
+   ],
+   "scenario": "tools/integration/fixtures/wall-family-scenarios/wall-family-mirror-coat-opponent.json",
+   "activationFrame": 322,
+   "scriptEndCommandFrame": 403,
+   "cleanupFrame": 404,
+   "activeFlagStuckAtTraceEnd": false,
+   "scriptPointerTrace": [
+    {
+     "frame": 322,
+     "scriptOffset": 4,
+     "ptr": "0x82d007c"
+    },
+    {
+     "frame": 325,
+     "scriptOffset": 7,
+     "ptr": "0x82d007f"
+    },
+    {
+     "frame": 328,
+     "scriptOffset": 25,
+     "ptr": "0x82d0091"
+    },
+    {
+     "frame": 340,
+     "scriptOffset": -83,
+     "ptr": "0x82d0025"
+    },
+    {
+     "frame": 348,
+     "scriptOffset": -66,
+     "ptr": "0x82d0036"
+    },
+    {
+     "frame": 355,
+     "scriptOffset": -49,
+     "ptr": "0x82d0047"
+    },
+    {
+     "frame": 364,
+     "scriptOffset": -32,
+     "ptr": "0x82d0058"
+    },
+    {
+     "frame": 372,
+     "scriptOffset": -15,
+     "ptr": "0x82d0069"
+    },
+    {
+     "frame": 380,
+     "scriptOffset": 34,
+     "ptr": "0x82d009a"
+    },
+    {
+     "frame": 403,
+     "scriptOffset": 37,
+     "ptr": "0x82d009d"
+    }
+   ],
+   "liveAgeOffset": 6,
+   "wall": {
+    "slot": 3,
+    "template": "gMirrorCoatWallSpriteTemplate",
+    "callback": "AnimDefensiveWall_Step1",
+    "createFrame": 328,
+    "createAge": 6,
+    "destroyFrame": 392,
+    "destroyAge": 70,
+    "lifetime": 64,
+    "ageFromWall": 0
+   },
+   "scriptSprites": [
+    {
+     "slot": 3,
+     "template": "gMirrorCoatWallSpriteTemplate",
+     "callback": "AnimDefensiveWall_Step1",
+     "createFrame": 328,
+     "createAge": 6,
+     "destroyFrame": 392,
+     "destroyAge": 70,
+     "lifetime": 64,
+     "ageFromWall": 0
+    },
+    {
+     "slot": 4,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 340,
+     "createAge": 18,
+     "destroyFrame": 360,
+     "destroyAge": 38,
+     "lifetime": 20,
+     "ageFromWall": 12
+    },
+    {
+     "slot": 5,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 348,
+     "createAge": 26,
+     "destroyFrame": 368,
+     "destroyAge": 46,
+     "lifetime": 20,
+     "ageFromWall": 20
+    },
+    {
+     "slot": 7,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 355,
+     "createAge": 33,
+     "destroyFrame": 375,
+     "destroyAge": 53,
+     "lifetime": 20,
+     "ageFromWall": 27
+    },
+    {
+     "slot": 4,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 364,
+     "createAge": 42,
+     "destroyFrame": 384,
+     "destroyAge": 62,
+     "lifetime": 20,
+     "ageFromWall": 36
+    },
+    {
+     "slot": 5,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 372,
+     "createAge": 50,
+     "destroyFrame": 394,
+     "destroyAge": 72,
+     "lifetime": 22,
+     "ageFromWall": 44
+    },
+    {
+     "slot": 7,
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "callback": "AnimWallSparkle",
+     "createFrame": 380,
+     "createAge": 58,
+     "destroyFrame": 402,
+     "destroyAge": 80,
+     "lifetime": 22,
+     "ageFromWall": 52
+    }
+   ],
+   "postScriptSprites": [],
+   "slotsReusedWithinScript": [
+    4,
+    5,
+    7
+   ],
+   "baselineOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "endOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "netZeroVsPreMoveBaseline": true,
+   "windowAllocatorCalls": [
+    {
+     "traceFrame": 328,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gMirrorCoatWallSpriteTemplate",
+     "slotArgument": 3,
+     "returnedSlot": 3,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 340,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 4,
+     "returnedSlot": 4,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 348,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 5,
+     "returnedSlot": 5,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 355,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 7,
+     "returnedSlot": 7,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 360,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 4,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 364,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 4,
+     "returnedSlot": 4,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 368,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 5,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 372,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 5,
+     "returnedSlot": 5,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 375,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 7,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 380,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gSpecialScreenSparkleSpriteTemplate",
+     "slotArgument": 7,
+     "returnedSlot": 7,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 384,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 4,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 392,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 3,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 394,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 5,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      5,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 402,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 7,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      6,
+      7,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    }
+   ],
+   "freshPairs": {
+    "clockPairIdentical": true,
+    "callsPairIdentical": true,
+    "clockSha256": [
+     "a92efa07ce6dbdb712899d69a87c80bd9d54b12fcc05d807dfd1b85ccd953da6",
+     "a92efa07ce6dbdb712899d69a87c80bd9d54b12fcc05d807dfd1b85ccd953da6"
+    ],
+    "callsSha256": [
+     "b36d74d7d57a61da4e9cefbea0fabe3c654316a8773ed16caacf85274c0b77bc",
+     "b36d74d7d57a61da4e9cefbea0fabe3c654316a8773ed16caacf85274c0b77bc"
+    ]
+   }
+  }
+ }
+}
