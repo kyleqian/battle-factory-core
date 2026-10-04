@@ -60,14 +60,14 @@ the exact healthbox bars. (The ROM prints the move-used text once; later hits sh
 * **Already-live "multi-hit" adapters are single-body.** Pin Missile 42, Spike Cannon 131, Twineedle 41, Fury Swipes 154 are one script invocation whose
   body already contains every projectile/swipe: `src/engine/liveMoveAnimation.ts:360-361` (41, 42), `:549` (131), `:562` (154) build a plain
   `{ move, attacker, target, fieldProfile }` config with no turn; durations `:190` (154 = `FURY_SWIPES_LAST_BODY_AGE + 1` = 48,
-  `src/animation/furySwipes.ts:35`), `:155` (131 = 84); Twineedle 37 (`tests/animation/liveContactMoveAdapters.test.ts:33-35`). Their fixtures are one
+  `src/animation/furySwipes.ts:35`), `:184` (131 = 84); Twineedle 37 (`tests/animation/liveContactMoveAdapters.test.ts:33-35`). Their fixtures are one
   window per orientation (`physical2b-pin-missile-*.json` is just `{sourceFixture, move}` over source window 86-178; the scenario's second script body at
   256-348 is not compared). Nothing in them models per-hit state, which is why none of it transfers: Double Slap / Comet Punch / Triple Kick are **one
   invocation per hit**, selected by `request.turn`.
 * **Turn selector pattern to copy:** Solar Beam `case 76` (`liveMoveAnimation.ts:222`, `:438`: `body: (request.turn & 1) === 0 ? ...`) and Brick Break
-  `case 280` (`:242`, `:644`). `liveAdapterFramebuffer.ts:28-43` (`Fixture.requestFields {turn,power,damage}`, `denseWindow`, `denseSegments`, `messageLines`) and
-  `:86-97` (`liveView`: `turn: f.body === "shattered-wall" ? 1 : 0, power: 0, damage: 0, friendship: 70, multihit: 0, ...f.requestFields`; message
-  `f.messageLines ?? [used, NAME!]`, `:100-105`) deliver `request.turn` to the config. Fixture merge `{...sourceFixture, ...fixture}` at `:121-123`.
+  `case 280` (`:242`, `:644`). `liveAdapterFramebuffer.ts:29-43` (`Fixture.requestFields {turn,power,damage}`, `denseWindow`, `denseSegments`, `messageLines`) and
+  `:77` (`liveView`: `turn: f.body === "shattered-wall" ? 1 : 0, power: 0, damage: 0, friendship: 70, multihit: 0, ...f.requestFields`; message
+  `:90` `f.messageLines ?? [used, NAME!]`) deliver `request.turn` to the config. Fixture merge `{...sourceFixture, ...fixture}` at `:109`.
   Per-hit rows therefore need **one fixture per hit** with `denseWindow` = that hit's activation..first-inactive and `requestFields.turn = i`; no
   `denseSegments` (each hit is contiguous) and no `ageOffset`.
 * **Inherited per-hit state** lives in the existing draw cases, keyed on `view.moveTurn`: Comet Punch `battleScene.ts:52744-52775`
