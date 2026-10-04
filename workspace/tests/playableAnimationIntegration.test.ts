@@ -71,13 +71,30 @@ describe("ordinary playable animation queue", () => {
   });
 
   it("plays Light Screen from six generated rentals, preserves text/self-target, and resumes after repeat failure", () => {
-    for (const seed of [2, 27, 45, 59, 84, 114]) {
-      const on = generatedCommandAnimationReplay(seed, "on", [3, 3]);
-      const off = generatedCommandAnimationReplay(seed, "off", [3, 3]);
+    // Seeds 27/84 ([3,3]) and 2 ([0,3]) play an unproved move animation before
+    // Light Screen, so allocator history is unknown and the generic bounded
+    // fallback renders; 2/45/59/114 ([3,3]) have Light Screen as the first move
+    // body with known entry history (exact adapter).
+    const routes: ReadonlyArray<readonly [number, readonly number[], boolean]> = [
+      [2, [3, 3], true], [27, [3, 3], false], [45, [3, 3], true],
+      [59, [3, 3], true], [84, [3, 3], false], [114, [3, 3], true],
+      [2, [0, 3], false],
+    ];
+    for (const [seed, slots, exact] of routes) {
+      const on = generatedCommandAnimationReplay(seed, "on", slots);
+      const off = generatedCommandAnimationReplay(seed, "off", slots);
       const body = on.animations.filter(animation => animation.moveId === 113);
       expect(body).toHaveLength(1);
       expect(body[0]!.ages).toEqual(Array.from({ length: 88 }, (_, age) => age));
-      expect(body[0]!.adapterActive).toEqual(Array(88).fill(true));
+      expect(body[0]!.adapterActive).toEqual(Array(88).fill(exact));
+      const lsCommand = on.commands.find(row => row.type === "move-animation"
+        && (row.command as { animation?: { moveId: number } }).animation?.moveId === 113)!;
+      expect(lsCommand.spriteInputHistoryKnown === true).toBe(exact);
+      if (!exact) {
+        expect(on.requests.some(request => request.moveId !== 113)).toBe(true);
+        expect(on.requests.findIndex(request => request.moveId !== 113))
+          .toBeLessThan(on.requests.findIndex(request => request.moveId === 113));
+      }
       expect(body[0]!.entryMessage?.visibleCharacters)
         .toBe(body[0]!.entryMessage?.lines.join("").length);
       const requests = on.requests.filter(request => request.moveId === 113);

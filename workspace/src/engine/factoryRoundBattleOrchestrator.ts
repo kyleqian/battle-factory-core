@@ -2087,11 +2087,11 @@ function prepareResolutionPalette(
     host = prepared.next;
     input = prepared.input;
     if (spriteHost && retainedSprites?.commandKey !== commandKey) {
-      if (command.animation.moveId === 113) {
-        const spritePrepared = prepareLiveMoveSpriteAllocator(spriteHost, command.animation);
-        spriteHost = spritePrepared.next;
-        spriteInput = spritePrepared.input;
-      }
+      // Every move animation goes through the allocator seam: only audited
+      // plans (Light Screen) keep history known, all others invalidate it.
+      const spritePrepared = prepareLiveMoveSpriteAllocator(spriteHost, command.animation);
+      spriteHost = spritePrepared.next;
+      spriteInput = spritePrepared.input;
     } else if (retainedSprites?.commandKey === commandKey) {
       spriteInput = resolution.liveMoveSpriteAllocatorInput;
     }

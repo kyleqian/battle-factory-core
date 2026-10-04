@@ -35,6 +35,7 @@ export function generatedCommandAnimationReplay(
     command: unknown;
     paletteInputHistoryKnown: boolean | undefined;
     retainedPaletteHistoryKnown: boolean | undefined;
+    spriteInputHistoryKnown: boolean | undefined;
     retainedSpriteHistoryKnown: boolean | undefined;
   }> = [];
   const requests: Array<BattleMoveAnimationRequest & { frame: number }> = [];
@@ -74,6 +75,7 @@ export function generatedCommandAnimationReplay(
           command,
           paletteInputHistoryKnown: r.liveMovePaletteInput?.historyKnown,
           retainedPaletteHistoryKnown: state.liveMovePaletteHost?.host.historyKnown,
+          spriteInputHistoryKnown: r.liveMoveSpriteAllocatorInput?.historyKnown,
           retainedSpriteHistoryKnown: state.liveMoveSpriteAllocatorHost?.host.historyKnown,
         });
         if (command.type === "move-animation" && command.animation) requests.push({ ...command.animation, frame });
