@@ -1,0 +1,442 @@
+{
+ "schema": "wall-family-source-receipt/v1",
+ "move": 182,
+ "name": "protect",
+ "referenceSha256": {
+  "pokeemerald.gba": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+  "pokeemerald.elf": "3a8aa584d7985c5a74ab10bb6eebd0c41b7c314ba8e423266727563c37f7727b",
+  "pokeemerald.map": "5c83d750d3a26480b849bc6af9c0d2382b5c31dc2a16d5eccf8096c4ac58e051"
+ },
+ "sourceSha256": {
+  "data/battle_anim_scripts.s": "76ad47e87abab7bf16f1606eb2cefb69fa39945d07458348623419f00404552d",
+  "data/battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+  "src/battle_anim.c": "57636179899de67c2c149bd44fe37bdb39cae837398fd18afd1e74bb238720cb",
+  "src/sprite.c": "795084634d44883629dd78ed4e3b90f07b2bf5b6cd5f312f14f121ea76f380ce",
+  "src/battle_anim_psychic.c": "931f1e540bb29544211a7207b51fa78800bba08e6b75dc178fea345b184ea1f2",
+  "src/battle_anim_effects_1.c": "79744f3e50c5749fd2478c83c4954feb8803a9bf923e65ab7d5c8cf32792e82e",
+  "src/battle_anim_effects_2.c": "8e427e4f09e8b65119e02ff49514ae5b268878bc228fa9de1ff29a9e7b31d012",
+  "src/battle_anim_effects_3.c": "fe195e2b1130502f2b954d5330c2fe827c4d768dfda47abdd0a0fc294f6d7e4e",
+  "src/battle_anim_mons.c": "93e653135430d35734763b640f7f5446bca2ce881f5781796b1f370fae213c9d",
+  "src/battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c"
+ },
+ "toolSha256": {
+  "wallFamilyClockProbe.py": "35774da437bac9c549407f709be370513e2206d60b72b5b763659e3b9438ab20",
+  "wallFamilyAllocatorCallProbe.py": "47f5adf917b2ac594a146417faec0616be77e700b493d24878b890e0ff500425",
+  "wallFamilyScenarios.py": "fdbf8004ae38ee7adcd3dc93ec38d9a383e7a4ef75b5fd97a50fd2a20f15e938",
+  "wallFamilyRunAll.sh": "9f9f7b3b37f11ec62d3676b2c82ae48e017728f357709eeb9a5e459ad909f592",
+  "lightScreenAllocatorCallProbe.py": "0b4ce615c54d72bba3d3c5da5d441aee9c0a9eb3442faee11826446ae7461cd5"
+ },
+ "profile": "battle-scene-on (same probe profile as the Light Screen receipts)",
+ "orientations": {
+  "player": {
+   "firstAnimationIsThisMove": true,
+   "animationActivations": [
+    {
+     "frame": 69,
+     "moveIndex": 182,
+     "lastActiveFrame": 69
+    },
+    {
+     "frame": 72,
+     "moveIndex": 182,
+     "lastActiveFrame": 72
+    },
+    {
+     "frame": 75,
+     "moveIndex": 182,
+     "lastActiveFrame": 322
+    },
+    {
+     "frame": 324,
+     "moveIndex": 201,
+     "lastActiveFrame": 324
+    },
+    {
+     "frame": 329,
+     "moveIndex": 201,
+     "lastActiveFrame": 344
+    },
+    {
+     "frame": 347,
+     "moveIndex": 201,
+     "lastActiveFrame": 356
+    },
+    {
+     "frame": 359,
+     "moveIndex": 201,
+     "lastActiveFrame": 368
+    },
+    {
+     "frame": 371,
+     "moveIndex": 201,
+     "lastActiveFrame": 380
+    },
+    {
+     "frame": 383,
+     "moveIndex": 201,
+     "lastActiveFrame": 392
+    },
+    {
+     "frame": 395,
+     "moveIndex": 201,
+     "lastActiveFrame": 404
+    },
+    {
+     "frame": 407,
+     "moveIndex": 201,
+     "lastActiveFrame": 416
+    },
+    {
+     "frame": 419,
+     "moveIndex": 201,
+     "lastActiveFrame": 682
+    },
+    {
+     "frame": 687,
+     "moveIndex": 0,
+     "lastActiveFrame": 702
+    },
+    {
+     "frame": 705,
+     "moveIndex": 0,
+     "lastActiveFrame": 714
+    },
+    {
+     "frame": 717,
+     "moveIndex": 0,
+     "lastActiveFrame": 726
+    },
+    {
+     "frame": 729,
+     "moveIndex": 0
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-protect-player-houndour-opponent-onix.json",
+   "activationFrame": 69,
+   "scriptEndCommandFrame": 186,
+   "cleanupFrame": 323,
+   "activeFlagStuckAtTraceEnd": false,
+   "scriptPointerTrace": [
+    {
+     "frame": 69,
+     "scriptOffset": 4,
+     "ptr": "0x82cb3b8"
+    },
+    {
+     "frame": 72,
+     "scriptOffset": 6,
+     "ptr": "0x82cb3ba"
+    },
+    {
+     "frame": 75,
+     "scriptOffset": 26,
+     "ptr": "0x82cb3ce"
+    },
+    {
+     "frame": 186,
+     "scriptOffset": 29,
+     "ptr": "0x82cb3d1"
+    }
+   ],
+   "liveAgeOffset": 6,
+   "wall": {
+    "slot": 3,
+    "template": "gProtectSpriteTemplate",
+    "callback": "AnimProtect_Step",
+    "createFrame": 75,
+    "createAge": 6,
+    "destroyFrame": 185,
+    "destroyAge": 116,
+    "lifetime": 110,
+    "ageFromWall": 0
+   },
+   "scriptSprites": [
+    {
+     "slot": 3,
+     "template": "gProtectSpriteTemplate",
+     "callback": "AnimProtect_Step",
+     "createFrame": 75,
+     "createAge": 6,
+     "destroyFrame": 185,
+     "destroyAge": 116,
+     "lifetime": 110,
+     "ageFromWall": 0
+    }
+   ],
+   "postScriptSprites": [],
+   "slotsReusedWithinScript": [],
+   "baselineOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "endOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "netZeroVsPreMoveBaseline": true,
+   "windowAllocatorCalls": [
+    {
+     "traceFrame": 75,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gProtectSpriteTemplate",
+     "slotArgument": 3,
+     "returnedSlot": 3,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 185,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 3,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    }
+   ],
+   "freshPairs": {
+    "clockPairIdentical": true,
+    "callsPairIdentical": true,
+    "clockSha256": [
+     "bb12ef336312d36241b3a5ef7cd05b40a6f5ceb414f5c391336aaf7bd62f3fe4",
+     "bb12ef336312d36241b3a5ef7cd05b40a6f5ceb414f5c391336aaf7bd62f3fe4"
+    ],
+    "callsSha256": [
+     "9425f9764d09005c1b1922e68d27044669ca6fe68a89e335cde5fee371210270",
+     "9425f9764d09005c1b1922e68d27044669ca6fe68a89e335cde5fee371210270"
+    ]
+   }
+  },
+  "opponent": {
+   "firstAnimationIsThisMove": true,
+   "animationActivations": [
+    {
+     "frame": 73,
+     "moveIndex": 182,
+     "lastActiveFrame": 73
+    },
+    {
+     "frame": 76,
+     "moveIndex": 182,
+     "lastActiveFrame": 76
+    },
+    {
+     "frame": 79,
+     "moveIndex": 182,
+     "lastActiveFrame": null
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-protect-opponent-houndour-player-onix.json",
+   "activationFrame": 73,
+   "scriptEndCommandFrame": 190,
+   "cleanupFrame": null,
+   "activeFlagStuckAtTraceEnd": true,
+   "scriptPointerTrace": [
+    {
+     "frame": 73,
+     "scriptOffset": 4,
+     "ptr": "0x82cb3b8"
+    },
+    {
+     "frame": 76,
+     "scriptOffset": 6,
+     "ptr": "0x82cb3ba"
+    },
+    {
+     "frame": 79,
+     "scriptOffset": 26,
+     "ptr": "0x82cb3ce"
+    },
+    {
+     "frame": 190,
+     "scriptOffset": 29,
+     "ptr": "0x82cb3d1"
+    }
+   ],
+   "liveAgeOffset": 6,
+   "wall": {
+    "slot": 3,
+    "template": "gProtectSpriteTemplate",
+    "callback": "AnimProtect_Step",
+    "createFrame": 79,
+    "createAge": 6,
+    "destroyFrame": 189,
+    "destroyAge": 116,
+    "lifetime": 110,
+    "ageFromWall": 0
+   },
+   "scriptSprites": [
+    {
+     "slot": 3,
+     "template": "gProtectSpriteTemplate",
+     "callback": "AnimProtect_Step",
+     "createFrame": 79,
+     "createAge": 6,
+     "destroyFrame": 189,
+     "destroyAge": 116,
+     "lifetime": 110,
+     "ageFromWall": 0
+    }
+   ],
+   "postScriptSprites": [],
+   "slotsReusedWithinScript": [],
+   "baselineOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "endOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "netZeroVsPreMoveBaseline": true,
+   "windowAllocatorCalls": [
+    {
+     "traceFrame": 79,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gProtectSpriteTemplate",
+     "slotArgument": 3,
+     "returnedSlot": 3,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 189,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 3,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    }
+   ],
+   "freshPairs": {
+    "clockPairIdentical": true,
+    "callsPairIdentical": true,
+    "clockSha256": [
+     "689b81eeebd19c51cf2334d29f43d9f31362027561e4d2a8b005432c1fee8a15",
+     "689b81eeebd19c51cf2334d29f43d9f31362027561e4d2a8b005432c1fee8a15"
+    ],
+    "callsSha256": [
+     "8bea10f62403a6c1b0eb25ab331b9d3cb69f43f2ff5cb8087cad673b036c37df",
+     "8bea10f62403a6c1b0eb25ab331b9d3cb69f43f2ff5cb8087cad673b036c37df"
+    ]
+   }
+  }
+ }
+}
