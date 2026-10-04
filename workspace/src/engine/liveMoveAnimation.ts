@@ -7,6 +7,8 @@ import type { BattleResolutionDisplayedField } from "./battleResolutionPresentat
 import type {
   SceneOnMovePresentationState, SceneOnMoveConfig, SceneOnPresentationBattler,
 } from "../animation/sceneOnPresentation.ts";
+import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
+import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
 import { TAIL_WHIP_FRAME_COUNT } from "../animation/tailWhip.ts";
 import { CONFUSE_RAY_FRAME_COUNT } from "../animation/confuseRay.ts";
@@ -65,6 +67,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   56, 61, 197, 238, 259, 294, 341,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
+  // selectors: request-selected branches and healing anchors.
+  76, 217, 236, 250,
 ] as const);
 
 export interface LiveBattlerAnchors {
@@ -214,6 +218,13 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 207: return 161; // Swagger accepted source window.
     case 263: return 81; // Facade accepted source window.
     case 339: return 104; // Bulk Up accepted source window.
+    // Cmd_choosetwoturnanim (battle_anim.c:1073): gAnimMoveTurn bit 0 selects the unleash body.
+    case 76: return (request.turn & 1) === 0 
+        ? SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE + 1 : SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE + 1;
+    // AnimTask_IsHealingMove (battle_anim_effects_3.c:1531): heal iff gAnimMoveDmg <= 0.
+    case 217: return request.damage > 0 ? PRESENT_DAMAGE_FRAME_COUNT : PRESENT_HEAL_FRAME_COUNT;
+    case 250: return 133; // Whirlpool main body (accepted window 78..210); residual is a general animation.
+    case 236: return 352; // Moonlight accepted source window (207..558).
     // The accepted opponent-front Mud Shot window is one row shorter.
     case 341: return request.attacker === 0 ? 145 : 144;
     case 204: return CHARM_BODY_FRAME_COUNT;
@@ -414,6 +425,41 @@ export function liveMoveAnimationPresentation(
       config = { move: "BULK_UP", attacker, target, fieldProfile,
         breathOrigin: attackerAnchors.picOffsetPoint, battlerHeight: attackerAnchors.pictureHeight };
       break;
+    case 250: config = { move: "WHIRLPOOL", attacker, target, fieldProfile, body: "main" }; break;
+    case 76: {
+      // sourceOrbOrigin adds 10 to the "resolved animation center" to reach
+      // GetBattlerSpriteCoord(Y_PIC_OFFSET), so battlers carry that point minus 10.
+      const resolved = (battler: SceneOnPresentationBattler): SceneOnPresentationBattler => {
+        const point = liveBattlerAnchors(battler.geometry.side, art).picOffsetPoint;
+        return { ...battler, geometry: { ...battler.geometry, animationCenter: {
+          x: point.x, y: point.y - 10 } } };
+      };
+      config = { move: "SOLAR_BEAM", attacker: resolved(attacker), target: resolved(target), fieldProfile,
+        body: (request.turn & 1) === 0 ? "setup" : "unleash" };
+      break;
+    }
+    case 217: {
+      // presentAtAge adds the player-side +8 of CreateHealingEffect's Y_PIC_OFFSET
+      // itself, so hand it the picture-offset point without that +8 (clamp kept).
+      const targetPoint = liveBattlerAnchors(target.geometry.side, art).picOffsetPoint;
+      config = { move: "PRESENT", attacker, fieldProfile,
+        branch: request.damage > 0 ? "damage" : "heal",
+        target: { ...target, geometry: { ...target.geometry, animationCenter: {
+          x: targetPoint.x, y: targetPoint.y - (target.geometry.side === "player" ? 8 : 0) } } } };
+      break;
+    }
+    case 236: {
+      // InitSpritePosToAnimAttacker(TRUE) reads the attacker's picture-offset point.
+      // The staged heal payload is never read live (the controller owns HP).
+      const attackerHp = attacker.geometry.side === "player" ? field.player.hp : field.opponent.hp;
+      const attackerMaxHp = attacker.geometry.side === "player" ? field.player.maxHP : field.opponent.maxHP;
+      config = { move: "MOONLIGHT", attacker, target,
+        fieldProfile: { ...fieldProfile, pendingHeal: {
+          battler: "attacker", fromHp: attackerHp, toHp: attackerMaxHp,
+          weather: "none", numerator: 1, denominator: 2 } },
+        healingCenter: attackerAnchors.picOffsetPoint };
+      break;
+    }
     case 259:
       config = { move: "TORMENT", attacker, target, fieldProfile,
         attackerPictureOffset: attackerAnchors.picOffsetPoint,

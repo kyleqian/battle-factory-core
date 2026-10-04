@@ -1547,6 +1547,85 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_SOLAR_BEAM",
+      "id": 76,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/selectors-live-adapter-receipt.json",
+        "../tools/integration/fixtures/selectors-solar-beam-player-setup.json",
+        "../tools/integration/fixtures/selectors-solar-beam-player-unleash.json",
+        "../tools/integration/fixtures/selectors-solar-beam-opponent-setup.json",
+        "../tools/integration/fixtures/selectors-solar-beam-opponent-unleash.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window (each selector variant)",
+        "generated command seed 73 slot 0 streak 14: setup (turn 0) and unleash (turn 1) bodies with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "body from request.turn & 1 (battle_anim.c:1073 Cmd_choosetwoturnanim)"
+    },
+    {
+      "move": "MOVE_PRESENT",
+      "id": 217,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/selectors-live-adapter-receipt.json",
+        "../tools/integration/fixtures/selectors-present-player-damage.json",
+        "../tools/integration/fixtures/selectors-present-player-heal.json",
+        "../tools/integration/fixtures/selectors-present-opponent-damage.json",
+        "../tools/integration/fixtures/selectors-present-opponent-heal.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window (each selector variant)",
+        "generated command seed 3303 slots 0,0 streak 0: damage and heal bodies with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "branch from request.damage > 0 (battle_anim_effects_3.c:1531 AnimTask_IsHealingMove)"
+    },
+    {
+      "move": "MOVE_MOONLIGHT",
+      "id": 236,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/selectors-live-adapter-receipt.json",
+        "../tools/integration/fixtures/selectors-moonlight-player.json",
+        "../tools/integration/fixtures/selectors-moonlight-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 76 slots 1,3 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_WHIRLPOOL",
+      "id": 250,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/selectors-live-adapter-receipt.json",
+        "../tools/integration/fixtures/selectors-whirlpool-player.json",
+        "../tools/integration/fixtures/selectors-whirlpool-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window (each selector variant)",
+        "generated command seed 54 slot 0 streak 0: main body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "main body only; the residual turn-trap animation is a separate general animation and is not adapted"
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -1569,7 +1648,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 118,
+  "implementedCount": 122,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},

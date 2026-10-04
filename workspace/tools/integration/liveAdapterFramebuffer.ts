@@ -25,6 +25,8 @@ export interface Fixture {
   sourceFixture?: string;
   move: string;
   denseWindow?: { startFrame: number; endFrame: number; ageOffset?: number };
+  /** Ordered inclusive source-frame segments of one body whose rows are not contiguous. */
+  denseSegments?: [number, number][];
   sourceWindow?: { startFrame: number; endFrame: number };
   probeMoveId?: number;
   probe: string;
@@ -35,6 +37,10 @@ export interface Fixture {
   target: { species: string; geometry: { side: "player" | "opponent" } };
   fieldProfile: SceneOnDragonRageFieldProfile;
   body?: "normal" | "shattered-wall";
+  /** Controller arguments the ROM held at this body (gAnimMoveTurn/Power/Dmg). */
+  /** Source text box content during this body (default: the move-used banner). */
+  messageLines?: [string, string];
+  requestFields?: { turn?: number; power?: number; damage?: number };
 }
 interface Probe {
   frames?: { frame: number; sha256: string }[];
@@ -68,6 +74,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
     moveId: ids[f.move]!, attacker,
     target: SELF_TARGET_MOVES.has(f.move) ? attacker : attacker === 0 ? 1 : 0,
     turn: f.body === "shattered-wall" ? 1 : 0, power: 0, damage: 0, friendship: 70, multihit: 0,
+    ...f.requestFields,
   };
   if (liveMoveAnimationDuration(request) === null) throw new Error(`No live adapter for ${f.move}`);
   const healthbox = (mon: typeof field.player) => ({
@@ -80,7 +87,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
   return {
     field, fieldArt: createBattleCommandFieldArtView(field),
     healthboxes: { player: healthbox(field.player), opponent: healthbox(field.opponent) },
-    message: { lines: [`${attacker === 1 ? "Foe " : ""}${f.attacker.species} used`, `${name}!`], visibleCharacters: 99 },
+    message: { lines: f.messageLines ?? [`${attacker === 1 ? "Foe " : ""}${f.attacker.species} used`, `${name}!`], visibleCharacters: 99 },
     effect: {
       type: "move", request, age,
       // Plans exist only for audited moves; every other move yields no input.
@@ -133,10 +140,17 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
     const window = fixture.denseWindow ?? fixture.sourceWindow;
     const probeFrames = probe.frames ?? probe.rows;
     if (!probeFrames) throw new Error("Probe omitted framebuffer rows");
-    const frames = window
+    const segments = fixture.denseSegments;
+    const frames = segments
+      ? segments.flatMap(([start, end]) => {
+          const part = probeFrames.filter(f => f.frame >= start && f.frame <= end);
+          if (part.length !== end - start + 1) throw new Error("Probe omitted part of a source segment");
+          return part;
+        })
+      : window
       ? probeFrames.filter(f => f.frame >= window.startFrame && f.frame <= window.endFrame)
       : probeFrames;
-    if (window && (frames.length !== window.endFrame - window.startFrame + 1
+    if (!segments && window && (frames.length !== window.endFrame - window.startFrame + 1
       || frames.some((f, i) => f.frame !== window.startFrame + i))) {
       throw new Error("Probe omitted part of the complete source window");
     }
