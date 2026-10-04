@@ -1,5 +1,20 @@
 # Animation integration progress
 
+## 2026-10-04 — read-only day audit of today's 31 adapters
+
+- Read-only audit (no edits): no confirmed defect. Certified: duration/side
+  symmetry for all 31 ids (only Mud Shot 145/144 and Block 141/146 asymmetric,
+  both handled), view-age offsets vs anchors, allocator plan table vs receipts,
+  target-idle x2 windows are script timing (species-independent; only the x2
+  value is species-specific and uses the rest offset), shared helpers.
+- Suspects being decided by alternate-species dense proofs (side lane):
+  (1) elevated-opponent enemy shadow on a body's first displayed row is drawn
+  only in a few branches and only for opponent attackers; (2) opponent-
+  attacker front idle rest offset (ONIX/RATTATA only) missing in ~10 new
+  branches; (3) Castform/Unown y-delta special cases in anchors; (4) Detect's
+  skipped first opponent row. Block keys on attacker vs source target side:
+  equal in singles.
+
 ## 2026-10-04 — net-zero audit extended to all 110 live ids
 
 - Side-lane evidence `fa3cefa22` folded (new files only): receipt
