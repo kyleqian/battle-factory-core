@@ -89,6 +89,9 @@ def write(c, forced_start=None):
     attacker_side = "player" if "-player-" in c["name"] and c["name"].index("-player-") < c["name"].index("-opponent-") else "opponent"
     other = "opponent" if attacker_side == "player" else "player"
     mons = {s: scen["overrides"]["parties"][s][0] for s in ("player", "opponent")}
+    if c.get("probeMoveId") == 44:  # poisonFangProbe.py patches species 41 -> MEOWTH at run time; the fixture must name the ROM-visible species
+        for m in mons.values():
+            if m["species"] == 41: m["species"] = 52
     # health/gender profile comes from the ROM battlers at the first window row
     first = next(r for r in rows if r["frame"] == sw)
     def battlers(row):
