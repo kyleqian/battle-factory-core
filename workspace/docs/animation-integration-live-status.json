@@ -885,15 +885,15 @@
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "4815edf5859b29b0f43905f19a7fc88578b2cd7e",
-    "build": "4815edf58 2026-10-02",
+    "commit": "28d5be5502b2eaa8c91fb190a7df93ba0cd1fc65",
+    "build": "28d5be550 2026-10-04",
     "url": "http://127.0.0.1:5191/",
-    "implementedAdapters": 79,
-    "fullTest": "Independent supervisor1482 files /11754 tests passed; production695e10751 unchanged",
-    "buildModules": 844,
-    "browser": "Eleven canvas and saved PNG hashes: actual initial/after-status party cancellations and Razor Leaf; export; ON -> OFF -> ON; no console/page errors",
-    "receipt": "../tools/integration/fixtures/playable-preview-4815edf58-receipt.json",
-    "availability": "Local Mac service on 127.0.0.1:5191; managed preview session; hcloud retired."
+    "implementedAdapters": 80,
+    "fullTest": "Worker 1483 files / 11763 tests passed on production a5d52f2fe (clean fast-forward reuse)",
+    "buildModules": 847,
+    "browser": "Four canvas and saved PNG hashes on the canonical ordinary route (identical to e3f60734c); session export; ON -> OFF restart; no page errors",
+    "receipt": "../tools/integration/fixtures/playable-preview-28d5be550-receipt.json",
+    "availability": "Local Mac service on 127.0.0.1:5191; hcloud retired."
   },
   "productionProviders": {
     "spritePaletteHistory": {

@@ -17,6 +17,9 @@
 - Gates: supervisor affected 6 files/47 tests, smoke 448; worker full
   1,483 files/11,763 tests, build 847, typecheck — reused on clean fast-forward.
   Receipt `tools/integration/fixtures/light-screen-guard-supervisor-receipt.json`.
+- Preview <http://127.0.0.1:5191/> serves `28d5be550` (847 modules): four
+  canvas/PNG hashes identical to `e3f60734c`, export, ON-to-OFF restart, no
+  errors. `playable-preview-28d5be550-receipt.json`.
 - Next: bounded H_BASIC adapter batches (Flame Wheel, Fire Spin, Heat Wave,
   Sandstorm, Sonic Boom, Block; then Synthesis, Milk Drink, Flash, Role Play,
   Spite). Light Screen after other bodies stays bounded fallback until more
