@@ -58,11 +58,57 @@ import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
-  65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 113,
-  114, 122, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 186, 201, 204,
-  208, 211, 213, 223, 227, 231, 235, 242, 246, 247, 257, 264, 272, 280, 281, 287, 290, 302,
-  305, 306, 319, 320, 321, 325, 335, 336, 337, 342, 343, 347,
+  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 106, 108, 109, 113,
+  114, 122, 124, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 186, 188, 201, 204,
+  208, 211, 213, 223, 227, 231, 232, 235, 242, 246, 247, 257, 264, 272, 280, 281, 287, 290, 302,
+  305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
 ] as const);
+
+export interface LiveBattlerAnchors {
+  /** `GetBattlerSpriteCoord2(battler, X_2/Y_PIC_OFFSET)`. */
+  readonly picOffsetPoint: Readonly<{ x: number; y: number }>;
+  /** Unshifted battler OBJ center (sprite x/y; BG1_X/BG1_Y source). */
+  readonly spriteCenter: Readonly<{ x: number; y: number }>;
+  /** `sBattlerCoords` x/y for the battler position. */
+  readonly battlePositionCenter: Readonly<{ x: number; y: number }>;
+  /** `MON_PIC_HEIGHT - 2 * yDelta` from the species pic coords. */
+  readonly pictureHeight: number;
+  /** Front idle rest offset (opponent only; the player back sprite has none). */
+  readonly frontIdleRest: Readonly<{ x2: number; y2: number }>;
+}
+
+/**
+ * Raw source anchors for one live battler. Per-move side corrections (Disable
+ * -8, Rest -16, ...) stay in each adapter. Sources, pokeemerald:
+ * - battle_anim_mons.c:112-165 GetBattlerSpriteCoord: X/X_2 read sBattlerCoords;
+ *   Y_PIC_OFFSET is GetBattlerSpriteFinal_Y(..., TRUE).
+ * - battle_anim_mons.c:269-292 GetBattlerSpriteFinal_Y: YDelta, minus enemy
+ *   elevation for the opponent, plus sBattlerCoords y; TRUE adds 8 on the
+ *   player side and clamps to DISPLAY_HEIGHT - MON_PIC_HEIGHT + 8 (= 104).
+ * - battle_anim_mons.c:294 GetBattlerSpriteCoord2 (X_2/Y_PIC_OFFSET forwards
+ *   to the same values; the species is the displayed one).
+ * - battle_gfx_sfx_util.c battler sprite creation: the OBJ is a 64x64 canvas
+ *   placed at the sBattlerCoords x with the species yOffset, so the OBJ
+ *   center is spriteCorner + 32 (opponent corner includes the elevation).
+ */
+export function liveBattlerAnchors(
+  battler: "player" | "opponent",
+  art: ReturnType<typeof createBattleCommandFieldArtView>,
+): LiveBattlerAnchors {
+  const origin = battleCommandFieldSpriteOrigin(art[battler], battler);
+  return {
+    picOffsetPoint: {
+      x: origin.x + 32,
+      y: Math.min(104, origin.y + 32 + (battler === "player" ? 8 : 0)),
+    },
+    spriteCenter: { x: origin.x + 32, y: origin.y + 32 },
+    battlePositionCenter: battler === "player" ? { x: 72, y: 80 } : { x: 176, y: 40 },
+    pictureHeight: 64 - 2 * art[battler].coords.yOffset,
+    frontIdleRest: battler === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(art[battler].speciesSymbol)
+      : { x2: 0, y2: 0 },
+  };
+}
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
   switch (request.moveId) {
@@ -92,6 +138,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 47: return request.attacker === 0 ? 245 : 248;
     case 48: return 51; // First Supersonic ring through the final inactive row.
     case 49: return 52; // Sonic Boom source body through the final inactive row.
+    case 51: return 131; // Acid source body through its final row.
+    case 55: return 111; // Water Gun source body through its final row.
     case 65: return 91; // Drill Peck's full BowMon/impact/cleanup body.
     case 66: return 124; // Submission source body through monbg cleanup.
     case 67: return 33; // Low Kick source body through first inactive row.
@@ -113,12 +161,14 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 101: return NIGHT_SHADE_FRAME_COUNT;
     case 103: return SCREECH_FIRST_INACTIVE_AGE + 1;
     case 105: return 169; // Recover's final blend/star source-owned row.
+    case 106: return 101; // Harden source body through its final blend row.
     case 108: return 125; // smokescreenAtAge: active through 123.
     case 109: return CONFUSE_RAY_FRAME_COUNT;
     // Script activation through the two inactive controller displays after
     // resource destruction. The following success printer starts next.
     case 113: return 88;
-    case 122: return 73; // Lick source body through first inactive row.
+    case 122: return 73;
+    case 124: return 102; // Sludge source body through its final row. // Lick source body through first inactive row.
     case 131: return 84; // Spike Cannon pointer body through inactive cleanup.
     case 136: return 91; // Hi Jump Kick source body through first inactive row.
     case 147: return SPORE_FRAME_COUNT;
@@ -134,12 +184,14 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 201: return 168; // Sandstorm source body (weather bookkeeping stays in rules).
     case 211: return 197; // Steel Wing source body through first inactive row.
     case 223: return 75; // Dynamic Punch source body through first inactive row.
-    case 231: return 135; // Iron Tail source body through first inactive row.
+    case 231: return 135;
+    case 232: return 140; // Metal Claw source body through its final row. // Iron Tail source body through first inactive row.
     case 235: return 130; // Synthesis grow/star body through cleanup.
     case 178: return COTTON_SPORE_FRAME_COUNT;
     case 180: return 221; // Spite ghost-bg/target-clone body through cleanup.
     case 208: return 186; // Milk Drink bottle/ring/star body through cleanup.
     case 186: return SWEET_KISS_FRAME_COUNT;
+    case 188: return 160; // Sludge Bomb source body through its final row.
     case 204: return CHARM_BODY_FRAME_COUNT;
     case 213: return ATTRACT_FRAME_COUNT;
     case 227: return ENCORE_END_AGE + 1;
@@ -170,6 +222,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 325: return request.attacker === 0 ? 106 : 105;
     // The source Block script is two rows longer on the opponent-front side.
     case 335: return request.attacker === 0 ? 141 : 146;
+    case 334: return 101; // Iron Defense source body through its final blend row.
     case 336: return HOWL_FRAME_COUNT;
     case 337: return 137; // Dragon Claw palette restoration through cleanup.
     case 342: return 187; // Poison Tail source body through first inactive row.
@@ -227,6 +280,7 @@ export function liveMoveAnimationPresentation(
   });
   const pictureHeight = (side: "player" | "opponent") =>
     64 - 2 * art[side].coords.yOffset;
+  const attackerAnchors = liveBattlerAnchors(attacker.geometry.side, art);
   const fieldProfile = {
     playerHp: field.player.hp, playerMaxHp: field.player.maxHP,
     opponentHp: field.opponent.hp, opponentMaxHp: field.opponent.maxHP,
@@ -275,6 +329,27 @@ export function liveMoveAnimationPresentation(
     case 47: config = { move: "SING", attacker, target, fieldProfile }; break;
     case 48: config = { move: "SUPERSONIC", attacker, target, fieldProfile }; break;
     case 49: config = { move: "SONIC_BOOM", attacker, target, fieldProfile }; break;
+    case 51:
+      config = { move: "ACID", attacker, target, fieldProfile, projectileOrigin: attackerAnchors.picOffsetPoint };
+      break;
+    case 55:
+      config = { move: "WATER_GUN", attacker, target, fieldProfile, projectileOrigin: attackerAnchors.picOffsetPoint };
+      break;
+    case 124:
+      config = { move: "SLUDGE", attacker, target, fieldProfile, projectileOrigin: attackerAnchors.picOffsetPoint };
+      break;
+    case 188:
+      config = { move: "SLUDGE_BOMB", attacker, target, fieldProfile, projectileOrigin: attackerAnchors.picOffsetPoint };
+      break;
+    case 106:
+      config = { move: "HARDEN", attacker, target, fieldProfile, attackerSpriteCenter: attackerAnchors.spriteCenter };
+      break;
+    case 334:
+      config = { move: "IRON_DEFENSE", attacker, target, fieldProfile, attackerSpriteCenter: attackerAnchors.spriteCenter };
+      break;
+    case 232:
+      config = { move: "METAL_CLAW", attacker, target, fieldProfile, attackerSpriteCenter: attackerAnchors.spriteCenter };
+      break;
     case 65:
       // BowMon affines the battler OBJ around its unshifted sprite center.
       // The impact sprites independently retain the target's picture-offset
@@ -519,5 +594,8 @@ export function liveMoveAnimationPresentation(
   }
   // sceneOnLightScreenView/lightScreenAtAge are relative to wall creation;
   // the controller-owned live command starts at animation-script activation.
-  return { config, age: request.moveId === 113 ? age - 7 : age };
+  // The MetallicShine bodies' accepted staged windows start at presentation
+  // age -1: the first displayed row precedes the shine task's age 0.
+  const shineBody = request.moveId === 106 || request.moveId === 334 || request.moveId === 232;
+  return { config, age: request.moveId === 113 ? age - 7 : shineBody ? age - 1 : age };
 }
