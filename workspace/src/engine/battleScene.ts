@@ -722,7 +722,7 @@ import {
 } from "./battlePartySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { drawTileBg as drawExtractedTileBg } from "./bg.ts";
+import { drawTileBg as drawExtractedTileBgBase } from "./bg.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, type HealthboxAssets } from "./healthboxAssembly.ts";
 import { magbySendOutAnimation } from "./magbySendOut.ts";
 import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_END_OFFSET } from "./kabutoSendOut.ts";
@@ -4320,6 +4320,15 @@ export function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, s
     drawSourceOpponentEnemyShadow(fb, species, { x: 176, y: 40 }, true);
   }
 }
+
+const drawExtractedTileBg: typeof drawExtractedTileBgBase = (fb, bg, ...rest) => {
+  drawExtractedTileBgBase(fb, bg, ...rest);
+  if (liveOpponentShadow.species !== null && bg.tileset === battleBg.static.tileset) {
+    const species = liveOpponentShadow.species;
+    liveOpponentShadow.species = null;
+    drawSourceOpponentEnemyShadow(fb, species, { x: 176, y: 40 }, true);
+  }
+};
 
 function drawTileBgBase(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][]): void {
   for (let screenY = 0; screenY < 160; screenY += 1) {
@@ -12666,6 +12675,11 @@ export function drawStaticBgShiftedY(fb: Uint8Array, shiftY: number, fadeY = 0, 
         setPixel(fb, screenX, screenY, c);
       }
     }
+  }
+  if (liveOpponentShadow.species !== null) {
+    const species = liveOpponentShadow.species;
+    liveOpponentShadow.species = null;
+    drawSourceOpponentEnemyShadow(fb, species, { x: 176, y: 40 }, true);
   }
 }
 
