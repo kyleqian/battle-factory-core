@@ -150,22 +150,31 @@ describe("net-zero move history persistence", () => {
   }) as const;
   const { firstMove } = createKnownEntrySpriteAllocatorProvider("ordinary-factory");
 
-  it("pins the constant exactly to the net-zero receipt intersected with live adapters", () => {
-    const receipt = JSON.parse(readFileSync(
-      "tools/integration/fixtures/allocator-net-zero-audit.json", "utf8"));
+  it("pins the constant exactly to the union of the net-zero receipts", () => {
+    const read = (name: string) => JSON.parse(readFileSync(`tools/integration/fixtures/${name}`, "utf8"));
+    const receipt = read("allocator-net-zero-audit.json");
+    const ext = read("allocator-net-zero-audit-ext.json");
+    expect(receipt.summary.notNetZero).toEqual({});
+    expect(ext.summary.notNetZero).toEqual({});
+    // Fury Swipes (154) was audited on the player side only in the original
+    // receipt; the extension audits the opponent side.
+    const union = new Set<number>([...receipt.summary.netZeroIds, ...ext.summary.netZeroIds]);
+    expect([...union].sort((a, b) => a - b)).toEqual(ext.combined.netZeroIds);
+    const auditedLive = (ext.combined.netZeroIds as number[]).filter(id => union.has(id));
+    expect([...LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS]).toEqual(auditedLive);
+    expect(ext.combined.liveIdsNotCovered).toEqual([]);
+    for (const id of LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS) {
+      // The extension supersedes the original's "move-never-active" rows.
+      const scenarios = (ext.moves[String(id)] ?? receipt.moves[String(id)])?.scenarios ?? [];
+      expect(scenarios.length).toBeGreaterThan(0);
+      expect(scenarios.every((s: { netZero: boolean }) => s.netZero)).toBe(true);
+    }
     const live = new Set<number>(JSON.parse(readFileSync(
       "docs/animation-integration-live-status.json", "utf8",
     )).implementedAdapters.map((a: { id: number }) => a.id));
-    expect(receipt.summary.notNetZero).toEqual({});
-    // Fury Swipes (154) was audited on the player side only.
-    const expected = (receipt.summary.netZeroIds as number[])
-      .filter(id => live.has(id) && id !== 154).sort((a, b) => a - b);
-    expect([...LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS]).toEqual(expected);
-    for (const id of LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS) {
-      expect(receipt.moves[String(id)].scenarios.every(
-        (s: { netZero: boolean }) => s.netZero)).toBe(true);
-    }
-    for (const id of [41, 44, 158, 162, 325, 51, 124, 188, 55, 106, 334, 232]) {
+    // Every audited id is a live adapter; later (unaudited) adapters stay out.
+    for (const id of LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS) expect(live.has(id)).toBe(true);
+    for (const id of [203, 116, 263, 107, 87, 86, 207, 339]) {
       expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).not.toContain(id);
     }
   });
@@ -177,7 +186,7 @@ describe("net-zero move history persistence", () => {
   });
 
   it("invalidates for non-audited moves and keeps unknown unknown", () => {
-    for (const id of [51, 44, 154, 999]) {
+    for (const id of [203, 116, 999]) {
       expect(prepareLiveMoveSpriteAllocator(firstMove, req(id)).next.historyKnown).toBe(false);
     }
     const unknown = invalidateLiveSpriteAllocatorHost(firstMove);

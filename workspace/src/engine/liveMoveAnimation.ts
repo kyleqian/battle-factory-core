@@ -63,6 +63,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   208, 211, 213, 223, 227, 231, 232, 235, 242, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287, 290, 302,
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
   56, 61, 197, 238, 259, 294, 341,
+  // anchor3: source battler anchors (position center, picture height, pic offset).
+  86, 87, 107, 116, 203, 207, 263, 339,
 ] as const);
 
 export interface LiveBattlerAnchors {
@@ -204,6 +206,14 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 238: return 88; // Cross Chop source body through its final row.
     case 259: return 177; // Torment source body through its final row.
     case 294: return 203; // Tail Glow source body through its final row.
+    case 86: return 120; // Thunder Wave accepted source animation window.
+    case 87: return 262; // Thunder source body through the first inactive cleanup row.
+    case 107: return 153; // Minimize accepted source window.
+    case 116: return 122; // Focus Energy accepted source window.
+    case 203: return 122; // Endure accepted source window.
+    case 207: return 161; // Swagger accepted source window.
+    case 263: return 81; // Facade accepted source window.
+    case 339: return 104; // Bulk Up accepted source window.
     // The accepted opponent-front Mud Shot window is one row shorter.
     case 341: return request.attacker === 0 ? 145 : 144;
     case 204: return CHARM_BODY_FRAME_COUNT;
@@ -381,6 +391,28 @@ export function liveMoveAnimationPresentation(
     case 294:
       config = { move: "TAIL_GLOW", attacker, target, fieldProfile,
         attackerPictureOffset: attackerAnchors.picOffsetPoint };
+      break;
+    case 116: case 203:
+      // GetBattlerSpriteCoord(attacker, BATTLER_COORD_X/Y) reads sBattlerCoords.
+      config = { move: request.moveId === 116 ? "FOCUS_ENERGY" : "ENDURE", attacker, target, fieldProfile,
+        attackerCoord: attackerAnchors.battlePositionCenter };
+      break;
+    case 263: case 107:
+      config = { move: request.moveId === 263 ? "FACADE" : "MINIMIZE", attacker, target, fieldProfile,
+        battlerHeight: attackerAnchors.pictureHeight };
+      break;
+    case 86: case 87:
+      // GetBattlerSpriteCoord(target, X_2/Y_2) resolves to the picture-offset point.
+      config = { move: request.moveId === 86 ? "THUNDER_WAVE" : "THUNDER", attacker, target, fieldProfile,
+        targetEffectCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint };
+      break;
+    case 207:
+      config = { move: "SWAGGER", attacker, target, fieldProfile,
+        breathOrigin: attackerAnchors.picOffsetPoint };
+      break;
+    case 339:
+      config = { move: "BULK_UP", attacker, target, fieldProfile,
+        breathOrigin: attackerAnchors.picOffsetPoint, battlerHeight: attackerAnchors.pictureHeight };
       break;
     case 259:
       config = { move: "TORMENT", attacker, target, fieldProfile,

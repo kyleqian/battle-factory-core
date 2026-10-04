@@ -32,7 +32,10 @@ const routes: ReadonlyArray<readonly [number, 0 | 1 | 2 | 3, number, number, boo
   [87, 2, 0, 277, true], [447, 0, 0, 277, true], [260, 0, 0, 277, false],
   [38, 3, 0, 182, true], [118, 0, 0, 182, true], [20, 0, 0, 182, false], [64, 2, 0, 182, false],
   [17, 3, 14, 115, true], [58, 3, 14, 115, false],
-  [231, 1, 0, 243, false], [345, 0, 0, 243, false],
+  [231, 1, 0, 243, false],
+  // Seed 345 plays Bubble Beam 61 first; 61 is audited net-zero (allocator-net-zero-audit-ext.json),
+  // so history stays known and Mirror Coat renders the exact adapter after an audited body.
+  [345, 0, 0, 243, true],
 ];
 
 describe("wall-family live adapters", () => {
@@ -64,8 +67,10 @@ describe("wall-family live adapters", () => {
       && (row.command as { animation?: { moveId: number } }).animation?.moveId === moveId)!;
     expect(command.spriteInputHistoryKnown === true).toBe(exact);
     const firstIndex = on.requests.findIndex(request => request.moveId === moveId);
-    if (exact) expect(firstIndex).toBe(0);
+    // Exact routes either start the battle's body list or follow audited net-zero bodies.
+    if (exact && seed !== 345) expect(firstIndex).toBe(0);
     else expect(firstIndex).toBeGreaterThan(0);
+    if (seed === 345) expect(on.requests[0]!.moveId).toBe(61);
     expect(body[0]!.entryMessage?.visibleCharacters)
       .toBe(body[0]!.entryMessage?.lines.join("").length);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
