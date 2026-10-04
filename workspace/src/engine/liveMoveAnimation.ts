@@ -100,6 +100,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     76, 217, 236, 250,
     // multihit batch (multihit-shadow-rows.json): every hit window starts at its own activation.
     3, 4, 167,
+    // anchor4 batch (issue142-shadow-rows-extra.json): every window starts at activation (Earthquake: age 0 is the activation frame).
+    89, 90, 152, 345, 60, 133,
   ].map((id) => [id, 0])),
 );
 

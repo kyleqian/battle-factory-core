@@ -12690,6 +12690,12 @@ function drawStaticBgShiftedX(
   paletteOverride?: RgbColor[][],
 ): void {
   drawStaticBgShiftedXRows(fb, shiftX, paletteOverride, 0, 160);
+  // The shadow OBJ is not part of the scrolled BG: draw it at its fixed position (see liveOpponentShadow).
+  if (liveOpponentShadow.species !== null) {
+    const species = liveOpponentShadow.species;
+    liveOpponentShadow.species = null;
+    drawSourceOpponentEnemyShadow(fb, species, { x: 176, y: 40 }, true);
+  }
 }
 
 function drawStaticBgShiftedXRows(

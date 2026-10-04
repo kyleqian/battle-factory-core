@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 269,
-  "ids": 125,
+  "rows": 281,
+  "ids": 131,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -2836,6 +2836,138 @@
     0
    ],
    "tailFirstAge": null
+  },
+  {
+   "id": 133,
+   "move": "AMNESIA",
+   "orientation": "opponent",
+   "duration": 216,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 215
+  },
+  {
+   "id": 133,
+   "move": "AMNESIA",
+   "orientation": "player",
+   "duration": 216,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 215
+  },
+  {
+   "id": 152,
+   "move": "CRABHAMMER",
+   "orientation": "opponent",
+   "duration": 105,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 104
+  },
+  {
+   "id": 152,
+   "move": "CRABHAMMER",
+   "orientation": "player",
+   "duration": 105,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 104
+  },
+  {
+   "id": 89,
+   "move": "EARTHQUAKE",
+   "orientation": "opponent",
+   "duration": 198,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 207
+  },
+  {
+   "id": 89,
+   "move": "EARTHQUAKE",
+   "orientation": "player",
+   "duration": 198,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 207
+  },
+  {
+   "id": 90,
+   "move": "FISSURE",
+   "orientation": "opponent",
+   "duration": 254,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 253
+  },
+  {
+   "id": 90,
+   "move": "FISSURE",
+   "orientation": "player",
+   "duration": 254,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 253
+  },
+  {
+   "id": 345,
+   "move": "MAGICAL_LEAF",
+   "orientation": "opponent",
+   "duration": 182,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 181
+  },
+  {
+   "id": 345,
+   "move": "MAGICAL_LEAF",
+   "orientation": "player",
+   "duration": 182,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 181
+  },
+  {
+   "id": 60,
+   "move": "PSYBEAM",
+   "orientation": "opponent",
+   "duration": 160,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 159
+  },
+  {
+   "id": 60,
+   "move": "PSYBEAM",
+   "orientation": "player",
+   "duration": 160,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": 159
   }
  ]
 }
