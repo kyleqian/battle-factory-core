@@ -72,6 +72,12 @@ def derive(side):
                 "template": (call["template"] or {}).get("names", [None])[0] if call["template"] else None,
                 "slotArgument": call["slotArgument"], "returnedSlot": call.get("resultSlot"),
                 "occupiedBefore": call["occupiedBefore"], "occupiedAfter": call.get("occupiedAfter")})
+    for e in window:  # every table change must be attributed to an allocator call
+        want = "CreateSprite" if e["kind"] == "create" else "DestroySprite"
+        if not any(x["traceFrame"] == e["frame"] and x["slotArgument"] == e["slot"] and x["kind"].startswith(want)
+                   or x["traceFrame"] == e["frame"] and x["returnedSlot"] == e["slot"] and x["kind"].startswith(want)
+                   for x in in_window_calls):
+            raise SystemExit(f"{name} {side}: no allocator call for {e['kind']} slot {e['slot']} at frame {e['frame']}")
     reused = sorted({s["slot"] for s in script if sum(1 for t in script if t["slot"] == s["slot"]) > 1})
     return {
         "firstAnimationIsThisMove": c["firstAnimationIsThisMove"],

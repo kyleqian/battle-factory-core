@@ -20,8 +20,8 @@
   "src/battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c"
  },
  "toolSha256": {
-  "wallFamilyClockProbe.py": "35774da437bac9c549407f709be370513e2206d60b72b5b763659e3b9438ab20",
-  "wallFamilyAllocatorCallProbe.py": "47f5adf917b2ac594a146417faec0616be77e700b493d24878b890e0ff500425",
+  "wallFamilyClockProbe.py": "821b8a88c38b7ee52080d0763df1689da7b33dfb3c0e11b3786cf873fbc4d4d2",
+  "wallFamilyAllocatorCallProbe.py": "898a369c4b7245584eea6682a0907056877c638a054d3a8a6c27c1fc20a1e36e",
   "wallFamilyScenarios.py": "fdbf8004ae38ee7adcd3dc93ec38d9a383e7a4ef75b5fd97a50fd2a20f15e938",
   "wallFamilyRunAll.sh": "9f9f7b3b37f11ec62d3676b2c82ae48e017728f357709eeb9a5e459ad909f592",
   "lightScreenAllocatorCallProbe.py": "0b4ce615c54d72bba3d3c5da5d441aee9c0a9eb3442faee11826446ae7461cd5"
@@ -32,116 +32,77 @@
    "firstAnimationIsThisMove": true,
    "animationActivations": [
     {
-     "frame": 66,
+     "frame": 65,
      "moveIndex": 115,
-     "lastActiveFrame": 66
+     "lastActiveFrame": 142
     },
     {
-     "frame": 69,
-     "moveIndex": 115,
-     "lastActiveFrame": 69
-    },
-    {
-     "frame": 72,
-     "moveIndex": 115,
-     "lastActiveFrame": 91
-    },
-    {
-     "frame": 94,
-     "moveIndex": 115,
-     "lastActiveFrame": 100
-    },
-    {
-     "frame": 103,
-     "moveIndex": 115,
-     "lastActiveFrame": 109
-    },
-    {
-     "frame": 112,
-     "moveIndex": 115,
-     "lastActiveFrame": 137
-    },
-    {
-     "frame": 140,
-     "moveIndex": 115,
-     "lastActiveFrame": 283
-    },
-    {
-     "frame": 285,
+     "frame": 284,
      "moveIndex": 33,
-     "lastActiveFrame": 285
-    },
-    {
-     "frame": 288,
-     "moveIndex": 33,
-     "lastActiveFrame": 288
-    },
-    {
-     "frame": 291,
-     "moveIndex": 33,
-     "lastActiveFrame": 296
-    },
-    {
-     "frame": 299,
-     "moveIndex": 33
+     "lastActiveFrame": 324
     }
    ],
    "scenario": "tools/battle-lab/mechanic-reflect-player-shuppet-opponent-shuckle.json",
-   "activationFrame": 66,
+   "activationFrame": 65,
    "scriptEndCommandFrame": 140,
-   "cleanupFrame": 284,
+   "cleanupFrame": 143,
    "activeFlagStuckAtTraceEnd": false,
    "scriptPointerTrace": [
     {
+     "frame": 65,
+     "scriptOffset": 0,
+     "ptr": "0x82d009f"
+    },
+    {
      "frame": 66,
-     "scriptOffset": 4,
+     "scriptOffset": 3,
      "ptr": "0x82d00a2"
     },
     {
      "frame": 69,
-     "scriptOffset": 7,
+     "scriptOffset": 6,
      "ptr": "0x82d00a5"
     },
     {
      "frame": 72,
-     "scriptOffset": 30,
+     "scriptOffset": 29,
      "ptr": "0x82d00bc"
     },
     {
      "frame": 94,
-     "scriptOffset": 47,
+     "scriptOffset": 46,
      "ptr": "0x82d00cd"
     },
     {
      "frame": 103,
-     "scriptOffset": 64,
+     "scriptOffset": 63,
      "ptr": "0x82d00de"
     },
     {
      "frame": 112,
-     "scriptOffset": 79,
+     "scriptOffset": 78,
      "ptr": "0x82d00ed"
     },
     {
      "frame": 137,
-     "scriptOffset": 82,
+     "scriptOffset": 81,
      "ptr": "0x82d00f0"
     },
     {
      "frame": 140,
-     "scriptOffset": 83,
+     "scriptOffset": 82,
      "ptr": "0x82d00f1"
     }
    ],
-   "liveAgeOffset": 6,
+   "liveAgeOffset": 7,
    "wall": {
     "slot": 3,
     "template": "gReflectWallSpriteTemplate",
     "callback": "AnimDefensiveWall_Step1",
     "createFrame": 72,
-    "createAge": 6,
+    "createAge": 7,
     "destroyFrame": 136,
-    "destroyAge": 70,
+    "destroyAge": 71,
     "lifetime": 64,
     "ageFromWall": 0
    },
@@ -151,9 +112,9 @@
      "template": "gReflectWallSpriteTemplate",
      "callback": "AnimDefensiveWall_Step1",
      "createFrame": 72,
-     "createAge": 6,
+     "createAge": 7,
      "destroyFrame": 136,
-     "destroyAge": 70,
+     "destroyAge": 71,
      "lifetime": 64,
      "ageFromWall": 0
     },
@@ -162,9 +123,9 @@
      "template": "gReflectSparkleSpriteTemplate",
      "callback": "AnimWallSparkle",
      "createFrame": 94,
-     "createAge": 28,
+     "createAge": 29,
      "destroyFrame": 109,
-     "destroyAge": 43,
+     "destroyAge": 44,
      "lifetime": 15,
      "ageFromWall": 22
     },
@@ -173,9 +134,9 @@
      "template": "gReflectSparkleSpriteTemplate",
      "callback": "AnimWallSparkle",
      "createFrame": 103,
-     "createAge": 37,
+     "createAge": 38,
      "destroyFrame": 118,
-     "destroyAge": 52,
+     "destroyAge": 53,
      "lifetime": 15,
      "ageFromWall": 31
     },
@@ -184,9 +145,9 @@
      "template": "gReflectSparkleSpriteTemplate",
      "callback": "AnimWallSparkle",
      "createFrame": 112,
-     "createAge": 46,
+     "createAge": 47,
      "destroyFrame": 127,
-     "destroyAge": 61,
+     "destroyAge": 62,
      "lifetime": 15,
      "ageFromWall": 40
     }
@@ -492,12 +453,12 @@
     "clockPairIdentical": true,
     "callsPairIdentical": true,
     "clockSha256": [
-     "77f79750c5056dd6603d7249b4206e68af3d6a48095fb00844ddc965e5e18279",
-     "77f79750c5056dd6603d7249b4206e68af3d6a48095fb00844ddc965e5e18279"
+     "9acdb8f08f34d114ca4d7616604b644710408b5dcfb0b4ab04aa1c6088bfd803",
+     "9acdb8f08f34d114ca4d7616604b644710408b5dcfb0b4ab04aa1c6088bfd803"
     ],
     "callsSha256": [
-     "546f721e300d5631490b3688ef71a345b3873052722fc5040d9624d944dd4a78",
-     "546f721e300d5631490b3688ef71a345b3873052722fc5040d9624d944dd4a78"
+     "aa8e49a8630d6f42fcba896de480fc2f6ea0a79b01cfbffcaaa341fa017b4190",
+     "aa8e49a8630d6f42fcba896de480fc2f6ea0a79b01cfbffcaaa341fa017b4190"
     ]
    }
   },
@@ -505,116 +466,77 @@
    "firstAnimationIsThisMove": true,
    "animationActivations": [
     {
-     "frame": 70,
+     "frame": 69,
      "moveIndex": 115,
-     "lastActiveFrame": 70
+     "lastActiveFrame": 146
     },
     {
-     "frame": 73,
-     "moveIndex": 115,
-     "lastActiveFrame": 73
-    },
-    {
-     "frame": 76,
-     "moveIndex": 115,
-     "lastActiveFrame": 95
-    },
-    {
-     "frame": 98,
-     "moveIndex": 115,
-     "lastActiveFrame": 104
-    },
-    {
-     "frame": 107,
-     "moveIndex": 115,
-     "lastActiveFrame": 113
-    },
-    {
-     "frame": 116,
-     "moveIndex": 115,
-     "lastActiveFrame": 141
-    },
-    {
-     "frame": 144,
-     "moveIndex": 115,
-     "lastActiveFrame": 282
-    },
-    {
-     "frame": 284,
+     "frame": 283,
      "moveIndex": 33,
-     "lastActiveFrame": 284
-    },
-    {
-     "frame": 287,
-     "moveIndex": 33,
-     "lastActiveFrame": 287
-    },
-    {
-     "frame": 290,
-     "moveIndex": 33,
-     "lastActiveFrame": 295
-    },
-    {
-     "frame": 298,
-     "moveIndex": 33
+     "lastActiveFrame": 323
     }
    ],
    "scenario": "tools/battle-lab/mechanic-reflect-opponent-shuppet-player-shuckle.json",
-   "activationFrame": 70,
+   "activationFrame": 69,
    "scriptEndCommandFrame": 144,
-   "cleanupFrame": 283,
+   "cleanupFrame": 147,
    "activeFlagStuckAtTraceEnd": false,
    "scriptPointerTrace": [
     {
+     "frame": 69,
+     "scriptOffset": 0,
+     "ptr": "0x82d009f"
+    },
+    {
      "frame": 70,
-     "scriptOffset": 4,
+     "scriptOffset": 3,
      "ptr": "0x82d00a2"
     },
     {
      "frame": 73,
-     "scriptOffset": 7,
+     "scriptOffset": 6,
      "ptr": "0x82d00a5"
     },
     {
      "frame": 76,
-     "scriptOffset": 30,
+     "scriptOffset": 29,
      "ptr": "0x82d00bc"
     },
     {
      "frame": 98,
-     "scriptOffset": 47,
+     "scriptOffset": 46,
      "ptr": "0x82d00cd"
     },
     {
      "frame": 107,
-     "scriptOffset": 64,
+     "scriptOffset": 63,
      "ptr": "0x82d00de"
     },
     {
      "frame": 116,
-     "scriptOffset": 79,
+     "scriptOffset": 78,
      "ptr": "0x82d00ed"
     },
     {
      "frame": 141,
-     "scriptOffset": 82,
+     "scriptOffset": 81,
      "ptr": "0x82d00f0"
     },
     {
      "frame": 144,
-     "scriptOffset": 83,
+     "scriptOffset": 82,
      "ptr": "0x82d00f1"
     }
    ],
-   "liveAgeOffset": 6,
+   "liveAgeOffset": 7,
    "wall": {
     "slot": 3,
     "template": "gReflectWallSpriteTemplate",
     "callback": "AnimDefensiveWall_Step1",
     "createFrame": 76,
-    "createAge": 6,
+    "createAge": 7,
     "destroyFrame": 140,
-    "destroyAge": 70,
+    "destroyAge": 71,
     "lifetime": 64,
     "ageFromWall": 0
    },
@@ -624,9 +546,9 @@
      "template": "gReflectWallSpriteTemplate",
      "callback": "AnimDefensiveWall_Step1",
      "createFrame": 76,
-     "createAge": 6,
+     "createAge": 7,
      "destroyFrame": 140,
-     "destroyAge": 70,
+     "destroyAge": 71,
      "lifetime": 64,
      "ageFromWall": 0
     },
@@ -635,9 +557,9 @@
      "template": "gReflectSparkleSpriteTemplate",
      "callback": "AnimWallSparkle",
      "createFrame": 98,
-     "createAge": 28,
+     "createAge": 29,
      "destroyFrame": 113,
-     "destroyAge": 43,
+     "destroyAge": 44,
      "lifetime": 15,
      "ageFromWall": 22
     },
@@ -646,9 +568,9 @@
      "template": "gReflectSparkleSpriteTemplate",
      "callback": "AnimWallSparkle",
      "createFrame": 107,
-     "createAge": 37,
+     "createAge": 38,
      "destroyFrame": 122,
-     "destroyAge": 52,
+     "destroyAge": 53,
      "lifetime": 15,
      "ageFromWall": 31
     },
@@ -657,9 +579,9 @@
      "template": "gReflectSparkleSpriteTemplate",
      "callback": "AnimWallSparkle",
      "createFrame": 116,
-     "createAge": 46,
+     "createAge": 47,
      "destroyFrame": 131,
-     "destroyAge": 61,
+     "destroyAge": 62,
      "lifetime": 15,
      "ageFromWall": 40
     }
@@ -965,12 +887,12 @@
     "clockPairIdentical": true,
     "callsPairIdentical": true,
     "clockSha256": [
-     "701e5387349b262073c670dd20796ac43de4f649b7951ae10f236ccb7b8e6925",
-     "701e5387349b262073c670dd20796ac43de4f649b7951ae10f236ccb7b8e6925"
+     "f65ebaf39256f6c46204b1872ccf931c7bff3b968a3a217d3fe084373b98268e",
+     "f65ebaf39256f6c46204b1872ccf931c7bff3b968a3a217d3fe084373b98268e"
     ],
     "callsSha256": [
-     "657c9087f3f5af62d338a82d9ecf3dd4975c3beef070d7374f71217932e83fd8",
-     "657c9087f3f5af62d338a82d9ecf3dd4975c3beef070d7374f71217932e83fd8"
+     "1bedcc7128d08a17cb3e3d80cd611bcf877b492281acd325d29e5aa8886dfeaf",
+     "1bedcc7128d08a17cb3e3d80cd611bcf877b492281acd325d29e5aa8886dfeaf"
     ]
    }
   }

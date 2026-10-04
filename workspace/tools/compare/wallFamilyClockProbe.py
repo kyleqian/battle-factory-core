@@ -62,9 +62,9 @@ def main() -> None:
     for line in nm.splitlines():
         parts = line.split()
         if len(parts) == 3:
-            addr = int(parts[0], 16) & ~1
-            names[parts[2]] = addr
-            by_addr.setdefault(addr, []).append(parts[2])
+            addr = int(parts[0], 16)
+            names[parts[2]] = addr  # exact: data symbols may sit at odd addresses
+            by_addr.setdefault(addr & ~1, []).append(parts[2])
     label = LABELS[MOVE]
     base_ptr = names[label]
 

@@ -60,10 +60,11 @@ def fast():
         changes.setdefault(step, {"freed": [], "allocated": [], "replacements": [],
                                   "occupiedBefore": [], "occupiedAfter": [],
                                   "note": "wall-family clock event frame"})
-    # Entry-phase steps are the Light Screen probe's business (and a lag frame
-    # can straddle a pending DestroySprite there); keep only the move window.
-    lo, hi = base + clock["activationFrame"] - 4, base + (clock["cleanupFrame"] or clock["endCommandFrame"]) + 2
-    keep = {step for step in flagged if lo <= step <= hi}
+    # Only the clock-event frames are single-stepped.  The Light Screen probe's
+    # own coalescing selection is dropped: an extra single-stepped frame next
+    # to an event frame shifts the frame phase and lost every later call
+    # (observed on the Mirror Coat opponent scenario).
+    keep = set()
     return sorted(keep | extra), changes, *rest
 
 
