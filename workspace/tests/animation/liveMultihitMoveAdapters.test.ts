@@ -9,7 +9,6 @@ import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts"
 import {
   LIVE_MOVE_ANIMATION_IDS,
   LIVE_MOVE_OPPONENT_SHADOW_ROW,
-  liveBattlerAnchors,
   liveMoveAnimationDuration,
   liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
