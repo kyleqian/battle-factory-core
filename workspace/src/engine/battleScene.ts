@@ -1,4 +1,4 @@
-import { liveMoveAnimationPresentation } from "./liveMoveAnimation.ts";
+import { liveMoveAnimationPresentation, liveMoveOpponentShadowRow } from "./liveMoveAnimation.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
 // window (tools/compare/traces-groundtruth/battle1-scene-dense.json, trace
 // ticks 1040-1295) plus the SEND-OUT window (battle1-sendout-dense.json,
@@ -722,7 +722,7 @@ import {
 } from "./battlePartySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { drawTileBg as drawExtractedTileBg } from "./bg.ts";
+import { drawTileBg as drawExtractedTileBgBase } from "./bg.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, type HealthboxAssets } from "./healthboxAssembly.ts";
 import { magbySendOutAnimation } from "./magbySendOut.ts";
 import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_END_OFFSET } from "./kabutoSendOut.ts";
@@ -4299,7 +4299,38 @@ function drawSpriteSheetWindowed(
   }
 }
 
+/**
+ * Live-move opponent shadow (ISSUES #142). `renderBattleResolutionLiveView`
+ * arms this on the live row named by `liveMoveOpponentShadowRow`; the shadow
+ * OBJ (priority 3, subpriority 0xC8: battle_gfx_sfx_util.c:1186) is the
+ * rearmost sprite, so it is painted right after the branch's first battle
+ * background and before battlers/effects. While `suppressAdHoc` is set the
+ * per-branch age-0 calls are skipped so the shadow is drawn exactly once, on
+ * the table row, instead of by each branch's own guess.
+ */
+const liveOpponentShadow: { species: string | null; suppressAdHoc: boolean } = {
+  species: null, suppressAdHoc: false,
+};
+
 export function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][]): void {
+  drawTileBgBase(fb, tileset, tilemap, subpalettes);
+  if (liveOpponentShadow.species !== null && tileset === battleBg.static.tileset) {
+    const species = liveOpponentShadow.species;
+    liveOpponentShadow.species = null;
+    drawSourceOpponentEnemyShadow(fb, species, { x: 176, y: 40 }, true);
+  }
+}
+
+const drawExtractedTileBg: typeof drawExtractedTileBgBase = (fb, bg, ...rest) => {
+  drawExtractedTileBgBase(fb, bg, ...rest);
+  if (liveOpponentShadow.species !== null && bg.tileset === battleBg.static.tileset) {
+    const species = liveOpponentShadow.species;
+    liveOpponentShadow.species = null;
+    drawSourceOpponentEnemyShadow(fb, species, { x: 176, y: 40 }, true);
+  }
+};
+
+function drawTileBgBase(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][]): void {
   for (let screenY = 0; screenY < 160; screenY += 1) {
     const tileRow = Math.floor(screenY / 8);
     const inTileY = screenY % 8;
@@ -5161,7 +5192,9 @@ function drawSourceOpponentEnemyShadow(
   fb: Uint8Array,
   species: string,
   battlePositionCenter: Readonly<{ x: number; y: number }>,
+  liveRow = false,
 ): void {
+  if (!liveRow && liveOpponentShadow.suppressAdHoc) return;
   if (!elevatedEnemyShadowSpecies.has(`SPECIES_${species}`)) return;
   const x = battlePositionCenter.x - battleEnemyShadow.width / 2;
   const y = battlePositionCenter.y + 29 - battleEnemyShadow.height / 2;
@@ -12643,6 +12676,11 @@ export function drawStaticBgShiftedY(fb: Uint8Array, shiftY: number, fadeY = 0, 
       }
     }
   }
+  if (liveOpponentShadow.species !== null) {
+    const species = liveOpponentShadow.species;
+    liveOpponentShadow.species = null;
+    drawSourceOpponentEnemyShadow(fb, species, { x: 176, y: 40 }, true);
+  }
 }
 
 /** BG3HOFS sampling for `AnimTask_ShakePlatforms`. */
@@ -17795,7 +17833,10 @@ export function renderSceneOnMovePresentation(
     const player = playerToOpponent ? phanpy : onix;
     const opponentBattler = playerToOpponent ? view.target : view.attacker;
     const playerBattler = playerToOpponent ? view.attacker : view.target;
-    const onixIdle = playerToOpponent
+    // The opponent front sprite keeps its species idle rest offset (ISSUES
+    // #142) whichever role it plays; only the staged Phanpy-front pair omits it.
+    const opponentIdleApplies = playerToOpponent || liveField;
+    const onixIdle = opponentIdleApplies
       ? speciesFrontIdleRestOffsetOrZero(opponentBattler.species)
       : { x2: 0, y2: 0 };
 
@@ -17810,9 +17851,9 @@ export function renderSceneOnMovePresentation(
       opponent.tileset,
       opponent.palette,
       opponentBattler.geometry.spriteCorner.x
-        + (playerToOpponent ? onixIdle.x2 : 0),
+        + (opponentIdleApplies ? onixIdle.x2 : 0),
       opponentBattler.geometry.spriteCorner.y
-        + (playerToOpponent ? onixIdle.y2 : 0),
+        + (opponentIdleApplies ? onixIdle.y2 : 0),
     );
     drawSpriteSheet(
       fb,
@@ -54500,7 +54541,16 @@ export function renderBattleResolutionLiveView(
     renderBattleResolutionSceneOffView(fb, view);
     return;
   }
-  renderSceneOnMovePresentation(fb, presentation, true);
+  const shadowRow = effect?.type === "move" ? liveMoveOpponentShadowRow(effect.request) : null;
+  liveOpponentShadow.species = effect?.type === "move" && effect.age === shadowRow
+    ? view.fieldArt.opponent.speciesSymbol : null;
+  liveOpponentShadow.suppressAdHoc = effect?.type === "move" && effect.age === 0;
+  try {
+    renderSceneOnMovePresentation(fb, presentation, true);
+  } finally {
+    liveOpponentShadow.species = null;
+    liveOpponentShadow.suppressAdHoc = false;
+  }
   // Encore's hardware fade targets OBJ as well as BG3. The live seam
   // replaces the staged healthboxes below with their controller-owned
   // values, so retain that OBJ-targeted BLDY on the replacement canvases.

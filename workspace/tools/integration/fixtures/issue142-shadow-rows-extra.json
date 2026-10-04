@@ -1,0 +1,274 @@
+{
+ "schema": "issue142-shadow-rows-extra/v1",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs",
+ "rows": [
+  {
+   "id": 236,
+   "move": "MOONLIGHT",
+   "orientation": "opponent",
+   "variant": "moonlight-opponent",
+   "activationFrame": 207,
+   "windowStart": 207,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 558,
+   "tailFirstAge": 351,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-moonlight-opponent.json",
+    "scenario": "tools/battle-lab/mechanic-moonlight-opponent-gloom-player-onix.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 236,
+   "move": "MOONLIGHT",
+   "orientation": "player",
+   "variant": "moonlight-player",
+   "activationFrame": 207,
+   "windowStart": 207,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 558,
+   "tailFirstAge": 351,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-moonlight-player.json",
+    "scenario": "tools/battle-lab/mechanic-moonlight-player-gloom-opponent-onix.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 217,
+   "move": "PRESENT",
+   "orientation": "opponent",
+   "variant": "present-opponent-damage",
+   "requestFields": {
+    "turn": 0,
+    "power": 40,
+    "damage": 40
+   },
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 278,
+   "tailFirstAge": 200,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-present-opponent-damage.json",
+    "scenario": "tools/battle-lab/mechanic-present-opponent-delibird-player-onix.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 217,
+   "move": "PRESENT",
+   "orientation": "opponent",
+   "variant": "present-opponent-heal",
+   "requestFields": {
+    "turn": 0,
+    "power": 0,
+    "damage": -40
+   },
+   "activationFrame": 1404,
+   "windowStart": 1404,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 1655,
+   "tailFirstAge": 251,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-present-opponent-heal.json",
+    "scenario": "tools/battle-lab/mechanic-present-opponent-delibird-player-onix-heal.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 217,
+   "move": "PRESENT",
+   "orientation": "player",
+   "variant": "present-player-damage",
+   "requestFields": {
+    "turn": 0,
+    "power": 40,
+    "damage": 40
+   },
+   "activationFrame": 1012,
+   "windowStart": 1012,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 1212,
+   "tailFirstAge": 200,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-present-player-damage.json",
+    "scenario": "tools/battle-lab/mechanic-present-player-delibird-opponent-onix.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 217,
+   "move": "PRESENT",
+   "orientation": "player",
+   "variant": "present-player-heal",
+   "requestFields": {
+    "turn": 0,
+    "power": 0,
+    "damage": -40
+   },
+   "activationFrame": 1946,
+   "windowStart": 1946,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 2197,
+   "tailFirstAge": 251,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-present-player-heal.json",
+    "scenario": "tools/battle-lab/mechanic-present-player-delibird-opponent-onix-heal.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 76,
+   "move": "SOLAR_BEAM",
+   "orientation": "opponent",
+   "variant": "solar-beam-opponent-setup",
+   "requestFields": {
+    "turn": 0,
+    "power": 0,
+    "damage": 0
+   },
+   "activationFrame": 190,
+   "windowStart": 190,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 297,
+   "tailFirstAge": 107,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-solar-beam-opponent-setup.json",
+    "scenario": "tools/battle-lab/mechanic-solar-beam-opponent-gloom-player-chansey.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 76,
+   "move": "SOLAR_BEAM",
+   "orientation": "opponent",
+   "variant": "solar-beam-opponent-unleash",
+   "requestFields": {
+    "turn": 1,
+    "power": 0,
+    "damage": 0
+   },
+   "activationFrame": 754,
+   "windowStart": 754,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 991,
+   "tailFirstAge": 237,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-solar-beam-opponent-unleash.json",
+    "scenario": "tools/battle-lab/mechanic-solar-beam-opponent-gloom-player-chansey.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 76,
+   "move": "SOLAR_BEAM",
+   "orientation": "player",
+   "variant": "solar-beam-player-setup",
+   "requestFields": {
+    "turn": 0,
+    "power": 0,
+    "damage": 0
+   },
+   "activationFrame": 194,
+   "windowStart": 194,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 301,
+   "tailFirstAge": 107,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-solar-beam-player-setup.json",
+    "scenario": "tools/battle-lab/mechanic-solar-beam-player-gloom-opponent-chansey.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 76,
+   "move": "SOLAR_BEAM",
+   "orientation": "player",
+   "variant": "solar-beam-player-unleash",
+   "requestFields": {
+    "turn": 1,
+    "power": 0,
+    "damage": 0
+   },
+   "activationFrame": 599,
+   "windowStart": 599,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 836,
+   "tailFirstAge": 237,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-solar-beam-player-unleash.json",
+    "scenario": "tools/battle-lab/mechanic-solar-beam-player-gloom-opponent-chansey.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 250,
+   "move": "WHIRLPOOL",
+   "orientation": "opponent",
+   "variant": "whirlpool-opponent",
+   "activationFrame": 82,
+   "windowStart": 82,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 214,
+   "tailFirstAge": 132,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-whirlpool-opponent.json",
+    "scenario": "tools/battle-lab/mechanic-whirlpool-opponent-wailmer-player-onix.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 250,
+   "move": "WHIRLPOOL",
+   "orientation": "player",
+   "variant": "whirlpool-player",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 210,
+   "tailFirstAge": 132,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/selectors-whirlpool-player.json",
+    "scenario": "tools/battle-lab/mechanic-whirlpool-player-wailmer-opponent-onix.json",
+    "body": "normal",
+    "activation": "issue142-selectors-activation-probes.json"
+   }
+  }
+ ]
+}
