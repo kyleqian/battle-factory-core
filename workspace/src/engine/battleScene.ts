@@ -28708,14 +28708,14 @@ export function renderSceneOnMovePresentation(
       ...reflectState, age: reflectState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "MINUN"
+      (liveField || view.attacker.species === "MINUN")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "MINUN"
+      (liveField || view.attacker.species === "MINUN")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -28724,10 +28724,14 @@ export function renderSceneOnMovePresentation(
     }
     const minunSource = playerToOpponent
       ? encoreArt.minunBack : encoreArt.minunFront;
-    const minun = playerToOpponent
+    const minun = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? minunSource
       : { ...minunSource, tileset: subTileset(minunSource.tileset, 0, 8) };
-    const shuckle = playerToOpponent
+    const shuckle = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent
       ? {
           ...selfDestructArt.shuckleFront,
           tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
@@ -28771,10 +28775,12 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? view.attacker.geometry.spriteCorner.y
         : view.target.geometry.spriteCorner.y,
     );
-    // Lower hardware OAM index wins equal-priority overlaps. The allocator
-    // reuses slot 4 for sparkle three, so reverse source creation order is
-    // also the exact painter order for this legal fixture.
-    for (const sparkle of displayed.sparkles.slice().reverse()) {
+    // Lower hardware OAM index wins equal-priority overlaps: paint in
+    // descending allocator slot, so the plan's slot reuse decides the order.
+    for (const sparkle of displayed.sparkles.slice().sort((left, right) =>
+      reflectState.config.allocatorProfile.sparkles[right.spawnIndex]!
+      - reflectState.config.allocatorProfile.sparkles[left.spawnIndex]!
+    )) {
       const rows = sparkle.tileOffset / 4;
       drawSpriteSheet(
         fb,
@@ -28853,14 +28859,14 @@ export function renderSceneOnMovePresentation(
       ...mirrorCoatState, age: mirrorCoatState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "CORSOLA"
+      (liveField || view.attacker.species === "CORSOLA")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "EXEGGCUTE"
+      && (liveField || view.target.species === "EXEGGCUTE")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "CORSOLA"
+      (liveField || view.attacker.species === "CORSOLA")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "EXEGGCUTE"
+      && (liveField || view.target.species === "EXEGGCUTE")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -28870,7 +28876,9 @@ export function renderSceneOnMovePresentation(
     }
     const corsolaSource = playerToOpponent
       ? mirrorCoatArt.corsolaBack : mirrorCoatArt.corsolaFront;
-    const corsola = playerToOpponent
+    const corsola = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? corsolaSource
       : {
           ...corsolaSource,
@@ -28878,7 +28886,9 @@ export function renderSceneOnMovePresentation(
         };
     const exeggcuteSource = playerToOpponent
       ? lightScreenArt.exeggcuteFront : lightScreenArt.exeggcuteBack;
-    const exeggcute = playerToOpponent
+    const exeggcute = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent
       ? {
           ...exeggcuteSource,
           tileset: subTileset(exeggcuteSource.tileset, 0, 8),
@@ -28933,8 +28943,12 @@ export function renderSceneOnMovePresentation(
         ? view.attacker.geometry.spriteCorner.y
         : view.target.geometry.spriteCorner.y,
     );
-    // The three allocator slots are reused by the second sparkle trio.
-    for (const sparkle of displayed.sparkles.slice().reverse()) {
+    // Lower OAM indexes win equal-priority overlaps; the plan's three
+    // slots are reused by the second sparkle trio.
+    for (const sparkle of displayed.sparkles.slice().sort((left, right) =>
+      mirrorCoatState.config.allocatorProfile.sparkles[right.spawnIndex]!
+      - mirrorCoatState.config.allocatorProfile.sparkles[left.spawnIndex]!
+    )) {
       drawSpriteSheet(
         fb,
         subTileset(
