@@ -45,7 +45,14 @@ draw it on row 1. Source draw order: shadow OBJ priority 3 (`battle_anim_smokesc
 each branch's battle background and before battlers/effects. The idle-x2 half only matters for moves ONIX or
 RATTATA can legally use in the Factory (compute from `src/data/gen/battle-frontier-mons.json`).
 
-**Fix shape:** one generic, source-cited live-path rule for the row-0 elevated-opponent shadow (draw order
+**Refinement (2026-10-04, `docs/altspecies3-results.md`, source-derived windows):** the shadow is visible on
+the ROM frame where the move script activates; a live adapter's row 0 is its accepted window start, which is
+the activation frame only for some moves (offset 0: Body Slam, Mega Punch, Night Shade, Brick Break, ...).
+Moves whose window starts later (Toxic +7, Confusion/Psychic/Shadow Ball +5, Calm Mind +3, Bite +10) are
+correctly exact without it. So the rule is per move, keyed on offset = window start − activation, not "row 0
+for every branch". Five reliable acceptance fixtures: `altspecies3-{body-slam,mega-punch,reflect,brick-break-…-shattered,night-shade-…-hp160-notail}`.
+
+**Fix shape:** one generic, source-cited live-path rule for the activation-frame elevated-opponent shadow (draw order
 from the shadow OBJ's priority/subpriority, not an overlay guess) applied to every live branch, plus the
 opponent-attacker rest offset where the source applies it. **Acceptance:** all alt-species cases in
 `tools/integration/fixtures/altspecies-*.json` exact twice fresh; every accepted live fixture whose opponent

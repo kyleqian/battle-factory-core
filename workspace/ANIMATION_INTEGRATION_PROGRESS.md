@@ -1,5 +1,18 @@
 # Animation integration progress
 
+## 2026-10-04 — altspecies3: source-derived windows refine #142
+
+- Side-lane evidence `4e720e41b` folded as `d2530865a` (new files only): all
+  16 alternate-species cases re-derived from the source activation frame,
+  twice fresh. Five reliable #142 fixtures (200 px at row 0): Body Slam,
+  Mega Punch, Reflect, Brick Break (shattered wall), Night Shade; eleven exact
+  controls. Brick Break/Haunter and Night Shade/Golbat residuals were staging
+  artifacts (missing body selector; HP digits). Tail variance of 1 frame in
+  `Task_FadeToBg` (Night Shade, Shadow Ball) is ROM behaviour not yet modelled.
+- Refinement: the shadow belongs to the activation frame; only moves whose
+  accepted window starts at activation (offset 0) need it on row 0. ISSUES
+  #142 and the fix brief updated to a per-move offset rule.
+
 ## 2026-10-04 — altspecies2 BEFORE set (partial) for #142
 
 - Side-lane evidence `79719cc3b` folded as `8429e7b24` (new files only): 16
