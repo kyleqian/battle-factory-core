@@ -26,9 +26,8 @@ species-dependent behaviour no gate sees. This document decides two suspects wit
   enemy-shadow mask `src/assets/gen/battle-enemy-shadow.json`, source/live colour pairs,
   best integer shift fit). Receipt: `tools/integration/fixtures/altspecies-live-evidence.json`;
   per-case row summary JSON: `tools/integration/fixtures/altspecies-evidence/`. Raw RGB/run dirs
-  and the first-residual-row source|live|diff PNGs (`png/<case>/first-residual-age0.png` for the
-  eight residual cases except that only Sandstorm was additionally saved under `png/sandstorm-onix`)
-  are under the gitignored `.integration/validation/altspecies-20261004/{pass1,pass2,png}`.
+  and the first-residual-row source|live|diff PNGs (`png/<case>/first-residual-age0.png`, one per
+  residual case, from pass1 run0) are under the gitignored `.integration/validation/altspecies-20261004/{pass1,pass2,png}`.
 
 ## Results (all 12 cases: 4 fresh runs, identical digests)
 
@@ -73,9 +72,9 @@ not separately attributed.
 
 | suspect | verdict |
 |---|---|
-| S1. Elevated-opponent shadow absent on row 0 in several new live branches | **CONFIRMED**: Mud Shot, Flame Wheel, Heat Wave, Block, Torment, Detect: exactly 200 px at age 0 (rows 1.. exact) for a non-attacking elevated opponent (GOLBAT, MAGNETON-class, HAUNTER); Torment with elevated opponent **attacker** (KOFFING) identical. Acid and Synthesis (both attacker roles) already draw it at age 0: **REFUTED** for those. Detect/Synthesis show the shadow is needed even when the move is self-targeted. |
+| S1. Elevated-opponent shadow absent on row 0 in several new live branches | **CONFIRMED**: Mud Shot, Flame Wheel, Heat Wave, Block, Torment, Detect: exactly 200 px at age 0 (rows 1.. exact) for a non-attacking elevated opponent (GOLBAT, MAGNETON, HAUNTER); Torment with elevated opponent **attacker** (KOFFING) identical. Acid and Synthesis (both attacker roles) already draw it at age 0: **REFUTED** for those. Detect/Synthesis show the shadow is needed even when the move is self-targeted. |
 | S1b. "Shadow only matters when the opponent attacks" | **REFUTED**: it is needed whenever an elevated species is the opponent battler, as target, attacker or bystander. |
-| S2. Opponent-attacker front-idle rest offset missing | **CONFIRMED for Sandstorm** (ONIX, all 168 rows, 903–1091 px). **REFUTED for Hyper Fang** (RATTATA x2=1 exact, 107 rows). Heat Wave, Sandstorm-style Block, Mud Shot, Hydro Pump, Bubble Beam, Cross Chop, Sludge, Role Play, Spite: **not testable** — no legal Factory ONIX/RATTATA carrier of those moves (ONIX: Rock Slide, Bind, Dragon Breath, Sandstorm; RATTATA: Hyper Fang, Pursuit, Quick Attack, Swagger). Recorded negative; the code paths named in the audit remain unproved for ONIX/RATTATA attackers. |
+| S2. Opponent-attacker front-idle rest offset missing | **CONFIRMED for Sandstorm** (ONIX, all 168 rows, 903–1091 px). **REFUTED for Hyper Fang** (RATTATA x2=1 exact, 107 rows). Heat Wave, Block, Mud Shot, Hydro Pump, Bubble Beam, Cross Chop, Sludge, Role Play, Spite: **not testable** — no legal Factory ONIX/RATTATA carrier of those moves (ONIX: Rock Slide, Bind, Dragon Breath, Sandstorm; RATTATA: Hyper Fang, Pursuit, Quick Attack, Swagger). Recorded negative; the code paths named in the audit remain unproved for ONIX/RATTATA attackers. |
 | Mud Shot vs GOLBAT | recorded negative: Ground vs Flying is immune, no animation runs (MAGNETON used). |
 | Elevated opponent attacker for Mud Shot, Acid, Flame Wheel, Heat Wave, Block | recorded negative: no elevated species carries those moves in a Factory set (only KOFFING Torment, SKIPLOOM/JUMPLUFF Synthesis, YANMA Detect do; Yanma Detect/Skiploom Synthesis are already accepted fixtures). |
 
