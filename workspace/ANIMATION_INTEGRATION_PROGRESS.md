@@ -1,5 +1,16 @@
 # Animation integration progress
 
+## 2026-10-04 — altspecies2 BEFORE set (partial) for #142
+
+- Side-lane evidence `79719cc3b` folded as `8429e7b24` (new files only): 16
+  alternate-species cases on older adapters, twice fresh. Reliable #142
+  acceptance: Body Slam/Golbat and Mega Punch/Magneton (200 px at age 0),
+  Brick Break/Haunter row 0. Window starts for the rest came from a biased
+  live-match finder; two unattributed residual families (Brick Break vs
+  Haunter ages 23-191 ~2,587 px/row; Night Shade vs Golbat 59 px/row).
+- Follow-up running (side lane): re-derive starts from the source activation
+  frame and attribute both families.
+
 ## 2026-10-04 — anchor3 batch (118 live), net-zero list 110, #142 scoped
 
 - Folded anchor3 `02d753d84` as `6faa70568` (src tree `dabce926b`): Endure,
