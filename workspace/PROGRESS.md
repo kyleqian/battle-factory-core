@@ -41,9 +41,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   routes. Read-only day audit: no confirmed defect; species-dependent
   suspects (elevated-opponent shadow on row 0, opponent idle x2) being
   decided by alternate-species dense proofs in the side lane.
-- **Also:** ISSUES #142 filed and scoped: most live bodies miss an elevated
-  opponent's shadow on their first frame (alternate-species proofs + scan).
-- **Next:** #142 fix across all branches from the per-move shadow-row table. Oracle freshness FAIL at orient was a false positive:
+- **Also:** ISSUES #142 fixed (elevated-opponent shadow on the activation
+  frame for 88 live ids; Sandstorm idle); 14 alternate-species fixtures exact.
+- **Next:** multi-hit adapters (prep banked); Reversal reducer change needs
+  the animation program (evidence banked). Oracle freshness FAIL at orient was a false positive:
   only workspace commits since service start; both services kept.
 - **Notes:** no material decision deferred.
 

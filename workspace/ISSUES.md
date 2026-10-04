@@ -17,47 +17,6 @@ backlog.
 
 # Open
 
-## #142 — Live move bodies miss species-dependent first-row state: elevated-opponent enemy shadow on row 0, and Sandstorm's opponent-attacker idle x2
-
-**Found 2026-10-04** (read-only day audit suspects, then CONFIRMED by alternate-species dense proofs:
-`tools/integration/fixtures/altspecies-live-evidence.json`, `docs/altspecies-live-evidence.md`;
-supervisor rerun of Mud Shot vs Magneton reproduced 144/145 rows with 200 px at age 0). Integration only;
-gameplay unaffected.
-
-1. **Elevated-opponent shadow, row 0.** Source `SpriteCB_EnemyShadow`
-   (`battle_gfx_sfx_util.c:1203`) hides the 32x8 shadow only once `gAnimScriptActive` is seen, so with the
-   one-frame display lag it is still visible on a move body's FIRST displayed row, for ANY elevated opponent
-   (61 species) whether it is the attacker, the target or a bystander. Most live branches in
-   `src/engine/battleScene.ts` never draw it at age 0 (a few draw it only for opponent attackers via
-   `drawSourceOpponentEnemyShadow`). Confirmed 200 px at age 0 (bbox x160-191, y65-72, all inside the
-   shadow mask) for Mud Shot, Flame Wheel, Heat Wave, Block, Torment (both attacker sides) and Detect;
-   Acid and Synthesis already correct. Every accepted fixture uses a non-elevated opponent (mostly Onix), so
-   no prior gate could see it; older adapters likely share it.
-2. **Sandstorm opponent-attacker idle x2** (`battleScene.ts` ~17798): `onixIdle` is zero unless the player
-   attacks; an Onix (rest x2 = 1) opponent attacker is drawn 1 px left on every row (180,304 px/run).
-   Hyper Fang with Rattata is correct. Heat Wave/Block/Mud Shot/Hydro Pump/Bubble Beam/Cross Chop/Sludge/
-   Role Play/Spite have the same code shape but no legal Onix/Rattata carrier (untestable, not cleared).
-
-**Scope (2026-10-04 scan, `tools/integration/issue142Scan.ts`, `docs/issue142-scan.md`):** of 110 live
-ids, 101 miss the row-0 shadow with an elevated opponent target and 89 with an elevated opponent attacker; none
-draw it on row 1. Source draw order: shadow OBJ priority 3 (`battle_anim_smokescreen.c:144`), subpriority 0xC8
-(`battle_gfx_sfx_util.c:1186`), battlers priority 2 — the shadow is the rearmost OBJ, so it belongs right after
-each branch's battle background and before battlers/effects. The idle-x2 half only matters for moves ONIX or
-RATTATA can legally use in the Factory (compute from `src/data/gen/battle-frontier-mons.json`).
-
-**Refinement (2026-10-04, `docs/altspecies3-results.md`, source-derived windows):** the shadow is visible on
-the ROM frame where the move script activates; a live adapter's row 0 is its accepted window start, which is
-the activation frame only for some moves (offset 0: Body Slam, Mega Punch, Night Shade, Brick Break, ...).
-Moves whose window starts later (Toxic +7, Confusion/Psychic/Shadow Ball +5, Calm Mind +3, Bite +10) are
-correctly exact without it. So the rule is per move, keyed on offset = window start − activation, not "row 0
-for every branch". Five reliable acceptance fixtures: `altspecies3-{body-slam,mega-punch,reflect,brick-break-…-shattered,night-shade-…-hp160-notail}`.
-
-**Fix shape:** one generic, source-cited live-path rule for the activation-frame elevated-opponent shadow (draw order
-from the shadow OBJ's priority/subpriority, not an overlay guess) applied to every live branch, plus the
-opponent-attacker rest offset where the source applies it. **Acceptance:** all alt-species cases in
-`tools/integration/fixtures/altspecies-*.json` exact twice fresh; every accepted live fixture whose opponent
-is elevated rerun exact; staged paths unchanged.
-
 ## #141 — Two `SetMoveEffect` exits must RE-RUN `seteffectwithchance` (which then wastes one `Random() % 100`): the THRASH lock-in `break`s without advancing the cursor, and Thief/Covet-vs-Sticky-Hold uses `BattleScriptPushCursor()` — the port `advance`s / `"call"`s instead (RNG-affecting)
 
 **Found 2026-08-26** (move-effect application audit,

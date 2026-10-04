@@ -1,5 +1,22 @@
 # Animation integration progress
 
+## 2026-10-04 — ISSUES #142 fixed: elevated-opponent shadow + Sandstorm idle
+
+- Folded worker `39675dec0` as `5cbc09758` (tested code `68ff5b22e`, src tree
+  `399bfc94a`): `liveMoveOpponentShadowRow` names the live row for the 88 ids
+  whose accepted window starts at script activation; the live view arms one
+  shadow draw consumed by the battle-background paths (behind battlers and
+  effects); ad-hoc age-0 draws removed (Hyper Fang, Swagger, Bulk Up no longer
+  draw it); Sandstorm's live opponent keeps its idle rest offset. Staged output
+  unchanged. ISSUES #142 deleted.
+- Supervisor: row scan rerun 248 rows / 122 ids, 0 mismatches; dense 14
+  alternate-species/elevated fixtures twice fresh, zero residual (five 200-px
+  row-0 cases and Sandstorm/Onix 180,304 px now exact; controls stay exact).
+  Supersonic fixtures unverifiable: its probe wrapper fails on master too.
+- Gates: supervisor focused 140 + smoke 448; worker full 1,491 files /
+  11,933 tests, build, typecheck reused. Receipt
+  `issue142-fix-supervisor-receipt.json`.
+
 ## 2026-10-04 — Reversal shake evidence banked
 
 - Side-lane evidence `8fbf3a7ab` folded (new files only):
