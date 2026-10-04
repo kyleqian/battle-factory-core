@@ -1478,17 +1478,17 @@
   "spriteAllocatorHistory": {
     "availableProvider": "../src/engine/knownEntrySpriteAllocator.ts:createKnownEntrySpriteAllocatorProvider",
     "liveConsumerRegistered": true,
-    "scope": "Fresh ordinary singles first prompt/first move source allocator helper consumed by the audited wall-family plans: MOVE_LIGHT_SCREEN, MOVE_BARRIER, MOVE_MAGIC_COAT, MOVE_PROTECT, MOVE_REFLECT and MOVE_MIRROR_COAT; complete move callbacks restore the command-field host (all six are net-zero). Eligible only as the first supported move body with known entry history; Transform/Substitute and every unproved intervening move animation (any move outside the audited plan table) invalidate the allocator host and leave history unknown, so the wall move then renders the generic bounded fallback. Mirror Coat needs a prior special hit and so is always a fallback in ordinary play today. Not a full per-frame allocator clock.",
+    "scope": "Ordinary singles source allocator history for the audited wall-family plans (MOVE_LIGHT_SCREEN, MOVE_BARRIER, MOVE_MAGIC_COAT, MOVE_PROTECT, MOVE_REFLECT, MOVE_MIRROR_COAT). History starts known at the first move body and now stays known across live move bodies whose scripts are audited OBJ-net-zero in both orientations (src LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS, 90 ids pinned to tools/integration/fixtures/allocator-net-zero-audit.json; Fury Swipes 154 is player-side only and excluded). Draw order of the six consumers is key-determined per tools/integration/fixtures/allocator-consumer-tie-audit.json, so free-slot sSpriteOrder drift does not change their pixels; this license covers only those six consumers. Any live move outside the net-zero list (e.g. Bubble Beam 61, Acid 51, Bite 44, anchor-batch moves), status animations, switches, summaries, trainer slides, recalls, Transform/Substitute invalidate the host and the wall move renders the generic bounded fallback. Mirror Coat needs a prior special hit; no generated route with an audited special hit before it was found in seeds 0-74, so it remains effectively fallback. Not a full per-frame allocator clock and not arbitrary-history framebuffer exactness; palette history is unchanged.",
     "independentSourceEvidence": "../tools/integration/fixtures/known-entry-sprite-allocator-supervisor-receipt.json",
     "nextConsumer": null,
     "remaining": [
       "unknown entry",
-      "status history",
       "switch",
       "in-battle summary",
       "substitute",
       "transform",
-      "arbitrary-history framebuffer parity"
+      "arbitrary-history framebuffer parity",
+      "status history (rung 2 skipped: no source-exact status-animation event->script mapping in production)"
     ],
     "consumers": [
       "MOVE_LIGHT_SCREEN",
@@ -1504,6 +1504,11 @@
       "../tools/integration/fixtures/wall-family-protect-source-receipt.json",
       "../tools/integration/fixtures/wall-family-reflect-source-receipt.json",
       "../tools/integration/fixtures/wall-family-mirror-coat-source-receipt.json"
-    ]
+    ],
+    "netZeroPersistence": {
+      "receipt": "../tools/integration/fixtures/allocator-history-persistence-receipt.json",
+      "netZeroSource": "../tools/integration/fixtures/allocator-net-zero-audit.json",
+      "tieAudit": "../tools/integration/fixtures/allocator-consumer-tie-audit.json"
+    }
   }
 }
