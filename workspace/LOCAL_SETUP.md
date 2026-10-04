@@ -16,8 +16,9 @@ bash tools/integration/start-local-preview.sh
 ```
 
 For hot reload use `npm run dev` (port 5173). The browser app needs neither the
-server nor the ROM/oracle at runtime. There are 79 live move adapters; the
-276 accepted Factory animation bodies include 197 still needing integration.
+server nor the ROM/oracle at runtime. The current live adapter count is
+in `ANIMATION_INTEGRATION_PROGRESS.md` (80 of 276 accepted Factory bodies on
+2026-10-04).
 Helping Hand is the sole unaccepted Factory move, pending legal doubles staging.
 Whole-playable arbitrary-history framebuffer exactness remains unclaimed.
 

@@ -34,8 +34,8 @@ Document deliberate module-boundary changes; never silently widen ratchets.
 ## Established baseline and remaining work
 
 The latest production receipt and preview revision are in
-`ANIMATION_INTEGRATION_PROGRESS.md`. The verified local session reached 79 live
-adapters out of 276 accepted Factory bodies, leaving 197 needing integration.
+`ANIMATION_INTEGRATION_PROGRESS.md`, which also holds the current live adapter
+count (80 of 276 accepted Factory bodies on 2026-10-04).
 The established path includes ordinary Scene ON/OFF selection, typed requests
 and completion, queue resume, real-route regressions and browser verification.
 Reuse recorded same-code full-suite/build receipts under the verification policy.
@@ -52,9 +52,10 @@ context, not a fresh list of missing features. Production must supply current
 species, geometry, graphics and per-frame host state; never import capture rows
 or fixture builders into gameplay or substitute generic effects as exact moves.
 
-The recovered physical2 batch is now verified and folded. Resume the latest
-ledger's next step: Light Screen allocator/intro ownership and full source-clock
-presentation proof; candidate `d12db7f0b` remains unmerged.
+Light Screen is folded as a known-entry first-body allocator consumer
+(2026-10-04). Resume the latest ledger's next step: bounded adapter batches,
+then reusable host providers (derived battler anchors, wall-family allocator
+plans, net-zero allocator history, sprite order).
 
 ## Deliverables
 
