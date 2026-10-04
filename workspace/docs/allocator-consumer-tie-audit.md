@@ -22,7 +22,7 @@ overlapping ties. Draw order of the move's sprites is therefore decided by `(oam
 | Light Screen 113 | 10 | 890 | 0 | 0 | after Tackle, Smokescreen(+status body 0), Toxic(+poison status body 0), both orientations | HISTORY-INDEPENDENT |
 | Reflect 115 | 9 | 738 | 0 | 0 | after Smokescreen + Tackle (player side) | HISTORY-INDEPENDENT |
 | Barrier 112 | 12 | 948 | 0 | 0 | after Tackle, Smokescreen, Toxic (+status body 0), Barrier itself; both orientations | HISTORY-INDEPENDENT |
-| Magic Coat 277 | 9 | 711 | 0 | 0 | after Smokescreen/Spikes-class bodies (player side, slot2-smokescreen) | HISTORY-INDEPENDENT |
+| Magic Coat 277 | 9 | 711 | 0 | 0 | after Rock Slide(157)+Smokescreen bodies (player side, slot2-smokescreen) | HISTORY-INDEPENDENT |
 | Protect 182 | 12 | 1512 | 0 | 0 | only after an earlier Protect body (t2), both orientations | HISTORY-INDEPENDENT (thin later-body evidence) |
 | Mirror Coat 243 | 5 | 445 | 0 | 0 | native 2nd body (after Confusion 93) and turn-2 repeat, both orientations | HISTORY-INDEPENDENT |
 
