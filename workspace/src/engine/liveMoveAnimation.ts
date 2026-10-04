@@ -1,3 +1,4 @@
+import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "json" };
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput } from "./liveMoveSpriteAllocator.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
@@ -56,11 +57,11 @@ import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
-  2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49,
-  50, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109,
-  113, 114, 122, 131, 136, 147, 151, 154, 156, 158, 162, 163, 172, 178, 186, 201, 204,
-  211, 213, 223, 227, 231, 242, 246, 247, 257, 264, 280, 281, 287, 290, 302, 305, 306,
-  319, 320, 321, 325, 335, 336, 337, 342, 343, 347,
+  2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
+  65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 113,
+  114, 122, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 186, 201, 204,
+  208, 211, 213, 223, 227, 231, 235, 242, 246, 247, 257, 264, 272, 280, 281, 287, 290, 302,
+  305, 306, 319, 320, 321, 325, 335, 336, 337, 342, 343, 347,
 ] as const);
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
@@ -121,6 +122,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 131: return 84; // Spike Cannon pointer body through inactive cleanup.
     case 136: return 91; // Hi Jump Kick source body through first inactive row.
     case 147: return SPORE_FRAME_COUNT;
+    case 148: return 64; // Flash source body (snap, hold, 16..0 ramp) through cleanup.
     case 114: return 202; // Haze's FadeToBg/fog restore through cleanup.
     case 151: return ACID_ARMOR_FIRST_INACTIVE_AGE + 1;
     case 154: return FURY_SWIPES_LAST_BODY_AGE + 1;
@@ -133,7 +135,10 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 211: return 197; // Steel Wing source body through first inactive row.
     case 223: return 75; // Dynamic Punch source body through first inactive row.
     case 231: return 135; // Iron Tail source body through first inactive row.
+    case 235: return 130; // Synthesis grow/star body through cleanup.
     case 178: return COTTON_SPORE_FRAME_COUNT;
+    case 180: return 221; // Spite ghost-bg/target-clone body through cleanup.
+    case 208: return 186; // Milk Drink bottle/ring/star body through cleanup.
     case 186: return SWEET_KISS_FRAME_COUNT;
     case 204: return CHARM_BODY_FRAME_COUNT;
     case 213: return ATTRACT_FRAME_COUNT;
@@ -145,6 +150,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
       return FOCUS_PUNCH_FIRST_INACTIVE_AGE[
         request.target === 0 ? "player" : "opponent"
       ] + 1;
+    case 272: return 147; // Role Play silhouette/blend body through cleanup.
     case 280:
       return request.turn === 0
         ? BRICK_BREAK_NORMAL_FRAME_COUNT
@@ -341,6 +347,7 @@ export function liveMoveAnimationPresentation(
       };
       break;
     case 147: config = { move: "SPORE", attacker, target, fieldProfile }; break;
+    case 148: config = { move: "FLASH", attacker, target, fieldProfile }; break;
     case 114: config = { move: "HAZE", attacker, target, fieldProfile }; break;
     case 151: config = { move: "ACID_ARMOR", attacker, target, fieldProfile }; break;
     case 154: config = { move: "FURY_SWIPES", attacker, target, fieldProfile }; break;
@@ -388,6 +395,8 @@ export function liveMoveAnimationPresentation(
       };
       break;
     case 178: config = { move: "COTTON_SPORE", attacker, target, fieldProfile }; break;
+    case 180: config = { move: "SPITE", attacker, target, fieldProfile }; break;
+    case 208: config = { move: "MILK_DRINK", attacker, target, fieldProfile }; break;
     case 186: config = { move: "SWEET_KISS", attacker, target, fieldProfile }; break;
     case 204: config = { move: "CHARM", attacker, target, fieldProfile }; break;
     case 213: config = { move: "ATTRACT", attacker, target, fieldProfile }; break;
@@ -396,6 +405,30 @@ export function liveMoveAnimationPresentation(
     case 246: config = { move: "ANCIENT_POWER", attacker, target, fieldProfile }; break;
     case 247: config = { move: "SHADOW_BALL", attacker, target, fieldProfile }; break;
     case 264: config = { move: "FOCUS_PUNCH", attacker, target, fieldProfile }; break;
+    case 272: {
+      // CreateAdditionalMonSpriteForMoveAnim places the target-species
+      // silhouette at the attacker's coord plus that species' pic y offset in
+      // the attacker's orientation; the view anchors it on battlePositionCenter.
+      const pics = (monPicCoordsData as unknown as {
+        back: Record<string, { yOffset: number }>; front: Record<string, { yOffset: number }>;
+      })[attacker.geometry.side === "player" ? "back" : "front"];
+      const yOffset = pics[target.species]?.yOffset ?? 0;
+      config = {
+        move: "ROLE_PLAY", target, fieldProfile,
+        attacker: {
+          ...attacker,
+          geometry: {
+            ...attacker.geometry,
+            battlePositionCenter: {
+              x: attacker.geometry.battlePositionCenter.x,
+              y: attacker.geometry.battlePositionCenter.y + yOffset,
+            },
+          },
+        },
+      };
+      break;
+    }
+    case 235: config = { move: "SYNTHESIS", attacker, target, fieldProfile }; break;
     case 280:
       config = {
         move: "BRICK_BREAK",

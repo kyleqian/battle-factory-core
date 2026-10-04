@@ -106,6 +106,10 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
   ];
   const probeMoveId = fixture.probeMoveId
     ?? (moveArgumentProbes.includes(fixture.probe) ? ids[fixture.move] : undefined);
+  // These probes take the first source frame to record as a fourth argument.
+  const startFrameProbes = ["tools/compare/synthesisProbe.py", "tools/compare/milkDrinkProbe.py"];
+  const probeStartFrame = startFrameProbes.includes(fixture.probe)
+    ? (fixture.denseWindow ?? fixture.sourceWindow)?.startFrame : undefined;
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
   const results = [];
   for (let run = 0; run < freshRuns; run++) {
@@ -116,6 +120,7 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
       join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe),
       resolve(root, fixture.scenario), output, rgbDir,
       ...(probeMoveId === undefined ? [] : [String(probeMoveId)]),
+      ...(probeStartFrame === undefined ? [] : [String(probeStartFrame)]),
     ], { cwd: root, encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
     if (probeRun.status !== 0) throw new Error(probeRun.stderr || probeRun.stdout);
     const probe = JSON.parse(readFileSync(output, "utf8")) as Probe;
