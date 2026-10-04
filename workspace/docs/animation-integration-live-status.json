@@ -1626,6 +1626,57 @@
         "whole-playable arbitrary-history framebuffer exactness"
       ],
       "selector": "main body only; the residual turn-trap animation is a separate general animation and is not adapted"
+    },
+    {
+      "move": "MOVE_DOUBLE_SLAP",
+      "id": 3,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/multihit-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer per hit, both orientations, twice fresh, zero residual, rows = accepted per-hit window (multihit-double-slap-*-hit*.json)",
+        "generated command seeds 95 slot 1 (4 hits), 246 slot 1 (3 hits) streak 0: one body per hit with request.turn 0..n-1, attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "one MOVE_ANIMATION per hit; request.turn selects the branch (Triple Kick clamps turn to 0|1|2)"
+    },
+    {
+      "move": "MOVE_COMET_PUNCH",
+      "id": 4,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/multihit-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer per hit, both orientations, twice fresh, zero residual, rows = accepted per-hit window (multihit-comet-punch-*-hit*.json)",
+        "generated command seed 226 slot 0 (3 hits) streak 0: one body per hit with request.turn 0..n-1, attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "one MOVE_ANIMATION per hit; request.turn selects the branch (Triple Kick clamps turn to 0|1|2)"
+    },
+    {
+      "move": "MOVE_TRIPLE_KICK",
+      "id": 167,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/multihit-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer per hit, both orientations, twice fresh, zero residual, rows = accepted per-hit window (multihit-triple-kick-*-hit*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness",
+        "no generated rental carries Triple Kick in seeds 1-400 slots 0-3 as the player's mon; no ordinary route"
+      ],
+      "selector": "one MOVE_ANIMATION per hit; request.turn selects the branch (Triple Kick clamps turn to 0|1|2)"
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -1648,7 +1699,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 122,
+  "implementedCount": 125,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
