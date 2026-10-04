@@ -123,14 +123,15 @@ describe("ordinary playable animation queue", () => {
     // (tools/integration/fixtures/allocator-net-zero-audit.json). Seed 20
     // plays Crunch 242 (+ Rest 156) before Protect 182; seeds 2 and 59 play
     // Screech 103 / Spite 180 before Light Screen: all audited net-zero, so the
-    // exact adapter renders. Seeds 45/47 play Bubble Beam 61 (live but NOT
-    // audited) first, so history is unknown and the bounded fallback renders.
+    // exact adapter renders. Seeds 45/47 play Bubble Beam 61 first; it is now
+    // audited net-zero (allocator-net-zero-audit-ext.json), so Light Screen
+    // renders with the exact adapter (no other unaudited body intervenes).
     // Routes where a status animation or switch-in intervenes (seeds 50, 62,
     // 59 [0,3]) stay fallback: status/switch invalidation is unchanged.
     const routes: ReadonlyArray<readonly [number, number, readonly (0 | 1 | 2 | 3)[], boolean]> = [
       [182, 20, [3, 3], true], [182, 20, [2, 3], true],
       [113, 59, [1, 3], true], [113, 2, [1, 3], true],
-      [113, 47, [0, 3], false], [113, 45, [0, 3], false],
+      [113, 47, [0, 3], true], [113, 45, [0, 3], true],
       [113, 50, [2, 3], false], [113, 62, [1, 3], false],
     ];
     for (const [moveId, seed, slots, exact] of routes) {

@@ -41,9 +41,11 @@ const PLANS: Readonly<Record<number, LiveMoveSpriteAllocatorPlan>> = Object.free
 
 /**
  * Live move ids whose scripts are audited OBJ-net-zero in both orientations,
- * twice fresh (tools/integration/fixtures/allocator-net-zero-audit.json,
- * summary.netZeroIds ∩ live adapters; Fury Swipes 154 is player-side only and
- * excluded). Occupancy-net-zero does not preserve the free-slot sSpriteOrder,
+ * twice fresh (tools/integration/fixtures/allocator-net-zero-audit.json plus
+ * allocator-net-zero-audit-ext.json, combined.netZeroIds: all 110 live ids at
+ * the time of the audit, including Fury Swipes 154 on the opponent side and the
+ * anchor/anchor2 ids). Moves added to the live set afterwards are NOT audited
+ * and must not be added here until they are. Occupancy-net-zero does not preserve the free-slot sSpriteOrder,
  * but the six allocator consumers never share a sort key with another visible
  * sprite (tools/integration/fixtures/allocator-consumer-tie-audit.json,
  * docs/allocator-consumer-tie-audit.md), so their pixels are key-determined.
@@ -52,11 +54,12 @@ const PLANS: Readonly<Record<number, LiveMoveSpriteAllocatorPlan>> = Object.free
  * are pinned by tests/liveSpriteAllocator.test.ts.
  */
 export const LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS: readonly number[] = Object.freeze([
-  2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 42, 43, 47, 48, 49, 50, 65, 66,
-  67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 112, 113, 114,
-  115, 122, 131, 136, 147, 148, 151, 156, 163, 172, 178, 180, 182, 186, 201, 204, 208,
-  211, 213, 223, 227, 231, 235, 242, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287,
-  290, 302, 305, 306, 319, 320, 321, 335, 336, 337, 342, 343, 347,
+  2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
+  51, 55, 56, 61, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105,
+  106, 108, 109, 112, 113, 114, 115, 122, 124, 131, 136, 147, 148, 151, 154, 156, 158, 162,
+  163, 172, 178, 180, 182, 186, 188, 197, 201, 204, 208, 211, 213, 223, 227, 231, 232, 235,
+  238, 242, 243, 246, 247, 257, 259, 264, 272, 277, 280, 281, 287, 290, 294, 302, 305, 306,
+  319, 320, 321, 325, 334, 335, 336, 337, 341, 342, 343, 347,
 ]);
 const NET_ZERO_MOVES: ReadonlySet<number> = new Set(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS);
 
