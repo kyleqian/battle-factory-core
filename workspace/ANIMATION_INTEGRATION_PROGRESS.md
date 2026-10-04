@@ -1,5 +1,23 @@
 # Animation integration progress
 
+## 2026-10-04 — allocator history persists across audited net-zero bodies
+
+- Folded worker `da5965fc2` (src tree `8566da639`): 90 audited net-zero live
+  ids without a plan now leave a known sprite-allocator host unchanged, so
+  Light Screen and the wall family use their exact adapters after audited
+  bodies, not only as the first body. Licensed by the net-zero audit plus the
+  consumer tie audit (six consumers only). Palette history unchanged; status,
+  switch and summary still invalidate.
+- Supervisor eligibility routes 17/17: adapter after Crunch+Rest (Protect),
+  Spite and Screech (Light Screen); fallback after unaudited Bubble Beam,
+  status animations, a faint + switch-in, or non-live moves.
+- Gates: supervisor focused 56 + smoke 448; worker full 1,488 files/11,858
+  tests, build, typecheck reused. Receipt
+  `allocator-history-persistence-supervisor-receipt.json`.
+- Follow-ups: widen the list to the extension's 110 ids; status-animation rung
+  was skipped (worker misread source availability) though the status audit
+  supports occupancy persistence across the nine scripts.
+
 ## 2026-10-04 — read-only day audit of today's 31 adapters
 
 - Read-only audit (no edits): no confirmed defect. Certified: duration/side

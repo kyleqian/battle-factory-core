@@ -34,8 +34,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Also:** anchor2 (seven picture-anchor moves; Reversal deferred): 2,204
   rows/run twice fresh, zero residual. Tie audit: the six allocator consumers
   never share draw-order keys, so free-slot history cannot change their pixels.
-- **Next:** allocator history persistence across audited net-zero bodies and
-  status animations; anchor3 batch. Oracle freshness FAIL at orient was a false positive:
+- **Also:** allocator history now persists across 90 audited net-zero bodies
+  (Light Screen/wall adapters no longer limited to the first body); 17/17
+  routes. Read-only day audit: no confirmed defect; species-dependent
+  suspects (elevated-opponent shadow on row 0, opponent idle x2) being
+  decided by alternate-species dense proofs in the side lane.
+- **Next:** anchor3 batch (+ widen net-zero list to 110); selectors batch. Oracle freshness FAIL at orient was a false positive:
   only workspace commits since service start; both services kept.
 - **Notes:** no material decision deferred.
 
