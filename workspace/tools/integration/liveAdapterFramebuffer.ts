@@ -28,6 +28,8 @@ export interface Fixture {
   sourceWindow?: { startFrame: number; endFrame: number };
   probeMoveId?: number;
   probe: string;
+  /** Extra probe CLI arguments (for example a defensive-wall mode). */
+  probeArgs?: string[];
   scenario: string;
   attacker: { species: string; geometry: { side: "player" | "opponent" } };
   target: { species: string; geometry: { side: "player" | "opponent" } };
@@ -41,6 +43,7 @@ interface Probe {
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const ids = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.id]));
 const names = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.name]));
+const SELF_TARGET_MOVES = new Set(["LIGHT_SCREEN", "BARRIER", "MAGIC_COAT", "PROTECT", "REFLECT"]);
 const hash = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
 export function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
@@ -63,7 +66,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
   const attacker = f.attacker.geometry.side === "player" ? 0 : 1;
   const request: BattleMoveAnimationRequest = {
     moveId: ids[f.move]!, attacker,
-    target: f.move === "LIGHT_SCREEN" ? attacker : attacker === 0 ? 1 : 0,
+    target: SELF_TARGET_MOVES.has(f.move) ? attacker : attacker === 0 ? 1 : 0,
     turn: f.body === "shattered-wall" ? 1 : 0, power: 0, damage: 0, friendship: 70, multihit: 0,
   };
   if (liveMoveAnimationDuration(request) === null) throw new Error(`No live adapter for ${f.move}`);
@@ -80,12 +83,11 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
     message: { lines: [`${attacker === 1 ? "Foe " : ""}${f.attacker.species} used`, `${name}!`], visibleCharacters: 99 },
     effect: {
       type: "move", request, age,
-      ...(f.move === "LIGHT_SCREEN"
-        ? { spriteAllocatorInput: prepareLiveMoveSpriteAllocator(
-            createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles").firstMove,
-            request,
-          ).input }
-        : {}),
+      // Plans exist only for audited moves; every other move yields no input.
+      spriteAllocatorInput: prepareLiveMoveSpriteAllocator(
+        createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles").firstMove,
+        request,
+      ).input,
     },
     visibility: { player: { sprite: true, healthbox: true }, opponent: { sprite: true, healthbox: true } },
     waitCursor: null, bottom: "message", confirmHandoff: null, switchIn: null,
@@ -122,6 +124,7 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
       resolve(root, fixture.scenario), output, rgbDir,
       ...(probeMoveId === undefined ? [] : [String(probeMoveId)]),
       ...(probeStartFrame === undefined ? [] : [String(probeStartFrame)]),
+      ...(fixture.probeArgs ?? []),
     ], { cwd: root, encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
     if (probeRun.status !== 0) throw new Error(probeRun.stderr || probeRun.stdout);
     const probe = JSON.parse(readFileSync(output, "utf8")) as Probe;

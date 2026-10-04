@@ -58,9 +58,9 @@ import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
-  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 106, 108, 109, 113,
-  114, 122, 124, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 186, 188, 201, 204,
-  208, 211, 213, 223, 227, 231, 232, 235, 242, 246, 247, 257, 264, 272, 280, 281, 287, 290, 302,
+  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 106, 108, 109, 112, 113,
+  114, 115, 122, 124, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 182, 186, 188, 201, 204,
+  208, 211, 213, 223, 227, 231, 232, 235, 242, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287, 290, 302,
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
 ] as const);
 
@@ -166,7 +166,12 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 109: return CONFUSE_RAY_FRAME_COUNT;
     // Script activation through the two inactive controller displays after
     // resource destruction. The following success printer starts next.
+    case 112:
+    case 277: return 76; // Defensive wall script through its first inactive cleanup row.
     case 113: return 88;
+    case 115: return 79; // Reflect script (activation..cleanup pointer row).
+    case 182: return 123; // Protect script through its first inactive row.
+    case 243: return 86; // Mirror Coat script (activation..cleanup pointer row).
     case 122: return 73;
     case 124: return 102; // Sludge source body through its final row. // Lick source body through first inactive row.
     case 131: return 84; // Spike Cannon pointer body through inactive cleanup.
@@ -411,6 +416,21 @@ export function liveMoveAnimationPresentation(
         },
       };
       break;
+    case 112: case 115: case 182: case 243: case 277: {
+      if (!spriteAllocatorInput?.historyKnown) return null;
+      const wall = spriteAllocatorInput.wall;
+      const sparkles = spriteAllocatorInput.sparkles;
+      config = request.moveId === 112
+        ? { move: "BARRIER", attacker, target, fieldProfile, allocatorProfile: { wall } }
+        : request.moveId === 277
+        ? { move: "MAGIC_COAT", attacker, target, fieldProfile, allocatorProfile: { wall } }
+        : request.moveId === 182
+        ? { move: "PROTECT", attacker, target, fieldProfile, allocatorProfile: { protect: wall } }
+        : request.moveId === 115
+        ? { move: "REFLECT", attacker, target, fieldProfile, allocatorProfile: { wall, sparkles } }
+        : { move: "MIRROR_COAT", attacker, target, fieldProfile, allocatorProfile: { wall, sparkles } };
+      break;
+    }
     case 122: config = { move: "LICK", attacker, target, fieldProfile }; break;
     case 131: config = { move: "SPIKE_CANNON", attacker, target, fieldProfile }; break;
     case 136:
@@ -597,5 +617,9 @@ export function liveMoveAnimationPresentation(
   // The MetallicShine bodies' accepted staged windows start at presentation
   // age -1: the first displayed row precedes the shine task's age 0.
   const shineBody = request.moveId === 106 || request.moveId === 334 || request.moveId === 232;
-  return { config, age: request.moveId === 113 ? age - 7 : shineBody ? age - 1 : age };
+  // Reflect and Mirror Coat views anchor at wall creation (activation + 7);
+  // Barrier, Magic Coat and Protect anchor at the first script pointer.
+  const wallAnchorOffset = request.moveId === 113 || request.moveId === 115
+    || request.moveId === 243 ? 7 : 0;
+  return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1 : age };
 }

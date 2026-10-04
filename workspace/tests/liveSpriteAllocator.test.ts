@@ -54,6 +54,24 @@ describe("known ordinary-singles entry sprite provider", () => {
     ).input).toBeUndefined();
   });
 
+  it.each([
+    [112, 3, []], [277, 3, []], [182, 3, []],
+    [115, 3, [4, 5, 4]], [243, 3, [4, 5, 7, 4, 5, 7]], [113, 3, [4, 5, 7, 4, 5, 7]],
+  ] as const)("pins the banked wall-family plan for move %i", (moveId, wall, sparkles) => {
+    const provider = createKnownEntrySpriteAllocatorProvider("ordinary-factory");
+    const request = {
+      moveId, attacker: 0, target: 0, turn: 0, power: 0,
+      damage: 0, friendship: 0, multihit: 0,
+    } as const;
+    const prepared = prepareLiveMoveSpriteAllocator(provider.firstMove, request);
+    expect(prepared.input).toEqual({ historyKnown: true, wall, sparkles });
+    // Every audited wall move is net-zero against the known-entry baseline.
+    expect(prepared.next).toEqual(provider.firstMove);
+    expect(prepareLiveMoveSpriteAllocator(
+      invalidateLiveSpriteAllocatorHost(provider.firstMove), request,
+    ).input).toBeUndefined();
+  });
+
   it.each(["ordinary-factory", "battle-lab-ordinary-singles"] as const)(
     "derives the bounded first-command and first-move topology for %s",
     route => {

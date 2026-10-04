@@ -1182,6 +1182,101 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_BARRIER",
+      "id": 112,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/wall-live-adapter-receipt.json",
+        "../tools/integration/fixtures/wall-barrier-player.json",
+        "../tools/integration/fixtures/wall-barrier-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = live window; allocator input from the audited plan, never captured slot rows",
+        "generated command routes: seeds 21 (player) / 82 (opponent) exact; 10 / 67 fallback; ON/OFF rules/RNG/boundary equal (scene bit 0x80 excluded)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteAllocatorPlan": "audited wall-family plan (net-zero against the known-entry baseline)",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_MAGIC_COAT",
+      "id": 277,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/wall-live-adapter-receipt.json",
+        "../tools/integration/fixtures/wall-magic-coat-player.json",
+        "../tools/integration/fixtures/wall-magic-coat-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = live window; allocator input from the audited plan, never captured slot rows",
+        "generated command routes: seeds 87 (player) / 447 (opponent) exact; 260 fallback; ON/OFF rules/RNG/boundary equal (scene bit 0x80 excluded)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteAllocatorPlan": "audited wall-family plan (net-zero against the known-entry baseline)",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_PROTECT",
+      "id": 182,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/wall-live-adapter-receipt.json",
+        "../tools/integration/fixtures/wall-protect-player.json",
+        "../tools/integration/fixtures/wall-protect-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = live window; allocator input from the audited plan, never captured slot rows",
+        "generated command routes: seeds 38 (player) / 118 (opponent) exact; 20 / 64 fallback; ON/OFF rules/RNG/boundary equal (scene bit 0x80 excluded)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteAllocatorPlan": "audited wall-family plan (net-zero against the known-entry baseline)",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_REFLECT",
+      "id": 115,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/wall-live-adapter-receipt.json",
+        "../tools/integration/fixtures/wall-reflect-player.json",
+        "../tools/integration/fixtures/wall-reflect-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = live window; allocator input from the audited plan, never captured slot rows",
+        "generated command routes: seed 17 slot 3 streak 14 exact; 58 slot 3 streak 14 fallback; ON/OFF rules/RNG/boundary equal (scene bit 0x80 excluded)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteAllocatorPlan": "audited wall-family plan (net-zero against the known-entry baseline)",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_MIRROR_COAT",
+      "id": 243,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/wall-live-adapter-receipt.json",
+        "../tools/integration/fixtures/wall-mirror-coat-player.json",
+        "../tools/integration/fixtures/wall-mirror-coat-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = live window; allocator input from the audited plan, never captured slot rows",
+        "generated command routes: fallback only (never a first body): seeds 231 slot 1 / 345 slot 0; ON/OFF rules/RNG/boundary equal (scene bit 0x80 excluded)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteAllocatorPlan": "audited wall-family plan (net-zero against the known-entry baseline)",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -1197,14 +1292,14 @@
     "source-derived ordinary singles party/B-cancel palette return with explicit known entry provenance; unknown histories and actual switches remain invalidated"
   ],
   "pending": [
-    "production adapters/providers for the remaining 178 accepted Factory moves",
+    "production adapters/providers for the remaining 173 accepted Factory moves",
     "complete graphics ownership across actual switches, forced replacement, summaries, substitute/transform and unmodeled histories",
     "source palette resource plans for 35 implemented adapters without audited ownership"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 98,
+  "implementedCount": 103,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
@@ -1257,7 +1352,7 @@
   "spriteAllocatorHistory": {
     "availableProvider": "../src/engine/knownEntrySpriteAllocator.ts:createKnownEntrySpriteAllocatorProvider",
     "liveConsumerRegistered": true,
-    "scope": "Fresh ordinary singles first prompt/first move source allocator helper consumed by MOVE_LIGHT_SCREEN; complete move callbacks restore the command-field host. Eligible only as the first supported move body with known entry history; Transform/Substitute and every unproved intervening move animation (any non-Light-Screen move) invalidate the allocator host and leave history unknown, so Light Screen then renders the generic bounded fallback. Not a full per-frame allocator clock.",
+    "scope": "Fresh ordinary singles first prompt/first move source allocator helper consumed by the audited wall-family plans: MOVE_LIGHT_SCREEN, MOVE_BARRIER, MOVE_MAGIC_COAT, MOVE_PROTECT, MOVE_REFLECT and MOVE_MIRROR_COAT; complete move callbacks restore the command-field host (all six are net-zero). Eligible only as the first supported move body with known entry history; Transform/Substitute and every unproved intervening move animation (any move outside the audited plan table) invalidate the allocator host and leave history unknown, so the wall move then renders the generic bounded fallback. Mirror Coat needs a prior special hit and so is always a fallback in ordinary play today. Not a full per-frame allocator clock.",
     "independentSourceEvidence": "../tools/integration/fixtures/known-entry-sprite-allocator-supervisor-receipt.json",
     "nextConsumer": null,
     "remaining": [
@@ -1268,6 +1363,21 @@
       "substitute",
       "transform",
       "arbitrary-history framebuffer parity"
+    ],
+    "consumers": [
+      "MOVE_LIGHT_SCREEN",
+      "MOVE_BARRIER",
+      "MOVE_MAGIC_COAT",
+      "MOVE_PROTECT",
+      "MOVE_REFLECT",
+      "MOVE_MIRROR_COAT"
+    ],
+    "planReceipts": [
+      "../tools/integration/fixtures/wall-family-barrier-source-receipt.json",
+      "../tools/integration/fixtures/wall-family-magic-coat-source-receipt.json",
+      "../tools/integration/fixtures/wall-family-protect-source-receipt.json",
+      "../tools/integration/fixtures/wall-family-reflect-source-receipt.json",
+      "../tools/integration/fixtures/wall-family-mirror-coat-source-receipt.json"
     ]
   }
 }

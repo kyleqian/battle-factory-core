@@ -1,0 +1,84 @@
+import { describe, expect, it } from "vitest";
+import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
+import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
+import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
+import {
+  LIVE_MOVE_ANIMATION_IDS, liveMoveAnimationDuration, liveMoveAnimationPresentation,
+} from "../../src/engine/liveMoveAnimation.ts";
+import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
+import { prepareLiveMoveSpriteAllocator } from "../../src/engine/liveMoveSpriteAllocator.ts";
+import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+
+/** Live age offsets are asserted through the dense proof; durations pin windows. */
+const moves = [
+  { id: 112, name: "BARRIER", duration: 76 },
+  { id: 277, name: "MAGIC_COAT", duration: 76 },
+  { id: 182, name: "PROTECT", duration: 123 },
+  { id: 115, name: "REFLECT", duration: 79 },
+  { id: 243, name: "MIRROR_COAT", duration: 86 },
+] as const;
+
+const field = (() => {
+  const mon = (name: string) => ({ species: speciesStats.species.find(s => s.name === `SPECIES_${name}`)!.id,
+    speciesSymbol: name, name, level: 50, hp: 100, maxHP: 100, gender: "male", status: "none" });
+  return { player: mon("CORSOLA"), opponent: mon("ONIX") } as unknown as BattleResolutionDisplayedField;
+})();
+
+// [seed, slot, factory win streak, move, expects exact adapter].
+// Exact routes have the wall move as the battle's first move body (known
+// allocator entry history); fallback routes play an unproved animation first.
+const routes: ReadonlyArray<readonly [number, 0 | 1 | 2 | 3, number, number, boolean]> = [
+  [21, 3, 0, 112, true], [82, 0, 0, 112, true], [10, 0, 0, 112, false], [67, 2, 0, 112, false],
+  [87, 2, 0, 277, true], [447, 0, 0, 277, true], [260, 0, 0, 277, false],
+  [38, 3, 0, 182, true], [118, 0, 0, 182, true], [20, 0, 0, 182, false], [64, 2, 0, 182, false],
+  [17, 3, 14, 115, true], [58, 3, 14, 115, false],
+  [231, 1, 0, 243, false], [345, 0, 0, 243, false],
+];
+
+describe("wall-family live adapters", () => {
+  it("registers every wall move with its source window and requires allocator history", () => {
+    for (const { id, duration } of moves) {
+      const request: BattleMoveAnimationRequest = {
+        moveId: id, attacker: 0, target: 1, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0,
+      };
+      expect(LIVE_MOVE_ANIMATION_IDS).toContain(id);
+      expect(liveMoveAnimationDuration(request)).toBe(duration);
+      const input = prepareLiveMoveSpriteAllocator(
+        createKnownEntrySpriteAllocatorProvider("ordinary-factory").firstMove, request,
+      ).input;
+      expect(input?.historyKnown).toBe(true);
+      expect(liveMoveAnimationPresentation(request, field, 0, undefined, input)).not.toBeNull();
+      expect(liveMoveAnimationPresentation(request, field, 0)).toBeNull();
+    }
+  });
+
+  it.each(routes)("seed %i slot %i streak %i move %i adapter=%s through the ordinary route", (seed, slot, streak, moveId, exact) => {
+    const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
+    const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
+    const duration = moves.find(row => row.id === moveId)!.duration;
+    const body = on.animations.filter(animation => animation.moveId === moveId);
+    expect(body).toHaveLength(1);
+    expect(body[0]!.ages).toEqual(Array.from({ length: duration }, (_, age) => age));
+    expect(body[0]!.adapterActive).toEqual(Array(duration).fill(exact));
+    const command = on.commands.find(row => row.type === "move-animation"
+      && (row.command as { animation?: { moveId: number } }).animation?.moveId === moveId)!;
+    expect(command.spriteInputHistoryKnown === true).toBe(exact);
+    const firstIndex = on.requests.findIndex(request => request.moveId === moveId);
+    if (exact) expect(firstIndex).toBe(0);
+    else expect(firstIndex).toBeGreaterThan(0);
+    expect(body[0]!.entryMessage?.visibleCharacters)
+      .toBe(body[0]!.entryMessage?.lines.join("").length);
+    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(on.boundaries).toHaveLength(2);
+    for (let index = 0; index < on.boundaries.length; index += 1) {
+      const a = on.boundaries[index]!, b = off.boundaries[index]!;
+      expect(a.rng).toEqual(b.rng);
+      const { hitMarker: am, ...ar } = a.rules.rulesContext;
+      const { hitMarker: bm, ...br } = b.rules.rulesContext;
+      expect(ar).toEqual(br);
+      // Scene mode may flip only the hit-marker scene bit (0x80).
+      expect((am ^ bm) & ~0x80).toBe(0);
+      expect(a.boundary).toEqual(b.boundary);
+    }
+  }, 60000);
+});
