@@ -16,8 +16,10 @@ const moveOwner = (identity: string, index: number): LiveSpriteOwner => ({
 
 /**
  * Applies the source `createsprite`/callback destruction order for a move.
- * An unknown host stays unknown and can never lend a guessed allocator
- * topology to an exact adapter.
+ * Computes Light Screen allocation slots and the complete-boundary host; it
+ * is not a full per-frame allocator clock. Every other move invalidates the
+ * host, and an unknown host stays unknown, so no guessed allocator topology
+ * is ever lent to an exact adapter.
  */
 export function prepareLiveMoveSpriteAllocator(
   host: LiveSpriteAllocatorHost,

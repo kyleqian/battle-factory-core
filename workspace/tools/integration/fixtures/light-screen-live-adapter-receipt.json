@@ -64,5 +64,5 @@
   "evidencePath": ".integration/validation/light-screen-live-1bc512d55.k9JyAE/",
   "exploratoryPath": ".integration/validation/light-screen-exploratory.ds7UMA/",
   "exploratoryFailure": "One pre-implementation Slowpoke clock attempt named a not-yet-created scenario path; its source log is retained and it grants no result.",
-  "acceptedScope": "Known-entry ordinary-singles live Light Screen adapter through source script activation, resource destruction, inactive controller cleanup and following displays. No whole-playable arbitrary-history claim; unknown entry/status/switch/summary/substitute/transform histories remain invalid."
+  "acceptedScope": "Known-entry ordinary-singles live Light Screen adapter through source script activation, resource destruction, inactive controller cleanup and following displays. Eligible only as the first supported move body with known entry history; any unproved intervening move animation (e.g. seeds 27, 84 with moves [3,3]; seed 2 with moves [0,3]) makes allocator history unknown and Light Screen uses the generic bounded fallback. The 528-row dense proof is a staged typed-live-view proof, not ordinary-history eligibility. No whole-playable arbitrary-history claim; unknown entry/status/switch/summary/substitute/transform histories remain invalid."
 }

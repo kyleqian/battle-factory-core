@@ -933,7 +933,7 @@
   "spriteAllocatorHistory": {
     "availableProvider": "../src/engine/knownEntrySpriteAllocator.ts:createKnownEntrySpriteAllocatorProvider",
     "liveConsumerRegistered": true,
-    "scope": "Fresh ordinary singles first prompt/first move source allocator helper consumed by MOVE_LIGHT_SCREEN; complete move callbacks restore the command-field host. Unknown entry/status/switch/summary/substitute/transform history remains unknown.",
+    "scope": "Fresh ordinary singles first prompt/first move source allocator helper consumed by MOVE_LIGHT_SCREEN; complete move callbacks restore the command-field host. Eligible only as the first supported move body with known entry history; Transform/Substitute and every unproved intervening move animation (any non-Light-Screen move) invalidate the allocator host and leave history unknown, so Light Screen then renders the generic bounded fallback. Not a full per-frame allocator clock.",
     "independentSourceEvidence": "../tools/integration/fixtures/known-entry-sprite-allocator-supervisor-receipt.json",
     "nextConsumer": null,
     "remaining": [
