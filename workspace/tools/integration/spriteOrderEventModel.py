@@ -164,6 +164,16 @@ def main(write):
                           "activationEdges": len(acts), "activationEdgesExactWithoutLiveKeys": clean,
                           "activationEdgesNeedingLiveKeys": len(acts) - clean},
                "callStreamCrossCheck": calls, "scenarios": scen}
+    if "--extra" in sys.argv:
+        extra = Path(sys.argv[sys.argv.index("--extra") + 1])
+        ex = {"dir": "(not committed; regenerate with the extra batch in the design doc)", "files": 0, "frames": 0, "hit": 0, "miss": 0, "missFiles": []}
+        for f in sorted(extra.glob("*-0.json")):
+            d, rows, seq, res = evaluate(f)
+            ex["files"] += 1; ex["frames"] += len(seq) - 1; ex["hit"] += res["hit"]; ex["miss"] += res["miss"]
+            if res["miss"]:
+                ex["missFiles"].append({"file": f.name, "firstMiss": res["firstMiss"]})
+        receipt["extraSingleRunScenarios"] = ex
+        print(json.dumps(ex, indent=1))
     print(json.dumps(receipt["totals"], indent=1))
     if write:
         RECEIPT.write_text(json.dumps(receipt, indent=1) + "\n")

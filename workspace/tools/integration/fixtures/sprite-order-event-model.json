@@ -2,7 +2,7 @@
  "schema": "sprite-order-event-model/v1",
  "pins": {
   "probe": "02b32684cacad2ada12e9c41f69ffc2b5c2bd7adb1b417c05c6568d375ff64db",
-  "model": "42dfc2e2ea78b7e9125d938f3ba84b7a23374ca01bc7a8df871965eb3a7b85eb",
+  "model": "4353ee1a3d31716a1b34578e6e0d0cba0364168ef96ac1d2b5ecc4208b1bd8f4",
   "batch": "63b15254cd90c063af13818a57d375c091291f8009bab82af6b16ccd1b4e59ee",
   "callProbe": "0b4ce615c54d72bba3d3c5da5d441aee9c0a9eb3442faee11826446ae7461cd5",
   "sprite.c": "795084634d44883629dd78ed4e3b90f07b2bf5b6cd5f312f14f121ea76f380ce",
@@ -2566,5 +2566,13 @@
     }
    ]
   }
- ]
+ ],
+ "extraSingleRunScenarios": {
+  "dir": "(not committed; regenerate with the extra batch in the design doc)",
+  "files": 221,
+  "frames": 373837,
+  "hit": 373837,
+  "miss": 0,
+  "missFiles": []
+ }
 }
