@@ -1,5 +1,24 @@
 # Animation integration progress
 
+## 2026-10-04 — sprite-order free-slot event model + provider design banked
+
+- Side-lane evidence/design `5f5680b46` folded (new files only):
+  `docs/sprite-order-provider-design.md`, model
+  `tools/integration/spriteOrderEventModel.py`, receipt
+  `tools/integration/fixtures/sprite-order-event-model.json`, raw and probes.
+- Source rule (sprite.c SortSprites :372-460 is a full stable insertion sort;
+  DestroySprite/ResetSprite give the max key): a destroyed slot goes to the
+  head of the free order; same-sort-window destroys keep previous array order;
+  CreateSprite just removes its slot. Model exact on 40,185/40,185 twice-fresh
+  frames (22 scenarios) and 373,837/373,837 single-run frames (221 scenarios).
+  Supervisor reran the model on committed raw and a fresh Blaze Kick probe:
+  identical.
+- 39/56 move activations need no live keys; 17 (multi-sprite bodies destroyed
+  together, e.g. player-first Flamethrower/Blaze Kick, later Dive/Grudge) need a
+  live-key tracker. Slice plan (design doc §4): pure SpriteOrderState module ->
+  known-entry wiring -> prior single-sprite bodies -> live-key tracker -> one
+  adapter per slice (Mud Slap, Sand Attack, Rock Throw, Grudge, Dive, ...).
+
 ## 2026-10-04 — sSpriteOrder evidence banked (no provider yet)
 
 - Side-lane evidence `5c7d4612f` folded (new files only): probe, batch runner,
