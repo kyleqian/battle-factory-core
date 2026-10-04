@@ -5,48 +5,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-04 — S10A: 79 -> 125 live adapters, #142 fixed
+## 2026-10-04 — S10A session wind-down: 79 -> 125 live adapters, #142 fixed
 
 - **State:** S10A, local master; 125 live adapters, 151 accepted bodies
-  remain (Light Screen, fieldfx 6, glow 5, anchor 7, wall 5, anchor2 7,
-  anchor3 8, selectors 4, multi-hit 3). Supervisor full suite on `6faa70568`: 1,489 files / 11,884
-  tests, build 847.
-  Opus supervisor with Sonnet workers.
-- **Did:** repair worker cherry-picked withheld candidate `84f2e5264` and made
-  every move animation pass the sprite-allocator seam (`306b5adf1`), so only
-  the audited Light Screen plan keeps history known. Folded by fast-forward.
-- **Checks:** independent eligibility PASS 7/7 (adapter only as first body;
-  bounded fallback after 185/318/209), dense 264 rows/run twice fresh with zero
-  residual, affected 47 + smoke 448. Worker full 1,483 files/11,763 tests and
-  build reused (clean fast-forward). Receipt
-  `light-screen-guard-supervisor-receipt.json`.
-- **Also:** fieldfx batch (Flame Wheel, Fire Spin, Heat Wave, Sandstorm,
-  Sonic Boom, Block) independently verified: 1,611 rows/run twice fresh,
-  zero residual; six ordinary routes PASS. Preview refreshed at `28d5be550`.
-- **Also:** glow batch (Synthesis, Milk Drink, Flash, Role Play, Spite):
-  1,496 rows/run twice fresh, zero residual; five routes PASS.
-- **Also:** anchor batch (shared battler-anchor helper + seven moves): 1,692
-  rows/run twice fresh, zero residual. Side lane banked wall-family allocator
-  evidence and a net-zero allocator audit of all live moves (all net-zero).
-- **Also:** wall family (Barrier, Magic Coat, Protect, Reflect, Mirror Coat)
-  with source allocator plans: 1,056 rows/run twice fresh, zero residual;
-  17/17 eligibility routes. Side lane banked sprite-order evidence, an exact
-  free-slot order event model with a provider design, and a status-animation
-  sprite audit (all net-zero).
-- **Also:** anchor2 (seven picture-anchor moves; Reversal deferred): 2,204
-  rows/run twice fresh, zero residual. Tie audit: the six allocator consumers
-  never share draw-order keys, so free-slot history cannot change their pixels.
-- **Also:** allocator history now persists across 90 audited net-zero bodies
-  (Light Screen/wall adapters no longer limited to the first body); 17/17
-  routes. Read-only day audit: no confirmed defect; species-dependent
-  suspects (elevated-opponent shadow on row 0, opponent idle x2) being
-  decided by alternate-species dense proofs in the side lane.
-- **Also:** ISSUES #142 fixed (elevated-opponent shadow on the activation
-  frame for 88 live ids; Sandstorm idle); 14 alternate-species fixtures exact.
-- **Also:** multi-hit adapters (Double Slap, Comet Punch, Triple Kick).
-- **Next:** see the integration ledger and ROADMAP S10A resume points. Oracle freshness FAIL at orient was a false positive:
-  only workspace commits since service start; both services kept.
-- **Notes:** no material decision deferred.
+  remain. Supervisor final gates on `0e2563abe`: 1,492 files / 11,944 tests,
+  build 847 (`final-supervisor-gates-20261004.json`); preview
+  <http://127.0.0.1:5191/> serves `0e2563abe`, four exact canvas/PNG hashes,
+  export, ON->OFF restart, no errors. Opus 5.5 supervisor, Sonnet 5.5 workers.
+- **Did (integration lane, 11 folds, each independently re-proved twice fresh
+  with zero residual + ordinary ON/OFF routes):** Light Screen guard repair;
+  fieldfx 6, glow 5, anchor 7 (+ `liveBattlerAnchors`), wall family 5 (source
+  allocator plans), anchor2 7, anchor3 8, selectors 4, multi-hit 3 adapters;
+  allocator history now persists across the 110 audited net-zero bodies;
+  ISSUES #142 found, scoped and fixed (elevated-opponent shadow on the
+  activation frame for 91 live ids; Sandstorm opponent idle).
+- **Did (side lane, new-files-only evidence):** wall-family allocator
+  receipts, net-zero audit (all live ids), consumer tie audit, sSpriteOrder
+  evidence + exact free-slot event model and provider design, status-animation
+  sprite audit, alternate-species proofs (source-derived windows), #142
+  shadow-row table, multi-hit prep, Reversal shake evidence.
+- **Next:** ROADMAP S10A resume points: sprite-order provider slices,
+  status-animation occupancy persistence, Reversal reducer change (needs the
+  animation program's acceptance), Soft-Boiled, remaining anchor moves, then
+  H_BUFFER/H_RANDOM/H_OUTCOME groups. Validate with alternate-species proofs.
+- **Notes:** no material decision deferred; DEFERRED.md has no open entries.
+  Oracle freshness FAIL at orient was a false positive (workspace-only
+  commits). Papercuts added: replay forced-replacement, Supersonic probe
+  wrapper, preview manifest wiped by builds. All worker refs merged/deleted;
+  evidence copied to primary `.integration/validation/`.
 
 ---
 
