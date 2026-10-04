@@ -75,7 +75,7 @@ describe("ordinary playable animation queue", () => {
     // Light Screen, so allocator history is unknown and the generic bounded
     // fallback renders; 2/45/59/114 ([3,3]) have Light Screen as the first move
     // body with known entry history (exact adapter).
-    const routes: ReadonlyArray<readonly [number, readonly number[], boolean]> = [
+    const routes: ReadonlyArray<readonly [number, readonly (0 | 1 | 2 | 3)[], boolean]> = [
       [2, [3, 3], true], [27, [3, 3], false], [45, [3, 3], true],
       [59, [3, 3], true], [84, [3, 3], false], [114, [3, 3], true],
       [2, [0, 3], false],
