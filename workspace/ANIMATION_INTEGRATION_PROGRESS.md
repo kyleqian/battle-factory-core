@@ -1,5 +1,26 @@
 # Animation integration progress
 
+## 2026-10-04 — sSpriteOrder evidence banked (no provider yet)
+
+- Side-lane evidence `5c7d4612f` folded (new files only): probe, batch runner,
+  analyzer, `tools/integration/fixtures/sprite-order-evidence.json`, doc
+  `docs/sprite-order-evidence.md`. 251 bodies / 110 moves, both runs identical;
+  supervisor rerun of Flamethrower player identical.
+- Verdict: occupied-slot order is a fresh sort of known keys, and effect slots
+  always sort behind them, but the order AMONG free (effect) slots is leftover
+  history (dummy-key ties; e.g. slots 3/4 swap with the number of prior
+  actions). Not derivable from known-entry occupants (best model 126/251).
+- A persistent 64-entry order array reset at battle entry and advanced by one
+  source SortSprites pass per frame reproduces 36,640/36,903 window frames and
+  every activation-1 frame; 8 of 10 accepted seeds match activation-1 exactly
+  (Mud Slap matches at its first-allocation frame).
+- Resume condition for ~19 order-needing moves (Flamethrower, Blaze Kick,
+  Dive, Grudge, Aurora Beam, Hyper Beam, Tri Attack, Water Spout, Rock Throw,
+  Mud Slap, Sand Attack, Mega Drain, Dream Eater, Giga Drain, Sunny Day,
+  Uproar, Magnitude, Pursuit, Rapid Spin): a production per-frame sprite-key
+  tracker (all live sprites incl. transient send-out/healthbox/shadow), which
+  is a new provider design. Not started.
+
 ## 2026-10-04 — anchor batch: battler-anchor helper + seven adapters (98 live)
 
 - Folded worker `99f9935f9` (tested code `9a3e45f0f`, src tree `bcc9f0d2c`):
