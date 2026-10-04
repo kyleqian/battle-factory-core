@@ -69,6 +69,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
   76, 217, 236, 250,
+  // multihit: one MOVE_ANIMATION per hit, selected by request.turn (battle_script_commands.c:1787).
+  3, 4, 167,
 ] as const);
 
 /**
@@ -91,6 +93,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     257, 259, 263, 264, 272, 277, 280, 281, 287, 290, 302, 306, 319, 320, 321, 335, 336, 341,
     // selectors batch (issue142-shadow-rows-extra.json): every variant's window starts at activation.
     76, 217, 236, 250,
+    // multihit batch (multihit-shadow-rows.json): every hit window starts at its own activation.
+    3, 4, 167,
   ].map((id) => [id, 0])),
 );
 
@@ -216,6 +220,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 114: return 202; // Haze's FadeToBg/fog restore through cleanup.
     case 151: return ACID_ARMOR_FIRST_INACTIVE_AGE + 1;
     case 154: return FURY_SWIPES_LAST_BODY_AGE + 1;
+    case 3: return 34; // Double Slap per-hit accepted window.
+    case 4: case 167: return 37; // Comet Punch / Triple Kick per-hit accepted window.
     case 156: return REST_FRAME_COUNT;
     case 158: return 107; // Hyper Fang restorebg fade through cleanup.
     case 162: return 200; // Super Fang's complete palette/return cleanup body.
@@ -588,6 +594,18 @@ export function liveMoveAnimationPresentation(
     case 114: config = { move: "HAZE", attacker, target, fieldProfile }; break;
     case 151: config = { move: "ACID_ARMOR", attacker, target, fieldProfile }; break;
     case 154: config = { move: "FURY_SWIPES", attacker, target, fieldProfile }; break;
+    case 3: config = { move: "DOUBLE_SLAP", attacker, target, fieldProfile, moveTurn: request.turn }; break;
+    case 4:
+      // cometPunchAtAge's opponent-route hitsplat offset (0, not the script's -8) is relative to
+      // the unshifted OBJ center, not the player-side +8 Y_PIC_OFFSET point.
+      config = { move: "COMET_PUNCH", attacker, target: affineCenterBattler(target), fieldProfile,
+        moveTurn: request.turn };
+      break;
+    // Cmd_jumpifmoveturn 0/1 else Center (battle_anim_scripts.s:6543): turns >= 2 share the Center branch.
+    case 167:
+      config = { move: "TRIPLE_KICK", attacker, target, fieldProfile,
+        moveTurn: Math.min(request.turn, 2) as 0 | 1 | 2 };
+      break;
     case 156:
       // Rest's player-side Letter-Z renderer carries the affine OAM center
       // correction at scanout (`screenCenterYOffset: 16`), so its reducer

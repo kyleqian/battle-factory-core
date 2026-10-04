@@ -52785,21 +52785,25 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "COMET_PUNCH") {
     const view = sceneOnCometPunchView(state);
     const displayed = sceneOnCometPunchView({ ...state, age: state.age - 1 });
-    const playerToOpponent = view.attacker.species === "LEDIAN"
+    const playerToOpponent = (liveField || view.attacker.species === "LEDIAN")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "LEDIAN"
+    const opponentToPlayer = (liveField || view.attacker.species === "LEDIAN")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged COMET_PUNCH pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const ledian = playerToOpponent ? ledianBackSprite : ledianFrontSprite;
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const ledian = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? ledianBackSprite : ledianFrontSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
@@ -52811,6 +52815,10 @@ export function renderSceneOnMovePresentation(
       ? (view.moveTurn === 0 ? targetIdle.x2 : 0)
       : displayed.targetX2;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (liveField && state.age === 0) {
+      const opponent = playerToOpponent ? view.target : view.attacker;
+      drawSourceOpponentEnemyShadow(fb, opponent.species, opponent.geometry.battlePositionCenter);
+    }
     drawSpriteSheet(
       fb,
       onix.tileset,
@@ -52822,7 +52830,7 @@ export function renderSceneOnMovePresentation(
     // `SpriteCB_EnemyShadow` has not yet observed the newly active script on
     // the first source display. Ledian is elevated, so its 32x8 enemy shadow
     // survives that one opponent-attacker frame before the callback hides it.
-    if (opponentToPlayer && state.age === 0) {
+    if (!liveField && opponentToPlayer && state.age === 0) {
       const shadowX = view.attacker.geometry.animationCenter.x - battleEnemyShadow.width / 2;
       const shadowY = view.attacker.geometry.battlePositionCenter.y + 29 - battleEnemyShadow.height / 2;
       for (const pixel of battleEnemyShadow.mask) {
@@ -52867,6 +52875,7 @@ export function renderSceneOnMovePresentation(
         displayed.fist.y - 16,
       );
     }
+    if (!liveField) {
     const profile = state.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
@@ -52900,27 +52909,32 @@ export function renderSceneOnMovePresentation(
         99,
       );
     }
+    }
     return;
   }
 
   if (state.config.move === "DOUBLE_SLAP") {
     const view = sceneOnDoubleSlapView(state);
     const displayed = sceneOnDoubleSlapView({ ...state, age: state.age - 1 });
-    const playerToOpponent = view.attacker.species === "POLIWHIRL"
+    const playerToOpponent = (liveField || view.attacker.species === "POLIWHIRL")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "POLIWHIRL"
+    const opponentToPlayer = (liveField || view.attacker.species === "POLIWHIRL")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged DOUBLE_SLAP pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const poliwhirl = playerToOpponent ? poliwhirlBackSprite : poliwhirlFrontSprite;
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const poliwhirl = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? poliwhirlBackSprite : poliwhirlFrontSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
@@ -52931,6 +52945,10 @@ export function renderSceneOnMovePresentation(
       ? (view.moveTurn === 0 ? targetIdle.x2 : 0)
       : displayed.targetX2;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (liveField && state.age === 0) {
+      const opponent = playerToOpponent ? view.target : view.attacker;
+      drawSourceOpponentEnemyShadow(fb, opponent.species, opponent.geometry.battlePositionCenter);
+    }
     drawSpriteSheet(
       fb,
       onix.tileset,
@@ -52963,6 +52981,7 @@ export function renderSceneOnMovePresentation(
         false,
       );
     }
+    if (!liveField) {
     const profile = state.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
@@ -52996,27 +53015,32 @@ export function renderSceneOnMovePresentation(
         99,
       );
     }
+    }
     return;
   }
 
   if (state.config.move === "TRIPLE_KICK") {
     const view = sceneOnTripleKickView(state);
     const displayed = sceneOnTripleKickView({ ...state, age: state.age - 1 });
-    const playerToOpponent = view.attacker.species === "HITMONTOP"
+    const playerToOpponent = (liveField || view.attacker.species === "HITMONTOP")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
-    const opponentToPlayer = view.attacker.species === "HITMONTOP"
+    const opponentToPlayer = (liveField || view.attacker.species === "HITMONTOP")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged TRIPLE_KICK pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const hitmontop = playerToOpponent ? hitmontopBackSprite : hitmontopFrontSprite;
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const hitmontop = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? hitmontopBackSprite : hitmontopFrontSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
@@ -53030,6 +53054,10 @@ export function renderSceneOnMovePresentation(
       ? (view.moveTurn === 0 ? targetIdle.x2 : 0)
       : displayed.targetX2;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (liveField && state.age === 0) {
+      const opponent = playerToOpponent ? view.target : view.attacker;
+      drawSourceOpponentEnemyShadow(fb, opponent.species, opponent.geometry.battlePositionCenter);
+    }
     drawSpriteSheet(
       fb,
       onix.tileset,
@@ -53071,6 +53099,7 @@ export function renderSceneOnMovePresentation(
         displayed.foot.y - 16,
       );
     }
+    if (!liveField) {
     const profile = state.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
@@ -53105,6 +53134,7 @@ export function renderSceneOnMovePresentation(
         "TRIPLE KICK!",
         99,
       );
+    }
     }
     return;
   }
