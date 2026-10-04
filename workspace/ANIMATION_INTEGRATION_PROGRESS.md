@@ -1,5 +1,17 @@
 # Animation integration progress
 
+## 2026-10-04 — Reversal shake evidence banked
+
+- Side-lane evidence `8fbf3a7ab` folded (new files only):
+  `docs/reversal-shake-evidence.md`, receipt
+  `tools/integration/fixtures/reversal-shake-evidence.json`. Power 20/40/80/
+  100/150/200, both sides, twice fresh: x2 = +ceil(A/2), -floor(A/2) toggling
+  every 2 frames (7 visible toggles), A = clamp(gAnimMovePower/12, 1, 16) from
+  the dynamic HP power; accepted reducer `reversal.ts` (A/0) exact only at A=1.
+- Resume: change the reducer's toggle, add A>1 tests from this receipt, then
+  wire Reversal live with amplitude from request.power. Caveat: HP was lowered
+  by Super Fang from a non-learner (Chansey); the shake depends only on power.
+
 ## 2026-10-04 — multi-hit adapter prep banked
 
 - Side-lane prep `797174269` folded (new files only): `docs/multihit-prep.md`,
