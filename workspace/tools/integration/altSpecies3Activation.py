@@ -28,8 +28,10 @@ lab = BattleLab(o, "battle-scene-on"); lab.prepare(req)
 nm = subprocess.run(["arm-none-eabi-nm", "-n", str(ref / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
 sym = {p[2]: int(p[0], 16) for p in (l.split() for l in nm.splitlines()) if len(p) == 3}
 PTR = os.environ.get("A3_TRACE_PTR") == "1"
-ptrs = []
+FADE = os.environ.get("A3_TRACE_FADE") == "1"  # raw gPaletteFade + vblank-ish counters per frame, for tail-duration attribution
+ptrs, fades = [], []
 def sample():
+    if FADE: fades.append([o.read_u8(sym["gPaletteFade"] + i) for i in range(12)] + [o.read_u8(sym["gTasks"] + 0)])
     if PTR: ptrs.append(o.read_u32(sym["sBattleAnimScriptPtr"]))
     return bool(o.read_u8(sym["gAnimScriptActive"])), o.read_u8(sym["sAnimMoveIndex"]) | o.read_u8(sym["sAnimMoveIndex"] + 1) << 8
 rows = [sample()]; f = 0
@@ -43,4 +45,5 @@ for fr, (a, m) in enumerate(rows):
 extra = {}
 if PTR:  # script-pointer schedule per interval: [frame, ptr] whenever the pointer changes while active
     extra["schedule"] = [[[fr, ptrs[fr]] for fr in range(i["start"], (i["end"] or f) + 1) if fr == i["start"] or ptrs[fr] != ptrs[fr - 1]] for i in iv]
+if FADE: extra["fades"] = fades
 OUT.write_text(json.dumps({"frames": f, "intervals": iv, **extra}))
