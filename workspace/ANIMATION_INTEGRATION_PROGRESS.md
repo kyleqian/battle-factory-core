@@ -1,5 +1,19 @@
 # Animation integration progress
 
+## 2026-10-04 — #142 per-move shadow-row table banked
+
+- Side-lane evidence `9de65cf17` folded (new files only):
+  `tools/integration/fixtures/issue142-shadow-rows.json`, doc
+  `docs/issue142-shadow-rows.md`, resolver/probe scripts. 236 rows (118 live
+  ids x 2 orientations) from accepted window starts vs probed/audited
+  activation frames; every in-window row is live row 0.
+- needsFix 70 ids (128 rows); wronglyDrawn 3 ids (Hyper Fang, Swagger, Bulk
+  Up draw the shadow although their windows start 4/7/4 frames after
+  activation); alreadyCorrect 26; notInWindow 34. Cross-checks 15/15 against
+  the source-derived alternate-species proofs; supervisor spot-check of Body
+  Slam (offset 0) and Toxic/Swagger (+7) agrees.
+- The #142 fix step implements this table (queued after the selectors batch).
+
 ## 2026-10-04 — altspecies3: source-derived windows refine #142
 
 - Side-lane evidence `4e720e41b` folded as `d2530865a` (new files only): all
