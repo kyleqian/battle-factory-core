@@ -1403,6 +1403,150 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_ENDURE",
+      "id": 203,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor3-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor3-endure-player.json",
+        "../tools/integration/fixtures/anchor3-endure-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 127 slot 3 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_FOCUS_ENERGY",
+      "id": 116,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor3-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor3-focus-energy-player.json",
+        "../tools/integration/fixtures/anchor3-focus-energy-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 61 slot 1 streak 7: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_FACADE",
+      "id": 263,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor3-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor3-facade-player.json",
+        "../tools/integration/fixtures/anchor3-facade-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 40 slot 1 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_MINIMIZE",
+      "id": 107,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor3-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor3-minimize-player.json",
+        "../tools/integration/fixtures/anchor3-minimize-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 0 slot 3 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_THUNDER",
+      "id": 87,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor3-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor3-thunder-player.json",
+        "../tools/integration/fixtures/anchor3-thunder-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 217 slot 0 streak 14: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_THUNDER_WAVE",
+      "id": 86,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor3-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor3-thunder-wave-player.json",
+        "../tools/integration/fixtures/anchor3-thunder-wave-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 27 slot 1 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SWAGGER",
+      "id": 207,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor3-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor3-swagger-player.json",
+        "../tools/integration/fixtures/anchor3-swagger-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 9 slot 3 streak 14: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_BULK_UP",
+      "id": 339,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor3-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor3-bulk-up-player.json",
+        "../tools/integration/fixtures/anchor3-bulk-up-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 5 slot 3 streak 14: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -1418,14 +1562,14 @@
     "source-derived ordinary singles party/B-cancel palette return with explicit known entry provenance; unknown histories and actual switches remain invalidated"
   ],
   "pending": [
-    "production adapters/providers for the remaining 173 accepted Factory moves",
+    "production adapters/providers for the remaining 165 accepted Factory moves",
     "complete graphics ownership across actual switches, forced replacement, summaries, substitute/transform and unmodeled histories",
-    "source palette resource plans for 35 implemented adapters without audited ownership"
+    "source palette resource plans for 43 implemented adapters without audited ownership"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 110,
+  "implementedCount": 118,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
@@ -1478,7 +1622,7 @@
   "spriteAllocatorHistory": {
     "availableProvider": "../src/engine/knownEntrySpriteAllocator.ts:createKnownEntrySpriteAllocatorProvider",
     "liveConsumerRegistered": true,
-    "scope": "Ordinary singles source allocator history for the audited wall-family plans (MOVE_LIGHT_SCREEN, MOVE_BARRIER, MOVE_MAGIC_COAT, MOVE_PROTECT, MOVE_REFLECT, MOVE_MIRROR_COAT). History starts known at the first move body and now stays known across live move bodies whose scripts are audited OBJ-net-zero in both orientations (src LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS, 90 ids pinned to tools/integration/fixtures/allocator-net-zero-audit.json; Fury Swipes 154 is player-side only and excluded). Draw order of the six consumers is key-determined per tools/integration/fixtures/allocator-consumer-tie-audit.json, so free-slot sSpriteOrder drift does not change their pixels; this license covers only those six consumers. Any live move outside the net-zero list (e.g. Bubble Beam 61, Acid 51, Bite 44, anchor-batch moves), status animations, switches, summaries, trainer slides, recalls, Transform/Substitute invalidate the host and the wall move renders the generic bounded fallback. Mirror Coat needs a prior special hit; no generated route with an audited special hit before it was found in seeds 0-74, so it remains effectively fallback. Not a full per-frame allocator clock and not arbitrary-history framebuffer exactness; palette history is unchanged.",
+    "scope": "Ordinary singles source allocator history for the audited wall-family plans (MOVE_LIGHT_SCREEN, MOVE_BARRIER, MOVE_MAGIC_COAT, MOVE_PROTECT, MOVE_REFLECT, MOVE_MIRROR_COAT). History starts known at the first move body and now stays known across live move bodies whose scripts are audited OBJ-net-zero in both orientations (src LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS, the 110 ids pinned to the union of tools/integration/fixtures/allocator-net-zero-audit.json and allocator-net-zero-audit-ext.json combined.netZeroIds, including Fury Swipes 154 on the opponent side and the anchor/anchor2 ids; the eight anchor3 adapters are NOT audited and stay outside the list). Draw order of the six consumers is key-determined per tools/integration/fixtures/allocator-consumer-tie-audit.json, so free-slot sSpriteOrder drift does not change their pixels; this license covers only those six consumers. Any live move outside the net-zero list (the anchor3 moves Endure, Focus Energy, Facade, Minimize, Thunder, Thunder Wave, Swagger, Bulk Up), status animations, switches, summaries, trainer slides, recalls, Transform/Substitute invalidate the host and the wall move renders the generic bounded fallback. Mirror Coat needs a prior special hit; no generated route with an audited special hit before it was found in seeds 0-74, so it remains effectively fallback. Not a full per-frame allocator clock and not arbitrary-history framebuffer exactness; palette history is unchanged.",
     "independentSourceEvidence": "../tools/integration/fixtures/known-entry-sprite-allocator-supervisor-receipt.json",
     "nextConsumer": null,
     "remaining": [
@@ -1508,7 +1652,8 @@
     "netZeroPersistence": {
       "receipt": "../tools/integration/fixtures/allocator-history-persistence-receipt.json",
       "netZeroSource": "../tools/integration/fixtures/allocator-net-zero-audit.json",
-      "tieAudit": "../tools/integration/fixtures/allocator-consumer-tie-audit.json"
+      "tieAudit": "../tools/integration/fixtures/allocator-consumer-tie-audit.json",
+      "netZeroSourceExtension": "../tools/integration/fixtures/allocator-net-zero-audit-ext.json"
     }
   }
 }
