@@ -1739,13 +1739,13 @@
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "68ff5b22e",
+    "productionCodeCommit": "fb5b811f6",
     "typecheck": "passed",
-    "workerFullTest": "1491 files / 11933 tests passed; 44 files / 223 tests skipped (worker, same src tree)",
+    "workerFullTest": "1492 files / 11944 tests passed; 44 files / 223 tests skipped (worker, same src tree)",
     "buildModules": 847,
-    "supervisorAffected": "10 affected files / 140 tests and 448 smoke passed (ISSUES #142 fix)",
-    "independentSource": "ISSUES #142: fourteen alternate-species/elevated fixtures twice fresh, zero residuals (five 200-px row-0 cases and Sandstorm/Onix fixed); row scan 248 rows 0 mismatches",
-    "sourceReceipt": "../tools/integration/fixtures/issue142-fix-supervisor-receipt.json",
+    "supervisorAffected": "7 affected files / 80 tests and 448 smoke passed (multihit)",
+    "independentSource": "multihit 21 per-hit fixtures twice fresh, 759 rows/run, zero residuals; three ordinary routes PASS; shadow scan 0 mismatches",
+    "sourceReceipt": "../tools/integration/fixtures/multihit-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed",
     "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261002.json"
   },

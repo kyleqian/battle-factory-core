@@ -1,5 +1,17 @@
 # Animation integration progress
 
+## 2026-10-04 — multi-hit per-hit adapters (125 live)
+
+- Folded worker `ed4095683` (tested code `fb5b811f6`, src tree `c14cdb45a`):
+  Double Slap, Comet Punch, Triple Kick, one body per hit with moveTurn from
+  request.turn; staged-only draw cases ported to the live field; shadow row 0
+  per hit. Adapters 125, remaining 151.
+- Supervisor dense: all 21 per-hit fixtures twice fresh, 759 rows/run, zero
+  residual. Routes: Double Slap 4 and 3 hits, Comet Punch 3 hits; Triple Kick
+  has no generated-rental carrier (dense only). Comet Punch's target anchor
+  was found by a y sweep then tied to the reducer's own opponent offset;
+  accepted on the exact ROM proof. Receipt `multihit-supervisor-receipt.json`.
+
 ## 2026-10-04 — ISSUES #142 fixed: elevated-opponent shadow + Sandstorm idle
 
 - Folded worker `39675dec0` as `5cbc09758` (tested code `68ff5b22e`, src tree

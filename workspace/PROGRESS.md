@@ -5,11 +5,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-04 — Light Screen + seven adapter batches folded (122 live)
+## 2026-10-04 — S10A: 79 -> 125 live adapters, #142 fixed
 
-- **State:** S10A, local master; 122 live adapters, 154 accepted bodies
+- **State:** S10A, local master; 125 live adapters, 151 accepted bodies
   remain (Light Screen, fieldfx 6, glow 5, anchor 7, wall 5, anchor2 7,
-  anchor3 8, selectors 4). Supervisor full suite on `6faa70568`: 1,489 files / 11,884
+  anchor3 8, selectors 4, multi-hit 3). Supervisor full suite on `6faa70568`: 1,489 files / 11,884
   tests, build 847.
   Opus supervisor with Sonnet workers.
 - **Did:** repair worker cherry-picked withheld candidate `84f2e5264` and made
@@ -43,8 +43,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   decided by alternate-species dense proofs in the side lane.
 - **Also:** ISSUES #142 fixed (elevated-opponent shadow on the activation
   frame for 88 live ids; Sandstorm idle); 14 alternate-species fixtures exact.
-- **Next:** multi-hit adapters (prep banked); Reversal reducer change needs
-  the animation program (evidence banked). Oracle freshness FAIL at orient was a false positive:
+- **Also:** multi-hit adapters (Double Slap, Comet Punch, Triple Kick).
+- **Next:** see the integration ledger and ROADMAP S10A resume points. Oracle freshness FAIL at orient was a false positive:
   only workspace commits since service start; both services kept.
 - **Notes:** no material decision deferred.
 
