@@ -858,6 +858,114 @@
         "independent arbitrary-species framebuffer comparison",
         "ordinary command-input replay"
       ]
+    },
+    {
+      "move": "MOVE_FLAME_WHEEL",
+      "id": 172,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/fieldfx-live-adapter-receipt.json",
+        "../tools/integration/fixtures/fieldfx-flame-wheel-player.json",
+        "../tools/integration/fixtures/fieldfx-flame-wheel-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 100 slot 0 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_FIRE_SPIN",
+      "id": 83,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/fieldfx-live-adapter-receipt.json",
+        "../tools/integration/fixtures/fieldfx-fire-spin-player.json",
+        "../tools/integration/fixtures/fieldfx-fire-spin-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 148 slot 0 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_HEAT_WAVE",
+      "id": 257,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/fieldfx-live-adapter-receipt.json",
+        "../tools/integration/fixtures/fieldfx-heat-wave-player.json",
+        "../tools/integration/fixtures/fieldfx-heat-wave-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 136 slot 0 streak 28: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SANDSTORM",
+      "id": 201,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/fieldfx-live-adapter-receipt.json",
+        "../tools/integration/fixtures/fieldfx-sandstorm-player.json",
+        "../tools/integration/fixtures/fieldfx-sandstorm-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 124 slot 3 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SONIC_BOOM",
+      "id": 49,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/fieldfx-live-adapter-receipt.json",
+        "../tools/integration/fixtures/fieldfx-sonic-boom-player.json",
+        "../tools/integration/fixtures/fieldfx-sonic-boom-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 122 slot 1 streak 7: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_BLOCK",
+      "id": 335,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/fieldfx-live-adapter-receipt.json",
+        "../tools/integration/fixtures/fieldfx-block-player.json",
+        "../tools/integration/fixtures/fieldfx-block-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 232 slot 3 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -873,14 +981,14 @@
     "source-derived ordinary singles party/B-cancel palette return with explicit known entry provenance; unknown histories and actual switches remain invalidated"
   ],
   "pending": [
-    "production adapters/providers for the remaining 196 accepted Factory moves",
+    "production adapters/providers for the remaining 190 accepted Factory moves",
     "complete graphics ownership across actual switches, forced replacement, summaries, substitute/transform and unmodeled histories",
-    "source palette resource plans for 22 implemented adapters without audited ownership"
+    "source palette resource plans for 28 implemented adapters without audited ownership"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 80,
+  "implementedCount": 86,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},

@@ -56,11 +56,11 @@ import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
-  2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 50,
-  65, 66, 67, 68, 74, 75, 78, 79, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 113, 114, 122,
-  131, 136, 147, 151, 154, 156, 158, 162, 163, 178, 186, 204, 211, 213, 223, 227, 231,
-  242, 246, 247, 264, 280, 281, 287, 290, 302, 305, 306, 319, 320, 321, 325, 336, 337, 342,
-  343, 347,
+  2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49,
+  50, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109,
+  113, 114, 122, 131, 136, 147, 151, 154, 156, 158, 162, 163, 172, 178, 186, 201, 204,
+  211, 213, 223, 227, 231, 242, 246, 247, 257, 264, 280, 281, 287, 290, 302, 305, 306,
+  319, 320, 321, 325, 335, 336, 337, 342, 343, 347,
 ] as const);
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
@@ -90,12 +90,14 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // Full source-script body, including the target-monbg / palette cleanup.
     case 47: return request.attacker === 0 ? 245 : 248;
     case 48: return 51; // First Supersonic ring through the final inactive row.
+    case 49: return 52; // Sonic Boom source body through the final inactive row.
     case 65: return 91; // Drill Peck's full BowMon/impact/cleanup body.
     case 66: return 124; // Submission source body through monbg cleanup.
     case 67: return 33; // Low Kick source body through first inactive row.
     case 68: return 88; // Counter's source body through final clear display.
     case 78:
     case 79: return STUN_SPORE_FRAME_COUNT;
+    case 83: return 104; // Fire Spin source window through target-shake cleanup.
     case 92: return 219; // Toxic's bubbles through the source-owned cleanup.
     case 93:
     case 94: return 140; // Psychic-background fade-out through inactive cleanup.
@@ -126,6 +128,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 158: return 107; // Hyper Fang restorebg fade through cleanup.
     case 162: return 200; // Super Fang's complete palette/return cleanup body.
     case 163: return 46; // Slash body through final source-owned shake row.
+    case 172: return 170; // Flame Wheel source body through cleanup.
+    case 201: return 168; // Sandstorm source body (weather bookkeeping stays in rules).
     case 211: return 197; // Steel Wing source body through first inactive row.
     case 223: return 75; // Dynamic Punch source body through first inactive row.
     case 231: return 135; // Iron Tail source body through first inactive row.
@@ -147,6 +151,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
         : BRICK_BREAK_SHATTERED_FRAME_COUNT;
     case 290: return 102; // Factory Secret Power -> Strength complete body.
     case 302: return NEEDLE_ARM_FRAME_COUNT;
+    case 257: return 168; // Heat Wave source body through cleanup.
     case 281: return YAWN_CLEANUP_AGE + 1;
     case 287: return REFRESH_FRAME_COUNT;
     case 305: return 104; // Poison Fang body through blend/monbg cleanup.
@@ -157,6 +162,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 321: return TICKLE_FRAME_COUNT;
     // Source restorebg fade, then inactive display. Both orientations restore.
     case 325: return request.attacker === 0 ? 106 : 105;
+    // The source Block script is two rows longer on the opponent-front side.
+    case 335: return request.attacker === 0 ? 141 : 146;
     case 336: return HOWL_FRAME_COUNT;
     case 337: return 137; // Dragon Claw palette restoration through cleanup.
     case 342: return 187; // Poison Tail source body through first inactive row.
@@ -261,6 +268,7 @@ export function liveMoveAnimationPresentation(
     case 44: config = { move: "BITE", attacker, target, fieldProfile }; break;
     case 47: config = { move: "SING", attacker, target, fieldProfile }; break;
     case 48: config = { move: "SUPERSONIC", attacker, target, fieldProfile }; break;
+    case 49: config = { move: "SONIC_BOOM", attacker, target, fieldProfile }; break;
     case 65:
       // BowMon affines the battler OBJ around its unshifted sprite center.
       // The impact sprites independently retain the target's picture-offset
@@ -277,6 +285,7 @@ export function liveMoveAnimationPresentation(
     case 68: config = { move: "COUNTER", attacker, target, fieldProfile }; break;
     case 78: config = { move: "STUN_SPORE", attacker, target, fieldProfile }; break;
     case 79: config = { move: "SLEEP_POWDER", attacker, target, fieldProfile }; break;
+    case 83: config = { move: "FIRE_SPIN", attacker, target, fieldProfile }; break;
     case 92: config = { move: "TOXIC", attacker, target, fieldProfile }; break;
     case 93: config = { move: "CONFUSION", attacker, target, fieldProfile }; break;
     case 94: config = { move: "PSYCHIC", attacker, target, fieldProfile }; break;
@@ -359,6 +368,8 @@ export function liveMoveAnimationPresentation(
     case 158: config = { move: "HYPER_FANG", attacker, target, fieldProfile }; break;
     case 162: config = { move: "SUPER_FANG", attacker, target, fieldProfile }; break;
     case 163: config = { move: "SLASH", attacker, target, fieldProfile }; break;
+    case 172: config = { move: "FLAME_WHEEL", attacker, target, fieldProfile }; break;
+    case 201: config = { move: "SANDSTORM", attacker, target, fieldProfile }; break;
     case 211:
       config = {
         move: "STEEL_WING",
@@ -405,6 +416,7 @@ export function liveMoveAnimationPresentation(
         },
       };
       break;
+    case 257: config = { move: "HEAT_WAVE", attacker, target, fieldProfile }; break;
     case 287: config = { move: "REFRESH", attacker, target, fieldProfile }; break;
     case 305: config = { move: "POISON_FANG", attacker, target, fieldProfile }; break;
     case 306: config = { move: "CRUSH_CLAW", attacker, target, fieldProfile }; break;
@@ -449,6 +461,7 @@ export function liveMoveAnimationPresentation(
         attackerSubpriority: request.attacker === 0 ? 30 : 40,
       };
       break;
+    case 335: config = { move: "BLOCK", attacker, target, fieldProfile }; break;
     case 336:
       config = {
         move: "HOWL", attacker, target, fieldProfile,
