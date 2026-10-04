@@ -34,7 +34,7 @@ const cases = fixtures.map(file => {
   }
   const attackerSide = src.attacker.geometry.side as string;
   const targetSide = src.target.geometry.side as string;
-  const w = src.denseWindow ?? src.sourceWindow;
+  const w = live.denseWindow ?? src.denseWindow ?? src.sourceWindow;
   return {
     case: name, derivation: deriv.get(name.replace("altspecies3-", "")), move: live.move ?? src.move, window: w,
     attacker: { species: src.attacker.species, side: attackerSide, elevated: attackerSide === "opponent" && elevated.has(src.attacker.species) },

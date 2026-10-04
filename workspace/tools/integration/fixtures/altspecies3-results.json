@@ -2,7 +2,7 @@
  "schema": "altspecies3-results/v1",
  "generatedAt": "2026-10-04",
  "evidenceRoot": ".integration/validation/altspecies3-20261004",
- "method": "liveAdapterFramebuffer.ts x2 passes x 2 fresh direct-mGBA runs per pass; residual rows attributed by altSpeciesAnalyze.ts",
+ "method": "window start = move-script activation frame (gAnimScriptActive rising edge with sAnimMoveIndex == move, allocatorNetZeroProbe.py detection) + the accepted fixture's own (window start - its scenario's activation); never live matching. 2 passes x 2 fresh direct-mGBA runs per case.",
  "cases": [
   {
    "case": "altspecies3-bite-player-meowth-opponent-magneton",
@@ -44,7 +44,7 @@
     "frameCount": 26
    },
    "attacker": {
-    "species": "ZUBAT",
+    "species": "MEOWTH",
     "side": "player",
     "elevated": false
    },
@@ -65,951 +65,14 @@
      "run": 0,
      "dir": ".integration/validation/altspecies3-20261004/pass1/altspecies3-bite-player-meowth-opponent-magneton-run0",
      "rows": 26,
-     "residualPixels": 49712,
-     "digest": "b85c1174e88ad7bd2f1ccf75f29508a1eb4c617504e8fb7db8e98b5fbd567e1f",
+     "residualPixels": 0,
+     "digest": "b4128a044cf70cb03713e23e506541d4858c4f89ab6a2fc5b2959227cbed5319",
      "sourceDigest": "24b66c1f9718afde8cd3eb9dc56e7c3fd5cad36c08195e3b4066178d90b74de2",
-     "residualRows": [
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 0,
-       "frame": 80,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 1,
-       "frame": 81,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 2,
-       "frame": 82,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 3,
-       "frame": 83,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 4,
-       "frame": 84,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 5,
-       "frame": 85,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 6,
-       "frame": 86,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 7,
-       "frame": 87,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 8,
-       "frame": 88,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 9,
-       "frame": 89,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 10,
-       "frame": 90,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 11,
-       "frame": 91,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 12,
-       "frame": 92,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 13,
-       "frame": 93,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 14,
-       "frame": 94,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 15,
-       "frame": 95,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 16,
-       "frame": 96,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 17,
-       "frame": 97,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 18,
-       "frame": 98,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 19,
-       "frame": 99,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 20,
-       "frame": 100,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 21,
-       "frame": 101,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 22,
-       "frame": 102,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 23,
-       "frame": 103,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 24,
-       "frame": 104,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      },
-      {
-       "shiftFit": {
-        "dx": 0,
-        "dy": 0,
-        "mismatches": 1671
-       },
-       "age": 25,
-       "frame": 105,
-       "pixels": 1912,
-       "bbox": {
-        "x0": 16,
-        "y0": 71,
-        "x1": 175,
-        "y1": 133
-       },
-       "inEnemyShadowMask": 0,
-       "sourceIsShadowColor": 0,
-       "colorPairs": [
-        {
-         "pair": "src(255,231,132)->live(123,115,189)",
-         "pixels": 186
-        },
-        {
-         "pair": "src(255,231,132)->live(173,165,239)",
-         "pixels": 134
-        },
-        {
-         "pair": "src(255,231,132)->live(247,247,255)",
-         "pixels": 83
-        },
-        {
-         "pair": "src(231,181,66)->live(123,115,189)",
-         "pixels": 72
-        }
-       ]
-      }
-     ],
+     "residualRows": [],
      "residualRowSummary": {
-      "count": 26,
-      "ages": "0..25",
-      "rowsDigest": "b11c819e9943e5331cea671f34e201303a050c8fb9194301b7e15bfcafd04bcb"
+      "count": 0,
+      "ages": [],
+      "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     },
     {
@@ -1017,13 +80,13 @@
      "run": 1,
      "dir": ".integration/validation/altspecies3-20261004/pass1/altspecies3-bite-player-meowth-opponent-magneton-run1",
      "rows": 26,
-     "residualPixels": 49712,
-     "digest": "b85c1174e88ad7bd2f1ccf75f29508a1eb4c617504e8fb7db8e98b5fbd567e1f",
+     "residualPixels": 0,
+     "digest": "b4128a044cf70cb03713e23e506541d4858c4f89ab6a2fc5b2959227cbed5319",
      "sourceDigest": "24b66c1f9718afde8cd3eb9dc56e7c3fd5cad36c08195e3b4066178d90b74de2",
      "residualRowSummary": {
-      "count": 26,
-      "ages": "0..25",
-      "rowsDigest": "b11c819e9943e5331cea671f34e201303a050c8fb9194301b7e15bfcafd04bcb"
+      "count": 0,
+      "ages": [],
+      "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     },
     {
@@ -1031,13 +94,13 @@
      "run": 0,
      "dir": ".integration/validation/altspecies3-20261004/pass2/altspecies3-bite-player-meowth-opponent-magneton-run0",
      "rows": 26,
-     "residualPixels": 49712,
-     "digest": "b85c1174e88ad7bd2f1ccf75f29508a1eb4c617504e8fb7db8e98b5fbd567e1f",
+     "residualPixels": 0,
+     "digest": "b4128a044cf70cb03713e23e506541d4858c4f89ab6a2fc5b2959227cbed5319",
      "sourceDigest": "24b66c1f9718afde8cd3eb9dc56e7c3fd5cad36c08195e3b4066178d90b74de2",
      "residualRowSummary": {
-      "count": 26,
-      "ages": "0..25",
-      "rowsDigest": "b11c819e9943e5331cea671f34e201303a050c8fb9194301b7e15bfcafd04bcb"
+      "count": 0,
+      "ages": [],
+      "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     },
     {
@@ -1045,16 +108,17 @@
      "run": 1,
      "dir": ".integration/validation/altspecies3-20261004/pass2/altspecies3-bite-player-meowth-opponent-magneton-run1",
      "rows": 26,
-     "residualPixels": 49712,
-     "digest": "b85c1174e88ad7bd2f1ccf75f29508a1eb4c617504e8fb7db8e98b5fbd567e1f",
+     "residualPixels": 0,
+     "digest": "b4128a044cf70cb03713e23e506541d4858c4f89ab6a2fc5b2959227cbed5319",
      "sourceDigest": "24b66c1f9718afde8cd3eb9dc56e7c3fd5cad36c08195e3b4066178d90b74de2",
      "residualRowSummary": {
-      "count": 26,
-      "ages": "0..25",
-      "rowsDigest": "b11c819e9943e5331cea671f34e201303a050c8fb9194301b7e15bfcafd04bcb"
+      "count": 0,
+      "ages": [],
+      "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     }
-   ]
+   ],
+   "classification": "control-exact"
   },
   {
    "case": "altspecies3-body-slam-player-lickitung-opponent-golbat",
@@ -1202,7 +266,157 @@
       "rowsDigest": "8953afc2805c4db21d0b1386356c5076f05d271ddb9e957c83822d698d1dc241"
      }
     }
-   ]
+   ],
+   "classification": "acceptance-142"
+  },
+  {
+   "case": "altspecies3-brick-break-player-lombre-opponent-haunter-shattered",
+   "move": "BRICK_BREAK",
+   "window": {
+    "startFrame": 291,
+    "endFrame": 482,
+    "frameCount": 192
+   },
+   "attacker": {
+    "species": "LOMBRE",
+    "side": "player",
+    "elevated": false
+   },
+   "target": {
+    "species": "HAUNTER",
+    "side": "opponent",
+    "elevated": true
+   },
+   "opponentSpecies": "HAUNTER",
+   "opponentElevated": true,
+   "scenario": "tools/integration/fixtures/altspecies3-scenarios/brick-break-player-lombre-opponent-haunter.json",
+   "sourceFixture": "tools/compare/fixtures/altspecies3-brick-break-player-lombre-opponent-haunter.json",
+   "liveFixture": "tools/integration/fixtures/altspecies3-brick-break-player-lombre-opponent-haunter-shattered.json",
+   "identicalAcrossRuns": true,
+   "runs": [
+    {
+     "pass": "pass1",
+     "run": 0,
+     "dir": ".integration/validation/altspecies3-20261004/pass1/altspecies3-brick-break-player-lombre-opponent-haunter-shattered-run0",
+     "rows": 192,
+     "residualPixels": 200,
+     "digest": "8a584eed6d012c59f171724f92f69b13ef15e8beb36d59e21716f3def5e66de7",
+     "sourceDigest": "a615a6cca7bf37d11d65e6ffbf587c868ee56d3620dbcf826b7a608ed5fefaa2",
+     "residualRows": [
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 200
+       },
+       "age": 0,
+       "frame": 291,
+       "pixels": 200,
+       "bbox": {
+        "x0": 160,
+        "y0": 65,
+        "x1": 191,
+        "y1": 72
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 200,
+       "colorPairs": [
+        {
+         "pair": "src(82,107,99)->live(189,189,156)",
+         "pixels": 200
+        }
+       ]
+      }
+     ],
+     "residualRowSummary": {
+      "count": 1,
+      "ages": [
+       0
+      ],
+      "rowsDigest": "e0a039e720347d817249495c62c435f97d239abb552fa9f48f326717928e9bbd"
+     }
+    },
+    {
+     "pass": "pass1",
+     "run": 1,
+     "dir": ".integration/validation/altspecies3-20261004/pass1/altspecies3-brick-break-player-lombre-opponent-haunter-shattered-run1",
+     "rows": 192,
+     "residualPixels": 200,
+     "digest": "8a584eed6d012c59f171724f92f69b13ef15e8beb36d59e21716f3def5e66de7",
+     "sourceDigest": "a615a6cca7bf37d11d65e6ffbf587c868ee56d3620dbcf826b7a608ed5fefaa2",
+     "residualRowSummary": {
+      "count": 1,
+      "ages": [
+       0
+      ],
+      "rowsDigest": "e0a039e720347d817249495c62c435f97d239abb552fa9f48f326717928e9bbd"
+     }
+    },
+    {
+     "pass": "pass2",
+     "run": 0,
+     "dir": ".integration/validation/altspecies3-20261004/pass2/altspecies3-brick-break-player-lombre-opponent-haunter-shattered-run0",
+     "rows": 192,
+     "residualPixels": 200,
+     "digest": "8a584eed6d012c59f171724f92f69b13ef15e8beb36d59e21716f3def5e66de7",
+     "sourceDigest": "a615a6cca7bf37d11d65e6ffbf587c868ee56d3620dbcf826b7a608ed5fefaa2",
+     "residualRowSummary": {
+      "count": 1,
+      "ages": [
+       0
+      ],
+      "rowsDigest": "e0a039e720347d817249495c62c435f97d239abb552fa9f48f326717928e9bbd"
+     }
+    },
+    {
+     "pass": "pass2",
+     "run": 1,
+     "dir": ".integration/validation/altspecies3-20261004/pass2/altspecies3-brick-break-player-lombre-opponent-haunter-shattered-run1",
+     "rows": 192,
+     "residualPixels": 200,
+     "digest": "8a584eed6d012c59f171724f92f69b13ef15e8beb36d59e21716f3def5e66de7",
+     "sourceDigest": "a615a6cca7bf37d11d65e6ffbf587c868ee56d3620dbcf826b7a608ed5fefaa2",
+     "residualRowSummary": {
+      "count": 1,
+      "ages": [
+       0
+      ],
+      "rowsDigest": "e0a039e720347d817249495c62c435f97d239abb552fa9f48f326717928e9bbd"
+     }
+    }
+   ],
+   "classification": "acceptance-142",
+   "derivation": {
+    "case": "brick-break-player-lombre-opponent-haunter",
+    "move": "BRICK_BREAK",
+    "moveId": 280,
+    "acceptedStart": 288,
+    "acceptedCount": 192,
+    "acceptedActivations": [
+     288
+    ],
+    "acceptedIntervalIndex": 0,
+    "offset": 0,
+    "altActivations": [
+     291
+    ],
+    "altIntervals": [
+     {
+      "move": 280,
+      "start": 291,
+      "end": 482
+     }
+    ],
+    "acceptedIntervals": [
+     {
+      "move": 280,
+      "start": 288,
+      "end": 479
+     }
+    ],
+    "liveWindow": null,
+    "derivedStart": 291
+   }
   },
   {
    "case": "altspecies3-brick-break-player-lombre-opponent-haunter",
@@ -6778,7 +5992,8 @@
       "rowsDigest": "990c8a5892acb960926dff70c6f345d1237a806bdd42e5b842a4434a25ce121d"
      }
     }
-   ]
+   ],
+   "classification": "superseded-staging-artifact (live fixture lacks body:shattered-wall)"
   },
   {
    "case": "altspecies3-calm-mind-player-lunatone-opponent-golbat",
@@ -6893,7 +6108,8 @@
       "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     }
-   ]
+   ],
+   "classification": "control-exact"
   },
   {
    "case": "altspecies3-confusion-player-kadabra-opponent-magneton",
@@ -7008,7 +6224,8 @@
       "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     }
-   ]
+   ],
+   "classification": "control-exact"
   },
   {
    "case": "altspecies3-karate-chop-player-primeape-opponent-golbat",
@@ -7123,7 +6340,8 @@
       "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     }
-   ]
+   ],
+   "classification": "control-exact"
   },
   {
    "case": "altspecies3-mega-punch-player-cacturne-opponent-magneton",
@@ -7271,7 +6489,873 @@
       "rowsDigest": "e84fa88876c19aec2742252898a82abc790234e796ed107d0940391426757615"
      }
     }
-   ]
+   ],
+   "classification": "acceptance-142"
+  },
+  {
+   "case": "altspecies3-night-shade-player-ariados-opponent-golbat-hp160-notail",
+   "move": "NIGHT_SHADE",
+   "window": {
+    "startFrame": 224,
+    "endFrame": 432
+   },
+   "attacker": {
+    "species": "ARIADOS",
+    "side": "player",
+    "elevated": false
+   },
+   "target": {
+    "species": "GOLBAT",
+    "side": "opponent",
+    "elevated": true
+   },
+   "opponentSpecies": "GOLBAT",
+   "opponentElevated": true,
+   "scenario": "tools/integration/fixtures/altspecies3-scenarios/night-shade-player-ariados-opponent-golbat.json",
+   "sourceFixture": "tools/compare/fixtures/altspecies3-night-shade-player-ariados-opponent-golbat-hp160.json",
+   "liveFixture": "tools/integration/fixtures/altspecies3-night-shade-player-ariados-opponent-golbat-hp160-notail.json",
+   "identicalAcrossRuns": true,
+   "runs": [
+    {
+     "pass": "pass1",
+     "run": 0,
+     "dir": ".integration/validation/altspecies3-20261004/pass1/altspecies3-night-shade-player-ariados-opponent-golbat-hp160-notail-run0",
+     "rows": 209,
+     "residualPixels": 200,
+     "digest": "2c409623d154ae590c4145170b2c6dfd6eecba1dffbe451d1ebbcaa0479218d1",
+     "sourceDigest": "e24be3c5882651ed651a862c6fe9e57a9565966d072174ea329a0742c5e17659",
+     "residualRows": [
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 200
+       },
+       "age": 0,
+       "frame": 224,
+       "pixels": 200,
+       "bbox": {
+        "x0": 160,
+        "y0": 65,
+        "x1": 191,
+        "y1": 72
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 200,
+       "colorPairs": [
+        {
+         "pair": "src(82,107,99)->live(189,189,156)",
+         "pixels": 200
+        }
+       ]
+      }
+     ],
+     "residualRowSummary": {
+      "count": 1,
+      "ages": [
+       0
+      ],
+      "rowsDigest": "17639215e1349cecb932c50600074f059707d5ba7e90a93e03866ad56cc52117"
+     }
+    },
+    {
+     "pass": "pass1",
+     "run": 1,
+     "dir": ".integration/validation/altspecies3-20261004/pass1/altspecies3-night-shade-player-ariados-opponent-golbat-hp160-notail-run1",
+     "rows": 209,
+     "residualPixels": 200,
+     "digest": "2c409623d154ae590c4145170b2c6dfd6eecba1dffbe451d1ebbcaa0479218d1",
+     "sourceDigest": "e24be3c5882651ed651a862c6fe9e57a9565966d072174ea329a0742c5e17659",
+     "residualRowSummary": {
+      "count": 1,
+      "ages": [
+       0
+      ],
+      "rowsDigest": "17639215e1349cecb932c50600074f059707d5ba7e90a93e03866ad56cc52117"
+     }
+    },
+    {
+     "pass": "pass2",
+     "run": 0,
+     "dir": ".integration/validation/altspecies3-20261004/pass2/altspecies3-night-shade-player-ariados-opponent-golbat-hp160-notail-run0",
+     "rows": 209,
+     "residualPixels": 200,
+     "digest": "2c409623d154ae590c4145170b2c6dfd6eecba1dffbe451d1ebbcaa0479218d1",
+     "sourceDigest": "e24be3c5882651ed651a862c6fe9e57a9565966d072174ea329a0742c5e17659",
+     "residualRowSummary": {
+      "count": 1,
+      "ages": [
+       0
+      ],
+      "rowsDigest": "17639215e1349cecb932c50600074f059707d5ba7e90a93e03866ad56cc52117"
+     }
+    },
+    {
+     "pass": "pass2",
+     "run": 1,
+     "dir": ".integration/validation/altspecies3-20261004/pass2/altspecies3-night-shade-player-ariados-opponent-golbat-hp160-notail-run1",
+     "rows": 209,
+     "residualPixels": 200,
+     "digest": "2c409623d154ae590c4145170b2c6dfd6eecba1dffbe451d1ebbcaa0479218d1",
+     "sourceDigest": "e24be3c5882651ed651a862c6fe9e57a9565966d072174ea329a0742c5e17659",
+     "residualRowSummary": {
+      "count": 1,
+      "ages": [
+       0
+      ],
+      "rowsDigest": "17639215e1349cecb932c50600074f059707d5ba7e90a93e03866ad56cc52117"
+     }
+    }
+   ],
+   "classification": "acceptance-142",
+   "derivation": {
+    "case": "night-shade-player-ariados-opponent-golbat",
+    "move": "NIGHT_SHADE",
+    "moveId": 101,
+    "acceptedStart": 217,
+    "acceptedCount": 228,
+    "acceptedActivations": [
+     217
+    ],
+    "acceptedIntervalIndex": 0,
+    "offset": 0,
+    "altActivations": [
+     224
+    ],
+    "altIntervals": [
+     {
+      "move": 101,
+      "start": 224,
+      "end": 450
+     }
+    ],
+    "acceptedIntervals": [
+     {
+      "move": 101,
+      "start": 217,
+      "end": 444
+     }
+    ],
+    "liveWindow": null,
+    "derivedStart": 224
+   }
+  },
+  {
+   "case": "altspecies3-night-shade-player-ariados-opponent-golbat-hp160",
+   "move": "NIGHT_SHADE",
+   "window": {
+    "startFrame": 224,
+    "endFrame": 450,
+    "frameCount": 227
+   },
+   "attacker": {
+    "species": "ARIADOS",
+    "side": "player",
+    "elevated": false
+   },
+   "target": {
+    "species": "GOLBAT",
+    "side": "opponent",
+    "elevated": true
+   },
+   "opponentSpecies": "GOLBAT",
+   "opponentElevated": true,
+   "scenario": "tools/integration/fixtures/altspecies3-scenarios/night-shade-player-ariados-opponent-golbat.json",
+   "sourceFixture": "tools/compare/fixtures/altspecies3-night-shade-player-ariados-opponent-golbat-hp160.json",
+   "liveFixture": "tools/integration/fixtures/altspecies3-night-shade-player-ariados-opponent-golbat-hp160.json",
+   "identicalAcrossRuns": true,
+   "runs": [
+    {
+     "pass": "pass1",
+     "run": 0,
+     "dir": ".integration/validation/altspecies3-20261004/pass1/altspecies3-night-shade-player-ariados-opponent-golbat-hp160-run0",
+     "rows": 227,
+     "residualPixels": 292024,
+     "digest": "f11e422f3d7783a6e3978d21800e8f7024bed172e0e6868c651dfd02040de118",
+     "sourceDigest": "e14da851218d1321724c4b9ca12bf4279103b3c5810c7e3af225c799f9b10c20",
+     "residualRows": [
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 200
+       },
+       "age": 0,
+       "frame": 224,
+       "pixels": 200,
+       "bbox": {
+        "x0": 160,
+        "y0": 65,
+        "x1": 191,
+        "y1": 72
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 200,
+       "colorPairs": [
+        {
+         "pair": "src(82,107,99)->live(189,189,156)",
+         "pixels": 200
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 209,
+       "frame": 433,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(16,15,15)->live(0,0,0)",
+         "pixels": 12472
+        },
+        {
+         "pair": "src(12,11,9)->live(0,0,0)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(15,14,14)->live(0,0,0)",
+         "pixels": 1406
+        },
+        {
+         "pair": "src(14,14,14)->live(0,0,0)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 210,
+       "frame": 434,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(31,30,31)->live(16,15,15)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(32,31,31)->live(16,15,15)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(24,23,19)->live(12,11,9)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(28,28,28)->live(14,14,14)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 211,
+       "frame": 435,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(47,46,47)->live(31,30,31)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(48,47,47)->live(32,31,31)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(36,35,29)->live(24,23,19)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(42,43,43)->live(28,28,28)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 212,
+       "frame": 436,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(62,61,63)->live(47,46,47)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(64,63,63)->live(48,47,47)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(48,47,39)->live(36,35,29)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(56,57,57)->live(42,43,43)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 213,
+       "frame": 437,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(78,77,79)->live(62,61,63)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(80,79,79)->live(64,63,63)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(60,59,48)->live(48,47,39)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(70,72,72)->live(56,57,57)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 214,
+       "frame": 438,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(93,92,95)->live(78,77,79)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(96,95,95)->live(80,79,79)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(71,70,58)->live(60,59,48)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(84,86,86)->live(70,72,72)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 215,
+       "frame": 439,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(109,108,111)->live(93,92,95)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(112,111,111)->live(96,95,95)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(83,82,68)->live(71,70,58)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(98,101,101)->live(84,86,86)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 216,
+       "frame": 440,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(124,123,127)->live(109,108,111)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(128,127,127)->live(112,111,111)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(95,94,78)->live(83,82,68)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(111,115,115)->live(98,101,101)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 217,
+       "frame": 441,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(139,138,143)->live(124,123,127)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(144,143,143)->live(128,127,127)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(107,106,87)->live(95,94,78)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(125,129,129)->live(111,115,115)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 218,
+       "frame": 442,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(155,154,159)->live(139,138,143)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(160,159,159)->live(144,143,143)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(119,118,97)->live(107,106,87)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(139,144,144)->live(125,129,129)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 219,
+       "frame": 443,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(170,169,175)->live(155,154,159)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(176,175,175)->live(160,159,159)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(130,129,107)->live(119,118,97)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(153,158,158)->live(139,144,144)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 220,
+       "frame": 444,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(186,185,191)->live(170,169,175)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(192,191,191)->live(176,175,175)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(142,141,117)->live(130,129,107)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(167,173,173)->live(153,158,158)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 221,
+       "frame": 445,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(201,200,207)->live(186,185,191)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(208,207,207)->live(192,191,191)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(154,153,126)->live(142,141,117)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(181,187,187)->live(167,173,173)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 222,
+       "frame": 446,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(217,216,223)->live(201,200,207)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(224,223,223)->live(208,207,207)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(166,165,136)->live(154,153,126)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(195,202,202)->live(181,187,187)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 223,
+       "frame": 447,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(232,231,239)->live(217,216,223)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(240,239,239)->live(224,223,223)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(178,177,146)->live(166,165,136)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(209,216,216)->live(195,202,202)",
+         "pixels": 720
+        }
+       ]
+      },
+      {
+       "shiftFit": {
+        "dx": 0,
+        "dy": 0,
+        "mismatches": 18239
+       },
+       "age": 224,
+       "frame": 448,
+       "pixels": 18239,
+       "bbox": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 239,
+        "y1": 111
+       },
+       "inEnemyShadowMask": 200,
+       "sourceIsShadowColor": 0,
+       "colorPairs": [
+        {
+         "pair": "src(247,247,255)->live(232,231,239)",
+         "pixels": 8626
+        },
+        {
+         "pair": "src(255,255,255)->live(240,239,239)",
+         "pixels": 3846
+        },
+        {
+         "pair": "src(189,189,156)->live(178,177,146)",
+         "pixels": 1981
+        },
+        {
+         "pair": "src(222,231,231)->live(209,216,216)",
+         "pixels": 720
+        }
+       ]
+      }
+     ],
+     "residualRowSummary": {
+      "count": 17,
+      "ages": "0..224",
+      "rowsDigest": "43e670a01863cff5a2c05a572b94cdd122fc00ac6a4ee0047c365973856e07d7"
+     }
+    },
+    {
+     "pass": "pass1",
+     "run": 1,
+     "dir": ".integration/validation/altspecies3-20261004/pass1/altspecies3-night-shade-player-ariados-opponent-golbat-hp160-run1",
+     "rows": 227,
+     "residualPixels": 292024,
+     "digest": "f11e422f3d7783a6e3978d21800e8f7024bed172e0e6868c651dfd02040de118",
+     "sourceDigest": "e14da851218d1321724c4b9ca12bf4279103b3c5810c7e3af225c799f9b10c20",
+     "residualRowSummary": {
+      "count": 17,
+      "ages": "0..224",
+      "rowsDigest": "43e670a01863cff5a2c05a572b94cdd122fc00ac6a4ee0047c365973856e07d7"
+     }
+    },
+    {
+     "pass": "pass2",
+     "run": 0,
+     "dir": ".integration/validation/altspecies3-20261004/pass2/altspecies3-night-shade-player-ariados-opponent-golbat-hp160-run0",
+     "rows": 227,
+     "residualPixels": 292024,
+     "digest": "f11e422f3d7783a6e3978d21800e8f7024bed172e0e6868c651dfd02040de118",
+     "sourceDigest": "e14da851218d1321724c4b9ca12bf4279103b3c5810c7e3af225c799f9b10c20",
+     "residualRowSummary": {
+      "count": 17,
+      "ages": "0..224",
+      "rowsDigest": "43e670a01863cff5a2c05a572b94cdd122fc00ac6a4ee0047c365973856e07d7"
+     }
+    },
+    {
+     "pass": "pass2",
+     "run": 1,
+     "dir": ".integration/validation/altspecies3-20261004/pass2/altspecies3-night-shade-player-ariados-opponent-golbat-hp160-run1",
+     "rows": 227,
+     "residualPixels": 292024,
+     "digest": "f11e422f3d7783a6e3978d21800e8f7024bed172e0e6868c651dfd02040de118",
+     "sourceDigest": "e14da851218d1321724c4b9ca12bf4279103b3c5810c7e3af225c799f9b10c20",
+     "residualRowSummary": {
+      "count": 17,
+      "ages": "0..224",
+      "rowsDigest": "43e670a01863cff5a2c05a572b94cdd122fc00ac6a4ee0047c365973856e07d7"
+     }
+    }
+   ],
+   "classification": "rom-tail-variance (restorebg fade 38 vs 39 frames; ages 209..224)",
+   "derivation": {
+    "case": "night-shade-player-ariados-opponent-golbat",
+    "move": "NIGHT_SHADE",
+    "moveId": 101,
+    "acceptedStart": 217,
+    "acceptedCount": 228,
+    "acceptedActivations": [
+     217
+    ],
+    "acceptedIntervalIndex": 0,
+    "offset": 0,
+    "altActivations": [
+     224
+    ],
+    "altIntervals": [
+     {
+      "move": 101,
+      "start": 224,
+      "end": 450
+     }
+    ],
+    "acceptedIntervals": [
+     {
+      "move": 101,
+      "start": 217,
+      "end": 444
+     }
+    ],
+    "liveWindow": null,
+    "derivedStart": 224
+   }
   },
   {
    "case": "altspecies3-night-shade-player-ariados-opponent-golbat",
@@ -15559,7 +15643,8 @@
       "rowsDigest": "459c44b7138953bc22c2e3d29b2a1a830dbd5f837cb9916237e13938456c5642"
      }
     }
-   ]
+   ],
+   "classification": "superseded-staging-artifact (fieldProfile playerHp 177, ROM 160)"
   },
   {
    "case": "altspecies3-psychic-opponent-haunter-player-kadabra",
@@ -15674,7 +15759,8 @@
       "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     }
-   ]
+   ],
+   "classification": "control-exact"
   },
   {
    "case": "altspecies3-psychic-player-kadabra-opponent-golbat",
@@ -15789,7 +15875,8 @@
       "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     }
-   ]
+   ],
+   "classification": "control-exact"
   },
   {
    "case": "altspecies3-reflect-player-shuppet-opponent-golbat",
@@ -15829,9 +15916,8 @@
    },
    "move": "REFLECT",
    "window": {
-    "startFrame": 39,
-    "endFrame": 246,
-    "frameCount": 208
+    "startFrame": 65,
+    "endFrame": 143
    },
    "attacker": {
     "species": "MINUN",
@@ -15940,7 +16026,135 @@
       "rowsDigest": "eaa539ab18bfe6fecc18fcc46e75d1034de40fb043dba41f23802ee898b44b32"
      }
     }
-   ]
+   ],
+   "classification": "acceptance-142"
+  },
+  {
+   "case": "altspecies3-shadow-ball-opponent-golbat-player-sableye-notail",
+   "move": "SHADOW_BALL",
+   "window": {
+    "startFrame": 86,
+    "endFrame": 217
+   },
+   "attacker": {
+    "species": "GOLBAT",
+    "side": "opponent",
+    "elevated": true
+   },
+   "target": {
+    "species": "ONIX",
+    "side": "player",
+    "elevated": false
+   },
+   "opponentSpecies": "GOLBAT",
+   "opponentElevated": true,
+   "scenario": "tools/integration/fixtures/altspecies3-scenarios/shadow-ball-opponent-golbat-player-sableye.json",
+   "sourceFixture": "tools/compare/fixtures/altspecies3-shadow-ball-opponent-golbat-player-sableye.json",
+   "liveFixture": "tools/integration/fixtures/altspecies3-shadow-ball-opponent-golbat-player-sableye-notail.json",
+   "identicalAcrossRuns": true,
+   "runs": [
+    {
+     "pass": "pass1",
+     "run": 0,
+     "dir": ".integration/validation/altspecies3-20261004/pass1/altspecies3-shadow-ball-opponent-golbat-player-sableye-notail-run0",
+     "rows": 132,
+     "residualPixels": 0,
+     "digest": "358e6fc9c7c93bfd95c1c40dfe59f040bc0ade56fd7be8c51eb8473ca9a84b30",
+     "sourceDigest": "2e4c5a5eed67393f332ca80f4f307ed7db0fdba9e41fb245cd84865743c7ce27",
+     "residualRows": [],
+     "residualRowSummary": {
+      "count": 0,
+      "ages": [],
+      "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+     }
+    },
+    {
+     "pass": "pass1",
+     "run": 1,
+     "dir": ".integration/validation/altspecies3-20261004/pass1/altspecies3-shadow-ball-opponent-golbat-player-sableye-notail-run1",
+     "rows": 132,
+     "residualPixels": 0,
+     "digest": "358e6fc9c7c93bfd95c1c40dfe59f040bc0ade56fd7be8c51eb8473ca9a84b30",
+     "sourceDigest": "2e4c5a5eed67393f332ca80f4f307ed7db0fdba9e41fb245cd84865743c7ce27",
+     "residualRowSummary": {
+      "count": 0,
+      "ages": [],
+      "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+     }
+    },
+    {
+     "pass": "pass2",
+     "run": 0,
+     "dir": ".integration/validation/altspecies3-20261004/pass2/altspecies3-shadow-ball-opponent-golbat-player-sableye-notail-run0",
+     "rows": 132,
+     "residualPixels": 0,
+     "digest": "358e6fc9c7c93bfd95c1c40dfe59f040bc0ade56fd7be8c51eb8473ca9a84b30",
+     "sourceDigest": "2e4c5a5eed67393f332ca80f4f307ed7db0fdba9e41fb245cd84865743c7ce27",
+     "residualRowSummary": {
+      "count": 0,
+      "ages": [],
+      "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+     }
+    },
+    {
+     "pass": "pass2",
+     "run": 1,
+     "dir": ".integration/validation/altspecies3-20261004/pass2/altspecies3-shadow-ball-opponent-golbat-player-sableye-notail-run1",
+     "rows": 132,
+     "residualPixels": 0,
+     "digest": "358e6fc9c7c93bfd95c1c40dfe59f040bc0ade56fd7be8c51eb8473ca9a84b30",
+     "sourceDigest": "2e4c5a5eed67393f332ca80f4f307ed7db0fdba9e41fb245cd84865743c7ce27",
+     "residualRowSummary": {
+      "count": 0,
+      "ages": [],
+      "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+     }
+    }
+   ],
+   "classification": "control-exact",
+   "derivation": {
+    "case": "shadow-ball-opponent-golbat-player-sableye",
+    "move": "SHADOW_BALL",
+    "moveId": 247,
+    "acceptedStart": 260,
+    "acceptedCount": 148,
+    "acceptedActivations": [
+     255,
+     789
+    ],
+    "acceptedIntervalIndex": 0,
+    "offset": 5,
+    "altActivations": [
+     81,
+     615
+    ],
+    "altIntervals": [
+     {
+      "move": 247,
+      "start": 81,
+      "end": 236
+     },
+     {
+      "move": 247,
+      "start": 615,
+      "end": 770
+     }
+    ],
+    "acceptedIntervals": [
+     {
+      "move": 247,
+      "start": 255,
+      "end": 409
+     },
+     {
+      "move": 247,
+      "start": 789,
+      "end": 944
+     }
+    ],
+    "liveWindow": null,
+    "derivedStart": 86
+   }
   },
   {
    "case": "altspecies3-shadow-ball-opponent-golbat-player-sableye",
@@ -16644,7 +16858,8 @@
       "rowsDigest": "925fabc976fc6bfe8c10947f69db64e4ea729c848dfc9ad344405c0a9acce74a"
      }
     }
-   ]
+   ],
+   "classification": "rom-tail-variance (restorebg fade 39 vs 38 frames; ages 132..147)"
   },
   {
    "case": "altspecies3-shadow-ball-player-sableye-opponent-magneton",
@@ -16765,7 +16980,8 @@
       "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     }
-   ]
+   ],
+   "classification": "control-exact"
   },
   {
    "case": "altspecies3-slash-player-charmeleon-opponent-magneton",
@@ -16880,7 +17096,8 @@
       "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     }
-   ]
+   ],
+   "classification": "control-exact"
   },
   {
    "case": "altspecies3-toxic-opponent-golbat-player-clamperl",
@@ -16995,7 +17212,8 @@
       "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     }
-   ]
+   ],
+   "classification": "control-exact"
   },
   {
    "case": "altspecies3-toxic-player-clamperl-opponent-ledian",
@@ -17110,7 +17328,8 @@
       "rowsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
      }
     }
-   ]
+   ],
+   "classification": "control-exact"
   }
  ]
 }
