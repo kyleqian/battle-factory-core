@@ -1,5 +1,23 @@
 # Animation integration progress
 
+## 2026-10-04 — wall-family source allocator evidence banked
+
+- Side-lane evidence `0014e69f7` folded as `523265bc5` (new files only):
+  generic wall-family clock/allocator-call probes, scenarios, five receipts
+  `wall-family-<move>-source-receipt.json`, doc
+  `docs/wall-family-allocator-evidence.md`. Production unchanged.
+- Both orientations twice fresh, raw pairs identical; supervisor fresh reruns of
+  Reflect player and Mirror Coat opponent byte-identical. Live offsets: Reflect,
+  Mirror Coat, Protect 7; Barrier, Magic Coat 4. Wall slot 3 throughout.
+  Reflect sparkles slots 4/5/4 (life 15); Mirror Coat matches Light Screen's
+  six-sparkle cycle 4/5/7 (last two live 22). Every move ends net-zero against
+  baseline `[0,1,2,6,8,60,61,62,63]`.
+- Mirror Coat can never be a first body (priority -5, needs a prior special
+  hit): under first-body eligibility it stays bounded fallback. Barrier's
+  accepted fixtures are not first-body; new scenarios cover that.
+- Next: wall-family adapters with source plans, and an audited net-zero rule so
+  audited moves keep allocator history known.
+
 ## 2026-10-04 — glow batch: five live adapters (91 live)
 
 - Folded worker `98348602f` (tested code `394aa629a`, src tree `f14e250a1`):
