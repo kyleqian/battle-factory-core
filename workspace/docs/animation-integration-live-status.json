@@ -1339,13 +1339,13 @@
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "9a3e45f0f",
+    "productionCodeCommit": "c09bcf141",
     "typecheck": "passed",
-    "workerFullTest": "1486 files / 11810 tests passed; 44 files / 223 tests skipped",
+    "workerFullTest": "1487 files / 11832 tests passed; 44 files / 223 tests skipped",
     "buildModules": 847,
-    "supervisorAffected": "8 affected files / 80 tests and 448 smoke passed (anchor)",
-    "independentSource": "anchor fourteen fixtures twice fresh, 1692 rows/run, zero residuals; seven ordinary routes PASS (glow 1496, fieldfx 1611, Light Screen 264 rows/run before it)",
-    "sourceReceipt": "../tools/integration/fixtures/anchor-supervisor-receipt.json",
+    "supervisorAffected": "7 affected files / 52 tests and 448 smoke passed (wall)",
+    "independentSource": "wall ten fixtures + Light Screen regression twice fresh, 1056 rows/run, zero residuals; seventeen eligibility routes PASS (anchor 1692, glow 1496, fieldfx 1611 rows/run earlier today)",
+    "sourceReceipt": "../tools/integration/fixtures/wall-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed",
     "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261002.json"
   },

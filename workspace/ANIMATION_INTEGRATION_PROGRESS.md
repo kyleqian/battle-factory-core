@@ -1,5 +1,23 @@
 # Animation integration progress
 
+## 2026-10-04 — wall family live with source allocator plans (103 live)
+
+- Folded worker `5b992edaa` (tested code `c09bcf141`, src tree `ea6ba1893`):
+  plan table in `prepareLiveMoveSpriteAllocator` (112/113/115/182/243/277)
+  and live renderers for Barrier, Magic Coat, Protect, Reflect, Mirror Coat.
+  Adapters 103, remaining 173. Live offsets from each view's anchor:
+  Barrier/Magic Coat/Protect 0 (anchor at activation), Reflect/Mirror Coat 7.
+- Supervisor dense proof: ten wall fixtures + Light Screen regression twice
+  fresh, 1,056 rows/run, zero residual (Light Screen digests unchanged).
+  Eligibility routes 17/17: adapter as first body, bounded fallback after an
+  unproved body; Mirror Coat can only fall back (never a first body).
+- Gates: supervisor focused 52 + smoke 448; worker full 1,487 files/11,832
+  tests, build, typecheck reused. Receipt `wall-supervisor-receipt.json`.
+- Open: sparkle paint follows plan-slot order; free-slot sSpriteOrder is
+  history-dependent, so persisting allocator history past earlier bodies first
+  needs proof that consumers are independent of free-slot ties (or the
+  sprite-order provider).
+
 ## 2026-10-04 — status-animation sprite audit banked
 
 - Side-lane evidence `9f6dad6a6` folded (new files only): receipt
