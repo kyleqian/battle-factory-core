@@ -1,0 +1,606 @@
+{
+ "schema": "wall-family-source-receipt/v1",
+ "move": 277,
+ "name": "magic-coat",
+ "referenceSha256": {
+  "pokeemerald.gba": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+  "pokeemerald.elf": "3a8aa584d7985c5a74ab10bb6eebd0c41b7c314ba8e423266727563c37f7727b",
+  "pokeemerald.map": "5c83d750d3a26480b849bc6af9c0d2382b5c31dc2a16d5eccf8096c4ac58e051"
+ },
+ "sourceSha256": {
+  "data/battle_anim_scripts.s": "76ad47e87abab7bf16f1606eb2cefb69fa39945d07458348623419f00404552d",
+  "data/battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+  "src/battle_anim.c": "57636179899de67c2c149bd44fe37bdb39cae837398fd18afd1e74bb238720cb",
+  "src/sprite.c": "795084634d44883629dd78ed4e3b90f07b2bf5b6cd5f312f14f121ea76f380ce",
+  "src/battle_anim_psychic.c": "931f1e540bb29544211a7207b51fa78800bba08e6b75dc178fea345b184ea1f2",
+  "src/battle_anim_effects_1.c": "79744f3e50c5749fd2478c83c4954feb8803a9bf923e65ab7d5c8cf32792e82e",
+  "src/battle_anim_effects_2.c": "8e427e4f09e8b65119e02ff49514ae5b268878bc228fa9de1ff29a9e7b31d012",
+  "src/battle_anim_effects_3.c": "fe195e2b1130502f2b954d5330c2fe827c4d768dfda47abdd0a0fc294f6d7e4e",
+  "src/battle_anim_mons.c": "93e653135430d35734763b640f7f5446bca2ce881f5781796b1f370fae213c9d",
+  "src/battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c"
+ },
+ "toolSha256": {
+  "wallFamilyClockProbe.py": "35774da437bac9c549407f709be370513e2206d60b72b5b763659e3b9438ab20",
+  "wallFamilyAllocatorCallProbe.py": "47f5adf917b2ac594a146417faec0616be77e700b493d24878b890e0ff500425",
+  "wallFamilyScenarios.py": "fdbf8004ae38ee7adcd3dc93ec38d9a383e7a4ef75b5fd97a50fd2a20f15e938",
+  "wallFamilyRunAll.sh": "9f9f7b3b37f11ec62d3676b2c82ae48e017728f357709eeb9a5e459ad909f592",
+  "lightScreenAllocatorCallProbe.py": "0b4ce615c54d72bba3d3c5da5d441aee9c0a9eb3442faee11826446ae7461cd5"
+ },
+ "profile": "battle-scene-on (same probe profile as the Light Screen receipts)",
+ "orientations": {
+  "player": {
+   "firstAnimationIsThisMove": true,
+   "animationActivations": [
+    {
+     "frame": 70,
+     "moveIndex": 277,
+     "lastActiveFrame": 70
+    },
+    {
+     "frame": 73,
+     "moveIndex": 277,
+     "lastActiveFrame": 138
+    },
+    {
+     "frame": 141,
+     "moveIndex": 277,
+     "lastActiveFrame": 294
+    },
+    {
+     "frame": 296,
+     "moveIndex": 157,
+     "lastActiveFrame": 296
+    },
+    {
+     "frame": 299,
+     "moveIndex": 157,
+     "lastActiveFrame": 299
+    },
+    {
+     "frame": 302,
+     "moveIndex": 157,
+     "lastActiveFrame": 303
+    },
+    {
+     "frame": 306,
+     "moveIndex": 157,
+     "lastActiveFrame": 307
+    },
+    {
+     "frame": 310,
+     "moveIndex": 157,
+     "lastActiveFrame": 311
+    },
+    {
+     "frame": 314,
+     "moveIndex": 157,
+     "lastActiveFrame": 315
+    },
+    {
+     "frame": 318,
+     "moveIndex": 157,
+     "lastActiveFrame": 319
+    },
+    {
+     "frame": 322,
+     "moveIndex": 157,
+     "lastActiveFrame": 323
+    },
+    {
+     "frame": 326,
+     "moveIndex": 157,
+     "lastActiveFrame": 327
+    },
+    {
+     "frame": 330,
+     "moveIndex": 157,
+     "lastActiveFrame": 331
+    },
+    {
+     "frame": 334,
+     "moveIndex": 157,
+     "lastActiveFrame": 335
+    },
+    {
+     "frame": 338,
+     "moveIndex": 157,
+     "lastActiveFrame": 339
+    },
+    {
+     "frame": 342,
+     "moveIndex": 157,
+     "lastActiveFrame": 343
+    },
+    {
+     "frame": 346,
+     "moveIndex": 157,
+     "lastActiveFrame": 347
+    },
+    {
+     "frame": 350,
+     "moveIndex": 157,
+     "lastActiveFrame": 351
+    },
+    {
+     "frame": 354,
+     "moveIndex": 157,
+     "lastActiveFrame": 355
+    },
+    {
+     "frame": 358,
+     "moveIndex": 157,
+     "lastActiveFrame": 359
+    },
+    {
+     "frame": 362,
+     "moveIndex": 157,
+     "lastActiveFrame": 363
+    },
+    {
+     "frame": 366,
+     "moveIndex": 157,
+     "lastActiveFrame": 367
+    },
+    {
+     "frame": 370,
+     "moveIndex": 157,
+     "lastActiveFrame": 371
+    },
+    {
+     "frame": 374,
+     "moveIndex": 157,
+     "lastActiveFrame": 375
+    },
+    {
+     "frame": 378,
+     "moveIndex": 157,
+     "lastActiveFrame": 379
+    },
+    {
+     "frame": 382,
+     "moveIndex": 157
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-magic-coat-player-spoink-opponent-onix.json",
+   "activationFrame": 70,
+   "scriptEndCommandFrame": 141,
+   "cleanupFrame": 295,
+   "activeFlagStuckAtTraceEnd": false,
+   "scriptPointerTrace": [
+    {
+     "frame": 70,
+     "scriptOffset": 4,
+     "ptr": "0x82d6c60"
+    },
+    {
+     "frame": 73,
+     "scriptOffset": 25,
+     "ptr": "0x82d6c75"
+    },
+    {
+     "frame": 138,
+     "scriptOffset": 28,
+     "ptr": "0x82d6c78"
+    },
+    {
+     "frame": 141,
+     "scriptOffset": 29,
+     "ptr": "0x82d6c79"
+    }
+   ],
+   "liveAgeOffset": 3,
+   "wall": {
+    "slot": 3,
+    "template": "gMagicCoatWallSpriteTemplate",
+    "callback": "AnimDefensiveWall_Step1",
+    "createFrame": 73,
+    "createAge": 3,
+    "destroyFrame": 137,
+    "destroyAge": 67,
+    "lifetime": 64,
+    "ageFromWall": 0
+   },
+   "scriptSprites": [
+    {
+     "slot": 3,
+     "template": "gMagicCoatWallSpriteTemplate",
+     "callback": "AnimDefensiveWall_Step1",
+     "createFrame": 73,
+     "createAge": 3,
+     "destroyFrame": 137,
+     "destroyAge": 67,
+     "lifetime": 64,
+     "ageFromWall": 0
+    }
+   ],
+   "postScriptSprites": [],
+   "slotsReusedWithinScript": [],
+   "baselineOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "endOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "netZeroVsPreMoveBaseline": true,
+   "windowAllocatorCalls": [
+    {
+     "traceFrame": 73,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gMagicCoatWallSpriteTemplate",
+     "slotArgument": 3,
+     "returnedSlot": 3,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 137,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 3,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    }
+   ],
+   "freshPairs": {
+    "clockPairIdentical": true,
+    "callsPairIdentical": true,
+    "clockSha256": [
+     "888df53a2152f543957002896c9c7199f638841f52a062e792d41b1c67df1000",
+     "888df53a2152f543957002896c9c7199f638841f52a062e792d41b1c67df1000"
+    ],
+    "callsSha256": [
+     "65c7f1445a767b1f948cb102407852658ff91c0c95787380fe5f45a94942e947",
+     "65c7f1445a767b1f948cb102407852658ff91c0c95787380fe5f45a94942e947"
+    ]
+   }
+  },
+  "opponent": {
+   "firstAnimationIsThisMove": true,
+   "animationActivations": [
+    {
+     "frame": 74,
+     "moveIndex": 277,
+     "lastActiveFrame": 74
+    },
+    {
+     "frame": 77,
+     "moveIndex": 277,
+     "lastActiveFrame": 142
+    },
+    {
+     "frame": 145,
+     "moveIndex": 277,
+     "lastActiveFrame": 298
+    },
+    {
+     "frame": 300,
+     "moveIndex": 157,
+     "lastActiveFrame": 300
+    },
+    {
+     "frame": 303,
+     "moveIndex": 157,
+     "lastActiveFrame": 303
+    },
+    {
+     "frame": 306,
+     "moveIndex": 157,
+     "lastActiveFrame": 307
+    },
+    {
+     "frame": 310,
+     "moveIndex": 157,
+     "lastActiveFrame": 311
+    },
+    {
+     "frame": 314,
+     "moveIndex": 157,
+     "lastActiveFrame": 315
+    },
+    {
+     "frame": 318,
+     "moveIndex": 157,
+     "lastActiveFrame": 319
+    },
+    {
+     "frame": 322,
+     "moveIndex": 157,
+     "lastActiveFrame": 323
+    },
+    {
+     "frame": 326,
+     "moveIndex": 157,
+     "lastActiveFrame": 327
+    },
+    {
+     "frame": 330,
+     "moveIndex": 157,
+     "lastActiveFrame": 331
+    },
+    {
+     "frame": 334,
+     "moveIndex": 157,
+     "lastActiveFrame": 335
+    },
+    {
+     "frame": 338,
+     "moveIndex": 157,
+     "lastActiveFrame": 339
+    },
+    {
+     "frame": 342,
+     "moveIndex": 157,
+     "lastActiveFrame": 343
+    },
+    {
+     "frame": 346,
+     "moveIndex": 157,
+     "lastActiveFrame": 347
+    },
+    {
+     "frame": 350,
+     "moveIndex": 157,
+     "lastActiveFrame": 351
+    },
+    {
+     "frame": 354,
+     "moveIndex": 157,
+     "lastActiveFrame": 355
+    },
+    {
+     "frame": 358,
+     "moveIndex": 157,
+     "lastActiveFrame": 359
+    },
+    {
+     "frame": 362,
+     "moveIndex": 157,
+     "lastActiveFrame": 363
+    },
+    {
+     "frame": 366,
+     "moveIndex": 157,
+     "lastActiveFrame": 367
+    },
+    {
+     "frame": 370,
+     "moveIndex": 157,
+     "lastActiveFrame": 371
+    },
+    {
+     "frame": 374,
+     "moveIndex": 157,
+     "lastActiveFrame": 375
+    },
+    {
+     "frame": 378,
+     "moveIndex": 157,
+     "lastActiveFrame": 379
+    },
+    {
+     "frame": 382,
+     "moveIndex": 157,
+     "lastActiveFrame": 383
+    },
+    {
+     "frame": 386,
+     "moveIndex": 157
+    }
+   ],
+   "scenario": "tools/battle-lab/mechanic-magic-coat-opponent-spoink-player-onix.json",
+   "activationFrame": 74,
+   "scriptEndCommandFrame": 145,
+   "cleanupFrame": 299,
+   "activeFlagStuckAtTraceEnd": false,
+   "scriptPointerTrace": [
+    {
+     "frame": 74,
+     "scriptOffset": 4,
+     "ptr": "0x82d6c60"
+    },
+    {
+     "frame": 77,
+     "scriptOffset": 25,
+     "ptr": "0x82d6c75"
+    },
+    {
+     "frame": 142,
+     "scriptOffset": 28,
+     "ptr": "0x82d6c78"
+    },
+    {
+     "frame": 145,
+     "scriptOffset": 29,
+     "ptr": "0x82d6c79"
+    }
+   ],
+   "liveAgeOffset": 3,
+   "wall": {
+    "slot": 3,
+    "template": "gMagicCoatWallSpriteTemplate",
+    "callback": "AnimDefensiveWall_Step1",
+    "createFrame": 77,
+    "createAge": 3,
+    "destroyFrame": 141,
+    "destroyAge": 67,
+    "lifetime": 64,
+    "ageFromWall": 0
+   },
+   "scriptSprites": [
+    {
+     "slot": 3,
+     "template": "gMagicCoatWallSpriteTemplate",
+     "callback": "AnimDefensiveWall_Step1",
+     "createFrame": 77,
+     "createAge": 3,
+     "destroyFrame": 141,
+     "destroyAge": 67,
+     "lifetime": 64,
+     "ageFromWall": 0
+    }
+   ],
+   "postScriptSprites": [],
+   "slotsReusedWithinScript": [],
+   "baselineOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "endOccupied": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    60,
+    61,
+    62,
+    63
+   ],
+   "netZeroVsPreMoveBaseline": true,
+   "windowAllocatorCalls": [
+    {
+     "traceFrame": 77,
+     "kind": "CreateSpriteAt",
+     "caller": "CreateSpriteAndAnimate+0x48",
+     "template": "gMagicCoatWallSpriteTemplate",
+     "slotArgument": 3,
+     "returnedSlot": 3,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    },
+    {
+     "traceFrame": 141,
+     "kind": "DestroySprite",
+     "caller": "DestroyAnimSprite+0xe",
+     "template": null,
+     "slotArgument": 3,
+     "returnedSlot": null,
+     "occupiedBefore": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ],
+     "occupiedAfter": [
+      0,
+      1,
+      2,
+      6,
+      8,
+      60,
+      61,
+      62,
+      63
+     ]
+    }
+   ],
+   "freshPairs": {
+    "clockPairIdentical": true,
+    "callsPairIdentical": true,
+    "clockSha256": [
+     "77913be91eec8684768f8831e41707f60e74ad3bc17ea1258ed42013766e64b9",
+     "77913be91eec8684768f8831e41707f60e74ad3bc17ea1258ed42013766e64b9"
+    ],
+    "callsSha256": [
+     "e3f5921c64040f487a509881582fef1ed8c7c93fe11998788e4c62326d364b0f",
+     "e3f5921c64040f487a509881582fef1ed8c7c93fe11998788e4c62326d364b0f"
+    ]
+   }
+  }
+ }
+}
