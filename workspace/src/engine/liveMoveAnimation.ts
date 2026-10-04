@@ -51,6 +51,9 @@ import { COTTON_SPORE_FRAME_COUNT } from "../animation/cottonSpore.ts";
 import { DISABLE_WINDOW_FRAMES } from "../animation/disable.ts";
 import { ENCORE_END_AGE } from "../animation/encore.ts";
 import { REFRESH_FRAME_COUNT } from "../animation/refresh.ts";
+import { CRABHAMMER_FRAME_COUNT } from "../animation/crabHammer.ts";
+import { FISSURE_FRAME_COUNT } from "../animation/fissure.ts";
+import { MAGICAL_LEAF_FRAME_COUNT } from "../animation/magicalLeaf.ts";
 import { REST_FRAME_COUNT } from "../animation/rest.ts";
 import { SWEET_KISS_FRAME_COUNT } from "../animation/sweetKiss.ts";
 import { TICKLE_FRAME_COUNT } from "../animation/tickle.ts";
@@ -71,6 +74,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   76, 217, 236, 250,
   // multihit: one MOVE_ANIMATION per hit, selected by request.turn (battle_script_commands.c:1787).
   3, 4, 167,
+  // anchor4: species idle offsets (and picture size) derived through liveBattlerAnchors.
+  89, 90, 152, 345,
 ] as const);
 
 /**
@@ -296,6 +301,10 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 337: return 137; // Dragon Claw palette restoration through cleanup.
     case 342: return 187; // Poison Tail source body through first inactive row.
     case 343: return COVET_FRAME_COUNT;
+    case 89: return 198; // Earthquake accepted window (197 rows from presentation age 1).
+    case 90: return FISSURE_FRAME_COUNT;
+    case 152: return CRABHAMMER_FRAME_COUNT;
+    case 345: return MAGICAL_LEAF_FRAME_COUNT;
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -760,6 +769,22 @@ export function liveMoveAnimationPresentation(
       };
       break;
     case 337: config = { move: "DRAGON_CLAW", attacker, target, fieldProfile }; break;
+    case 89:
+      // ShakeBattlers retains each battler's current idle x2 (player back sprites have none).
+      config = { move: "EARTHQUAKE", attacker, target, fieldProfile,
+        initialBattlerX2: {
+          player: liveBattlerAnchors("player", art).frontIdleRest.x2,
+          opponent: liveBattlerAnchors("opponent", art).frontIdleRest.x2,
+        } };
+      break;
+    case 90:
+      config = { move: "FISSURE", attacker, target, fieldProfile,
+        initialTargetX2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2 };
+      break;
+    case 152: case 345:
+      config = { move: request.moveId === 152 ? "CRABHAMMER" : "MAGICAL_LEAF", attacker, target, fieldProfile,
+        targetIdleX2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2 };
+      break;
     case 342:
       config = {
         move: "POISON_TAIL",

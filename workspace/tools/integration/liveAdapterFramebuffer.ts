@@ -117,7 +117,7 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
     ?? (moveArgumentProbes.includes(fixture.probe) ? ids[fixture.move] : undefined);
   // These probes take the first source frame to record as a fourth argument.
   const startFrameProbes = ["tools/compare/synthesisProbe.py", "tools/compare/milkDrinkProbe.py",
-    "tools/compare/acidProbe.py", "tools/compare/waterGunProbe.py"];
+    "tools/compare/acidProbe.py", "tools/compare/waterGunProbe.py", "tools/compare/earthquakeProbe.py"];
   const probeStartFrame = startFrameProbes.includes(fixture.probe)
     ? (fixture.denseWindow ?? fixture.sourceWindow)?.startFrame : undefined;
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
