@@ -65,6 +65,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   56, 61, 197, 238, 259, 294, 341,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
+  // selectors: request-selected branches and healing anchors.
+  236,
 ] as const);
 
 export interface LiveBattlerAnchors {
@@ -214,6 +216,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 207: return 161; // Swagger accepted source window.
     case 263: return 81; // Facade accepted source window.
     case 339: return 104; // Bulk Up accepted source window.
+    case 236: return 352; // Moonlight accepted source window (207..558).
     // The accepted opponent-front Mud Shot window is one row shorter.
     case 341: return request.attacker === 0 ? 145 : 144;
     case 204: return CHARM_BODY_FRAME_COUNT;
@@ -414,6 +417,18 @@ export function liveMoveAnimationPresentation(
       config = { move: "BULK_UP", attacker, target, fieldProfile,
         breathOrigin: attackerAnchors.picOffsetPoint, battlerHeight: attackerAnchors.pictureHeight };
       break;
+    case 236: {
+      // InitSpritePosToAnimAttacker(TRUE) reads the attacker's picture-offset point.
+      // The staged heal payload is never read live (the controller owns HP).
+      const attackerHp = attacker.geometry.side === "player" ? field.player.hp : field.opponent.hp;
+      const attackerMaxHp = attacker.geometry.side === "player" ? field.player.maxHP : field.opponent.maxHP;
+      config = { move: "MOONLIGHT", attacker, target,
+        fieldProfile: { ...fieldProfile, pendingHeal: {
+          battler: "attacker", fromHp: attackerHp, toHp: attackerMaxHp,
+          weather: "none", numerator: 1, denominator: 2 } },
+        healingCenter: attackerAnchors.picOffsetPoint };
+      break;
+    }
     case 259:
       config = { move: "TORMENT", attacker, target, fieldProfile,
         attackerPictureOffset: attackerAnchors.picOffsetPoint,

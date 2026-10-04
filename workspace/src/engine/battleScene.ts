@@ -45430,14 +45430,14 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnMoonlightView(state);
     const displayed = sceneOnMoonlightView({ ...state, age: state.age - 1 });
     const playerToOpponent =
-      view.attacker.species === "GLOOM"
+      (liveField || view.attacker.species === "GLOOM")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "GLOOM"
+      (liveField || view.attacker.species === "GLOOM")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -45451,20 +45451,21 @@ export function renderSceneOnMovePresentation(
     const attackerMaxHp = playerToOpponent
       ? state.config.fieldProfile.playerMaxHp
       : state.config.fieldProfile.opponentMaxHp;
+    // The live adapter never reads the heal payload (the controller owns HP).
     if (
-      pendingHeal.battler !== "attacker"
+      !liveField && (pendingHeal.battler !== "attacker"
       || pendingHeal.fromHp !== attackerHp
       || pendingHeal.toHp !== attackerMaxHp
       || pendingHeal.weather !== "none"
       || pendingHeal.numerator !== 1
-      || pendingHeal.denominator !== 2
+      || pendingHeal.denominator !== 2)
     ) {
       throw new Error("unsupported staged MOONLIGHT healing payload");
     }
 
     const attackerSource = playerToOpponent
       ? moonlightArt.gloomBack : moonlightArt.gloomFront;
-    const attackerSprite = playerToOpponent
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? attackerSource
       : {
           ...attackerSource,
@@ -45474,7 +45475,8 @@ export function renderSceneOnMovePresentation(
             tiles: attackerSource.tileset.tiles.slice(0, 64),
           },
         };
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetSprite = liveField
+      ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const moonWhite = { r: 222, g: 239, b: 255 };
     let backgroundPalette: RgbColor[][];
     if (displayed.background.mode === "blend") {
@@ -45499,6 +45501,13 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       backgroundPalette,
     );
+    // Elevated opponents keep the enemy shadow for the first source display.
+    if (liveField && state.age === 0) {
+      const shadowBattler = opponentToPlayer ? view.attacker : view.target;
+      drawSourceOpponentEnemyShadow(
+        fb, shadowBattler.species, shadowBattler.geometry.battlePositionCenter,
+      );
+    }
     // OBJ mode 1 blends against the background target, not another OBJ.
     const nonObjTarget2 = fb.slice();
     const battlerCoefficient = displayed.battlerPaletteCoefficient;
@@ -45516,8 +45525,10 @@ export function renderSceneOnMovePresentation(
       fb,
       attackerSprite.tileset,
       blendPaletteToward(attackerSprite.palette, moonWhite, battlerCoefficient),
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x
+        + (liveField && opponentToPlayer ? speciesFrontIdleRestOffsetOrZero(view.attacker.species).x2 : 0),
+      view.attacker.geometry.spriteCorner.y
+        + (liveField && opponentToPlayer ? speciesFrontIdleRestOffsetOrZero(view.attacker.species).y2 : 0),
     );
 
     const effectCoefficient = displayed.effectPaletteCoefficient;
@@ -45582,6 +45593,7 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    if (liveField) return;
     const opponentSpecies = playerToOpponent ? "ONIX" : "GLOOM";
     const playerSpecies = playerToOpponent ? "GLOOM" : "ONIX";
     drawSendOutHealthbox(
