@@ -1028,13 +1028,13 @@
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "a5d52f2fec0465acc405ee5c3fca790cb85fc88a",
+    "productionCodeCommit": "caaab87a4",
     "typecheck": "passed",
-    "workerFullTest": "1483 files / 11763 tests passed; 44 files / 223 tests skipped",
+    "workerFullTest": "1484 files / 11776 tests passed; 44 files / 223 tests skipped",
     "buildModules": 847,
-    "supervisorAffected": "6 affected files / 47 tests and 448 smoke passed",
-    "independentSource": "Light Screen three cases twice fresh, 264 rows/run, zero residuals; seven ordinary eligibility routes PASS",
-    "sourceReceipt": "../tools/integration/fixtures/light-screen-guard-supervisor-receipt.json",
+    "supervisorAffected": "5 affected files / 40 tests and 448 smoke passed (fieldfx)",
+    "independentSource": "fieldfx twelve fixtures twice fresh, 1611 rows/run, zero residuals; six ordinary routes PASS (Light Screen 264 rows/run before it)",
+    "sourceReceipt": "../tools/integration/fixtures/fieldfx-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed",
     "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261002.json"
   },

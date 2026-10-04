@@ -5,10 +5,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-04 — Light Screen live adapter folded; history guard repaired
+## 2026-10-04 — Light Screen + fieldfx batch folded (86 live adapters)
 
-- **State:** S10A, local master `a5d52f2fe`; 80 live adapters, 196 accepted
-  bodies remain. Opus supervisor with Sonnet workers.
+- **State:** S10A, local master; 86 live adapters, 190 accepted bodies
+  remain (Light Screen, then the six-move fieldfx batch at `08ccbcaf9`).
+  Opus supervisor with Sonnet workers.
 - **Did:** repair worker cherry-picked withheld candidate `84f2e5264` and made
   every move animation pass the sprite-allocator seam (`306b5adf1`), so only
   the audited Light Screen plan keeps history known. Folded by fast-forward.
@@ -17,8 +18,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   residual, affected 47 + smoke 448. Worker full 1,483 files/11,763 tests and
   build reused (clean fast-forward). Receipt
   `light-screen-guard-supervisor-receipt.json`.
-- **Next:** six-move field-effect adapter batch, then a five-move batch (see
-  integration ledger). Oracle freshness FAIL at orient was a false positive:
+- **Also:** fieldfx batch (Flame Wheel, Fire Spin, Heat Wave, Sandstorm,
+  Sonic Boom, Block) independently verified: 1,611 rows/run twice fresh,
+  zero residual; six ordinary routes PASS. Preview refreshed at `28d5be550`.
+- **Next:** glow batch, then battler-anchor helper batch (integration ledger). Oracle freshness FAIL at orient was a false positive:
   only workspace commits since service start; both services kept.
 - **Notes:** no material decision deferred.
 

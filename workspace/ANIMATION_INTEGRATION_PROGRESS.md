@@ -1,5 +1,23 @@
 # Animation integration progress
 
+## 2026-10-04 — fieldfx batch: six live adapters (86 live)
+
+- Folded `08ccbcaf9` (worker `7dec4734b`, tested code `caaab87a4`, src tree
+  `e45fc575d`): Flame Wheel, Fire Spin, Heat Wave, Sandstorm, Sonic Boom,
+  Block. Adapters 86, accepted 276, remaining 190. No palette plans added.
+- Sonic Boom's live target idle now uses the species rest offset and the
+  source enemy shadow; staged output unchanged. Block duration is per side
+  (141/146). Fire Spin's live window is the accepted 104 rows.
+- Supervisor dense proof: twelve fixtures twice fresh, 1,611 rows/run, zero
+  residual. Ordinary routes PASS for all six (Flame Wheel, Sandstorm and Block
+  with repeats); Sandstorm's first-found seed 18 is a legitimate no-body route
+  (user immobilized by Attract).
+- Gates: supervisor focused 40 + smoke 448; worker full 1,484 files/11,776
+  tests, build, typecheck reused on the clean merge. Receipt
+  `tools/integration/fixtures/fieldfx-supervisor-receipt.json`.
+- Next: glow batch (Synthesis, Milk Drink, Flash, Role Play, Spite), then the
+  battler-anchor helper with seven projectile/sprite-center moves.
+
 ## 2026-10-04 — Light Screen live adapter folded with history guard repaired
 
 - Production `a5d52f2fe` (src tree `b24b89ddbdeffb5e3b3cf19e7091e478537f0ef3`);
