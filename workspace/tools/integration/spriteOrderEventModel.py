@@ -80,30 +80,95 @@ def evaluate(path, variant="array"):
     return d, rows, seq, {"hit": hit, "miss": miss, "multiDestroyFrames": multi, "firstMiss": first_miss}
 
 
-def activation_samples(d, seq, variant="array"):
-    """free-slot order predicted/observed at the frame BEFORE each move-activation edge (act 0->1)."""
-    out, F = [], None
-    F = list(range(64))
-    prev, prev_act = seq[0][1], 0
-    for n, r in seq[1:]:
-        F, _ = step(F, prev["order"], prev["mask"], r["mask"], variant)
-        if r["act"] and not prev_act:
-            out.append({"frame": n, "move": r["mv"], "predicted": F, "observed": free_order(prev["order"], prev["mask"]),
-                        "predictedHit": F == free_order(prev["order"], prev["mask"]) if False else None})
-        prev, prev_act = r, r["act"]
-    return out
-
-
 def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
 
-if __name__ == "__main__":
+def keyless_class(seq):
+    """per move activation edge: is F exact WITHOUT live keys?  Keyless = same-frame destroy groups ordered ascending by
+    slot, except the known-entry {3,4} group (constant [4,3]) and the entry bulk groups 48..59 (ascending).  'dirty' =
+    some earlier same-frame destroy group had a different array order, i.e. needs live sprite keys."""
+    out, prev, pact, dirty, entry = [], seq[0][1], 0, False, True
+    F = list(range(64))
+    for n, r in seq[1:]:
+        ds = [s for s in range(64) if prev["mask"] >> s & 1 and not r["mask"] >> s & 1]
+        if len(ds) > 1:
+            pos = {s: i for i, s in enumerate(prev["order"])}
+            arr = sorted(ds, key=lambda s: pos[s])
+            if not (arr == sorted(ds) or (entry and sorted(ds) == [3, 4] and arr == [4, 3])):
+                dirty = True
+        F, _ = step(F, prev["order"], prev["mask"], r["mask"], "array")
+        if r["act"] and not pact:
+            out.append({"frame": n, "traceFrame": r["tf"], "move": r["mv"], "freeOrderHead": F[:12],
+                        "observedHead": free_order(prev["order"], prev["mask"])[:12],
+                        "needsLiveKeys": dirty})
+        if r["act"]:
+            entry = False
+        pact, prev = r["act"], r
+    return out
+
+
+def crosscheck_calls(raw0, calls_path):
+    import collections
+    c = json.loads(Path(calls_path).read_text())
+    d, rows, seq, _ = evaluate(raw0)
+    st = dict(seq)
+    by = collections.defaultdict(list)
+    for x in c["calls"]:
+        by[x["step"]].append(x)
+    ok = bad = net0 = 0
+    for stp, cl in by.items():
+        mask, m0 = st[stp - 1]["mask"], st[stp - 1]["mask"]
+        touched = set()
+        for x in cl:
+            sl = x["slotArgument"] if x["kind"] == "DestroySprite" else x["resultSlot"]
+            touched.add(sl)
+            mask = mask & ~(1 << sl) if x["kind"] == "DestroySprite" else mask | 1 << sl
+        net0 += sum((m0 >> t & 1) == (mask >> t & 1) for t in touched)
+        ok += mask == st[stp]["mask"]
+        bad += mask != st[stp]["mask"]
+    return {"callFrames": len(by), "calls": len(c["calls"]), "maskMatch": ok, "maskMismatch": bad, "netZeroSlotTouches": net0}
+
+
+def main(write):
     files = sorted(RAW.glob("*-0.json"))
-    summary = {}
-    for variant in ("array", "asc", "desc"):
-        h = m = 0
-        for f in files:
-            h_, m_ = evaluate(f, variant)[3]["hit"], evaluate(f, variant)[3]["miss"]
-            h += h_; m += m_
-        summary[variant] = (h, m)
-    print(summary)
+    scen, tot = [], {v: [0, 0] for v in ("array", "asc", "desc")}
+    for f0 in files:
+        f1 = f0.with_name(f0.name[:-7] + "-1.json")
+        rec = {"file": f0.name[:-7], "move": json.loads(f0.read_text())["move"], "sha256": [sha(f0), sha(f1)],
+               "freshRunsIdentical": f0.read_bytes() == f1.read_bytes(), "variants": {}}
+        for v in ("array", "asc", "desc"):
+            d, rows, seq, res = evaluate(f0, v)
+            rec["variants"][v] = {k: res[k] for k in ("hit", "miss")}
+            tot[v][0] += res["hit"]; tot[v][1] += res["miss"]
+            if v == "array":
+                rec["frames"] = len(seq) - 1
+                rec["multiDestroyFrames"] = res["multiDestroyFrames"]
+                rec["activations"] = keyless_class(seq)
+        scen.append(rec)
+    calls = {}
+    for c in sorted((RAW / "calls").glob("*-0.json")):
+        stem = c.name[:-7]
+        raw0 = next(f for f in files if f.name.endswith(stem + "-0.json"))
+        c1 = c.with_name(stem + "-1.json")
+        calls[stem] = {**crosscheck_calls(raw0, c), "callProbeRunsIdentical": c.read_bytes() == c1.read_bytes(), "sha256": sha(c)}
+    acts = [a for r in scen for a in r["activations"]]
+    clean = sum(not a["needsLiveKeys"] for a in acts)
+    receipt = {"schema": "sprite-order-event-model/v1",
+               "pins": {"probe": sha(ROOT / "tools/compare/spriteOrderEventProbe.py"), "model": sha(__file__),
+                        "batch": sha(ROOT / "tools/integration/spriteOrderEventBatch.py"),
+                        "callProbe": sha(ROOT / "tools/compare/lightScreenAllocatorCallProbe.py"),
+                        "sprite.c": sha(ROOT / "reference/pokeemerald/src/sprite.c"),
+                        "pokeemerald.gba": sha(ROOT / "reference/pokeemerald/pokeemerald.gba")},
+               "totals": {"scenarios": len(scen), "freshRunsIdentical": sum(r["freshRunsIdentical"] for r in scen),
+                          "perFrameFreeOrderHitsMisses": {k: {"hit": v[0], "miss": v[1]} for k, v in tot.items()},
+                          "activationEdges": len(acts), "activationEdgesExactWithoutLiveKeys": clean,
+                          "activationEdgesNeedingLiveKeys": len(acts) - clean},
+               "callStreamCrossCheck": calls, "scenarios": scen}
+    print(json.dumps(receipt["totals"], indent=1))
+    if write:
+        RECEIPT.write_text(json.dumps(receipt, indent=1) + "\n")
+        print("wrote", RECEIPT)
+
+
+if __name__ == "__main__":
+    main("--write" in sys.argv)

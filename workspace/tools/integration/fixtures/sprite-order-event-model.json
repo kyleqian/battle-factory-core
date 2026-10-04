@@ -1,0 +1,2570 @@
+{
+ "schema": "sprite-order-event-model/v1",
+ "pins": {
+  "probe": "02b32684cacad2ada12e9c41f69ffc2b5c2bd7adb1b417c05c6568d375ff64db",
+  "model": "42dfc2e2ea78b7e9125d938f3ba84b7a23374ca01bc7a8df871965eb3a7b85eb",
+  "batch": "63b15254cd90c063af13818a57d375c091291f8009bab82af6b16ccd1b4e59ee",
+  "callProbe": "0b4ce615c54d72bba3d3c5da5d441aee9c0a9eb3442faee11826446ae7461cd5",
+  "sprite.c": "795084634d44883629dd78ed4e3b90f07b2bf5b6cd5f312f14f121ea76f380ce",
+  "pokeemerald.gba": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af"
+ },
+ "totals": {
+  "scenarios": 22,
+  "freshRunsIdentical": 22,
+  "perFrameFreeOrderHitsMisses": {
+   "array": {
+    "hit": 40185,
+    "miss": 0
+   },
+   "asc": {
+    "hit": 40117,
+    "miss": 68
+   },
+   "desc": {
+    "hit": 40088,
+    "miss": 97
+   }
+  },
+  "activationEdges": 56,
+  "activationEdgesExactWithoutLiveKeys": 39,
+  "activationEdgesNeedingLiveKeys": 17
+ },
+ "callStreamCrossCheck": {
+  "flamethrower-opponent-onix-player-murkrow": {
+   "callFrames": 13,
+   "calls": 82,
+   "maskMatch": 13,
+   "maskMismatch": 0,
+   "netZeroSlotTouches": 4,
+   "callProbeRunsIdentical": true,
+   "sha256": "d1b11d9c06ad8fd9208df0a66497e7098fd2815f1782265f918df88128496705"
+  },
+  "flamethrower-player-onix-opponent-murkrow": {
+   "callFrames": 13,
+   "calls": 82,
+   "maskMatch": 13,
+   "maskMismatch": 0,
+   "netZeroSlotTouches": 4,
+   "callProbeRunsIdentical": true,
+   "sha256": "38c34753c777f05a3f96d3aa297d69205e40061cf2df87d8e9f73b448553806c"
+  },
+  "mud-slap-pidgeotto-onix": {
+   "callFrames": 13,
+   "calls": 82,
+   "maskMatch": 13,
+   "maskMismatch": 0,
+   "netZeroSlotTouches": 4,
+   "callProbeRunsIdentical": true,
+   "sha256": "96427a1cfad3d2258849732e423ecaeaaf9e47b438b24ddc2b05726c6dfb610d"
+  },
+  "rock-throw-player-graveler-opponent-onix": {
+   "callFrames": 13,
+   "calls": 82,
+   "maskMatch": 13,
+   "maskMismatch": 0,
+   "netZeroSlotTouches": 4,
+   "callProbeRunsIdentical": true,
+   "sha256": "c3242f6e6b993ffc3db1d32f33a76be6dc340c48644327b44542c84e4901fc30"
+  }
+ },
+ "scenarios": [
+  {
+   "file": "101-mechanic-night-shade-opponent-ariados-player-onix",
+   "move": 101,
+   "sha256": [
+    "04d6ab0a53f820d713b712095b103768bb25943d2e7d41d92d8fcaf2125229be",
+    "04d6ab0a53f820d713b712095b103768bb25943d2e7d41d92d8fcaf2125229be"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1373,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1372,
+     "miss": 1
+    },
+    "desc": {
+     "hit": 1371,
+     "miss": 2
+    }
+   },
+   "frames": 1373,
+   "multiDestroyFrames": 3,
+   "activations": [
+    {
+     "frame": 2074,
+     "traceFrame": 68,
+     "move": 33,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2224,
+     "traceFrame": 218,
+     "move": 101,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    }
+   ]
+  },
+  {
+   "file": "101-mechanic-night-shade-player-ariados-opponent-onix",
+   "move": 101,
+   "sha256": [
+    "97b2c6b5d6a749743b3eb358d0aecea154c482abac94a1a8a0aecac0486e81c3",
+    "97b2c6b5d6a749743b3eb358d0aecea154c482abac94a1a8a0aecac0486e81c3"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1348,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1347,
+     "miss": 1
+    },
+    "desc": {
+     "hit": 1346,
+     "miss": 2
+    }
+   },
+   "frames": 1348,
+   "multiDestroyFrames": 3,
+   "activations": [
+    {
+     "frame": 2078,
+     "traceFrame": 72,
+     "move": 33,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2223,
+     "traceFrame": 217,
+     "move": 101,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    }
+   ]
+  },
+  {
+   "file": "103-mechanic-screech-opponent-voltorb-player-onix",
+   "move": 103,
+   "sha256": [
+    "3bec0594515b95986df7c5adf88e7cf7b6a73ee9a5adb6aaedcebe59af841d2c",
+    "3bec0594515b95986df7c5adf88e7cf7b6a73ee9a5adb6aaedcebe59af841d2c"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1771,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1770,
+     "miss": 1
+    },
+    "desc": {
+     "hit": 1769,
+     "miss": 2
+    }
+   },
+   "frames": 1771,
+   "multiDestroyFrames": 3,
+   "activations": [
+    {
+     "frame": 2082,
+     "traceFrame": 76,
+     "move": 103,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2148,
+     "traceFrame": 142,
+     "move": 0,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2369,
+     "traceFrame": 363,
+     "move": 33,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    }
+   ]
+  },
+  {
+   "file": "105-mechanic-recover-player-kadabra-opponent-onix",
+   "move": 105,
+   "sha256": [
+    "5c6bb4935a66100990fa0406a5d61ff9373c31e55148d73614b6deee9ac7c3d9",
+    "5c6bb4935a66100990fa0406a5d61ff9373c31e55148d73614b6deee9ac7c3d9"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 2313,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 2312,
+     "miss": 1
+    },
+    "desc": {
+     "hit": 2310,
+     "miss": 3
+    }
+   },
+   "frames": 2313,
+   "multiDestroyFrames": 4,
+   "activations": [
+    {
+     "frame": 2229,
+     "traceFrame": 223,
+     "move": 33,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2607,
+     "traceFrame": 601,
+     "move": 105,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2945,
+     "traceFrame": 939,
+     "move": 33,
+     "freeOrderHead": [
+      3,
+      5,
+      4,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      5,
+      4,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    }
+   ]
+  },
+  {
+   "file": "108-mechanic-smokescreen-player-koffing-opponent-onix",
+   "move": 108,
+   "sha256": [
+    "0c406406467a68ce197c86908d422faba8714a7f9d663c346494fc340710ef8e",
+    "0c406406467a68ce197c86908d422faba8714a7f9d663c346494fc340710ef8e"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1548,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1545,
+     "miss": 3
+    },
+    "desc": {
+     "hit": 1545,
+     "miss": 3
+    }
+   },
+   "frames": 1548,
+   "multiDestroyFrames": 5,
+   "activations": [
+    {
+     "frame": 2078,
+     "traceFrame": 72,
+     "move": 33,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2220,
+     "traceFrame": 214,
+     "move": 108,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2348,
+     "traceFrame": 342,
+     "move": 0,
+     "freeOrderHead": [
+      21,
+      20,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13,
+      12,
+      11,
+      10
+     ],
+     "observedHead": [
+      21,
+      20,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13,
+      12,
+      11,
+      10
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "109-mechanic-confuse-ray-opponent-chinchou-player-onix",
+   "move": 109,
+   "sha256": [
+    "a5acba24c01c42f08270692702bc889efcbe0ad0be30f205723caabbf334b7d0",
+    "a5acba24c01c42f08270692702bc889efcbe0ad0be30f205723caabbf334b7d0"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1672,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1669,
+     "miss": 3
+    },
+    "desc": {
+     "hit": 1668,
+     "miss": 4
+    }
+   },
+   "frames": 1672,
+   "multiDestroyFrames": 5,
+   "activations": [
+    {
+     "frame": 2086,
+     "traceFrame": 80,
+     "move": 109,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2360,
+     "traceFrame": 354,
+     "move": 0,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2643,
+     "traceFrame": 637,
+     "move": 0,
+     "freeOrderHead": [
+      4,
+      5,
+      3,
+      7,
+      9,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16,
+      15
+     ],
+     "observedHead": [
+      4,
+      5,
+      3,
+      7,
+      9,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16,
+      15
+     ],
+     "needsLiveKeys": true
+    },
+    {
+     "frame": 2773,
+     "traceFrame": 767,
+     "move": 33,
+     "freeOrderHead": [
+      4,
+      5,
+      3,
+      7,
+      9,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16,
+      15
+     ],
+     "observedHead": [
+      4,
+      5,
+      3,
+      7,
+      9,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16,
+      15
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "112-mechanic-barrier-opponent-drowzee-player-onix",
+   "move": 112,
+   "sha256": [
+    "054e386b9ae78a16cb13c69f614d4551de2fb25a9dd8df4505ce57f92b0e2648",
+    "054e386b9ae78a16cb13c69f614d4551de2fb25a9dd8df4505ce57f92b0e2648"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1561,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1560,
+     "miss": 1
+    },
+    "desc": {
+     "hit": 1559,
+     "miss": 2
+    }
+   },
+   "frames": 1561,
+   "multiDestroyFrames": 3,
+   "activations": [
+    {
+     "frame": 2074,
+     "traceFrame": 68,
+     "move": 33,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2222,
+     "traceFrame": 216,
+     "move": 112,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2301,
+     "traceFrame": 295,
+     "move": 0,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    }
+   ]
+  },
+  {
+   "file": "189-mechanic-mud-slap-pidgeotto-onix",
+   "move": 189,
+   "sha256": [
+    "55776d8a5d66e957f83b45ffc451a4fca60e10d3907e962fbf8725b5fbb13b2b",
+    "55776d8a5d66e957f83b45ffc451a4fca60e10d3907e962fbf8725b5fbb13b2b"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1579,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1572,
+     "miss": 7
+    },
+    "desc": {
+     "hit": 1571,
+     "miss": 8
+    }
+   },
+   "frames": 1579,
+   "multiDestroyFrames": 9,
+   "activations": [
+    {
+     "frame": 2087,
+     "traceFrame": 81,
+     "move": 189,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2281,
+     "traceFrame": 275,
+     "move": 0,
+     "freeOrderHead": [
+      3,
+      33,
+      30,
+      32,
+      34,
+      31,
+      29,
+      25,
+      28,
+      27,
+      26,
+      24
+     ],
+     "observedHead": [
+      3,
+      33,
+      30,
+      32,
+      34,
+      31,
+      29,
+      25,
+      28,
+      27,
+      26,
+      24
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "189-mechanic-mud-slap-player-pidgeotto-onix",
+   "move": 189,
+   "sha256": [
+    "fb322b121d4f8b270dc38c9094a478b6a92086cbd6fb7338d7295c44e9b15e64",
+    "fb322b121d4f8b270dc38c9094a478b6a92086cbd6fb7338d7295c44e9b15e64"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1555,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1548,
+     "miss": 7
+    },
+    "desc": {
+     "hit": 1547,
+     "miss": 8
+    }
+   },
+   "frames": 1555,
+   "multiDestroyFrames": 9,
+   "activations": [
+    {
+     "frame": 2083,
+     "traceFrame": 77,
+     "move": 189,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2276,
+     "traceFrame": 270,
+     "move": 0,
+     "freeOrderHead": [
+      3,
+      30,
+      33,
+      32,
+      34,
+      31,
+      28,
+      25,
+      27,
+      26,
+      29,
+      21
+     ],
+     "observedHead": [
+      3,
+      30,
+      33,
+      32,
+      34,
+      31,
+      28,
+      25,
+      27,
+      26,
+      29,
+      21
+     ],
+     "needsLiveKeys": true
+    },
+    {
+     "frame": 2493,
+     "traceFrame": 487,
+     "move": 225,
+     "freeOrderHead": [
+      3,
+      30,
+      33,
+      32,
+      34,
+      31,
+      28,
+      25,
+      27,
+      26,
+      29,
+      21
+     ],
+     "observedHead": [
+      3,
+      30,
+      33,
+      32,
+      34,
+      31,
+      28,
+      25,
+      27,
+      26,
+      29,
+      21
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "2-mechanic-karate-chop-opponent-primeape-player-onix",
+   "move": 2,
+   "sha256": [
+    "ad2aee6493d852e1b4a7f7fa9ed8469d18f9706afeaa85a5d041131204f8f9c5",
+    "ad2aee6493d852e1b4a7f7fa9ed8469d18f9706afeaa85a5d041131204f8f9c5"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1260,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1259,
+     "miss": 1
+    },
+    "desc": {
+     "hit": 1258,
+     "miss": 2
+    }
+   },
+   "frames": 1260,
+   "multiDestroyFrames": 3,
+   "activations": [
+    {
+     "frame": 2087,
+     "traceFrame": 81,
+     "move": 2,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2344,
+     "traceFrame": 338,
+     "move": 33,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    }
+   ]
+  },
+  {
+   "file": "28-mechanic-sand-attack-pidgeotto-onix",
+   "move": 28,
+   "sha256": [
+    "9345cf93029e90e070f2557703e131a816fe9a90558e7c3ff621cd7facc84542",
+    "9345cf93029e90e070f2557703e131a816fe9a90558e7c3ff621cd7facc84542"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1579,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1572,
+     "miss": 7
+    },
+    "desc": {
+     "hit": 1571,
+     "miss": 8
+    }
+   },
+   "frames": 1579,
+   "multiDestroyFrames": 9,
+   "activations": [
+    {
+     "frame": 2088,
+     "traceFrame": 82,
+     "move": 28,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2150,
+     "traceFrame": 144,
+     "move": 0,
+     "freeOrderHead": [
+      31,
+      33,
+      30,
+      32,
+      34,
+      27,
+      26,
+      25,
+      28,
+      29,
+      23,
+      22
+     ],
+     "observedHead": [
+      31,
+      33,
+      30,
+      32,
+      34,
+      27,
+      26,
+      25,
+      28,
+      29,
+      23,
+      22
+     ],
+     "needsLiveKeys": true
+    },
+    {
+     "frame": 2356,
+     "traceFrame": 350,
+     "move": 157,
+     "freeOrderHead": [
+      3,
+      31,
+      33,
+      30,
+      32,
+      34,
+      27,
+      26,
+      25,
+      28,
+      29,
+      23
+     ],
+     "observedHead": [
+      3,
+      31,
+      33,
+      30,
+      32,
+      34,
+      27,
+      26,
+      25,
+      28,
+      29,
+      23
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "28-mechanic-sand-attack-player-pidgeotto-onix",
+   "move": 28,
+   "sha256": [
+    "ab1970c1aaddeefa3a128d8a43efcd941c9b3690a70b141142a9cba03644f8c6",
+    "ab1970c1aaddeefa3a128d8a43efcd941c9b3690a70b141142a9cba03644f8c6"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1555,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1548,
+     "miss": 7
+    },
+    "desc": {
+     "hit": 1547,
+     "miss": 8
+    }
+   },
+   "frames": 1555,
+   "multiDestroyFrames": 9,
+   "activations": [
+    {
+     "frame": 2084,
+     "traceFrame": 78,
+     "move": 28,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2146,
+     "traceFrame": 140,
+     "move": 0,
+     "freeOrderHead": [
+      33,
+      30,
+      32,
+      34,
+      31,
+      29,
+      25,
+      28,
+      27,
+      26,
+      24,
+      21
+     ],
+     "observedHead": [
+      33,
+      30,
+      32,
+      34,
+      31,
+      29,
+      25,
+      28,
+      27,
+      26,
+      24,
+      21
+     ],
+     "needsLiveKeys": true
+    },
+    {
+     "frame": 2362,
+     "traceFrame": 356,
+     "move": 225,
+     "freeOrderHead": [
+      3,
+      33,
+      30,
+      32,
+      34,
+      31,
+      29,
+      25,
+      28,
+      27,
+      26,
+      24
+     ],
+     "observedHead": [
+      3,
+      33,
+      30,
+      32,
+      34,
+      31,
+      29,
+      25,
+      28,
+      27,
+      26,
+      24
+     ],
+     "needsLiveKeys": true
+    },
+    {
+     "frame": 2530,
+     "traceFrame": 524,
+     "move": 0,
+     "freeOrderHead": [
+      3,
+      9,
+      7,
+      5,
+      4,
+      10,
+      33,
+      30,
+      32,
+      34,
+      31,
+      29
+     ],
+     "observedHead": [
+      3,
+      9,
+      7,
+      5,
+      4,
+      10,
+      33,
+      30,
+      32,
+      34,
+      31,
+      29
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "288-mechanic-grudge-opponent-haunter-player-onix",
+   "move": 288,
+   "sha256": [
+    "9202bc9405cbb35d7a47290144599db05a340fdcff14df1269fed332ad9253b7",
+    "9202bc9405cbb35d7a47290144599db05a340fdcff14df1269fed332ad9253b7"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 2293,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 2289,
+     "miss": 4
+    },
+    "desc": {
+     "hit": 2289,
+     "miss": 4
+    }
+   },
+   "frames": 2293,
+   "multiDestroyFrames": 6,
+   "activations": [
+    {
+     "frame": 2076,
+     "traceFrame": 70,
+     "move": 288,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2810,
+     "traceFrame": 804,
+     "move": 288,
+     "freeOrderHead": [
+      4,
+      3,
+      7,
+      5,
+      9,
+      10,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16
+     ],
+     "observedHead": [
+      4,
+      3,
+      7,
+      5,
+      9,
+      10,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "288-mechanic-grudge-player-haunter-opponent-onix",
+   "move": 288,
+   "sha256": [
+    "29d7f787ed5a2e0e3736b2cc16c025ea056631b5662f5c38a7a1e73f6a4de1d6",
+    "29d7f787ed5a2e0e3736b2cc16c025ea056631b5662f5c38a7a1e73f6a4de1d6"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 2312,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 2309,
+     "miss": 3
+    },
+    "desc": {
+     "hit": 2307,
+     "miss": 5
+    }
+   },
+   "frames": 2312,
+   "multiDestroyFrames": 6,
+   "activations": [
+    {
+     "frame": 2072,
+     "traceFrame": 66,
+     "move": 288,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2806,
+     "traceFrame": 800,
+     "move": 288,
+     "freeOrderHead": [
+      3,
+      4,
+      7,
+      9,
+      10,
+      5,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16
+     ],
+     "observedHead": [
+      3,
+      4,
+      7,
+      9,
+      10,
+      5,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "291-mechanic-dive-opponent-chinchou-player-onix",
+   "move": 291,
+   "sha256": [
+    "63d23df55610c98ee092c4f1ffc1e1275489d559bb079f869b04ab0175304b18",
+    "63d23df55610c98ee092c4f1ffc1e1275489d559bb079f869b04ab0175304b18"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 2789,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 2783,
+     "miss": 6
+    },
+    "desc": {
+     "hit": 2778,
+     "miss": 11
+    }
+   },
+   "frames": 2789,
+   "multiDestroyFrames": 15,
+   "activations": [
+    {
+     "frame": 2074,
+     "traceFrame": 68,
+     "move": 33,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2202,
+     "traceFrame": 196,
+     "move": 291,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2770,
+     "traceFrame": 764,
+     "move": 291,
+     "freeOrderHead": [
+      4,
+      3,
+      15,
+      14,
+      13,
+      7,
+      9,
+      12,
+      10,
+      5,
+      11,
+      21
+     ],
+     "observedHead": [
+      4,
+      3,
+      15,
+      14,
+      13,
+      7,
+      9,
+      12,
+      10,
+      5,
+      11,
+      21
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "291-mechanic-dive-player-chinchou-opponent-onix",
+   "move": 291,
+   "sha256": [
+    "dcb51a1406b25b054f5bd458531f1dfdcea812fcfd1144bef991b4de1f90978d",
+    "dcb51a1406b25b054f5bd458531f1dfdcea812fcfd1144bef991b4de1f90978d"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 2783,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 2778,
+     "miss": 5
+    },
+    "desc": {
+     "hit": 2772,
+     "miss": 11
+    }
+   },
+   "frames": 2783,
+   "multiDestroyFrames": 14,
+   "activations": [
+    {
+     "frame": 2078,
+     "traceFrame": 72,
+     "move": 33,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2205,
+     "traceFrame": 199,
+     "move": 291,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2635,
+     "traceFrame": 629,
+     "move": 291,
+     "freeOrderHead": [
+      10,
+      12,
+      9,
+      7,
+      15,
+      13,
+      11,
+      5,
+      4,
+      14,
+      3,
+      21
+     ],
+     "observedHead": [
+      10,
+      12,
+      9,
+      7,
+      15,
+      13,
+      11,
+      5,
+      4,
+      14,
+      3,
+      21
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "299-mechanic-blaze-kick-opponent-onix-player-murkrow",
+   "move": 299,
+   "sha256": [
+    "fd7141df2f127c32cd09101693f7a7cda41992e537e0032f9a2561008062a7b9",
+    "fd7141df2f127c32cd09101693f7a7cda41992e537e0032f9a2561008062a7b9"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1555,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1553,
+     "miss": 2
+    },
+    "desc": {
+     "hit": 1552,
+     "miss": 3
+    }
+   },
+   "frames": 1555,
+   "multiDestroyFrames": 4,
+   "activations": [
+    {
+     "frame": 2083,
+     "traceFrame": 77,
+     "move": 185,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2449,
+     "traceFrame": 443,
+     "move": 299,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    }
+   ]
+  },
+  {
+   "file": "299-mechanic-blaze-kick-player-onix-opponent-murkrow",
+   "move": 299,
+   "sha256": [
+    "74b2d085dea8fd61843ec80f9c3378a5d8ee531b15b8db426bfa6bcbd99f2264",
+    "74b2d085dea8fd61843ec80f9c3378a5d8ee531b15b8db426bfa6bcbd99f2264"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1579,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1576,
+     "miss": 3
+    },
+    "desc": {
+     "hit": 1576,
+     "miss": 3
+    }
+   },
+   "frames": 1579,
+   "multiDestroyFrames": 5,
+   "activations": [
+    {
+     "frame": 2078,
+     "traceFrame": 72,
+     "move": 259,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2395,
+     "traceFrame": 389,
+     "move": 299,
+     "freeOrderHead": [
+      3,
+      10,
+      9,
+      7,
+      5,
+      4,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16
+     ],
+     "observedHead": [
+      3,
+      10,
+      9,
+      7,
+      5,
+      4,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "53-mechanic-flamethrower-opponent-onix-player-murkrow",
+   "move": 53,
+   "sha256": [
+    "5d0c7b9abdaf11af5cad0b37c6bc30c9695458bd41dfefd0eb2519ac5da99930",
+    "5d0c7b9abdaf11af5cad0b37c6bc30c9695458bd41dfefd0eb2519ac5da99930"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1555,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1554,
+     "miss": 1
+    },
+    "desc": {
+     "hit": 1553,
+     "miss": 2
+    }
+   },
+   "frames": 1555,
+   "multiDestroyFrames": 3,
+   "activations": [
+    {
+     "frame": 2083,
+     "traceFrame": 77,
+     "move": 185,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2451,
+     "traceFrame": 445,
+     "move": 53,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    }
+   ]
+  },
+  {
+   "file": "53-mechanic-flamethrower-player-onix-opponent-murkrow",
+   "move": 53,
+   "sha256": [
+    "7d8e5886f55400730d0498fda3b1d85fa5fbd5ce7cc3035d546f851023dd212e",
+    "7d8e5886f55400730d0498fda3b1d85fa5fbd5ce7cc3035d546f851023dd212e"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 1579,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 1577,
+     "miss": 2
+    },
+    "desc": {
+     "hit": 1577,
+     "miss": 2
+    }
+   },
+   "frames": 1579,
+   "multiDestroyFrames": 4,
+   "activations": [
+    {
+     "frame": 2078,
+     "traceFrame": 72,
+     "move": 259,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2397,
+     "traceFrame": 391,
+     "move": 53,
+     "freeOrderHead": [
+      3,
+      10,
+      9,
+      7,
+      5,
+      4,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16
+     ],
+     "observedHead": [
+      3,
+      10,
+      9,
+      7,
+      5,
+      4,
+      21,
+      20,
+      19,
+      18,
+      17,
+      16
+     ],
+     "needsLiveKeys": true
+    }
+   ]
+  },
+  {
+   "file": "88-mechanic-rock-throw-opponent-graveler-player-onix",
+   "move": 88,
+   "sha256": [
+    "6a214c6fddcb76326d37c69b7a8e0928732119e5ca54fe7aed5fc7f046a875ef",
+    "6a214c6fddcb76326d37c69b7a8e0928732119e5ca54fe7aed5fc7f046a875ef"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 2313,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 2312,
+     "miss": 1
+    },
+    "desc": {
+     "hit": 2311,
+     "miss": 2
+    }
+   },
+   "frames": 2313,
+   "multiDestroyFrames": 3,
+   "activations": [
+    {
+     "frame": 2074,
+     "traceFrame": 68,
+     "move": 33,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2302,
+     "traceFrame": 296,
+     "move": 88,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    }
+   ]
+  },
+  {
+   "file": "88-mechanic-rock-throw-player-graveler-opponent-onix",
+   "move": 88,
+   "sha256": [
+    "7a7b05f7165c41cf67a41fd19bf60c13d61ce8d50a1b2f929f4ebecef1b560c0",
+    "7a7b05f7165c41cf67a41fd19bf60c13d61ce8d50a1b2f929f4ebecef1b560c0"
+   ],
+   "freshRunsIdentical": true,
+   "variants": {
+    "array": {
+     "hit": 2313,
+     "miss": 0
+    },
+    "asc": {
+     "hit": 2312,
+     "miss": 1
+    },
+    "desc": {
+     "hit": 2311,
+     "miss": 2
+    }
+   },
+   "frames": 2313,
+   "multiDestroyFrames": 3,
+   "activations": [
+    {
+     "frame": 2078,
+     "traceFrame": 72,
+     "move": 33,
+     "freeOrderHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      4,
+      3,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    },
+    {
+     "frame": 2302,
+     "traceFrame": 296,
+     "move": 88,
+     "freeOrderHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "observedHead": [
+      3,
+      4,
+      21,
+      20,
+      5,
+      19,
+      18,
+      17,
+      16,
+      15,
+      14,
+      13
+     ],
+     "needsLiveKeys": false
+    }
+   ]
+  }
+ ]
+}
