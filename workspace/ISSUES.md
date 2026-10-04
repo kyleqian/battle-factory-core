@@ -17,6 +17,33 @@ backlog.
 
 # Open
 
+## #142 — Live move bodies miss species-dependent first-row state: elevated-opponent enemy shadow on row 0, and Sandstorm's opponent-attacker idle x2
+
+**Found 2026-10-04** (read-only day audit suspects, then CONFIRMED by alternate-species dense proofs:
+`tools/integration/fixtures/altspecies-live-evidence.json`, `docs/altspecies-live-evidence.md`;
+supervisor rerun of Mud Shot vs Magneton reproduced 144/145 rows with 200 px at age 0). Integration only;
+gameplay unaffected.
+
+1. **Elevated-opponent shadow, row 0.** Source `SpriteCB_EnemyShadow`
+   (`battle_gfx_sfx_util.c:1203`) hides the 32x8 shadow only once `gAnimScriptActive` is seen, so with the
+   one-frame display lag it is still visible on a move body's FIRST displayed row, for ANY elevated opponent
+   (61 species) whether it is the attacker, the target or a bystander. Most live branches in
+   `src/engine/battleScene.ts` never draw it at age 0 (a few draw it only for opponent attackers via
+   `drawSourceOpponentEnemyShadow`). Confirmed 200 px at age 0 (bbox x160-191, y65-72, all inside the
+   shadow mask) for Mud Shot, Flame Wheel, Heat Wave, Block, Torment (both attacker sides) and Detect;
+   Acid and Synthesis already correct. Every accepted fixture uses a non-elevated opponent (mostly Onix), so
+   no prior gate could see it; older adapters likely share it.
+2. **Sandstorm opponent-attacker idle x2** (`battleScene.ts` ~17798): `onixIdle` is zero unless the player
+   attacks; an Onix (rest x2 = 1) opponent attacker is drawn 1 px left on every row (180,304 px/run).
+   Hyper Fang with Rattata is correct. Heat Wave/Block/Mud Shot/Hydro Pump/Bubble Beam/Cross Chop/Sludge/
+   Role Play/Spite have the same code shape but no legal Onix/Rattata carrier (untestable, not cleared).
+
+**Fix shape:** one generic, source-cited live-path rule for the row-0 elevated-opponent shadow (draw order
+from the shadow OBJ's priority/subpriority, not an overlay guess) applied to every live branch, plus the
+opponent-attacker rest offset where the source applies it. **Acceptance:** all alt-species cases in
+`tools/integration/fixtures/altspecies-*.json` exact twice fresh; every accepted live fixture whose opponent
+is elevated rerun exact; staged paths unchanged.
+
 ## #141 — Two `SetMoveEffect` exits must RE-RUN `seteffectwithchance` (which then wastes one `Random() % 100`): the THRASH lock-in `break`s without advancing the cursor, and Thief/Covet-vs-Sticky-Hold uses `BattleScriptPushCursor()` — the port `advance`s / `"call"`s instead (RNG-affecting)
 
 **Found 2026-08-26** (move-effect application audit,

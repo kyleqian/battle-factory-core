@@ -1,5 +1,17 @@
 # Animation integration progress
 
+## 2026-10-04 — alternate-species dense proofs confirm ISSUES #142
+
+- Side-lane evidence `6a018f986` folded (new files only): twelve alternate-
+  species cases (elevated Golbat/Magneton/Haunter/Koffing/Jumpluff opponents;
+  Onix/Rattata opponent attackers), each twice fresh with identical source
+  digests. Receipt `altspecies-live-evidence.json`; doc
+  `docs/altspecies-live-evidence.md`.
+- CONFIRMED: elevated-opponent shadow missing on row 0 (200 px) for Mud Shot,
+  Flame Wheel, Heat Wave, Block, Torment, Detect; Sandstorm opponent-attacker
+  Onix idle x2 missing. Acid, Synthesis, Hyper Fang/Rattata correct. Filed
+  as ISSUES #142 with fix shape and acceptance; fix step queued.
+
 ## 2026-10-04 — allocator history persists across audited net-zero bodies
 
 - Folded worker `da5965fc2` (src tree `8566da639`): 90 audited net-zero live
