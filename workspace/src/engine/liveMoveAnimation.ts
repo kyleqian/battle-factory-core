@@ -8,6 +8,7 @@ import type {
   SceneOnMovePresentationState, SceneOnMoveConfig, SceneOnPresentationBattler,
 } from "../animation/sceneOnPresentation.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
+import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
 import { TAIL_WHIP_FRAME_COUNT } from "../animation/tailWhip.ts";
 import { CONFUSE_RAY_FRAME_COUNT } from "../animation/confuseRay.ts";
@@ -67,7 +68,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
-  217, 236,
+  76, 217, 236,
 ] as const);
 
 export interface LiveBattlerAnchors {
@@ -217,6 +218,9 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 207: return 161; // Swagger accepted source window.
     case 263: return 81; // Facade accepted source window.
     case 339: return 104; // Bulk Up accepted source window.
+    // Cmd_choosetwoturnanim (battle_anim.c:1073): gAnimMoveTurn bit 0 selects the unleash body.
+    case 76: return (request.turn & 1) === 0 
+        ? SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE + 1 : SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE + 1;
     // AnimTask_IsHealingMove (battle_anim_effects_3.c:1531): heal iff gAnimMoveDmg <= 0.
     case 217: return request.damage > 0 ? PRESENT_DAMAGE_FRAME_COUNT : PRESENT_HEAL_FRAME_COUNT;
     case 236: return 352; // Moonlight accepted source window (207..558).
@@ -420,6 +424,18 @@ export function liveMoveAnimationPresentation(
       config = { move: "BULK_UP", attacker, target, fieldProfile,
         breathOrigin: attackerAnchors.picOffsetPoint, battlerHeight: attackerAnchors.pictureHeight };
       break;
+    case 76: {
+      // sourceOrbOrigin adds 10 to the "resolved animation center" to reach
+      // GetBattlerSpriteCoord(Y_PIC_OFFSET), so battlers carry that point minus 10.
+      const resolved = (battler: SceneOnPresentationBattler): SceneOnPresentationBattler => {
+        const point = liveBattlerAnchors(battler.geometry.side, art).picOffsetPoint;
+        return { ...battler, geometry: { ...battler.geometry, animationCenter: {
+          x: point.x, y: point.y - 10 } } };
+      };
+      config = { move: "SOLAR_BEAM", attacker: resolved(attacker), target: resolved(target), fieldProfile,
+        body: (request.turn & 1) === 0 ? "setup" : "unleash" };
+      break;
+    }
     case 217: {
       // presentAtAge adds the player-side +8 of CreateHealingEffect's Y_PIC_OFFSET
       // itself, so hand it the picture-offset point without that +8 (clamp kept).

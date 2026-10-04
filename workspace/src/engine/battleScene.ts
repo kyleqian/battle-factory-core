@@ -31705,6 +31705,15 @@ export function renderSceneOnMovePresentation(
       drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap,
         blendPaletteBanksToward(battleBg.palette, black, view.background.bldy));
     }
+    // Elevated opponents keep the enemy shadow for the first source display.
+    if (liveField && view.age === 0) {
+      const shadowBattler = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
+      drawSourceOpponentEnemyShadow(
+        fb, shadowBattler.species, shadowBattler.geometry.battlePositionCenter,
+      );
+    }
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species) : { x2: 0, y2: 0 };
     const attackerPalette = displayed.paletteBlend
       ? blendPaletteToward(attackerArt.palette, yellow, displayed.paletteBlend.coefficient)
       : attackerArt.palette;
@@ -31722,7 +31731,8 @@ export function renderSceneOnMovePresentation(
     );
     const drawAttacker = (): void => drawSpriteSheet(
       fb, tilesFor(attackerArt, view.attacker.geometry.side), attackerPalette,
-      view.attacker.geometry.spriteCorner.x, view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     // Setup puts ANIM_ATK_PARTNER on the mon BG, whereas unleash puts the
     // target there.  The semi-transparent absorption OBJ therefore selects
@@ -31782,6 +31792,7 @@ export function renderSceneOnMovePresentation(
         draw();
       }
     }
+    if (liveField) return;
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = solarState.config.fieldProfile;
