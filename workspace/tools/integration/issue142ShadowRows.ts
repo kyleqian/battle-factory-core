@@ -8,8 +8,8 @@
  * shadowRow (live age on which the source enemy shadow is still displayed) = activationFrame - windowStart + ageOffset, where
  * live row i = ROM frame windowStart + i, live age = i + ageOffset (liveAdapterFramebuffer.ts verifyLiveAdapterFramebuffer).
  * currentlyDrawn: renders production renderBattleResolutionLiveView (via liveAdapterFramebuffer.liveView) with an elevated
- * GOLBAT opponent at every age 0..duration-1 and counts the 200 mask pixels of battle-enemy-shadow.json at (160,65); a
- * non-elevated ONIX opponent control at the same ages removes coincidental colour matches.
+ * GOLBAT opponent at every age 0..duration-1 and counts the 200 mask pixels of battle-enemy-shadow.json at (160,65); only a
+ * full 200/200 match is "drawn" (partial matches are body-colour coincidences, listed as partialRows).
  * Modes: (default) orchestrate; `render <jobs.json> <out.json>` child.
  */
 import { spawn } from "node:child_process";
@@ -45,19 +45,17 @@ async function renderMode(jobsPath: string, outPath: string) {
       fieldProfile: { playerHp: 120, playerMaxHp: 120, opponentHp: 120, opponentMaxHp: 120, playerGender: "male", opponentGender: "male" },
     });
     try {
-      const f = mk("GOLBAT"), c = mk("ONIX");
+      const f = mk("GOLBAT");
       const duration = liveMoveAnimationDuration((liveView(f as any, 0).effect as any).request) as number;
-      const golbat: number[] = [], onix: number[] = [];
+      const golbat: number[] = [];
       for (let age = 0; age < duration; age++) {
         const fb = new Uint8Array(240 * 160 * 4);
         renderBattleResolutionLiveView(fb, liveView(f as any, age));
-        const g = count(fb);
-        let o = 0;
-        if (g > 0) { const fb2 = new Uint8Array(240 * 160 * 4); renderBattleResolutionLiveView(fb2, liveView(c as any, age)); o = count(fb2); }
-        golbat.push(g); onix.push(o);
+        golbat.push(count(fb));
       }
-      // net = shadow-coloured mask pixels attributable to the elevated opponent (control-subtracted)
-      out[j.key] = { duration, net: golbat.map((g, i) => Math.max(0, g - onix[i]!)) };
+      // No control subtraction: a non-elevated control (ONIX/RATTATA/...) still matches 0..177 mask pixels through its own
+      // body colours, so only a FULL 200/200 mask match counts as "shadow drawn"; 0<n<200 is reported separately as ambiguous.
+      out[j.key] = { duration, counts: golbat };
     } catch (e) { out[j.key] = { error: String((e as Error).message ?? e) }; }
   }
   writeFileSync(outPath, JSON.stringify(out));
@@ -103,7 +101,9 @@ if (process.argv[2] === "render") {
     const c = cands[0];
     const e: any = { id: r.id, move: r.move, orientation: r.orientation };
     if (rd?.error) { e.error = rd.error; table.push(e); continue; }
-    const drawnRows = (rd.net as number[]).map((n, i) => (n > 0 ? [i, n] : null)).filter(Boolean) as number[][];
+    const counts = rd.counts as number[];
+    const drawnRows = counts.map((n, i) => (n === FULL ? [i, n] : null)).filter(Boolean) as number[][];
+    const partialRows = counts.map((n, i) => (n > 0 && n < FULL ? [i, n] : null)).filter(Boolean) as number[][];
     e.duration = rd.duration;
     if (c) {
       e.activationFrame = c.activationFrame; e.windowStart = c.windowStart; e.ageOffset = c.ageOffset;
@@ -112,10 +112,17 @@ if (process.argv[2] === "render") {
       e.offsetWindowStartMinusActivation = c.windowStart - c.activationFrame;
     } else { e.shadowRow = null; e.inWindow = null; e.unresolved = r.notes.join("; ") || "no accepted window / activation"; }
     e.drawnRows = drawnRows;                       // [age, mask pixels] with net>0
-    e.currentlyDrawn = e.inWindow ? (drawnRows.find(([a]) => a === e.shadowRow)?.[1] ?? 0) === FULL : null;
+    e.partialRows = partialRows;                   // ambiguous (body/effect coincidence or occlusion); not counted as drawn
+    e.currentlyDrawn = e.inWindow ? counts[e.shadowRow] === FULL : null;
     e.needsFix = e.inWindow === null ? null : e.inWindow && !e.currentlyDrawn;
-    e.wronglyDrawn = drawnRows.some(([a, n]) => a !== e.shadowRow || n !== FULL);
-    e.wronglyDrawnRows = drawnRows.filter(([a, n]) => a !== e.shadowRow || n !== FULL);
+    // After cleanup (first frame gAnimScriptActive is false) SpriteCB_EnemyShadow shows the shadow again
+    // (battle_gfx_sfx_util.c:1214), so rows at/after the cleanup frame are legitimately drawn, not "wrong".
+    const tailAge = c ? c.cleanup - c.windowStart + c.ageOffset : Infinity;
+    e.cleanupFrame = c?.cleanup ?? null; e.tailFirstAge = c ? tailAge : null;
+    e.tailDrawnRows = drawnRows.filter(([a]) => a >= tailAge && a !== e.shadowRow);
+    e.tailMissingRows = c ? counts.map((n, a) => (a >= tailAge && a < rd.duration && n !== FULL ? a : -1)).filter(a => a >= 0).length : null;
+    e.wronglyDrawnRows = drawnRows.filter(([a]) => a !== e.shadowRow && a < tailAge);
+    e.wronglyDrawn = e.wronglyDrawnRows.length > 0;
     e.sources = { fixture: c?.fixture, scenario: c?.scenario, activation: c?.audit, windowKind: c?.windowKind, body: c?.body,
       scriptBodies: c?.bodies, bodyContainsWindowStart: c?.bodyContainsWindowStart,
       otherCandidates: cands.slice(1).map((o: any) => ({ fixture: o.fixture, windowStart: o.windowStart, activationFrame: o.activationFrame })) };

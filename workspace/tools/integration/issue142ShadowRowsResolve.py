@@ -98,6 +98,16 @@ for i in LIVE_IDS:
                     row["candidates"].append({"fixture": rc, "scenario": sc, "audit": s["auditFile"], "windowStart": a0, "windowEnd": a1,
                         "ageOffset": 0, "windowKind": "receipt", "body": bodyk, "bodies": [[x["activation"], x["cleanup"]] for x in s["bodies"]],
                         "activationFrame": b["activation"], "cleanup": b["cleanup"], "bodyContainsWindowStart": cont})
+        if not row["candidates"] and i == 109:
+            # CONFUSE_RAY's fixtures carry no window: agilityProbe.py:63-68 defines the source window as rows[first active frame with the
+            # Move_CONFUSE_RAY script pointer .. first inactive frame], i.e. it STARTS at the activation frame (offset 0 by construction).
+            for s in scs:
+                if s["scenario"].endswith(f"mechanic-confuse-ray-{o}-chinchou-{'opponent' if o == 'player' else 'player'}-onix.json"):
+                    b = s["bodies"][0]
+                    row["candidates"].append({"fixture": "tools/compare/agilityProbe.py:63-68 (window definition; fixture has none)", "scenario": s["scenario"],
+                        "audit": s["auditFile"], "windowStart": b["activation"], "windowEnd": b["cleanup"], "ageOffset": 0, "windowKind": "probe-definition",
+                        "body": "normal", "bodies": [[x["activation"], x["cleanup"]] for x in s["bodies"]], "activationFrame": b["activation"],
+                        "cleanup": b["cleanup"], "bodyContainsWindowStart": True})
         if not row["candidates"]:
             # accepted fixture exists but no audited (move, scenario) pair matches: activation must be probed
             alts = sorted([e for e in bymove.get(N, []) if side_of(e[1]) == o and window_of(e[1])
