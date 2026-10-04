@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-04 — Light Screen live adapter folded; history guard repaired
+
+- **State:** S10A, local master `a5d52f2fe`; 80 live adapters, 196 accepted
+  bodies remain. Opus supervisor with Sonnet workers.
+- **Did:** repair worker cherry-picked withheld candidate `84f2e5264` and made
+  every move animation pass the sprite-allocator seam (`306b5adf1`), so only
+  the audited Light Screen plan keeps history known. Folded by fast-forward.
+- **Checks:** independent eligibility PASS 7/7 (adapter only as first body;
+  bounded fallback after 185/318/209), dense 264 rows/run twice fresh with zero
+  residual, affected 47 + smoke 448. Worker full 1,483 files/11,763 tests and
+  build reused (clean fast-forward). Receipt
+  `light-screen-guard-supervisor-receipt.json`.
+- **Next:** six-move field-effect adapter batch, then a five-move batch (see
+  integration ledger). Oracle freshness FAIL at orient was a false positive:
+  only workspace commits since service start; both services kept.
+- **Notes:** no material decision deferred.
+
+---
+
 ## 2026-10-04 — Opus supervisor and Sonnet worker defaults
 
 - **State:** default `./run-supervisor.sh` now uses Claude Opus 5.5
@@ -43,23 +62,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** unknown later entry/status/switch/summary histories stay unknown.
   Preview `e3f60734c` verified: four canvas/PNG hashes, replay/export/mode restart,
   no errors. Raw evidence, worker ref/logs preserved. No deferred decision.
-
----
-
-## 2026-10-03 — Light Screen allocator lifecycle independently verified
-
-- **State:** S10A on local master; 79 adapters, 197 accepted bodies remain.
-  Source/tool checkpoint `f9bdab222` accepted; production remains `695e10751`.
-- **Did:** reproduced six fresh intro-through-Light-Screen allocator traces,
-  both Exeggcute sides twice plus Slowpoke twice. Observed wall3 and sparkle
-  4/5/7 lifetimes; script cleanup388/298/391. Same-frame replacements remain
-  unresolved; no runtime allocator provider or framebuffer credit.
-- **Checks:** six source runs, 19 focused tests, Python compile, boundary/
-  inventory, coverage/asset audit and diff pass. Reuse unchanged local final
-  full suite/build receipt (1,482 files / 11,754 tests, build844).
-- **Next:** exact in-frame CreateSprite/DestroySprite caller order, then bounded
-  source allocator provider and Light Screen activation/text/cleanup proof.
-- **Notes:** raw pass/failure evidence and worker logs preserved in primary.
-  No material choice deferred. Slowpoke +3 timing observed; cause unproved.
-
----

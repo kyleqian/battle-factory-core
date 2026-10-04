@@ -2202,11 +2202,10 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next: review the unmerged Light Screen candidate `d12db7f0b` against the fresh
-source clock and allocator evidence. Derive intro/sendout/summary ownership,
-preserve completed text, and prove the complete body, cleanup and following
-display in both orientations twice, including the complete Slowpoke variant.
-Then continue reusable host providers and remaining accepted move adapters.
+Next (2026-10-04): Light Screen is live as a known-entry first-body adapter
+(80 live). Continue bounded batches of accepted adapters that reuse the
+established recipe, then reusable host providers (allocator plans, status,
+switch and summary history) that unlock the rest.
 Latest progress supersedes this starting checkpoint as verified work lands.
 
 Acceptance:

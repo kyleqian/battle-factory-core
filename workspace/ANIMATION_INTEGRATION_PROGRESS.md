@@ -1,5 +1,27 @@
 # Animation integration progress
 
+## 2026-10-04 — Light Screen live adapter folded with history guard repaired
+
+- Production `a5d52f2fe` (src tree `b24b89ddbdeffb5e3b3cf19e7091e478537f0ef3`);
+  adapters 80, accepted 276, remaining 196. Fast-forward of the repair worker.
+- Repair `306b5adf1`: every move animation now passes the allocator seam, so
+  only the audited Light Screen plan keeps history known. The withheld
+  candidate's three commits were cherry-picked unchanged.
+- Supervisor eligibility check (`.codex-logs/verify-ls-eligibility.mjs`) PASS
+  7/7: adapter on seeds 2/45/59/114 [3,3] and opponent first body seed 16;
+  bounded fallback after unproved 185/318/209 (seeds 27/84, 2 [0,3]). All
+  routes: 88 ages, full text, success and repeat failure, action-menu, ON/OFF
+  rules/RNG/boundaries equal (scene bit only). Candidate fails the same check.
+- Dense source: independent 3 cases twice fresh, 264 rows/run, zero residual,
+  digests identical to the worker and the candidate.
+- Gates: supervisor affected 6 files/47 tests, smoke 448; worker full
+  1,483 files/11,763 tests, build 847, typecheck — reused on clean fast-forward.
+  Receipt `tools/integration/fixtures/light-screen-guard-supervisor-receipt.json`.
+- Next: bounded H_BASIC adapter batches (Flame Wheel, Fire Spin, Heat Wave,
+  Sandstorm, Sonic Boom, Block; then Synthesis, Milk Drink, Flash, Role Play,
+  Spite). Light Screen after other bodies stays bounded fallback until more
+  allocator plans exist.
+
 ## 2026-10-03 — known-entry sprite allocator provider verified
 
 - Production helper `277834353`, tested tree `02b775a5d988d6884c722a48829c8b01931c8e64`;

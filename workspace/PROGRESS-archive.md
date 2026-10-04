@@ -1,3 +1,21 @@
+## 2026-10-03 — Light Screen allocator lifecycle independently verified
+
+- **State:** S10A on local master; 79 adapters, 197 accepted bodies remain.
+  Source/tool checkpoint `f9bdab222` accepted; production remains `695e10751`.
+- **Did:** reproduced six fresh intro-through-Light-Screen allocator traces,
+  both Exeggcute sides twice plus Slowpoke twice. Observed wall3 and sparkle
+  4/5/7 lifetimes; script cleanup388/298/391. Same-frame replacements remain
+  unresolved; no runtime allocator provider or framebuffer credit.
+- **Checks:** six source runs, 19 focused tests, Python compile, boundary/
+  inventory, coverage/asset audit and diff pass. Reuse unchanged local final
+  full suite/build receipt (1,482 files / 11,754 tests, build844).
+- **Next:** exact in-frame CreateSprite/DestroySprite caller order, then bounded
+  source allocator provider and Light Screen activation/text/cleanup proof.
+- **Notes:** raw pass/failure evidence and worker logs preserved in primary.
+  No material choice deferred. Slowpoke +3 timing observed; cause unproved.
+
+---
+
 ## 2026-10-03 — Integration is the next main roadmap stage
 
 - **State:** normal `./run-supervisor.sh` follows `ROADMAP.md`; S10A is playable
