@@ -1,5 +1,23 @@
 # Animation integration progress
 
+## 2026-10-04 — status-animation sprite audit banked
+
+- Side-lane evidence `9f6dad6a6` folded (new files only): receipt
+  `tools/integration/fixtures/status-animation-sprite-audit.json`, doc
+  `docs/status-animation-sprite-audit.md`, probe/batch/receipt tools.
+- Poison, Confusion, Burn, Infatuation, Sleep, Paralysis, Freeze, Curse and
+  Nightmare (59 windows, both sides, twice fresh): all OBJ-net-zero; each has a
+  fixed create/destroy stream (lowest free slot); sprite-order model exact on
+  every frame. B_ANIM_STATUS_WRAPPED does not exist; Wrap/Bind/Fire Spin play
+  B_ANIM_TURN_TRAP (not a `status-animation` event) and are also net-zero.
+  Supervisor fresh rerun of Confusion-by-opponent identical after trimming.
+- Effects a production rule must model: free-slot order is permuted by each
+  status's stream (apply it, do not treat as no-op); bank-7 unfaded OBJ palette
+  is rewritten and left stale for Burn/Confusion/Curse/Nightmare/Infatuation/
+  Sleep/trap, so palette consumers of bank 7 still need invalidation.
+- Resume: allocator occupancy can stay known across these status windows;
+  sprite order needs the per-status stream; palette stays invalidated.
+
 ## 2026-10-04 — sprite-order free-slot event model + provider design banked
 
 - Side-lane evidence/design `5f5680b46` folded (new files only):
