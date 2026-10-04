@@ -17833,7 +17833,10 @@ export function renderSceneOnMovePresentation(
     const player = playerToOpponent ? phanpy : onix;
     const opponentBattler = playerToOpponent ? view.target : view.attacker;
     const playerBattler = playerToOpponent ? view.attacker : view.target;
-    const onixIdle = playerToOpponent
+    // The opponent front sprite keeps its species idle rest offset (ISSUES
+    // #142) whichever role it plays; only the staged Phanpy-front pair omits it.
+    const opponentIdleApplies = playerToOpponent || liveField;
+    const onixIdle = opponentIdleApplies
       ? speciesFrontIdleRestOffsetOrZero(opponentBattler.species)
       : { x2: 0, y2: 0 };
 
@@ -17848,9 +17851,9 @@ export function renderSceneOnMovePresentation(
       opponent.tileset,
       opponent.palette,
       opponentBattler.geometry.spriteCorner.x
-        + (playerToOpponent ? onixIdle.x2 : 0),
+        + (opponentIdleApplies ? onixIdle.x2 : 0),
       opponentBattler.geometry.spriteCorner.y
-        + (playerToOpponent ? onixIdle.y2 : 0),
+        + (opponentIdleApplies ? onixIdle.y2 : 0),
     );
     drawSpriteSheet(
       fb,
