@@ -8,6 +8,36 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## `generatedCommandAnimationReplay` cannot drive the forced-replacement party screen
+
+- **What:** `tools/integration/generatedCommandAnimationReplay.ts` waits for
+  `action-menu` after each decision; when the player's mon faints the game
+  waits in `battleForcedPartySelect` and the tool throws "exceeded budget"
+  (same in Scene OFF and on master). Looks like a hang; it is not.
+- **Hits:** 3 (2026-10-04 supervisor route checks: Water Gun seed 69,
+  Sludge seed 4, Bubble Beam seed 38; ~15 min total).
+- **Fix:** let the driver pick the first healthy party member on forced
+  replacement (or accept a `{ forcedSwitch: n }` slot entry).
+
+## `statusBatchSupersonicProbe.py` fails on the known mGBA teardown crash
+
+- **What:** the wrapper runs `tools/compare/supersonicProbe.py` with
+  `subprocess.run(check=True)`, so the documented post-output teardown
+  SIGSEGV aborts the fixture (`status-batch-supersonic-*` cannot be rerun).
+- **Hits:** 1 (2026-10-04, #142 regression; ~5 min worker + supervisor).
+- **Fix:** route the inner probe through `tools/run-mgba-probe.py`, which
+  accepts the teardown crash when the output parses.
+
+## `npm run build` in the main tree wipes the live preview's `dist/build.json`
+
+- **What:** the local preview (`start-local-preview.sh`, port 5191) serves
+  `dist/` directly; any main-tree `npm run build` (e.g. a supervisor full
+  gate) replaces it without the manifest, so `/build.json` 404s and the
+  browser check cannot match a revision until the preview is restarted.
+- **Hits:** 1 (2026-10-04, ~5 min).
+- **Fix:** have the preview serve a copied build directory, or have the
+  build step write `build.json`.
+
 ## Obsolete compare traces still sit in `tools/compare/traces/` with no marker
 
 - **What:** `loss-terminal-decline-continuation-off.json` matches 50/155 on
