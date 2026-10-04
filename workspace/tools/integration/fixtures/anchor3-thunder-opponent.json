@@ -1,0 +1,1 @@
+{"schema":"anchor3-live-adapter/v1","sourceFixture":"tools/compare/fixtures/thunder-opponent-magneton-player-shuckle.json","move":"THUNDER","sourceWindow":{"startFrame":80,"endFrame":341},"fieldProfile":{"playerHp":127,"playerMaxHp":127,"opponentHp":157,"opponentMaxHp":157,"playerGender":"male","opponentGender":"none"}}
