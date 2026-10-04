@@ -1056,6 +1056,132 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_ACID",
+      "id": 51,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor-acid-player.json",
+        "../tools/integration/fixtures/anchor-acid-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 26 slot 1 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SLUDGE",
+      "id": 124,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor-sludge-player.json",
+        "../tools/integration/fixtures/anchor-sludge-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 4 slot 0 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SLUDGE_BOMB",
+      "id": 188,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor-sludge-bomb-player.json",
+        "../tools/integration/fixtures/anchor-sludge-bomb-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 8 slot 2 streak 14: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_WATER_GUN",
+      "id": 55,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor-water-gun-player.json",
+        "../tools/integration/fixtures/anchor-water-gun-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 91 slot 1 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_HARDEN",
+      "id": 106,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor-harden-player.json",
+        "../tools/integration/fixtures/anchor-harden-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 12 slot 2 streak 7: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_IRON_DEFENSE",
+      "id": 334,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor-iron-defense-player.json",
+        "../tools/integration/fixtures/anchor-iron-defense-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 7 slot 2 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_METAL_CLAW",
+      "id": 232,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor-metal-claw-player.json",
+        "../tools/integration/fixtures/anchor-metal-claw-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 130 slot 0 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -1071,14 +1197,14 @@
     "source-derived ordinary singles party/B-cancel palette return with explicit known entry provenance; unknown histories and actual switches remain invalidated"
   ],
   "pending": [
-    "production adapters/providers for the remaining 190 accepted Factory moves",
+    "production adapters/providers for the remaining 178 accepted Factory moves",
     "complete graphics ownership across actual switches, forced replacement, summaries, substitute/transform and unmodeled histories",
-    "source palette resource plans for 28 implemented adapters without audited ownership"
+    "source palette resource plans for 35 implemented adapters without audited ownership"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 91,
+  "implementedCount": 98,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
