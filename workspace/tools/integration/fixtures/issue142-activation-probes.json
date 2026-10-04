@@ -1,0 +1,467 @@
+{
+ "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json|None": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 339,
+    "start": 72,
+    "end": 179
+   },
+   {
+    "move": 0,
+    "start": 183,
+    "end": 258
+   },
+   {
+    "move": 33,
+    "start": 487,
+    "end": 528
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json|None": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 339,
+    "start": 68,
+    "end": 175
+   },
+   {
+    "move": 0,
+    "start": 179,
+    "end": 254
+   },
+   {
+    "move": 33,
+    "start": 479,
+    "end": 520
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-endure-opponent-eevee-player-onix.json|None": {
+  "frames": 534,
+  "intervals": [
+   {
+    "move": 203,
+    "start": 68,
+    "end": 189
+   },
+   {
+    "move": 33,
+    "start": 317,
+    "end": 358
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-endure-player-eevee-opponent-onix.json|None": {
+  "frames": 534,
+  "intervals": [
+   {
+    "move": 203,
+    "start": 64,
+    "end": 185
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-facade-opponent-azumarill-player-onix.json|None": {
+  "frames": 834,
+  "intervals": [
+   {
+    "move": 33,
+    "start": 68,
+    "end": 109
+   },
+   {
+    "move": 263,
+    "start": 212,
+    "end": 292
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-facade-player-azumarill-opponent-onix.json|None": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 33,
+    "start": 72,
+    "end": 113
+   },
+   {
+    "move": 263,
+    "start": 212,
+    "end": 292
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-focus-energy-opponent-taillow-player-onix.json|None": {
+  "frames": 534,
+  "intervals": [
+   {
+    "move": 116,
+    "start": 77,
+    "end": 198
+   },
+   {
+    "move": 33,
+    "start": 332,
+    "end": 373
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-focus-energy-player-taillow-opponent-onix.json|None": {
+  "frames": 534,
+  "intervals": [
+   {
+    "move": 116,
+    "start": 73,
+    "end": 194
+   },
+   {
+    "move": 33,
+    "start": 328,
+    "end": 369
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-minimize-opponent-grimer-player-onix.json|None": {
+  "frames": 834,
+  "intervals": [
+   {
+    "move": 33,
+    "start": 68,
+    "end": 109
+   },
+   {
+    "move": 107,
+    "start": 210,
+    "end": 362
+   },
+   {
+    "move": 0,
+    "start": 366,
+    "end": 441
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-minimize-player-grimer-opponent-onix.json|None": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 33,
+    "start": 72,
+    "end": 113
+   },
+   {
+    "move": 107,
+    "start": 210,
+    "end": 362
+   },
+   {
+    "move": 0,
+    "start": 366,
+    "end": 441
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json|158": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 158,
+    "start": 82,
+    "end": 194
+   },
+   {
+    "move": 33,
+    "start": 486,
+    "end": 527
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json|162": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 162,
+    "start": 79,
+    "end": 278
+   },
+   {
+    "move": 33,
+    "start": 417,
+    "end": 458
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json|207": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 207,
+    "start": 73,
+    "end": 241
+   },
+   {
+    "move": 0,
+    "start": 248,
+    "end": 337
+   },
+   {
+    "move": 0,
+    "start": 435,
+    "end": 534
+   },
+   {
+    "move": 0,
+    "start": 716,
+    "end": null
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json|41": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 41,
+    "start": 89,
+    "end": 152
+   },
+   {
+    "move": 41,
+    "start": 325,
+    "end": 388
+   },
+   {
+    "move": 0,
+    "start": 541,
+    "end": 611
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json|44": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 44,
+    "start": 74,
+    "end": 114
+   },
+   {
+    "move": 33,
+    "start": 324,
+    "end": 365
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json|158": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 158,
+    "start": 78,
+    "end": 190
+   },
+   {
+    "move": 33,
+    "start": 386,
+    "end": 427
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json|162": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 162,
+    "start": 75,
+    "end": 274
+   },
+   {
+    "move": 33,
+    "start": 417,
+    "end": 458
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json|207": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 207,
+    "start": 69,
+    "end": 237
+   },
+   {
+    "move": 0,
+    "start": 244,
+    "end": 333
+   },
+   {
+    "move": 0,
+    "start": 435,
+    "end": 534
+   },
+   {
+    "move": 0,
+    "start": 724,
+    "end": null
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json|41": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 41,
+    "start": 85,
+    "end": 148
+   },
+   {
+    "move": 41,
+    "start": 228,
+    "end": 291
+   },
+   {
+    "move": 33,
+    "start": 580,
+    "end": 621
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json|44": {
+  "frames": 734,
+  "intervals": [
+   {
+    "move": 44,
+    "start": 70,
+    "end": 110
+   },
+   {
+    "move": 33,
+    "start": 222,
+    "end": 263
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-shadow-punch-haunter-onix-dense.json|None": {
+  "frames": 244,
+  "intervals": [
+   {
+    "move": 325,
+    "start": 77,
+    "end": 186
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-shadow-punch-onix-haunter-dense.json|None": {
+  "frames": 244,
+  "intervals": [
+   {
+    "move": 325,
+    "start": 81,
+    "end": 189
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-thunder-opponent-magneton-player-shuckle.json|None": {
+  "frames": 534,
+  "intervals": [
+   {
+    "move": 87,
+    "start": 80,
+    "end": 341
+   },
+   {
+    "move": 0,
+    "start": 433,
+    "end": 471
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-thunder-player-magneton-opponent-shuckle.json|None": {
+  "frames": 534,
+  "intervals": [
+   {
+    "move": 87,
+    "start": 76,
+    "end": 337
+   },
+   {
+    "move": 33,
+    "start": 469,
+    "end": 510
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-thunder-wave-opponent-flaaffy-player-shuckle.json|None": {
+  "frames": 434,
+  "intervals": [
+   {
+    "move": 86,
+    "start": 83,
+    "end": 202
+   },
+   {
+    "move": 0,
+    "start": 207,
+    "end": 245
+   },
+   {
+    "move": 33,
+    "start": 406,
+    "end": null
+   }
+  ]
+ },
+ "tools/battle-lab/mechanic-thunder-wave-player-flaaffy-opponent-shuckle.json|None": {
+  "frames": 434,
+  "intervals": [
+   {
+    "move": 86,
+    "start": 79,
+    "end": 198
+   },
+   {
+    "move": 0,
+    "start": 203,
+    "end": 241
+   },
+   {
+    "move": 33,
+    "start": 410,
+    "end": null
+   }
+  ]
+ },
+ "tools/integration/fixtures/wall-family-scenarios/wall-mirror-coat-live-opponent-scenario.json|None": {
+  "frames": 934,
+  "intervals": [
+   {
+    "move": 93,
+    "start": 78,
+    "end": 222
+   },
+   {
+    "move": 243,
+    "start": 348,
+    "end": 433
+   }
+  ]
+ },
+ "tools/integration/fixtures/wall-family-scenarios/wall-mirror-coat-live-player-scenario.json|None": {
+  "frames": 934,
+  "intervals": [
+   {
+    "move": 93,
+    "start": 82,
+    "end": 225
+   },
+   {
+    "move": 243,
+    "start": 342,
+    "end": 427
+   }
+  ]
+ }
+}
