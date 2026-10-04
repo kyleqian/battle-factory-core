@@ -1,0 +1,41 @@
+{
+ "schema": "multihit-live-adapter/v1",
+ "draft": true,
+ "move": "TRIPLE_KICK",
+ "probe": "tools/integration/multihitProbe.py",
+ "probeArgs": [
+  "167"
+ ],
+ "scenario": "tools/battle-lab/mechanic-triple-kick-player-hitmontop-opponent-onix.json",
+ "attacker": {
+  "species": "HITMONTOP",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 151,
+  "playerMaxHp": 157,
+  "opponentHp": 108,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 483,
+  "endFrame": 519
+ },
+ "requestFields": {
+  "turn": 2
+ },
+ "messageLines": [
+  "",
+  ""
+ ]
+}
