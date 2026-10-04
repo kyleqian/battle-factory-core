@@ -1,5 +1,22 @@
 # Animation integration progress
 
+## 2026-10-04 — sprite-allocator net-zero audit banked
+
+- Side-lane evidence `eee899bee` folded (new files only): probe
+  `tools/compare/allocatorNetZeroProbe.py`, batch/manifest/receipt tools,
+  receipt `tools/integration/fixtures/allocator-net-zero-audit.json`, doc
+  `docs/allocator-net-zero-audit.md`. Production unchanged.
+- 91 ids net-zero (86 live adapters plus the five wall moves), 0 not net-zero;
+  every body starts and ends at `[0,1,2,6,8,60,61,62,63]`; 203 scenario pairs
+  identical across fresh runs; Light Screen/wall calibration reproduced.
+  Supervisor reruns of Razor Leaf, Brick Break and Light Screen identical.
+- Not audited: Twineedle, Bite, Hyper Fang, Super Fang (fixtures reuse the
+  Poison Fang scenario, move never activates) and Shadow Punch (no fixture).
+  Fury Swipes player side only. Slot 3 reappears after many bodies as the next
+  animation or the damage healthbox hit effect; outside the move script.
+- Scope: Scene ON, scenario-specific; status/stat/switch/summary animations not
+  covered and still invalidate.
+
 ## 2026-10-04 — wall-family source allocator evidence banked
 
 - Side-lane evidence `0014e69f7` folded as `523265bc5` (new files only):
