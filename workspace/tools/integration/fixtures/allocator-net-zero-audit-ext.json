@@ -1,0 +1,4314 @@
+{
+ "schema": "allocator-net-zero-audit-ext/v1",
+ "profile": "battle-scene-on",
+ "definition": "docs/allocator-net-zero-audit-ext.md",
+ "referenceSha256": {
+  "pokeemerald.gba": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+  "pokeemerald.elf": "3a8aa584d7985c5a74ab10bb6eebd0c41b7c314ba8e423266727563c37f7727b",
+  "pokeemerald.map": "5c83d750d3a26480b849bc6af9c0d2382b5c31dc2a16d5eccf8096c4ac58e051"
+ },
+ "toolSha256": {
+  "tools/compare/allocatorNetZeroProbe.py": "1fc87ca651fe23a8beea555d8c88b94d583e7bb1d242c6b6e828b8710d24135d",
+  "tools/integration/allocatorNetZeroExtBatch.py": "a7ed5dbb35ca696122302c6ac712dbed7ce7811fcc1533d1a6eb306bf0ac97a6",
+  "tools/integration/allocatorNetZeroExtManifest.py": "f2c8cb5231f4a3a222176e298f59bc4c0aafa12d5123a61b53edd041e3fbbac8",
+  "tools/integration/allocatorNetZeroExtReceipt.py": "ac968f845e230371499b5214068e4bcbfb947d70c8a230990f5eeea055e651eb",
+  "tools/integration/allocatorNetZeroExtStage.py": "3ca353cf362780a380a3eee2c63eb013f4c472964d79d107bc61a9ab34b64dfc",
+  "tools/integration/allocatorNetZeroManifest.py": "d69bd4091196e0d7e4c614ccd05814f41e3f9619f33df63c8ba614f4ed05e84c"
+ },
+ "summary": {
+  "netZeroIds": [
+   41,
+   44,
+   51,
+   55,
+   56,
+   61,
+   106,
+   124,
+   154,
+   158,
+   162,
+   188,
+   197,
+   232,
+   238,
+   259,
+   294,
+   325,
+   334,
+   341
+  ],
+  "notNetZero": {},
+  "netZeroWithLateChangesInNext8Frames": [
+   41,
+   44,
+   51,
+   55,
+   56,
+   61,
+   106,
+   124,
+   154,
+   158,
+   162,
+   188,
+   232,
+   238,
+   294,
+   325,
+   334,
+   341
+  ],
+  "notAudited": {},
+  "counts": {
+   "moves": 20,
+   "netZero": 20,
+   "notNetZero": 0,
+   "notAudited": 0
+  }
+ },
+ "moves": {
+  "51": {
+   "name": "ACID",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-acid-opponent-ekans-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/acid-opponent-ekans-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-acid-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "8e2ef1922678b316fd17ace06473f196cd1f1bf34120af07b9edc81845b57c88",
+      "8e2ef1922678b316fd17ace06473f196cd1f1bf34120af07b9edc81845b57c88"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       51,
+       73,
+       215
+      ],
+      [
+       0,
+       353,
+       428
+      ],
+      [
+       33,
+       553,
+       594
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 73,
+       "cleanup": 215,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 13,
+       "destroyed": 13,
+       "lateChanges": [
+        {
+         "frame": 219,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         73,
+         215
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-acid-player-ekans-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/acid-player-ekans-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-acid-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "bb9df51bb15546985fe4e6578a61e77fa393e3634fcdb844877883ec37ca6796",
+      "bb9df51bb15546985fe4e6578a61e77fa393e3634fcdb844877883ec37ca6796"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       51,
+       69,
+       211
+      ],
+      [
+       33,
+       390,
+       431
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 69,
+       "cleanup": 211,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 13,
+       "destroyed": 13,
+       "lateChanges": [
+        {
+         "frame": 215,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         69,
+         211
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "55": {
+   "name": "WATER_GUN",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-water-gun-opponent-horsea-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/water-gun-opponent-horsea-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-water-gun-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "6ebed9248b861d8d4e22dfdabd34dfb3976759527cac019d33c6c73df209bd21",
+      "6ebed9248b861d8d4e22dfdabd34dfb3976759527cac019d33c6c73df209bd21"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       55,
+       77,
+       203
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 203,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 9,
+       "destroyed": 9,
+       "lateChanges": [
+        {
+         "frame": 207,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         77,
+         203
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-water-gun-player-horsea-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/water-gun-player-horsea-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-water-gun-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "bccf913148d44f88d3970257a7042791542d2eabe10ddfa99cc790eb1811d8fe",
+      "bccf913148d44f88d3970257a7042791542d2eabe10ddfa99cc790eb1811d8fe"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       55,
+       73,
+       199
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 73,
+       "cleanup": 199,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 9,
+       "destroyed": 9,
+       "lateChanges": [
+        {
+         "frame": 203,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         73,
+         199
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "106": {
+   "name": "HARDEN",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-harden-opponent-relicanth-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/harden-opponent-relicanth-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-harden-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "61496ce21e6c2a20ac447ca09fab225adf2fdfd1c80eccd14ec3620ec83342af",
+      "61496ce21e6c2a20ac447ca09fab225adf2fdfd1c80eccd14ec3620ec83342af"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       106,
+       291,
+       392
+      ],
+      [
+       0,
+       396,
+       471
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 291,
+       "cleanup": 392,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "lateChanges": [
+        {
+         "frame": 398,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x202499c",
+           [
+            "gMultiuseSpriteTemplate"
+           ],
+           "0x8007429",
+           [
+            "SpriteCallbackDummy"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         291,
+         392
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-harden-player-relicanth-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/harden-player-relicanth-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-harden-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "2148002ce18f99d418648b5a7a968a81ca958c8e653bb181c1a3fecfea539f1a",
+      "2148002ce18f99d418648b5a7a968a81ca958c8e653bb181c1a3fecfea539f1a"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       106,
+       291,
+       392
+      ],
+      [
+       0,
+       396,
+       471
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 291,
+       "cleanup": 392,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "lateChanges": [
+        {
+         "frame": 398,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x202499c",
+           [
+            "gMultiuseSpriteTemplate"
+           ],
+           "0x8007429",
+           [
+            "SpriteCallbackDummy"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         291,
+         392
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "124": {
+   "name": "SLUDGE",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-sludge-opponent-grimer-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/sludge-opponent-grimer-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-sludge-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "99cbbfce28db373ed556ad9acf77673ac5d76a9d50fb1f19c34e36b79781852b",
+      "99cbbfce28db373ed556ad9acf77673ac5d76a9d50fb1f19c34e36b79781852b"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       124,
+       226,
+       337
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 226,
+       "cleanup": 337,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 7,
+       "destroyed": 7,
+       "lateChanges": [
+        {
+         "frame": 341,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         226,
+         337
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-sludge-player-grimer-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/sludge-player-grimer-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-sludge-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "8fe56c6312dcc99ddf7aab2f1725e9c96b7dd99abf05f750e2d21258d9fa90ca",
+      "8fe56c6312dcc99ddf7aab2f1725e9c96b7dd99abf05f750e2d21258d9fa90ca"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       124,
+       214,
+       325
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 214,
+       "cleanup": 325,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 7,
+       "destroyed": 7,
+       "lateChanges": [
+        {
+         "frame": 329,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         214,
+         325
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "188": {
+   "name": "SLUDGE_BOMB",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-sludge-bomb-opponent-weepinbell-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/sludge-bomb-opponent-weepinbell-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-sludge-bomb-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "05c6b999a80345db3f0415c7e8256dc53526636be9f95a38e11969a876dcb9a2",
+      "05c6b999a80345db3f0415c7e8256dc53526636be9f95a38e11969a876dcb9a2"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       188,
+       85,
+       253
+      ],
+      [
+       33,
+       433,
+       474
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 85,
+       "cleanup": 253,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 28,
+       "destroyed": 28,
+       "lateChanges": [
+        {
+         "frame": 257,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         85,
+         253
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-sludge-bomb-player-weepinbell-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/sludge-bomb-player-weepinbell-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-sludge-bomb-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "389827af315691b606ba92abfbb56f59a35080dcbd0affed6f1b9e0f25a1a1e6",
+      "389827af315691b606ba92abfbb56f59a35080dcbd0affed6f1b9e0f25a1a1e6"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       188,
+       81,
+       249
+      ],
+      [
+       0,
+       391,
+       461
+      ],
+      [
+       33,
+       596,
+       637
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 81,
+       "cleanup": 249,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 28,
+       "destroyed": 28,
+       "lateChanges": [
+        {
+         "frame": 253,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         81,
+         249
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "232": {
+   "name": "METAL_CLAW",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-metal-claw-opponent-charmander-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/metal-claw-opponent-charmander-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-metal-claw-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "0afc7e49a3a816914bf4bccb7b6b27f578c324a0e6b3bd2bba3096007f2bb6eb",
+      "0afc7e49a3a816914bf4bccb7b6b27f578c324a0e6b3bd2bba3096007f2bb6eb"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       232,
+       225,
+       382
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 225,
+       "cleanup": 382,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 19,
+       "destroyed": 19,
+       "lateChanges": [
+        {
+         "frame": 386,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         225,
+         382
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-metal-claw-player-charmander-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/metal-claw-player-charmander-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-metal-claw-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "afc5bbdd134037aa54b4734b9b44ccf9d7491c7c82035c4fb747f99b537e741b",
+      "afc5bbdd134037aa54b4734b9b44ccf9d7491c7c82035c4fb747f99b537e741b"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       232,
+       223,
+       380
+      ],
+      [
+       0,
+       529,
+       604
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 223,
+       "cleanup": 380,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 19,
+       "destroyed": 19,
+       "lateChanges": [
+        {
+         "frame": 384,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         223,
+         380
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "334": {
+   "name": "IRON_DEFENSE",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-iron-defense-opponent-clamperl-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/iron-defense-opponent-clamperl-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-iron-defense-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "0a83132bc097bed81c5e6e9e0831dd9a5a8f5ffdb400f0eaa138a523f5ff33f8",
+      "0a83132bc097bed81c5e6e9e0831dd9a5a8f5ffdb400f0eaa138a523f5ff33f8"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       334,
+       214,
+       315
+      ],
+      [
+       0,
+       319,
+       408
+      ],
+      [
+       33,
+       602,
+       643
+      ],
+      [
+       334,
+       744,
+       845
+      ],
+      [
+       0,
+       849,
+       938
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 214,
+       "cleanup": 315,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "lateChanges": [
+        {
+         "frame": 321,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x202499c",
+           [
+            "gMultiuseSpriteTemplate"
+           ],
+           "0x8007429",
+           [
+            "SpriteCallbackDummy"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         214,
+         315
+        ]
+       ]
+      },
+      {
+       "activation": 744,
+       "cleanup": 845,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "lateChanges": [
+        {
+         "frame": 851,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x202499c",
+           [
+            "gMultiuseSpriteTemplate"
+           ],
+           "0x8007429",
+           [
+            "SpriteCallbackDummy"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         744,
+         845
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-iron-defense-player-clamperl-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/iron-defense-player-clamperl-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor-iron-defense-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "e64bbd465db29bf85756353be1a28985cd97bf348793b572b23026a0d5916966",
+      "e64bbd465db29bf85756353be1a28985cd97bf348793b572b23026a0d5916966"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       334,
+       214,
+       315
+      ],
+      [
+       0,
+       319,
+       408
+      ],
+      [
+       33,
+       606,
+       647
+      ],
+      [
+       334,
+       744,
+       845
+      ],
+      [
+       0,
+       849,
+       938
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 214,
+       "cleanup": 315,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "lateChanges": [
+        {
+         "frame": 321,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x202499c",
+           [
+            "gMultiuseSpriteTemplate"
+           ],
+           "0x8007429",
+           [
+            "SpriteCallbackDummy"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         214,
+         315
+        ]
+       ]
+      },
+      {
+       "activation": 744,
+       "cleanup": 845,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 3,
+       "destroyed": 3,
+       "lateChanges": [
+        {
+         "frame": 851,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x202499c",
+           [
+            "gMultiuseSpriteTemplate"
+           ],
+           "0x8007429",
+           [
+            "SpriteCallbackDummy"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         744,
+         845
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "56": {
+   "name": "HYDRO_PUMP",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-hydro-pump-opponent-masquerain-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/hydro-pump-opponent-masquerain-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-hydro-pump-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "e12cab374e13933e44468d046536961aac4ce729f55b2322ecb432c5023d4431",
+      "e12cab374e13933e44468d046536961aac4ce729f55b2322ecb432c5023d4431"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       56,
+       232,
+       372
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 232,
+       "cleanup": 372,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 68,
+       "destroyed": 68,
+       "lateChanges": [
+        {
+         "frame": 376,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         232,
+         372
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-hydro-pump-player-masquerain-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/hydro-pump-player-masquerain-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-hydro-pump-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "396681640cc1693b63620ae4a9c8a1c4b5bbcc54225c1edd6fe165e2f5dcceed",
+      "396681640cc1693b63620ae4a9c8a1c4b5bbcc54225c1edd6fe165e2f5dcceed"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       56,
+       213,
+       353
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 213,
+       "cleanup": 353,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 68,
+       "destroyed": 68,
+       "lateChanges": [
+        {
+         "frame": 357,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         213,
+         353
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "61": {
+   "name": "BUBBLE_BEAM",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-bubble-beam-opponent-surskit-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/bubble-beam-opponent-surskit-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-bubble-beam-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "01dfe28413ac74bbb832d9f31344d6aee834900d7ca28faef86cdf88056a111e",
+      "01dfe28413ac74bbb832d9f31344d6aee834900d7ca28faef86cdf88056a111e"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       61,
+       81,
+       319
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 81,
+       "cleanup": 319,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 132,
+       "destroyed": 132,
+       "lateChanges": [
+        {
+         "frame": 323,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         81,
+         319
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-bubble-beam-player-surskit-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/bubble-beam-player-surskit-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-bubble-beam-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "74502c49fd5a1b0f7bc2c42fd786719512b37fcd6d3721b6f687ae6f5ee25efb",
+      "74502c49fd5a1b0f7bc2c42fd786719512b37fcd6d3721b6f687ae6f5ee25efb"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       61,
+       77,
+       315
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 315,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 132,
+       "destroyed": 132,
+       "lateChanges": [
+        {
+         "frame": 319,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         77,
+         315
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "197": {
+   "name": "DETECT",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-detect-opponent-yanma-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/detect-opponent-yanma-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-detect-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "d81a085cc2763a05571f232ee77618a3a52eaba8bea59ea258227041d2e896d8",
+      "d81a085cc2763a05571f232ee77618a3a52eaba8bea59ea258227041d2e896d8"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       197,
+       68,
+       177
+      ],
+      [
+       0,
+       437,
+       512
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 68,
+       "cleanup": 177,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 4,
+       "destroyed": 4,
+       "lateChanges": [],
+       "lateFlag": false,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         68,
+         177
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-detect-player-yanma-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/detect-player-yanma-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-detect-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "fcb363fb3a02b0c82cbf9992d07b862ceaf00bea046e1d280979c16a0a882f62",
+      "fcb363fb3a02b0c82cbf9992d07b862ceaf00bea046e1d280979c16a0a882f62"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       197,
+       64,
+       173
+      ],
+      [
+       0,
+       429,
+       504
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 64,
+       "cleanup": 173,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 4,
+       "destroyed": 4,
+       "lateChanges": [],
+       "lateFlag": false,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         64,
+         173
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "238": {
+   "name": "CROSS_CHOP",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-cross-chop-opponent-machoke-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/cross-chop-opponent-machoke-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-cross-chop-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "bbb2e176b6a47e56b80f35f34516fa992d69eceb5069e94fe5d5368d763bc9d2",
+      "bbb2e176b6a47e56b80f35f34516fa992d69eceb5069e94fe5d5368d763bc9d2"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       238,
+       217,
+       304
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 217,
+       "cleanup": 304,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 14,
+       "destroyed": 14,
+       "lateChanges": [
+        {
+         "frame": 308,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         217,
+         304
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-cross-chop-player-machoke-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/cross-chop-player-machoke-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-cross-chop-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "0cd0fa54bea606f2d45914f5b5f1e8cbbd34758e307ff9a6fb14382510ff76f8",
+      "0cd0fa54bea606f2d45914f5b5f1e8cbbd34758e307ff9a6fb14382510ff76f8"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       238,
+       216,
+       303
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 216,
+       "cleanup": 303,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 14,
+       "destroyed": 14,
+       "lateChanges": [
+        {
+         "frame": 307,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         216,
+         303
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "259": {
+   "name": "TORMENT",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-torment-opponent-murkrow-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/torment-opponent-murkrow-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-torment-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "3a68d7773f9e71605ae0bfd934bd3788e01e40b11bb033bd7ec661a2d3ee3ac9",
+      "3a68d7773f9e71605ae0bfd934bd3788e01e40b11bb033bd7ec661a2d3ee3ac9"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       259,
+       72,
+       248
+      ],
+      [
+       33,
+       383,
+       424
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 72,
+       "cleanup": 248,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 16,
+       "destroyed": 16,
+       "lateChanges": [],
+       "lateFlag": false,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         72,
+         248
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-torment-player-murkrow-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/torment-player-murkrow-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-torment-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "640dff0ef27bce202cbba93dc8fe3c2fd41e0c3fefc1f2d9163f7bbe12789297",
+      "640dff0ef27bce202cbba93dc8fe3c2fd41e0c3fefc1f2d9163f7bbe12789297"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       259,
+       68,
+       244
+      ],
+      [
+       33,
+       387,
+       428
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 68,
+       "cleanup": 244,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 16,
+       "destroyed": 16,
+       "lateChanges": [],
+       "lateFlag": false,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         68,
+         244
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "294": {
+   "name": "TAIL_GLOW",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-tail-glow-opponent-volbeat-player-shuckle.json",
+     "sourceFixture": "tools/compare/fixtures/tail-glow-opponent-volbeat-player-shuckle.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-tail-glow-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "77165aa868770f6471e9f1c0bcfc9786edccf85965d2afb0350a1b33aea0ed24",
+      "77165aa868770f6471e9f1c0bcfc9786edccf85965d2afb0350a1b33aea0ed24"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       294,
+       76,
+       279
+      ],
+      [
+       0,
+       283,
+       372
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 279,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 4,
+       "destroyed": 4,
+       "lateChanges": [
+        {
+         "frame": 285,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x202499c",
+           [
+            "gMultiuseSpriteTemplate"
+           ],
+           "0x8007429",
+           [
+            "SpriteCallbackDummy"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         76,
+         279
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-tail-glow-player-volbeat-opponent-shuckle.json",
+     "sourceFixture": "tools/compare/fixtures/tail-glow-player-volbeat-opponent-shuckle.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-tail-glow-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "96b8507df15998bf35119ed1ceab9115555afa720e0ca4223998292dcc1ee4d6",
+      "96b8507df15998bf35119ed1ceab9115555afa720e0ca4223998292dcc1ee4d6"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       294,
+       72,
+       275
+      ],
+      [
+       0,
+       279,
+       368
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 72,
+       "cleanup": 275,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 4,
+       "destroyed": 4,
+       "lateChanges": [
+        {
+         "frame": 281,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x202499c",
+           [
+            "gMultiuseSpriteTemplate"
+           ],
+           "0x8007429",
+           [
+            "SpriteCallbackDummy"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         72,
+         275
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "341": {
+   "name": "MUD_SHOT",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-mud-shot-opponent-krabby-player-onix.json",
+     "sourceFixture": "tools/compare/fixtures/mud-shot-opponent-krabby-player-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-mud-shot-opponent.json",
+     "fallback": null,
+     "rawSha256": [
+      "d6047f55c080b7aa184698555e96758be9c38ed541245420d7e316e2bc340213",
+      "d6047f55c080b7aa184698555e96758be9c38ed541245420d7e316e2bc340213"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       68,
+       109
+      ],
+      [
+       341,
+       302,
+       445
+      ],
+      [
+       0,
+       611,
+       686
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 302,
+       "cleanup": 445,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 22,
+       "destroyed": 22,
+       "lateChanges": [
+        {
+         "frame": 449,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         302,
+         445
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "player",
+     "scenario": "tools/battle-lab/mechanic-mud-shot-player-krabby-opponent-onix.json",
+     "sourceFixture": "tools/compare/fixtures/mud-shot-player-krabby-opponent-onix.json",
+     "integrationFixture": "tools/integration/fixtures/anchor2-mud-shot-player.json",
+     "fallback": null,
+     "rawSha256": [
+      "06e18bdacd9f76977162da38b62c884b9e33264f18b030be5f2b51620a1f7161",
+      "06e18bdacd9f76977162da38b62c884b9e33264f18b030be5f2b51620a1f7161"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       33,
+       72,
+       113
+      ],
+      [
+       341,
+       212,
+       356
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 212,
+       "cleanup": 356,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 22,
+       "destroyed": 22,
+       "lateChanges": [
+        {
+         "frame": 360,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         212,
+         356
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "41": {
+   "name": "TWINEEDLE",
+   "scenarios": [
+    {
+     "orientation": "player",
+     "scenario": "tools/integration/fixtures/allocator-net-zero-ext-scenarios/allocator-ext-twineedle-player-beedrill-opponent-onix.json",
+     "sourceFixture": null,
+     "integrationFixture": null,
+     "fallback": null,
+     "rawSha256": [
+      "26ab4543e61601195b1ad5ff473be8b394b9f1d744fda27f4e31361362f87093",
+      "26ab4543e61601195b1ad5ff473be8b394b9f1d744fda27f4e31361362f87093"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       41,
+       85,
+       148
+      ],
+      [
+       41,
+       228,
+       291
+      ],
+      [
+       33,
+       487,
+       528
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 85,
+       "cleanup": 148,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "lateChanges": [
+        {
+         "frame": 152,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         85,
+         148
+        ]
+       ]
+      },
+      {
+       "activation": 228,
+       "cleanup": 291,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "lateChanges": [
+        {
+         "frame": 295,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         228,
+         291
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "opponent",
+     "scenario": "tools/integration/fixtures/allocator-net-zero-ext-scenarios/allocator-ext-twineedle-opponent-beedrill-player-onix.json",
+     "sourceFixture": null,
+     "integrationFixture": null,
+     "fallback": null,
+     "rawSha256": [
+      "66ab79087b4ab28a1a6268ec624d76d36bb6c0cbb2465344d8818574d17e5278",
+      "66ab79087b4ab28a1a6268ec624d76d36bb6c0cbb2465344d8818574d17e5278"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       41,
+       89,
+       152
+      ],
+      [
+       41,
+       325,
+       388
+      ],
+      [
+       0,
+       541,
+       611
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 89,
+       "cleanup": 152,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "lateChanges": [
+        {
+         "frame": 156,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         89,
+         152
+        ]
+       ]
+      },
+      {
+       "activation": 325,
+       "cleanup": 388,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "lateChanges": [
+        {
+         "frame": 392,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         325,
+         388
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "44": {
+   "name": "BITE",
+   "scenarios": [
+    {
+     "orientation": "player",
+     "scenario": "tools/integration/fixtures/allocator-net-zero-ext-scenarios/allocator-ext-bite-player-carvanha-opponent-onix.json",
+     "sourceFixture": null,
+     "integrationFixture": null,
+     "fallback": null,
+     "rawSha256": [
+      "0f5e440950fe00da84edc1b14b293baebe151faf8917c81cba182f46f97386a3",
+      "0f5e440950fe00da84edc1b14b293baebe151faf8917c81cba182f46f97386a3"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       44,
+       72,
+       112
+      ],
+      [
+       33,
+       250,
+       291
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 72,
+       "cleanup": 112,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 6,
+       "destroyed": 6,
+       "lateChanges": [
+        {
+         "frame": 116,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         72,
+         112
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "opponent",
+     "scenario": "tools/integration/fixtures/allocator-net-zero-ext-scenarios/allocator-ext-bite-opponent-carvanha-player-onix.json",
+     "sourceFixture": null,
+     "integrationFixture": null,
+     "fallback": null,
+     "rawSha256": [
+      "ba51dd7a329784c32d91e54c1aaee134350052f21d8a6f15ac845c2c0c0bf877",
+      "ba51dd7a329784c32d91e54c1aaee134350052f21d8a6f15ac845c2c0c0bf877"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       44,
+       76,
+       116
+      ],
+      [
+       33,
+       378,
+       419
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 76,
+       "cleanup": 116,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 6,
+       "destroyed": 6,
+       "lateChanges": [
+        {
+         "frame": 120,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         76,
+         116
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "158": {
+   "name": "HYPER_FANG",
+   "scenarios": [
+    {
+     "orientation": "player",
+     "scenario": "tools/integration/fixtures/allocator-net-zero-ext-scenarios/allocator-ext-hyper-fang-player-raticate-opponent-onix.json",
+     "sourceFixture": null,
+     "integrationFixture": null,
+     "fallback": null,
+     "rawSha256": [
+      "2eb3b4532bb93d876020d318df0fe870cbde35ce15862d7e572f7bfdc07b2157",
+      "2eb3b4532bb93d876020d318df0fe870cbde35ce15862d7e572f7bfdc07b2157"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       158,
+       78,
+       190
+      ],
+      [
+       33,
+       385,
+       426
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 78,
+       "cleanup": 190,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "lateChanges": [
+        {
+         "frame": 194,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         78,
+         190
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "opponent",
+     "scenario": "tools/integration/fixtures/allocator-net-zero-ext-scenarios/allocator-ext-hyper-fang-opponent-raticate-player-onix.json",
+     "sourceFixture": null,
+     "integrationFixture": null,
+     "fallback": null,
+     "rawSha256": [
+      "e91507861711e99f2682353af7234b482bbc764fb381588f47cce8f4d9593551",
+      "e91507861711e99f2682353af7234b482bbc764fb381588f47cce8f4d9593551"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       158,
+       82,
+       194
+      ],
+      [
+       33,
+       483,
+       524
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 82,
+       "cleanup": 194,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 1,
+       "destroyed": 1,
+       "lateChanges": [
+        {
+         "frame": 198,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         82,
+         194
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "162": {
+   "name": "SUPER_FANG",
+   "scenarios": [
+    {
+     "orientation": "player",
+     "scenario": "tools/integration/fixtures/allocator-net-zero-ext-scenarios/allocator-ext-super-fang-player-raticate-opponent-onix.json",
+     "sourceFixture": null,
+     "integrationFixture": null,
+     "fallback": null,
+     "rawSha256": [
+      "1b0bb4b583df61d40a6f7428d3a98d89447a6250c9c7cb1574983307d38885cf",
+      "1b0bb4b583df61d40a6f7428d3a98d89447a6250c9c7cb1574983307d38885cf"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       162,
+       75,
+       274
+      ],
+      [
+       33,
+       417,
+       458
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 75,
+       "cleanup": 274,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "lateChanges": [
+        {
+         "frame": 278,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         75,
+         274
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "opponent",
+     "scenario": "tools/integration/fixtures/allocator-net-zero-ext-scenarios/allocator-ext-super-fang-opponent-raticate-player-onix.json",
+     "sourceFixture": null,
+     "integrationFixture": null,
+     "fallback": null,
+     "rawSha256": [
+      "b2f1f51e50432a532da68b68437886cd86d200fd79b053ddfd6663a84337cc2c",
+      "b2f1f51e50432a532da68b68437886cd86d200fd79b053ddfd6663a84337cc2c"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       162,
+       79,
+       278
+      ],
+      [
+       33,
+       417,
+       458
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 79,
+       "cleanup": 278,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 8,
+       "destroyed": 8,
+       "lateChanges": [
+        {
+         "frame": 282,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         79,
+         278
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "325": {
+   "name": "SHADOW_PUNCH",
+   "scenarios": [
+    {
+     "orientation": "player",
+     "scenario": "tools/integration/fixtures/allocator-net-zero-ext-scenarios/allocator-ext-shadow-punch-player-haunter-opponent-onix.json",
+     "sourceFixture": null,
+     "integrationFixture": null,
+     "fallback": null,
+     "rawSha256": [
+      "f13c972307b7c2301219a7b122a2ddfaacc385f775d46b83ad6bb2ccb433089f",
+      "f13c972307b7c2301219a7b122a2ddfaacc385f775d46b83ad6bb2ccb433089f"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       325,
+       77,
+       186
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 77,
+       "cleanup": 186,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "lateChanges": [
+        {
+         "frame": 190,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         77,
+         186
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    },
+    {
+     "orientation": "opponent",
+     "scenario": "tools/integration/fixtures/allocator-net-zero-ext-scenarios/allocator-ext-shadow-punch-opponent-haunter-player-onix.json",
+     "sourceFixture": null,
+     "integrationFixture": null,
+     "fallback": null,
+     "rawSha256": [
+      "57300e5b666e4c3d1e52939355622918b7549d3f75f86227a7eb000c4db66ca3",
+      "57300e5b666e4c3d1e52939355622918b7549d3f75f86227a7eb000c4db66ca3"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       325,
+       81,
+       190
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 81,
+       "cleanup": 190,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 12,
+       "destroyed": 12,
+       "lateChanges": [
+        {
+         "frame": 194,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         81,
+         190
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  },
+  "154": {
+   "name": "FURY_SWIPES",
+   "scenarios": [
+    {
+     "orientation": "opponent",
+     "scenario": "tools/battle-lab/mechanic-fury-swipes-player-onix-opponent-aipom.json",
+     "sourceFixture": null,
+     "integrationFixture": null,
+     "fallback": null,
+     "rawSha256": [
+      "ff1d63d99e1d5d3c5276c2024210f4351ca7e6e8132315d2d07f5b57d6ac31ff",
+      "ff1d63d99e1d5d3c5276c2024210f4351ca7e6e8132315d2d07f5b57d6ac31ff"
+     ],
+     "runsIdentical": true,
+     "activationSequence": [
+      [
+       154,
+       87,
+       134
+      ],
+      [
+       154,
+       205,
+       252
+      ],
+      [
+       33,
+       607,
+       648
+      ]
+     ],
+     "bodies": [
+      {
+       "activation": 87,
+       "cleanup": 134,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 10,
+       "destroyed": 10,
+       "lateChanges": [
+        {
+         "frame": 138,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         87,
+         134
+        ]
+       ]
+      },
+      {
+       "activation": 205,
+       "cleanup": 252,
+       "baseline": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "end": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        60,
+        61,
+        62,
+        63
+       ],
+       "created": 10,
+       "destroyed": 10,
+       "lateChanges": [
+        {
+         "frame": 256,
+         "occupied": [
+          0,
+          1,
+          2,
+          3,
+          6,
+          8,
+          60,
+          61,
+          62,
+          63
+         ],
+         "added": [
+          [
+           3,
+           "0x832a3a8",
+           [
+            "sInvisibleSpriteTemplate"
+           ],
+           "0x8076a39",
+           [
+            "SpriteCB_HitAnimHealthoxEffect"
+           ]
+          ]
+         ],
+         "removed": []
+        }
+       ],
+       "lateFlag": true,
+       "netZero": true,
+       "endEqualsBaselineTable": true,
+       "intervals": [
+        [
+         205,
+         252
+        ]
+       ]
+      }
+     ],
+     "status": "audited",
+     "netZero": true
+    }
+   ]
+  }
+ },
+ "originalReceiptSha256": "75d1af0ab7113fa6f7e7f933e3e0c3d7404a22bef3ff67c7087a3ee6824763f4",
+ "scenarioSha256": {
+  "allocator-ext-bite-opponent-carvanha-player-onix.json": "d0d075d1074f682d7ba7fe5d5f63e233c417b04740464d4e31aed6a9ff1265c2",
+  "allocator-ext-bite-player-carvanha-opponent-onix.json": "99fd6eb24075d1103890f2a3ada57099eca6892eebbf6c4c1853c57a070ac45b",
+  "allocator-ext-hyper-fang-opponent-raticate-player-onix.json": "bb6d2a8e482033f9e3a3dbd1764b16b13f737439ce26623bc0c7a20c7bf72ddd",
+  "allocator-ext-hyper-fang-player-raticate-opponent-onix.json": "67879799fa69fd8fa0984fdf756a2e3d3c649b958f4cad56f47e305a881ea6d8",
+  "allocator-ext-shadow-punch-opponent-haunter-player-onix.json": "4a92b21efb9e805d9cd563f98b9944d769480018691878149228d9c10573a09c",
+  "allocator-ext-shadow-punch-player-haunter-opponent-onix.json": "e8b7b8da65b5bdecca3cd1c0ce9feeab81d2cea7f394a812bcfea1c4e4740838",
+  "allocator-ext-super-fang-opponent-raticate-player-onix.json": "96404a86366562e0210ad8dd7e5348fd8b23483e078a08c4d18359a3ef8d394d",
+  "allocator-ext-super-fang-player-raticate-opponent-onix.json": "0d9a28c92e1bb623f76df5be30b9bf569ea6ee3bd3d01f28f8b96bfbec83b1d8",
+  "allocator-ext-twineedle-opponent-beedrill-player-onix.json": "a6bc291fdd088de948827e25833255d706c43ca408f612c6b2ad8b4f9587902f",
+  "allocator-ext-twineedle-player-beedrill-opponent-onix.json": "2e33b122da42b0b929613c305f10d856df8767f6a125292e5f608a19c9ee1e73"
+ },
+ "combined": {
+  "netZeroIds": [
+   2,
+   5,
+   9,
+   11,
+   12,
+   14,
+   21,
+   23,
+   25,
+   27,
+   29,
+   34,
+   36,
+   38,
+   39,
+   41,
+   42,
+   43,
+   44,
+   47,
+   48,
+   49,
+   50,
+   51,
+   55,
+   56,
+   61,
+   65,
+   66,
+   67,
+   68,
+   74,
+   75,
+   78,
+   79,
+   83,
+   92,
+   93,
+   94,
+   95,
+   97,
+   101,
+   103,
+   105,
+   106,
+   108,
+   109,
+   112,
+   113,
+   114,
+   115,
+   122,
+   124,
+   131,
+   136,
+   147,
+   148,
+   151,
+   154,
+   156,
+   158,
+   162,
+   163,
+   172,
+   178,
+   180,
+   182,
+   186,
+   188,
+   197,
+   201,
+   204,
+   208,
+   211,
+   213,
+   223,
+   227,
+   231,
+   232,
+   235,
+   238,
+   242,
+   243,
+   246,
+   247,
+   257,
+   259,
+   264,
+   272,
+   277,
+   280,
+   281,
+   287,
+   290,
+   294,
+   302,
+   305,
+   306,
+   319,
+   320,
+   321,
+   325,
+   334,
+   335,
+   336,
+   337,
+   341,
+   342,
+   343,
+   347
+  ],
+  "notNetZero": {},
+  "notAudited": {},
+  "liveIds": 110,
+  "liveIdsNetZero": 110,
+  "liveIdsNotCovered": [],
+  "wallIdsNetZero": []
+ }
+}
