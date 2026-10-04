@@ -204,7 +204,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 238: return 88; // Cross Chop source body through its final row.
     case 259: return 177; // Torment source body through its final row.
     case 294: return 203; // Tail Glow source body through its final row.
-    case 341: return 145; // Mud Shot source body through its final row.
+    // The accepted opponent-front Mud Shot window is one row shorter.
+    case 341: return request.attacker === 0 ? 145 : 144;
     case 204: return CHARM_BODY_FRAME_COUNT;
     case 213: return ATTRACT_FRAME_COUNT;
     case 227: return ENCORE_END_AGE + 1;

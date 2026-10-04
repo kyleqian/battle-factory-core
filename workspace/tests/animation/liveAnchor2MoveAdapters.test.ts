@@ -17,7 +17,7 @@ import { generatedCommandAnimationReplay } from "../../tools/integration/generat
 
 type Key = "attackerPictureOffset" | "targetPictureOffset";
 const cases: ReadonlyArray<{
-  id: number; move: string; fixture: string; keys: readonly Key[]; duration: number; effectAge: number;
+  id: number; move: string; fixture: string; keys: readonly Key[]; duration: number; opponentDuration?: number; effectAge: number;
   route: { seed: number; slot: 0 | 1 | 2 | 3; streak: number };
 }> = [
   { id: 61, move: "BUBBLE_BEAM", fixture: "bubble-beam-%s-surskit-%s-onix", keys: ["attackerPictureOffset", "targetPictureOffset"],
@@ -25,7 +25,7 @@ const cases: ReadonlyArray<{
   { id: 56, move: "HYDRO_PUMP", fixture: "hydro-pump-%s-masquerain-%s-onix", keys: ["attackerPictureOffset", "targetPictureOffset"],
     duration: 141, effectAge: 60, route: { seed: 10, slot: 0, streak: 14 } },
   { id: 341, move: "MUD_SHOT", fixture: "mud-shot-%s-krabby-%s-onix", keys: ["attackerPictureOffset", "targetPictureOffset"],
-    duration: 145, effectAge: 60, route: { seed: 43, slot: 1, streak: 0 } },
+    duration: 145, opponentDuration: 144, effectAge: 60, route: { seed: 43, slot: 1, streak: 0 } },
   { id: 238, move: "CROSS_CHOP", fixture: "cross-chop-%s-machoke-%s-onix", keys: ["targetPictureOffset"],
     duration: 88, effectAge: 40, route: { seed: 5, slot: 0, streak: 14 } },
   { id: 197, move: "DETECT", fixture: "detect-%s-yanma-%s-onix", keys: ["attackerPictureOffset"],
@@ -101,7 +101,7 @@ describe("live anchor2 move adapters", () => {
   it("registers seven source-owned bodies and moves the anchors with the live species", () => {
     expect(LIVE_MOVE_ANIMATION_IDS).toEqual(expect.arrayContaining(cases.map(row => row.id)));
     for (const row of cases) for (const attacker of [0, 1] as const) {
-      expect(liveMoveAnimationDuration(request(row.id, attacker))).toBe(row.duration);
+      expect(liveMoveAnimationDuration(request(row.id, attacker))).toBe(attacker === 0 ? row.duration : row.opponentDuration ?? row.duration);
       const live = liveMoveAnimationPresentation(request(row.id, attacker), field, 0)?.config as
         unknown as Record<string, any>;
       expect(live).toMatchObject({ move: row.move,
@@ -125,7 +125,7 @@ describe("live anchor2 move adapters", () => {
 
   it.each(cases)("renders $move with alternate legal art in both orientations", row => {
     for (const attacker of [0, 1] as const) {
-      expect(new Set([0, row.effectAge, row.duration - 1]
+      expect(new Set([0, row.effectAge, (attacker === 0 ? row.duration : row.opponentDuration ?? row.duration) - 1]
         .map(age => render(row.id, attacker, age))).size).toBeGreaterThan(1);
     }
   });
