@@ -29551,14 +29551,14 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnProtectView(protectState);
     const displayed = sceneOnProtectView({ ...protectState, age: protectState.age - 1 });
     const playerToOpponent =
-      view.attacker.species === "HOUNDOUR"
+      (liveField || view.attacker.species === "HOUNDOUR")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "HOUNDOUR"
+      (liveField || view.attacker.species === "HOUNDOUR")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -29567,11 +29567,15 @@ export function renderSceneOnMovePresentation(
     }
     const houndourSource = playerToOpponent
       ? protectArt.houndourBack : protectArt.houndourFront;
-    const houndour = playerToOpponent
+    const houndour = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? houndourSource
       : { ...houndourSource, tileset: subTileset(houndourSource.tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const onixIdle = playerToOpponent
@@ -29657,14 +29661,14 @@ export function renderSceneOnMovePresentation(
         });
     const attackerSpecies = magic ? "SPOINK" : "DROWZEE";
     const playerToOpponent =
-      view.attacker.species === attackerSpecies
+      (liveField || view.attacker.species === attackerSpecies)
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === attackerSpecies
+      (liveField || view.attacker.species === attackerSpecies)
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -29675,11 +29679,15 @@ export function renderSceneOnMovePresentation(
     const attackerSource = magic
       ? (playerToOpponent ? magicCoatArt.spoinkBack : magicCoatArt.spoinkFront)
       : (playerToOpponent ? barrierArt.drowzeeBack : barrierArt.drowzeeFront);
-    const attacker = playerToOpponent
+    const attacker = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? attackerSource
       : { ...attackerSource, tileset: subTileset(attackerSource.tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const onixIdle = playerToOpponent
