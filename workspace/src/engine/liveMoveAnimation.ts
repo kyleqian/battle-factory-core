@@ -75,7 +75,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // multihit: one MOVE_ANIMATION per hit, selected by request.turn (battle_script_commands.c:1787).
   3, 4, 167,
   // anchor4: species idle offsets (and picture size) derived through liveBattlerAnchors.
-  89, 90, 152, 345, 133,
+  89, 90, 152, 345, 133, 60,
 ] as const);
 
 /**
@@ -305,6 +305,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 90: return FISSURE_FRAME_COUNT;
     case 152: return CRABHAMMER_FRAME_COUNT;
     case 345: return MAGICAL_LEAF_FRAME_COUNT;
+    case 60: return 160; // Psybeam accepted window (source script through first inactive row).
     case 133: return 216; // Amnesia accepted window (source script through first inactive row).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
@@ -788,8 +789,9 @@ export function liveMoveAnimationPresentation(
         attackerPictureSize: { width: art[attacker.geometry.side].coords.width,
           height: art[attacker.geometry.side].coords.height } };
       break;
-    case 152: case 345:
-      config = { move: request.moveId === 152 ? "CRABHAMMER" : "MAGICAL_LEAF", attacker, target, fieldProfile,
+    case 152: case 345: case 60:
+      // Species-owned idle x2 of the target (player back sprites have none).
+      config = { move: request.moveId === 152 ? "CRABHAMMER" : request.moveId === 60 ? "PSYBEAM" : "MAGICAL_LEAF", attacker, target, fieldProfile,
         targetIdleX2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2 };
       break;
     case 342:

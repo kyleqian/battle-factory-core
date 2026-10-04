@@ -37836,14 +37836,14 @@ export function renderSceneOnMovePresentation(
       age: psybeamState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "SPINDA"
+      (liveField || view.attacker.species === "SPINDA")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "SPINDA"
+      (liveField || view.attacker.species === "SPINDA")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -37857,11 +37857,15 @@ export function renderSceneOnMovePresentation(
     // picture/name chrome while the complete party override supplies SPINDA's
     // semantic move carrier; the committed OAM/palette/RGB evidence pins that
     // presentation identity in both orientations.
-    const spinda = playerToOpponent
+    const spinda = liveField
+      ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CRAWDAUNT!
       : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CRAWDAUNT!;
-    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onixSource = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField || playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const gpuDarken = (palette: readonly RgbColor[]) =>
@@ -37945,6 +37949,7 @@ export function renderSceneOnMovePresentation(
       drawRings();
     }
 
+    if (!liveField) {
     const profile = psybeamState.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
@@ -37981,6 +37986,7 @@ export function renderSceneOnMovePresentation(
       "PSYBEAM!",
       99,
     );
+    }
     return;
   }
 
