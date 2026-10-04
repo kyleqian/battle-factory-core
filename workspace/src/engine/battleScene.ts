@@ -22087,14 +22087,14 @@ export function renderSceneOnMovePresentation(
       age: view.battlerDisplayAge,
     });
     const playerToOpponent =
-      view.attacker.species === "WAILMER"
+      (liveField || view.attacker.species === "WAILMER")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "WAILMER"
+      (liveField || view.attacker.species === "WAILMER")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -22104,13 +22104,14 @@ export function renderSceneOnMovePresentation(
     }
     const wailmerSource = playerToOpponent
       ? hydroPumpArt.wailmerBack : hydroPumpArt.wailmerFront;
-    const wailmer = playerToOpponent
+    const wailmer = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? wailmerSource
       : {
           ...wailmerSource,
           tileset: subTileset(wailmerSource.tileset, 0, 8),
         };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const vortexTint = { r: 0, g: 107, b: 189 };
     const targetPalette = blendPaletteToward(
       onix.palette,
@@ -22123,8 +22124,17 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette,
     );
-    const targetInitialX2 =
-      view.body === "main" && playerToOpponent && view.age <= 9 ? 1 : 0;
+    // Elevated opponents keep the enemy shadow for the first source display.
+    if (liveField && view.age === 0) {
+      const shadowBattler = opponentToPlayer ? view.attacker : view.target;
+      drawSourceOpponentEnemyShadow(
+        fb, shadowBattler.species, shadowBattler.geometry.battlePositionCenter,
+      );
+    }
+    const targetInitialX2 = liveField
+      ? (view.body === "main" && playerToOpponent && view.age <= 9
+        ? speciesFrontIdleRestOffsetOrZero(view.target.species).x2 : 0)
+      : view.body === "main" && playerToOpponent && view.age <= 9 ? 1 : 0;
     const drawOnix = () => drawSpriteSheet(
       fb,
       onix.tileset,
@@ -22137,8 +22147,10 @@ export function renderSceneOnMovePresentation(
       fb,
       wailmer.tileset,
       wailmer.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x
+        + (liveField && opponentToPlayer ? speciesFrontIdleRestOffsetOrZero(view.attacker.species).x2 : 0),
+      view.attacker.geometry.spriteCorner.y
+        + (liveField && opponentToPlayer ? speciesFrontIdleRestOffsetOrZero(view.attacker.species).y2 : 0),
     );
     drawOnix();
     drawWailmer();
@@ -22169,6 +22181,7 @@ export function renderSceneOnMovePresentation(
         false,
       );
     }
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,

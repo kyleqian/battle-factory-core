@@ -68,7 +68,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
-  76, 217, 236,
+  76, 217, 236, 250,
 ] as const);
 
 export interface LiveBattlerAnchors {
@@ -223,6 +223,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
         ? SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE + 1 : SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE + 1;
     // AnimTask_IsHealingMove (battle_anim_effects_3.c:1531): heal iff gAnimMoveDmg <= 0.
     case 217: return request.damage > 0 ? PRESENT_DAMAGE_FRAME_COUNT : PRESENT_HEAL_FRAME_COUNT;
+    case 250: return 133; // Whirlpool main body (accepted window 78..210); residual is a general animation.
     case 236: return 352; // Moonlight accepted source window (207..558).
     // The accepted opponent-front Mud Shot window is one row shorter.
     case 341: return request.attacker === 0 ? 145 : 144;
@@ -424,6 +425,7 @@ export function liveMoveAnimationPresentation(
       config = { move: "BULK_UP", attacker, target, fieldProfile,
         breathOrigin: attackerAnchors.picOffsetPoint, battlerHeight: attackerAnchors.pictureHeight };
       break;
+    case 250: config = { move: "WHIRLPOOL", attacker, target, fieldProfile, body: "main" }; break;
     case 76: {
       // sourceOrbOrigin adds 10 to the "resolved animation center" to reach
       // GetBattlerSpriteCoord(Y_PIC_OFFSET), so battlers carry that point minus 10.
