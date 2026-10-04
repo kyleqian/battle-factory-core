@@ -1,5 +1,24 @@
 # Animation integration progress
 
+## 2026-10-04 — anchor batch: battler-anchor helper + seven adapters (98 live)
+
+- Folded worker `99f9935f9` (tested code `9a3e45f0f`, src tree `bcc9f0d2c`):
+  `liveBattlerAnchors` (raw source anchors, pinned on 14 fixtures) and Acid,
+  Sludge, Sludge Bomb, Water Gun, Harden, Iron Defense, Metal Claw. Adapters
+  98, remaining 178. No palette plans.
+- MetallicShine bodies (Harden/Iron Defense/Metal Claw) render view age = live
+  age - 1: accepted windows start one frame before the task's age 0
+  (convention alignment, not a fit; controller timing remains unclaimed).
+- Supervisor dense proof: fourteen fixtures twice fresh, 1,692 rows/run, zero
+  residual. Routes PASS for all seven. Repeat routes that end in a player
+  faint stop at the forced-replacement screen, which
+  `generatedCommandAnimationReplay` does not drive (tool limit; also OFF and
+  on master) — single-decision routes used.
+- Gates: supervisor focused 80 + smoke 448; worker full 1,486 files/11,810
+  tests, build, typecheck reused. Receipt `anchor-supervisor-receipt.json`.
+- Next: wall-family adapters with source plans; remaining anchor groups
+  (picture offsets, coords, heights, effect centers, initial x2).
+
 ## 2026-10-04 — sprite-allocator net-zero audit banked
 
 - Side-lane evidence `eee899bee` folded (new files only): probe

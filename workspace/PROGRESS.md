@@ -5,10 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-04 — Light Screen + two adapter batches folded (91 live)
+## 2026-10-04 — Light Screen + three adapter batches folded (98 live)
 
-- **State:** S10A, local master; 91 live adapters, 185 accepted bodies
-  remain (Light Screen, fieldfx six, glow five this session).
+- **State:** S10A, local master; 98 live adapters, 178 accepted bodies
+  remain (Light Screen, fieldfx six, glow five, anchor seven this session).
   Opus supervisor with Sonnet workers.
 - **Did:** repair worker cherry-picked withheld candidate `84f2e5264` and made
   every move animation pass the sprite-allocator seam (`306b5adf1`), so only
@@ -23,7 +23,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   zero residual; six ordinary routes PASS. Preview refreshed at `28d5be550`.
 - **Also:** glow batch (Synthesis, Milk Drink, Flash, Role Play, Spite):
   1,496 rows/run twice fresh, zero residual; five routes PASS.
-- **Next:** battler-anchor helper batch; wall-family evidence (side lane). Oracle freshness FAIL at orient was a false positive:
+- **Also:** anchor batch (shared battler-anchor helper + seven moves): 1,692
+  rows/run twice fresh, zero residual. Side lane banked wall-family allocator
+  evidence and a net-zero allocator audit of all live moves (all net-zero).
+- **Next:** wall-family adapters; sprite-order research (side lane). Oracle freshness FAIL at orient was a false positive:
   only workspace commits since service start; both services kept.
 - **Notes:** no material decision deferred.
 
