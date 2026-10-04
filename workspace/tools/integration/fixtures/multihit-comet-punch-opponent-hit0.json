@@ -1,0 +1,37 @@
+{
+ "schema": "multihit-live-adapter/v1",
+ "draft": true,
+ "move": "COMET_PUNCH",
+ "probe": "tools/integration/multihitProbe.py",
+ "probeArgs": [
+  "4"
+ ],
+ "scenario": "tools/battle-lab/mechanic-comet-punch-opponent-ledian-player-onix.json",
+ "attacker": {
+  "species": "LEDIAN",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 162,
+  "opponentMaxHp": 162,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 88,
+  "endFrame": 124
+ },
+ "requestFields": {
+  "turn": 0
+ }
+}

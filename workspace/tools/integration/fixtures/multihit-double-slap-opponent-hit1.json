@@ -1,0 +1,41 @@
+{
+ "schema": "multihit-live-adapter/v1",
+ "draft": true,
+ "move": "DOUBLE_SLAP",
+ "probe": "tools/integration/multihitProbe.py",
+ "probeArgs": [
+  "3"
+ ],
+ "scenario": "tools/battle-lab/mechanic-double-slap-opponent-poliwhirl-player-onix.json",
+ "attacker": {
+  "species": "POLIWHIRL",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 141,
+  "playerMaxHp": 142,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 191,
+  "endFrame": 224
+ },
+ "requestFields": {
+  "turn": 1
+ },
+ "messageLines": [
+  "",
+  ""
+ ]
+}
