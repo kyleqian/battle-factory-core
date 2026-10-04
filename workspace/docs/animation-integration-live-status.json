@@ -1704,14 +1704,14 @@
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "5dcd93a62e6b73bbabf5dde21c256bc1ab06910b",
-    "build": "5dcd93a62 2026-10-04",
+    "commit": "0e2563abe1bf3788ae13923509268f684fc778d9",
+    "build": "0e2563abe 2026-10-04",
     "url": "http://127.0.0.1:5191/",
-    "implementedAdapters": 118,
-    "fullTest": "Supervisor 1489 files / 11884 tests passed on production 6faa70568 (same src tree)",
+    "implementedAdapters": 125,
+    "fullTest": "Supervisor 1492 files / 11944 tests passed on 0e2563abe",
     "buildModules": 847,
     "browser": "Four canvas and saved PNG hashes on the canonical ordinary route (identical to earlier previews); session export; ON -> OFF restart; no page errors",
-    "receipt": "../tools/integration/fixtures/playable-preview-5dcd93a62-receipt.json",
+    "receipt": "../tools/integration/fixtures/playable-preview-0e2563abe-receipt.json",
     "availability": "Local Mac service on 127.0.0.1:5191; hcloud retired."
   },
   "productionProviders": {
@@ -1747,7 +1747,7 @@
     "independentSource": "multihit 21 per-hit fixtures twice fresh, 759 rows/run, zero residuals; three ordinary routes PASS; shadow scan 0 mismatches",
     "sourceReceipt": "../tools/integration/fixtures/multihit-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed",
-    "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261002.json"
+    "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261004.json"
   },
   "spriteAllocatorHistory": {
     "availableProvider": "../src/engine/knownEntrySpriteAllocator.ts:createKnownEntrySpriteAllocatorProvider",
