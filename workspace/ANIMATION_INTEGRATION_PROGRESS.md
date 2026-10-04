@@ -1,5 +1,17 @@
 # Animation integration progress
 
+## 2026-10-04 — multi-hit adapter prep banked
+
+- Side-lane prep `797174269` folded (new files only): `docs/multihit-prep.md`,
+  per-hit evidence and 21 drafted fixtures
+  `tools/integration/fixtures/multihit-<move>-<side>-hit<i>.json` for Double
+  Slap (34 rows/hit), Comet Punch (37), Triple Kick (37), both sides; each hit
+  window starts at its own activation; request.turn = hit index; hits >= 1
+  show a blank message box; target x2 0 after hit 0.
+- Resume: port the three staged-only draw cases (battleScene.ts Comet Punch,
+  Double Slap, Triple Kick) to liveField like Fury Swipes, wire moveTurn from
+  request.turn, run the drafted fixtures. Not yet framebuffer-verified.
+
 ## 2026-10-04 — selectors batch: four request-selector adapters (122 live)
 
 - Folded worker `e6d6c056f` (tested code `786a17110`, src tree `379f96d40`):
