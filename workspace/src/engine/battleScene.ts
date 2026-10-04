@@ -37202,6 +37202,7 @@ export function renderSceneOnMovePresentation(
         );
       }
     }
+    if (!liveField) {
     const profile = amnesiaState.config.fieldProfile;
     const opponentSpecies = opponent.species;
     const playerSpecies = player.species;
@@ -37227,6 +37228,7 @@ export function renderSceneOnMovePresentation(
       "AMNESIA!",
       99,
     );
+    }
     return;
   }
 

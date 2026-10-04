@@ -75,7 +75,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // multihit: one MOVE_ANIMATION per hit, selected by request.turn (battle_script_commands.c:1787).
   3, 4, 167,
   // anchor4: species idle offsets (and picture size) derived through liveBattlerAnchors.
-  89, 90, 152, 345,
+  89, 90, 152, 345, 133,
 ] as const);
 
 /**
@@ -305,6 +305,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 90: return FISSURE_FRAME_COUNT;
     case 152: return CRABHAMMER_FRAME_COUNT;
     case 345: return MAGICAL_LEAF_FRAME_COUNT;
+    case 133: return 216; // Amnesia accepted window (source script through first inactive row).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -780,6 +781,12 @@ export function liveMoveAnimationPresentation(
     case 90:
       config = { move: "FISSURE", attacker, target, fieldProfile,
         initialTargetX2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2 };
+      break;
+    case 133:
+      // BATTLER_COORD_ATTR_WIDTH/HEIGHT: GetBattlerSpriteCoordAttr reads the species pic coords.
+      config = { move: "AMNESIA", attacker, target, fieldProfile,
+        attackerPictureSize: { width: art[attacker.geometry.side].coords.width,
+          height: art[attacker.geometry.side].coords.height } };
       break;
     case 152: case 345:
       config = { move: request.moveId === 152 ? "CRABHAMMER" : "MAGICAL_LEAF", attacker, target, fieldProfile,
