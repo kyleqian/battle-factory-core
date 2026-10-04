@@ -71,6 +71,32 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   76, 217, 236, 250,
 ] as const);
 
+/**
+ * ISSUES #142: live age on which the elevated-opponent enemy shadow is still
+ * displayed. `SpriteCB_EnemyShadow` (battle_gfx_sfx_util.c:1203) hides the
+ * 32x8 shadow only after it observes gAnimScriptActive, so with the one-frame
+ * display lag it is visible on the ROM frame where the move script activates.
+ * shadowRow = activationFrame - acceptedWindowStart + ageOffset; an id is
+ * listed only when 0 <= shadowRow < duration (its window starts at the
+ * activation frame). Ids whose accepted window starts after activation (Bite,
+ * Toxic, Confusion, ...) are absent: that frame precedes the body. Both
+ * orientations share the row (tools/integration/fixtures/issue142-shadow-rows.json,
+ * pinned by tests/liveShadowRows.test.ts).
+ */
+export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = Object.freeze(
+  Object.fromEntries([
+    2, 5, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 42, 43, 47, 49, 50, 56, 61, 65, 66, 67, 68,
+    78, 79, 83, 86, 87, 95, 97, 101, 103, 107, 108, 109, 112, 113, 114, 115, 116, 122, 131, 147, 148,
+    151, 154, 156, 162, 163, 172, 178, 180, 182, 186, 197, 201, 203, 211, 213, 231, 238, 242, 243, 246,
+    257, 259, 263, 264, 272, 277, 280, 281, 287, 290, 302, 306, 319, 320, 321, 335, 336, 341,
+  ].map((id) => [id, 0])),
+);
+
+/** Shadow row for a live request, or null when the activation frame is outside the window. */
+export function liveMoveOpponentShadowRow(request: BattleMoveAnimationRequest): number | null {
+  return LIVE_MOVE_OPPONENT_SHADOW_ROW[request.moveId] ?? null;
+}
+
 export interface LiveBattlerAnchors {
   /** `GetBattlerSpriteCoord2(battler, X_2/Y_PIC_OFFSET)`. */
   readonly picOffsetPoint: Readonly<{ x: number; y: number }>;
