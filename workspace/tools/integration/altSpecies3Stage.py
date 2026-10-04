@@ -83,6 +83,8 @@ def write(c, forced_start=None):
         if forced_start == 0: forced_start = rows[0]["frame"]  # provisional, for the start finder
         win = (forced_start, forced_start + n - 1)
     sw, ew = win
+    last = rows[-1]["frame"]
+    if ew > last: print("TRUNCATED window end", ew, "->", last, "(probe records no later frame)"); ew = last
     scen = json.loads(path.read_text())
     attacker_side = "player" if "-player-" in c["name"] and c["name"].index("-player-") < c["name"].index("-opponent-") else "opponent"
     other = "opponent" if attacker_side == "player" else "player"
