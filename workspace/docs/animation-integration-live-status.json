@@ -1118,13 +1118,13 @@
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "caaab87a4",
+    "productionCodeCommit": "394aa629a",
     "typecheck": "passed",
-    "workerFullTest": "1484 files / 11776 tests passed; 44 files / 223 tests skipped",
+    "workerFullTest": "1485 files / 11787 tests passed; 44 files / 223 tests skipped",
     "buildModules": 847,
-    "supervisorAffected": "5 affected files / 40 tests and 448 smoke passed (fieldfx)",
-    "independentSource": "fieldfx twelve fixtures twice fresh, 1611 rows/run, zero residuals; six ordinary routes PASS (Light Screen 264 rows/run before it)",
-    "sourceReceipt": "../tools/integration/fixtures/fieldfx-supervisor-receipt.json",
+    "supervisorAffected": "7 affected files / 57 tests and 448 smoke passed (glow)",
+    "independentSource": "glow ten fixtures twice fresh, 1496 rows/run, zero residuals; five ordinary routes PASS (fieldfx 1611 and Light Screen 264 rows/run before it)",
+    "sourceReceipt": "../tools/integration/fixtures/glow-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed",
     "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261002.json"
   },

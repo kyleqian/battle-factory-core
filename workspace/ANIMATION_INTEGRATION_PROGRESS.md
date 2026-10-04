@@ -1,5 +1,23 @@
 # Animation integration progress
 
+## 2026-10-04 — glow batch: five live adapters (91 live)
+
+- Folded worker `98348602f` (tested code `394aa629a`, src tree `f14e250a1`):
+  Synthesis, Milk Drink, Flash, Role Play, Spite. Adapters 91, remaining 185.
+  No palette plans; history invalidates after each body.
+- Role Play's silhouette now adds the target species' picture y-offset in the
+  attacker's orientation (source `CreateAdditionalMonSpriteForMoveAnim`,
+  supervisor-checked). Spite uses the source enemy shadow. The framebuffer
+  harness passes start frames to the Synthesis/Milk Drink probes.
+- Supervisor dense proof: ten fixtures twice fresh, 1,496 rows/run, zero
+  residual. Ordinary routes PASS (Synthesis after a damaging turn, Spite after
+  a prior move, Flash repeated, Role Play on an independent seed).
+- Gates: supervisor focused 57 + smoke 448; worker full 1,485 files/11,787
+  tests, build, typecheck reused on the clean merge. Receipt
+  `tools/integration/fixtures/glow-supervisor-receipt.json`.
+- Next: battler-anchor helper batch; wall-family source allocator evidence is
+  being banked in parallel (side lane, new files only).
+
 ## 2026-10-04 — fieldfx batch: six live adapters (86 live)
 
 - Folded `08ccbcaf9` (worker `7dec4734b`, tested code `caaab87a4`, src tree
