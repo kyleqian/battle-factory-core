@@ -1,5 +1,19 @@
 # Animation integration progress
 
+## 2026-10-04 — allocator-consumer draw-order tie audit banked
+
+- Side-lane evidence `d5a781ef9` folded (new files only): receipt
+  `tools/integration/fixtures/allocator-consumer-tie-audit.json`, doc
+  `docs/allocator-consumer-tie-audit.md`, probe and 44 staged scenarios.
+- 54 consumer x scenario rows (~5,200 window frames, twice fresh, identical):
+  no visible wall/sparkle/shield sprite ever shares a SortSprites key with any
+  other visible sprite, so draw order is key-determined; later-body emission
+  order showed no inversions although free-slot order differed. Supervisor
+  rerun of Light Screen opponent after Toxic + poison status: identical.
+- Thin coverage: Protect later bodies only after Protect; Reflect and Magic
+  Coat later bodies player side only. Licenses treating free-slot order as
+  irrelevant for these six consumers in Factory L50 singles layouts only.
+
 ## 2026-10-04 — wall family live with source allocator plans (103 live)
 
 - Folded worker `5b992edaa` (tested code `c09bcf141`, src tree `ea6ba1893`):
