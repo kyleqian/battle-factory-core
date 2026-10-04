@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 248,
-  "ids": 122,
+  "rows": 269,
+  "ids": 125,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -2605,6 +2605,237 @@
     0
    ],
    "tailFirstAge": 132
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "player",
+   "duration": 34,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "player",
+   "duration": 34,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "player",
+   "duration": 34,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "opponent",
+   "duration": 34,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "opponent",
+   "duration": 34,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "opponent",
+   "duration": 34,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "player",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "player",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "player",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "player",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "opponent",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "opponent",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "opponent",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "opponent",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "opponent",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "player",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "player",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "player",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "opponent",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "opponent",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "opponent",
+   "duration": 37,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
   }
  ]
 }

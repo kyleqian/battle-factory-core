@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json)",
  "rows": [
   {
    "id": 236,
@@ -268,6 +268,426 @@
     "scenario": "tools/battle-lab/mechanic-whirlpool-player-wailmer-opponent-onix.json",
     "body": "normal",
     "activation": "issue142-selectors-activation-probes.json"
+   }
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "player",
+   "variant": "hit0",
+   "activationFrame": 86,
+   "windowStart": 86,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 0
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-double-slap-player-hit0.json",
+    "scenario": "tools/battle-lab/mechanic-double-slap-player-poliwhirl-opponent-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "player",
+   "variant": "hit1",
+   "activationFrame": 187,
+   "windowStart": 187,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 1
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-double-slap-player-hit1.json",
+    "scenario": "tools/battle-lab/mechanic-double-slap-player-poliwhirl-opponent-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "player",
+   "variant": "hit2",
+   "activationFrame": 288,
+   "windowStart": 288,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 2
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-double-slap-player-hit2.json",
+    "scenario": "tools/battle-lab/mechanic-double-slap-player-poliwhirl-opponent-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "opponent",
+   "variant": "hit0",
+   "activationFrame": 90,
+   "windowStart": 90,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 0
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-double-slap-opponent-hit0.json",
+    "scenario": "tools/battle-lab/mechanic-double-slap-opponent-poliwhirl-player-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "opponent",
+   "variant": "hit1",
+   "activationFrame": 191,
+   "windowStart": 191,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 1
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-double-slap-opponent-hit1.json",
+    "scenario": "tools/battle-lab/mechanic-double-slap-opponent-poliwhirl-player-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 3,
+   "move": "DOUBLE_SLAP",
+   "orientation": "opponent",
+   "variant": "hit2",
+   "activationFrame": 292,
+   "windowStart": 292,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 2
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-double-slap-opponent-hit2.json",
+    "scenario": "tools/battle-lab/mechanic-double-slap-opponent-poliwhirl-player-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "player",
+   "variant": "hit0",
+   "activationFrame": 84,
+   "windowStart": 84,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 0
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-comet-punch-player-hit0.json",
+    "scenario": "tools/battle-lab/mechanic-comet-punch-player-ledian-opponent-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "player",
+   "variant": "hit1",
+   "activationFrame": 188,
+   "windowStart": 188,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 1
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-comet-punch-player-hit1.json",
+    "scenario": "tools/battle-lab/mechanic-comet-punch-player-ledian-opponent-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "player",
+   "variant": "hit2",
+   "activationFrame": 373,
+   "windowStart": 373,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 2
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-comet-punch-player-hit2.json",
+    "scenario": "tools/battle-lab/mechanic-comet-punch-player-ledian-opponent-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "player",
+   "variant": "hit3",
+   "activationFrame": 477,
+   "windowStart": 477,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 3
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-comet-punch-player-hit3.json",
+    "scenario": "tools/battle-lab/mechanic-comet-punch-player-ledian-opponent-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "opponent",
+   "variant": "hit0",
+   "activationFrame": 88,
+   "windowStart": 88,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 0
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-comet-punch-opponent-hit0.json",
+    "scenario": "tools/battle-lab/mechanic-comet-punch-opponent-ledian-player-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "opponent",
+   "variant": "hit1",
+   "activationFrame": 192,
+   "windowStart": 192,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 1
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-comet-punch-opponent-hit1.json",
+    "scenario": "tools/battle-lab/mechanic-comet-punch-opponent-ledian-player-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "opponent",
+   "variant": "hit2",
+   "activationFrame": 297,
+   "windowStart": 297,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 2
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-comet-punch-opponent-hit2.json",
+    "scenario": "tools/battle-lab/mechanic-comet-punch-opponent-ledian-player-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "opponent",
+   "variant": "hit3",
+   "activationFrame": 401,
+   "windowStart": 401,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 3
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-comet-punch-opponent-hit3.json",
+    "scenario": "tools/battle-lab/mechanic-comet-punch-opponent-ledian-player-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 4,
+   "move": "COMET_PUNCH",
+   "orientation": "opponent",
+   "variant": "hit4",
+   "activationFrame": 505,
+   "windowStart": 505,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 4
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-comet-punch-opponent-hit4.json",
+    "scenario": "tools/battle-lab/mechanic-comet-punch-opponent-ledian-player-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "player",
+   "variant": "hit0",
+   "activationFrame": 225,
+   "windowStart": 225,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 0
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-triple-kick-player-hit0.json",
+    "scenario": "tools/battle-lab/mechanic-triple-kick-player-hitmontop-opponent-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "player",
+   "variant": "hit1",
+   "activationFrame": 354,
+   "windowStart": 354,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 1
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-triple-kick-player-hit1.json",
+    "scenario": "tools/battle-lab/mechanic-triple-kick-player-hitmontop-opponent-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "player",
+   "variant": "hit2",
+   "activationFrame": 483,
+   "windowStart": 483,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 2
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-triple-kick-player-hit2.json",
+    "scenario": "tools/battle-lab/mechanic-triple-kick-player-hitmontop-opponent-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "opponent",
+   "variant": "hit0",
+   "activationFrame": 226,
+   "windowStart": 226,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 0
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-triple-kick-opponent-hit0.json",
+    "scenario": "tools/battle-lab/mechanic-triple-kick-opponent-hitmontop-player-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "opponent",
+   "variant": "hit1",
+   "activationFrame": 436,
+   "windowStart": 436,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 1
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-triple-kick-opponent-hit1.json",
+    "scenario": "tools/battle-lab/mechanic-triple-kick-opponent-hitmontop-player-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 167,
+   "move": "TRIPLE_KICK",
+   "orientation": "opponent",
+   "variant": "hit2",
+   "activationFrame": 565,
+   "windowStart": 565,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "inWindow": true,
+   "requestFields": {
+    "turn": 2
+   },
+   "sources": {
+    "fixture": "tools/integration/fixtures/multihit-triple-kick-opponent-hit2.json",
+    "scenario": "tools/battle-lab/mechanic-triple-kick-opponent-hitmontop-player-onix.json",
+    "body": "normal",
+    "activation": "multihit-shadow-rows.json"
    }
   }
  ]
