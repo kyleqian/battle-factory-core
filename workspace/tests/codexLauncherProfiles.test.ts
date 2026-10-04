@@ -94,9 +94,9 @@ describe("Supervisor and worker launcher profiles", () => {
       supervisor_lane: "ts",
       supervisor_guide: "SUPERVISOR.md",
       oracle_profile: "battle-scene-off",
-      supervisor_model: "gpt-6.1-sol",
-      supervisor_effort: "high",
-      worker_routing: "tiered",
+      supervisor_model: "claude-opus-5-5",
+      supervisor_effort: "n/a",
+      worker_routing: "fixed",
     });
     expect(main.status).toBe(0);
     expect(configFrom(supervisor.stdout)).toEqual(configFrom(main.stdout));
@@ -132,15 +132,15 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
       supervisor: "claude",
-      supervisor_model: "claude-fable-5",
+      supervisor_model: "claude-opus-5-5",
       sub_agent: "claude",
-      worker_model: "claude-sonnet-5",
+      worker_model: "claude-sonnet-5-5",
     });
   });
 
   it("scopes the Sol 6.1 upgrade to supervisors and permits explicit legacy supervisors", () => {
     const legacy = runLauncher("run-supervisor.sh", [
-      "--model", "gpt-5.6-sol", "--print-config",
+      "--supervisor", "codex", "--model", "gpt-5.6-sol", "--print-config",
     ]);
     const worker = runLauncher("tools/run-subagent.sh", [
       "--sub-agent", "codex", "--model", "gpt-6.1-sol", "--print-config",
@@ -154,21 +154,28 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(worker.stderr).toContain("unsupported ordinary Codex worker model");
   });
 
-  it("defaults to a Sol 6.1 supervisor and preserves tiered worker routing", () => {
+  it("defaults to Opus 5.5 supervision and Sonnet 5.5 workers", () => {
     const result = runLauncher("run-supervisor.sh", ["--print-config"]);
+    const worker = runLauncher("tools/run-subagent.sh", ["--print-config"]);
 
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
-      supervisor: "codex",
-      supervisor_model: "gpt-6.1-sol",
-      supervisor_effort: "high",
-      supervisor_shell_cwd: "per-command",
+      supervisor: "claude",
+      supervisor_model: "claude-opus-5-5",
+      supervisor_effort: "n/a",
+      supervisor_shell_cwd: "project-root-reset",
       max_mode: "0",
-      sub_agent: "codex",
-      worker_launch_mode: "managed",
-      worker_routing: "tiered",
-      worker_model: "gpt-5.6-sol",
-      worker_effort: "high",
+      sub_agent: "claude",
+      worker_launch_mode: "background",
+      worker_routing: "fixed",
+      worker_model: "claude-sonnet-5-5",
+      worker_effort: "n/a",
+    });
+    expect(worker.status).toBe(0);
+    expect(configFrom(worker.stdout)).toMatchObject({
+      sub_agent: "claude",
+      worker_model: "claude-sonnet-5-5",
+      worker_effort: "n/a",
     });
   });
 
@@ -195,8 +202,8 @@ describe("Supervisor and worker launcher profiles", () => {
   });
 
   it.each([
-    ["opus", "claude-opus-5"],
-    ["sonnet", "claude-sonnet-5"],
+    ["opus", "claude-opus-5-5"],
+    ["sonnet", "claude-sonnet-5-5"],
     ["fable", "claude-fable-5"],
     ["haiku", "claude-haiku-4-5-20251001"],
   ])(
@@ -219,15 +226,15 @@ describe("Supervisor and worker launcher profiles", () => {
           supervisor: "claude",
           supervisor_model: model,
           sub_agent: "claude",
-          worker_model: "claude-sonnet-5",
+          worker_model: "claude-sonnet-5-5",
         });
       }
     },
   );
 
   it.each([
-    ["opus", "claude-opus-5"],
-    ["sonnet", "claude-sonnet-5"],
+    ["opus", "claude-opus-5-5"],
+    ["sonnet", "claude-sonnet-5-5"],
     ["fable", "claude-fable-5"],
     ["haiku", "claude-haiku-4-5-20251001"],
   ])(
@@ -244,7 +251,7 @@ describe("Supervisor and worker launcher profiles", () => {
       expect(result.status).toBe(0);
       expect(configFrom(result.stdout)).toMatchObject({
         supervisor: "claude",
-        supervisor_model: "claude-fable-5",
+        supervisor_model: "claude-opus-5-5",
         sub_agent: "claude",
         worker_routing: "fixed",
         worker_model: model,
@@ -262,7 +269,7 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
       supervisor: "claude",
-      supervisor_model: "claude-opus-5",
+      supervisor_model: "claude-opus-5-5",
     });
   });
 
@@ -278,9 +285,9 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
       supervisor: "claude",
-      supervisor_model: "claude-opus-5",
+      supervisor_model: "claude-opus-5-5",
       sub_agent: "claude",
-      worker_model: "claude-sonnet-5",
+      worker_model: "claude-sonnet-5-5",
     });
   });
 
@@ -289,12 +296,12 @@ describe("Supervisor and worker launcher profiles", () => {
       "-S",
       "opus",
       "-m",
-      "claude-opus-5",
+      "claude-opus-5-5",
       "--print-config",
     ]);
 
     expect(result.status).toBe(0);
-    expect(configFrom(result.stdout).supervisor_model).toBe("claude-opus-5");
+    expect(configFrom(result.stdout).supervisor_model).toBe("claude-opus-5-5");
   });
 
   it("rejects a --model that conflicts with a --supervisor Claude alias", () => {
@@ -302,13 +309,13 @@ describe("Supervisor and worker launcher profiles", () => {
       "-S",
       "opus",
       "-m",
-      "claude-sonnet-5",
+      "claude-sonnet-5-5",
       "--print-config",
     ]);
 
     expect(result.status).toBe(2);
     expect(result.stderr).toContain(
-      "--supervisor 'opus' already selects model 'claude-opus-5'; --model 'claude-sonnet-5' conflicts with it",
+      "--supervisor 'opus' already selects model 'claude-opus-5-5'; --model 'claude-sonnet-5-5' conflicts with it",
     );
   });
 
@@ -328,7 +335,7 @@ describe("Supervisor and worker launcher profiles", () => {
   });
 
   it.each([
-    ["opus", "claude-opus-5"],
+    ["opus", "claude-opus-5-5"],
     ["fable", "claude-fable-5"],
   ])(
     "resolves the '%s' Claude model alias through SUPERVISOR_AGENT/SUB_AGENT env vars",
@@ -350,8 +357,8 @@ describe("Supervisor and worker launcher profiles", () => {
   );
 
   it.each([
-    ["opus", "claude-opus-5"],
-    ["sonnet", "claude-sonnet-5"],
+    ["opus", "claude-opus-5-5"],
+    ["sonnet", "claude-sonnet-5-5"],
     ["fable", "claude-fable-5"],
     ["haiku", "claude-haiku-4-5-20251001"],
   ])(
@@ -381,7 +388,7 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
       sub_agent: "claude",
-      worker_model: "claude-opus-5",
+      worker_model: "claude-opus-5-5",
     });
   });
 
@@ -390,13 +397,13 @@ describe("Supervisor and worker launcher profiles", () => {
       "-s",
       "opus",
       "-m",
-      "claude-sonnet-5",
+      "claude-sonnet-5-5",
       "--print-config",
     ]);
 
     expect(result.status).toBe(2);
     expect(result.stderr).toContain(
-      "--sub-agent 'opus' already selects model 'claude-opus-5'; --model 'claude-sonnet-5' conflicts with it",
+      "--sub-agent 'opus' already selects model 'claude-opus-5-5'; --model 'claude-sonnet-5-5' conflicts with it",
     );
   });
 
@@ -419,13 +426,13 @@ describe("Supervisor and worker launcher profiles", () => {
     const result = runLauncher(
       "tools/run-subagent.sh",
       ["--print-config"],
-      { POKEBENCH_WORKER_PROVIDER: "claude", WORKER_MODEL: "claude-opus-5" },
+      { POKEBENCH_WORKER_PROVIDER: "claude", WORKER_MODEL: "claude-opus-5-5" },
     );
 
     expect(result.status).toBe(0);
     expect(configFrom(result.stdout)).toMatchObject({
       sub_agent: "claude",
-      worker_model: "claude-opus-5",
+      worker_model: "claude-opus-5-5",
     });
   });
 
@@ -436,7 +443,7 @@ describe("Supervisor and worker launcher profiles", () => {
       ["--supervisor", "claude", "--sub-agent", "codex"],
     ],
   ])(
-    "%s selects a Fable supervisor with tiered Codex workers",
+    "%s selects an Opus supervisor with tiered Codex workers",
     (_name, profileArgs) => {
       const result = runLauncher("run-supervisor.sh", [
         ...profileArgs,
@@ -446,7 +453,7 @@ describe("Supervisor and worker launcher profiles", () => {
       expect(result.status).toBe(0);
       expect(configFrom(result.stdout)).toMatchObject({
         supervisor: "claude",
-        supervisor_model: "claude-fable-5",
+        supervisor_model: "claude-opus-5-5",
         supervisor_effort: "n/a",
         supervisor_shell_cwd: "project-root-reset",
         max_mode: "0",
@@ -480,7 +487,7 @@ describe("Supervisor and worker launcher profiles", () => {
     ["short flag", ["-S", "Claude", "-s", "DeepSeek"]],
     ["long flag", ["--supervisor", "claude", "--sub-agent", "deepseek"]],
   ])(
-    "%s selects a Fable supervisor with fixed DeepSeek V4 Flash/OpenCode workers",
+    "%s selects an Opus supervisor with fixed DeepSeek V4 Flash/OpenCode workers",
     (_name, profileArgs) => {
       const result = runLauncher("run-supervisor.sh", [
         ...profileArgs,
@@ -490,7 +497,7 @@ describe("Supervisor and worker launcher profiles", () => {
       expect(result.status).toBe(0);
       expect(configFrom(result.stdout)).toMatchObject({
         supervisor: "claude",
-        supervisor_model: "claude-fable-5",
+        supervisor_model: "claude-opus-5-5",
         supervisor_effort: "n/a",
         supervisor_shell_cwd: "project-root-reset",
         max_mode: "0",

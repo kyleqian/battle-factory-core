@@ -1,3 +1,22 @@
+## 2026-10-03 — Integration is the next main roadmap stage
+
+- **State:** normal `./run-supervisor.sh` follows `ROADMAP.md`; S10A is playable
+  animation integration. Supervisor remains Sol 6.1/high, with unchanged worker
+  routing. No separate supervisor lane is required; the previous integration
+  flag is a compatibility alias. Worker isolation and ON validation remain.
+- **Did:** removed the launcher's hardcoded main mechanics mission, added S10A
+  acceptance/continuity, and aligned active guides and local startup. Default
+  terminal mode is interactive; `--headless` selects non-interactive output/logs
+  with the same roadmap, worker setup and six-hour cap.
+- **Checks:** shell syntax, 4 affected files / 73 tests, boundary/inventory,
+  coverage/asset audit and diff checks pass. No production change; reuse final
+  `695e10751` receipt: 1,482 files / 11,754 tests, build 844 modules.
+- **Next:** resume latest `ANIMATION_INTEGRATION_PROGRESS.md`: 79 adapters,
+  197 accepted moves remaining; Light Screen source allocator/intro ownership
+  and full displayed-frame proof. This setup change starts no new work session.
+
+---
+
 ## 1402 — [ts worker, 2026-08-25 ~18:15] **ISSUES #129 CLOSED as NOT-A-BUG: the stock ROM DOES draw King's Rock's `Random()` at `MOVEEND_KINGSROCK_SHELLBELL` on a KO — #129's premise was a truncated-trace artifact, and the engine was already source-exact**
 
 - **State:** #129 deleted from `ISSUES.md`; no engine change was needed. Green at

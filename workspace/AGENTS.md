@@ -40,7 +40,8 @@ cap (`--help` lists the flags).
 **Supervised alternative:** **`./run-supervisor.sh`** runs the two-level flow:
 a supervisor plans one increment at a time, delegates it to a capped
 disposable worker via `tools/run-subagent.sh`, and verifies the result between
-steps. The repo default is Codex `gpt-6.1-sol/high`. The normal command follows
+steps. The repo default is Claude Opus 5.5 with Claude Sonnet 5.5 workers.
+The normal command follows
 the current stage in `ROADMAP.md`; playable integration needs no supervisor lane
 flag. For S10A read `ANIMATION_INTEGRATION_SUPERVISOR.md`; the main supervisor
 owns local master and uses temporary integration worker worktrees. Select the

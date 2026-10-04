@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-04 — Opus supervisor and Sonnet worker defaults
+
+- **State:** default `./run-supervisor.sh` now uses Claude Opus 5.5
+  (`claude-opus-5-5`) with Sonnet 5.5 (`claude-sonnet-5-5`) workers.
+  S10A remains active; 79 adapters, 197 accepted moves remain.
+- **Did:** changed the default provider/model, refreshed Opus/Sonnet aliases
+  and direct-worker default, and aligned active run guides. Explicit Codex,
+  mixed-provider and max-mode profiles remain available.
+- **Checks:** shell syntax and both resolved configs pass; three affected
+  launcher/boundary/inventory files, 71 tests pass; coverage/asset audit and
+  diff checks pass. Launcher tooling only; accepted production unchanged.
+- **Next:** review preserved Light Screen candidate `84f2e5264` in
+  `.worktrees/integration-20261003-085057`; repair its allocator-history guard
+  before independent proof and merge. Brief remains in
+  `.codex-logs/s10a-lightscreen-guard-repair-20261003.txt`.
+- **Notes:** latest IDs verified against Anthropic's model documentation;
+  Claude Code 2.1.289 installed. This change starts no new work session.
+  The prior supervisor stopped at a model-capacity error after withholding
+  Light Screen; candidate worktree and logs are retained.
+
+---
+
 ## 2026-10-03 — Source-derived sprite allocator provider accepted
 
 - **State:** S10A, local master; 79 adapters, 197 accepted moves remain.
@@ -39,24 +61,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   source allocator provider and Light Screen activation/text/cleanup proof.
 - **Notes:** raw pass/failure evidence and worker logs preserved in primary.
   No material choice deferred. Slowpoke +3 timing observed; cause unproved.
-
----
-
-## 2026-10-03 — Integration is the next main roadmap stage
-
-- **State:** normal `./run-supervisor.sh` follows `ROADMAP.md`; S10A is playable
-  animation integration. Supervisor remains Sol 6.1/high, with unchanged worker
-  routing. No separate supervisor lane is required; the previous integration
-  flag is a compatibility alias. Worker isolation and ON validation remain.
-- **Did:** removed the launcher's hardcoded main mechanics mission, added S10A
-  acceptance/continuity, and aligned active guides and local startup. Default
-  terminal mode is interactive; `--headless` selects non-interactive output/logs
-  with the same roadmap, worker setup and six-hour cap.
-- **Checks:** shell syntax, 4 affected files / 73 tests, boundary/inventory,
-  coverage/asset audit and diff checks pass. No production change; reuse final
-  `695e10751` receipt: 1,482 files / 11,754 tests, build 844 modules.
-- **Next:** resume latest `ANIMATION_INTEGRATION_PROGRESS.md`: 79 adapters,
-  197 accepted moves remaining; Light Screen source allocator/intro ownership
-  and full displayed-frame proof. This setup change starts no new work session.
 
 ---

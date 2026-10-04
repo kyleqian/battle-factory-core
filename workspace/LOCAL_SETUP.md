@@ -27,8 +27,10 @@ Resume the current main roadmap stage from this workspace with:
 ./run-supervisor.sh
 ```
 
-The repository supervisor defaults to Codex `gpt-6.1-sol/high`; workers retain
-the established Terra/Luna/Sol routing. The default is an interactive supervisor;
+The repository supervisor defaults to Claude Opus 5.5 (`claude-opus-5-5`) with
+Claude Sonnet 5.5 (`claude-sonnet-5-5`) workers. Use `-S codex` for Codex
+`gpt-6.1-sol/high` with the established Terra/Luna/Sol worker routing.
+The default is an interactive supervisor with Claude Remote Control;
 add `--headless` for unattended execution with streamed output and saved logs.
 Both follow `ROADMAP.md` and have a six-hour default cap. `--print-config` checks the selected
 profile without starting a run. See `ANIMATION_INTEGRATION_SUPERVISOR.md` for

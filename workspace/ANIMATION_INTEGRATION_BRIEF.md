@@ -7,6 +7,8 @@ history onto this Mac, then authorized continued integration using the repositor
 supervisor with Sol 6.1. On 2026-10-03 the user directed integration to be the
 next main roadmap stage, with no separate supervisor lane. hcloud was deleted
 after backup and local validation.
+On 2026-10-04 the user changed the defaults to Claude Opus 5.5 supervision
+and Claude Sonnet 5.5 workers.
 Historical remote-only instructions and isolated cloud branches are superseded.
 
 Canonical checkout: `/Users/kyle/Developer/pokebench/pokeemerald-factory-core`,

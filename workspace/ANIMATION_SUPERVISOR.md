@@ -98,9 +98,10 @@ substitutions:
   move. This is the July batch pattern, and it is how the cheap tail of a
   track should close — one-move-per-round is for moves that add components
   or unresolved latches.
-- **Route** each brief to a tier deliberately — `SUPERVISOR.md`'s routing
-  rubric applies here in full, and the launcher's Sol default is not a
-  decision. In this lane it lands as: **Terra/max** for narrow source-
+- **Route** each brief using the selected worker provider. The default Claude
+  profile uses Sonnet 5.5; inherit it without Codex model or effort flags.
+  For Codex workers, `SUPERVISOR.md`'s routing rubric applies here in full.
+  In this lane it lands as: **Terra/max** for narrow source-
   transcription families with established reducer, fixture, and probe
   patterns (most component tracks); **Luna/max** for bounded multi-phase
   lifecycle work with moderate state-machine ambiguity; **Sol/high** reserved

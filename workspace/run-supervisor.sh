@@ -2,7 +2,7 @@
 # Supervised work session for THIS run: a long-lived supervisor plans one
 # increment at a time, delegates it to a capped disposable worker, verifies
 # the result, and continues, fixes, or defers — per SUPERVISOR.md. The
-# default is Codex GPT-6.1 Sol/high with the established tiered Codex workers.
+# default is Claude Opus 5.5 with Claude Sonnet 5.5 workers.
 # Choose the two roles independently with
 # -S/--supervisor and -s/--sub-agent. Supervisors may be Claude or Codex;
 # sub-agents may additionally be DeepSeek V4 Flash through OpenCode. If the
@@ -25,9 +25,9 @@
 #   ./run-supervisor.sh --headless    # unattended, stream view like run-agent.sh
 #   ./run-supervisor.sh -S codex      # Sol 6.1/high + tiered Codex workers
 #   ./run-supervisor.sh -S claude -s codex
-#                                      # Fable supervisor + tiered Codex workers
+#                                      # Opus supervisor + tiered Codex workers
 #   ./run-supervisor.sh -S claude -s deepseek
-#                                      # Fable supervisor + DeepSeek V4 Flash workers
+#                                      # Opus supervisor + DeepSeek V4 Flash workers
 #   ./run-supervisor.sh --max-mode    # Sol/ultra supervisor + Sol/xhigh workers
 #   ./run-supervisor.sh -m NAME       # override the selected profile's model
 #   ./run-supervisor.sh -S opus -s sonnet
@@ -65,7 +65,7 @@ Usage: ./run-supervisor.sh [options]
                         branch <lane>-main. The main supervisor follows ROADMAP.md;
                         integration needs no separate supervisor lane. The old
                         "integration" spelling remains an alias for ts.
-  -S, --supervisor NAME codex (default, gpt-6.1-sol/high), claude, or a Claude model alias
+  -S, --supervisor NAME claude (default, Opus 5.5), codex, or a Claude model alias
                         (opus, sonnet, fable, haiku) that selects Claude and
                         that exact model in one step. DeepSeek cannot
                         supervise.
@@ -102,7 +102,7 @@ EOF
 HEADLESS="${HEADLESS:-0}"
 CAP_HOURS="${CAP_HOURS:-6}"
 LANE="${SUPERVISOR_LANE:-ts}"
-PROVIDER="${SUPERVISOR_AGENT:-codex}"
+PROVIDER="${SUPERVISOR_AGENT:-claude}"
 MODEL="${SUPERVISOR_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${SUPERVISOR_REASONING_EFFORT:-}"
 MAX_MODE="${SUPERVISOR_MAX_MODE:-0}"
@@ -317,7 +317,7 @@ if [[ "$PRINT_CONFIG" != "1" && "$HEADLESS" == "1" && "$LANE" =~ ^(animation|rus
 fi
 case "$PROVIDER" in
   claude)
-    MODEL="${MODEL:-claude-fable-5}"
+    MODEL="${MODEL:-claude-opus-5-5}"
     if [[ -n "$REASONING_EFFORT" ]]; then
       echo "run-supervisor: --effort applies only to a Codex supervisor" >&2
       exit 2
@@ -418,7 +418,7 @@ elif [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
   export WORKER_MODEL
 elif [[ "$WORKER_PROVIDER" == "claude" && -n "${WORKER_MODEL:-}" ]]; then
   # Only set when a Claude model alias (-s opus, etc.) fixed it; otherwise
-  # tools/run-subagent.sh applies its own claude-sonnet-5 default per call.
+  # tools/run-subagent.sh applies its own claude-sonnet-5-5 default per call.
   export WORKER_MODEL
 fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then
@@ -472,7 +472,7 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
     echo "worker_headless=1"
     echo "worker_permissions=auto"
   else
-    echo "worker_model=${WORKER_MODEL:-claude-sonnet-5}"
+    echo "worker_model=${WORKER_MODEL:-claude-sonnet-5-5}"
     echo "worker_effort=n/a"
   fi
   exit 0
@@ -540,7 +540,7 @@ if [[ "$WORKER_PROVIDER" == "codex" ]]; then
 elif [[ "$WORKER_PROVIDER" == "deepseek" ]]; then
   WORKER_ROUTING_NOTE="DeepSeek worker mode is active: every worker is fixed at $POKEBENCH_DEEPSEEK_WORKER_MODEL through OpenCode. Invoke run-subagent.sh without --sub-agent, --model, or --effort overrides."
 else
-  WORKER_ROUTING_NOTE="Workers are Claude on the ${WORKER_MODEL:-claude-sonnet-5} profile unless a step explicitly overrides the worker model with run-subagent.sh -m (accepts a full model name or the aliases opus/sonnet/fable/haiku)."
+  WORKER_ROUTING_NOTE="Workers are Claude on the ${WORKER_MODEL:-claude-sonnet-5-5} profile unless a step explicitly overrides the worker model with run-subagent.sh -m (accepts a full model name or the aliases opus/sonnet/fable/haiku)."
 fi
 if [[ "$PROVIDER" == "codex" ]]; then
   WORKER_LAUNCH_NOTE="Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and wait on it."

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Run ONE bounded, disposable worker step — the supervisor's hands.
 #
-# Launches one fresh headless worker. The default remains the original Claude
-# worker (claude-sonnet-5); a Codex supervisor automatically selects the Codex
+# Launches one fresh headless worker. The default is Claude Sonnet 5.5
+# (claude-sonnet-5-5); a Codex supervisor automatically selects the Codex
 # worker profile (gpt-5.6-sol at high effort). Ordinary Codex routing permits
 # exactly Terra/max, Luna/max, or Sol/high. Codex max mode remains the separate
 # all-Sol profile and defaults workers to xhigh. The DeepSeek sub-agent option
@@ -261,7 +261,7 @@ if [[ -n "$WT_BASE_REF" && "$LANE" == "ts" ]]; then
 fi
 case "$PROVIDER" in
   claude)
-    MODEL="${MODEL:-claude-sonnet-5}"
+    MODEL="${MODEL:-claude-sonnet-5-5}"
     if [[ -n "$REASONING_EFFORT" ]]; then
       echo "run-subagent: --effort applies only to a Codex sub-agent" >&2
       exit 2

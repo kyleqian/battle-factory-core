@@ -14,14 +14,14 @@ the session's compute. You run rarely and think hard when you do.
 
 The launcher selects the two agent roles independently:
 
-- `./run-supervisor.sh` — Codex Sol 6.1/high supervisor with tiered Codex workers,
+- `./run-supervisor.sh` — Claude Opus 5.5 supervisor with Sonnet 5.5 workers,
   following the current main roadmap stage;
 - `./run-supervisor.sh -S codex` — Codex Sol 6.1/high supervisor with
   tiered Codex workers;
-- `./run-supervisor.sh -S claude -s codex` — Claude Fable supervisor,
+- `./run-supervisor.sh -S claude -s codex` — Claude Opus 5.5 supervisor,
   available through Claude Remote Control in interactive mode, with tiered
   Codex workers;
-- `./run-supervisor.sh -S claude -s deepseek` — Claude Fable supervisor
+- `./run-supervisor.sh -S claude -s deepseek` — Claude Opus 5.5 supervisor
   with workers fixed at `deepseek/deepseek-v4-flash` through headless
   OpenCode `--auto` runs.
 
@@ -97,6 +97,9 @@ edit.
    before launching the worker** (AGENTS.md's commit discipline applies to
    you too; any session can be killed at any moment, and the next one resumes
    from git alone).
+   **Default Claude workers use Sonnet 5.5.** Inherit the launcher's worker
+   profile without Codex model or effort flags. Claude model overrides accept
+   `-m sonnet`, `-m opus`, or a full Claude model ID.
    **Whenever the sub-agent is ordinary Codex, the supervisor chooses one
    exact, mechanically enforced pair:**
    - `gpt-5.6-terra` / `max`;
@@ -106,8 +109,8 @@ edit.
    - `gpt-5.6-sol` / `high` (launcher default).
    No other ordinary Codex worker model or effort pairing is allowed. In particular,
    never lower Terra or Luna below max, and never raise Sol above high.
-   A Codex supervisor defaults to `gpt-6.1-sol/high`; a Claude supervisor stays at
-   Claude Fable while retaining this worker routing.
+   A Codex supervisor defaults to `gpt-6.1-sol/high`; a Claude supervisor defaults
+   to Opus 5.5. This routing rubric applies when Codex workers are selected.
    `./run-supervisor.sh --max-mode` remains the separate all-Sol
    profile: the supervisor runs Sol/ultra, every worker is locked to Sol, and
    workers default to xhigh (the worker ceiling) while permitting high.
