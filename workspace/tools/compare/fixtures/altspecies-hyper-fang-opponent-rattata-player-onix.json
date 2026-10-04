@@ -6,8 +6,8 @@
  "probeMoveId": 158,
  "move": "HYPER_FANG",
  "denseWindow": {
-  "startFrame": 81,
-  "endFrame": 187,
+  "startFrame": 85,
+  "endFrame": 191,
   "frameCount": 107
  },
  "appStage": {

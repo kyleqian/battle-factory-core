@@ -52,7 +52,22 @@ export function analyze(livePath: string, runDir: string, pngDir?: string) {
         diff.set([255, 0, 255], p * 3);
       } else diff.set([s[0]! >> 2, s[1]! >> 2, s[2]! >> 2], p * 3);
     }
-    residualRows.push({
+    // Does the live frame, shifted by (dx,dy), reproduce the source inside the residual bbox? (x2/y2 body offsets)
+    const shiftFit = (() => {
+      let best = { dx: 0, dy: 0, mismatches: Infinity };
+      for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) {
+        let bad = 0;
+        for (let y = Math.max(0, y0); y <= Math.min(111, y1); y++) for (let x = Math.max(0, x0); x <= Math.min(239, x1); x++) {
+          const sx2 = x - dx, sy2 = y - dy;
+          if (sx2 < 0 || sx2 > 239 || sy2 < 0 || sy2 > 159) { bad++; continue; }
+          const p = y * 240 + x, q = sy2 * 240 + sx2;
+          if (rgb[p * 3] !== rgba[q * 4] || rgb[p * 3 + 1] !== rgba[q * 4 + 1] || rgb[p * 3 + 2] !== rgba[q * 4 + 2]) bad++;
+        }
+        if (bad < best.mismatches) best = { dx, dy, mismatches: bad };
+      }
+      return best; // live shifted right/down by (dx,dy) best matches source
+    })();
+    residualRows.push({ shiftFit,
       age: row.age, frame: row.frame, pixels: n, bbox: { x0, y0, x1, y1 }, inEnemyShadowMask: inMask,
       sourceIsShadowColor: srcShadowColor, colorPairs: [...cols].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => ({ pair: k, pixels: v })),
     });

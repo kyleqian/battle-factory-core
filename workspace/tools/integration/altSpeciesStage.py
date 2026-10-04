@@ -70,6 +70,7 @@ def write(c, forced_start=None):
     probe = run_probe(c, path, forced_start or 0)
     rows = probe.get("frames") or probe.get("rows")
     win = window_of(rows, probe, n)
+    if forced_start and win is not None: win = (forced_start, forced_start + n - 1)  # start verified by altSpeciesFindStart.ts
     if win is None:  # start-frame probes: the caller supplies the start found by altSpeciesFindStart.ts
         if forced_start is None:
             print("NEEDSTART", c["name"], run_probe.last_dir, n); return
