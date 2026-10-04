@@ -595,7 +595,12 @@ export function liveMoveAnimationPresentation(
     case 151: config = { move: "ACID_ARMOR", attacker, target, fieldProfile }; break;
     case 154: config = { move: "FURY_SWIPES", attacker, target, fieldProfile }; break;
     case 3: config = { move: "DOUBLE_SLAP", attacker, target, fieldProfile, moveTurn: request.turn }; break;
-    case 4: config = { move: "COMET_PUNCH", attacker, target, fieldProfile, moveTurn: request.turn }; break;
+    case 4:
+      // cometPunchAtAge's opponent-route hitsplat offset (0, not the script's -8) is relative to
+      // the unshifted OBJ center, not the player-side +8 Y_PIC_OFFSET point.
+      config = { move: "COMET_PUNCH", attacker, target: affineCenterBattler(target), fieldProfile,
+        moveTurn: request.turn };
+      break;
     // Cmd_jumpifmoveturn 0/1 else Center (battle_anim_scripts.s:6543): turns >= 2 share the Center branch.
     case 167:
       config = { move: "TRIPLE_KICK", attacker, target, fieldProfile,
