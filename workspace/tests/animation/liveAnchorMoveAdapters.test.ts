@@ -15,7 +15,6 @@ import {
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 
-type Anchor = "projectileOrigin" | "attackerSpriteCenter";
 const cases = [
   { id: 51, move: "ACID", fixture: "acid-%s-ekans-%s-onix", anchor: "projectileOrigin", duration: 131, effectAge: 60,
     route: { seed: 26, slot: 1, streak: 0 } },
@@ -31,7 +30,7 @@ const cases = [
     route: { seed: 7, slot: 2, streak: 0 } },
   { id: 232, move: "METAL_CLAW", fixture: "metal-claw-%s-charmander-%s-onix", anchor: "attackerSpriteCenter", duration: 140, effectAge: 110,
     route: { seed: 130, slot: 0, streak: 0 } },
-] as const satisfies readonly { anchor: Anchor }[];
+] as const;
 
 const field = {
   player: { species: 340, speciesSymbol: "CAMERUPT", name: "CAMERUPT", level: 50,
