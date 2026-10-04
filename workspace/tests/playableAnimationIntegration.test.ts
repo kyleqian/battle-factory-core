@@ -71,8 +71,8 @@ describe("ordinary playable animation queue", () => {
   });
 
   it("plays Light Screen from six generated rentals, preserves text/self-target, and resumes after repeat failure", () => {
-    // Seeds 27/84 ([3,3]) and 2 ([0,3]) play an unproved move animation before
-    // Light Screen, so allocator history is unknown and the generic bounded
+    // Seeds 27/84 ([3,3]) and 2 ([0,3]) play a non-live, unaudited move (185,
+    // 318, 209) before Light Screen, so allocator history is unknown and the generic bounded
     // fallback renders; 2/45/59/114 ([3,3]) have Light Screen as the first move
     // body with known entry history (exact adapter).
     const routes: ReadonlyArray<readonly [number, readonly (0 | 1 | 2 | 3)[], boolean]> = [
@@ -117,4 +117,42 @@ describe("ordinary playable animation queue", () => {
       }
     }
   }, 60000);
+
+  it("keeps allocator history known across audited net-zero move bodies and falls back after unaudited ones", () => {
+    // Re-derived from generated rentals with the net-zero persistence list
+    // (tools/integration/fixtures/allocator-net-zero-audit.json). Seed 20
+    // plays Crunch 242 (+ Rest 156) before Protect 182; seeds 2 and 59 play
+    // Screech 103 / Spite 180 before Light Screen: all audited net-zero, so the
+    // exact adapter renders. Seeds 45/47 play Bubble Beam 61 (live but NOT
+    // audited) first, so history is unknown and the bounded fallback renders.
+    // Routes where a status animation or switch-in intervenes (seeds 50, 62,
+    // 59 [0,3]) stay fallback: status/switch invalidation is unchanged.
+    const routes: ReadonlyArray<readonly [number, number, readonly (0 | 1 | 2 | 3)[], boolean]> = [
+      [182, 20, [3, 3], true], [182, 20, [2, 3], true],
+      [113, 59, [1, 3], true], [113, 2, [1, 3], true],
+      [113, 47, [0, 3], false], [113, 45, [0, 3], false],
+      [113, 50, [2, 3], false], [113, 62, [1, 3], false],
+    ];
+    for (const [moveId, seed, slots, exact] of routes) {
+      const on = generatedCommandAnimationReplay(seed, "on", slots);
+      const off = generatedCommandAnimationReplay(seed, "off", slots);
+      const body = on.animations.filter(animation => animation.moveId === moveId);
+      expect(body).toHaveLength(1);
+      expect(body[0]!.adapterActive).toEqual(Array(body[0]!.ages.length).fill(exact));
+      expect(on.requests.findIndex(request => request.moveId === moveId)).toBeGreaterThan(0);
+      expect(body[0]!.entryMessage?.visibleCharacters)
+        .toBe(body[0]!.entryMessage?.lines.join("").length);
+      expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+      expect(on.boundaries).toHaveLength(off.boundaries.length);
+      for (let index = 0; index < on.boundaries.length; index += 1) {
+        const a = on.boundaries[index]!, b = off.boundaries[index]!;
+        expect(a.rng).toEqual(b.rng);
+        const { hitMarker: am, ...ar } = a.rules.rulesContext;
+        const { hitMarker: bm, ...br } = b.rules.rulesContext;
+        expect(ar).toEqual(br);
+        expect((am ^ bm) & ~0x80).toBe(0);
+        expect(a.boundary).toEqual(b.boundary);
+      }
+    }
+  }, 120000);
 });

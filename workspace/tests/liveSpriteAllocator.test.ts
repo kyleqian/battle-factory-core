@@ -7,7 +7,9 @@ import {
   type LiveSpriteOwner,
 } from "../src/engine/liveSpriteAllocator.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../src/engine/knownEntrySpriteAllocator.ts";
-import { prepareLiveMoveSpriteAllocator } from "../src/engine/liveMoveSpriteAllocator.ts";
+import {
+  LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS, prepareLiveMoveSpriteAllocator,
+} from "../src/engine/liveMoveSpriteAllocator.ts";
 
 const move = (identity: string, index = 0): LiveSpriteOwner => ({ kind: "move", identity, index });
 
@@ -138,5 +140,47 @@ describe("known ordinary-singles entry sprite provider", () => {
     expect(receipt.unsupported).toEqual([
       "unknown entry", "switch", "in-battle summary", "substitute", "transform",
     ]);
+  });
+});
+
+describe("net-zero move history persistence", () => {
+  const req = (moveId: number) => ({
+    moveId, attacker: 0, target: 0, turn: 0, power: 0,
+    damage: 0, friendship: 0, multihit: 0,
+  }) as const;
+  const { firstMove } = createKnownEntrySpriteAllocatorProvider("ordinary-factory");
+
+  it("pins the constant exactly to the net-zero receipt intersected with live adapters", () => {
+    const receipt = JSON.parse(readFileSync(
+      "tools/integration/fixtures/allocator-net-zero-audit.json", "utf8"));
+    const live = new Set<number>(JSON.parse(readFileSync(
+      "docs/animation-integration-live-status.json", "utf8",
+    )).implementedAdapters.map((a: { id: number }) => a.id));
+    expect(receipt.summary.notNetZero).toEqual({});
+    // Fury Swipes (154) was audited on the player side only.
+    const expected = (receipt.summary.netZeroIds as number[])
+      .filter(id => live.has(id) && id !== 154).sort((a, b) => a - b);
+    expect([...LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS]).toEqual(expected);
+    for (const id of LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS) {
+      expect(receipt.moves[String(id)].scenarios.every(
+        (s: { netZero: boolean }) => s.netZero)).toBe(true);
+    }
+    for (const id of [41, 44, 158, 162, 325, 51, 124, 188, 55, 106, 334, 232]) {
+      expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS).not.toContain(id);
+    }
+  });
+
+  it("keeps a known host identical across a net-zero move and creates no input", () => {
+    const prepared = prepareLiveMoveSpriteAllocator(firstMove, req(2));
+    expect(prepared.next).toBe(firstMove);
+    expect(prepared.input).toBeUndefined();
+  });
+
+  it("invalidates for non-audited moves and keeps unknown unknown", () => {
+    for (const id of [51, 44, 154, 999]) {
+      expect(prepareLiveMoveSpriteAllocator(firstMove, req(id)).next.historyKnown).toBe(false);
+    }
+    const unknown = invalidateLiveSpriteAllocatorHost(firstMove);
+    expect(prepareLiveMoveSpriteAllocator(unknown, req(2)).next.historyKnown).toBe(false);
   });
 });

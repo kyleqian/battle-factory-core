@@ -40,9 +40,31 @@ const PLANS: Readonly<Record<number, LiveMoveSpriteAllocatorPlan>> = Object.free
 });
 
 /**
+ * Live move ids whose scripts are audited OBJ-net-zero in both orientations,
+ * twice fresh (tools/integration/fixtures/allocator-net-zero-audit.json,
+ * summary.netZeroIds ∩ live adapters; Fury Swipes 154 is player-side only and
+ * excluded). Occupancy-net-zero does not preserve the free-slot sSpriteOrder,
+ * but the six allocator consumers never share a sort key with another visible
+ * sprite (tools/integration/fixtures/allocator-consumer-tie-audit.json,
+ * docs/allocator-consumer-tie-audit.md), so their pixels are key-determined.
+ * That license covers ONLY the six PLANS consumers; any new allocator consumer
+ * needs its own tie audit or the sprite-order provider. Changes to this list
+ * are pinned by tests/liveSpriteAllocator.test.ts.
+ */
+export const LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS: readonly number[] = Object.freeze([
+  2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 42, 43, 47, 48, 49, 50, 65, 66,
+  67, 68, 74, 75, 78, 79, 83, 92, 93, 94, 95, 97, 101, 103, 105, 108, 109, 112, 113, 114,
+  115, 122, 131, 136, 147, 148, 151, 156, 163, 172, 178, 180, 182, 186, 201, 204, 208,
+  211, 213, 223, 227, 231, 235, 242, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287,
+  290, 302, 305, 306, 319, 320, 321, 335, 336, 337, 342, 343, 347,
+]);
+const NET_ZERO_MOVES: ReadonlySet<number> = new Set(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS);
+
+/**
  * Applies the source `createsprite`/callback destruction order for an audited
  * wall-family move. Computes allocation slots and the complete-boundary host;
- * it is not a full per-frame allocator clock. Every other move invalidates the
+ * it is not a full per-frame allocator clock. An audited net-zero move without
+ * a plan leaves a known host unchanged (no input); every other move invalidates the
  * host, and an unknown host stays unknown, so no guessed allocator topology
  * is ever lent to an exact adapter.
  */
@@ -54,6 +76,9 @@ export function prepareLiveMoveSpriteAllocator(
   input?: LiveMoveSpriteAllocatorInput;
 }> {
   const plan = PLANS[request.moveId];
+  if (host.historyKnown && !plan && NET_ZERO_MOVES.has(request.moveId)) {
+    return Object.freeze({ next: host });
+  }
   if (!host.historyKnown || !plan) {
     return Object.freeze({ next: invalidateLiveSpriteAllocatorHost(host) });
   }
