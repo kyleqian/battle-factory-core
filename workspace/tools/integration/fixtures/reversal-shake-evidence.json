@@ -1,0 +1,1050 @@
+{
+ "schema": "reversal-shake-evidence/v1",
+ "oracleProfile": "battle-scene-on (Scene OFF skips move animations)",
+ "probe": "tools/integration/reversalShakeProbe.py",
+ "scenarioBase": "tools/battle-lab/mechanic-reversal-hp-bands-off.json",
+ "staging": "Yanma(Reversal) vs Chansey(Super Fang x1 slot): Super Fang halves the user's real HP each turn; no HP injection",
+ "romSha256": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+ "probeSha256": "71f1b88158ba8db878448fd943a155fd298aa6cb456039582f8da1f91fafb729",
+ "rawSha256": {
+  "opponent-run1.json": "d61b78eb10b25c856f042c72abb20848114bd6b2927cd61bfae40a3693ff2ee8",
+  "opponent-run2.json": "d61b78eb10b25c856f042c72abb20848114bd6b2927cd61bfae40a3693ff2ee8",
+  "player-run1.json": "754c119cbadbcfc9f786182830bd49fae824a3c3a916adc169634c76ab99fbe0",
+  "player-run2.json": "754c119cbadbcfc9f786182830bd49fae824a3c3a916adc169634c76ab99fbe0"
+ },
+ "freshRunsIdentical": true,
+ "rows": [
+  {
+   "orientation": "player",
+   "run": 1,
+   "activation": 73,
+   "power": 20,
+   "dmg": 17,
+   "hp": {
+    "player": [
+     140,
+     140
+    ],
+    "opponent": [
+     357,
+     357
+    ]
+   },
+   "A_power": 1,
+   "A_dmg": 1,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": true
+  },
+  {
+   "orientation": "player",
+   "run": 1,
+   "activation": 1039,
+   "power": 40,
+   "dmg": 36,
+   "hp": {
+    "player": [
+     70,
+     140
+    ],
+    "opponent": [
+     340,
+     357
+    ]
+   },
+   "A_power": 3,
+   "A_dmg": 3,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "player",
+   "run": 1,
+   "activation": 1973,
+   "power": 80,
+   "dmg": 62,
+   "hp": {
+    "player": [
+     35,
+     140
+    ],
+    "opponent": [
+     304,
+     357
+    ]
+   },
+   "A_power": 6,
+   "A_dmg": 5,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "player",
+   "run": 1,
+   "activation": 2907,
+   "power": 100,
+   "dmg": 86,
+   "hp": {
+    "player": [
+     18,
+     140
+    ],
+    "opponent": [
+     242,
+     357
+    ]
+   },
+   "A_power": 8,
+   "A_dmg": 7,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "player",
+   "run": 1,
+   "activation": 3841,
+   "power": 150,
+   "dmg": 132,
+   "hp": {
+    "player": [
+     9,
+     140
+    ],
+    "opponent": [
+     156,
+     357
+    ]
+   },
+   "A_power": 12,
+   "A_dmg": 11,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "player",
+   "run": 1,
+   "activation": 4775,
+   "power": 200,
+   "dmg": 161,
+   "hp": {
+    "player": [
+     5,
+     140
+    ],
+    "opponent": [
+     24,
+     357
+    ]
+   },
+   "A_power": 16,
+   "A_dmg": 13,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "opponent",
+   "run": 1,
+   "activation": 77,
+   "power": 20,
+   "dmg": 19,
+   "hp": {
+    "player": [
+     357,
+     357
+    ],
+    "opponent": [
+     140,
+     140
+    ]
+   },
+   "A_power": 1,
+   "A_dmg": 1,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": true
+  },
+  {
+   "orientation": "opponent",
+   "run": 1,
+   "activation": 1043,
+   "power": 40,
+   "dmg": 32,
+   "hp": {
+    "player": [
+     338,
+     357
+    ],
+    "opponent": [
+     70,
+     140
+    ]
+   },
+   "A_power": 3,
+   "A_dmg": 2,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "opponent",
+   "run": 1,
+   "activation": 1977,
+   "power": 80,
+   "dmg": 74,
+   "hp": {
+    "player": [
+     306,
+     357
+    ],
+    "opponent": [
+     35,
+     140
+    ]
+   },
+   "A_power": 6,
+   "A_dmg": 6,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "opponent",
+   "run": 1,
+   "activation": 2911,
+   "power": 100,
+   "dmg": 92,
+   "hp": {
+    "player": [
+     232,
+     357
+    ],
+    "opponent": [
+     18,
+     140
+    ]
+   },
+   "A_power": 8,
+   "A_dmg": 7,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "opponent",
+   "run": 1,
+   "activation": 3845,
+   "power": 150,
+   "dmg": 138,
+   "hp": {
+    "player": [
+     140,
+     357
+    ],
+    "opponent": [
+     9,
+     140
+    ]
+   },
+   "A_power": 12,
+   "A_dmg": 11,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "opponent",
+   "run": 1,
+   "activation": 4779,
+   "power": 200,
+   "dmg": 176,
+   "hp": {
+    "player": [
+     2,
+     357
+    ],
+    "opponent": [
+     5,
+     140
+    ]
+   },
+   "A_power": 16,
+   "A_dmg": 14,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "player",
+   "run": 2,
+   "activation": 73,
+   "power": 20,
+   "dmg": 17,
+   "hp": {
+    "player": [
+     140,
+     140
+    ],
+    "opponent": [
+     357,
+     357
+    ]
+   },
+   "A_power": 1,
+   "A_dmg": 1,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": true
+  },
+  {
+   "orientation": "player",
+   "run": 2,
+   "activation": 1039,
+   "power": 40,
+   "dmg": 36,
+   "hp": {
+    "player": [
+     70,
+     140
+    ],
+    "opponent": [
+     340,
+     357
+    ]
+   },
+   "A_power": 3,
+   "A_dmg": 3,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "player",
+   "run": 2,
+   "activation": 1973,
+   "power": 80,
+   "dmg": 62,
+   "hp": {
+    "player": [
+     35,
+     140
+    ],
+    "opponent": [
+     304,
+     357
+    ]
+   },
+   "A_power": 6,
+   "A_dmg": 5,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "player",
+   "run": 2,
+   "activation": 2907,
+   "power": 100,
+   "dmg": 86,
+   "hp": {
+    "player": [
+     18,
+     140
+    ],
+    "opponent": [
+     242,
+     357
+    ]
+   },
+   "A_power": 8,
+   "A_dmg": 7,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "player",
+   "run": 2,
+   "activation": 3841,
+   "power": 150,
+   "dmg": 132,
+   "hp": {
+    "player": [
+     9,
+     140
+    ],
+    "opponent": [
+     156,
+     357
+    ]
+   },
+   "A_power": 12,
+   "A_dmg": 11,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "player",
+   "run": 2,
+   "activation": 4775,
+   "power": 200,
+   "dmg": 161,
+   "hp": {
+    "player": [
+     5,
+     140
+    ],
+    "opponent": [
+     24,
+     357
+    ]
+   },
+   "A_power": 16,
+   "A_dmg": 13,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "opponent",
+   "run": 2,
+   "activation": 77,
+   "power": 20,
+   "dmg": 19,
+   "hp": {
+    "player": [
+     357,
+     357
+    ],
+    "opponent": [
+     140,
+     140
+    ]
+   },
+   "A_power": 1,
+   "A_dmg": 1,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": true
+  },
+  {
+   "orientation": "opponent",
+   "run": 2,
+   "activation": 1043,
+   "power": 40,
+   "dmg": 32,
+   "hp": {
+    "player": [
+     338,
+     357
+    ],
+    "opponent": [
+     70,
+     140
+    ]
+   },
+   "A_power": 3,
+   "A_dmg": 2,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2,
+    -1,
+    -1,
+    2,
+    2
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "opponent",
+   "run": 2,
+   "activation": 1977,
+   "power": 80,
+   "dmg": 74,
+   "hp": {
+    "player": [
+     306,
+     357
+    ],
+    "opponent": [
+     35,
+     140
+    ]
+   },
+   "A_power": 6,
+   "A_dmg": 6,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3,
+    -3,
+    -3,
+    3,
+    3
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "opponent",
+   "run": 2,
+   "activation": 2911,
+   "power": 100,
+   "dmg": 92,
+   "hp": {
+    "player": [
+     232,
+     357
+    ],
+    "opponent": [
+     18,
+     140
+    ]
+   },
+   "A_power": 8,
+   "A_dmg": 7,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4,
+    -4,
+    -4,
+    4,
+    4
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "opponent",
+   "run": 2,
+   "activation": 3845,
+   "power": 150,
+   "dmg": 138,
+   "hp": {
+    "player": [
+     140,
+     357
+    ],
+    "opponent": [
+     9,
+     140
+    ]
+   },
+   "A_power": 12,
+   "A_dmg": 11,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6,
+    -6,
+    -6,
+    6,
+    6
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  },
+  {
+   "orientation": "opponent",
+   "run": 2,
+   "activation": 4779,
+   "power": 200,
+   "dmg": 176,
+   "hp": {
+    "player": [
+     2,
+     357
+    ],
+    "opponent": [
+     5,
+     140
+    ]
+   },
+   "A_power": 16,
+   "A_dmg": 14,
+   "firstInactiveOffset": 173,
+   "yAlwaysZero": true,
+   "x2Sequence155to168": [
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8,
+    -8,
+    -8,
+    8,
+    8
+   ],
+   "nonzeroX2Window": [
+    155,
+    168
+   ],
+   "matchesSourceFormula": true,
+   "matchesAcceptedReducer": false
+  }
+ ]
+}
