@@ -966,6 +966,96 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_FLASH",
+      "id": 148,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/glow-live-adapter-receipt.json",
+        "../tools/integration/fixtures/glow-flash-player.json",
+        "../tools/integration/fixtures/glow-flash-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 122 slot 3 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SPITE",
+      "id": 180,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/glow-live-adapter-receipt.json",
+        "../tools/integration/fixtures/glow-spite-player.json",
+        "../tools/integration/fixtures/glow-spite-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 316 slots [0,2] streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_MILK_DRINK",
+      "id": 208,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/glow-live-adapter-receipt.json",
+        "../tools/integration/fixtures/glow-milk-drink-player.json",
+        "../tools/integration/fixtures/glow-milk-drink-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 199 slot 3 streak 21: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SYNTHESIS",
+      "id": 235,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/glow-live-adapter-receipt.json",
+        "../tools/integration/fixtures/glow-synthesis-player.json",
+        "../tools/integration/fixtures/glow-synthesis-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 388 slots [1,3] streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_ROLE_PLAY",
+      "id": 272,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/glow-live-adapter-receipt.json",
+        "../tools/integration/fixtures/glow-role-play-player.json",
+        "../tools/integration/fixtures/glow-role-play-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 270 slot 1 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -988,7 +1078,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 86,
+  "implementedCount": 91,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
