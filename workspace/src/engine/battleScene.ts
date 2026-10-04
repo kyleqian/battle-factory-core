@@ -34582,14 +34582,14 @@ export function renderSceneOnMovePresentation(
       age: presentState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "DELIBIRD"
+      (liveField || view.attacker.species === "DELIBIRD")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "DELIBIRD"
+      (liveField || view.attacker.species === "DELIBIRD")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -34597,14 +34597,14 @@ export function renderSceneOnMovePresentation(
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const delibird = playerToOpponent
+    const delibird = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? delibirdBackSprite
       : {
           ...delibirdFrontSprite,
           tileset: subTileset(delibirdFrontSprite.tileset, 0, 8),
         };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     drawTileBg(
@@ -34613,12 +34613,21 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette,
     );
+    // Elevated opponents keep the enemy shadow for the first source display.
+    if (liveField && presentState.age === 0) {
+      const shadowBattler = opponentToPlayer ? view.attacker : view.target;
+      drawSourceOpponentEnemyShadow(
+        fb, shadowBattler.species, shadowBattler.geometry.battlePositionCenter,
+      );
+    }
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
     const drawAttacker = () => drawSpriteSheet(
       fb,
       delibird.tileset,
       delibird.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
+      view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
     );
     const drawTarget = () => drawSpriteSheet(
       fb,
@@ -34691,6 +34700,7 @@ export function renderSceneOnMovePresentation(
       }
     }
 
+    if (liveField) return;
     const profile = presentState.config.fieldProfile;
     drawSendOutHealthbox(
       fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {

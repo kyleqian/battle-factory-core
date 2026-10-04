@@ -7,6 +7,7 @@ import type { BattleResolutionDisplayedField } from "./battleResolutionPresentat
 import type {
   SceneOnMovePresentationState, SceneOnMoveConfig, SceneOnPresentationBattler,
 } from "../animation/sceneOnPresentation.ts";
+import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
 import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
 import { TAIL_WHIP_FRAME_COUNT } from "../animation/tailWhip.ts";
 import { CONFUSE_RAY_FRAME_COUNT } from "../animation/confuseRay.ts";
@@ -66,7 +67,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
-  236,
+  217, 236,
 ] as const);
 
 export interface LiveBattlerAnchors {
@@ -216,6 +217,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 207: return 161; // Swagger accepted source window.
     case 263: return 81; // Facade accepted source window.
     case 339: return 104; // Bulk Up accepted source window.
+    // AnimTask_IsHealingMove (battle_anim_effects_3.c:1531): heal iff gAnimMoveDmg <= 0.
+    case 217: return request.damage > 0 ? PRESENT_DAMAGE_FRAME_COUNT : PRESENT_HEAL_FRAME_COUNT;
     case 236: return 352; // Moonlight accepted source window (207..558).
     // The accepted opponent-front Mud Shot window is one row shorter.
     case 341: return request.attacker === 0 ? 145 : 144;
@@ -417,6 +420,16 @@ export function liveMoveAnimationPresentation(
       config = { move: "BULK_UP", attacker, target, fieldProfile,
         breathOrigin: attackerAnchors.picOffsetPoint, battlerHeight: attackerAnchors.pictureHeight };
       break;
+    case 217: {
+      // presentAtAge adds the player-side +8 of CreateHealingEffect's Y_PIC_OFFSET
+      // itself, so hand it the picture-offset point without that +8 (clamp kept).
+      const targetPoint = liveBattlerAnchors(target.geometry.side, art).picOffsetPoint;
+      config = { move: "PRESENT", attacker, fieldProfile,
+        branch: request.damage > 0 ? "damage" : "heal",
+        target: { ...target, geometry: { ...target.geometry, animationCenter: {
+          x: targetPoint.x, y: targetPoint.y - (target.geometry.side === "player" ? 8 : 0) } } } };
+      break;
+    }
     case 236: {
       // InitSpritePosToAnimAttacker(TRUE) reads the attacker's picture-offset point.
       // The staged heal payload is never read live (the controller owns HP).

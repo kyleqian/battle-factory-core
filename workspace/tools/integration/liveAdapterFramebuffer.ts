@@ -35,6 +35,8 @@ export interface Fixture {
   target: { species: string; geometry: { side: "player" | "opponent" } };
   fieldProfile: SceneOnDragonRageFieldProfile;
   body?: "normal" | "shattered-wall";
+  /** Controller arguments the ROM held at this body (gAnimMoveTurn/Power/Dmg). */
+  requestFields?: { turn?: number; power?: number; damage?: number };
 }
 interface Probe {
   frames?: { frame: number; sha256: string }[];
@@ -68,6 +70,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
     moveId: ids[f.move]!, attacker,
     target: SELF_TARGET_MOVES.has(f.move) ? attacker : attacker === 0 ? 1 : 0,
     turn: f.body === "shattered-wall" ? 1 : 0, power: 0, damage: 0, friendship: 70, multihit: 0,
+    ...f.requestFields,
   };
   if (liveMoveAnimationDuration(request) === null) throw new Error(`No live adapter for ${f.move}`);
   const healthbox = (mon: typeof field.player) => ({
