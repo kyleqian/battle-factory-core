@@ -1277,6 +1277,132 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_BUBBLE_BEAM",
+      "id": 61,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor2-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor2-bubble-beam-player.json",
+        "../tools/integration/fixtures/anchor2-bubble-beam-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 38 slot 0 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_HYDRO_PUMP",
+      "id": 56,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor2-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor2-hydro-pump-player.json",
+        "../tools/integration/fixtures/anchor2-hydro-pump-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 10 slot 0 streak 14: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_MUD_SHOT",
+      "id": 341,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor2-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor2-mud-shot-player.json",
+        "../tools/integration/fixtures/anchor2-mud-shot-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 43 slot 1 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_CROSS_CHOP",
+      "id": 238,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor2-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor2-cross-chop-player.json",
+        "../tools/integration/fixtures/anchor2-cross-chop-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 5 slot 0 streak 14: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_DETECT",
+      "id": 197,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor2-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor2-detect-player.json",
+        "../tools/integration/fixtures/anchor2-detect-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 10 slot 3 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_TAIL_GLOW",
+      "id": 294,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor2-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor2-tail-glow-player.json",
+        "../tools/integration/fixtures/anchor2-tail-glow-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 3 slot 3 streak 14: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_TORMENT",
+      "id": 259,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor2-live-adapter-receipt.json",
+        "../tools/integration/fixtures/anchor2-torment-player.json",
+        "../tools/integration/fixtures/anchor2-torment-opponent.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer both orientations twice fresh, zero residual, rows = accepted window",
+        "generated command seed 4 slot 2 streak 0: complete body with attacker 0, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -1299,7 +1425,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 103,
+  "implementedCount": 110,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
