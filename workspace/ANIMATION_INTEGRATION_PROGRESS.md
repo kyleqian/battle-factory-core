@@ -1,5 +1,19 @@
 # Animation integration progress
 
+## 2026-10-04 — anchor2 batch: seven picture-anchor adapters (110 live)
+
+- Folded worker `66952b8fb` (tested code `26b46eff4`, src tree `08b2ac222`):
+  Bubble Beam, Hydro Pump, Mud Shot, Cross Chop, Detect, Tail Glow, Torment.
+  Adapters 110, remaining 166. No palette plans.
+- Reversal dropped: `resolvedShake` comes from
+  AnimTask_ShakeTargetBasedOnMovePowerOrDmg. Resume: derive it from the live
+  request's power/damage (ordinary requests carry them, e.g. power 60/dmg 47).
+- Supervisor dense proof: fourteen fixtures twice fresh, 2,204 rows/run, zero
+  residual. Routes PASS for all seven. Target idle-x2 age windows come from
+  Onix captures (value uses the species rest offset; unverified elsewhere).
+- Gates: supervisor focused 78 + smoke 448; worker full 1,488 files/11,854
+  tests, build, typecheck reused. Receipt `anchor2-supervisor-receipt.json`.
+
 ## 2026-10-04 — allocator-consumer draw-order tie audit banked
 
 - Side-lane evidence `d5a781ef9` folded (new files only): receipt

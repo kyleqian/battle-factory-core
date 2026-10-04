@@ -5,10 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-04 — Light Screen + four adapter batches folded (103 live)
+## 2026-10-04 — Light Screen + five adapter batches folded (110 live)
 
-- **State:** S10A, local master; 103 live adapters, 173 accepted bodies
-  remain (Light Screen, fieldfx six, glow five, anchor seven, wall five).
+- **State:** S10A, local master; 110 live adapters, 166 accepted bodies
+  remain (Light Screen, fieldfx 6, glow 5, anchor 7, wall 5, anchor2 7).
   Opus supervisor with Sonnet workers.
 - **Did:** repair worker cherry-picked withheld candidate `84f2e5264` and made
   every move animation pass the sprite-allocator seam (`306b5adf1`), so only
@@ -31,8 +31,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   17/17 eligibility routes. Side lane banked sprite-order evidence, an exact
   free-slot order event model with a provider design, and a status-animation
   sprite audit (all net-zero).
-- **Next:** anchor2 batch (eight picture-anchor moves); evidence on whether
-  allocator consumers depend on free-slot draw-order ties. Oracle freshness FAIL at orient was a false positive:
+- **Also:** anchor2 (seven picture-anchor moves; Reversal deferred): 2,204
+  rows/run twice fresh, zero residual. Tie audit: the six allocator consumers
+  never share draw-order keys, so free-slot history cannot change their pixels.
+- **Next:** allocator history persistence across audited net-zero bodies and
+  status animations; anchor3 batch. Oracle freshness FAIL at orient was a false positive:
   only workspace commits since service start; both services kept.
 - **Notes:** no material decision deferred.
 
