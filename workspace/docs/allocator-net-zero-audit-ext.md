@@ -16,7 +16,7 @@ original receipt; `combined` = original ∪ extension). Raw window rows:
 `LIVE_MOVE_ANIMATION_IDS` on this base = **110** ids (91 at the first audit; +7 anchor, +7 anchor2,
 +5 wall ids that went live and were already re-measured). Extension: 20 rows (19 new ids + Fury
 Swipes opponent orientation): **audited 20 / net-zero 20 / not net-zero 0 / not audited 0**.
-Every row: both orientations, two fresh processes, raw pairs byte-identical (40 scenario pairs
+Every row: both orientations, two fresh processes, raw pairs byte-identical (39 scenario pairs
 incl. the Fury Swipes one), baseline `[0,1,2,6,8,60,61,62,63]` == end for every body,
 created == destroyed per body. Combined with the original receipt: **110 net-zero ids, 0 not
 net-zero, 0 not audited; every live id is covered** (`combined.liveIdsNotCovered` = []).
