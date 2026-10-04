@@ -197,7 +197,7 @@ def receipt():
                 if var.startswith("slot2") and ori == "opponent":
                     continue  # opponent AI picks the move slot; not stageable
                 runs = []
-                for r in raw["runs"]:
+                for r in raw["runs"][:1]:  # run 1 is stored as a hash; identity is in raw["identical"]
                     bodies = []
                     for bi, b in enumerate(r["bodies"]):
                         later = [x for x in r["allBodies"] if x[1] < b["activationTick"] and x[0] != 0 or (x[0] == 0 and x[1] < b["activationTick"])]

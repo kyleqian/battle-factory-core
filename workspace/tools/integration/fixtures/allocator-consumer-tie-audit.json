@@ -3,7 +3,7 @@
  "profile": "battle-scene-on",
  "pins": {
   "probe": "69d7721f927cb5ee9b1cba38f4d27ef2aeb8343ad1916dbf16ab6b3f270b1576",
-  "audit": "5a91989881d0354843374c46e1339bcffcb3a8f477bb13f53cb0fc77f1ff54fb",
+  "audit": "23ed8a162af3a6b1520b088e8cd7f049e1e2539af776ab4bd53d8b67d855986d",
   "sprite.c": "795084634d44883629dd78ed4e3b90f07b2bf5b6cd5f312f14f121ea76f380ce",
   "rom": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af"
  },
@@ -1062,7 +1062,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/light-screen-player-first.json",
-   "rawSha256": "b68267966d3d231c102ba9db58c7c914f20dad8bd8120b4ec8e40402e8bb575a"
+   "rawSha256": "bbefaaf19c43637854639476568093db28e909c25f067985ca1db08a530f2c67"
   },
   {
    "consumer": "light-screen",
@@ -2121,7 +2121,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/light-screen-player-slot2-smokescreen.json",
-   "rawSha256": "1395fb176c9a421d75a5bfe4e176feb2b1470c5d32e32fd3636493ff94ab9c41"
+   "rawSha256": "5d7fbb0baa4b63f3fb4a6cffab93626a4f44c4cad916b412cdd25d9c7c891927"
   },
   {
    "consumer": "light-screen",
@@ -3181,7 +3181,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/light-screen-player-slot2-toxic.json",
-   "rawSha256": "7880e6aacab0ef48e56326d6bd7281fb57b632a7f4a8489295f34aa413c438f6"
+   "rawSha256": "d6b602db4586310c332cca6d0074125fb97de059dcd389f9307dee4e0b1ba3dd"
   },
   {
    "consumer": "light-screen",
@@ -3272,7 +3272,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/light-screen-player-slow.json",
-   "rawSha256": "7672bd81c2fe26e0fd5877ae93deff8225feb1fd70679bd81fe816b289aac5bf"
+   "rawSha256": "71bc2d14f0d596475350a19b239a5f828108da862911085792eb04944173852c"
   },
   {
    "consumer": "light-screen",
@@ -4329,7 +4329,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/light-screen-player-smokescreen-t2.json",
-   "rawSha256": "b2756dc7f2e41c44c92018aebce96ff7676f00eb58813e4a1cb38cd23d7a8f90"
+   "rawSha256": "95b8afe90f3ba87f3ec716afdf8b422004c6c0c2032ae697dfc0a0bdc7cf551a"
   },
   {
    "consumer": "light-screen",
@@ -5386,7 +5386,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/light-screen-player-toxic-t2.json",
-   "rawSha256": "d27279bfab18a28e672f55f5824f5af5f8235598209a271b033c8838eb01c44a"
+   "rawSha256": "cb8301c22cc4a7f2773f6259bf05fc2cb7deea218a04f6a1020cccb7c06eed4a"
   },
   {
    "consumer": "light-screen",
@@ -8746,7 +8746,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/light-screen-opponent-first.json",
-   "rawSha256": "93e676f75a23db993ea1d87893fc29c233aa54f12e1071fc2fe6337ec558bb8f"
+   "rawSha256": "a70ea858bced7edd9a3f851f2013fcfe167ecda4853ef107d70acc1c13e576bd"
   },
   {
    "consumer": "light-screen",
@@ -8837,7 +8837,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/light-screen-opponent-slow.json",
-   "rawSha256": "3b6859ea55ab49450c1301c83de4554002b2da4f18a670f8f2d3547359e6fa9e"
+   "rawSha256": "6b482e2baa4ed3c7ec335caa885f87bde89ef3e77faa91e3be1f8e3838bdc6bf"
   },
   {
    "consumer": "light-screen",
@@ -12198,7 +12198,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/light-screen-opponent-smokescreen-t2.json",
-   "rawSha256": "063421817b432b057867ffb56acb7fb16be2b9cc516bcbfd48bae7988697fd39"
+   "rawSha256": "ffb6c9f2303adec4903109ef9a8d4cd50a0db5c92c0351243251bd524ee55b50"
   },
   {
    "consumer": "light-screen",
@@ -15559,7 +15559,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/light-screen-opponent-toxic-t2.json",
-   "rawSha256": "ae10df388919cf30ff243bd174888c4f36a7f55e3d435fe67937ad72f813f94e"
+   "rawSha256": "e0dba74ed9b3aa15d94ebf16dd01bf70856fc34b92882b460915eaa9fdbc3b79"
   },
   {
    "consumer": "reflect",
@@ -15649,7 +15649,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/reflect-player-first.json",
-   "rawSha256": "34b186008251a28a355182e314269ec95a3e0648c24844cab75a7feead58881b"
+   "rawSha256": "b2925b3951b7fccf5f94e1d553376a5a95ea292e22f03b3f74e8483f6b8199ca"
   },
   {
    "consumer": "reflect",
@@ -15743,7 +15743,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/reflect-player-slot2-smokescreen.json",
-   "rawSha256": "bd2b2f0e598610e41e6eb2bfb486f624eecade7f277bfe1e36a4fe59b3da0add"
+   "rawSha256": "7743d702db01b85a171a1039d85e26e7c593d78a2d30c2a03ecf8881ca1dcd2a"
   },
   {
    "consumer": "reflect",
@@ -15759,7 +15759,7 @@
     []
    ],
    "rawFile": "allocator-consumer-tie-raw/reflect-player-slot2-toxic.json",
-   "rawSha256": "9d2145c981640517ea5e45a0334ddac657d03f584072217e7581276227bf0835"
+   "rawSha256": "b39c4eee51170be036c065a86e709f6e411b76f2a9f3bb2b8bc27fa4b8892a92"
   },
   {
    "consumer": "reflect",
@@ -15849,7 +15849,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/reflect-player-slow.json",
-   "rawSha256": "e20a8d95f37420f7e0bd072f214b62aa4ee9528a4a41510b0c9d7ab9f948fe74"
+   "rawSha256": "5748c3792759a728c894e1f3158a09005e7080ba6c03b94f2f2801f44ea88e47"
   },
   {
    "consumer": "reflect",
@@ -15939,7 +15939,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/reflect-player-smokescreen-t2.json",
-   "rawSha256": "f66bba0946b866049e62d24d7a90a14fb3f4f5ed0ee0a3096722f335e82d4160"
+   "rawSha256": "6c34864895dec146af91881344531d7cc91e3c5a6772706080c041a0e80a09b2"
   },
   {
    "consumer": "reflect",
@@ -16029,7 +16029,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/reflect-player-toxic-t2.json",
-   "rawSha256": "90a2902fad166c8a592600c00b6663cfc988c2c9e5c0458ed10fcf993eac2922"
+   "rawSha256": "a1f918856b350740cd287b5574c880c1b8ad4c09fb89cb902299f60d81bffce5"
   },
   {
    "consumer": "reflect",
@@ -16119,7 +16119,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/reflect-opponent-first.json",
-   "rawSha256": "0c9a914b8b9cf4f0e193c44396ae4add75ef71de3922da86c8c5665d01483829"
+   "rawSha256": "23dd3615a5c323cd3faf37060112ec9915257565ab6294e528bb49ec9e17d2da"
   },
   {
    "consumer": "reflect",
@@ -16209,7 +16209,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/reflect-opponent-slow.json",
-   "rawSha256": "a77661eee41883e580063e3c9f3a4d1aa12ee4050980820291f0c0b461a0830f"
+   "rawSha256": "eeb9375591d22c4b5d0ef1427b6f2e26d7903f16a28da1176a1348c1c461eafc"
   },
   {
    "consumer": "reflect",
@@ -16299,7 +16299,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/reflect-opponent-smokescreen-t2.json",
-   "rawSha256": "9b49edfa15b45f134f65e10d337b18caf1474720ebe6ee93ea475396dec646a2"
+   "rawSha256": "89573c61661a5abb2afb70e362bf4d16c3efe9725d122241d0e30d574a0a8e29"
   },
   {
    "consumer": "reflect",
@@ -16389,7 +16389,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/reflect-opponent-toxic-t2.json",
-   "rawSha256": "8d5e16de2441a22e2c227ce1cd907069e8ad806a2b3a2bd018c4fdfa59736e18"
+   "rawSha256": "c6fa2c5252112b01fd83a5bb0df62c0b117d42b3e2139c7c40189c0f918c6031"
   },
   {
    "consumer": "barrier",
@@ -17062,7 +17062,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/barrier-player-first.json",
-   "rawSha256": "98f2fd52e531d2ee19f1b5f2dcaa9a87233e3455a6e80d975fa5147186778a56"
+   "rawSha256": "ec84a4763307ca384cc0b6dc859442f9ff048916d12d46c3307c21a7f753fc84"
   },
   {
    "consumer": "barrier",
@@ -17738,7 +17738,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/barrier-player-slot2-smokescreen.json",
-   "rawSha256": "681b0d7841e979d3acef25c1dd28ffb8ac3e397703769ef740dcd55d7cc4216c"
+   "rawSha256": "a4bb558b31b9cf7e88c5a72a5b2ade5676e50430d9659551a8ed0c77262f20f1"
   },
   {
    "consumer": "barrier",
@@ -18412,7 +18412,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/barrier-player-slot2-toxic.json",
-   "rawSha256": "4e3c4db52521d7ea07ded4450029b074fcb454b8515783c0f1c8b264915c2ac0"
+   "rawSha256": "d45bcdf3bbef5d6fde22ff1156f322d68b52da42391dc148cec44db02634a41b"
   },
   {
    "consumer": "barrier",
@@ -18500,7 +18500,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/barrier-player-slow.json",
-   "rawSha256": "8ea59640bd4f92947445d9669e27ace371609d13d054e3d07e4f9ef6061f302e"
+   "rawSha256": "e91a4074f54ea516ab9cb1f989b233f850c8878f59cbb23c7576f14ceb579987"
   },
   {
    "consumer": "barrier",
@@ -19835,7 +19835,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/barrier-player-smokescreen-t2.json",
-   "rawSha256": "9f766735821b4b88059f663812b29f71aefd9441a7da7a25166e21734d185916"
+   "rawSha256": "fdd223c563cff564ff545471a0b233503b24cb698eb24a5f6a4b5d2c738a234e"
   },
   {
    "consumer": "barrier",
@@ -20509,7 +20509,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/barrier-player-toxic-t2.json",
-   "rawSha256": "9d340af580e4a15f95155bbd60abae53e5e50c468371d02ecc0b2083e9fab6ea"
+   "rawSha256": "b3be1d6a1e3531cd9238dd71356cc362e71eeee71a96c5490fa31ff9f43f067c"
   },
   {
    "consumer": "barrier",
@@ -23070,7 +23070,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/barrier-opponent-first.json",
-   "rawSha256": "dd376e87edca7ed25b75e008a05913925cdb8b841cbec187b6de989145c48711"
+   "rawSha256": "a79a5c5f5cba6f494ac1096f4788acf47d1b21e6e6380a6ee5b969743a53cbf5"
   },
   {
    "consumer": "barrier",
@@ -23158,7 +23158,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/barrier-opponent-slow.json",
-   "rawSha256": "5514ad15ba0229f16db448a934cc1b12223d405db97b752e2e69343808ad072c"
+   "rawSha256": "d65c9d0c6636e5190dfa7889257794f3c9e3873d984dfb030d1ecceb09d3c7ab"
   },
   {
    "consumer": "barrier",
@@ -28269,7 +28269,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/barrier-opponent-smokescreen-t2.json",
-   "rawSha256": "af79d6f00d4737db4feae2ef03e4cc37312c5b883d685f34cf44542c29175508"
+   "rawSha256": "cfbee6c732119005956b7547e98a468a1f38114a4821e569021ed9e15b14785c"
   },
   {
    "consumer": "barrier",
@@ -30831,7 +30831,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/barrier-opponent-toxic-t2.json",
-   "rawSha256": "84080445d3cd938226740c343f0d15b71157e3057b798279847fde9cec4f8536"
+   "rawSha256": "0d49c9e1de01988a7cd1032bd425302b12cf3461b7c2c5ff15fca19943819a3c"
   },
   {
    "consumer": "magic-coat",
@@ -30919,7 +30919,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/magic-coat-player-first.json",
-   "rawSha256": "c2c110c764ba56977f155941045706b71f06c0b973299c46cf0d8bb19ba01a22"
+   "rawSha256": "4daf825b1c02f318ba606c09004a4bfb2738048c7e59b07faaa74714b7601686"
   },
   {
    "consumer": "magic-coat",
@@ -31011,7 +31011,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/magic-coat-player-slot2-smokescreen.json",
-   "rawSha256": "39c2e93e0192776ad4a21795534e0cc3846d880e00fe1fb2719d998a43a4a0d4"
+   "rawSha256": "6271097277f075e8a7c2e1bbb8f2fead169a96ab68c387544f9cd6a44e87cf15"
   },
   {
    "consumer": "magic-coat",
@@ -31027,7 +31027,7 @@
     []
    ],
    "rawFile": "allocator-consumer-tie-raw/magic-coat-player-slot2-toxic.json",
-   "rawSha256": "24e210ea3f1fe469a84e1b8ab07b03b77ef46b8b34473878c5ac50ff65cb5889"
+   "rawSha256": "2503dee19611fa60be0f4f0bfd5ee6c796c65ffac400f22ed2bb19a0697d090f"
   },
   {
    "consumer": "magic-coat",
@@ -31698,7 +31698,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/magic-coat-player-slow.json",
-   "rawSha256": "6a167a27258784b282d5270d6b5828970e3bdc5fb1747db6ef5c4356738b9f46"
+   "rawSha256": "842f96438fcf952c80edbc1704f9168df1c27a899943285ca3c87ee2e4bbcf60"
   },
   {
    "consumer": "magic-coat",
@@ -31786,7 +31786,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/magic-coat-player-smokescreen-t2.json",
-   "rawSha256": "643726dfb5bb5cfccea8d96e5fa3324d358fcc9d3b3df18b1d64d21c4570e2a9"
+   "rawSha256": "0a23fbf9c1e687d70797e0f811ef2864dfb14f4aeb2c529244d9063e8ae462e4"
   },
   {
    "consumer": "magic-coat",
@@ -31874,7 +31874,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/magic-coat-player-toxic-t2.json",
-   "rawSha256": "59147943e88051dfae5d27b0772c44cdef27328c57d3a7483be03592183077b7"
+   "rawSha256": "7957f7cd7fb2ae240c20e09d35fff3228c2b549c075c666c0f84f82c28c95402"
   },
   {
    "consumer": "magic-coat",
@@ -31962,7 +31962,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/magic-coat-opponent-first.json",
-   "rawSha256": "e43224f3ce501bbcfc91a4d52bd70d3cf8a92b503f90a7b2aacaaad8bd0b85ee"
+   "rawSha256": "c16776fb025dec9f9242c0d8dd8f02239db34e574768a2df749d94d1454aad49"
   },
   {
    "consumer": "magic-coat",
@@ -34521,7 +34521,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/magic-coat-opponent-slow.json",
-   "rawSha256": "e68841717d534ba6d6adc6876249ec00eb9ac3424219ab7e79291994aa662f44"
+   "rawSha256": "78ac8b947d8c1f82303bc558ab77724407719d2418a486defdd590a5c28b4be5"
   },
   {
    "consumer": "magic-coat",
@@ -34609,7 +34609,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/magic-coat-opponent-smokescreen-t2.json",
-   "rawSha256": "b7ada26e75c88ae78aabfe724292fe4456f8d1be5975e7d1b38bf6da725c4b44"
+   "rawSha256": "ad4f995e5bd560eb3112eb83cacef041827648af3b7b68e15d21919283ccb94a"
   },
   {
    "consumer": "magic-coat",
@@ -34697,7 +34697,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/magic-coat-opponent-toxic-t2.json",
-   "rawSha256": "06372b2c84572e3db1ad8393b7303f4c76867bdd20acb0a2775915da4f2fe2a0"
+   "rawSha256": "27c35c2df63f0eed4b4303bbe42bbae068a56af92ae032bcd938db8f373ec226"
   },
   {
    "consumer": "protect",
@@ -34785,7 +34785,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/protect-player-first.json",
-   "rawSha256": "ffbd16235a75a8e7fbf3ba4f4a2d12199e1cc0c1a0027889fa61d923a5b49d92"
+   "rawSha256": "71779e0ecec3a4b6f0011373e1c6ed02e0491d348e33c91f71e3476fc82ae337"
   },
   {
    "consumer": "protect",
@@ -34801,7 +34801,7 @@
     []
    ],
    "rawFile": "allocator-consumer-tie-raw/protect-player-slot2-smokescreen.json",
-   "rawSha256": "20bdca3bc60b62d311b68beb196eb95e2b096e60bcaabbd6c07b6af603b9ff09"
+   "rawSha256": "adc73268e9868ba5f533accf38c6f42783b30562e3d297bfc4e0dc07ae2f77b4"
   },
   {
    "consumer": "protect",
@@ -34817,7 +34817,7 @@
     []
    ],
    "rawFile": "allocator-consumer-tie-raw/protect-player-slot2-toxic.json",
-   "rawSha256": "bd4fd902c0ec35ac816b0560960a7441deaaca03c428595fe1934b9787859a92"
+   "rawSha256": "1e13062a49cce3c45718bc3ed6c5e3aaf7d982bd101410f0eb427785e0355834"
   },
   {
    "consumer": "protect",
@@ -38864,7 +38864,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/protect-player-slow.json",
-   "rawSha256": "16ac950f8700bc0771a2ff81ce9ae7e585beaf2c1e20abbeb29365100825e5fb"
+   "rawSha256": "41ded3e5458c845d50d3463a2c67cb1c0f980ed6c911d9842718c6a56a8a36ee"
   },
   {
    "consumer": "protect",
@@ -39025,7 +39025,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/protect-player-smokescreen-t2.json",
-   "rawSha256": "16a45bf9763dbc28afd5efd6d649d08e3011399e32a37ee55d406ca194e2dfdf"
+   "rawSha256": "d2ebc7190e85c8abf6d4d9daea049a0286f3185a4ab7cfbca70cb3aa59271af6"
   },
   {
    "consumer": "protect",
@@ -39186,7 +39186,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/protect-player-toxic-t2.json",
-   "rawSha256": "294ae57867a3b1914f62afa9eac5906f028ac4bd224901197cf4ff3bc00a08ec"
+   "rawSha256": "bb6ec3fa5ad359387c22702a8c5d881977a3f2f8c14f4fbcd3fb8c46bdbf6d8a"
   },
   {
    "consumer": "protect",
@@ -39274,7 +39274,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/protect-opponent-first.json",
-   "rawSha256": "e78f8094ec60f503fe692c0b31364358510fabc6b710e3d5943851ac2c97a520"
+   "rawSha256": "b75437c7703ecb4ee95acf86ba3ed2e45a83e6fa945636bf4e8693432031cf77"
   },
   {
    "consumer": "protect",
@@ -43321,7 +43321,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/protect-opponent-slow.json",
-   "rawSha256": "3e837ab55c1e8cb3cb10b3e7471ad510ea4ab4ed8a32791bd3d6fd5244dfcc91"
+   "rawSha256": "bd10f4828931394fc0d0ab259c65967f58b5848086054cf3a47b73f998107f37"
   },
   {
    "consumer": "protect",
@@ -43482,7 +43482,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/protect-opponent-smokescreen-t2.json",
-   "rawSha256": "e5bab7835a67c039f32f9a94cebfd24143fd9a0f2f008b81a7908690e9ea1155"
+   "rawSha256": "41c7284f53e1931776337687a9bd24075d9c513872fd7c3d2787aef6bd07a66d"
   },
   {
    "consumer": "protect",
@@ -43643,7 +43643,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/protect-opponent-toxic-t2.json",
-   "rawSha256": "f6f15f9d155bda66e1447245ab19b47c0c95c87c4440328df6fbae5fae4381be"
+   "rawSha256": "3cce19e06d671ca3b8ff2dfd8c7a4dfd07bed542910fa3dd18a209a38cfa9de1"
   },
   {
    "consumer": "mirror-coat",
@@ -43736,7 +43736,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/mirror-coat-player-first.json",
-   "rawSha256": "48f16b724d3ed4907ab52c5f2f7745b91e62a61949852f1ad141e5418f6d0d98"
+   "rawSha256": "761d63c4c1e1f34248862817b82e30d8b400539f1b76ac40fe53b0e3fc127ef5"
   },
   {
    "consumer": "mirror-coat",
@@ -43829,7 +43829,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/mirror-coat-player-t2.json",
-   "rawSha256": "cbeeed3ee43a09d119237786b00c239fbc2341beca5fd2bae5020e8c7950e96d"
+   "rawSha256": "9955d689a74442b529a0136f102682104bd7148d05b833688981cddc2d115c06"
   },
   {
    "consumer": "mirror-coat",
@@ -43922,7 +43922,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/mirror-coat-opponent-first.json",
-   "rawSha256": "4bf35c2a9589c0b0ece53f33097f966b0b0f0d72888d3b1be50b435ecf5c7935"
+   "rawSha256": "02030626613dfb2d52f1a924472ea8c2a0c5992677f3d0cbe7da82bcd7db493f"
   },
   {
    "consumer": "mirror-coat",
@@ -44093,7 +44093,7 @@
     ]
    ],
    "rawFile": "allocator-consumer-tie-raw/mirror-coat-opponent-t2.json",
-   "rawSha256": "6e59934fb5e7a5af34ca9ea080540bc686b20478800dc83f81b0becc78d57ec1"
+   "rawSha256": "da2c8bbd8f0ed12aafe090abf08964755afc4e33c0af0876085f5c03aa3711d5"
   }
  ]
 }
