@@ -62,6 +62,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   114, 115, 122, 124, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 182, 186, 188, 201, 204,
   208, 211, 213, 223, 227, 231, 232, 235, 242, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287, 290, 302,
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
+  56, 61, 197, 238, 259, 294, 341,
 ] as const);
 
 export interface LiveBattlerAnchors {
@@ -197,6 +198,13 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 208: return 186; // Milk Drink bottle/ring/star body through cleanup.
     case 186: return SWEET_KISS_FRAME_COUNT;
     case 188: return 160; // Sludge Bomb source body through its final row.
+    case 56: return 141; // Hydro Pump source body through its final row.
+    case 61: return 239; // Bubble Beam source body through its final row.
+    case 197: return 110; // Detect source body through its final row.
+    case 238: return 88; // Cross Chop source body through its final row.
+    case 259: return 177; // Torment source body through its final row.
+    case 294: return 203; // Tail Glow source body through its final row.
+    case 341: return 145; // Mud Shot source body through its final row.
     case 204: return CHARM_BODY_FRAME_COUNT;
     case 213: return ATTRACT_FRAME_COUNT;
     case 227: return ENCORE_END_AGE + 1;
@@ -351,6 +359,33 @@ export function liveMoveAnimationPresentation(
       break;
     case 334:
       config = { move: "IRON_DEFENSE", attacker, target, fieldProfile, attackerSpriteCenter: attackerAnchors.spriteCenter };
+      break;
+    case 56: case 61: case 341: {
+      const move = request.moveId === 56 ? "HYDRO_PUMP" : request.moveId === 61 ? "BUBBLE_BEAM" : "MUD_SHOT";
+      config = {
+        move, attacker, target, fieldProfile,
+        attackerPictureOffset: attackerAnchors.picOffsetPoint,
+        targetPictureOffset: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+      };
+      break;
+    }
+    case 238:
+      config = { move: "CROSS_CHOP", attacker, target, fieldProfile,
+        targetPictureOffset: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint };
+      break;
+    case 197:
+      config = { move: "DETECT", attacker, target, fieldProfile,
+        attackerPictureOffset: attackerAnchors.picOffsetPoint };
+      break;
+    case 294:
+      config = { move: "TAIL_GLOW", attacker, target, fieldProfile,
+        attackerPictureOffset: attackerAnchors.picOffsetPoint };
+      break;
+    case 259:
+      config = { move: "TORMENT", attacker, target, fieldProfile,
+        attackerPictureOffset: attackerAnchors.picOffsetPoint,
+        targetPictureOffset: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+        battlerHeight: attackerAnchors.pictureHeight };
       break;
     case 232:
       config = { move: "METAL_CLAW", attacker, target, fieldProfile, attackerSpriteCenter: attackerAnchors.spriteCenter };
