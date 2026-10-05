@@ -1,0 +1,109 @@
+{
+  "schema": "order-consumer-adapter-draft/v1",
+  "move": "FLAMETHROWER",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "scenario": "tools/battle-lab/mechanic-flamethrower-player-onix-opponent-murkrow.json",
+  "attacker": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player"
+    }
+  },
+  "target": {
+    "species": "MURKROW",
+    "geometry": {
+      "side": "opponent"
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 142,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "orientation": "player-back ONIX -> opponent-front MURKROW",
+  "denseWindow": {
+    "startFrame": 406,
+    "endFrame": 520,
+    "ageOffset": 0
+  },
+  "draft": {
+    "activationFrame": 391,
+    "scriptEndFirstInactive": 600,
+    "shadowRow": -15,
+    "shadowRowInMap": false,
+    "expectedDuration": 115,
+    "consumedByTest": false,
+    "acceptedWindow": {
+      "startFrame": 395,
+      "endFrame": 520,
+      "firstFramePresentationAge": -11
+    },
+    "windowEndMinusScriptEnd": -80,
+    "derivedAttacker": {
+      "animationCenter": {
+        "x": 72,
+        "y": 88
+      },
+      "battlePositionCenter": {
+        "x": 72,
+        "y": 80
+      }
+    },
+    "verdict": "READY-WITH-PROVIDER",
+    "orderField": "animationProfile.spriteOrderSeed (relative order of animationProfile.flameSpriteSlots; flamethrower.ts:22-34 geometry, :93-110 createSpriteOrderState)",
+    "orderProviderCall": "F at the frame before the first flame create, filtered to flameSpriteSlots: provider.free.filter(s => flameSpriteSlots.includes(s)) (NOT free.slice(0, n): the first-8 of F is [4,3,21,20,..], the 8 lowest-free slots are 3,4,5,7,9..12)",
+    "orderMeasurement": "order-consumer-seeds.json: provider == accepted literal == observed on 2/2; order-consumer-seed-sensitivity.json: 5 alternative seeds change 0/130 ages (flames are created one per sort window)",
+    "orderValidation": {
+      "providerValid": true,
+      "edgeMatchesObserved": true,
+      "firstCreateFrame": 2412,
+      "firstCreateMatchesObserved": true,
+      "acceptedLiteralSource": "tools/compare/fixtures/flamethrower-player-onix-opponent-murkrow.json animationProfile.spriteOrderSeed",
+      "providerMatchesLiteral": true,
+      "observedMatchesLiteral": true,
+      "frameChecked": 2411,
+      "framesLiteralEqualsProvider": [
+        [
+          2395,
+          2411
+        ]
+      ],
+      "occupiedPrefixEqualsObserved": null,
+      "matchBeforeEachCreateWindow": [
+        [
+          2412,
+          1,
+          true
+        ],
+        [
+          2416,
+          1,
+          false
+        ],
+        [
+          2420,
+          1,
+          false
+        ],
+        [
+          2424,
+          1,
+          false
+        ],
+        [
+          2428,
+          1,
+          false
+        ],
+        [
+          2432,
+          1,
+          false
+        ]
+      ]
+    },
+    "pins": "tools/integration/fixtures/order-consumer-pins.json"
+  }
+}

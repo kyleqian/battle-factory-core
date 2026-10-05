@@ -1,0 +1,89 @@
+{
+  "schema": "order-consumer-adapter-draft/v1",
+  "move": "BLAZE_KICK",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "scenario": "tools/battle-lab/mechanic-blaze-kick-opponent-onix-player-murkrow.json",
+  "attacker": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent"
+    }
+  },
+  "target": {
+    "species": "MURKROW",
+    "geometry": {
+      "side": "player"
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 142,
+    "opponentHp": 69,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "orientation": "opponent-front ONIX -> player-back MURKROW",
+  "denseWindow": {
+    "startFrame": 453,
+    "endFrame": 530,
+    "ageOffset": 0
+  },
+  "draft": {
+    "activationFrame": 443,
+    "scriptEndFirstInactive": 539,
+    "shadowRow": -10,
+    "shadowRowInMap": false,
+    "expectedDuration": 78,
+    "consumedByTest": false,
+    "acceptedWindow": {
+      "startFrame": 453,
+      "endFrame": 530,
+      "firstFramePresentationAge": 0
+    },
+    "windowEndMinusScriptEnd": -9,
+    "derivedAttacker": {
+      "animationCenter": {
+        "x": 176,
+        "y": 42
+      },
+      "battlePositionCenter": {
+        "x": 176,
+        "y": 40
+      }
+    },
+    "verdict": "READY-WITH-PROVIDER",
+    "orderField": "animationProfile.spriteOrderSeed (relative order of animationProfile.spriteSlots; blazeKick.ts:37, :226)",
+    "orderProviderCall": "F before the first create (frame body+19/+... see seeds receipt, creates [3]) filtered to spriteSlots [3,4,5,7,9..14]",
+    "orderMeasurement": "order-consumer-seeds.json: provider == literal == observed 2/2; seed sensitivity: reversed/ascending seeds change 8 ages, swap(3,4) 0. Own body is NEEDS-KEYS (cannot precede another order consumer)",
+    "orderValidation": {
+      "providerValid": true,
+      "edgeMatchesObserved": true,
+      "firstCreateFrame": 2462,
+      "firstCreateMatchesObserved": true,
+      "acceptedLiteralSource": "tools/compare/fixtures/blaze-kick-opponent-onix-player-murkrow.json animationProfile.spriteOrderSeed",
+      "providerMatchesLiteral": true,
+      "observedMatchesLiteral": true,
+      "frameChecked": 2461,
+      "framesLiteralEqualsProvider": [
+        [
+          2447,
+          2461
+        ]
+      ],
+      "occupiedPrefixEqualsObserved": null,
+      "matchBeforeEachCreateWindow": [
+        [
+          2462,
+          1,
+          true
+        ],
+        [
+          2494,
+          9,
+          false
+        ]
+      ]
+    },
+    "pins": "tools/integration/fixtures/order-consumer-pins.json"
+  }
+}

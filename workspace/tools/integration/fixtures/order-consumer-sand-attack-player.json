@@ -1,0 +1,100 @@
+{
+  "schema": "order-consumer-adapter-draft/v1",
+  "move": "SAND_ATTACK",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "scenario": "tools/battle-lab/mechanic-sand-attack-player-pidgeotto-onix.json",
+  "attacker": {
+    "species": "PIDGEOTTO",
+    "geometry": {
+      "side": "player"
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent"
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 156,
+    "opponentHp": 117,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "orientation": "player-back PIDGEOTTO -> opponent-front ONIX",
+  "denseWindow": {
+    "startFrame": 46,
+    "endFrame": 314,
+    "ageOffset": 7
+  },
+  "draft": {
+    "activationFrame": 78,
+    "scriptEndFirstInactive": 136,
+    "shadowRow": 39,
+    "shadowRowInMap": true,
+    "expectedDuration": 276,
+    "consumedByTest": false,
+    "acceptedWindow": {
+      "startFrame": 46,
+      "endFrame": 314,
+      "firstFramePresentationAge": 7
+    },
+    "windowEndMinusScriptEnd": 178,
+    "derivedAttacker": {},
+    "verdict": "READY-WITH-PROVIDER",
+    "orderField": "animationProfile.spriteOrderSeed (64 entries; sandAttack.ts:13, :89)",
+    "orderProviderCall": "same as Mud Slap: [...occupiedPrefix, ...F after the body plan prefix up to the 6-slot dirt window]. The accepted literal (head [4,3,..]) equals F BEFORE the transient slot-3 create, i.e. it is NOT F at the 6-slot allocation (head [3,4,..]); pixel-neutral (swap 0/150 ages)",
+    "orderMeasurement": "order-consumer-seeds.json: literal == provider == observed at the first create window, != at the 6-slot window; seed sensitivity: acceptedWith34Swapped 0 differing ages, other permutations 10-41",
+    "orderValidation": {
+      "providerValid": true,
+      "edgeMatchesObserved": true,
+      "firstCreateFrame": 2091,
+      "firstCreateMatchesObserved": true,
+      "acceptedLiteralSource": "tools/compare/fixtures/sand-attack-player-pidgeotto-onix.json animationProfile.spriteOrderSeed",
+      "providerMatchesLiteral": true,
+      "observedMatchesLiteral": true,
+      "frameChecked": 2090,
+      "framesLiteralEqualsProvider": [
+        [
+          2082,
+          2090
+        ]
+      ],
+      "occupiedPrefixEqualsObserved": true,
+      "matchBeforeEachCreateWindow": [
+        [
+          2091,
+          1,
+          true
+        ],
+        [
+          2096,
+          6,
+          false
+        ],
+        [
+          2100,
+          5,
+          false
+        ],
+        [
+          2104,
+          5,
+          false
+        ],
+        [
+          2108,
+          5,
+          false
+        ],
+        [
+          2112,
+          5,
+          false
+        ]
+      ]
+    },
+    "pins": "tools/integration/fixtures/order-consumer-pins.json"
+  }
+}

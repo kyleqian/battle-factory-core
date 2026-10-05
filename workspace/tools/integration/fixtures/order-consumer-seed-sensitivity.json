@@ -1,0 +1,760 @@
+[
+ {
+  "label": "flamethrower-player-onix-opponent-murkrow",
+  "agesRendered": 130,
+  "move": "FLAMETHROWER",
+  "acceptedSeed": [
+   3,
+   10,
+   9,
+   7,
+   5,
+   4,
+   12,
+   11
+  ],
+  "providerSeed": [
+   3,
+   10,
+   9,
+   7,
+   5,
+   4,
+   12,
+   11
+  ],
+  "providerEqualsAccepted": true,
+  "alternatives": {
+   "providerFAtFirstAlloc": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "swap34": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "reversed": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "ascending": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "rotated3": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   }
+  }
+ },
+ {
+  "label": "flamethrower-opponent-onix-player-murkrow",
+  "agesRendered": 130,
+  "move": "FLAMETHROWER",
+  "acceptedSeed": [
+   3,
+   4,
+   5,
+   12,
+   11,
+   10,
+   9,
+   7
+  ],
+  "providerSeed": [
+   3,
+   4,
+   5,
+   12,
+   11,
+   10,
+   9,
+   7
+  ],
+  "providerEqualsAccepted": true,
+  "alternatives": {
+   "providerFAtFirstAlloc": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "swap34": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "reversed": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "ascending": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "rotated3": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   }
+  }
+ },
+ {
+  "label": "blaze-kick-player-onix-opponent-murkrow",
+  "agesRendered": 80,
+  "move": "BLAZE_KICK",
+  "acceptedSeed": [
+   3,
+   10,
+   9,
+   7,
+   5,
+   4,
+   14,
+   13,
+   12,
+   11
+  ],
+  "providerSeed": [
+   3,
+   10,
+   9,
+   7,
+   5,
+   4,
+   14,
+   13,
+   12,
+   11
+  ],
+  "providerEqualsAccepted": true,
+  "alternatives": {
+   "providerFAtFirstAlloc": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "swap34": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "reversed": {
+    "agesDrawOrderDiffers": 8,
+    "agesFlippedPairOverlaps16": 0,
+    "first": {
+     "age": 35,
+     "accepted": [
+      11,
+      13,
+      14,
+      10,
+      12,
+      7,
+      9,
+      4,
+      3
+     ],
+     "alt": [
+      10,
+      14,
+      13,
+      11,
+      9,
+      7,
+      12,
+      4,
+      3
+     ]
+    }
+   },
+   "ascending": {
+    "agesDrawOrderDiffers": 8,
+    "agesFlippedPairOverlaps16": 0,
+    "first": {
+     "age": 35,
+     "accepted": [
+      11,
+      13,
+      14,
+      10,
+      12,
+      7,
+      9,
+      4,
+      3
+     ],
+     "alt": [
+      14,
+      13,
+      11,
+      10,
+      12,
+      9,
+      7,
+      4,
+      3
+     ]
+    }
+   },
+   "rotated3": {
+    "agesDrawOrderDiffers": 3,
+    "agesFlippedPairOverlaps16": 0,
+    "first": {
+     "age": 35,
+     "accepted": [
+      11,
+      13,
+      14,
+      10,
+      12,
+      7,
+      9,
+      4,
+      3
+     ],
+     "alt": [
+      10,
+      11,
+      13,
+      14,
+      9,
+      12,
+      7,
+      4,
+      3
+     ]
+    }
+   }
+  }
+ },
+ {
+  "label": "blaze-kick-opponent-onix-player-murkrow",
+  "agesRendered": 80,
+  "move": "BLAZE_KICK",
+  "acceptedSeed": [
+   3,
+   4,
+   5,
+   14,
+   13,
+   12,
+   11,
+   10,
+   9,
+   7
+  ],
+  "providerSeed": [
+   3,
+   4,
+   5,
+   14,
+   13,
+   12,
+   11,
+   10,
+   9,
+   7
+  ],
+  "providerEqualsAccepted": true,
+  "alternatives": {
+   "providerFAtFirstAlloc": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "swap34": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "reversed": {
+    "agesDrawOrderDiffers": 8,
+    "agesFlippedPairOverlaps16": 0,
+    "first": {
+     "age": 35,
+     "accepted": [
+      10,
+      11,
+      13,
+      14,
+      7,
+      9,
+      12,
+      4,
+      3
+     ],
+     "alt": [
+      14,
+      13,
+      11,
+      10,
+      12,
+      9,
+      7,
+      4,
+      3
+     ]
+    }
+   },
+   "ascending": {
+    "agesDrawOrderDiffers": 8,
+    "agesFlippedPairOverlaps16": 0,
+    "first": {
+     "age": 35,
+     "accepted": [
+      10,
+      11,
+      13,
+      14,
+      7,
+      9,
+      12,
+      4,
+      3
+     ],
+     "alt": [
+      14,
+      13,
+      11,
+      10,
+      12,
+      9,
+      7,
+      4,
+      3
+     ]
+    }
+   },
+   "rotated3": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   }
+  }
+ },
+ {
+  "label": "rock-throw-player-graveler-opponent-onix",
+  "agesRendered": 90,
+  "move": "ROCK_THROW",
+  "providerFreeTailEqualsAccepted": true,
+  "alternatives": {
+   "swap34": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "reversed": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "ascending": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "rotated3": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "providerFAtFirstAlloc": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   }
+  }
+ },
+ {
+  "label": "rock-throw-opponent-graveler-player-onix",
+  "agesRendered": 90,
+  "move": "ROCK_THROW",
+  "providerFreeTailEqualsAccepted": true,
+  "alternatives": {
+   "swap34": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "reversed": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "ascending": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "rotated3": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "providerFAtFirstAlloc": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   }
+  }
+ },
+ {
+  "label": "mud-slap-player-pidgeotto-onix",
+  "agesRendered": 150,
+  "move": "MUD_SLAP",
+  "acceptedFreeTailHead": [
+   3,
+   4,
+   21,
+   20
+  ],
+  "sixSlotWindowFrame": 2092,
+  "note": "acceptedWith34Swapped = the other of the two real F heads (4,3 vs 3,4)",
+  "alternatives": {
+   "swap34": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "reversed": {
+    "agesDrawOrderDiffers": 40,
+    "agesFlippedPairOverlaps16": 40,
+    "first": {
+     "age": 52,
+     "accepted": [
+      7,
+      10,
+      9,
+      5,
+      4
+     ],
+     "alt": [
+      10,
+      7,
+      4,
+      5,
+      9
+     ]
+    }
+   },
+   "ascending": {
+    "agesDrawOrderDiffers": 21,
+    "agesFlippedPairOverlaps16": 21,
+    "first": {
+     "age": 52,
+     "accepted": [
+      7,
+      10,
+      9,
+      5,
+      4
+     ],
+     "alt": [
+      10,
+      7,
+      9,
+      5,
+      4
+     ]
+    }
+   },
+   "rotated3": {
+    "agesDrawOrderDiffers": 22,
+    "agesFlippedPairOverlaps16": 22,
+    "first": {
+     "age": 52,
+     "accepted": [
+      7,
+      10,
+      9,
+      5,
+      4
+     ],
+     "alt": [
+      7,
+      10,
+      4,
+      9,
+      5
+     ]
+    }
+   },
+   "acceptedWith34Swapped": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   }
+  }
+ },
+ {
+  "label": "mud-slap-pidgeotto-onix",
+  "agesRendered": 150,
+  "move": "MUD_SLAP",
+  "acceptedFreeTailHead": [
+   3,
+   4,
+   21,
+   20
+  ],
+  "sixSlotWindowFrame": 2096,
+  "note": "acceptedWith34Swapped = the other of the two real F heads (4,3 vs 3,4)",
+  "alternatives": {
+   "swap34": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "reversed": {
+    "agesDrawOrderDiffers": 41,
+    "agesFlippedPairOverlaps16": 41,
+    "first": {
+     "age": 52,
+     "accepted": [
+      7,
+      9,
+      10,
+      5,
+      4
+     ],
+     "alt": [
+      7,
+      4,
+      5,
+      10,
+      9
+     ]
+    }
+   },
+   "ascending": {
+    "agesDrawOrderDiffers": 28,
+    "agesFlippedPairOverlaps16": 28,
+    "first": {
+     "age": 52,
+     "accepted": [
+      7,
+      9,
+      10,
+      5,
+      4
+     ],
+     "alt": [
+      7,
+      10,
+      9,
+      5,
+      4
+     ]
+    }
+   },
+   "rotated3": {
+    "agesDrawOrderDiffers": 21,
+    "agesFlippedPairOverlaps16": 21,
+    "first": {
+     "age": 52,
+     "accepted": [
+      7,
+      9,
+      10,
+      5,
+      4
+     ],
+     "alt": [
+      7,
+      4,
+      9,
+      10,
+      5
+     ]
+    }
+   },
+   "acceptedWith34Swapped": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   }
+  }
+ },
+ {
+  "label": "sand-attack-player-pidgeotto-onix",
+  "agesRendered": 150,
+  "move": "SAND_ATTACK",
+  "acceptedFreeTailHead": [
+   4,
+   3,
+   21,
+   20
+  ],
+  "sixSlotWindowFrame": 2096,
+  "note": "acceptedWith34Swapped = the other of the two real F heads (4,3 vs 3,4)",
+  "alternatives": {
+   "swap34": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "reversed": {
+    "agesDrawOrderDiffers": 41,
+    "agesFlippedPairOverlaps16": 41,
+    "first": {
+     "age": 56,
+     "accepted": [
+      7,
+      9,
+      10,
+      5,
+      4
+     ],
+     "alt": [
+      7,
+      4,
+      5,
+      10,
+      9
+     ]
+    }
+   },
+   "ascending": {
+    "agesDrawOrderDiffers": 13,
+    "agesFlippedPairOverlaps16": 13,
+    "first": {
+     "age": 56,
+     "accepted": [
+      7,
+      9,
+      10,
+      5,
+      4
+     ],
+     "alt": [
+      7,
+      10,
+      9,
+      5,
+      4
+     ]
+    }
+   },
+   "rotated3": {
+    "agesDrawOrderDiffers": 21,
+    "agesFlippedPairOverlaps16": 21,
+    "first": {
+     "age": 56,
+     "accepted": [
+      7,
+      9,
+      10,
+      5,
+      4
+     ],
+     "alt": [
+      7,
+      4,
+      9,
+      10,
+      5
+     ]
+    }
+   },
+   "acceptedWith34Swapped": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   }
+  }
+ },
+ {
+  "label": "sand-attack-pidgeotto-onix",
+  "agesRendered": 150,
+  "move": "SAND_ATTACK",
+  "acceptedFreeTailHead": [
+   4,
+   3,
+   21,
+   20
+  ],
+  "sixSlotWindowFrame": 2100,
+  "note": "acceptedWith34Swapped = the other of the two real F heads (4,3 vs 3,4)",
+  "alternatives": {
+   "swap34": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   },
+   "reversed": {
+    "agesDrawOrderDiffers": 39,
+    "agesFlippedPairOverlaps16": 39,
+    "first": {
+     "age": 56,
+     "accepted": [
+      10,
+      4,
+      7,
+      9,
+      5
+     ],
+     "alt": [
+      4,
+      10,
+      5,
+      9,
+      7
+     ]
+    }
+   },
+   "ascending": {
+    "agesDrawOrderDiffers": 30,
+    "agesFlippedPairOverlaps16": 30,
+    "first": {
+     "age": 56,
+     "accepted": [
+      10,
+      4,
+      7,
+      9,
+      5
+     ],
+     "alt": [
+      10,
+      4,
+      9,
+      7,
+      5
+     ]
+    }
+   },
+   "rotated3": {
+    "agesDrawOrderDiffers": 10,
+    "agesFlippedPairOverlaps16": 10,
+    "first": {
+     "age": 56,
+     "accepted": [
+      10,
+      4,
+      7,
+      9,
+      5
+     ],
+     "alt": [
+      4,
+      10,
+      7,
+      9,
+      5
+     ]
+    }
+   },
+   "acceptedWith34Swapped": {
+    "agesDrawOrderDiffers": 0,
+    "agesFlippedPairOverlaps16": 0,
+    "first": null
+   }
+  }
+ }
+]

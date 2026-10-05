@@ -1,0 +1,560 @@
+[
+ {
+  "move": "EMBER",
+  "id": 52,
+  "side": "player",
+  "activation": 384,
+  "scriptEndFirstInactive": 453,
+  "window": [
+   388,
+   450
+  ],
+  "ageOffset": 0,
+  "shadowRow": -4,
+  "shadowRowInMap": false,
+  "rowsInWindow": 63,
+  "expectedDuration": 63,
+  "windowEndMinusScriptEnd": -3,
+  "verdict": "READY (provider-independent)",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": null
+ },
+ {
+  "move": "EMBER",
+  "id": 52,
+  "side": "opponent",
+  "activation": 438,
+  "scriptEndFirstInactive": 507,
+  "window": [
+   442,
+   504
+  ],
+  "ageOffset": 0,
+  "shadowRow": -4,
+  "shadowRowInMap": false,
+  "rowsInWindow": 63,
+  "expectedDuration": 63,
+  "windowEndMinusScriptEnd": -3,
+  "verdict": "READY (provider-independent)",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": null
+ },
+ {
+  "move": "FLAMETHROWER",
+  "id": 53,
+  "side": "player",
+  "activation": 391,
+  "scriptEndFirstInactive": 600,
+  "window": [
+   395,
+   520
+  ],
+  "ageOffset": -11,
+  "shadowRow": -15,
+  "shadowRowInMap": false,
+  "rowsInWindow": 115,
+  "expectedDuration": 115,
+  "windowEndMinusScriptEnd": -80,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2412,
+    1
+   ]
+  ]
+ },
+ {
+  "move": "FLAMETHROWER",
+  "id": 53,
+  "side": "opponent",
+  "activation": 445,
+  "scriptEndFirstInactive": 654,
+  "window": [
+   449,
+   574
+  ],
+  "ageOffset": -11,
+  "shadowRow": -15,
+  "shadowRowInMap": false,
+  "rowsInWindow": 115,
+  "expectedDuration": 115,
+  "windowEndMinusScriptEnd": -80,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2466,
+    1
+   ]
+  ]
+ },
+ {
+  "move": "ROCK_THROW",
+  "id": 88,
+  "side": "player",
+  "activation": 296,
+  "scriptEndFirstInactive": 382,
+  "window": [
+   296,
+   382
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 87,
+  "expectedDuration": 87,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2306,
+    2
+   ]
+  ]
+ },
+ {
+  "move": "ROCK_THROW",
+  "id": 88,
+  "side": "opponent",
+  "activation": 296,
+  "scriptEndFirstInactive": 382,
+  "window": [
+   296,
+   382
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 87,
+  "expectedDuration": 87,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2306,
+    2
+   ]
+  ]
+ },
+ {
+  "move": "DRAGON_RAGE",
+  "id": 82,
+  "side": "player",
+  "activation": 82,
+  "scriptEndFirstInactive": 259,
+  "window": [
+   89,
+   238
+  ],
+  "ageOffset": 0,
+  "shadowRow": -7,
+  "shadowRowInMap": false,
+  "rowsInWindow": 150,
+  "expectedDuration": 150,
+  "windowEndMinusScriptEnd": -21,
+  "verdict": "READY (provider-independent)",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": null
+ },
+ {
+  "move": "DRAGON_RAGE",
+  "id": 82,
+  "side": "opponent",
+  "activation": 86,
+  "scriptEndFirstInactive": 263,
+  "window": [
+   93,
+   242
+  ],
+  "ageOffset": 0,
+  "shadowRow": -7,
+  "shadowRowInMap": false,
+  "rowsInWindow": 150,
+  "expectedDuration": 150,
+  "windowEndMinusScriptEnd": -21,
+  "verdict": "READY (provider-independent)",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": null
+ },
+ {
+  "move": "HEAL_BELL",
+  "id": 215,
+  "side": "player",
+  "activation": 209,
+  "scriptEndFirstInactive": 469,
+  "window": [
+   209,
+   469
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 261,
+  "expectedDuration": 261,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": null
+ },
+ {
+  "move": "HEAL_BELL",
+  "id": 215,
+  "side": "opponent",
+  "activation": 210,
+  "scriptEndFirstInactive": 470,
+  "window": [
+   210,
+   470
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 261,
+  "expectedDuration": 261,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": null
+ },
+ {
+  "move": "PERISH_SONG",
+  "id": 195,
+  "side": "player",
+  "activation": 71,
+  "scriptEndFirstInactive": 329,
+  "window": [
+   71,
+   329
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 259,
+  "expectedDuration": 259,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "READY (provider optional; needs 3/3 literals)",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": null
+ },
+ {
+  "move": "PERISH_SONG",
+  "id": 195,
+  "side": "opponent",
+  "activation": 75,
+  "scriptEndFirstInactive": 333,
+  "window": [
+   75,
+   333
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 259,
+  "expectedDuration": 259,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "READY (provider optional; needs 3/3 literals)",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": null
+ },
+ {
+  "move": "LEAF_BLADE",
+  "id": 348,
+  "side": "player",
+  "activation": 76,
+  "scriptEndFirstInactive": 299,
+  "window": [
+   76,
+   299
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 224,
+  "expectedDuration": 224,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": null
+ },
+ {
+  "move": "LEAF_BLADE",
+  "id": 348,
+  "side": "opponent",
+  "activation": 80,
+  "scriptEndFirstInactive": 303,
+  "window": [
+   80,
+   303
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 224,
+  "expectedDuration": 224,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": null
+ },
+ {
+  "move": "BLAZE_KICK",
+  "id": 299,
+  "side": "player",
+  "activation": 389,
+  "scriptEndFirstInactive": 485,
+  "window": [
+   399,
+   476
+  ],
+  "ageOffset": 0,
+  "shadowRow": -10,
+  "shadowRowInMap": false,
+  "rowsInWindow": 78,
+  "expectedDuration": 78,
+  "windowEndMinusScriptEnd": -9,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2408,
+    1
+   ]
+  ]
+ },
+ {
+  "move": "BLAZE_KICK",
+  "id": 299,
+  "side": "opponent",
+  "activation": 443,
+  "scriptEndFirstInactive": 539,
+  "window": [
+   453,
+   530
+  ],
+  "ageOffset": 0,
+  "shadowRow": -10,
+  "shadowRowInMap": false,
+  "rowsInWindow": 78,
+  "expectedDuration": 78,
+  "windowEndMinusScriptEnd": -9,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2462,
+    1
+   ]
+  ]
+ },
+ {
+  "move": "MUD_SLAP",
+  "id": 189,
+  "side": "player",
+  "activation": 77,
+  "scriptEndFirstInactive": 128,
+  "window": [
+   80,
+   130
+  ],
+  "ageOffset": 41,
+  "shadowRow": 38,
+  "shadowRowInMap": true,
+  "rowsInWindow": 51,
+  "expectedDuration": 92,
+  "windowEndMinusScriptEnd": 2,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2092,
+    6
+   ]
+  ]
+ },
+ {
+  "move": "MUD_SLAP",
+  "id": 189,
+  "side": "opponent",
+  "activation": 81,
+  "scriptEndFirstInactive": 132,
+  "window": [
+   84,
+   134
+  ],
+  "ageOffset": 45,
+  "shadowRow": 42,
+  "shadowRowInMap": true,
+  "rowsInWindow": 51,
+  "expectedDuration": 96,
+  "windowEndMinusScriptEnd": 2,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2096,
+    6
+   ]
+  ]
+ },
+ {
+  "move": "SAND_ATTACK",
+  "id": 28,
+  "side": "player",
+  "activation": 78,
+  "scriptEndFirstInactive": 136,
+  "window": [
+   46,
+   314
+  ],
+  "ageOffset": 7,
+  "shadowRow": 39,
+  "shadowRowInMap": true,
+  "rowsInWindow": 269,
+  "expectedDuration": 276,
+  "windowEndMinusScriptEnd": 178,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2091,
+    1
+   ]
+  ]
+ },
+ {
+  "move": "SAND_ATTACK",
+  "id": 28,
+  "side": "opponent",
+  "activation": 82,
+  "scriptEndFirstInactive": 140,
+  "window": [
+   46,
+   314
+  ],
+  "ageOffset": 7,
+  "shadowRow": 43,
+  "shadowRowInMap": true,
+  "rowsInWindow": 269,
+  "expectedDuration": 276,
+  "windowEndMinusScriptEnd": 174,
+  "verdict": "READY-WITH-PROVIDER",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2095,
+    1
+   ]
+  ]
+ },
+ {
+  "move": "GRUDGE",
+  "id": 288,
+  "side": "player",
+  "activation": 66,
+  "scriptEndFirstInactive": 274,
+  "window": [
+   66,
+   274
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 209,
+  "expectedDuration": 209,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "READY-WITH-PROVIDER (first body only; later body NEEDS-KEYS)",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2118,
+    6
+   ]
+  ]
+ },
+ {
+  "move": "GRUDGE",
+  "id": 288,
+  "side": "opponent",
+  "activation": 70,
+  "scriptEndFirstInactive": 278,
+  "window": [
+   70,
+   278
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 209,
+  "expectedDuration": 209,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "READY-WITH-PROVIDER (first body only; later body NEEDS-KEYS)",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2122,
+    6
+   ]
+  ]
+ },
+ {
+  "move": "DIVE",
+  "id": 291,
+  "side": "player",
+  "activation": 199,
+  "scriptEndFirstInactive": 316,
+  "window": [
+   199,
+   316
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 118,
+  "expectedDuration": 118,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "NEEDS-KEYS (setup body READY-WITH-PROVIDER; attack body needs live keys)",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2215,
+    1
+   ],
+   [
+    2272,
+    11
+   ]
+  ]
+ },
+ {
+  "move": "DIVE",
+  "id": 291,
+  "side": "opponent",
+  "activation": 196,
+  "scriptEndFirstInactive": 310,
+  "window": [
+   196,
+   310
+  ],
+  "ageOffset": 0,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "rowsInWindow": 115,
+  "expectedDuration": 115,
+  "windowEndMinusScriptEnd": 0,
+  "verdict": "NEEDS-KEYS (setup body READY-WITH-PROVIDER; attack body needs live keys)",
+  "providerValid": true,
+  "providerMatchesLiteralAtCreateWindows": [
+   [
+    2212,
+    1
+   ],
+   [
+    2266,
+    11
+   ]
+  ]
+ }
+]
