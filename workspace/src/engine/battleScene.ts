@@ -46469,13 +46469,13 @@ export function renderSceneOnMovePresentation(
       ...softBoiledState,
       age: softBoiledState.age - 1,
     });
-    const playerBack = view.attacker.species === "CHANSEY"
+    const playerBack = (liveField || view.attacker.species === "CHANSEY")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "CHANSEY"
+      && (liveField || view.target.species === "CHANSEY")
       && view.target.geometry.side === "player";
-    const opponentFront = view.attacker.species === "CHANSEY"
+    const opponentFront = (liveField || view.attacker.species === "CHANSEY")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "CHANSEY"
+      && (liveField || view.target.species === "CHANSEY")
       && view.target.geometry.side === "opponent";
     if (!playerBack && !opponentFront) {
       throw new Error(
@@ -46494,20 +46494,31 @@ export function renderSceneOnMovePresentation(
         view.palette.backgroundCoefficient,
       ),
     );
+    const bystander = liveField ? softBoiledState.config.bystander : undefined;
+    if (liveField && !bystander) throw new Error("live SOFT_BOILED needs the displayed bystander battler");
     const chanseySource = playerBack
       ? softBoiledArt.chanseyBack
       : softBoiledArt.chanseyFront;
-    const chansey = playerBack ? chanseySource : {
+    const chansey = liveField ? liveSceneOnBattlerArt(view.attacker) : playerBack ? chanseySource : {
       ...chanseySource,
       tileset: subTileset(chanseySource.tileset, 0, 8),
     };
     const chanseyShakeY = playerBack
       ? view.registers.bg2vofs === 0 ? 0 : 453 - view.registers.bg2vofs
       : view.registers.bg1vofs === 0 ? 0 : 495 - view.registers.bg1vofs;
-    const onixCorner = playerBack
+    // Live: the other-side battler is the displayed field's art at its own corner
+    // (an opponent front sprite also carries its idle rest offset).
+    const bystanderIdle = bystander && bystander.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(bystander.species) : { x2: 0, y2: 0 };
+    const onixCorner = bystander
+      ? { x: bystander.geometry.spriteCorner.x + bystanderIdle.x2,
+          y: bystander.geometry.spriteCorner.y + bystanderIdle.y2 }
+      : playerBack
       ? { x: 145, y: 10 }
       : ONIX_MATERIALIZE_CORNER;
-    const onix = playerBack ? onixFrontSprite : onixBackSprite;
+    const onix = bystander
+      ? liveSceneOnBattlerArt(bystander)
+      : playerBack ? onixFrontSprite : onixBackSprite;
 
     // Monbg makes the self-targeted Chansey a BG layer while the egg body
     // is live. Drawing both battlers before the owned OAM list preserves
@@ -46605,6 +46616,7 @@ export function renderSceneOnMovePresentation(
     }
 
     const profile = state.config.fieldProfile;
+    if (!liveField) {
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: playerBack ? "ONIX" : "CHANSEY",
       level: 50,
@@ -46628,6 +46640,7 @@ export function renderSceneOnMovePresentation(
       "SOFTBOILED!",
       99,
     );
+    }
     return;
   }
 

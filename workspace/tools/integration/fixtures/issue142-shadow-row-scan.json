@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 289,
-  "ids": 135,
+  "rows": 291,
+  "ids": 136,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -3022,6 +3022,24 @@
    "expected": null,
    "drawn": [],
    "tailFirstAge": 69
+  },
+  {
+   "id": 135,
+   "move": "SOFT_BOILED",
+   "orientation": "player",
+   "duration": 272,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": 272
+  },
+  {
+   "id": 135,
+   "move": "SOFT_BOILED",
+   "orientation": "opponent",
+   "duration": 272,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": 272
   },
   {
    "id": 137,

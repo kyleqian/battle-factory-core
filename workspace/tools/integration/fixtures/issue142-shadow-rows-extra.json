@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py)",
  "rows": [
   {
    "id": 236,
@@ -1022,6 +1022,42 @@
    "inWindow": false,
    "sources": {
     "fixture": "tools/integration/fixtures/next-dizzy-punch-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 135,
+   "move": "SOFT_BOILED",
+   "orientation": "player",
+   "variant": "next-soft-boiled-player",
+   "activationFrame": 227,
+   "windowStart": 227,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": 272,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-soft-boiled-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 135,
+   "move": "SOFT_BOILED",
+   "orientation": "opponent",
+   "variant": "next-soft-boiled-opponent",
+   "activationFrame": 228,
+   "windowStart": 228,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": 272,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-soft-boiled-opponent.json",
     "body": "normal",
     "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
    }

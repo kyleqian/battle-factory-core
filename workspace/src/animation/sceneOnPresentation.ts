@@ -1760,6 +1760,11 @@ export interface SceneOnSoftBoiledConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** `AnimSpriteOnMonPos`'s source target picture center for HealingEffect2. */
   readonly healingCenter: Readonly<{ x: number; y: number }>;
+  /**
+   * Live field only: the displayed battler on the other side, drawn instead of
+   * the staged Onix constants (the move body does not touch it).
+   */
+  readonly bystander?: SceneOnPresentationBattler;
 }
 
 export interface SceneOnMoonlightFieldProfile

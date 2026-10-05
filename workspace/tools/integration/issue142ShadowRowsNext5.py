@@ -9,6 +9,7 @@ spec = [
   (184, "SCARY_FACE", "next-scary-face", {"player": (75, 79), "opponent": (79, 83)}, 190, "mechanic-scary-face-%s-rhyhorn-opponent-shuckle"),
   (298, "TEETER_DANCE", "next-teeter-dance", {"player": (227, 227), "opponent": (222, 222)}, 169, None),
   (146, "DIZZY_PUNCH", "next-dizzy-punch", {"player": (77, 90), "opponent": (81, 94)}, 69, None),
+  (135, "SOFT_BOILED", "next-soft-boiled", {"player": (227, 227), "opponent": (228, 228)}, 272, None),
   (137, "GLARE", "next-glare", {"player": (74, 74), "opponent": (78, 78)}, 213, None),
 ]
 owned = {s[0] for s in spec}

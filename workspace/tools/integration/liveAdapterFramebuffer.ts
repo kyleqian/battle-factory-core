@@ -38,6 +38,8 @@ export interface Fixture {
   fieldProfile: SceneOnDragonRageFieldProfile;
   /** Real attacker party personality (Spinda spots); presentation-only. */
   attackerPersonality?: number;
+  /** Self-target moves: the species displayed on the other side of the field. */
+  bystander?: { species: string };
   body?: "normal" | "shattered-wall";
   /** Controller arguments the ROM held at this body (gAnimMoveTurn/Power/Dmg). */
   /** Source text box content during this body (default: the move-used banner). */
@@ -51,13 +53,13 @@ interface Probe {
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const ids = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.id]));
 const names = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.name]));
-const SELF_TARGET_MOVES = new Set(["LIGHT_SCREEN", "BARRIER", "MAGIC_COAT", "PROTECT", "REFLECT"]);
+const SELF_TARGET_MOVES = new Set(["LIGHT_SCREEN", "BARRIER", "MAGIC_COAT", "PROTECT", "REFLECT", "SOFT_BOILED"]);
 const hash = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
 export function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
   const profile = f.fieldProfile;
   const makeBattler = (side: "player" | "opponent") => {
-    const mon = f.attacker.geometry.side === side ? f.attacker : f.target;
+    const mon = f.attacker.geometry.side === side ? f.attacker : f.bystander ?? f.target;
     const species = speciesStats.species.find(s => s.name === `SPECIES_${mon.species}`)?.id;
     if (species === undefined) throw new Error(`Unknown species ${mon.species}`);
     return {
