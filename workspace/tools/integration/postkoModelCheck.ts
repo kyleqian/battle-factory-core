@@ -55,6 +55,9 @@ export const SCENARIOS: Record<string, Step[]> = {
   // turn 2: player Barrier / Reflect (faster), the first body after the send-out.
   "postko-barrier": [...TURN1, P, C, edge("112:player"), body(112, "player")],
   "postko-reflect": [...TURN1, P, C, edge("115:player"), body(115, "player")],
+  "postko-frustration": [...TURN1, P, C, edge("218:player"), body(218, "player")],
+  "postko-seismictoss": [...TURN1, P, C, edge("69:player"), body(69, "player")],
+  "postko-safeguard": [...TURN1, P, C, edge("219:player"), body(219, "player")],
 };
 
 const SUMMARY = decodeSpriteOrderPlan(UNIT_PLANS.summary), SENDOUT = decodeSpriteOrderPlan(UNIT_PLANS.nextSendOut);
