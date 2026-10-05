@@ -2992,8 +2992,10 @@
    "move": "TEETER_DANCE",
    "orientation": "player",
    "duration": 169,
-   "expected": null,
-   "drawn": [],
+   "expected": 0,
+   "drawn": [
+    0
+   ],
    "tailFirstAge": 169
   },
   {
@@ -3001,8 +3003,10 @@
    "move": "TEETER_DANCE",
    "orientation": "opponent",
    "duration": 169,
-   "expected": null,
-   "drawn": [],
+   "expected": 0,
+   "drawn": [
+    0
+   ],
    "tailFirstAge": 169
   },
   {
@@ -3028,8 +3032,10 @@
    "move": "SOFT_BOILED",
    "orientation": "player",
    "duration": 272,
-   "expected": null,
-   "drawn": [],
+   "expected": 0,
+   "drawn": [
+    0
+   ],
    "tailFirstAge": 272
   },
   {
@@ -3037,8 +3043,10 @@
    "move": "SOFT_BOILED",
    "orientation": "opponent",
    "duration": 272,
-   "expected": null,
-   "drawn": [],
+   "expected": 0,
+   "drawn": [
+    0
+   ],
    "tailFirstAge": 272
   },
   {

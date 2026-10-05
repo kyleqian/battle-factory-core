@@ -108,8 +108,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     3, 4, 167,
     // anchor4 batch (issue142-shadow-rows-extra.json): every window starts at activation (Earthquake: age 0 is the activation frame).
     89, 90, 152, 345, 60, 133,
-    // next5 (issue142-shadow-rows-extra.json): Glare's window starts at activation; Scary Face (-4) does not.
-    137,
+    // next5 (issue142-shadow-rows-extra.json): Glare/Teeter Dance/Soft-Boiled windows start at activation;
+    // Scary Face (-4) and Dizzy Punch (-13) start after it and have no row.
+    137, 298, 135,
   ].map((id) => [id, 0])),
 );
 
