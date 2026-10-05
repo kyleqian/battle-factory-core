@@ -1,6 +1,6 @@
 {
  "schema": "prep6-live-adapter-receipt/v1",
- "testedCodeCommit": "78eab2f7c8d670845844dc52760b4eece64987ff",
+ "testedCodeCommit": "0aecb959ad555f62240829bf5fbabf11321f5e57",
  "srcTree": "5a9ef5cdf396a6260552285bf31c4d6f3e163d30",
  "branch": "worker/integration-20261005-004251",
  "batch": "prep6 (Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off, Faint Attack player attacker only)",
@@ -25,7 +25,21 @@
   "python3 tools/integration/altSpecies9.py; POKEBENCH_LIVE_EVIDENCE_DIR=.integration/validation/prep6-alt-final-20261005 node --experimental-strip-types tools/integration/liveAdapterFramebuffer.ts tools/integration/fixtures/altspecies3-{knock-off-player-sableye-opponent-onix,knock-off-opponent-banette-player-onix,safeguard-player-wobbuffet-opponent-onix,rock-tomb-opponent-rhydon-player-onix,faint-attack-player-murkrow-opponent-onix,faint-attack-player-onix-opponent-grovyle}.json",
   "python3 tools/integration/issue142ShadowRowsPrep6.py; node --experimental-strip-types tools/integration/issue142ShadowRowScan.ts"
  ],
- "gates": {},
+ "gates": {
+  "focused": "7 files / 127 tests passed (livePrep6MoveAdapters 13, animationBoundaryRatchet, factoryAnimationInventory, liveMoveAnimationPalette, playableAnimationIntegration, liveShadowRows 80, liveSpriteOrderHost)",
+  "smoke": "8 files / 448 tests",
+  "fullSuite": "1503 files / 12124 tests passed; 44 files / 223 tests skipped (HEAD 0aecb959ad555f62240829bf5fbabf11321f5e57, src tree 5a9ef5cdf396a6260552285bf31c4d6f3e163d30)",
+  "build": "passed",
+  "typecheck": "passed",
+  "animationCoverage": "ran, no change",
+  "animationAudit": "ran, no change",
+  "diffCheck": "clean",
+  "shadowScan": {
+   "rows": 368,
+   "ids": 173,
+   "mismatches": 0
+  }
+ },
  "sourceDense": {
   "prep6-rock-tomb-player": {
    "fixture": "tools/integration/fixtures/prep6-rock-tomb-player.json",
@@ -491,7 +505,7 @@
   }
  },
  "alternateSpeciesNotes": {
-  "derivation": "window start = alternate-scenario activation (altSpequation tools/integration/altSpecies3Activation.py, Scene ON direct mGBA) + the accepted fixture's own (window start - accepted activation); tools/integration/fixtures/altspecies9-derivation.json. Faint Attack has no battle-lab scenario: the alternate scenario is the Knock Off battle-lab scenario with the lead MURKROW knowing FAINT_ATTACK, offset = the accepted +4.",
+  "derivation": "window start = alternate-scenario activation (tools/integration/altSpecies3Activation.py, Scene ON direct mGBA) + the accepted fixture's own (window start - accepted activation); tools/integration/fixtures/altspecies9-derivation.json. Faint Attack has no battle-lab scenario: the alternate scenario is the Knock Off battle-lab scenario with the lead MURKROW knowing FAINT_ATTACK, offset = the accepted +4.",
   "exact": [
    "Knock Off SABLEYE (player attacker) 59/59",
    "Safeguard WOBBUFFET (player attacker) 71/71",
