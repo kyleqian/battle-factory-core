@@ -1,0 +1,623 @@
+{
+ "schema": "voluntary-lend-receipt/v1",
+ "scope": "S10A presentation-only: sprite-order lend + allocator re-seed after a cancelled voluntary party menu (reshowBoth) and after a voluntary switch (reshowBoth -> recall -> switch-in), docs/voluntary-switch-lend-audit.md \u00a74. Gameplay, RNG, damage, turn order and facility state untouched (ON/OFF parity on routes; RNG/boundaries equal master). Opponent AI switches, Pursuit on a switch-out and Baton Pass stay invalidating. Not whole-playable arbitrary-history exactness.",
+ "productionCodeCommit": "daa3d59d9",
+ "srcTree": "d4bccd5816c25da769bf4fe15a66f2b16a3f8d37",
+ "mapping": {
+  "B_SCR_OP_RETURNATKTOBALL, battler 0, invisible, no earlier MOVE_ANIMATION in the segment": "switch-out (recall(player slot), roles kept) -- the player's voluntary switch: battleResolutionPresentation.ts withSynthesizedSwitchRecallEvents (dispatcher synthesized-voluntary-switch, sourceLabel BattleScript_ActionSwitch); recorded in all 8 voluntary-switch drafts' precedingTurns as provenanceOpcodeName B_SCR_OP_RETURNATKTOBALL; ROM: 18/18 post-recall edges exact (\u00a72.3)",
+  "B_SCR_OP_RETURNTOBALL of the segment's latest MOVE_ANIMATION target": "forced-switch-out {side} (Roar/Whirlwind; unchanged)",
+  "B_SCR_OP_RETURNATKTOBALL battler 1 (opponent AI switch)": "invalidate 'return to ball' (unprobed; unchanged)",
+  "B_SCR_OP_RETURNATKTOBALL after a MOVE_ANIMATION in the segment (Pursuit switch-out damage)": "invalidate (unprobed)",
+  "B_SCR_OP_RETURNTOBALL of the attacker (Baton Pass), B_SCR_OP_VARIOUS": "invalidate (unchanged)",
+  "battle-reshow {playerBattlerPresent: true}": "roles {healthboxMain: {player: n2, opponent: n5}, shadow: n8} = ROM 2 / 3 / 4 (45 edges, 0 mismatches)",
+  "allocator re-seed": "liveSpriteAllocatorReseedable: send-out, or (switch-in | reshow) with roles known, and role-isomorphic; orchestrator returnOrderHostFromPartyMenu (cancel) re-seeds; voluntary switch-in via the existing switch-in call"
+ },
+ "pureHost": {
+  "tests/voluntaryLend.test.ts": "reshowBoth roles/lend from 4 start trackers == model-check edges 0/3/4; 45/45 model-check edges lent == roleLend; recall group-order invariance (4 variants); host mapping (RETURNATKTOBALL battler 0 -> switch-out; opponent / VARIOUS / after-body / Baton Pass invalidate); cancel-return re-seed; 15 drafts through postkoHostReplay: lend == roleLend, Light Screen allocator present @325 only"
+ },
+ "dense": {
+  "tool": "tools/integration/voluntaryLendDense.ts (verifyLiveAdapterFramebuffer, 2 fresh direct-mGBA runs per fixture; run twice: two batches, identical digests)",
+  "exact": 13,
+  "declines": 2,
+  "notExact": 0,
+  "exactRows": 2132,
+  "rows": [
+   {
+    "fixture": "tools/integration/fixtures/voluntary-sunny-day-player.json",
+    "move": "SUNNY_DAY",
+    "edge": 322,
+    "rows": 158,
+    "ageOffset": 0,
+    "exactRows": [
+     158,
+     158
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "1704ca1872043c0124d9cacf92860470bf1a727e0dec92b3262774515ec90200",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 158,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-swift-opponent.json",
+    "move": "SWIFT",
+    "edge": 1606,
+    "rows": 80,
+    "ageOffset": 0,
+    "exactRows": [
+     80,
+     80
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "263ecbf860db73eddb9860e8aeb2914d6c42b0af109976a1a9090559a77073fc",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 80,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-heal-bell-player.json",
+    "move": "HEAL_BELL",
+    "edge": 2118,
+    "rows": 261,
+    "ageOffset": 0,
+    "exactRows": [
+     261,
+     261
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "a04fd21ec7a26462f879b9e375fef442762b4c3f3ec91434f8493b79436952a0",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 261,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-light-screen-player.json",
+    "move": "LIGHT_SCREEN",
+    "edge": 3153,
+    "rows": 88,
+    "ageOffset": 0,
+    "exactRows": [
+     15,
+     15
+    ],
+    "residualPixels": [
+     149507,
+     149507
+    ],
+    "digest": "1e810ba3534b6a2b9ff2f34faafb3c318d27f4e5879f02be420f21a83f85d3cc",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 0,
+    "verdict": "declines"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-thunderbolt-opponent.json",
+    "move": "THUNDERBOLT",
+    "edge": 575,
+    "rows": 237,
+    "ageOffset": 0,
+    "exactRows": [
+     237,
+     237
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "e28fcd38d53b0339d960f6240befee531a2502fd2719deb368d0cd60b6f0826f",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 237,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-giga-drain-opponent.json",
+    "move": "GIGA_DRAIN",
+    "edge": 578,
+    "rows": 230,
+    "ageOffset": 0,
+    "exactRows": [
+     230,
+     230
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "3077f000aa1ef7c3cd3be218e5977dcd4c3ba22c4e546eba4800ca1391d3ad25",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 230,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-swift-opponent-cancel.json",
+    "move": "SWIFT",
+    "edge": 326,
+    "rows": 80,
+    "ageOffset": 0,
+    "exactRows": [
+     80,
+     80
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "92c3f49d973cf8a8d664ce7b748a8365fbd8ebf5c05d7455fea53e1d80ae461d",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 80,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-sunny-day-player-cancel2.json",
+    "move": "SUNNY_DAY",
+    "edge": 516,
+    "rows": 158,
+    "ageOffset": 0,
+    "exactRows": [
+     158,
+     158
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "6e636fdc49e71e3475f96b507e0724c4f0f7ed79a0e5a0e26f268b57c486c1db",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 158,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-swift-opponent-slot2.json",
+    "move": "SWIFT",
+    "edge": 1614,
+    "rows": 80,
+    "ageOffset": 0,
+    "exactRows": [
+     80,
+     80
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "a923d544169b78c6aa31de04b73788cdab8e6952d14003dc286d5d0d5d78f814",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 80,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-light-screen-player-slot2.json",
+    "move": "LIGHT_SCREEN",
+    "edge": 2432,
+    "rows": 88,
+    "ageOffset": 0,
+    "exactRows": [
+     15,
+     15
+    ],
+    "residualPixels": [
+     149507,
+     149507
+    ],
+    "digest": "c88ec1eb2a56b76f3ab9b3172eea2a6b508c1881d0fd7fe9495948687ee0c57b",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 0,
+    "verdict": "declines"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-heal-bell-player-slot2.json",
+    "move": "HEAL_BELL",
+    "edge": 3187,
+    "rows": 261,
+    "ageOffset": 0,
+    "exactRows": [
+     261,
+     261
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "1fac13f9dcf31d168c3359cd7441ee43f02a76912558de3e7db3cd7df14b094a",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 261,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-light-screen-player-cancel.json",
+    "move": "LIGHT_SCREEN",
+    "edge": 325,
+    "rows": 88,
+    "ageOffset": 0,
+    "exactRows": [
+     88,
+     88
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "c8214e995f23e30d2c1ddf0924a856a229e5ebda70e8262325d0aadd53311717",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": true,
+    "adapterActiveRows": 88,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-heal-bell-player-cancel.json",
+    "move": "HEAL_BELL",
+    "edge": 835,
+    "rows": 261,
+    "ageOffset": 0,
+    "exactRows": [
+     261,
+     261
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "c739d323804f8c3d2fd2c3f0ad46226b480f4f04b3510157f11c1baa708eef09",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 261,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-sunny-day-player-faintko.json",
+    "move": "SUNNY_DAY",
+    "edge": 2197,
+    "rows": 158,
+    "ageOffset": 0,
+    "exactRows": [
+     158,
+     158
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "1f0ba2a8515f706650a398ff7dcd05a1a1d3dce254b54ebb8c726ad46953361b",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 158,
+    "verdict": "exact"
+   },
+   {
+    "fixture": "tools/integration/fixtures/voluntary-swift-opponent-faintko2.json",
+    "move": "SWIFT",
+    "edge": 2205,
+    "rows": 80,
+    "ageOffset": 0,
+    "exactRows": [
+     80,
+     80
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "7e6902cb3bc39db856cfb0a82b494d7ce2206e209f03adadeefd20892a19690e",
+    "freshRunsIdentical": true,
+    "orderLent": true,
+    "lendEqualsRole": true,
+    "allocatorInput": false,
+    "adapterActiveRows": 80,
+    "verdict": "exact"
+   }
+  ],
+  "declining": "LIGHT_SCREEN @3153 (cancel-slot1) and @2432 (cancel-slot2): the order is lent (== roleLend) but the allocator host has no input -- history lost after the non-net-zero bodies Sunny Day 241 / Swift 129 earlier in the battle (allocatorHistoryLostAfterBodies, \u00a73.1 caveat; not voluntary-specific). The adapter declines at all 88 rows (scene-off fallback, 15/88 vs the ROM) -- unchanged from master; no body renders non-exact."
+ },
+ "routes": {
+  "helper": "tools/integration/generatedCommandAnimationReplay.ts seed 16 (ordinary input, slots `{switch: n}` / 'cancel-party')",
+  "rows": [
+   {
+    "seed": 16,
+    "slots": [
+     {
+      "switch": 1
+     },
+     0
+    ],
+    "bodiesMaster": [
+     "113-",
+     "61-"
+    ],
+    "bodiesBranch": [
+     "113LA",
+     "61L"
+    ],
+    "firstDecisionDiffCommandIndex": 8,
+    "firstSwitchOutCommandIndex": 1,
+    "rngAndBoundariesEqualMaster": true,
+    "adaptersBranch": [
+     [
+      113,
+      true
+     ],
+     [
+      61,
+      true
+     ]
+    ],
+    "adaptersMaster": [
+     [
+      113,
+      false
+     ],
+     [
+      61,
+      true
+     ]
+    ]
+   },
+   {
+    "seed": 16,
+    "slots": [
+     "cancel-party",
+     0
+    ],
+    "bodiesMaster": [
+     "113-",
+     "325-"
+    ],
+    "bodiesBranch": [
+     "113LA",
+     "325L"
+    ],
+    "firstDecisionDiffCommandIndex": 1,
+    "firstSwitchOutCommandIndex": null,
+    "rngAndBoundariesEqualMaster": true,
+    "adaptersBranch": [
+     [
+      113,
+      true
+     ],
+     [
+      325,
+      true
+     ]
+    ],
+    "adaptersMaster": [
+     [
+      113,
+      false
+     ],
+     [
+      325,
+      true
+     ]
+    ]
+   },
+   {
+    "seed": 16,
+    "slots": [
+     0,
+     {
+      "switch": 1
+     },
+     0
+    ],
+    "bodiesMaster": [
+     "113LA",
+     "325L",
+     "129-",
+     "129-",
+     "61-"
+    ],
+    "bodiesBranch": [
+     "113LA",
+     "325L",
+     "129L",
+     "129L",
+     "61L"
+    ],
+    "firstDecisionDiffCommandIndex": 22,
+    "firstSwitchOutCommandIndex": 15,
+    "rngAndBoundariesEqualMaster": true,
+    "adaptersBranch": [
+     [
+      113,
+      true
+     ],
+     [
+      325,
+      true
+     ],
+     [
+      129,
+      true
+     ],
+     [
+      129,
+      true
+     ],
+     [
+      61,
+      true
+     ]
+    ],
+    "adaptersMaster": [
+     [
+      113,
+      true
+     ],
+     [
+      325,
+      true
+     ],
+     [
+      129,
+      false
+     ],
+     [
+      129,
+      false
+     ],
+     [
+      61,
+      true
+     ]
+    ]
+   },
+   {
+    "seed": 16,
+    "slots": [
+     0,
+     "cancel-party",
+     0
+    ],
+    "bodiesMaster": [
+     "113LA",
+     "325L"
+    ],
+    "bodiesBranch": [
+     "113LA",
+     "325L"
+    ],
+    "firstDecisionDiffCommandIndex": null,
+    "firstSwitchOutCommandIndex": null,
+    "rngAndBoundariesEqualMaster": true,
+    "adaptersBranch": [
+     [
+      113,
+      true
+     ],
+     [
+      325,
+      true
+     ]
+    ],
+    "adaptersMaster": [
+     [
+      113,
+      true
+     ],
+     [
+      325,
+      true
+     ]
+    ]
+   },
+   {
+    "seed": 16,
+    "slots": [
+     {
+      "switch": 2
+     },
+     0,
+     0
+    ],
+    "bodiesMaster": [
+     "113-",
+     "129-",
+     "209-",
+     "9-",
+     "209-"
+    ],
+    "bodiesBranch": [
+     "113LA",
+     "129L",
+     "209L",
+     "9-",
+     "209-"
+    ],
+    "firstDecisionDiffCommandIndex": 8,
+    "firstSwitchOutCommandIndex": 1,
+    "rngAndBoundariesEqualMaster": true,
+    "adaptersBranch": [
+     [
+      113,
+      true
+     ],
+     [
+      129,
+      true
+     ],
+     [
+      209,
+      true
+     ],
+     [
+      9,
+      true
+     ],
+     [
+      209,
+      false
+     ]
+    ],
+    "adaptersMaster": [
+     [
+      113,
+      false
+     ],
+     [
+      129,
+      false
+     ],
+     [
+      209,
+      false
+     ],
+     [
+      9,
+      true
+     ],
+     [
+      209,
+      false
+     ]
+    ]
+   }
+  ],
+  "tests": "tests/liveSpriteOrderHost.test.ts 'lends after a voluntary switch or a cancelled party menu' (4 routes: ON/OFF rules/RNG/boundary parity, hitMarker xor 0x80, next prompt, adapters active)"
+ }
+}

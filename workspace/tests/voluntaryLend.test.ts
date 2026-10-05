@@ -171,3 +171,21 @@ describe("voluntary drafts through the production harness replay (postkoHostRepl
       "light-screen-player-slot2.json@2432": false });
   });
 });
+
+describe("voluntary dense receipt (tools/integration/voluntaryLendDense.ts, two fresh direct-mGBA runs per fixture)", () => {
+  it("13 bodies exact through the production lend (0 px, adapter active every row); the two later Light Screens decline", () => {
+    const receipt = JSON.parse(readFileSync("tools/integration/fixtures/voluntary-lend-receipt.json", "utf8")) as { dense: {
+      rows: { fixture: string; rows: number; exactRows: number[]; residualPixels: number[]; freshRunsIdentical: boolean;
+        lendEqualsRole: boolean; adapterActiveRows: number; verdict: string; digest: string }[] } };
+    const rows = receipt.dense.rows;
+    expect(rows.map(r => r.fixture).sort()).toEqual([...VOLUNTARY_FIXTURES].sort());
+    expect(rows.every(r => r.freshRunsIdentical && r.lendEqualsRole)).toBe(true);
+    for (const r of rows) {
+      if (r.verdict === "exact") expect([r.exactRows, r.residualPixels, r.adapterActiveRows]).toEqual([[r.rows, r.rows], [0, 0], r.rows]);
+      else expect([r.verdict, r.adapterActiveRows]).toEqual(["declines", 0]);
+    }
+    expect(rows.filter(r => r.verdict === "declines").map(r => r.fixture.split("/").at(-1)).sort())
+      .toEqual(["voluntary-light-screen-player-slot2.json", "voluntary-light-screen-player.json"]);
+    expect(rows.filter(r => r.verdict === "exact").reduce((n, r) => n + r.rows, 0)).toBe(2132);
+  });
+});
