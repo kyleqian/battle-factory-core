@@ -1,8 +1,8 @@
 {
   "schema": "prep7-adapter-draft/v1",
   "move": "DOUBLE_TEAM",
-  "probe": "tools/probe/stage-fire-punch-portable-on.py player double-team",
-  "scenario": "tools/probe/stage-fire-punch-portable-on.py player double-team",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "scenario": "tools/integration/fixtures/prep7-scenarios/mechanic-double-team-onix-grovyle-firstbody.json",
   "attacker": {
     "species": "ONIX",
     "geometry": {
@@ -16,20 +16,21 @@
     }
   },
   "fieldProfile": {
-    "playerHp": 117,
+    "playerHp": 142,
+    "playerMaxHp": 142,
     "opponentHp": 143,
-    "playerStatus": "none"
+    "opponentMaxHp": 143
   },
   "orientation": "player-back ONIX -> GROVYLE",
   "verdict": "NEEDS-ORDER-POLICY (stat command precedes the animation => first-body order unknown today); player-attacker only; frontClone = b on the first body (pixel-measured)",
   "denseWindow": {
-    "startFrame": 2337,
-    "endFrame": 2566,
+    "startFrame": 71,
+    "endFrame": 300,
     "ageOffset": 0
   },
   "draft": {
-    "activationFrame": 2336,
-    "scriptEndFirstInactive": 2494,
+    "activationFrame": 70,
+    "scriptEndFirstInactive": 229,
     "shadowRow": -1,
     "shadowRowInMap": false,
     "expectedDuration": 230,
@@ -131,10 +132,6 @@
     ],
     "livePlan": "frontClone = F.indexOf(4) < F.indexOf(3) ? 'b' : 'a' from the first-body free order; blocked until the order seam survives the preceding 'stat' command; decline the opponent-attacker orientation (no accepted evidence, renderer gate :49472)"
   },
-  "precedingBodies": [
-    {
-      "moveId": "AI body (staged)",
-      "side": "opponent"
-    }
-  ]
+  "precedingBodies": [],
+  "dense": "first-body lab run (prep7-scenarios, activation 70 per prep7-activation): the staged 2337..2566 window replays a post-AI-body history (frontClone a); live proof uses the first-body ROM run"
 }

@@ -121,6 +121,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // prep9 (docs/next-adapters-prep9.md; the D-PAL label is stale: no palette snapshot is consumed), each gated on the lent
   // known tracked order: Giga Drain, Sunny Day, Mega Drain, Absorb, Dream Eater.
   202, 241, 72, 71, 138,
+  // prep7 order-gated (docs/next-adapters-prep7.md s0, docs/sprite-order-policy-gaps.md): Double Team (player attacker only;
+  // frontClone from the lent order), Feather Dance (lend gate; the reducer simulates its own draw order).
+  104, 297,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -198,6 +201,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // prep9 (issue142-shadow-rows-extra.json): Giga Drain, Sunny Day, Mega Drain, Dream Eater windows start at the
     // activation frame (row 0). Absorb's window starts 10 frames after it (row -10, the Taunt convention): no row.
     202, 241, 72, 138,
+    // Feather Dance (297): the live window starts at the activation frame (row 0). Double Team (104): the first window row is
+    // one frame after the activation (row -1): no row.
+    297,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -520,6 +526,11 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 85: return 237; // Thunderbolt 83..319 / 79..315.
     case 254: return 99; // Stockpile 205..303 / 207..305 (after a Peck body).
     case 192: return 112; // Zap Cannon 84..195 / 80..191.
+    // Double Team 71..300 (first-body lab run, activation 70; player attacker only, no accepted opponent evidence): row -1.
+    case 104: return request.attacker === 0 ? 230 : null;
+    // Feather Dance: activation..script end (79..246 / 83..250); the controller's stat banner and messages that follow are
+    // queue commands (prep7 s2.2). The reducer is relative to the printer, +44 at the activation frame.
+    case 297: return 168;
     case 202: return 230; // Giga Drain 214..443 both orientations (activation..script end).
     case 241: return 158; // Sunny Day 211..368.
     case 72: return 218; // Mega Drain 75..292 / 79..296.
@@ -1620,6 +1631,23 @@ export function liveMoveAnimationPresentation(
       }
       break;
     }
+    case 104: {
+      if (!spriteOrderInput?.known) return null;
+      const clonePair = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, [3, 4]);
+      if (clonePair === null) return null;
+      // The two clone sprites take slots 3 and 4; the one earlier in the lent order is drawn in front ("b" on a first body).
+      config = { move: "DOUBLE_TEAM", attacker, target,
+        fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        animationProfile: { cloneAnchorAge: 0, cloneVisibleStartAge: 2, cloneVisibleEndAge: 129, statsBannerStartAge: 163,
+          statsBannerEndAge: 229, statsBannerBg1YAnchorAge: 166, frontClone: clonePair.indexOf(4) < clonePair.indexOf(3) ? "b" : "a" },
+        moveTextStartAge: -28 };
+      break;
+    }
+    case 297:
+      if (!spriteOrderInput?.known) return null;
+      config = { move: "FEATHER_DANCE", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        controllerProfile: { attackStageBefore: 0, attackStageAfter: 0 }, moveTextStartAge: 0, animationAgeOffset: 0 };
+      break;
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:
@@ -1645,5 +1673,7 @@ export function liveMoveAnimationPresentation(
     || request.moveId === 243 ? 7 : 0;
   // Sweet Scent's accepted rows start at reducer age -4 (the pointer-owned setup rows, sweetScentFramebuffer.ts:101).
   const setupAge = request.moveId === 230 ? 4 : 0;
-  return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1 : age - setupAge };
+  // Feather Dance: the reducer age is the printer-relative age, 44 at the activation frame (prep7 s2.2).
+  return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1
+    : request.moveId === 297 ? age + 44 : age - setupAge };
 }

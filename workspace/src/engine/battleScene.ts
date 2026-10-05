@@ -48908,27 +48908,30 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnFeatherDanceView(state);
     const { attacker, target } = view;
     const originalOrientation =
-      attacker.species !== "PIDGEOTTO"
-      ? false
-      : attacker.geometry.side === "opponent"
-        && target.species === "ONIX"
-        && target.geometry.side === "player";
+      (liveField || attacker.species === "PIDGEOTTO")
+      && attacker.geometry.side === "opponent"
+      && (liveField || target.species === "ONIX")
+      && target.geometry.side === "player";
     const oppositeOrientation =
-      attacker.species === "PIDGEOTTO"
+      (liveField || attacker.species === "PIDGEOTTO")
       && attacker.geometry.side === "player"
-      && target.species === "ONIX"
+      && (liveField || target.species === "ONIX")
       && target.geometry.side === "opponent";
     if (!originalOrientation && !oppositeOrientation) {
       throw new Error(
         `unsupported staged FEATHER_DANCE pair ${attacker.species}->${target.species}`,
       );
     }
-    const attackerSprite = originalOrientation
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(attacker) : originalOrientation
       ? pidgeottoFrontSprite
       : pidgeottoBackSprite;
-    const targetSprite = originalOrientation
+    const targetSprite = liveField ? liveSceneOnBattlerArt(target) : originalOrientation
       ? onixBackSprite
       : onixFrontSprite;
+    // The staged corners already include the settled front idle offset; the live field's corners do not.
+    const liveIdle = (battler: typeof attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
+    const attackerIdle = liveIdle(attacker), targetIdle = liveIdle(target);
     const behindTargetPriorityCutoff =
       target.geometry.side === "player" ? 3 : 2;
     drawTileBg(
@@ -48941,8 +48944,8 @@ export function renderSceneOnMovePresentation(
       fb,
       attackerSprite.tileset,
       attackerSprite.palette,
-      attacker.geometry.spriteCorner.x,
-      attacker.geometry.spriteCorner.y,
+      attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     drawFeatherSpriteList(
       fb,
@@ -48954,8 +48957,8 @@ export function renderSceneOnMovePresentation(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      target.geometry.spriteCorner.x,
-      target.geometry.spriteCorner.y,
+      target.geometry.spriteCorner.x + targetIdle.x2,
+      target.geometry.spriteCorner.y + targetIdle.y2,
     );
     drawFeatherSpriteList(
       fb,
@@ -48963,6 +48966,7 @@ export function renderSceneOnMovePresentation(
       false,
       behindTargetPriorityCutoff,
     );
+    if (liveField) return;
     if (originalOrientation) {
       drawSendOutHealthbox(
         fb,
@@ -49551,10 +49555,10 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "DOUBLE_TEAM") {
     const view = sceneOnDoubleTeamView(state);
     const { attacker, target } = view;
+    // The live adapter is player-attacker only (no accepted opponent-attacker evidence): art follows the displayed species.
     if (
-      attacker.species !== "ONIX"
+      (!liveField && (attacker.species !== "ONIX" || target.species !== "GROVYLE"))
       || attacker.geometry.side !== "player"
-      || target.species !== "GROVYLE"
       || target.geometry.side !== "opponent"
     ) {
       throw new Error(
@@ -49568,18 +49572,21 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette,
     );
+    const targetArt = liveField ? liveSceneOnBattlerArt(target) : grovyleFrontSprite;
+    const attackerArt = liveField ? liveSceneOnBattlerArt(attacker) : onixBackSprite;
+    const targetIdle = liveField ? speciesFrontIdleRestOffsetOrZero(target.species) : { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
-      grovyleFrontSprite.tileset,
-      grovyleFrontSprite.palette,
-      target.geometry.spriteCorner.x,
-      target.geometry.spriteCorner.y,
+      targetArt.tileset,
+      targetArt.palette,
+      target.geometry.spriteCorner.x + targetIdle.x2,
+      target.geometry.spriteCorner.y + targetIdle.y2,
     );
     if (view.clones) {
-      const palette = doubleTeamClonePalette(onixBackSprite.palette);
+      const palette = doubleTeamClonePalette(attackerArt.palette);
       const drawClone = (offset: number) => drawSpriteSheetBlended(
         fb,
-        onixBackSprite.tileset,
+        attackerArt.tileset,
         palette,
         attacker.geometry.spriteCorner.x + offset,
         attacker.geometry.spriteCorner.y,
@@ -49596,8 +49603,8 @@ export function renderSceneOnMovePresentation(
     } else {
       drawSpriteSheet(
         fb,
-        onixBackSprite.tileset,
-        onixBackSprite.palette,
+        attackerArt.tileset,
+        attackerArt.palette,
         attacker.geometry.spriteCorner.x,
         attacker.geometry.spriteCorner.y,
       );
@@ -49605,13 +49612,14 @@ export function renderSceneOnMovePresentation(
     if (view.statsBanner) {
       drawStatIncreaseBannerForBattler(
         fb,
-        onixBackSprite.tileset,
+        attackerArt.tileset,
         attacker.geometry.spriteCorner,
         view.statsBanner.eva,
         view.statsBanner.bg1Y,
       );
     }
 
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,

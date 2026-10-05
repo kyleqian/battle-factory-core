@@ -3323,6 +3323,60 @@
     "body": "normal",
     "activation": "tools/integration/fixtures (census-activation / prep9-activation; docs/next-adapters-prep9.md; issue142ActivationProbe.py)"
    }
+  },
+  {
+   "id": 104,
+   "move": "DOUBLE_TEAM",
+   "orientation": "player",
+   "variant": "prep7-double-team-player",
+   "activationFrame": 70,
+   "windowStart": 71,
+   "ageOffset": 0,
+   "shadowRow": -1,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-double-team-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 297,
+   "move": "FEATHER_DANCE",
+   "orientation": "player",
+   "variant": "prep7-feather-dance-player",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-feather-dance-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 297,
+   "move": "FEATHER_DANCE",
+   "orientation": "opponent",
+   "variant": "prep7-feather-dance-opponent",
+   "activationFrame": 83,
+   "windowStart": 83,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep7-feather-dance-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures (census-activation / prep7-activation; docs/next-adapters-prep7.md; issue142ActivationProbe.py)"
+   }
   }
  ]
 }
