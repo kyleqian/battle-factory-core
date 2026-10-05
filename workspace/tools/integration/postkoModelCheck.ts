@@ -40,6 +40,13 @@ export const SCENARIOS: Record<string, Step[]> = {
   "postko-lightscreen-protect-rockslide": [...TURN1, P, C, edge("113:player"), body(113, "player"), P, C, edge("182:player"), body(182, "player")],
   // turn 2: player Flamethrower (faster) -> SLOWBRO, SLOWBRO Rock Slide -> player (the only relied-on post-KO edge is 157:opponent; the later
   // turns add burn / end-turn animations that are outside this check).
+  // turn 2: player Sunny Day, SLOWBRO Swift, sun continues; turn 3: player Dragon Dance (+ multiple +1 stat animation), Swift, sun continues;
+  // turn 4: player Fire Blast misses (no animation), Swift, sun continues.
+  "postko-sunnyday-dragondance-fireblast": [...TURN1, P, C, edge("241:player"), body(241, "player"), edge("129:opponent"), body(129, "opponent"), HIT,
+    edge("general:SUN_CONTINUES"), { kind: "general-animation", animation: "SUN_CONTINUES" }, P, C, edge("349:player"), body(349, "player"),
+    edge("stat:player"), { kind: "stat-animation", argument: 55 }, edge("129:opponent"), body(129, "opponent"), HIT, edge("general:SUN_CONTINUES"),
+    { kind: "general-animation", animation: "SUN_CONTINUES" }, P, C, edge("129:opponent"), body(129, "opponent"), HIT, edge("general:SUN_CONTINUES"),
+    { kind: "general-animation", animation: "SUN_CONTINUES" }],
   "postko-rockslide-opponent": [...TURN1, P, C, edge("53:player"), body(53, "player"), HIT, edge("157:opponent"), body(157, "opponent")],
 };
 
