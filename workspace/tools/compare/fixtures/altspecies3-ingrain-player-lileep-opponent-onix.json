@@ -1,0 +1,56 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "move": "INGRAIN",
+ "probe": "tools/compare/ingrainProbe.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/ingrain-player-lileep-opponent-onix.json",
+ "attacker": {
+  "species": "LILEEP",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 170,
+  "playerMaxHp": 173,
+  "opponentHp": 142,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 286,
+  "endFrame": 449,
+  "frameCount": 164
+ },
+ "draft": {
+  "activationFrame": 205,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "expectedDuration": 164,
+  "consumedByTest": false,
+  "acceptedWindow": {
+   "startFrame": 205,
+   "endFrame": 368,
+   "firstFramePresentationAge": 0
+  },
+  "animationProfile": {
+   "attackerSubpriority": 30
+  },
+  "attackerBattlePositionCenter": {
+   "x": 72,
+   "y": 80
+  },
+  "order": "ORDER-OK: renderer slots 6/8 battlers, 3/4/5/7 roots, 9+i orbs == known-entry firstMove free list (3,4,5,7,9,10,11); 0 overlapping equal-subpriority pairs (prep4-order-scan2.json)",
+  "speciesNote": "pixel evidence is CACTURNE art; a Lileep rental renders different art (unverified)"
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep4-ingrain-player.json",
+ "swap": {
+  "player": "LILEEP"
+ }
+}
