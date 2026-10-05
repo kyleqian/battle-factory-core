@@ -1,5 +1,26 @@
 # Animation integration progress
 
+## 2026-10-05 (day) — post-KO tracking rung 1 + consumer audit
+
+- Folded Opus worker `0f08fa4d1` (code `be86f3141`, src tree `badeb050`) as `e2eb653b6`:
+  the production sprite-order tracker models faint, next-mon summary + send-out, forced
+  switch-in, party-menu reset (open and return) + battle reshow, and the win trainer slide
+  (`docs/sprite-order-uncovered-units.md` §2); the lend gate is unchanged, so no adapter
+  output moved. Evidence replay through the production transform: route 84/84/0, lab
+  25/25/0 (23/23 with the recall still invalidating), unit checks 36/36. Supervisor: 8
+  sprite-order test files green; route comparison over 43 generated battles (master vs
+  branch, `.codex-logs/verify-postko-neutral.mjs`): every body decision identical; retained
+  order known after a faint 0 -> most commands. Worker gates: 1,510 files / 12,186 tests,
+  build 851. Receipt `postko-tracker-receipt.json`.
+- Post-KO consumer audit (`f78de13fd`, `docs/postko-consumer-audit.md`, new files only):
+  37 consumers (16.7% of Level-50 move uses); post-KO model vs ROM 0 mismatches at 37 known
+  edges (8 BattleLab scenarios, twice fresh); lending the order relabelled to entry slot
+  labels (π) makes all 13 probed bodies exact (7 already generalize, 6 need π), 0 need new
+  inputs. Supervisor reproduced the Thunderbolt-opponent case: probe twice byte-identical,
+  π lend 237/237 zero residual, raw lend 12/237.
+- Running: rung 2 (π lend + allocator re-seed + post-KO dense proofs); census regeneration
+  + measured prep for the single-input moves (side).
+
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 
 - CASTFORM normal-form Y placement fixed (`55d1ef1dd`, ISSUES #143 trimmed to weather
