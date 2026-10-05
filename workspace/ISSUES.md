@@ -17,6 +17,24 @@ backlog.
 
 # Open
 
+## #143 — CASTFORM live art differs from the ROM by a constant block (S10A, found 2026-10-05)
+
+- **Symptom:** a Thunderbolt alternate-species dense run with CASTFORM as the
+  attacker (BattleLab scenarios `thunderbolt-{player,opponent}-castform-*-shuckle`,
+  window = alt activation + accepted offset) leaves a CONSTANT residual on every
+  row: 800 px/row with Castform as the player (back) battler, 400 px/row as the
+  opponent (front) battler (237/237 rows, 189,600 px player run). The same move
+  with MINUN is exact both ways, so the residual is Castform's own sprite, not
+  the move body — every live adapter (and possibly the static scene) is affected
+  when Castform is on the field.
+- **Not yet known:** whether it is the form/weather variant of Castform's
+  graphics, its palette, or the pic coords/idle frame. Not root-caused.
+- **Evidence:** `.integration/validation/prep8-batch-worker/castform-alt/`
+  (both orientations, two runs each, `live-comparison.json` + `rgb/`, staged
+  scenarios under `scenarios/`).
+- **Next:** compare `liveSceneOnBattlerArt` / the art view for CASTFORM against
+  the ROM's gSprites battler tiles and palette at the activation frame.
+
 ## #141 — Two `SetMoveEffect` exits must RE-RUN `seteffectwithchance` (which then wastes one `Random() % 100`): the THRASH lock-in `break`s without advancing the cursor, and Thief/Covet-vs-Sticky-Hold uses `BattleScriptPushCursor()` — the port `advance`s / `"call"`s instead (RNG-affecting)
 
 **Found 2026-08-26** (move-effect application audit,

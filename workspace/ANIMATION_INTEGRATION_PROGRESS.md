@@ -1,5 +1,21 @@
 # Animation integration progress
 
+## 2026-10-05 — prep8 batch folded: 191 live adapters; uncovered-unit evidence
+
+- Folded worker `6598eb715` as `4c7791984` (src `4bf17bef1`): Swift, Trick,
+  Frustration (friendship ≤ 30), Seismic Toss (damage 33..65), Horn Drill,
+  Aurora Beam, Uproar, Thunderbolt, Stockpile, Zap Cannon — allocator constants
+  + lent order, gated on the tracked order being known. Supervisor dense 24
+  fixtures twice fresh, 4,013 rows/run, zero residual; routes 10/10 PASS.
+  Receipt `prep8-supervisor-receipt.json`. New ISSUES #143 (CASTFORM art).
+- Uncovered units (`80a12ace4`, `docs/sprite-order-uncovered-units.md`): faint,
+  summary, send-out, switch-in, party menu, reshow, recall and trainer-slide
+  order transforms 36/36 exact (strict route edges known rise accordingly), but
+  after a KO the battler slots and the affine baseline change, so lends stay
+  gated (needs occupancy-aware consumers + post-unit affine/task baselines).
+- Running: final batch (Giga Drain, Sunny Day, Mega Drain, Absorb, Dream
+  Eater, Double Team player, Feather Dance).
+
 ## 2026-10-05 — prep7 batch folded: 181 live adapters
 
 - Folded worker `81929ce83` as `d244f2f79` (src `907516e6b`): Aerial Ace,
