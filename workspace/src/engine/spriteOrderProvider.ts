@@ -207,11 +207,15 @@ export const BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS: readonly (readonly [read
   ].map(([created, destroyed]) => Object.freeze([Object.freeze(created!), Object.freeze(destroyed!)] as const)));
 
 /**
- * Free order after the known entry stream (== KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER). Only the route the corpus
- * covers is modelled; any other route is unknown history and returns an invalid state — never a guess.
+ * Free order after the known entry stream (== KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER). Both routes run the same stock
+ * CB2_InitBattle singles entry from ResetSpriteData: BattleLab (22 scenarios x 2) and the ordinary Factory draft ->
+ * battle 1 route (Scene ON, tools/integration/fixtures/sprite-order-factory-raw, docs/sprite-order-factory-entry.md)
+ * produce the identical window stream. Any other route is unknown history and returns an invalid state.
  */
 export function knownEntrySpriteOrderState(route: "ordinary-factory" | "battle-lab-ordinary-singles"): SpriteOrderState {
-  if (route !== "battle-lab-ordinary-singles") return invalidateSpriteOrderState(initSpriteOrderState());
+  if (route !== "battle-lab-ordinary-singles" && route !== "ordinary-factory") {
+    return invalidateSpriteOrderState(initSpriteOrderState());
+  }
   // Entry windows only destroy groups whose array order is stored in the table; the array itself is not needed.
   const identity = Array.from({ length: SPRITE_ORDER_SLOT_COUNT }, (_, slot) => slot);
   let state = initSpriteOrderState();

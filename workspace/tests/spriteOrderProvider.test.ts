@@ -160,6 +160,71 @@ describe("known-entry sprite order replay", () => {
       prev = frame;
     }
     expect(windows).toEqual(BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS.map(([c, d]) => [[...c], [...d]]));
-    expect(knownEntrySpriteOrderState("ordinary-factory").known).toBe(false);
+    expect(knownEntrySpriteOrderState("ordinary-factory").free).toEqual(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER);
+    expect(knownEntrySpriteOrderState("ordinary-factory").known).toBe(true);
+    expect(knownEntrySpriteOrderState("unmodelled" as "ordinary-factory").known).toBe(false);
+  });
+});
+
+describe("ordinary Factory entry (Scene ON, draft -> battle 1, tools/integration/fixtures/sprite-order-factory-raw)", () => {
+  const FACTORY = join(import.meta.dirname, "../tools/integration/fixtures/sprite-order-factory-raw");
+  const names = readdirSync(FACTORY).filter(f => f.endsWith(".json")).sort();
+
+  function load(file: string) {
+    const raw = JSON.parse(readFileSync(join(FACTORY, file), "utf8"));
+    const rows: Frame[] = raw.rows.map((r: [number, unknown, string, string, number]) => (
+      { n: r[0], order: hex(r[2]), mask: BigInt(`0x${r[3]}`), act: r[4] }));
+    const frames: Frame[] = [];
+    let i = 0;
+    for (let n = rows[0]!.n; n <= raw.lastFrame; n++) {
+      while (i + 1 < rows.length && rows[i + 1]!.n <= n) i++;
+      frames.push({ ...rows[i]!, n });
+    }
+    return { raw, frames };
+  }
+
+  it("has two byte-identical runs per scenario", () => {
+    expect(names).toHaveLength(4);
+    for (const base of ["battle1-turn1", "battle1-turn1-varB"]) {
+      expect(readFileSync(join(FACTORY, `${base}-0.json`), "utf8")).toBe(readFileSync(join(FACTORY, `${base}-1.json`), "utf8"));
+    }
+  });
+
+  it("replays the entry stream, first-move free order and occupants for every scenario", () => {
+    const provider = createKnownEntrySpriteAllocatorProvider("ordinary-factory");
+    const occupied = provider.firstMove.occupants.map(o => o.slot).sort((a, b) => a - b);
+    const opponents = new Set<number>();
+    for (const file of names.filter(f => /-0\.json$/.test(f))) {
+      const { raw, frames } = load(file);
+      opponents.add(raw.endState.opponent[0][0]);
+      expect(frames[0]!.mask).toBe(0n);
+      const windows: [number[], number[]][] = [];
+      let state = initSpriteOrderState();
+      let prev = frames[0]!;
+      let hit = 0, miss = 0, firstMoveFree: number[] | null = null, firstMoveOccupied: number[] = [];
+      let actSeen = false;
+      for (const frame of frames.slice(1)) {
+        const before = new Set(slotsOf(prev.mask)), after = new Set(slotsOf(frame.mask));
+        const created = [...after].filter(s => !before.has(s));
+        const destroyed = [...before].filter(s => !after.has(s)).sort((a, b) => prev.order.indexOf(a) - prev.order.indexOf(b));
+        if (actSeen && firstMoveFree === null && created.length) {
+          firstMoveFree = freeOf(prev.order, prev.mask);
+          firstMoveOccupied = slotsOf(prev.mask);
+        }
+        if (created.length || destroyed.length) windows.push([created, destroyed]);
+        state = applySpriteOrderWindow(state, created, destroyed, prev.order);
+        const observed = freeOf(frame.order, frame.mask);
+        if (state.free.join() === observed.join()) hit++; else { miss++; state = { ...state, free: observed }; }
+        if (frame.act) actSeen = true;
+        prev = frame;
+      }
+      expect(miss).toBe(0);
+      expect(hit).toBe(frames.length - 1);
+      const table = BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS.map(([c, d]) => [[...c], [...d]]);
+      expect(windows.slice(0, table.length)).toEqual(table);
+      expect(firstMoveFree).toEqual(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER);
+      expect(firstMoveOccupied).toEqual(occupied);
+    }
+    expect(opponents.size).toBe(2);
   });
 });
