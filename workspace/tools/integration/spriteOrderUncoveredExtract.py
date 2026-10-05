@@ -81,17 +81,19 @@ def windows_of(raw, R, a, b):
 
 
 def plan_of(wins):
-    made = []
-    plan = []
+    """Plan in the production token format.  A destroyed slot created earlier in the unit is named by its LIVE creation index (slot reuse after a
+    destroy names the newer sprite); anything else is an external occupant (["o", slot])."""
+    made, live, plan = [], {}, []
     for w in wins:
         win = {}
         if w["creates"]:
             win["C"] = []
             for c in w["creates"]:
                 win["C"].append(["n", len(made), c["mode"]])
+                live[c["slot"]] = len(made)
                 made.append(c["slot"])
         if w["destroys"]:
-            win["D"] = [["n", made.index(s)] if s in made else ["o", s] for s in w["destroys"]]
+            win["D"] = [["n", live.pop(s)] if s in live else ["o", s] for s in w["destroys"]]
         plan.append(win)
     return plan, made
 
@@ -112,7 +114,7 @@ def main():
             wins = windows_of(raw, R, c["first"], c["last"])
             plan, made = plan_of(wins)
             mb, ma = R.mask(c["first"] - 1), R.mask(c["last"] + 3)
-            surv = [s for s in made if (ma >> s) & 1]
+            surv = [s for s in dict.fromkeys(made) if (ma >> s) & 1]
             units.append({"trace": name, "first": c["first"], "last": c["last"], "class": label(c), "main": c["main"], "ctrl": c["ctrl"], "windows": wins, "plan": plan,
                           "survivors": surv, "occBefore": c["occupiedBefore"], "occAfter": c["occupiedAfter"],
                           "FbeforeHead": R.free(c["first"] - 1)[:16], "FafterHead": R.free(c["last"] + 3)[:24], "shape": shape(plan)})
