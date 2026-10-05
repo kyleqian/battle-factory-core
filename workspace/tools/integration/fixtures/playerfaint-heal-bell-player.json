@@ -1,0 +1,138 @@
+{
+ "schema": "playerfaint-adapter-draft/v1",
+ "draft": true,
+ "move": "HEAL_BELL",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/playerfaint-lightscreen-healbell-gigadrain-thunderbolt.json",
+ "stateFixture": "tools/integration/fixtures/playerfaint/state-playerfaint-lightscreen-healbell-gigadrain-thunderbolt.json",
+ "modelCheck": "tools/integration/fixtures/playerfaint/model-check-playerfaint-lightscreen-healbell-gigadrain-thunderbolt.json",
+ "attacker": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 172,
+  "playerMaxHp": 235,
+  "opponentHp": 170,
+  "opponentMaxHp": 170,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 1540,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 1540,
+  "endFrame": 1800,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset/length of postko-lend/postko-heal-bell-player.json (261 rows; Giga Drain P = prep9-giga-drain-player.json 214..443, same 230 rows); body after player faint -> forced party menu -> reshow -> forced switch-in",
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "faint-animation",
+     "battler": 0
+    },
+    {
+     "kind": "forced-party-menu",
+     "battlers": {
+      "player": false,
+      "opponent": true
+     }
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 0,
+     "partyIndex": 1
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "113",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "215",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

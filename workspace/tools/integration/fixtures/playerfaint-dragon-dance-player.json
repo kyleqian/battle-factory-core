@@ -1,0 +1,145 @@
+{
+ "schema": "playerfaint-adapter-draft/v1",
+ "draft": true,
+ "move": "DRAGON_DANCE",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/playerfaint-sunnyday-dragondance-swift.json",
+ "stateFixture": "tools/integration/fixtures/playerfaint/state-playerfaint-sunnyday-dragondance-swift.json",
+ "modelCheck": "tools/integration/fixtures/playerfaint/model-check-playerfaint-sunnyday-dragondance-swift.json",
+ "attacker": {
+  "species": "JOLTEON",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 140,
+  "opponentHp": 170,
+  "opponentMaxHp": 170,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 1766,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 1766,
+  "endFrame": 1907,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset/length of postko-dragon-dance-player.json (142 rows); body after player faint -> forced party menu -> reshow -> forced switch-in",
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "faint-animation",
+     "battler": 0
+    },
+    {
+     "kind": "forced-party-menu",
+     "battlers": {
+      "player": false,
+      "opponent": true
+     }
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 0,
+     "partyIndex": 1
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "241",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "SUN_CONTINUES",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "349",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

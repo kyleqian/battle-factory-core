@@ -1,0 +1,489 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-afterko-sunny-day-player.json",
+  "move": "SUNNY_DAY",
+  "side": "player",
+  "edge": 2247,
+  "window": {
+   "startFrame": 2247,
+   "endFrame": 2404,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 158,
+    "rows": 158,
+    "residualPixels": 0,
+    "digest": "95ff4e55339b676fcd0027a02fa912cb1af3bc2868a910f717a3e9e2c3983535"
+   },
+   "production": {
+    "exactRows": 48,
+    "rows": 158,
+    "residualPixels": 824656,
+    "digest": "43df686fc53c167a038a5ff09922507eeac6b11d4ece941da1a17073bc201135"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-afterko-sunny-day-player.json",
+   "edge": 2247,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-dragon-dance-player.json",
+  "move": "DRAGON_DANCE",
+  "side": "player",
+  "edge": 1766,
+  "window": {
+   "startFrame": 1766,
+   "endFrame": 1907,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 142,
+    "rows": 142,
+    "residualPixels": 0,
+    "digest": "e7d81dbec498b731daee2c3a876a0fd6850988c1c1d8f7e5427e65495098b641"
+   },
+   "production": {
+    "exactRows": 54,
+    "rows": 142,
+    "residualPixels": 99009,
+    "digest": "5a70bc08568b927f3ea86e26aeb12ce3d3051e245b4488ac6b94508801402470"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-dragon-dance-player.json",
+   "edge": 1766,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-giga-drain-player.json",
+  "move": "GIGA_DRAIN",
+  "side": "player",
+  "edge": 2223,
+  "window": {
+   "startFrame": 2223,
+   "endFrame": 2452,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 230,
+    "rows": 230,
+    "residualPixels": 0,
+    "digest": "5c719bda3dbd2479604ced170592882f417b101867d94508353e735366ea034a"
+   },
+   "production": {
+    "exactRows": 28,
+    "rows": 230,
+    "residualPixels": 3507137,
+    "digest": "3cf828e25eef528740ee3f933c95c7c5ec0cf1e13a41fe3201061c9e10dc2097"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-giga-drain-player.json",
+   "edge": 2223,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-heal-bell-player.json",
+  "move": "HEAL_BELL",
+  "side": "player",
+  "edge": 1540,
+  "window": {
+   "startFrame": 1540,
+   "endFrame": 1800,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 261,
+    "rows": 261,
+    "residualPixels": 0,
+    "digest": "d6ef1307a36b2b1a90bc56a7123e84977b0416ff3ffeb44bcbf59a4556cc5474"
+   },
+   "production": {
+    "exactRows": 12,
+    "rows": 261,
+    "residualPixels": 3032936,
+    "digest": "3fd3916184048a3ace541c8ffa8a726f93785a88133ce8d7ff0fd1dae83708db"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-heal-bell-player.json",
+   "edge": 1540,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-light-screen-player.json",
+  "move": "LIGHT_SCREEN",
+  "side": "player",
+  "edge": 921,
+  "window": {
+   "startFrame": 921,
+   "endFrame": 1008,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 88,
+    "rows": 88,
+    "residualPixels": 0,
+    "digest": "335e39bc52bccc9e42b7a01450e6903a4d1a64aa55733928fa58bed1331ca911"
+   },
+   "production": {
+    "exactRows": 88,
+    "rows": 88,
+    "residualPixels": 0,
+    "digest": "335e39bc52bccc9e42b7a01450e6903a4d1a64aa55733928fa58bed1331ca911"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-light-screen-player.json",
+   "edge": 921,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend + host re-seed)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-protect-player.json",
+  "move": "PROTECT",
+  "side": "player",
+  "edge": 1170,
+  "window": {
+   "startFrame": 1170,
+   "endFrame": 1292,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 123,
+    "rows": 123,
+    "residualPixels": 0,
+    "digest": "082a94181622065f52e5704100d893bd02e483ecb725a017c4f12966e00a0d4b"
+   },
+   "production": {
+    "exactRows": 123,
+    "rows": 123,
+    "residualPixels": 0,
+    "digest": "082a94181622065f52e5704100d893bd02e483ecb725a017c4f12966e00a0d4b"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-protect-player.json",
+   "edge": 1170,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend + host re-seed)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-secondko-sunny-day-player.json",
+  "move": "SUNNY_DAY",
+  "side": "player",
+  "edge": 2773,
+  "window": {
+   "startFrame": 2773,
+   "endFrame": 2930,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 158,
+    "rows": 158,
+    "residualPixels": 0,
+    "digest": "633bd8190c5427f40f1134ac4f9deb1fd1c7234ebb036c6e480ece76d6bcde84"
+   },
+   "production": {
+    "exactRows": 158,
+    "rows": 158,
+    "residualPixels": 0,
+    "digest": "633bd8190c5427f40f1134ac4f9deb1fd1c7234ebb036c6e480ece76d6bcde84"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-secondko-sunny-day-player.json",
+   "edge": 2773,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": "lent",
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": true,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "GENERALIZES (today's pi lend)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-slot2-sunny-day-player.json",
+  "move": "SUNNY_DAY",
+  "side": "player",
+  "edge": 949,
+  "window": {
+   "startFrame": 949,
+   "endFrame": 1106,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 158,
+    "rows": 158,
+    "residualPixels": 0,
+    "digest": "ddebf460ce503a10bbc498dd75b5c01ed92d6d926d382285f75c145b292e8fda"
+   },
+   "production": {
+    "exactRows": 48,
+    "rows": 158,
+    "residualPixels": 824656,
+    "digest": "2cefe62c3996e939ae9d5ae3cfb1b597f85134d2c3cedaee6b0574747337349d"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-slot2-sunny-day-player.json",
+   "edge": 949,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-sunny-day-player.json",
+  "move": "SUNNY_DAY",
+  "side": "player",
+  "edge": 937,
+  "window": {
+   "startFrame": 937,
+   "endFrame": 1094,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 158,
+    "rows": 158,
+    "residualPixels": 0,
+    "digest": "95b19889dc09ede4f37c09ac21311ca19f8b4cacb3998cc28fde068f7b3c84b3"
+   },
+   "production": {
+    "exactRows": 48,
+    "rows": 158,
+    "residualPixels": 824656,
+    "digest": "f736f1845c4db4f1cd03fde66ab8a990d9e05c840af392e6fd389b55d2d11d35"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-sunny-day-player.json",
+   "edge": 937,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-swift-opponent.json",
+  "move": "SWIFT",
+  "side": "opponent",
+  "edge": 1238,
+  "window": {
+   "startFrame": 1238,
+   "endFrame": 1317,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 80,
+    "rows": 80,
+    "residualPixels": 0,
+    "digest": "426251a005a9b81b8746864891520c5800a7eb2e6f969b38fd3a54b02075bc8f"
+   },
+   "production": {
+    "exactRows": 17,
+    "rows": 80,
+    "residualPixels": 58503,
+    "digest": "11693d0489b0f8c7a86c2b6ad2480e2b4b0bfa6028570573f2146b62248a3d19"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-swift-opponent.json",
+   "edge": 1238,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-swift-player.json",
+  "move": "SWIFT",
+  "side": "player",
+  "edge": 2747,
+  "window": {
+   "startFrame": 2747,
+   "endFrame": 2824,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 78,
+    "rows": 78,
+    "residualPixels": 0,
+    "digest": "4c89d3f28f484e9508e0e0aadc5e84c1d7ebabd4a7eebc08615cf01d265d700e"
+   },
+   "production": {
+    "exactRows": 16,
+    "rows": 78,
+    "residualPixels": 68648,
+    "digest": "7afdaf9b0165541f3e4011a8a6b10c87233f06c1818eee7b037d4939375b77ce"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-swift-player.json",
+   "edge": 2747,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-thunderbolt-opponent.json",
+  "move": "THUNDERBOLT",
+  "side": "opponent",
+  "edge": 1685,
+  "window": {
+   "startFrame": 1685,
+   "endFrame": 1921,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 237,
+    "rows": 237,
+    "residualPixels": 0,
+    "digest": "1310acbd20361b15c0d0c1e95d2895838cd92a316a2b7a94cba26f20511841a9"
+   },
+   "production": {
+    "exactRows": 12,
+    "rows": 237,
+    "residualPixels": 4114979,
+    "digest": "1639b6952fc3b247716e0badc54b8d35d102e7fbe4c8c795b25c4c3166a60f7e"
+   },
+   "raw": {
+    "exactRows": 12,
+    "rows": 237,
+    "residualPixels": 4114979,
+    "digest": "1639b6952fc3b247716e0badc54b8d35d102e7fbe4c8c795b25c4c3166a60f7e"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-thunderbolt-opponent.json",
+   "edge": 1685,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-twice-sunny-day-player.json",
+  "move": "SUNNY_DAY",
+  "side": "player",
+  "edge": 1777,
+  "window": {
+   "startFrame": 1777,
+   "endFrame": 1934,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 158,
+    "rows": 158,
+    "residualPixels": 0,
+    "digest": "60b7a621238ecafe83d3691f266ee831929415bd0b89df3dcf620d6f35abfe89"
+   },
+   "production": {
+    "exactRows": 48,
+    "rows": 158,
+    "residualPixels": 824656,
+    "digest": "ce2b2252b732d9f074b5218d494c38b45f8b53a170b63b47024b2c2c6c3434ff"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-twice-sunny-day-player.json",
+   "edge": 1777,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ }
+]
