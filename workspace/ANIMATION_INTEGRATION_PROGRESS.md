@@ -1,5 +1,25 @@
 # Animation integration progress
 
+## 2026-10-04 (night) — order-consumer batch folded: 166 live adapters
+
+- Folded worker `bd04c68bd` as `72610e111` (src `53130b776`): Ember, Dragon
+  Rage (no order input), Flamethrower (provider seed or ascending, both exact)
+  render always; Heal Bell, Leaf Blade (new `initialOrder` parameters, staged
+  defaults unchanged), Rock Throw (occupied prefix + F), Blaze Kick, Perish
+  Song (creation rank, 3/3 turns) render as the battle's first body only.
+  Harness replays fixture `precedingBodies` with the plan applier (16/16 equal
+  the validated seeds).
+- Supervisor dense: 16 fixtures + Ember/Flamethrower HOUNDOUR both sides
+  twice fresh, 2,874 rows/run, zero residual; routes 8/8 exact ON/OFF parity.
+  Receipt `order-consumers-supervisor-receipt.json`.
+- Limits: Blaze Kick has no first-body ROM scenario (proof uses its
+  Torment-preceded accepted history); tails Flamethrower 80 / Dragon Rage 21 /
+  Blaze Kick 9 / Ember 3 frames uncovered.
+- Plan coverage (`adc8d04f3`, `docs/sprite-order-plan-coverage.md`): 228 more
+  scenarios (two identical runs each) raise EXACT body plans to 68% of
+  weighted Factory move uses (was 52%); union replay 1,053/1,053 exact.
+- Running: cross-body order tracking (Opus); remaining-adapters census (side).
+
 ## 2026-10-04 (night) — sprite-order provider wired (first body) + Grudge: 158
 
 - Folded Opus worker `3bb021abb` (code `f279df7cc`, src `953b81b0a`) as
