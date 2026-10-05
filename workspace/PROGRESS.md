@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-04 (night, checkpoint 2) — S10A: 166 live adapters, sprite order live
+
+- **State:** production `72610e111` (166 live adapters). Folds since
+  checkpoint 1 each re-proved by the supervisor (dense twice fresh, zero
+  residual; routes all PASS) with worker full suites (latest 1,500 files /
+  12,081 tests) plus supervisor typecheck/smoke/affected on each union.
+  Preview serves `bb0e1e021`, verified (four hashes, export, ON->OFF, no errors).
+- **Did:** prep5 batch (6); sprite-order provider wired into production for
+  the battle's first move body + Grudge; order-consumer batch (Ember, Dragon
+  Rage, Flamethrower always; Heal Bell, Leaf Blade, Rock Throw, Blaze Kick,
+  Perish Song first body). Evidence: order-consumer prep, gap causes (blip =
+  hit animation), real Factory battle validation, plan coverage 68% of
+  weighted move uses, prep6 (7 READY).
+- **Next:** cross-body order tracking (running, Opus); prep6 batch (brief
+  ready in `.codex-logs/`); census of remaining moves (running).
+
+---
+
 ## 2026-10-04 (night, checkpoint 1) — S10A: 151 live adapters + sprite-order provider
 
 - **State:** S10A, local master; production `5fd7ea33b` (151 live adapters).
