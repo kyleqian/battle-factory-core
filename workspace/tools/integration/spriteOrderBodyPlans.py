@@ -82,11 +82,10 @@ def extract_scenario(kind, path):
         return None
     edges.append(len(W))
     created_at = {}  # slot -> (frame, F index at creation) for live sprites
-    units = []
-    for j in range(len(edges) - 1):
-        a, b = edges[j], edges[j + 1]
+
+    def unit_of(kind, lo, hi, **extra):
         wl = []
-        for w in W[a:b]:
+        for w in W[lo:hi]:
             if not (w["C"] or w["D"]):
                 continue
             ent = {"f": w["n"]}
@@ -97,7 +96,6 @@ def extract_scenario(kind, path):
             if w["D"]:
                 ent["D"] = w["D"]
                 if len(w["D"]) > 1:
-                    ent["G"] = [[s] + [(w["keys"].get(str(s)) or [None] * 3)[0] if False else 0] for s in w["D"]]
                     ent["G"] = []
                     for s in w["D"]:
                         k = w["keys"].get(str(s))
@@ -106,7 +104,16 @@ def extract_scenario(kind, path):
                 for s in w["D"]:
                     created_at.pop(s, None)
             wl.append(ent)
-        units.append({"mv": W[a]["mv"], "edgeFrame": W[a]["n"], "observedFreeAtEdge": W[a]["obsF"], "windows": wl})
+        return {"kind": kind, "frame": W[min(lo, len(W) - 1)]["n"], "windows": wl, **extra}
+
+    units = []
+    for j in range(len(edges) - 1):
+        a, b = edges[j], edges[j + 1]
+        k = a
+        while k < b and W[k]["act"]:
+            k += 1
+        units.append(unit_of("body", a, k, mv=W[a]["mv"], observedFreeAtEdge=W[a]["F"]))
+        units.append(unit_of("gap", k, b, last=(j == len(edges) - 2), nextMv=(W[b]["mv"] if b < len(W) else None)))
     return {"file": Path(path).name, "kind": kind, "move": d.get("move"), "side": side,
             "freeAtFirstEdge": W[edges[0]]["obsF"], "units": units}
 
@@ -275,6 +282,10 @@ class Sim:
                 self.F = slots + [s for s in self.F if s not in slots]
 
 
+def ukey(sc, u):
+    return f"{u['mv']}:{owner_side(sc, u['mv']) or '?'}"
+
+
 def main(argv):
     extra = argv[argv.index("--extra") + 1] if "--extra" in argv else None
     if extra:
@@ -283,85 +294,96 @@ def main(argv):
         print("wrote", TABLE, TABLE.stat().st_size, "bytes")
     table = json.loads(TABLE.read_text())
     SC = table["scenarios"]
+    lives = set(live_ids())
 
-    # ---- plans per (move, side)
-    plans = collections.defaultdict(lambda: {"sigs": collections.defaultdict(list), "scenarios": [], "cls": collections.Counter(),
-                                              "why": collections.Counter(), "prompt": 0, "pw": collections.defaultdict(set)})
+    def new_plan():
+        return {"sigs": collections.defaultdict(list), "scenarios": [], "cls": collections.Counter(), "why": collections.Counter(),
+                "pw": collections.defaultdict(set)}
+
+    bodies, gaps = collections.defaultdict(new_plan), collections.defaultdict(new_plan)
     toks = []
     for sc in SC:
         T = tokenize_scenario(sc)
         toks.append(T)
-        for ui, (u, tw) in enumerate(zip(sc["units"], T)):
-            tw2, prompt = strip_prompt(tw, ui == len(T) - 1)
-            side = owner_side(sc, u["mv"])
-            if side is None:
-                side = "?"
-            p = plans[(u["mv"], side)]
-            p["sigs"][sig(tw2)].append(sc["file"])
-            p["scenarios"].append(sc["file"]); p["prompt"] += prompt
-            for g, w in enumerate(tw2):
+        U = sc["units"]
+        for ui, (u, tw) in enumerate(zip(U, T)):
+            if u["kind"] == "body":
+                p = bodies[ukey(sc, u)]
+            else:
+                if u["last"]:
+                    continue  # truncated at end of trace (ends in the next prompt's cursor-pair create); not a plan
+                p = gaps[ukey(sc, U[ui - 1]) + ">" + ukey(sc, U[ui + 1])]
+            p["sigs"][sig(tw)].append(sc["file"])
+            p["scenarios"].append(sc["file"])
+            for w in tw:
                 if "cls" in w and "D" in w:
                     p["cls"][w["cls"]] += 1
                     if "why" in w:
                         p["why"][w["why"]] += 1
                     if w["cls"] == "STATIC":
                         p["pw"][json.dumps(w["D"])].add(json.dumps(w["pw"]))
-    # ---- verdict
-    lives = set(live_ids())
-    rows = {}
-    for (mv, side), p in sorted(plans.items()):
-        bad = p["cls"]["KEYS"]
-        multi = len(p["sigs"]) > 1
-        v = "EXACT-PLAN" if not bad and not multi else "NEEDS-KEYS"
-        if not bad and multi:
-            v = "NEEDS-KEYS"  # window stream differs between scenarios (context/species dependent)
-        stat_const = all(len(x) == 1 for x in p["pw"].values())
-        rows[f"{mv}:{side}"] = {"move": mv, "side": side, "live": mv in lives, "scenarios": len(p["scenarios"]),
-                                "distinctPlans": len(p["sigs"]), "groupClasses": dict(p["cls"]),
-                                "keysReasons": dict(p["why"]), "staticKeyWordsConstant": stat_const,
-                                "verdict": v, "trailingPromptCursorCreate": p["prompt"],
-                                "plan": json.loads(max(p["sigs"], key=lambda s: len(p["sigs"][s]))),
-                                "planFiles": {k: v2[:3] for k, v2 in list(p["sigs"].items())[:1]}}
-    exact = {k for k, r in rows.items() if r["verdict"] == "EXACT-PLAN"}
 
-    # ---- replay
+    def verdicts(plans, with_live):
+        rows = {}
+        for key, p in sorted(plans.items()):
+            multi = len(p["sigs"]) > 1
+            bad = p["cls"]["KEYS"]
+            v = "EXACT-PLAN" if not bad and not multi else "NEEDS-KEYS"
+            top = max(p["sigs"], key=lambda x: len(p["sigs"][x]))
+            r = {"scenarios": len(p["scenarios"]), "distinctPlans": len(p["sigs"]), "groupClasses": dict(p["cls"]),
+                 "keysReasons": dict(p["why"]), "staticKeyWordsConstant": all(len(x) == 1 for x in p["pw"].values()),
+                 "verdict": v, "plan": json.loads(top), "planExamples": p["sigs"][top][:2]}
+            if multi:
+                r["otherPlans"] = {x: len(f) for x, f in p["sigs"].items() if x != top}
+            if with_live:
+                r["move"], r["side"] = key.split(":"); r["live"] = int(r["move"]) in lives
+            rows[key] = r
+        return rows
+
+    brow, grow = verdicts(bodies, True), verdicts(gaps, False)
+    bex = {k for k, r in brow.items() if r["verdict"] == "EXACT-PLAN"}
+    gex = {k for k, r in grow.items() if r["verdict"] == "EXACT-PLAN"}
+
+    # ---- replay: entry constant + plans only
     stat = collections.Counter()
     bad_edges = []
     for sc, T in zip(SC, toks):
-        sim = Sim()
-        plan_ok = True
-        for ui, (u, tw) in enumerate(zip(sc["units"], T)):
-            side = owner_side(sc, u["mv"]) or "?"
-            key = f"{u['mv']}:{side}"
-            stat["edges"] += 1
-            if plan_ok:
-                stat["edgesPrecededByExactPlans"] += 1
-                if sim.F == u["observedFreeAtEdge"]:
-                    stat["edgesExact"] += 1
-                else:
-                    stat["edgesMismatched"] += 1
-                    bad_edges.append({"file": sc["file"], "unit": ui, "move": u["mv"], "predicted": sim.F[:10], "observed": u["observedFreeAtEdge"][:10]})
-            tw2, _ = strip_prompt(tw, ui == len(T) - 1)
-            if key not in exact:
-                plan_ok = False
+        sim, ok, gap_ok = Sim(), True, True
+        U = sc["units"]
+        for ui, (u, tw) in enumerate(zip(U, T)):
+            if u["kind"] == "body":
+                key = ukey(sc, u)
+                stat["edges"] += 1
+                if ok:
+                    stat["edgesPrecededByExactPlans"] += 1
+                    if sim.F == u["observedFreeAtEdge"]:
+                        stat["edgesExact"] += 1
+                    else:
+                        stat["edgesMismatched"] += 1
+                        bad_edges.append({"file": sc["file"], "unit": ui, "move": u["mv"], "predicted": sim.F[:10], "observed": u["observedFreeAtEdge"][:10]})
+                plan, valid = (brow[key]["plan"], key in bex)
+            else:
+                if u["last"]:
+                    continue
+                key = ukey(sc, U[ui - 1]) + ">" + ukey(sc, U[ui + 1])
+                plan, valid = (grow[key]["plan"], key in gex)
+            if not valid:
+                ok = False
                 continue
-            # replay the *table plan* of this (move, side), not the scenario's own tokens
-            plan = rows[key]["plan"]
-            # attach group classes by position from the scenario's own classification (class is a property of the plan)
-            own = [w for w in tw2]
-            planw = []
-            for pw_, ow in zip(plan, own):
-                x = dict(pw_); x["cls"] = ow.get("cls", "SINGLE"); planw.append(x)
+            if not ok:
+                continue
+            planw = [dict(pw_, cls=ow.get("cls", "SINGLE")) for pw_, ow in zip(plan, tw)]
             sim.apply_unit(planw, None)
     out = {"schema": "sprite-order-body-plans/v1", "table": {"scenarios": len(SC), "sha256": hashlib.sha256(TABLE.read_bytes()).hexdigest()},
-           "tokens": "('n',k)=k-th sprite created by this body; ('c',ago,k)=survivor k of the unit `ago` earlier; ('o',slot)=pre-unit occupant",
+           "tokens": "('n',k)=k-th sprite created by this unit (creation order: lowest-free ascending then end descending); ('c',ago,k)=survivor k of the unit `ago` units earlier (units alternate body,gap); ('o',slot)=occupant that predates every unit",
            "groupClasses": "SINGLE | STATIC (distinct priority words) | FDERIVED (tied keys; creation window then free-order index) | KEYS",
            "replay": dict(stat), "replayMismatches": bad_edges[:20],
-           "liveIds": sorted(lives), "plans": rows}
-    covered = {r["move"] for r in rows.values()}
+           "liveIds": sorted(lives), "bodies": brow, "gaps": grow}
+    covered = {int(k.split(":")[0]) for k in brow}
     out["liveNotObserved"] = sorted(lives - covered)
-    ver = collections.Counter(r["verdict"] for r in rows.values())
-    print(json.dumps({"verdicts": ver, "replay": dict(stat), "liveNotObserved": len(out["liveNotObserved"])}, indent=1))
+    print(json.dumps({"bodyVerdicts": collections.Counter(r["verdict"] for r in brow.values()),
+                      "gapVerdicts": collections.Counter(r["verdict"] for r in grow.values()), "replay": dict(stat),
+                      "liveNotObserved": len(out["liveNotObserved"])}, indent=1))
     if "--write" in argv:
         PLANS.write_text(json.dumps(out, indent=1) + "\n")
         print("wrote", PLANS)
