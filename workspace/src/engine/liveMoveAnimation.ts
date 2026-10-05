@@ -241,6 +241,26 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
  */
 export const LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS: Readonly<Record<number, number>> = Object.freeze({ 113: 2, 248: 2 });
 
+/**
+ * ISSUES #147: ordinary rows after a live body on which the elevated-opponent shadow stays hidden, keyed by attacker side
+ * then move id. `SpriteCB_EnemyShadow` re-shows the shadow one display frame after the ROM script ends; these accepted
+ * windows end d = scriptEnd - E frames before it, so the shadow returns on E + d + 1
+ * (tools/integration/fixtures/elevated-postbody/script-end-vs-window-table.json, docs/elevated-postbody-audit.md 3;
+ * pinned by tests/elevatedRendererPostBody.test.ts). Unlisted move/side pairs measured d = 0 or were not measured.
+ */
+export const LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS: Readonly<Record<"player" | "opponent", Readonly<Record<number, number>>>> =
+  Object.freeze({
+    // Absorb, Dragon Rage, Dream Eater, Psybeam, Razor Wind, Sing, Sky Uppercut.
+    player: Object.freeze({ 71: 2, 82: 21, 138: 1, 60: 1, 13: 1, 47: 1, 327: 1 }),
+    // Absorb, Dragon Rage, Horn Drill.
+    opponent: Object.freeze({ 71: 2, 82: 21, 32: 1 }),
+  });
+
+/** Post-body shadow hide rows for a finished live request (0 when the shadow returns on E+1). */
+export function liveMoveOpponentShadowPostBodyHideRows(request: BattleMoveAnimationRequest): number {
+  return LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS[request.attacker === 0 ? "player" : "opponent"][request.moveId] ?? 0;
+}
+
 /** True when `age` is on one of the final return rows of a request (see LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS). */
 export function liveMoveOpponentShadowReturn(request: BattleMoveAnimationRequest, age: number): boolean {
   const rows = LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS[request.moveId];

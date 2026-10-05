@@ -54413,6 +54413,13 @@ export function renderBattleResolutionSceneOffView(
     );
   }
   if (view.visibility.opponent.sprite) {
+    // ISSUES #147: the ordinary field draws an elevated opponent at the same
+    // elevated origin and with the same generated shadow as the command menu
+    // (docs/elevated-postbody-audit.md, docs/elevated-renderer-off-check.md:
+    // both profiles). `SpriteCB_EnemyShadow` hides the shadow while the
+    // battler sprite is invisible (the blink's hidden rows clear
+    // visibility.opponent.sprite) and for `postBodyShadowHidden` ordinary
+    // rows after a live body whose script outlives its accepted window.
     if (
       faint?.battler === 1
       && faint.sink.type === "opponent-tile-rows"
@@ -54426,12 +54433,13 @@ export function renderBattleResolutionSceneOffView(
         faint.sink.keptRows,
       );
     } else {
+      if (!view.postBodyShadowHidden) drawGeneratedOpponentShadow(fb, view.fieldArt);
       drawSpriteSheet(
         fb,
         view.fieldArt.opponent.pic.tileset as Tileset,
         view.fieldArt.opponent.pic.palette as RgbColor[],
         view.fieldArt.opponent.origin.x,
-        view.fieldArt.opponent.origin.y,
+        view.fieldArt.opponent.origin.y - enemyMonElevation(view.fieldArt.opponent.speciesSymbol),
       );
     }
   }

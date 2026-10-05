@@ -1,6 +1,6 @@
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
-import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
+import { liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows } from "./liveMoveAnimation.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import {
   BATTLE_COMMAND_ACTION_ENTER_DELAY,
@@ -602,6 +602,13 @@ export type BattleResolutionPresentationRenderView = Readonly<{
     visibleCharacters: number;
   }> | null;
   effect: BattleResolutionRenderEffect | null;
+  /**
+   * ISSUES #147: true on the ordinary rows right after a live move body whose
+   * ROM script outlives its accepted window (`SpriteCB_EnemyShadow` keeps the
+   * elevated-opponent shadow hidden while `gAnimScriptActive`); see
+   * LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS. Absent means false.
+   */
+  postBodyShadowHidden?: boolean;
   visibility: Readonly<{
     player: Readonly<{ sprite: boolean; healthbox: boolean }>;
     opponent: Readonly<{ sprite: boolean; healthbox: boolean }>;
@@ -895,6 +902,37 @@ export function isBattleResolutionNextCommandHandoffComplete(
 ): boolean {
   return state.lifecycle.phase === "next-command-handoff"
     && state.lifecycle.phaseElapsed >= BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES;
+}
+
+/**
+ * ISSUES #147: whether the current presenting row is one of the first
+ * `liveMoveOpponentShadowPostBodyHideRows` ordinary rows after the segment's
+ * latest live move body (row 1 = the first frame after the body's last row).
+ */
+function postBodyShadowHiddenAt(
+  state: BattleResolutionPresentationState,
+  segment: ReturnType<typeof currentSegment>,
+): boolean {
+  if (
+    state.lifecycle.phase !== "presenting"
+    && state.lifecycle.phase !== "awaiting-message-dismiss"
+  ) return false;
+  const command = segment.commands[state.commandIndex];
+  if (!command || (command.type === "move-animation" && command.animation)) return false;
+  const fields = [state.field];
+  for (let index = 0; index < state.commandIndex; index += 1) {
+    fields.push(applyCompletedCommand(fields[index]!, segment.commands[index]!));
+  }
+  let rows = state.lifecycle.phaseElapsed + 1;
+  for (let index = state.commandIndex - 1; index >= 0; index -= 1) {
+    const completed = segment.commands[index]!;
+    if (completed.type === "move-animation") {
+      if (!completed.animation || liveMoveAnimationDuration(completed.animation) === null) return false;
+      return rows <= liveMoveOpponentShadowPostBodyHideRows(completed.animation);
+    }
+    rows += battleResolutionCommandDuration(completed, fields[index]!);
+  }
+  return false;
 }
 
 function healthboxParams(
@@ -1289,6 +1327,7 @@ export function createBattleResolutionPresentationRenderView(
             visibleCharacters,
           }),
     effect,
+    postBodyShadowHidden: postBodyShadowHiddenAt(state, segment),
     visibility: Object.freeze({
       player: Object.freeze({
         sprite: (spriteVisibility.get(0) ?? true)
