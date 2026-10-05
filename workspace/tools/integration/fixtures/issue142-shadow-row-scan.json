@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 335,
-  "ids": 158,
+  "rows": 351,
+  "ids": 166,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -3537,6 +3537,166 @@
    "drawn": [
     0
    ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 52,
+   "move": "EMBER",
+   "orientation": "player",
+   "duration": 63,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 52,
+   "move": "EMBER",
+   "orientation": "opponent",
+   "duration": 63,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 82,
+   "move": "DRAGON_RAGE",
+   "orientation": "player",
+   "duration": 150,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 82,
+   "move": "DRAGON_RAGE",
+   "orientation": "opponent",
+   "duration": 150,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 53,
+   "move": "FLAMETHROWER",
+   "orientation": "player",
+   "duration": 115,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 53,
+   "move": "FLAMETHROWER",
+   "orientation": "opponent",
+   "duration": 115,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 88,
+   "move": "ROCK_THROW",
+   "orientation": "player",
+   "duration": 87,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 88,
+   "move": "ROCK_THROW",
+   "orientation": "opponent",
+   "duration": 87,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 215,
+   "move": "HEAL_BELL",
+   "orientation": "player",
+   "duration": 261,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 215,
+   "move": "HEAL_BELL",
+   "orientation": "opponent",
+   "duration": 261,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 195,
+   "move": "PERISH_SONG",
+   "orientation": "player",
+   "duration": 259,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 195,
+   "move": "PERISH_SONG",
+   "orientation": "opponent",
+   "duration": 259,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 348,
+   "move": "LEAF_BLADE",
+   "orientation": "player",
+   "duration": 224,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 348,
+   "move": "LEAF_BLADE",
+   "orientation": "opponent",
+   "duration": 224,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 299,
+   "move": "BLAZE_KICK",
+   "orientation": "player",
+   "duration": 78,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 299,
+   "move": "BLAZE_KICK",
+   "orientation": "opponent",
+   "duration": 78,
+   "expected": null,
+   "drawn": [],
    "tailFirstAge": null
   }
  ]

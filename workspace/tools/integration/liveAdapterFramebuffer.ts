@@ -80,6 +80,9 @@ const seedsFixture = (() => {
 
 /** Order cursor at the fixture body's activation edge: known entry + the declared preceding bodies' plans. */
 export function fixtureSpriteOrder(f: Fixture, request: BattleMoveAnimationRequest) {
+  // POKEBENCH_LIVE_ORDER_INPUT=first-body: ignore precedingBodies and lend the known-entry order, exactly what
+  // production supplies when the move is the battle's first body (the oracle frames still come from the scenario).
+  if (process.env.POKEBENCH_LIVE_ORDER_INPUT === "first-body") f = { ...f, precedingBodies: [] };
   const table = planFixture();
   const entry = createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles").firstMove.occupants.map(o => o.slot);
   let cursor = createSpriteOrderPlanCursor(knownEntrySpriteOrderState("battle-lab-ordinary-singles"), entry);
@@ -97,7 +100,7 @@ export function fixtureSpriteOrder(f: Fixture, request: BattleMoveAnimationReque
   const scenarioName = basename(f.scenario, ".json").replace(/^mechanic-/, "");
   const row = seedsFixture().scenarios.find(s => s.scenario === scenarioName && s.move === request.moveId
     && s.attackerSide === f.attacker.geometry.side && s.unitIndex === 1 + 2 * (f.precedingBodies?.length ?? 0));
-  if (row) {
+  if (row && process.env.POKEBENCH_LIVE_ORDER_INPUT !== "first-body") {
     if (!row.providerValid || JSON.stringify(row.observedFreeAtEdge) !== JSON.stringify(cursor.order.free)) {
       throw new Error(`Plan-replayed order differs from order-consumer-seeds.json for ${scenarioName}`);
     }
