@@ -35,7 +35,13 @@ export function encodeSpriteOrderPlan(plan: Plan): string {
 const statClass = (arg: number): 1 | 2 | null =>
   (arg >= 15 && arg <= 28) || arg === 55 || arg === 57 ? 1 : arg >= 39 && arg <= 52 ? 2 : null;
 
-/** Extra EXACT-PLAN body rows merged after the ext table (policy-gaps relative-y rows; rely rows of tier "confirmed" only). */
+/** abs-invariant rely rows admitted to production (283:player is already supplied, identically, by the policy-gaps rows): every sprite in a KEYS group has a y that depends only on battler-position
+ * constants and script constants (Fissure: a common elevation offset), proved per row in docs/sprite-order-absinv-source-check.md. */
+export const SOURCE_CONFIRMED_ABS_INVARIANT: ReadonlySet<string> = new Set(
+  [45, 46, 336, 263, 90, 69, 230, 18, 215, 312].flatMap(move => [`${move}:player`, `${move}:opponent`])
+    .concat(["135:player", "236:player"]));
+
+/** Extra EXACT-PLAN body rows merged after the ext table (policy-gaps relative-y rows; rely rows of tier "confirmed" + source-confirmed abs-invariant). */
 export function renderSpriteOrderProductionTable(ext: { bodies: Record<string, Row> }, gapCauses: {
   midBattleAnimations: { anims: Record<string, Row> };
 }, extraBodies: readonly Record<string, Row & { readonly tier?: string }>[] = []): string {
@@ -50,7 +56,7 @@ export function renderSpriteOrderProductionTable(ext: { bodies: Record<string, R
   const merged: Record<string, Row> = { ...ext.bodies };
   for (const extra of extraBodies) {
     for (const [key, row] of Object.entries(extra)) {
-      if (row.tier !== undefined && row.tier !== "confirmed") continue; // abs-invariant rely rows stay out of production
+      if (row.tier !== undefined && row.tier !== "confirmed" && !(row.tier === "abs-invariant" && SOURCE_CONFIRMED_ABS_INVARIANT.has(key))) continue;
       if (merged[key]?.verdict === "EXACT-PLAN") throw new Error(`body row ${key} is already in the table`);
       merged[key] = row;
     }

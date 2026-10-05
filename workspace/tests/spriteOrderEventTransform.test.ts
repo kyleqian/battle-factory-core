@@ -8,7 +8,7 @@ import { SPRITE_ORDER_PRODUCTION_BODIES, SPRITE_ORDER_PRODUCTION_PLANS } from ".
 import {
   KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState,
 } from "../src/engine/spriteOrderProvider.ts";
-import { encodeSpriteOrderPlan, renderSpriteOrderProductionTableFromFixtures } from "../tools/integration/spriteOrderProductionTable.ts";
+import { SOURCE_CONFIRMED_ABS_INVARIANT, encodeSpriteOrderPlan, renderSpriteOrderProductionTableFromFixtures } from "../tools/integration/spriteOrderProductionTable.ts";
 import { REAL_ROUTE_TRACES, replayCrossBodyTrace } from "../tools/integration/spriteOrderCrossBodyReplay.ts";
 import { replayCrossBodyCorpus } from "../tools/integration/spriteOrderCrossBodyCorpusReplay.ts";
 
@@ -21,13 +21,13 @@ describe("production sprite-order plan table (generated, pinned)", () => {
   it("regenerates byte-identically from the evidence JSON", () => {
     const committed = readFileSync(new URL("../src/engine/spriteOrderProductionPlans.ts", import.meta.url), "utf8");
     expect(renderSpriteOrderProductionTableFromFixtures()).toBe(committed);
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(445);
-    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(176);
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(467);
+    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(187);
   });
 
   it("decodes every EXACT-PLAN (move, side) body of the ext table to the fixture plan", () => {
     const bodies = fixture("sprite-order-body-plans-ext.json").bodies as Record<string, { verdict: string; plan: unknown }>;
-    // Rows merged from the policy-gaps relative-y plans and the rely table (confirmed tier only) cover keys the ext table leaves non-EXACT.
+    // Rows merged from the policy-gaps relative-y plans and the rely table (confirmed tier + the source-confirmed abs-invariant allowlist) cover keys the ext table leaves non-EXACT.
     const extra: Record<string, { verdict: string; plan: unknown; tier?: string }> = {
       ...fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, ...fixture("sprite-order-body-plans-rely.json").bodies,
     };
@@ -36,7 +36,7 @@ describe("production sprite-order plan table (generated, pinned)", () => {
       const [move, side] = key.split(":");
       if (side !== "player" && side !== "opponent") continue;
       const plan = spriteOrderProductionBodyPlan(Number(move), side);
-      const merged = extra[key] !== undefined && (extra[key]!.tier ?? "confirmed") === "confirmed" ? extra[key]! : undefined;
+      const merged = extra[key] !== undefined && ((extra[key]!.tier ?? "confirmed") === "confirmed" || SOURCE_CONFIRMED_ABS_INVARIANT.has(key)) ? extra[key]! : undefined;
       if (row.verdict !== "EXACT-PLAN" && merged) {
         expect(plan, key).toEqual(merged.plan);
         continue;
@@ -176,7 +176,7 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
     expect({ scenarios: corpus.scenarios, skipped: corpus.skipped, edges: corpus.edges, mismatched: corpus.mismatched })
       .toEqual({ scenarios: 573, skipped: 19, edges: 1366, mismatched: 0 });
     expect(corpus.exact).toBe(corpus.known);
-    expect(corpus.known).toBe(1101);
-    expect(corpus.laterKnown).toBe(547);
+    expect(corpus.known).toBe(1110);
+    expect(corpus.laterKnown).toBe(556);
   });
 });

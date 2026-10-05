@@ -18,7 +18,7 @@ type Replay = ReturnType<typeof generatedCommandAnimationReplay>;
 // 20-battle sweep: command edges compared host vs pure, host known, host declines where pure is known (all 27 = seed 17,
 // "command resolution without an action prompt": the locked-action continuation the host refuses), later bodies with a
 // known pre-body tracker (35 of 80 without the battle units).
-const SWEEP_PIN = { compared: 863, hostKnown: 476, declines: 27, laterAfter: 47 };
+const SWEEP_PIN = { compared: 863, hostKnown: 477, declines: 27, laterAfter: 47 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {
