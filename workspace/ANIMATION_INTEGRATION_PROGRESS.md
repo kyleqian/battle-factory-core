@@ -1,5 +1,17 @@
 # Animation integration progress
 
+## 2026-10-04 — next-adapters prep banked (evidence only)
+
+- Side-lane prep `72ff8df29` folded (new files only): `docs/next-adapters-prep.md`
+  and ten drafted fixtures `tools/integration/fixtures/next-*.json` for Dizzy
+  Punch, Teeter Dance, Soft-Boiled, Scary Face, Glare (windows, activation,
+  #142 shadow rows: Teeter Dance/Soft-Boiled/Glare 0; Dizzy Punch -13 and Scary
+  Face -4 = no shadow). Inputs: personality must be threaded from
+  `BattleScriptRulesBattlerState.personality` (only Spinda pixels depend on
+  it); Soft-Boiled renderer hard-codes Onix and needs self-target support in
+  the harness; eye centers derive from anchors + pic height for any species.
+  Not yet framebuffer-verified.
+
 ## 2026-10-04 — visual-randomness prep banked (evidence only)
 
 - Side-lane prep `d4356b7a1` folded (new files only):
