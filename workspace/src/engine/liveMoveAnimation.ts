@@ -64,10 +64,11 @@ import { CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY } from "../animation/dragonBreath
 import { icyWindEffectOamOrderAtAge } from "../animation/icyWind.ts";
 import { blizzardEffectOamOrderAtAge } from "../animation/blizzard.ts";
 import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
+import { ROCK_THROW_ANIMATION_PROFILE } from "../animation/rockThrow.ts";
 import { perishSongNoteOrderFromFree } from "../animation/perishSong.ts";
 import { LEAF_BLADE_OAM_ORDER_SLOTS } from "../animation/leafBlade.ts";
 import { HEAL_BELL_REUSED_ORDER_SLOTS } from "../animation/healBell.ts";
-import { spriteOrderForSlots } from "./spriteOrderProvider.ts";
+import { KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderForSlots, spriteOrderWithOccupiedPrefix } from "./spriteOrderProvider.ts";
 
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
@@ -122,6 +123,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   348,
   // Perish Song (equal-centerY note ties from the provider's creation rank; literal 3/3 turn counts).
   195,
+  // Rock Throw (64-entry seed: occupied prefix + F).
+  88,
 ] as const);
 
 /**
@@ -161,7 +164,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     296, 312, 266, 118, 187,
     // order consumers (issue142-shadow-rows-extra.json): Grudge's window starts at activation (66/70).
     // Heal Bell (215), Rock Throw (88), Perish Song (195), Leaf Blade (348) start at activation (0).
-    288, 215, 348, 195,
+    288, 215, 348, 195, 88,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -435,6 +438,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 118: return 127; // Metronome body (245..371 / 244..370); the called move is a separate request.
     case 269: return 125; // Taunt (76..200 / 80..204); script activation is 10 frames earlier.
     case 187: return 110; // Belly Drum (231..340 / 211..320).
+    case 88: return 87; // Rock Throw (296..382 / 296..382, no tail).
     case 195: return 259; // Perish Song (71..329 / 75..333, no tail).
     case 348: return 224; // Leaf Blade (76..299 / 80..303, no tail).
     case 215: return 261; // Heal Bell (209..469 / 210..470, no tail).
@@ -1108,6 +1112,17 @@ export function liveMoveAnimationPresentation(
       config = { move: "LEAF_BLADE", attacker, target, fieldProfile, oamOrderSeed,
         targetProfile: { pictureOffset: targetAnchors.picOffsetPoint, width: targetCoords.width,
           height: targetCoords.height, subpriority: target.geometry.side === "player" ? 30 : 40 } };
+      break;
+    }
+    case 88: {
+      // Order consumer (docs/order-consumer-prep.md §0): the profile's 64-entry seed is the known-entry occupied
+      // prefix + F (valid only while the occupants are the known-entry ones, i.e. the battle's first body).
+      if (!spriteOrderInput?.known) return null;
+      const spriteOrderSeed = spriteOrderWithOccupiedPrefix(
+        { known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (spriteOrderSeed === null) return null;
+      config = { move: "ROCK_THROW", attacker, target, fieldProfile,
+        animationProfile: { ...ROCK_THROW_ANIMATION_PROFILE, spriteOrderSeed } };
       break;
     }
     case 195: {

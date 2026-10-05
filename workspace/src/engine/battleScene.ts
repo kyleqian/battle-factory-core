@@ -49635,23 +49635,24 @@ export function renderSceneOnMovePresentation(
     const player = attacker.geometry.side === "player" ? attacker : target;
     const opponent = attacker.geometry.side === "opponent" ? attacker : target;
     const playerToOpponent =
-      attacker.species === "GRAVELER"
+      (liveField || attacker.species === "GRAVELER")
       && attacker.geometry.side === "player"
-      && target.species === "ONIX"
+      && (liveField || target.species === "ONIX")
       && target.geometry.side === "opponent";
     const opponentToPlayer =
-      attacker.species === "GRAVELER"
+      (liveField || attacker.species === "GRAVELER")
       && attacker.geometry.side === "opponent"
-      && target.species === "ONIX"
+      && (liveField || target.species === "ONIX")
       && target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged ROCK_THROW pair ${attacker.species}->${target.species}`,
       );
     }
-    const attackerSprite = playerToOpponent
-      ? gravelerBackSprite : gravelerFrontSprite;
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(attacker)
+      : playerToOpponent ? gravelerBackSprite : gravelerFrontSprite;
+    const targetSprite = liveField ? liveSceneOnBattlerArt(target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
 
     drawStaticBgShiftedY(fb, view.bg3Y);
     // Opponent-front sits below player-back (same OBJ priority rule as the
@@ -49692,6 +49693,7 @@ export function renderSceneOnMovePresentation(
     for (const rock of view.rocks) {
       drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
     }
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,
