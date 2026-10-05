@@ -82,7 +82,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
   56, 61, 197, 238, 259, 294, 341,
   // prep11 (docs/next-adapters-prep11.md): Leech Seed main body.
-  73, 161, 194, 314,
+  73, 161, 193, 194, 314,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -221,7 +221,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // one frame after the activation (row -1): no row.
     297,
     // prep11 (issue142-shadow-rows-extra.json): Leech Seed main body window starts at the activation frame (row 0).
-    73, 161, 194, 314,
+    73, 161, 193, 194, 314,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -499,6 +499,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 88: return 87; // Rock Throw (296..382 / 296..382, no tail).
     case 195: return 259; // Perish Song (71..329 / 75..333, no tail).
     case 348: return 224; // Leaf Blade (76..299 / 80..303, no tail).
+    case 193: return 167; // Foresight 211..377 / 210..376.
     case 194: return 188; // Destiny Bond 219..406 / 218..405 (prep11 s0.2).
     case 314: return 112; // Air Cutter 74..185 / 78..189.
     case 161: return 284; // Tri Attack 81..364 / 77..360 (prep11 s0.2).
@@ -1283,6 +1284,26 @@ export function liveMoveAnimationPresentation(
             matrixBitmap: 6, spriteOrder: fullOrder,
             monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", center: { x: cx, y: cy }, bgX: 32 - cx, bgY: 32 - cy } } };
       }
+      break;
+    }
+    case 193: {
+      // prep11 s0.2: constants equal the accepted corpora; target bounds are the GetBattlerSpriteCoordAttr rectangle (pic offset
+      // +-half the pic coords; the corpus holds bottom one pixel inside and the right-top corner one below top).
+      if (!spriteOrderInput?.known) return null;
+      const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
+      const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const tc = liveBattlerCoordAttrs(target.geometry.side, art);
+      const pic = targetAnchors.picOffsetPoint;
+      const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
+      const top = pic.y - tc.height / 2;
+      config = { move: "FORESIGHT", attacker, target, fieldProfile,
+        animationInputs: { targetBounds: { left: pic.x - tc.width / 2, right: pic.x + tc.width / 2, top, bottom: pic.y + tc.height / 2 - 1, rightTop: top + 1 },
+          targetPictureOffset: pic, targetSpriteSlot: target.geometry.side === "player" ? 6 : 8, glassSpriteSlot: 3, blendTaskSlot: 0,
+          updateMonBgTaskSlot: 1, clearMonBgTaskSlot: 0, spriteOrder: fullOrder, glassPaletteBank: 7, glassTileSlot: 6, matrixBitmap: 6,
+          monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", spriteX: cx, spriteY: cy, bgX: 32 - cx, bgY: 32 - cy,
+            inBg2: target.geometry.side === "player", battlerId: target.geometry.side === "player" ? 0 : 1 } } };
       break;
     }
     case 348: {
