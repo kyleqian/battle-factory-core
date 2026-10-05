@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs)",
  "rows": [
   {
    "id": 236,
@@ -688,6 +688,234 @@
     "scenario": "tools/battle-lab/mechanic-triple-kick-opponent-hitmontop-player-onix.json",
     "body": "normal",
     "activation": "multihit-shadow-rows.json"
+   }
+  },
+  {
+   "id": 133,
+   "move": "AMNESIA",
+   "orientation": "opponent",
+   "variant": "anchor4-amnesia-opponent",
+   "activationFrame": 205,
+   "windowStart": 205,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 420,
+   "tailFirstAge": 215,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-amnesia-opponent.json",
+    "scenario": "tools/battle-lab/mechanic-amnesia-opponent-torkoal-player-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 133,
+   "move": "AMNESIA",
+   "orientation": "player",
+   "variant": "anchor4-amnesia-player",
+   "activationFrame": 205,
+   "windowStart": 205,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 420,
+   "tailFirstAge": 215,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-amnesia-player.json",
+    "scenario": "tools/battle-lab/mechanic-amnesia-player-torkoal-opponent-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 152,
+   "move": "CRABHAMMER",
+   "orientation": "opponent",
+   "variant": "anchor4-crabhammer-opponent",
+   "activationFrame": 302,
+   "windowStart": 302,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 406,
+   "tailFirstAge": 104,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-crabhammer-opponent.json",
+    "scenario": "tools/battle-lab/mechanic-crabhammer-opponent-krabby-player-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 152,
+   "move": "CRABHAMMER",
+   "orientation": "player",
+   "variant": "anchor4-crabhammer-player",
+   "activationFrame": 212,
+   "windowStart": 212,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 316,
+   "tailFirstAge": 104,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-crabhammer-player.json",
+    "scenario": "tools/battle-lab/mechanic-crabhammer-player-krabby-opponent-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 89,
+   "move": "EARTHQUAKE",
+   "orientation": "opponent",
+   "variant": "anchor4-earthquake-opponent",
+   "activationFrame": 83,
+   "windowStart": 84,
+   "ageOffset": 1,
+   "shadowRow": 0,
+   "cleanupFrame": 290,
+   "tailFirstAge": 207,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-earthquake-opponent.json",
+    "scenario": "tools/battle-lab/mechanic-earthquake-opponent-dugtrio-player-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 89,
+   "move": "EARTHQUAKE",
+   "orientation": "player",
+   "variant": "anchor4-earthquake-player",
+   "activationFrame": 79,
+   "windowStart": 80,
+   "ageOffset": 1,
+   "shadowRow": 0,
+   "cleanupFrame": 286,
+   "tailFirstAge": 207,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-earthquake-player.json",
+    "scenario": "tools/battle-lab/mechanic-earthquake-player-dugtrio-opponent-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 90,
+   "move": "FISSURE",
+   "orientation": "opponent",
+   "variant": "anchor4-fissure-opponent",
+   "activationFrame": 76,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 329,
+   "tailFirstAge": 253,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-fissure-opponent.json",
+    "scenario": "tools/battle-lab/mechanic-fissure-opponent-dugtrio-player-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 90,
+   "move": "FISSURE",
+   "orientation": "player",
+   "variant": "anchor4-fissure-player",
+   "activationFrame": 72,
+   "windowStart": 72,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 325,
+   "tailFirstAge": 253,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-fissure-player.json",
+    "scenario": "tools/battle-lab/mechanic-fissure-player-dugtrio-opponent-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 345,
+   "move": "MAGICAL_LEAF",
+   "orientation": "opponent",
+   "variant": "anchor4-magical-leaf-opponent",
+   "activationFrame": 81,
+   "windowStart": 81,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 262,
+   "tailFirstAge": 181,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-magical-leaf-opponent.json",
+    "scenario": "tools/battle-lab/mechanic-magical-leaf-opponent-roselia-player-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 345,
+   "move": "MAGICAL_LEAF",
+   "orientation": "player",
+   "variant": "anchor4-magical-leaf-player",
+   "activationFrame": 77,
+   "windowStart": 77,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 258,
+   "tailFirstAge": 181,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-magical-leaf-player.json",
+    "scenario": "tools/battle-lab/mechanic-magical-leaf-player-roselia-opponent-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 60,
+   "move": "PSYBEAM",
+   "orientation": "opponent",
+   "variant": "anchor4-psybeam-opponent",
+   "activationFrame": 213,
+   "windowStart": 213,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 372,
+   "tailFirstAge": 159,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-psybeam-opponent.json",
+    "scenario": "tools/battle-lab/mechanic-psybeam-opponent-spinda-player-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 60,
+   "move": "PSYBEAM",
+   "orientation": "player",
+   "variant": "anchor4-psybeam-player",
+   "activationFrame": 213,
+   "windowStart": 213,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": 372,
+   "tailFirstAge": 159,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/anchor4-psybeam-player.json",
+    "scenario": "tools/battle-lab/mechanic-psybeam-player-spinda-opponent-onix.json",
+    "body": "normal",
+    "activation": "issue142-anchor4-activation-probes.json"
    }
   }
  ]

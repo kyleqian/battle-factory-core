@@ -1677,6 +1677,102 @@
         "no generated rental carries Triple Kick in seeds 1-400 slots 0-3 as the player's mon; no ordinary route"
       ],
       "selector": "one MOVE_ANIMATION per hit; request.turn selects the branch (Triple Kick clamps turn to 0|1|2)"
+    },
+    {
+      "move": "MOVE_EARTHQUAKE",
+      "id": 89,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor4-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh x2 batches, zero residual, rows = accepted window (anchor4-earthquake-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "initialBattlerX2 = both battlers' idle x2 via liveBattlerAnchors frontIdleRest"
+    },
+    {
+      "move": "MOVE_FISSURE",
+      "id": 90,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor4-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh x2 batches, zero residual, rows = accepted window (anchor4-fissure-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "initialTargetX2 = target idle x2"
+    },
+    {
+      "move": "MOVE_CRABHAMMER",
+      "id": 152,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor4-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh x2 batches, zero residual, rows = accepted window (anchor4-crabhammer-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "targetIdleX2 = target idle x2"
+    },
+    {
+      "move": "MOVE_MAGICAL_LEAF",
+      "id": 345,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor4-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh x2 batches, zero residual, rows = accepted window (anchor4-magical-leaf-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "targetIdleX2 = target idle x2"
+    },
+    {
+      "move": "MOVE_PSYBEAM",
+      "id": 60,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor4-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh x2 batches, zero residual, rows = accepted window (anchor4-psybeam-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "targetIdleX2 = target idle x2"
+    },
+    {
+      "move": "MOVE_AMNESIA",
+      "id": 133,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/anchor4-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh x2 batches, zero residual, rows = accepted window (anchor4-amnesia-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "attackerPictureSize = species pic coords width/height (GetBattlerSpriteCoordAttr)"
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -1692,14 +1788,14 @@
     "source-derived ordinary singles party/B-cancel palette return with explicit known entry provenance; unknown histories and actual switches remain invalidated"
   ],
   "pending": [
-    "production adapters/providers for the remaining 165 accepted Factory moves",
+    "production adapters/providers for the remaining 159 accepted Factory moves",
     "complete graphics ownership across actual switches, forced replacement, summaries, substitute/transform and unmodeled histories",
-    "source palette resource plans for 43 implemented adapters without audited ownership"
+    "source palette resource plans for 49 implemented adapters without audited ownership"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 125,
+  "implementedCount": 131,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
