@@ -1,7 +1,7 @@
 {
   "schema": "prep9-adapter-draft/v1",
   "move": "DREAM_EATER",
-  "probe": "tools/battle-lab/mechanic-dream-eater-opponent-wigglytuff-player-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "WIGGLYTUFF",
     "geometry": {
@@ -19,8 +19,7 @@
     "playerMaxHp": 110,
     "opponentHp": 195,
     "opponentMaxHp": 215,
-    "opponentGender": "female",
-    "playerStatus": "sleep"
+    "opponentGender": "female"
   },
   "verdict": "READY-WITH-ORDER (+renderer lift): no palette snapshot needed; allocator constants == ROM; orderSeed [4,3,16,..] identical across all 5 histories and == lend after Tackle->Sing (both have production body plans); 0 px; sleep-setting body other than Sing is unplanned",
   "denseWindow": {
@@ -415,15 +414,22 @@
   "precedingBodies": [
     {
       "moveId": 33,
-      "riseFrame": 2074
+      "riseFrame": 2074,
+      "side": "player"
     },
     {
       "moveId": 33,
-      "riseFrame": 3209
+      "riseFrame": 3209,
+      "side": "player"
     },
     {
       "moveId": 47,
-      "riseFrame": 3352
+      "riseFrame": 3352,
+      "side": "opponent"
     }
-  ]
+  ],
+  "scenario": "tools/battle-lab/mechanic-dream-eater-opponent-wigglytuff-player-onix.json",
+  "displayedStatus": {
+    "player": "sleep"
+  }
 }

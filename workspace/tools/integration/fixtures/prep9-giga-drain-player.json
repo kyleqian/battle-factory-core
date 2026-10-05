@@ -1,7 +1,7 @@
 {
   "schema": "prep9-adapter-draft/v1",
   "move": "GIGA_DRAIN",
-  "probe": "tools/battle-lab/mechanic-giga-drain-player-roselia-opponent-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "ROSELIA",
     "geometry": {
@@ -531,7 +531,9 @@
   "precedingBodies": [
     {
       "moveId": 33,
-      "riseFrame": 2078
+      "riseFrame": 2078,
+      "side": "opponent"
     }
-  ]
+  ],
+  "scenario": "tools/battle-lab/mechanic-giga-drain-player-roselia-opponent-onix.json"
 }

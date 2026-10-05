@@ -35904,6 +35904,7 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    if (liveField) return;
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = sunnyState.config.fieldProfile;
@@ -44430,14 +44431,14 @@ export function renderSceneOnMovePresentation(
       age: absorbState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "LOMBRE"
+      (liveField || view.attacker.species === "LOMBRE")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "LOMBRE"
+      (liveField || view.attacker.species === "LOMBRE")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -44446,10 +44447,11 @@ export function renderSceneOnMovePresentation(
     }
     const lombreSource = playerToOpponent
       ? absorbArt.lombreBack : absorbArt.lombreFront;
-    const lombre = playerToOpponent
+    const lombre = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? lombreSource
       : { ...lombreSource, tileset: subTileset(lombreSource.tileset, 0, 8) };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     // BlendColorCycle owns only BG palette banks 1-3. 0x33ED expands with
     // mGBA's 5-to-8-bit replication to RGB(107,255,99).
     const green = { r: 107, g: 255, b: 99 };
@@ -44542,6 +44544,7 @@ export function renderSceneOnMovePresentation(
       }
     }
 
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,
@@ -44597,14 +44600,14 @@ export function renderSceneOnMovePresentation(
       age: megaDrainState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "SKIPLOOM"
+      (liveField || view.attacker.species === "SKIPLOOM")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "SKIPLOOM"
+      (liveField || view.attacker.species === "SKIPLOOM")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -44614,13 +44617,14 @@ export function renderSceneOnMovePresentation(
 
     const attackerSource = playerToOpponent
       ? synthesisArt.skiploomBack : synthesisArt.skiploomFront;
-    const attacker = playerToOpponent
+    const attacker = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? attackerSource
       : {
           ...attackerSource,
           tileset: subTileset(attackerSource.tileset, 0, 8),
         };
-    const target = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const target = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     // `simple_palette_blend F_PAL_BG` writes the software-faded palette; the
     // display transfer sees the prior row.  0x33ED expands to RGB(107,255,99).
     const green = { r: 107, g: 255, b: 99 };
@@ -44661,7 +44665,7 @@ export function renderSceneOnMovePresentation(
     // SpriteCB_EnemyShadow first observes gAnimScriptActive after this source
     // row's OAM transfer.  The opponent's elevated battler shadow is therefore
     // still present for this one displayed row, in front of its lower tiles.
-    if (opponentToPlayer && megaDrainState.age === 0) {
+    if (!liveField && opponentToPlayer && megaDrainState.age === 0) {
       drawSpriteSheet(
         fb,
         sonicBoomArt.enemyShadow.tileset,
@@ -44735,6 +44739,7 @@ export function renderSceneOnMovePresentation(
       }
     }
 
+    if (liveField) return;
     const opponentSpecies = playerToOpponent ? "ONIX" : "SKIPLOOM";
     const playerSpecies = playerToOpponent ? "SKIPLOOM" : "ONIX";
     drawSendOutHealthbox(
@@ -44786,14 +44791,14 @@ export function renderSceneOnMovePresentation(
     });
     const targetDisplayed = displayed;
     const playerToOpponent =
-      view.attacker.species === "ROSELIA"
+      (liveField || view.attacker.species === "ROSELIA")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "ROSELIA"
+      (liveField || view.attacker.species === "ROSELIA")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -44803,10 +44808,11 @@ export function renderSceneOnMovePresentation(
     const roseliaSource = playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ROSELIA!
       : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ROSELIA!;
-    const roselia = playerToOpponent
+    const roselia = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? roseliaSource
       : { ...roseliaSource, tileset: subTileset(roseliaSource.tileset, 0, 8) };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const green = { r: 107, g: 255, b: 99 };
     const bgPalettes = battleBg.palette.map((palette) =>
       blendPaletteToward(palette, green, displayed.bgPaletteBlendY));
@@ -44902,6 +44908,7 @@ export function renderSceneOnMovePresentation(
         );
       }
     }
+    if (liveField) return;
     const opponentSpecies = playerToOpponent ? "ONIX" : "ROSELIA";
     const playerSpecies = playerToOpponent ? "ROSELIA" : "ONIX";
     drawSendOutHealthbox(
@@ -45078,14 +45085,14 @@ export function renderSceneOnMovePresentation(
     // remains the honest owner of that one-row transition.
     const blendDisplayed = displayed.alpha?.eva === 8;
     const playerToOpponent =
-      view.attacker.species === "WIGGLYTUFF"
+      (liveField || view.attacker.species === "WIGGLYTUFF")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "WIGGLYTUFF"
+      (liveField || view.attacker.species === "WIGGLYTUFF")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -45096,10 +45103,11 @@ export function renderSceneOnMovePresentation(
     const wigglytuffSource = playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).WIGGLYTUFF!
       : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).WIGGLYTUFF!;
-    const wigglytuff = playerToOpponent
+    const wigglytuff = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? wigglytuffSource
       : { ...wigglytuffSource, tileset: subTileset(wigglytuffSource.tileset, 0, 8) };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const gpuDarken = (palette: readonly RgbColor[]) =>
       palette.map((color) => {
         const packed = mgbaDarkenColor(
@@ -45252,6 +45260,7 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    if (liveField) return;
     const opponentSpecies = playerToOpponent ? "ONIX" : "WIGGLYTUFF";
     const playerSpecies = playerToOpponent ? "WIGGLYTUFF" : "ONIX";
     drawSendOutHealthbox(

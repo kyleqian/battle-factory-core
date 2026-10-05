@@ -1,7 +1,7 @@
 {
   "schema": "prep9-adapter-draft/v1",
   "move": "MEGA_DRAIN",
-  "probe": "tools/battle-lab/mechanic-mega-drain-opponent-skiploom-player-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "SKIPLOOM",
     "geometry": {
@@ -426,5 +426,6 @@
       "anySlotCount": 2646
     }
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "scenario": "tools/battle-lab/mechanic-mega-drain-opponent-skiploom-player-onix.json"
 }

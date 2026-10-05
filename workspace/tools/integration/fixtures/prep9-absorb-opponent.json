@@ -1,7 +1,7 @@
 {
   "schema": "prep9-adapter-draft/v1",
   "move": "ABSORB",
-  "probe": "tools/battle-lab/mechanic-absorb-opponent-lombre-player-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "attacker": {
     "species": "LOMBRE",
     "geometry": {
@@ -24,7 +24,7 @@
   "denseWindow": {
     "startFrame": 223,
     "endFrame": 416,
-    "ageOffset": 10
+    "ageOffset": 0
   },
   "draft": {
     "activationFrame": 213,
@@ -316,7 +316,9 @@
   "precedingBodies": [
     {
       "moveId": 33,
-      "riseFrame": 2074
+      "riseFrame": 2074,
+      "side": "player"
     }
-  ]
+  ],
+  "scenario": "tools/battle-lab/mechanic-absorb-opponent-lombre-player-onix.json"
 }
