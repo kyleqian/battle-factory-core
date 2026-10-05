@@ -1,0 +1,38 @@
+{
+ "schema": "voluntary-adapter-draft/v1",
+ "draft": true,
+ "move": "GIGA_DRAIN",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/voluntary-slot2-gigadrain.json",
+ "stateFixture": "tools/integration/fixtures/voluntary/state-voluntary-slot2-gigadrain.json",
+ "modelCheck": "tools/integration/fixtures/voluntary/model-check-voluntary-slot2-gigadrain.json",
+ "attacker": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 235,
+  "playerMaxHp": 235,
+  "opponentHp": 170,
+  "opponentMaxHp": 170,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 578,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 578,
+  "endFrame": 807,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset/length of playerfaint-giga-drain-player.json (230 rows); first body after a voluntary switch to party slot 2"
+}

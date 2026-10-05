@@ -1,0 +1,38 @@
+{
+ "schema": "voluntary-adapter-draft/v1",
+ "draft": true,
+ "move": "THUNDERBOLT",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/voluntary-slot1-thunderbolt.json",
+ "stateFixture": "tools/integration/fixtures/voluntary/state-voluntary-slot1-thunderbolt.json",
+ "modelCheck": "tools/integration/fixtures/voluntary/model-check-voluntary-slot1-thunderbolt.json",
+ "attacker": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "NINETALES",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 148,
+  "opponentHp": 170,
+  "opponentMaxHp": 170,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 575,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 575,
+  "endFrame": 811,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset/length of playerfaint-thunderbolt-opponent.json (237 rows); first body after a voluntary switch to party slot 1"
+}
