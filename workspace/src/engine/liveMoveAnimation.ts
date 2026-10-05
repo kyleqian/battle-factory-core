@@ -110,6 +110,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   52,
   // Dragon Rage: one plume per sort window (orderFirePlumesForDraw); the 21-frame script tail is not covered.
   82,
+  // Flamethrower: one flame per sort window, so the order seed is pixel-neutral (provider seed when known, ascending
+  // otherwise); the script's 80-frame tail beyond the accepted window is uncovered.
+  53,
 ] as const);
 
 /**
@@ -422,6 +425,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 118: return 127; // Metronome body (245..371 / 244..370); the called move is a separate request.
     case 269: return 125; // Taunt (76..200 / 80..204); script activation is 10 frames earlier.
     case 187: return 110; // Belly Drum (231..340 / 211..320).
+    case 53: return 115; // Flamethrower (395..520 / 449..574 incl. 11 negative-age rows, ageOffset -11); script ends 600/654.
     case 82: return 150; // Dragon Rage (89..238 / 93..242); the script runs 21 frames past the window (259/263), uncovered.
     case 52: return 63; // Ember (388..450 / 442..504, ageOffset 0); script ends 3 frames later (453/507).
     case 288: return 209; // Grudge (66..274 / 70..278); script end 274/278 (no tail).
@@ -1069,6 +1073,27 @@ export function liveMoveAnimationPresentation(
           targetSubpriority: target.geometry.side === "player" ? 30 : 40,
         } };
       break;
+    case 53: {
+      // docs/order-consumer-prep.md §0: flames take the eight lowest free slots, one per sort window, so equal keys
+      // resolve by creation order whatever the free order is (0/130 ages change for 5 alternative seeds). A known
+      // order supplies the provider's relative order (== accepted literal == observed 2/2); otherwise the slots
+      // ascend. Slots are labels only here (known-entry lowest-free 3,4,5,7,9,10,11,12 when the host has no order).
+      const known = spriteOrderInput?.known ? [...spriteOrderInput.free].sort((l, r) => l - r).slice(0, 8) : null;
+      const flameSpriteSlots = known ?? [3, 4, 5, 7, 9, 10, 11, 12];
+      const provided = known && spriteOrderInput
+        ? spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, flameSpriteSlots) : null;
+      config = { move: "FLAMETHROWER", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        animationProfile: {
+          attackerCenter: attackerAnchors.picOffsetPoint,
+          targetCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+          attackerSide: attacker.geometry.side,
+          // ANIM_ATTACKER subpriority 3 off the attacker's base (30 player / 40 opponent): 27 / 37.
+          flameSubpriority: attacker.geometry.side === "player" ? 27 : 37,
+          flameSpriteSlots,
+          spriteOrderSeed: provided ?? flameSpriteSlots,
+        } };
+      break;
+    }
     case 82: config = { move: "DRAGON_RAGE", attacker, target, fieldProfile }; break;
     case 288: {
       // Order consumer (docs/order-consumer-prep.md §0): the six flames take the six lowest free slots in one

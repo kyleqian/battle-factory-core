@@ -48375,29 +48375,33 @@ export function renderSceneOnMovePresentation(
       sceneOnFlamethrowerView(state).animationAge,
     );
     const playerToOpponent =
-      view.attacker.species === "ONIX"
+      (liveField || view.attacker.species === "ONIX")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "MURKROW"
+      && (liveField || view.target.species === "MURKROW")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "ONIX"
+      (liveField || view.attacker.species === "ONIX")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "MURKROW"
+      && (liveField || view.target.species === "MURKROW")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged FLAMETHROWER pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const attackerSprite = playerToOpponent ? onixBackSprite : onixFrontSprite;
-    const targetSprite = playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? onixBackSprite : onixFrontSprite;
+    const targetSprite = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     drawSpriteSheet(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      view.target.geometry.spriteCorner.x + displayedBattlerEffect.targetX2,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + displayedBattlerEffect.targetX2 + liveIdle(view.target).x2,
+      view.target.geometry.spriteCorner.y + liveIdle(view.target).y2,
     );
     drawSpriteSheet(
       fb,
@@ -48415,6 +48419,7 @@ export function renderSceneOnMovePresentation(
         flame.centerY - 16,
       );
     }
+    if (liveField) return;
     if (playerToOpponent) {
       drawSendOutHealthbox(
         fb,

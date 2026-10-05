@@ -152,7 +152,9 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
       ).input,
       // Every fixture body is the scenario's first move body after the known entry: supply the order exactly as
       // production does there (known-entry F, checked against the allocator occupancy), never from capture rows.
-      spriteOrderInput: prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input,
+      // POKEBENCH_LIVE_ORDER_INPUT=none withholds it (order-independent adapters must stay exact without a host order).
+      spriteOrderInput: process.env.POKEBENCH_LIVE_ORDER_INPUT === "none" ? undefined
+        : prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input,
     },
     visibility: { player: { sprite: true, healthbox: true }, opponent: { sprite: true, healthbox: true } },
     waitCursor: null, bottom: "message", confirmHandoff: null, switchIn: null,

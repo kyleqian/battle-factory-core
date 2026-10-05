@@ -26,9 +26,9 @@
   },
   "orientation": "player-back ONIX -> opponent-front MURKROW",
   "denseWindow": {
-    "startFrame": 406,
+    "startFrame": 395,
     "endFrame": 520,
-    "ageOffset": 0
+    "ageOffset": -11
   },
   "draft": {
     "activationFrame": 391,
