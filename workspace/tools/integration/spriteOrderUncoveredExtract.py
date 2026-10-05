@@ -19,7 +19,11 @@ spec = importlib.util.spec_from_file_location("rr", ROOT / "tools/integration/sp
 rr = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rr)
 
+LABRAW = ROOT / "tools/integration/fixtures/sprite-order-uncovered/raw"
+LAB_NAMES = ["forced-switch-player-choice", "forced-switch-ai-choice", "hit-chain-ko", "gate6-ohko-hit", "destiny-bond-ko", "issue129-noitem-ohko", "endturn-toxic-ko",
+             "issue131-endturn-order-switch", "factory-ai-switch-receipt-a", "issue135-pursuit-switch-intercept", "gate6-ohko-sturdy", "issue129-shellbell-ko-heal"]
 RAWS = {t: ROOT / "tools/integration/fixtures/sprite-order-real-route/raw" / f"{t}-0.json" for t in rr.TRACES}
+RAWS.update({"lab:" + n: LABRAW / f"{n}.json" for n in LAB_NAMES if (LABRAW / f"{n}.json").exists()})
 args = sys.argv[1:]
 for i, a in enumerate(args):
     if a == "--raw":
@@ -131,6 +135,24 @@ def build_any(name, path, raw):
         rr.FX = saved
 
 
+def write_events(units):
+    """events/<name>.json: the real-route event list (rr.build) with every uncovered cluster annotated with its unit class (identified from ROM function
+    identities only: the engine-side marker, never an observed mask) and the extracted windowed plan; consumed by spriteOrderUncoveredReplay.ts."""
+    (FX / "events").mkdir(parents=True, exist_ok=True)
+    for name, path in RAWS.items():
+        raw = json.loads(path.read_text())
+        _, events, clusters, initial = build_any(name, path, raw)
+        mine = {(u["first"]): u for u in units if u["trace"] == name}
+        for e in events:
+            if e["k"] == "uncovered":
+                u = mine[e["n"]]
+                e["unitClass"], e["plan"], e["survivors"], e["ctrl"] = u["class"], u["plan"], u["survivors"], u["ctrl"]
+                e["creatorsByWindow"] = [[c["by"] for c in w["creates"]] for w in u["windows"]]
+        safe = name.replace(":", "-")
+        (FX / "events" / f"{safe}.json").write_text(json.dumps({"schema": "sprite-order-uncovered-events/v1", "trace": name, "firstFrame": raw["firstFrame"], "lastFrame": raw["lastFrame"],
+                                                                 "initial": initial, "events": events}, separators=(",", ":")) + "\n")
+
+
 if __name__ == "__main__":
     units = main()
     by = collections.defaultdict(list)
@@ -145,4 +167,5 @@ if __name__ == "__main__":
         print(k, summary[k])
     if WRITE:
         FX.mkdir(parents=True, exist_ok=True)
+        write_events(units)
         (FX / "units.json").write_text(json.dumps({"schema": "sprite-order-uncovered-units/v1", "summary": summary, "units": units}, separators=(",", ":")) + "\n")
