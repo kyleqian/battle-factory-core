@@ -125,6 +125,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   195,
   // Rock Throw (64-entry seed: occupied prefix + F).
   88,
+  // Blaze Kick (pixel-sensitive seed; 9-frame script tail beyond the accepted window is uncovered).
+  299,
 ] as const);
 
 /**
@@ -438,6 +440,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 118: return 127; // Metronome body (245..371 / 244..370); the called move is a separate request.
     case 269: return 125; // Taunt (76..200 / 80..204); script activation is 10 frames earlier.
     case 187: return 110; // Belly Drum (231..340 / 211..320).
+    case 299: return 78; // Blaze Kick (399..476 / 453..530); the script runs 9 frames past the window (485/539), uncovered.
     case 88: return 87; // Rock Throw (296..382 / 296..382, no tail).
     case 195: return 259; // Perish Song (71..329 / 75..333, no tail).
     case 348: return 224; // Leaf Blade (76..299 / 80..303, no tail).
@@ -1112,6 +1115,22 @@ export function liveMoveAnimationPresentation(
       config = { move: "LEAF_BLADE", attacker, target, fieldProfile, oamOrderSeed,
         targetProfile: { pictureOffset: targetAnchors.picOffsetPoint, width: targetCoords.width,
           height: targetCoords.height, subpriority: target.geometry.side === "player" ? 30 : 40 } };
+      break;
+    }
+    case 299: {
+      // Order consumer (docs/order-consumer-prep.md §0): F filtered to the ten lowest-free slots before the foot
+      // allocation seeds the sort (pixel-sensitive: reversed/ascending seeds change 8 ages); unknown -> null.
+      if (!spriteOrderInput?.known) return null;
+      const spriteSlots = [...spriteOrderInput.free].sort((l, r) => l - r).slice(0, 10);
+      const spriteOrderSeed = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] },
+        spriteSlots);
+      if (spriteOrderSeed === null || spriteSlots.length !== 10) return null;
+      config = { move: "BLAZE_KICK", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        animationProfile: {
+          targetCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+          targetSubpriority: target.geometry.side === "player" ? 30 : 40,
+          attackerSide: attacker.geometry.side, spriteSlots, spriteOrderSeed,
+        } };
       break;
     }
     case 88: {
