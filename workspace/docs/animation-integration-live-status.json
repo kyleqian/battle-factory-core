@@ -2011,14 +2011,14 @@
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "e036bc4762ab58c3603c4c3cba2944f39ecec036",
-    "build": "e036bc476 2026-10-04",
+    "commit": "1dbd33332075bdbec15ad727ea67775345b7ba14",
+    "build": "1dbd33332 2026-10-04",
     "url": "http://127.0.0.1:5191/",
-    "implementedAdapters": 136,
-    "fullTest": "Supervisor 1494 files / 11972 tests passed on 4818dc692 (next5 fold; later commits docs-only)",
+    "implementedAdapters": 144,
+    "fullTest": "Supervisor 1495 files / 11996 tests passed on 1a68bb532 (prep2 fold; later commits docs-only)",
     "buildModules": 847,
     "browser": "Four canvas and saved PNG hashes on the canonical ordinary route (identical to earlier previews); session export; ON -> OFF restart; no page errors",
-    "receipt": "../tools/integration/fixtures/playable-preview-e036bc476-receipt.json",
+    "receipt": "../tools/integration/fixtures/playable-preview-1dbd33332-receipt.json",
     "availability": "Local Mac service on 127.0.0.1:5191; hcloud retired."
   },
   "productionProviders": {
@@ -2046,15 +2046,15 @@
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "4818dc692",
+    "productionCodeCommit": "1a68bb532",
     "typecheck": "passed",
-    "workerFullTest": "supervisor 1494 files / 11972 tests passed; 44 files / 223 tests skipped",
+    "workerFullTest": "supervisor final 1495 files / 11996 tests passed; 44 files / 223 tests skipped",
     "buildModules": 847,
-    "supervisorAffected": "next5: worker focused 6 files / 70 tests, smoke 448",
-    "independentSource": "next5 twelve fixtures (incl. ARBOK/SEVIPER alternate species) twice fresh, 2229 rows/run, zero residuals; four ordinary routes PASS",
-    "sourceReceipt": "../tools/integration/fixtures/next5-supervisor-receipt.json",
+    "supervisorAffected": "prep2: worker focused 6 files / 85 tests, smoke 448",
+    "independentSource": "prep2 eighteen fixtures (incl. SEALEO/POLIWHIRL alternate species) twice fresh, 3620 rows/run, zero residuals; seven ordinary routes PASS",
+    "sourceReceipt": "../tools/integration/fixtures/prep2-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed",
-    "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261004.json"
+    "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261004-evening.json"
   },
   "spriteAllocatorHistory": {
     "availableProvider": "../src/engine/knownEntrySpriteAllocator.ts:createKnownEntrySpriteAllocatorProvider",
