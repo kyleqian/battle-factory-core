@@ -16557,6 +16557,7 @@ export function renderSceneOnMovePresentation(
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
     const profile = recycleState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponentSpecies,
       level: 50,
@@ -23581,6 +23582,7 @@ export function renderSceneOnMovePresentation(
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = cutterState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species,
       level: 50,
@@ -36085,6 +36087,7 @@ export function renderSceneOnMovePresentation(
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = foresightState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
       hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none",
@@ -36241,6 +36244,7 @@ export function renderSceneOnMovePresentation(
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = skyState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50,
       gender: profile.opponentGender ?? "male",
@@ -36355,6 +36359,7 @@ export function renderSceneOnMovePresentation(
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = destinyState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "male",
       hpFraction: profile.opponentHp / profile.opponentMaxHp, status: profile.opponentStatus ?? "none",
@@ -36838,6 +36843,7 @@ export function renderSceneOnMovePresentation(
     const player = playerAttacker ? view.attacker : view.target;
     const opponent = playerAttacker ? view.target : view.attacker;
     const profile = spiderWebState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species,
       level: 50,
@@ -37024,6 +37030,7 @@ export function renderSceneOnMovePresentation(
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
     const profile = petalState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50,
       gender: profile.opponentGender ?? "male",
