@@ -2203,6 +2203,151 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_EMBER",
+      "id": 52,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-ember-*.json, 63 rows)",
+        "ordinary route seed 4 / streak 7 / move slot 1 (MAGCARGO): adapter active 63/63, action-menu, ON/OFF rules/RNG equal; alternate carrier HOUNDOUR (rental set 119) dense 63/63 both orientations x2 exact (altspecies9-ember-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order-independent (docs/order-consumer-prep.md section 0): renders with or without a host order; equal-key ember/flare pairs are created in different sort windows so creation order decides",
+      "remaining": [
+        "3-frame script tail (453/507) beyond the accepted window is uncovered; no accepted-species ordinary route (ONIX is not an Ember carrier)",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_DRAGON_RAGE",
+      "id": 82,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-dragon-rage-*.json, 150 rows)",
+        "ordinary route seed 37 / streak 14 / move slot 3 (CHARMELEON): adapter active 150/150, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order-independent (docs/order-consumer-prep.md section 0): renders with or without a host order; one fire plume per sort window (orderFirePlumesForDraw)",
+      "remaining": [
+        "21-frame script tail (259/263) beyond the accepted window is uncovered",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_FLAMETHROWER",
+      "id": 53,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-flamethrower-*.json, 126 rows incl. 11 negative-age rows, ageOffset -11, duration 115)",
+        "ordinary route seed 22 / streak 21 / move slot 0 (MAGMAR; a LATER body: the opponent's Quick Attack is the first, so no host order is lent): adapter active 115/115, action-menu, ON/OFF rules/RNG equal; alternate carrier HOUNDOUR (rental set 119) dense 126/126 both orientations x2 exact (altspecies9-flamethrower-*.json); order withheld (ascending seed) also exact"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order-independent (docs/order-consumer-prep.md section 0): renders with or without a host order; flames are one per sort window so the seed is pixel-neutral (provider seed when known, ascending slots otherwise; 0/130 ages change for 5 alternative seeds)",
+      "remaining": [
+        "80-frame script tail (600/654) beyond the accepted window is uncovered; no accepted-species ordinary route",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_HEAL_BELL",
+      "id": 215,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-heal-bell-*.json, 261 rows)",
+        "ordinary route seed 0 / streak 7 / move slot 3 (DELCATTY): Heal Bell is the battle's first body, adapter active 261/261, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order consumer: live ONLY when the move is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback). seed = known-entry F filtered to [4,5,7,9,10,11] (healBellNotesInPainterOrder initialOrder; staged default unchanged); ad-hoc opponent shadow retired for the shared #142 row-0 hook",
+      "remaining": [
+        "Heal Bell as a later body (needs body/gap plan application in production; Heal Bell's own body is NEEDS-KEYS)",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_LEAF_BLADE",
+      "id": 348,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-leaf-blade-*.json, 224 rows)",
+        "ordinary route seed 89 / streak 21 / move slot 0 (SCEPTILE): first body, adapter active 224/224, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order consumer: live ONLY when the move is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback). seed = known-entry F filtered to the blade + trail slots [3,4,5,7,9..16] (leafBladeDisplayedOamOrderAtAge initialOrder; staged default unchanged)",
+      "remaining": [
+        "Leaf Blade as a later body (own body is NEEDS-KEYS)",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_PERISH_SONG",
+      "id": 195,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-perish-song-*.json, 259 rows)",
+        "ordinary route seed 25 / streak 14 / move slot 0 (MURKROW): first body, adapter active 259/259, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order consumer: live ONLY when the move is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback). equal-centerY note ties from the provider's creation rank (two creation windows x F order); literal 3/3 perish counts (battle engine result)",
+      "remaining": [
+        "Perish Song as a later body (own body is NEEDS-KEYS)",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_ROCK_THROW",
+      "id": 88,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-rock-throw-*.json, 87 rows)",
+        "ordinary route seed 33 / streak 0 / move slot 1 (GRAVELER): first body, adapter active 87/87, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order consumer: live ONLY when the move is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback). 64-entry seed = known-entry occupied prefix [62,60,0,63,1,61,6,8,2] + F",
+      "remaining": [
+        "Rock Throw as a later body",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_BLAZE_KICK",
+      "id": 299,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-blaze-kick-*.json, 78 rows)",
+        "ordinary route seed 322 / streak 28 / move slot 0 (BLAZIKEN): first body, adapter active 78/78, action-menu, ON/OFF rules/RNG equal; seed 43 / streak 28 / slot 0: the opponent's body is first, Blaze Kick declines to the scene-off fallback (0/78 active)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "order consumer: live ONLY when the move is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback). seed = F filtered to the ten lowest-free slots before the foot allocation (pixel-sensitive). The dense proof is the plan-replayed (Torment-preceded) history; with the production first-body order the same oracle frames differ by 15 px on one row (player orientation), so first-body Blaze Kick pixels are not source-verified",
+      "remaining": [
+        "9-frame script tail (485/539) beyond the accepted window is uncovered",
+        "first-body Blaze Kick has no oracle scenario (order differs from the accepted later-body history)",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -2225,7 +2370,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 158,
+  "implementedCount": 166,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
@@ -2275,10 +2420,16 @@
         "battle start with lifecycle events (nextEventSequence > 0)"
       ],
       "liveConsumers": [
-        "MOVE_GRUDGE (288)"
+        "MOVE_GRUDGE (288)",
+        "MOVE_HEAL_BELL (215)",
+        "MOVE_LEAF_BLADE (348)",
+        "MOVE_PERISH_SONG (195)",
+        "MOVE_ROCK_THROW (88)",
+        "MOVE_BLAZE_KICK (299)",
+        "MOVE_FLAMETHROWER (53, optional seed)"
       ],
       "planReplay": "TS replay of sprite-order-body-plans.json: 790 edges, 659 preceded by exact plans, 659 exact, 0 mismatched (tests/spriteOrderProvider.test.ts)",
-      "receipt": "../tools/integration/fixtures/order-wiring-live-receipt.json"
+      "receipt": "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json"
     }
   },
   "validationCheckpoint": {
