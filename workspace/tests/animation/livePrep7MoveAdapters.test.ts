@@ -16,12 +16,15 @@ import { generatedCommandAnimationReplay } from "../../tools/integration/generat
 // route = prep7 s2.5 (seed / index of the move on party member 0 / streak, from prep7-routes.json).
 type Orders = readonly [number | null, number | null];
 const cases: { id: number; move: string; duration: Orders; shadow: number | undefined; alt: [string, string];
-  route: { seed: number; move: 0 | 1 | 2 | 3; streak: number } }[] = [
+  route: { seed: number; move: 0 | 1 | 2 | 3; streak: number; turns?: number; stall?: boolean } }[] = [
   { id: 332, move: "AERIAL_ACE", duration: [50, 50], shadow: 0, alt: ["CHARIZARD", "ONIX"], route: { seed: 3, move: 0, streak: 0 } },
   { id: 98, move: "QUICK_ATTACK", duration: [33, 33], shadow: 0, alt: ["RAICHU", "ONIX"], route: { seed: 3, move: 1, streak: 0 } },
   // Ice Punch has no accepted-species rental carrier: the ordinary route is the alternate-species Gengar route (prep7 s2.5).
   // Fake Tears: row -1 (the first displayed row is one frame after activation): no shadow row; 83 script rows + 4 clear rows.
   { id: 313, move: "FAKE_TEARS", duration: [87, 87], shadow: undefined, alt: ["PLUSLE", "ONIX"], route: { seed: 0, move: 0, streak: 14 } },
+  // Sleep Talk needs a sleeping attacker: Seaking seed 3014 / streak 14 (prep7 s2.5): turn 1/2 the opponent plays Double Team and
+  // Sleep Powder, the player's Sleep Talk (index 2) pressed three times fires on turn 3; the called move is an ordinary second request.
+  { id: 214, move: "SLEEP_TALK", duration: [186, 189], shadow: 0, alt: ["WHISCASH", "ONIX"], route: { seed: 3014, move: 2, streak: 14, turns: 3, stall: true } },
   { id: 8, move: "ICE_PUNCH", duration: [184, 184], shadow: 0, alt: ["GENGAR", "ONIX"], route: { seed: 18, move: 2, streak: 42 } },
 ];
 
@@ -109,12 +112,14 @@ describe("live prep7 move adapters", () => {
 
   it.each(cases)("completes ordinary $move and preserves ON/OFF rules and RNG", c => {
     const r = c.route;
-    const on = generatedCommandAnimationReplay(r.seed, "on", [r.move], r.streak);
-    const off = generatedCommandAnimationReplay(r.seed, "off", [r.move], r.streak);
+    const slots = Array.from({ length: r.turns ?? 1 }, () => r.move);
+    const on = generatedCommandAnimationReplay(r.seed, "on", slots, r.streak, r.stall ?? false);
+    const off = generatedCommandAnimationReplay(r.seed, "off", slots, r.streak, r.stall ?? false);
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === 0);
     expect(body?.ages).toEqual(Array.from({ length: c.duration[0]! }, (_, age) => age));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
-    expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    if (!r.stall) expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
+    expect(on.stalled).toBe(off.stalled);
     expect(on.boundaries.length).toBeGreaterThan(0);
     expect(off.boundaries).toHaveLength(on.boundaries.length);
     for (let i = 0; i < on.boundaries.length; i += 1) {

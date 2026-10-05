@@ -1,7 +1,7 @@
 {
   "schema": "prep7-adapter-draft/v1",
   "move": "SLEEP_TALK",
-  "probe": "tools/battle-lab/mechanic-sleep-talk-opponent-seaking-player-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "scenario": "tools/battle-lab/mechanic-sleep-talk-opponent-seaking-player-onix.json",
   "attacker": {
     "species": "SEAKING",
@@ -15,7 +15,14 @@
       "side": "player"
     }
   },
-  "fieldProfile": null,
+  "fieldProfile": {
+    "playerHp": 110,
+    "playerMaxHp": 110,
+    "opponentHp": 153,
+    "opponentMaxHp": 162,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
   "orientation": "opponent-front SEAKING -> ONIX",
   "verdict": "READY (both orientations; called move = ordinary second request)",
   "denseWindow": {
@@ -77,5 +84,13 @@
     "routes": [],
     "livePlan": "request 214 then the called move as a SEPARATE ordinary second request (prep7-sleep-talk-field.json: Exploud 214 @1432 -> Shadow Ball 247 @1488, Whiscash 214 @1648 -> Fissure 90 @1704, 56-frame gap); displayed attacker status = 'sleep' at the event (4/4 routes); no config profile"
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "acceptedDenseWindow": {
+    "startFrame": 4570,
+    "endFrame": 4758,
+    "ageOffset": 0
+  },
+  "displayedStatus": {
+    "opponent": "sleep"
+  }
 }

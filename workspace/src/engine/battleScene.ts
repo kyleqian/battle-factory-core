@@ -34295,14 +34295,14 @@ export function renderSceneOnMovePresentation(
       age: sleepTalkState.age - 2,
     });
     const playerToOpponent =
-      view.attacker.species === "SEAKING"
+      (liveField || view.attacker.species === "SEAKING")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "SEAKING"
+      (liveField || view.attacker.species === "SEAKING")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -34312,27 +34312,30 @@ export function renderSceneOnMovePresentation(
     }
     const seakingSource = playerToOpponent
       ? restArt.seakingBack : restArt.seakingFront;
-    const seaking = playerToOpponent
+    const seaking = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? seakingSource
       : { ...seakingSource, tileset: subTileset(seakingSource.tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
-    const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
+    const onixIdle = playerToOpponent || liveField
+      ? (view.target.geometry.side === "opponent" ? speciesFrontIdleRestOffsetOrZero(view.target.species) : { x2: 0, y2: 0 })
       : { x2: 0, y2: 0 };
+    const attackerIdle = liveField && view.attacker.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species) : { x2: 0, y2: 0 };
     const attackerX2 = displayedSway.swayTask?.offsetX2 ?? 0;
     // gMonBackPicCoords[SEAKING].y_offset=11 is loaded at hardware OAM y=59
     // for this resolved back-side geometry; the generic picture corner is
     // eight pixels lower because it addresses the unclipped logical sheet.
-    const seakingSpriteY = view.attacker.geometry.spriteCorner.y
-      + (playerToOpponent ? -8 : 0);
+    // Under liveField the corner is the production origin (hardware OAM y already), so the -8 is not applied again.
+    const seakingSpriteY = view.attacker.geometry.spriteCorner.y + attackerIdle.y2
+      + (playerToOpponent && !liveField ? -8 : 0);
     const drawAttacker = () => drawSpriteSheet(
       fb,
       seaking.tileset,
       seaking.palette,
-      view.attacker.geometry.spriteCorner.x + attackerX2,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2 + attackerX2,
       seakingSpriteY,
     );
     const drawTarget = () => drawSpriteSheet(
@@ -34384,6 +34387,7 @@ export function renderSceneOnMovePresentation(
       drawTarget();
       drawLetters();
     }
+    if (liveField) return;
     drawSendOutHealthbox(
       fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
         name: playerToOpponent ? "ONIX" : "SEAKING",

@@ -40,6 +40,8 @@ export interface Fixture {
   attacker: { species: string; geometry: { side: "player" | "opponent" } };
   target: { species: string; geometry: { side: "player" | "opponent" } };
   fieldProfile: SceneOnDragonRageFieldProfile;
+  /** Displayed status of each battler at the body (presentation field only; default none, e.g. the sleeping Sleep Talk user). */
+  displayedStatus?: { player?: "none" | "sleep" | "burn" | "poison" | "paralysis" | "freeze"; opponent?: "none" | "sleep" | "burn" | "poison" | "paralysis" | "freeze" };
   /** Real attacker party personality (Spinda spots); presentation-only. */
   attackerPersonality?: number;
   /** Self-target moves: the species displayed on the other side of the field. */
@@ -120,7 +122,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
       hp: side === "player" ? profile.playerHp : profile.opponentHp,
       maxHP: side === "player" ? profile.playerMaxHp : profile.opponentMaxHp,
       gender: (side === "player" ? profile.playerGender : profile.opponentGender) ?? "male",
-      status: "none" as const, moveIds: [0, 0, 0, 0] as const,
+      status: f.displayedStatus?.[side] ?? "none" as const, moveIds: [0, 0, 0, 0] as const,
       currentPP: [0, 0, 0, 0] as const, ppBonuses: 0,
     };
   };
