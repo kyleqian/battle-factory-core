@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Direct-mGBA event-probe sweep for the NOT-OBSERVED (move, side) pairs of real Factory Level-50 sets, by weight.
-usage (from workspace/, mGBA venv): spriteOrderPlanCoverageProbe.py [outdir=/tmp/ev-ext] [--repeat K=1] [--max-per-pair N=1] [--jobs J=6]
+usage (from workspace/, mGBA venv): spriteOrderPlanCoverageProbe.py [outdir=/tmp/ev-ext] [--plans plans.json] [--repeat K=1] [--max-per-pair N=1] [--jobs J=6]
 Scenario choice per pair: tools/battle-lab/mechanic-<move>-*.json whose attacker side (spriteOrderBodyPlans.side_of) is the pair's side, plus
 tools/integration/fixtures/plan-coverage-scenarios/<move>-*.json (generated minimal scenarios). Raw rows are written to <outdir>/<id>-<stem>-<run>.json
 (not committed). Never uses the HTTP oracles."""
@@ -13,11 +13,13 @@ import spriteOrderBodyPlans as P, spriteOrderPlanCoverageRank as R
 args = [a for a in sys.argv[1:]]
 def opt(n, d): return int(args[args.index(n) + 1]) if n in args else d
 OUT = Path(next((a for a in args if not a.startswith("--") and not a.isdigit()), "/tmp/ev-ext")); OUT.mkdir(exist_ok=True)
+PLANS = args[args.index("--plans") + 1] if "--plans" in args else None
+args = [a for i, a in enumerate(args) if not (a == "--plans" or (i and args[i - 1] == "--plans"))]
 REPEAT, PER, JOBS = opt("--repeat", 1), opt("--max-per-pair", 1), opt("--jobs", 6)
 
 
 def jobs():
-    plans = json.loads((R.FIX / "sprite-order-body-plans.json").read_text())
+    plans = json.loads(Path(PLANS or R.FIX / "sprite-order-body-plans.json").read_text())
     w = R.weights(); names = {v: k for k, v in R.move_ids().items()}
     out, seen = [], set()
     for m in sorted(w, key=lambda m: -w[m]):

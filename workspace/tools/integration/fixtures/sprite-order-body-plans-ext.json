@@ -1,22 +1,22 @@
 {
  "schema": "sprite-order-body-plans/v1",
  "table": {
-  "scenarios": 517,
+  "scenarios": 540,
   "committedScenarios": 350,
-  "extScenarios": 167,
+  "extScenarios": 190,
   "committedTableSha256": "8dadb8893faad5f5d2f3d8e32ba57f564235dbd8f02dfbf8b5671e2021e597a5",
-  "extTableSha256": "99202372e058a2ec38b40591fad5b3e86e9a4ffcd6c1f2d6a3993eb3ddd70139"
+  "extTableSha256": "40ffb501cf6467a5b4deec58b02cb94206d9e2731e7c1f7ea4942a702084e417"
  },
  "tokens": "('n',k)=k-th sprite created by this unit (creation order: lowest-free ascending then end descending); ('c',ago,k)=survivor k of the unit `ago` units earlier (units alternate body,gap); ('o',slot)=occupant that predates every unit",
  "groupClasses": "SINGLE | STATIC (distinct priority words) | FDERIVED (tied keys; creation window then free-order index) | KEYS",
  "replay": {
-  "edges": 1229,
-  "edgesPrecededByExactPlans": 949,
-  "firstEdgesPrecededByExactPlans": 499,
-  "edgesExact": 949,
-  "firstEdgesExact": 499,
-  "laterEdgesPrecededByExactPlans": 450,
-  "laterEdgesExact": 450,
+  "edges": 1280,
+  "edgesPrecededByExactPlans": 985,
+  "firstEdgesPrecededByExactPlans": 522,
+  "edgesExact": 985,
+  "firstEdgesExact": 522,
+  "laterEdgesPrecededByExactPlans": 463,
+  "laterEdgesExact": 463,
   "scenariosEntryWindowsDiffer": 30,
   "scenariosEntryFreeOrderDiffers(skipped)": 18
  },
@@ -182,9 +182,9 @@
   347
  ],
  "liveIdOrientationCells": {
-  "EXACT-PLAN": 233,
-  "NEEDS-KEYS": 63,
-  "NOT-OBSERVED": 20
+  "EXACT-PLAN": 241,
+  "NEEDS-KEYS": 67,
+  "NOT-OBSERVED": 8
  },
  "orderDependentAdapterEdges": {
   "28": [
@@ -434,6 +434,12 @@
   "103:player": [
    "[]"
   ],
+  "104:opponent": [
+   "[]"
+  ],
+  "104:player": [
+   "[]"
+  ],
   "104:unattributed": [
    "[]"
   ],
@@ -618,10 +624,22 @@
   "157:player": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
+  "158:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "158:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
   "161:opponent": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
   "161:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "162:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "162:player": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
   "163:opponent": [
@@ -671,6 +689,9 @@
   ],
   "184:player": [
    "[]"
+  ],
+  "185:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
   "185:player": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
@@ -746,6 +767,12 @@
   "205:opponent": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
+  "207:opponent": [
+   "[]"
+  ],
+  "207:player": [
+   "[]"
+  ],
   "208:player": [
    "[]"
   ],
@@ -773,6 +800,9 @@
   "212:player": [
    "[]"
   ],
+  "213:opponent": [
+   "[]"
+  ],
   "213:unattributed": [
    "[]"
   ],
@@ -793,6 +823,12 @@
   ],
   "218:opponent": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "219:opponent": [
+   "[]"
+  ],
+  "219:player": [
+   "[]"
   ],
   "222:opponent": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
@@ -1032,6 +1068,12 @@
   "297:player": [
    "[]"
   ],
+  "298:opponent": [
+   "[]"
+  ],
+  "298:player": [
+   "[]"
+  ],
   "29:player": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
@@ -1254,6 +1296,12 @@
   "3:player": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
+  "41:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "41:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
   "42:opponent": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
@@ -1265,6 +1313,12 @@
   ],
   "43:player": [
    "[]"
+  ],
+  "44:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "44:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
   "45:opponent": [
    "[]"
@@ -1383,6 +1437,9 @@
   "79:player": [
    "[]"
   ],
+  "7:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
   "82:opponent": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
@@ -1417,6 +1474,12 @@
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
   "88:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "8:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "8:player": [
    "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
   ],
   "91:opponent": [
@@ -1469,19 +1532,19 @@
   "created [3, 4] destroyed [3, 4] class FDERIVED priorityWord 782 y -96": 37,
   "created [3, 4] destroyed [4, 3] class FDERIVED priorityWord 782 y -96": 15
  },
- "bodiesWithTwoOrMoreScenarios": 110,
+ "bodiesWithTwoOrMoreScenarios": 112,
  "bodies": {
   "0:any": {
-   "scenarios": 240,
+   "scenarios": 250,
    "distinctPlans": 18,
    "groupClasses": {
-    "SINGLE": 488,
-    "KEYS": 59,
+    "SINGLE": 490,
+    "KEYS": 65,
     "STATIC": 3,
     "FDERIVED": 1
    },
    "keysReasons": {
-    "equal priority word, different y (y is species/position dependent)": 59
+    "equal priority word, different y (y is species/position dependent)": 65
    },
    "keysGroups": [
     "[[[\"n\", 0], [\"n\", 1]], \"equal priority word, different y (y is species/position dependent)\"]",
@@ -1546,8 +1609,8 @@
     "189-mechanic-mud-slap-pidgeotto-onix-0.json"
    ],
    "otherPlans": {
-    "[{\"C\":[[\"n\",0,\"f\"]]}]": 41,
-    "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"],[\"n\",2,\"f\"],[\"n\",3,\"f\"],[\"n\",4,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",2],[\"n\",0],[\"n\",3],[\"n\",4]]}]": 17,
+    "[{\"C\":[[\"n\",0,\"f\"]]}]": 43,
+    "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"],[\"n\",2,\"f\"],[\"n\",3,\"f\"],[\"n\",4,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",2],[\"n\",0],[\"n\",3],[\"n\",4]]}]": 23,
     "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0]]},{\"C\":[[\"n\",2,\"f\"]]},{\"D\":[[\"n\",1]]},{\"C\":[[\"n\",3,\"f\"]]},{\"D\":[[\"n\",2]]},{\"C\":[[\"n\",4,\"f\"]]},{\"D\":[[\"n\",3]]},{\"C\":[[\"n\",5,\"f\"]]},{\"D\":[[\"n\",4]]},{\"C\":[[\"n\",6,\"f\"]]},{\"D\":[[\"n\",5]]},{\"C\":[[\"n\",7,\"f\"]]},{\"D\":[[\"n\",6]]}]": 13,
     "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"C\":[[\"n\",2,\"f\"]]},{\"D\":[[\"n\",0]]},{\"D\":[[\"n\",1]]}]": 7,
     "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0]]}]": 30,
@@ -1571,6 +1634,8 @@
     "source": "committed+ext",
     "committedScenarios": 145,
     "extScenarios": [
+     "104-double-team-opponent-generic-0.json",
+     "104-double-team-player-generic-0.json",
      "111-mechanic-defense-curl-opponent-phanpy-player-onix-0.json",
      "111-mechanic-defense-curl-player-phanpy-opponent-onix-0.json",
      "123-mechanic-smog-opponent-magby-player-onix-0.json",
@@ -1599,6 +1664,10 @@
      "192-mechanic-zap-cannon-player-forretress-opponent-shuckle-0.json",
      "20-mechanic-bind-opponent-onix-player-murkrow-0.json",
      "20-mechanic-bind-player-onix-opponent-murkrow-0.json",
+     "207-swagger-opponent-generic-0.json",
+     "207-swagger-opponent-generic-0.json",
+     "207-swagger-player-generic-0.json",
+     "207-swagger-player-generic-0.json",
      "214-mechanic-sleep-talk-opponent-seaking-player-onix-0.json",
      "214-mechanic-sleep-talk-opponent-seaking-player-onix-0.json",
      "214-mechanic-sleep-talk-opponent-seaking-player-onix-0.json",
@@ -1643,6 +1712,10 @@
      "297-mechanic-feather-dance-pidgeotto-onix-0.json",
      "297-mechanic-feather-dance-player-pidgeotto-onix-0.json",
      "297-mechanic-feather-dance-player-pidgeotto-onix-0.json",
+     "298-teeter-dance-opponent-generic-0.json",
+     "298-teeter-dance-opponent-generic-0.json",
+     "298-teeter-dance-player-generic-0.json",
+     "298-teeter-dance-player-generic-0.json",
      "304-mechanic-hyper-voice-opponent-exploud-player-slowking-0.json",
      "304-mechanic-hyper-voice-opponent-exploud-player-slowking-0.json",
      "304-mechanic-hyper-voice-player-exploud-opponent-slowking-0.json",
@@ -1900,6 +1973,118 @@
     "source": "committed",
     "committedScenarios": 1,
     "extScenarios": []
+   }
+  },
+  "104:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "FDERIVED": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       1
+      ]
+     ],
+     "pw": [
+      552,
+      552
+     ]
+    }
+   ],
+   "planExamples": [
+    "104-double-team-opponent-generic-0.json"
+   ],
+   "move": "104",
+   "side": "opponent",
+   "live": false,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "104-double-team-opponent-generic-0.json"
+    ]
+   }
+  },
+  "104:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "FDERIVED": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       1
+      ]
+     ],
+     "pw": [
+      542,
+      542
+     ]
+    }
+   ],
+   "planExamples": [
+    "104-double-team-player-generic-0.json"
+   ],
+   "move": "104",
+   "side": "player",
+   "live": false,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "104-double-team-player-generic-0.json"
+    ]
    }
   },
   "104:unattributed": {
@@ -13699,10 +13884,10 @@
    }
   },
   "157:player": {
-   "scenarios": 6,
+   "scenarios": 15,
    "distinctPlans": 1,
    "groupClasses": {
-    "SINGLE": 126
+    "SINGLE": 315
    },
    "keysReasons": {},
    "keysGroups": [],
@@ -14074,9 +14259,18 @@
     "source": "committed+ext",
     "committedScenarios": 2,
     "extScenarios": [
+     "104-double-team-opponent-generic-0.json",
+     "158-hyper-fang-opponent-generic-0.json",
+     "162-super-fang-opponent-generic-0.json",
+     "185-faint-attack-opponent-generic-0.json",
      "19-mechanic-fly-murkrow-onix-0.json",
+     "219-safeguard-opponent-generic-0.json",
      "297-mechanic-feather-dance-pidgeotto-onix-0.json",
      "340-mechanic-bounce-paralysis-spoink-onix-0.json",
+     "41-twineedle-opponent-generic-0.json",
+     "44-bite-opponent-generic-0.json",
+     "7-fire-punch-opponent-generic-0.json",
+     "8-ice-punch-opponent-generic-0.json",
      "98-mechanic-quick-attack-pidgeotto-onix-0.json"
     ]
    }
@@ -14457,6 +14651,92 @@
     "source": "committed",
     "committedScenarios": 2,
     "extScenarios": []
+   }
+  },
+  "158:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "158-hyper-fang-opponent-generic-0.json"
+   ],
+   "move": "158",
+   "side": "opponent",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "158-hyper-fang-opponent-generic-0.json"
+    ]
+   }
+  },
+  "158:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "158-hyper-fang-player-generic-0.json"
+   ],
+   "move": "158",
+   "side": "player",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "158-hyper-fang-player-generic-0.json"
+    ]
    }
   },
   "161:opponent": {
@@ -15205,6 +15485,160 @@
     "source": "committed",
     "committedScenarios": 1,
     "extScenarios": []
+   }
+  },
+  "162:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 3
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "162-super-fang-opponent-generic-0.json"
+   ],
+   "move": "162",
+   "side": "opponent",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "162-super-fang-opponent-generic-0.json"
+    ]
+   }
+  },
+  "162:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 3
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "162-super-fang-player-generic-0.json"
+   ],
+   "move": "162",
+   "side": "player",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "162-super-fang-player-generic-0.json"
+    ]
    }
   },
   "163:opponent": {
@@ -18311,6 +18745,49 @@
     "source": "committed",
     "committedScenarios": 1,
     "extScenarios": []
+   }
+  },
+  "185:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "185-faint-attack-opponent-generic-0.json"
+   ],
+   "move": "185",
+   "side": "opponent",
+   "live": false,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "185-faint-attack-opponent-generic-0.json"
+    ]
    }
   },
   "185:player": {
@@ -25414,6 +25891,160 @@
     ]
    }
   },
+  "207:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 3
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "207-swagger-opponent-generic-0.json"
+   ],
+   "move": "207",
+   "side": "opponent",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "207-swagger-opponent-generic-0.json"
+    ]
+   }
+  },
+  "207:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 3
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "207-swagger-player-generic-0.json"
+   ],
+   "move": "207",
+   "side": "player",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "207-swagger-player-generic-0.json"
+    ]
+   }
+  },
   "208:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -26942,6 +27573,228 @@
     "committedScenarios": 0,
     "extScenarios": [
      "212-mechanic-mean-look-player-murkrow-opponent-onix-0.json"
+    ]
+   }
+  },
+  "213:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 9,
+    "KEYS": 1
+   },
+   "keysReasons": {
+    "observed order contradicts key/creation rule": 1
+   },
+   "keysGroups": [
+    "[[[\"n\", 3], [\"n\", 5], [\"n\", 6], [\"n\", 1], [\"n\", 4], [\"n\", 2]], \"observed order contradicts key/creation rule\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ],
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ],
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ],
+      [
+       "n",
+       5
+      ],
+      [
+       "n",
+       6
+      ],
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       4
+      ],
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ],
+      [
+       "n",
+       11,
+       "f"
+      ],
+      [
+       "n",
+       12,
+       "f"
+      ],
+      [
+       "n",
+       13,
+       "f"
+      ],
+      [
+       "n",
+       14,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       10
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       12
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       14
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       13
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "213-attract-opponent-generic-0.json"
+   ],
+   "move": "213",
+   "side": "opponent",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "213-attract-opponent-generic-0.json"
     ]
    }
   },
@@ -28601,6 +29454,160 @@
     ]
    }
   },
+  "219:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 3
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "219-safeguard-opponent-generic-0.json"
+   ],
+   "move": "219",
+   "side": "opponent",
+   "live": false,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "219-safeguard-opponent-generic-0.json"
+    ]
+   }
+  },
+  "219:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 3
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "219-safeguard-player-generic-0.json"
+   ],
+   "move": "219",
+   "side": "player",
+   "live": false,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "219-safeguard-player-generic-0.json"
+    ]
+   }
+  },
   "21:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -29616,10 +30623,10 @@
    }
   },
   "225:opponent": {
-   "scenarios": 6,
+   "scenarios": 14,
    "distinctPlans": 1,
    "groupClasses": {
-    "SINGLE": 66
+    "SINGLE": 154
    },
    "keysReasons": {},
    "keysGroups": [],
@@ -29825,9 +30832,17 @@
     "source": "committed+ext",
     "committedScenarios": 2,
     "extScenarios": [
+     "104-double-team-player-generic-0.json",
+     "158-hyper-fang-player-generic-0.json",
+     "162-super-fang-player-generic-0.json",
+     "219-safeguard-player-generic-0.json",
+     "283-endeavor-player-generic-0.json",
      "297-mechanic-feather-dance-player-pidgeotto-onix-0.json",
      "332-mechanic-aerial-ace-player-pidgeotto-onix-0.json",
      "340-mechanic-bounce-player-spoink-onix-0.json",
+     "41-twineedle-player-generic-0.json",
+     "44-bite-player-generic-0.json",
+     "8-ice-punch-player-generic-0.json",
      "98-mechanic-quick-attack-player-pidgeotto-onix-0.json"
     ]
    }
@@ -44084,6 +45099,58 @@
     ]
    }
   },
+  "271:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "STATIC": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       1
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "271-trick-opponent-generic-0.json"
+   ],
+   "move": "271",
+   "side": "opponent",
+   "live": false,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "271-trick-opponent-generic-0.json"
+    ]
+   }
+  },
   "272:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -49331,6 +50398,228 @@
     "committedScenarios": 0,
     "extScenarios": [
      "297-mechanic-feather-dance-player-pidgeotto-onix-0.json"
+    ]
+   }
+  },
+  "298:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 5
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "298-teeter-dance-opponent-generic-0.json"
+   ],
+   "move": "298",
+   "side": "opponent",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "298-teeter-dance-opponent-generic-0.json"
+    ]
+   }
+  },
+  "298:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 5
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "298-teeter-dance-player-generic-0.json"
+   ],
+   "move": "298",
+   "side": "player",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "298-teeter-dance-player-generic-0.json"
     ]
    }
   },
@@ -71677,6 +72966,192 @@
     "extScenarios": []
    }
   },
+  "41:opponent": {
+   "scenarios": 2,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "KEYS": 2,
+    "SINGLE": 4
+   },
+   "keysReasons": {
+    "equal priority word, different y (y is species/position dependent)": 2
+   },
+   "keysGroups": [
+    "[[[\"n\", 0], [\"n\", 1]], \"equal priority word, different y (y is species/position dependent)\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "41-twineedle-opponent-generic-0.json",
+    "41-twineedle-opponent-generic-0.json"
+   ],
+   "move": "41",
+   "side": "opponent",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "41-twineedle-opponent-generic-0.json",
+     "41-twineedle-opponent-generic-0.json"
+    ]
+   }
+  },
+  "41:player": {
+   "scenarios": 2,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "KEYS": 2,
+    "SINGLE": 4
+   },
+   "keysReasons": {
+    "equal priority word, different y (y is species/position dependent)": 2
+   },
+   "keysGroups": [
+    "[[[\"n\", 1], [\"n\", 0]], \"equal priority word, different y (y is species/position dependent)\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "41-twineedle-player-generic-0.json",
+    "41-twineedle-player-generic-0.json"
+   ],
+   "move": "41",
+   "side": "player",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "41-twineedle-player-generic-0.json",
+     "41-twineedle-player-generic-0.json"
+    ]
+   }
+  },
   "42:opponent": {
    "scenarios": 2,
    "distinctPlans": 1,
@@ -72013,6 +73488,154 @@
     "source": "committed",
     "committedScenarios": 3,
     "extScenarios": []
+   }
+  },
+  "44:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "KEYS": 1,
+    "SINGLE": 1
+   },
+   "keysReasons": {
+    "equal priority word, different y (y is species/position dependent)": 1
+   },
+   "keysGroups": [
+    "[[[\"n\", 1], [\"n\", 0]], \"equal priority word, different y (y is species/position dependent)\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "44-bite-opponent-generic-0.json"
+   ],
+   "move": "44",
+   "side": "opponent",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "44-bite-opponent-generic-0.json"
+    ]
+   }
+  },
+  "44:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "KEYS": 1,
+    "SINGLE": 1
+   },
+   "keysReasons": {
+    "equal priority word, different y (y is species/position dependent)": 1
+   },
+   "keysGroups": [
+    "[[[\"n\", 1], [\"n\", 0]], \"equal priority word, different y (y is species/position dependent)\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "44-bite-player-generic-0.json"
+   ],
+   "move": "44",
+   "side": "player",
+   "live": true,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "44-bite-player-generic-0.json"
+    ]
    }
   },
   "45:opponent": {
@@ -89312,6 +90935,179 @@
     ]
    }
   },
+  "7:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "KEYS": 2,
+    "SINGLE": 2
+   },
+   "keysReasons": {
+    "equal priority word, different y (y is species/position dependent)": 2
+   },
+   "keysGroups": [
+    "[[[\"n\", 0], [\"n\", 3], [\"n\", 1], [\"n\", 2]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 7], [\"n\", 6], [\"n\", 10], [\"n\", 11], [\"n\", 9], [\"n\", 12], [\"n\", 8]], \"equal priority word, different y (y is species/position dependent)\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ],
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       3
+      ],
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ],
+      [
+       "n",
+       6,
+       "f"
+      ],
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ],
+      [
+       "n",
+       11,
+       "f"
+      ],
+      [
+       "n",
+       12,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ],
+      [
+       "n",
+       6
+      ],
+      [
+       "n",
+       10
+      ],
+      [
+       "n",
+       11
+      ],
+      [
+       "n",
+       9
+      ],
+      [
+       "n",
+       12
+      ],
+      [
+       "n",
+       8
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "7-fire-punch-opponent-generic-0.json"
+   ],
+   "move": "7",
+   "side": "opponent",
+   "live": false,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "7-fire-punch-opponent-generic-0.json"
+    ]
+   }
+  },
   "80:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -93116,6 +94912,614 @@
     "extScenarios": []
    }
   },
+  "8:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 11,
+    "KEYS": 2
+   },
+   "keysReasons": {
+    "equal priority word, different y (y is species/position dependent)": 1,
+    "observed order contradicts key/creation rule": 1
+   },
+   "keysGroups": [
+    "[[[\"n\", 1], [\"n\", 4], [\"n\", 2], [\"n\", 3]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 5], [\"n\", 8], [\"n\", 6], [\"n\", 7]], \"observed order contradicts key/creation rule\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ],
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ],
+      [
+       "n",
+       6,
+       "f"
+      ],
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       4
+      ],
+      [
+       "n",
+       2
+      ],
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       10
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ],
+      [
+       "n",
+       8
+      ],
+      [
+       "n",
+       6
+      ],
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       11,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       12,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       13,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       14,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       15,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       16,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       17,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       12
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       13
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       14
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       15
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       16
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       17
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       18,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       18
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "8-ice-punch-opponent-generic-0.json"
+   ],
+   "move": "8",
+   "side": "opponent",
+   "live": false,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "8-ice-punch-opponent-generic-0.json"
+    ]
+   }
+  },
+  "8:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 11,
+    "KEYS": 2
+   },
+   "keysReasons": {
+    "equal priority word, different y (y is species/position dependent)": 1,
+    "observed order contradicts key/creation rule": 1
+   },
+   "keysGroups": [
+    "[[[\"n\", 1], [\"n\", 4], [\"n\", 2], [\"n\", 3]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 5], [\"n\", 8], [\"n\", 6], [\"n\", 7]], \"observed order contradicts key/creation rule\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ],
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ],
+      [
+       "n",
+       6,
+       "f"
+      ],
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       4
+      ],
+      [
+       "n",
+       2
+      ],
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       10
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ],
+      [
+       "n",
+       8
+      ],
+      [
+       "n",
+       6
+      ],
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       11,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       12,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       13,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       14,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       15,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       16,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       17,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       12
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       13
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       14
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       15
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       16
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       17
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       18,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       18
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "8-ice-punch-player-generic-0.json"
+   ],
+   "move": "8",
+   "side": "player",
+   "live": false,
+   "provenance": {
+    "source": "ext",
+    "committedScenarios": 0,
+    "extScenarios": [
+     "8-ice-punch-player-generic-0.json"
+    ]
+   }
+  },
   "90:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -95868,10 +98272,10 @@
  },
  "gaps": {
   "0:any>0:any": {
-   "scenarios": 30,
+   "scenarios": 36,
    "distinctPlans": 4,
    "groupClasses": {
-    "SINGLE": 17,
+    "SINGLE": 19,
     "FDERIVED": 5
    },
    "keysReasons": {},
@@ -95885,7 +98289,7 @@
    ],
    "otherPlans": {
     "[{\"D\":[[\"c\",1,0]]},{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]],\"pw\":[782,782]}]": 5,
-    "[{\"D\":[[\"c\",1,0]]}]": 11,
+    "[{\"D\":[[\"c\",1,0]]}]": 13,
     "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]": 1
    }
   },
@@ -96043,7 +98447,7 @@
    ]
   },
   "0:any>157:player": {
-   "scenarios": 2,
+   "scenarios": 4,
    "distinctPlans": 2,
    "groupClasses": {
     "SINGLE": 1
@@ -96054,7 +98458,8 @@
    "verdict": "NEEDS-KEYS",
    "plan": [],
    "planExamples": [
-    "28-mechanic-sand-attack-pidgeotto-onix-0.json"
+    "28-mechanic-sand-attack-pidgeotto-onix-0.json",
+    "104-double-team-opponent-generic-0.json"
    ],
    "otherPlans": {
     "[{\"D\":[[\"c\",1,0]]}]": 1
@@ -96275,7 +98680,7 @@
    ]
   },
   "0:any>225:opponent": {
-   "scenarios": 3,
+   "scenarios": 5,
    "distinctPlans": 2,
    "groupClasses": {
     "SINGLE": 1
@@ -97316,6 +99721,32 @@
    "plan": [],
    "planExamples": [
     "103-mechanic-screech-player-voltorb-opponent-onix-0.json"
+   ]
+  },
+  "104:opponent>0:any": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "104-double-team-opponent-generic-0.json"
+   ]
+  },
+  "104:player>0:any": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "104-double-team-player-generic-0.json"
    ]
   },
   "104:unattributed>0:unattributed": {
@@ -98877,6 +101308,72 @@
     "340-mechanic-bounce-paralysis-spoink-onix-0.json"
    ]
   },
+  "158:opponent>157:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "158-hyper-fang-opponent-generic-0.json"
+   ]
+  },
+  "158:player>225:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "158-hyper-fang-player-generic-0.json"
+   ]
+  },
   "161:opponent>33:player": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -98941,6 +101438,72 @@
    ],
    "planExamples": [
     "161-mechanic-tri-attack-player-porygon-opponent-shuckle-0.json"
+   ]
+  },
+  "162:opponent>157:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "162-super-fang-opponent-generic-0.json"
+   ]
+  },
+  "162:player>225:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "162-super-fang-player-generic-0.json"
    ]
   },
   "163:opponent>33:player": {
@@ -99351,6 +101914,39 @@
    "plan": [],
    "planExamples": [
     "184-mechanic-scary-face-player-rhyhorn-opponent-shuckle-0.json"
+   ]
+  },
+  "185:opponent>157:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "185-faint-attack-opponent-generic-0.json"
    ]
   },
   "185:player>20:opponent": {
@@ -100111,6 +102707,32 @@
     "205-mechanic-rollout-opponent-voltorb-player-onix-0.json"
    ]
   },
+  "207:opponent>0:any": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "207-swagger-opponent-generic-0.json"
+   ]
+  },
+  "207:player>0:any": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "207-swagger-player-generic-0.json"
+   ]
+  },
   "208:player>33:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -100370,6 +102992,19 @@
     "212-mechanic-mean-look-player-murkrow-opponent-onix-0.json"
    ]
   },
+  "213:opponent>0:any": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "213-attract-opponent-generic-0.json"
+   ]
+  },
   "213:unattributed>0:unattributed": {
    "scenarios": 2,
    "distinctPlans": 1,
@@ -100597,6 +103232,32 @@
    ],
    "planExamples": [
     "218-mechanic-frustration-opponent-furret-player-onix-0.json"
+   ]
+  },
+  "219:opponent>157:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "219-safeguard-opponent-generic-0.json"
+   ]
+  },
+  "219:player>225:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "219-safeguard-player-generic-0.json"
    ]
   },
   "222:opponent>33:player": {
@@ -103199,6 +105860,32 @@
    "plan": [],
    "planExamples": [
     "297-mechanic-feather-dance-player-pidgeotto-onix-0.json"
+   ]
+  },
+  "298:opponent>0:any": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "298-teeter-dance-opponent-generic-0.json"
+   ]
+  },
+  "298:player>0:any": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "298-teeter-dance-player-generic-0.json"
    ]
   },
   "29:player>33:opponent": {
@@ -111595,6 +114282,138 @@
     "3-mechanic-double-slap-player-poliwhirl-opponent-onix-0.json"
    ]
   },
+  "41:opponent>157:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "41-twineedle-opponent-generic-0.json"
+   ]
+  },
+  "41:opponent>41:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "41-twineedle-opponent-generic-0.json"
+   ]
+  },
+  "41:player>225:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "41-twineedle-player-generic-0.json"
+   ]
+  },
+  "41:player>41:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "41-twineedle-player-generic-0.json"
+   ]
+  },
   "42:opponent>33:player": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -111753,6 +114572,72 @@
    "planExamples": [
     "101-status-alternate-night-shade-opponent-scenario-0.json",
     "336-howl-alternate-opponent-scenario-0.json"
+   ]
+  },
+  "44:opponent>157:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "44-bite-opponent-generic-0.json"
+   ]
+  },
+  "44:player>225:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "44-bite-player-generic-0.json"
    ]
   },
   "45:opponent>0:any": {
@@ -113135,6 +116020,39 @@
     "173-mechanic-snore-opponent-sealeo-player-venomoth-0.json"
    ]
   },
+  "7:opponent>157:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "7-fire-punch-opponent-generic-0.json"
+   ]
+  },
   "82:opponent>150:player": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -113722,6 +116640,72 @@
     "79-mechanic-sleep-powder-opponent-hoppip-player-onix-0.json"
    ]
   },
+  "8:opponent>157:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "8-ice-punch-opponent-generic-0.json"
+   ]
+  },
+  "8:player>225:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "8-ice-punch-player-generic-0.json"
+   ]
+  },
   "91:opponent>45:player": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -114160,6 +117144,32 @@
    "plan": [],
    "planExamples": [
     "103-mechanic-screech-player-voltorb-opponent-onix-0.json"
+   ]
+  },
+  "entry>104:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "104-double-team-opponent-generic-0.json"
+   ]
+  },
+  "entry>104:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "104-double-team-player-generic-0.json"
    ]
   },
   "entry>104:unattributed": {
@@ -114725,6 +117735,32 @@
     "battle1-turn1-varB-0.json"
    ]
   },
+  "entry>158:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "158-hyper-fang-opponent-generic-0.json"
+   ]
+  },
+  "entry>158:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "158-hyper-fang-player-generic-0.json"
+   ]
+  },
   "entry>161:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -114749,6 +117785,32 @@
    "plan": [],
    "planExamples": [
     "161-mechanic-tri-attack-player-porygon-opponent-shuckle-0.json"
+   ]
+  },
+  "entry>162:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "162-super-fang-opponent-generic-0.json"
+   ]
+  },
+  "entry>162:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "162-super-fang-player-generic-0.json"
    ]
   },
   "entry>163:opponent": {
@@ -114984,6 +118046,19 @@
    "plan": [],
    "planExamples": [
     "184-mechanic-scary-face-player-rhyhorn-opponent-shuckle-0.json"
+   ]
+  },
+  "entry>185:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "185-faint-attack-opponent-generic-0.json"
    ]
   },
   "entry>185:player": {
@@ -115287,6 +118362,32 @@
     "205-mechanic-rollout-opponent-voltorb-player-onix-0.json"
    ]
   },
+  "entry>207:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "207-swagger-opponent-generic-0.json"
+   ]
+  },
+  "entry>207:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "207-swagger-player-generic-0.json"
+   ]
+  },
   "entry>209:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -115378,6 +118479,19 @@
     "212-mechanic-mean-look-player-murkrow-opponent-onix-0.json"
    ]
   },
+  "entry>213:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "213-attract-opponent-generic-0.json"
+   ]
+  },
   "entry>213:unattributed": {
    "scenarios": 2,
    "distinctPlans": 1,
@@ -115430,6 +118544,32 @@
    "plan": [],
    "planExamples": [
     "218-mechanic-frustration-opponent-furret-player-onix-0.json"
+   ]
+  },
+  "entry>219:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "219-safeguard-opponent-generic-0.json"
+   ]
+  },
+  "entry>219:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "219-safeguard-player-generic-0.json"
    ]
   },
   "entry>222:opponent": {
@@ -115485,7 +118625,7 @@
    ]
   },
   "entry>225:opponent": {
-   "scenarios": 1,
+   "scenarios": 2,
    "distinctPlans": 1,
    "groupClasses": {},
    "keysReasons": {},
@@ -115494,6 +118634,7 @@
    "verdict": "EXACT-PLAN",
    "plan": [],
    "planExamples": [
+    "283-endeavor-player-generic-0.json",
     "340-mechanic-bounce-player-spoink-onix-0.json"
    ]
   },
@@ -115888,6 +119029,19 @@
     "269-mechanic-taunt-opponent-murkrow-player-shuckle-0.json"
    ]
   },
+  "entry>271:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "271-trick-opponent-generic-0.json"
+   ]
+  },
   "entry>272:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -116211,6 +119365,32 @@
    "plan": [],
    "planExamples": [
     "297-mechanic-feather-dance-player-pidgeotto-onix-0.json"
+   ]
+  },
+  "entry>298:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "298-teeter-dance-opponent-generic-0.json"
+   ]
+  },
+  "entry>298:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "298-teeter-dance-player-generic-0.json"
    ]
   },
   "entry>29:opponent": {
@@ -117076,6 +120256,32 @@
     "3-mechanic-double-slap-player-poliwhirl-opponent-onix-0.json"
    ]
   },
+  "entry>41:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "41-twineedle-opponent-generic-0.json"
+   ]
+  },
+  "entry>41:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "41-twineedle-player-generic-0.json"
+   ]
+  },
   "entry>42:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -117113,6 +120319,32 @@
    "plan": [],
    "planExamples": [
     "43-mechanic-leer-opponent-dragonair-player-onix-0.json"
+   ]
+  },
+  "entry>44:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "44-bite-opponent-generic-0.json"
+   ]
+  },
+  "entry>44:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "44-bite-player-generic-0.json"
    ]
   },
   "entry>45:opponent": {
@@ -117559,6 +120791,19 @@
     "173-mechanic-snore-opponent-sealeo-player-venomoth-0.json"
    ]
   },
+  "entry>7:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "7-fire-punch-opponent-generic-0.json"
+   ]
+  },
   "entry>82:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -117741,6 +120986,32 @@
    "plan": [],
    "planExamples": [
     "89-mechanic-earthquake-player-dugtrio-opponent-onix-0.json"
+   ]
+  },
+  "entry>8:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "8-ice-punch-opponent-generic-0.json"
+   ]
+  },
+  "entry>8:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "8-ice-punch-player-generic-0.json"
    ]
   },
   "entry>90:opponent": {
@@ -117941,13 +121212,7 @@
   }
  },
  "liveNotObserved": [
-  41,
-  44,
-  158,
-  162,
-  207,
-  296,
-  298
+  296
  ],
  "note": "committed table + ext table; produced by tools/integration/spriteOrderBodyPlansExt.py"
 }
