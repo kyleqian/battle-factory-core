@@ -3034,6 +3034,118 @@
         "window ends 2 rows before the script end; hardwareTieSlotOrder is an accepted constant",
         "ordinary command-input replay: see the receipt"
       ]
+    },
+    {
+      "move": "MOVE_LEECH_SEED",
+      "id": 73,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep11-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 3/3 zero residual twice (EXEGGCUTE both orientations + VENUSAUR alternate); main body only"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "the end-turn drain body (move 0, 207 rows) stays scene-off",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_PETAL_DANCE",
+      "id": 80,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep11-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 3/3 zero residual twice (GLOOM both orientations + VILEPLUME alternate)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_TRI_ATTACK",
+      "id": 161,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep11-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 3/3 zero residual twice (PORYGON both orientations + DUGTRIO alternate)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_SPIDER_WEB",
+      "id": 169,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep11-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 2/2 base orientations zero residual twice (SPINARAK); ARIADOS alternate 193/207 rows, 14 px (open)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ARIADOS alternate: 1 px at the first display of each of 14 threads (open species-dependent residual)",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_FORESIGHT",
+      "id": 193,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep11-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 3/3 zero residual twice (MACHOKE both orientations + HITMONLEE alternate)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_DESTINY_BOND",
+      "id": 194,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep11-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 3/3 zero residual twice (WOBBUFFET both orientations + GENGAR alternate)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_RECYCLE",
+      "id": 278,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep11-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 3/3 zero residual twice (PORYGON both orientations + TAUROS-target alternate, opponent attacker)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "route needs a prior consumed item (two-turn seed 378/0)",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_AIR_CUTTER",
+      "id": 314,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep11-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 3/3 zero residual twice (GOLBAT both orientations + CROBAT alternate)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_SKY_UPPERCUT",
+      "id": 327,
+      "sourceFieldEvidence": "../tools/integration/fixtures/prep11-live-adapter-receipt.json",
+      "liveEvidence": [
+        "dense 2/2 HITMONCHAN both orientations zero residual twice; COMBUSKEN alternate 173/189 rows (script ends 1 frame later; ages 170-188 residual, open)"
+      ],
+      "remaining": [
+        "independent arbitrary-species/history framebuffer comparison",
+        "COMBUSKEN tail: species-dependent 1-frame later end (prep11 open point 1) is NOT modelled",
+        "ordinary command-input replay: see the receipt"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3056,7 +3168,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 204,
+  "implementedCount": 213,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
@@ -3113,14 +3225,21 @@
         "MOVE_PERISH_SONG (195)",
         "MOVE_ROCK_THROW (88)",
         "MOVE_BLAZE_KICK (299)",
-        "MOVE_FLAMETHROWER (53, optional seed)"
+        "MOVE_FLAMETHROWER (53, optional seed)",
+        "MOVE_TRI_ATTACK (161)",
+        "MOVE_PETAL_DANCE (80)",
+        "MOVE_DESTINY_BOND (194)",
+        "MOVE_AIR_CUTTER (314)",
+        "MOVE_FORESIGHT (193)",
+        "MOVE_SKY_UPPERCUT (327)",
+        "MOVE_SPIDER_WEB (169)"
       ],
       "planReplay": "TS replay of sprite-order-body-plans.json: 790 edges, 659 preceded by exact plans, 659 exact, 0 mismatched (tests/spriteOrderProvider.test.ts). Event transform, strict real-route (five battle-1 traces, no resync): 3 known / 3 exact / 0 mismatched move edges per trace (was 1), first invalidation 283:opponent (not observed); resync 91/91 exact. BattleLab corpus through the transform: 1366 edges, 1044 known (554 first + 490 later), 1044 exact, 0 mismatched (tests/spriteOrderEventTransform.test.ts). Live host = pure transform on 200 generated battles: 1009 bodies, 812 later, 239 later known, 0 mismatches (tests/liveSpriteOrderHost.test.ts, tools/integration/orderCrossBodyRouteScan.ts)",
       "receipt": "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json",
       "consumerPolicy": "while the tracked order is known (any body of the battle whose every preceding unit since the known entry is modelled); otherwise null (bounded scene-off fallback)",
       "crossBodyReceipt": "../tools/integration/fixtures/order-cross-body-live-receipt.json",
       "postKoLend": {
-        "claim": "Post-KO lends for the opponent-KO geometry: after a modelled opponent faint + next-mon summary + send-out the tracked occupancy is role-isomorphic to the known entry and the body is lent pi(F) (entry slot labels; src spriteOrderTrackerLend / spriteOrderEntryLabelRelabel), and the allocator host is re-seeded with the known-entry firstMove host (reseedLiveSpriteAllocatorAfterSendOut). No consumer code changed. Measured exact twice fresh through the production lend: 13 audit bodies (2001 rows) + Barrier, Reflect, Magic Coat, Frustration, Seismic Toss, Safeguard, Heal Bell, Sweet Scent, Mega Drain, Perish Song, Grudge. Leaf Blade is NOT exact post-KO (212/224, target box ages 0-11) and keeps declining (POSTKO_LEND_EXCLUDED_MOVE_IDS).",
+        "claim": "Post-KO lends for the opponent-KO geometry: after a modelled opponent faint + next-mon summary + send-out the tracked occupancy is role-isomorphic to the known entry and the body is lent pi(F) (entry slot labels; src spriteOrderTrackerLend / spriteOrderEntryLabelRelabel), and the allocator host is re-seeded with the known-entry firstMove host (reseedLiveSpriteAllocatorAfterSendOut). No consumer code changed. Measured exact twice fresh through the production lend: 13 audit bodies (2001 rows) + Barrier, Reflect, Magic Coat, Frustration, Seismic Toss, Safeguard, Heal Bell, Sweet Scent, Mega Drain, Perish Song, Grudge. Leaf Blade (348) is exact post-KO since ISSUES #144 was fixed (target front-idle x2, not the lend): 224/224 twice fresh through the production lend (postko-lend/postko-leaf-blade-fixed-receipt.json); POSTKO_LEND_EXCLUDED_MOVE_IDS is empty.",
         "caveats": "Player-faint reshow geometry {0,1,2,3,5,60..63} still declines; a second opponent KO lends by the same state argument but is UNIT_PLANS-predicted, not ROM-probed; remaining consumers are class-inferred (docs/postko-consumer-audit.md 3.2). Not whole-playable arbitrary-history exactness.",
         "receipt": "../tools/integration/fixtures/postko-lend-receipt.json"
       }
