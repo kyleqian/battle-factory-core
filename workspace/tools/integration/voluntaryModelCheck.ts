@@ -48,7 +48,7 @@ export const SCENARIOS: Record<string, Step[]> = {
     P, C, ...mv(53, "player", true), ...OPPONENT_KO_SEND_OUT,
     P, C, ...mv(241, "player"), ...mv(129, "opponent", true), ...SUN,
     P, C, ...mv(129, "player", true), ...mv(129, "opponent", true), ...SUN],
-  // SNORLAX lead switches to slot 1 (JOLTEON) into SLOWBRO Thunderbolt (85:opponent has no EXACT plan: the tracker ends after it).
+  // SNORLAX lead switches to slot 1 (NINETALES; a JOLTEON's Volt Absorb skips the animation) into SLOWBRO Thunderbolt (85:opponent has no EXACT plan: the tracker ends after it).
   "voluntary-slot1-thunderbolt": [...MENU_SWITCH, ...mv(85, "opponent", true)],
   // JOLTEON lead switches to slot 2 (SNORLAX) into SLOWBRO Giga Drain (202:opponent has no EXACT plan).
   "voluntary-slot2-gigadrain": [...MENU_SWITCH, ...mv(202, "opponent", true)],

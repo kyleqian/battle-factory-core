@@ -9,11 +9,11 @@ BASE = {"schemaVersion": 1, "mode": "mechanicLab", "profile": "battle-scene-on",
         "trainerId": 150, "playerSetIds": [495, 496, 497], "opponentSetIds": [498, 499, 500], "seed": 305419897}
 
 
-def mon(species, moves, speed=31, level=50, nature=0):
+def mon(species, moves, speed=31, level=50, nature=0, gender="male"):
     return {"species": species, "level": level, "nature": nature,
             "ivs": {"hp": 31, "attack": 31, "defense": 31, "speed": speed, "spAttack": 31, "spDefense": 31},
             "evs": {"hp": 0, "attack": 0, "defense": 0, "speed": 0, "spAttack": 0, "spDefense": 0}, "moves": moves,
-            "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0, "friendship": 70, "gender": "male", "shiny": False}
+            "ppUps": [0, 0, 0, 0], "item": 0, "abilitySlot": 0, "friendship": 70, "gender": gender, "shiny": False}
 
 
 
@@ -33,10 +33,10 @@ SCENARIOS = {
                      {"turns": [{"cancel": True}, 0, {"switch": 2}, 0, 1], "frames": 5200}),
     # C: player faint -> forced switch-in (NINETALES) -> opponent KO (Flamethrower KOs SHEDINJA) + send-out (SLOWBRO) -> Sunny Day, Swift.
     "faint-ko-sunnyday": ({"player": [mon(MAGIKARP, [SPLASH] * 4, speed=0, level=5), mon(NINETALES, [FLAME, SUNNY, SWIFT, LSCREEN]),
-                                      mon(SNORLAX, [SWIFT] * 4)], "opponent": [mon(SHEDINJA, [SWIFT] * 4, speed=0, nature=2), slowbro(SWIFT), slowbro(SWIFT)]},
+                                      mon(SNORLAX, [SWIFT] * 4)], "opponent": [mon(SHEDINJA, [SWIFT] * 4, speed=0, nature=2, gender="genderless"), slowbro(SWIFT), slowbro(SWIFT)]},
                           {"turns": [0, 0, 1, 2], "forcedDown": 1, "frames": 5200}),
-    # D: voluntary switch to slot 1 into a Thunderbolt opponent (85:opponent has no EXACT plan: the last relied-on edge is its activation).
-    "slot1-thunderbolt": ({"player": [mon(SNORLAX, [SWIFT] * 4, speed=0), mon(JOLTEON, [SUNNY, SWIFT, TBOLT, LSCREEN]), mon(MAGIKARP, [SPLASH] * 4)],
+    # D: voluntary switch to slot 1 (NINETALES; a JOLTEON's Volt Absorb skips the animation) into a Thunderbolt opponent (85:opponent has no EXACT plan: the last relied-on edge is its activation).
+    "slot1-thunderbolt": ({"player": [mon(SNORLAX, [SWIFT] * 4, speed=0), mon(NINETALES, [SUNNY, SWIFT, FLAME, LSCREEN]), mon(MAGIKARP, [SPLASH] * 4)],
                            "opponent": [slowbro(TBOLT)] * 3},
                           {"turns": [{"switch": 1}, 0], "frames": 2600}),
     # E: voluntary switch to slot 2 into a Giga Drain opponent (202:opponent has no EXACT plan).
