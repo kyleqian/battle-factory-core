@@ -2231,7 +2231,8 @@
       ],
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-dragon-rage-*.json, 150 rows)",
-        "ordinary route seed 37 / streak 14 / move slot 3 (CHARMELEON): adapter active 150/150, action-menu, ON/OFF rules/RNG equal"
+        "ordinary route seed 37 / streak 14 / move slot 3 (CHARMELEON): adapter active 150/150, action-menu, ON/OFF rules/RNG equal",
+        "species targets (#145 D1, fire-spit aim from attacker/target pic offsets, twice fresh, zero residual): GOLEM / GOLBAT / SHUCKLE opponent targets 150/150 (species-audit derived fixtures), player-GOLEM back sprite vs opponent attacker 150/150; accepted ONIX fixtures unchanged (tools/integration/fixtures/issue145-flybounce-receipt.json); the CHARMELEON back-sprite start is formula-derived, other player attackers unmeasured"
       ],
       "palettePlan": "no plan, history invalidates",
       "spriteOrder": "order-independent (docs/order-consumer-prep.md section 0): renders with or without a host order; one fire plume per sort window (orderFirePlumesForDraw)",
@@ -2490,7 +2491,8 @@
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, 50 rows from the ACTIVATION frame (prep7-aerial-ace-*.json): the accepted 236/232-row windows begin 35/31 rows earlier with idle body rows owned by the queue's preceding message command; live age 0 = activation = reducer age 42 (animationAgeOffset 42, both orientations); the 151-row hit/HP/text tail is queue commands",
         "ordinary route seed 3 / streak 0 / move index 0 (PIDGEOTTO): adapter active 50/50, action-menu, ON/OFF rules/RNG equal",
-        "alternate species dense proofs twice fresh: CHARIZARD player attacker 50/50 and DELIBIRD opponent attacker 50/50 zero residual, DRAGONAIR lab controls player 50/50; CHARIZARD / DRAGONAIR opponent attackers 48/50 (14 / 51 px at ages 10-11 on the opponent platform clip row y 74: the live clip is the absolute terrain row, the ROM shows those pixels)"
+        "alternate species dense proofs twice fresh: CHARIZARD player attacker 50/50 and DELIBIRD opponent attacker 50/50 zero residual, DRAGONAIR lab controls player 50/50; CHARIZARD / DRAGONAIR opponent attackers 48/50 (14 / 51 px at ages 10-11 on the opponent platform clip row y 74: the live clip is the absolute terrain row, the ROM shows those pixels)",
+        "species targets (#145 D2, settled target x = frontIdleRest.x2): GOLEM / GOLBAT / SHUCKLE lab targets 50/50 twice fresh zero residual (previously 15/50 GOLEM); accepted ONIX fixtures unchanged"
       ],
       "palettePlan": "no plan, history invalidates",
       "spriteOrder": "order-independent (0/40 seeds)",
@@ -2515,7 +2517,8 @@
       "remaining": [
         "no alternate-species dense proof (Aerial Ace carries the shared Pidgeotto-block lift)",
         "unknown entry/status/switch/summary/substitute/transform histories",
-        "whole-playable arbitrary-history framebuffer exactness"
+        "whole-playable arbitrary-history framebuffer exactness",
+        "species-target swap not run (the audit stager needs an explicit-party scenario); code review: the Quick Attack body adds the species-keyed frontIdleRest x2 and has no ONIX constant"
       ]
     },
     {
