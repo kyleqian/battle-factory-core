@@ -10,78 +10,70 @@
   "src/data/gen/battle-frontier-mons.json",
   "src/data/gen/factory-round-policy.json"
  ],
- "liveStatusImplementedCount": 158,
- "inFlightMoves": {
-  "MOVE_EMBER": "order-consumer batch",
-  "MOVE_DRAGON_RAGE": "order-consumer batch",
-  "MOVE_FLAMETHROWER": "order-consumer batch",
-  "MOVE_HEAL_BELL": "order-consumer batch",
-  "MOVE_LEAF_BLADE": "order-consumer batch",
-  "MOVE_ROCK_THROW": "order-consumer batch",
-  "MOVE_BLAZE_KICK": "order-consumer batch",
-  "MOVE_PERISH_SONG": "order-consumer batch",
-  "MOVE_ROCK_TOMB": "prep6 READY batch",
-  "MOVE_SAFEGUARD": "prep6 READY batch",
-  "MOVE_SWEET_SCENT": "prep6 READY batch",
-  "MOVE_SELF_DESTRUCT": "prep6 READY batch",
-  "MOVE_KNOCK_OFF": "prep6 READY batch",
-  "MOVE_SWALLOW": "prep6 READY batch",
-  "MOVE_FAINT_ATTACK": "prep6 READY batch"
- },
+ "liveStatusImplementedCount": 198,
+ "staleCodesCorrected": [
+  "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
+  "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
+  "D-PAL: prep9 (docs/next-adapters-prep9.md) showed Absorb/Mega Drain/Giga Drain/Dream Eater/Sunny Day consume only age-derived blend schedules, no snapshot; those five are not in the remaining set. D-PAL on the remaining moves is NOT re-measured here and stays a blocker",
+  "C (Random2) stays a blocker: gRng2Value is not reconstructible (another worker is evidencing trackability)",
+  "Batches N1-N3 (hard-coded) all landed except the one-input moves; batch picks are now derived from the groups each run",
+  "SMALL-INPUT now means every needed code is a small input (X-REDUCER, X-POWER, E-OUT, X-DISABLE, X-SCHED), several allowed"
+ ],
+ "inFlightMoves": {},
  "summary": {
   "accepted": 276,
-  "live": 158,
-  "inFlight": 15,
-  "remaining": 103,
+  "live": 198,
+  "inFlight": 0,
+  "remaining": 78,
   "inFlightBreakdown": {
-   "orderConsumerBatch": 8,
-   "prep6Ready": 7
+   "orderConsumerBatch": 0,
+   "prep6Ready": 0
   },
   "weightPct": {
-   "live": 61.296,
-   "inFlight": 4.333,
-   "remaining": 33.884
+   "live": 80.641,
+   "inFlight": 0,
+   "remaining": 18.872
   },
   "remainingByGroup": {
-   "PROVIDER-x": {
-    "moves": 31,
-    "weightPct": 10.41
-   },
-   "READY-NOW": {
-    "moves": 10,
-    "weightPct": 9.242
-   },
    "MULTI": {
-    "moves": 56,
-    "weightPct": 12.784
+    "moves": 47,
+    "weightPct": 9.561
+   },
+   "PROVIDER-x": {
+    "moves": 22,
+    "weightPct": 7.384
    },
    "SMALL-INPUT": {
-    "moves": 5,
-    "weightPct": 1.336
+    "moves": 6,
+    "weightPct": 1.668
    },
    "OUT": {
     "moves": 1,
     "weightPct": 0.112
+   },
+   "READY-NOW": {
+    "moves": 2,
+    "weightPct": 0.147
    }
   },
   "remainingByHostClass": {
-   "H_BASIC": 6,
-   "H_BUFFER": 78,
+   "H_BASIC": 5,
+   "H_BUFFER": 59,
    "H_DERIVED": 6,
-   "H_OUTCOME": 13,
+   "H_OUTCOME": 4,
    "H_RANDOM": 5,
    "H_VARIANT": 11
   },
-  "orderFirstBodyOnlyMoves": 62,
-  "slotPlanNeededMoves": 76,
-  "sumsTo": "158+15+103=276",
+  "orderFirstBodyOnlyMoves": 46,
+  "slotPlanNeededMoves": 58,
+  "sumsTo": "198+0+78=276",
   "triageCiteDrift": 1,
   "triageCiteDriftList": [
    "MOVE_ROCK_BLAST bodies[].animationProfile(RockBlastAnimationProfile) src/animation/rockBlast.ts:21"
   ]
  },
  "codes": {
-  "B": "sSpriteOrder: satisfied for the battle's FIRST body only (spriteOrderForSlots + occupied prefix); later bodies need the cross-body plan tracker",
+  "B": "sSpriteOrder: SATISFIED by the lend (src/engine/liveSpriteOrderHost.ts + spriteOrderProvider.ts) incl. the cross-body tracker while the history is modelled; falls back after an unmodelled graphics command",
   "C": "Random2 surrogate (presentation-only gRng2Value stream)",
   "F-AFFINE": "affine matrix allocator (AllocOamMatrix ids / matrixBitmap)",
   "E-TASK": "task-slot allocator (CreateTask slots / live task table)",
@@ -111,84 +103,28 @@
    "D-PAL",
    "D-TILE",
    "F-AUDIO"
-  ],
-  "allocator plan v2 (affine+task)": [
-   "F-AFFINE",
-   "E-TASK"
   ]
  },
  "ranking": [
-  {
-   "provider": "allocator plan v2 (affine+task)",
-   "label": "allocator plan v2 (affine+task)",
-   "codes": [
-    "F-AFFINE",
-    "E-TASK"
-   ],
-   "aloneMoves": 12,
-   "aloneWeightPct": 3.289,
-   "aloneNames": [
-    "AURORA_BEAM",
-    "FRUSTRATION",
-    "HORN_DRILL",
-    "RAZOR_WIND",
-    "ROCK_BLAST",
-    "SEISMIC_TOSS",
-    "STOCKPILE",
-    "SWIFT",
-    "THUNDERBOLT",
-    "TRICK",
-    "UPROAR",
-    "ZAP_CANNON"
-   ],
-   "touchingMoves": 59,
-   "touchingWeightPct": 13.51,
-   "meta": {
-    "cost": "new provider (sibling affine-bitmap + task table fed by the same create/destroy events as src/engine/liveSpriteAllocator.ts:89-123; per-move timelines like src/engine/liveMoveSpriteAllocator.ts:28)",
-    "claim": "exact from a known baseline (lowest-free allocations); baseline of gOamMatrix bitmap and gTasks at move activation must be measured"
-   }
-  },
-  {
-   "provider": "F-AFFINE",
-   "label": "affine matrix allocator (AllocOamMatrix ids / matrixBitmap)",
-   "codes": [
-    "F-AFFINE"
-   ],
-   "aloneMoves": 9,
-   "aloneWeightPct": 2.781,
-   "aloneNames": [
-    "AURORA_BEAM",
-    "FRUSTRATION",
-    "HORN_DRILL",
-    "RAZOR_WIND",
-    "SEISMIC_TOSS",
-    "STOCKPILE",
-    "THUNDERBOLT",
-    "UPROAR",
-    "ZAP_CANNON"
-   ],
-   "touchingMoves": 43,
-   "touchingWeightPct": 9.302,
-   "meta": {
-    "cost": "new provider (matrixBitmap lowest-free over a known baseline)",
-    "claim": "exact from a known baseline"
-   }
-  },
   {
    "provider": "C",
    "label": "Random2 surrogate (presentation-only gRng2Value stream)",
    "codes": [
     "C"
    ],
-   "aloneMoves": 7,
-   "aloneWeightPct": 2.081,
+   "aloneMoves": 11,
+   "aloneWeightPct": 4.172,
    "aloneNames": [
     "ASTONISH",
     "DOUBLE_KICK",
+    "HIDDEN_POWER",
+    "HYPER_BEAM",
+    "ICE_BEAM",
     "METEOR_MASH",
     "MUD_SLAP",
     "SAND_ATTACK",
     "THRASH",
+    "WATER_SPOUT",
     "WISH"
    ],
    "touchingMoves": 52,
@@ -210,43 +146,24 @@
     "D-TILE",
     "F-AUDIO"
    ],
-   "aloneMoves": 6,
-   "aloneWeightPct": 2.665,
+   "aloneMoves": 9,
+   "aloneWeightPct": 1.267,
    "aloneNames": [
-    "ABSORB",
-    "DREAM_EATER",
-    "GIGA_DRAIN",
-    "MEGA_DRAIN",
+    "AIR_CUTTER",
+    "DESTINY_BOND",
+    "FORESIGHT",
     "MEMENTO",
-    "SUNNY_DAY"
+    "PETAL_DANCE",
+    "RECYCLE",
+    "SKY_UPPERCUT",
+    "SPIDER_WEB",
+    "TRI_ATTACK"
    ],
-   "touchingMoves": 55,
-   "touchingWeightPct": 12.434,
+   "touchingMoves": 50,
+   "touchingWeightPct": 9.807,
    "meta": {
     "cost": "new large host (docs/animation-integration-readiness.md A6)",
     "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
-   }
-  },
-  {
-   "provider": "D-PAL",
-   "label": "palette snapshot provider (unfaded/faded/hardware per move plan)",
-   "codes": [
-    "D-PAL"
-   ],
-   "aloneMoves": 5,
-   "aloneWeightPct": 2.628,
-   "aloneNames": [
-    "ABSORB",
-    "DREAM_EATER",
-    "GIGA_DRAIN",
-    "MEGA_DRAIN",
-    "SUNNY_DAY"
-   ],
-   "touchingMoves": 47,
-   "touchingWeightPct": 10.842,
-   "meta": {
-    "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
-    "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
    }
   },
   {
@@ -270,23 +187,23 @@
    }
   },
   {
-   "provider": "E-TASK",
-   "label": "task-slot allocator (CreateTask slots / live task table)",
+   "provider": "D-PAL",
+   "label": "palette snapshot provider (unfaded/faded/hardware per move plan)",
    "codes": [
-    "E-TASK"
+    "D-PAL"
    ],
    "aloneMoves": 3,
-   "aloneWeightPct": 0.508,
+   "aloneWeightPct": 0.548,
    "aloneNames": [
-    "ROCK_BLAST",
-    "SWIFT",
-    "TRICK"
+    "DESTINY_BOND",
+    "RECYCLE",
+    "TRI_ATTACK"
    ],
-   "touchingMoves": 44,
-   "touchingWeightPct": 9.841,
+   "touchingMoves": 42,
+   "touchingWeightPct": 8.214,
    "meta": {
-    "cost": "new provider (CreateTask slot table)",
-    "claim": "exact from a known baseline"
+    "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
+    "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
    }
   },
   {
@@ -340,6 +257,21 @@
    ],
    "touchingMoves": 1,
    "touchingWeightPct": 0.264,
+   "meta": null
+  },
+  {
+   "provider": "D-BG",
+   "label": "BG regs / BLDCNT / monbg state",
+   "codes": [
+    "D-BG"
+   ],
+   "aloneMoves": 1,
+   "aloneWeightPct": 0.253,
+   "aloneNames": [
+    "PETAL_DANCE"
+   ],
+   "touchingMoves": 38,
+   "touchingWeightPct": 7.292,
    "meta": null
   },
   {
@@ -434,19 +366,6 @@
    "meta": null
   },
   {
-   "provider": "D-BG",
-   "label": "BG regs / BLDCNT / monbg state",
-   "codes": [
-    "D-BG"
-   ],
-   "aloneMoves": 0,
-   "aloneWeightPct": 0,
-   "aloneNames": [],
-   "touchingMoves": 38,
-   "touchingWeightPct": 7.292,
-   "meta": null
-  },
-  {
    "provider": "D-OAM",
    "label": "software/hardware OAM + affine buffer host",
    "codes": [
@@ -505,106 +424,80 @@
  "greedy": [
   {
    "step": 1,
-   "provider": "allocator plan v2 (affine+task)",
-   "newMoves": 12,
-   "newWeightPct": 3.289,
-   "cumulativeRemainingUnlocked": 22,
+   "provider": "C",
+   "newMoves": 11,
+   "newWeightPct": 4.172,
+   "cumulativeRemainingUnlocked": 13,
    "newNames": [
-    "AURORA_BEAM",
-    "FRUSTRATION",
-    "HORN_DRILL",
-    "RAZOR_WIND",
-    "ROCK_BLAST",
-    "SEISMIC_TOSS",
-    "STOCKPILE",
-    "SWIFT",
-    "THUNDERBOLT",
-    "TRICK",
-    "UPROAR",
-    "ZAP_CANNON"
+    "ASTONISH",
+    "DOUBLE_KICK",
+    "HIDDEN_POWER",
+    "HYPER_BEAM",
+    "ICE_BEAM",
+    "METEOR_MASH",
+    "MUD_SLAP",
+    "SAND_ATTACK",
+    "THRASH",
+    "WATER_SPOUT",
+    "WISH"
    ]
   },
   {
    "step": 2,
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
-   "newMoves": 14,
-   "newWeightPct": 3.895,
-   "cumulativeRemainingUnlocked": 36,
+   "newMoves": 41,
+   "newWeightPct": 7.524,
+   "cumulativeRemainingUnlocked": 54,
    "newNames": [
-    "ABSORB",
     "AIR_CUTTER",
-    "DESTINY_BOND",
-    "DREAM_EATER",
-    "FORESIGHT",
-    "GIGA_DRAIN",
-    "MEGA_DRAIN",
-    "MEMENTO",
-    "PETAL_DANCE",
-    "RECYCLE",
-    "SKY_UPPERCUT",
-    "SPIDER_WEB",
-    "SUNNY_DAY",
-    "TRI_ATTACK"
-   ]
-  },
-  {
-   "step": 3,
-   "provider": "C",
-   "newMoves": 43,
-   "newWeightPct": 10.43,
-   "cumulativeRemainingUnlocked": 79,
-   "newNames": [
-    "ASTONISH",
     "BONEMERANG",
     "CURSE",
-    "DOUBLE_KICK",
+    "DESTINY_BOND",
     "ERUPTION",
     "EXTRASENSORY",
     "FLATTER",
+    "FORESIGHT",
     "HAIL",
-    "HIDDEN_POWER",
-    "HYPER_BEAM",
     "HYPER_VOICE",
-    "ICE_BEAM",
     "LOVELY_KISS",
     "LUSTER_PURGE",
     "MACH_PUNCH",
     "MEGAHORN",
-    "METEOR_MASH",
-    "MUD_SLAP",
+    "MEMENTO",
     "NIGHTMARE",
     "OCTAZOOKA",
     "OUTRAGE",
     "OVERHEAT",
+    "PETAL_DANCE",
     "PSYCH_UP",
     "PSYWAVE",
     "RAIN_DANCE",
+    "RECYCLE",
     "RETURN",
     "REVENGE",
-    "SAND_ATTACK",
     "SAND_TOMB",
     "SHEER_COLD",
     "SHOCK_WAVE",
     "SIGNAL_BEAM",
     "SILVER_WIND",
     "SKY_ATTACK",
+    "SKY_UPPERCUT",
     "SMOG",
     "SNORE",
+    "SPIDER_WEB",
     "SPIKES",
     "SUPERPOWER",
-    "THRASH",
+    "TRI_ATTACK",
     "WATER_PULSE",
-    "WATER_SPOUT",
-    "WILL_O_WISP",
-    "WISH"
+    "WILL_O_WISP"
    ]
   },
   {
-   "step": 4,
+   "step": 3,
    "provider": "E-OUT",
    "newMoves": 6,
    "newWeightPct": 1.796,
-   "cumulativeRemainingUnlocked": 85,
+   "cumulativeRemainingUnlocked": 60,
    "newNames": [
     "ENDEAVOR",
     "FIRE_PUNCH",
@@ -615,11 +508,11 @@
    ]
   },
   {
-   "step": 5,
+   "step": 4,
    "provider": "X-TWOTURN",
    "newMoves": 4,
    "newWeightPct": 1.269,
-   "cumulativeRemainingUnlocked": 89,
+   "cumulativeRemainingUnlocked": 64,
    "newNames": [
     "BOUNCE",
     "DIG",
@@ -628,11 +521,11 @@
    ]
   },
   {
-   "step": 6,
+   "step": 5,
    "provider": "X-DISABLE",
    "newMoves": 4,
    "newWeightPct": 0.627,
-   "cumulativeRemainingUnlocked": 93,
+   "cumulativeRemainingUnlocked": 68,
    "newNames": [
     "FURY_CUTTER",
     "ICE_BALL",
@@ -641,11 +534,11 @@
    ]
   },
   {
-   "step": 7,
+   "step": 6,
    "provider": "X-SWITCH",
    "newMoves": 3,
    "newWeightPct": 1.818,
-   "cumulativeRemainingUnlocked": 96,
+   "cumulativeRemainingUnlocked": 71,
    "newNames": [
     "BATON_PASS",
     "ROAR",
@@ -653,190 +546,113 @@
    ]
   },
   {
-   "step": 8,
+   "step": 7,
    "provider": "X-POWER",
    "newMoves": 2,
    "newWeightPct": 0.512,
-   "cumulativeRemainingUnlocked": 98,
+   "cumulativeRemainingUnlocked": 73,
    "newNames": [
     "FLAIL",
     "MAGNITUDE"
    ]
   },
   {
-   "step": 9,
+   "step": 8,
    "provider": "X-REDUCER",
    "newMoves": 2,
    "newWeightPct": 0.406,
-   "cumulativeRemainingUnlocked": 100,
+   "cumulativeRemainingUnlocked": 75,
    "newNames": [
     "PAIN_SPLIT",
     "REVERSAL"
    ]
   },
   {
-   "step": 10,
+   "step": 9,
    "provider": "X-SCHED",
    "newMoves": 1,
    "newWeightPct": 0.264,
-   "cumulativeRemainingUnlocked": 101,
+   "cumulativeRemainingUnlocked": 76,
    "newNames": [
     "SPARK"
    ]
   },
   {
-   "step": 11,
+   "step": 10,
    "provider": "X-SUBST",
    "newMoves": 1,
    "newWeightPct": 0.223,
-   "cumulativeRemainingUnlocked": 102,
+   "cumulativeRemainingUnlocked": 77,
    "newNames": [
     "SUBSTITUTE"
    ]
   },
   {
-   "step": 12,
+   "step": 11,
    "provider": "X-AGE",
    "newMoves": 1,
    "newWeightPct": 0.112,
-   "cumulativeRemainingUnlocked": 103,
+   "cumulativeRemainingUnlocked": 78,
    "newNames": [
     "EXTREME_SPEED"
    ]
   },
   {
-   "step": 13,
-   "provider": "F-AFFINE",
+   "step": 12,
+   "provider": "D-PAL",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 103,
+   "cumulativeRemainingUnlocked": 78,
+   "newNames": []
+  },
+  {
+   "step": 13,
+   "provider": "D-TILE",
+   "newMoves": 0,
+   "newWeightPct": 0,
+   "cumulativeRemainingUnlocked": 78,
    "newNames": []
   },
   {
    "step": 14,
-   "provider": "E-TASK",
+   "provider": "D-BG",
    "newMoves": 0,
    "newWeightPct": 0,
-   "cumulativeRemainingUnlocked": 103,
+   "cumulativeRemainingUnlocked": 78,
    "newNames": []
   }
  ],
  "batches": [
   {
-   "id": "N1",
-   "title": "READY-NOW recipe batch: body-only views of the canonical controller moves + dense-measured buffer moves",
-   "count": 8,
-   "weightPct": 5.406,
+   "id": "P1",
+   "title": "READY-NOW (derived): no provider dependency",
+   "count": 2,
+   "weightPct": 0.147,
    "moves": [
     {
-     "move": "MOVE_AERIAL_ACE",
-     "group": "READY-NOW",
-     "providerNeeds": [],
-     "orderFirstBodyOnly": false,
-     "weightPct": 2.216,
-     "prep": "measured here (census-activation): act 81/77, reducer age at activation 42/38 (window 46..281, appStage presentationAge 7 at frame 46), script 49 frames; missing: ordinary-route request/HP route, #142 shadow row choice (age basis +42/+38 or ageOffset), species-gate/HUD retirement under !liveField"
-    },
-    {
-     "move": "MOVE_QUICK_ATTACK",
-     "group": "READY-NOW",
-     "providerNeeds": [],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.949,
-     "prep": "measured here: act 83/79, age at activation 44/40, script 32 frames; missing: afterimage slot 3/4 tie audit, route check"
-    },
-    {
-     "move": "MOVE_ICE_PUNCH",
-     "group": "READY-NOW",
-     "providerNeeds": [],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.697,
-     "prep": "measured here (staged, direct mGBA): act 1966 opponent / 2339 player == accepted window start (row 0), script 183 frames; missing: staged-boundary only (no BattleLab scenario) so an ordinary-route activation and the crystal slot plan (A-SLOT) need one probe each"
-    },
-    {
-     "move": "MOVE_FIRE_BLAST",
+     "move": "MOVE_RAZOR_WIND",
      "group": "READY-NOW",
      "providerNeeds": [],
      "orderFirstBodyOnly": true,
-     "weightPct": 0.592,
-     "prep": "prep6 measured (215/215..411, 1147/1147..1343, row 0, 197 frames; opponent needs the 1200-frame input tail); missing: first-body order (full 64-pool permutation, FIRE_BLAST_ORDER_SEED fireBlast.ts:34) from spriteOrderForSlots, later body falls back"
+     "weightPct": 0.074,
+     "prep": "no activation receipt; B: animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys) | F-AFFINE: animationProfile:tornadoMatrixIds (affine matrix allocator)"
     },
     {
-     "move": "MOVE_DRAGON_DANCE",
-     "group": "READY-NOW",
-     "providerNeeds": [],
-     "orderFirstBodyOnly": true,
-     "weightPct": 0.4,
-     "prep": "prep6 measured (74/74..215 / 78/78..219, row 0, 142 frames); missing: 1-bit order from the first-body provider (relative order of slots 3/4 at age 20), later body falls back"
-    },
-    {
-     "move": "MOVE_FAKE_TEARS",
-     "group": "READY-NOW",
-     "providerNeeds": [],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.258,
-     "prep": "measured here: act 79/75, visual window 80..166 / 76..162 (row -1, no map row; window ends 4 frames after the script end), script 83 frames; missing: attackerPictureBounds from liveBattlerAnchors, confirm the renderer ignores controllerPresentation under !liveField"
-    },
-    {
-     "move": "MOVE_SLEEP_TALK",
-     "group": "READY-NOW",
-     "providerNeeds": [],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.22,
-     "prep": "measured here: act 4570/1356 == window start (row 0), body 186 frames; missing: renderer HUD block behind !liveField (battleScene.ts:34256 branch), attacker sleep status in the displayed field, called-move second request as Metronome"
-    },
-    {
-     "move": "MOVE_FEATHER_DANCE",
+     "move": "MOVE_ROCK_BLAST",
      "group": "READY-NOW",
      "providerNeeds": [],
      "orderFirstBodyOnly": false,
      "weightPct": 0.074,
-     "prep": "measured here: act 83/79, age at activation 44/40, script 168 frames; missing: ordinary-route check (feathers use battlePositionCenter + ageOffset only)"
+     "prep": "no activation receipt; E-TASK: bodies[].animationProfile(RockBlastAnimationProfile) (bodies[] = one body per hit (multi-hit count from resolution); RockBlastAnimationProfile rockBlast.ts:21-47: attacker/target {spriteSlot,initialX2/Y2,battlePositionCenter,effectCenter}, allocator {lungeSlot,rockSlot,hitsplatSlot,fragmentSlots[4],shakeTaskSlot}, gameplayRng; no order seed, no Random2 field)"
     }
    ]
   },
   {
-   "id": "N2",
-   "title": "one-named-input batch: single-orientation evidence + dynamic power + two reducer parameterizations",
-   "count": 8,
-   "weightPct": 5.505,
+   "id": "P2",
+   "title": "SMALL-INPUT (derived): one named input / reducer parameter each (docs/next-adapters-prep10.md measures them)",
+   "count": 6,
+   "weightPct": 1.668,
    "moves": [
-    {
-     "move": "MOVE_ROCK_SLIDE",
-     "group": "READY-NOW",
-     "providerNeeds": [],
-     "orderFirstBodyOnly": true,
-     "weightPct": 2.117,
-     "prep": "measured here (staged): opponent act 1967 == window start (row 0), script 137 (window +37 tail); player act 2340 behind the staged AI Double Team body, 79 in the lab scenario (first body, script 137); missing: accepted player-attacker evidence (animation lane) and first-body order (profile spriteOrderSeed sceneOnPresentation.ts:13474)"
-    },
-    {
-     "move": "MOVE_DOUBLE_TEAM",
-     "group": "READY-NOW",
-     "providerNeeds": [],
-     "orderFirstBodyOnly": true,
-     "weightPct": 1.72,
-     "prep": "prep6 measured player only (2336/2337..2566, row -1, 7-frame tail); missing: opponent-attacker evidence (staged AI used Rock Slide) and the frontClone order bit"
-    },
-    {
-     "move": "MOVE_MAGNITUDE",
-     "group": "SMALL-INPUT",
-     "providerNeeds": [
-      "X-POWER"
-     ],
-     "orderFirstBodyOnly": true,
-     "weightPct": 0.108,
-     "prep": "measured here: act == window start for all four bodies (intense 195/191, regular 411; row 0); missing: dynamic power on the request (X-POWER) and first-body order"
-    },
-    {
-     "move": "MOVE_REVERSAL",
-     "group": "MULTI",
-     "providerNeeds": [
-      "X-REDUCER",
-      "X-POWER"
-     ],
-     "orderFirstBodyOnly": false,
-     "weightPct": 0.332,
-     "prep": "measured here: act == window start (404 / 451, row 0, 173 frames); missing: reducer toggle fix + A>1 tests (reversal-shake-evidence.json), dynamic power on the request"
-    },
     {
      "move": "MOVE_FIRE_PUNCH",
      "group": "SMALL-INPUT",
@@ -845,17 +661,18 @@
      ],
      "orderFirstBodyOnly": false,
      "weightPct": 0.669,
-     "prep": "measured here (staged): opponent act 1967, player 2340, script 101; UNRESOLVED mismatch with the accepted windows (2081 / 2313); missing: re-derive the accepted window phase, burn/faint outcome input or body-only split"
+     "prep": "activation measured (2 receipts); E-OUT: view.burnFlames depend on resolution.secondaryRollSucceeded and resolution.faint (burn roll + target faint outcomes), which the MOVE_ANIMATION request does not carry; the view bundles status-animation flames with the move body"
     },
     {
-     "move": "MOVE_ENDEAVOR",
+     "move": "MOVE_REVERSAL",
      "group": "SMALL-INPUT",
      "providerNeeds": [
-      "E-OUT"
+      "X-REDUCER",
+      "X-POWER"
      ],
      "orderFirstBodyOnly": false,
-     "weightPct": 0.221,
-     "prep": "measured here (staged): player act 2339 vs window 2345..2485 (row -6, age at activation -8, 67-frame script, +79 tail); opponent evidence missing (AI used Rock Slide); missing: HP before/after + stale power input"
+     "weightPct": 0.332,
+     "prep": "activation measured (2 receipts); X-REDUCER: accepted reducer toggles A/0 while the source toggles +ceil(A/2)/-floor(A/2) (exact only at A=1); evidence banked in docs/reversal-shake-evidence.md | X-POWER: amplitude clamp(power/12,1,16) needs the dynamic power (Reversal power is gDynamicBasePower, not the static table power)"
     },
     {
      "move": "MOVE_SPARK",
@@ -865,7 +682,27 @@
      ],
      "orderFirstBodyOnly": true,
      "weightPct": 0.264,
-     "prep": "measured here: act 74/70 vs window 83/79 (row -9), window ends 2 frames before the script end; missing: flashing*Advances derivation and hardwareTieSlotOrder from the first-body order"
+     "prep": "activation measured (2 receipts); B: hardwareTieSlotOrder [12,7,3,4,5,9,10,11] (order provider first body may supply) | X-SCHED: flashingInitialCallbackAdvances / flashingInitialAffineAdvances (scheduler advances before the first accepted frame; unmeasured whether derivable from spawn timing)"
+    },
+    {
+     "move": "MOVE_ENDEAVOR",
+     "group": "SMALL-INPUT",
+     "providerNeeds": [
+      "E-OUT"
+     ],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.221,
+     "prep": "activation measured (2 receipts); E-OUT: animationProfile:staleMovePower (HP before/after + stale gAnimMovePower (value left by the previous animation))"
+    },
+    {
+     "move": "MOVE_MAGNITUDE",
+     "group": "SMALL-INPUT",
+     "providerNeeds": [
+      "X-POWER"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.108,
+     "prep": "activation measured (4 receipts); B: animationInputs:spriteOrder (sSpriteOrder / live sort keys) | X-POWER: dynamic gBattleMovePower / gDynamicBasePower on the MOVE_ANIMATION request (production emits the static move-table power)"
     },
     {
      "move": "MOVE_PAIN_SPLIT",
@@ -875,227 +712,130 @@
      ],
      "orderFirstBodyOnly": false,
      "weightPct": 0.074,
-     "prep": "prep6 measured (445/445..525 / 446/446..526, row 0, 81 rows); missing: per-side coords.yOffset into the reducer"
+     "prep": "no activation receipt; X-REDUCER: reducer hard-codes the four accepted (species,side) y2 constants (4/2/2, 5/3/3, 5/2/2); production liveBattlerCoordAttrs.yOffset reproduces them exactly (prep6 pins) but is not a reducer input"
     }
    ]
   },
   {
-   "id": "N3",
-   "title": "first provider build: allocator plan v2 (affine matrix + task slots), exact from a known baseline",
-   "count": 8,
-   "weightPct": 3.071,
+   "id": "P3",
+   "title": "first provider build (derived from the greedy order): C",
+   "count": 11,
+   "weightPct": 4.172,
    "moves": [
     {
-     "move": "MOVE_THUNDERBOLT",
-     "group": "PROVIDER-F-AFFINE",
+     "move": "MOVE_ASTONISH",
+     "group": "PROVIDER-C",
      "providerNeeds": [
-      "F-AFFINE"
-     ],
-     "orderFirstBodyOnly": true,
-     "weightPct": 1.618,
-     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (2 BattleLab scenario files in tools/battle-lab)"
-    },
-    {
-     "move": "MOVE_FRUSTRATION",
-     "group": "PROVIDER-F-AFFINE",
-     "providerNeeds": [
-      "F-AFFINE"
-     ],
-     "orderFirstBodyOnly": true,
-     "weightPct": 0.343,
-     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (5 BattleLab scenario files in tools/battle-lab)"
-    },
-    {
-     "move": "MOVE_SWIFT",
-     "group": "PROVIDER-E-TASK",
-     "providerNeeds": [
-      "E-TASK"
+      "C"
      ],
      "orderFirstBodyOnly": false,
-     "weightPct": 0.258,
-     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (3 BattleLab scenario files in tools/battle-lab)"
+     "weightPct": 0.077,
+     "prep": "no activation receipt; C: dropletRandom: 4 Random2 words (AnimSprayWaterDroplet 0x1ff&, 0x7f&)"
     },
     {
-     "move": "MOVE_HORN_DRILL",
-     "group": "PROVIDER-F-AFFINE",
+     "move": "MOVE_DOUBLE_KICK",
+     "group": "PROVIDER-C",
      "providerNeeds": [
-      "F-AFFINE"
-     ],
-     "orderFirstBodyOnly": true,
-     "weightPct": 0.257,
-     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (2 BattleLab scenario files in tools/battle-lab)"
-    },
-    {
-     "move": "MOVE_SEISMIC_TOSS",
-     "group": "PROVIDER-F-AFFINE",
-     "providerNeeds": [
-      "F-AFFINE"
-     ],
-     "orderFirstBodyOnly": true,
-     "weightPct": 0.248,
-     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (2 BattleLab scenario files in tools/battle-lab)"
-    },
-    {
-     "move": "MOVE_TRICK",
-     "group": "PROVIDER-E-TASK",
-     "providerNeeds": [
-      "E-TASK"
+      "C"
      ],
      "orderFirstBodyOnly": false,
-     "weightPct": 0.176,
-     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (1 BattleLab scenario file in tools/battle-lab)"
+     "weightPct": 0.444,
+     "prep": "no activation receipt; C: fistRandom: 4 Random2 words (x, y, two sign bits)"
     },
     {
-     "move": "MOVE_AURORA_BEAM",
-     "group": "PROVIDER-F-AFFINE",
+     "move": "MOVE_HIDDEN_POWER",
+     "group": "PROVIDER-C",
      "providerNeeds": [
-      "F-AFFINE"
+      "C"
      ],
      "orderFirstBodyOnly": true,
-     "weightPct": 0.102,
-     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (2 BattleLab scenario files in tools/battle-lab)"
+     "weightPct": 0.04,
+     "prep": "no activation receipt; B: animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys) | C: animationProfile:animationRngSeed (presentation Random2 (gRng2Value)) | F-AFFINE: animationProfile:orbitMatrixNums (affine matrix allocator)"
     },
     {
-     "move": "MOVE_STOCKPILE",
-     "group": "PROVIDER-F-AFFINE",
+     "move": "MOVE_HYPER_BEAM",
+     "group": "PROVIDER-C",
      "providerNeeds": [
-      "F-AFFINE"
+      "C"
      ],
      "orderFirstBodyOnly": true,
-     "weightPct": 0.068,
-     "prep": "unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (4 BattleLab scenario files in tools/battle-lab)"
+     "weightPct": 0.037,
+     "prep": "no activation receipt; B: animationProfile:orbs (HyperBeamOrbRandom {animation,speed,phase,slot,persistentOrder}; AnimHyperBeamOrb Random2 (battle_anim_effects_1.c:2339-2356)) | C: animationProfile:orbs (HyperBeamOrbRandom {animation,speed,phase,slot,persistentOrder}; AnimHyperBeamOrb Random2 (battle_anim_effects_1.c:2339-2356)) | F-AFFINE: animationProfile:orbs (HyperBeamOrbRandom {animation,speed,phase,slot,persistentOrder}; AnimHyperBeamOrb Random2 (battle_anim_effects_1.c:2339-2356))"
+    },
+    {
+     "move": "MOVE_ICE_BEAM",
+     "group": "PROVIDER-C",
+     "providerNeeds": [
+      "C"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 1.98,
+     "prep": "no activation receipt; B: animationProfile:spriteOrder (sSpriteOrder / live sort keys) | C: animationProfile:animationRngStart (presentation Random2 (gRng2Value)) | E-TASK: animationProfile:soundTaskSlot (CreateTask slot / live task table)"
+    },
+    {
+     "move": "MOVE_METEOR_MASH",
+     "group": "PROVIDER-C",
+     "providerNeeds": [
+      "C"
+     ],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.22,
+     "prep": "no activation receipt; C: twinkles: 48 Random2-resolved variants (optional field; geometry.twinkles)"
+    },
+    {
+     "move": "MOVE_MUD_SLAP",
+     "group": "PROVIDER-C",
+     "providerNeeds": [
+      "C"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.539,
+     "prep": "no activation receipt; B: animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys) | C: animationProfile:mud (MudSlapMudSeed {slot,xStep,yStep}: AnimDirtScatter Random2 (battle_anim_ground.c:213-214))"
+    },
+    {
+     "move": "MOVE_SAND_ATTACK",
+     "group": "PROVIDER-C",
+     "providerNeeds": [
+      "C"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.406,
+     "prep": "no activation receipt; B: animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys) | C: animationProfile:dirt (SandAttackDirtSeed {slot,xStep,yStep}: AnimDirtScatter Random2)"
+    },
+    {
+     "move": "MOVE_THRASH",
+     "group": "PROVIDER-C",
+     "providerNeeds": [
+      "C"
+     ],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.037,
+     "prep": "no activation receipt; C: fistRandom: 12 Random2 words (three fist sprites x 4)"
+    },
+    {
+     "move": "MOVE_WATER_SPOUT",
+     "group": "PROVIDER-C",
+     "providerNeeds": [
+      "C"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.034,
+     "prep": "no activation receipt; B: animationInputs:spriteOrderSeed (sSpriteOrder / live sort keys) | C: animationInputs:animationRng (presentation Random2 (gRng2Value)) | E-TASK: animationInputs:launchTaskSlot (CreateTask slot / live task table)"
+    },
+    {
+     "move": "MOVE_WISH",
+     "group": "PROVIDER-C",
+     "providerNeeds": [
+      "C"
+     ],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.358,
+     "prep": "no activation receipt; C: twinkles: 21 Random2-resolved variants, reducer throws on any other count"
     }
    ]
   }
  ],
  "rows": [
-  {
-   "move": "MOVE_ABSORB",
-   "id": 71,
-   "name": "ABSORB",
-   "hostClass": [
-    "H_BUFFER",
-    "H_OUTCOME"
-   ],
-   "weightShare": 0.0003968253968253967,
-   "config": "src/animation/sceneOnPresentation.ts:1800",
-   "needs": [
-    "D-PAL"
-   ],
-   "blockers": [
-    {
-     "code": "D-PAL",
-     "text": "allocatorProfile ({hitsplat,orbs[],stars[],paletteController} slots; paletteController = palette-blend sprite slot)",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:1800"
-     ]
-    }
-   ],
-   "notes": [
-    "STALE triage verdict: the config carries no HP field (h-buffer-triage.md s2.10); the HP bar belongs to the ordinary queue"
-   ],
-   "staleCorrections": [
-    "STALE triage verdict: the config carries no HP field (h-buffer-triage.md s2.10); the HP bar belongs to the ordinary queue"
-   ],
-   "consumedInputs": [
-    {
-     "path": "healingCenter",
-     "classes": [
-      "A",
-      "E-OUT"
-     ],
-     "status": "blocked: E-OUT",
-     "cite": null
-    },
-    {
-     "path": "absorptionCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "allocatorProfile",
-     "classes": [
-      "A-SLOT",
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": null
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": null,
-   "carrierOccurrences": 559,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": false,
-   "providerNeeds": [
-    "D-PAL"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-D-PAL"
-  },
-  {
-   "move": "MOVE_AERIAL_ACE",
-   "id": 332,
-   "name": "AERIAL ACE",
-   "hostClass": [
-    "H_OUTCOME"
-   ],
-   "weightShare": 0.02215844671201812,
-   "config": "src/animation/sceneOnPresentation.ts:1495",
-   "needs": [],
-   "blockers": [],
-   "notes": [
-    "STALE readiness H_OUTCOME verdict: the body (aerialAceAnimationAtAge) does not read controllerProfile; it feeds only hitReaction / displayedTargetHp / resultText / currentMove (HUD fields the ordinary queue owns). Recipe: pass displayed HP (before, before-damage) + dummy ages, retire the PIDGEOTTO/ONIX gate and hard-coded HUD under !liveField"
-   ],
-   "staleCorrections": [
-    "STALE readiness H_OUTCOME verdict: the body (aerialAceAnimationAtAge) does not read controllerProfile; it feeds only hitReaction / displayedTargetHp / resultText / currentMove (HUD fields the ordinary queue owns). Recipe: pass displayed HP (before, before-damage) + dummy ages, retire the PIDGEOTTO/ONIX gate and hard-coded HUD under !liveField"
-   ],
-   "orderFirstBodyOnly": false,
-   "providerNeeds": [],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [
-    {
-     "probe": "aerial-ace-pidgeotto-onix",
-     "staged": false,
-     "activation": 81,
-     "scriptFrames": 49,
-     "windowStart": 46,
-     "windowEnd": 281,
-     "activationMinusWindowStart": 35,
-     "windowEndMinusScriptEnd": 151,
-     "reducerAgeAtActivation": 42,
-     "note": null
-    },
-    {
-     "probe": "aerial-ace-player-pidgeotto-onix",
-     "staged": false,
-     "activation": 77,
-     "scriptFrames": 49,
-     "windowStart": 46,
-     "windowEnd": 277,
-     "activationMinusWindowStart": 31,
-     "windowEndMinusScriptEnd": 151,
-     "reducerAgeAtActivation": 38,
-     "note": null
-    }
-   ],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "READY-NOW"
-  },
   {
    "move": "MOVE_AIR_CUTTER",
    "id": 314,
@@ -1104,7 +844,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0014243197278911563,
-   "config": "src/animation/sceneOnPresentation.ts:2598",
+   "config": "src/animation/sceneOnPresentation.ts:2600",
    "needs": [
     "B",
     "F-AFFINE",
@@ -1377,9 +1117,12 @@
    "carrierOccurrences": 2316,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
+    "B",
     "F-AFFINE",
-    "E-TASK",
+    "E-TASK"
+   ],
+   "providerNeeds": [
     "D-TILE",
     "D-BG"
    ],
@@ -1400,7 +1143,7 @@
     "H_RANDOM"
    ],
    "weightShare": 0.0007688492063492061,
-   "config": "src/animation/sceneOnPresentation.ts:3662",
+   "config": "src/animation/sceneOnPresentation.ts:3668",
    "needs": [
     "C"
    ],
@@ -1419,6 +1162,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "C"
    ],
@@ -1432,113 +1176,6 @@
    "group": "PROVIDER-C"
   },
   {
-   "move": "MOVE_AURORA_BEAM",
-   "id": 62,
-   "name": "AURORA BEAM",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.001020408163265306,
-   "config": "src/animation/sceneOnPresentation.ts:2881",
-   "needs": [
-    "B",
-    "F-AFFINE"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/auroraBeam.ts:20"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationProfile:ringMatrixIds (affine matrix allocator)",
-     "cites": [
-      "src/animation/auroraBeam.ts:18"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationGeometry:attackerRingOrigin",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/auroraBeam.ts:11"
-    },
-    {
-     "path": "animationGeometry:targetPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/auroraBeam.ts:12"
-    },
-    {
-     "path": "animationGeometry:targetRestOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/auroraBeam.ts:13"
-    },
-    {
-     "path": "animationProfile:ringSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/auroraBeam.ts:17"
-    },
-    {
-     "path": "animationProfile:ringMatrixIds",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/auroraBeam.ts:18"
-    },
-    {
-     "path": "animationProfile:ringSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/auroraBeam.ts:19"
-    },
-    {
-     "path": "animationProfile:spriteOrderSeed",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/auroraBeam.ts:20"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 2041,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "F-AFFINE"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-F-AFFINE"
-  },
-  {
    "move": "MOVE_BATON_PASS",
    "id": 226,
    "name": "BATON PASS",
@@ -1546,7 +1183,7 @@
     "H_BASIC"
    ],
    "weightShare": 0.004815051020408163,
-   "config": "src/animation/sceneOnPresentation.ts:2439",
+   "config": "src/animation/sceneOnPresentation.ts:2441",
    "needs": [
     "X-SWITCH"
    ],
@@ -1556,7 +1193,7 @@
      "text": "attackanimation; openpartyscreen; switchoutabilities; returntoball; switchinanim after the body",
      "cites": [
       "reference/pokeemerald/data/battle_scripts_1.s:1700-1714",
-      "src/animation/sceneOnPresentation.ts:2439"
+      "src/animation/sceneOnPresentation.ts:2441"
      ]
     }
    ],
@@ -1565,6 +1202,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "X-SWITCH"
    ],
@@ -1585,7 +1223,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:2642",
+   "config": "src/animation/sceneOnPresentation.ts:2644",
    "needs": [
     "B",
     "C",
@@ -1906,10 +1544,13 @@
    "carrierOccurrences": 765,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-TILE",
     "D-BG"
    ],
@@ -1950,6 +1591,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "X-TWOTURN"
    ],
@@ -1971,7 +1613,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.005208333333333333,
-   "config": "src/animation/sceneOnPresentation.ts:2814",
+   "config": "src/animation/sceneOnPresentation.ts:2816",
    "needs": [
     "E-TASK",
     "D-OAM",
@@ -2187,8 +1829,10 @@
     }
    ],
    "orderFirstBodyOnly": false,
+   "lentConstants": [
+    "E-TASK"
+   ],
    "providerNeeds": [
-    "E-TASK",
     "D-OAM",
     "D-SCAN",
     "D-PAL",
@@ -2213,7 +1857,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0017963435374149656,
-   "config": "src/animation/sceneOnPresentation.ts:3834",
+   "config": "src/animation/sceneOnPresentation.ts:3840",
    "needs": [
     "B",
     "F-AFFINE",
@@ -2412,9 +2056,12 @@
    "carrierOccurrences": 2852,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
+    "B",
     "F-AFFINE",
-    "E-TASK",
+    "E-TASK"
+   ],
+   "providerNeeds": [
     "D-PAL"
    ],
    "palettePlan": false,
@@ -2424,7 +2071,7 @@
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
    },
-   "group": "MULTI"
+   "group": "PROVIDER-D-PAL"
   },
   {
    "move": "MOVE_DIG",
@@ -2435,7 +2082,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0074971655328798185,
-   "config": "src/animation/sceneOnPresentation.ts:3864",
+   "config": "src/animation/sceneOnPresentation.ts:3870",
    "needs": [
     "B",
     "C",
@@ -2927,10 +2574,13 @@
    "carrierOccurrences": 12580,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-TILE",
     "D-BG",
     "D-OAM",
@@ -2955,7 +2605,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0018707482993197276,
-   "config": "src/animation/sceneOnPresentation.ts:3101",
+   "config": "src/animation/sceneOnPresentation.ts:3105",
    "needs": [
     "B",
     "C",
@@ -3136,9 +2786,12 @@
    "carrierOccurrences": 3486,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
     "X-TWOTURN"
    ],
    "palettePlan": false,
@@ -3158,7 +2811,7 @@
     "H_RANDOM"
    ],
    "weightShare": 0.004443027210884353,
-   "config": "src/animation/sceneOnPresentation.ts:4130",
+   "config": "src/animation/sceneOnPresentation.ts:4136",
    "needs": [
     "C"
    ],
@@ -3177,6 +2830,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "C"
    ],
@@ -3188,275 +2842,6 @@
     "player": "EXACT-PLAN"
    },
    "group": "PROVIDER-C"
-  },
-  {
-   "move": "MOVE_DOUBLE_TEAM",
-   "id": 104,
-   "name": "DOUBLE TEAM",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.01720167233560091,
-   "config": "src/animation/sceneOnPresentation.ts:1646",
-   "needs": [
-    "B"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "sSpriteOrder: satisfied for the battle's FIRST body only (spriteOrderForSlots + occupied prefix); later bodies need the cross-body plan tracker",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:6082",
-      "src/animation/sceneOnPresentation.ts:13510"
-     ]
-    }
-   ],
-   "notes": [
-    "STALE triage READY-NOW: frontClone a|b is the persistent-order tie winner of slots 3/4 (1 bit; seed shape A measured = a); opponent-attacker evidence missing"
-   ],
-   "staleCorrections": [
-    "STALE triage READY-NOW: frontClone a|b is the persistent-order tie winner of slots 3/4 (1 bit; seed shape A measured = a); opponent-attacker evidence missing"
-   ],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:cloneAnchorAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/engine/battleMenu.ts:1396"
-    },
-    {
-     "path": "animationProfile:cloneVisibleStartAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/engine/battleMenu.ts:1397"
-    },
-    {
-     "path": "animationProfile:cloneVisibleEndAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/engine/battleMenu.ts:1398"
-    },
-    {
-     "path": "animationProfile:statsBannerStartAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/engine/battleMenu.ts:1399"
-    },
-    {
-     "path": "animationProfile:statsBannerEndAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/engine/battleMenu.ts:1400"
-    },
-    {
-     "path": "animationProfile:statsBannerBg1YAnchorAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/engine/battleMenu.ts:1401"
-    },
-    {
-     "path": "animationProfile:frontClone",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/engine/battleMenu.ts:1402"
-    },
-    {
-     "path": "moveTextStartAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": false,
-   "orderKind": null,
-   "carrierOccurrences": 28469,
-   "stagedOrientations": "single-or-unnamed",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "READY-NOW"
-  },
-  {
-   "move": "MOVE_DRAGON_DANCE",
-   "id": 349,
-   "name": "DRAGON DANCE",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.003996598639455781,
-   "config": "src/animation/sceneOnPresentation.ts:3501",
-   "needs": [
-    "B"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "sSpriteOrder: satisfied for the battle's FIRST body only (spriteOrderForSlots + occupied prefix); later bodies need the cross-body plan tracker",
-     "cites": [
-      "src/animation/dragonDance.ts:157"
-     ]
-    }
-   ],
-   "notes": [
-    "STALE triage READY-NOW (no order field): prep6 measured one order bit (relative sSpriteOrder position of slots 3/4 at window age 20); first-body provider supplies it"
-   ],
-   "staleCorrections": [
-    "STALE triage READY-NOW (no order field): prep6 measured one order bit (relative sSpriteOrder position of slots 3/4 at window age 20); first-body provider supplies it"
-   ],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:pictureSize",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dragonDance.ts:30"
-    },
-    {
-     "path": "animationProfile:allocationSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/dragonDance.ts:31"
-    },
-    {
-     "path": "animationProfile:allocationOrder",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/dragonDance.ts:32"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": null,
-   "carrierOccurrences": 6965,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "READY-NOW"
-  },
-  {
-   "move": "MOVE_DREAM_EATER",
-   "id": 138,
-   "name": "DREAM EATER",
-   "hostClass": [
-    "H_BUFFER",
-    "H_OUTCOME"
-   ],
-   "weightShare": 0.002168367346938775,
-   "config": "src/animation/sceneOnPresentation.ts:1868",
-   "needs": [
-    "B",
-    "D-PAL"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "allocatorProfile (DreamEaterAllocatorProfile dreamEater.ts:44)",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:1868"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "allocatorProfile (DreamEaterAllocatorProfile dreamEater.ts:44)",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:1868"
-     ]
-    }
-   ],
-   "notes": [
-    "same as Absorb"
-   ],
-   "staleCorrections": [
-    "same as Absorb"
-   ],
-   "consumedInputs": [
-    {
-     "path": "healingCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "absorptionCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "targetRestOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "allocatorProfile",
-     "classes": [
-      "A-SLOT",
-      "D-PAL",
-      "B"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": null
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 3687,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "D-PAL"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-D-PAL"
   },
   {
    "move": "MOVE_ENDEAVOR",
@@ -3537,6 +2922,7 @@
    "carrierOccurrences": 4251,
    "stagedOrientations": "single-or-unnamed",
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "E-OUT"
    ],
@@ -3582,7 +2968,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3876",
+   "config": "src/animation/sceneOnPresentation.ts:3882",
    "needs": [
     "B",
     "C",
@@ -3739,9 +3125,12 @@
    "carrierOccurrences": 511,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "F-AUDIO"
@@ -3763,7 +3152,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0011089852607709747,
-   "config": "src/animation/sceneOnPresentation.ts:2729",
+   "config": "src/animation/sceneOnPresentation.ts:2731",
    "needs": [
     "B",
     "C",
@@ -4286,10 +3675,13 @@
    "carrierOccurrences": 1984,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG",
@@ -4334,6 +3726,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "X-AGE"
    ],
@@ -4345,182 +3738,6 @@
     "player": "EXACT-PLAN"
    },
    "group": "OUT"
-  },
-  {
-   "move": "MOVE_FAKE_TEARS",
-   "id": 313,
-   "name": "FAKE TEARS",
-   "hostClass": [
-    "H_OUTCOME"
-   ],
-   "weightShare": 0.002582908163265306,
-   "config": "src/animation/sceneOnPresentation.ts:3265",
-   "needs": [],
-   "blockers": [],
-   "notes": [
-    "STALE H_OUTCOME verdict: sceneOnFakeTearsView reads only attackerPictureBounds (derivable from liveBattlerAnchors picture rect); controllerPresentation is not read by the view (renderer HUD only). The stat drop is a separate queue event"
-   ],
-   "staleCorrections": [
-    "STALE H_OUTCOME verdict: sceneOnFakeTearsView reads only attackerPictureBounds (derivable from liveBattlerAnchors picture rect); controllerPresentation is not read by the view (renderer HUD only). The stat drop is a separate queue event"
-   ],
-   "orderFirstBodyOnly": false,
-   "providerNeeds": [],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [
-    {
-     "probe": "fake-tears-opponent-delcatty-player-shuckle",
-     "staged": false,
-     "activation": 79,
-     "scriptFrames": 83,
-     "windowStart": 80,
-     "windowEnd": 166,
-     "activationMinusWindowStart": -1,
-     "windowEndMinusScriptEnd": 4,
-     "reducerAgeAtActivation": null,
-     "note": null
-    },
-    {
-     "probe": "fake-tears-player-delcatty-opponent-shuckle",
-     "staged": false,
-     "activation": 75,
-     "scriptFrames": 83,
-     "windowStart": 76,
-     "windowEnd": 162,
-     "activationMinusWindowStart": -1,
-     "windowEndMinusScriptEnd": 4,
-     "reducerAgeAtActivation": null,
-     "note": null
-    }
-   ],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "READY-NOW"
-  },
-  {
-   "move": "MOVE_FEATHER_DANCE",
-   "id": 297,
-   "name": "FEATHERDANCE",
-   "hostClass": [
-    "H_OUTCOME"
-   ],
-   "weightShare": 0.0007369614512471653,
-   "config": "src/animation/sceneOnPresentation.ts:1440",
-   "needs": [],
-   "blockers": [],
-   "notes": [
-    "STALE H_OUTCOME verdict: feathers depend on battlePositionCenter/side/ageOffset only; stat-stage message is controllerDisplay (HUD). The stat change itself is a separate ordinary-queue event"
-   ],
-   "staleCorrections": [
-    "STALE H_OUTCOME verdict: feathers depend on battlePositionCenter/side/ageOffset only; stat-stage message is controllerDisplay (HUD). The stat change itself is a separate ordinary-queue event"
-   ],
-   "orderFirstBodyOnly": false,
-   "providerNeeds": [],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [
-    {
-     "probe": "feather-dance-pidgeotto-onix",
-     "staged": false,
-     "activation": 83,
-     "scriptFrames": 168,
-     "windowStart": 46,
-     "windowEnd": 445,
-     "activationMinusWindowStart": 37,
-     "windowEndMinusScriptEnd": 194,
-     "reducerAgeAtActivation": 44,
-     "note": null
-    },
-    {
-     "probe": "feather-dance-player-pidgeotto-onix",
-     "staged": false,
-     "activation": 79,
-     "scriptFrames": 168,
-     "windowStart": 46,
-     "windowEnd": 445,
-     "activationMinusWindowStart": 33,
-     "windowEndMinusScriptEnd": 198,
-     "reducerAgeAtActivation": 40,
-     "note": null
-    }
-   ],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "READY-NOW"
-  },
-  {
-   "move": "MOVE_FIRE_BLAST",
-   "id": 126,
-   "name": "FIRE BLAST",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.005920493197278911,
-   "config": "src/animation/sceneOnPresentation.ts:2059",
-   "needs": [
-    "B"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "sSpriteOrder: satisfied for the battle's FIRST body only (spriteOrderForSlots + occupied prefix); later bodies need the cross-body plan tracker",
-     "cites": [
-      "src/animation/fireBlast.ts:34",
-      "src/animation/fireBlast.ts:319"
-     ]
-    }
-   ],
-   "notes": [
-    "STALE triage READY-NOW: the reducer replays a persistent 64-pool order from the hard-coded FIRE_BLAST_ORDER_SEED; prep6 NEEDS-ORDER (1..35 of 197 frames change for arbitrary seeds)"
-   ],
-   "staleCorrections": [
-    "STALE triage READY-NOW: the reducer replays a persistent 64-pool order from the hard-coded FIRE_BLAST_ORDER_SEED; prep6 NEEDS-ORDER (1..35 of 197 frames change for arbitrary seeds)"
-   ],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:attackerPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/fireBlast.ts:42"
-    },
-    {
-     "path": "animationProfile:targetPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/fireBlast.ts:43"
-    },
-    {
-     "path": "animationProfile:targetSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/fireBlast.ts:44"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": null,
-   "carrierOccurrences": 9830,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "READY-NOW"
   },
   {
    "move": "MOVE_FIRE_PUNCH",
@@ -4539,7 +3756,7 @@
      "code": "E-OUT",
      "text": "view.burnFlames depend on resolution.secondaryRollSucceeded and resolution.faint (burn roll + target faint outcomes), which the MOVE_ANIMATION request does not carry; the view bundles status-animation flames with the move body",
      "cites": [
-      "src/animation/sceneOnPresentation.ts:12550",
+      "src/animation/sceneOnPresentation.ts:12556",
       "src/animation/sceneOnPresentation.ts:1541"
      ]
     }
@@ -4549,6 +3766,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "E-OUT"
    ],
@@ -4594,7 +3812,7 @@
     "H_RANDOM"
    ],
    "weightShare": 0.004046201814058956,
-   "config": "src/animation/sceneOnPresentation.ts:3648",
+   "config": "src/animation/sceneOnPresentation.ts:3654",
    "needs": [
     "C",
     "X-POWER"
@@ -4622,6 +3840,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "C",
     "X-POWER"
@@ -4643,7 +3862,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007936507936507934,
-   "config": "src/animation/sceneOnPresentation.ts:2844",
+   "config": "src/animation/sceneOnPresentation.ts:2846",
    "needs": [
     "B",
     "C",
@@ -5064,10 +4283,13 @@
    "carrierOccurrences": 1107,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG",
@@ -5111,6 +4333,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "X-TWOTURN"
    ],
@@ -5131,7 +4354,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0014172335600907027,
-   "config": "src/animation/sceneOnPresentation.ts:3785",
+   "config": "src/animation/sceneOnPresentation.ts:3791",
    "needs": [
     "B",
     "F-AFFINE",
@@ -5282,9 +4505,12 @@
    "carrierOccurrences": 2136,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
+    "B",
     "F-AFFINE",
-    "E-TASK",
+    "E-TASK"
+   ],
+   "providerNeeds": [
     "D-PAL",
     "D-BG"
    ],
@@ -5298,145 +4524,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_FRUSTRATION",
-   "id": 218,
-   "name": "FRUSTRATION",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0034332482993197273,
-   "config": "src/animation/sceneOnPresentation.ts:3086",
-   "needs": [
-    "B",
-    "F-AFFINE"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:impactOrders (FrustrationAllocationProfile.impactOrders sort ordinals)",
-     "cites": [
-      "src/animation/frustration.ts:21"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationProfile:angerMatrix (affine matrix allocator)",
-     "cites": [
-      "src/animation/frustration.ts:18"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:angerSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/frustration.ts:17"
-    },
-    {
-     "path": "animationProfile:angerMatrix",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/frustration.ts:18"
-    },
-    {
-     "path": "animationProfile:impactSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/frustration.ts:19"
-    },
-    {
-     "path": "animationProfile:impactMatrices",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/frustration.ts:20"
-    },
-    {
-     "path": "animationProfile:impactOrders",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/frustration.ts:21"
-    },
-    {
-     "path": "animationProfile:impactSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/frustration.ts:22"
-    },
-    {
-     "path": "animationProfile:attackerSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/frustration.ts:23"
-    },
-    {
-     "path": "animationProfile:targetSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/frustration.ts:24"
-    },
-    {
-     "path": "attackerEffectCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "targetEffectCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "targetInitialX2",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 5941,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "F-AFFINE"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-F-AFFINE"
-  },
-  {
    "move": "MOVE_FURY_CUTTER",
    "id": 210,
    "name": "FURY CUTTER",
@@ -5445,7 +4532,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.002551020408163265,
-   "config": "src/animation/sceneOnPresentation.ts:2792",
+   "config": "src/animation/sceneOnPresentation.ts:2794",
    "needs": [
     "E-TASK",
     "D-OAM",
@@ -5619,8 +4706,10 @@
     }
    ],
    "orderFirstBodyOnly": false,
+   "lentConstants": [
+    "E-TASK"
+   ],
    "providerNeeds": [
-    "E-TASK",
     "D-OAM",
     "D-PAL",
     "D-BG",
@@ -5638,88 +4727,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_GIGA_DRAIN",
-   "id": 202,
-   "name": "GIGA DRAIN",
-   "hostClass": [
-    "H_BUFFER",
-    "H_OUTCOME"
-   ],
-   "weightShare": 0.01375425170068028,
-   "config": "src/animation/sceneOnPresentation.ts:1857",
-   "needs": [
-    "B",
-    "D-PAL"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "allocatorProfile (GigaDrainAllocatorProfile gigaDrain.ts:86)",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:1857"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "allocatorProfile (GigaDrainAllocatorProfile gigaDrain.ts:86)",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:1857"
-     ]
-    }
-   ],
-   "notes": [
-    "same as Absorb"
-   ],
-   "staleCorrections": [
-    "same as Absorb"
-   ],
-   "consumedInputs": [
-    {
-     "path": "healingCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "absorptionCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "allocatorProfile",
-     "classes": [
-      "A-SLOT",
-      "D-PAL",
-      "B"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": null
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 22757,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "D-PAL"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-D-PAL"
-  },
-  {
    "move": "MOVE_HAIL",
    "id": 258,
    "name": "HAIL",
@@ -5727,7 +4734,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0025581065759637187,
-   "config": "src/animation/sceneOnPresentation.ts:2087",
+   "config": "src/animation/sceneOnPresentation.ts:2089",
    "needs": [
     "C",
     "F-AFFINE",
@@ -5870,9 +4877,11 @@
    "carrierOccurrences": 4576,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": false,
+   "lentConstants": [
+    "F-AFFINE"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
     "D-PAL",
     "D-OAM"
    ],
@@ -5893,7 +4902,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003968253968253967,
-   "config": "src/animation/sceneOnPresentation.ts:2144",
+   "config": "src/animation/sceneOnPresentation.ts:2146",
    "needs": [
     "B",
     "C",
@@ -6004,9 +5013,12 @@
    "carrierOccurrences": 0,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "C",
+   "lentConstants": [
+    "B",
     "F-AFFINE"
+   ],
+   "providerNeeds": [
+    "C"
    ],
    "palettePlan": false,
    "activationMeasured": false,
@@ -6015,138 +5027,7 @@
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
    },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_HORN_DRILL",
-   "id": 32,
-   "name": "HORN DRILL",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0025722789115646253,
-   "config": "src/animation/sceneOnPresentation.ts:2871",
-   "needs": [
-    "B",
-    "F-AFFINE"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/hornDrill.ts:10"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationProfile:hornMatrixId (affine matrix allocator)",
-     "cites": [
-      "src/animation/hornDrill.ts:7"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationGeometry:attackerCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hornDrill.ts:14"
-    },
-    {
-     "path": "animationGeometry:targetPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hornDrill.ts:15"
-    },
-    {
-     "path": "animationGeometry:attackerRestOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hornDrill.ts:16"
-    },
-    {
-     "path": "animationGeometry:targetRestOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hornDrill.ts:17"
-    },
-    {
-     "path": "animationProfile:hornSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/hornDrill.ts:6"
-    },
-    {
-     "path": "animationProfile:hornMatrixId",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/hornDrill.ts:7"
-    },
-    {
-     "path": "animationProfile:impactSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/hornDrill.ts:8"
-    },
-    {
-     "path": "animationProfile:impactMatrixIds",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/hornDrill.ts:9"
-    },
-    {
-     "path": "animationProfile:spriteOrderSeed",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/hornDrill.ts:10"
-    },
-    {
-     "path": "animationProfile:effectSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/hornDrill.ts:11"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 4234,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "F-AFFINE"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-F-AFFINE"
+   "group": "PROVIDER-C"
   },
   {
    "move": "MOVE_HYPER_BEAM",
@@ -6156,7 +5037,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:2906",
+   "config": "src/animation/sceneOnPresentation.ts:2908",
    "needs": [
     "B",
     "C",
@@ -6262,9 +5143,12 @@
    "carrierOccurrences": 904,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "C",
+   "lentConstants": [
+    "B",
     "F-AFFINE"
+   ],
+   "providerNeeds": [
+    "C"
    ],
    "palettePlan": false,
    "activationMeasured": false,
@@ -6273,7 +5157,7 @@
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
    },
-   "group": "MULTI"
+   "group": "PROVIDER-C"
   },
   {
    "move": "MOVE_HYPER_VOICE",
@@ -6283,7 +5167,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:2305",
+   "config": "src/animation/sceneOnPresentation.ts:2307",
    "needs": [
     "B",
     "C",
@@ -6596,10 +5480,13 @@
    "carrierOccurrences": 662,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG"
@@ -6622,7 +5509,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0011337868480725622,
-   "config": "src/animation/sceneOnPresentation.ts:2803",
+   "config": "src/animation/sceneOnPresentation.ts:2805",
    "needs": [
     "D-OAM",
     "D-PAL",
@@ -6804,12 +5691,14 @@
     }
    ],
    "orderFirstBodyOnly": false,
+   "lentConstants": [
+    "E-TASK"
+   ],
    "providerNeeds": [
     "D-OAM",
     "D-PAL",
     "D-BG",
     "D-TILE",
-    "E-TASK",
     "C",
     "X-DISABLE"
    ],
@@ -6830,7 +5719,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.01980229591836734,
-   "config": "src/animation/sceneOnPresentation.ts:3944",
+   "config": "src/animation/sceneOnPresentation.ts:3950",
    "needs": [
     "B",
     "C",
@@ -6965,9 +5854,12 @@
    "carrierOccurrences": 33428,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "C",
+   "lentConstants": [
+    "B",
     "E-TASK"
+   ],
+   "providerNeeds": [
+    "C"
    ],
    "palettePlan": false,
    "activationMeasured": false,
@@ -6976,60 +5868,7 @@
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
    },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_ICE_PUNCH",
-   "id": 8,
-   "name": "ICE PUNCH",
-   "hostClass": [
-    "H_OUTCOME"
-   ],
-   "weightShare": 0.00697278911564626,
-   "config": "src/animation/sceneOnPresentation.ts:1555",
-   "needs": [],
-   "blockers": [],
-   "notes": [
-    "STALE H_OUTCOME verdict: overlay/crystals/hitCrystals read only the target animationCenter/side; hpDrain/status/held-item/action-menu are HUD fields. Freeze status is a separate ordinary-queue status animation"
-   ],
-   "staleCorrections": [
-    "STALE H_OUTCOME verdict: overlay/crystals/hitCrystals read only the target animationCenter/side; hpDrain/status/held-item/action-menu are HUD fields. Freeze status is a separate ordinary-queue status animation"
-   ],
-   "orderFirstBodyOnly": false,
-   "providerNeeds": [],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [
-    {
-     "probe": "ice-punch-player",
-     "staged": true,
-     "activation": 2339,
-     "scriptFrames": 183,
-     "windowStart": 2339,
-     "windowEnd": 2800,
-     "activationMinusWindowStart": 0,
-     "windowEndMinusScriptEnd": 278,
-     "reducerAgeAtActivation": 0,
-     "note": "second action (after the AI Double Team body); window = body + controller tail"
-    },
-    {
-     "probe": "ice-punch-opponent",
-     "staged": true,
-     "activation": 1966,
-     "scriptFrames": 183,
-     "windowStart": 1966,
-     "windowEnd": 3259,
-     "activationMinusWindowStart": 0,
-     "windowEndMinusScriptEnd": 1110,
-     "reducerAgeAtActivation": 0,
-     "note": "first body of the staged battle; window = body + controller tail (1293 frames)"
-    }
-   ],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "READY-NOW"
+   "group": "PROVIDER-C"
   },
   {
    "move": "MOVE_LEECH_SEED",
@@ -7104,6 +5943,7 @@
    "carrierOccurrences": 7240,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "D-PAL",
     "E-OUT"
@@ -7125,7 +5965,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0014880952380952376,
-   "config": "src/animation/sceneOnPresentation.ts:3442",
+   "config": "src/animation/sceneOnPresentation.ts:3446",
    "needs": [
     "C",
     "D-PAL"
@@ -7252,6 +6092,7 @@
    "carrierOccurrences": 2211,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "C",
     "D-PAL"
@@ -7273,7 +6114,7 @@
     "H_RANDOM"
    ],
    "weightShare": 0,
-   "config": "src/animation/sceneOnPresentation.ts:3562",
+   "config": "src/animation/sceneOnPresentation.ts:3568",
    "needs": [
     "C",
     "D-BG"
@@ -7291,7 +6132,7 @@
      "code": "D-BG",
      "text": "monbgCenter / monbgPosition (monbg state)",
      "cites": [
-      "src/animation/sceneOnPresentation.ts:3562"
+      "src/animation/sceneOnPresentation.ts:3568"
      ]
     }
    ],
@@ -7300,6 +6141,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "C",
     "D-BG"
@@ -7321,7 +6163,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0013924319727891155,
-   "config": "src/animation/sceneOnPresentation.ts:2281",
+   "config": "src/animation/sceneOnPresentation.ts:2283",
    "needs": [
     "B",
     "C",
@@ -7666,10 +6508,13 @@
    "carrierOccurrences": 2593,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG"
@@ -7691,7 +6536,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.001077097505668934,
-   "config": "src/animation/sceneOnPresentation.ts:3746",
+   "config": "src/animation/sceneOnPresentation.ts:3752",
    "needs": [
     "B",
     "X-POWER"
@@ -7767,6 +6612,9 @@
    "carrierOccurrences": 1640,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B"
+   ],
    "providerNeeds": [
     "X-POWER"
    ],
@@ -7836,7 +6684,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0029443027210884344,
-   "config": "src/animation/sceneOnPresentation.ts:2751",
+   "config": "src/animation/sceneOnPresentation.ts:2753",
    "needs": [
     "E-TASK",
     "D-OAM",
@@ -8001,8 +6849,11 @@
     }
    ],
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
     "E-TASK",
+    "B"
+   ],
+   "providerNeeds": [
     "D-OAM",
     "D-PAL",
     "D-BG",
@@ -8017,88 +6868,6 @@
     "player": "EXACT-PLAN"
    },
    "group": "MULTI"
-  },
-  {
-   "move": "MOVE_MEGA_DRAIN",
-   "id": 72,
-   "name": "MEGA DRAIN",
-   "hostClass": [
-    "H_BUFFER",
-    "H_OUTCOME"
-   ],
-   "weightShare": 0.0015306122448979589,
-   "config": "src/animation/sceneOnPresentation.ts:1843",
-   "needs": [
-    "B",
-    "D-PAL"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "allocatorProfile (MegaDrainAllocatorProfile {hitsplat,orbs,stars,paletteController,orderSeed} megaDrain.ts:85)",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:1843"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "allocatorProfile (MegaDrainAllocatorProfile {hitsplat,orbs,stars,paletteController,orderSeed} megaDrain.ts:85)",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:1843"
-     ]
-    }
-   ],
-   "notes": [
-    "same as Absorb (no HP field in the config)"
-   ],
-   "staleCorrections": [
-    "same as Absorb (no HP field in the config)"
-   ],
-   "consumedInputs": [
-    {
-     "path": "healingCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "absorptionCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "allocatorProfile",
-     "classes": [
-      "A-SLOT",
-      "D-PAL",
-      "B"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": null
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 2646,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "D-PAL"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-D-PAL"
   },
   {
    "move": "MOVE_MEMENTO",
@@ -8127,6 +6896,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "D-SCAN"
    ],
@@ -8166,6 +6936,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "C"
    ],
@@ -8250,6 +7021,9 @@
    "carrierOccurrences": 8231,
    "stagedOrientations": "single-or-unnamed",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B"
+   ],
    "providerNeeds": [
     "C"
    ],
@@ -8270,7 +7044,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007121598639455781,
-   "config": "src/animation/sceneOnPresentation.ts:2672",
+   "config": "src/animation/sceneOnPresentation.ts:2674",
    "needs": [
     "B",
     "C",
@@ -8568,10 +7342,13 @@
    "carrierOccurrences": 1439,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG",
@@ -8594,7 +7371,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0006802721088435374,
-   "config": "src/animation/sceneOnPresentation.ts:2943",
+   "config": "src/animation/sceneOnPresentation.ts:2945",
    "needs": [
     "C",
     "D-PAL"
@@ -8745,6 +7522,7 @@
    "carrierOccurrences": 1209,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "C",
     "D-PAL"
@@ -8766,7 +7544,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0,
-   "config": "src/animation/sceneOnPresentation.ts:2350",
+   "config": "src/animation/sceneOnPresentation.ts:2352",
    "needs": [
     "E-TASK",
     "D-TILE",
@@ -9011,8 +7789,11 @@
     }
    ],
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
     "E-TASK",
+    "B"
+   ],
+   "providerNeeds": [
     "D-TILE",
     "D-PAL",
     "D-BG",
@@ -9035,7 +7816,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.007684948979591839,
-   "config": "src/animation/sceneOnPresentation.ts:2335",
+   "config": "src/animation/sceneOnPresentation.ts:2337",
    "needs": [
     "B",
     "C",
@@ -9540,10 +8321,13 @@
    "carrierOccurrences": 14165,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG"
@@ -9584,6 +8368,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "X-REDUCER"
    ],
@@ -9604,7 +8389,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0025262188208616775,
-   "config": "src/animation/sceneOnPresentation.ts:3806",
+   "config": "src/animation/sceneOnPresentation.ts:3812",
    "needs": [
     "B",
     "F-AFFINE",
@@ -9859,9 +8644,12 @@
    "carrierOccurrences": 3920,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
+    "B",
     "F-AFFINE",
-    "E-TASK",
+    "E-TASK"
+   ],
+   "providerNeeds": [
     "D-BG"
    ],
    "palettePlan": false,
@@ -9871,7 +8659,7 @@
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
    },
-   "group": "MULTI"
+   "group": "PROVIDER-D-BG"
   },
   {
    "move": "MOVE_PSYCH_UP",
@@ -9881,7 +8669,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0036883503401360534,
-   "config": "src/animation/sceneOnPresentation.ts:2291",
+   "config": "src/animation/sceneOnPresentation.ts:2293",
    "needs": [
     "B",
     "C",
@@ -10326,10 +9114,13 @@
    "carrierOccurrences": 6320,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG"
@@ -10351,7 +9142,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007369614512471653,
-   "config": "src/animation/sceneOnPresentation.ts:2717",
+   "config": "src/animation/sceneOnPresentation.ts:2719",
    "needs": [
     "B",
     "C",
@@ -10826,10 +9617,13 @@
    "carrierOccurrences": 1168,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG",
@@ -10854,7 +9648,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0025581065759637187,
-   "config": "src/animation/sceneOnPresentation.ts:2702",
+   "config": "src/animation/sceneOnPresentation.ts:2704",
    "needs": [
     "B",
     "C",
@@ -11413,10 +10207,13 @@
    "carrierOccurrences": 4521,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG",
@@ -11435,59 +10232,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_QUICK_ATTACK",
-   "id": 98,
-   "name": "QUICK ATTACK",
-   "hostClass": [
-    "H_OUTCOME"
-   ],
-   "weightShare": 0.009488378684807256,
-   "config": "src/animation/sceneOnPresentation.ts:1458",
-   "needs": [],
-   "blockers": [],
-   "notes": [
-    "STALE H_OUTCOME verdict: afterimage body independent of controllerProfile (HUD/result text only); same recipe as Aerial Ace; renderer branch battleScene.ts:48615 draws PIDGEOTTO/ONIX art + HUD. Afterimage slots 3/4 carry an explicit OAM-tie suppression (battleScene.ts:20847): slot plan = first-free plus a tie audit (docs/allocator-consumer-tie-audit.md)"
-   ],
-   "staleCorrections": [
-    "STALE H_OUTCOME verdict: afterimage body independent of controllerProfile (HUD/result text only); same recipe as Aerial Ace; renderer branch battleScene.ts:48615 draws PIDGEOTTO/ONIX art + HUD. Afterimage slots 3/4 carry an explicit OAM-tie suppression (battleScene.ts:20847): slot plan = first-free plus a tie audit (docs/allocator-consumer-tie-audit.md)"
-   ],
-   "orderFirstBodyOnly": false,
-   "providerNeeds": [],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [
-    {
-     "probe": "quick-attack-pidgeotto-onix",
-     "staged": false,
-     "activation": 83,
-     "scriptFrames": 32,
-     "windowStart": 46,
-     "windowEnd": 264,
-     "activationMinusWindowStart": 37,
-     "windowEndMinusScriptEnd": 149,
-     "reducerAgeAtActivation": 44,
-     "note": null
-    },
-    {
-     "probe": "quick-attack-player-pidgeotto-onix",
-     "staged": false,
-     "activation": 79,
-     "scriptFrames": 32,
-     "windowStart": 46,
-     "windowEnd": 259,
-     "activationMinusWindowStart": 33,
-     "windowEndMinusScriptEnd": 148,
-     "reducerAgeAtActivation": 40,
-     "note": null
-    }
-   ],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "READY-NOW"
-  },
-  {
    "move": "MOVE_RAIN_DANCE",
    "id": 240,
    "name": "RAIN DANCE",
@@ -11495,7 +10239,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.008382936507936511,
-   "config": "src/animation/sceneOnPresentation.ts:2078",
+   "config": "src/animation/sceneOnPresentation.ts:2080",
    "needs": [
     "C",
     "D-PAL"
@@ -11582,6 +10326,7 @@
    "carrierOccurrences": 15051,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "C",
     "D-PAL"
@@ -11603,7 +10348,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3774",
+   "config": "src/animation/sceneOnPresentation.ts:3780",
    "needs": [
     "B",
     "C",
@@ -11874,10 +10619,13 @@
    "carrierOccurrences": 567,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG",
@@ -11902,7 +10650,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0007369614512471653,
-   "config": "src/animation/sceneOnPresentation.ts:2855",
+   "config": "src/animation/sceneOnPresentation.ts:2857",
    "needs": [
     "B",
     "F-AFFINE"
@@ -12025,9 +10773,11 @@
    "carrierOccurrences": 1219,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
+    "B",
     "F-AFFINE"
    ],
+   "providerNeeds": [],
    "palettePlan": false,
    "activationMeasured": false,
    "activationReceipts": [],
@@ -12035,7 +10785,7 @@
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
    },
-   "group": "PROVIDER-F-AFFINE"
+   "group": "READY-NOW"
   },
   {
    "move": "MOVE_RECYCLE",
@@ -12045,7 +10795,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007369614512471653,
-   "config": "src/animation/sceneOnPresentation.ts:2180",
+   "config": "src/animation/sceneOnPresentation.ts:2182",
    "needs": [
     "F-AFFINE",
     "D-PAL"
@@ -12116,8 +10866,10 @@
    "carrierOccurrences": 991,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": false,
+   "lentConstants": [
+    "F-AFFINE"
+   ],
    "providerNeeds": [
-    "F-AFFINE",
     "D-PAL"
    ],
    "palettePlan": false,
@@ -12127,7 +10879,7 @@
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
    },
-   "group": "MULTI"
+   "group": "PROVIDER-D-PAL"
   },
   {
    "move": "MOVE_RETURN",
@@ -12137,7 +10889,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.002508503401360544,
-   "config": "src/animation/sceneOnPresentation.ts:2829",
+   "config": "src/animation/sceneOnPresentation.ts:2831",
    "needs": [
     "B",
     "C",
@@ -12606,10 +11358,13 @@
    "carrierOccurrences": 4381,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG",
@@ -12633,7 +11388,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0006802721088435374,
-   "config": "src/animation/sceneOnPresentation.ts:2771",
+   "config": "src/animation/sceneOnPresentation.ts:2773",
    "needs": [
     "E-TASK",
     "D-OAM",
@@ -12814,8 +11569,11 @@
     }
    ],
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
     "E-TASK",
+    "B"
+   ],
+   "providerNeeds": [
     "D-OAM",
     "D-PAL",
     "D-BG",
@@ -12839,7 +11597,7 @@
     "H_DERIVED"
    ],
    "weightShare": 0.003316326530612244,
-   "config": "src/animation/sceneOnPresentation.ts:3035",
+   "config": "src/animation/sceneOnPresentation.ts:3039",
    "needs": [
     "X-REDUCER",
     "X-POWER"
@@ -12867,6 +11625,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "X-REDUCER",
     "X-POWER"
@@ -12903,7 +11662,7 @@
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
    },
-   "group": "MULTI"
+   "group": "SMALL-INPUT"
   },
   {
    "move": "MOVE_ROAR",
@@ -12913,7 +11672,7 @@
     "H_BASIC"
    ],
    "weightShare": 0.011837443310657602,
-   "config": "src/animation/sceneOnPresentation.ts:3381",
+   "config": "src/animation/sceneOnPresentation.ts:3385",
    "needs": [
     "X-SWITCH"
    ],
@@ -12923,7 +11682,7 @@
      "text": "AnimTask_SlideOffScreen leaves the target off-screen, then returntoball + BattleScript_TrainerBattleForceOut",
      "cites": [
       "reference/pokeemerald/data/battle_scripts_1.s:3324-3338",
-      "src/animation/sceneOnPresentation.ts:3381"
+      "src/animation/sceneOnPresentation.ts:3385"
      ]
     }
    ],
@@ -12932,6 +11691,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "X-SWITCH"
    ],
@@ -12952,7 +11712,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007369614512471653,
-   "config": "src/animation/sceneOnPresentation.ts:3927",
+   "config": "src/animation/sceneOnPresentation.ts:3933",
    "needs": [
     "E-TASK"
    ],
@@ -12989,142 +11749,16 @@
    "carrierOccurrences": 1229,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": false,
-   "providerNeeds": [
+   "lentConstants": [
     "E-TASK"
    ],
+   "providerNeeds": [],
    "palettePlan": false,
    "activationMeasured": false,
    "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-E-TASK"
-  },
-  {
-   "move": "MOVE_ROCK_SLIDE",
-   "id": 157,
-   "name": "ROCK SLIDE",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.021166383219954635,
-   "config": "src/animation/sceneOnPresentation.ts:1624",
-   "needs": [
-    "B"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "sSpriteOrder: satisfied for the battle's FIRST body only (spriteOrderForSlots + occupied prefix); later bodies need the cross-body plan tracker",
-     "cites": [
-      "src/animation/sceneOnPresentation.ts:13474",
-      "src/engine/spriteOrderProvider.ts:38"
-     ]
-    }
-   ],
-   "notes": [
-    "order input = GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE.spriteOrderSeed (64) = occupied prefix + free order (first action: KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER `4,3,21,20,5,...`, spriteOrderProvider.ts:38); accepted opponent-attacker only (rock-slide-grovyle-onix.json), no player-attacker evidence"
-   ],
-   "staleCorrections": [
-    "order input = GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE.spriteOrderSeed (64) = occupied prefix + free order (first action: KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER `4,3,21,20,5,...`, spriteOrderProvider.ts:38); accepted opponent-attacker only (rock-slide-grovyle-onix.json), no player-attacker evidence"
-   ],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:rockAnchorAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/engine/battleMenu.ts:1713"
-    },
-    {
-     "path": "animationProfile:targetShakeStartAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/engine/battleMenu.ts:1715"
-    },
-    {
-     "path": "animationProfile:targetShakeEndAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/engine/battleMenu.ts:1716"
-    },
-    {
-     "path": "animationProfile:hitFlashAnchorAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/engine/battleMenu.ts:1718"
-    },
-    {
-     "path": "animationProfile:spriteOrderSeed",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/engine/battleMenu.ts:1720"
-    },
-    {
-     "path": "animationProfile:occupiedSpriteSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/engine/battleMenu.ts:1722"
-    },
-    {
-     "path": "moveTextStartAge",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 35677,
-   "stagedOrientations": "single-or-unnamed",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [
-    {
-     "probe": "rock-slide-player",
-     "staged": true,
-     "activation": 2340,
-     "scriptFrames": 137,
-     "windowStart": null,
-     "windowEnd": null,
-     "activationMinusWindowStart": null,
-     "windowEndMinusScriptEnd": null,
-     "reducerAgeAtActivation": null,
-     "note": "no accepted player-attacker evidence (rock-slide-grovyle-onix.json is opponent Grovyle -> player Onix only); staged run has the AI Double Team body first (history != first body)"
-    },
-    {
-     "probe": "rock-slide-opponent",
-     "staged": true,
-     "activation": 1967,
-     "scriptFrames": 137,
-     "windowStart": 1967,
-     "windowEnd": 2141,
-     "activationMinusWindowStart": 0,
-     "windowEndMinusScriptEnd": 37,
-     "reducerAgeAtActivation": 0,
-     "note": "first body of the staged battle"
-    }
-   ],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
    },
    "group": "READY-NOW"
   },
@@ -13136,7 +11770,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.002242772108843537,
-   "config": "src/animation/sceneOnPresentation.ts:2068",
+   "config": "src/animation/sceneOnPresentation.ts:2070",
    "needs": [
     "D-BG",
     "X-DISABLE"
@@ -13261,6 +11895,7 @@
    "carrierOccurrences": 3436,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "D-BG",
     "X-DISABLE"
@@ -13359,6 +11994,9 @@
    "carrierOccurrences": 7040,
    "stagedOrientations": "single-or-unnamed",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B"
+   ],
    "providerNeeds": [
     "C"
    ],
@@ -13379,7 +12017,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:3899",
+   "config": "src/animation/sceneOnPresentation.ts:3905",
    "needs": [
     "B",
     "C",
@@ -13555,9 +12193,12 @@
    "carrierOccurrences": 760,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "E-TASK",
     "D-PAL",
     "D-TILE"
    ],
@@ -13571,157 +12212,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_SEISMIC_TOSS",
-   "id": 69,
-   "name": "SEISMIC TOSS",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.002476615646258503,
-   "config": "src/animation/sceneOnPresentation.ts:3113",
-   "needs": [
-    "B",
-    "F-AFFINE"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:rocks (SeismicTossAllocation {slot,matrixNum,persistentOrder} seismicToss.ts:14)",
-     "cites": [
-      "src/animation/seismicToss.ts:20"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationProfile:rocks (SeismicTossAllocation {slot,matrixNum,persistentOrder} seismicToss.ts:14)",
-     "cites": [
-      "src/animation/seismicToss.ts:20"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationGeometry:targetEffectCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/seismicToss.ts:30"
-    },
-    {
-     "path": "animationGeometry:targetRockCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/seismicToss.ts:31"
-    },
-    {
-     "path": "animationGeometry:attackerRestOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/seismicToss.ts:32"
-    },
-    {
-     "path": "animationGeometry:targetRestOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/seismicToss.ts:33"
-    },
-    {
-     "path": "animationProfile:rocks",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/seismicToss.ts:20"
-    },
-    {
-     "path": "animationProfile:hitsplats",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/seismicToss.ts:21"
-    },
-    {
-     "path": "animationProfile:attackerSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/seismicToss.ts:22"
-    },
-    {
-     "path": "animationProfile:targetSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/seismicToss.ts:23"
-    },
-    {
-     "path": "animationProfile:attackerPalette",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/seismicToss.ts:24"
-    },
-    {
-     "path": "animationProfile:targetPalette",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/seismicToss.ts:25"
-    },
-    {
-     "path": "animationProfile:attackerAnimFrame",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/seismicToss.ts:26"
-    },
-    {
-     "path": "animationProfile:targetAnimFrame",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/seismicToss.ts:27"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 3764,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "F-AFFINE"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-F-AFFINE"
-  },
-  {
    "move": "MOVE_SHEER_COLD",
    "id": 329,
    "name": "SHEER COLD",
@@ -13729,7 +12219,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0014880952380952376,
-   "config": "src/animation/sceneOnPresentation.ts:2613",
+   "config": "src/animation/sceneOnPresentation.ts:2615",
    "needs": [
     "B",
     "C",
@@ -13994,10 +12484,13 @@
    "carrierOccurrences": 2092,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-TILE",
     "D-BG"
    ],
@@ -14018,7 +12511,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0014739229024943307,
-   "config": "src/animation/sceneOnPresentation.ts:2320",
+   "config": "src/animation/sceneOnPresentation.ts:2322",
    "needs": [
     "B",
     "C",
@@ -14587,10 +13080,13 @@
    "carrierOccurrences": 2907,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG",
@@ -14613,7 +13109,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0018459467120181402,
-   "config": "src/animation/sceneOnPresentation.ts:2658",
+   "config": "src/animation/sceneOnPresentation.ts:2660",
    "needs": [
     "B",
     "C",
@@ -14871,10 +13367,13 @@
    "carrierOccurrences": 2794,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG"
@@ -14896,7 +13395,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.005165816326530613,
-   "config": "src/animation/sceneOnPresentation.ts:2365",
+   "config": "src/animation/sceneOnPresentation.ts:2367",
    "needs": [
     "B",
     "C",
@@ -15297,10 +13796,13 @@
    "carrierOccurrences": 9415,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG"
@@ -15322,7 +13824,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0017644557823129248,
-   "config": "src/animation/sceneOnPresentation.ts:2688",
+   "config": "src/animation/sceneOnPresentation.ts:2690",
    "needs": [
     "B",
     "C",
@@ -15789,10 +14291,13 @@
    "carrierOccurrences": 2973,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG",
@@ -15819,7 +14324,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:2387",
+   "config": "src/animation/sceneOnPresentation.ts:2389",
    "needs": [
     "B",
     "C",
@@ -16081,10 +14586,13 @@
    "carrierOccurrences": 463,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG",
@@ -16107,7 +14615,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0010522959183673468,
-   "config": "src/animation/sceneOnPresentation.ts:3818",
+   "config": "src/animation/sceneOnPresentation.ts:3824",
    "needs": [
     "B",
     "F-AFFINE",
@@ -16362,9 +14870,12 @@
    "carrierOccurrences": 1854,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
+    "B",
     "F-AFFINE",
-    "E-TASK",
+    "E-TASK"
+   ],
+   "providerNeeds": [
     "D-PAL",
     "D-BG"
    ],
@@ -16378,59 +14889,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_SLEEP_TALK",
-   "id": 214,
-   "name": "SLEEP TALK",
-   "hostClass": [
-    "H_BASIC"
-   ],
-   "weightShare": 0.002200255102040816,
-   "config": "src/animation/sceneOnPresentation.ts:3352",
-   "needs": [],
-   "blockers": [],
-   "notes": [
-    "STALE verdict (prep2 BLOCKED: called-move flow): Metronome is live with the called move as a separate request (liveMoveAnimation.ts:417,1043), so only the renderer's hard-coded HUD block (battleScene.ts:34256 branch) must go behind !liveField; SceneOnSleepTalkConfig has no profile (sceneOnPresentation.ts:3352). Measured prep exists (1356/4570 windows, row 0, 186 rows)"
-   ],
-   "staleCorrections": [
-    "STALE verdict (prep2 BLOCKED: called-move flow): Metronome is live with the called move as a separate request (liveMoveAnimation.ts:417,1043), so only the renderer's hard-coded HUD block (battleScene.ts:34256 branch) must go behind !liveField; SceneOnSleepTalkConfig has no profile (sceneOnPresentation.ts:3352). Measured prep exists (1356/4570 windows, row 0, 186 rows)"
-   ],
-   "orderFirstBodyOnly": false,
-   "providerNeeds": [],
-   "palettePlan": false,
-   "activationMeasured": true,
-   "activationReceipts": [
-    {
-     "probe": "sleep-talk-opponent-seaking-player-onix",
-     "staged": false,
-     "activation": 4570,
-     "scriptFrames": 188,
-     "windowStart": 4570,
-     "windowEnd": 4758,
-     "activationMinusWindowStart": 0,
-     "windowEndMinusScriptEnd": 0,
-     "reducerAgeAtActivation": null,
-     "note": null
-    },
-    {
-     "probe": "sleep-talk-player-seaking-opponent-onix",
-     "staged": false,
-     "activation": 1356,
-     "scriptFrames": 185,
-     "windowStart": 1356,
-     "windowEnd": 1541,
-     "activationMinusWindowStart": 0,
-     "windowEndMinusScriptEnd": 0,
-     "reducerAgeAtActivation": null,
-     "note": null
-    }
-   ],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "READY-NOW"
-  },
-  {
    "move": "MOVE_SMOG",
    "id": 123,
    "name": "SMOG",
@@ -16438,7 +14896,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003968253968253967,
-   "config": "src/animation/sceneOnPresentation.ts:2628",
+   "config": "src/animation/sceneOnPresentation.ts:2630",
    "needs": [
     "B",
     "C",
@@ -16743,10 +15201,13 @@
    "carrierOccurrences": 532,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG"
@@ -16768,7 +15229,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0007369614512471653,
-   "config": "src/animation/sceneOnPresentation.ts:2376",
+   "config": "src/animation/sceneOnPresentation.ts:2378",
    "needs": [
     "B",
     "C",
@@ -16982,10 +15443,13 @@
    "carrierOccurrences": 1142,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-TILE",
     "D-BG"
@@ -17007,7 +15471,7 @@
     "H_DERIVED"
    ],
    "weightShare": 0.002639597505668934,
-   "config": "src/animation/sceneOnPresentation.ts:3185",
+   "config": "src/animation/sceneOnPresentation.ts:3189",
    "needs": [
     "B",
     "X-SCHED"
@@ -17018,7 +15482,7 @@
      "text": "hardwareTieSlotOrder [12,7,3,4,5,9,10,11] (order provider first body may supply)",
      "cites": [
       "src/animation/spark.ts:19",
-      "src/animation/sceneOnPresentation.ts:3185"
+      "src/animation/sceneOnPresentation.ts:3189"
      ]
     },
     {
@@ -17035,6 +15499,9 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B"
+   ],
    "providerNeeds": [
     "X-SCHED"
    ],
@@ -17080,7 +15547,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003968253968253967,
-   "config": "src/animation/sceneOnPresentation.ts:3795",
+   "config": "src/animation/sceneOnPresentation.ts:3801",
    "needs": [
     "B",
     "F-AFFINE",
@@ -17263,9 +15730,12 @@
    "carrierOccurrences": 556,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
+    "B",
     "F-AFFINE",
-    "E-TASK",
+    "E-TASK"
+   ],
+   "providerNeeds": [
     "D-PAL",
     "D-BG"
    ],
@@ -17286,7 +15756,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0010841836734693875,
-   "config": "src/animation/sceneOnPresentation.ts:2952",
+   "config": "src/animation/sceneOnPresentation.ts:2954",
    "needs": [
     "C",
     "D-PAL"
@@ -17413,6 +15883,7 @@
    "carrierOccurrences": 1829,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "C",
     "D-PAL"
@@ -17435,7 +15906,7 @@
     "H_VARIANT"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:2781",
+   "config": "src/animation/sceneOnPresentation.ts:2783",
    "needs": [
     "E-TASK",
     "D-OAM",
@@ -17609,8 +16080,10 @@
     }
    ],
    "orderFirstBodyOnly": false,
+   "lentConstants": [
+    "E-TASK"
+   ],
    "providerNeeds": [
-    "E-TASK",
     "D-OAM",
     "D-PAL",
     "D-BG",
@@ -17628,113 +16101,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_STOCKPILE",
-   "id": 254,
-   "name": "STOCKPILE",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0006802721088435374,
-   "config": "src/animation/sceneOnPresentation.ts:3063",
-   "needs": [
-    "B",
-    "F-AFFINE"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/stockpile.ts:31"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationProfile:orbMatrixPool (affine matrix allocator)",
-     "cites": [
-      "src/animation/stockpile.ts:29"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "attackerPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "attackerPictureYOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    },
-    {
-     "path": "animationProfile:orbSlotPool",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/stockpile.ts:27"
-    },
-    {
-     "path": "animationProfile:orbMatrixPool",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/stockpile.ts:29"
-    },
-    {
-     "path": "animationProfile:spriteOrderSeed",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/stockpile.ts:31"
-    },
-    {
-     "path": "animationProfile:attackerSubpriority",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/stockpile.ts:32"
-    },
-    {
-     "path": "attackerShadowAtEntry",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": null
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 1036,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "F-AFFINE"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-F-AFFINE"
-  },
-  {
    "move": "MOVE_SUBSTITUTE",
    "id": 164,
    "name": "SUBSTITUTE",
@@ -17742,7 +16108,7 @@
     "H_BASIC"
    ],
    "weightShare": 0.0022321428571428566,
-   "config": "src/animation/sceneOnPresentation.ts:3685",
+   "config": "src/animation/sceneOnPresentation.ts:3691",
    "needs": [
     "X-SUBST"
    ],
@@ -17753,7 +16119,7 @@
      "cites": [
       "reference/pokeemerald/data/battle_scripts_1.s:1085-1103",
       "src/engine/battleCommandFieldArt.ts:1",
-      "src/animation/sceneOnPresentation.ts:3685"
+      "src/animation/sceneOnPresentation.ts:3691"
      ]
     }
    ],
@@ -17762,6 +16128,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "X-SUBST"
    ],
@@ -17775,97 +16142,6 @@
    "group": "PROVIDER-X-SUBST"
   },
   {
-   "move": "MOVE_SUNNY_DAY",
-   "id": 241,
-   "name": "SUNNY DAY",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.008428996598639459,
-   "config": "src/animation/sceneOnPresentation.ts:3755",
-   "needs": [
-    "B",
-    "D-PAL"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/sunnyDay.ts:13"
-     ]
-    },
-    {
-     "code": "D-PAL",
-     "text": "animationInputs:paletteBanks (palette host / resource plan)",
-     "cites": [
-      "src/animation/sunnyDay.ts:15"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:attackerGeometry",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sunnyDay.ts:8"
-    },
-    {
-     "path": "animationInputs:targetGeometry",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/sunnyDay.ts:9"
-    },
-    {
-     "path": "animationInputs:raySlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/sunnyDay.ts:11"
-    },
-    {
-     "path": "animationInputs:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/sunnyDay.ts:13"
-    },
-    {
-     "path": "animationInputs:paletteBanks",
-     "classes": [
-      "D-PAL"
-     ],
-     "status": "blocked: D-PAL",
-     "cite": "src/animation/sunnyDay.ts:15"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 13877,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "D-PAL"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-D-PAL"
-  },
-  {
    "move": "MOVE_SUPERPOWER",
    "id": 276,
    "name": "SUPERPOWER",
@@ -17873,7 +16149,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:2761",
+   "config": "src/animation/sceneOnPresentation.ts:2763",
    "needs": [
     "E-TASK",
     "D-OAM",
@@ -18054,8 +16330,11 @@
     }
    ],
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
     "E-TASK",
+    "B"
+   ],
+   "providerNeeds": [
     "D-OAM",
     "D-PAL",
     "D-BG",
@@ -18072,121 +16351,6 @@
    "group": "MULTI"
   },
   {
-   "move": "MOVE_SWIFT",
-   "id": 129,
-   "name": "SWIFT",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.002582908163265306,
-   "config": "src/animation/sceneOnPresentation.ts:3935",
-   "needs": [
-    "E-TASK"
-   ],
-   "blockers": [
-    {
-     "code": "E-TASK",
-     "text": "animationProfile:targetShakeTaskSlot (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/swift.ts:32"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:attackerEffectCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/swift.ts:26"
-    },
-    {
-     "path": "animationProfile:targetAverageCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/swift.ts:27"
-    },
-    {
-     "path": "animationProfile:attackerSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/swift.ts:28"
-    },
-    {
-     "path": "animationProfile:targetSpriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/swift.ts:29"
-    },
-    {
-     "path": "animationProfile:targetInitialOffset",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/swift.ts:30"
-    },
-    {
-     "path": "animationProfile:starSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/swift.ts:31"
-    },
-    {
-     "path": "animationProfile:targetShakeTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/swift.ts:32"
-    },
-    {
-     "path": "animationProfile:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/swift.ts:33"
-    },
-    {
-     "path": "animationProfile:immutableGameplayState",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/swift.ts:34"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": null,
-   "carrierOccurrences": 4143,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": false,
-   "providerNeeds": [
-    "E-TASK"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-E-TASK"
-  },
-  {
    "move": "MOVE_THRASH",
    "id": 37,
    "name": "THRASH",
@@ -18194,7 +16358,7 @@
     "H_RANDOM"
    ],
    "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:4117",
+   "config": "src/animation/sceneOnPresentation.ts:4123",
    "needs": [
     "C"
    ],
@@ -18213,6 +16377,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "C"
    ],
@@ -18226,252 +16391,6 @@
    "group": "PROVIDER-C"
   },
   {
-   "move": "MOVE_THUNDERBOLT",
-   "id": 85,
-   "name": "THUNDERBOLT",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.01617772108843538,
-   "config": "src/animation/sceneOnPresentation.ts:2916",
-   "needs": [
-    "B",
-    "F-AFFINE"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:bolts (ThunderboltAllocation {slot,matrixNum,order} thunderbolt.ts:9)",
-     "cites": [
-      "src/animation/thunderbolt.ts:13"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationProfile:bolts (ThunderboltAllocation {slot,matrixNum,order} thunderbolt.ts:9)",
-     "cites": [
-      "src/animation/thunderbolt.ts:13"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationGeometry:targetBattleCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/thunderbolt.ts:6"
-    },
-    {
-     "path": "animationGeometry:targetPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/thunderbolt.ts:7"
-    },
-    {
-     "path": "animationProfile:bolts",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/thunderbolt.ts:13"
-    },
-    {
-     "path": "animationProfile:orb",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/thunderbolt.ts:14"
-    },
-    {
-     "path": "animationProfile:flashes",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/thunderbolt.ts:15"
-    },
-    {
-     "path": "animationProfile:arcs",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/thunderbolt.ts:16"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 26491,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "F-AFFINE"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-F-AFFINE"
-  },
-  {
-   "move": "MOVE_TRICK",
-   "id": 271,
-   "name": "TRICK",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0017644557823129248,
-   "config": "src/animation/sceneOnPresentation.ts:3909",
-   "needs": [
-    "E-TASK"
-   ],
-   "blockers": [
-    {
-     "code": "E-TASK",
-     "text": "animationProfile:attacker.stretchTaskSlot (CreateTask slot / live task table)",
-     "cites": [
-      "src/animation/trick.ts:69"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationProfile:bagSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/trick.ts:66"
-    },
-    {
-     "path": "animationProfile:attacker",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/trick.ts:67"
-    },
-    {
-     "path": "animationProfile:attacker.spriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/trick.ts:68"
-    },
-    {
-     "path": "animationProfile:attacker.stretchTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/trick.ts:69"
-    },
-    {
-     "path": "animationProfile:attacker.shakeTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/trick.ts:70"
-    },
-    {
-     "path": "animationProfile:target",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/trick.ts:72"
-    },
-    {
-     "path": "animationProfile:target.spriteSlot",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/trick.ts:73"
-    },
-    {
-     "path": "animationProfile:target.stretchTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/trick.ts:74"
-    },
-    {
-     "path": "animationProfile:target.shakeTaskSlot",
-     "classes": [
-      "E-TASK"
-     ],
-     "status": "blocked: E-TASK",
-     "cite": "src/animation/trick.ts:75"
-    },
-    {
-     "path": "animationProfile:orientation",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/trick.ts:77"
-    },
-    {
-     "path": "animationProfile:gameplayRng",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/trick.ts:79"
-    },
-    {
-     "path": "animationProfile:immutableGameplayState",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/trick.ts:80"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": null,
-   "carrierOccurrences": 3501,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": false,
-   "providerNeeds": [
-    "E-TASK"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "EXACT-PLAN",
-    "player": "EXACT-PLAN"
-   },
-   "group": "PROVIDER-E-TASK"
-  },
-  {
    "move": "MOVE_TRI_ATTACK",
    "id": 161,
    "name": "TRI ATTACK",
@@ -18479,7 +16398,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0029443027210884344,
-   "config": "src/animation/sceneOnPresentation.ts:2896",
+   "config": "src/animation/sceneOnPresentation.ts:2898",
    "needs": [
     "B",
     "F-AFFINE",
@@ -18614,8 +16533,11 @@
    "carrierOccurrences": 5554,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE"
+   ],
    "providerNeeds": [
-    "F-AFFINE",
     "D-PAL"
    ],
    "palettePlan": false,
@@ -18625,114 +16547,7 @@
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
    },
-   "group": "MULTI"
-  },
-  {
-   "move": "MOVE_UPROAR",
-   "id": 253,
-   "name": "UPROAR",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3764",
-   "needs": [
-    "B",
-    "F-AFFINE"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationInputs:spriteOrder (sSpriteOrder / live sort keys)",
-     "cites": [
-      "src/animation/uproar.ts:13"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationInputs:attackerMatrixSlot (affine matrix allocator)",
-     "cites": [
-      "src/animation/uproar.ts:14"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationInputs:attackerCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/uproar.ts:8"
-    },
-    {
-     "path": "animationInputs:attackerYDelta",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/uproar.ts:10"
-    },
-    {
-     "path": "animationInputs:ringSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/uproar.ts:11"
-    },
-    {
-     "path": "animationInputs:noteSlots",
-     "classes": [
-      "A-SLOT"
-     ],
-     "status": "slot-plan (recipe)",
-     "cite": "src/animation/uproar.ts:12"
-    },
-    {
-     "path": "animationInputs:spriteOrder",
-     "classes": [
-      "B"
-     ],
-     "status": "first-body-order",
-     "cite": "src/animation/uproar.ts:13"
-    },
-    {
-     "path": "animationInputs:attackerMatrixSlot",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/uproar.ts:14"
-    },
-    {
-     "path": "animationInputs:ringMatrixSlots",
-     "classes": [
-      "F-AFFINE"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/uproar.ts:15"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "full",
-   "carrierOccurrences": 535,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "F-AFFINE"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-F-AFFINE"
+   "group": "PROVIDER-D-PAL"
   },
   {
    "move": "MOVE_WATER_PULSE",
@@ -18742,7 +16557,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.004705215419501133,
-   "config": "src/animation/sceneOnPresentation.ts:3849",
+   "config": "src/animation/sceneOnPresentation.ts:3855",
    "needs": [
     "B",
     "C",
@@ -19053,10 +16868,13 @@
    "carrierOccurrences": 7345,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
+   "lentConstants": [
+    "B",
+    "F-AFFINE",
+    "E-TASK"
+   ],
    "providerNeeds": [
     "C",
-    "F-AFFINE",
-    "E-TASK",
     "D-PAL",
     "D-BG"
    ],
@@ -19077,7 +16895,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.0003401360544217687,
-   "config": "src/animation/sceneOnPresentation.ts:3890",
+   "config": "src/animation/sceneOnPresentation.ts:3896",
    "needs": [
     "B",
     "C",
@@ -19196,9 +17014,12 @@
    "carrierOccurrences": 567,
    "stagedOrientations": "bilateral",
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "C",
+   "lentConstants": [
+    "B",
     "E-TASK"
+   ],
+   "providerNeeds": [
+    "C"
    ],
    "palettePlan": false,
    "activationMeasured": false,
@@ -19207,7 +17028,7 @@
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
    },
-   "group": "MULTI"
+   "group": "PROVIDER-C"
   },
   {
    "move": "MOVE_WHIRLWIND",
@@ -19217,7 +17038,7 @@
     "H_BASIC"
    ],
    "weightShare": 0.0015306122448979589,
-   "config": "src/animation/sceneOnPresentation.ts:2507",
+   "config": "src/animation/sceneOnPresentation.ts:2509",
    "needs": [
     "X-SWITCH"
    ],
@@ -19227,7 +17048,7 @@
      "text": "same forced-switch continuation as Roar (slide-off on the target)",
      "cites": [
       "reference/pokeemerald/data/battle_scripts_1.s:3324-3338",
-      "src/animation/sceneOnPresentation.ts:2507"
+      "src/animation/sceneOnPresentation.ts:2509"
      ]
     }
    ],
@@ -19236,6 +17057,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "X-SWITCH"
    ],
@@ -19256,7 +17078,7 @@
     "H_BUFFER"
    ],
    "weightShare": 0.002912414965986394,
-   "config": "src/animation/sceneOnPresentation.ts:2740",
+   "config": "src/animation/sceneOnPresentation.ts:2742",
    "needs": [
     "E-TASK",
     "D-OAM",
@@ -19429,8 +17251,11 @@
     }
    ],
    "orderFirstBodyOnly": true,
-   "providerNeeds": [
+   "lentConstants": [
     "E-TASK",
+    "B"
+   ],
+   "providerNeeds": [
     "D-OAM",
     "D-PAL",
     "D-BG",
@@ -19473,6 +17298,7 @@
    ],
    "staleCorrections": [],
    "orderFirstBodyOnly": false,
+   "lentConstants": [],
    "providerNeeds": [
     "C"
    ],
@@ -19484,111 +17310,6 @@
     "player": "EXACT-PLAN"
    },
    "group": "PROVIDER-C"
-  },
-  {
-   "move": "MOVE_ZAP_CANNON",
-   "id": 192,
-   "name": "ZAP CANNON",
-   "hostClass": [
-    "H_BUFFER"
-   ],
-   "weightShare": 0.0003720238095238094,
-   "config": "src/animation/sceneOnPresentation.ts:2926",
-   "needs": [
-    "B",
-    "F-AFFINE"
-   ],
-   "blockers": [
-    {
-     "code": "B",
-     "text": "animationProfile:ball (ZapCannonAllocation {slot,matrixNum,order} zapCannon.ts:14)",
-     "cites": [
-      "src/animation/zapCannon.ts:25"
-     ]
-    },
-    {
-     "code": "F-AFFINE",
-     "text": "animationProfile:ball (ZapCannonAllocation {slot,matrixNum,order} zapCannon.ts:14)",
-     "cites": [
-      "src/animation/zapCannon.ts:25"
-     ]
-    }
-   ],
-   "notes": [],
-   "staleCorrections": [],
-   "consumedInputs": [
-    {
-     "path": "animationGeometry:attackerPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/zapCannon.ts:10"
-    },
-    {
-     "path": "animationGeometry:targetPictureCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/zapCannon.ts:11"
-    },
-    {
-     "path": "animationGeometry:targetBattleCenter",
-     "classes": [
-      "A"
-     ],
-     "status": "derivable-now",
-     "cite": "src/animation/zapCannon.ts:12"
-    },
-    {
-     "path": "animationProfile:ball",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/zapCannon.ts:25"
-    },
-    {
-     "path": "animationProfile:sparks",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/zapCannon.ts:26"
-    },
-    {
-     "path": "animationProfile:arcs",
-     "classes": [
-      "A-SLOT",
-      "F-AFFINE",
-      "B"
-     ],
-     "status": "blocked: F-AFFINE",
-     "cite": "src/animation/zapCannon.ts:27"
-    }
-   ],
-   "staleFieldCites": 0,
-   "slotPlanNeeded": true,
-   "orderKind": "seed",
-   "carrierOccurrences": 681,
-   "stagedOrientations": "bilateral",
-   "orderFirstBodyOnly": true,
-   "providerNeeds": [
-    "F-AFFINE"
-   ],
-   "palettePlan": false,
-   "activationMeasured": false,
-   "activationReceipts": [],
-   "ownBodyOrder": {
-    "opponent": "NEEDS-KEYS",
-    "player": "NEEDS-KEYS"
-   },
-   "group": "PROVIDER-F-AFFINE"
   }
  ]
 }

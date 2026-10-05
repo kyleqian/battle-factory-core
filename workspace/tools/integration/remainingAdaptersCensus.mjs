@@ -24,8 +24,8 @@ const nameOf = Object.fromEntries(moveRows.map((m) => [m.move, m.name]));
 
 // ---- scope sets ------------------------------------------------------------------------------------------------------
 // In-flight batches named by the supervisor (ANIMATION_INTEGRATION_PROGRESS.md "Running: order-consumer batch" + prep6 READY list).
-const ORDER_BATCH = ["EMBER", "DRAGON_RAGE", "FLAMETHROWER", "HEAL_BELL", "LEAF_BLADE", "ROCK_THROW", "BLAZE_KICK", "PERISH_SONG"];
-const PREP6_READY = ["ROCK_TOMB", "SAFEGUARD", "SWEET_SCENT", "SELF_DESTRUCT", "KNOCK_OFF", "SWALLOW", "FAINT_ATTACK"];
+const ORDER_BATCH = []; // all landed (live = 198); kept for the in-flight bucket, which is now empty
+const PREP6_READY = []; // all landed
 const liveSet = new Set(live.implementedAdapters.map((x) => x.move));
 const inflight = new Map();
 for (const m of ORDER_BATCH) inflight.set(`MOVE_${m}`, "order-consumer batch");
@@ -40,6 +40,7 @@ const inflightIn = [...accepted].filter((m) => !liveSet.has(m) && inflight.has(m
 const remaining = [...accepted].filter((m) => !liveSet.has(m) && !inflight.has(m)).sort();
 if (accepted.size !== live.currentAcceptedFactoryMoves) throw new Error(`accepted ${accepted.size} != live-status currentAcceptedFactoryMoves ${live.currentAcceptedFactoryMoves}`);
 for (const m of liveSet) if (!accepted.has(m)) throw new Error(`live adapter ${m} is not an accepted Factory move`);
+if (liveIn.length !== live.implementedCount) throw new Error(`live ${liveIn.length} != implementedCount ${live.implementedCount}`);
 if (liveIn.length + inflightIn.length + remaining.length !== accepted.size) throw new Error("live + in-flight + remaining != accepted");
 if (new Set([...liveIn, ...inflightIn, ...remaining]).size !== accepted.size) throw new Error("a move is counted twice");
 
@@ -76,7 +77,7 @@ const share = (m) => (W[m] ?? 0) / wTotal; // fraction of all Factory move uses 
 // ---- provider vocabulary -----------------------------------------------------------------------------------------------
 // Needs codes. B is satisfied (first body) by the wired provider; A / A-SLOT are recipe work. Everything else is a blocker.
 const CODES = {
-  B: "sSpriteOrder: satisfied for the battle's FIRST body only (spriteOrderForSlots + occupied prefix); later bodies need the cross-body plan tracker",
+  B: "sSpriteOrder: SATISFIED by the lend (src/engine/liveSpriteOrderHost.ts + spriteOrderProvider.ts) incl. the cross-body tracker while the history is modelled; falls back after an unmodelled graphics command",
   C: "Random2 surrogate (presentation-only gRng2Value stream)",
   "F-AFFINE": "affine matrix allocator (AllocOamMatrix ids / matrixBitmap)",
   "E-TASK": "task-slot allocator (CreateTask slots / live task table)",
@@ -98,9 +99,10 @@ const CODES = {
   "X-TWOTURN": "semi-invulnerable two-turn state (hidden battler between turns)",
 };
 const A6 = ["D-OAM", "D-VRAM", "D-SCAN", "D-BG", "D-PAL", "D-TILE", "F-AUDIO"];
-const BUNDLES = { "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)": A6, "allocator plan v2 (affine+task)": ["F-AFFINE", "E-TASK"] };
+const BUNDLES = { "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)": A6 };
 const SMALL = new Set(["X-DISABLE", "X-REDUCER", "X-SCHED", "E-OUT", "X-POWER"]);
 const OUT = new Set(["X-AGE"]);
+const LENT = new Set(["B", "F-AFFINE", "E-TASK"]);
 
 // ---- per-move overrides ------------------------------------------------------------------------------------------------
 const SCP = "src/animation/sceneOnPresentation.ts";
@@ -272,8 +274,11 @@ for (const m of remaining) {
     row.notes.push("accepted as a LiveInputs config (docs/animation-integration-merged-readiness.json); not in the older triage docs");
   } else throw new Error(`no data source for ${m}`);
   row.config && checkCite(row.config);
-  row.orderFirstBodyOnly = row.needs.includes("B");
-  row.providerNeeds = row.needs.filter((n) => n !== "B");
+  // Production TODAY supplies these (gated on the lent order, so first bodies and tracked later bodies; docs/allocator-plan-v2-evidence.md):
+  //   B = sSpriteOrder via the lend + cross-body tracker; F-AFFINE/E-TASK = the constant 0x6 bitmap / no-task baseline at every known-entry body.
+  row.orderFirstBodyOnly = row.needs.includes("B"); // kept key name: now means "consumes the lent order"
+  row.lentConstants = row.needs.filter((n) => LENT.has(n));
+  row.providerNeeds = row.needs.filter((n) => !LENT.has(n));
   row.palettePlan = palPlanMoves.has(m);
   row.activationMeasured = activationNames.has(m) || !!actByMove[m];
   row.activationReceipts = actByMove[m] ?? [];
@@ -281,13 +286,14 @@ for (const m of remaining) {
   const p = row.providerNeeds;
   row.group = p.length === 0 ? "READY-NOW"
     : p.every((x) => OUT.has(x)) ? "OUT"
-    : p.length === 1 ? (SMALL.has(p[0]) ? "SMALL-INPUT" : `PROVIDER-${p[0]}`)
+    : p.every((x) => SMALL.has(x)) ? "SMALL-INPUT"
+    : p.length === 1 ? `PROVIDER-${p[0]}`
     : "MULTI";
   rows.push(row);
 }
 
 // ---- provider ranking --------------------------------------------------------------------------------------------------
-const providers = Object.keys(CODES).filter((c) => c !== "B");
+const providers = Object.keys(CODES).filter((c) => !LENT.has(c));
 const need = (r) => new Set(r.providerNeeds);
 function unlocked(provided) { return rows.filter((r) => r.providerNeeds.length && r.providerNeeds.every((n) => provided.has(n))); }
 function cover(provided) {
@@ -341,37 +347,29 @@ const PROVIDER_META = {
   "X-DISABLE": { cost: "add a DisableStruct counter snapshot to the MOVE_ANIMATION request (rules context already holds the counters)", claim: "exact (presentation-only copy of rules state)" },
   "X-POWER": { cost: "emit the dynamic gBattleMovePower/gDynamicBasePower on the request instead of the static table power (src/engine/battleScriptHitChainOpcode.ts:2285)", claim: "exact; must not alter damage" },
 };
-const BATCH_PICKS = [
-  { id: "N1", title: "READY-NOW recipe batch: body-only views of the canonical controller moves + dense-measured buffer moves", moves: ["AERIAL_ACE", "QUICK_ATTACK", "ICE_PUNCH", "FIRE_BLAST", "DRAGON_DANCE", "FAKE_TEARS", "SLEEP_TALK", "FEATHER_DANCE"],
-    prep: {
-      AERIAL_ACE: "measured here (census-activation): act 81/77, reducer age at activation 42/38 (window 46..281, appStage presentationAge 7 at frame 46), script 49 frames; missing: ordinary-route request/HP route, #142 shadow row choice (age basis +42/+38 or ageOffset), species-gate/HUD retirement under !liveField",
-      QUICK_ATTACK: "measured here: act 83/79, age at activation 44/40, script 32 frames; missing: afterimage slot 3/4 tie audit, route check",
-      ICE_PUNCH: "measured here (staged, direct mGBA): act 1966 opponent / 2339 player == accepted window start (row 0), script 183 frames; missing: staged-boundary only (no BattleLab scenario) so an ordinary-route activation and the crystal slot plan (A-SLOT) need one probe each",
-      FIRE_BLAST: "prep6 measured (215/215..411, 1147/1147..1343, row 0, 197 frames; opponent needs the 1200-frame input tail); missing: first-body order (full 64-pool permutation, FIRE_BLAST_ORDER_SEED fireBlast.ts:34) from spriteOrderForSlots, later body falls back",
-      DRAGON_DANCE: "prep6 measured (74/74..215 / 78/78..219, row 0, 142 frames); missing: 1-bit order from the first-body provider (relative order of slots 3/4 at age 20), later body falls back",
-      FAKE_TEARS: "measured here: act 79/75, visual window 80..166 / 76..162 (row -1, no map row; window ends 4 frames after the script end), script 83 frames; missing: attackerPictureBounds from liveBattlerAnchors, confirm the renderer ignores controllerPresentation under !liveField",
-      SLEEP_TALK: "measured here: act 4570/1356 == window start (row 0), body 186 frames; missing: renderer HUD block behind !liveField (battleScene.ts:34256 branch), attacker sleep status in the displayed field, called-move second request as Metronome",
-      FEATHER_DANCE: "measured here: act 83/79, age at activation 44/40, script 168 frames; missing: ordinary-route check (feathers use battlePositionCenter + ageOffset only)",
-    } },
-  { id: "N2", title: "one-named-input batch: single-orientation evidence + dynamic power + two reducer parameterizations", moves: ["ROCK_SLIDE", "DOUBLE_TEAM", "MAGNITUDE", "REVERSAL", "FIRE_PUNCH", "ENDEAVOR", "SPARK", "PAIN_SPLIT"],
-    prep: {
-      ROCK_SLIDE: "measured here (staged): opponent act 1967 == window start (row 0), script 137 (window +37 tail); player act 2340 behind the staged AI Double Team body, 79 in the lab scenario (first body, script 137); missing: accepted player-attacker evidence (animation lane) and first-body order (profile spriteOrderSeed sceneOnPresentation.ts:13474)",
-      DOUBLE_TEAM: "prep6 measured player only (2336/2337..2566, row -1, 7-frame tail); missing: opponent-attacker evidence (staged AI used Rock Slide) and the frontClone order bit",
-      MAGNITUDE: "measured here: act == window start for all four bodies (intense 195/191, regular 411; row 0); missing: dynamic power on the request (X-POWER) and first-body order",
-      REVERSAL: "measured here: act == window start (404 / 451, row 0, 173 frames); missing: reducer toggle fix + A>1 tests (reversal-shake-evidence.json), dynamic power on the request",
-      FIRE_PUNCH: "measured here (staged): opponent act 1967, player 2340, script 101; UNRESOLVED mismatch with the accepted windows (2081 / 2313); missing: re-derive the accepted window phase, burn/faint outcome input or body-only split",
-      ENDEAVOR: "measured here (staged): player act 2339 vs window 2345..2485 (row -6, age at activation -8, 67-frame script, +79 tail); opponent evidence missing (AI used Rock Slide); missing: HP before/after + stale power input",
-      SPARK: "measured here: act 74/70 vs window 83/79 (row -9), window ends 2 frames before the script end; missing: flashing*Advances derivation and hardwareTieSlotOrder from the first-body order",
-      PAIN_SPLIT: "prep6 measured (445/445..525 / 446/446..526, row 0, 81 rows); missing: per-side coords.yOffset into the reducer",
-    } },
-  { id: "N3", title: "first provider build: allocator plan v2 (affine matrix + task slots), exact from a known baseline", moves: ["THUNDERBOLT", "FRUSTRATION", "SWIFT", "HORN_DRILL", "SEISMIC_TOSS", "TRICK", "AURORA_BEAM", "STOCKPILE"],
-    prep: Object.fromEntries(["THUNDERBOLT", "FRUSTRATION", "SWIFT", "HORN_DRILL", "SEISMIC_TOSS", "TRICK", "AURORA_BEAM", "STOCKPILE"].map((m) => {
-      const slug = m.toLowerCase().replaceAll("_", "-");
-      const lab = fs.readdirSync("tools/battle-lab").filter((f) => f.startsWith(`mechanic-${slug}`)).length;
-      return [m, `unmeasured: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe shared by the batch), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe (${lab} BattleLab scenario file${lab === 1 ? "" : "s"} in tools/battle-lab)`];
-    })) },
-];
+// Batches are DERIVED from the groups (no hard-coded move lists: N1-N3 landed and every pick is recomputed each run).
+const BATCH_PICKS = (() => {
+  const byGroup = (g) => rows.filter((r) => r.group === g).sort((x, y) => y.weightShare - x.weightShare).map((r) => r.move.replace("MOVE_", ""));
+  const top = greedy[0];
+  const mk = (id, title, names, why) => ({ id, title, moves: names, prep: Object.fromEntries(names.map((n) => [n, why(n)])) });
+  const rowOf = (n) => rows.find((r) => r.move === `MOVE_${n}`);
+  const short = (n) => { const r = rowOf(n); return r.activationReceipts.length ? `activation measured (${r.activationReceipts.length} receipt${r.activationReceipts.length === 1 ? "" : "s"}); ` : "no activation receipt; "; };
+  const blk = (n) => rowOf(n).blockers.map((b) => `${b.code}: ${b.text}`).join(" | ") || "none (recipe work only)";
+  return [
+    mk("P1", "READY-NOW (derived): no provider dependency", byGroup("READY-NOW"), (n) => short(n) + blk(n)),
+    mk("P2", "SMALL-INPUT (derived): one named input / reducer parameter each (docs/next-adapters-prep10.md measures them)", byGroup("SMALL-INPUT"), (n) => short(n) + blk(n)),
+    mk("P3", `first provider build (derived from the greedy order): ${top ? top.provider : "none"}`, top ? top.newNames : [], (n) => short(n) + blk(n)),
+  ].filter((b) => b.moves.length);
+})();
 
+const STALE_CODES = [
+  "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
+  "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
+  "D-PAL: prep9 (docs/next-adapters-prep9.md) showed Absorb/Mega Drain/Giga Drain/Dream Eater/Sunny Day consume only age-derived blend schedules, no snapshot; those five are not in the remaining set. D-PAL on the remaining moves is NOT re-measured here and stays a blocker",
+  "C (Random2) stays a blocker: gRng2Value is not reconstructible (another worker is evidencing trackability)",
+  "Batches N1-N3 (hard-coded) all landed except the one-input moves; batch picks are now derived from the groups each run",
+  "SMALL-INPUT now means every needed code is a small input (X-REDUCER, X-POWER, E-OUT, X-DISABLE, X-SCHED), several allowed",
+];
 // ---- summary -----------------------------------------------------------------------------------------------------------
 const groupCount = {};
 for (const r of rows) { const g = r.group.startsWith("PROVIDER-") ? "PROVIDER-x" : r.group; (groupCount[g] ??= { moves: 0, weightPct: 0 }); groupCount[g].moves++; groupCount[g].weightPct += r.weightShare * 100; }
@@ -400,7 +398,7 @@ const batches = BATCH_PICKS.map((b) => {
 const batchSeen = batches.flatMap((b) => b.moves.map((m) => m.move));
 if (new Set(batchSeen).size !== batchSeen.length) throw new Error("a move is in two batches");
 for (const r of ranking) r.meta = PROVIDER_META[r.provider] ?? null;
-const out = { schema: "remaining-adapters-census/v1", generatedBy: "tools/integration/remainingAdaptersCensus.mjs", inputs: ["docs/animation-integration-live-status.json", "docs/animation-integration-readiness.json", "docs/animation-integration-merged-readiness.json", "tools/integration/fixtures/h-buffer-triage.json", "tools/integration/fixtures/sprite-order-body-plans-ext.json", "src/data/gen/battle-frontier-mons.json", "src/data/gen/factory-round-policy.json"], liveStatusImplementedCount: live.implementedCount, inFlightMoves: Object.fromEntries([...inflight].filter(([m]) => accepted.has(m)).map(([m, k]) => [m, liveSet.has(m) ? "now live" : k])), summary: { ...summary, triageCiteDrift: triageDrift.length, triageCiteDriftList: triageDrift }, codes: CODES, bundles: BUNDLES, ranking, greedy, batches, rows };
+const out = { schema: "remaining-adapters-census/v1", generatedBy: "tools/integration/remainingAdaptersCensus.mjs", inputs: ["docs/animation-integration-live-status.json", "docs/animation-integration-readiness.json", "docs/animation-integration-merged-readiness.json", "tools/integration/fixtures/h-buffer-triage.json", "tools/integration/fixtures/sprite-order-body-plans-ext.json", "src/data/gen/battle-frontier-mons.json", "src/data/gen/factory-round-policy.json"], liveStatusImplementedCount: live.implementedCount, staleCodesCorrected: STALE_CODES, inFlightMoves: Object.fromEntries([...inflight].filter(([m]) => accepted.has(m)).map(([m, k]) => [m, liveSet.has(m) ? "now live" : k])), summary: { ...summary, triageCiteDrift: triageDrift.length, triageCiteDriftList: triageDrift }, codes: CODES, bundles: BUNDLES, ranking, greedy, batches, rows };
 export { out, rows, summary, ranking, greedy, batches, CODES };
 
 if (process.argv.includes("--write")) fs.writeFileSync("tools/integration/fixtures/remaining-adapters-census.json", JSON.stringify(out, null, 1) + "\n");
