@@ -377,5 +377,15 @@
     }
    ]
   }
- ]
+ ],
+ "gates": {
+  "fullSuite": "1493 files passed / 11971 tests passed, 44 files / 223 skipped on dfeb57f5e (src tree unchanged afterward); the single failure (tests/battleCommandPresentation.test.ts hand-built expected projection lacked the new presentation-only personality) was fixed test-only and that file re-run green (32 tests); suite not repeated",
+  "focused": "liveNext5MoveAdapters + animationBoundaryRatchet + factoryAnimationInventory + liveMoveAnimationPalette + playableAnimationIntegration + liveShadowRows: 6 files / 70 tests passed",
+  "smoke": "8 files / 448 tests passed",
+  "typecheck": "pass",
+  "build": "pass",
+  "animationCoverage": "pass",
+  "animationAudit": "pass",
+  "shadowScan": "291 rows, 136 ids, 0 mismatches"
+ }
 }
