@@ -8,6 +8,37 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## vite-node CLIs: `import.meta.url === argv[1]` main checks silently no-op
+
+- **What:** under `npx vite-node tool.ts -- args` the usual main-module
+  check is false, so `tools/integration/liveAdapterFramebuffer.ts`'s CLI
+  exits 0 with no output; new tools have to be split into a library plus a
+  `...Run.ts` entry (or call the exported function from a wrapper).
+- **Hits:** 2 (2026-10-05 post-KO tracker worker ~3 min; post-KO audit
+  worker ~4 min).
+- **Fix:** run CLIs with `node --experimental-strip-types`, or make the
+  check vite-node-aware (compare resolved file paths, not URLs).
+
+## Sprite-order lab probes mask bit 0 of every symbol address
+
+- **What:** `tools/integration/spriteOrderUncoveredLabProbe.py` (and its
+  sibling probes) clear bit 0 of every `nm` address, so the
+  `gAnimScriptActive` column (bool8 at odd 0x020383fd) actually reads
+  `sAnimFramesToWait` (0x020383fc). Activation flags there come from the
+  script-pointer jump, so results stand, but the column is mislabelled.
+  `postkoStateProbe.py` keeps bit 0 for data symbols.
+- **Hits:** 1 (2026-10-05 post-KO audit worker, ~5 min).
+- **Fix:** mask bit 0 only for Thumb code symbols.
+
+## BattleLab Scene ON: faint / send-out messages wait for A presses
+
+- **What:** Scene ON BattleLab scenarios that KO a mon need two extra A
+  presses before turn 2 (the faint and send-out messages are
+  button-gated); a script without them stalls at the message.
+- **Hits:** 1 (2026-10-05 post-KO audit worker, ~3 min).
+- **Fix:** document in tools/battle-lab/README.md (continuous low-duty A
+  spam self-times, as for the post-KO switch-in papercut).
+
 ## `generatedCommandAnimationReplay` cannot drive the forced-replacement party screen
 
 - **What:** `tools/integration/generatedCommandAnimationReplay.ts` waits for
