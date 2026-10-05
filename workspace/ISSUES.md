@@ -17,6 +17,25 @@ backlog.
 
 # Open
 
+## #144 — Leaf Blade (live) shifts every non-ONIX opponent target 1 px at ages 0-11; target-swap audit leftovers (S10A, found 2026-10-05)
+
+- **Symptom (affects play today):** live Leaf Blade (348) against an opponent GOLEM leaves
+  11,843 px on rows 0-11 (212/224), first body or post-KO alike; STEELIX 12,202 px; ONIX
+  (the accepted fixture target) exact. Residual = the target's own tones shifted 1 px.
+- **Mechanism:** `src/animation/leafBlade.ts:231-233` returns `x2 = 1` for every opponent
+  target at ages <= 11; the ROM holds the target's front-idle x2, which is 1 only for ONIX
+  (0 for GOLEM, GRAVELER, GENGAR, SHUCKLE, ABSOL, ZANGOOSE, SWELLOW, STEELIX).
+- **Fix shape:** pass `targetIdleX2` from `liveBattlerAnchors(...).frontIdleRest.x2` into the
+  Leaf Blade config (as Crabhammer/Psybeam/Magical Leaf do) and thread it to
+  `leafBladeDisplayedTargetX2AtAge`; then drop 348 from `POSTKO_LEND_EXCLUDED_MOVE_IDS`
+  (`liveSpriteOrderHost.ts`) after re-proving `postko-leaf-blade-player.json`.
+- **Audit leftovers (`docs/next-adapters-prep11.md` Part A, `audit-golem-summary.json`):**
+  swapping GOLEM in for ONIX across 58 accepted ONIX-target fixtures: 22 exact; Dragon Rage
+  2,115 px at ages 86-96 (fireball in flight: a second species-dependent target input,
+  untriaged); ~9 more residuals and 23 errors attributed to the fixed accepted window not
+  matching the swapped scenario's timing (untriaged — each needs a source-derived window).
+- Evidence: `tools/integration/fixtures/prep11/leaf-*.json`, supervisor rerun 2026-10-05.
+
 ## #143 — CASTFORM non-normal forms (weather) are not modelled (S10A; normal-form residual FIXED 2026-10-05)
 
 - **Fixed (`55d1ef1dd`):** the normal-form Y placement (player back delta 0 from
