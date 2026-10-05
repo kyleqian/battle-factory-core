@@ -1,0 +1,4661 @@
+{
+ "schema": "sprite-order-policy-gaps-rely/v1",
+ "bodiesWithKeysGroups": 162,
+ "verdicts": {
+  "REL-Y-STATIC (single geometry: unconfirmed)": 121,
+  "NEEDS-KEYS": 36,
+  "REL-Y-STATIC (confirmed: >=2 absolute geometries)": 5
+ },
+ "bodies": {
+  "108:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     16,
+     16,
+     0,
+     0
+    ],
+    [
+     30,
+     30,
+     24,
+     24,
+     18,
+     18,
+     12,
+     12,
+     6,
+     6,
+     0,
+     0
+    ]
+   ]
+  },
+  "108:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     16,
+     16,
+     0,
+     0
+    ],
+    [
+     30,
+     30,
+     24,
+     24,
+     18,
+     18,
+     12,
+     12,
+     6,
+     6,
+     0,
+     0
+    ]
+   ]
+  },
+  "11:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     33,
+     0
+    ]
+   ]
+  },
+  "11:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     33,
+     0
+    ]
+   ]
+  },
+  "126:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 11,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ]
+   ]
+  },
+  "126:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 11,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     52,
+     37,
+     29,
+     5,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ],
+    [
+     50,
+     50,
+     0
+    ]
+   ]
+  },
+  "12:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     64,
+     0
+    ]
+   ]
+  },
+  "12:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     64,
+     0
+    ]
+   ]
+  },
+  "131:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     16,
+     8,
+     0
+    ],
+    [
+     16,
+     8,
+     0
+    ]
+   ]
+  },
+  "131:player": {
+   "scenarios": 3,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     16,
+     8,
+     0
+    ],
+    [
+     16,
+     8,
+     0
+    ]
+   ]
+  },
+  "135:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     18,
+     0
+    ]
+   ]
+  },
+  "135:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     18,
+     0
+    ]
+   ]
+  },
+  "137:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 13,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ]
+   ]
+  },
+  "137:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 13,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     0
+    ]
+   ]
+  },
+  "138:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 5,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     2,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ]
+  },
+  "138:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  "13:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 0,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "13:player": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 0,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "142:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     28,
+     20,
+     4,
+     0
+    ]
+   ]
+  },
+  "142:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     28,
+     20,
+     4,
+     0
+    ]
+   ]
+  },
+  "146:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     6,
+     5,
+     2,
+     2,
+     0,
+     0
+    ],
+    [
+     6,
+     5,
+     2,
+     2,
+     0,
+     0
+    ]
+   ]
+  },
+  "146:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     6,
+     5,
+     2,
+     2,
+     0,
+     0
+    ],
+    [
+     6,
+     5,
+     2,
+     2,
+     0,
+     0
+    ]
+   ]
+  },
+  "161:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     29,
+     0
+    ]
+   ]
+  },
+  "161:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     29,
+     0
+    ]
+   ]
+  },
+  "172:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ]
+  },
+  "172:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ]
+  },
+  "173:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     5,
+     5,
+     0
+    ],
+    [
+     5,
+     5,
+     0
+    ]
+   ]
+  },
+  "173:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     5,
+     5,
+     0
+    ],
+    [
+     5,
+     5,
+     0
+    ]
+   ]
+  },
+  "179:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     3,
+     3,
+     2,
+     2,
+     0,
+     0
+    ]
+   ]
+  },
+  "179:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     3,
+     3,
+     2,
+     2,
+     0,
+     0
+    ]
+   ]
+  },
+  "186:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     8,
+     6,
+     4,
+     3,
+     1,
+     0
+    ]
+   ]
+  },
+  "186:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     8,
+     6,
+     4,
+     3,
+     1,
+     0
+    ]
+   ]
+  },
+  "188:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     46,
+     37,
+     7,
+     0
+    ],
+    [
+     45,
+     29,
+     8,
+     0
+    ],
+    [
+     48,
+     25,
+     18,
+     0
+    ]
+   ]
+  },
+  "188:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     46,
+     37,
+     7,
+     0
+    ],
+    [
+     45,
+     29,
+     8,
+     0
+    ],
+    [
+     48,
+     25,
+     18,
+     0
+    ]
+   ]
+  },
+  "189:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 6,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     21,
+     13,
+     13,
+     8,
+     0
+    ],
+    [
+     17,
+     14,
+     12,
+     3,
+     0
+    ],
+    [
+     14,
+     8,
+     2,
+     2,
+     0
+    ],
+    [
+     21,
+     19,
+     6,
+     2,
+     0
+    ],
+    [
+     30,
+     24,
+     22,
+     20,
+     0
+    ],
+    [
+     15,
+     9,
+     4,
+     4,
+     0
+    ]
+   ]
+  },
+  "189:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 6,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     25,
+     15,
+     8,
+     1,
+     0
+    ],
+    [
+     29,
+     10,
+     4,
+     2,
+     0
+    ],
+    [
+     25,
+     20,
+     14,
+     10,
+     0
+    ],
+    [
+     10,
+     10,
+     10,
+     1,
+     0
+    ],
+    [
+     17,
+     10,
+     10,
+     3,
+     0
+    ],
+    [
+     26,
+     25,
+     16,
+     16,
+     0
+    ]
+   ]
+  },
+  "18:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     40,
+     32,
+     24,
+     16,
+     8,
+     0
+    ]
+   ]
+  },
+  "18:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     40,
+     32,
+     24,
+     16,
+     8,
+     0
+    ]
+   ]
+  },
+  "192:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     18,
+     17,
+     14,
+     12,
+     11,
+     7,
+     4,
+     0
+    ]
+   ]
+  },
+  "192:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     23,
+     16,
+     10,
+     8,
+     7,
+     5,
+     2,
+     0
+    ]
+   ]
+  },
+  "195:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     24,
+     23,
+     22,
+     22,
+     19,
+     15,
+     12,
+     10,
+     9,
+     7,
+     6,
+     3,
+     2,
+     1,
+     1,
+     0
+    ]
+   ]
+  },
+  "195:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     24,
+     23,
+     22,
+     22,
+     19,
+     15,
+     12,
+     10,
+     9,
+     7,
+     6,
+     3,
+     2,
+     1,
+     1,
+     0
+    ]
+   ]
+  },
+  "202:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 5,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     2,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ]
+  },
+  "202:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  "209:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     49,
+     45,
+     40,
+     26,
+     23,
+     9,
+     4,
+     0
+    ]
+   ]
+  },
+  "209:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     49,
+     45,
+     40,
+     26,
+     23,
+     9,
+     4,
+     0
+    ]
+   ]
+  },
+  "213:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     6,
+     5,
+     2,
+     2,
+     0,
+     0
+    ]
+   ]
+  },
+  "213:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     6,
+     5,
+     2,
+     2,
+     0,
+     0
+    ]
+   ]
+  },
+  "213:unattributed": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "215:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     99,
+     97,
+     51,
+     0
+    ],
+    [
+     67,
+     0
+    ],
+    [
+     61,
+     59,
+     0
+    ]
+   ]
+  },
+  "215:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     99,
+     97,
+     51,
+     0
+    ],
+    [
+     67,
+     0
+    ],
+    [
+     61,
+     59,
+     0
+    ]
+   ]
+  },
+  "230:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     15,
+     0
+    ]
+   ]
+  },
+  "230:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     15,
+     0
+    ]
+   ]
+  },
+  "232:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     20,
+     0
+    ]
+   ]
+  },
+  "232:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     20,
+     0
+    ]
+   ]
+  },
+  "236:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     64,
+     48,
+     32,
+     16,
+     0,
+     10
+    ]
+   ]
+  },
+  "236:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     64,
+     48,
+     32,
+     16,
+     0,
+     10
+    ]
+   ]
+  },
+  "237:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     99,
+     0
+    ]
+   ]
+  },
+  "237:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     99,
+     0
+    ],
+    [
+     176,
+     0
+    ]
+   ]
+  },
+  "240:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 39,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     46,
+     0
+    ],
+    [
+     18,
+     0
+    ],
+    [
+     14,
+     0
+    ],
+    [
+     43,
+     0
+    ],
+    [
+     28,
+     0
+    ],
+    [
+     34,
+     0
+    ],
+    [
+     20,
+     0
+    ],
+    [
+     13,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     20,
+     0
+    ],
+    [
+     27,
+     0
+    ],
+    [
+     26,
+     0
+    ],
+    [
+     34,
+     0
+    ],
+    [
+     9,
+     0
+    ],
+    [
+     24,
+     0
+    ],
+    [
+     12,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     34,
+     0
+    ],
+    [
+     49,
+     0
+    ],
+    [
+     27,
+     0
+    ],
+    [
+     14,
+     0
+    ],
+    [
+     49,
+     0
+    ],
+    [
+     53,
+     0
+    ],
+    [
+     13,
+     0
+    ],
+    [
+     45,
+     0
+    ],
+    [
+     32,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     62,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     41,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     49,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     23,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     23,
+     0
+    ],
+    [
+     25,
+     0
+    ]
+   ]
+  },
+  "240:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 39,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     69,
+     0
+    ],
+    [
+     13,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     10,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     13,
+     0
+    ],
+    [
+     15,
+     0
+    ],
+    [
+     5,
+     0
+    ],
+    [
+     18,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     37,
+     0
+    ],
+    [
+     60,
+     0
+    ],
+    [
+     33,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     23,
+     0
+    ],
+    [
+     16,
+     0
+    ],
+    [
+     28,
+     0
+    ],
+    [
+     40,
+     0
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     26,
+     0
+    ],
+    [
+     23,
+     0
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     22,
+     0
+    ],
+    [
+     22,
+     0
+    ],
+    [
+     9,
+     0
+    ],
+    [
+     19,
+     0
+    ],
+    [
+     4,
+     0
+    ],
+    [
+     20,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     37,
+     0
+    ],
+    [
+     62,
+     0
+    ],
+    [
+     19,
+     0
+    ],
+    [
+     30,
+     0
+    ]
+   ]
+  },
+  "242:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     57,
+     0
+    ],
+    [
+     57,
+     0
+    ]
+   ]
+  },
+  "242:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     57,
+     0
+    ],
+    [
+     57,
+     0
+    ]
+   ]
+  },
+  "253:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     39,
+     51,
+     0
+    ],
+    [
+     39,
+     51,
+     0
+    ]
+   ]
+  },
+  "253:player": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     39,
+     51,
+     0
+    ],
+    [
+     39,
+     51,
+     0
+    ]
+   ]
+  },
+  "255:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     168,
+     132,
+     132,
+     84,
+     84,
+     24,
+     24,
+     0
+    ]
+   ]
+  },
+  "255:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     220,
+     220,
+     172,
+     172,
+     112,
+     112,
+     88,
+     0
+    ]
+   ]
+  },
+  "258:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     64,
+     0
+    ]
+   ]
+  },
+  "258:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     64,
+     0
+    ]
+   ]
+  },
+  "260:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     58,
+     55,
+     55,
+     53,
+     51,
+     51,
+     50,
+     50,
+     50,
+     48,
+     46,
+     34,
+     34,
+     28,
+     28,
+     25,
+     25,
+     25,
+     25,
+     23,
+     23,
+     23,
+     21,
+     21,
+     20,
+     16,
+     16,
+     14,
+     14,
+     14,
+     14,
+     12,
+     8,
+     6,
+     6,
+     6,
+     4,
+     0
+    ]
+   ]
+  },
+  "260:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     58,
+     55,
+     55,
+     53,
+     51,
+     51,
+     50,
+     50,
+     50,
+     48,
+     46,
+     34,
+     34,
+     28,
+     28,
+     25,
+     25,
+     25,
+     25,
+     23,
+     23,
+     23,
+     21,
+     21,
+     20,
+     16,
+     16,
+     14,
+     14,
+     14,
+     14,
+     12,
+     8,
+     6,
+     6,
+     6,
+     4,
+     0
+    ]
+   ]
+  },
+  "261:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     31,
+     29,
+     14,
+     18,
+     2,
+     0
+    ]
+   ]
+  },
+  "261:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     31,
+     29,
+     14,
+     18,
+     2,
+     0
+    ]
+   ]
+  },
+  "263:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 6,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ]
+   ]
+  },
+  "263:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 6,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ]
+   ]
+  },
+  "280:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 0,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "280:player": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 0,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "283:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ]
+   ]
+  },
+  "283:player": {
+   "scenarios": 3,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ],
+    [
+     6,
+     6,
+     0,
+     0
+    ]
+   ]
+  },
+  "284:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     39,
+     0
+    ],
+    [
+     39,
+     0
+    ]
+   ]
+  },
+  "288:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     12,
+     7,
+     0,
+     9,
+     2,
+     0
+    ]
+   ]
+  },
+  "288:player": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     12,
+     9,
+     2,
+     7,
+     0,
+     0
+    ]
+   ]
+  },
+  "28:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 6,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     19,
+     16,
+     14,
+     6,
+     0
+    ],
+    [
+     26,
+     15,
+     12,
+     1,
+     0
+    ],
+    [
+     28,
+     25,
+     19,
+     11,
+     0
+    ],
+    [
+     26,
+     26,
+     7,
+     5,
+     0
+    ],
+    [
+     25,
+     17,
+     15,
+     14,
+     0
+    ],
+    [
+     26,
+     15,
+     15,
+     15,
+     0
+    ]
+   ]
+  },
+  "28:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 6,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     20,
+     11,
+     11,
+     8,
+     0
+    ],
+    [
+     18,
+     15,
+     11,
+     3,
+     0
+    ],
+    [
+     15,
+     8,
+     3,
+     1,
+     0
+    ],
+    [
+     22,
+     18,
+     7,
+     2,
+     0
+    ],
+    [
+     30,
+     23,
+     22,
+     20,
+     0
+    ],
+    [
+     15,
+     10,
+     3,
+     3,
+     0
+    ]
+   ]
+  },
+  "291:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 5,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "291:player": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 5,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "299:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ]
+  },
+  "299:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ]
+  },
+  "301:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     26,
+     25,
+     20,
+     7,
+     0
+    ]
+   ]
+  },
+  "301:player": {
+   "scenarios": 5,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 5,
+   "distinctRelativeYVectors": 5,
+   "distinctAbsoluteYFingerprints": 5,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "302:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     16,
+     47,
+     40,
+     40,
+     24,
+     24,
+     7,
+     7,
+     0
+    ]
+   ]
+  },
+  "302:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     16,
+     47,
+     40,
+     40,
+     24,
+     24,
+     7,
+     7,
+     0
+    ]
+   ]
+  },
+  "306:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     20,
+     0
+    ]
+   ]
+  },
+  "306:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     20,
+     0
+    ]
+   ]
+  },
+  "309:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 9,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     39,
+     0
+    ],
+    [
+     40,
+     0
+    ],
+    [
+     32,
+     0
+    ],
+    [
+     33,
+     0
+    ],
+    [
+     47,
+     0
+    ],
+    [
+     33,
+     0
+    ],
+    [
+     40,
+     0
+    ],
+    [
+     32,
+     0
+    ],
+    [
+     40,
+     0
+    ]
+   ]
+  },
+  "309:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 9,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     29,
+     0
+    ],
+    [
+     37,
+     0
+    ],
+    [
+     39,
+     0
+    ],
+    [
+     40,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     38,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     44,
+     0
+    ]
+   ]
+  },
+  "310:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     22,
+     0
+    ]
+   ]
+  },
+  "312:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     48,
+     0
+    ],
+    [
+     33,
+     0
+    ],
+    [
+     15,
+     0
+    ]
+   ]
+  },
+  "312:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     33,
+     0
+    ],
+    [
+     20,
+     0
+    ]
+   ]
+  },
+  "313:opponent": {
+   "scenarios": 4,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "verdict": "REL-Y-STATIC (confirmed: >=2 absolute geometries)",
+   "relativeY": [
+    [
+     8,
+     0
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     8,
+     0
+    ]
+   ]
+  },
+  "313:player": {
+   "scenarios": 5,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 3,
+   "verdict": "REL-Y-STATIC (confirmed: >=2 absolute geometries)",
+   "relativeY": [
+    [
+     8,
+     0
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     8,
+     0
+    ]
+   ]
+  },
+  "315:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ],
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ],
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ]
+   ]
+  },
+  "315:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ],
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ],
+    [
+     126,
+     105,
+     105,
+     63,
+     63,
+     18,
+     18,
+     0
+    ]
+   ]
+  },
+  "323:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     2,
+     2,
+     2,
+     1,
+     0
+    ],
+    [
+     2,
+     2,
+     0,
+     0
+    ],
+    [
+     3,
+     3,
+     2,
+     2,
+     2,
+     1,
+     1,
+     1,
+     1,
+     0
+    ],
+    [
+     16,
+     0
+    ]
+   ]
+  },
+  "323:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 7,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     3,
+     0
+    ],
+    [
+     1,
+     1,
+     1,
+     1,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     1,
+     1,
+     1,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     16,
+     0
+    ],
+    [
+     16,
+     0
+    ]
+   ]
+  },
+  "324:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 21,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     31,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     15,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ]
+  },
+  "324:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 21,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     31,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     15,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ]
+  },
+  "336:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ]
+  },
+  "336:player": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ]
+  },
+  "337:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     80,
+     60,
+     0
+    ]
+   ]
+  },
+  "337:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     20,
+     0
+    ],
+    [
+     26,
+     20,
+     0
+    ]
+   ]
+  },
+  "345:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     8,
+     0
+    ],
+    [
+     35,
+     0
+    ]
+   ]
+  },
+  "345:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     8,
+     0
+    ],
+    [
+     39,
+     0
+    ]
+   ]
+  },
+  "348:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 5,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     9,
+     0
+    ],
+    [
+     10,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     5,
+     0
+    ]
+   ]
+  },
+  "348:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 5,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     12,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     9,
+     0
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     7,
+     0
+    ]
+   ]
+  },
+  "349:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     227,
+     224,
+     146,
+     81,
+     5,
+     0
+    ]
+   ]
+  },
+  "349:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     178,
+     113,
+     37,
+     32,
+     3,
+     0
+    ]
+   ]
+  },
+  "350:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     47,
+     47,
+     5,
+     0
+    ]
+   ]
+  },
+  "350:player": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     47,
+     47,
+     5,
+     0
+    ]
+   ]
+  },
+  "351:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ]
+  },
+  "351:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     0
+    ]
+   ]
+  },
+  "352:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 5,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     47,
+     0
+    ],
+    [
+     20,
+     45,
+     0
+    ],
+    [
+     21,
+     47,
+     0
+    ],
+    [
+     57,
+     0
+    ],
+    [
+     59,
+     0
+    ]
+   ]
+  },
+  "352:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 5,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     43,
+     0
+    ],
+    [
+     84,
+     39,
+     0
+    ],
+    [
+     84,
+     39,
+     0
+    ],
+    [
+     59,
+     0
+    ],
+    [
+     57,
+     0
+    ]
+   ]
+  },
+  "41:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     16,
+     0
+    ]
+   ]
+  },
+  "41:player": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     16,
+     0
+    ]
+   ]
+  },
+  "44:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     57,
+     0
+    ]
+   ]
+  },
+  "44:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     57,
+     0
+    ]
+   ]
+  },
+  "45:opponent": {
+   "scenarios": 3,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ]
+  },
+  "45:player": {
+   "scenarios": 6,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ]
+  },
+  "46:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ]
+  },
+  "46:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     81,
+     41,
+     0
+    ],
+    [
+     81,
+     41,
+     0
+    ]
+   ]
+  },
+  "56:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 27,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     30,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     15,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  "56:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 27,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     30,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     11,
+     0
+    ],
+    [
+     15,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     29,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     31,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     25,
+     0
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     30,
+     0
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  "58:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 12,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     0
+    ]
+   ]
+  },
+  "58:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 12,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     8,
+     0
+    ],
+    [
+     24,
+     0
+    ]
+   ]
+  },
+  "59:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     25,
+     0
+    ],
+    [
+     12,
+     0,
+     0
+    ],
+    [
+     12,
+     0
+    ]
+   ]
+  },
+  "63:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     6,
+     0
+    ],
+    [
+     15,
+     14,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     11,
+     0
+    ]
+   ]
+  },
+  "63:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 5,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     11,
+     8,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     15,
+     0
+    ],
+    [
+     3,
+     1,
+     0
+    ],
+    [
+     18,
+     2,
+     0
+    ]
+   ]
+  },
+  "69:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     25,
+     22,
+     12,
+     0
+    ],
+    [
+     21,
+     18,
+     11,
+     0
+    ],
+    [
+     25,
+     22,
+     12,
+     0
+    ]
+   ]
+  },
+  "69:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     25,
+     22,
+     12,
+     0
+    ],
+    [
+     21,
+     18,
+     11,
+     0
+    ],
+    [
+     25,
+     22,
+     12,
+     0
+    ]
+   ]
+  },
+  "72:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  "72:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  "75:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     37,
+     0
+    ]
+   ]
+  },
+  "75:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     39,
+     0
+    ]
+   ]
+  },
+  "78:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     14,
+     0,
+     0
+    ],
+    [
+     19,
+     12,
+     5,
+     0
+    ],
+    [
+     14,
+     7,
+     4,
+     0
+    ],
+    [
+     14,
+     4,
+     0,
+     0
+    ]
+   ]
+  },
+  "78:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     14,
+     0,
+     0
+    ],
+    [
+     19,
+     12,
+     5,
+     0
+    ],
+    [
+     14,
+     7,
+     4,
+     0
+    ],
+    [
+     14,
+     4,
+     0,
+     0
+    ]
+   ]
+  },
+  "79:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "79:player": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 4,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "7:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     3,
+     2,
+     1,
+     0
+    ],
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ]
+  },
+  "7:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     3,
+     2,
+     1,
+     0
+    ],
+    [
+     62,
+     52,
+     32,
+     20,
+     7,
+     5,
+     0
+    ]
+   ]
+  },
+  "80:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     2,
+     0
+    ]
+   ]
+  },
+  "80:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     2,
+     0
+    ]
+   ]
+  },
+  "85:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "REL-Y-STATIC (confirmed: >=2 absolute geometries)",
+   "relativeY": [
+    [
+     46,
+     44,
+     32,
+     28,
+     26,
+     23,
+     15,
+     0
+    ]
+   ]
+  },
+  "85:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 1,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     46,
+     44,
+     32,
+     28,
+     26,
+     23,
+     15,
+     0
+    ]
+   ]
+  },
+  "8:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     3,
+     2,
+     1,
+     0
+    ],
+    [
+     3,
+     3,
+     0,
+     0
+    ]
+   ]
+  },
+  "8:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 2,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": [
+    [
+     3,
+     2,
+     1,
+     0
+    ],
+    [
+     3,
+     3,
+     0,
+     0
+    ]
+   ]
+  },
+  "90:opponent": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     36,
+     21,
+     4,
+     0
+    ],
+    [
+     18,
+     13,
+     1,
+     0
+    ],
+    [
+     36,
+     21,
+     4,
+     0
+    ]
+   ]
+  },
+  "90:player": {
+   "scenarios": 1,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 1,
+   "verdict": "REL-Y-STATIC (single geometry: unconfirmed)",
+   "relativeY": [
+    [
+     36,
+     21,
+     4,
+     0
+    ],
+    [
+     18,
+     13,
+     1,
+     0
+    ],
+    [
+     36,
+     21,
+     4,
+     0
+    ]
+   ]
+  },
+  "91:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 0,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "91:player": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 0,
+   "onlyEqualPwDifferentY": false,
+   "distinctPlans": 2,
+   "distinctRelativeYVectors": 2,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "NEEDS-KEYS",
+   "relativeY": null
+  },
+  "95:opponent": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "REL-Y-STATIC (confirmed: >=2 absolute geometries)",
+   "relativeY": [
+    [
+     16,
+     0
+    ],
+    [
+     16,
+     0
+    ],
+    [
+     16,
+     0
+    ]
+   ]
+  },
+  "95:player": {
+   "scenarios": 2,
+   "keysGroupsPerBody": 3,
+   "onlyEqualPwDifferentY": true,
+   "distinctPlans": 1,
+   "distinctRelativeYVectors": 1,
+   "distinctAbsoluteYFingerprints": 2,
+   "verdict": "REL-Y-STATIC (confirmed: >=2 absolute geometries)",
+   "relativeY": [
+    [
+     16,
+     0
+    ],
+    [
+     16,
+     0
+    ],
+    [
+     16,
+     0
+    ]
+   ]
+  }
+ }
+}

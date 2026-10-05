@@ -1,0 +1,1265 @@
+{
+ "schema": "sprite-order-policy-gaps-replay/v1",
+ "q1": {
+  "proposed (production table)": {
+   "total": {
+    "edges": 29,
+    "known": 20,
+    "exact": 20,
+    "mismatch": 0,
+    "lent": 20
+   },
+   "perScenario": {
+    "dt-player": {
+     "name": "dt-player",
+     "edges": 2,
+     "known": 2,
+     "exact": 2,
+     "mismatch": 0,
+     "lent": 2
+    },
+    "dt-opponent": {
+     "name": "dt-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 3,
+     "mismatch": 0,
+     "lent": 3
+    },
+    "ft-player": {
+     "name": "ft-player",
+     "edges": 2,
+     "known": 1,
+     "exact": 1,
+     "mismatch": 0,
+     "lent": 1
+    },
+    "ft-opponent": {
+     "name": "ft-opponent",
+     "edges": 3,
+     "known": 1,
+     "exact": 1,
+     "mismatch": 0,
+     "lent": 1
+    },
+    "ftb-player": {
+     "name": "ftb-player",
+     "edges": 3,
+     "known": 2,
+     "exact": 2,
+     "mismatch": 0,
+     "lent": 2
+    },
+    "ftb-opponent": {
+     "name": "ftb-opponent",
+     "edges": 3,
+     "known": 1,
+     "exact": 1,
+     "mismatch": 0,
+     "lent": 1
+    },
+    "ftc-player": {
+     "name": "ftc-player",
+     "edges": 3,
+     "known": 2,
+     "exact": 2,
+     "mismatch": 0,
+     "lent": 2
+    },
+    "ftc-opponent": {
+     "name": "ftc-opponent",
+     "edges": 3,
+     "known": 1,
+     "exact": 1,
+     "mismatch": 0,
+     "lent": 1
+    },
+    "fd-player": {
+     "name": "fd-player",
+     "edges": 4,
+     "known": 4,
+     "exact": 4,
+     "mismatch": 0,
+     "lent": 4
+    },
+    "fd-opponent": {
+     "name": "fd-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 3,
+     "mismatch": 0,
+     "lent": 3
+    }
+   }
+  },
+  "proposed + Fake Tears relative-y plan": {
+   "total": {
+    "edges": 29,
+    "known": 29,
+    "exact": 29,
+    "mismatch": 0,
+    "lent": 29
+   },
+   "perScenario": {
+    "dt-player": {
+     "name": "dt-player",
+     "edges": 2,
+     "known": 2,
+     "exact": 2,
+     "mismatch": 0,
+     "lent": 2
+    },
+    "dt-opponent": {
+     "name": "dt-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 3,
+     "mismatch": 0,
+     "lent": 3
+    },
+    "ft-player": {
+     "name": "ft-player",
+     "edges": 2,
+     "known": 2,
+     "exact": 2,
+     "mismatch": 0,
+     "lent": 2
+    },
+    "ft-opponent": {
+     "name": "ft-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 3,
+     "mismatch": 0,
+     "lent": 3
+    },
+    "ftb-player": {
+     "name": "ftb-player",
+     "edges": 3,
+     "known": 3,
+     "exact": 3,
+     "mismatch": 0,
+     "lent": 3
+    },
+    "ftb-opponent": {
+     "name": "ftb-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 3,
+     "mismatch": 0,
+     "lent": 3
+    },
+    "ftc-player": {
+     "name": "ftc-player",
+     "edges": 3,
+     "known": 3,
+     "exact": 3,
+     "mismatch": 0,
+     "lent": 3
+    },
+    "ftc-opponent": {
+     "name": "ftc-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 3,
+     "mismatch": 0,
+     "lent": 3
+    },
+    "fd-player": {
+     "name": "fd-player",
+     "edges": 4,
+     "known": 4,
+     "exact": 4,
+     "mismatch": 0,
+     "lent": 4
+    },
+    "fd-opponent": {
+     "name": "fd-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 3,
+     "mismatch": 0,
+     "lent": 3
+    }
+   }
+  },
+  "control: stat command invalidates": {
+   "total": {
+    "edges": 29,
+    "known": 2,
+    "exact": 2,
+    "mismatch": 0,
+    "lent": 2
+   },
+   "perScenario": {
+    "dt-player": {
+     "name": "dt-player",
+     "edges": 2,
+     "known": 0,
+     "exact": 0,
+     "mismatch": 0,
+     "lent": 0
+    },
+    "dt-opponent": {
+     "name": "dt-opponent",
+     "edges": 3,
+     "known": 0,
+     "exact": 0,
+     "mismatch": 0,
+     "lent": 0
+    },
+    "ft-player": {
+     "name": "ft-player",
+     "edges": 2,
+     "known": 0,
+     "exact": 0,
+     "mismatch": 0,
+     "lent": 0
+    },
+    "ft-opponent": {
+     "name": "ft-opponent",
+     "edges": 3,
+     "known": 0,
+     "exact": 0,
+     "mismatch": 0,
+     "lent": 0
+    },
+    "ftb-player": {
+     "name": "ftb-player",
+     "edges": 3,
+     "known": 1,
+     "exact": 1,
+     "mismatch": 0,
+     "lent": 1
+    },
+    "ftb-opponent": {
+     "name": "ftb-opponent",
+     "edges": 3,
+     "known": 0,
+     "exact": 0,
+     "mismatch": 0,
+     "lent": 0
+    },
+    "ftc-player": {
+     "name": "ftc-player",
+     "edges": 3,
+     "known": 1,
+     "exact": 1,
+     "mismatch": 0,
+     "lent": 1
+    },
+    "ftc-opponent": {
+     "name": "ftc-opponent",
+     "edges": 3,
+     "known": 0,
+     "exact": 0,
+     "mismatch": 0,
+     "lent": 0
+    },
+    "fd-player": {
+     "name": "fd-player",
+     "edges": 4,
+     "known": 0,
+     "exact": 0,
+     "mismatch": 0,
+     "lent": 0
+    },
+    "fd-opponent": {
+     "name": "fd-opponent",
+     "edges": 3,
+     "known": 0,
+     "exact": 0,
+     "mismatch": 0,
+     "lent": 0
+    }
+   }
+  },
+  "control: stat plan applied before the body": {
+   "total": {
+    "edges": 29,
+    "known": 29,
+    "exact": 8,
+    "mismatch": 21,
+    "lent": 29
+   },
+   "perScenario": {
+    "dt-player": {
+     "name": "dt-player",
+     "edges": 2,
+     "known": 2,
+     "exact": 1,
+     "mismatch": 1,
+     "lent": 2
+    },
+    "dt-opponent": {
+     "name": "dt-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 2,
+     "mismatch": 1,
+     "lent": 3
+    },
+    "ft-player": {
+     "name": "ft-player",
+     "edges": 2,
+     "known": 2,
+     "exact": 0,
+     "mismatch": 2,
+     "lent": 2
+    },
+    "ft-opponent": {
+     "name": "ft-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 0,
+     "mismatch": 3,
+     "lent": 3
+    },
+    "ftb-player": {
+     "name": "ftb-player",
+     "edges": 3,
+     "known": 3,
+     "exact": 2,
+     "mismatch": 1,
+     "lent": 3
+    },
+    "ftb-opponent": {
+     "name": "ftb-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 0,
+     "mismatch": 3,
+     "lent": 3
+    },
+    "ftc-player": {
+     "name": "ftc-player",
+     "edges": 3,
+     "known": 3,
+     "exact": 2,
+     "mismatch": 1,
+     "lent": 3
+    },
+    "ftc-opponent": {
+     "name": "ftc-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 0,
+     "mismatch": 3,
+     "lent": 3
+    },
+    "fd-player": {
+     "name": "fd-player",
+     "edges": 4,
+     "known": 4,
+     "exact": 1,
+     "mismatch": 3,
+     "lent": 4
+    },
+    "fd-opponent": {
+     "name": "fd-opponent",
+     "edges": 3,
+     "known": 3,
+     "exact": 0,
+     "mismatch": 3,
+     "lent": 3
+    }
+   }
+  }
+ },
+ "q1Edges": {
+  "dt-player": [
+   {
+    "n": 2081,
+    "key": "104:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2243,
+    "key": "gBattleAnims_General:1:21",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "dt-opponent": [
+   {
+    "n": 2085,
+    "key": "104:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2247,
+    "key": "gBattleAnims_General:1:21",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2458,
+    "key": "33:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "ft-player": [
+   {
+    "n": 2081,
+    "key": "313:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2168,
+    "key": "gBattleAnims_General:1:50",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "ft-opponent": [
+   {
+    "n": 2085,
+    "key": "313:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2172,
+    "key": "gBattleAnims_General:1:50",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2399,
+    "key": "33:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "ftb-player": [
+   {
+    "n": 2083,
+    "key": "33:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2307,
+    "key": "313:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2394,
+    "key": "gBattleAnims_General:1:50",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "ftb-opponent": [
+   {
+    "n": 2082,
+    "key": "313:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2169,
+    "key": "gBattleAnims_General:1:50",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2400,
+    "key": "33:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "ftc-player": [
+   {
+    "n": 2081,
+    "key": "33:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2232,
+    "key": "313:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2319,
+    "key": "gBattleAnims_General:1:50",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "ftc-opponent": [
+   {
+    "n": 2087,
+    "key": "313:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2174,
+    "key": "gBattleAnims_General:1:50",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2401,
+    "key": "33:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "fd-player": [
+   {
+    "n": 2085,
+    "key": "297:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2257,
+    "key": "gBattleAnims_General:1:46",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2493,
+    "key": "225:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2661,
+    "key": "gBattleAnims_StatusConditions:5:null",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "fd-opponent": [
+   {
+    "n": 2089,
+    "key": "297:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2261,
+    "key": "gBattleAnims_General:1:46",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2487,
+    "key": "157:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ]
+ },
+ "q3Lab": {
+  "without plan": {
+   "edges": 10,
+   "known": 7,
+   "exact": 7,
+   "mismatch": 0,
+   "lent": 7
+  },
+  "with Endeavor plan": {
+   "edges": 10,
+   "known": 10,
+   "exact": 10,
+   "mismatch": 0,
+   "lent": 10
+  }
+ },
+ "q3LabEdges": {
+  "en-player": [
+   {
+    "n": 2082,
+    "key": "283:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2512,
+    "key": "33:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "en-opponent": [
+   {
+    "n": 2086,
+    "key": "283:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2448,
+    "key": "33:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "en2-player": [
+   {
+    "n": 2083,
+    "key": "33:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2308,
+    "key": "283:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "en3-player": [
+   {
+    "n": 2081,
+    "key": "33:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2233,
+    "key": "283:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "en3-opponent": [
+   {
+    "n": 2088,
+    "key": "283:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2399,
+    "key": "33:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ]
+ },
+ "q2": {
+  "prePromptFreeHead": [
+   4,
+   21,
+   20,
+   5,
+   19,
+   18,
+   17,
+   16,
+   15,
+   14,
+   13,
+   12,
+   11,
+   10,
+   9,
+   7,
+   3,
+   54,
+   55,
+   56
+  ],
+  "preEqualsObservedAtIntimidateEdge": true,
+  "promptOnPreEqualsKnownEntryConstant": true,
+  "scenarios": 12,
+  "proposed": {
+   "edges": 24,
+   "exact": 24,
+   "mismatch": 0
+  },
+  "controlConstantSeed": {
+   "edges": 24,
+   "exact": 12,
+   "mismatch": 12
+  },
+  "rows": [
+   {
+    "file": "336-howl-alternate-opponent-scenario-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   },
+   {
+    "file": "336-howl-alternate-player-scenario-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   },
+   {
+    "file": "38-mechanic-double-edge-opponent-hitmontop-player-onix-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   },
+   {
+    "file": "38-mechanic-double-edge-player-hitmontop-opponent-onix-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   },
+   {
+    "file": "68-mechanic-counter-opponent-hitmontop-player-onix-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   },
+   {
+    "file": "68-mechanic-counter-player-hitmontop-opponent-onix-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   },
+   {
+    "file": "167-mechanic-triple-kick-opponent-hitmontop-player-onix-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   },
+   {
+    "file": "167-mechanic-triple-kick-player-hitmontop-opponent-onix-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   },
+   {
+    "file": "51-mechanic-acid-opponent-ekans-player-onix-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   },
+   {
+    "file": "51-mechanic-acid-player-ekans-opponent-onix-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   },
+   {
+    "file": "56-mechanic-hydro-pump-opponent-masquerain-player-onix-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   },
+   {
+    "file": "56-mechanic-hydro-pump-player-masquerain-opponent-onix-0.json",
+    "proposed": [
+     true,
+     true
+    ],
+    "control": [
+     false,
+     true
+    ]
+   }
+  ]
+ },
+ "q3RealRoute": [
+  {
+   "trace": "battle1-turn17-dense",
+   "original": {
+    "move": {
+     "edges": 29,
+     "known": 3,
+     "tested": 3,
+     "exact": 3,
+     "mismatched": 0,
+     "occupiedMismatch": 0,
+     "lent": 3
+    },
+    "anim": {
+     "edges": 9,
+     "known": 1,
+     "tested": 1,
+     "exact": 1,
+     "mismatched": 0,
+     "occupiedMismatch": 0,
+     "lent": 1
+    },
+    "firstInvalidation": {
+     "frame": 2992,
+     "reason": "no EXACT plan: body 283:opponent"
+    }
+   },
+   "copyNoOverride": {
+    "edges": 38,
+    "known": 4,
+    "exact": 4,
+    "mismatch": 0,
+    "lent": 4
+   },
+   "copyMatchesOriginal": true,
+   "withEndeavor": {
+    "edges": 38,
+    "known": 12,
+    "exact": 12,
+    "mismatch": 0,
+    "lent": 12
+   },
+   "withEndeavorAndFakeTears": {
+    "edges": 38,
+    "known": 12,
+    "exact": 12,
+    "mismatch": 0,
+    "lent": 12
+   },
+   "moveEdgesBaseline": {
+    "edges": 29,
+    "known": 3,
+    "exact": 3,
+    "mismatch": 0,
+    "lent": 3
+   },
+   "moveEdgesWithEndeavor": {
+    "edges": 29,
+    "known": 10,
+    "exact": 10,
+    "mismatch": 0,
+    "lent": 10
+   },
+   "animEdgesWithEndeavor": {
+    "edges": 9,
+    "known": 2,
+    "exact": 2,
+    "mismatch": 0,
+    "lent": 2
+   },
+   "firstInvalidationBaseline": {
+    "n": 2992,
+    "key": "283:opponent",
+    "reason": "no EXACT plan: body 283:opponent"
+   },
+   "firstInvalidationWithEndeavor": {
+    "n": 6519,
+    "key": "uncovered: RunTurnActionsFunctions",
+    "reason": "uncovered: RunTurnActionsFunctions"
+   }
+  },
+  {
+   "trace": "battle1-switch",
+   "original": {
+    "move": {
+     "edges": 24,
+     "known": 3,
+     "tested": 3,
+     "exact": 3,
+     "mismatched": 0,
+     "occupiedMismatch": 0,
+     "lent": 3
+    },
+    "anim": {
+     "edges": 7,
+     "known": 1,
+     "tested": 1,
+     "exact": 1,
+     "mismatched": 0,
+     "occupiedMismatch": 0,
+     "lent": 1
+    },
+    "firstInvalidation": {
+     "frame": 2992,
+     "reason": "no EXACT plan: body 283:opponent"
+    }
+   },
+   "copyNoOverride": {
+    "edges": 31,
+    "known": 4,
+    "exact": 4,
+    "mismatch": 0,
+    "lent": 4
+   },
+   "copyMatchesOriginal": true,
+   "withEndeavor": {
+    "edges": 31,
+    "known": 12,
+    "exact": 12,
+    "mismatch": 0,
+    "lent": 12
+   },
+   "withEndeavorAndFakeTears": {
+    "edges": 31,
+    "known": 12,
+    "exact": 12,
+    "mismatch": 0,
+    "lent": 12
+   },
+   "moveEdgesBaseline": {
+    "edges": 24,
+    "known": 3,
+    "exact": 3,
+    "mismatch": 0,
+    "lent": 3
+   },
+   "moveEdgesWithEndeavor": {
+    "edges": 24,
+    "known": 10,
+    "exact": 10,
+    "mismatch": 0,
+    "lent": 10
+   },
+   "animEdgesWithEndeavor": {
+    "edges": 7,
+    "known": 2,
+    "exact": 2,
+    "mismatch": 0,
+    "lent": 2
+   },
+   "firstInvalidationBaseline": {
+    "n": 2992,
+    "key": "283:opponent",
+    "reason": "no EXACT plan: body 283:opponent"
+   },
+   "firstInvalidationWithEndeavor": {
+    "n": 6519,
+    "key": "uncovered: RunTurnActionsFunctions",
+    "reason": "uncovered: RunTurnActionsFunctions"
+   }
+  },
+  {
+   "trace": "battle1-turn2-dragonbreath",
+   "original": {
+    "move": {
+     "edges": 4,
+     "known": 3,
+     "tested": 3,
+     "exact": 3,
+     "mismatched": 0,
+     "occupiedMismatch": 0,
+     "lent": 3
+    },
+    "anim": {
+     "edges": 1,
+     "known": 1,
+     "tested": 1,
+     "exact": 1,
+     "mismatched": 0,
+     "occupiedMismatch": 0,
+     "lent": 1
+    },
+    "firstInvalidation": {
+     "frame": 2992,
+     "reason": "no EXACT plan: body 283:opponent"
+    }
+   },
+   "copyNoOverride": {
+    "edges": 5,
+    "known": 4,
+    "exact": 4,
+    "mismatch": 0,
+    "lent": 4
+   },
+   "copyMatchesOriginal": true,
+   "withEndeavor": {
+    "edges": 5,
+    "known": 5,
+    "exact": 5,
+    "mismatch": 0,
+    "lent": 5
+   },
+   "withEndeavorAndFakeTears": {
+    "edges": 5,
+    "known": 5,
+    "exact": 5,
+    "mismatch": 0,
+    "lent": 5
+   },
+   "moveEdgesBaseline": {
+    "edges": 4,
+    "known": 3,
+    "exact": 3,
+    "mismatch": 0,
+    "lent": 3
+   },
+   "moveEdgesWithEndeavor": {
+    "edges": 4,
+    "known": 4,
+    "exact": 4,
+    "mismatch": 0,
+    "lent": 4
+   },
+   "animEdgesWithEndeavor": {
+    "edges": 1,
+    "known": 1,
+    "exact": 1,
+    "mismatch": 0,
+    "lent": 1
+   },
+   "firstInvalidationBaseline": {
+    "n": 2992,
+    "key": "283:opponent",
+    "reason": "no EXACT plan: body 283:opponent"
+   },
+   "firstInvalidationWithEndeavor": {
+    "n": 3336,
+    "key": "uncovered: HandleTurnActionSelectionState",
+    "reason": "uncovered: HandleTurnActionSelectionState"
+   }
+  },
+  {
+   "trace": "battle1-grovyle-faint",
+   "original": {
+    "move": {
+     "edges": 10,
+     "known": 3,
+     "tested": 3,
+     "exact": 3,
+     "mismatched": 0,
+     "occupiedMismatch": 0,
+     "lent": 3
+    },
+    "anim": {
+     "edges": 3,
+     "known": 1,
+     "tested": 1,
+     "exact": 1,
+     "mismatched": 0,
+     "occupiedMismatch": 0,
+     "lent": 1
+    },
+    "firstInvalidation": {
+     "frame": 2992,
+     "reason": "no EXACT plan: body 283:opponent"
+    }
+   },
+   "copyNoOverride": {
+    "edges": 13,
+    "known": 4,
+    "exact": 4,
+    "mismatch": 0,
+    "lent": 4
+   },
+   "copyMatchesOriginal": true,
+   "withEndeavor": {
+    "edges": 13,
+    "known": 12,
+    "exact": 12,
+    "mismatch": 0,
+    "lent": 12
+   },
+   "withEndeavorAndFakeTears": {
+    "edges": 13,
+    "known": 12,
+    "exact": 12,
+    "mismatch": 0,
+    "lent": 12
+   },
+   "moveEdgesBaseline": {
+    "edges": 10,
+    "known": 3,
+    "exact": 3,
+    "mismatch": 0,
+    "lent": 3
+   },
+   "moveEdgesWithEndeavor": {
+    "edges": 10,
+    "known": 10,
+    "exact": 10,
+    "mismatch": 0,
+    "lent": 10
+   },
+   "animEdgesWithEndeavor": {
+    "edges": 3,
+    "known": 2,
+    "exact": 2,
+    "mismatch": 0,
+    "lent": 2
+   },
+   "firstInvalidationBaseline": {
+    "n": 2992,
+    "key": "283:opponent",
+    "reason": "no EXACT plan: body 283:opponent"
+   },
+   "firstInvalidationWithEndeavor": {
+    "n": 6519,
+    "key": "uncovered: RunTurnActionsFunctions",
+    "reason": "uncovered: RunTurnActionsFunctions"
+   }
+  },
+  {
+   "trace": "battle1-victory",
+   "original": {
+    "move": {
+     "edges": 24,
+     "known": 3,
+     "tested": 3,
+     "exact": 3,
+     "mismatched": 0,
+     "occupiedMismatch": 0,
+     "lent": 3
+    },
+    "anim": {
+     "edges": 7,
+     "known": 1,
+     "tested": 1,
+     "exact": 1,
+     "mismatched": 0,
+     "occupiedMismatch": 0,
+     "lent": 1
+    },
+    "firstInvalidation": {
+     "frame": 2992,
+     "reason": "no EXACT plan: body 283:opponent"
+    }
+   },
+   "copyNoOverride": {
+    "edges": 31,
+    "known": 4,
+    "exact": 4,
+    "mismatch": 0,
+    "lent": 4
+   },
+   "copyMatchesOriginal": true,
+   "withEndeavor": {
+    "edges": 31,
+    "known": 12,
+    "exact": 12,
+    "mismatch": 0,
+    "lent": 12
+   },
+   "withEndeavorAndFakeTears": {
+    "edges": 31,
+    "known": 12,
+    "exact": 12,
+    "mismatch": 0,
+    "lent": 12
+   },
+   "moveEdgesBaseline": {
+    "edges": 24,
+    "known": 3,
+    "exact": 3,
+    "mismatch": 0,
+    "lent": 3
+   },
+   "moveEdgesWithEndeavor": {
+    "edges": 24,
+    "known": 10,
+    "exact": 10,
+    "mismatch": 0,
+    "lent": 10
+   },
+   "animEdgesWithEndeavor": {
+    "edges": 7,
+    "known": 2,
+    "exact": 2,
+    "mismatch": 0,
+    "lent": 2
+   },
+   "firstInvalidationBaseline": {
+    "n": 2992,
+    "key": "283:opponent",
+    "reason": "no EXACT plan: body 283:opponent"
+   },
+   "firstInvalidationWithEndeavor": {
+    "n": 6519,
+    "key": "uncovered: RunTurnActionsFunctions",
+    "reason": "uncovered: RunTurnActionsFunctions"
+   }
+  }
+ ]
+}

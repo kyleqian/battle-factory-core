@@ -1,0 +1,326 @@
+{
+ "schema": "sprite-order-policy-gaps-engine/v1",
+ "battleStart": [
+  {
+   "label": "player Ekans (Intimidate) vs set 300",
+   "nextEventSequence": 3,
+   "events": [
+    {
+     "sequence": 0,
+     "kind": "stat-stage-change",
+     "opcode": "B_SCR_OP_STATBUFFCHANGE",
+     "battler": 1,
+     "stat": "attack",
+     "from": 6,
+     "to": 5
+    },
+    {
+     "sequence": 1,
+     "kind": "animation",
+     "opcode": "B_SCR_OP_PLAYANIMATION",
+     "animationId": "STATS_CHANGE",
+     "arguments": [
+      "22"
+     ],
+     "battler": 1
+    },
+    {
+     "sequence": 2,
+     "kind": "message",
+     "opcode": "B_SCR_OP_PRINTSTRING"
+    }
+   ]
+  },
+  {
+   "label": "opponent Ekans (Intimidate) vs set 300",
+   "nextEventSequence": 3,
+   "events": [
+    {
+     "sequence": 0,
+     "kind": "stat-stage-change",
+     "opcode": "B_SCR_OP_STATBUFFCHANGE",
+     "battler": 0,
+     "stat": "attack",
+     "from": 6,
+     "to": 5
+    },
+    {
+     "sequence": 1,
+     "kind": "animation",
+     "opcode": "B_SCR_OP_PLAYANIMATION",
+     "animationId": "STATS_CHANGE",
+     "arguments": [
+      "22"
+     ],
+     "battler": 0
+    },
+    {
+     "sequence": 2,
+     "kind": "message",
+     "opcode": "B_SCR_OP_PRINTSTRING"
+    }
+   ]
+  },
+  {
+   "label": "both Intimidate (Ekans vs Ekans)",
+   "nextEventSequence": 6,
+   "events": [
+    {
+     "sequence": 0,
+     "kind": "stat-stage-change",
+     "opcode": "B_SCR_OP_STATBUFFCHANGE",
+     "battler": 1,
+     "stat": "attack",
+     "from": 6,
+     "to": 5
+    },
+    {
+     "sequence": 1,
+     "kind": "animation",
+     "opcode": "B_SCR_OP_PLAYANIMATION",
+     "animationId": "STATS_CHANGE",
+     "arguments": [
+      "22"
+     ],
+     "battler": 1
+    },
+    {
+     "sequence": 2,
+     "kind": "message",
+     "opcode": "B_SCR_OP_PRINTSTRING"
+    },
+    {
+     "sequence": 3,
+     "kind": "stat-stage-change",
+     "opcode": "B_SCR_OP_STATBUFFCHANGE",
+     "battler": 0,
+     "stat": "attack",
+     "from": 6,
+     "to": 5
+    },
+    {
+     "sequence": 4,
+     "kind": "animation",
+     "opcode": "B_SCR_OP_PLAYANIMATION",
+     "animationId": "STATS_CHANGE",
+     "arguments": [
+      "22"
+     ],
+     "battler": 0
+    },
+    {
+     "sequence": 5,
+     "kind": "message",
+     "opcode": "B_SCR_OP_PRINTSTRING"
+    }
+   ]
+  },
+  {
+   "label": "no Intimidate",
+   "nextEventSequence": 0,
+   "events": []
+  }
+ ],
+ "routes": [
+  {
+   "seed": 21,
+   "move": "FAKE_TEARS",
+   "prep7ScanFirstBody": false,
+   "prep7ScanOrderInputKnown": false,
+   "nowFirstRequest": [
+    93,
+    0,
+    true
+   ],
+   "nowMoveRequestOrderKnown": true,
+   "requestsKnown": [
+    true,
+    true
+   ],
+   "eventWindow": [
+    "2:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION",
+    "4:animation:HIT_ANIMATION:B_SCR_OP_HITANIMATION",
+    "11:stat-stage-change:B_SCR_OP_STATBUFFCHANGE",
+    "12:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION"
+   ]
+  },
+  {
+   "seed": 28,
+   "move": "FAKE_TEARS",
+   "prep7ScanFirstBody": true,
+   "prep7ScanOrderInputKnown": false,
+   "nowFirstRequest": [
+    313,
+    1,
+    true
+   ],
+   "nowMoveRequestOrderKnown": true,
+   "requestsKnown": [
+    true,
+    false
+   ],
+   "eventWindow": [
+    "2:stat-stage-change:B_SCR_OP_STATBUFFCHANGE",
+    "3:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION",
+    "4:animation:STATS_CHANGE:B_SCR_OP_PLAYANIMATION",
+    "10:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION"
+   ]
+  },
+  {
+   "seed": 199,
+   "move": "DOUBLE_TEAM",
+   "prep7ScanFirstBody": false,
+   "prep7ScanOrderInputKnown": false,
+   "nowFirstRequest": [
+    163,
+    0,
+    true
+   ],
+   "nowMoveRequestOrderKnown": true,
+   "requestsKnown": [
+    true,
+    true
+   ],
+   "eventWindow": [
+    "2:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION",
+    "4:animation:HIT_ANIMATION:B_SCR_OP_HITANIMATION",
+    "11:stat-stage-change:B_SCR_OP_STATBUFFCHANGE",
+    "12:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION"
+   ]
+  },
+  {
+   "seed": 329,
+   "move": "DOUBLE_TEAM",
+   "prep7ScanFirstBody": true,
+   "prep7ScanOrderInputKnown": false,
+   "nowFirstRequest": [
+    104,
+    1,
+    true
+   ],
+   "nowMoveRequestOrderKnown": true,
+   "requestsKnown": [
+    true
+   ],
+   "eventWindow": [
+    "2:stat-stage-change:B_SCR_OP_STATBUFFCHANGE",
+    "3:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION",
+    "4:animation:STATS_CHANGE:B_SCR_OP_PLAYANIMATION"
+   ]
+  },
+  {
+   "seed": 448,
+   "move": "FAKE_TEARS",
+   "prep7ScanFirstBody": false,
+   "prep7ScanOrderInputKnown": false,
+   "nowFirstRequest": [
+    83,
+    0,
+    true
+   ],
+   "nowMoveRequestOrderKnown": true,
+   "requestsKnown": [
+    true,
+    true
+   ],
+   "eventWindow": [
+    "2:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION",
+    "4:animation:HIT_ANIMATION:B_SCR_OP_HITANIMATION",
+    "12:stat-stage-change:B_SCR_OP_STATBUFFCHANGE",
+    "13:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION"
+   ]
+  },
+  {
+   "seed": 513,
+   "move": "FAKE_TEARS",
+   "prep7ScanFirstBody": false,
+   "prep7ScanOrderInputKnown": false,
+   "nowFirstRequest": [
+    209,
+    0,
+    true
+   ],
+   "nowMoveRequestOrderKnown": false,
+   "requestsKnown": [
+    true,
+    false
+   ],
+   "eventWindow": [
+    "2:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION",
+    "4:animation:HIT_ANIMATION:B_SCR_OP_HITANIMATION",
+    "12:stat-stage-change:B_SCR_OP_STATBUFFCHANGE",
+    "13:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION"
+   ]
+  },
+  {
+   "seed": 550,
+   "move": "DOUBLE_TEAM",
+   "prep7ScanFirstBody": false,
+   "prep7ScanOrderInputKnown": false,
+   "nowFirstRequest": [
+    318,
+    0,
+    true
+   ],
+   "nowMoveRequestOrderKnown": true,
+   "requestsKnown": [
+    true,
+    true
+   ],
+   "eventWindow": [
+    "2:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION",
+    "4:animation:HIT_ANIMATION:B_SCR_OP_HITANIMATION",
+    "12:stat-stage-change:B_SCR_OP_STATBUFFCHANGE",
+    "13:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION"
+   ]
+  },
+  {
+   "seed": 553,
+   "move": "DOUBLE_TEAM",
+   "prep7ScanFirstBody": false,
+   "prep7ScanOrderInputKnown": false,
+   "nowFirstRequest": [
+    172,
+    0,
+    true
+   ],
+   "nowMoveRequestOrderKnown": false,
+   "requestsKnown": [
+    true,
+    false
+   ],
+   "eventWindow": [
+    "2:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION",
+    "4:animation:HIT_ANIMATION:B_SCR_OP_HITANIMATION",
+    "13:stat-stage-change:B_SCR_OP_STATBUFFCHANGE",
+    "14:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION"
+   ]
+  },
+  {
+   "seed": 554,
+   "move": "DOUBLE_TEAM",
+   "prep7ScanFirstBody": true,
+   "prep7ScanOrderInputKnown": false,
+   "nowFirstRequest": [
+    104,
+    1,
+    true
+   ],
+   "nowMoveRequestOrderKnown": true,
+   "requestsKnown": [
+    true
+   ],
+   "eventWindow": [
+    "7:stat-stage-change:B_SCR_OP_STATBUFFCHANGE",
+    "8:animation:MOVE_ANIMATION:B_SCR_OP_ATTACKANIMATION",
+    "9:animation:STATS_CHANGE:B_SCR_OP_PLAYANIMATION"
+   ]
+  }
+ ],
+ "routeSummary": {
+  "routes": 9,
+  "firstBodyRoutes": 3,
+  "firstBodyKnownNow": 3,
+  "firstBodyKnownInPrep7Scan": 0
+ }
+}
