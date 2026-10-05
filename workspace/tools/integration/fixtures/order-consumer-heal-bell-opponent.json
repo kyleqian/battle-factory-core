@@ -63,5 +63,11 @@
       "firstCreateMatchesObserved": true
     },
     "pins": "tools/integration/fixtures/order-consumer-pins.json"
-  }
+  },
+  "precedingBodies": [
+    {
+      "moveId": 33,
+      "side": "player"
+    }
+  ]
 }

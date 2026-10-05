@@ -105,6 +105,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   296, 312, 266, 118, 269, 187,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
+  // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
+  // by creation order whatever the free order is).
+  52,
 ] as const);
 
 /**
@@ -417,6 +420,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 118: return 127; // Metronome body (245..371 / 244..370); the called move is a separate request.
     case 269: return 125; // Taunt (76..200 / 80..204); script activation is 10 frames earlier.
     case 187: return 110; // Belly Drum (231..340 / 211..320).
+    case 52: return 63; // Ember (388..450 / 442..504, ageOffset 0); script ends 3 frames later (453/507).
     case 288: return 209; // Grudge (66..274 / 70..278); script end 274/278 (no tail).
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
@@ -1050,6 +1054,18 @@ export function liveMoveAnimationPresentation(
       config = { move: "BELLY_DRUM", attacker, target, fieldProfile, attackerNoteOrigin: { x: pic.x, y: pic.y + 8 } };
       break;
     }
+    case 52:
+      // Order-independent (docs/order-consumer-prep.md §0): every equal-key ember/flare pair is created in a different
+      // sort window, so ember.ts's creation-order rule needs no host order. Geometry as Dragon Breath's fire.
+      config = { move: "EMBER", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
+        animationProfile: {
+          attackerCenter: attackerAnchors.picOffsetPoint,
+          targetCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+          targetBattlePosition: liveBattlerAnchors(target.geometry.side, art).battlePositionCenter,
+          attackerSide: attacker.geometry.side,
+          targetSubpriority: target.geometry.side === "player" ? 30 : 40,
+        } };
+      break;
     case 288: {
       // Order consumer (docs/order-consumer-prep.md §0): the six flames take the six lowest free slots in one
       // sort window and inherit their relative free order, so only a host-supplied order is exact. Unknown order

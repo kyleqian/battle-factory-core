@@ -50682,29 +50682,33 @@ export function renderSceneOnMovePresentation(
     // their RAM state (same lag DRAGON_BREATH/FLAMETHROWER already pin).
     const view = sceneOnEmberView({ ...state, age: state.age - 1 });
     const playerToOpponent =
-      view.attacker.species === "ONIX"
+      (liveField || view.attacker.species === "ONIX")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "MURKROW"
+      && (liveField || view.target.species === "MURKROW")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "ONIX"
+      (liveField || view.attacker.species === "ONIX")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "MURKROW"
+      && (liveField || view.target.species === "MURKROW")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged EMBER pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const attackerSprite = playerToOpponent ? onixBackSprite : onixFrontSprite;
-    const targetSprite = playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? onixBackSprite : onixFrontSprite;
+    const targetSprite = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     drawSpriteSheet(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + liveIdle(view.target).x2,
+      view.target.geometry.spriteCorner.y + liveIdle(view.target).y2,
     );
     const drawEmberSprites = () => {
       for (const sprite of view.sprites) {
@@ -50740,6 +50744,7 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.y,
     );
     if (embersInFrontOfAttacker) drawEmberSprites();
+    if (liveField) return;
     if (playerToOpponent) {
       drawSendOutHealthbox(
         fb,

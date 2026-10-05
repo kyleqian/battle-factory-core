@@ -15,7 +15,10 @@ import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandF
 import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
 import { prepareLiveMoveSpriteAllocator, prepareLiveMoveSpriteOrder } from "../../src/engine/liveMoveSpriteAllocator.ts";
-import { createSpriteOrderPlanCursor, knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
+import {
+  applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState, spriteOrderPlanTableFromFixture,
+  type SpriteOrderPlan,
+} from "../../src/engine/spriteOrderProvider.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
@@ -46,6 +49,13 @@ export interface Fixture {
   /** Source text box content during this body (default: the move-used banner). */
   messageLines?: [string, string];
   requestFields?: { turn?: number; power?: number; damage?: number };
+  /**
+   * Units that ran before this body in the scenario (docs/sprite-order-body-plans.md §2/§5): bodies by move id and
+   * ATTACKER side, in order. Omitted = this is the scenario's first body after the known entry. The harness replays
+   * them with the plan applier (gap tables between units) and asserts the resulting free order equals the
+   * per-fixture value in order-consumer-seeds.json (provider == accepted literal == observed); never capture rows.
+   */
+  precedingBodies?: { moveId: number; side: "player" | "opponent" }[];
 }
 interface Probe {
   frames?: { frame: number; sha256: string }[];
@@ -56,6 +66,44 @@ const ids = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOV
 const names = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^MOVE_/, ""), row.name]));
 const SELF_TARGET_MOVES = new Set(["LIGHT_SCREEN", "BARRIER", "MAGIC_COAT", "PROTECT", "REFLECT", "SOFT_BOILED"]);
 const hash = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
+
+const planFixture = (() => {
+  let table: ReturnType<typeof spriteOrderPlanTableFromFixture> | undefined;
+  return () => table ??= spriteOrderPlanTableFromFixture(
+    JSON.parse(readFileSync(resolve(root, "tools/integration/fixtures/sprite-order-body-plans.json"), "utf8")));
+})();
+const seedsFixture = (() => {
+  let seeds: { scenarios: { scenario: string; move: number; attackerSide: string; observedFreeAtEdge?: number[];
+    providerValid?: boolean; unitIndex: number }[] } | undefined;
+  return () => seeds ??= JSON.parse(readFileSync(resolve(root, "tools/integration/fixtures/order-consumer-seeds.json"), "utf8"));
+})();
+
+/** Order cursor at the fixture body's activation edge: known entry + the declared preceding bodies' plans. */
+export function fixtureSpriteOrder(f: Fixture, request: BattleMoveAnimationRequest) {
+  const table = planFixture();
+  const entry = createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles").firstMove.occupants.map(o => o.slot);
+  let cursor = createSpriteOrderPlanCursor(knownEntrySpriteOrderState("battle-lab-ordinary-singles"), entry);
+  const keys = [...(f.precedingBodies ?? []).map(u => `${u.moveId}:${u.side}`),
+    `${request.moveId}:${f.attacker.geometry.side}`];
+  let previous = "entry";
+  keys.forEach((key, index) => {
+    const gap: SpriteOrderPlan | undefined = table.gaps.get(`${previous}>${key}`) ?? table.gapAfterBody.get(previous)
+      ?? (previous === "entry" ? [] : undefined);
+    cursor = applySpriteOrderUnitPlan(cursor, gap);
+    if (index < keys.length - 1) cursor = applySpriteOrderUnitPlan(cursor, table.bodies.get(key));
+    previous = key;
+  });
+  if (!cursor.order.known) throw new Error(`Sprite order unknown for ${f.move}`);
+  const scenarioName = basename(f.scenario, ".json").replace(/^mechanic-/, "");
+  const row = seedsFixture().scenarios.find(s => s.scenario === scenarioName && s.move === request.moveId
+    && s.attackerSide === f.attacker.geometry.side && s.unitIndex === 1 + 2 * (f.precedingBodies?.length ?? 0));
+  if (row) {
+    if (!row.providerValid || JSON.stringify(row.observedFreeAtEdge) !== JSON.stringify(cursor.order.free)) {
+      throw new Error(`Plan-replayed order differs from order-consumer-seeds.json for ${scenarioName}`);
+    }
+  }
+  return cursor;
+}
 
 export function liveView(f: Fixture, age: number): BattleResolutionPresentationRenderView {
   const profile = f.fieldProfile;
@@ -104,10 +152,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
       ).input,
       // Every fixture body is the scenario's first move body after the known entry: supply the order exactly as
       // production does there (known-entry F, checked against the allocator occupancy), never from capture rows.
-      spriteOrderInput: prepareLiveMoveSpriteOrder(createSpriteOrderPlanCursor(
-        knownEntrySpriteOrderState("battle-lab-ordinary-singles"),
-        createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles").firstMove.occupants.map(o => o.slot),
-      ).order, request).input,
+      spriteOrderInput: prepareLiveMoveSpriteOrder(fixtureSpriteOrder(f, request).order, request).input,
     },
     visibility: { player: { sprite: true, healthbox: true }, opponent: { sprite: true, healthbox: true } },
     waitCursor: null, bottom: "message", confirmHandoff: null, switchIn: null,
