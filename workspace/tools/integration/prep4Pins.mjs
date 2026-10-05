@@ -96,6 +96,15 @@ for (const [move, file] of [["EMBER", "ember"], ["DRAGON_BREATH", "dragon-breath
     out.push({ move: "SMELLING_SALT", orientation: o, field: "fieldProfile (accepted)", accepted: JSON.stringify(cfg.fieldProfile), derived: "-", match: true });
   }
 }
+// S2: BIND (Onix <-> Murkrow) / WRAP (Tentacool <-> Onix): configs are script literals + geometry; compare fixtures
+for (const [move, file, att, tgt] of [["BIND", "bind", "ONIX", "MURKROW"], ["WRAP", "wrap", "TENTACOOL", "ONIX"]]) {
+  for (const o of O) {
+    const s = side(o);
+    const fx = rd(`tools/compare/fixtures/${file}-${s === "player" ? `player-${att.toLowerCase()}-opponent-${tgt.toLowerCase()}` : `opponent-${att.toLowerCase()}-player-${tgt.toLowerCase()}`}.json`);
+    geo(move, o, fx, att, tgt);
+    out.push({ move, orientation: o, field: "fieldProfile (accepted)", accepted: JSON.stringify(fx.fieldProfile), derived: "-", match: true });
+  }
+}
 // Consumption audit of the geometry fields whose accepted value is NOT the live pic-point convention (cites in docs/h-buffer-s1-prep.md).
 const NOTE = {
   "DEFENSE_CURL attacker.geometry.animationCenter": ["CONSUMED", "orb origin: Move_DEFENSE_CURL argv (0,6,0,1) -> AnimSpriteOnMonPos respectMonPicOffsets=FALSE (battle_anim_mons.c:1515-1528) = attacker battlePositionCenter + (0,6): (72,86)/(176,46)"],
@@ -103,6 +112,8 @@ const NOTE = {
   "INGRAIN attacker.geometry.animationCenter": ["UNCONSUMED", "sceneOnIngrainView reads attacker.battlePositionCenter only (sceneOnPresentation.ts:10285-10300)"],
   "INGRAIN target.geometry.animationCenter": ["UNCONSUMED", "same"],
   "MEAN_LOOK attacker.geometry.animationCenter": ["UNCONSUMED", "sceneOnMeanLookView reads target.animationCenter only (sceneOnPresentation.ts:10303-10318); accepted target value equals derived pic point"],
+  "WRAP attacker.geometry.animationCenter": ["UNCONSUMED", "sceneOnWrapView/wrapAnimationAtAge take no geometry (sceneOnPresentation.ts:6952); accepted value is the RAM sprite centre"],
+  "WRAP target.geometry.animationCenter": ["UNCONSUMED", "same"],
   "SMELLING_SALT attacker.geometry.animationCenter": ["UNCONSUMED", "reducer reads targetVerticalSpan only (sceneOnPresentation.ts:7838-7850); renderer reads attacker.battlePositionCenter and target.animationCenter.x only"],
 };
 for (const r of out) {

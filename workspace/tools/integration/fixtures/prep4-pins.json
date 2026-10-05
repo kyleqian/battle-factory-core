@@ -1212,5 +1212,233 @@
   "accepted": "{\"playerHp\":142,\"playerMaxHp\":142,\"opponentHp\":190,\"opponentMaxHp\":197,\"playerGender\":\"male\",\"opponentGender\":\"female\"}",
   "derived": "-",
   "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "player-back",
+  "field": "attacker.geometry.spriteCorner",
+  "accepted": "40,48",
+  "derived": "40,48",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "player-back",
+  "field": "attacker.geometry.animationCenter",
+  "accepted": "72,88",
+  "derived": "72,88",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "player-back",
+  "field": "attacker.geometry.battlePositionCenter",
+  "accepted": "72,80",
+  "derived": "72,80",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "player-back",
+  "field": "target.geometry.spriteCorner",
+  "accepted": "144,19",
+  "derived": "144,19",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "player-back",
+  "field": "target.geometry.animationCenter",
+  "accepted": "176,51",
+  "derived": "176,51",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "player-back",
+  "field": "target.geometry.battlePositionCenter",
+  "accepted": "176,40",
+  "derived": "176,40",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "player-back",
+  "field": "fieldProfile (accepted)",
+  "accepted": "{\"playerHp\":117,\"opponentHp\":142,\"opponentHpAfter\":137,\"playerStatus\":\"none\",\"playerGender\":\"female\",\"opponentGender\":\"male\",\"playerPpBefore\":20,\"playerPpAfter\":19,\"ppUps\":[0,0,0,0]}",
+  "derived": "-",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "opponent-front",
+  "field": "attacker.geometry.spriteCorner",
+  "accepted": "144,10",
+  "derived": "144,10",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "opponent-front",
+  "field": "attacker.geometry.animationCenter",
+  "accepted": "176,42",
+  "derived": "176,42",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "opponent-front",
+  "field": "attacker.geometry.battlePositionCenter",
+  "accepted": "176,40",
+  "derived": "176,40",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "opponent-front",
+  "field": "target.geometry.spriteCorner",
+  "accepted": "40,57",
+  "derived": "40,57",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "opponent-front",
+  "field": "target.geometry.animationCenter",
+  "accepted": "72,97",
+  "derived": "72,97",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "opponent-front",
+  "field": "target.geometry.battlePositionCenter",
+  "accepted": "72,80",
+  "derived": "72,80",
+  "match": true
+ },
+ {
+  "move": "BIND",
+  "orientation": "opponent-front",
+  "field": "fieldProfile (accepted)",
+  "accepted": "{\"playerHp\":142,\"opponentHp\":69,\"playerStatus\":\"none\",\"playerGender\":\"female\",\"opponentGender\":\"male\",\"opponentPpBefore\":20,\"opponentPpAfter\":19,\"ppUps\":[0,0,0,0]}",
+  "derived": "-",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "player-back",
+  "field": "attacker.geometry.spriteCorner",
+  "accepted": "40,58",
+  "derived": "40,58",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "player-back",
+  "field": "attacker.geometry.animationCenter",
+  "accepted": "72,90",
+  "derived": "72,98",
+  "match": false,
+  "note": "UNCONSUMED: sceneOnWrapView/wrapAnimationAtAge take no geometry (sceneOnPresentation.ts:6952); accepted value is the RAM sprite centre",
+  "resolved": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "player-back",
+  "field": "attacker.geometry.battlePositionCenter",
+  "accepted": "72,80",
+  "derived": "72,80",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "player-back",
+  "field": "target.geometry.spriteCorner",
+  "accepted": "144,10",
+  "derived": "144,10",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "player-back",
+  "field": "target.geometry.animationCenter",
+  "accepted": "176,42",
+  "derived": "176,42",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "player-back",
+  "field": "target.geometry.battlePositionCenter",
+  "accepted": "176,40",
+  "derived": "176,40",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "player-back",
+  "field": "fieldProfile (accepted)",
+  "accepted": "{\"playerHp\":117,\"playerMaxHp\":136,\"opponentHp\":110,\"opponentMaxHp\":110,\"playerGender\":\"male\",\"opponentGender\":\"male\"}",
+  "derived": "-",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "opponent-front",
+  "field": "attacker.geometry.spriteCorner",
+  "accepted": "144,17",
+  "derived": "144,17",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "opponent-front",
+  "field": "attacker.geometry.animationCenter",
+  "accepted": "176,49",
+  "derived": "176,49",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "opponent-front",
+  "field": "attacker.geometry.battlePositionCenter",
+  "accepted": "176,40",
+  "derived": "176,40",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "opponent-front",
+  "field": "target.geometry.spriteCorner",
+  "accepted": "40,48",
+  "derived": "40,48",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "opponent-front",
+  "field": "target.geometry.animationCenter",
+  "accepted": "72,80",
+  "derived": "72,88",
+  "match": false,
+  "note": "UNCONSUMED: same",
+  "resolved": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "opponent-front",
+  "field": "target.geometry.battlePositionCenter",
+  "accepted": "72,80",
+  "derived": "72,80",
+  "match": true
+ },
+ {
+  "move": "WRAP",
+  "orientation": "opponent-front",
+  "field": "fieldProfile (accepted)",
+  "accepted": "{\"playerHp\":110,\"playerMaxHp\":110,\"opponentHp\":136,\"opponentMaxHp\":136,\"playerGender\":\"male\",\"opponentGender\":\"male\"}",
+  "derived": "-",
+  "match": true
  }
 ]
