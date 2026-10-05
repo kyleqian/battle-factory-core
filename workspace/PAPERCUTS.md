@@ -14,10 +14,50 @@ history.
   check is false, so `tools/integration/liveAdapterFramebuffer.ts`'s CLI
   exits 0 with no output; new tools have to be split into a library plus a
   `...Run.ts` entry (or call the exported function from a wrapper).
-- **Hits:** 2 (2026-10-05 post-KO tracker worker ~3 min; post-KO audit
-  worker ~4 min).
+- **Hits:** 5 (2026-10-05 post-KO tracker worker ~3 min; post-KO audit
+  worker ~4 min; post-KO lend worker ~2 min; prep11 worker ~10 min; prep10
+  batch used a shell wrapper).
 - **Fix:** run CLIs with `node --experimental-strip-types`, or make the
   check vite-node-aware (compare resolved file paths, not URLs).
+
+## BattleLab scenario species ids are national-dex for some Hoenn species
+
+- **What:** several `tools/battle-lab/mechanic-*.json` files name a species
+  in the file name but store a national-dex id where the ROM wants the
+  internal id (the "camerupt" Magnitude files are BARBOACH vs NINCADA; 356
+  is MEDITITE, not DUSCLOPS). A probe then reports a false species
+  discrepancy. Scene-OFF lab files are also rejected by the Scene-ON
+  harness (flip `profile` in memory).
+- **Hits:** 1 (2026-10-05 prep10 worker, ~20 min).
+- **Fix:** resolve names through `species.h` (`prep10Scenarios.py` does);
+  add a validator that checks file-name species against the ids.
+
+## `speciesFrontIdleRestOffsetOrZero` silently returns {0,0} for a wrong key
+
+- **What:** the table is keyed WITHOUT the `SPECIES_` prefix; a prefixed
+  key returns `{x2:0,y2:0}` with no error, which looks like a real idle
+  offset of zero.
+- **Hits:** 1 (2026-10-05 prep11 worker, ~15 min).
+- **Fix:** accept both forms or throw on an unknown species.
+
+## Probe output details that cost time (2026-10-05)
+
+- Sprite `attr` read at the spawn frame is not final (palette/tile set
+  after `CreateSprite`); read a frame later (prep11, ~10 min).
+- Fly/Bounce lab files override only moves; genderless carriers reject
+  gendered replacements (prep11, ~10 min).
+- BattleLab `validate_request` rejects unknown top-level fields such as
+  `description` (Random2, ~1 min); the libmgba savestate blob is not
+  byte-stable across identical runs, so state hashes need a RAM-only
+  digest (Random2, ~3 min).
+- `run-battle-lab-rgb.py` lab traces stop at fixed frames: a third
+  Rock Blast hit needed a longer-trace copy (prep10 batch, ~8 min).
+- Line-number pins (`tools/report/ability-item-parity-census.ts`) and the
+  rules-context field-list test break on any `damageCalc.ts` / context
+  change until edited by hand (prep10 batch, ~3 min).
+- Dense runs leave large RGB scratch: a failing run keeps ~0.5 GB in
+  `$TMPDIR`; the prep10 batch left 23 GB under the worktree's
+  `.integration/validation` (supervisor copied 5 MB of summaries).
 
 ## Sprite-order lab probes mask bit 0 of every symbol address
 
