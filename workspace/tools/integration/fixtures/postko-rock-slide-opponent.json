@@ -1,0 +1,38 @@
+{
+ "schema": "postko-adapter-draft/v1",
+ "draft": true,
+ "move": "ROCK_SLIDE",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/postko-rockslide-opponent.json",
+ "stateFixture": "tools/integration/fixtures/postko/state-postko-rockslide-opponent.json",
+ "modelCheck": "tools/integration/fixtures/postko/model-check-postko-rockslide-opponent.json",
+ "attacker": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "NINETALES",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 148,
+  "opponentHp": 145,
+  "opponentMaxHp": 170,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 2499,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 2499,
+  "endFrame": 2636,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset of prep7-rock-slide-opponent.json (activation 1967 -> window 1967..2104, 138 rows); ungated adapter (renders today post-KO: prefix seed null -> accepted literal); second post-KO body"
+}

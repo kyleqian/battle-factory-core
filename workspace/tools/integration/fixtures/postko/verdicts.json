@@ -1,0 +1,732 @@
+{
+ "schema": "postko-verdicts/v1",
+ "probed": [
+  {
+   "move": "FLAMETHROWER",
+   "side": "player",
+   "scenario": "tools/battle-lab/postko-flamethrower-doubleteam.json",
+   "edge": 2079,
+   "window": {
+    "startFrame": 2083,
+    "endFrame": 2208,
+    "ageOffset": -11
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "rung2": {
+     "rows": 126,
+     "exactRows": 126,
+     "residualPixels": 0,
+     "digest": "f145e2cee5cc5255a77acdf28d315e6a40d49da399852ae5bfa9ae8d00c0fdf5"
+    },
+    "none": {
+     "rows": 126,
+     "exactRows": 126,
+     "residualPixels": 0,
+     "digest": "f145e2cee5cc5255a77acdf28d315e6a40d49da399852ae5bfa9ae8d00c0fdf5"
+    }
+   },
+   "verdict": "GENERALIZES"
+  },
+  {
+   "move": "ROCK_TOMB",
+   "side": "player",
+   "scenario": "tools/battle-lab/postko-rocktomb-thunderbolt.json",
+   "edge": 3791,
+   "window": {
+    "startFrame": 3791,
+    "endFrame": 3964,
+    "ageOffset": 0
+   },
+   "modelMismatches": 2,
+   "trackerKnown": false,
+   "edgeChecks": {
+    "free": false,
+    "occupied": false,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "none": {
+     "rows": 174,
+     "exactRows": 174,
+     "residualPixels": 0,
+     "digest": "b4a333095277882a0479a8ef19017f56ad04081cecdb3bb99d7d6b0ae5303b24"
+    }
+   },
+   "verdict": "GENERALIZES"
+  },
+  {
+   "move": "THUNDERBOLT",
+   "side": "opponent",
+   "scenario": "tools/battle-lab/postko-rocktomb-thunderbolt.json",
+   "edge": 2092,
+   "window": {
+    "startFrame": 2092,
+    "endFrame": 2328,
+    "ageOffset": 0
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "rung2": {
+     "rows": 237,
+     "exactRows": 12,
+     "residualPixels": 4128592,
+     "digest": "aa0b4f85612491e09c60140b5433fcfd66930875549198e7d561b1f9e1697730"
+    },
+    "relabel": {
+     "rows": 237,
+     "exactRows": 237,
+     "residualPixels": 0,
+     "digest": "98c27c1e878755d92c1a81d6e87ad16a63008fec75e3e7f5cbb9e66ba634fba7"
+    }
+   },
+   "verdict": "NEEDS-PARAM (entry-label lend pi(F))"
+  },
+  {
+   "move": "GIGA_DRAIN",
+   "side": "opponent",
+   "scenario": "tools/battle-lab/postko-doubleteam-swift-gigadrain.json",
+   "edge": 2089,
+   "window": {
+    "startFrame": 2089,
+    "endFrame": 2318,
+    "ageOffset": 0
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "rung2": {
+     "rows": 230,
+     "exactRows": 0,
+     "residualPixels": 3960922,
+     "digest": "50483e4d813b7edda338761d6717c714883fed9622d432889276b31f5c26181e"
+    },
+    "relabel": {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "digest": "790bb91ee7f92cb59ca0a0e0293d2e870750cd4cc5e57d0a6653f65613414089"
+    }
+   },
+   "verdict": "NEEDS-PARAM (entry-label lend pi(F))"
+  },
+  {
+   "move": "DOUBLE_TEAM",
+   "side": "player",
+   "scenario": "tools/battle-lab/postko-doubleteam-swift.json",
+   "edge": 2085,
+   "window": {
+    "startFrame": 2086,
+    "endFrame": 2315,
+    "ageOffset": 0
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "rung2": {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "digest": "4aef76357316c58876c11cd5974c64ea3792647a13bc3398f30abc7efe935428"
+    },
+    "relabel": {
+     "rows": 230,
+     "exactRows": 230,
+     "residualPixels": 0,
+     "digest": "4aef76357316c58876c11cd5974c64ea3792647a13bc3398f30abc7efe935428"
+    }
+   },
+   "verdict": "GENERALIZES"
+  },
+  {
+   "move": "SWIFT",
+   "side": "player",
+   "scenario": "tools/battle-lab/postko-doubleteam-swift.json",
+   "edge": 3240,
+   "window": {
+    "startFrame": 3240,
+    "endFrame": 3317,
+    "ageOffset": 0
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "rung2": {
+     "rows": 78,
+     "exactRows": 78,
+     "residualPixels": 0,
+     "digest": "18f72dc781df09f49285ecf7edcd141fdbc22161843ffa3fd2ae6f09074ca69a"
+    },
+    "relabel": {
+     "rows": 78,
+     "exactRows": 78,
+     "residualPixels": 0,
+     "digest": "18f72dc781df09f49285ecf7edcd141fdbc22161843ffa3fd2ae6f09074ca69a"
+    }
+   },
+   "verdict": "GENERALIZES"
+  },
+  {
+   "move": "SWIFT",
+   "side": "opponent",
+   "scenario": "tools/battle-lab/postko-doubleteam-swift.json",
+   "edge": 2460,
+   "window": {
+    "startFrame": 2460,
+    "endFrame": 2539,
+    "ageOffset": 0
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "rung2": {
+     "rows": 80,
+     "exactRows": 80,
+     "residualPixels": 0,
+     "digest": "75951d2733a753598860515c307a3736af397b04684667528501e2470a182096"
+    },
+    "relabel": {
+     "rows": 80,
+     "exactRows": 80,
+     "residualPixels": 0,
+     "digest": "75951d2733a753598860515c307a3736af397b04684667528501e2470a182096"
+    }
+   },
+   "verdict": "GENERALIZES"
+  },
+  {
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "scenario": "tools/battle-lab/postko-lightscreen-protect-rockslide.json",
+   "edge": 2085,
+   "window": {
+    "startFrame": 2085,
+    "endFrame": 2172
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "relabel": {
+     "rows": 88,
+     "exactRows": 88,
+     "residualPixels": 0,
+     "digest": "1509c97043e8456178114d85c06186ccd122d0270167f50c65d8168602fb2e21"
+    }
+   },
+   "verdict": "NEEDS-PARAM (allocator host: post-unit view or entry-label input)"
+  },
+  {
+   "move": "PROTECT",
+   "side": "player",
+   "scenario": "tools/battle-lab/postko-lightscreen-protect-rockslide.json",
+   "edge": 3225,
+   "window": {
+    "startFrame": 3225,
+    "endFrame": 3347
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "relabel": {
+     "rows": 123,
+     "exactRows": 123,
+     "residualPixels": 0,
+     "digest": "2a8877b790500818c9a04f1996c036174021bbabad8f0875f0e5e9ef25cce08a"
+    }
+   },
+   "verdict": "NEEDS-PARAM (allocator host: post-unit view or entry-label input)"
+  },
+  {
+   "move": "ROCK_SLIDE",
+   "side": "opponent",
+   "scenario": "tools/battle-lab/postko-rockslide-opponent.json",
+   "edge": 2499,
+   "window": {
+    "startFrame": 2499,
+    "endFrame": 2636,
+    "ageOffset": 0
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "none": {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "digest": "04159c0a40188876061333eac819cf921f5ea0cbfb305e6e5a6bc45a6595e1a5"
+    },
+    "relabel": {
+     "rows": 138,
+     "exactRows": 138,
+     "residualPixels": 0,
+     "digest": "04159c0a40188876061333eac819cf921f5ea0cbfb305e6e5a6bc45a6595e1a5"
+    }
+   },
+   "verdict": "GENERALIZES"
+  },
+  {
+   "move": "SUNNY_DAY",
+   "side": "player",
+   "scenario": "tools/battle-lab/postko-sunnyday-dragondance-fireblast.json",
+   "edge": 2082,
+   "window": {
+    "startFrame": 2082,
+    "endFrame": 2239,
+    "ageOffset": 0
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "rung2": {
+     "rows": 158,
+     "exactRows": 48,
+     "residualPixels": 843312,
+     "digest": "144c5221cdc292cb3c93182bade591cbbf544ddf69ae619fe4f862d8b71f6e8d"
+    },
+    "relabel": {
+     "rows": 158,
+     "exactRows": 158,
+     "residualPixels": 0,
+     "digest": "ce30bc1d2d7c982608159a82d5f0ed78739e553e0991b4cb6aa5add1f2ce8a7f"
+    }
+   },
+   "verdict": "NEEDS-PARAM (entry-label lend pi(F))"
+  },
+  {
+   "move": "DRAGON_DANCE",
+   "side": "player",
+   "scenario": "tools/battle-lab/postko-sunnyday-dragondance-fireblast.json",
+   "edge": 3230,
+   "window": {
+    "startFrame": 3230,
+    "endFrame": 3371,
+    "ageOffset": 0
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "rung2": {
+     "rows": 142,
+     "exactRows": 53,
+     "residualPixels": 99974,
+     "digest": "e74329bd24c3c52959378b2fbeac9d1eae54a8263732facf3f2aa9dea70dcfc4"
+    },
+    "relabel": {
+     "rows": 142,
+     "exactRows": 142,
+     "residualPixels": 0,
+     "digest": "973cdab59aec8e3890da90525bc370b86bf3ac1f64c99deb614ef93b25149580"
+    }
+   },
+   "verdict": "NEEDS-PARAM (entry-label lend pi(F))"
+  },
+  {
+   "move": "FIRE_BLAST",
+   "side": "player",
+   "scenario": "tools/battle-lab/postko-fireblast-player.json",
+   "edge": 2089,
+   "window": {
+    "startFrame": 2089,
+    "endFrame": 2285,
+    "ageOffset": 0
+   },
+   "modelMismatches": 0,
+   "trackerKnown": true,
+   "edgeChecks": {
+    "free": true,
+    "occupied": true,
+    "battlerSlots": true,
+    "bitmap": true,
+    "tasks": true,
+    "battlerMatrix": true
+   },
+   "whatIf": {
+    "rung2": {
+     "rows": 197,
+     "exactRows": 197,
+     "residualPixels": 0,
+     "digest": "131f6d997addd5d75ffc9b45f2b4e33aa9b07e2764478464443a895a872fecbb"
+    },
+    "relabel": {
+     "rows": 197,
+     "exactRows": 197,
+     "residualPixels": 0,
+     "digest": "131f6d997addd5d75ffc9b45f2b4e33aa9b07e2764478464443a895a872fecbb"
+    }
+   },
+   "verdict": "GENERALIZES"
+  }
+ ],
+ "classInferred": [
+  {
+   "move": "BARRIER",
+   "id": 112,
+   "classes": [
+    "i"
+   ],
+   "gate": "allocator",
+   "usageSharePct": 0.191,
+   "verdict": "class-inferred NEEDS-PARAM (allocator host post-unit view / entry-label input; Light Screen + Protect measured)"
+  },
+  {
+   "move": "REFLECT",
+   "id": 115,
+   "classes": [
+    "i"
+   ],
+   "gate": "allocator",
+   "usageSharePct": 0.322,
+   "verdict": "class-inferred NEEDS-PARAM (allocator host post-unit view / entry-label input; Light Screen + Protect measured)"
+  },
+  {
+   "move": "MIRROR_COAT",
+   "id": 243,
+   "classes": [
+    "i"
+   ],
+   "gate": "allocator",
+   "usageSharePct": 0.557,
+   "verdict": "class-inferred NEEDS-PARAM (allocator host post-unit view / entry-label input; Light Screen + Protect measured)"
+  },
+  {
+   "move": "MAGIC_COAT",
+   "id": 277,
+   "classes": [
+    "i"
+   ],
+   "gate": "allocator",
+   "usageSharePct": 0.108,
+   "verdict": "class-inferred NEEDS-PARAM (allocator host post-unit view / entry-label input; Light Screen + Protect measured)"
+  },
+  {
+   "move": "HEAL_BELL",
+   "id": 215,
+   "classes": [
+    "ii"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.142,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "LEAF_BLADE",
+   "id": 348,
+   "classes": [
+    "ii"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.149,
+   "verdict": "class-inferred GENERALIZES under pi(F) (raw-F behaviour unmeasured)"
+  },
+  {
+   "move": "BLAZE_KICK",
+   "id": 299,
+   "classes": [
+    "i"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.037,
+   "verdict": "class-inferred GENERALIZES under pi(F) (raw-F behaviour unmeasured)"
+  },
+  {
+   "move": "ROCK_THROW",
+   "id": 88,
+   "classes": [
+    "iii"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.074,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "PERISH_SONG",
+   "id": 195,
+   "classes": [
+    "ii"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.146,
+   "verdict": "class-inferred GENERALIZES under pi(F) (raw-F behaviour unmeasured)"
+  },
+  {
+   "move": "GRUDGE",
+   "id": 288,
+   "classes": [
+    "i"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.111,
+   "verdict": "class-inferred GENERALIZES under pi(F) (raw-F behaviour unmeasured)"
+  },
+  {
+   "move": "SAFEGUARD",
+   "id": 219,
+   "classes": [
+    "ii"
+   ],
+   "gate": "none",
+   "usageSharePct": 0.287,
+   "verdict": "class-inferred GENERALIZES (ungated; renders today; Rock Tomb, Rock Slide, Flamethrower measured exact)"
+  },
+  {
+   "move": "SWEET_SCENT",
+   "id": 230,
+   "classes": [
+    "ii"
+   ],
+   "gate": "none",
+   "usageSharePct": 0.185,
+   "verdict": "class-inferred GENERALIZES (ungated; renders today; Rock Tomb, Rock Slide, Flamethrower measured exact)"
+  },
+  {
+   "move": "TRICK",
+   "id": 271,
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.176,
+   "verdict": "class-inferred GENERALIZES under pi(F) (raw-F behaviour unmeasured)"
+  },
+  {
+   "move": "FRUSTRATION",
+   "id": 218,
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.343,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "SEISMIC_TOSS",
+   "id": 69,
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.248,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "HORN_DRILL",
+   "id": 32,
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.257,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "AURORA_BEAM",
+   "id": 62,
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.102,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "UPROAR",
+   "id": 253,
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.034,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "STOCKPILE",
+   "id": 254,
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.068,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "ZAP_CANNON",
+   "id": 192,
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.037,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "MEGA_DRAIN",
+   "id": 72,
+   "classes": [
+    "ii",
+    "iii"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.153,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "ABSORB",
+   "id": 71,
+   "classes": [
+    "ii",
+    "iii"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.04,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "DREAM_EATER",
+   "id": 138,
+   "classes": [
+    "ii",
+    "iii"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.217,
+   "verdict": "class-inferred NEEDS-PARAM (entry-label lend pi(F); self-declines on raw F like Thunderbolt/Giga Drain/Sunny Day/Dragon Dance)"
+  },
+  {
+   "move": "FEATHER_DANCE",
+   "id": 297,
+   "classes": [
+    "v"
+   ],
+   "gate": "order",
+   "usageSharePct": 0.074,
+   "verdict": "class-inferred GENERALIZES under pi(F) (raw-F behaviour unmeasured)"
+  },
+  {
+   "move": "SHADOW_PUNCH",
+   "id": 325,
+   "classes": [
+    "iii"
+   ],
+   "gate": "none",
+   "usageSharePct": 0.074,
+   "verdict": "class-inferred GENERALIZES (ungated; renders today; Rock Tomb, Rock Slide, Flamethrower measured exact)"
+  }
+ ],
+ "summary": {
+  "probed": 13,
+  "generalizes": 7,
+  "needsParam": 6,
+  "needsNew": 0,
+  "allExactUnderRelabelOrToday": true,
+  "modelMismatchesAtRelyEdges": 0
+ }
+}

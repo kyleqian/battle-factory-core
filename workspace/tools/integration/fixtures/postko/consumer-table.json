@@ -1,0 +1,1810 @@
+{
+ "schema": "postko-consumer-table/v1",
+ "geometry": {
+  "entryOccupied": [
+   0,
+   1,
+   2,
+   6,
+   8,
+   60,
+   61,
+   62,
+   63
+  ],
+  "postKoOccupied": [
+   0,
+   1,
+   2,
+   5,
+   6,
+   60,
+   61,
+   62,
+   63
+  ],
+  "entryLowestFree": [
+   3,
+   4,
+   5,
+   7,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20
+  ],
+  "postKoLowestFree": [
+   3,
+   4,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20
+  ],
+  "entryBattler": {
+   "player": 6,
+   "opponent": 8
+  },
+  "postKoBattler": {
+   "player": 6,
+   "opponent": 5
+  },
+  "entryMatrixBitmap": "0x6",
+  "postKoMatrixBitmap": "0x3"
+ },
+ "byClass": {
+  "i": {
+   "count": 9,
+   "usageSharePct": 4.244,
+   "moves": [
+    "LIGHT_SCREEN",
+    "BARRIER",
+    "REFLECT",
+    "PROTECT",
+    "MIRROR_COAT",
+    "MAGIC_COAT",
+    "BLAZE_KICK",
+    "FLAMETHROWER",
+    "GRUDGE"
+   ]
+  },
+  "ii": {
+   "count": 22,
+   "usageSharePct": 8.798,
+   "moves": [
+    "HEAL_BELL",
+    "LEAF_BLADE",
+    "PERISH_SONG",
+    "SAFEGUARD",
+    "SWEET_SCENT",
+    "DRAGON_DANCE",
+    "SWIFT",
+    "TRICK",
+    "FRUSTRATION",
+    "SEISMIC_TOSS",
+    "HORN_DRILL",
+    "AURORA_BEAM",
+    "UPROAR",
+    "THUNDERBOLT",
+    "STOCKPILE",
+    "ZAP_CANNON",
+    "SUNNY_DAY",
+    "GIGA_DRAIN",
+    "MEGA_DRAIN",
+    "ABSORB",
+    "DREAM_EATER",
+    "DOUBLE_TEAM"
+   ]
+  },
+  "iii": {
+   "count": 20,
+   "usageSharePct": 9.354,
+   "moves": [
+    "ROCK_THROW",
+    "ROCK_TOMB",
+    "ROCK_SLIDE",
+    "FIRE_BLAST",
+    "SWIFT",
+    "TRICK",
+    "FRUSTRATION",
+    "SEISMIC_TOSS",
+    "HORN_DRILL",
+    "AURORA_BEAM",
+    "UPROAR",
+    "THUNDERBOLT",
+    "STOCKPILE",
+    "ZAP_CANNON",
+    "SUNNY_DAY",
+    "GIGA_DRAIN",
+    "MEGA_DRAIN",
+    "ABSORB",
+    "DREAM_EATER",
+    "SHADOW_PUNCH"
+   ]
+  },
+  "iv": {
+   "count": 10,
+   "usageSharePct": 3.141,
+   "moves": [
+    "SWIFT",
+    "TRICK",
+    "FRUSTRATION",
+    "SEISMIC_TOSS",
+    "HORN_DRILL",
+    "AURORA_BEAM",
+    "UPROAR",
+    "THUNDERBOLT",
+    "STOCKPILE",
+    "ZAP_CANNON"
+   ]
+  },
+  "v": {
+   "count": 1,
+   "usageSharePct": 0.074,
+   "moves": [
+    "FEATHER_DANCE"
+   ]
+  }
+ },
+ "byCurrentOutcome": {
+  "host-derived": {
+   "count": 6,
+   "usageSharePct": 3.145,
+   "moves": [
+    "LIGHT_SCREEN",
+    "BARRIER",
+    "REFLECT",
+    "PROTECT",
+    "MIRROR_COAT",
+    "MAGIC_COAT"
+   ]
+  },
+  "self-declines": {
+   "count": 16,
+   "usageSharePct": 5.951,
+   "moves": [
+    "HEAL_BELL",
+    "ROCK_THROW",
+    "DRAGON_DANCE",
+    "FRUSTRATION",
+    "SEISMIC_TOSS",
+    "HORN_DRILL",
+    "AURORA_BEAM",
+    "UPROAR",
+    "THUNDERBOLT",
+    "STOCKPILE",
+    "ZAP_CANNON",
+    "SUNNY_DAY",
+    "GIGA_DRAIN",
+    "MEGA_DRAIN",
+    "ABSORB",
+    "DREAM_EATER"
+   ]
+  },
+  "gate only / labels": {
+   "count": 4,
+   "usageSharePct": 4.06,
+   "moves": [
+    "LEAF_BLADE",
+    "ROCK_SLIDE",
+    "DOUBLE_TEAM",
+    "FEATHER_DANCE"
+   ]
+  },
+  "derives from F": {
+   "count": 3,
+   "usageSharePct": 1.099,
+   "moves": [
+    "BLAZE_KICK",
+    "FLAMETHROWER",
+    "GRUDGE"
+   ]
+  },
+  "derives from F via fixed note windows": {
+   "count": 1,
+   "usageSharePct": 0.146,
+   "moves": [
+    "PERISH_SONG"
+   ]
+  },
+  "WRONG-SILENT": {
+   "count": 7,
+   "usageSharePct": 2.3,
+   "moves": [
+    "ROCK_TOMB",
+    "SAFEGUARD",
+    "SWEET_SCENT",
+    "FIRE_BLAST",
+    "SWIFT",
+    "TRICK",
+    "SHADOW_PUNCH"
+   ]
+  }
+ },
+ "totalConsumers": 37,
+ "totalUsageSharePct": 16.701,
+ "rows": [
+  {
+   "move": 113,
+   "name": "LIGHT_SCREEN",
+   "line": "src/engine/liveMoveAnimation.ts:806",
+   "gate": "allocator",
+   "classes": [
+    "i"
+   ],
+   "constants": {
+    "note": "wall/sparkles = host first-free (allocateFirstLiveSprite); host invalidated by faint/summary/switch-in"
+   },
+   "weightPerSide": 0.03257,
+   "usageSharePct": 0.814,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "host-derived (allocator host must model the post-unit occupancy; today invalidated)"
+   }
+  },
+  {
+   "move": 112,
+   "name": "BARRIER",
+   "line": "src/engine/liveMoveAnimation.ts:816",
+   "gate": "allocator",
+   "classes": [
+    "i"
+   ],
+   "constants": {},
+   "weightPerSide": 0.00764,
+   "usageSharePct": 0.191,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "host-derived (allocator host must model the post-unit occupancy; today invalidated)"
+   }
+  },
+  {
+   "move": 115,
+   "name": "REFLECT",
+   "line": "src/engine/liveMoveAnimation.ts:816",
+   "gate": "allocator",
+   "classes": [
+    "i"
+   ],
+   "constants": {},
+   "weightPerSide": 0.01288,
+   "usageSharePct": 0.322,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "host-derived (allocator host must model the post-unit occupancy; today invalidated)"
+   }
+  },
+  {
+   "move": 182,
+   "name": "PROTECT",
+   "line": "src/engine/liveMoveAnimation.ts:816",
+   "gate": "allocator",
+   "classes": [
+    "i"
+   ],
+   "constants": {},
+   "weightPerSide": 0.0461,
+   "usageSharePct": 1.153,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "host-derived (allocator host must model the post-unit occupancy; today invalidated)"
+   }
+  },
+  {
+   "move": 243,
+   "name": "MIRROR_COAT",
+   "line": "src/engine/liveMoveAnimation.ts:816",
+   "gate": "allocator",
+   "classes": [
+    "i"
+   ],
+   "constants": {},
+   "weightPerSide": 0.02226,
+   "usageSharePct": 0.557,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "host-derived (allocator host must model the post-unit occupancy; today invalidated)"
+   }
+  },
+  {
+   "move": 277,
+   "name": "MAGIC_COAT",
+   "line": "src/engine/liveMoveAnimation.ts:816",
+   "gate": "allocator",
+   "classes": [
+    "i"
+   ],
+   "constants": {},
+   "weightPerSide": 0.00431,
+   "usageSharePct": 0.108,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "host-derived (allocator host must model the post-unit occupancy; today invalidated)"
+   }
+  },
+  {
+   "move": 215,
+   "name": "HEAL_BELL",
+   "line": "src/engine/liveMoveAnimation.ts:1188",
+   "gate": "order",
+   "classes": [
+    "ii"
+   ],
+   "constants": {
+    "slots": [
+     4,
+     5,
+     7,
+     9,
+     10,
+     11
+    ],
+    "via": "spriteOrderForSlots(HEAL_BELL_REUSED_ORDER_SLOTS)"
+   },
+   "weightPerSide": 0.00567,
+   "usageSharePct": 0.142,
+   "postKo": {
+    "slotsEntry": [
+     4,
+     5,
+     7,
+     9,
+     10,
+     11
+    ],
+    "slotsPostKo": [
+     4,
+     7,
+     8,
+     9,
+     10,
+     11
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "currentCodeUnderPostKoLend": "self-declines (a hard-coded slot is occupied post-KO)"
+   }
+  },
+  {
+   "move": 348,
+   "name": "LEAF_BLADE",
+   "line": "src/engine/liveMoveAnimation.ts:1198",
+   "gate": "order",
+   "classes": [
+    "ii"
+   ],
+   "constants": {
+    "slotsRef": "LEAF_BLADE_OAM_ORDER_SLOTS",
+    "via": "spriteOrderForSlots"
+   },
+   "weightPerSide": 0.00595,
+   "usageSharePct": 0.149,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "gate only / labels"
+   }
+  },
+  {
+   "move": 299,
+   "name": "BLAZE_KICK",
+   "line": "src/engine/liveMoveAnimation.ts:1212",
+   "gate": "order",
+   "classes": [
+    "i"
+   ],
+   "constants": {
+    "via": "sorted(F)[:10]"
+   },
+   "weightPerSide": 0.00149,
+   "usageSharePct": 0.037,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "derives from F (generalizes by construction for slots)"
+   }
+  },
+  {
+   "move": 88,
+   "name": "ROCK_THROW",
+   "line": "src/engine/liveMoveAnimation.ts:1228",
+   "gate": "order",
+   "classes": [
+    "iii"
+   ],
+   "constants": {
+    "prefix": true,
+    "via": "spriteOrderWithOccupiedPrefix(KNOWN_ENTRY_OCCUPIED)"
+   },
+   "weightPerSide": 0.00295,
+   "usageSharePct": 0.074,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 195,
+   "name": "PERISH_SONG",
+   "line": "src/engine/liveMoveAnimation.ts:1240",
+   "gate": "order",
+   "classes": [
+    "ii"
+   ],
+   "constants": {
+    "via": "perishSongNoteOrderFromFree (fixed note windows of slots)"
+   },
+   "weightPerSide": 0.00582,
+   "usageSharePct": 0.146,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "derives from F via fixed note windows (check windows at the post-KO free set)"
+   }
+  },
+  {
+   "move": 53,
+   "name": "FLAMETHROWER",
+   "line": "src/engine/liveMoveAnimation.ts:1251",
+   "gate": "none",
+   "classes": [
+    "i"
+   ],
+   "constants": {
+    "via": "sorted(F)[:8] when lent, else literal [3,4,5,7,9,10,11,12] (labels only, prep \u00a70)"
+   },
+   "weightPerSide": 0.03805,
+   "usageSharePct": 0.951,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "derives from F (generalizes by construction for slots)"
+   }
+  },
+  {
+   "move": 288,
+   "name": "GRUDGE",
+   "line": "src/engine/liveMoveAnimation.ts:1273",
+   "gate": "order",
+   "classes": [
+    "i"
+   ],
+   "constants": {
+    "via": "sorted(F)[:6]"
+   },
+   "weightPerSide": 0.00444,
+   "usageSharePct": 0.111,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "derives from F (generalizes by construction for slots)"
+   }
+  },
+  {
+   "move": 317,
+   "name": "ROCK_TOMB",
+   "line": "src/engine/liveMoveAnimation.ts:1307",
+   "gate": "none",
+   "classes": [
+    "iii"
+   ],
+   "constants": {
+    "battlerSlot": "target",
+    "note": "targetSpriteSlot opponent 8 / player 6; rock slots first-free inside the reducer (seed-independent)"
+   },
+   "weightPerSide": 0.02911,
+   "usageSharePct": 0.728,
+   "postKo": {
+    "battlerSlot": {
+     "entry": {
+      "player": 6,
+      "opponent": 8
+     },
+     "postKo": {
+      "player": 6,
+      "opponent": 5
+     },
+     "uses": "target"
+    },
+    "currentCodeUnderPostKoLend": "WRONG-SILENT (entry battler slot 8 for the opponent)"
+   }
+  },
+  {
+   "move": 219,
+   "name": "SAFEGUARD",
+   "line": "src/engine/liveMoveAnimation.ts:1318",
+   "gate": "none",
+   "classes": [
+    "ii"
+   ],
+   "constants": {
+    "slots": [
+     3,
+     4,
+     5
+    ],
+    "note": "labels only (0/42 seeds, prep6 s2.3)"
+   },
+   "weightPerSide": 0.01147,
+   "usageSharePct": 0.287,
+   "postKo": {
+    "slotsEntry": [
+     3,
+     4,
+     5
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "currentCodeUnderPostKoLend": "WRONG-SILENT (renders entry slots that are not the post-KO allocation slots)"
+   }
+  },
+  {
+   "move": 230,
+   "name": "SWEET_SCENT",
+   "line": "src/engine/liveMoveAnimation.ts:1324",
+   "gate": "none",
+   "classes": [
+    "ii"
+   ],
+   "constants": {
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     3,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     4,
+     5,
+     7,
+     9,
+     10,
+     3,
+     11,
+     12,
+     13,
+     14
+    ],
+    "note": "seed-independent (0/42 seeds)"
+   },
+   "weightPerSide": 0.00738,
+   "usageSharePct": 0.185,
+   "postKo": {
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     3,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     4,
+     5,
+     7,
+     9,
+     10,
+     3,
+     11,
+     12,
+     13,
+     14
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9,
+     10,
+     3,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     4,
+     7,
+     8,
+     9,
+     10,
+     3,
+     11,
+     12,
+     13,
+     14
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "currentCodeUnderPostKoLend": "WRONG-SILENT (renders entry slots that are not the post-KO allocation slots)"
+   }
+  },
+  {
+   "move": 157,
+   "name": "ROCK_SLIDE",
+   "line": "src/engine/liveMoveAnimation.ts:1407",
+   "gate": "none",
+   "classes": [
+    "iii"
+   ],
+   "constants": {
+    "prefix": true,
+    "note": "opponent attacker only; prefix order when lent, accepted literal otherwise (seed-independent 0/40)"
+   },
+   "weightPerSide": 0.08467,
+   "usageSharePct": 2.117,
+   "postKo": {
+    "prefix": "falls back to the accepted known-entry literal (wrong occupant set; seed-independent per prep7 s2.3)",
+    "currentCodeUnderPostKoLend": "gate only / labels"
+   }
+  },
+  {
+   "move": 126,
+   "name": "FIRE_BLAST",
+   "line": "src/engine/liveMoveAnimation.ts:1419",
+   "gate": "order",
+   "classes": [
+    "iii"
+   ],
+   "constants": {
+    "battlerSlot": "target"
+   },
+   "weightPerSide": 0.02368,
+   "usageSharePct": 0.592,
+   "postKo": {
+    "battlerSlot": {
+     "entry": {
+      "player": 6,
+      "opponent": 8
+     },
+     "postKo": {
+      "player": 6,
+      "opponent": 5
+     },
+     "uses": "target"
+    },
+    "currentCodeUnderPostKoLend": "WRONG-SILENT (entry battler slot 8 for the opponent)"
+   }
+  },
+  {
+   "move": 349,
+   "name": "DRAGON_DANCE",
+   "line": "src/engine/liveMoveAnimation.ts:1430",
+   "gate": "order",
+   "classes": [
+    "ii"
+   ],
+   "constants": {
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10
+    ],
+    "via": "spriteOrderForSlots"
+   },
+   "weightPerSide": 0.01599,
+   "usageSharePct": 0.4,
+   "postKo": {
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9,
+     10
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "currentCodeUnderPostKoLend": "self-declines (a hard-coded slot is occupied post-KO)"
+   }
+  },
+  {
+   "move": 129,
+   "name": "SWIFT",
+   "line": "src/engine/liveMoveAnimation.ts:1445",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "constants": {
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "battlerSlot": "both",
+    "tasks": {
+     "targetShakeTaskSlot": 0
+    }
+   },
+   "weightPerSide": 0.01033,
+   "usageSharePct": 0.258,
+   "postKo": {
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "battlerSlot": {
+     "entry": {
+      "player": 6,
+      "opponent": 8
+     },
+     "postKo": {
+      "player": 6,
+      "opponent": 5
+     },
+     "uses": "both"
+    },
+    "tasks": {
+     "entry": {
+      "targetShakeTaskSlot": 0
+     },
+     "postKo": "unchanged iff the task table is empty at activation (s1.3: cry tasks end ~100 frames after the send-out)"
+    },
+    "currentCodeUnderPostKoLend": "WRONG-SILENT (renders entry slots that are not the post-KO allocation slots)"
+   }
+  },
+  {
+   "move": 271,
+   "name": "TRICK",
+   "line": "src/engine/liveMoveAnimation.ts:1445",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "constants": {
+    "slots": [
+     3,
+     4
+    ],
+    "battlerSlot": "both",
+    "tasks": {
+     "stretch": [
+      1,
+      0
+     ],
+     "shake": [
+      0,
+      1
+     ]
+    }
+   },
+   "weightPerSide": 0.00706,
+   "usageSharePct": 0.176,
+   "postKo": {
+    "slotsEntry": [
+     3,
+     4
+    ],
+    "slotsPostKo": [
+     3,
+     4
+    ],
+    "slotsChange": false,
+    "forSlotsAllFree": true,
+    "battlerSlot": {
+     "entry": {
+      "player": 6,
+      "opponent": 8
+     },
+     "postKo": {
+      "player": 6,
+      "opponent": 5
+     },
+     "uses": "both"
+    },
+    "tasks": {
+     "entry": {
+      "stretch": [
+       1,
+       0
+      ],
+      "shake": [
+       0,
+       1
+      ]
+     },
+     "postKo": "unchanged iff the task table is empty at activation (s1.3: cry tasks end ~100 frames after the send-out)"
+    },
+    "currentCodeUnderPostKoLend": "WRONG-SILENT (entry battler slot 8 for the opponent)"
+   }
+  },
+  {
+   "move": 218,
+   "name": "FRUSTRATION",
+   "line": "src/engine/liveMoveAnimation.ts:1469",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     3,
+     4
+    ],
+    "matrices": [
+     0,
+     0,
+     3
+    ]
+   },
+   "weightPerSide": 0.01373,
+   "usageSharePct": 0.343,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     3,
+     4
+    ],
+    "slotsPostKo": [
+     3,
+     3,
+     4
+    ],
+    "slotsChange": false,
+    "forSlotsAllFree": true,
+    "matricesEntry": [
+     0,
+     0,
+     3
+    ],
+    "matricesPostKo": [
+     2,
+     2,
+     3
+    ],
+    "matricesChange": true,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 69,
+   "name": "SEISMIC_TOSS",
+   "line": "src/engine/liveMoveAnimation.ts:1469",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    "matrices": [
+     0,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ]
+   },
+   "weightPerSide": 0.00991,
+   "usageSharePct": 0.248,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "matricesEntry": [
+     0,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ],
+    "matricesPostKo": [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ],
+    "matricesChange": true,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 32,
+   "name": "HORN_DRILL",
+   "line": "src/engine/liveMoveAnimation.ts:1469",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5
+    ],
+    "matrices": [
+     0,
+     3,
+     4
+    ],
+    "via": "spriteOrderForSlots([3,4,5])"
+   },
+   "weightPerSide": 0.01029,
+   "usageSharePct": 0.257,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "matricesEntry": [
+     0,
+     3,
+     4
+    ],
+    "matricesPostKo": [
+     2,
+     3,
+     4
+    ],
+    "matricesChange": true,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 62,
+   "name": "AURORA_BEAM",
+   "line": "src/engine/liveMoveAnimation.ts:1469",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10
+    ],
+    "matrices": [
+     0,
+     3,
+     4,
+     5,
+     6,
+     7
+    ]
+   },
+   "weightPerSide": 0.00408,
+   "usageSharePct": 0.102,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9,
+     10
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "matricesEntry": [
+     0,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "matricesPostKo": [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "matricesChange": true,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 253,
+   "name": "UPROAR",
+   "line": "src/engine/liveMoveAnimation.ts:1469",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5
+    ],
+    "matrices": [
+     0
+    ],
+    "battlerMatrix": "attacker"
+   },
+   "weightPerSide": 0.00136,
+   "usageSharePct": 0.034,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "matricesEntry": [
+     0
+    ],
+    "matricesPostKo": [
+     2
+    ],
+    "matricesChange": true,
+    "battlerMatrix": {
+     "entry": {
+      "player": 1,
+      "opponent": 2
+     },
+     "postKo": {
+      "player": 1,
+      "opponent": 0
+     }
+    },
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 85,
+   "name": "THUNDERBOLT",
+   "line": "src/engine/liveMoveAnimation.ts:1469",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    "matrices": [
+     0,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ]
+   },
+   "weightPerSide": 0.06471,
+   "usageSharePct": 1.618,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "matricesEntry": [
+     0,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ],
+    "matricesPostKo": [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ],
+    "matricesChange": true,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 254,
+   "name": "STOCKPILE",
+   "line": "src/engine/liveMoveAnimation.ts:1469",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "matrices": [
+     0,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "weightPerSide": 0.00272,
+   "usageSharePct": 0.068,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "matricesEntry": [
+     0,
+     3,
+     4,
+     5,
+     6
+    ],
+    "matricesPostKo": [
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "matricesChange": true,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 192,
+   "name": "ZAP_CANNON",
+   "line": "src/engine/liveMoveAnimation.ts:1469",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii",
+    "iv"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    "matrices": [
+     0,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   "weightPerSide": 0.00149,
+   "usageSharePct": 0.037,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "matricesEntry": [
+     0,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "matricesPostKo": [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "matricesChange": true,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 241,
+   "name": "SUNNY_DAY",
+   "line": "src/engine/liveMoveAnimation.ts:1584",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5,
+     7
+    ]
+   },
+   "weightPerSide": 0.03372,
+   "usageSharePct": 0.843,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 202,
+   "name": "GIGA_DRAIN",
+   "line": "src/engine/liveMoveAnimation.ts:1584",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21
+    ]
+   },
+   "weightPerSide": 0.05502,
+   "usageSharePct": 1.375,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 72,
+   "name": "MEGA_DRAIN",
+   "line": "src/engine/liveMoveAnimation.ts:1584",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16
+    ]
+   },
+   "weightPerSide": 0.00612,
+   "usageSharePct": 0.153,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 71,
+   "name": "ABSORB",
+   "line": "src/engine/liveMoveAnimation.ts:1584",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10
+    ]
+   },
+   "weightPerSide": 0.00159,
+   "usageSharePct": 0.04,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9,
+     10
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 138,
+   "name": "DREAM_EATER",
+   "line": "src/engine/liveMoveAnimation.ts:1584",
+   "gate": "order",
+   "classes": [
+    "ii",
+    "iii"
+   ],
+   "constants": {
+    "prefix": true,
+    "slots": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21
+    ]
+   },
+   "weightPerSide": 0.00867,
+   "usageSharePct": 0.217,
+   "postKo": {
+    "prefix": "declines (prefix lacks 5, repeats 8: spriteOrderWithOccupiedPrefix -> null)",
+    "slotsEntry": [
+     3,
+     4,
+     5,
+     7,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21
+    ],
+    "slotsPostKo": [
+     3,
+     4,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21
+    ],
+    "slotsChange": true,
+    "forSlotsAllFree": false,
+    "currentCodeUnderPostKoLend": "self-declines (prefix)"
+   }
+  },
+  {
+   "move": 104,
+   "name": "DOUBLE_TEAM",
+   "line": "src/engine/liveMoveAnimation.ts:1634",
+   "gate": "order",
+   "classes": [
+    "ii"
+   ],
+   "constants": {
+    "slots": [
+     3,
+     4
+    ],
+    "via": "spriteOrderForSlots([3,4])"
+   },
+   "weightPerSide": 0.06881,
+   "usageSharePct": 1.72,
+   "postKo": {
+    "slotsEntry": [
+     3,
+     4
+    ],
+    "slotsPostKo": [
+     3,
+     4
+    ],
+    "slotsChange": false,
+    "forSlotsAllFree": true,
+    "currentCodeUnderPostKoLend": "gate only / labels"
+   }
+  },
+  {
+   "move": 297,
+   "name": "FEATHER_DANCE",
+   "line": "src/engine/liveMoveAnimation.ts:1646",
+   "gate": "order",
+   "classes": [
+    "v"
+   ],
+   "constants": {
+    "note": "gate only (no order field consumed); body is the known-entry staged profile"
+   },
+   "weightPerSide": 0.00295,
+   "usageSharePct": 0.074,
+   "postKo": {
+    "currentCodeUnderPostKoLend": "gate only / labels"
+   }
+  },
+  {
+   "move": 325,
+   "name": "SHADOW_PUNCH",
+   "line": "src/engine/liveMoveAnimation.ts:991",
+   "gate": "none",
+   "classes": [
+    "iii"
+   ],
+   "constants": {
+    "battlerSlot": "attacker",
+    "note": "attackerSpriteId 6/8"
+   },
+   "weightPerSide": 0.00295,
+   "usageSharePct": 0.074,
+   "postKo": {
+    "battlerSlot": {
+     "entry": {
+      "player": 6,
+      "opponent": 8
+     },
+     "postKo": {
+      "player": 6,
+      "opponent": 5
+     },
+     "uses": "attacker"
+    },
+    "currentCodeUnderPostKoLend": "WRONG-SILENT (entry battler slot 8 for the opponent)"
+   }
+  }
+ ]
+}

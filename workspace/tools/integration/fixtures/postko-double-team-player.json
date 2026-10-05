@@ -1,0 +1,38 @@
+{
+ "schema": "postko-adapter-draft/v1",
+ "draft": true,
+ "move": "DOUBLE_TEAM",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/postko-doubleteam-swift.json",
+ "stateFixture": "tools/integration/fixtures/postko/state-postko-doubleteam-swift.json",
+ "modelCheck": "tools/integration/fixtures/postko/model-check-postko-doubleteam-swift.json",
+ "attacker": {
+  "species": "NINETALES",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 148,
+  "opponentHp": 170,
+  "opponentMaxHp": 170,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 2085,
+ "windowOffsetFromActivation": 1,
+ "denseWindow": {
+  "startFrame": 2086,
+  "endFrame": 2315,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset of prep7-double-team-player.json (activation 70 -> window 71..300); first body after the send-out"
+}

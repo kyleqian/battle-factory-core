@@ -1,0 +1,38 @@
+{
+ "schema": "postko-adapter-draft/v1",
+ "draft": true,
+ "move": "SUNNY_DAY",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/postko-sunnyday-dragondance-fireblast.json",
+ "stateFixture": "tools/integration/fixtures/postko/state-postko-sunnyday-dragondance-fireblast.json",
+ "modelCheck": "tools/integration/fixtures/postko/model-check-postko-sunnyday-dragondance-fireblast.json",
+ "attacker": {
+  "species": "NINETALES",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 148,
+  "opponentHp": 170,
+  "opponentMaxHp": 170,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 2082,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 2082,
+  "endFrame": 2239,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset of prep9-sunny-day-player.json (activation 211 -> 211..368, 158 rows); first body after the send-out"
+}
