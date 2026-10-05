@@ -1800,14 +1800,14 @@
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "0e2563abe1bf3788ae13923509268f684fc778d9",
-    "build": "0e2563abe 2026-10-04",
+    "commit": "d935baca42ff479a137d660aca98f93f5059bdd9",
+    "build": "d935baca4 2026-10-04",
     "url": "http://127.0.0.1:5191/",
-    "implementedAdapters": 125,
-    "fullTest": "Supervisor 1492 files / 11944 tests passed on 0e2563abe",
+    "implementedAdapters": 131,
+    "fullTest": "Supervisor 1493 files / 11963 tests passed on d935baca4",
     "buildModules": 847,
     "browser": "Four canvas and saved PNG hashes on the canonical ordinary route (identical to earlier previews); session export; ON -> OFF restart; no page errors",
-    "receipt": "../tools/integration/fixtures/playable-preview-0e2563abe-receipt.json",
+    "receipt": "../tools/integration/fixtures/playable-preview-d935baca4-receipt.json",
     "availability": "Local Mac service on 127.0.0.1:5191; hcloud retired."
   },
   "productionProviders": {
@@ -1835,13 +1835,13 @@
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "fb5b811f6",
+    "productionCodeCommit": "d935baca4",
     "typecheck": "passed",
-    "workerFullTest": "1492 files / 11944 tests passed; 44 files / 223 tests skipped (worker, same src tree)",
+    "workerFullTest": "supervisor final 1493 files / 11963 tests passed; 44 files / 223 tests skipped",
     "buildModules": 847,
-    "supervisorAffected": "7 affected files / 80 tests and 448 smoke passed (multihit)",
-    "independentSource": "multihit 21 per-hit fixtures twice fresh, 759 rows/run, zero residuals; three ordinary routes PASS; shadow scan 0 mismatches",
-    "sourceReceipt": "../tools/integration/fixtures/multihit-supervisor-receipt.json",
+    "supervisorAffected": "6 affected files / 72 tests and 448 smoke passed (anchor4)",
+    "independentSource": "anchor4 twelve fixtures twice fresh, 2228 rows/run, zero residuals; six ordinary routes PASS; shadow scan 0 mismatches",
+    "sourceReceipt": "../tools/integration/fixtures/anchor4-supervisor-receipt.json",
     "shadowFade": "prior residuals remain partial and unclaimed",
     "independentFinalGates": "../tools/integration/fixtures/final-supervisor-gates-20261004.json"
   },

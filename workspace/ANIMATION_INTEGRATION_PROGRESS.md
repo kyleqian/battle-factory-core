@@ -1,5 +1,22 @@
 # Animation integration progress
 
+## 2026-10-04 — session wind-down: anchor4 folded, 131 live adapters
+
+- Folded anchor4 `17e7a98f9` as `d935baca4` (src tree `3dc209a36`):
+  Earthquake, Fissure, Crabhammer, Magical Leaf, Psybeam, Amnesia (idle x2 /
+  picture size from live species; shadow rows 0; shifted-X static BG now fires
+  the shared #142 hook). Supervisor dense 12 fixtures twice fresh, 2,228
+  rows/run, zero residual; routes 6/6; scan 281 rows / 131 ids, 0 mismatches.
+- Final production `d935baca4`: adapters 131, accepted 276, remaining 145.
+  Supervisor final full 1,493 files / 11,963 tests, build 847
+  (`final-supervisor-gates-20261004.json`). Preview serves `d935baca4`; four
+  exact canvas/PNG hashes, export, ON->OFF restart, no errors.
+- Next (resume points, all with banked evidence): sprite-order provider
+  slices (`docs/sprite-order-provider-design.md`); status-animation occupancy
+  persistence; Reversal reducer change (needs the animation program);
+  Soft-Boiled; Scary Face/Glare eye anchors; H_BUFFER/H_RANDOM/H_OUTCOME
+  groups. No arbitrary-history framebuffer claim.
+
 ## 2026-10-04 — multi-hit per-hit adapters (125 live)
 
 - Folded worker `ed4095683` (tested code `fb5b811f6`, src tree `c14cdb45a`):

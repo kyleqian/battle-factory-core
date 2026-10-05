@@ -5,20 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-04 — S10A session wind-down: 79 -> 125 live adapters, #142 fixed
+## 2026-10-04 — S10A session wind-down: 79 -> 131 live adapters, #142 fixed
 
-- **State:** S10A, local master; 125 live adapters, 151 accepted bodies
-  remain. Supervisor final gates on `0e2563abe`: 1,492 files / 11,944 tests,
-  build 847 (`final-supervisor-gates-20261004.json`); preview
-  <http://127.0.0.1:5191/> serves `0e2563abe`, four exact canvas/PNG hashes,
+- **State:** S10A, local master `d935baca4`; 131 live adapters, 145 accepted
+  bodies remain. Supervisor final gates on `d935baca4`: 1,493 files / 11,963
+  tests, build 847 (`final-supervisor-gates-20261004.json`); preview
+  <http://127.0.0.1:5191/> serves `d935baca4`, four exact canvas/PNG hashes,
   export, ON->OFF restart, no errors. Opus 5.5 supervisor, Sonnet 5.5 workers.
-- **Did (integration lane, 11 folds, each independently re-proved twice fresh
+- **Did (integration lane, 12 folds, each independently re-proved twice fresh
   with zero residual + ordinary ON/OFF routes):** Light Screen guard repair;
   fieldfx 6, glow 5, anchor 7 (+ `liveBattlerAnchors`), wall family 5 (source
-  allocator plans), anchor2 7, anchor3 8, selectors 4, multi-hit 3 adapters;
+  allocator plans), anchor2 7, anchor3 8, selectors 4, multi-hit 3, anchor4 6 adapters;
   allocator history now persists across the 110 audited net-zero bodies;
   ISSUES #142 found, scoped and fixed (elevated-opponent shadow on the
-  activation frame for 91 live ids; Sandstorm opponent idle).
+  activation frame for 97 live ids; Sandstorm opponent idle).
 - **Did (side lane, new-files-only evidence):** wall-family allocator
   receipts, net-zero audit (all live ids), consumer tie audit, sSpriteOrder
   evidence + exact free-slot event model and provider design, status-animation
@@ -26,7 +26,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   shadow-row table, multi-hit prep, Reversal shake evidence.
 - **Next:** ROADMAP S10A resume points: sprite-order provider slices,
   status-animation occupancy persistence, Reversal reducer change (needs the
-  animation program's acceptance), Soft-Boiled, remaining anchor moves, then
+  animation program's acceptance), Soft-Boiled, Scary Face/Glare, then
   H_BUFFER/H_RANDOM/H_OUTCOME groups. Validate with alternate-species proofs.
 - **Notes:** no material decision deferred; DEFERRED.md has no open entries.
   Oracle freshness FAIL at orient was a false positive (workspace-only
