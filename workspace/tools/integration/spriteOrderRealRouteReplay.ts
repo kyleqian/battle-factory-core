@@ -49,7 +49,26 @@ const seed = (free: number[], occupied: number[]): SpriteOrderPlanCursor =>
 interface Edge { frame: number; kind: string; move?: number; side?: string; attacker: number; anim?: string; known: boolean; exact: boolean | null; occupiedMatch: boolean | null;
   consumerOrderExact: boolean | null; trivial: boolean; observedFHead: number[]; predictedFHead: number[] | null; observedFFull?: number[]; predictedFFull?: number[] | null; unitsSincePrevEdge: string[] }
 
-function replay(trace: string, mode: "strict" | "resync") {
+type Mode = "strict" | "resync" | "learned";
+const eq = (a: readonly number[] | null | undefined, b: readonly number[] | null | undefined) => JSON.stringify(a) === JSON.stringify(b);
+/** Net transform of one unit from ROM states: F_post = prefix ++ (F_pre without prefix/survivors); plan-lite with concrete tokens. Null if not of that form. */
+function netPlan(preFree: number[], preOcc: number[], postFree: number[], postOcc: number[]): { plan: SpriteOrderPlan; prefix: number[]; survivors: number[] } | null {
+  const survivors = postOcc.filter(s => !preOcc.includes(s));
+  for (let j = 0; j <= postFree.length; j++) {
+    const prefix = postFree.slice(0, j);
+    if (preOcc.some(s => !postOcc.includes(s) && !prefix.includes(s))) continue;
+    if (!eq(preFree.filter(s => !prefix.includes(s) && !survivors.includes(s)), postFree.slice(j).filter(s => !preOcc.includes(s) || postFree.slice(j).includes(s)))) continue;
+    const created = [...new Set([...survivors, ...prefix.filter(s => preFree.includes(s))])].sort((a, b) => a - b);
+    const win: { C?: [string, number, string][]; D?: [string, ...number[]][] }[] = [];
+    if (created.length) win.push({ C: created.map((_, k) => ["n", k, "f"]) });
+    if (prefix.length) win.push({ D: prefix.map(s => created.includes(s) ? ["n", created.indexOf(s)] : ["o", s]) });
+    return { plan: win as unknown as SpriteOrderPlan, prefix, survivors };
+  }
+  return null;
+}
+const learnedNets = new Map<string, { plan: SpriteOrderPlan; src: string }>();
+
+function replay(trace: string, mode: Mode) {
   const doc = read(`sprite-order-real-route/events/${trace}.json`);
   const events: Ev[] = doc.events;
   let cursor = createSpriteOrderPlanCursor(knownEntrySpriteOrderState("ordinary-factory"));
@@ -57,6 +76,7 @@ function replay(trace: string, mode: "strict" | "resync") {
   // entry (first prompt) are applied: the entry clusters (BeginBattleIntro ... Intro_TryShinyAnimShowHealthbox) are the known-entry constant.
   const entryEnd = events.find(e => e.k === "prompt" || e.k === "body" || e.k === "anim")!.n;
   const edges: Edge[] = [];
+  const bodyChecks: { frame: number; unit: string; source: string; exact: boolean; occupiedMatch: boolean; observedFHead: number[]; predictedFHead: number[] }[] = [];
   const invalidations: { frame: number; reason: string; event: string }[] = [];
   let sinceEdge: string[] = [];
   const apply = (e: Ev, plan: SpriteOrderPlan | null | undefined, label: string) => {
@@ -98,20 +118,35 @@ function replay(trace: string, mode: "strict" | "resync") {
         observedFHead: head(observedFree), predictedFHead: predicted ? head(predicted) : null, observedFFull: observedFree, predictedFFull: predicted, unitsSincePrevEdge: sinceEdge,
       });
       sinceEdge = [];
-      if (mode === "resync" && !known) { resync(e, observedFree, e.obsMask as string); }
-      const plan = isBody ? plans.bodies.get(key!) : key ? (anims[key]?.verdict === "EXACT-PLAN" ? anims[key]!.plan : null) : null;
-      apply(e, plan, `${isBody ? "body" : "anim"}:${key}`);
-      // resync mode: a body/animation without an EXACT-PLAN leaves the order unknown; re-seed from the ROM state just before the next event
-      if (mode === "resync" && !cursor.order.known && events[i + 1]) { const nx = events[i + 1]!; resync(nx, nx.preF as number[], nx.preMask as string, nx); }
+      if (mode !== "strict" && !known) { resync(e, observedFree, e.obsMask as string); }
+      const tablePlan = isBody ? plans.bodies.get(key!) : key ? (anims[key]?.verdict === "EXACT-PLAN" ? anims[key]!.plan : null) : null;
+      const learnKey = `${isBody ? "body" : "anim"}:${key}`;
+      const learned = mode === "learned" && !tablePlan ? learnedNets.get(learnKey) : undefined;
+      const source = tablePlan ? "table" : learned ? `learned@${learned.src}` : "none";
+      const nx = events[i + 1];
+      apply(e, tablePlan ?? learned?.plan, learnKey);
+      if (mode === "learned" && !tablePlan && !learned && nx) {
+        const net = netPlan(observedFree, observedOcc, nx.preF as number[], maskSlots(nx.preMask as string));
+        if (net) learnedNets.set(learnKey, { plan: net.plan, src: `${trace}:${e.n}` });
+      }
+      // resync/learned mode: a body/animation without a usable plan leaves the order unknown; re-seed from the ROM state just before the next event
+      if (mode !== "strict" && !cursor.order.known && nx) { resync(nx, nx.preF as number[], nx.preMask as string, nx); }
       if (isBody) {
         const after = plans.gapAfterBody.get(key!);
         if (after && JSON.stringify(after) === CARRY_SHAPE) carry(e, after, "gap");
       } else carry(e, CARRY_PLAN, "anim");
+      if (source !== "none" && cursor.order.known && nx) {
+        // body-level check: predicted F right after the unit vs the ROM state just before the next event (the unit is complete by then)
+        bodyChecks.push({ frame: e.n, unit: learnKey, source, exact: eq(cursor.order.free, nx.preF as number[]), occupiedMatch: eq(cursor.occupied, maskSlots(nx.preMask as string)),
+          observedFHead: head(nx.preF as number[]), predictedFHead: head(cursor.order.free) });
+      }
+      // a learned (non-table) net must not cascade into later table checks: re-seed from the observed post-state
+      if (source.startsWith("learned") && nx) resync(nx, nx.preF as number[], nx.preMask as string, nx);
     } else if (e.k === "reset") invalidate(e, "party menu / battle reshow ResetSpriteData-class (all sprites freed)", "reset");
     else if (e.k === "prompt-unterminated") invalidate(e, "prompt bounce pair never ended inside the trace (truncated or interrupted)", "prompt-unterminated");
     else if (e.k === "uncovered") {
       invalidate(e, `uncovered unit class: ${String(e.klass).slice(0, 120)}`, "uncovered");
-      if (mode === "resync") resync({ ...e, n: e.last as number } as Ev, e.obsF as number[], e.obsMask as string);
+      if (mode !== "strict") resync({ ...e, n: e.last as number } as Ev, e.obsF as number[], e.obsMask as string);
     }
   }
   const mv = edges.filter(x => x.kind === "move");
@@ -119,13 +154,15 @@ function replay(trace: string, mode: "strict" | "resync") {
     tested: list.filter(x => x.known && !x.trivial).length, exact: list.filter(x => x.exact === true && !x.trivial).length,
     mismatched: list.filter(x => x.exact === false && !x.trivial).length, occupiedMismatch: list.filter(x => x.occupiedMatch === false && !x.trivial).length,
     consumerOrderMismatch: list.filter(x => x.consumerOrderExact === false && !x.trivial).length });
-  return { trace, mode, moveEdges: stat(mv), animEdges: stat(edges.filter(x => x.kind === "anim")), invalidations, edges };
+  const bc = (src: (x: string) => boolean) => { const l = bodyChecks.filter(x => src(x.source)); return { checks: l.length, exact: l.filter(x => x.exact).length, mismatched: l.filter(x => !x.exact).length, occupiedMismatch: l.filter(x => !x.occupiedMatch).length }; };
+  return { trace, mode, moveEdges: stat(mv), animEdges: stat(edges.filter(x => x.kind === "anim")), bodyLevel: { table: bc(x => x === "table"), learned: bc(x => x.startsWith("learned")) },
+    invalidations, bodyChecks, edges };
 }
 
 const out: unknown[] = [];
-for (const trace of TRACES) for (const mode of ["strict", "resync"] as const) out.push(replay(trace, mode));
+for (const trace of TRACES) for (const mode of ["strict", "resync", "learned"] as const) out.push(replay(trace, mode));
 writeFileSync(new URL("sprite-order-real-route/replay-receipt.json", FX), JSON.stringify({
   schema: "sprite-order-real-route-replay/v1", model: "TS applier src/engine/spriteOrderProvider.ts (spriteOrderPlanTableFromFixture/createSpriteOrderPlanCursor/applySpriteOrderUnitPlan) driven by recorded events",
   planFixtures: ["tools/integration/fixtures/sprite-order-body-plans.json", "tools/integration/fixtures/sprite-order-gap-causes.json (midBattleAnimations)"], results: out,
 }, null, 0) + "\n");
-for (const r of out as ReturnType<typeof replay>[]) console.log(r.trace, r.mode, JSON.stringify(r.moveEdges), "anim", JSON.stringify(r.animEdges), "inval", r.invalidations.length);
+for (const r of out as ReturnType<typeof replay>[]) console.log(r.trace, r.mode, JSON.stringify(r.moveEdges), "anim", JSON.stringify(r.animEdges), "body", JSON.stringify(r.bodyLevel), "inval", r.invalidations.length);
