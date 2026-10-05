@@ -33133,14 +33133,14 @@ export function renderSceneOnMovePresentation(
       ...scaryState, age: scaryState.age - 2,
     }).targetOffset;
     const playerToOpponent =
-      view.attacker.species === "RHYHORN"
+      (liveField || view.attacker.species === "RHYHORN")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "RHYHORN"
+      (liveField || view.attacker.species === "RHYHORN")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -33149,10 +33149,12 @@ export function renderSceneOnMovePresentation(
     }
     const rhyhornSource = playerToOpponent
       ? scaryFaceArt.rhyhornBack : scaryFaceArt.rhyhornFront;
-    const rhyhorn = playerToOpponent
+    const rhyhorn = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? rhyhornSource
       : { ...rhyhornSource, tileset: subTileset(rhyhornSource.tileset, 0, 8) };
-    const shuckle = playerToOpponent
+    const targetIdle = liveField && view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species) : { x2: 0, y2: 0 };
+    const shuckle = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? {
           ...selfDestructArt.shuckleFront,
           tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
@@ -33193,8 +33195,8 @@ export function renderSceneOnMovePresentation(
       slot: playerToOpponent ? 8 : 6,
       draw: () => drawSpriteSheet(
         fb, shuckle.tileset, shuckle.palette,
-        view.target.geometry.spriteCorner.x + targetDisplayed.x2,
-        view.target.geometry.spriteCorner.y,
+        view.target.geometry.spriteCorner.x + targetDisplayed.x2 + targetIdle.x2,
+        view.target.geometry.spriteCorner.y + targetIdle.y2,
       ),
     });
     const eyeRows = [0, 2, 4, 2, 0] as const;
@@ -33231,6 +33233,7 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    if (!liveField) {
     drawSendOutHealthbox(
       fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
         name: playerToOpponent ? "SHUCKLE" : "RHYHORN",
@@ -33260,6 +33263,7 @@ export function renderSceneOnMovePresentation(
       "SCARY FACE!",
       99,
     );
+    }
     return;
   }
 
@@ -33284,14 +33288,14 @@ export function renderSceneOnMovePresentation(
       glareState.age, glareGeometry,
     );
     const playerToOpponent =
-      view.attacker.species === "DUNSPARCE"
+      (liveField || view.attacker.species === "DUNSPARCE")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "DUNSPARCE"
+      (liveField || view.attacker.species === "DUNSPARCE")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -33302,14 +33306,14 @@ export function renderSceneOnMovePresentation(
     const dunsparceSource = playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DUNSPARCE!
       : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DUNSPARCE!;
-    const dunsparce = playerToOpponent ? dunsparceSource : {
+    const dunsparce = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? dunsparceSource : {
       ...dunsparceSource,
       tileset: subTileset(dunsparceSource.tileset, 0, 8),
     };
     const shuckleSource = playerToOpponent
       ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SHUCKLE!
       : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SHUCKLE!;
-    const shuckle = playerToOpponent ? {
+    const shuckle = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? {
       ...shuckleSource,
       tileset: subTileset(shuckleSource.tileset, 0, 8),
     } : shuckleSource;
@@ -33354,7 +33358,9 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.side,
       shuckle,
       view.target.geometry.spriteCorner,
-      view.battlers[view.target.geometry.side].hardware.x2,
+      view.battlers[view.target.geometry.side].hardware.x2
+        + (liveField && view.target.geometry.side === "opponent"
+          ? speciesFrontIdleRestOffsetOrZero(view.target.species).x2 : 0),
       playerToOpponent ? 8 : 6,
     );
     for (const dot of dotsDisplayed) {
@@ -33407,6 +33413,7 @@ export function renderSceneOnMovePresentation(
     }
 
     const profile = state.config.fieldProfile;
+    if (!liveField) {
     drawSendOutHealthbox(
       fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
         name: playerToOpponent ? "SHUCKLE" : "DUNSPARCE",
@@ -33434,6 +33441,7 @@ export function renderSceneOnMovePresentation(
       "GLARE!",
       99,
     );
+    }
     return;
   }
 

@@ -76,6 +76,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   3, 4, 167,
   // anchor4: species idle offsets (and picture size) derived through liveBattlerAnchors.
   89, 90, 152, 345, 133, 60,
+  // next5: eye anchors from liveBattlerAnchors (docs/next-adapters-prep.md s4).
+  184, 137,
 ] as const);
 
 /**
@@ -102,6 +104,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     3, 4, 167,
     // anchor4 batch (issue142-shadow-rows-extra.json): every window starts at activation (Earthquake: age 0 is the activation frame).
     89, 90, 152, 345, 60, 133,
+    // next5 (issue142-shadow-rows-extra.json): Glare's window starts at activation; Scary Face (-4) does not.
+    137,
   ].map((id) => [id, 0])),
 );
 
@@ -309,6 +313,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 345: return MAGICAL_LEAF_FRAME_COUNT;
     case 60: return 160; // Psybeam accepted window (source script through first inactive row).
     case 133: return 216; // Amnesia accepted window (source script through first inactive row).
+    case 184: return 190; // Scary Face accepted window (79..268); script tail 14 rows uncovered.
+    case 137: return 213; // Glare accepted window (GLARE_SOURCE_FRAME_COUNT).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -796,6 +802,22 @@ export function liveMoveAnimationPresentation(
       config = { move: request.moveId === 152 ? "CRABHAMMER" : request.moveId === 60 ? "PSYBEAM" : "MAGICAL_LEAF", attacker, target, fieldProfile,
         targetIdleX2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2 };
       break;
+    case 184:
+      // InitSpritePosToAnimAttacker(sprite, TRUE): attacker X_2 / Y_PIC_OFFSET.
+      config = { move: "SCARY_FACE", attacker, target, fieldProfile,
+        attackerEyeCenter: attackerAnchors.picOffsetPoint };
+      break;
+    case 137: {
+      // AnimTask_GlareEyeDots (battle_anim_effects_3.c:3989): HEIGHT = GET_MON_COORDS_HEIGHT of the
+      // attacker's own (back for player, front for opponent) pic coords, not LiveBattlerAnchors.pictureHeight.
+      const pic = attackerAnchors.picOffsetPoint;
+      const quarter = Math.trunc(art[attacker.geometry.side].coords.height / 4);
+      config = { move: "GLARE", attacker, target, fieldProfile,
+        attackerEyeCenter: { x: pic.x, y: pic.y - 8 },
+        eyeDotStart: { x: pic.x + (attacker.geometry.side === "player" ? quarter : -quarter), y: pic.y - quarter },
+        eyeDotEnd: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint };
+      break;
+    }
     case 342:
       config = {
         move: "POISON_TAIL",
