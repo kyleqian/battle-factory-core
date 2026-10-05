@@ -276,10 +276,88 @@
   "taskPairsOnlyMine": []
  },
  "leech-seed-player": {
-  "error": "KeyError('resourceAllocators')"
+  "scenario": "mechanic-leech-seed-opponent-exeggcute-player-onix",
+  "windowRows": {
+   "accepted": 141,
+   "mine": 141
+  },
+  "firstFrame": {
+   "accepted": 246,
+   "mine": 245
+  },
+  "bitmapAtActivation": {
+   "accepted": null,
+   "mine": 6
+  },
+  "tasksAtActivation": {
+   "accepted": 0,
+   "mine": 0
+  },
+  "spriteKinds(template,pal,tile,matrix)": {
+   "equal": true,
+   "accepted": [
+    [
+     "gLeechSeedSpriteTemplate",
+     7,
+     305,
+     null
+    ]
+   ],
+   "mine": [
+    [
+     "gLeechSeedSpriteTemplate",
+     7,
+     305,
+     null
+    ]
+   ]
+  },
+  "spawnSlotSequenceEqual": true,
+  "taskPairsEqual": true,
+  "taskPairsOnlyAccepted": [],
+  "taskPairsOnlyMine": []
  },
  "leech-seed-opponent": {
-  "error": "KeyError('resourceAllocators')"
+  "scenario": "mechanic-leech-seed-opponent-exeggcute-player-onix",
+  "windowRows": {
+   "accepted": 141,
+   "mine": 141
+  },
+  "firstFrame": {
+   "accepted": 245,
+   "mine": 245
+  },
+  "bitmapAtActivation": {
+   "accepted": null,
+   "mine": 6
+  },
+  "tasksAtActivation": {
+   "accepted": 0,
+   "mine": 0
+  },
+  "spriteKinds(template,pal,tile,matrix)": {
+   "equal": true,
+   "accepted": [
+    [
+     "gLeechSeedSpriteTemplate",
+     7,
+     305,
+     null
+    ]
+   ],
+   "mine": [
+    [
+     "gLeechSeedSpriteTemplate",
+     7,
+     305,
+     null
+    ]
+   ]
+  },
+  "spawnSlotSequenceEqual": true,
+  "taskPairsEqual": true,
+  "taskPairsOnlyAccepted": [],
+  "taskPairsOnlyMine": []
  },
  "petal-dance-player": {
   "scenario": "mechanic-petal-dance-opponent-gloom-player-onix",
@@ -462,10 +540,88 @@
   "taskPairsOnlyMine": []
  },
  "recycle-player": {
-  "error": "KeyError('resourceAllocators')"
+  "scenario": "mechanic-recycle-opponent-porygon-player-gyarados",
+  "windowRows": {
+   "accepted": 203,
+   "mine": 203
+  },
+  "firstFrame": {
+   "accepted": 2589,
+   "mine": 2193
+  },
+  "bitmapAtActivation": {
+   "accepted": null,
+   "mine": 6
+  },
+  "tasksAtActivation": {
+   "accepted": 0,
+   "mine": 0
+  },
+  "spriteKinds(template,pal,tile,matrix)": {
+   "equal": true,
+   "accepted": [
+    [
+     "gRecycleSpriteTemplate",
+     7,
+     305,
+     0
+    ]
+   ],
+   "mine": [
+    [
+     "gRecycleSpriteTemplate",
+     7,
+     305,
+     0
+    ]
+   ]
+  },
+  "spawnSlotSequenceEqual": true,
+  "taskPairsEqual": true,
+  "taskPairsOnlyAccepted": [],
+  "taskPairsOnlyMine": []
  },
  "recycle-opponent": {
-  "error": "KeyError('resourceAllocators')"
+  "scenario": "mechanic-recycle-opponent-porygon-player-gyarados",
+  "windowRows": {
+   "accepted": 203,
+   "mine": 203
+  },
+  "firstFrame": {
+   "accepted": 2193,
+   "mine": 2193
+  },
+  "bitmapAtActivation": {
+   "accepted": null,
+   "mine": 6
+  },
+  "tasksAtActivation": {
+   "accepted": 0,
+   "mine": 0
+  },
+  "spriteKinds(template,pal,tile,matrix)": {
+   "equal": true,
+   "accepted": [
+    [
+     "gRecycleSpriteTemplate",
+     7,
+     305,
+     0
+    ]
+   ],
+   "mine": [
+    [
+     "gRecycleSpriteTemplate",
+     7,
+     305,
+     0
+    ]
+   ]
+  },
+  "spawnSlotSequenceEqual": true,
+  "taskPairsEqual": true,
+  "taskPairsOnlyAccepted": [],
+  "taskPairsOnlyMine": []
  },
  "rollout-player": {
   "error": "KeyError('windows')"
@@ -810,9 +966,327 @@
   "taskPairsOnlyMine": []
  },
  "tri-attack-player": {
-  "error": "KeyError('resourceAllocators')"
+  "scenario": "mechanic-tri-attack-opponent-porygon-player-shuckle",
+  "windowRows": {
+   "accepted": 284,
+   "mine": 284
+  },
+  "firstFrame": {
+   "accepted": 77,
+   "mine": 81
+  },
+  "bitmapAtActivation": {
+   "accepted": null,
+   "mine": 6
+  },
+  "tasksAtActivation": {
+   "accepted": 0,
+   "mine": 0
+  },
+  "spriteKinds(template,pal,tile,matrix)": {
+   "equal": true,
+   "accepted": [
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     0
+    ],
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     4
+    ],
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     8
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     3
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     5
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     6
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     7
+    ],
+    [
+     "gLargeFlameScatterSpriteTemplate",
+     8,
+     537,
+     null
+    ],
+    [
+     "gLightningSpriteTemplate",
+     9,
+     665,
+     null
+    ],
+    [
+     "gSimplePaletteBlendSpriteTemplate",
+     15,
+     1023,
+     null
+    ],
+    [
+     "gTriAttackTriangleSpriteTemplate",
+     7,
+     305,
+     0
+    ]
+   ],
+   "mine": [
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     0
+    ],
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     4
+    ],
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     8
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     3
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     5
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     6
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     7
+    ],
+    [
+     "gLargeFlameScatterSpriteTemplate",
+     8,
+     537,
+     null
+    ],
+    [
+     "gLightningSpriteTemplate",
+     9,
+     665,
+     null
+    ],
+    [
+     "gSimplePaletteBlendSpriteTemplate",
+     15,
+     1023,
+     null
+    ],
+    [
+     "gTriAttackTriangleSpriteTemplate",
+     7,
+     305,
+     0
+    ]
+   ]
+  },
+  "spawnSlotSequenceEqual": true,
+  "taskPairsEqual": true,
+  "taskPairsOnlyAccepted": [],
+  "taskPairsOnlyMine": []
  },
  "tri-attack-opponent": {
-  "error": "KeyError('resourceAllocators')"
+  "scenario": "mechanic-tri-attack-opponent-porygon-player-shuckle",
+  "windowRows": {
+   "accepted": 284,
+   "mine": 284
+  },
+  "firstFrame": {
+   "accepted": 81,
+   "mine": 81
+  },
+  "bitmapAtActivation": {
+   "accepted": null,
+   "mine": 6
+  },
+  "tasksAtActivation": {
+   "accepted": 0,
+   "mine": 0
+  },
+  "spriteKinds(template,pal,tile,matrix)": {
+   "equal": true,
+   "accepted": [
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     0
+    ],
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     4
+    ],
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     8
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     3
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     5
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     6
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     7
+    ],
+    [
+     "gLargeFlameScatterSpriteTemplate",
+     8,
+     537,
+     null
+    ],
+    [
+     "gLightningSpriteTemplate",
+     9,
+     665,
+     null
+    ],
+    [
+     "gSimplePaletteBlendSpriteTemplate",
+     15,
+     1023,
+     null
+    ],
+    [
+     "gTriAttackTriangleSpriteTemplate",
+     7,
+     305,
+     0
+    ]
+   ],
+   "mine": [
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     0
+    ],
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     4
+    ],
+    [
+     "gIceCrystalHitLargeSpriteTemplate",
+     10,
+     437,
+     8
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     3
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     5
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     6
+    ],
+    [
+     "gIceCrystalHitSmallSpriteTemplate",
+     10,
+     439,
+     7
+    ],
+    [
+     "gLargeFlameScatterSpriteTemplate",
+     8,
+     537,
+     null
+    ],
+    [
+     "gLightningSpriteTemplate",
+     9,
+     665,
+     null
+    ],
+    [
+     "gSimplePaletteBlendSpriteTemplate",
+     15,
+     1023,
+     null
+    ],
+    [
+     "gTriAttackTriangleSpriteTemplate",
+     7,
+     305,
+     0
+    ]
+   ]
+  },
+  "spawnSlotSequenceEqual": true,
+  "taskPairsEqual": true,
+  "taskPairsOnlyAccepted": [],
+  "taskPairsOnlyMine": []
  }
 }

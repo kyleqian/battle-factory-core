@@ -15,7 +15,7 @@ def mine(move, side):
         if f"-{side}-" not in sc or "alt" in sc or f"mechanic-{move}-" not in sc: continue
         for r in rows:
             if r["move"] == MOVES[move]: return sc, r
-def acc(move, side):
+def acc(move, side):  # older corpora (leech seed, recycle, tri attack) predate resourceAllocators: bitmap0 None there
     c = json.load(gzip.open(EV / f"{move}-{side}-dense-state.json.gz")); f = c.get("frames") or c["windows"]["main"]["frames"]  # leech seed / rollout corpora nest the body windows
     if not f: raise FileNotFoundError(move)
     f0 = f[0]; base_slots = {s["slot"] for s in f0["sprites"]}
@@ -30,7 +30,7 @@ def acc(move, side):
         for t in fr["tasks"]:
             k = (t["slot"], t["func"]["symbol"])
             if k not in seen_t: seen_t.add(k); tasks.append([i, t["slot"], t["func"]["symbol"]])
-    return {"first": f0["frame"], "last": f[-1]["frame"], "rows": len(f), "bitmap0": (f0.get("resourceAllocators") or {}).get("matrixBitmap")  # older corpora (leech seed, recycle, tri attack) predate resourceAllocators, "tasks0": len(f0["tasks"]), "spawns": spawns, "tasks": tasks,
+    return {"first": f0["frame"], "last": f[-1]["frame"], "rows": len(f), "bitmap0": (f0.get("resourceAllocators") or {}).get("matrixBitmap"), "tasks0": len(f0["tasks"]), "spawns": spawns, "tasks": tasks,
             "order0": f0["spriteOrder"][:20]}
 out = {}
 for move in MOVES:
@@ -41,7 +41,7 @@ for move in MOVES:
         if not m: out[f"{move}-{side}"] = {"accepted": {k: a[k] for k in ("first", "last", "rows", "bitmap0")}, "mine": None}; continue
         sc, r = m
         # my spawns: first spawn of each slot (the corpus first-appearance logic ignores re-use of an already seen slot only when still live; compare sets of (template, pal, tile, matrix) and spawn slots)
-        mySpawns = [[s["age"], s["slot"], s["tmpl"], s["palLate"], s["tileLate"], s["matrix"]] for s in r["sprites"]]
+        mySpawns = [[s["age"], s["slot"], s["tmpl"], s["palLate"], s["tile"], s["matrix"]] for s in r["sprites"]]
         key = lambda l: sorted({(x[2], x[3], x[4], x[5]) for x in l})
         myTasks = sorted({(int(k), v) for _, t in r["taskEvents"] for k, v in t.items()})
         accTasks = sorted({(t[1], t[2]) for t in a["tasks"]})
