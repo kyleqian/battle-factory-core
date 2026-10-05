@@ -1,0 +1,1546 @@
+{
+"1": [
+"ANIM_V_JUMPS_H_JUMPS",
+0
+],
+"10": [
+"ANIM_SWING_CONCAVE",
+0
+],
+"100": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"101": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"102": [
+"ANIM_H_SLIDE_SLOW",
+0
+],
+"103": [
+"ANIM_H_JUMPS_V_STRETCH",
+0
+],
+"104": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL",
+0
+],
+"105": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES",
+0
+],
+"106": [
+"ANIM_H_STRETCH",
+0
+],
+"107": [
+"ANIM_GROW_VIBRATE",
+25
+],
+"108": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"109": [
+"ANIM_SHRINK_GROW",
+0
+],
+"11": [
+"ANIM_SWING_CONCAVE",
+0
+],
+"110": [
+"ANIM_V_SLIDE",
+0
+],
+"111": [
+"ANIM_V_SHAKE",
+0
+],
+"112": [
+"ANIM_SHRINK_GROW",
+0
+],
+"113": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"114": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL",
+0
+],
+"115": [
+"ANIM_V_STRETCH",
+0
+],
+"116": [
+"ANIM_TWIST",
+0
+],
+"117": [
+"ANIM_V_SLIDE",
+0
+],
+"118": [
+"ANIM_SWING_CONVEX",
+0
+],
+"119": [
+"ANIM_V_SLIDE_WOBBLE",
+0
+],
+"12": [
+"ANIM_H_SLIDE_WOBBLE",
+0
+],
+"120": [
+"ANIM_TWIST_TWICE",
+0
+],
+"121": [
+"ANIM_TWIST",
+0
+],
+"122": [
+"ANIM_H_SLIDE_SLOW",
+0
+],
+"123": [
+"ANIM_H_VIBRATE",
+10
+],
+"124": [
+"ANIM_V_STRETCH",
+0
+],
+"125": [
+"ANIM_FLASH_YELLOW",
+0
+],
+"126": [
+"ANIM_H_SHAKE",
+0
+],
+"127": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"128": [
+"ANIM_V_SHAKE_TWICE",
+10
+],
+"129": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES",
+0
+],
+"13": [
+"ANIM_H_SLIDE_SLOW",
+10
+],
+"130": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL",
+0
+],
+"131": [
+"ANIM_V_STRETCH",
+0
+],
+"132": [
+"ANIM_CIRCULAR_STRETCH_TWICE",
+0
+],
+"133": [
+"ANIM_V_STRETCH",
+0
+],
+"134": [
+"ANIM_V_STRETCH",
+0
+],
+"135": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"136": [
+"ANIM_V_STRETCH",
+0
+],
+"137": [
+"ANIM_V_JUMPS_SMALL",
+0
+],
+"138": [
+"ANIM_V_SLIDE_WOBBLE_SMALL",
+0
+],
+"139": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"14": [
+"ANIM_GLOW_ORANGE",
+20
+],
+"140": [
+"ANIM_H_SLIDE_WOBBLE",
+0
+],
+"141": [
+"ANIM_H_SHAKE",
+0
+],
+"142": [
+"ANIM_V_SLIDE_SLOW",
+0
+],
+"143": [
+"ANIM_SWING_CONCAVE",
+0
+],
+"144": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"145": [
+"ANIM_FLASH_YELLOW",
+0
+],
+"146": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"147": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"148": [
+"ANIM_V_SHAKE",
+0
+],
+"149": [
+"ANIM_V_SLIDE_SLOW",
+0
+],
+"15": [
+"ANIM_H_VIBRATE",
+35
+],
+"150": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"151": [
+"ANIM_SWING_CONVEX",
+0
+],
+"152": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"153": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"154": [
+"ANIM_V_STRETCH",
+0
+],
+"155": [
+"ANIM_V_JUMPS_SMALL",
+0
+],
+"156": [
+"ANIM_V_STRETCH",
+0
+],
+"157": [
+"ANIM_V_SHAKE",
+20
+],
+"158": [
+"ANIM_H_JUMPS",
+0
+],
+"159": [
+"ANIM_H_SHAKE",
+0
+],
+"16": [
+"ANIM_V_SLIDE_SLOW",
+0
+],
+"160": [
+"ANIM_H_SHAKE",
+5
+],
+"161": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"162": [
+"ANIM_H_JUMPS_V_STRETCH",
+0
+],
+"163": [
+"ANIM_V_SLIDE_SLOW",
+0
+],
+"164": [
+"ANIM_V_STRETCH",
+0
+],
+"165": [
+"ANIM_V_JUMPS_SMALL",
+0
+],
+"166": [
+"ANIM_V_SLIDE_SLOW",
+0
+],
+"167": [
+"ANIM_CIRCLE_C_CLOCKWISE_SLOW",
+0
+],
+"168": [
+"ANIM_H_SHAKE",
+0
+],
+"169": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"17": [
+"ANIM_V_STRETCH",
+25
+],
+"170": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"171": [
+"ANIM_V_SLIDE_WOBBLE_SMALL",
+0
+],
+"172": [
+"ANIM_V_JUMPS_BIG",
+0
+],
+"173": [
+"ANIM_V_JUMPS_SMALL",
+0
+],
+"174": [
+"ANIM_SWING_CONCAVE_FAST",
+0
+],
+"175": [
+"ANIM_SWING_CONCAVE",
+0
+],
+"176": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"177": [
+"ANIM_H_JUMPS",
+30
+],
+"178": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"179": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+50
+],
+"18": [
+"ANIM_FRONT_FLIP",
+0
+],
+"180": [
+"ANIM_V_JUMPS_BIG",
+0
+],
+"181": [
+"ANIM_FLASH_YELLOW",
+10
+],
+"182": [
+"ANIM_SWING_CONCAVE",
+0
+],
+"183": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"184": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW",
+0
+],
+"185": [
+"ANIM_H_SLIDE_SLOW",
+0
+],
+"186": [
+"ANIM_H_JUMPS_V_STRETCH",
+40
+],
+"187": [
+"ANIM_V_SLIDE_WOBBLE",
+0
+],
+"188": [
+"ANIM_RISING_WOBBLE",
+0
+],
+"189": [
+"ANIM_V_SLIDE_WOBBLE_SMALL",
+0
+],
+"19": [
+"ANIM_RAPID_H_HOPS",
+0
+],
+"190": [
+"ANIM_H_JUMPS_V_STRETCH",
+0
+],
+"191": [
+"ANIM_V_JUMPS_SMALL",
+0
+],
+"192": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"193": [
+"ANIM_FIGURE_8",
+0
+],
+"194": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"195": [
+"ANIM_H_STRETCH",
+0
+],
+"196": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"197": [
+"ANIM_V_SHAKE",
+0
+],
+"198": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"199": [
+"ANIM_SHRINK_GROW",
+0
+],
+"2": [
+"ANIM_V_STRETCH",
+0
+],
+"20": [
+"ANIM_FIGURE_8",
+0
+],
+"200": [
+"ANIM_V_SLIDE_WOBBLE",
+0
+],
+"201": [
+"ANIM_ZIGZAG_FAST",
+0
+],
+"202": [
+"ANIM_DEEP_V_SQUISH_AND_BOUNCE",
+0
+],
+"203": [
+"ANIM_V_JUMPS_BIG",
+0
+],
+"204": [
+"ANIM_SWING_CONCAVE",
+0
+],
+"205": [
+"ANIM_V_SHAKE",
+0
+],
+"206": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+10
+],
+"207": [
+"ANIM_SHRINK_GROW",
+0
+],
+"208": [
+"ANIM_H_SHAKE",
+45
+],
+"209": [
+"ANIM_V_STRETCH",
+0
+],
+"21": [
+"ANIM_RISING_WOBBLE",
+0
+],
+"210": [
+"ANIM_V_SHAKE",
+0
+],
+"211": [
+"ANIM_GROW_IN_STAGES",
+39
+],
+"212": [
+"ANIM_H_VIBRATE",
+19
+],
+"213": [
+"ANIM_SWING_CONCAVE",
+0
+],
+"214": [
+"ANIM_LUNGE_GROW",
+0
+],
+"215": [
+"ANIM_H_STRETCH",
+0
+],
+"216": [
+"ANIM_V_STRETCH",
+0
+],
+"217": [
+"ANIM_V_SHAKE",
+0
+],
+"218": [
+"ANIM_V_STRETCH",
+0
+],
+"219": [
+"ANIM_V_STRETCH",
+0
+],
+"22": [
+"ANIM_FIGURE_8",
+2
+],
+"220": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"221": [
+"ANIM_H_SHAKE",
+0
+],
+"222": [
+"ANIM_H_SLIDE",
+0
+],
+"223": [
+"ANIM_V_JUMPS_SMALL",
+0
+],
+"224": [
+"ANIM_V_STRETCH",
+20
+],
+"225": [
+"ANIM_V_JUMPS_SMALL",
+0
+],
+"226": [
+"ANIM_SWING_CONVEX",
+0
+],
+"227": [
+"ANIM_V_STRETCH",
+0
+],
+"228": [
+"ANIM_V_STRETCH",
+0
+],
+"229": [
+"ANIM_V_SHAKE",
+0
+],
+"23": [
+"ANIM_H_STRETCH",
+30
+],
+"230": [
+"ANIM_CIRCLE_INTO_BG",
+0
+],
+"231": [
+"ANIM_H_JUMPS_V_STRETCH",
+0
+],
+"232": [
+"ANIM_V_SHAKE_TWICE",
+0
+],
+"233": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"234": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"235": [
+"ANIM_H_JUMPS",
+0
+],
+"236": [
+"ANIM_H_STRETCH",
+0
+],
+"237": [
+"ANIM_H_VIBRATE",
+0
+],
+"238": [
+"ANIM_GROW_VIBRATE",
+40
+],
+"239": [
+"ANIM_FLASH_YELLOW",
+0
+],
+"24": [
+"ANIM_V_STRETCH",
+0
+],
+"240": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"241": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"242": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"243": [
+"ANIM_FLASH_YELLOW",
+0
+],
+"244": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"245": [
+"ANIM_V_SHAKE",
+0
+],
+"246": [
+"ANIM_V_JUMPS_SMALL",
+0
+],
+"247": [
+"ANIM_V_SHAKE",
+0
+],
+"248": [
+"ANIM_H_SHAKE",
+10
+],
+"249": [
+"ANIM_GROW_IN_STAGES",
+20
+],
+"25": [
+"ANIM_FLASH_YELLOW",
+0
+],
+"250": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"251": [
+"ANIM_RISING_WOBBLE",
+0
+],
+"26": [
+"ANIM_V_STRETCH",
+0
+],
+"27": [
+"ANIM_SWING_CONCAVE_FAST_SHORT",
+0
+],
+"277": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"278": [
+"ANIM_V_STRETCH",
+0
+],
+"279": [
+"ANIM_V_SHAKE",
+0
+],
+"28": [
+"ANIM_V_STRETCH",
+0
+],
+"280": [
+"ANIM_H_STRETCH",
+0
+],
+"281": [
+"ANIM_V_JUMPS_H_JUMPS",
+0
+],
+"282": [
+"ANIM_H_SHAKE",
+0
+],
+"283": [
+"ANIM_CIRCULAR_STRETCH_TWICE",
+0
+],
+"284": [
+"ANIM_V_SLIDE",
+0
+],
+"285": [
+"ANIM_V_JUMPS_BIG",
+0
+],
+"286": [
+"ANIM_V_SHAKE",
+0
+],
+"287": [
+"ANIM_V_SHAKE",
+0
+],
+"288": [
+"ANIM_H_SLIDE",
+0
+],
+"289": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"29": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+28
+],
+"290": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"291": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"292": [
+"ANIM_V_SLIDE",
+0
+],
+"293": [
+"ANIM_V_SLIDE",
+0
+],
+"294": [
+"ANIM_V_JUMPS_H_JUMPS",
+0
+],
+"295": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"296": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"297": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW",
+0
+],
+"298": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES",
+0
+],
+"299": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"3": [
+"ANIM_ROTATE_UP_SLAM_DOWN",
+0
+],
+"30": [
+"ANIM_V_STRETCH",
+0
+],
+"300": [
+"ANIM_H_VIBRATE",
+0
+],
+"301": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"302": [
+"ANIM_H_SLIDE_SLOW",
+0
+],
+"303": [
+"ANIM_V_SLIDE_WOBBLE",
+0
+],
+"304": [
+"ANIM_V_JUMPS_BIG",
+0
+],
+"305": [
+"ANIM_CIRCULAR_STRETCH_TWICE",
+0
+],
+"306": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"307": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"308": [
+"ANIM_H_JUMPS",
+0
+],
+"309": [
+"ANIM_H_PIVOT",
+0
+],
+"31": [
+"ANIM_H_SHAKE",
+0
+],
+"310": [
+"ANIM_V_SLIDE_WOBBLE",
+0
+],
+"311": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"312": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"313": [
+"ANIM_CIRCULAR_STRETCH_TWICE",
+0
+],
+"314": [
+"ANIM_V_SLIDE_WOBBLE",
+10
+],
+"315": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"316": [
+"ANIM_V_STRETCH",
+0
+],
+"317": [
+"ANIM_FLICKER_INCREASING",
+30
+],
+"318": [
+"ANIM_H_SLIDE_WOBBLE",
+0
+],
+"319": [
+"ANIM_V_SLIDE_WOBBLE_SMALL",
+0
+],
+"32": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"320": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW",
+0
+],
+"321": [
+"ANIM_V_STRETCH",
+0
+],
+"322": [
+"ANIM_GLOW_BLACK",
+0
+],
+"323": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW",
+0
+],
+"324": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW",
+0
+],
+"325": [
+"ANIM_H_SLIDE_WOBBLE",
+0
+],
+"326": [
+"ANIM_V_SHAKE",
+0
+],
+"327": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"328": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW",
+0
+],
+"329": [
+"ANIM_GLOW_BLUE",
+45
+],
+"33": [
+"ANIM_SHRINK_GROW",
+0
+],
+"330": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW",
+0
+],
+"331": [
+"ANIM_H_JUMPS_V_STRETCH_TWICE",
+0
+],
+"332": [
+"ANIM_V_SHAKE",
+0
+],
+"333": [
+"ANIM_H_SHAKE",
+0
+],
+"334": [
+"ANIM_ZIGZAG_SLOW",
+0
+],
+"335": [
+"ANIM_SWING_CONCAVE",
+0
+],
+"336": [
+"ANIM_ROTATE_UP_TO_SIDES",
+0
+],
+"337": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"338": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"339": [
+"ANIM_V_SLIDE",
+0
+],
+"34": [
+"ANIM_H_SHAKE",
+25
+],
+"340": [
+"ANIM_V_SHAKE",
+0
+],
+"341": [
+"ANIM_SPIN",
+15
+],
+"342": [
+"ANIM_V_STRETCH",
+0
+],
+"343": [
+"ANIM_H_SHAKE",
+0
+],
+"344": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW",
+0
+],
+"345": [
+"ANIM_V_SLIDE",
+0
+],
+"346": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+20
+],
+"347": [
+"ANIM_ZIGZAG_FAST",
+0
+],
+"348": [
+"ANIM_SWING_CONVEX_FAST",
+0
+],
+"349": [
+"ANIM_ROTATE_TO_SIDES_TWICE",
+0
+],
+"35": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"350": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"351": [
+"ANIM_H_JUMPS_V_STRETCH_TWICE",
+0
+],
+"352": [
+"ANIM_H_JUMPS_V_STRETCH",
+15
+],
+"353": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"354": [
+"ANIM_CIRCULAR_STRETCH_TWICE",
+0
+],
+"355": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"356": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES",
+0
+],
+"357": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"358": [
+"ANIM_V_SLIDE",
+0
+],
+"359": [
+"ANIM_H_STRETCH",
+0
+],
+"36": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW",
+0
+],
+"360": [
+"ANIM_H_JUMPS_V_STRETCH",
+15
+],
+"361": [
+"ANIM_ZIGZAG_FAST",
+0
+],
+"362": [
+"ANIM_H_VIBRATE",
+30
+],
+"363": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"364": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"365": [
+"ANIM_H_JUMPS",
+0
+],
+"366": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"367": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"368": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"369": [
+"ANIM_V_SHAKE",
+0
+],
+"37": [
+"ANIM_V_STRETCH",
+0
+],
+"370": [
+"ANIM_H_SLIDE",
+0
+],
+"371": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW",
+0
+],
+"372": [
+"ANIM_V_SHAKE_TWICE",
+0
+],
+"373": [
+"ANIM_TWIST",
+0
+],
+"374": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"375": [
+"ANIM_V_SLIDE_WOBBLE",
+0
+],
+"376": [
+"ANIM_CIRCULAR_VIBRATE",
+45
+],
+"377": [
+"ANIM_V_SLIDE_WOBBLE",
+0
+],
+"378": [
+"ANIM_SWING_CONVEX",
+0
+],
+"379": [
+"ANIM_V_STRETCH",
+0
+],
+"38": [
+"ANIM_V_SHAKE",
+0
+],
+"380": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"381": [
+"ANIM_TIP_MOVE_FORWARD",
+0
+],
+"382": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"383": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"384": [
+"ANIM_V_SHAKE_TWICE",
+0
+],
+"385": [
+"ANIM_H_SLIDE_WOBBLE",
+0
+],
+"386": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"387": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES",
+0
+],
+"388": [
+"ANIM_V_STRETCH",
+0
+],
+"389": [
+"ANIM_V_SHAKE_TWICE",
+0
+],
+"39": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL",
+0
+],
+"390": [
+"ANIM_TWIST",
+0
+],
+"391": [
+"ANIM_V_SHAKE",
+0
+],
+"392": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"393": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"394": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"395": [
+"ANIM_V_SHAKE_TWICE",
+0
+],
+"396": [
+"ANIM_V_SLIDE",
+0
+],
+"397": [
+"ANIM_H_SHAKE",
+70
+],
+"398": [
+"ANIM_H_SHAKE",
+0
+],
+"399": [
+"ANIM_V_SLIDE",
+0
+],
+"4": [
+"ANIM_V_JUMPS_SMALL",
+0
+],
+"40": [
+"ANIM_H_JUMPS",
+0
+],
+"400": [
+"ANIM_V_SHAKE",
+0
+],
+"401": [
+"ANIM_CIRCULAR_STRETCH_TWICE",
+0
+],
+"402": [
+"ANIM_FOUR_PETAL",
+0
+],
+"403": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"404": [
+"ANIM_SWING_CONCAVE_FAST_SHORT",
+60
+],
+"405": [
+"ANIM_V_SHAKE",
+0
+],
+"406": [
+"ANIM_H_SHAKE",
+60
+],
+"407": [
+"ANIM_SWING_CONCAVE_FAST_SHORT",
+0
+],
+"408": [
+"ANIM_V_SHAKE",
+0
+],
+"409": [
+"ANIM_SWING_CONVEX",
+0
+],
+"41": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"410": [
+"ANIM_H_PIVOT",
+0
+],
+"411": [
+"ANIM_H_SLIDE_WOBBLE",
+0
+],
+"42": [
+"ANIM_H_SLIDE_WOBBLE",
+0
+],
+"43": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"44": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"45": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW",
+0
+],
+"46": [
+"ANIM_H_SLIDE_SLOW",
+10
+],
+"47": [
+"ANIM_H_SHAKE",
+45
+],
+"48": [
+"ANIM_V_JUMPS_H_JUMPS",
+20
+],
+"49": [
+"ANIM_ZIGZAG_SLOW",
+0
+],
+"5": [
+"ANIM_BACK_AND_LUNGE",
+0
+],
+"50": [
+"ANIM_V_SHAKE",
+25
+],
+"51": [
+"ANIM_H_SHAKE_SLOW",
+35
+],
+"52": [
+"ANIM_V_JUMPS_SMALL",
+40
+],
+"53": [
+"ANIM_V_STRETCH",
+20
+],
+"54": [
+"ANIM_V_JUMPS_H_JUMPS",
+0
+],
+"55": [
+"ANIM_H_SHAKE_SLOW",
+0
+],
+"56": [
+"ANIM_H_JUMPS_V_STRETCH",
+20
+],
+"57": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL",
+0
+],
+"58": [
+"ANIM_BACK_AND_LUNGE",
+30
+],
+"59": [
+"ANIM_H_VIBRATE",
+40
+],
+"6": [
+"ANIM_V_SHAKE",
+0
+],
+"60": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"61": [
+"ANIM_H_JUMPS_V_STRETCH",
+5
+],
+"62": [
+"ANIM_V_SHAKE_TWICE",
+0
+],
+"63": [
+"ANIM_H_JUMPS",
+0
+],
+"64": [
+"ANIM_GROW_VIBRATE",
+0
+],
+"65": [
+"ANIM_V_STRETCH",
+0
+],
+"66": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"67": [
+"ANIM_V_SHAKE",
+0
+],
+"68": [
+"ANIM_H_JUMPS",
+0
+],
+"69": [
+"ANIM_V_STRETCH",
+0
+],
+"7": [
+"ANIM_SWING_CONCAVE",
+0
+],
+"70": [
+"ANIM_SWING_CONVEX",
+3
+],
+"71": [
+"ANIM_H_JUMPS_V_STRETCH",
+0
+],
+"72": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"73": [
+"ANIM_V_SQUISH_AND_BOUNCE",
+0
+],
+"74": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL",
+0
+],
+"75": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL",
+0
+],
+"76": [
+"ANIM_ROTATE_UP_SLAM_DOWN",
+0
+],
+"77": [
+"ANIM_GLOW_ORANGE",
+0
+],
+"78": [
+"ANIM_CIRCULAR_VIBRATE",
+0
+],
+"79": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"8": [
+"ANIM_SHRINK_GROW",
+0
+],
+"80": [
+"ANIM_SWING_CONCAVE",
+0
+],
+"81": [
+"ANIM_TUMBLING_FRONT_FLIP_TWICE",
+0
+],
+"82": [
+"ANIM_FLASH_YELLOW",
+0
+],
+"83": [
+"ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL",
+0
+],
+"84": [
+"ANIM_H_SHAKE_SLOW",
+0
+],
+"85": [
+"ANIM_LUNGE_GROW",
+0
+],
+"86": [
+"ANIM_SWING_CONCAVE",
+0
+],
+"87": [
+"ANIM_V_SQUISH_AND_BOUNCE_SLOW",
+0
+],
+"88": [
+"ANIM_H_SLIDE_SLOW",
+0
+],
+"89": [
+"ANIM_DEEP_V_SQUISH_AND_BOUNCE",
+45
+],
+"9": [
+"ANIM_V_SHAKE_TWICE",
+50
+],
+"90": [
+"ANIM_TWIST",
+20
+],
+"91": [
+"ANIM_H_SLIDE_WOBBLE",
+0
+],
+"92": [
+"ANIM_GLOW_BLACK",
+0
+],
+"93": [
+"ANIM_FLICKER_INCREASING",
+23
+],
+"94": [
+"ANIM_GROW_IN_STAGES",
+0
+],
+"95": [
+"ANIM_RAPID_H_HOPS",
+0
+],
+"96": [
+"ANIM_CIRCLE_C_CLOCKWISE_SLOW",
+48
+],
+"97": [
+"ANIM_GROW_VIBRATE",
+40
+],
+"98": [
+"ANIM_H_SLIDE",
+0
+],
+"99": [
+"ANIM_ZIGZAG_SLOW",
+0
+]
+}
