@@ -10,6 +10,7 @@ import {
 } from "../src/engine/spriteOrderProvider.ts";
 import { encodeSpriteOrderPlan, renderSpriteOrderProductionTableFromFixtures } from "../tools/integration/spriteOrderProductionTable.ts";
 import { REAL_ROUTE_TRACES, replayCrossBodyTrace } from "../tools/integration/spriteOrderCrossBodyReplay.ts";
+import { replayCrossBodyCorpus } from "../tools/integration/spriteOrderCrossBodyCorpusReplay.ts";
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../tools/integration/fixtures/${name}`, import.meta.url), "utf8"));
 const known = () => createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory"));
@@ -156,5 +157,14 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
       }
     }
     expect(matched).toBe(44);
+  });
+
+  it("BattleLab corpus (committed + ext event tables): every edge the transform knows is exact", () => {
+    const corpus = replayCrossBodyCorpus();
+    expect({ scenarios: corpus.scenarios, skipped: corpus.skipped, edges: corpus.edges, mismatched: corpus.mismatched })
+      .toEqual({ scenarios: 573, skipped: 19, edges: 1366, mismatched: 0 });
+    expect(corpus.exact).toBe(corpus.known);
+    expect(corpus.known).toBe(1044);
+    expect(corpus.laterKnown).toBe(490);
   });
 });
