@@ -5,7 +5,8 @@ Per frame: gAnimScriptActive / sAnimMoveIndex -> every animation body (move id, 
 gAnimMovePower, gBattleMovePower, gDynamicBasePower, gAnimMoveDmg, gBattleMoveDamage, gBattleScripting.animTurn/animTargetsHit, gMultiHitCounter, gCurrentMove,
 gBattlerAttacker/Target, both battlers' hp/maxHP/status1/species, gOamMatrixAllocBitmap, active task count, sSpriteOrder (64), in-use sprite slots.
 Also logs every CHANGE of gBattleMovePower / gDynamicBasePower / gAnimMovePower with the frame and gCurrentMove (the stale-power writers)."""
-import json, subprocess, sys
+import json, os, subprocess, sys
+ALWAYS = os.environ.get("PREP11_ALWAYS") == "1"  # log series/spawns/tasks for the whole run (forced-switch continuation)
 from pathlib import Path
 SCEN, OUT = map(Path, sys.argv[1:3])
 ROOT = Path(__file__).resolve().parents[2]
@@ -49,6 +50,7 @@ def state():
             "multiHitCounter": u8(sym["gMultiHitCounter"]), "currentMove": u16(sym["gCurrentMove"]), "attacker": u8(sym["gBattlerAttacker"]), "target": u8(sym["gBattlerTarget"]),
             "mons": [mon(0), mon(1)], "bitmap": u32(sym["gOamMatrixAllocBitmap"]), "tasks": tasks(), "sprites": sprites(), "spriteOrder": [u8(sym["sSpriteOrder"] + i) for i in range(64)]}
 bodies, changes, spawns, bseries, oseries = [], [], [], [], []
+species_ev, prev_species = [], None
 taskev, prev_tasks, bgev, prev_bg = [], None, [], None
 prev_order = None
 prev_sp = set()
@@ -63,23 +65,26 @@ def step():
     for e in pending_end:
         if f == e[0]: e[1]["atEnd+1"] = {k: v for k, v in state().items() if k in ("mons", "bitmap", "tasks", "sprites", "gAnimMovePower", "gBattleMovePower")}
     global prev_sp, prev_order
+    global prev_species
+    sp_now = [u16(sym["gBattleMons"] + 0x58 * b) for b in (0, 1)] + [u8(sym["gBattlerPartyIndexes"] + 2 * b) for b in (0, 1)]
+    if sp_now != prev_species: species_ev.append([f, sp_now, u16(sym["gCurrentMove"]), bool(a), [u8(sym["gBattlerSpriteIds"] + b) for b in (0, 1)]]); prev_species = sp_now
     global prev_tasks, prev_bg
-    if cur is not None or a:  # task table changes (slot -> func) and BG/blend register changes while a body is active
+    if ALWAYS or cur is not None or a:  # task table changes (slot -> func) and BG/blend register changes while a body is active
         tf = tfuncs()
         if tf != prev_tasks: taskev.append([f, {str(k): v for k, v in tf.items()}]); prev_tasks = tf
         rg = regs()
         if rg != prev_bg: bgev.append([f, rg]); prev_bg = rg
-    if cur is not None:  # sSpriteOrder whenever it changes inside a body (hardware tie-order derivation)
+    if ALWAYS or cur is not None:  # sSpriteOrder whenever it changes inside a body (hardware tie-order derivation)
         od = [u8(sym["sSpriteOrder"] + i) for i in range(64)]
         if od != prev_order: oseries.append([f, od]); prev_order = od
-    if cur is not None:  # battler sprite y2/x2 + matrix per frame inside a body (Pain Split offsets, shake)
+    if ALWAYS or cur is not None:  # battler sprite y2/x2 + matrix per frame inside a body (Pain Split offsets, shake)
         r = [f]
         for b in (0, 1):
             sa = sym["gSprites"] + u8(sym["gBattlerSpriteIds"] + b) * 0x44
             mn = (u16(sa + 2) >> 9) & 31; ma = sym["gOamMatrices"] + 8 * mn
             r += [sg(sa + 0x24), sg(sa + 0x26), mn, u8(sa + 0x3e) >> 2 & 1, sg(ma), sg(ma + 2), sg(ma + 4), sg(ma + 6)]  # x2, y2, matrixNum, invisible, matrix a b c d
         bseries.append(r)
-    if cur is not None or a:  # sprite spawn/free log only while an animation script is active (+ the frame it ends)
+    if ALWAYS or cur is not None or a:  # sprite spawn/free log only while an animation script is active (+ the frame it ends)
         sp = set(sprites())
         base = sym["gSprites"]
         for i in sorted(sp - prev_sp): spawns.append({"f": f, "slot": i, "ev": "+", "tmpl": u32(base + i * 0x44 + 0x14), "attr": [u16(base + i * 0x44), u16(base + i * 0x44 + 2), u16(base + i * 0x44 + 4)],
@@ -96,4 +101,4 @@ step()
 for seg in req["trace"]["segments"]:
     for _ in range(seg["frames"]):
         o.advance(seg.get("buttons", [])); f += 1; step()
-OUT.write_text(json.dumps({"scenario": SCEN.name, "frames": f, "bodies": bodies, "powerChanges": changes, "spawns": spawns, "battlerSeries": bseries, "orderSeries": oseries, "taskEvents": taskev, "regEvents": bgev, "battlerPal": [(u16(sym["gSprites"] + u8(sym["gBattlerSpriteIds"] + b) * 0x44 + 4) >> 12) for b in (0, 1)], "taskFuncNames": {str(v): k for k, v in sym.items() if k.startswith(("Task_", "AnimTask_", "sub_"))} }, separators=(",", ":")))
+OUT.write_text(json.dumps({"scenario": SCEN.name, "frames": f, "bodies": bodies, "powerChanges": changes, "spawns": spawns, "battlerSeries": bseries, "orderSeries": oseries, "speciesEvents": species_ev, "taskEvents": taskev, "regEvents": bgev, "battlerPal": [(u16(sym["gSprites"] + u8(sym["gBattlerSpriteIds"] + b) * 0x44 + 4) >> 12) for b in (0, 1)], "taskFuncNames": {str(v): k for k, v in sym.items() if k.startswith(("Task_", "AnimTask_", "sub_"))} }, separators=(",", ":")))
