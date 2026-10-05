@@ -20,7 +20,17 @@
   `F` filtered to their allocation slots, not `F.slice(0, n)`. Dive attack body
   needs live keys; Magnitude's own evidence is not accepted.
 - Running: provider wiring step (first body of a battle + Grudge consumer,
-  Opus worker); gap-cause probe (side lane).
+  Opus worker).
+- Gap causes (`e26052db2`, `docs/sprite-order-gap-causes.md`): the
+  between-body one-sprite blip is the target hit animation's healthbox jiggle
+  (`DoHitAnimHealthboxEffect`, 20 frames; 170/170 corpus blips = its calls;
+  absent on miss/no-effect/heal/charge turns; supervisor fresh probe of
+  Tackle-vs-Ghost reproduced, two runs identical) → key on the engine's
+  `hit-animation` command with a visible target. The prompt pair is the
+  action-prompt bounce pair (create two lowest-free at the prompt, destroy at
+  commit; move-menu cancel/cursor no-op; party menu → invalidate). Intimidate
+  entries run `B_ANIM_STATS_CHANGE` (`C[f]; D[n0]`) before the first prompt
+  (12/12 replay exact). Confusion/Hail/trap end-turn animations need keys.
 
 ## 2026-10-04 (night) — H_BUFFER S1 folded: 151 live adapters
 
