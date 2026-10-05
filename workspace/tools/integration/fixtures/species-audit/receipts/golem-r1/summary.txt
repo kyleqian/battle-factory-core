@@ -1,0 +1,32 @@
+anchor4-amnesia-player	ERROR	Probe omitted part of the complete source window
+light-screen-live-slowpoke-player	88/88	px 0	dur 88	identical True	field 0 chrome 0	bad ages []..[] n=0
+multihit-comet-punch-player-hit1	37/37	px 0	dur 37	identical True	field 0 chrome 0	bad ages []..[] n=0
+multihit-comet-punch-player-hit2	37/37	px 0	dur 37	identical True	field 0 chrome 0	bad ages []..[] n=0
+multihit-comet-punch-player-hit3	37/37	px 0	dur 37	identical True	field 0 chrome 0	bad ages []..[] n=0
+multihit-double-slap-player-hit1	34/34	px 0	dur 34	identical True	field 0 chrome 0	bad ages []..[] n=0
+multihit-double-slap-player-hit2	34/34	px 0	dur 34	identical True	field 0 chrome 0	bad ages []..[] n=0
+multihit-triple-kick-player-hit0	37/37	px 0	dur 37	identical True	field 0 chrome 0	bad ages []..[] n=0
+multihit-triple-kick-player-hit1	37/37	px 0	dur 37	identical True	field 0 chrome 0	bad ages []..[] n=0
+multihit-triple-kick-player-hit2	37/37	px 0	dur 37	identical True	field 0 chrome 0	bad ages []..[] n=0
+next-teeter-dance-player	169/169	px 0	dur 169	identical True	field 0 chrome 0	bad ages []..[] n=0
+order-consumer-dragon-rage-player	ERROR	run-mgba-probe: probe failed; exit 138; log: /var/folders/wk/mq92yc6s53jfllv0m6rwvydc0000gn/T/pokebench-live-adapter-GPb3nf/probe.json.log
+order-consumer-leaf-blade-player	212/224	px 11843	dur 224	identical True	field 11843 chrome 0	bad ages [0, 1, 2]..[9, 10, 11] n=12
+prep2-blizzard-player	372/372	px 0	dur 372	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep2-cosmic-power-player	ERROR	Probe omitted part of the complete source window
+prep2-icy-wind-player	287/287	px 0	dur 287	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep4-defense-curl-player	100/100	px 0	dur 100	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep4-ingrain-player	164/164	px 0	dur 164	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep4-smelling-salt-player	121/121	px 0	dur 121	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep4-wrap-player	38/38	px 0	dur 38	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep5-dragon-rage-player	139/150	px 2115	dur 150	identical True	field 2115 chrome 0	bad ages [86, 87, 88]..[94, 95, 96] n=11
+prep5-heal-bell-player	261/261	px 0	dur 261	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep5-leaf-blade-player	212/224	px 11843	dur 224	identical True	field 11843 chrome 0	bad ages [0, 1, 2]..[9, 10, 11] n=12
+prep5-metronome-player	127/127	px 0	dur 127	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep6-rock-tomb-player	174/174	px 0	dur 174	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep6-safeguard-player	71/71	px 0	dur 71	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep6-sweet-scent-player	175/175	px 0	dur 175	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep7-aerial-ace-lab-player	0/50	px 35705	dur 50	identical True	field 35705 chrome 0	bad ages [0, 1, 2]..[47, 48, 49] n=50
+prep7-fire-blast-player	197/197	px 0	dur 197	identical True	field 0 chrome 0	bad ages []..[] n=0
+prep7-ice-punch-lab-player	0/184	px 4416	dur 184	identical True	field 4416 chrome 0	bad ages [0, 1, 2]..[181, 182, 183] n=184
+prep7-sleep-talk-player	186/186	px 0	dur 186	identical True	field 0 chrome 0	bad ages []..[] n=0
+status-batch-sing-player	245/245	px 0	dur 245	identical True	field 0 chrome 0	bad ages []..[] n=0
