@@ -13,6 +13,7 @@ import { initSpriteOrderState, knownEntrySpriteOrderState } from "../src/engine/
 import { replayPostKoTurnsThroughHost } from "../tools/integration/postkoHostReplay.ts";
 import { PLAYERFAINT_FIXTURES, playerfaintTurnsToEdge } from "../tools/integration/playerfaintLendHistory.ts";
 import { PLAYER_FAINT_SWITCH, SCENARIOS, roleMap, type Roles } from "../tools/integration/playerfaintModelCheck.ts";
+import { playerfaintRoute } from "../tools/integration/playerfaintRoutes.ts";
 
 // Player-faint lends (docs/playerfaint-lend-audit.md §4): occupant roles in the tracker, the role relabel rho, the lend after a
 // player faint + forced party menu + reshowPlayerGone + forced switch-in, and the allocator re-seed there. Hermetic: the audit's
@@ -138,6 +139,19 @@ describe("player-faint lends through the production hosts (recorded histories + 
     expect(allocatorMoves.PROTECT).toBeDefined();
   });
 
+  it("dense receipt: all 13 drafts exact through the production lend on both fresh runs (0 px), no exclusions", () => {
+    const receipt = JSON.parse(readFileSync("tools/integration/fixtures/playerfaint-lend-receipt.json", "utf8")) as { dense: {
+      exclusions: unknown[]; rows: { fixture: string; rows: number; exactRows: number[]; residualPixels: number[]; freshRunsIdentical: boolean }[] } };
+    expect(receipt.dense.exclusions).toEqual([]);
+    expect(receipt.dense.rows.map(r => r.fixture)).toEqual(PLAYERFAINT_FIXTURES);
+    for (const row of receipt.dense.rows) {
+      expect({ exactRows: row.exactRows, residualPixels: row.residualPixels, fresh: row.freshRunsIdentical }, row.fixture)
+        .toEqual({ exactRows: [row.rows, row.rows], residualPixels: [0, 0], fresh: true });
+      expect(JSON.parse(readFileSync(row.fixture, "utf8")).draft, row.fixture).toBe(false);
+    }
+    expect(receipt.dense.rows.reduce((sum, r) => sum + r.rows, 0)).toBe(2029);
+  });
+
   it("allocator re-seed: after a forced switch-in (roles known) and after a send-out; never after the voluntary chain or mid-chain", () => {
     const firstMove = createKnownEntrySpriteAllocatorProvider("ordinary-factory").firstMove;
     const invalid = invalidateLiveSpriteAllocatorHost(firstMove);
@@ -155,4 +169,26 @@ describe("player-faint lends through the production hosts (recorded histories + 
     expect(liveSpriteAllocatorReseedable(voluntary)).toBe(false);
     expect(reseedLiveSpriteAllocatorAfterSendOut(invalid, voluntary)).toBe(invalid);
   });
+});
+
+describe("player-faint lends on ordinary-input generated routes (forced replacement answered: first healthy member)", () => {
+  it("seed 33: bodies after two forced switch-ins are lent; Light Screen gets the re-seeded allocator host; active every age; ON/OFF parity", () => {
+    const r = playerfaintRoute(33, Array(8).fill(0));
+    expect({ stalled: r.stalled, offStalled: r.offStalled, parity: r.parity }).toEqual({ stalled: false, offStalled: false, parity: null });
+    expect(r.playerFaints).toHaveLength(2);
+    expect(r.playerSwitchIns).toHaveLength(2);
+    const post = r.bodies.filter(b => b.afterForcedSwitchIn);
+    expect(post.map(b => `${b.moveId}:${b.side}`)).toEqual(["107:opponent", "61:opponent", "113:opponent"]);
+    expect(post.every(b => b.lent !== null && /^1+$/.test(b.adapterActive ?? ""))).toBe(true);
+    expect(post.at(-1)!.allocatorKnown).toBe(true); // Light Screen: allocator re-seeded on the orchestrator's forced path
+  }, 60000);
+
+  it("seed 4: every body after the forced switch-in is lent and its adapter active at every age; ON/OFF parity", () => {
+    const r = playerfaintRoute(4, Array(8).fill(0));
+    expect(r.parity).toBeNull();
+    const post = r.bodies.filter(b => b.afterForcedSwitchIn);
+    expect(post).toHaveLength(8);
+    expect(post.every(b => b.lent !== null && /^1+$/.test(b.adapterActive ?? ""))).toBe(true);
+    expect(r.bodies.filter(b => !b.afterPlayerFaint).length).toBe(3);
+  }, 60000);
 });

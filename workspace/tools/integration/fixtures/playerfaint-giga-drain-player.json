@@ -1,6 +1,6 @@
 {
  "schema": "playerfaint-adapter-draft/v1",
- "draft": true,
+ "draft": false,
  "move": "GIGA_DRAIN",
  "probe": "tools/integration/postkoStateProbe.py",
  "scenario": "tools/battle-lab/playerfaint-lightscreen-healbell-gigadrain-thunderbolt.json",
@@ -173,5 +173,6 @@
     }
    ]
   }
- ]
+ ],
+ "denseProof": "tools/integration/fixtures/playerfaint-lend-receipt.json (production lend, 2 fresh runs, 0 residual)"
 }

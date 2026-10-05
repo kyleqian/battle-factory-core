@@ -1,0 +1,560 @@
+{
+ "schema": "playerfaint-lend-receipt/v1",
+ "scope": "S10A presentation-only: sprite-order lend + allocator re-seed after a player faint + forced party menu + reshowPlayerGone + forced switch-in (docs/playerfaint-lend-audit.md \u00a74). Gameplay, RNG, damage, turn order and facility state untouched (ON/OFF parity on routes). The voluntary switch (reshowBoth / recall) still declines. Not whole-playable arbitrary-history exactness.",
+ "productionCodeCommit": "28bea5f9c",
+ "srcTree": "3172ec9ff8827a221d5f8c63161e269df7bc9f7c",
+ "api": {
+  "SpriteOrderTracker.occupantRoles": "{ healthboxMain: {player, opponent}, shadow } | null: entry 0/1/2 (KNOWN_ENTRY_OCCUPANT_ROLES); null after party-menu-reset, reshowBoth and the provisional recall; reshowPlayerGone sets them from its survivors n1 / n4 / n7 (ROM 1 / 2 / 3); faint, summary, send-out, switch-in and bodies keep them",
+  "createSpriteOrderTracker(order, battlerSlots?, occupantRoles?)": "roles default to the entry roles, kept only while all occupied",
+  "spriteOrderTrackerPostUnitView(tracker)": "adds occupantRoles",
+  "spriteOrderEntryLabelRelabel(view)": "rho: battlers -> 6/8, healthbox mains -> 0/1, shadow -> 2, 60..63 fixed, free slots rank-for-rank onto the known-entry free set; null unless occupied == exactly that 9-slot role set; view.occupantRoles undefined = entry roles (= pi), null = decline",
+  "liveSpriteAllocatorReseedable(host)": "lastUnit send-out, or switch-in with roles known (forced chain), and role-isomorphic",
+  "reseedLiveSpriteAllocatorAfterSendOut(allocator, host, route?)": "re-seeds the known-entry firstMove host whenever liveSpriteAllocatorReseedable",
+  "orchestrator": "presenting-switch-in (forced replacement) re-seeds the allocator once after the forced switch-in and keeps it for the rest of the switch-in presentation (the forced switch-in command is never presented in the ordinary phase, so the ~:2262 call site does not see it)",
+  "postkoHostReplay.replayPostKoTurnsThroughHost": "replays the forced-party-menu marker (open + return party menu hooks, allocator invalidated, re-seeded after the switch-in)"
+ },
+ "pureHost": {
+  "modelCheckEdges": "41 known edges (7 entry + 27 after a forced switch-in + 7 after opponent KOs) lent == model-check roleLend; rho == reference roleMap at every edge; 14 edges production lent before == unchanged; 4 strict-unknown (202:player) decline (tests/playerfaintLend.test.ts)",
+  "hostReplay": "13/13 fixtures: precedingTurns == playerfaintTurnsToEdge; production host lend == roleLend == whatif-*-role.json lendFree; Light Screen / Protect allocator input from the re-seeded host"
+ },
+ "dense": {
+  "command": "npx vite-node tools/integration/postkoLendDense.ts -- --out <receipt> tools/integration/fixtures/playerfaint-*.json",
+  "harness": "liveAdapterFramebuffer.ts liveView -> fixturePostKoLend -> replayPostKoTurnsThroughHost (production lendLiveSpriteOrder + re-seeded allocator host); two fresh direct-mGBA runs (postkoStateProbe.py), every row of the accepted window",
+  "exclusions": [],
+  "draftsChanged": "none (drafts exact as recorded)",
+  "rows": [
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-sunny-day-player.json",
+    "rows": 158,
+    "ageOffset": 0,
+    "expectedDuration": 158,
+    "exactRows": [
+     158,
+     158
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "f123347b9fd1e72c31c58218750b10027ce8c467b4fb2b225f9216718c9d0f5a",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-swift-opponent.json",
+    "rows": 80,
+    "ageOffset": 0,
+    "expectedDuration": 80,
+    "exactRows": [
+     80,
+     80
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "eb07e28db1393653835ec4e4e12ab729803789f1956ab4cd4b7ab7d7ac3255a4",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-dragon-dance-player.json",
+    "rows": 142,
+    "ageOffset": 0,
+    "expectedDuration": 142,
+    "exactRows": [
+     142,
+     142
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "9da80b96c06dcac3c9f67b5854dee831e3c0a75252cc19d3888ae41c7cd4707e",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-swift-player.json",
+    "rows": 78,
+    "ageOffset": 0,
+    "expectedDuration": 78,
+    "exactRows": [
+     78,
+     78
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "812f2c439fbc704e352d2a3554d75db5dbec68c676026e74bcd5fdc96486782c",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-protect-player.json",
+    "rows": 123,
+    "ageOffset": 0,
+    "expectedDuration": 123,
+    "exactRows": [
+     123,
+     123
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "5417dd23d43a02e510bc8ac34bbb791b0be3cce3f1298ff1c2db489b9a250af6",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-thunderbolt-opponent.json",
+    "rows": 237,
+    "ageOffset": 0,
+    "expectedDuration": 237,
+    "exactRows": [
+     237,
+     237
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "bc35f1fa4d0b7dd0e7622d9770e69a50cbd082334ca927d2498957c915f630ed",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-light-screen-player.json",
+    "rows": 88,
+    "ageOffset": 0,
+    "expectedDuration": 88,
+    "exactRows": [
+     88,
+     88
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "ed577b5312519eec7b1669a2ff24622f9ade7c0b8a882eed6bd6f76e4ffa8e0b",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-heal-bell-player.json",
+    "rows": 261,
+    "ageOffset": 0,
+    "expectedDuration": 261,
+    "exactRows": [
+     261,
+     261
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "2adc9b3a703966ff623991dc81353e23199fe45a2c18709c1e5e7bdec93945c9",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-giga-drain-player.json",
+    "rows": 230,
+    "ageOffset": 0,
+    "expectedDuration": 230,
+    "exactRows": [
+     230,
+     230
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "9951d30b48016d29534a546ad2afb7170ef98c39d017d84d7bf13b345b9fa840",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-secondko-sunny-day-player.json",
+    "rows": 158,
+    "ageOffset": 0,
+    "expectedDuration": 158,
+    "exactRows": [
+     158,
+     158
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "1e48b4c755aced201a298f3e701e9ffe6e6eccee71611f3fd4aa7a26f33ee16a",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-slot2-sunny-day-player.json",
+    "rows": 158,
+    "ageOffset": 0,
+    "expectedDuration": 158,
+    "exactRows": [
+     158,
+     158
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "647bf22c4919c4888af1806195d6be8c875736fc20b8fce1b302a5b704e802cb",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-afterko-sunny-day-player.json",
+    "rows": 158,
+    "ageOffset": 0,
+    "expectedDuration": 158,
+    "exactRows": [
+     158,
+     158
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "792dcadc1bf70aba967c9dc41b1c5210a6445e30babad99c19de77f3fd88a498",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   },
+   {
+    "fixture": "tools/integration/fixtures/playerfaint-twice-sunny-day-player.json",
+    "rows": 158,
+    "ageOffset": 0,
+    "expectedDuration": 158,
+    "exactRows": [
+     158,
+     158
+    ],
+    "residualPixels": [
+     0,
+     0
+    ],
+    "digest": "25a6900cf1a93028f509fcf7635f3d959f1e3db9f70cd93a628fa522fdf3312e",
+    "freshRunsIdentical": true,
+    "firstMismatches": []
+   }
+  ],
+  "totals": {
+   "fixtures": 13,
+   "rows": 2029,
+   "exactRuns": [
+    2029,
+    2029
+   ],
+   "residualPixels": [
+    0,
+    0
+   ]
+  }
+ },
+ "routes": {
+  "command": "npx vite-node tools/integration/playerfaintRoutes.ts -- <seed>:<slot> ... (generatedCommandAnimationReplay answerForcedSwitch: first healthy member); master-vs-branch = same tools on a scratch copy of src with the 3 changed files at c77025880",
+  "rows": [
+   {
+    "spec": "69:0",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     false,
+     false
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 2,
+    "preFaintBodies": 4,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 8,
+    "postLentBranch": 2,
+    "postLentMaster": 0,
+    "flippedToLend": 2,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 2,
+    "newlyActiveEveryAge": []
+   },
+   {
+    "spec": "69:1",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     false,
+     false
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 2,
+    "preFaintBodies": 4,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 8,
+    "postLentBranch": 3,
+    "postLentMaster": 0,
+    "flippedToLend": 3,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 3,
+    "newlyActiveEveryAge": [
+     "182:player",
+     "182:player"
+    ]
+   },
+   {
+    "spec": "4:0",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     false,
+     false
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 1,
+    "preFaintBodies": 3,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 8,
+    "postLentBranch": 8,
+    "postLentMaster": 0,
+    "flippedToLend": 8,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 8,
+    "newlyActiveEveryAge": []
+   },
+   {
+    "spec": "4:1",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     false,
+     false
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 1,
+    "preFaintBodies": 5,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 6,
+    "postLentBranch": 6,
+    "postLentMaster": 0,
+    "flippedToLend": 6,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 6,
+    "newlyActiveEveryAge": []
+   },
+   {
+    "spec": "11:0",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     true,
+     true
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 0,
+    "preFaintBodies": 13,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 0,
+    "postLentBranch": 0,
+    "postLentMaster": 0,
+    "flippedToLend": 0,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 0,
+    "newlyActiveEveryAge": []
+   },
+   {
+    "spec": "54:3",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     false,
+     false
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 1,
+    "preFaintBodies": 19,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 4,
+    "postLentBranch": 4,
+    "postLentMaster": 0,
+    "flippedToLend": 4,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 4,
+    "newlyActiveEveryAge": [
+     "215:opponent"
+    ]
+   },
+   {
+    "spec": "7:0",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     false,
+     false
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 0,
+    "preFaintBodies": 14,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 0,
+    "postLentBranch": 0,
+    "postLentMaster": 0,
+    "flippedToLend": 0,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 0,
+    "newlyActiveEveryAge": []
+   },
+   {
+    "spec": "12:2",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     false,
+     false
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 0,
+    "preFaintBodies": 7,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 0,
+    "postLentBranch": 0,
+    "postLentMaster": 0,
+    "flippedToLend": 0,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 0,
+    "newlyActiveEveryAge": []
+   },
+   {
+    "spec": "20:1",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     false,
+     false
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 0,
+    "preFaintBodies": 11,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 0,
+    "postLentBranch": 0,
+    "postLentMaster": 0,
+    "flippedToLend": 0,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 0,
+    "newlyActiveEveryAge": []
+   },
+   {
+    "spec": "33:0",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     false,
+     false
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 2,
+    "preFaintBodies": 6,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 3,
+    "postLentBranch": 3,
+    "postLentMaster": 0,
+    "flippedToLend": 3,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 3,
+    "newlyActiveEveryAge": [
+     "113:opponent"
+    ]
+   },
+   {
+    "spec": "5:0",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     false,
+     false
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 2,
+    "preFaintBodies": 4,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 7,
+    "postLentBranch": 2,
+    "postLentMaster": 0,
+    "flippedToLend": 2,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 2,
+    "newlyActiveEveryAge": []
+   },
+   {
+    "spec": "8:1",
+    "parity": [
+     null,
+     null
+    ],
+    "stalled": [
+     false,
+     false
+    ],
+    "sameLogicalRoute": true,
+    "playerFaints": 1,
+    "preFaintBodies": 5,
+    "preFaintDecisionsIdentical": true,
+    "postSwitchBodies": 13,
+    "postLentBranch": 0,
+    "postLentMaster": 0,
+    "flippedToLend": 0,
+    "regressions": 0,
+    "activeDrops": 0,
+    "lentActiveEveryAge": 0,
+    "newlyActiveEveryAge": []
+   }
+  ],
+  "summary": {
+   "routes": 12,
+   "parityAll": true,
+   "preFaintDecisionsIdentical": true,
+   "sameLogicalRoute": true,
+   "postSwitchBodies": 57,
+   "postLentBranch": 28,
+   "postLentMaster": 0,
+   "regressions": 0,
+   "activeDrops": 0
+  }
+ }
+}
