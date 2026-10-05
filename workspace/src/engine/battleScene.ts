@@ -28168,6 +28168,7 @@ export function renderSceneOnMovePresentation(
       || right.order - left.order || right.slot - left.slot);
     for (const entry of entries) entry.draw();
 
+    if (liveField) return;
     const playerIsAttacker = view.attacker.geometry.side === "player";
     const player = playerIsAttacker ? view.attacker : view.target;
     const opponent = playerIsAttacker ? view.target : view.attacker;

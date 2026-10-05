@@ -152,6 +152,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   220,
   // prep10: Rock Blast per-hit bodies (request.turn / request.multihit; lent order gate).
   350,
+  // prep10: Razor Wind setup/unleash by request.turn (Cmd_choosetwoturnanim, like Solar Beam; lent order gate).
+  13,
 ] as const);
 
 const SWEET_SCENT_PETAL_SLOTS: readonly number[] = Object.freeze([
@@ -207,7 +209,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // prep8 (issue142-shadow-rows-extra.json): every window starts at the activation frame (row 0).
     129, 271, 218, 69, 32, 62, 253, 85, 254, 192,
     // prep10 (issue142-shadow-rows-extra.json): Magnitude / Reversal windows start at the activation frame (row 0).
-    222, 179, 220, 350,
+    222, 179, 220, 350, 13,
     // prep9 (issue142-shadow-rows-extra.json): Giga Drain, Sunny Day, Mega Drain, Dream Eater windows start at the
     // activation frame (row 0). Absorb's window starts 10 frames after it (row -10, the Taunt convention): no row.
     202, 241, 72, 138,
@@ -530,6 +532,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 271: return 225; // Trick 70..294 / 66..290.
     // Magnitude 411..585 (power 70, 174 frames) / 191..397 (power 110, 206 frames): the reducer's first inactive age.
     case 222: return request.power > 99 ? 206 : request.power >= 10 && request.power <= 99 ? 174 : null;
+    // Razor Wind: setup 45 frames (195..240 / 192..237), unleash 72 (553..625 / 661..733); gAnimMoveTurn bit 0 selects the body.
+    case 13: return (request.turn & 1) === 0 ? 45 : 72;
     case 350: return 89; // Rock Blast per-hit body: activation..ROCK_BLAST_FIRST_INACTIVE_AGE (84/266/448 + 89 each).
     case 220: return 81; // Pain Split 445 / 446 .. +80 (81 accepted rows; the live window ends at the script's last active row).
     case 179: return 173; // Reversal 404..577 / 451..624: activation..first inactive row (reducer 174 displays, ages 0..173).
@@ -1479,6 +1483,21 @@ export function liveMoveAnimationPresentation(
             target: { spriteSlot: targetSlot, stretchTaskSlot: 0, shakeTaskSlot: 1 },
             orientation: attacker.geometry.side === "player" ? "player-back" : "opponent-front", gameplayRng: 0 } };
       }
+      break;
+    }
+    case 13: {
+      // prep10 s3.9: the allocator ids are the known-entry constants (tornadoes 3,4,5 / matrices 0,3,4; crescents 3,4,5 /
+      // matrices 16,8,0; subpriority = attacker subpriority - 2). The three own sprites are created in ascending slot order
+      // and nothing else in the order is drawn, so the lent order is pixel-neutral (dense-verified with the order
+      // withheld AND lent): ungated like Solar Beam, which is why the unleash body (after an untracked setup body) renders.
+      // ShakeMon2 starts from the target's live idle x2/y2.
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      config = { move: "RAZOR_WIND", body: (request.turn & 1) === 0 ? "setup" : "unleash", attacker, target, fieldProfile,
+        attackerPictureCenter: attackerAnchors.picOffsetPoint, targetPictureCenter: targetAnchors.picOffsetPoint,
+        targetRestOffset: { x2: targetAnchors.frontIdleRest.x2, y2: targetAnchors.frontIdleRest.y2 },
+        animationProfile: { tornadoSpriteSlots: [3, 4, 5], tornadoMatrixIds: [0, 3, 4], crescentSpriteSlots: [3, 4, 5],
+          crescentMatrixIds: [16, 8, 0], spriteOrderSeed: [3, 4, 5], effectPriority: 1,
+          effectSubpriority: (attacker.geometry.side === "player" ? 30 : 40) - 2 } };
       break;
     }
     case 350: {

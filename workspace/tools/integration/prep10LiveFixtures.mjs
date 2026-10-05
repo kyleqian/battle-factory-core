@@ -42,6 +42,8 @@ for (const f of readdirSync(FX).filter(x => x.startsWith(`prep10-${move.toLowerC
       denseWindow: { startFrame: b.start, endFrame: b.end - 1 + (move === "PAIN_SPLIT" ? 1 : 0), // Pain Split: the accepted window includes the first inactive row (81 rows)
  ageOffset: 0 },
       // Magnitude's ROM text box shows STRINGID_MAGNITUDESTRENGTH (queue-owned in production), not the move-used banner.
+      // Razor Wind's setup body shows no text (the unleash body shows the move-used banner).
+      ...(move === "RAZOR_WIND" && b.animTurn === 0 ? { messageLines: ["", ""] } : {}),
       ...(move === "ROCK_BLAST" && i > 0 ? { messageLines: ["", ""] } : {}), // later hits: the text box is empty (queue-owned)
       ...(move === "MAGNITUDE" ? { messageLines: [`MAGNITUDE ${b.gAnimMovePower <= 10 ? 4 : b.gAnimMovePower <= 30 ? 5 : b.gAnimMovePower <= 50 ? 6 : b.gAnimMovePower <= 70 ? 7 : b.gAnimMovePower <= 90 ? 8 : b.gAnimMovePower <= 110 ? 9 : 10}!`, ""] } : {}),
       requestFields: { turn: b.animTurn, power: b.gAnimMovePower, ...(b.multiHitCounter ? { multihit: b.multiHitCounter } : {}) },
