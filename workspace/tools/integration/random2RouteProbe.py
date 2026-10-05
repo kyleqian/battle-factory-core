@@ -37,6 +37,8 @@ ap.add_argument("--frames", type=int, default=0, help="stop after N frames (0 = 
 ap.add_argument("--step-sample", type=int, default=3,
                 help="single-step the first K flagged frames of each (context, steps) class")
 ap.add_argument("--step-frames", default="", help="extra comma-separated frames to single-step")
+ap.add_argument("--controller-ctx", action="store_true",
+                help="add gBattlerControllerFuncs[0] (player controller state) to the frame context")
 ap.add_argument("--step-anim", action="store_true",
                 help="also single-step every gAnimScriptActive frame and every frame with >1 step")
 args = ap.parse_args()
@@ -99,6 +101,7 @@ BMF = syms["gBattleMainFunc"]
 ANIM_ACTIVE = syms["gAnimScriptActive"]
 ANIM_PTR = syms["sBattleAnimScriptPtr"]
 WCT = syms["gWirelessCommType"]
+CTRL = syms["gBattlerControllerFuncs"]
 
 
 def fresh() -> tuple[EmeraldOracle, list[list[str]]]:
@@ -125,7 +128,8 @@ def fresh() -> tuple[EmeraldOracle, list[list[str]]]:
 def context(o: EmeraldOracle) -> tuple:
     active = o.read_u8(ANIM_ACTIVE)
     return (label(o.read_u32(GMAIN + 4)), label(o.read_u32(BMF)), active,
-            label(o.read_u32(ANIM_PTR)) if active else "-")
+            label(o.read_u32(ANIM_PTR)) if active else "-",
+            label(o.read_u32(CTRL)) if args.controller_ctx else "-")
 
 
 def state_sha1(o: EmeraldOracle) -> str:
