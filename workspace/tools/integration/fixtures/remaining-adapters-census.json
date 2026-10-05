@@ -139,7 +139,11 @@
     "ZAP_CANNON"
    ],
    "touchingMoves": 59,
-   "touchingWeightPct": 13.51
+   "touchingWeightPct": 13.51,
+   "meta": {
+    "cost": "new provider (sibling affine-bitmap + task table fed by the same create/destroy events as src/engine/liveSpriteAllocator.ts:89-123; per-move timelines like src/engine/liveMoveSpriteAllocator.ts:28)",
+    "claim": "exact from a known baseline (lowest-free allocations); baseline of gOamMatrix bitmap and gTasks at move activation must be measured"
+   }
   },
   {
    "provider": "F-AFFINE",
@@ -161,7 +165,11 @@
     "ZAP_CANNON"
    ],
    "touchingMoves": 43,
-   "touchingWeightPct": 9.302
+   "touchingWeightPct": 9.302,
+   "meta": {
+    "cost": "new provider (matrixBitmap lowest-free over a known baseline)",
+    "claim": "exact from a known baseline"
+   }
   },
   {
    "provider": "C",
@@ -181,7 +189,11 @@
     "WISH"
    ],
    "touchingMoves": 52,
-   "touchingWeightPct": 12.64
+   "touchingWeightPct": 12.64,
+   "meta": {
+    "cost": "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)",
+    "claim": "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact"
+   }
   },
   {
    "provider": "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)",
@@ -206,7 +218,11 @@
     "SUNNY_DAY"
    ],
    "touchingMoves": 55,
-   "touchingWeightPct": 12.434
+   "touchingWeightPct": 12.434,
+   "meta": {
+    "cost": "new large host (docs/animation-integration-readiness.md A6)",
+    "claim": "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today"
+   }
   },
   {
    "provider": "D-PAL",
@@ -224,7 +240,11 @@
     "SUNNY_DAY"
    ],
    "touchingMoves": 47,
-   "touchingWeightPct": 10.842
+   "touchingWeightPct": 10.842,
+   "meta": {
+    "cost": "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)",
+    "claim": "exact for audited plan rows from a known entry; actual status animations/switches invalidate"
+   }
   },
   {
    "provider": "X-SWITCH",
@@ -240,7 +260,11 @@
     "WHIRLWIND"
    ],
    "touchingMoves": 3,
-   "touchingWeightPct": 1.818
+   "touchingWeightPct": 1.818,
+   "meta": {
+    "cost": "new flow owner (switch / forced-switch presentation; shares the pending 'actual switches' graphics ownership)",
+    "claim": "separate S10x program: forced replacement and summaries are explicitly pending in docs/animation-integration-live-status.json"
+   }
   },
   {
    "provider": "E-TASK",
@@ -256,7 +280,11 @@
     "TRICK"
    ],
    "touchingMoves": 44,
-   "touchingWeightPct": 9.841
+   "touchingWeightPct": 9.841,
+   "meta": {
+    "cost": "new provider (CreateTask slot table)",
+    "claim": "exact from a known baseline"
+   }
   },
   {
    "provider": "E-OUT",
@@ -271,7 +299,11 @@
     "FIRE_PUNCH"
    ],
    "touchingMoves": 6,
-   "touchingWeightPct": 1.796
+   "touchingWeightPct": 1.796,
+   "meta": {
+    "cost": "per-move plumbing from resolution (secondary-effect / HP / stale-power values)",
+    "claim": "exact outcome data; no RNG ownership"
+   }
   },
   {
    "provider": "X-TWOTURN",
@@ -286,7 +318,11 @@
     "FLY"
    ],
    "touchingMoves": 4,
-   "touchingWeightPct": 1.269
+   "touchingWeightPct": 1.269,
+   "meta": {
+    "cost": "hidden-battler state across the two turns in the field art view",
+    "claim": "exact once the semi-invulnerable state is rendered"
+   }
   },
   {
    "provider": "X-SCHED",
@@ -300,7 +336,8 @@
     "SPARK"
    ],
    "touchingMoves": 1,
-   "touchingWeightPct": 0.264
+   "touchingWeightPct": 0.264,
+   "meta": null
   },
   {
    "provider": "X-SUBST",
@@ -314,7 +351,8 @@
     "SUBSTITUTE"
    ],
    "touchingMoves": 1,
-   "touchingWeightPct": 0.223
+   "touchingWeightPct": 0.223,
+   "meta": null
   },
   {
    "provider": "X-AGE",
@@ -328,7 +366,8 @@
     "EXTREME_SPEED"
    ],
    "touchingMoves": 1,
-   "touchingWeightPct": 0.112
+   "touchingWeightPct": 0.112,
+   "meta": null
   },
   {
    "provider": "X-POWER",
@@ -342,7 +381,11 @@
     "MAGNITUDE"
    ],
    "touchingMoves": 3,
-   "touchingWeightPct": 0.844
+   "touchingWeightPct": 0.844,
+   "meta": {
+    "cost": "emit the dynamic gBattleMovePower/gDynamicBasePower on the request instead of the static table power (src/engine/battleScriptHitChainOpcode.ts:2285)",
+    "claim": "exact; must not alter damage"
+   }
   },
   {
    "provider": "X-REDUCER",
@@ -356,7 +399,8 @@
     "PAIN_SPLIT"
    ],
    "touchingMoves": 2,
-   "touchingWeightPct": 0.406
+   "touchingWeightPct": 0.406,
+   "meta": null
   },
   {
    "provider": "D-SCAN",
@@ -370,7 +414,8 @@
     "MEMENTO"
    ],
    "touchingMoves": 5,
-   "touchingWeightPct": 1.453
+   "touchingWeightPct": 1.453,
+   "meta": null
   },
   {
    "provider": "D-TILE",
@@ -382,7 +427,8 @@
    "aloneWeightPct": 0,
    "aloneNames": [],
    "touchingMoves": 33,
-   "touchingWeightPct": 6.129
+   "touchingWeightPct": 6.129,
+   "meta": null
   },
   {
    "provider": "D-BG",
@@ -394,7 +440,8 @@
    "aloneWeightPct": 0,
    "aloneNames": [],
    "touchingMoves": 38,
-   "touchingWeightPct": 7.292
+   "touchingWeightPct": 7.292,
+   "meta": null
   },
   {
    "provider": "D-OAM",
@@ -406,7 +453,8 @@
    "aloneWeightPct": 0,
    "aloneNames": [],
    "touchingMoves": 16,
-   "touchingWeightPct": 3.567
+   "touchingWeightPct": 3.567,
+   "meta": null
   },
   {
    "provider": "D-VRAM",
@@ -418,7 +466,8 @@
    "aloneWeightPct": 0,
    "aloneNames": [],
    "touchingMoves": 6,
-   "touchingWeightPct": 0.801
+   "touchingWeightPct": 0.801,
+   "meta": null
   },
   {
    "provider": "F-AUDIO",
@@ -430,7 +479,8 @@
    "aloneWeightPct": 0,
    "aloneNames": [],
    "touchingMoves": 8,
-   "touchingWeightPct": 1.052
+   "touchingWeightPct": 1.052,
+   "meta": null
   },
   {
    "provider": "X-DISABLE",
@@ -442,7 +492,11 @@
    "aloneWeightPct": 0,
    "aloneNames": [],
    "touchingMoves": 4,
-   "touchingWeightPct": 0.627
+   "touchingWeightPct": 0.627,
+   "meta": {
+    "cost": "add a DisableStruct counter snapshot to the MOVE_ANIMATION request (rules context already holds the counters)",
+    "claim": "exact (presentation-only copy of rules state)"
+   }
   }
  ],
  "greedy": [
@@ -664,6 +718,253 @@
    "newNames": []
   }
  ],
+ "batches": [
+  {
+   "id": "N1",
+   "title": "READY-NOW recipe batch: body-only views of the canonical controller moves + dense-measured buffer moves",
+   "count": 8,
+   "weightPct": 5.406,
+   "moves": [
+    {
+     "move": "MOVE_AERIAL_ACE",
+     "group": "READY-NOW",
+     "providerNeeds": [],
+     "orderFirstBodyOnly": false,
+     "weightPct": 2.216,
+     "prep": "measured here (census-activation): act 81/77, reducer age at activation 42/38 (window 46..281, appStage presentationAge 7 at frame 46), script 49 frames; missing: ordinary-route request/HP route, #142 shadow row choice (age basis +42/+38 or ageOffset), species-gate/HUD retirement under !liveField"
+    },
+    {
+     "move": "MOVE_QUICK_ATTACK",
+     "group": "READY-NOW",
+     "providerNeeds": [],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.949,
+     "prep": "measured here: act 83/79, age at activation 44/40, script 32 frames; missing: afterimage slot 3/4 tie audit, route check"
+    },
+    {
+     "move": "MOVE_ICE_PUNCH",
+     "group": "READY-NOW",
+     "providerNeeds": [],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.697,
+     "prep": "measured here (staged, direct mGBA): act 1966 opponent / 2339 player == accepted window start (row 0), script 183 frames; missing: staged-boundary only (no BattleLab scenario) so an ordinary-route activation and the crystal slot plan (A-SLOT) need one probe each"
+    },
+    {
+     "move": "MOVE_FIRE_BLAST",
+     "group": "READY-NOW",
+     "providerNeeds": [],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.592,
+     "prep": "prep6 measured (215/215..411, 1147/1147..1343, row 0, 197 frames; opponent needs the 1200-frame input tail); missing: first-body order (full 64-pool permutation, FIRE_BLAST_ORDER_SEED fireBlast.ts:34) from spriteOrderForSlots, later body falls back"
+    },
+    {
+     "move": "MOVE_DRAGON_DANCE",
+     "group": "READY-NOW",
+     "providerNeeds": [],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.4,
+     "prep": "prep6 measured (74/74..215 / 78/78..219, row 0, 142 frames); missing: 1-bit order from the first-body provider (relative order of slots 3/4 at age 20), later body falls back"
+    },
+    {
+     "move": "MOVE_FAKE_TEARS",
+     "group": "READY-NOW",
+     "providerNeeds": [],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.258,
+     "prep": "measured here: act 79/75, visual window 80..166 / 76..162 (row -1, no map row; window ends 4 frames after the script end), script 83 frames; missing: attackerPictureBounds from liveBattlerAnchors, confirm the renderer ignores controllerPresentation under !liveField"
+    },
+    {
+     "move": "MOVE_SLEEP_TALK",
+     "group": "READY-NOW",
+     "providerNeeds": [],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.22,
+     "prep": "measured here: act 4570/1356 == window start (row 0), body 186 frames; missing: renderer HUD block behind !liveField (battleScene.ts:34256 branch), attacker sleep status in the displayed field, called-move second request as Metronome"
+    },
+    {
+     "move": "MOVE_FEATHER_DANCE",
+     "group": "READY-NOW",
+     "providerNeeds": [],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.074,
+     "prep": "measured here: act 83/79, age at activation 44/40, script 168 frames; missing: ordinary-route check (feathers use battlePositionCenter + ageOffset only)"
+    }
+   ]
+  },
+  {
+   "id": "N2",
+   "title": "one-named-input batch: single-orientation evidence + dynamic power + two reducer parameterizations",
+   "count": 8,
+   "weightPct": 5.505,
+   "moves": [
+    {
+     "move": "MOVE_ROCK_SLIDE",
+     "group": "READY-NOW",
+     "providerNeeds": [],
+     "orderFirstBodyOnly": true,
+     "weightPct": 2.117,
+     "prep": "measured here (staged): opponent act 1967 == window start (row 0), script 137 (window +37 tail); player act 2340 behind the staged AI Double Team body, 79 in the lab scenario (first body, script 137); missing: accepted player-attacker evidence (animation lane) and first-body order (profile spriteOrderSeed sceneOnPresentation.ts:13474)"
+    },
+    {
+     "move": "MOVE_DOUBLE_TEAM",
+     "group": "READY-NOW",
+     "providerNeeds": [],
+     "orderFirstBodyOnly": true,
+     "weightPct": 1.72,
+     "prep": "prep6 measured player only (2336/2337..2566, row -1, 7-frame tail); missing: opponent-attacker evidence (staged AI used Rock Slide) and the frontClone order bit"
+    },
+    {
+     "move": "MOVE_MAGNITUDE",
+     "group": "SMALL-INPUT",
+     "providerNeeds": [
+      "X-POWER"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.108,
+     "prep": "measured here: act == window start for all four bodies (intense 195/191, regular 411; row 0); missing: dynamic power on the request (X-POWER) and first-body order"
+    },
+    {
+     "move": "MOVE_REVERSAL",
+     "group": "MULTI",
+     "providerNeeds": [
+      "X-REDUCER",
+      "X-POWER"
+     ],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.332,
+     "prep": "measured here: act == window start (404 / 451, row 0, 173 frames); missing: reducer toggle fix + A>1 tests (reversal-shake-evidence.json), dynamic power on the request"
+    },
+    {
+     "move": "MOVE_FIRE_PUNCH",
+     "group": "SMALL-INPUT",
+     "providerNeeds": [
+      "E-OUT"
+     ],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.669,
+     "prep": "measured here (staged): opponent act 1967, player 2340, script 101; UNRESOLVED mismatch with the accepted windows (2081 / 2313); missing: re-derive the accepted window phase, burn/faint outcome input or body-only split"
+    },
+    {
+     "move": "MOVE_ENDEAVOR",
+     "group": "SMALL-INPUT",
+     "providerNeeds": [
+      "E-OUT"
+     ],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.221,
+     "prep": "measured here (staged): player act 2339 vs window 2345..2485 (row -6, age at activation -8, 67-frame script, +79 tail); opponent evidence missing (AI used Rock Slide); missing: HP before/after + stale power input"
+    },
+    {
+     "move": "MOVE_SPARK",
+     "group": "SMALL-INPUT",
+     "providerNeeds": [
+      "X-SCHED"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.264,
+     "prep": "measured here: act 74/70 vs window 83/79 (row -9), window ends 2 frames before the script end; missing: flashing*Advances derivation and hardwareTieSlotOrder from the first-body order"
+    },
+    {
+     "move": "MOVE_PAIN_SPLIT",
+     "group": "SMALL-INPUT",
+     "providerNeeds": [
+      "X-REDUCER"
+     ],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.074,
+     "prep": "prep6 measured (445/445..525 / 446/446..526, row 0, 81 rows); missing: per-side coords.yOffset into the reducer"
+    }
+   ]
+  },
+  {
+   "id": "N3",
+   "title": "first provider build: allocator plan v2 (affine matrix + task slots), exact from a known baseline",
+   "count": 8,
+   "weightPct": 3.071,
+   "moves": [
+    {
+     "move": "MOVE_THUNDERBOLT",
+     "group": "PROVIDER-F-AFFINE",
+     "providerNeeds": [
+      "F-AFFINE"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 1.618,
+     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+    },
+    {
+     "move": "MOVE_FRUSTRATION",
+     "group": "PROVIDER-F-AFFINE",
+     "providerNeeds": [
+      "F-AFFINE"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.343,
+     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+    },
+    {
+     "move": "MOVE_SWIFT",
+     "group": "PROVIDER-E-TASK",
+     "providerNeeds": [
+      "E-TASK"
+     ],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.258,
+     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+    },
+    {
+     "move": "MOVE_HORN_DRILL",
+     "group": "PROVIDER-F-AFFINE",
+     "providerNeeds": [
+      "F-AFFINE"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.257,
+     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+    },
+    {
+     "move": "MOVE_SEISMIC_TOSS",
+     "group": "PROVIDER-F-AFFINE",
+     "providerNeeds": [
+      "F-AFFINE"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.248,
+     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+    },
+    {
+     "move": "MOVE_TRICK",
+     "group": "PROVIDER-E-TASK",
+     "providerNeeds": [
+      "E-TASK"
+     ],
+     "orderFirstBodyOnly": false,
+     "weightPct": 0.176,
+     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+    },
+    {
+     "move": "MOVE_AURORA_BEAM",
+     "group": "PROVIDER-F-AFFINE",
+     "providerNeeds": [
+      "F-AFFINE"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.102,
+     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+    },
+    {
+     "move": "MOVE_STOCKPILE",
+     "group": "PROVIDER-F-AFFINE",
+     "providerNeeds": [
+      "F-AFFINE"
+     ],
+     "orderFirstBodyOnly": true,
+     "weightPct": 0.068,
+     "prep": "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"
+    }
+   ]
+  }
+ ],
  "rows": [
   {
    "move": "MOVE_ABSORB",
@@ -703,6 +1004,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -729,7 +1031,33 @@
    "orderFirstBodyOnly": false,
    "providerNeeds": [],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "aerial-ace-pidgeotto-onix",
+     "staged": false,
+     "activation": 81,
+     "scriptFrames": 49,
+     "windowStart": 46,
+     "windowEnd": 281,
+     "activationMinusWindowStart": 35,
+     "windowEndMinusScriptEnd": 151,
+     "reducerAgeAtActivation": 42,
+     "note": null
+    },
+    {
+     "probe": "aerial-ace-player-pidgeotto-onix",
+     "staged": false,
+     "activation": 77,
+     "scriptFrames": 49,
+     "windowStart": 46,
+     "windowEnd": 277,
+     "activationMinusWindowStart": 31,
+     "windowEndMinusScriptEnd": 151,
+     "reducerAgeAtActivation": 38,
+     "note": null
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -804,6 +1132,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -842,6 +1171,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "NEEDS-KEYS"
@@ -889,6 +1219,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -927,6 +1258,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "NOT-OBSERVED"
@@ -1010,6 +1342,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -1049,6 +1382,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -1145,6 +1479,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -1210,6 +1545,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -1326,6 +1662,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -1397,6 +1734,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": true,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -1435,6 +1773,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -1477,6 +1816,7 @@
    "providerNeeds": [],
    "palettePlan": false,
    "activationMeasured": true,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -1518,6 +1858,7 @@
    "providerNeeds": [],
    "palettePlan": false,
    "activationMeasured": true,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -1570,6 +1911,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -1608,7 +1950,33 @@
     "E-OUT"
    ],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "endeavor-player",
+     "staged": true,
+     "activation": 2339,
+     "scriptFrames": 67,
+     "windowStart": 2345,
+     "windowEnd": 2485,
+     "activationMinusWindowStart": -6,
+     "windowEndMinusScriptEnd": 79,
+     "reducerAgeAtActivation": -8,
+     "note": "second action (after the AI Double Team body)"
+    },
+    {
+     "probe": "endeavor-opponent",
+     "staged": true,
+     "activation": null,
+     "scriptFrames": null,
+     "windowStart": null,
+     "windowEnd": null,
+     "activationMinusWindowStart": null,
+     "windowEndMinusScriptEnd": null,
+     "reducerAgeAtActivation": null,
+     "note": "NOT PRODUCED: the staged AI selected Rock Slide (157) instead; opponent-attacker Endeavor evidence is missing"
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "NOT-OBSERVED",
     "player": "NOT-OBSERVED"
@@ -1692,6 +2060,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "NEEDS-KEYS"
@@ -1820,6 +2189,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -1858,6 +2228,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -1884,7 +2255,33 @@
    "orderFirstBodyOnly": false,
    "providerNeeds": [],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "fake-tears-opponent-delcatty-player-shuckle",
+     "staged": false,
+     "activation": 79,
+     "scriptFrames": 83,
+     "windowStart": 80,
+     "windowEnd": 166,
+     "activationMinusWindowStart": -1,
+     "windowEndMinusScriptEnd": 4,
+     "reducerAgeAtActivation": null,
+     "note": null
+    },
+    {
+     "probe": "fake-tears-player-delcatty-opponent-shuckle",
+     "staged": false,
+     "activation": 75,
+     "scriptFrames": 83,
+     "windowStart": 76,
+     "windowEnd": 162,
+     "activationMinusWindowStart": -1,
+     "windowEndMinusScriptEnd": 4,
+     "reducerAgeAtActivation": null,
+     "note": null
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -1911,7 +2308,33 @@
    "orderFirstBodyOnly": false,
    "providerNeeds": [],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "feather-dance-pidgeotto-onix",
+     "staged": false,
+     "activation": 83,
+     "scriptFrames": 168,
+     "windowStart": 46,
+     "windowEnd": 445,
+     "activationMinusWindowStart": 37,
+     "windowEndMinusScriptEnd": 194,
+     "reducerAgeAtActivation": 44,
+     "note": null
+    },
+    {
+     "probe": "feather-dance-player-pidgeotto-onix",
+     "staged": false,
+     "activation": 79,
+     "scriptFrames": 168,
+     "windowStart": 46,
+     "windowEnd": 445,
+     "activationMinusWindowStart": 33,
+     "windowEndMinusScriptEnd": 198,
+     "reducerAgeAtActivation": 40,
+     "note": null
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -1954,6 +2377,7 @@
    "providerNeeds": [],
    "palettePlan": false,
    "activationMeasured": true,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -1991,7 +2415,33 @@
     "E-OUT"
    ],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "fire-punch-player",
+     "staged": true,
+     "activation": 2340,
+     "scriptFrames": 101,
+     "windowStart": 2313,
+     "windowEnd": 2537,
+     "activationMinusWindowStart": 27,
+     "windowEndMinusScriptEnd": 96,
+     "reducerAgeAtActivation": 27,
+     "note": "UNRESOLVED: accepted window starts 27 frames BEFORE the staged activation (window 2313 vs act 2340)"
+    },
+    {
+     "probe": "fire-punch-opponent",
+     "staged": true,
+     "activation": 1967,
+     "scriptFrames": 101,
+     "windowStart": 2081,
+     "windowEnd": 2357,
+     "activationMinusWindowStart": -114,
+     "windowEndMinusScriptEnd": 289,
+     "reducerAgeAtActivation": -114,
+     "note": "UNRESOLVED: accepted window starts 114 frames AFTER the staged activation and after the script end (2081 vs act 1967, end 2068); signs differ per side, so the accepted staging is not the copied stage boundary or the window is the burn/status phase"
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -2040,6 +2490,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -2150,6 +2601,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -2189,6 +2641,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -2263,6 +2716,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -2310,6 +2764,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -2404,6 +2859,7 @@
    ],
    "palettePlan": true,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -2456,6 +2912,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -2522,6 +2979,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -2578,6 +3036,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -2625,6 +3084,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -2681,6 +3141,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -2773,6 +3234,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -2867,6 +3329,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -2923,6 +3386,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -2949,7 +3413,33 @@
    "orderFirstBodyOnly": false,
    "providerNeeds": [],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "ice-punch-player",
+     "staged": true,
+     "activation": 2339,
+     "scriptFrames": 183,
+     "windowStart": 2339,
+     "windowEnd": 2800,
+     "activationMinusWindowStart": 0,
+     "windowEndMinusScriptEnd": 278,
+     "reducerAgeAtActivation": 0,
+     "note": "second action (after the AI Double Team body); window = body + controller tail"
+    },
+    {
+     "probe": "ice-punch-opponent",
+     "staged": true,
+     "activation": 1966,
+     "scriptFrames": 183,
+     "windowStart": 1966,
+     "windowEnd": 3259,
+     "activationMinusWindowStart": 0,
+     "windowEndMinusScriptEnd": 1110,
+     "reducerAgeAtActivation": 0,
+     "note": "first body of the staged battle; window = body + controller tail (1293 frames)"
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -2999,6 +3489,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -3047,6 +3538,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -3094,6 +3586,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NOT-OBSERVED",
     "player": "NOT-OBSERVED"
@@ -3186,6 +3679,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -3237,7 +3731,57 @@
     "X-POWER"
    ],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "magnitude-intense-opponent-camerupt-player-onix",
+     "staged": false,
+     "activation": 195,
+     "scriptFrames": 206,
+     "windowStart": 195,
+     "windowEnd": 401,
+     "activationMinusWindowStart": 0,
+     "windowEndMinusScriptEnd": 0,
+     "reducerAgeAtActivation": null,
+     "note": null
+    },
+    {
+     "probe": "magnitude-intense-player-camerupt-opponent-onix",
+     "staged": false,
+     "activation": 191,
+     "scriptFrames": 206,
+     "windowStart": 191,
+     "windowEnd": 397,
+     "activationMinusWindowStart": 0,
+     "windowEndMinusScriptEnd": 0,
+     "reducerAgeAtActivation": null,
+     "note": null
+    },
+    {
+     "probe": "magnitude-regular-opponent-graveler-player-onix",
+     "staged": false,
+     "activation": 411,
+     "scriptFrames": 174,
+     "windowStart": 411,
+     "windowEnd": 585,
+     "activationMinusWindowStart": 0,
+     "windowEndMinusScriptEnd": 0,
+     "reducerAgeAtActivation": null,
+     "note": null
+    },
+    {
+     "probe": "magnitude-regular-player-graveler-opponent-onix",
+     "staged": false,
+     "activation": 411,
+     "scriptFrames": 174,
+     "windowStart": 411,
+     "windowEnd": 585,
+     "activationMinusWindowStart": 0,
+     "windowEndMinusScriptEnd": 0,
+     "reducerAgeAtActivation": null,
+     "note": null
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -3329,6 +3873,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -3381,6 +3926,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -3419,6 +3965,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -3457,6 +4004,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -3504,6 +4052,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": true,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -3605,6 +4154,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -3653,6 +4203,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -3735,6 +4286,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NOT-OBSERVED",
     "player": "NOT-OBSERVED"
@@ -3827,6 +4379,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -3865,6 +4418,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": true,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -3930,6 +4484,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -4022,6 +4577,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -4141,6 +4697,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -4269,6 +4826,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -4287,15 +4845,41 @@
    "needs": [],
    "blockers": [],
    "notes": [
-    "STALE H_OUTCOME verdict: afterimage body independent of controllerProfile (HUD/result text only); same recipe as Aerial Ace; renderer branch battleScene.ts:48615 draws PIDGEOTTO/ONIX art + HUD"
+    "STALE H_OUTCOME verdict: afterimage body independent of controllerProfile (HUD/result text only); same recipe as Aerial Ace; renderer branch battleScene.ts:48615 draws PIDGEOTTO/ONIX art + HUD. Afterimage slots 3/4 carry an explicit OAM-tie suppression (battleScene.ts:20847): slot plan = first-free plus a tie audit (docs/allocator-consumer-tie-audit.md)"
    ],
    "staleCorrections": [
-    "STALE H_OUTCOME verdict: afterimage body independent of controllerProfile (HUD/result text only); same recipe as Aerial Ace; renderer branch battleScene.ts:48615 draws PIDGEOTTO/ONIX art + HUD"
+    "STALE H_OUTCOME verdict: afterimage body independent of controllerProfile (HUD/result text only); same recipe as Aerial Ace; renderer branch battleScene.ts:48615 draws PIDGEOTTO/ONIX art + HUD. Afterimage slots 3/4 carry an explicit OAM-tie suppression (battleScene.ts:20847): slot plan = first-free plus a tie audit (docs/allocator-consumer-tie-audit.md)"
    ],
    "orderFirstBodyOnly": false,
    "providerNeeds": [],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "quick-attack-pidgeotto-onix",
+     "staged": false,
+     "activation": 83,
+     "scriptFrames": 32,
+     "windowStart": 46,
+     "windowEnd": 264,
+     "activationMinusWindowStart": 37,
+     "windowEndMinusScriptEnd": 149,
+     "reducerAgeAtActivation": 44,
+     "note": null
+    },
+    {
+     "probe": "quick-attack-player-pidgeotto-onix",
+     "staged": false,
+     "activation": 79,
+     "scriptFrames": 32,
+     "windowStart": 46,
+     "windowEnd": 259,
+     "activationMinusWindowStart": 33,
+     "windowEndMinusScriptEnd": 148,
+     "reducerAgeAtActivation": 40,
+     "note": null
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -4344,6 +4928,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -4454,6 +5039,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -4506,6 +5092,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -4554,6 +5141,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -4664,6 +5252,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -4755,6 +5344,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -4802,7 +5392,33 @@
     "X-POWER"
    ],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "reversal-player-delcatty-opponent-vigoroth",
+     "staged": false,
+     "activation": 404,
+     "scriptFrames": 173,
+     "windowStart": 404,
+     "windowEnd": 577,
+     "activationMinusWindowStart": 0,
+     "windowEndMinusScriptEnd": 0,
+     "reducerAgeAtActivation": null,
+     "note": null
+    },
+    {
+     "probe": "reversal-player-vigoroth-opponent-delcatty",
+     "staged": false,
+     "activation": 451,
+     "scriptFrames": 173,
+     "windowStart": 451,
+     "windowEnd": 624,
+     "activationMinusWindowStart": 0,
+     "windowEndMinusScriptEnd": 0,
+     "reducerAgeAtActivation": null,
+     "note": null
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -4841,6 +5457,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -4884,6 +5501,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -4920,7 +5538,33 @@
    "orderFirstBodyOnly": true,
    "providerNeeds": [],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "rock-slide-player",
+     "staged": true,
+     "activation": 2340,
+     "scriptFrames": 137,
+     "windowStart": null,
+     "windowEnd": null,
+     "activationMinusWindowStart": null,
+     "windowEndMinusScriptEnd": null,
+     "reducerAgeAtActivation": null,
+     "note": "no accepted player-attacker evidence (rock-slide-grovyle-onix.json is opponent Grovyle -> player Onix only); staged run has the AI Double Team body first (history != first body)"
+    },
+    {
+     "probe": "rock-slide-opponent",
+     "staged": true,
+     "activation": 1967,
+     "scriptFrames": 137,
+     "windowStart": 1967,
+     "windowEnd": 2141,
+     "activationMinusWindowStart": 0,
+     "windowEndMinusScriptEnd": 37,
+     "reducerAgeAtActivation": 0,
+     "note": "first body of the staged battle"
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -4975,6 +5619,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -5027,6 +5672,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": true,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -5101,6 +5747,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -5148,6 +5795,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -5231,6 +5879,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -5332,6 +5981,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -5424,6 +6074,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -5516,6 +6167,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -5644,6 +6296,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -5750,6 +6403,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -5824,6 +6478,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -5850,7 +6505,33 @@
    "orderFirstBodyOnly": false,
    "providerNeeds": [],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "sleep-talk-opponent-seaking-player-onix",
+     "staged": false,
+     "activation": 4570,
+     "scriptFrames": 188,
+     "windowStart": 4570,
+     "windowEnd": 4758,
+     "activationMinusWindowStart": 0,
+     "windowEndMinusScriptEnd": 0,
+     "reducerAgeAtActivation": null,
+     "note": null
+    },
+    {
+     "probe": "sleep-talk-player-seaking-opponent-onix",
+     "staged": false,
+     "activation": 1356,
+     "scriptFrames": 185,
+     "windowStart": 1356,
+     "windowEnd": 1541,
+     "activationMinusWindowStart": 0,
+     "windowEndMinusScriptEnd": 0,
+     "reducerAgeAtActivation": null,
+     "note": null
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -5943,6 +6624,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -6035,6 +6717,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -6081,7 +6764,33 @@
     "X-SCHED"
    ],
    "palettePlan": false,
-   "activationMeasured": false,
+   "activationMeasured": true,
+   "activationReceipts": [
+    {
+     "probe": "spark-opponent-minun-player-shuckle",
+     "staged": false,
+     "activation": 74,
+     "scriptFrames": 125,
+     "windowStart": 83,
+     "windowEnd": 197,
+     "activationMinusWindowStart": -9,
+     "windowEndMinusScriptEnd": -2,
+     "reducerAgeAtActivation": null,
+     "note": null
+    },
+    {
+     "probe": "spark-player-minun-opponent-shuckle",
+     "staged": false,
+     "activation": 70,
+     "scriptFrames": 125,
+     "windowStart": 79,
+     "windowEnd": 193,
+     "activationMinusWindowStart": -9,
+     "windowEndMinusScriptEnd": -2,
+     "reducerAgeAtActivation": null,
+     "note": null
+    }
+   ],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -6156,6 +6865,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -6204,6 +6914,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -6298,6 +7009,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -6345,6 +7057,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -6384,6 +7097,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -6431,6 +7145,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -6522,6 +7237,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -6561,6 +7277,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -6599,6 +7316,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -6646,6 +7364,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -6685,6 +7404,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -6741,6 +7461,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -6788,6 +7509,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -6871,6 +7593,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -6927,6 +7650,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -6965,6 +7689,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -7056,6 +7781,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"
@@ -7094,6 +7820,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "EXACT-PLAN",
     "player": "EXACT-PLAN"
@@ -7141,6 +7868,7 @@
    ],
    "palettePlan": false,
    "activationMeasured": false,
+   "activationReceipts": [],
    "ownBodyOrder": {
     "opponent": "NEEDS-KEYS",
     "player": "NEEDS-KEYS"

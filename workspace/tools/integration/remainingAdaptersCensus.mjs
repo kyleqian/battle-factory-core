@@ -149,7 +149,7 @@ const CURATED = {
   MOVE_LUSTER_PURGE: { needs: ["C", "D-BG"], blockers: { C: ["visualRandom: 12 Random2 words (6 hitsplats x 2)", ["src/animation/lusterPurge.ts:29", `${R}src/battle_anim_normal.c:1062-1063`]], "D-BG": ["monbgCenter / monbgPosition (monbg state)", [SC("SceneOnLusterPurgeConfig")]] }, note: "also attackerBattlerId, sprite slots, circleCenter (A/A-SLOT)" },
   MOVE_THRASH: { needs: ["C"], blockers: { C: ["fistRandom: 12 Random2 words (three fist sprites x 4)", ["src/animation/thrash.ts:1", `${R}src/battle_anim_fight.c:487-492`]] }, note: "lock-in / confusion end flow is gameplay, not presentation" },
   MOVE_AERIAL_ACE: { needs: [], blockers: {}, note: "STALE readiness H_OUTCOME verdict: the body (aerialAceAnimationAtAge) does not read controllerProfile; it feeds only hitReaction / displayedTargetHp / resultText / currentMove (HUD fields the ordinary queue owns). Recipe: pass displayed HP (before, before-damage) + dummy ages, retire the PIDGEOTTO/ONIX gate and hard-coded HUD under !liveField", cites: [SC("sceneOnAerialAceView")] },
-  MOVE_QUICK_ATTACK: { needs: [], blockers: {}, note: "STALE H_OUTCOME verdict: afterimage body independent of controllerProfile (HUD/result text only); same recipe as Aerial Ace; renderer branch battleScene.ts:48615 draws PIDGEOTTO/ONIX art + HUD", cites: [SC("sceneOnQuickAttackView"), "src/engine/battleScene.ts:48615"] },
+  MOVE_QUICK_ATTACK: { needs: [], blockers: {}, note: "STALE H_OUTCOME verdict: afterimage body independent of controllerProfile (HUD/result text only); same recipe as Aerial Ace; renderer branch battleScene.ts:48615 draws PIDGEOTTO/ONIX art + HUD. Afterimage slots 3/4 carry an explicit OAM-tie suppression (battleScene.ts:20847): slot plan = first-free plus a tie audit (docs/allocator-consumer-tie-audit.md)", cites: [SC("sceneOnQuickAttackView"), "src/engine/battleScene.ts:48615", "src/engine/battleScene.ts:20847"] },
   MOVE_FIRE_PUNCH: { needs: ["E-OUT"], blockers: { "E-OUT": ["view.burnFlames depend on resolution.secondaryRollSucceeded and resolution.faint (burn roll + target faint outcomes), which the MOVE_ANIMATION request does not carry; the view bundles status-animation flames with the move body", [SC("sceneOnFirePunchView"), SC("SceneOnFirePunchConfig")]] }, note: "SMALL-INPUT: secondary-effect (burn applied) + faint outcome, or a body-only split that leaves flames to the ordinary status animation" },
   MOVE_ICE_PUNCH: { needs: [], blockers: {}, note: "STALE H_OUTCOME verdict: overlay/crystals/hitCrystals read only the target animationCenter/side; hpDrain/status/held-item/action-menu are HUD fields. Freeze status is a separate ordinary-queue status animation", cites: [SC("sceneOnIcePunchView")] },
   MOVE_FEATHER_DANCE: { needs: [], blockers: {}, note: "STALE H_OUTCOME verdict: feathers depend on battlePositionCenter/side/ageOffset only; stat-stage message is controllerDisplay (HUD). The stat change itself is a separate ordinary-queue event", cites: [SC("sceneOnFeatherDanceView")] },
@@ -208,6 +208,9 @@ for (const f of ["issue142-shadow-rows.json", "issue142-shadow-rows-extra.json",
   const text = fs.readFileSync(p, "utf8");
   for (const m of text.matchAll(/"move"\s*:\s*"([A-Z_0-9]+)"/g)) activationNames.add(`MOVE_${m[1].replace(/^MOVE_/, "")}`);
 }
+const actSummary = fs.existsSync("tools/integration/fixtures/census-activation/summary.json") ? rd("tools/integration/fixtures/census-activation/summary.json").rows : [];
+const actByMove = {};
+for (const r of actSummary) (actByMove[`MOVE_${r.move}`] ??= []).push({ probe: r.probe, staged: !!r.staged, activation: r.activation, scriptFrames: r.scriptFrames, windowStart: r.window?.start ?? null, windowEnd: r.window?.end ?? null, activationMinusWindowStart: r.activationMinusWindowStart ?? null, windowEndMinusScriptEnd: r.windowEndMinusScriptEnd ?? null, reducerAgeAtActivation: r.reducerAgeAtActivation ?? null, note: r.note ?? null });
 const bodyVerdict = (id, side) => plans.bodies[`${id}:${side}`]?.verdict ?? "NOT-OBSERVED";
 
 const cfgCite = (m) => { const e = readinessByMove[m]; const sym = e ? e.entryPoints.config.symbol : (mergedByMove[m]?.entryPoints?.config ?? null); return sym ? SC(sym) : null; };
@@ -264,7 +267,8 @@ for (const m of remaining) {
   row.orderFirstBodyOnly = row.needs.includes("B");
   row.providerNeeds = row.needs.filter((n) => n !== "B");
   row.palettePlan = palPlanMoves.has(m);
-  row.activationMeasured = activationNames.has(m);
+  row.activationMeasured = activationNames.has(m) || !!actByMove[m];
+  row.activationReceipts = actByMove[m] ?? [];
   row.ownBodyOrder = { opponent: bodyVerdict(row.id, "opponent"), player: bodyVerdict(row.id, "player") };
   const p = row.providerNeeds;
   row.group = p.length === 0 ? "READY-NOW"
@@ -314,6 +318,48 @@ const greedy = [];
   }
 }
 
+
+// ---- provider metadata + recommended batches -----------------------------------------------------------------------------
+const PROVIDER_META = {
+  "allocator plan v2 (affine+task)": { cost: "new provider (sibling affine-bitmap + task table fed by the same create/destroy events as src/engine/liveSpriteAllocator.ts:89-123; per-move timelines like src/engine/liveMoveSpriteAllocator.ts:28)", claim: "exact from a known baseline (lowest-free allocations); baseline of gOamMatrix bitmap and gTasks at move activation must be measured" },
+  "F-AFFINE": { cost: "new provider (matrixBitmap lowest-free over a known baseline)", claim: "exact from a known baseline" },
+  "E-TASK": { cost: "new provider (CreateTask slot table)", claim: "exact from a known baseline" },
+  C: { cost: "new provider (presentation-only LCG ISO_RANDOMIZE1 stream, docs/visual-randomness-prep.md s4)", claim: "NON-EXACT per play: gRng2Value also advances once per rendered frame plus every earlier animation's draws (not reconstructible from battle state); exact only with a pinned seed. Claim-boundary question: ROM-faithful in distribution and draw order, not bit-exact" },
+  "A6 graphics host (OAM+VRAM+scanline+BG+palette+tile+audio)": { cost: "new large host (docs/animation-integration-readiness.md A6)", claim: "only as exact as the persisted graphics history; per-move retained oracle rows are verifier-only today" },
+  "D-PAL": { cost: "extend existing (src/engine/liveMoveAnimationPalette.ts:8-11,91 returns only the Shadow Punch scratch; plans in src/data/gen/live-animation-palette-resources.json cover 58 moves)", claim: "exact for audited plan rows from a known entry; actual status animations/switches invalidate" },
+  "X-SWITCH": { cost: "new flow owner (switch / forced-switch presentation; shares the pending 'actual switches' graphics ownership)", claim: "separate S10x program: forced replacement and summaries are explicitly pending in docs/animation-integration-live-status.json" },
+  "E-OUT": { cost: "per-move plumbing from resolution (secondary-effect / HP / stale-power values)", claim: "exact outcome data; no RNG ownership" },
+  "X-TWOTURN": { cost: "hidden-battler state across the two turns in the field art view", claim: "exact once the semi-invulnerable state is rendered" },
+  "X-DISABLE": { cost: "add a DisableStruct counter snapshot to the MOVE_ANIMATION request (rules context already holds the counters)", claim: "exact (presentation-only copy of rules state)" },
+  "X-POWER": { cost: "emit the dynamic gBattleMovePower/gDynamicBasePower on the request instead of the static table power (src/engine/battleScriptHitChainOpcode.ts:2285)", claim: "exact; must not alter damage" },
+};
+const BATCH_PICKS = [
+  { id: "N1", title: "READY-NOW recipe batch: body-only views of the canonical controller moves + dense-measured buffer moves", moves: ["AERIAL_ACE", "QUICK_ATTACK", "ICE_PUNCH", "FIRE_BLAST", "DRAGON_DANCE", "FAKE_TEARS", "SLEEP_TALK", "FEATHER_DANCE"],
+    prep: {
+      AERIAL_ACE: "measured here (census-activation): act 81/77, reducer age at activation 42/38 (window 46..281, appStage presentationAge 7 at frame 46), script 49 frames; missing: ordinary-route request/HP route, #142 shadow row choice (age basis +42/+38 or ageOffset), species-gate/HUD retirement under !liveField",
+      QUICK_ATTACK: "measured here: act 83/79, age at activation 44/40, script 32 frames; missing: afterimage slot 3/4 tie audit, route check",
+      ICE_PUNCH: "measured here (staged, direct mGBA): act 1966 opponent / 2339 player == accepted window start (row 0), script 183 frames; missing: staged-boundary only (no BattleLab scenario) so an ordinary-route activation and the crystal slot plan (A-SLOT) need one probe each",
+      FIRE_BLAST: "prep6 measured (215/215..411, 1147/1147..1343, row 0, 197 frames; opponent needs the 1200-frame input tail); missing: first-body order (full 64-pool permutation, FIRE_BLAST_ORDER_SEED fireBlast.ts:34) from spriteOrderForSlots, later body falls back",
+      DRAGON_DANCE: "prep6 measured (74/74..215 / 78/78..219, row 0, 142 frames); missing: 1-bit order from the first-body provider (relative order of slots 3/4 at age 20), later body falls back",
+      FAKE_TEARS: "measured here: act 79/75, visual window 80..166 / 76..162 (row -1, no map row; window ends 4 frames after the script end), script 83 frames; missing: attackerPictureBounds from liveBattlerAnchors, confirm the renderer ignores controllerPresentation under !liveField",
+      SLEEP_TALK: "measured here: act 4570/1356 == window start (row 0), body 186 frames; missing: renderer HUD block behind !liveField (battleScene.ts:34256 branch), attacker sleep status in the displayed field, called-move second request as Metronome",
+      FEATHER_DANCE: "measured here: act 83/79, age at activation 44/40, script 168 frames; missing: ordinary-route check (feathers use battlePositionCenter + ageOffset only)",
+    } },
+  { id: "N2", title: "one-named-input batch: single-orientation evidence + dynamic power + two reducer parameterizations", moves: ["ROCK_SLIDE", "DOUBLE_TEAM", "MAGNITUDE", "REVERSAL", "FIRE_PUNCH", "ENDEAVOR", "SPARK", "PAIN_SPLIT"],
+    prep: {
+      ROCK_SLIDE: "measured here (staged): opponent act 1967 == window start (row 0), script 137 (window +37 tail); player act 2340 behind the staged AI Double Team body, 79 in the lab scenario (first body, script 137); missing: accepted player-attacker evidence (animation lane) and first-body order (profile spriteOrderSeed sceneOnPresentation.ts:13474)",
+      DOUBLE_TEAM: "prep6 measured player only (2336/2337..2566, row -1, 7-frame tail); missing: opponent-attacker evidence (staged AI used Rock Slide) and the frontClone order bit",
+      MAGNITUDE: "measured here: act == window start for all four bodies (intense 195/191, regular 411; row 0); missing: dynamic power on the request (X-POWER) and first-body order",
+      REVERSAL: "measured here: act == window start (404 / 451, row 0, 173 frames); missing: reducer toggle fix + A>1 tests (reversal-shake-evidence.json), dynamic power on the request",
+      FIRE_PUNCH: "measured here (staged): opponent act 1967, player 2340, script 101; UNRESOLVED mismatch with the accepted windows (2081 / 2313); missing: re-derive the accepted window phase, burn/faint outcome input or body-only split",
+      ENDEAVOR: "measured here (staged): player act 2339 vs window 2345..2485 (row -6, age at activation -8, 67-frame script, +79 tail); opponent evidence missing (AI used Rock Slide); missing: HP before/after + stale power input",
+      SPARK: "measured here: act 74/70 vs window 83/79 (row -9), window ends 2 frames before the script end; missing: flashing*Advances derivation and hardwareTieSlotOrder from the first-body order",
+      PAIN_SPLIT: "prep6 measured (445/445..525 / 446/446..526, row 0, 81 rows); missing: per-side coords.yOffset into the reducer",
+    } },
+  { id: "N3", title: "first provider build: allocator plan v2 (affine matrix + task slots), exact from a known baseline", moves: ["THUNDERBOLT", "FRUSTRATION", "SWIFT", "HORN_DRILL", "SEISMIC_TOSS", "TRICK", "AURORA_BEAM", "STOCKPILE"],
+    prep: Object.fromEntries(["THUNDERBOLT", "FRUSTRATION", "SWIFT", "HORN_DRILL", "SEISMIC_TOSS", "TRICK", "AURORA_BEAM", "STOCKPILE"].map((m) => [m, "needs: baseline gOamMatrix bitmap + gTasks occupancy at activation in the known-entry battle (one direct-mGBA probe), the move's affine/task create/destroy timeline, first-body order, plan row + tie audit, activation/window/row probe from its BattleLab scenario"])) },
+];
+
 // ---- summary -----------------------------------------------------------------------------------------------------------
 const groupCount = {};
 for (const r of rows) { const g = r.group.startsWith("PROVIDER-") ? "PROVIDER-x" : r.group; (groupCount[g] ??= { moves: 0, weightPct: 0 }); groupCount[g].moves++; groupCount[g].weightPct += r.weightShare * 100; }
@@ -334,12 +380,23 @@ if (citeErrors.length) { console.error("CITE ERRORS:\n" + citeErrors.join("\n"))
 if (rows.some((r) => r.needs.length && !r.blockers.length)) throw new Error("a need without a blocker cite");
 for (const r of rows) for (const b of r.blockers) if (!b.cites.length) throw new Error(`blocker without cite ${r.move} ${b.code}`);
 
-const out = { schema: "remaining-adapters-census/v1", generatedBy: "tools/integration/remainingAdaptersCensus.mjs", inputs: ["docs/animation-integration-live-status.json", "docs/animation-integration-readiness.json", "docs/animation-integration-merged-readiness.json", "tools/integration/fixtures/h-buffer-triage.json", "tools/integration/fixtures/sprite-order-body-plans-ext.json", "src/data/gen/battle-frontier-mons.json", "src/data/gen/factory-round-policy.json"], liveStatusImplementedCount: live.implementedCount, inFlightMoves: Object.fromEntries([...inflight].filter(([m]) => accepted.has(m)).map(([m, k]) => [m, liveSet.has(m) ? "now live" : k])), summary: { ...summary, triageCiteDrift: triageDrift.length }, codes: CODES, bundles: BUNDLES, ranking, greedy, rows };
-export { out, rows, summary, ranking, greedy, CODES };
+const batches = BATCH_PICKS.map((b) => {
+  const picked = b.moves.map((n) => { const r = rows.find((x) => x.move === `MOVE_${n}`); if (!r) throw new Error(`batch ${b.id}: ${n} is not a remaining move`); return r; });
+  for (const n of b.moves) if (!b.prep[n]) throw new Error(`batch ${b.id}: no prep text for ${n}`);
+  return { id: b.id, title: b.title, count: picked.length, weightPct: +(picked.reduce((a, r) => a + r.weightShare, 0) * 100).toFixed(3), moves: picked.map((r) => ({ move: r.move, group: r.group, providerNeeds: r.providerNeeds, orderFirstBodyOnly: r.orderFirstBodyOnly, weightPct: +(r.weightShare * 100).toFixed(3), prep: b.prep[r.move.replace("MOVE_", "")] })) };
+});
+const batchSeen = batches.flatMap((b) => b.moves.map((m) => m.move));
+if (new Set(batchSeen).size !== batchSeen.length) throw new Error("a move is in two batches");
+for (const r of ranking) r.meta = PROVIDER_META[r.provider] ?? null;
+const out = { schema: "remaining-adapters-census/v1", generatedBy: "tools/integration/remainingAdaptersCensus.mjs", inputs: ["docs/animation-integration-live-status.json", "docs/animation-integration-readiness.json", "docs/animation-integration-merged-readiness.json", "tools/integration/fixtures/h-buffer-triage.json", "tools/integration/fixtures/sprite-order-body-plans-ext.json", "src/data/gen/battle-frontier-mons.json", "src/data/gen/factory-round-policy.json"], liveStatusImplementedCount: live.implementedCount, inFlightMoves: Object.fromEntries([...inflight].filter(([m]) => accepted.has(m)).map(([m, k]) => [m, liveSet.has(m) ? "now live" : k])), summary: { ...summary, triageCiteDrift: triageDrift.length }, codes: CODES, bundles: BUNDLES, ranking, greedy, batches, rows };
+export { out, rows, summary, ranking, greedy, batches, CODES };
 
 if (process.argv.includes("--write")) fs.writeFileSync("tools/integration/fixtures/remaining-adapters-census.json", JSON.stringify(out, null, 1) + "\n");
 if (process.argv.includes("--summary")) console.log(JSON.stringify({ summary, ranking: ranking.slice(0, 10).map((r) => [r.provider, r.aloneMoves, r.aloneWeightPct]), greedy: greedy.map((g) => [g.provider, g.newMoves, g.newWeightPct]) }, null, 1));
 if (process.argv.includes("--doc")) {
   const { renderDoc } = await import("./remainingAdaptersCensusDoc.mjs");
-  fs.writeFileSync("docs/remaining-adapters-census.md", renderDoc(out));
+  const doc = renderDoc(out);
+  for (const mm of doc.matchAll(/`((?:src|tools|docs|reference)\/[\w./-]+\.(?:ts|mjs|json|py|c|s|md)):(\d+)(?:-(\d+))?`/g)) checkCite(mm[3] ? `${mm[1]}:${mm[2]}-${mm[3]}` : `${mm[1]}:${mm[2]}`);
+  if (citeErrors.length) { console.error("DOC CITE ERRORS:\n" + citeErrors.join("\n")); process.exit(3); }
+  fs.writeFileSync("docs/remaining-adapters-census.md", doc);
 }
