@@ -32,13 +32,15 @@ export const UNIT_PLANS = {
   switchInParticles: "Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Cf;Dc1.2;Cf;Cf;Cf;Dc1.0;D0;D1;D2;D3;D4;D5;D6;D7;D8;D9;D10;D11;D12;D13;D14;D15",
   /** `HandleEndTurn_FinishBattle` -> `OpponentHandleTrainerSlide`: one lowest-free create that lives to the end of the battle. */
   trainerSlide: "Cf",
+  /** Voluntary switch-out (`InitAndLaunchSpecialAnimation` B_ANIM_SWITCH_OUT_PLAYER_MON): 16 ball-open particles, freed in order; the player battler (`o<slot>`, `FreeMonSpriteAfterSwitchOutAnim`) is destroyed in the group with particle n2. One observed instance. */
+  recall: (battlerSlot: number) => `${"Cf;".repeat(16)}D0;D1;D2,o${battlerSlot};${Array.from({ length: 13 }, (_, i) => `D${i + 3}`).join(";")}`,
   /** Reshow from ResetSpriteData identity, player battler already gone (forced switch after a faint): opponent battler n0, healthboxes, enemy shadow. */
   reshowPlayerGone: "Cf;Cfee;Cfee;Cf",
   /** Reshow with both battlers (voluntary party-menu return): player n0, opponent n1. */
   reshowBoth: "Cf;Cf;Cfee;Cfee;Cf",
 } as const;
-const PLANS: Record<keyof typeof UNIT_PLANS, SpriteOrderPlan> = Object.fromEntries(
-  Object.entries(UNIT_PLANS).map(([key, text]) => [key, decodeSpriteOrderPlan(text)])) as never;
+const PLANS: Record<Exclude<keyof typeof UNIT_PLANS, "recall">, SpriteOrderPlan> = Object.fromEntries(
+  Object.entries(UNIT_PLANS).filter(([key]) => key !== "recall").map(([key, text]) => [key, decodeSpriteOrderPlan(text as string)])) as never;
 
 interface Ev { n: number; k: string; [key: string]: unknown }
 type Side = "player" | "opponent";
@@ -75,7 +77,7 @@ export function replay(name: string, mode: Mode, isolated = false) {
   const events: Ev[] = doc.events;
   let tracker: SpriteOrderTracker = createSpriteOrderTracker(knownEntrySpriteOrderState("ordinary-factory"));
   const roles: Roles = { battler: { player: 6, opponent: 8 }, lastUnit: "entry", playerGone: false };
-  const entryEnd = events.find(e => e.k === "prompt" || e.k === "body" || e.k === "anim")!.n;
+  const entryEnd = events.find(e => e.k === "prompt" || e.k === "body" || e.k === "anim" || e.k === "prompt-unterminated")!.n;
   const edges: Edge[] = [];
   const unitChecks: UnitCheck[] = [];
   const invalidations: { frame: number; reason: string }[] = [];
@@ -149,6 +151,12 @@ export function replay(name: string, mode: Mode, isolated = false) {
         roles.battler.opponent = survivors[roles.playerGone ? 0 : 1] ?? null;
         roles.battler.player = roles.playerGone ? null : survivors[0] ?? null;
       }
+    } else if (klass === "U8-recall-switch-out") {
+      const slot = roles.battler.player;
+      roles.playerGone = true;
+      roles.lastUnit = "recall";
+      if (slot === null) { kill(e, "recall: player battler slot unknown"); return true; }
+      if (planUnit(e, decodeSpriteOrderPlan(UNIT_PLANS.recall(slot)), klass)) roles.battler.player = null;
     } else if (klass === "U7-end-trainer-slide") {
       roles.lastUnit = "trainer-slide";
       planUnit(e, PLANS.trainerSlide, klass);
@@ -175,6 +183,12 @@ export function replay(name: string, mode: Mode, isolated = false) {
         occupiedMatch: known ? same(tracker.cursor.occupied, maskSlots(e.obsMask as string)) : null, trivial: seededAt === e,
       });
       if (isolated && !known) seed(e, e.obsF as number[], e.obsMask as string);
+      if (!isBody && mode === "modelled" && e.unitClass === "U8-recall-switch-out") {
+        modelUnit(e);
+        modelled.push(`${e.n}:${String(e.unitClass)}`);
+        if (next && tracker.cursor.order.known) unitChecks.push({ frame: e.n, unit: String(e.unitClass), exact: same(tracker.cursor.order.free, next.preF as number[]), occupiedMatch: same(tracker.cursor.occupied, maskSlots(next.preMask as string)), mode: "strict" });
+        continue;
+      }
       const override = isBody ? BODY_OVERRIDES[`${e.move}:${e.side}`] : undefined;
       if (override) {
         if (tracker.promptPair !== null) kill(e, "body while the prompt pair lives");

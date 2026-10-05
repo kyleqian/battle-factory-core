@@ -118,6 +118,20 @@ def main():
             units.append({"trace": name, "first": c["first"], "last": c["last"], "class": label(c), "main": c["main"], "ctrl": c["ctrl"], "windows": wins, "plan": plan,
                           "survivors": surv, "occBefore": c["occupiedBefore"], "occAfter": c["occupiedAfter"],
                           "FbeforeHead": R.free(c["first"] - 1)[:16], "FafterHead": R.free(c["last"] + 3)[:24], "shape": shape(plan)})
+        for e in events:
+            if e["k"] == "anim" and str(e.get("table")) == "gBattleAnims_Special":
+                a, b = e["n"], e["end"] + 2
+                for c in sorted(raw["calls"], key=lambda c: c["n"]):  # the unit runs on past the controller-idle frame: extend while allocator calls follow within 40 frames
+                    if c["n"] > b and c["n"] - b <= rr.CLUSTER_GAP and c["k"] in ("CreateSpriteAt", "DestroySprite") and c["slot"] is not None:
+                        if c["k"] == "CreateSpriteAt" and any("StartSendOutAnim" in x or "SpriteCB_WaitForBattlerBallRelease" in x for x in (c.get("chain") or [])[:1]):
+                            break  # the switch-in ball (next unit) starts here
+                        b = c["n"]
+                wins = windows_of(raw, R, a, b)
+                plan, made = plan_of(wins)
+                mb, ma = R.mask(a - 1), R.mask(b + 3)
+                units.append({"trace": name, "first": a, "last": b, "class": "U8-recall-switch-out" if e["id"] == 1 else f"U8-special-{e['id']}", "main": "LaunchBattleAnimation(Special)", "ctrl": [],
+                              "windows": wins, "plan": plan, "survivors": [x for x in dict.fromkeys(made) if (ma >> x) & 1], "occBefore": bin(mb).count("1"), "occAfter": bin(ma).count("1"),
+                              "FbeforeHead": R.free(a - 1)[:16], "FafterHead": R.free(b + 3)[:24], "shape": shape(plan), "special": True})
     return units
 
 
@@ -145,6 +159,10 @@ def write_events(units):
         raw = json.loads(path.read_text())
         _, events, clusters, initial = build_any(name, path, raw)
         mine = {(u["first"]): u for u in units if u["trace"] == name}
+        for e in events:
+            if e["k"] == "anim" and e["n"] in mine and mine[e["n"]].get("special"):
+                u = mine[e["n"]]
+                e["unitClass"], e["plan"], e["survivors"] = u["class"], u["plan"], u["survivors"]
         for e in events:
             if e["k"] == "uncovered":
                 u = mine[e["n"]]
