@@ -1,0 +1,38 @@
+{
+  "schema": "supervisor-final-gates/v1",
+  "verifier": "independent integration supervisor (Claude Opus 5.5), 2026-10-05 night wind-down",
+  "productionCodeCommit": "09b92c56df2758cb1f5eef06ede20d39320b4e9b",
+  "implementedAdapters": 198,
+  "typecheck": {
+    "command": "npm run typecheck",
+    "result": "passed",
+    "log": ".integration/validation/supervisor-final-20261005/typecheck.log"
+  },
+  "fullTest": {
+    "command": "PATH=\"$PWD/tools/autonomy/bin:$PATH\" POKEBENCH_VITEST_MAX_WORKERS=4 npm test -- --maxWorkers=4",
+    "passedFiles": 1508,
+    "skippedFiles": 44,
+    "passedTests": 12175,
+    "skippedTests": 223,
+    "durationSeconds": 362.7,
+    "log": ".integration/validation/supervisor-final-20261005/npm-test.log"
+  },
+  "build": {
+    "command": "npm run build",
+    "modules": 851,
+    "result": "passed",
+    "log": ".integration/validation/supervisor-final-20261005/build.log"
+  },
+  "batchReceipts": [
+    "tools/integration/fixtures/hbuffer-s1-supervisor-receipt.json",
+    "tools/integration/fixtures/prep5-supervisor-receipt.json",
+    "tools/integration/fixtures/order-wiring-supervisor-receipt.json",
+    "tools/integration/fixtures/order-consumers-supervisor-receipt.json",
+    "tools/integration/fixtures/order-cross-body-supervisor-receipt.json",
+    "tools/integration/fixtures/prep6-supervisor-receipt.json",
+    "tools/integration/fixtures/prep7-supervisor-receipt.json",
+    "tools/integration/fixtures/prep8-supervisor-receipt.json",
+    "tools/integration/fixtures/prep9-supervisor-receipt.json"
+  ],
+  "scope": "Independent complete typecheck/suite/build on the session's final production (198 live adapters, after the prep9 + Double Team/Feather Dance fold); later commits are docs/receipts/evidence only."
+}
