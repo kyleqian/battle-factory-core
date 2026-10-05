@@ -4,7 +4,7 @@ import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandF
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
-import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
+import { renderBattleResolutionLiveView, renderSceneOnMovePresentation } from "../../src/engine/battleScene.ts";
 import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveBattlerAnchors,
   liveMoveAnimationDuration, liveMoveAnimationPresentation,
@@ -130,6 +130,39 @@ describe("live prep6 move adapters", () => {
       expect(new Set([0, Math.floor(duration / 4), Math.floor(duration / 2), duration - 1].map(age => render(field, 256, a, age, turn))).size).toBeGreaterThan(1);
     }
   });
+
+  // Slot source (prep6 s2.2/s2.3): the ring / petal / battler slots are the known-entry first-free labels; the host-less constants
+  // are justified because no live pixel depends on them (every age, both orientations, relabelled slots render identically).
+  it("slot labels are pixel-irrelevant for Safeguard, Sweet Scent and Rock Tomb", () => {
+    const run = (id: number, attacker: 0 | 1, player: string, opponent: string, mutate: (c: any) => void): string => {
+      const field = displayed(player, opponent);
+      const d = liveMoveAnimationDuration(request(id, attacker))!;
+      const h = createHash("sha256");
+      for (let age = 0; age < d; age += 1) {
+        const state = liveMoveAnimationPresentation(request(id, attacker), field, age)!;
+        const config = { ...state.config } as any;
+        mutate(config);
+        const fb = new Uint8Array(240 * 160 * 4);
+        renderSceneOnMovePresentation(fb, { ...state, config }, true);
+        h.update(fb);
+      }
+      return h.digest("hex");
+    };
+    for (const a of [0, 1] as const) {
+      const pair = (carrier: string) => (a === 0 ? [carrier, "ONIX"] : ["ONIX", carrier]) as [string, string];
+      const [sp, so] = pair("WOBBUFFET");
+      const sg = run(219, a, sp, so, () => {});
+      expect(run(219, a, sp, so, c => { c.animationProfile = { ...c.animationProfile, ringSlots: [10, 11, 12] }; })).toBe(sg);
+      expect(run(219, a, sp, so, c => { c.animationProfile = { ...c.animationProfile, ringSlots: [5, 4, 3] }; })).toBe(sg);
+      const [wp, wo] = pair("VICTREEBEL");
+      const sw = run(230, a, wp, wo, () => {});
+      expect(run(230, a, wp, wo, c => { c.animationProfile = { ...c.animationProfile,
+        spriteSlots: c.animationProfile.spriteSlots.map((x: number) => x + 20) }; })).toBe(sw);
+      const [rp, ro] = pair("GOLEM");
+      const rt = run(317, a, rp, ro, () => {});
+      for (const slot of [0, 20]) expect(run(317, a, rp, ro, c => { c.targetSpriteSlot = slot; })).toBe(rt);
+    }
+  }, 120000);
 
   it.each(cases)("completes ordinary $move and preserves ON/OFF rules and RNG", c => {
     const r = c.route;
