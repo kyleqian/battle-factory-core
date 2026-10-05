@@ -1,0 +1,555 @@
+{
+ "rows": [
+  {
+   "scenario": "mechanic-air-cutter-opponent-golbat-player-chansey",
+   "move": "AIR_CUTTER",
+   "createdAge": 12,
+   "slot": "1",
+   "data": [
+    6,
+    72,
+    91,
+    -40,
+    -59,
+    1,
+    0,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    72,
+    91
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-air-cutter-player-golbat-opponent-chansey",
+   "move": "AIR_CUTTER",
+   "createdAge": 12,
+   "slot": "1",
+   "data": [
+    8,
+    176,
+    49,
+    -144,
+    -17,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    49
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-foresight-opponent-machoke-player-onix",
+   "move": "FORESIGHT",
+   "createdAge": 4,
+   "slot": "1",
+   "data": [
+    6,
+    72,
+    80,
+    -40,
+    -48,
+    1,
+    0,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    72,
+    80
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-foresight-player-machoke-opponent-onix",
+   "move": "FORESIGHT",
+   "createdAge": 4,
+   "slot": "1",
+   "data": [
+    8,
+    177,
+    42,
+    -145,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 1,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-petal-dance-opponent-gloom-player-onix",
+   "move": "PETAL_DANCE",
+   "createdAge": 7,
+   "slot": "1",
+   "data": [
+    6,
+    72,
+    80,
+    -40,
+    -48,
+    1,
+    0,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    72,
+    80
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-petal-dance-player-gloom-opponent-onix",
+   "move": "PETAL_DANCE",
+   "createdAge": 7,
+   "slot": "1",
+   "data": [
+    8,
+    177,
+    42,
+    -145,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 1,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-recycle-opponent-porygon-player-gyarados",
+   "move": "RECYCLE",
+   "createdAge": 4,
+   "slot": "1",
+   "data": [
+    8,
+    176,
+    53,
+    -144,
+    -21,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    53
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-recycle-player-porygon-opponent-gyarados",
+   "move": "RECYCLE",
+   "createdAge": 4,
+   "slot": "1",
+   "data": [
+    6,
+    72,
+    93,
+    -40,
+    -61,
+    1,
+    0,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    72,
+    93
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "move": "ROAR",
+   "createdAge": 4,
+   "slot": "1",
+   "data": [
+    8,
+    176,
+    51,
+    -144,
+    -19,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    51
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-roar-player-houndour-opponent-onix",
+   "move": "ROAR",
+   "createdAge": 4,
+   "slot": "1",
+   "data": [
+    6,
+    72,
+    92,
+    -40,
+    -60,
+    1,
+    0,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    72,
+    92
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-rollout-opponent-voltorb-player-onix",
+   "move": "ROLLOUT",
+   "createdAge": 10,
+   "slot": "1",
+   "data": [
+    6,
+    72,
+    80,
+    -40,
+    -48,
+    1,
+    0,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    72,
+    80
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-rollout-player-voltorb-opponent-onix",
+   "move": "ROLLOUT",
+   "createdAge": 10,
+   "slot": "1",
+   "data": [
+    8,
+    177,
+    42,
+    -145,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 1,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-rollout-player-voltorb-opponent-onix",
+   "move": "ROLLOUT",
+   "createdAge": 10,
+   "slot": "1",
+   "data": [
+    8,
+    176,
+    42,
+    -144,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-sky-uppercut-opponent-hitmonchan-player-onix",
+   "move": "SKY_UPPERCUT",
+   "createdAge": 4,
+   "slot": "1",
+   "data": [
+    6,
+    72,
+    80,
+    -40,
+    -48,
+    1,
+    0,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    72,
+    80
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-sky-uppercut-player-hitmonchan-opponent-onix",
+   "move": "SKY_UPPERCUT",
+   "createdAge": 4,
+   "slot": "1",
+   "data": [
+    8,
+    177,
+    42,
+    -145,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 1,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-spider-web-opponent-spinarak-player-onix",
+   "move": "SPIDER_WEB",
+   "createdAge": 7,
+   "slot": "1",
+   "data": [
+    6,
+    72,
+    80,
+    -40,
+    -48,
+    1,
+    0,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    72,
+    80
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "mechanic-spider-web-player-spinarak-opponent-onix",
+   "move": "SPIDER_WEB",
+   "createdAge": 7,
+   "slot": "1",
+   "data": [
+    8,
+    177,
+    42,
+    -145,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 1,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "prep11-air-cutter-alt-crobat",
+   "move": "AIR_CUTTER",
+   "createdAge": 12,
+   "slot": "1",
+   "data": [
+    8,
+    176,
+    49,
+    -144,
+    -17,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    49
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "prep11-foresight-alt-hitmonlee",
+   "move": "FORESIGHT",
+   "createdAge": 4,
+   "slot": "1",
+   "data": [
+    8,
+    177,
+    42,
+    -145,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 1,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "prep11-petal-dance-alt-vileplume",
+   "move": "PETAL_DANCE",
+   "createdAge": 7,
+   "slot": "1",
+   "data": [
+    8,
+    177,
+    42,
+    -145,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 1,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "prep11-roar-alt-vaporeon",
+   "move": "ROAR",
+   "createdAge": 4,
+   "slot": "1",
+   "data": [
+    6,
+    72,
+    90,
+    -40,
+    -58,
+    1,
+    0,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    72,
+    90
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "prep11-rollout-alt-wailmer",
+   "move": "ROLLOUT",
+   "createdAge": 10,
+   "slot": "1",
+   "data": [
+    8,
+    177,
+    42,
+    -145,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 1,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "prep11-rollout-alt-wailmer",
+   "move": "ROLLOUT",
+   "createdAge": 10,
+   "slot": "1",
+   "data": [
+    8,
+    176,
+    42,
+    -144,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 0,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "prep11-sky-uppercut-alt-combusken",
+   "move": "SKY_UPPERCUT",
+   "createdAge": 4,
+   "slot": "1",
+   "data": [
+    8,
+    177,
+    42,
+    -145,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 1,
+   "formulaHolds": true
+  },
+  {
+   "scenario": "prep11-spider-web-alt-ariados",
+   "move": "SPIDER_WEB",
+   "createdAge": 7,
+   "slot": "1",
+   "data": [
+    8,
+    177,
+    42,
+    -145,
+    -10,
+    0,
+    1,
+    0
+   ],
+   "targetBattlerXYatActivation": [
+    176,
+    42
+   ],
+   "xDelta": 1,
+   "formulaHolds": true
+  }
+ ],
+ "violations": []
+}
