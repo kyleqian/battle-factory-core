@@ -104,6 +104,12 @@ describe("live prep5 move adapters", () => {
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === 0);
     expect(body?.ages).toEqual(Array.from({ length: c.duration[0] }, (_, age) => age));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
+    if (c.id === 118) {
+      // Body only: the called move is an ordinary second request (prep5 s2.5) handled by its own adapter or the fallback.
+      const i = on.requests.findIndex(q => q.moveId === 118 && q.attacker === 0);
+      expect(on.requests[i + 1]).toMatchObject({ attacker: 0 });
+      expect(on.requests[i + 1]!.moveId).not.toBe(118);
+    }
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries.length).toBeGreaterThan(0);
     expect(off.boundaries).toHaveLength(on.boundaries.length);
