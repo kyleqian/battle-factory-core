@@ -2202,22 +2202,31 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-04 late): 144 live adapters (master after the prep2 fold). Ready
-batches with measured prep and drafted fixtures: H_BUFFER S1/S2 (Mean Look,
-Smelling Salt, Defense Curl, Ingrain, Wrap, Bind, Dragon Breath;
-`docs/h-buffer-s1-prep.md`, brief `.codex-logs/s10a-hbuffer-s1-batch-20261004-brief.txt`),
-then Mist Ball, Aromatherapy, Follow Me, Metronome, Taunt, Belly Drum
-(`docs/next-adapters-prep5.md`). The sprite-order provider
-(`docs/sprite-order-provider-design.md` slices) is now the biggest unlock:
-Ember, Heal Bell, Perish Song, Leaf Blade, Dragon Rage, Rock Throw/Slide,
-Flamethrower, Blaze Kick, Magnitude and the order+affine group
-(`docs/h-buffer-triage.md`). Other resume points: status-animation occupancy
-persistence, Reversal reducer change (`docs/reversal-shake-evidence.md`),
-Icy Wind/Blizzard retained-slot-table fallback, Random2 presentation provider
-(`docs/visual-randomness-prep.md`), switch/substitute/called-move bodies
-(`docs/next-adapters-prep2.md` blocked list). Validate new adapters with
-alternate-species dense proofs whose windows come from the source activation
-frame, not only the accepted fixture species.
+Next (2026-10-05): 198 live adapters (master after the 2026-10-04 night session).
+New production infrastructure: the free-slot sprite-order provider with
+event-driven cross-body tracking (`src/engine/liveSpriteOrderHost.ts`, generated
+381-body table `src/engine/spriteOrderProductionPlans.ts`); order consumers and
+allocator-plan-v2 moves render only while the tracked order is lent (known-entry
+occupancy). Resume points, in order:
+1. Order coverage: merge the 83 REL-Y rows (`docs/sprite-order-rely-confirmation.md`,
+   weighted plan coverage 68% -> 81%) and the policy-gaps proposal A-C (Endeavor /
+   Fake Tears rows, Intimidate seed; `docs/sprite-order-policy-gaps.md`) into the
+   production table/host.
+2. Post-knock-out lends: every order-/allocator-gated adapter falls back after the
+   first faint/switch because battler slots and the affine baseline change
+   (`docs/sprite-order-uncovered-units.md`: unit transforms 36/36 exact); needs
+   occupancy-aware consumers and post-unit affine/task baselines.
+3. Remaining adapters: regenerate `docs/remaining-adapters-census.md`
+   (`node tools/integration/remainingAdaptersCensus.mjs --write --doc`); single-input
+   moves (Magnitude/Reversal dynamic power, Pain Split yOffset, Spark, Fire Punch /
+   Endeavor outcome input), Rock Blast / Razor Wind outcome, the Random2 group (a
+   surrogate presentation RNG is never bit-exact in play: claim-boundary decision
+   first), the graphics-host group.
+4. Limits to revisit: Faint Attack lab-vs-staged fade frame, Aerial Ace opponent
+   platform clip for some species, Blaze Kick first-body ROM scenario, CASTFORM
+   weather forms (ISSUES #143 if still open).
+Validate new adapters with alternate-species dense proofs whose windows come from
+the source activation frame, not only the accepted fixture species.
 Latest progress supersedes this starting checkpoint as verified work lands.
 
 Acceptance:
