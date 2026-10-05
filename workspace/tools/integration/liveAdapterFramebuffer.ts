@@ -67,16 +67,14 @@ const names = Object.fromEntries(moveData.moves.map(row => [row.move.replace(/^M
 const SELF_TARGET_MOVES = new Set(["LIGHT_SCREEN", "BARRIER", "MAGIC_COAT", "PROTECT", "REFLECT", "SOFT_BOILED"]);
 const hash = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
-const planFixture = (() => {
-  let table: ReturnType<typeof spriteOrderPlanTableFromFixture> | undefined;
-  return () => table ??= spriteOrderPlanTableFromFixture(
-    JSON.parse(readFileSync(resolve(root, "tools/integration/fixtures/sprite-order-body-plans.json"), "utf8")));
-})();
-const seedsFixture = (() => {
-  let seeds: { scenarios: { scenario: string; move: number; attackerSide: string; observedFreeAtEdge?: number[];
-    providerValid?: boolean; unitIndex: number }[] } | undefined;
-  return () => seeds ??= JSON.parse(readFileSync(resolve(root, "tools/integration/fixtures/order-consumer-seeds.json"), "utf8"));
-})();
+let planCache: ReturnType<typeof spriteOrderPlanTableFromFixture> | undefined;
+const planFixture = (): ReturnType<typeof spriteOrderPlanTableFromFixture> => planCache ??= spriteOrderPlanTableFromFixture(
+  JSON.parse(readFileSync(resolve(root, "tools/integration/fixtures/sprite-order-body-plans.json"), "utf8")));
+interface SeedRow { scenario: string; move: number; attackerSide: string; observedFreeAtEdge?: number[];
+  providerValid?: boolean; unitIndex: number }
+let seedsCache: { scenarios: SeedRow[] } | undefined;
+const seedsFixture = (): { scenarios: SeedRow[] } => seedsCache ??=
+  JSON.parse(readFileSync(resolve(root, "tools/integration/fixtures/order-consumer-seeds.json"), "utf8"));
 
 /** Order cursor at the fixture body's activation edge: known entry + the declared preceding bodies' plans. */
 export function fixtureSpriteOrder(f: Fixture, request: BattleMoveAnimationRequest) {
@@ -136,7 +134,7 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
   };
   if (liveMoveAnimationDuration(request) === null) throw new Error(`No live adapter for ${f.move}`);
   const healthbox = (mon: typeof field.player) => ({
-    name: mon.name, level: mon.level, gender: mon.gender, status: mon.status,
+    name: mon.name, level: mon.level, gender: mon.gender === "genderless" ? "none" as const : mon.gender, status: mon.status,
     hpFraction: mon.hp / mon.maxHP, currentHp: mon.hp, maxHp: mon.maxHP,
   });
   // Battle text uses the source's display spelling (for example VICEGRIP,
@@ -184,7 +182,8 @@ export function verifyLiveAdapterFramebuffer(path: string, freshRuns = 2) {
   const probeStartFrame = startFrameProbes.includes(fixture.probe)
     ? (fixture.denseWindow ?? fixture.sourceWindow)?.startFrame : undefined;
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
-  const results = [];
+  const results: Array<{ digest: string; exactRows: number; rows: number; expectedDuration: number | null; ageOffset: number;
+    residualPixels: number } & Record<string, unknown>> = [];
   for (let run = 0; run < freshRuns; run++) {
     const scratch = createScratchDir("pokebench-live-adapter-");
     const output = join(scratch, "probe.json"), rgbDir = join(scratch, "rgb");
