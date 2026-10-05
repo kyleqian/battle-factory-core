@@ -29,7 +29,7 @@ export function playerfaintTurnsToEdge(key: string, edgeIndex: number): Turn[] {
   const steps = SCENARIOS[key];
   if (!steps) throw new Error(`unknown scenario ${key}`);
   const turns: Payload[][] = [];
-  let edge = -1, sideOfEdge: 0 | 1 = 0, lastAttacker: 0 | 1 = 0, done = false, sendOuts = 0;
+  let edge = -1, sideOfEdge: 0 | 1 = 0, lastAttacker: 0 | 1 = 0, done = false, sendOuts = 0, playerSwitchIns = 0;
   const push = (payload: Payload) => turns[turns.length - 1]!.push(Object.freeze(payload));
   for (const step of steps as Step[]) {
     if (done) break;
@@ -52,7 +52,7 @@ export function playerfaintTurnsToEdge(key: string, edgeIndex: number): Turn[] {
       case "party-summary-next": push({ kind: "draw-party-status-summary", battler: 1 }); push({ kind: "hide-party-status-summary", battler: 1 }); break;
       case "next-mon-send-out": push({ kind: "switch-in-animation", battler: 1, partyIndex: ++sendOuts }); break;
       case "party-menu-reset": push({ kind: "forced-party-menu", battlers: { player: false, opponent: true } }); break;
-      case "switch-in-finish": push({ kind: "switch-in-animation", battler: 0, partyIndex: key.includes("slot2") ? 2 : 1 }); break;
+      case "switch-in-finish": push({ kind: "switch-in-animation", battler: 0, partyIndex: ++playerSwitchIns + (key.includes("slot2") ? 1 : 0) }); break;
       default: throw new Error(`unmapped step ${step.kind}`);
     }
   }
@@ -99,7 +99,7 @@ export function replayPlayerfaintTurns(turns: readonly Turn[]) {
 }
 
 export const PLAYERFAINT_FIXTURES = ["sunny-day-player", "swift-opponent", "dragon-dance-player", "swift-player", "protect-player",
-  "thunderbolt-opponent", "light-screen-player", "heal-bell-player", "giga-drain-player", "secondko-sunny-day-player", "slot2-sunny-day-player", "afterko-sunny-day-player"]
+  "thunderbolt-opponent", "light-screen-player", "heal-bell-player", "giga-drain-player", "secondko-sunny-day-player", "slot2-sunny-day-player", "afterko-sunny-day-player", "twice-sunny-day-player"]
   .map(name => `tools/integration/fixtures/playerfaint-${name}.json`);
 
 if (process.argv.includes("--run") || process.argv.includes("--write")) {

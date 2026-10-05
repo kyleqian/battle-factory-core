@@ -448,5 +448,42 @@
    "roleLendFromHostEqualsModel": true
   },
   "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-twice-sunny-day-player.json",
+  "move": "SUNNY_DAY",
+  "side": "player",
+  "edge": 1777,
+  "window": {
+   "startFrame": 1777,
+   "endFrame": 1934,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 158,
+    "rows": 158,
+    "residualPixels": 0,
+    "digest": "60b7a621238ecafe83d3691f266ee831929415bd0b89df3dcf620d6f35abfe89"
+   },
+   "production": {
+    "exactRows": 48,
+    "rows": 158,
+    "residualPixels": 824656,
+    "digest": "ce2b2252b732d9f074b5218d494c38b45f8b53a170b63b47024b2c2c6c3434ff"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-twice-sunny-day-player.json",
+   "edge": 1777,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
  }
 ]

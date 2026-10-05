@@ -8,7 +8,7 @@ controller input.  Adaptive rules (all read from ROM state, never injected):
     80 frames (the menu ignores input while its fade runs, ~60 frames), DOWN x `menuDown` (12 apart), +30 A (selection menu), +40 A (SHIFT);
   * idle fallback: >900 frames without an event while turns remain -> A every 60 frames (logged as idle-A);
   * otherwise no input.  Battle ends early only if `frames` runs out.
-usage: playerfaintStage.py <base scenario.json> <out scenario.json> '<json: {"turns":[slot,...], "menuDown":1, "frames":N}>'
+usage: playerfaintStage.py <base scenario.json> <out scenario.json> '<json: {"turns":[slot,...], "menuDown":1 | [1,2,...], "frames":N}>'
 """
 from __future__ import annotations
 import bisect, json, os, subprocess, sys
@@ -48,7 +48,10 @@ def main():
     lab = BattleLab(o, "battle-scene-on")
     lab.prepare(request)
     u8, u16, u32 = o.read_u8, o.read_u16, o.read_u32
-    turns, menu_down, total = list(plan["turns"]), int(plan.get("menuDown", 1)), int(plan["frames"])
+    turns, total = list(plan["turns"]), int(plan["frames"])
+    # menuDown: DOWN presses per forced menu (int, or a list for successive player faints)
+    menu_downs = plan.get("menuDown", 1)
+    menu_downs = list(menu_downs) if isinstance(menu_downs, list) else [int(menu_downs)]
     pressed: dict[int, list[str]] = {}
     events, prev_ctrl, menu_state, menu_at = [], "", "idle", None
     for frame in range(1, total + 1):
@@ -79,7 +82,7 @@ def main():
             menu_state = "menu"
             t = frame + 80
             seq = []
-            for _ in range(menu_down):
+            for _ in range(menu_downs.pop(0) if len(menu_downs) > 1 else menu_downs[0]):
                 seq.append((t, "DOWN"))
                 t += 12
             seq += [(t + 18, "A"), (t + 58, "A")]
@@ -87,7 +90,7 @@ def main():
                 pressed[at] = pressed[at + 1] = [btn]
             events.append({"frame": frame, "kind": "party-menu-open", "presses": seq})
         if menu_state == "menu" and cb2 == "BattleMainCB2" and u16(N["gBattleMons"] + 0x28) > 0:
-            menu_state = "done"
+            menu_state = "idle"  # a later player faint opens the next forced menu
             events.append({"frame": frame, "kind": "player-switched-in", "species": u16(N["gBattleMons"])})
         # idle fallback: a message that waits for A (none needed in the committed scenarios; kept for other geometries)
         if turns and menu_state != "menu" and frame - max([e["frame"] for e in events] + [0]) > 900 and frame % 60 == 0 \

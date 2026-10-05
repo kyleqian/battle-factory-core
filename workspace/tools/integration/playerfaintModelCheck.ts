@@ -56,6 +56,11 @@ export const SCENARIOS: Record<string, Step[]> = {
   "playerfaint-afterko-sunnyday": [P, C, edge("53:player", "entry"), body(53, "player"), HIT, ...OPPONENT_KO_SEND_OUT,
     P, C, edge("129:opponent"), body(129, "opponent"), HIT, ...PLAYER_FAINT_SWITCH,
     P, C, edge("241:player"), body(241, "player"), edge("129:opponent"), body(129, "opponent"), HIT, ...SUN],
+  // two player faints: SLOWBRO Swift KOs MAGIKARP #1 (turn 1) -> forced menu -> MAGIKARP #2, KO'd in turn 2 -> second forced menu
+  // (DOWN x2) -> JOLTEON; turn 3: Sunny Day, Swift, sun.
+  "playerfaint-twice-sunnyday": [P, C, edge("129:opponent", "entry"), body(129, "opponent"), HIT, ...PLAYER_FAINT_SWITCH,
+    P, C, edge("129:opponent"), body(129, "opponent"), HIT, ...PLAYER_FAINT_SWITCH,
+    P, C, edge("241:player"), body(241, "player"), edge("129:opponent"), body(129, "opponent"), HIT, ...SUN],
   // second opponent KO: NINETALES Flamethrower KOs SHEDINJA #1 (turn 1) and SHEDINJA #2 (turn 2; send-out #3 reuses slot 5);
   // turn 3: Sunny Day (first body after send-out #3), SHEDINJA #3 Swift, sun; turn 4: player Swift has no effect (Wonder Guard, no
   // animation), Swift, sun.

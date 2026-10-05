@@ -130,5 +130,16 @@
   "todayAllocatorInput": null,
   "todayLendEqualsRole": null,
   "roleLendFromHostEqualsModel": true
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-twice-sunny-day-player.json",
+  "edge": 1777,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": null,
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": null,
+  "roleLendFromHostEqualsModel": true
  }
 ]
