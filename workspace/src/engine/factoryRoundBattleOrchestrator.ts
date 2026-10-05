@@ -23,6 +23,7 @@ import {
   liveSpriteOrderBattlersPresent,
   liveSpriteOrderHostOrder,
   openLiveSpriteOrderHostPartyMenu,
+  reseedLiveSpriteAllocatorAfterSendOut,
   returnLiveSpriteOrderHostFromPartyMenu,
   seedLiveSpriteOrderHostFromBattleStart,
   type LiveSpriteOrderHost,
@@ -2253,6 +2254,12 @@ function prepareResolutionPalette(
     orderHost = advanceLiveSpriteOrderHost(
       orderHost, resolution, isFinalCommand ? Number.POSITIVE_INFINITY : commandSequence,
     );
+  }
+  // A modelled opponent faint + next-mon summary + send-out leaves the
+  // allocator occupancy role-isomorphic to the known entry: re-seed the
+  // known-entry host in entry labels (docs/postko-consumer-audit.md §4.3).
+  if (spriteHost && orderHost && command?.type === "switch-in") {
+    spriteHost = reseedLiveSpriteAllocatorAfterSendOut(spriteHost, orderHost);
   }
   if ((hasTrailingUnknownGraphics || crossedUnknownGraphics) && spriteHost) {
     spriteHost = invalidateLiveSpriteAllocatorHost(spriteHost);

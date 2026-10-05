@@ -9,6 +9,7 @@ import {
 } from "../src/engine/spriteOrderEventTransform.ts";
 import { KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
 import { replayPostKoTurnsThroughHost } from "../tools/integration/postkoHostReplay.ts";
+import { postKoRoute } from "../tools/integration/postKoTrackerRoutes.ts";
 import { POSTKO_DENSE_FIXTURES, postkoFixtureEdge, postkoTrackerSteps, postkoTurnsToEdge } from "../tools/integration/postkoLendHistory.ts";
 import { SCENARIOS } from "../tools/integration/postkoModelCheck.ts";
 
@@ -141,4 +142,34 @@ describe("post-KO entry-label lend (rung 2, presentation-only)", () => {
     const lightScreen = JSON.parse(readFileSync("tools/integration/fixtures/postko-light-screen-player.json", "utf8"));
     expect(replayPostKoTurnsThroughHost(lightScreen.precedingTurns).spriteAllocatorInput).toMatchObject({ wall: 3 });
   });
+});
+
+describe("post-KO lends on ordinary-input generated routes (presentation-only)", () => {
+  const route = (seed: number, slot: 0 | 1 | 2 | 3) => postKoRoute(seed, Array(8).fill(slot));
+  const sendOut = (r: ReturnType<typeof route>) => r.sendOuts[0]!;
+
+  it("seed 54: the opponent's Heal Bell after an opponent KO + send-out is lent pi(F); adapter active every age; ON/OFF parity", () => {
+    const r = route(54, 3);
+    expect(r.parity).toBeNull();
+    expect(r.hostVsPure.mismatches).toEqual([]);
+    const body = r.bodies.find(b => b.sequence > sendOut(r) && b.moveId === 215)!;
+    expect(body.lent?.slice(0, 5)).toEqual([3, 4, 21, 20, 5]);
+    expect(body.pureOccupied).toEqual([0, 1, 2, 5, 6, 60, 61, 62, 63]);
+    const healBells = r.decisions.animations.filter(a => a.moveId === 215);
+    const index = r.bodies.filter(b => b.moveId === 215 && b.sequence < body.sequence).length;
+    expect(healBells[index]!.adapterActive).toMatch(/^1+$/);
+    expect(r.bodies.some(b => b.sequence > body.sequence)).toBe(true); // the next prompt was reached
+  }, 60000);
+
+  it("seed 11: Barrier after an opponent KO + send-out gets the re-seeded entry-label allocator host; active every age; parity", () => {
+    const r = route(11, 0);
+    expect(r.parity).toBeNull();
+    const barriers = r.bodies.filter(b => b.moveId === 112);
+    expect(barriers.length).toBe(2);
+    expect(barriers.every(b => b.sequence > sendOut(r) && b.lent !== null)).toBe(true);
+    expect(r.decisions.animations.filter(a => a.moveId === 112).map(a => /^1+$/.test(a.adapterActive))).toEqual([true, true]);
+    const allocatorBodies = r.decisions.commands.filter(c => c.type === "move-animation" && c.spriteInputHistoryKnown === true);
+    expect(allocatorBodies).toHaveLength(2);
+    expect(r.bodies.some(b => b.sequence > barriers[1]!.sequence)).toBe(true);
+  }, 60000);
 });
