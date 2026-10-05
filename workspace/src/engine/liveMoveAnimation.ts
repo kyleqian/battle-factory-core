@@ -111,8 +111,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   296, 312, 266, 118, 269, 187,
   // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off, Faint Attack (player attacker only).
   317, 219, 230, 120, 256, 282, 185,
-  // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack, Ice Punch, Fake Tears, Sleep Talk, Rock Slide (opponent attacker only).
-  332, 98, 8, 313, 214, 157,
+  // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack, Ice Punch, Fake Tears, Sleep Talk, Rock Slide (opponent attacker only),
+  // Fire Blast (known-order gate), Dragon Dance (allocationOrder derived from the provider order).
+  332, 98, 8, 313, 214, 157, 126, 349,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -184,7 +185,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // the shadow row is live age 0.
     332, 98,
     // Ice Punch (staged windows start at activation: row 0). Sleep Talk likewise.
-    8, 214, 157,
+    8, 214, 157, 126, 349,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -497,6 +498,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // Rock Slide, opponent attacker only (no accepted player-attacker evidence): activation..first inactive script row
     // (1967..2104); the 37 later accepted rows are the target hit flash (hitFlashAnchorAge 141) and controller HUD.
     case 157: return request.attacker === 1 ? 138 : null;
+    case 349: return 142; // Dragon Dance (78..219 / 74..215): window start = activation, window end = script end.
+    case 126: return 197; // Fire Blast (1147..1343 / 215..411): window start = activation, window end = script end.
     case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
@@ -1373,6 +1376,32 @@ export function liveMoveAnimationPresentation(
               KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER) : null) ?? GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE.spriteOrderSeed },
         fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" }, moveTextStartAge: 0 };
       break;
+    case 126: {
+      // First-body gate (prep7 s2.3): the reducer's own 64-entry literal (fireBlast.ts FIRE_BLAST_ORDER_SEED) differs from
+      // the provider order (occupied prefix + F) only in slots 3/4 and renders identically (0 differing pixels / 197 ages,
+      // both orientations), so no reducer input exists; a body without a known tracked order is not proven -> null.
+      if (!spriteOrderInput?.known) return null;
+      config = { move: "FIRE_BLAST", attacker, target, fieldProfile,
+        animationProfile: { attackerPictureCenter: attackerAnchors.picOffsetPoint,
+          targetPictureCenter: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint,
+          targetSpriteSlot: target.geometry.side === "opponent" ? 8 : 6 } };
+      break;
+    }
+    case 349: {
+      // First-body gate (prep7 s2): the six orbs take the slots 3,4,5,7,9,10 (first-free); the reducer ranks them by
+      // `allocationOrder` = each orb's index in the provider's free order restricted to those slots ([4,3,5,10,9,7] ->
+      // [1,0,2,5,4,3], reproduces the ROM orb order at age 20). Unknown tracked order -> null (Grudge recipe). The orb
+      // radius is max(width, height) >> 1 of the attacker's picture.
+      if (!spriteOrderInput?.known) return null;
+      const allocationSlots = [3, 4, 5, 7, 9, 10];
+      const providerOrder = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, allocationSlots);
+      if (providerOrder === null) return null;
+      const { width, height } = liveBattlerCoordAttrs(attacker.geometry.side, art);
+      config = { move: "DRAGON_DANCE", attacker, target, fieldProfile,
+        animationProfile: { pictureSize: { width, height }, allocationSlots,
+          allocationOrder: allocationSlots.map(slot => providerOrder.indexOf(slot)) } };
+      break;
+    }
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:

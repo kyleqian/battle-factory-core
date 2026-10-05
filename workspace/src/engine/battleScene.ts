@@ -37221,6 +37221,7 @@ export function renderSceneOnMovePresentation(
     } else {
       drawAttacker(); drawOrbs(); drawTarget();
     }
+    if (liveField) return;
     const profile = dragonState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50,
@@ -47680,21 +47681,29 @@ export function renderSceneOnMovePresentation(
     // BuildOamBuffer and the palette transfer expose the preceding callback
     // row.  The reducer keeps that latch explicit instead of shifting the
     // move's source age or its allocation lifecycle.
-    const playerToOpponent = live.attacker.species === "OCTILLERY"
+    const playerToOpponent = (liveField || live.attacker.species === "OCTILLERY")
       && live.attacker.geometry.side === "player"
-      && live.target.species === "ONIX"
+      && (liveField || live.target.species === "ONIX")
       && live.target.geometry.side === "opponent";
-    const opponentToPlayer = live.attacker.species === "OCTILLERY"
+    const opponentToPlayer = (liveField || live.attacker.species === "OCTILLERY")
       && live.attacker.geometry.side === "opponent"
-      && live.target.species === "ONIX"
+      && (liveField || live.target.species === "ONIX")
       && live.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged FIRE_BLAST pair ${live.attacker.species}->${live.target.species}`,
       );
     }
-    const attackerSprite = playerToOpponent ? octilleryBackSprite : octilleryFrontSprite;
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(live.attacker)
+      : playerToOpponent ? octilleryBackSprite : octilleryFrontSprite;
+    const targetSprite = liveField ? liveSceneOnBattlerArt(live.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
+    // Live corners are the production field origins; the opponent's settled front idle offset is added (the staged
+    // ONIX corner carries x2 = 1 until the target shake task resets it at age 114).
+    const liveIdle = (battler: typeof live.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
+    const attackerIdle = liveIdle(live.attacker);
+    const targetIdle = liveIdle(live.target);
     const black = { r: 0, g: 0, b: 0 };
     const paletteDisplayLag = state.age < 170 ? 4 : 3;
     const bgCoefficient = sceneOnFireBlastView({
@@ -47713,21 +47722,22 @@ export function renderSceneOnMovePresentation(
       fadedBgPalette,
     );
 
-    const targetBaselineX2 = playerToOpponent && state.age < 114 ? 1 : 0;
+    const targetBaselineX2 = liveField ? (state.age < 114 ? targetIdle.x2 : 0)
+      : playerToOpponent && state.age < 114 ? 1 : 0;
     const targetShake = shakeMonOffsetAtTick(5, 0, 20, 1, state.age - 114);
     const drawTarget = () => drawSpriteSheet(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
       live.target.geometry.spriteCorner.x + targetBaselineX2 + targetShake.x2,
-      live.target.geometry.spriteCorner.y,
+      live.target.geometry.spriteCorner.y + targetIdle.y2,
     );
     const drawAttacker = () => drawSpriteSheet(
       fb,
       attackerSprite.tileset,
       attackerSprite.palette,
-      live.attacker.geometry.spriteCorner.x,
-      live.attacker.geometry.spriteCorner.y,
+      live.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      live.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     const effects = fireBlastSpritesInPainterOrderAtAge(
       state.age - 1,
@@ -47759,6 +47769,7 @@ export function renderSceneOnMovePresentation(
       drawTarget();
       drawEffects();
     }
+    if (liveField) return;
     const profile = state.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: playerToOpponent ? "ONIX" : "OCTILLERY", level: 50,

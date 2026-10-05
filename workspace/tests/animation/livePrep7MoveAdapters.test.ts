@@ -9,6 +9,8 @@ import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
+import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
+import { knownEntrySpriteOrderState, spriteOrderForSlots } from "../../src/engine/spriteOrderProvider.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 
 // docs/next-adapters-prep7.md: live durations are counted from the activation frame to the first inactive script row
@@ -17,7 +19,7 @@ import { generatedCommandAnimationReplay } from "../../tools/integration/generat
 type Orders = readonly [number | null, number | null];
 // attacker: which side's body the ordinary route must produce (default the player, 0).
 const cases: { id: number; move: string; duration: Orders; shadow: number | undefined; alt: [string, string];
-  route: { seed: number; move: 0 | 1 | 2 | 3; streak: number; turns?: number; stall?: boolean; attacker?: 0 | 1 } }[] = [
+  route: { seed: number; move: 0 | 1 | 2 | 3; streak: number; turns?: number; stall?: boolean; attacker?: 0 | 1 }; order?: true }[] = [
   { id: 332, move: "AERIAL_ACE", duration: [50, 50], shadow: 0, alt: ["CHARIZARD", "ONIX"], route: { seed: 3, move: 0, streak: 0 } },
   { id: 98, move: "QUICK_ATTACK", duration: [33, 33], shadow: 0, alt: ["RAICHU", "ONIX"], route: { seed: 3, move: 1, streak: 0 } },
   // Ice Punch has no accepted-species rental carrier: the ordinary route is the alternate-species Gengar route (prep7 s2.5).
@@ -29,6 +31,9 @@ const cases: { id: number; move: string; duration: Orders; shadow: number | unde
   // Rock Slide: opponent attacker only (no accepted player-attacker evidence: no adapter there, Faint Attack precedent). Route =
   // the opponent's Onix (seed 134, streak 0, player presses slot 0; first body, order known, prep7 s2.5).
   { id: 157, move: "ROCK_SLIDE", duration: [null, 138], shadow: 0, alt: ["DUGTRIO", "ONIX"], route: { seed: 134, move: 0, streak: 0, attacker: 1 } },
+  // Order consumers (first-body gate, known tracked order only). Routes: prep7 s2.5 (Charizard 8/21/0 slot 0; Kingdra 4/35/2).
+  { id: 126, move: "FIRE_BLAST", duration: [197, 197], shadow: 0, alt: ["NINETALES", "ONIX"], route: { seed: 8, move: 0, streak: 21 }, order: true },
+  { id: 349, move: "DRAGON_DANCE", duration: [142, 142], shadow: 0, alt: ["KINGDRA", "ONIX"], route: { seed: 4, move: 2, streak: 35 }, order: true },
   { id: 8, move: "ICE_PUNCH", duration: [184, 184], shadow: 0, alt: ["GENGAR", "ONIX"], route: { seed: 18, move: 2, streak: 42 } },
 ];
 
@@ -42,7 +47,10 @@ function displayed(player: string, opponent: string): BattleResolutionDisplayedF
 const request = (moveId: number, attacker: 0 | 1, turn = 0): BattleMoveAnimationRequest => ({
   moveId, attacker, target: attacker === 0 ? 1 : 0, turn, power: 0, damage: 0, friendship: 70, multihit: 0,
 });
-function render(field: BattleResolutionDisplayedField, moveId: number, attacker: 0 | 1, age: number, turn = 0): string {
+const knownOrder = (moveId: number): LiveMoveSpriteOrderInput =>
+  prepareLiveMoveSpriteOrder(knownEntrySpriteOrderState("ordinary-factory"), request(moveId, 0)).input!;
+function render(field: BattleResolutionDisplayedField, moveId: number, attacker: 0 | 1, age: number, turn = 0,
+  order?: LiveMoveSpriteOrderInput): string {
   const view = {
     field, fieldArt: createBattleCommandFieldArtView(field),
     healthboxes: {
@@ -50,7 +58,7 @@ function render(field: BattleResolutionDisplayedField, moveId: number, attacker:
       opponent: { name: field.opponent.name, level: 50, gender: "male", hpFraction: 1, status: "none" },
     },
     message: { lines: ["X used", "A MOVE!"], visibleCharacters: 99 },
-    effect: { type: "move", request: request(moveId, attacker, turn), age },
+    effect: { type: "move", request: request(moveId, attacker, turn), age, spriteOrderInput: order },
     visibility: { player: { sprite: true, healthbox: true }, opponent: { sprite: true, healthbox: true } },
     waitCursor: null, bottom: "message", confirmHandoff: null, switchIn: null, midBattleSwitchIn: null,
     switchOut: null, partySummary: null, midBattleSwitchFade: null, midBattleSwitchParticles: null, trainerSlide: null,
@@ -59,8 +67,8 @@ function render(field: BattleResolutionDisplayedField, moveId: number, attacker:
   renderBattleResolutionLiveView(fb, view);
   return createHash("sha256").update(fb).digest("hex");
 }
-const cfg = (field: BattleResolutionDisplayedField, id: number, attacker: 0 | 1, turn = 0) =>
-  liveMoveAnimationPresentation(request(id, attacker, turn), field, 0)?.config as unknown as Record<string, any>;
+const cfg = (field: BattleResolutionDisplayedField, id: number, attacker: 0 | 1, turn = 0, order?: LiveMoveSpriteOrderInput) =>
+  liveMoveAnimationPresentation(request(id, attacker, turn), field, 0, undefined, undefined, order)?.config as unknown as Record<string, any>;
 const rulesWithoutSceneMarker = (v: { rules: any }) => {
   const rc = v.rules.rulesContext;
   return { ...v.rules, rulesContext: { ...rc, hitMarker: rc.hitMarker & ~0x80 } };
@@ -103,6 +111,31 @@ describe("live prep7 move adapters", () => {
       attackerPictureBounds: { left: 40, right: 104, top: 72 }, attacker: { geometry: { animationCenter: { x: 72, y: 88 } } } });
   });
 
+  it("gates the order consumers on a known tracked order and derives their inputs from the provider (prep7 s2.3)", () => {
+    for (const id of [126, 349]) {
+      for (const a of [0, 1] as const) {
+        const field = a === 0 ? displayed("DRAGONAIR", "ONIX") : displayed("ONIX", "DRAGONAIR");
+        expect(liveMoveAnimationPresentation(request(id, a), field, 0), `${id} ${a}`).toBeNull();
+      }
+    }
+    // Dragon Dance: provider free order over [3,4,5,7,9,10] = [4,3,5,10,9,7] -> each orb's index [1,0,2,5,4,3].
+    const order = knownOrder(349);
+    expect(spriteOrderForSlots({ known: true, free: order.free, pendingDestroyed: [] }, [3, 4, 5, 7, 9, 10])).toEqual([4, 3, 5, 10, 9, 7]);
+    for (const a of [0, 1] as const) {
+      const field = a === 0 ? displayed("DRAGONAIR", "ONIX") : displayed("ONIX", "DRAGONAIR");
+      expect(cfg(field, 349, a, 0, order).animationProfile).toMatchObject({
+        allocationSlots: [3, 4, 5, 7, 9, 10], allocationOrder: [1, 0, 2, 5, 4, 3], pictureSize: expect.any(Object) });
+    }
+    // A different known order is consumed as given.
+    const identity = { known: true as const, free: Array.from({ length: 64 }, (_, i) => i) };
+    expect(cfg(displayed("DRAGONAIR", "ONIX"), 349, 0, 0, identity).animationProfile.allocationOrder).toEqual([3, 4, 5, 7, 9, 10].map(slot => [3, 4, 5, 7, 9, 10].indexOf(slot)));
+    // Fire Blast: first-body gate only; targetSpriteSlot is the known-entry battler slot, centres are the pic points.
+    expect(cfg(displayed("OCTILLERY", "ONIX"), 126, 0, 0, order).animationProfile).toEqual({
+      attackerPictureCenter: { x: 72, y: 98 }, targetPictureCenter: { x: 176, y: 42 }, targetSpriteSlot: 8 });
+    expect(cfg(displayed("ONIX", "OCTILLERY"), 126, 1, 0, order).animationProfile).toEqual({
+      attackerPictureCenter: { x: 176, y: 50 }, targetPictureCenter: { x: 72, y: 88 }, targetSpriteSlot: 6 });
+  });
+
   it("renders every move with an alternate carrier in both orientations without fixture-species throws", () => {
     for (const c of cases) for (const a of [0, 1] as const) {
       const [carrier, other] = c.alt;
@@ -113,8 +146,9 @@ describe("live prep7 move adapters", () => {
         expect(liveMoveAnimationPresentation(request(c.id, a), field, 0)).toBeNull();
         continue;
       }
-      expect(liveMoveAnimationPresentation(request(c.id, a), field, 0), `${c.move} ${a}`).not.toBeNull();
-      expect(new Set([0, Math.floor(duration / 4), Math.floor(duration / 2), duration - 1].map(age => render(field, c.id, a, age))).size, `${c.move} ${a}`).toBeGreaterThan(1);
+      const order = c.order ? knownOrder(c.id) : undefined;
+      expect(liveMoveAnimationPresentation(request(c.id, a), field, 0, undefined, undefined, order), `${c.move} ${a}`).not.toBeNull();
+      expect(new Set([0, Math.floor(duration / 4), Math.floor(duration / 2), duration - 1].map(age => render(field, c.id, a, age, 0, order))).size, `${c.move} ${a}`).toBeGreaterThan(1);
     }
   }, 120000);
 
@@ -127,6 +161,12 @@ describe("live prep7 move adapters", () => {
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === side);
     expect(body?.ages).toEqual(Array.from({ length: c.duration[side]! }, (_, age) => age));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
+    if (c.order) {
+      // The move is the battle's first body: the production host lent the known-entry order.
+      const firstBody = on.commands.find(row => row.type === "move-animation")!;
+      expect((firstBody.command as { animation: { moveId: number } }).animation.moveId).toBe(c.id);
+      expect(firstBody.spriteOrderInput).toBeDefined();
+    }
     if (!r.stall) expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);
     expect(on.boundaries.length).toBeGreaterThan(0);
