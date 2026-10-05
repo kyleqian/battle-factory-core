@@ -23,6 +23,9 @@ const SUN: Step[] = [edge("general:SUN_CONTINUES"), { kind: "general-animation",
 /** Player faint -> forced party menu (ResetSpriteData) -> menu return reshow without the player battler -> forced switch-in. */
 export const PLAYER_FAINT_SWITCH: Step[] = [{ kind: "faint", side: "player" }, { kind: "party-menu-reset" },
   { kind: "battle-reshow", playerBattlerPresent: false }, { kind: "switch-in-start" }, { kind: "switch-in-finish" }];
+/** Opponent faint -> next-mon party summary -> send-out (docs/sprite-order-uncovered-units.md s2). */
+export const OPPONENT_KO_SEND_OUT: Step[] = [{ kind: "faint", side: "opponent" }, { kind: "party-summary-next" }, { kind: "party-summary-hide" },
+  { kind: "next-mon-send-out" }];
 export const SCENARIOS: Record<string, Step[]> = {
   // turn 1: slow SLOWBRO Swift KOs the L5 MAGIKARP lead (Splash never runs); forced menu -> JOLTEON.
   // turn 2: JOLTEON Sunny Day (faster), SLOWBRO Swift, sun continues; turn 3: Dragon Dance (+ multi-stat), Swift, sun;
@@ -32,6 +35,18 @@ export const SCENARIOS: Record<string, Step[]> = {
     P, C, edge("349:player"), body(349, "player"), edge("stat:player"), { kind: "stat-animation", argument: 55 },
     edge("129:opponent"), body(129, "opponent"), HIT, ...SUN,
     P, C, edge("129:player"), body(129, "player"), HIT, edge("129:opponent"), body(129, "opponent"), HIT, ...SUN],
+  // turn 1: fast JOLTEON Thunderbolt KOs the L5 MAGIKARP lead; forced menu -> SNORLAX. turn 2: SNORLAX Protect (+4 priority, first body),
+  // Thunderbolt blocked (no animation); turn 3: JOLTEON Thunderbolt (first). Later ROM activations (PRZ status, full paralysis) follow a
+  // body without an EXACT plan (85:opponent) and are not relied on.
+  "playerfaint-protect-thunderbolt": [P, C, edge("85:opponent", "entry"), body(85, "opponent"), HIT, ...PLAYER_FAINT_SWITCH,
+    P, C, edge("182:player"), body(182, "player"), P, C, edge("85:opponent"), body(85, "opponent")],
+  // second opponent KO: NINETALES Flamethrower KOs SHEDINJA #1 (turn 1) and SHEDINJA #2 (turn 2; send-out #3 reuses slot 5);
+  // turn 3: Sunny Day (first body after send-out #3), SHEDINJA #3 Swift, sun; turn 4: player Swift has no effect (Wonder Guard, no
+  // animation), Swift, sun.
+  "playerfaint-secondko-sunnyday-swift": [P, C, edge("53:player", "entry"), body(53, "player"), HIT, ...OPPONENT_KO_SEND_OUT,
+    P, C, edge("53:player"), body(53, "player"), HIT, ...OPPONENT_KO_SEND_OUT,
+    P, C, edge("241:player"), body(241, "player"), edge("129:opponent"), body(129, "opponent"), HIT, ...SUN,
+    P, C, edge("129:opponent"), body(129, "opponent"), HIT, ...SUN],
 };
 
 /** Occupant roles. Healthbox = [main (CreateSprite), other half (CreateSpriteAtEnd), bar (CreateSpriteAtEnd)]. */
@@ -99,6 +114,8 @@ export function modelCheck(key: string, probe: { activations: { riseFrame: numbe
       battlerMatrix: b.battlerMatrix.every((m, i) => m === null || m === constants.battlerMatrix[i]),
       // condition (b): the ROM occupant prefix relabelled by the role map is the known-entry prefix
       prefixRelabels: romRho !== null && same(romPrefix.map(s => romRho.get(s)), ENTRY_PREFIX),
+      // the role lend agrees with today's production lend wherever production lends (entry, opponent-KO geometry)
+      productionAgrees: spriteOrderTrackerLend(tracker) === null || same(spriteOrderTrackerLend(tracker), rho && view ? view.free.map(s => rho.get(s)!) : null),
     };
     edges.push({ label: step.label, geometry: step.geometry, riseFrame: rom.riseFrame, romMove: [rom.moveIndex, rom.animAttacker], known,
       promptPair: tracker.promptPair, checks, mismatches: Object.values(checks).filter(v => !v).length, predicted, roles,

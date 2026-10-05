@@ -6,6 +6,7 @@ controller input.  Adaptive rules (all read from ROM state, never injected):
     remembered slot (gMoveSelectionCursor[0]; layout 0 1 / 2 3) to the planned slot with RIGHT/LEFT/DOWN/UP presses 12 frames apart, then A;
   * forced party menu (player battler fainted): A every 30 frames until CB2_InitPartyMenu (the "<mon> fainted!" message waits for A), then
     80 frames (the menu ignores input while its fade runs, ~60 frames), DOWN x `menuDown` (12 apart), +30 A (selection menu), +40 A (SHIFT);
+  * idle fallback: >900 frames without an event while turns remain -> A every 60 frames (logged as idle-A);
   * otherwise no input.  Battle ends early only if `frames` runs out.
 usage: playerfaintStage.py <base scenario.json> <out scenario.json> '<json: {"turns":[slot,...], "menuDown":1, "frames":N}>'
 """
@@ -88,6 +89,11 @@ def main():
         if menu_state == "menu" and cb2 == "BattleMainCB2" and u16(N["gBattleMons"] + 0x28) > 0:
             menu_state = "done"
             events.append({"frame": frame, "kind": "player-switched-in", "species": u16(N["gBattleMons"])})
+        # idle fallback: a message that waits for A (none needed in the committed scenarios; kept for other geometries)
+        if turns and menu_state != "menu" and frame - max([e["frame"] for e in events] + [0]) > 900 and frame % 60 == 0 \
+                and ctrl != "HandleInputChooseAction":
+            pressed[frame + 1] = pressed[frame + 2] = ["A"]
+            events.append({"frame": frame, "kind": "idle-A"})
         prev_ctrl = ctrl
     segments, cur, run = [], None, 0
     for frame in range(1, total + 1):

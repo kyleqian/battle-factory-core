@@ -18,7 +18,8 @@
     "bitmap": true,
     "tasks": true,
     "battlerMatrix": true,
-    "prefixRelabels": true
+    "prefixRelabels": true,
+    "productionAgrees": true
    },
    "mismatches": 0,
    "predicted": {
@@ -347,7 +348,8 @@
     "bitmap": true,
     "tasks": true,
     "battlerMatrix": true,
-    "prefixRelabels": true
+    "prefixRelabels": true,
+    "productionAgrees": true
    },
    "mismatches": 0,
    "predicted": {
@@ -630,7 +632,8 @@
     "bitmap": true,
     "tasks": true,
     "battlerMatrix": true,
-    "prefixRelabels": true
+    "prefixRelabels": true,
+    "productionAgrees": true
    },
    "mismatches": 0,
    "predicted": {
@@ -913,7 +916,8 @@
     "bitmap": true,
     "tasks": true,
     "battlerMatrix": true,
-    "prefixRelabels": true
+    "prefixRelabels": true,
+    "productionAgrees": true
    },
    "mismatches": 0,
    "predicted": {
@@ -1196,7 +1200,8 @@
     "bitmap": true,
     "tasks": true,
     "battlerMatrix": true,
-    "prefixRelabels": true
+    "prefixRelabels": true,
+    "productionAgrees": true
    },
    "mismatches": 0,
    "predicted": {
@@ -1479,7 +1484,8 @@
     "bitmap": true,
     "tasks": true,
     "battlerMatrix": true,
-    "prefixRelabels": true
+    "prefixRelabels": true,
+    "productionAgrees": true
    },
    "mismatches": 0,
    "predicted": {
@@ -1762,7 +1768,8 @@
     "bitmap": true,
     "tasks": true,
     "battlerMatrix": true,
-    "prefixRelabels": true
+    "prefixRelabels": true,
+    "productionAgrees": true
    },
    "mismatches": 0,
    "predicted": {
@@ -2045,7 +2052,8 @@
     "bitmap": true,
     "tasks": true,
     "battlerMatrix": true,
-    "prefixRelabels": true
+    "prefixRelabels": true,
+    "productionAgrees": true
    },
    "mismatches": 0,
    "predicted": {
@@ -2328,7 +2336,8 @@
     "bitmap": true,
     "tasks": true,
     "battlerMatrix": true,
-    "prefixRelabels": true
+    "prefixRelabels": true,
+    "productionAgrees": true
    },
    "mismatches": 0,
    "predicted": {
@@ -2611,7 +2620,8 @@
     "bitmap": true,
     "tasks": true,
     "battlerMatrix": true,
-    "prefixRelabels": true
+    "prefixRelabels": true,
+    "productionAgrees": true
    },
    "mismatches": 0,
    "predicted": {
@@ -2894,7 +2904,8 @@
     "bitmap": true,
     "tasks": true,
     "battlerMatrix": true,
-    "prefixRelabels": true
+    "prefixRelabels": true,
+    "productionAgrees": true
    },
    "mismatches": 0,
    "predicted": {
