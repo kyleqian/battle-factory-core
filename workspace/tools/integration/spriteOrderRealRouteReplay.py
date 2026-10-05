@@ -174,6 +174,8 @@ def build(trace: str):
         if e["k"] in ("body", "anim"):
             e["obsF"] = R.free(e["n"] - 1)
             e["obsMask"] = format(R.mask(e["n"] - 1), "x")
+    for e in events:  # state just before the frame of the event (used only to re-seed the resync model)
+        e["preF"], e["preMask"] = R.free(e["n"] - 1), format(R.mask(e["n"] - 1), "x")
     order = {"uncovered": 0, "reset": 1, "prompt": 2, "body": 3, "anim": 3, "blip": 4, "prompt-unterminated": 5}
     events.sort(key=lambda e: (e["n"], order[e["k"]]))
     initial = {"F": R.free(first), "mask": format(R.mask(first), "x")}
