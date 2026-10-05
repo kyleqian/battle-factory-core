@@ -1,5 +1,40 @@
 # Animation integration progress
 
+## 2026-10-04 (evening 2) — prep2 batch folded: 144 live adapters
+
+- Folded worker `773aca6f7` (tested code `ee469399c`, src tree `702752ac5`):
+  Surf + Muddy Water (one branch), Icy Wind, Blizzard (anchor-derived
+  effectGeometry), Fake Out (new `liveBattlerCoordAttrs`), Cosmic Power,
+  Future Sight (turn-1 body), Explosion (displayed HP already 0). Shadow rows
+  0 except Future Sight/Explosion (not in map); Blizzard and Cosmic Power
+  ad-hoc shadows retired. No palette plans.
+- Supervisor dense: 16 fixtures + Surf/SEALEO and Icy Wind/POLIWHIRL
+  alternate species twice fresh, 3,620 rows/run, zero residual. Routes 7/7
+  exact ON/OFF parity; Explosion route (worker) ends at the forced-replacement
+  screen via new `allowStall` in generatedCommandAnimationReplay. Receipt
+  `prep2-supervisor-receipt.json`.
+- Limit: Icy Wind/Blizzard return the scene-off view when the reducer's
+  retained particle slot table cannot verify the live geometry
+  (`provableEffectOrder`); Blizzard live for ~90% of player-attacker and ~34%
+  of opponent-attacker species pairs. Lifting it needs a reducer change.
+
+## 2026-10-04 (evening 2) — H_BUFFER triage + measured prep (evidence only)
+
+- `docs/h-buffer-triage.md` (static, 84 moves): 14 ready-now, order provider
+  alone +5 (19 with ready), order+affine 27. Measured follow-up
+  `docs/h-buffer-s1-prep.md` (176 production pins vs accepted): Dragon
+  Breath, Defense Curl (animationCenter = battlePositionCenter + (0,6)),
+  Ingrain (accepted species Cacturne), Mean Look, Smelling Salt, Bind (shadow
+  row +2), Wrap READY with drafted `prep4-*` fixtures and routes; EMBER needs
+  the sprite-order provider (117 equal-key pairs, 90 overlapping).
+- `docs/next-adapters-prep5.md` (132 pins): Mist Ball, Aromatherapy (400/396
+  by side), Follow Me, Metronome, Taunt, Belly Drum READY with `prep5-*`
+  fixtures/routes; Heal Bell, Perish Song, Leaf Blade, Dragon Rage need the
+  order provider. Metronome's called move is an ordinary second request.
+- Next integration batch brief (not dispatched; user asked to wind down):
+  Mean Look, Smelling Salt, Defense Curl, Ingrain (+LILEEP alt species),
+  Wrap, Bind, Dragon Breath from `prep4-*`; then the six prep5 READY moves.
+
 ## 2026-10-04 (evening 2) — next5 folded: 136 live adapters
 
 - Folded worker `172b4024b` as `4818dc692` (src tree `8a0b13c30`): Scary Face,

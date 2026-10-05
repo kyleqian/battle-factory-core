@@ -2202,17 +2202,22 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-04 evening): 131 live adapters (master `d935baca4`). Light Screen and the wall family
-use source allocator plans and keep known history across the 110 audited
-net-zero bodies; ISSUES #142 (elevated-opponent shadow on the activation frame)
-is fixed for all live ids. Resume points with banked evidence: sprite-order
-provider (`docs/sprite-order-provider-design.md` slice plan; unlocks ~19 order
-moves), status-animation occupancy persistence (`docs/status-animation-sprite-
-audit.md`), Reversal reducer change (`docs/reversal-shake-evidence.md`; needs
-the animation program's acceptance), Scary Face/Glare eye anchors, Soft-Boiled, and the
-H_BUFFER/H_RANDOM/H_OUTCOME groups. Validate new
-adapters with alternate-species dense proofs whose windows come from the
-source activation frame, not only the accepted fixture species.
+Next (2026-10-04 late): 144 live adapters (master after the prep2 fold). Ready
+batches with measured prep and drafted fixtures: H_BUFFER S1/S2 (Mean Look,
+Smelling Salt, Defense Curl, Ingrain, Wrap, Bind, Dragon Breath;
+`docs/h-buffer-s1-prep.md`, brief `.codex-logs/s10a-hbuffer-s1-batch-20261004-brief.txt`),
+then Mist Ball, Aromatherapy, Follow Me, Metronome, Taunt, Belly Drum
+(`docs/next-adapters-prep5.md`). The sprite-order provider
+(`docs/sprite-order-provider-design.md` slices) is now the biggest unlock:
+Ember, Heal Bell, Perish Song, Leaf Blade, Dragon Rage, Rock Throw/Slide,
+Flamethrower, Blaze Kick, Magnitude and the order+affine group
+(`docs/h-buffer-triage.md`). Other resume points: status-animation occupancy
+persistence, Reversal reducer change (`docs/reversal-shake-evidence.md`),
+Icy Wind/Blizzard retained-slot-table fallback, Random2 presentation provider
+(`docs/visual-randomness-prep.md`), switch/substitute/called-move bodies
+(`docs/next-adapters-prep2.md` blocked list). Validate new adapters with
+alternate-species dense proofs whose windows come from the source activation
+frame, not only the accepted fixture species.
 Latest progress supersedes this starting checkpoint as verified work lands.
 
 Acceptance:

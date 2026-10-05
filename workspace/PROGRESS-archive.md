@@ -1,3 +1,22 @@
+## 2026-10-03 — Source-derived sprite allocator provider accepted
+
+- **State:** S10A, local master; 79 adapters, 197 accepted moves remain.
+  Production helper `277834353` accepted; no Light Screen registration yet.
+- **Did:** ported semantic healthbox/trainer/summary/battler/ball/controller
+  allocation/free procedures. Independent six fresh exact-call witnesses
+  (82/82/82/82/84/84 calls) and canonical prompt spot check agree.
+- **Checks:** independent14files/476smoke+affected tests; worker final full
+  1,483files/11,761tests, build844 reused on clean fast-forward. Source/reference
+  hashes pinned; no rules/RNG/damage/order/facility changes.
+- **Next:** consume provider for Light Screen, align actual activation and wall
+  clocks, preserve completed text; full body/cleanup/following display twice
+  bilateral plus complete Slowpoke, real routes and ON/OFF parity.
+- **Notes:** unknown later entry/status/switch/summary histories stay unknown.
+  Preview `e3f60734c` verified: four canvas/PNG hashes, replay/export/mode restart,
+  no errors. Raw evidence, worker ref/logs preserved. No deferred decision.
+
+---
+
 ## 2026-10-03 — Light Screen allocator lifecycle independently verified
 
 - **State:** S10A on local master; 79 adapters, 197 accepted bodies remain.
