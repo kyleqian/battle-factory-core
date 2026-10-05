@@ -123,6 +123,168 @@ def summarize(names: list[str], quiet: bool = False) -> dict:
     return result
 
 
+# ---------------------------------------------------------------------------------------------------------------------------
+# corpus analysis: join the event table (raw sort windows) with the call-stream probe outputs in $OUT
+# ---------------------------------------------------------------------------------------------------------------------------
+import collections, re, sys as _sys
+_sys.path.insert(0, str(ROOT / "tools/integration"))
+import spriteOrderBodyPlans as BP  # noqa: E402
+
+TABLE = json.loads((ROOT / "tools/integration/fixtures/sprite-order-body-events.json").read_text())["scenarios"]
+CONST = (ROOT / "reference/pokeemerald/include/constants/battle_anim.h").read_text()
+
+
+def anim_constants() -> dict[str, dict[int, str]]:
+    out: dict[str, dict[int, str]] = {"General": {}, "Special": {}, "Status": {}}
+    section = None
+    for line in CONST.splitlines():
+        if "table ids for general animations" in line:
+            section = "General"
+        elif "special animations table" in line:
+            section = "Special"
+        elif "status animation table" in line:
+            section = "Status"
+        elif line.startswith("// Tasks with return values"):
+            section = None
+        m = re.match(r"#define (B_ANIM_\w+)\s+(\d+)", line)
+        if m and section:
+            out[section][int(m.group(2))] = m.group(1)
+    return out
+
+
+ANIMS = anim_constants()
+LAUNCHERS = ("marker:TryHandleLaunchBattleTableAnimation", "marker:InitAndLaunchSpecialAnimation", "marker:LaunchStatusAnimation",
+             "marker:InitAndLaunchChosenStatusAnimation")
+
+
+def anim_identity(c: dict) -> dict:
+    """Decode one launcher marker into (table, id, name, argument)."""
+    k = c["kind"].split(":")[1]
+    a = c["args"]  # r0..r3 + first stack word
+    if k == "TryHandleLaunchBattleTableAnimation":  # (activeBattler, atk, def, tableId, argument)
+        return {"launcher": k, "table": "General", "id": a[3] & 0xFF, "arg": a[4] & 0xFFFF, "caller": c["caller"]}
+    if k == "InitAndLaunchSpecialAnimation":  # (activeBattler, atk, def, tableId)
+        return {"launcher": k, "table": "Special", "id": a[3] & 0xFF, "arg": None, "caller": c["caller"]}
+    if k == "LaunchStatusAnimation":  # (battler, statusAnimId)
+        return {"launcher": k, "table": "Status", "id": a[1] & 0xFF, "arg": None, "caller": c["caller"]}
+    return {"launcher": k, "table": "ChosenStatus", "id": a[3] & 0xFF if len(a) > 3 else None, "arg": None, "caller": c["caller"]}
+
+
+def raw_to_lab(name: str) -> str | None:
+    m = re.match(r"^\d+-(.*)-\d+\.json$", name)
+    if not m:
+        return None
+    for cand in (m.group(1), m.group(1).replace("-scenario", "")):
+        if (OUT / f"{cand}.json").is_file():
+            return cand
+    return None
+
+
+def load_probe(lab: str) -> dict:
+    d = json.loads((OUT / f"{lab}.json").read_text())
+    d["calls"] = [c for c in d["calls"] if c["n"] > d["resetFrame"]]
+    return d
+
+
+def table_blips(sc: dict) -> set[int]:
+    """Create frames of single-slot create/destroy pairs 20 frames apart (the transient blip) anywhere in the unit stream."""
+    out = set()
+    wins = [w for u in sc["units"] for w in u["windows"]]
+    for w in [w for u in sc["units"] if u["kind"] == "gap" for w in u["windows"]]:
+        if "C" in w and len(w["C"]) == 1:
+            slot = w["C"][0][0]
+            if any(x["f"] == w["f"] + 20 and x.get("D") == [slot] for x in wins):
+                out.add(w["f"])
+    return out
+
+
+def validate_blips() -> dict:
+    res = {"scenarios": 0, "tableBlips": 0, "probeBlips": 0, "matched": 0, "tableOnly": [], "probeOnly": []}
+    for sc in TABLE:
+        lab = raw_to_lab(sc["file"])
+        if not lab:
+            continue
+        d = load_probe(lab)
+        probe = {c["n"] for c in d["calls"] if c["kind"] == "marker:DoHitAnimHealthboxEffect"}
+        tb = table_blips(sc)
+        # table frames beyond the probe's last frame are truncated tails
+        last = max([c["n"] for c in d["calls"]] + [0])
+        res["scenarios"] += 1
+        res["tableBlips"] += len(tb)
+        res["probeBlips"] += len(probe)
+        res["matched"] += len(tb & probe)
+        res["tableOnly"] += [[sc["file"], f] for f in sorted(tb - probe)]
+        res["probeOnly"] += [[sc["file"], f] for f in sorted(probe - tb)]
+    return res
+
+
+def analyse_anims() -> dict:
+    """Identify every mv-0 body by the animation launcher called inside it and re-derive its order verdict per animation id."""
+    plans = collections.defaultdict(lambda: {"sigs": collections.defaultdict(list), "cls": collections.Counter(), "why": collections.Counter(),
+                                              "inst": [], "creators": collections.Counter(), "destroyers": collections.Counter(),
+                                              "templates": collections.Counter()})
+    unmatched = []
+    for sc in TABLE:
+        lab = raw_to_lab(sc["file"])
+        if not lab:
+            continue
+        d = load_probe(lab)
+        launches = [c for c in d["calls"] if c["kind"] in LAUNCHERS]
+        toks = BP.tokenize_scenario(sc)
+        for ui, (u, tw) in enumerate(zip(sc["units"], toks)):
+            if u["kind"] != "body" or u["mv"] != 0 or u.get("truncated"):
+                continue
+            prev_end = max([w["f"] for v in sc["units"][:ui] for w in v["windows"]] + [d["resetFrame"]])
+            lo = max(prev_end, 0)
+            hi = max([w["f"] for w in u["windows"]] + [u["frame"]])
+            ids = [anim_identity(c) for c in launches if lo < c["n"] <= hi]
+            if not ids:  # fallback: raw non-move LaunchBattleAnimation
+                ids = [{"table": ",".join(c["table"]).replace("gBattleAnims_", ""), "id": c["tableId"], "arg": None, "caller": c["caller"]}
+                       for c in d["calls"] if c["kind"] == "marker:LaunchBattleAnimation" and not c["isMove"] and lo < c["n"] <= hi]
+            if not ids:
+                unmatched.append([sc["file"], ui, u["frame"]])
+                continue
+            key = "+".join(f"{i['table']}:{ANIMS.get(i['table'], {}).get(i['id'], i['id'])}" for i in ids)
+            p = plans[key]
+            p["sigs"][BP.sig(tw)].append(sc["file"])
+            p["inst"].append({"file": sc["file"], "unit": ui, "args": [i["arg"] for i in ids], "launch": [i["caller"] for i in ids]})
+            for w in tw:
+                if "cls" in w and "D" in w:
+                    p["cls"][w["cls"]] += 1
+                    if "why" in w:
+                        p["why"][w["why"]] += 1
+            for c in d["calls"]:
+                if lo <= c["n"] <= hi and not c["kind"].startswith("marker:"):
+                    if c["kind"] == "DestroySprite":
+                        p["destroyers"][c["caller"].split("+")[0] + " (" + ",".join(c["victim"]["cb"]) + ")"] += 1
+                    elif c["caller"].split("+")[0] not in INTERNAL:
+                        p["creators"][c["caller"].split("+")[0]] += 1
+                        p["templates"][",".join(c["tpl"]["names"])] += 1
+    out = {}
+    for key, p in sorted(plans.items()):
+        multi = len(p["sigs"]) > 1
+        bad = p["cls"]["KEYS"]
+        top = max(p["sigs"], key=lambda x: len(p["sigs"][x]))
+        out[key] = {"instances": len(p["inst"]), "distinctPlans": len(p["sigs"]), "groupClasses": dict(p["cls"]), "keysReasons": dict(p["why"]),
+                    "verdict": "EXACT-PLAN" if not bad and not multi else "NEEDS-KEYS", "plan": json.loads(top), "planExamples": p["sigs"][top][:2],
+                    "otherPlans": {x: len(f) for x, f in p["sigs"].items() if x != top} if multi else {},
+                    "args": sorted({str(a) for i in p["inst"] for a in i["args"]}),
+                    "creators": dict(p["creators"].most_common(8)), "destroyers": dict(p["destroyers"].most_common(8)),
+                    "templates": dict(p["templates"].most_common(8)), "exampleLaunchCallers": sorted({c for i in p["inst"] for c in i["launch"]})}
+    return {"anims": out, "unmatchedMv0Bodies": unmatched}
+
+
+if __name__ == "__main__" and sys.argv[1] in ("blips", "anims"):
+    r = validate_blips() if sys.argv[1] == "blips" else analyse_anims()
+    if sys.argv[1] == "blips":
+        print({k: (v if not isinstance(v, list) else v[:6]) for k, v in r.items()}, "tableOnly", len(r["tableOnly"]), "probeOnly", len(r["probeOnly"]))
+    else:
+        for k, v in r["anims"].items():
+            print(k, v["instances"], v["verdict"], "plans", v["distinctPlans"], v["groupClasses"], v["args"][:6])
+        print("unmatched", len(r["unmatchedMv0Bodies"]), r["unmatchedMv0Bodies"][:5])
+    sys.exit(0)
+
+
 if __name__ == "__main__":
     cmd, names = sys.argv[1], sys.argv[2:]
     if cmd == "gen":

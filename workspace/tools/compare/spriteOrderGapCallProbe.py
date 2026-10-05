@@ -141,6 +141,10 @@ def pass1():
         c = context(o)
         if c["animActive"] and not st.get("prevAct"):
             st["flag"].setdefault(st["n"], {"freed": [], "alloc": []})  # LaunchBattleAnimation frame (no sprite change needed)
+        ptr = int(c["animScript"], 16)
+        if ptr and (abs(ptr - st.get("prevPtr", 0)) > 0x400 or ptr < st.get("prevPtr", 0)):  # script pointer jumped = a (new) animation was launched, even if gAnimScriptActive stayed 1
+            st["flag"].setdefault(st["n"], {"freed": [], "alloc": []})
+        st["prevPtr"] = ptr
         st["prevAct"] = c["animActive"]
         key = json.dumps({k: c[k] for k in ("mainFunc", "ctrl", "attacker", "target", "curMove", "resultFlags", "animActive", "animMove", "hp")}, sort_keys=True)
         if key != st["lastctx"]:
