@@ -35,5 +35,125 @@
   "ageOffset": 0
  },
  "note": "accepted window offset/length of playerfaint-heal-bell-player.json (261 rows); turn after a voluntary switch to party slot 1",
- "precedingTurns": null
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "voluntary-party-menu",
+     "outcome": "cancel"
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "241",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "SUN_CONTINUES",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "voluntary-party-menu",
+     "outcome": "switch"
+    },
+    {
+     "kind": "set-battler-sprite-visibility",
+     "battler": 0,
+     "invisible": true,
+     "provenanceOpcodeName": "B_SCR_OP_RETURNATKTOBALL"
+    },
+    {
+     "kind": "switch",
+     "battler": 0
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 0,
+     "partyIndex": 1
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "SUN_CONTINUES",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "215",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
 }

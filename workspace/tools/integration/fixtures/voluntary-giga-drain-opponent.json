@@ -35,5 +35,43 @@
   "ageOffset": 0
  },
  "note": "accepted window offset/length of playerfaint-giga-drain-player.json (230 rows); first body after a voluntary switch to party slot 2",
- "precedingTurns": null
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "voluntary-party-menu",
+     "outcome": "switch"
+    },
+    {
+     "kind": "set-battler-sprite-visibility",
+     "battler": 0,
+     "invisible": true,
+     "provenanceOpcodeName": "B_SCR_OP_RETURNATKTOBALL"
+    },
+    {
+     "kind": "switch",
+     "battler": 0
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 0,
+     "partyIndex": 1
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "202",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
 }

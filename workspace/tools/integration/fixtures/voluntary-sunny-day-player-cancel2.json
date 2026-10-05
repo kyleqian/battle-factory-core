@@ -35,5 +35,49 @@
   "ageOffset": 0
  },
  "note": "accepted window offset/length of playerfaint-sunny-day-player.json (158 rows); second body after a cancelled voluntary party menu",
- "precedingTurns": null
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "voluntary-party-menu",
+     "outcome": "cancel"
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "241",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
 }

@@ -34,5 +34,29 @@
   "endFrame": 412,
   "ageOffset": 0
  },
- "note": "accepted window offset/length of playerfaint-light-screen-player.json (88 rows); first body after a cancelled voluntary party menu"
+ "note": "accepted window offset/length of playerfaint-light-screen-player.json (88 rows); first body after a cancelled voluntary party menu",
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "voluntary-party-menu",
+     "outcome": "cancel"
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "113",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
 }

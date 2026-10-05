@@ -34,5 +34,68 @@
   "endFrame": 1095,
   "ageOffset": 0
  },
- "note": "accepted window offset/length of playerfaint-heal-bell-player.json (261 rows); turn after a cancelled voluntary party menu"
+ "note": "accepted window offset/length of playerfaint-heal-bell-player.json (261 rows); turn after a cancelled voluntary party menu",
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "voluntary-party-menu",
+     "outcome": "cancel"
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "113",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "215",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
 }

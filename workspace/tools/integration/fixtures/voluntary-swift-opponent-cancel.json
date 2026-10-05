@@ -35,5 +35,28 @@
   "ageOffset": 0
  },
  "note": "accepted window offset/length of playerfaint-swift-opponent.json (80 rows); first body after a cancelled voluntary party menu (opponent first)",
- "precedingTurns": null
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "voluntary-party-menu",
+     "outcome": "cancel"
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
 }
