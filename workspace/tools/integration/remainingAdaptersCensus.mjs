@@ -236,6 +236,12 @@ for (const m of remaining) {
     }
     for (const n of fx?.add ?? []) add(n, CODES[n], EXTRA_CITE[n] ?? fx.cites);
     if (fx) { row.notes.push(fx.note); row.staleCorrections.push(fx.note); for (const x of fx.cites) checkCite(x); }
+    row.consumedInputs = t.fields.map((f) => {
+      const cls = f.cls.filter((x) => x !== "A"), stale = f.cite.startsWith(SCP);
+      const status = cls.length === 0 ? "derivable-now" : cls.every((x) => x === "A-SLOT" || x === "B") ? (cls.includes("B") ? "first-body-order" : "slot-plan (recipe)") : `blocked: ${cls.filter((x) => x !== "A-SLOT" && x !== "B").join("+")}`;
+      return { path: f.path, classes: f.cls, status, cite: stale ? null : f.cite };
+    });
+    row.staleFieldCites = row.consumedInputs.filter((x) => x.cite && (() => { const [file, ln] = x.cite.split(":"); return !(linesOf(file)?.[Number(ln) - 1] ?? "").trim(); })()).length;
     row.slotPlanNeeded = !!t.needsSpriteSlotPlan;
     row.orderKind = t.orderKind ?? null;
     row.carrierOccurrences = t.carrier?.occurrences ?? 0;
@@ -257,6 +263,7 @@ for (const m of remaining) {
       add(cls, `${f.path} (${f.type.slice(0, 50)})`, [`${path}:${f.line}`]);
     }
     row.slotPlanNeeded = fields.some((f) => classify1(f.path) === "A-SLOT");
+    row.consumedInputs = fields.map((f) => { const cls = classify1(f.path); return { path: f.path, classes: [cls], status: cls === "A" ? "derivable-now" : cls === "A-SLOT" ? "slot-plan (recipe)" : cls === "B" ? "first-body-order" : `blocked: ${cls}`, cite: `${path}:${f.line}` }; });
     if (!seenCls.size) row.notes.push("no buffer fields found");
     const sel = { MOVE_SPIT_UP: ["X-DISABLE", "stockpiles 1/2/3 branch = DisableStruct.stockpileCounter (Cmd_stockpiletohpheal sets animTurn only for Swallow; Spit Up reads the counter from the DisableStruct snapshot)", [`${R}src/battle_script_commands.c:1787`, "src/animation/spitUp.ts:14"]], MOVE_FURY_CUTTER: ["X-DISABLE", "counter 1..4 = DisableStruct.furyCutterCounter (AnimTask_IsFuryCutterHitRight)", [`${R}src/battle_anim_effects_2.c:3824`, "src/animation/furyCutter.ts:14"]], MOVE_ICE_BALL: ["X-DISABLE", "counter 0..4 = rolloutTimerStartValue - rolloutTimer - 1 (AnimTask_GetIceBallCounter)", [`${R}src/battle_anim_ice.c:1613`, "src/animation/iceBall.ts:9"]], MOVE_CURSE: ["E-OUT", "branch ghost|stats = request.turn (choosetwoturnanim, battle_anim_scripts.s:7641); the request already carries it, so this is recipe, not a provider", [`${R}data/battle_anim_scripts.s:7641`, "src/animation/curse.ts:22"]] }[m];
     if (sel && sel[0] === "E-OUT") { row.notes.push(sel[1]); sel[2].forEach(checkCite); row.staleCorrections.push("Curse selector is request.turn"); }
@@ -392,7 +399,7 @@ const batches = BATCH_PICKS.map((b) => {
 const batchSeen = batches.flatMap((b) => b.moves.map((m) => m.move));
 if (new Set(batchSeen).size !== batchSeen.length) throw new Error("a move is in two batches");
 for (const r of ranking) r.meta = PROVIDER_META[r.provider] ?? null;
-const out = { schema: "remaining-adapters-census/v1", generatedBy: "tools/integration/remainingAdaptersCensus.mjs", inputs: ["docs/animation-integration-live-status.json", "docs/animation-integration-readiness.json", "docs/animation-integration-merged-readiness.json", "tools/integration/fixtures/h-buffer-triage.json", "tools/integration/fixtures/sprite-order-body-plans-ext.json", "src/data/gen/battle-frontier-mons.json", "src/data/gen/factory-round-policy.json"], liveStatusImplementedCount: live.implementedCount, inFlightMoves: Object.fromEntries([...inflight].filter(([m]) => accepted.has(m)).map(([m, k]) => [m, liveSet.has(m) ? "now live" : k])), summary: { ...summary, triageCiteDrift: triageDrift.length }, codes: CODES, bundles: BUNDLES, ranking, greedy, batches, rows };
+const out = { schema: "remaining-adapters-census/v1", generatedBy: "tools/integration/remainingAdaptersCensus.mjs", inputs: ["docs/animation-integration-live-status.json", "docs/animation-integration-readiness.json", "docs/animation-integration-merged-readiness.json", "tools/integration/fixtures/h-buffer-triage.json", "tools/integration/fixtures/sprite-order-body-plans-ext.json", "src/data/gen/battle-frontier-mons.json", "src/data/gen/factory-round-policy.json"], liveStatusImplementedCount: live.implementedCount, inFlightMoves: Object.fromEntries([...inflight].filter(([m]) => accepted.has(m)).map(([m, k]) => [m, liveSet.has(m) ? "now live" : k])), summary: { ...summary, triageCiteDrift: triageDrift.length, triageCiteDriftList: triageDrift }, codes: CODES, bundles: BUNDLES, ranking, greedy, batches, rows };
 export { out, rows, summary, ranking, greedy, batches, CODES };
 
 if (process.argv.includes("--write")) fs.writeFileSync("tools/integration/fixtures/remaining-adapters-census.json", JSON.stringify(out, null, 1) + "\n");
