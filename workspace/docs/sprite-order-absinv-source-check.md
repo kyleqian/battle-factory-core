@@ -45,7 +45,7 @@ Paths: `S` = `reference/pokeemerald/data/battle_anim_scripts.s`, `src/…` = `re
 | 336:opponent, 336:player | HOWL | same 2 x 3 noise lines | SOURCE-CONFIRMED | `S:4380-4388`, `RoarEffect` |
 | 45:opponent, 45:player | GROWL | same 2 x 3 noise lines | SOURCE-CONFIRMED | `S:4993-5003`, `RoarEffect` (ShakeMon2 tasks create no sprites) |
 | 263:opponent, 263:player | FACADE | 6 x 4 sweat drops [6,6,0,0] | SOURCE-CONFIRMED | `S:3538-3543`, `CreateSweatDroplets` |
-| 283:player | ENDEAVOR | 4 x 4 sweat drops [6,6,0,0] | SOURCE-CONFIRMED | `S:3789-3803`; hit splats (species-dependent) are singleton windows |
+| 283:player | ENDEAVOR | 4 x 4 sweat drops [6,6,0,0] | SOURCE-CONFIRMED (already in production via the policy-gaps row, identical plan; not re-added) | `S:3789-3803`; hit splats (species-dependent) are singleton windows |
 | 90:opponent, 90:player | FISSURE | 3 x 4 dirt plumes [36,21,4,0],[18,13,1,0],[36,21,4,0] | SOURCE-CONFIRMED (relative y) | `S:2609-2634`, `FissureDirtPlumeFar/Close S:2636-2650`, `AnimDirtPlumeParticle`: absolute y = `COORD_Y - gEnemyMonElevation[species]` (opponent target only) is a COMMON offset of all four plumes of a group (same target battler, linear/arc translation relative to the start), so relative y is species-independent; absolute y (not used by the plan) may shift by elevation |
 | 69:opponent, 69:player | SEISMIC_TOSS | 3 x 4 rocks [25,22,12,0],[21,18,11,0],[25,22,12,0] | SOURCE-CONFIRMED | `S:9424-9450,9472-9489`, `AnimRockScatter`; hit splats singleton |
 | 230:opponent, 230:player | SWEET_SCENT | [15,0] petal pair | SOURCE-CONFIRMED | `S:8324-8360`, `AnimSweetScentPetal` (no battler coordinate) |
@@ -55,6 +55,6 @@ Paths: `S` = `reference/pokeemerald/data/battle_anim_scripts.s`, `src/…` = `re
 | 215:opponent, 215:player | HEAL_BELL | [99,97,51,0],[67,0],[61,59,0] (notes + rings) | SOURCE-CONFIRMED | `S:7708-7752`, `HealBellRing S:7753-7758`, `AnimHealBellMusicNote`, ring arg3=1; sparkling stars singleton |
 | 312:opponent, 312:player | AROMATHERAPY | [48,0],[33,0],[15,0] flowers | SOURCE-CONFIRMED | `S:4137-4174` (unk5 in {0,1}), `AnimFlyingParticle`; sparkling stars singleton |
 
-23 rows, 23 SOURCE-CONFIRMED, 0 SPECIES-DEPENDENT in a KEYS group, 0 UNCLEAR.
+23 rows, 23 SOURCE-CONFIRMED (22 newly admitted; 283:player was already in the table), 0 SPECIES-DEPENDENT in a KEYS group, 0 UNCLEAR.
 Residual caveat (shared with all rely rows): the plan's *window* structure (which sprites die together, and when) is observed, not derived;
 this check only closes the "second absolute-y geometry" gap for the y that orders sprites inside a window.
