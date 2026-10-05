@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py)",
  "rows": [
   {
    "id": 236,
@@ -916,6 +916,186 @@
     "scenario": "tools/battle-lab/mechanic-psybeam-player-spinda-opponent-onix.json",
     "body": "normal",
     "activation": "issue142-anchor4-activation-probes.json"
+   }
+  },
+  {
+   "id": 184,
+   "move": "SCARY_FACE",
+   "orientation": "player",
+   "variant": "next-scary-face-player",
+   "activationFrame": 75,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": -4,
+   "cleanupFrame": null,
+   "tailFirstAge": 190,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-scary-face-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 184,
+   "move": "SCARY_FACE",
+   "orientation": "opponent",
+   "variant": "next-scary-face-opponent",
+   "activationFrame": 79,
+   "windowStart": 83,
+   "ageOffset": 0,
+   "shadowRow": -4,
+   "cleanupFrame": null,
+   "tailFirstAge": 190,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-scary-face-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 298,
+   "move": "TEETER_DANCE",
+   "orientation": "player",
+   "variant": "next-teeter-dance-player",
+   "activationFrame": 227,
+   "windowStart": 227,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": 169,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-teeter-dance-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 298,
+   "move": "TEETER_DANCE",
+   "orientation": "opponent",
+   "variant": "next-teeter-dance-opponent",
+   "activationFrame": 222,
+   "windowStart": 222,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": 169,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-teeter-dance-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 146,
+   "move": "DIZZY_PUNCH",
+   "orientation": "player",
+   "variant": "next-dizzy-punch-player",
+   "activationFrame": 77,
+   "windowStart": 90,
+   "ageOffset": 0,
+   "shadowRow": -13,
+   "cleanupFrame": null,
+   "tailFirstAge": 69,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-dizzy-punch-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 146,
+   "move": "DIZZY_PUNCH",
+   "orientation": "opponent",
+   "variant": "next-dizzy-punch-opponent",
+   "activationFrame": 81,
+   "windowStart": 94,
+   "ageOffset": 0,
+   "shadowRow": -13,
+   "cleanupFrame": null,
+   "tailFirstAge": 69,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-dizzy-punch-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 135,
+   "move": "SOFT_BOILED",
+   "orientation": "player",
+   "variant": "next-soft-boiled-player",
+   "activationFrame": 227,
+   "windowStart": 227,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": 272,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-soft-boiled-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 135,
+   "move": "SOFT_BOILED",
+   "orientation": "opponent",
+   "variant": "next-soft-boiled-opponent",
+   "activationFrame": 228,
+   "windowStart": 228,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": 272,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-soft-boiled-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 137,
+   "move": "GLARE",
+   "orientation": "player",
+   "variant": "next-glare-player",
+   "activationFrame": 74,
+   "windowStart": 74,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": 213,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-glare-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 137,
+   "move": "GLARE",
+   "orientation": "opponent",
+   "variant": "next-glare-opponent",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": 213,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/next-glare-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
    }
   }
  ]

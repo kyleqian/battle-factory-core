@@ -1,0 +1,41 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "oracleProfile": "battle-scene-on",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/scary-face-player-arbok-opponent-shuckle.json",
+ "probe": "tools/compare/scaryFaceProbe.py",
+ "move": "SCARY_FACE",
+ "attackerSide": "player",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 266,
+  "frameCount": 190
+ },
+ "attackerEyeCenter": {
+  "x": 72,
+  "y": 100
+ },
+ "attacker": {
+  "species": "ARBOK",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 167,
+  "playerMaxHp": 167,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "baseSourceFixture": "tools/compare/fixtures/scary-face-player-rhyhorn-opponent-shuckle.json",
+ "swap": {
+  "player": "ARBOK"
+ }
+}

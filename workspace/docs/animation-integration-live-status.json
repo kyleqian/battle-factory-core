@@ -1773,6 +1773,92 @@
         "whole-playable arbitrary-history framebuffer exactness"
       ],
       "selector": "attackerPictureSize = species pic coords width/height (GetBattlerSpriteCoordAttr)"
+    },
+    {
+      "move": "MOVE_SCARY_FACE",
+      "id": 184,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/next5-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (next-scary-face-*.json)",
+        "alternate-species dense proof twice fresh, zero residual (altspecies3-scary-face-player-arbok-opponent-shuckle.json, window 77..266)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness",
+        "accepted window ends 14 frames before the script end (tail uncovered)"
+      ],
+      "selector": "attackerEyeCenter = attacker liveBattlerAnchors picOffsetPoint"
+    },
+    {
+      "move": "MOVE_GLARE",
+      "id": 137,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/next5-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (next-glare-*.json)",
+        "alternate-species dense proof twice fresh, zero residual (altspecies3-glare-opponent-seviper-player-shuckle.json, window 76..288)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ],
+      "selector": "attackerEyeCenter = pic point + (0,-8); eyeDotStart from GET_MON_COORDS_HEIGHT/4 (mon-pic-coords); eyeDotEnd = target pic point"
+    },
+    {
+      "move": "MOVE_TEETER_DANCE",
+      "id": 298,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/next5-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (next-teeter-dance-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness",
+        "ordinary route seed 49 slot 1 streak 0 (player SPINDA)"
+      ],
+      "selector": "attackerSpriteCenter = OBJ center; attacker note center = pic point, player target OBJ center / opponent target pic point; attackerPersonality = displayed party personality (presentation-only)"
+    },
+    {
+      "move": "MOVE_DIZZY_PUNCH",
+      "id": 146,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/next5-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (next-dizzy-punch-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness",
+        "accepted window ends ~5 frames before the script end (tail uncovered)"
+      ],
+      "selector": "attackerPersonality = displayed party personality (presentation-only); target idle x2 from the target species"
+    },
+    {
+      "move": "MOVE_SOFT_BOILED",
+      "id": 135,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/next5-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (next-soft-boiled-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness",
+        "no generated rental carries Soft-Boiled (seeds 0-119): dense-only, no ordinary route"
+      ],
+      "selector": "target = attacker (MOVE_TARGET_USER); healingCenter = attacker pic point; bystander = displayed other-side battler"
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -1788,14 +1874,14 @@
     "source-derived ordinary singles party/B-cancel palette return with explicit known entry provenance; unknown histories and actual switches remain invalidated"
   ],
   "pending": [
-    "production adapters/providers for the remaining 159 accepted Factory moves",
+    "production adapters/providers for the remaining 154 accepted Factory moves",
     "complete graphics ownership across actual switches, forced replacement, summaries, substitute/transform and unmodeled histories",
-    "source palette resource plans for 49 implemented adapters without audited ownership"
+    "source palette resource plans for 54 implemented adapters without audited ownership"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 131,
+  "implementedCount": 136,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},

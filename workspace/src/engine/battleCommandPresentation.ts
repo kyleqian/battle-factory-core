@@ -82,6 +82,12 @@ export type BattleCommandFieldBattler = Readonly<{
   moveIds: BattleCommandMoveIds;
   currentPP: BattleCommandMovePp;
   ppBonuses: number;
+  /**
+   * Presentation-only: the party mon's personality, read by source art that
+   * depends on it (Spinda spots in Dizzy Punch / Teeter Dance). Never feeds
+   * rules or RNG; Transform leaves it unchanged (battleScriptRulesContext.ts:365).
+   */
+  personality?: number;
 }>;
 
 export type BattleCommandPresentationPhase =
@@ -337,6 +343,7 @@ export function battleCommandFieldBattlerFromPartyMember(
     name: battleCommandSpeciesDisplayName(partyMember.species),
     level: partyMember.level,
     gender: getMonGender(speciesStats.genderRatio, partyMember.personality),
+    personality: partyMember.personality,
     hp: partyMember.hp,
     maxHP: partyMember.maxHP,
     status: battleCommandUiStatusFromStatus1(partyMember.status1),

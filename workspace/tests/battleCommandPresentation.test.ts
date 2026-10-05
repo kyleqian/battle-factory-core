@@ -171,6 +171,8 @@ describe("battle-command presentation state construction", () => {
           moveIds: ONIX_MOVES.moveIds,
           currentPP: ONIX_MOVES.maxPP,
           ppBonuses: rules.party.player[0].ppBonuses,
+          // Presentation-only (Spinda spots): the party record's personality.
+          personality: rules.party.player[0].personality,
         },
         opponent: {
           side: "trainer",
@@ -181,6 +183,7 @@ describe("battle-command presentation state construction", () => {
           moveIds: rules.battlers[1].moves,
           currentPP: rules.battlers[1].pp,
           ppBonuses: rules.party.opponent[0].ppBonuses,
+          personality: rules.party.opponent[0].personality,
         },
       },
       promptBattler: BATTLE2_ACTION_MENU_MODEL.promptBattler,

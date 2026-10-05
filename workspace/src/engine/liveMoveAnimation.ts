@@ -76,6 +76,12 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   3, 4, 167,
   // anchor4: species idle offsets (and picture size) derived through liveBattlerAnchors.
   89, 90, 152, 345, 133, 60,
+  // next5: eye anchors from liveBattlerAnchors (docs/next-adapters-prep.md s4).
+  184, 137,
+  // next5 personality: Spinda spots read the displayed party mon's personality (presentation-only).
+  298, 146,
+  // next5 self-target: healing anchors on the attacker, other-side battler drawn from the field.
+  135,
 ] as const);
 
 /**
@@ -102,6 +108,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     3, 4, 167,
     // anchor4 batch (issue142-shadow-rows-extra.json): every window starts at activation (Earthquake: age 0 is the activation frame).
     89, 90, 152, 345, 60, 133,
+    // next5 (issue142-shadow-rows-extra.json): Glare/Teeter Dance/Soft-Boiled windows start at activation;
+    // Scary Face (-4) and Dizzy Punch (-13) start after it and have no row.
+    137, 298, 135,
   ].map((id) => [id, 0])),
 );
 
@@ -309,6 +318,11 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 345: return MAGICAL_LEAF_FRAME_COUNT;
     case 60: return 160; // Psybeam accepted window (source script through first inactive row).
     case 133: return 216; // Amnesia accepted window (source script through first inactive row).
+    case 135: return 272; // Soft-Boiled accepted window (first inactive row 271).
+    case 298: return 169; // Teeter Dance accepted window (firstInactiveAge 168).
+    case 146: return 69; // Dizzy Punch accepted window; script tail 5 rows uncovered.
+    case 184: return 190; // Scary Face accepted window (79..268); script tail 14 rows uncovered.
+    case 137: return 213; // Glare accepted window (GLARE_SOURCE_FRAME_COUNT).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -796,6 +810,48 @@ export function liveMoveAnimationPresentation(
       config = { move: request.moveId === 152 ? "CRABHAMMER" : request.moveId === 60 ? "PSYBEAM" : "MAGICAL_LEAF", attacker, target, fieldProfile,
         targetIdleX2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2 };
       break;
+    case 135: {
+      // MOVE_TARGET_USER: the semantic target is the attacker (healing stars use X_2 / Y_PIC_OFFSET of it);
+      // the other-side battler is only background and is drawn from the displayed field.
+      // softBoiledFramebuffer.ts:30: the egg's attacker center is the OBJ center +5 (player) / +7 (opponent).
+      const eggAttacker = { ...attacker, geometry: { ...attacker.geometry, animationCenter: {
+        x: attackerAnchors.spriteCenter.x,
+        y: attackerAnchors.spriteCenter.y + (attacker.geometry.side === "player" ? 5 : 7) } } };
+      config = { move: "SOFT_BOILED", attacker: eggAttacker, target: eggAttacker, fieldProfile,
+        healingCenter: attackerAnchors.picOffsetPoint, bystander: target };
+      break;
+    }
+    case 298: {
+      // teeterDanceFramebuffer.ts:84-110: the attacker's note/pic center is its pic point, the player-side
+      // target uses its OBJ center, and the attacker's own sprite x/y is the OBJ center.
+      config = { move: "TEETER_DANCE",
+        attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: attackerAnchors.picOffsetPoint } },
+        target: { ...target, geometry: { ...target.geometry, animationCenter: target.geometry.side === "player"
+          ? liveBattlerAnchors("player", art).spriteCenter : liveBattlerAnchors("opponent", art).picOffsetPoint } },
+        fieldProfile, attackerSpriteCenter: attackerAnchors.spriteCenter,
+        attackerPersonality: field[attacker.geometry.side].personality ?? 0 };
+      break;
+    }
+    case 146:
+      config = { move: "DIZZY_PUNCH", attacker, target, fieldProfile,
+        attackerPersonality: field[attacker.geometry.side].personality ?? 0 };
+      break;
+    case 184:
+      // InitSpritePosToAnimAttacker(sprite, TRUE): attacker X_2 / Y_PIC_OFFSET.
+      config = { move: "SCARY_FACE", attacker, target, fieldProfile,
+        attackerEyeCenter: attackerAnchors.picOffsetPoint };
+      break;
+    case 137: {
+      // AnimTask_GlareEyeDots (battle_anim_effects_3.c:3989): HEIGHT = GET_MON_COORDS_HEIGHT of the
+      // attacker's own (back for player, front for opponent) pic coords, not LiveBattlerAnchors.pictureHeight.
+      const pic = attackerAnchors.picOffsetPoint;
+      const quarter = Math.trunc(art[attacker.geometry.side].coords.height / 4);
+      config = { move: "GLARE", attacker, target, fieldProfile,
+        attackerEyeCenter: { x: pic.x, y: pic.y - 8 },
+        eyeDotStart: { x: pic.x + (attacker.geometry.side === "player" ? quarter : -quarter), y: pic.y - quarter },
+        eyeDotEnd: liveBattlerAnchors(target.geometry.side, art).picOffsetPoint };
+      break;
+    }
     case 342:
       config = {
         move: "POISON_TAIL",

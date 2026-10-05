@@ -15,6 +15,9 @@
       "side": "player"
     }
   },
+  "bystander": {
+    "species": "ONIX"
+  },
   "fieldProfile": {
     "playerHp": 297,
     "playerMaxHp": 325,
