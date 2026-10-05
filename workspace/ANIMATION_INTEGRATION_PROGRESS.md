@@ -18,7 +18,14 @@
 - Plan coverage (`adc8d04f3`, `docs/sprite-order-plan-coverage.md`): 228 more
   scenarios (two identical runs each) raise EXACT body plans to 68% of
   weighted Factory move uses (was 52%); union replay 1,053/1,053 exact.
-- Running: cross-body order tracking (Opus); remaining-adapters census (side).
+- Remaining-adapters census (`2add7576e`, `docs/remaining-adapters-census.md`,
+  regenerate `node tools/integration/remainingAdaptersCensus.mjs --write --doc`):
+  276 = 158 live + 15 in flight + 103 remaining (READY-NOW 10, SMALL-INPUT 5,
+  single provider 31, multi 56). Provider ranking: allocator plan v2
+  (affine matrix + task slots) +12 moves; Random2 surrogate +7 (non-exact,
+  claim-boundary question); graphics host +6; palette snapshots +5.
+- Running: cross-body order tracking (Opus); prep7 measured prep for the
+  census READY-NOW batch (side).
 
 ## 2026-10-04 (night) — sprite-order provider wired (first body) + Grudge: 158
 
