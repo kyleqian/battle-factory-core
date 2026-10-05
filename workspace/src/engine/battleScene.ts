@@ -22689,6 +22689,7 @@ export function renderSceneOnMovePresentation(
     const targetX2 = leafBladeDisplayedTargetX2AtAge(
       state.age,
       view.target.geometry.side,
+      leafState.config.targetIdleX2,
     );
     const drawSceptile = () => drawSpriteSheet(
       fb,

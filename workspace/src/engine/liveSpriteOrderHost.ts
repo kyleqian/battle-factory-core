@@ -276,12 +276,11 @@ export function advanceLiveSpriteOrderHost(
 }
 
 /**
- * Consumers measured NOT exact after an opponent KO under the entry-label lend (docs/postko-consumer-audit.md §4; dense
- * receipts tools/integration/fixtures/postko-lend/): they keep declining post-KO (scene-off fallback) until resolved.
- * LEAF_BLADE 348 (player): 212/224 rows twice fresh, 11,843 px, all on the target sprite box (GOLEM, x149-203 y18-71) at ages
- * 0-11, exact from age 12 (postko-leaf-blade-player.json). Pinned by tests/postkoLend.test.ts.
+ * Consumers measured NOT exact after an opponent KO under the entry-label lend (docs/postko-consumer-audit.md §4): they keep
+ * declining post-KO (scene-off fallback) until resolved. Empty: Leaf Blade 348 was excluded for ISSUES #144, which was the target
+ * species' front-idle x2 (not the lend); fixed, postko-lend/postko-leaf-blade-fixed-receipt.json is 224/224 twice fresh.
  */
-export const POSTKO_LEND_EXCLUDED_MOVE_IDS: readonly number[] = Object.freeze([348]);
+export const POSTKO_LEND_EXCLUDED_MOVE_IDS: readonly number[] = Object.freeze<number[]>([]);
 
 /**
  * Order lent to the move body at its activation edge (undefined = consumers decline): the tracker's entry-label lend

@@ -1228,6 +1228,7 @@ export function liveMoveAnimationPresentation(
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
       const targetCoords = liveBattlerCoordAttrs(target.geometry.side, art);
       config = { move: "LEAF_BLADE", attacker, target, fieldProfile, oamOrderSeed,
+        targetIdleX2: targetAnchors.frontIdleRest.x2,
         targetProfile: { pictureOffset: targetAnchors.picOffsetPoint, width: targetCoords.width,
           height: targetCoords.height, subpriority: target.geometry.side === "player" ? 30 : 40 } };
       break;

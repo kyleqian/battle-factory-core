@@ -160,3 +160,12 @@ describe("MOVE_LEAF_BLADE source-relative reducer", () => {
     } as never)).toThrow("expected LEAF_BLADE");
   });
 });
+
+describe("Leaf Blade target front-idle x2 (ISSUES #144)", () => {
+  it("uses the target species idle x2 at ages <= 11; staged default is ONIX (1)", () => {
+    expect([0, 11, 12].map((age) => leafBladeDisplayedTargetX2AtAge(age, "opponent", 0))).toEqual([0, 0, 2]);
+    expect([0, 5, 10].map((age) => leafBladeDisplayedTargetX2AtAge(age, "opponent", 1))).toEqual([1, 1, 1]);
+    expect([0, 5].map((age) => leafBladeDisplayedTargetX2AtAge(age, "opponent"))).toEqual([1, 1]);
+    expect(leafBladeDisplayedTargetX2AtAge(5, "player")).toBe(0);
+  });
+});

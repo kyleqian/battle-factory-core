@@ -212,6 +212,8 @@ function spriteShape(
 export function leafBladeDisplayedTargetX2AtAge(
   age: number,
   targetSide: LeafBladeSide,
+  /** Species-owned front-idle x2 of the target; the staged ONIX default is 1 for the opponent front. */
+  targetIdleX2: number = targetSide === "opponent" ? 1 : 0,
 ): number {
   // Once target monbg is active, ShakeMon2 writes BG scroll before scanout;
   // the long impact shake therefore follows the ordinary RAM+1 display path.
@@ -228,9 +230,9 @@ export function leafBladeDisplayedTargetX2AtAge(
       if (displayed.active) return displayed.offset.x2;
     }
   }
-  // ONIX's opponent-front idle holds x2=1 until the first shake task owns
-  // and then neutralizes that field. Player-back ONIX starts at zero.
-  return targetSide === "opponent" && age <= 11 ? 1 : 0;
+  // The species front idle (ONIX x2=1; GOLEM/STEELIX 0) holds until the first
+  // shake task owns and then neutralizes that field. Player-back sprites start at zero.
+  return targetSide === "opponent" && age <= 11 ? targetIdleX2 : 0;
 }
 
 /**

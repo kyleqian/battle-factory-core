@@ -147,22 +147,20 @@ describe("post-KO entry-label lend (rung 2, presentation-only)", () => {
 });
 
 describe("post-KO lend exclusions (measured not exact under pi)", () => {
-  it("Leaf Blade keeps declining after an opponent KO (pinned residual), still lends at the entry; other consumers lend", () => {
-    expect(POSTKO_LEND_EXCLUDED_MOVE_IDS).toEqual([348]);
+  it("Leaf Blade is lent after an opponent KO (ISSUES #144 fixed: target idle x2, not the lend); no exclusions remain", () => {
+    expect(POSTKO_LEND_EXCLUDED_MOVE_IDS).toEqual([]);
     const leaf = JSON.parse(readFileSync("tools/integration/fixtures/postko-lend/postko-leaf-blade-player.json", "utf8"));
-    expect(replayPostKoTurnsThroughHost(leaf.precedingTurns).spriteOrderInput).toBeUndefined();
+    expect(replayPostKoTurnsThroughHost(leaf.precedingTurns).spriteOrderInput?.known).toBe(true);
     const host = (...events: SpriteOrderPresentationEvent[]) =>
       Object.freeze({ ...createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")), tracker: feed(entry(), ...events) });
     expect(lendLiveSpriteOrder(host(), 348)?.free).toEqual(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER);
-    expect(lendLiveSpriteOrder(host(...KO), 348)).toBeUndefined();
+    expect(lendLiveSpriteOrder(host(...KO), 348)?.free).toEqual(spriteOrderTrackerLend(feed(entry(), ...KO)));
     expect(lendLiveSpriteOrder(host(...KO), 218)?.free).toEqual(spriteOrderTrackerLend(feed(entry(), ...KO)));
-    // The lent measurement that motivated the exclusion: 212/224 rows on both fresh runs, 11,843 px, ages 0-11 only.
-    const dense = JSON.parse(readFileSync("tools/integration/fixtures/postko-lend/dense-class-batch4.json", "utf8")) as
+    // Dense receipt through the production lend (postkoLendDense.ts): 224/224 on both fresh runs, 0 px.
+    const fixed = JSON.parse(readFileSync("tools/integration/fixtures/postko-lend/postko-leaf-blade-fixed-receipt.json", "utf8")) as
       { fixture: string; rows: number; exactRows: number[]; residualPixels: number[] }[];
-    const row = dense.find(r => r.fixture.endsWith("postko-leaf-blade-player.json"))!;
-    expect({ rows: row.rows, exactRows: row.exactRows, residualPixels: row.residualPixels })
-      .toEqual({ rows: 224, exactRows: [212, 212], residualPixels: [11843, 11843] });
-    expect(dense.filter(r => r !== row).every(r => r.exactRows.every(n => n === r.rows) && r.residualPixels.every(n => n === 0))).toBe(true);
+    expect(fixed.map(r => ({ rows: r.rows, exactRows: r.exactRows, residualPixels: r.residualPixels })))
+      .toEqual([{ rows: 224, exactRows: [224, 224], residualPixels: [0, 0] }]);
   });
 });
 
