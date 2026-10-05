@@ -70,8 +70,22 @@
   suspected). D-PAL/D-BG/E-TASK/F-AFFINE labels stale for 9 moves (constants == accepted corpora
   18/18; monbg formula 25/25); Roar/Whirlwind continuation and Baton Pass flow unresolved;
   Rollout needs the counter; Fly/Bounce need the hidden-attacker seam.
-- Running: #144 fix + prep11 batch (Leech Seed, Tri Attack, Petal Dance, Destiny Bond, Air
-  Cutter, Foresight, Sky Uppercut, Recycle, Spider Web); live-adapter species audit (side).
+- Folded Sonnet worker `bbbea5ac0` (src tree `9c687e34`): **213 live adapters** (+Leech Seed main
+  body, Tri Attack, Petal Dance, Destiny Bond, Air Cutter, Foresight, Sky Uppercut, Recycle,
+  Spider Web) and the #144 fix (Leaf Blade target x2 from the species front idle; ONIX output
+  byte-identical; GOLEM/STEELIX now exact; post-KO exclusion lifted, 224/224). Supervisor:
+  dense rerun 7 fixtures twice fresh, zero residual (1,451 rows/run); routes 9/9 PASS. Limits:
+  Sky Uppercut COMBUSKEN script ends 1 frame later (ages 170-188); Spider Web ARIADOS back
+  sprite 14 px. Worker gates 1,514 files / 12,244 tests + build. Receipt
+  `prep11-live-adapter-receipt.json`. ISSUES #144 deleted.
+- Live-adapter species audit (`ffe363f39`, `docs/live-species-audit.md`, new files only): GOLEM,
+  GOLBAT, SHUCKLE and player-side GOLEM swaps over ~250 accepted fixtures; two new live defects
+  filed as **ISSUES #145** (Dragon Rage fire-spit aim from ONIX literals; Aerial Ace hard-coded
+  ONIX idle x2), both proven by one-value patches (supervisor reran: Dragon Rage GOLEM 139/150 ->
+  150/150, Aerial Ace 50/50). Unresolved: one-frame-later tail fades (suspected lag frame),
+  GOLBAT-only small residuals.
+- Running: #145 fixes + Fly/Bounce (hidden attacker between turns); player-faint lend evidence
+  (side).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 
