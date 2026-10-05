@@ -213,13 +213,26 @@ export const BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS: readonly (readonly [read
  * produce the identical window stream. Any other route is unknown history and returns an invalid state.
  */
 export function knownEntrySpriteOrderState(route: "ordinary-factory" | "battle-lab-ordinary-singles"): SpriteOrderState {
+  return knownEntryStateThrough(route, 0);
+}
+
+/**
+ * The same entry stream without its last two windows (the action-prompt bounce pair create/destroy): the order a
+ * battle-start script animation (Intimidate's STATS_CHANGE, docs/sprite-order-policy-gaps.md §2) sees. Applying the
+ * ordinary prompt cycle to it yields `knownEntrySpriteOrderState`.
+ */
+export function knownEntryPrePromptSpriteOrderState(route: "ordinary-factory" | "battle-lab-ordinary-singles"): SpriteOrderState {
+  return knownEntryStateThrough(route, 2);
+}
+
+function knownEntryStateThrough(route: "ordinary-factory" | "battle-lab-ordinary-singles", dropLast: number): SpriteOrderState {
   if (route !== "battle-lab-ordinary-singles" && route !== "ordinary-factory") {
     return invalidateSpriteOrderState(initSpriteOrderState());
   }
   // Entry windows only destroy groups whose array order is stored in the table; the array itself is not needed.
   const identity = Array.from({ length: SPRITE_ORDER_SLOT_COUNT }, (_, slot) => slot);
   let state = initSpriteOrderState();
-  for (const [created, destroyed] of BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS) {
+  for (const [created, destroyed] of BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS.slice(0, BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS.length - dropLast)) {
     // `previousArrayOrder` ordering is already baked into `destroyed`; pass it as the array prefix.
     state = applySpriteOrderWindow(state, created, destroyed, [...destroyed, ...identity.filter(s => !destroyed.includes(s))]);
   }

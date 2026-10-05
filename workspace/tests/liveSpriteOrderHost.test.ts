@@ -4,6 +4,7 @@ import { prepareLiveMoveSpriteOrder } from "../src/engine/liveMoveSpriteAllocato
 import {
   KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, invalidateSpriteOrderState, knownEntrySpriteOrderState,
 } from "../src/engine/spriteOrderProvider.ts";
+import { seedLiveSpriteOrderHostFromBattleStart } from "../src/engine/liveSpriteOrderHost.ts";
 import { battleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import { ORDER_CONSUMER_MOVES, predictLentOrders, scanRoute } from "../tools/integration/orderCrossBodyRouteScan.ts";
 
@@ -118,21 +119,45 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     }
   }, 60000);
 
-  it("refuses the order at battle start when the entry ran battle-start script events (Intimidate-class)", () => {
-    let withEvents = 0, without = 0;
-    for (let seed = 0; seed < 60 && (withEvents === 0 || without === 0); seed += 1) {
+  it("battle-start events: none = known entry, exactly one Intimidate triple = pre-prompt + stat plan (lends after the prompt), anything else refuses", () => {
+    let intimidate = 0, other = 0, without = 0;
+    for (const seed of [26, 34, 53, 83, 116, 3]) {
       const run = generatedCommandAnimationReplay(seed, "on", []);
       const host = run.state.liveMoveSpriteAllocatorHost!;
       expect(host.host.historyKnown).toBe(true);
-      if (run.state.battle!.nextEventSequence > 0) {
-        withEvents += 1;
+      const n = run.state.battle!.nextEventSequence;
+      if (n === 3) {
+        intimidate += 1;
+        expect(host.order.known).toBe(true);
+        expect(host.order.free.slice(0, 4)).toEqual([3, 4, 21, 20]); // pre-prompt + stat plan, before the prompt cycle
+      } else if (n > 0) {
+        other += 1;
         expect(host.order.known).toBe(false);
       } else {
         without += 1;
         expect(host.order.free).toEqual(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER);
       }
     }
-    expect(withEvents).toBeGreaterThan(0);
-    expect(without).toBeGreaterThan(0);
-  }, 60000);
+    expect([intimidate > 0, other > 0, without > 0]).toEqual([true, true, true]);
+    const ev = (kind: string, extra: object = {}) => ({ sequence: 0, payload: { kind, ...extra }, provenance: undefined }) as any;
+    const triple = [ev("stat-stage-change"), ev("animation", { animationId: "STATS_CHANGE", battler: 1, target: 0, arguments: ["22"] }), ev("message")];
+    expect(seedLiveSpriteOrderHostFromBattleStart([]).tracker.cursor.order).toEqual(knownEntrySpriteOrderState("ordinary-factory"));
+    expect(seedLiveSpriteOrderHostFromBattleStart([...triple, ...triple]).tracker.cursor.order.known).toBe(false);
+    expect(seedLiveSpriteOrderHostFromBattleStart(triple.slice(0, 2)).tracker.cursor.order.known).toBe(false);
+  }, 120000);
+
+  it("a generated battle with an Intimidate lead (seed 53) lends a known order to its first body; adapter active every age; ON/OFF parity", () => {
+    const on = generatedCommandAnimationReplay(53, "on", [0, 0]);
+    const off = generatedCommandAnimationReplay(53, "off", [0, 0]);
+    expectRulesEqual(on, off);
+    expect(generatedCommandAnimationReplay(53, "on", []).state.battle!.nextEventSequence).toBe(3);
+    const moves = bodies(on);
+    expect(moves.length).toBeGreaterThanOrEqual(1);
+    // ROM first move edge after Intimidate (12/12 corpus): slots 3,4 swapped against the no-Intimidate entry
+    expect(moves[0]!.spriteOrderInput).toEqual([3, 4, ...KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER.slice(2)]);
+    expect(on.animations.length).toBeGreaterThan(0);
+    // Hex 290 (first, player) and 332 (second, opponent) render with the exact adapter every age; the unaudited later body falls back.
+    expect(on.animations.slice(0, 2).map(row => [row.moveId, row.ages.length > 0 && row.adapterActive.every(Boolean)])).toEqual([[290, true], [332, true]]);
+    expect(off.commands.every(row => row.spriteOrderInput === undefined)).toBe(true);
+  }, 120000);
 });
