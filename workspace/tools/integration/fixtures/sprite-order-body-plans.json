@@ -2,15 +2,16 @@
  "schema": "sprite-order-body-plans/v1",
  "table": {
   "scenarios": 245,
-  "sha256": "62ec21bf996f1879900389350f8824e973e668fd6690f2c038b809b2de1e8139"
+  "sha256": "71b1ed9bd2284bd8d4020bf234b479e5d11daa58fab424f67361489746c12a49"
  },
  "tokens": "('n',k)=k-th sprite created by this unit (creation order: lowest-free ascending then end descending); ('c',ago,k)=survivor k of the unit `ago` units earlier (units alternate body,gap); ('o',slot)=occupant that predates every unit",
  "groupClasses": "SINGLE | STATIC (distinct priority words) | FDERIVED (tied keys; creation window then free-order index) | KEYS",
  "replay": {
-  "edges": 584,
-  "edgesPrecededByExactPlans": 367,
-  "edgesExact": 360,
-  "edgesMismatched": 7
+  "edges": 554,
+  "edgesPrecededByExactPlans": 458,
+  "edgesExact": 457,
+  "scenariosEntryDivergesFromProvider": 10,
+  "edgesMismatched": 1
  },
  "replayMismatches": [
   {
@@ -40,180 +41,6 @@
     19,
     18,
     17
-   ]
-  },
-  {
-   "file": "336-howl-alternate-opponent-scenario-0.json",
-   "unit": 1,
-   "move": 0,
-   "predicted": [
-    4,
-    3,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15
-   ],
-   "observed": [
-    4,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15,
-    14
-   ]
-  },
-  {
-   "file": "336-howl-alternate-player-scenario-0.json",
-   "unit": 1,
-   "move": 0,
-   "predicted": [
-    4,
-    3,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15
-   ],
-   "observed": [
-    4,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15,
-    14
-   ]
-  },
-  {
-   "file": "38-mechanic-double-edge-opponent-hitmontop-player-onix-0.json",
-   "unit": 1,
-   "move": 0,
-   "predicted": [
-    4,
-    3,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15
-   ],
-   "observed": [
-    4,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15,
-    14
-   ]
-  },
-  {
-   "file": "38-mechanic-double-edge-player-hitmontop-opponent-onix-0.json",
-   "unit": 1,
-   "move": 0,
-   "predicted": [
-    4,
-    3,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15
-   ],
-   "observed": [
-    4,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15,
-    14
-   ]
-  },
-  {
-   "file": "68-mechanic-counter-opponent-hitmontop-player-onix-0.json",
-   "unit": 1,
-   "move": 0,
-   "predicted": [
-    4,
-    3,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15
-   ],
-   "observed": [
-    4,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15,
-    14
-   ]
-  },
-  {
-   "file": "68-mechanic-counter-player-hitmontop-opponent-onix-0.json",
-   "unit": 1,
-   "move": 0,
-   "predicted": [
-    4,
-    3,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15
-   ],
-   "observed": [
-    4,
-    21,
-    20,
-    5,
-    19,
-    18,
-    17,
-    16,
-    15,
-    14
    ]
   }
  ],
@@ -43279,35 +43106,16 @@
   },
   "entry>115:?": {
    "scenarios": 2,
-   "distinctPlans": 2,
-   "groupClasses": {
-    "KEYS": 1
-   },
-   "keysReasons": {
-    "tied but a member predates the unit (no creation record)": 1
-   },
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
    "staticKeyWordsConstant": true,
-   "verdict": "NEEDS-KEYS",
-   "plan": [
-    {
-     "D": [
-      [
-       "o",
-       4
-      ],
-      [
-       "o",
-       3
-      ]
-     ]
-    }
-   ],
+   "verdict": "EXACT-PLAN",
+   "plan": [],
    "planExamples": [
-    "280-mechanic-brick-break-opponent-lombre-player-onix-0.json"
-   ],
-   "otherPlans": {
-    "[]": 1
-   }
+    "280-mechanic-brick-break-opponent-lombre-player-onix-0.json",
+    "280-mechanic-brick-break-player-lombre-opponent-onix-0.json"
+   ]
   },
   "entry>115:opponent": {
    "scenarios": 1,
@@ -43997,28 +43805,11 @@
   "entry>277:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
-   "groupClasses": {
-    "KEYS": 1
-   },
-   "keysReasons": {
-    "tied but a member predates the unit (no creation record)": 1
-   },
+   "groupClasses": {},
+   "keysReasons": {},
    "staticKeyWordsConstant": true,
-   "verdict": "NEEDS-KEYS",
-   "plan": [
-    {
-     "D": [
-      [
-       "o",
-       4
-      ],
-      [
-       "o",
-       3
-      ]
-     ]
-    }
-   ],
+   "verdict": "EXACT-PLAN",
+   "plan": [],
    "planExamples": [
     "277-mechanic-magic-coat-opponent-spoink-player-onix-0.json"
    ]
@@ -44315,23 +44106,16 @@
   },
   "entry>33:player": {
    "scenarios": 42,
-   "distinctPlans": 2,
-   "groupClasses": {
-    "KEYS": 1
-   },
-   "keysReasons": {
-    "tied but a member predates the unit (no creation record)": 1
-   },
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
    "staticKeyWordsConstant": true,
-   "verdict": "NEEDS-KEYS",
+   "verdict": "EXACT-PLAN",
    "plan": [],
    "planExamples": [
     "101-mechanic-night-shade-opponent-ariados-player-onix-0.json",
     "112-mechanic-barrier-opponent-drowzee-player-onix-0.json"
-   ],
-   "otherPlans": {
-    "[{\"D\":[[\"o\",4],[\"o\",3]]}]": 1
-   }
+   ]
   },
   "entry>343:opponent": {
    "scenarios": 1,

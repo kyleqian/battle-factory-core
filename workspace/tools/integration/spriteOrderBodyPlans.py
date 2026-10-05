@@ -29,7 +29,6 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools/integration"))
 import spriteOrderEventModel as M
 
-ENTRY_WINDOWS = 78  # nonempty sort windows of the known entry stream (BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS)
 FIX = ROOT / "tools/integration/fixtures"
 TABLE = FIX / "sprite-order-body-events.json"
 PLANS = FIX / "sprite-order-body-plans.json"
@@ -111,7 +110,10 @@ def extract_scenario(kind, path):
 
     units = []
     nonempty = [i for i, w in enumerate(W) if w["C"] or w["D"]]
-    pre0 = nonempty[ENTRY_WINDOWS] if len(nonempty) > ENTRY_WINDOWS else edges[0]  # entry stream is the known table
+    _, ts_wins = ts_entry()
+    got = [(W[i]["C"], W[i]["D"]) for i in nonempty[:len(ts_wins)]]
+    entry_ok = got == [(sorted(c), d) for c, d in ts_wins]
+    pre0 = nonempty[len(ts_wins)] if entry_ok and len(nonempty) > len(ts_wins) else edges[0]  # known entry stream = TS table
     units.append(unit_of("gap", 0, 0, pre=True, last=False, nextMv=W[edges[0]]["mv"], windowsFrom=pre0, upTo=edges[0]))
     for j in range(len(edges) - 1):
         a, b = edges[j], edges[j + 1]
@@ -121,7 +123,7 @@ def extract_scenario(kind, path):
         units.append(unit_of("body", a, k, mv=W[a]["mv"], observedFreeAtEdge=W[a]["F"], truncated=(k >= len(W))))
         units.append(unit_of("gap", k, b, last=(j == len(edges) - 2), nextMv=(W[b]["mv"] if b < len(W) else None)))
     return {"file": Path(path).name, "kind": kind, "move": d.get("move"), "side": side,
-            "freeAtFirstEdge": W[edges[0]]["obsF"], "units": units}
+            "freeAtFirstEdge": W[edges[0]]["F"], "entryMatchesProvider": entry_ok, "units": units}
 
 
 def scen_files(extra):
@@ -367,6 +369,9 @@ def main(argv):
     bad_edges = []
     for sc, T in zip(SC, toks):
         sim, ok, gap_ok = Sim(), True, True
+        if not sc["entryMatchesProvider"]:
+            stat["scenariosEntryDivergesFromProvider"] += 1
+            continue
         U = sc["units"]
         for ui, (u, tw) in enumerate(zip(U, T)):
             if u["kind"] == "body":
