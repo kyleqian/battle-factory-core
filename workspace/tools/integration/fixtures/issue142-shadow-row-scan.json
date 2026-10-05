@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 351,
-  "ids": 166,
+  "rows": 368,
+  "ids": 173,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -3695,6 +3695,183 @@
    "move": "BLAZE_KICK",
    "orientation": "opponent",
    "duration": 78,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 317,
+   "move": "ROCK_TOMB",
+   "orientation": "player",
+   "duration": 174,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 317,
+   "move": "ROCK_TOMB",
+   "orientation": "opponent",
+   "duration": 174,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 219,
+   "move": "SAFEGUARD",
+   "orientation": "player",
+   "duration": 71,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 219,
+   "move": "SAFEGUARD",
+   "orientation": "opponent",
+   "duration": 71,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 230,
+   "move": "SWEET_SCENT",
+   "orientation": "player",
+   "duration": 175,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 230,
+   "move": "SWEET_SCENT",
+   "orientation": "opponent",
+   "duration": 175,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 120,
+   "move": "SELF_DESTRUCT",
+   "orientation": "player",
+   "duration": 113,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 120,
+   "move": "SELF_DESTRUCT",
+   "orientation": "opponent",
+   "duration": 113,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 256,
+   "move": "SWALLOW",
+   "orientation": "player",
+   "duration": 163,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 256,
+   "move": "SWALLOW",
+   "orientation": "player",
+   "duration": 178,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 256,
+   "move": "SWALLOW",
+   "orientation": "player",
+   "duration": 193,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 256,
+   "move": "SWALLOW",
+   "orientation": "opponent",
+   "duration": 161,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 256,
+   "move": "SWALLOW",
+   "orientation": "opponent",
+   "duration": 176,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 256,
+   "move": "SWALLOW",
+   "orientation": "opponent",
+   "duration": 191,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 282,
+   "move": "KNOCK_OFF",
+   "orientation": "player",
+   "duration": 48,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 282,
+   "move": "KNOCK_OFF",
+   "orientation": "opponent",
+   "duration": 48,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 185,
+   "move": "FAINT_ATTACK",
+   "orientation": "player",
+   "duration": 221,
    "expected": null,
    "drawn": [],
    "tailFirstAge": null
