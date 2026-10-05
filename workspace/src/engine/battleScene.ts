@@ -19125,14 +19125,14 @@ export function renderSceneOnMovePresentation(
       age: whirlwindState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "BUTTERFREE"
+      (liveField || view.attacker.species === "BUTTERFREE")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "BUTTERFREE"
+      (liveField || view.attacker.species === "BUTTERFREE")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -19143,13 +19143,13 @@ export function renderSceneOnMovePresentation(
     const butterfreeSource = playerToOpponent
       ? whirlwindArt.butterfreeBack
       : whirlwindArt.butterfreeFront;
-    const butterfree = playerToOpponent
+    const butterfree = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? butterfreeSource
       : {
           ...butterfreeSource,
           tileset: subTileset(butterfreeSource.tileset, 0, 8),
         };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const initialOnixOffset = playerToOpponent
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
@@ -19169,7 +19169,7 @@ export function renderSceneOnMovePresentation(
     // SpriteCB_EnemyShadow observes gAnimScriptActive after the first source
     // display has already reached scanout. Butterfree's nonzero elevation
     // therefore leaves one source-relative shadow display.
-    if (opponentToPlayer && view.age === 0) {
+    if (!liveField && opponentToPlayer && view.age === 0) {
       drawSpriteSheet(
         fb,
         sonicBoomArt.enemyShadow.tileset,
@@ -19224,6 +19224,7 @@ export function renderSceneOnMovePresentation(
       drawOnix();
     }
 
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,
@@ -38418,14 +38419,14 @@ export function renderSceneOnMovePresentation(
       age: roarState.age - 2,
     });
     const playerToOpponent =
-      view.attacker.species === "HOUNDOUR"
+      (liveField || view.attacker.species === "HOUNDOUR")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "HOUNDOUR"
+      (liveField || view.attacker.species === "HOUNDOUR")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -38435,11 +38436,11 @@ export function renderSceneOnMovePresentation(
     }
     const houndourSource = playerToOpponent
       ? houndourBackSprite : houndourFrontSprite;
-    const houndour = playerToOpponent
+    const houndour = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? houndourSource
       : { ...houndourSource, tileset: subTileset(houndourSource.tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent
+    const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const onixIdle = playerToOpponent
@@ -38506,6 +38507,7 @@ export function renderSceneOnMovePresentation(
       );
     }
     const profile = roarState.config.fieldProfile;
+    if (liveField) return;
     drawSendOutHealthbox(
       fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
         name: playerToOpponent ? "ONIX" : "HOUNDOUR",

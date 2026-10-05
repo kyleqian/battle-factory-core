@@ -1212,10 +1212,16 @@ export function createBattleResolutionPresentationRenderView(
       // the battler's pixels for the whole span (the generic draw is gated
       // off below); from relative 25 the sprite is freed and the field is
       // empty until the send-in.
-      switchOut = midBattleSwitchOutAt(
-        state.lifecycle.phaseElapsed,
-        command.battler,
-      );
+      switchOut = command.skipAnimation
+        // Scene ON forced removal: the live body left the target off-screen; nothing draws it until the recall receipt.
+        ? Object.freeze({
+            ...midBattleSwitchOutAt(state.lifecycle.phaseElapsed, command.battler),
+            spriteVisible: false,
+          })
+        : midBattleSwitchOutAt(
+            state.lifecycle.phaseElapsed,
+            command.battler,
+          );
     } else if (command.type === "sprite-visibility") {
       spriteVisibility.set(command.battler, command.visible);
       if (command.recall) healthboxVisibility.set(command.battler, command.visible);

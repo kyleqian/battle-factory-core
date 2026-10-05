@@ -62,7 +62,7 @@ describe("live prep11 move adapters", () => {
       for (const a of [0, 1] as const) expect(liveMoveAnimationDuration(request(Number(id), a)), id).toBe(duration);
     }
     // Out of scope for this batch: still no adapter.
-    for (const id of [46, 18, 226, 205, 19, 340]) expect(LIVE_MOVE_ANIMATION_IDS).not.toContain(id);
+    for (const id of [226, 205, 19, 340]) expect(LIVE_MOVE_ANIMATION_IDS).not.toContain(id);
   });
 
   it("gates the order consumers on the lent order; Leech Seed and Recycle are order-independent", () => {

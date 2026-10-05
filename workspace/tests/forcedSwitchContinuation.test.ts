@@ -1,7 +1,14 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { SPRITE_ORDER_UNIT_PLAN_TEXTS, decodeSpriteOrderPlan } from "../src/engine/spriteOrderEventTransform.ts";
-import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor } from "../src/engine/spriteOrderProvider.ts";
+import type { BattleKernelSemanticEvent } from "../src/engine/battleDecisionBoundary.ts";
+import { advanceLiveSpriteOrderHost, beginLiveSpriteOrderTurn, createLiveSpriteOrderHost } from "../src/engine/liveSpriteOrderHost.ts";
+import {
+  KNOWN_ENTRY_OCCUPANT_ROLES, SPRITE_ORDER_UNIT_PLAN_TEXTS, applySpriteOrderPresentationEvent, createSpriteOrderTracker,
+  decodeSpriteOrderPlan, spriteOrderTrackerRoleIsomorphic, type SpriteOrderPresentationEvent,
+} from "../src/engine/spriteOrderEventTransform.ts";
+import {
+  applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, knownEntrySpriteOrderState,
+} from "../src/engine/spriteOrderProvider.ts";
 
 // docs/forced-switch-continuation.md: the ROM continuation after a Roar / Whirlwind body (two identical fresh direct-mGBA runs per scenario;
 // fixtures under tools/integration/fixtures/forced-switch/, produced by forcedSwitchRomProbe.py / forcedSwitchOrderFixture.ts).
@@ -55,5 +62,57 @@ describe("sprite-order units: the existing switchInStart / switchInParticles pla
       expect(cursor.order.known, label).toBe(true);
       expect(cursor.order.free, label).toEqual(expected);
     }
+  });
+});
+
+describe("sprite-order events: forced-switch-out + side-generic switch-in keep the tracker known (production transform + live host)", () => {
+  for (const [name, o] of Object.entries(order)) it(`${name}: event-level units equal the ROM free order after each unit`, () => {
+    const side = o.battlerSlot === 6 ? "player" as const : "opponent" as const;
+    let tracker = createSpriteOrderTracker({ known: true, free: o.pre.free, pendingDestroyed: [] });
+    const steps: [SpriteOrderPresentationEvent, number[]][] = [
+      [{ kind: "forced-switch-out", side }, o.afterFree],
+      [{ kind: "switch-in-start", side }, o.afterStart],
+      [{ kind: "switch-in-finish", side }, o.afterParticles],
+    ];
+    for (const [event, expected] of steps) {
+      tracker = applySpriteOrderPresentationEvent(tracker, event);
+      expect(tracker.cursor.order.known, event.kind).toBe(true);
+      expect(tracker.cursor.order.free, event.kind).toEqual(expected);
+    }
+    expect(tracker.battlerSlots[side]).not.toBeNull();
+    expect(tracker.occupantRoles).toEqual(KNOWN_ENTRY_OCCUPANT_ROLES);
+    expect(spriteOrderTrackerRoleIsomorphic(tracker)).toBe(true);
+  });
+
+  const ev = (sequence: number, payload: Record<string, unknown>, opcodeName?: string) => Object.freeze({
+    sequence, payload: Object.freeze(payload), ...(opcodeName ? { provenance: Object.freeze({ opcodeName }) } : {}),
+  }) as unknown as BattleKernelSemanticEvent;
+  const hostAfter = (events: BattleKernelSemanticEvent[]) => {
+    let host = beginLiveSpriteOrderTurn(createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")), 7, true);
+    host = advanceLiveSpriteOrderHost(host, { resolutionId: { requestId: 7 }, segmentIndex: 0, segments: [{ events }] },
+      Number.POSITIVE_INFINITY);
+    return host.tracker;
+  };
+  for (const [moveId, attacker] of [[46, 0], [46, 1], [18, 0], [18, 1]] as const) {
+    it(`live host maps move ${moveId} attacker ${attacker}: RETURNTOBALL -> forced-switch-out, send-in -> switch-in units (known)`, () => {
+      const target = attacker === 0 ? 1 : 0;
+      const tracker = hostAfter([
+        ev(0, { kind: "animation", animationId: "MOVE_ANIMATION", battler: attacker, target, arguments: [String(moveId), "0", "0", "0", "70", "0"] }),
+        ev(1, { kind: "set-battler-sprite-visibility", battler: target, invisible: true }, "B_SCR_OP_RETURNTOBALL"),
+        ev(2, { kind: "switch", side: target === 0 ? "player" : "opponent", fromPartyIndex: 0, toPartyIndex: 1 }),
+        ev(3, { kind: "switch-in-animation", battler: target, partyIndex: 1 }),
+      ]);
+      expect(tracker.invalidReason).toBeNull();
+      expect(tracker.cursor.order.known).toBe(true);
+      expect(tracker.lastUnit).toBe("switch-in");
+      expect(tracker.battlerSlots[target === 0 ? "player" : "opponent"]).not.toBeNull();
+    });
+  }
+  it("Baton Pass shape (returntoball of the body's attacker) keeps invalidating", () => {
+    const tracker = hostAfter([
+      ev(0, { kind: "animation", animationId: "MOVE_ANIMATION", battler: 0, target: 1, arguments: ["226", "0", "0", "0", "70", "0"] }),
+      ev(1, { kind: "set-battler-sprite-visibility", battler: 0, invisible: true }, "B_SCR_OP_RETURNTOBALL"),
+    ]);
+    expect(tracker.cursor.order.known).toBe(false);
   });
 });

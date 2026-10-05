@@ -84,6 +84,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   56, 61, 197, 238, 259, 294, 341,
   // prep11 (docs/next-adapters-prep11.md): Leech Seed main body.
   73, 80, 161, 169, 193, 194, 278, 314, 327,
+  // Roar / Whirlwind bodies (prep11 s0.2); the forced switch-out continuation is the Scene ON skip-removal hold.
+  46, 18,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -223,6 +225,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     297,
     // prep11 (issue142-shadow-rows-extra.json): Leech Seed main body window starts at the activation frame (row 0).
     73, 80, 161, 169, 193, 194, 278, 314, 327,
+    // Roar / Whirlwind: activation == window start (row 0) on both sides (prep11 s0.2).
+    46, 18,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -501,6 +505,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 195: return 259; // Perish Song (71..329 / 75..333, no tail).
     case 348: return 224; // Leaf Blade (76..299 / 80..303, no tail).
     case 80: return 244; // Petal Dance 215..458 / 217..460 (prep11 s0.2).
+    case 46: return request.attacker === 0 ? 99 : 104; // Roar 252..350 / 219..322 (cry timing differs by side; prep11 s0.2).
+    case 18: return 83; // Whirlwind 222..304 / 316..398 (prep11 s0.2).
     case 278: return 203; // Recycle 2193..2395 / 2589..2791 (prep11 s0.2).
     case 169: return 207; // Spider Web 220..426 / 219..425.
     case 327: return 188; // Sky Uppercut 82..269 / 86..273; the COMBUSKEN script ends one frame later (prep11 open point 1).
@@ -1958,6 +1964,10 @@ export function liveMoveAnimationPresentation(
       break;
     case 343: config = { move: "COVET", attacker, target, fieldProfile }; break;
     case 347: config = { move: "CALM_MIND", attacker, target, fieldProfile }; break;
+    // prep11 s0.2: no order or allocator input (slots/tasks are constants); the body ends with the target off-screen and
+    // the Scene ON forced switch-out hold (battleResolutionPresentation.ts) owns E+1.. without redrawing it.
+    case 46: config = { move: "ROAR", attacker, target, fieldProfile }; break;
+    case 18: config = { move: "WHIRLWIND", attacker, target, fieldProfile }; break;
     default: return null;
   }
   // sceneOnLightScreenView/lightScreenAtAge are relative to wall creation;

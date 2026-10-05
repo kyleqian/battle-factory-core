@@ -26,8 +26,10 @@
  *   party-summary-next           Cfeeeeee (opponent next-mon summary; only after the opponent battler is gone)
  *   party-summary-hide           marker: must directly follow party-summary-next, no allocation
  *   next-mon-send-out            nextSendOut directly after party-summary-next; its single survivor = opponent battler
- *   switch-in-start / -finish    switchInStart (player battler gone, directly after a reshow or recall), then
- *                                switchInParticles directly after it; player battler = n1 of the start unit
+ *   switch-in-start / -finish    switchInStart (side battler gone, directly after a reshow or recall; side default
+ *                                player), then switchInParticles directly after it; side battler = n1 of the start unit
+ *   forced-switch-out {side}     D o<battler slot> (Roar/Whirlwind `returntoball`, skipAnim: no recall particles;
+ *                                docs/forced-switch-continuation.md §2.4, ROM free order 6/6); roles kept, unit "recall"
  *   party-menu-reset             ResetSpriteData: identity F, empty occupancy, battler slots and occupant roles
  *                                forgotten; revives an invalid tracker (the one revive path)
  *   battle-reshow                directly after a reset: reshowBoth / reshowPlayerGone by playerBattlerPresent;
@@ -69,8 +71,9 @@ export type SpriteOrderPresentationEvent =
   | Readonly<{ kind: "party-summary-next" }>
   | Readonly<{ kind: "party-summary-hide" }>
   | Readonly<{ kind: "next-mon-send-out" }>
-  | Readonly<{ kind: "switch-in-start" }>
-  | Readonly<{ kind: "switch-in-finish" }>
+  | Readonly<{ kind: "switch-in-start"; side?: SpriteOrderSide }>
+  | Readonly<{ kind: "switch-in-finish"; side?: SpriteOrderSide }>
+  | Readonly<{ kind: "forced-switch-out"; side: SpriteOrderSide }>
   | Readonly<{ kind: "party-menu-reset" }>
   | Readonly<{ kind: "battle-reshow"; playerBattlerPresent: boolean }>
   | Readonly<{ kind: "switch-out" }>
@@ -302,8 +305,16 @@ function applyBattleUnit(
       if (survivors.length !== 1) return fail(`send-out left ${survivors.length} survivors`);
       return withUnit(tracker, cursor, "send-out", { ...slots, opponent: survivors[0]! });
     }
+    case "forced-switch-out": {
+      const slot = slots[event.side];
+      if (slot === null) return fail(`forced switch-out of ${event.side}: battler slot unknown`);
+      const cursor = applyUnit(tracker, [{ D: [["o", slot]] }]);
+      return cursor ? withUnit(tracker, cursor, "recall", { ...slots, [event.side]: null })
+        : fail(`forced switch-out of ${event.side}: plan did not resolve`);
+    }
     case "switch-in-start": {
-      if (slots.player !== null) return fail("switch-in while the player battler is tracked");
+      const side = event.side ?? "player";
+      if (slots[side] !== null) return fail(`switch-in while the ${side} battler is tracked`);
       if (tracker.lastUnit !== "reshow" && tracker.lastUnit !== "recall") {
         return fail("switch-in without a reshow or recall directly before it");
       }
@@ -315,7 +326,7 @@ function applyBattleUnit(
       const battler = lastSurvivors(tracker.cursor)[1];
       const cursor = applyUnit(tracker, UNIT_PLANS.switchInParticles);
       if (!cursor || battler === undefined) return fail("switch-in particles: plan did not resolve");
-      return withUnit(tracker, cursor, "switch-in", { ...slots, player: battler });
+      return withUnit(tracker, cursor, "switch-in", { ...slots, [event.side ?? "player"]: battler });
     }
     case "battle-reshow": {
       if (tracker.lastUnit !== "reset") return fail("reshow without a party-menu reset directly before it");
