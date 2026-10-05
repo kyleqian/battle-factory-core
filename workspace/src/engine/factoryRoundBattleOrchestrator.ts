@@ -6,7 +6,6 @@ import {
 import { createKnownEntrySpriteAllocatorProvider } from "./knownEntrySpriteAllocator.ts";
 import {
   prepareLiveMoveSpriteAllocator,
-  prepareLiveMoveSpriteOrder,
   type LiveMoveSpriteAllocatorInput,
   type LiveMoveSpriteOrderInput,
 } from "./liveMoveSpriteAllocator.ts";
@@ -15,6 +14,15 @@ import {
   knownEntrySpriteOrderState,
   type SpriteOrderState,
 } from "./spriteOrderProvider.ts";
+import {
+  advanceLiveSpriteOrderHost,
+  beginLiveSpriteOrderTurn,
+  createLiveSpriteOrderHost,
+  invalidateLiveSpriteOrderHost,
+  lendLiveSpriteOrder,
+  liveSpriteOrderHostOrder,
+  type LiveSpriteOrderHost,
+} from "./liveSpriteOrderHost.ts";
 import {
   invalidateLiveSpriteAllocatorHost,
   type LiveSpriteAllocatorHost,
@@ -438,14 +446,14 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
     commandKey: string;
     host: LiveSpriteAllocatorHost;
     /**
-     * Free-slot sSpriteOrder beside the allocator (presentation-only). Known
-     * only from a known entry until the battle's first move body, which
-     * consumes it; every allocator invalidation, any non-message command and
-     * any later resolution invalidate it (see prepareResolutionPalette).
+     * Free-slot sSpriteOrder beside the allocator (presentation-only), mirror
+     * of `orderHost`'s tracked state. Known from a known entry while every
+     * prompt cycle, body, hit, stat and status animation since is modelled
+     * (liveSpriteOrderHost.ts); anything else invalidates it for the battle.
      */
     order: SpriteOrderState;
-    /** Resolution that first observed the known order; a later one invalidates it. */
-    orderRequestId?: number;
+    /** Event-driven order tracker; absent = derive from `order`. */
+    orderHost?: LiveSpriteOrderHost;
   }>;
   /**
    * An opposing locked action may outlive its charge presentation while the
@@ -1080,6 +1088,9 @@ function startCurrentBattle(
           order: started.nextEventSequence === 0
             ? knownEntrySpriteOrderState("ordinary-factory")
             : invalidateSpriteOrderState(knownEntrySpriteOrderState("ordinary-factory")),
+          orderHost: createLiveSpriteOrderHost(started.nextEventSequence === 0
+            ? knownEntrySpriteOrderState("ordinary-factory")
+            : invalidateSpriteOrderState(knownEntrySpriteOrderState("ordinary-factory"))),
         })
       : undefined,
     retainedLockedActionPresentationOwner: null,
@@ -1517,8 +1528,14 @@ function installDriveReceiptImmediately(
     moveSelectionCursors,
     state.usedMessageHoldFrames,
   );
+  // The receipt's events are never presented, so the tracked order cannot
+  // follow them.
+  const sprites = state.liveMoveSpriteAllocatorHost;
   return Object.freeze({
     ...state,
+    liveMoveSpriteAllocatorHost: sprites === undefined ? undefined : withOrderHost(
+      sprites, invalidateLiveSpriteOrderHost(orderHostOf(sprites), "battle advanced without a presented resolution"),
+    ),
     battle: receipt.battle,
     battleCommandPresentation,
     battleResolutionPresentation: null,
@@ -1615,6 +1632,35 @@ function applyReceiptPpToBoundaries(
   return next;
 }
 
+type OrderHostCarrier = Readonly<{ order: SpriteOrderState; orderHost?: LiveSpriteOrderHost }>;
+
+function orderHostOf(sprites: OrderHostCarrier): LiveSpriteOrderHost {
+  return sprites.orderHost ?? createLiveSpriteOrderHost(sprites.order);
+}
+
+function withOrderHost<T extends OrderHostCarrier>(sprites: T, orderHost: LiveSpriteOrderHost): T {
+  return Object.freeze({ ...sprites, orderHost, order: liveSpriteOrderHostOrder(orderHost) });
+}
+
+/**
+ * The submitted command came from the action prompt: its bounce pair is
+ * created and destroyed before the turn's first body (gap-causes §2). A
+ * locked player action shows no prompt and a retained locked-action
+ * continuation interleaves a second prompt mid-resolution: both invalidate.
+ */
+function beginOrderTurn(
+  state: FactoryRoundBattleOrchestratorState,
+  requestId: number,
+  promptShown: boolean,
+): FactoryRoundBattleOrchestratorState["liveMoveSpriteAllocatorHost"] {
+  const sprites = state.liveMoveSpriteAllocatorHost;
+  if (
+    state.config.battleScene !== "on" || sprites === undefined
+    || sprites.battleCallStart !== state.activeBattleCallStart
+  ) return sprites;
+  return withOrderHost(sprites, beginLiveSpriteOrderTurn(orderHostOf(sprites), requestId, promptShown));
+}
+
 function beginCommandResolution(
   state: FactoryRoundBattleOrchestratorState,
   presentation: BattleCommandPresentationState,
@@ -1694,8 +1740,16 @@ function beginCommandResolution(
         })
       : freshResolution();
   }
+  const playerLocked = (state.battle.rules.rulesContext.battlers[presentation.request.battler]!.status2 & (
+    BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+    | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+  )) !== 0;
+  const liveMoveSpriteAllocatorHost = beginOrderTurn(
+    state, resolution.resolutionId.requestId, retained === null && !playerLocked,
+  );
   return Object.freeze({
     ...state,
+    liveMoveSpriteAllocatorHost,
     battle: receipt.battle,
     battleCommandPresentation: null,
     battleResolutionPresentation: resolution,
@@ -2043,9 +2097,10 @@ function prepareResolutionPalette(
         ...retained, host: invalidateLiveMovePaletteHost(retained.host),
       }) : undefined,
       liveMoveSpriteAllocatorHost: retainedSprites ? Object.freeze({
-        ...retainedSprites,
+        ...withOrderHost(retainedSprites, invalidateLiveSpriteOrderHost(
+          orderHostOf(retainedSprites), "switch-in presentation",
+        )),
         host: invalidateLiveSpriteAllocatorHost(retainedSprites.host),
-        order: invalidateSpriteOrderState(retainedSprites.order),
       }) : undefined,
       battleResolutionPresentation: Object.freeze({
         ...resolution, liveMovePaletteInput: undefined,
@@ -2111,17 +2166,12 @@ function prepareResolutionPalette(
       === state.activeBattleCallStart
     ? state.liveMoveSpriteAllocatorHost : undefined;
   let spriteHost = retainedSprites?.host;
-  let spriteOrder = retainedSprites?.order;
+  let orderHost = retainedSprites ? orderHostOf(retainedSprites) : undefined;
   let spriteOrderInput: LiveMoveSpriteOrderInput | undefined;
-  const requestId = resolution.resolutionId.requestId;
-  // First body only: a later resolution (a prompt cycle moved the cursor
-  // pair) or an unprojected graphics event before this command (status /
-  // ability animation) leaves the order unknown.
-  if (
-    spriteOrder?.known && (crossedUnknownGraphics
-      || (retainedSprites?.orderRequestId !== undefined
-        && retainedSprites.orderRequestId !== requestId))
-  ) spriteOrder = invalidateSpriteOrderState(spriteOrder);
+  // Event-driven order (liveSpriteOrderHost.ts): apply every semantic event
+  // strictly before this command, lend the order to a move body at its
+  // activation edge, then apply the command's own event (the body plan).
+  if (orderHost) orderHost = advanceLiveSpriteOrderHost(orderHost, resolution, commandSequence, true);
   if (command?.type === "move-animation" && command.animation) {
     const prepared = prepareLiveMovePalette(host, command.animation);
     host = prepared.next;
@@ -2132,11 +2182,7 @@ function prepareResolutionPalette(
       const spritePrepared = prepareLiveMoveSpriteAllocator(spriteHost, command.animation);
       spriteHost = spritePrepared.next;
       spriteInput = spritePrepared.input;
-      if (spriteOrder) {
-        const orderPrepared = prepareLiveMoveSpriteOrder(spriteOrder, command.animation);
-        spriteOrder = orderPrepared.next;
-        spriteOrderInput = orderPrepared.input;
-      }
+      if (orderHost) spriteOrderInput = lendLiveSpriteOrder(orderHost);
     } else if (retainedSprites?.commandKey === commandKey) {
       spriteInput = resolution.liveMoveSpriteAllocatorInput;
       spriteOrderInput = resolution.liveMoveSpriteOrderInput;
@@ -2149,20 +2195,13 @@ function prepareResolutionPalette(
     host = invalidateLiveMovePaletteHost(host);
     if (spriteHost) spriteHost = invalidateLiveSpriteAllocatorHost(spriteHost);
   }
-  // Conservative order policy: only message commands may precede the first
-  // body (switch, summary, slide, recall, stat/status, faint, turn end, a
-  // move animation without a typed request, ...).
-  if (
-    command !== undefined && command.type !== "message"
-    && !(command.type === "move-animation" && command.animation) && spriteOrder
-  ) {
-    spriteOrder = invalidateSpriteOrderState(spriteOrder);
+  if (orderHost) {
+    orderHost = advanceLiveSpriteOrderHost(
+      orderHost, resolution, isFinalCommand ? Number.POSITIVE_INFINITY : commandSequence,
+    );
   }
   if ((hasTrailingUnknownGraphics || crossedUnknownGraphics) && spriteHost) {
     spriteHost = invalidateLiveSpriteAllocatorHost(spriteHost);
-  }
-  if ((hasTrailingUnknownGraphics || crossedUnknownGraphics) && spriteOrder) {
-    spriteOrder = invalidateSpriteOrderState(spriteOrder);
   }
   // The active command's palette input was captured above. Any unprojected
   // graphics events after the segment's final command affect only the
@@ -2177,8 +2216,10 @@ function prepareResolutionPalette(
     }),
     liveMoveSpriteAllocatorHost: spriteHost === undefined ? undefined : Object.freeze({
       battleCallStart: state.activeBattleCallStart, commandKey, host: spriteHost,
-      order: spriteOrder ?? invalidateSpriteOrderState(knownEntrySpriteOrderState("ordinary-factory")),
-      orderRequestId: retainedSprites?.orderRequestId ?? requestId,
+      order: orderHost
+        ? liveSpriteOrderHostOrder(orderHost)
+        : invalidateSpriteOrderState(knownEntrySpriteOrderState("ordinary-factory")),
+      ...(orderHost ? { orderHost } : {}),
     }),
     battleResolutionPresentation: Object.freeze({
       ...resolution, liveMovePaletteInput: input,
@@ -2718,9 +2759,10 @@ export function advanceFactoryRoundBattleCommand(
           : state.liveMovePaletteHost,
         liveMoveSpriteAllocatorHost: state.config.battleScene === "on" && retainedSprites
           ? Object.freeze({
-              ...retainedSprites,
+              ...withOrderHost(retainedSprites, invalidateLiveSpriteOrderHost(
+                orderHostOf(retainedSprites), "party menu",
+              )),
               host: invalidateLiveSpriteAllocatorHost(retainedSprites.host),
-              order: invalidateSpriteOrderState(retainedSprites.order),
             })
           : state.liveMoveSpriteAllocatorHost,
         battleCommandPresentation: advanced,

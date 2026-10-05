@@ -117,7 +117,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // Flamethrower: one flame per sort window, so the order seed is pixel-neutral (provider seed when known, ascending
   // otherwise); the script's 80-frame tail beyond the accepted window is uncovered.
   53,
-  // Provider consumers (first body of a battle only; unknown order -> null): Heal Bell.
+  // Provider consumers (while the tracked order is known; unknown order -> null): Heal Bell.
   215,
   // Leaf Blade (initial persistent order of the blade + trail slots).
   348,
@@ -1095,7 +1095,7 @@ export function liveMoveAnimationPresentation(
       break;
     case 215: {
       // Order consumer (docs/order-consumer-prep.md §0): the persistent sort replays from F filtered to the six reused
-      // slots at activation. Unknown order (any body after the battle's first) -> null, the bounded scene-off view.
+      // slots at activation. Unknown tracked order (liveSpriteOrderHost.ts) -> null, the bounded scene-off view.
       if (!spriteOrderInput?.known) return null;
       const noteOrderSeed = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] },
         HEAL_BELL_REUSED_ORDER_SLOTS);
@@ -1135,7 +1135,8 @@ export function liveMoveAnimationPresentation(
     }
     case 88: {
       // Order consumer (docs/order-consumer-prep.md §0): the profile's 64-entry seed is the known-entry occupied
-      // prefix + F (valid only while the occupants are the known-entry ones, i.e. the battle's first body).
+      // prefix + F (valid only while the occupants are the known-entry ones: the host lends only then, and the prefix
+      // order is the known one at every such real-route body edge, tests/spriteOrderEventTransform.test.ts).
       if (!spriteOrderInput?.known) return null;
       const spriteOrderSeed = spriteOrderWithOccupiedPrefix(
         { known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -1179,8 +1180,8 @@ export function liveMoveAnimationPresentation(
     case 82: config = { move: "DRAGON_RAGE", attacker, target, fieldProfile }; break;
     case 288: {
       // Order consumer (docs/order-consumer-prep.md §0): the six flames take the six lowest free slots in one
-      // sort window and inherit their relative free order, so only a host-supplied order is exact. Unknown order
-      // (any body after the battle's first, docs/sprite-order-body-plans.md) -> null, the bounded scene-off view.
+      // sort window and inherit their relative free order, so only a host-supplied order is exact. Unknown tracked
+      // order (liveSpriteOrderHost.ts) -> null, the bounded scene-off view.
       if (!spriteOrderInput?.known) return null;
       const lowestFree = [...spriteOrderInput.free].sort((left, right) => left - right).slice(0, 6);
       const seed = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, lowestFree);

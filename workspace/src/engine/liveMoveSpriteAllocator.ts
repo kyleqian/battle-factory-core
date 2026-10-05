@@ -130,11 +130,9 @@ export interface LiveMoveSpriteOrderInput {
 }
 
 /**
- * Sprite-order seam for one move body. Policy of this step (docs/sprite-order-body-plans.md §3: the cause of the
- * between-body transient blip is still being probed, so no body/gap plan is applied in production): a known order
- * is lent to the body and then invalidated, so only the first move body after a known entry with no other
- * graphics command in between ever receives an order. A later step can replace the invalidation with
- * `applySpriteOrderUnitPlan` per body/gap without changing callers.
+ * Single-body sprite-order seam (lend once, then invalidate). Production no longer uses it: the orchestrator tracks
+ * the order across bodies with liveSpriteOrderHost.ts (event transform of docs/sprite-order-gap-causes.md §2) and
+ * lends via `lendLiveSpriteOrder`. Kept as the conservative fallback seam pinned by tests/liveSpriteOrderHost.test.ts.
  */
 export function prepareLiveMoveSpriteOrder(
   order: SpriteOrderState,
