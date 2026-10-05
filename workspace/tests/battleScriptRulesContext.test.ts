@@ -198,6 +198,8 @@ describe("source-shaped Battle Script rules context", () => {
       "battleCommunication0",
       "battleCommunication1",
       "battleMoveDamage",
+      "battleMovePower",
+      "battleMovePowerWritten",
       "battleOutcome",
       "battleStructAbsentBattlerFlags",
       "battleTextBuff1ByteNumber",
