@@ -47,6 +47,9 @@ export const SCENARIOS: Record<string, Step[]> = {
     edge("stat:player"), { kind: "stat-animation", argument: 55 }, edge("129:opponent"), body(129, "opponent"), HIT, edge("general:SUN_CONTINUES"),
     { kind: "general-animation", animation: "SUN_CONTINUES" }, P, C, edge("129:opponent"), body(129, "opponent"), HIT, edge("general:SUN_CONTINUES"),
     { kind: "general-animation", animation: "SUN_CONTINUES" }],
+  // turns 2-4: player Fire Blast (faster) -> SLOWBRO, SLOWBRO Swift -> player.
+  "postko-fireblast-player": [...TURN1, ...[0, 1, 2].flatMap(() => [P, C, edge("126:player"), body(126, "player"), HIT, edge("129:opponent"),
+    body(129, "opponent"), HIT])],
   "postko-rockslide-opponent": [...TURN1, P, C, edge("53:player"), body(53, "player"), HIT, edge("157:opponent"), body(157, "opponent")],
 };
 

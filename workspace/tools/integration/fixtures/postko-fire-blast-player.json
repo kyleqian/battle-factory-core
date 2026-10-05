@@ -1,0 +1,38 @@
+{
+ "schema": "postko-adapter-draft/v1",
+ "draft": true,
+ "move": "FIRE_BLAST",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/postko-fireblast-player.json",
+ "stateFixture": "tools/integration/fixtures/postko/state-postko-fireblast-player.json",
+ "modelCheck": "tools/integration/fixtures/postko/model-check-postko-fireblast-player.json",
+ "attacker": {
+  "species": "NINETALES",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 148,
+  "opponentHp": 170,
+  "opponentMaxHp": 170,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 2089,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 2089,
+  "endFrame": 2285,
+  "ageOffset": 0
+ },
+ "note": "window = activation + 0, 197 rows (liveMoveAnimationDuration 126 = 197, 'window start = activation'; prep7-fire-blast-opponent.json activation 1147 -> 1147..1343); first body after the send-out"
+}
