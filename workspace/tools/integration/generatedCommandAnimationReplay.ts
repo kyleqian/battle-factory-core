@@ -11,11 +11,15 @@ import {
 import type { GbaButton } from "../../src/input.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 
+class StallError extends Error {}
+
 /** Legal generated rentals/opponent; only ordinary command input follows generation. */
 export function generatedCommandAnimationReplay(
   seed: number, battleScene: "on" | "off",
   moveSlots: readonly (0 | 1 | 2 | 3 | "cancel-party" | { switch: 1 | 2 })[],
   factoryWinStreak = 0,
+  /** Stop at the frame budget instead of throwing (forced-replacement party screen: the driver cannot answer it). */
+  allowStall = false,
 ) {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
     id: `live-animation-generated-${seed}`, rngValue: seed, battleScene,
@@ -49,7 +53,7 @@ export function generatedCommandAnimationReplay(
   let frame = 0;
   let key = "";
   const step = (buttons: readonly GbaButton[] = []) => {
-    if (++frame > 30000) throw new Error(`generated command replay exceeded budget at seed ${seed}`);
+    if (++frame > 30000) throw new StallError(`generated command replay exceeded budget at seed ${seed}`);
     if (state.battleStartIntro) state = advanceFactoryRoundBattleStartIntro(state, new Set(buttons));
     else if (state.battleResolutionPresentation) state = advanceFactoryRoundBattleResolution(state, new Set(buttons));
     else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons));
@@ -111,6 +115,8 @@ export function generatedCommandAnimationReplay(
   const pulse = (button: GbaButton) => { step(); step([button]); step(); };
   until(() => phase() === "action-menu");
   boundaries.push(state.battle!);
+  let stalled = false;
+  try {
   for (const slot of moveSlots) {
     if (slot === "cancel-party") {
       pulse("DOWN");
@@ -146,5 +152,9 @@ export function generatedCommandAnimationReplay(
     until(() => phase() === "action-menu");
     boundaries.push(state.battle!);
   }
-  return { state, boundaries, animations, requests, commands, semanticEvents, frame };
+  } catch (error) {
+    if (!allowStall || !(error instanceof StallError)) throw error;
+    stalled = true;
+  }
+  return { state, boundaries, animations, requests, commands, semanticEvents, frame, stalled };
 }

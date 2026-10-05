@@ -58,6 +58,8 @@ import { REST_FRAME_COUNT } from "../animation/rest.ts";
 import { SWEET_KISS_FRAME_COUNT } from "../animation/sweetKiss.ts";
 import { TICKLE_FRAME_COUNT } from "../animation/tickle.ts";
 import { SURF_WAVE_FRAME_COUNT } from "../animation/surfWave.ts";
+import { icyWindEffectOamOrderAtAge } from "../animation/icyWind.ts";
+import { blizzardEffectOamOrderAtAge } from "../animation/blizzard.ts";
 import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
 
 
@@ -188,6 +190,29 @@ export function liveBattlerCoordAttrs(
 ): { readonly width: number; readonly height: number; readonly yOffset: number } {
   const { width, height, yOffset } = art[battler].coords;
   return { width, height, yOffset };
+}
+
+const effectOrderProvable = new Map<string, boolean>();
+/**
+ * Icy Wind / Blizzard replay source CreateSprite/SortSprites against the retained OAM slot table, which
+ * their reducers verify and throw on (icyWind.ts:257, blizzard.ts:562). The table was captured at the
+ * accepted geometry; a species pair whose pic points sort the particles differently is not proven, so
+ * the live seam returns null (the scene-off view) instead of throwing mid-battle. The result depends on
+ * the geometry only and is cached per (move, side, geometry).
+ */
+function provableEffectOrder(moveId: 196 | 59, side: "player" | "opponent", duration: number,
+  geometry: Parameters<typeof icyWindEffectOamOrderAtAge>[2] | Parameters<typeof blizzardEffectOamOrderAtAge>[2]): boolean {
+  const key = `${moveId}/${side}/${JSON.stringify(geometry)}`;
+  let ok = effectOrderProvable.get(key);
+  if (ok === undefined) {
+    try {
+      if (moveId === 196) icyWindEffectOamOrderAtAge(duration - 1, side, geometry as Parameters<typeof icyWindEffectOamOrderAtAge>[2]);
+      else blizzardEffectOamOrderAtAge(duration - 1, side, geometry);
+      ok = true;
+    } catch { ok = false; }
+    effectOrderProvable.set(key, ok);
+  }
+  return ok;
 }
 
 export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): number | null {
@@ -893,9 +918,11 @@ export function liveMoveAnimationPresentation(
       // Icy Wind's spikes aim at the target's sBattlerCoords point (battlePositionCenter).
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
       const geometry = { attackerCenter: attackerAnchors.picOffsetPoint, targetCenter: targetAnchors.picOffsetPoint };
+      const icyGeometry = { ...geometry, spikeTargetCenter: targetAnchors.battlePositionCenter };
+      if (!provableEffectOrder(request.moveId as 196 | 59, attacker.geometry.side,
+        liveMoveAnimationDuration(request)!, request.moveId === 196 ? icyGeometry : geometry)) return null;
       config = request.moveId === 196
-        ? { move: "ICY_WIND", attacker, target, fieldProfile,
-            effectGeometry: { ...geometry, spikeTargetCenter: targetAnchors.battlePositionCenter } }
+        ? { move: "ICY_WIND", attacker, target, fieldProfile, effectGeometry: icyGeometry }
         : { move: "BLIZZARD", attacker, target, fieldProfile, effectGeometry: geometry };
       break;
     }
