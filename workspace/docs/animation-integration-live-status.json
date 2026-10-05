@@ -2194,12 +2194,13 @@
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-grudge-*.json, 209 rows); order supplied as production does at a first body (known-entry F filtered to the six lowest free slots)",
         "ordinary route seed 57 / streak 0 / move slot 3 (HAUNTER): Grudge is the battle's first body, adapter active 209/209, returns to action-menu, ON/OFF rules/RNG equal",
-        "ordinary route seed 16 / streak 0 / move slot 3 (HAUNTER): the opponent's Light Screen is the first body, so Grudge has no known order and declines to the bounded scene-off fallback (0/209 active)"
+        "ordinary route seed 16 / streak 0 / move slot 3 (HAUNTER): the opponent's Light Screen (EXACT plan) is the first body; since the cross-body host (order-cross-body-live-receipt.json) Grudge renders as the 2nd body with the tracked order, active 209/209 (was a first-body-only decline)",
+        "ordinary later-body routes (receipt order-cross-body-live-receipt.json): seed 16 / slots [2,3] (HAUNTER): Grudge is the 3rd body after the opponent's Light Screen and Spite, tracked order known, adapter active 209/209, action-menu, ON/OFF rules/RNG equal; opponent Grudge seed 59 slots [1,1,1] (2nd body); seed 16 slots [1,3]: an earlier Confuse Ray body has no EXACT plan, Grudge declines (0/209 active)"
       ],
       "palettePlan": "no plan, history invalidates",
-      "spriteOrder": "order consumer: live ONLY when Grudge is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback)",
+      "spriteOrder": "order consumer: live while the tracked order is known (liveSpriteOrderHost.ts: known entry and every prompt cycle, body, hit, stat and status unit since modelled; see productionProviders.spriteOrder.invalidationTriggers); otherwise liveMoveAnimationPresentation returns null (fallback)",
       "remaining": [
-        "Grudge as a later body (needs body/gap plan application in production; Grudge's own body is NEEDS-KEYS so it ends the order chain)",
+        "Grudge after an unmodelled unit (NEEDS-KEYS / not-observed body, Confusion/BRN/Hail/trap animation, faint/switch/summary/party menu) declines; Grudge's own body is NEEDS-KEYS so it ends the order chain",
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
@@ -2266,12 +2267,13 @@
       ],
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-heal-bell-*.json, 261 rows)",
-        "ordinary route seed 0 / streak 7 / move slot 3 (DELCATTY): Heal Bell is the battle's first body, adapter active 261/261, action-menu, ON/OFF rules/RNG equal"
+        "ordinary route seed 0 / streak 7 / move slot 3 (DELCATTY): Heal Bell is the battle's first body, adapter active 261/261, action-menu, ON/OFF rules/RNG equal",
+        "ordinary later-body routes: seed 12 / slots [1,3] (DELCATTY): Heal Bell is the 2nd body after Faint Attack, active 261/261, action-menu, ON/OFF rules/RNG equal; opponent Heal Bell seed 186 / slots [0,0,0]: 5th body (after 290, 332, 185, 332), active 261/261, action-menu"
       ],
       "palettePlan": "no plan, history invalidates",
-      "spriteOrder": "order consumer: live ONLY when the move is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback). seed = known-entry F filtered to [4,5,7,9,10,11] (healBellNotesInPainterOrder initialOrder; staged default unchanged); ad-hoc opponent shadow retired for the shared #142 row-0 hook",
+      "spriteOrder": "order consumer: live while the tracked order is known (liveSpriteOrderHost.ts: known entry and every prompt cycle, body, hit, stat and status unit since modelled; see productionProviders.spriteOrder.invalidationTriggers); otherwise liveMoveAnimationPresentation returns null (fallback). seed = known-entry F filtered to [4,5,7,9,10,11] (healBellNotesInPainterOrder initialOrder; staged default unchanged); ad-hoc opponent shadow retired for the shared #142 row-0 hook",
       "remaining": [
-        "Heal Bell as a later body (needs body/gap plan application in production; Heal Bell's own body is NEEDS-KEYS)",
+        "Heal Bell after an unmodelled unit declines; Heal Bell's own body is NEEDS-KEYS",
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
@@ -2287,9 +2289,9 @@
         "ordinary route seed 89 / streak 21 / move slot 0 (SCEPTILE): first body, adapter active 224/224, action-menu, ON/OFF rules/RNG equal"
       ],
       "palettePlan": "no plan, history invalidates",
-      "spriteOrder": "order consumer: live ONLY when the move is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback). seed = known-entry F filtered to the blade + trail slots [3,4,5,7,9..16] (leafBladeDisplayedOamOrderAtAge initialOrder; staged default unchanged)",
+      "spriteOrder": "order consumer: live while the tracked order is known (liveSpriteOrderHost.ts: known entry and every prompt cycle, body, hit, stat and status unit since modelled; see productionProviders.spriteOrder.invalidationTriggers); otherwise liveMoveAnimationPresentation returns null (fallback). seed = known-entry F filtered to the blade + trail slots [3,4,5,7,9..16] (leafBladeDisplayedOamOrderAtAge initialOrder; staged default unchanged)",
       "remaining": [
-        "Leaf Blade as a later body (own body is NEEDS-KEYS)",
+        "Leaf Blade after an unmodelled unit declines; no later-body generated route found in seeds 0-199 (lead-mon scan)",
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
@@ -2305,9 +2307,9 @@
         "ordinary route seed 25 / streak 14 / move slot 0 (MURKROW): first body, adapter active 259/259, action-menu, ON/OFF rules/RNG equal"
       ],
       "palettePlan": "no plan, history invalidates",
-      "spriteOrder": "order consumer: live ONLY when the move is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback). equal-centerY note ties from the provider's creation rank (two creation windows x F order); literal 3/3 perish counts (battle engine result)",
+      "spriteOrder": "order consumer: live while the tracked order is known (liveSpriteOrderHost.ts: known entry and every prompt cycle, body, hit, stat and status unit since modelled; see productionProviders.spriteOrder.invalidationTriggers); otherwise liveMoveAnimationPresentation returns null (fallback). equal-centerY note ties from the provider's creation rank (two creation windows x F order); literal 3/3 perish counts (battle engine result)",
       "remaining": [
-        "Perish Song as a later body (own body is NEEDS-KEYS)",
+        "Perish Song after an unmodelled unit declines; no later-body generated route found in seeds 0-199 (lead-mon scan)",
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
@@ -2320,12 +2322,13 @@
       ],
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-rock-throw-*.json, 87 rows)",
-        "ordinary route seed 33 / streak 0 / move slot 1 (GRAVELER): first body, adapter active 87/87, action-menu, ON/OFF rules/RNG equal"
+        "ordinary route seed 33 / streak 0 / move slot 1 (GRAVELER): first body, adapter active 87/87, action-menu, ON/OFF rules/RNG equal",
+        "ordinary later-body route: seed 112 / slots [3,3] (opponent GRAVELER): Rock Throw is the 4th body after Agility, Defense Curl, Agility, active 87/87, action-menu; occupied prefix [62,60,0,63,1,61,6,8,2] equals the ROM order at all 44 real-route body edges with the known occupants (tests/spriteOrderEventTransform.test.ts)"
       ],
       "palettePlan": "no plan, history invalidates",
-      "spriteOrder": "order consumer: live ONLY when the move is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback). 64-entry seed = known-entry occupied prefix [62,60,0,63,1,61,6,8,2] + F",
+      "spriteOrder": "order consumer: live while the tracked order is known (liveSpriteOrderHost.ts: known entry and every prompt cycle, body, hit, stat and status unit since modelled; see productionProviders.spriteOrder.invalidationTriggers); otherwise liveMoveAnimationPresentation returns null (fallback). 64-entry seed = known-entry occupied prefix [62,60,0,63,1,61,6,8,2] + F",
       "remaining": [
-        "Rock Throw as a later body",
+        "Rock Throw after an unmodelled unit or once the occupants change (faint/send-out) declines",
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
@@ -2338,10 +2341,11 @@
       ],
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-blaze-kick-*.json, 78 rows)",
-        "ordinary route seed 322 / streak 28 / move slot 0 (BLAZIKEN): first body, adapter active 78/78, action-menu, ON/OFF rules/RNG equal; seed 43 / streak 28 / slot 0: the opponent's body is first, Blaze Kick declines to the scene-off fallback (0/78 active)"
+        "ordinary route seed 322 / streak 28 / move slot 0 (BLAZIKEN): first body, adapter active 78/78, action-menu, ON/OFF rules/RNG equal; seed 43 / streak 28 / slot 0 (opponent Sunny Day first) was a first-body-only decline and now renders as a later body (next entry)",
+        "ordinary later-body route seed 43 / streak 28 / slot 0: Blaze Kick after the opponent's Sunny Day now renders with the tracked order (active 78/78; tests/animation/liveOrderConsumerMoveAdapters.test.ts)"
       ],
       "palettePlan": "no plan, history invalidates",
-      "spriteOrder": "order consumer: live ONLY when the move is the first move body of the battle after a known entry with no other non-message presentation command before it; otherwise liveMoveAnimationPresentation returns null (fallback). seed = F filtered to the ten lowest-free slots before the foot allocation (pixel-sensitive). The dense proof is the plan-replayed (Torment-preceded) history; with the production first-body order the same oracle frames differ by 15 px on one row (player orientation), so first-body Blaze Kick pixels are not source-verified",
+      "spriteOrder": "order consumer: live while the tracked order is known (liveSpriteOrderHost.ts: known entry and every prompt cycle, body, hit, stat and status unit since modelled; see productionProviders.spriteOrder.invalidationTriggers); otherwise liveMoveAnimationPresentation returns null (fallback). seed = F filtered to the ten lowest-free slots before the foot allocation (pixel-sensitive). The dense proof is the plan-replayed (Torment-preceded) history; with the production first-body order the same oracle frames differ by 15 px on one row (player orientation), so first-body Blaze Kick pixels are not source-verified",
       "remaining": [
         "9-frame script tail (485/539) beyond the accepted window is uncovered",
         "first-body Blaze Kick has no oracle scenario (order differs from the accepted later-body history)",
@@ -2408,15 +2412,16 @@
       }
     },
     "spriteOrder": {
-      "available": "../src/engine/spriteOrderProvider.ts (spriteOrderForSlots, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderWithOccupiedPrefix, applySpriteOrderUnitPlan)",
-      "hostSeam": "../src/engine/factoryRoundBattleOrchestrator.ts liveMoveSpriteAllocatorHost.order + ../src/engine/liveMoveSpriteAllocator.ts prepareLiveMoveSpriteOrder / LiveMoveSpriteOrderInput",
-      "scope": "Free-slot sSpriteOrder, presentation-only. Seeded with knownEntrySpriteOrderState('ordinary-factory') at battle start (Scene ON) only when the start ran no battle-start script events (Intimidate-class entries start from a different order: invalid). Lent to the FIRST move-animation body of the battle and then invalidated. No body/gap plans are applied in production yet (docs/sprite-order-body-plans.md section 3 blip cause under probe); the plan applier is test/harness-only.",
+      "available": "../src/engine/spriteOrderProvider.ts (spriteOrderForSlots, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderWithOccupiedPrefix, applySpriteOrderUnitPlan) + ../src/engine/spriteOrderEventTransform.ts (applySpriteOrderPresentationEvent, spriteOrderTrackerLend) + ../src/engine/spriteOrderProductionPlans.ts (generated by ../tools/integration/spriteOrderProductionTable.ts: 381 EXACT (move, side) bodies, 133 distinct plans, 16.6 KB source)",
+      "hostSeam": "../src/engine/factoryRoundBattleOrchestrator.ts liveMoveSpriteAllocatorHost.orderHost (beginOrderTurn at command submission, advanceLiveSpriteOrderHost / lendLiveSpriteOrder in prepareResolutionPalette) + ../src/engine/liveSpriteOrderHost.ts + LiveMoveSpriteOrderInput",
+      "scope": "Free-slot sSpriteOrder, presentation-only, tracked ACROSS bodies (docs/sprite-order-gap-causes.md section 2). Seeded with knownEntrySpriteOrderState('ordinary-factory') at battle start (Scene ON) only when the start ran no battle-start script events (Intimidate-class entries stay unknown). Each player command submitted from the action prompt applies the bounce pair (C two lowest free, D in F order at creation); every semantic event of the resolution is applied once in sequence order: MOVE_ANIMATION -> EXACT body plan of (move, attacker side) else invalidate, HIT_ANIMATION -> blip, STATS_CHANGE -> stat class plan (+-2 carry), PSN/PRZ/SLP/INFATUATION status animations, HELD_ITEM_EFFECT/SUN_CONTINUES/FOCUS_PUNCH_SETUP. The order is lent to every move body while it is known and the allocator occupancy is the known-entry set; consumers return null otherwise. Strict: once unknown it stays unknown for the battle (no resync). A live adapter is not whole-playable arbitrary-history exactness.",
       "invalidationTriggers": [
-        "after the first move-animation body (consumed)",
-        "any non-message presentation command before it (switch, summary, trainer slide, recall, stat, status, status-icon, hp, hit, faint, turn-end, move-animation without request)",
-        "crossed or trailing status-animation events (unprojected graphics)",
-        "a resolution other than the first one that observed the order (prompt cycle moves the cursor pair)",
-        "presenting-switch-in phase and the party menu (with the allocator host)",
+        "a move body without an EXACT plan for (move, attacker side) in the production table (NEEDS-KEYS / not observed, incl. moves without a live adapter; the order consumers' own bodies are NEEDS-KEYS except Rock Throw), Substitute (164) and Transform (144)",
+        "status animations other than PSN/PRZ/SLP/INFATUATION (Confusion, BRN, FRZ, Curse, Nightmare, Wrap) and general animations other than HELD_ITEM_EFFECT/SUN_CONTINUES/FOCUS_PUNCH_SETUP (Hail/Sandstorm/Rain, TURN_TRAP, Leech Seed, Ingrain, Wish, Future Sight, Focus Band, item steal/knock-off, Substitute fade, ...); stat animation args 56/58 (multiple +-2, unobserved)",
+        "faint, switch, switch-in send-out, party status summary draw/hide, trainer slide in/out, battle outcome, return-to-ball recall",
+        "a battler hidden by the semi-invulnerable toggle (Fly/Dig/Dive/Bounce); a hit animation on a hidden target",
+        "party menu open (incl. B-cancel return) and the presenting-switch-in phase (with the allocator host)",
+        "a command resolution without an action prompt (locked player action) or a retained opponent-locked-action continuation; a resolution whose events were not all applied",
         "battle start with lifecycle events (nextEventSequence > 0)"
       ],
       "liveConsumers": [
@@ -2428,8 +2433,10 @@
         "MOVE_BLAZE_KICK (299)",
         "MOVE_FLAMETHROWER (53, optional seed)"
       ],
-      "planReplay": "TS replay of sprite-order-body-plans.json: 790 edges, 659 preceded by exact plans, 659 exact, 0 mismatched (tests/spriteOrderProvider.test.ts)",
-      "receipt": "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json"
+      "planReplay": "TS replay of sprite-order-body-plans.json: 790 edges, 659 preceded by exact plans, 659 exact, 0 mismatched (tests/spriteOrderProvider.test.ts). Event transform, strict real-route (five battle-1 traces, no resync): 3 known / 3 exact / 0 mismatched move edges per trace (was 1), first invalidation 283:opponent (not observed); resync 91/91 exact. BattleLab corpus through the transform: 1366 edges, 1044 known (554 first + 490 later), 1044 exact, 0 mismatched (tests/spriteOrderEventTransform.test.ts). Live host = pure transform on 200 generated battles: 1009 bodies, 812 later, 239 later known, 0 mismatches (tests/liveSpriteOrderHost.test.ts, tools/integration/orderCrossBodyRouteScan.ts)",
+      "receipt": "../tools/integration/fixtures/order-consumers-live-adapter-receipt.json",
+      "consumerPolicy": "while the tracked order is known (any body of the battle whose every preceding unit since the known entry is modelled); otherwise null (bounded scene-off fallback)",
+      "crossBodyReceipt": "../tools/integration/fixtures/order-cross-body-live-receipt.json"
     }
   },
   "validationCheckpoint": {
