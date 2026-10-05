@@ -2094,6 +2094,96 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_MIST_BALL",
+      "id": 296,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep5-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep5-mist-ball-*.json); retired the ad-hoc age-0 enemy-shadow draw (shared #142 hook, row 0)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_AROMATHERAPY",
+      "id": 312,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep5-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep5-aromatherapy-*.json); duration 400 rows player attacker / 396 opponent attacker (both windows end on script-end frame 474)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_FOLLOW_ME",
+      "id": 266,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep5-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep5-follow-me-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_METRONOME",
+      "id": 118,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep5-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep5-metronome-*.json); body only; the called move is an ordinary second MOVE_ANIMATION request (adapter or fallback)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_TAUNT",
+      "id": 269,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep5-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep5-taunt-*.json); window starts 10 frames after script activation (row -10): the first 10 script frames have no accepted pixels"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_BELLY_DRUM",
+      "id": 187,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep5-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep5-belly-drum-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -2116,7 +2206,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 151,
+  "implementedCount": 157,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},

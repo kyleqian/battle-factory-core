@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 321,
-  "ids": 151,
+  "rows": 333,
+  "ids": 157,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -3387,6 +3387,134 @@
    "duration": 83,
    "expected": null,
    "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 296,
+   "move": "MIST_BALL",
+   "orientation": "player",
+   "duration": 213,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 296,
+   "move": "MIST_BALL",
+   "orientation": "opponent",
+   "duration": 213,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 312,
+   "move": "AROMATHERAPY",
+   "orientation": "player",
+   "duration": 400,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 312,
+   "move": "AROMATHERAPY",
+   "orientation": "opponent",
+   "duration": 396,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 266,
+   "move": "FOLLOW_ME",
+   "orientation": "player",
+   "duration": 185,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 266,
+   "move": "FOLLOW_ME",
+   "orientation": "opponent",
+   "duration": 185,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 118,
+   "move": "METRONOME",
+   "orientation": "player",
+   "duration": 127,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 118,
+   "move": "METRONOME",
+   "orientation": "opponent",
+   "duration": 127,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 269,
+   "move": "TAUNT",
+   "orientation": "player",
+   "duration": 125,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 269,
+   "move": "TAUNT",
+   "orientation": "opponent",
+   "duration": 125,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 187,
+   "move": "BELLY_DRUM",
+   "orientation": "player",
+   "duration": 110,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 187,
+   "move": "BELLY_DRUM",
+   "orientation": "opponent",
+   "duration": 110,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
    "tailFirstAge": null
   }
  ]

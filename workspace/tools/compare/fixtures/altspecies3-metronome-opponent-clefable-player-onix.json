@@ -1,0 +1,63 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "move": "METRONOME",
+ "probe": "tools/compare/metronomeProbe.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/metronome-opponent-clefable-player-onix.json",
+ "attacker": {
+  "species": "CLEFABLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 162,
+  "opponentMaxHp": 170,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "denseWindow": {
+  "startFrame": 237,
+  "endFrame": 363,
+  "frameCount": 127
+ },
+ "draft": {
+  "activationFrame": 244,
+  "scriptEndFirstInactive": 370,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "expectedDuration": 127,
+  "consumedByTest": false,
+  "acceptedWindow": {
+   "startFrame": 244,
+   "endFrame": 370
+  },
+  "order": "ORDER-INDEPENDENT: bubble (offset 11) and finger (offset 12) differ in subpriority (same note as Taunt)",
+  "adhocShadowDraw": "none",
+  "derivedAttacker": {
+   "animationCenter": {
+    "x": 176,
+    "y": 49
+   },
+   "battlePositionCenter": {
+    "x": 176,
+    "y": 40
+   }
+  },
+  "attackerHead": {
+   "x": 140,
+   "y": 37
+  }
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep5-metronome-opponent.json",
+ "swap": {
+  "opponent": "CLEFABLE"
+ }
+}

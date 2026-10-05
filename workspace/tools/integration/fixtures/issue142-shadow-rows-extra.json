@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py)",
  "rows": [
   {
    "id": 236,
@@ -1636,6 +1636,222 @@
     "fixture": "tools/integration/fixtures/prep4-dragon-breath-opponent.json",
     "body": "normal",
     "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 296,
+   "move": "MIST_BALL",
+   "orientation": "player",
+   "variant": "prep5-mist-ball-player",
+   "activationFrame": 75,
+   "windowStart": 75,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-mist-ball-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 296,
+   "move": "MIST_BALL",
+   "orientation": "opponent",
+   "variant": "prep5-mist-ball-opponent",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-mist-ball-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 312,
+   "move": "AROMATHERAPY",
+   "orientation": "player",
+   "variant": "prep5-aromatherapy-player",
+   "activationFrame": 75,
+   "windowStart": 75,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-aromatherapy-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 312,
+   "move": "AROMATHERAPY",
+   "orientation": "opponent",
+   "variant": "prep5-aromatherapy-opponent",
+   "activationFrame": 79,
+   "windowStart": 79,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-aromatherapy-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 266,
+   "move": "FOLLOW_ME",
+   "orientation": "player",
+   "variant": "prep5-follow-me-player",
+   "activationFrame": 69,
+   "windowStart": 69,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-follow-me-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 266,
+   "move": "FOLLOW_ME",
+   "orientation": "opponent",
+   "variant": "prep5-follow-me-opponent",
+   "activationFrame": 73,
+   "windowStart": 73,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-follow-me-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 118,
+   "move": "METRONOME",
+   "orientation": "player",
+   "variant": "prep5-metronome-player",
+   "activationFrame": 245,
+   "windowStart": 245,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-metronome-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 118,
+   "move": "METRONOME",
+   "orientation": "opponent",
+   "variant": "prep5-metronome-opponent",
+   "activationFrame": 244,
+   "windowStart": 244,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-metronome-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 269,
+   "move": "TAUNT",
+   "orientation": "player",
+   "variant": "prep5-taunt-player",
+   "activationFrame": 66,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": -10,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-taunt-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 269,
+   "move": "TAUNT",
+   "orientation": "opponent",
+   "variant": "prep5-taunt-opponent",
+   "activationFrame": 70,
+   "windowStart": 80,
+   "ageOffset": 0,
+   "shadowRow": -10,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-taunt-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 187,
+   "move": "BELLY_DRUM",
+   "orientation": "player",
+   "variant": "prep5-belly-drum-player",
+   "activationFrame": 231,
+   "windowStart": 231,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-belly-drum-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 187,
+   "move": "BELLY_DRUM",
+   "orientation": "opponent",
+   "variant": "prep5-belly-drum-opponent",
+   "activationFrame": 211,
+   "windowStart": 211,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep5-belly-drum-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep5-activation (docs/next-adapters-prep5.md; issue142ActivationProbe.py)"
    }
   }
  ]

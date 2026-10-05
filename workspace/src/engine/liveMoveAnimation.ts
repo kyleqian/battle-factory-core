@@ -100,6 +100,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   153,
   // H_BUFFER S1 (docs/h-buffer-s1-prep.md): Mean Look, Smelling Salt, Defense Curl, Ingrain, Wrap, Bind, Dragon Breath.
   212, 265, 111, 275, 35, 20, 225,
+  // prep5 (docs/next-adapters-prep5.md): Mist Ball, Aromatherapy, Follow Me, Metronome (body), Taunt, Belly Drum.
+  296, 312, 266, 118, 269, 187,
 ] as const);
 
 /**
@@ -134,6 +136,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // H_BUFFER S1 (issue142-shadow-rows-extra.json): Mean Look, Smelling Salt, Defense Curl, Ingrain, Wrap start at activation.
     // Dragon Breath (-6) starts after it and has no row.
     212, 265, 111, 275, 35,
+    // prep5 (issue142-shadow-rows-extra.json): Mist Ball, Aromatherapy, Follow Me, Metronome, Belly Drum start at
+    // activation. Taunt (-10) starts after it and has no row.
+    296, 312, 266, 118, 187,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -398,6 +403,15 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 275: return 164; // Ingrain (205..368 / 293..456).
     case 35: return 38; // Wrap (222..259 / 78..115).
     case 20: return 45; // Bind (382..426 / 436..480).
+    // prep5 accepted windows (docs/next-adapters-prep5.md s2.4).
+    case 296: return 213; // Mist Ball (75..287 / 79..291).
+    // Aromatherapy: both windows end on the same script-end frame 474 but start at activation 75 / 79, so the
+    // opponent-attacker window is 4 rows shorter (the reducer frameCount is 400; Blizzard precedent).
+    case 312: return request.attacker === 0 ? 400 : 396;
+    case 266: return 185; // Follow Me (69..253 / 73..257).
+    case 118: return 127; // Metronome body (245..371 / 244..370); the called move is a separate request.
+    case 269: return 125; // Taunt (76..200 / 80..204); script activation is 10 frames earlier.
+    case 187: return 110; // Belly Drum (231..340 / 211..320).
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
@@ -1000,6 +1014,35 @@ export function liveMoveAnimationPresentation(
           attackerSide: attacker.geometry.side,
           targetSubpriority: target.geometry.side === "player" ? 30 : 40 } };
       break;
+    case 296: config = { move: "MIST_BALL", attacker, target, fieldProfile }; break;
+    case 312: config = { move: "AROMATHERAPY", attacker, target, fieldProfile }; break;
+    case 266: {
+      // battle_anim_effects_1.c thought-bubble/finger top: BATTLER_COORD_X and max(10, pic y - height / 2).
+      const pic = attackerAnchors.picOffsetPoint;
+      const coords = liveBattlerCoordAttrs(attacker.geometry.side, art);
+      config = { move: "FOLLOW_ME", attacker, target, fieldProfile,
+        attackerTop: { x: attackerAnchors.battlePositionCenter.x, y: Math.max(10, pic.y - coords.height / 2) } };
+      break;
+    }
+    case 118: case 269: {
+      // SetSpriteNextToMonHead (battle_anim_effects_1.c:5480-5488).
+      const pic = attackerAnchors.picOffsetPoint;
+      const coords = liveBattlerCoordAttrs(attacker.geometry.side, art);
+      const attackerHead = {
+        x: pic.x + (attacker.geometry.side === "player" ? coords.width / 2 + 8 : -coords.width / 2 - 8),
+        y: pic.y - Math.trunc(coords.height / 4),
+      };
+      config = request.moveId === 118
+        ? { move: "METRONOME", attacker, target, fieldProfile, attackerHead }
+        : { move: "TAUNT", attacker, target, fieldProfile, attackerHead };
+      break;
+    }
+    case 187: {
+      // SetSpriteCoordsToAnimAttackerCoords + the note's +8 y; HP is the displayed pre-move HP (healthbarupdate follows).
+      const pic = attackerAnchors.picOffsetPoint;
+      config = { move: "BELLY_DRUM", attacker, target, fieldProfile, attackerNoteOrigin: { x: pic.x, y: pic.y + 8 } };
+      break;
+    }
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:

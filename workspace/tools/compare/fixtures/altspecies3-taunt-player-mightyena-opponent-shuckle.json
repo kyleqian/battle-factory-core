@@ -1,0 +1,63 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "move": "TAUNT",
+ "probe": "tools/compare/tauntProbe.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/taunt-player-mightyena-opponent-shuckle.json",
+ "attacker": {
+  "species": "MIGHTYENA",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 166,
+  "playerMaxHp": 166,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 202,
+  "frameCount": 125
+ },
+ "draft": {
+  "activationFrame": 66,
+  "scriptEndFirstInactive": 200,
+  "shadowRow": -10,
+  "shadowRowInMap": false,
+  "expectedDuration": 125,
+  "consumedByTest": false,
+  "acceptedWindow": {
+   "startFrame": 76,
+   "endFrame": 200
+  },
+  "order": "ORDER-INDEPENDENT: bubble (createsprite subpriority offset 11) and finger (12) differ in subpriority; the scan's equal-key hits are same-position pairs with distinct keys",
+  "adhocShadowDraw": "none",
+  "derivedAttacker": {
+   "animationCenter": {
+    "x": 72,
+    "y": 97
+   },
+   "battlePositionCenter": {
+    "x": 72,
+    "y": 80
+   }
+  },
+  "attackerHead": {
+   "x": 104,
+   "y": 85
+  }
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep5-taunt-player.json",
+ "swap": {
+  "player": "MIGHTYENA"
+ }
+}
