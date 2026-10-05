@@ -1,0 +1,696 @@
+{
+ "schema": "elevated-postbody-receipt/v1",
+ "group": "pl",
+ "window": "opp",
+ "note": "k = frames after the body's last accepted row E; ':N' = residual px in the opponent-sprite window; trailing 's' = ROM elevated shadow drawn",
+ "rows": [
+  {
+   "fixture": "prep9-absorb-player.json",
+   "run": 0,
+   "E": 426,
+   "scriptEndMinusE": 2,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+3 -8 +12 -16 +20 -24 +28",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1699 2:1699 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1326 9:1326 10:1326 11:1326 12:1845s 13:1845s 14:1845s 15:1845s 16:1326 17:1326 18:1326 19:1326 20:1845s 21:1845s 22:1845s 23:1845s 24:1326 25:1326 26:1326 27:1326 28:1845s 29:1845s 30:1845s",
+    "digest": "dc51524938b8f57098df6cf805dcfd9e3631c648b6c5766bd8194fc4f1355df3"
+   },
+   "patched": {
+    "postExact": 18,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0 2:0 3:0s 4:0s 5:0s 6:0s 7:0s 8:1526 9:1526 10:1526 11:1526 12:0s 13:0s 14:0s 15:0s 16:1526 17:1526 18:1526 19:1526 20:0s 21:0s 22:0s 23:0s 24:1526 25:1526 26:1526 27:1526 28:0s 29:0s 30:0s",
+    "digest": "384d20c7072f4cdec33c68b1b1d291be2a1a7e4d7728177e77ed4791c0091c5b"
+   }
+  },
+  {
+   "fixture": "prep9-absorb-player.json",
+   "run": 1,
+   "E": 426,
+   "scriptEndMinusE": 2,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+3 -8 +12 -16 +20 -24 +28",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1699 2:1699 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1326 9:1326 10:1326 11:1326 12:1845s 13:1845s 14:1845s 15:1845s 16:1326 17:1326 18:1326 19:1326 20:1845s 21:1845s 22:1845s 23:1845s 24:1326 25:1326 26:1326 27:1326 28:1845s 29:1845s 30:1845s",
+    "digest": "dc51524938b8f57098df6cf805dcfd9e3631c648b6c5766bd8194fc4f1355df3"
+   },
+   "patched": {
+    "postExact": 18,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0 2:0 3:0s 4:0s 5:0s 6:0s 7:0s 8:1526 9:1526 10:1526 11:1526 12:0s 13:0s 14:0s 15:0s 16:1526 17:1526 18:1526 19:1526 20:0s 21:0s 22:0s 23:0s 24:1526 25:1526 26:1526 27:1526 28:0s 29:0s 30:0s",
+    "digest": "384d20c7072f4cdec33c68b1b1d291be2a1a7e4d7728177e77ed4791c0091c5b"
+   }
+  },
+  {
+   "fixture": "prep8-horn-drill-player.json",
+   "run": 0,
+   "E": 413,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep8-horn-drill-player.json",
+   "run": 1,
+   "E": 413,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep9-dream-eater-player.json",
+   "error": "Sprite order unknown for DREAM_EATER"
+  },
+  {
+   "fixture": "sky-uppercut-player-sky-uppercut-player-hitmonchan-opponent-onix.json",
+   "run": 0,
+   "E": 416,
+   "scriptEndMinusE": 1,
+   "bodyRowsResidual": 9028,
+   "romShadowToggles": "+2 -7 +11 -15 +19 -23 +27",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:1699 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1326 8:1326 9:1326 10:1326 11:1845s 12:1845s 13:1845s 14:1845s 15:1326 16:1326 17:1326 18:1326 19:1845s 20:1845s 21:1845s 22:1845s 23:1326 24:1326 25:1326 26:1326 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "6a6851153246dd9f34788583951cca74ae6a58cf3f46b47538bec100d264cee8"
+   },
+   "patched": {
+    "postExact": 18,
+    "postRows": 30,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:0 2:0s 3:0s 4:0s 5:0s 6:0s 7:1526 8:1526 9:1526 10:1526 11:0s 12:0s 13:0s 14:0s 15:1526 16:1526 17:1526 18:1526 19:0s 20:0s 21:0s 22:0s 23:1526 24:1526 25:1526 26:1526 27:0s 28:0s 29:0s 30:0s",
+    "digest": "01b38e0ac7a4f3b4d58677af96b177a8521d8bbe57e5126c1652ae22970af038"
+   }
+  },
+  {
+   "fixture": "sky-uppercut-player-sky-uppercut-player-hitmonchan-opponent-onix.json",
+   "run": 1,
+   "E": 416,
+   "scriptEndMinusE": 1,
+   "bodyRowsResidual": 9028,
+   "romShadowToggles": "+2 -7 +11 -15 +19 -23 +27",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:1699 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1326 8:1326 9:1326 10:1326 11:1845s 12:1845s 13:1845s 14:1845s 15:1326 16:1326 17:1326 18:1326 19:1845s 20:1845s 21:1845s 22:1845s 23:1326 24:1326 25:1326 26:1326 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "6a6851153246dd9f34788583951cca74ae6a58cf3f46b47538bec100d264cee8"
+   },
+   "patched": {
+    "postExact": 18,
+    "postRows": 30,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:0 2:0s 3:0s 4:0s 5:0s 6:0s 7:1526 8:1526 9:1526 10:1526 11:0s 12:0s 13:0s 14:0s 15:1526 16:1526 17:1526 18:1526 19:0s 20:0s 21:0s 22:0s 23:1526 24:1526 25:1526 26:1526 27:0s 28:0s 29:0s 30:0s",
+    "digest": "01b38e0ac7a4f3b4d58677af96b177a8521d8bbe57e5126c1652ae22970af038"
+   }
+  },
+  {
+   "fixture": "prep8-aurora-beam-player.json",
+   "run": 0,
+   "E": 436,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 9028,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "e797033b43844c5af5dbaeb02b20dd62f9e6d141e21fb6a87e06d67d2c4965b9"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "5a762a7c4b2d46cc35372443955895d12a6c5dce0a01ee37a9e04fc79247e508"
+   }
+  },
+  {
+   "fixture": "prep8-aurora-beam-player.json",
+   "run": 1,
+   "E": 436,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 9028,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "e797033b43844c5af5dbaeb02b20dd62f9e6d141e21fb6a87e06d67d2c4965b9"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "5a762a7c4b2d46cc35372443955895d12a6c5dce0a01ee37a9e04fc79247e508"
+   }
+  },
+  {
+   "fixture": "spider-web-player-spider-web-player-spinarak-opponent-onix.json",
+   "run": 0,
+   "E": 437,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "spider-web-player-spider-web-player-spinarak-opponent-onix.json",
+   "run": 1,
+   "E": 437,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "petal-dance-player-petal-dance-player-gloom-opponent-onix.json",
+   "run": 0,
+   "E": 466,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "petal-dance-player-petal-dance-player-gloom-opponent-onix.json",
+   "run": 1,
+   "E": 466,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep9-giga-drain-player.json",
+   "run": 0,
+   "E": 451,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep9-giga-drain-player.json",
+   "run": 1,
+   "E": 451,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep7-aerial-ace-lab-player.json",
+   "run": 0,
+   "E": 126,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep7-aerial-ace-lab-player.json",
+   "run": 1,
+   "E": 126,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep8-frustration-player.json",
+   "run": 0,
+   "E": 304,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep8-frustration-player.json",
+   "run": 1,
+   "E": 304,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep8-seismic-toss-player.json",
+   "run": 0,
+   "E": 304,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep8-seismic-toss-player.json",
+   "run": 1,
+   "E": 304,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep8-swift-player.json",
+   "run": 0,
+   "E": 146,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep8-swift-player.json",
+   "run": 1,
+   "E": 146,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep2-future-sight-player.json",
+   "run": 0,
+   "E": 190,
+   "scriptEndMinusE": -2,
+   "bodyRowsResidual": 400,
+   "romShadowToggles": "+-1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:200s 0:200s 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "e1756fc1142663676e91fdc4e73be94f7298eb2745bd1f061cc8fd1cfbe1d7d0"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:200s 0:200s 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "ba96ee73c85d1adbe4e9c1a89bf8b31b2ccc0754ce9d1fa5a12ff07ee995d3d9"
+   }
+  },
+  {
+   "fixture": "prep2-future-sight-player.json",
+   "run": 1,
+   "E": 190,
+   "scriptEndMinusE": -2,
+   "bodyRowsResidual": 400,
+   "romShadowToggles": "+-1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:200s 0:200s 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "e1756fc1142663676e91fdc4e73be94f7298eb2745bd1f061cc8fd1cfbe1d7d0"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:200s 0:200s 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "ba96ee73c85d1adbe4e9c1a89bf8b31b2ccc0754ce9d1fa5a12ff07ee995d3d9"
+   }
+  },
+  {
+   "fixture": "prep7-ice-punch-lab-player.json",
+   "run": 0,
+   "E": 261,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep7-ice-punch-lab-player.json",
+   "run": 1,
+   "E": 261,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep7-sleep-talk-player.json",
+   "error": "Sprite order unknown for SLEEP_TALK"
+  },
+  {
+   "fixture": "prep8-uproar-player.json",
+   "run": 0,
+   "E": 147,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "prep8-uproar-player.json",
+   "run": 1,
+   "E": 147,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -6 +10 -14 +18 -22 +26 -30",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1326 7:1326 8:1326 9:1326 10:1845s 11:1845s 12:1845s 13:1845s 14:1326 15:1326 16:1326 17:1326 18:1845s 19:1845s 20:1845s 21:1845s 22:1326 23:1326 24:1326 25:1326 26:1845s 27:1845s 28:1845s 29:1845s 30:1326",
+    "digest": "8652a5a7de434a96f4445d1b3ff9838b2aa933c3e088f913c24ff4a1a3c96b68"
+   },
+   "patched": {
+    "postExact": 17,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:1526 7:1526 8:1526 9:1526 10:0s 11:0s 12:0s 13:0s 14:1526 15:1526 16:1526 17:1526 18:0s 19:0s 20:0s 21:0s 22:1526 23:1526 24:1526 25:1526 26:0s 27:0s 28:0s 29:0s 30:1526",
+    "digest": "50b434a99730a92cd7730e1b70705eb49c53bb167efdcee6bbb1257cadb8183b"
+   }
+  },
+  {
+   "fixture": "razor-wind-player-razor-wind-player-nuzleaf-opponent-onix-b0.json",
+   "run": 0,
+   "E": 251,
+   "scriptEndMinusE": 1,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+2",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1699 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "2e1963a16ae937c154c7a44900e42f8fea40c91e641950a1f6a66c256fd0ca73"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "4906886a37ce02cef4c023843e2b1fbbf0f84e4e0e222c4495988996007a7435"
+   }
+  },
+  {
+   "fixture": "razor-wind-player-razor-wind-player-nuzleaf-opponent-onix-b0.json",
+   "run": 1,
+   "E": 251,
+   "scriptEndMinusE": 1,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+2",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1699 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "2e1963a16ae937c154c7a44900e42f8fea40c91e641950a1f6a66c256fd0ca73"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "4906886a37ce02cef4c023843e2b1fbbf0f84e4e0e222c4495988996007a7435"
+   }
+  },
+  {
+   "fixture": "foresight-player-foresight-player-machoke-opponent-onix.json",
+   "run": 0,
+   "E": 385,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "foresight-player-foresight-player-machoke-opponent-onix.json",
+   "run": 1,
+   "E": 385,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "leech-seed-player-leech-seed-player-exeggcute-opponent-onix.json",
+   "run": 0,
+   "E": 392,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "leech-seed-player-leech-seed-player-exeggcute-opponent-onix.json",
+   "run": 1,
+   "E": 392,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  }
+ ]
+}

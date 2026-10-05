@@ -1,0 +1,208 @@
+{
+ "schema": "elevated-postbody-receipt/v1",
+ "group": "oa",
+ "window": "opp",
+ "note": "k = frames after the body's last accepted row E; ':N' = residual px in the opponent-sprite window; trailing 's' = ROM elevated shadow drawn",
+ "rows": [
+  {
+   "fixture": "prep8-stockpile-opponent.json",
+   "run": 0,
+   "E": 303,
+   "scriptEndMinusE": null,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:2053s 2:2053s 3:2053s 4:2053s 5:2053s 6:2053s 7:2053s 8:2053s 9:2053s 10:2053s 11:2053s 12:2053s 13:2053s 14:2053s 15:2053s 16:2053s 17:2053s 18:2053s 19:2053s 20:2053s 21:2053s 22:2053s 23:2053s 24:2053s 25:2053s 26:2053s 27:2053s 28:2053s 29:2053s 30:2053s",
+    "digest": "a93c8e6bfba88a3ccc26b48405c74426006de63376c2bc9ed83f001905021cfd"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "prep8-stockpile-opponent.json",
+   "run": 1,
+   "E": 303,
+   "scriptEndMinusE": null,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:2053s 2:2053s 3:2053s 4:2053s 5:2053s 6:2053s 7:2053s 8:2053s 9:2053s 10:2053s 11:2053s 12:2053s 13:2053s 14:2053s 15:2053s 16:2053s 17:2053s 18:2053s 19:2053s 20:2053s 21:2053s 22:2053s 23:2053s 24:2053s 25:2053s 26:2053s 27:2053s 28:2053s 29:2053s 30:2053s",
+    "digest": "a93c8e6bfba88a3ccc26b48405c74426006de63376c2bc9ed83f001905021cfd"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "prep9-mega-drain-opponent.json",
+   "run": 0,
+   "E": 296,
+   "scriptEndMinusE": null,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1288s 2:1288s 3:1288s 4:1288s 5:1288s 6:1288s 7:1288s 8:1288s 9:1288s 10:1288s 11:1288s 12:1288s 13:1288s 14:1288s 15:1288s 16:1288s 17:1288s 18:1288s 19:1288s 20:1288s 21:1288s 22:1288s 23:1288s 24:1288s 25:1288s 26:1288s 27:1288s 28:1288s 29:1288s 30:1288s",
+    "digest": "e2794187199691f7414b3d53608e040d3fb6f390f48bd68889e38b0b62dc6e70"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "prep9-mega-drain-opponent.json",
+   "run": 1,
+   "E": 296,
+   "scriptEndMinusE": null,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1288s 2:1288s 3:1288s 4:1288s 5:1288s 6:1288s 7:1288s 8:1288s 9:1288s 10:1288s 11:1288s 12:1288s 13:1288s 14:1288s 15:1288s 16:1288s 17:1288s 18:1288s 19:1288s 20:1288s 21:1288s 22:1288s 23:1288s 24:1288s 25:1288s 26:1288s 27:1288s 28:1288s 29:1288s 30:1288s",
+    "digest": "e2794187199691f7414b3d53608e040d3fb6f390f48bd68889e38b0b62dc6e70"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "prep9-mega-drain-opponent.json",
+   "run": 0,
+   "E": 296,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1288s 2:1288s 3:1288s 4:1288s 5:1288s 6:1288s 7:1288s 8:1288s 9:1288s 10:1288s 11:1288s 12:1288s 13:1288s 14:1288s 15:1288s 16:1288s 17:1288s 18:1288s 19:1288s 20:1288s 21:1288s 22:1288s 23:1288s 24:1288s 25:1288s 26:1288s 27:1288s 28:1288s 29:1288s 30:1288s",
+    "digest": "e2794187199691f7414b3d53608e040d3fb6f390f48bd68889e38b0b62dc6e70"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "prep9-mega-drain-opponent.json",
+   "run": 1,
+   "E": 296,
+   "scriptEndMinusE": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1288s 2:1288s 3:1288s 4:1288s 5:1288s 6:1288s 7:1288s 8:1288s 9:1288s 10:1288s 11:1288s 12:1288s 13:1288s 14:1288s 15:1288s 16:1288s 17:1288s 18:1288s 19:1288s 20:1288s 21:1288s 22:1288s 23:1288s 24:1288s 25:1288s 26:1288s 27:1288s 28:1288s 29:1288s 30:1288s",
+    "digest": "e2794187199691f7414b3d53608e040d3fb6f390f48bd68889e38b0b62dc6e70"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "air-cutter-opponent-air-cutter-opponent-golbat-player-chansey.json",
+   "run": 0,
+   "E": 189,
+   "scriptEndMinusE": null,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "air-cutter-opponent-air-cutter-opponent-golbat-player-chansey.json",
+   "run": 1,
+   "E": 189,
+   "scriptEndMinusE": null,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "pain-split-opponent-pain-split-opponent-misdreavus-player-gengar-b0.json",
+   "run": 0,
+   "E": 526,
+   "scriptEndMinusE": null,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1109s 2:1109s 3:1109s 4:1109s 5:1109s 6:1109s 7:1109s 8:1109s 9:1109s 10:1109s 11:1109s 12:1109s 13:1109s 14:1109s 15:1109s 16:1109s 17:1109s 18:1109s 19:1109s 20:1109s 21:1109s 22:1109s 23:1109s 24:1109s 25:1109s 26:1109s 27:1109s 28:1109s 29:1109s 30:1109s",
+    "digest": "f2842414bc0acc59f901b79ef16aa7065c4fb540c2818e3efe77e5b6e4c3737c"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "pain-split-opponent-pain-split-opponent-misdreavus-player-gengar-b0.json",
+   "run": 1,
+   "E": 526,
+   "scriptEndMinusE": null,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1109s 2:1109s 3:1109s 4:1109s 5:1109s 6:1109s 7:1109s 8:1109s 9:1109s 10:1109s 11:1109s 12:1109s 13:1109s 14:1109s 15:1109s 16:1109s 17:1109s 18:1109s 19:1109s 20:1109s 21:1109s 22:1109s 23:1109s 24:1109s 25:1109s 26:1109s 27:1109s 28:1109s 29:1109s 30:1109s",
+    "digest": "f2842414bc0acc59f901b79ef16aa7065c4fb540c2818e3efe77e5b6e4c3737c"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  }
+ ]
+}

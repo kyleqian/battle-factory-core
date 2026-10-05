@@ -1,0 +1,38 @@
+{
+ "schema": "prep9-adapter-draft/v1",
+ "move": "GIGA_DRAIN",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "attacker": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 135,
+  "opponentMaxHp": 146,
+  "opponentGender": "male"
+ },
+ "verdict": "READY-WITH-ORDER (+renderer lift): no palette snapshot needed; allocator constants == ROM; orderSeed 17 slots: accepted post-Tackle [3,4,21,..] == lend, first-body [4,3,21,..] == provider; 0 px over all variants; Growl-preceded history unknown to the tracker",
+ "denseWindow": {
+  "startFrame": 214,
+  "endFrame": 443,
+  "ageOffset": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "riseFrame": 2074,
+   "side": "player"
+  }
+ ],
+ "scenario": "tools/battle-lab/elevated-postbody-golbat-prep9-giga-drain-opponent.json"
+}

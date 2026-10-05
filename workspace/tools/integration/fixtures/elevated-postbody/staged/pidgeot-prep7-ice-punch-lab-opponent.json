@@ -1,0 +1,32 @@
+{
+ "fieldProfile": {
+  "playerHp": 117,
+  "opponentHp": 143,
+  "playerStatus": "none",
+  "playerMaxHp": 117,
+  "opponentMaxHp": 143,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "schema": "prep7-adapter-draft/v1",
+ "move": "ICE_PUNCH",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/elevated-postbody-pidgeot-prep7-ice-punch-lab-opponent.json",
+ "denseWindow": {
+  "startFrame": 82,
+  "endFrame": 265,
+  "ageOffset": 0
+ },
+ "attacker": {
+  "species": "PIDGEOT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ }
+}

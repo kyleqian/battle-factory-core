@@ -1,0 +1,344 @@
+{
+ "schema": "elevated-postbody-receipt/v1",
+ "group": "sw",
+ "window": "opp",
+ "note": "k = frames after the body's last accepted row E; ':N' = residual px in the opponent-sprite window; trailing 's' = ROM elevated shadow drawn",
+ "rows": [
+  {
+   "fixture": "golbat-prep8-frustration-opponent.json",
+   "run": 0,
+   "E": 308,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "golbat-prep8-frustration-opponent.json",
+   "run": 1,
+   "E": 308,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "golbat-prep8-seismic-toss-opponent.json",
+   "run": 0,
+   "E": 307,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "golbat-prep8-seismic-toss-opponent.json",
+   "run": 1,
+   "E": 307,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "pidgeot-prep8-swift-opponent.json",
+   "run": 0,
+   "E": 153,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:2160s 2:2160s 3:2160s 4:2160s 5:2160s 6:2160s 7:2160s 8:2160s 9:2160s 10:2160s 11:2160s 12:2160s 13:2160s 14:2160s 15:2160s 16:2160s 17:2160s 18:2160s 19:2160s 20:2160s 21:2160s 22:2160s 23:2160s 24:2160s 25:2160s 26:2160s 27:2160s 28:2160s 29:2160s 30:2160s",
+    "digest": "58901d2c78bbb2a677c5e804229139934d571c3d251a0c0b6240454babaf6f27"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "pidgeot-prep8-swift-opponent.json",
+   "run": 1,
+   "E": 153,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:2160s 2:2160s 3:2160s 4:2160s 5:2160s 6:2160s 7:2160s 8:2160s 9:2160s 10:2160s 11:2160s 12:2160s 13:2160s 14:2160s 15:2160s 16:2160s 17:2160s 18:2160s 19:2160s 20:2160s 21:2160s 22:2160s 23:2160s 24:2160s 25:2160s 26:2160s 27:2160s 28:2160s 29:2160s 30:2160s",
+    "digest": "58901d2c78bbb2a677c5e804229139934d571c3d251a0c0b6240454babaf6f27"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "butterfree-prep9-absorb-opponent.json",
+   "run": 0,
+   "E": 420,
+   "scriptEndMinusE": 2,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+3",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1444 2:1444 3:1578s 4:1578s 5:1578s 6:1578s 7:1578s 8:1578s 9:1578s 10:1578s 11:1578s 12:1578s 13:1578s 14:1578s 15:1578s 16:1578s 17:1578s 18:1578s 19:1578s 20:1578s 21:1578s 22:1578s 23:1578s 24:1578s 25:1578s 26:1578s 27:1578s 28:1578s 29:1578s 30:1578s",
+    "digest": "c79819ac62444f7c73230a2043eb45cbcc951015bb2974ae543c22670fc79d64"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0 2:0 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "1bbf8fab026f284a751f8c73d555b17aa827ecf6f55081575b60eb6696aec1b9"
+   }
+  },
+  {
+   "fixture": "butterfree-prep9-absorb-opponent.json",
+   "run": 1,
+   "E": 420,
+   "scriptEndMinusE": 2,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+3",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1444 2:1444 3:1578s 4:1578s 5:1578s 6:1578s 7:1578s 8:1578s 9:1578s 10:1578s 11:1578s 12:1578s 13:1578s 14:1578s 15:1578s 16:1578s 17:1578s 18:1578s 19:1578s 20:1578s 21:1578s 22:1578s 23:1578s 24:1578s 25:1578s 26:1578s 27:1578s 28:1578s 29:1578s 30:1578s",
+    "digest": "c79819ac62444f7c73230a2043eb45cbcc951015bb2974ae543c22670fc79d64"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0 2:0 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "1bbf8fab026f284a751f8c73d555b17aa827ecf6f55081575b60eb6696aec1b9"
+   }
+  },
+  {
+   "fixture": "pidgeot-prep7-ice-punch-lab-opponent.json",
+   "run": 0,
+   "E": 263,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:2160s 2:2160s 3:2160s 4:2160s 5:2160s 6:2160s 7:2160s 8:2160s 9:2160s 10:2160s 11:2160s 12:2160s 13:2160s 14:2160s 15:2160s 16:2160s 17:2160s 18:2160s 19:2160s 20:2160s 21:2160s 22:2160s 23:2160s 24:2160s 25:2160s 26:2160s 27:2160s 28:2160s 29:2160s 30:2160s",
+    "digest": "58901d2c78bbb2a677c5e804229139934d571c3d251a0c0b6240454babaf6f27"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "pidgeot-prep7-ice-punch-lab-opponent.json",
+   "run": 1,
+   "E": 263,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:2160s 2:2160s 3:2160s 4:2160s 5:2160s 6:2160s 7:2160s 8:2160s 9:2160s 10:2160s 11:2160s 12:2160s 13:2160s 14:2160s 15:2160s 16:2160s 17:2160s 18:2160s 19:2160s 20:2160s 21:2160s 22:2160s 23:2160s 24:2160s 25:2160s 26:2160s 27:2160s 28:2160s 29:2160s 30:2160s",
+    "digest": "58901d2c78bbb2a677c5e804229139934d571c3d251a0c0b6240454babaf6f27"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "golbat-prep8-uproar-opponent.json",
+   "run": 0,
+   "E": 149,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "golbat-prep8-uproar-opponent.json",
+   "run": 1,
+   "E": 149,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1845s 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1845s 8:1845s 9:1845s 10:1845s 11:1845s 12:1845s 13:1845s 14:1845s 15:1845s 16:1845s 17:1845s 18:1845s 19:1845s 20:1845s 21:1845s 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1845s 28:1845s 29:1845s 30:1845s",
+    "digest": "88e0c0658794abfaf787ac63780cd582fa28c881a3137f0b1438639c48aebe67"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "butterfree-prep7-dragon-dance-opponent.json",
+   "run": 0,
+   "E": 220,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -5",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1578s 2:1578s 3:1578s 4:1578s 5:1444 6:1444 7:1444 8:1444 9:1444 10:1444 11:1602 12:1606 13:1613 14:1616 15:1615 16:1616 17:1619 18:1626 19:1626 20:1623 21:1606 22:1605 23:1608 24:1612 25:1616 26:1613 27:1616 28:1623 29:1626 30:1626",
+    "digest": "3cc5ff4c4a547a9c3c4e5f5c732c45264a84015d5d4d5ffaf7dd4371049ae24f"
+   },
+   "patched": {
+    "postExact": 4,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:200 6:200 7:200 8:200 9:200 10:200 11:1339 12:1333 13:1327 14:1326 15:1324 16:1334 17:1350 18:1369 19:1372 20:1369 21:1351 22:1343 23:1331 24:1325 25:1327 26:1324 27:1335 28:1355 29:1372 30:1371",
+    "digest": "b7d0f3c5cdb5d9f41cbb3b4e450512b22abb842f738ffd8cc64182bb9a5d85a3"
+   }
+  },
+  {
+   "fixture": "butterfree-prep7-dragon-dance-opponent.json",
+   "run": 1,
+   "E": 220,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1 -5",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1578s 2:1578s 3:1578s 4:1578s 5:1444 6:1444 7:1444 8:1444 9:1444 10:1444 11:1602 12:1606 13:1613 14:1616 15:1615 16:1616 17:1619 18:1626 19:1626 20:1623 21:1606 22:1605 23:1608 24:1612 25:1616 26:1613 27:1616 28:1623 29:1626 30:1626",
+    "digest": "3cc5ff4c4a547a9c3c4e5f5c732c45264a84015d5d4d5ffaf7dd4371049ae24f"
+   },
+   "patched": {
+    "postExact": 4,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:200 6:200 7:200 8:200 9:200 10:200 11:1339 12:1333 13:1327 14:1326 15:1324 16:1334 17:1350 18:1369 19:1372 20:1369 21:1351 22:1343 23:1331 24:1325 25:1327 26:1324 27:1335 28:1355 29:1372 30:1371",
+    "digest": "b7d0f3c5cdb5d9f41cbb3b4e450512b22abb842f738ffd8cc64182bb9a5d85a3"
+   }
+  },
+  {
+   "fixture": "pidgeot-prep8-aurora-beam-opponent.json",
+   "run": 0,
+   "E": 435,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:2160s 2:2160s 3:2160s 4:2160s 5:2160s 6:2160s 7:2160s 8:2160s 9:2160s 10:2160s 11:2160s 12:2160s 13:2160s 14:2160s 15:2160s 16:2160s 17:2160s 18:2160s 19:2160s 20:2160s 21:2160s 22:2160s 23:2160s 24:2160s 25:2160s 26:2160s 27:2160s 28:2160s 29:2160s 30:2160s",
+    "digest": "58901d2c78bbb2a677c5e804229139934d571c3d251a0c0b6240454babaf6f27"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  },
+  {
+   "fixture": "pidgeot-prep8-aurora-beam-opponent.json",
+   "run": 1,
+   "E": 435,
+   "scriptEndMinusE": 0,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+1",
+   "production": {
+    "postExact": 0,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:2160s 2:2160s 3:2160s 4:2160s 5:2160s 6:2160s 7:2160s 8:2160s 9:2160s 10:2160s 11:2160s 12:2160s 13:2160s 14:2160s 15:2160s 16:2160s 17:2160s 18:2160s 19:2160s 20:2160s 21:2160s 22:2160s 23:2160s 24:2160s 25:2160s 26:2160s 27:2160s 28:2160s 29:2160s 30:2160s",
+    "digest": "58901d2c78bbb2a677c5e804229139934d571c3d251a0c0b6240454babaf6f27"
+   },
+   "patched": {
+    "postExact": 30,
+    "postRows": 30,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0s 2:0s 3:0s 4:0s 5:0s 6:0s 7:0s 8:0s 9:0s 10:0s 11:0s 12:0s 13:0s 14:0s 15:0s 16:0s 17:0s 18:0s 19:0s 20:0s 21:0s 22:0s 23:0s 24:0s 25:0s 26:0s 27:0s 28:0s 29:0s 30:0s",
+    "digest": "8badcbad4980fabf8bffaf5208f976c688c2de214ad092fff78ebb6ccea72b76"
+   }
+  }
+ ]
+}

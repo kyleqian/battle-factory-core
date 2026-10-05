@@ -1,0 +1,38 @@
+{
+ "schema": "prep9-adapter-draft/v1",
+ "move": "ABSORB",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "attacker": {
+  "species": "BUTTERFREE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 152,
+  "opponentMaxHp": 167,
+  "opponentGender": "male"
+ },
+ "verdict": "READY (+renderer lift): no palette snapshot needed (D-PAL stale); allocator profile constants == ROM first-free replay == accepted literal; no order field in the config (order-neutrality of its sprite kinds measured on Giga/Mega/DE only); reducer age = activation age - 10",
+ "denseWindow": {
+  "startFrame": 223,
+  "endFrame": 416,
+  "ageOffset": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "riseFrame": 2074,
+   "side": "player"
+  }
+ ],
+ "scenario": "tools/battle-lab/elevated-postbody-butterfree-prep9-absorb-opponent.json"
+}
