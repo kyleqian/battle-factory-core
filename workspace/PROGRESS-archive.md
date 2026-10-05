@@ -1,3 +1,64 @@
+## 2026-10-04 (night, checkpoint 2) — S10A: 166 live adapters, sprite order live
+
+- **State:** production `72610e111` (166 live adapters). Folds since
+  checkpoint 1 each re-proved by the supervisor (dense twice fresh, zero
+  residual; routes all PASS) with worker full suites (latest 1,500 files /
+  12,081 tests) plus supervisor typecheck/smoke/affected on each union.
+  Preview serves `bb0e1e021`, verified (four hashes, export, ON->OFF, no errors).
+- **Did:** prep5 batch (6); sprite-order provider wired into production for
+  the battle's first move body + Grudge; order-consumer batch (Ember, Dragon
+  Rage, Flamethrower always; Heal Bell, Leaf Blade, Rock Throw, Blaze Kick,
+  Perish Song first body). Evidence: order-consumer prep, gap causes (blip =
+  hit animation), real Factory battle validation, plan coverage 68% of
+  weighted move uses, prep6 (7 READY).
+- **Next:** cross-body order tracking (running, Opus); prep6 batch (brief
+  ready in `.codex-logs/`); census of remaining moves (running).
+
+---
+
+## 2026-10-04 (night, checkpoint 1) — S10A: 151 live adapters + sprite-order provider
+
+- **State:** S10A, local master; production `5fd7ea33b` (151 live adapters).
+  Supervisor union gates on `5fd7ea33b`: 1,497 files / 12,029 tests, build
+  passed. Preview serves `d8d96846c`: four hashes equal to earlier previews,
+  export, ON->OFF restart, no errors (`playable-preview-d8d96846c-receipt.json`).
+  Opus 5.5 supervisor, Sonnet 5.5 workers.
+- **Did:** H_BUFFER S1 batch (Mean Look, Smelling Salt, Defense Curl, Ingrain,
+  Wrap, Bind, Dragon Breath), re-proved by the supervisor (17 fixtures twice
+  fresh, zero residual; routes 7/7). Free-slot sprite-order provider module
+  (unwired), ROM-confirmed for the real Factory entry, plus per-body order
+  plans (659/659 later edges replay exact). Details in
+  `ANIMATION_INTEGRATION_PROGRESS.md`.
+- **Next:** prep5 batch (six moves, running); order-consumer measured prep
+  (running); then the provider wiring step (first body of each battle first,
+  then across bodies once the between-body one-frame sprite's cause is pinned).
+- **Notes:** oracle freshness FAIL at orient is the known false positive (no
+  harness commit since the services started). No DEFERRED entries.
+
+---
+
+## 2026-10-04 — Opus supervisor and Sonnet worker defaults
+
+- **State:** default `./run-supervisor.sh` now uses Claude Opus 5.5
+  (`claude-opus-5-5`) with Sonnet 5.5 (`claude-sonnet-5-5`) workers.
+  S10A remains active; 79 adapters, 197 accepted moves remain.
+- **Did:** changed the default provider/model, refreshed Opus/Sonnet aliases
+  and direct-worker default, and aligned active run guides. Explicit Codex,
+  mixed-provider and max-mode profiles remain available.
+- **Checks:** shell syntax and both resolved configs pass; three affected
+  launcher/boundary/inventory files, 71 tests pass; coverage/asset audit and
+  diff checks pass. Launcher tooling only; accepted production unchanged.
+- **Next:** review preserved Light Screen candidate `84f2e5264` in
+  `.worktrees/integration-20261003-085057`; repair its allocator-history guard
+  before independent proof and merge. Brief remains in
+  `.codex-logs/s10a-lightscreen-guard-repair-20261003.txt`.
+- **Notes:** latest IDs verified against Anthropic's model documentation;
+  Claude Code 2.1.289 installed. This change starts no new work session.
+  The prior supervisor stopped at a model-capacity error after withholding
+  Light Screen; candidate worktree and logs are retained.
+
+---
+
 ## 2026-10-03 — Source-derived sprite allocator provider accepted
 
 - **State:** S10A, local master; 79 adapters, 197 accepted moves remain.

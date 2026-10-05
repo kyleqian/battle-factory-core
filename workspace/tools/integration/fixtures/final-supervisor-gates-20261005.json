@@ -1,12 +1,12 @@
 {
   "schema": "supervisor-final-gates/v1",
   "verifier": "independent integration supervisor (Claude Opus 5.5), 2026-10-05 night wind-down",
-  "productionCodeCommit": "09b92c56df2758cb1f5eef06ede20d39320b4e9b",
+  "productionCodeCommit": "55d1ef1dd3b7d3af621e4e55c68587f4d4c9140a",
   "implementedAdapters": 198,
   "typecheck": {
     "command": "npm run typecheck",
     "result": "passed",
-    "log": ".integration/validation/supervisor-final-20261005/typecheck.log"
+    "log": ".integration/validation/supervisor-final2-20261005/typecheck.log"
   },
   "fullTest": {
     "command": "PATH=\"$PWD/tools/autonomy/bin:$PATH\" POKEBENCH_VITEST_MAX_WORKERS=4 npm test -- --maxWorkers=4",
@@ -14,14 +14,14 @@
     "skippedFiles": 44,
     "passedTests": 12175,
     "skippedTests": 223,
-    "durationSeconds": 362.7,
-    "log": ".integration/validation/supervisor-final-20261005/npm-test.log"
+    "durationSeconds": 363.83,
+    "log": ".integration/validation/supervisor-final2-20261005/npm-test.log"
   },
   "build": {
     "command": "npm run build",
     "modules": 851,
     "result": "passed",
-    "log": ".integration/validation/supervisor-final-20261005/build.log"
+    "log": ".integration/validation/supervisor-final2-20261005/build.log"
   },
   "batchReceipts": [
     "tools/integration/fixtures/hbuffer-s1-supervisor-receipt.json",
@@ -32,7 +32,13 @@
     "tools/integration/fixtures/prep6-supervisor-receipt.json",
     "tools/integration/fixtures/prep7-supervisor-receipt.json",
     "tools/integration/fixtures/prep8-supervisor-receipt.json",
-    "tools/integration/fixtures/prep9-supervisor-receipt.json"
+    "tools/integration/fixtures/prep9-supervisor-receipt.json",
+    "tools/integration/fixtures/castform-fix-receipt.json"
   ],
-  "scope": "Independent complete typecheck/suite/build on the session's final production (198 live adapters, after the prep9 + Double Team/Feather Dance fold); later commits are docs/receipts/evidence only."
+  "scope": "Independent complete typecheck/suite/build on the session's final production (198 live adapters + the CASTFORM normal-form fix); later commits are docs/receipts/evidence only.",
+  "earlierRun": {
+    "productionCodeCommit": "09b92c56d",
+    "result": "typecheck passed; 1508 files / 12175 tests; build 851 (before the CASTFORM fix)",
+    "log": ".integration/validation/supervisor-final-20261005/"
+  }
 }
