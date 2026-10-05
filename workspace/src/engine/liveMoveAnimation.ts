@@ -1,6 +1,6 @@
 import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "json" };
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
-import type { LiveMoveSpriteAllocatorInput } from "./liveMoveSpriteAllocator.ts";
+import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
@@ -427,7 +427,9 @@ export function liveMoveAnimationPresentation(
   age: number,
   paletteInput?: LiveMovePaletteInput,
   spriteAllocatorInput?: LiveMoveSpriteAllocatorInput,
+  spriteOrderInput?: LiveMoveSpriteOrderInput,
 ): SceneOnMovePresentationState | null {
+  void spriteOrderInput; // No order consumer yet.
   if (liveMoveAnimationDuration(request) === null) return null;
   const art = createBattleCommandFieldArtView(field);
   const battler = (side: "player" | "opponent"): SceneOnPresentationBattler => {

@@ -54727,7 +54727,7 @@ export function renderBattleResolutionLiveView(
   const presentation = effect?.type === "move"
     ? liveMoveAnimationPresentation(
         effect.request, view.field, effect.age, effect.paletteInput,
-        effect.spriteAllocatorInput,
+        effect.spriteAllocatorInput, effect.spriteOrderInput,
       )
     : null;
   if (!presentation) {
