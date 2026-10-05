@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-05 (day, in progress) — S10A: post-knock-out animations live; Random2 decision deferred
+
+- **State:** S10A, local master; production `c35b3b64c` (198 live adapters, unchanged count).
+  Preview <http://127.0.0.1:5191/> serves `1294b06fc` (receipt
+  `playable-preview-1294b06fc-receipt.json`). Opus 5.5 supervisor; Opus/Sonnet 5.5 workers.
+- **Did:** sprite-order tracker kept across faint / summary / send-out / switch-in / party menu
+  (presentation-neutral, 43 battles identical); post-KO lends: order relabelled to entry slot
+  labels + allocator re-seed, 24 post-KO bodies dense-exact twice fresh, Leaf Blade pinned out;
+  census regenerated (78 remaining); prep10 measured prep; Random2 trackability evidence.
+- **Next:** fold the prep10 batch (running); prep11 (running); ROADMAP S10A resume points.
+- **Notes:** **DEFERRED D3 (OPEN)**: Random2 animations (52 moves) cannot be tracked exactly in
+  play; surrogate presentation RNG or fallback? Recommendation (a), separate claim bucket.
+
+---
+
 ## 2026-10-05 (night) — S10A wind-down: 144 -> 198 live adapters, sprite order live
 
 - **State:** S10A, local master; production `782822914` (198 live adapters, 78
