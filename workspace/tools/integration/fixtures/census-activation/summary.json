@@ -1,0 +1,290 @@
+{
+ "schema": "census-activation-summary/v1",
+ "note": "activation = first frame with gAnimScriptActive for the move id (issue142ActivationProbe.py, direct mGBA, Scene ON, one fresh run per scenario); window = accepted evidence window; shadow row = activationMinusWindowStart + ageOffset",
+ "rows": [
+  {
+   "move": "AERIAL_ACE",
+   "probe": "aerial-ace-pidgeotto-onix",
+   "activation": 81,
+   "scriptEnd": 130,
+   "scriptFrames": 49,
+   "window": {
+    "start": 46,
+    "end": 281
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 35,
+   "windowEndMinusScriptEnd": 151,
+   "reducerAgeAtActivation": 42
+  },
+  {
+   "move": "AERIAL_ACE",
+   "probe": "aerial-ace-player-pidgeotto-onix",
+   "activation": 77,
+   "scriptEnd": 126,
+   "scriptFrames": 49,
+   "window": {
+    "start": 46,
+    "end": 277
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 31,
+   "windowEndMinusScriptEnd": 151,
+   "reducerAgeAtActivation": 38
+  },
+  {
+   "move": "QUICK_ATTACK",
+   "probe": "quick-attack-pidgeotto-onix",
+   "activation": 83,
+   "scriptEnd": 115,
+   "scriptFrames": 32,
+   "window": {
+    "start": 46,
+    "end": 264
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 37,
+   "windowEndMinusScriptEnd": 149,
+   "reducerAgeAtActivation": 44
+  },
+  {
+   "move": "QUICK_ATTACK",
+   "probe": "quick-attack-player-pidgeotto-onix",
+   "activation": 79,
+   "scriptEnd": 111,
+   "scriptFrames": 32,
+   "window": {
+    "start": 46,
+    "end": 259
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 33,
+   "windowEndMinusScriptEnd": 148,
+   "reducerAgeAtActivation": 40
+  },
+  {
+   "move": "FEATHER_DANCE",
+   "probe": "feather-dance-pidgeotto-onix",
+   "activation": 83,
+   "scriptEnd": 251,
+   "scriptFrames": 168,
+   "window": {
+    "start": 46,
+    "end": 445
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 37,
+   "windowEndMinusScriptEnd": 194,
+   "reducerAgeAtActivation": 44
+  },
+  {
+   "move": "FEATHER_DANCE",
+   "probe": "feather-dance-player-pidgeotto-onix",
+   "activation": 79,
+   "scriptEnd": 247,
+   "scriptFrames": 168,
+   "window": {
+    "start": 46,
+    "end": 445
+   },
+   "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+   },
+   "activationMinusWindowStart": 33,
+   "windowEndMinusScriptEnd": 198,
+   "reducerAgeAtActivation": 40
+  },
+  {
+   "move": "FAKE_TEARS",
+   "probe": "fake-tears-opponent-delcatty-player-shuckle",
+   "activation": 79,
+   "scriptEnd": 162,
+   "scriptFrames": 83,
+   "window": {
+    "start": 80,
+    "end": 166
+   },
+   "appStage": {
+    "presentationAge": 0
+   },
+   "activationMinusWindowStart": -1,
+   "windowEndMinusScriptEnd": 4
+  },
+  {
+   "move": "FAKE_TEARS",
+   "probe": "fake-tears-player-delcatty-opponent-shuckle",
+   "activation": 75,
+   "scriptEnd": 158,
+   "scriptFrames": 83,
+   "window": {
+    "start": 76,
+    "end": 162
+   },
+   "appStage": {
+    "presentationAge": 0
+   },
+   "activationMinusWindowStart": -1,
+   "windowEndMinusScriptEnd": 4
+  },
+  {
+   "move": "SLEEP_TALK",
+   "probe": "sleep-talk-opponent-seaking-player-onix",
+   "activation": 4570,
+   "scriptEnd": 4758,
+   "scriptFrames": 188,
+   "window": {
+    "start": 4570,
+    "end": 4758
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SLEEP_TALK",
+   "probe": "sleep-talk-player-seaking-opponent-onix",
+   "activation": 1356,
+   "scriptEnd": 1541,
+   "scriptFrames": 185,
+   "window": {
+    "start": 1356,
+    "end": 1541
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SPARK",
+   "probe": "spark-opponent-minun-player-shuckle",
+   "activation": 74,
+   "scriptEnd": 199,
+   "scriptFrames": 125,
+   "window": {
+    "start": 83,
+    "end": 197
+   },
+   "appStage": {
+    "presentationAge": 0
+   },
+   "activationMinusWindowStart": -9,
+   "windowEndMinusScriptEnd": -2
+  },
+  {
+   "move": "SPARK",
+   "probe": "spark-player-minun-opponent-shuckle",
+   "activation": 70,
+   "scriptEnd": 195,
+   "scriptFrames": 125,
+   "window": {
+    "start": 79,
+    "end": 193
+   },
+   "appStage": {
+    "presentationAge": 0
+   },
+   "activationMinusWindowStart": -9,
+   "windowEndMinusScriptEnd": -2
+  },
+  {
+   "move": "REVERSAL",
+   "probe": "reversal-player-delcatty-opponent-vigoroth",
+   "activation": 404,
+   "scriptEnd": 577,
+   "scriptFrames": 173,
+   "window": {
+    "start": 404,
+    "end": 577
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "REVERSAL",
+   "probe": "reversal-player-vigoroth-opponent-delcatty",
+   "activation": 451,
+   "scriptEnd": 624,
+   "scriptFrames": 173,
+   "window": {
+    "start": 451,
+    "end": 624
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "MAGNITUDE",
+   "probe": "magnitude-intense-opponent-camerupt-player-onix",
+   "activation": 195,
+   "scriptEnd": 401,
+   "scriptFrames": 206,
+   "window": {
+    "start": 195,
+    "end": 401
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "MAGNITUDE",
+   "probe": "magnitude-intense-player-camerupt-opponent-onix",
+   "activation": 191,
+   "scriptEnd": 397,
+   "scriptFrames": 206,
+   "window": {
+    "start": 191,
+    "end": 397
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "MAGNITUDE",
+   "probe": "magnitude-regular-opponent-graveler-player-onix",
+   "activation": 411,
+   "scriptEnd": 585,
+   "scriptFrames": 174,
+   "window": {
+    "start": 411,
+    "end": 585
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "MAGNITUDE",
+   "probe": "magnitude-regular-player-graveler-opponent-onix",
+   "activation": 411,
+   "scriptEnd": 585,
+   "scriptFrames": 174,
+   "window": {
+    "start": 411,
+    "end": 585
+   },
+   "appStage": null,
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 0
+  }
+ ]
+}
