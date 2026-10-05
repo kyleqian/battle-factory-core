@@ -9,7 +9,13 @@
   rows/run, zero residual; routes 8/8 PASS. Receipt `prep7-supervisor-receipt.json`.
 - Limit: Aerial Ace with CHARIZARD/DRAGONAIR opponent attackers leaves 14/51 px
   at ages 10-11 on the opponent platform clip row.
-- Running: prep8 batch (ten allocator-plan-v2 moves); REL-Y-STATIC confirmation (side).
+- REL-Y-STATIC confirmation (`259c1a694`, `docs/sprite-order-rely-confirmation.md`;
+  supervisor regenerated the 83-row file identically): 60 candidate bodies
+  confirmed order-static across ≥2 geometries (+23 absolute-invariant), 30
+  refuted; weighted EXACT plan coverage 68.2% → 80.6% (83.7% with all rows);
+  union replay 2,158/2,158 exact. Rows are not yet in the production table.
+- Running: prep8 batch (ten allocator-plan-v2 moves); uncovered units
+  (faint / send-out / switch / party menu) order evidence (side).
 
 ## 2026-10-05 — prep6 batch folded: 173 live adapters; prep8 prep
 
