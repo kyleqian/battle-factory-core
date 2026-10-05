@@ -118,7 +118,8 @@ describe("production sprite-order battle units (faint / summary / send-out / swi
     expect(revived.invalidReason).toBeNull();
     expect(spriteOrderTrackerPostUnitView(run(revived, { kind: "battle-reshow", playerBattlerPresent: true })))
       .toEqual({ free: expect.any(Array), occupied: [0, 1, 2, 3, 4, 60, 61, 62, 63], battlerSlots: { player: 0, opponent: 1 },
-        occupantRoles: null }); // reshowBoth geometry: roles not ROM-verified for the lend, declines
+        // reshowBoth survivors n2 / n5 / n8 (docs/voluntary-switch-lend-audit.md §2.2: ROM roles 2 / 3 / 4 at 45 edges)
+        occupantRoles: { healthboxMain: { player: 2, opponent: 3 }, shadow: 4 } });
     expect(spriteOrderTrackerPostUnitView(invalidateSpriteOrderTracker(entry(), "test"))).toBeNull();
     // outcome-style invalidation still sticks until a reset
     expect(run(entry(), { kind: "invalidate", reason: "outcome" }, { kind: "trainer-slide-end" }).cursor.order.known).toBe(false);

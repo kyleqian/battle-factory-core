@@ -9,10 +9,11 @@
  *   animation STATS_CHANGE                           stat-animation (B_ANIM_STATS_CHANGE argument)
  *   any other animation id                           general-animation (HELD_ITEM_EFFECT / SUN_CONTINUES / ...)
  *   status-animation                                 status-animation (InitAndLaunchChosenStatusAnimation name)
- *   set-battler-sprite-visibility                    hiding (semi-invulnerable) or a return-to-ball receipt invalidates
- *                                                    (the voluntary recall stays invalidating: provisional, one instance),
+ *   set-battler-sprite-visibility                    hiding (semi-invulnerable) or a return-to-ball receipt invalidates,
  *                                                    except Roar/Whirlwind's `returntoball` of the segment's latest
- *                                                    MOVE_ANIMATION target: forced-switch-out {side}
+ *                                                    MOVE_ANIMATION target: forced-switch-out {side}, and the player's
+ *                                                    voluntary `returnatktoball` (battler 0, no earlier MOVE_ANIMATION
+ *                                                    in the segment): switch-out (docs/voluntary-switch-lend-audit.md)
  *   faint-animation battler 0 / 1                    faint (player / opponent battler slot; unknown slot invalidates)
  *   draw-party-status-summary battler 1 / 0          party-summary-next / no allocation (no-op)
  *   hide-party-status-summary battler 1 / 0          party-summary-hide (adjacency marker) / no-op
@@ -194,6 +195,20 @@ function followsForcedSwitchOut(events: readonly BattleKernelSemanticEvent[], in
   return false;
 }
 
+/**
+ * The player's voluntary switch-out (BattleScript_ActionSwitch `returnatktoball`, docs/voluntary-switch-lend-audit.md §2.3):
+ * a RETURNATKTOBALL hide of battler 0 before any move body of the segment. The opponent's AI switch (battler 1) and a
+ * recall after a body (Pursuit's switch-out damage) are unprobed and keep invalidating.
+ */
+function isVoluntaryPlayerSwitchOut(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const event = events[index]!;
+  const payload = event.payload;
+  if (payload.kind !== "set-battler-sprite-visibility" || !payload.invisible || payload.battler !== 0
+    || event.provenance?.opcodeName !== "B_SCR_OP_RETURNATKTOBALL") return false;
+  return !events.slice(0, index).some(({ payload: earlier }) =>
+    earlier.kind === "animation" && earlier.animationId === "MOVE_ANIMATION");
+}
+
 function orderEventOf(
   events: readonly BattleKernelSemanticEvent[], index: number, hidden: readonly [boolean, boolean],
 ): { event?: SpriteOrderPresentationEvent; then?: SpriteOrderPresentationEvent; hidden?: readonly [boolean, boolean] } {
@@ -251,6 +266,7 @@ function orderEventOf(
     if (isForcedSwitchOut(events, index)) {
       return { event: { kind: "forced-switch-out", side: payload.battler === 0 ? "player" : "opponent" } };
     }
+    if (isVoluntaryPlayerSwitchOut(events, index)) return { event: { kind: "switch-out" } };
     if (RECALL_OPCODES.has(event.provenance?.opcodeName ?? "")) return { event: { kind: "invalidate", reason: "return to ball" } };
     if (payload.battler !== 0 && payload.battler !== 1) return { event: { kind: "invalidate", reason: "visibility battler" } };
     const next: [boolean, boolean] = [hidden[0], hidden[1]];
@@ -339,17 +355,19 @@ export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number):
 /**
  * Whether the order host's last unit leaves the allocator occupancy role-isomorphic to the known entry, so that the
  * allocator host can be re-seeded in entry labels: a modelled opponent faint + next-mon summary + send-out
- * (docs/postko-consumer-audit.md §4.3), or a player faint + forced party menu + reshowPlayerGone + forced switch-in
- * (docs/playerfaint-lend-audit.md §4.3; occupant roles known, i.e. not the voluntary reshowBoth / recall chain).
+ * (docs/postko-consumer-audit.md §4.3), a player faint + forced party menu + reshowPlayerGone + forced switch-in
+ * (docs/playerfaint-lend-audit.md §4.3), a voluntary recall + switch-in, or the return from a cancelled voluntary party
+ * menu (reshowBoth; docs/voluntary-switch-lend-audit.md §4.4). Occupant roles must be known.
  */
 export function liveSpriteAllocatorReseedable(host: LiveSpriteOrderHost): boolean {
   const { lastUnit, occupantRoles } = host.tracker;
-  return (lastUnit === "send-out" || (lastUnit === "switch-in" && occupantRoles !== null))
+  return (lastUnit === "send-out" || ((lastUnit === "switch-in" || lastUnit === "reshow") && occupantRoles !== null))
     && spriteOrderTrackerRoleIsomorphic(host.tracker);
 }
 
 /**
- * Allocator host after a modelled opponent send-out or forced player switch-in (liveSpriteAllocatorReseedable): the
+ * Allocator host after a modelled opponent send-out, a player switch-in or a cancelled party menu's reshow
+ * (liveSpriteAllocatorReseedable): the
  * occupancy is role-isomorphic to the known entry (battlers, healthboxes, shadow), so the host is re-seeded with the
  * known-entry `firstMove` host, i.e. the post-unit view relabelled to entry slot labels (the labels the order lend
  * uses). Any other host is returned unchanged (an invalid host stays invalid). Net-zero history persists from there.

@@ -242,15 +242,34 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     expect(ORDER_CONSUMER_MOVES[288]).toBe("GRUDGE");
   }, 120000);
 
-  it("refuses the order after a preceding switch or party menu", () => {
-    for (const slots of [[{ switch: 1 }, 0], ["cancel-party", 0]] as const) {
+  // docs/voluntary-switch-lend-audit.md §4: reshowBoth roles, the voluntary recall as the switch-out unit, allocator re-seeded after the
+  // cancel return and after the voluntary switch-in. Before: every body after a switch or party menu declined (no lend).
+  it("lends after a voluntary switch or a cancelled party menu; adapters active every age; ON/OFF parity; next prompt", () => {
+    const routes = [
+      { slots: [{ switch: 1 }, 0], post: ["113LA", "61L"] }, // Light Screen: re-seeded after the voluntary switch-in
+      { slots: ["cancel-party", 0], post: ["113LA", "325L"] }, // Light Screen: re-seeded at the cancel return
+      { slots: [0, { switch: 1 }, 0], pre: ["113LA", "325L"], post: ["129L", "129L", "61L"] },
+      { slots: [{ switch: 2 }, 0, 0], post: ["113LA", "129L", "209L", "9-", "209-"] }, // 209 (no EXACT plan) ends the tracker
+    ] as const;
+    for (const { slots, post, ...route } of routes) {
       const on = generatedCommandAnimationReplay(16, "on", slots);
       const off = generatedCommandAnimationReplay(16, "off", slots);
       expectRulesEqual(on, off);
-      expect(bodies(on).length).toBeGreaterThan(0);
-      expect(bodies(on).every(row => row.spriteOrderInput === undefined)).toBe(true);
+      expect([on.stalled, off.stalled]).toEqual([false, false]); // every slot reached its next action prompt
+      expect(off.commands.every(row => row.spriteOrderInput === undefined)).toBe(true);
+      const out = on.commands.findIndex(row => row.type === "switch-out");
+      const pre = "pre" in route ? route.pre : [];
+      expect(out >= 0).toBe(slots.some(slot => typeof slot === "object"));
+      const labels = bodies(on).map(row => `${(row.command as { animation: { moveId: number } }).animation.moveId}`
+        + `${row.spriteOrderInput ? "L" : "-"}${row.spriteInputHistoryKnown ? "A" : ""}`);
+      expect(labels).toEqual([...pre, ...post]);
+      // bodies before the menu: unchanged decisions (the seed 16 [0, 0] route lends the same first turn)
+      if (pre.length) expect(bodies(on).slice(0, pre.length).map(row => row.spriteOrderInput))
+        .toEqual(bodies(generatedCommandAnimationReplay(16, "on", [0, 0])).slice(0, pre.length).map(row => row.spriteOrderInput));
+      const active = on.animations.map(row => row.ages.length > 0 && row.adapterActive.every(Boolean));
+      expect(active.slice(0, labels.findIndex(label => label.endsWith("-")) >>> 0)).not.toContain(false);
     }
-  }, 60000);
+  }, 120000);
 
   it("battle-start events: none = known entry, exactly one Intimidate triple = pre-prompt + stat plan (lends after the prompt), anything else refuses", () => {
     let intimidate = 0, other = 0, without = 0;

@@ -36,10 +36,16 @@ const isBody = (payload: PostKoSemanticPayload) => payload.kind === "animation" 
 
 /**
  * Replay `turns` (the last turn ends with the body under test) through the production hosts and return the lends at the final
- * body's activation edge. `route` = the known entry the scenario starts from. One orchestrator marker the kernel stream does not
- * carry, `{ kind: "forced-party-menu", battlers }` (playerfaintLendHistory.ts: the forced party handoff after a player faint), is
- * replayed as the orchestrator's forced path does: party-menu reset + reshow (openLiveSpriteOrderHostPartyMenu +
- * returnLiveSpriteOrderHostFromPartyMenu), the allocator host invalidated, and re-seeded after the forced switch-in.
+ * body's activation edge. `route` = the known entry the scenario starts from. Orchestrator markers the kernel stream does not
+ * carry:
+ *   `{ kind: "forced-party-menu", battlers }` (playerfaintLendHistory.ts: the forced party handoff after a player faint) is
+ *   replayed as the orchestrator's forced path does: party-menu reset + reshow (openLiveSpriteOrderHostPartyMenu +
+ *   returnLiveSpriteOrderHostFromPartyMenu), the allocator host invalidated, and re-seeded after the forced switch-in;
+ *   `{ kind: "voluntary-party-menu", outcome }` (voluntaryLendHistory.ts; first event of its turn): the menu opened from the
+ *   action prompt (openLiveSpriteOrderHostPartyMenu, allocator invalidated); `cancel` then returns as the orchestrator's
+ *   returnOrderHostFromPartyMenu does (reshow + allocator re-seed) before the turn's prompt cycle, `switch` begins the turn
+ *   from the party menu (beginLiveSpriteOrderTurn fromPartyMenu: reshow, no prompt cycle).
+ * A payload's `provenanceOpcodeName` (the voluntary recall's B_SCR_OP_RETURNATKTOBALL) is restored as the event provenance.
  */
 export function replayPostKoTurnsThroughHost(
   turns: readonly PostKoTurn[], route: "ordinary-factory" | "battle-lab-ordinary-singles" = "battle-lab-ordinary-singles",
@@ -49,13 +55,26 @@ export function replayPostKoTurnsThroughHost(
   let sequence = 0;
   for (const [turnIndex, turn] of turns.entries()) {
     const requestId = turnIndex + 1;
-    const events = turn.events.map(payload => Object.freeze({ sequence: sequence++, payload, provenance: undefined }) as unknown as BattleKernelSemanticEvent);
-    const isMarker = (event: BattleKernelSemanticEvent) => (event.payload as unknown as PostKoSemanticPayload).kind === "forced-party-menu";
+    const events = turn.events.map(payload => Object.freeze({ sequence: sequence++, payload,
+      provenance: typeof payload.provenanceOpcodeName === "string" ? { opcodeName: payload.provenanceOpcodeName } : undefined,
+    }) as unknown as BattleKernelSemanticEvent);
+    const isMarker = (event: BattleKernelSemanticEvent) =>
+      ["forced-party-menu", "voluntary-party-menu"].includes((event.payload as unknown as PostKoSemanticPayload).kind);
     const resolution = { resolutionId: { requestId }, segmentIndex: 0, segments: [{ events: events.filter(event => !isMarker(event)) }] };
-    host = beginLiveSpriteOrderTurn(host, requestId, true);
+    const menu = turn.events[0]?.kind === "voluntary-party-menu" ? turn.events[0].outcome as "cancel" | "switch" : null;
+    if (menu !== null) {
+      host = openLiveSpriteOrderHostPartyMenu(host);
+      allocator = invalidateLiveSpriteAllocatorHost(allocator);
+    }
+    if (menu === "cancel") {
+      host = returnLiveSpriteOrderHostFromPartyMenu(host, { player: true, opponent: true });
+      allocator = reseedLiveSpriteAllocatorAfterSendOut(allocator, host, route);
+    }
+    host = beginLiveSpriteOrderTurn(host, requestId, true, menu === "switch");
     const last = turnIndex === turns.length - 1;
     for (const [index, event] of events.entries()) {
       const payload = event.payload as unknown as PostKoSemanticPayload;
+      if (payload.kind === "voluntary-party-menu") continue;
       if (isMarker(event)) {
         host = returnLiveSpriteOrderHostFromPartyMenu(openLiveSpriteOrderHostPartyMenu(host), payload.battlers as { player: boolean; opponent: boolean });
         allocator = invalidateLiveSpriteAllocatorHost(allocator);
@@ -72,7 +91,9 @@ export function replayPostKoTurnsThroughHost(
       }
       if (isBody(payload)) allocator = prepareLiveMoveSpriteAllocator(allocator, requestOf(payload)).next;
       else if (payload.kind === "draw-party-status-summary" || payload.kind === "switch-in-animation"
-        || payload.kind === "status-animation") allocator = invalidateLiveSpriteAllocatorHost(allocator);
+        || payload.kind === "status-animation" || payload.provenanceOpcodeName !== undefined) {
+        allocator = invalidateLiveSpriteAllocatorHost(allocator);
+      }
       host = advanceLiveSpriteOrderHost(host, resolution, event.sequence);
       if (payload.kind === "switch-in-animation") allocator = reseedLiveSpriteAllocatorAfterSendOut(allocator, host, route);
     }
