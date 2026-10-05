@@ -2150,8 +2150,12 @@ function prepareResolutionPalette(
     if (spriteHost) spriteHost = invalidateLiveSpriteAllocatorHost(spriteHost);
   }
   // Conservative order policy: only message commands may precede the first
-  // body (switch, summary, slide, recall, stat/status, faint, turn end, ...).
-  if (command !== undefined && command.type !== "message" && command.type !== "move-animation" && spriteOrder) {
+  // body (switch, summary, slide, recall, stat/status, faint, turn end, a
+  // move animation without a typed request, ...).
+  if (
+    command !== undefined && command.type !== "message"
+    && !(command.type === "move-animation" && command.animation) && spriteOrder
+  ) {
     spriteOrder = invalidateSpriteOrderState(spriteOrder);
   }
   if ((hasTrailingUnknownGraphics || crossedUnknownGraphics) && spriteHost) {
