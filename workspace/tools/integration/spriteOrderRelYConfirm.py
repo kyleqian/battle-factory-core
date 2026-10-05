@@ -23,7 +23,8 @@ TPL = {"player": FIX / "sprite-order-policy-gaps/scenarios/endeavor-player-onix-
        "opponent": FIX / "sprite-order-policy-gaps/scenarios/endeavor-opponent-onix-player-pidgeotto.json"}
 # (name, attacker species, other-side species): internal species ids (Dragonair 148, Diglett 50, Chansey 113, Onix 95, Pidgeotto 17)
 GEOMS = [("dragonair-chansey", 148, 113), ("diglett-chansey", 50, 113), ("onix-pidgeotto", 95, 17)]
-NEW_GEOMS = GEOMS[:2]
+NEW_GEOMS = GEOMS
+SEEDS = (11, 22, 33, 44, 55, 66)  # `retry`: alternate battle seeds for cells whose first scenarios produced no body (accuracy misses)
 PY = "/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python"
 SKIP = {0: "unattributed"}
 
@@ -45,14 +46,23 @@ def scen_path(move, side, geom):
     return RELY / "scenarios" / f"{move}-{side}-{geom}.json"
 
 
-def gen(rows):
+def geoms_of(move, side):
+    """geometry labels (scenario file suffixes) that exist for this cell"""
+    pre = f"{move}-{side}-"
+    return sorted(p.stem[len(pre):] for p in (RELY / "scenarios").glob(pre + "*.json"))
+
+
+def gen(rows, seed=None, only=None):
     n = 0
     for r in rows:
-        if r["move"] in SKIP or r["side"] not in ("player", "opponent"):
+        if r["move"] in SKIP or r["side"] not in ("player", "opponent") or (only is not None and r["cell"] not in only):
             continue
-        for g, a, o in NEW_GEOMS:
+        for g0, a, o in NEW_GEOMS:
+            g = g0 if seed is None else f"{g0}-s{seed}"
             d = json.loads(TPL[r["side"]].read_text())
             oth = "opponent" if r["side"] == "player" else "player"
+            if seed is not None:
+                d["seed"] = seed
             d["overrides"]["parties"][r["side"]][0].update(species=a, moves=[r["move"]] * 4)
             d["overrides"]["parties"][oth][0]["species"] = o
             for who, sp in ((r["side"], a), (oth, o)):
@@ -66,7 +76,7 @@ def probe(rows, jobs, limit):
     OUT.mkdir(parents=True, exist_ok=True)
     work = []
     for r in rows[:limit]:
-        for g, _, _ in NEW_GEOMS:
+        for g in geoms_of(r["move"], r["side"]):
             for run in "AB":
                 work.append((r["move"], r["side"], g, run))
     # run A of everything first (rank order), then B
@@ -102,6 +112,18 @@ def body_facts(sc, m, side):
     return out
 
 
+def sig_diff(facts):
+    """first window where the most common plan and a deviating one differ"""
+    by = collections.defaultdict(list)
+    for f in facts:
+        by[f[2]["sig"]].append(f[0])
+    (a, la), (b, lb) = sorted(by.items(), key=lambda kv: -len(kv[1]))[:2]
+    wa, wb = json.loads(a), json.loads(b)
+    i = next((i for i, (x, y) in enumerate(zip(wa, wb)) if x != y), min(len(wa), len(wb)))
+    enc = lambda w: json.dumps(w, separators=(",", ":"))
+    return {"majority": la[:3], "other": lb[:3], "windows": [len(wa), len(wb)], "firstDifferingWindow": i, "majorityWindow": enc(wa[i]) if i < len(wa) else None, "otherWindow": enc(wb[i]) if i < len(wb) else None}
+
+
 def old_facts():
     base = json.loads(P.TABLE.read_text())["scenarios"]
     ext = json.loads((FIX / "sprite-order-body-events-ext.json").read_text())["scenarios"]
@@ -127,7 +149,7 @@ def analyze(rows, write):
                 facts.append(("old:" + sc["file"], True, b))
         seen_old = len(facts)
         new_runs = {}
-        for g, _, _ in NEW_GEOMS:
+        for g in geoms_of(m, s):
             a, b_ = OUT / f"{m}-{s}-{g}-A.json", OUT / f"{m}-{s}-{g}-B.json"
             if not a.exists() or not b_.exists():
                 new_runs[g] = {"status": "not probed"}; continue
@@ -151,15 +173,22 @@ def analyze(rows, write):
             sigs = {f[2]["sig"] for f in facts}; rels = {json.dumps(f[2]["rel"]) for f in facts}
             absf = {json.dumps(f[2]["abs"]) for f in facts}
             whys = {w for f in facts for w in f[2]["why"]}
+            row["planByGeometry"] = {f[0]: hashlib.sha1(f[2]["sig"].encode()).hexdigest()[:6] + "/" + hashlib.sha1(json.dumps(f[2]["rel"]).encode()).hexdigest()[:4] for f in facts}
+            row["newOnlyDistinctPlans"] = len({f[2]["sig"] for f in facts[seen_old:]})
             row.update(distinctPlans=len(sigs), distinctRelativeYVectors=len(rels), distinctAbsoluteYFingerprints=len(absf), newBodies=len(newf))
             if whys - {ONLY_Y}:
                 row.update(verdict="NEEDS-KEYS", why="KEYS group not of the equal-word/different-y kind: " + ";".join(sorted(whys - {ONLY_Y})))
             elif len(sigs) > 1:
-                row.update(verdict="NEEDS-KEYS", why="plan differs across geometries (%d distinct plans)" % len(sigs))
+                row.update(verdict="NEEDS-KEYS", why="plan differs across geometries (%d distinct plans)" % len(sigs), difference=sig_diff(facts))
             elif len(rels) > 1:
                 row.update(verdict="NEEDS-KEYS", why="relative-y vectors differ across geometries: " + " vs ".join(sorted(rels)))
             elif len(absf) < 2:
-                row.update(verdict="INCONCLUSIVE", why="all geometries share one absolute-y fingerprint")
+                labels = {f[0] for f in facts}
+                if len(labels) >= 3:  # same plan and the same absolute y in every KEYS group over >= 3 species pairs: y does not depend on the picture geometry at all
+                    row.update(verdict="CONFIRMED-ABS-INVARIANT", why="same plan, same relative-y and same absolute-y vectors over %d scenarios on different species pairs (y not species dependent)" % len(labels))
+                    confirmed[r["cell"]] = {"plan": json.loads(next(iter(sigs))), "relativeY": json.loads(next(iter(rels))), "geometries": sorted(labels), "absFingerprints": sorted(absf), "tier": "abs-invariant"}
+                else:
+                    row.update(verdict="INCONCLUSIVE", why="all geometries share one absolute-y fingerprint (<3 scenarios)")
             else:
                 row.update(verdict="CONFIRMED", why="same plan + same relative-y vectors over %d absolute geometries" % len(absf))
                 plan = json.loads(next(iter(sigs)))
@@ -185,6 +214,11 @@ def main(argv):
             print(r["cell"], r["name"], round(r["weight"] * 100, 3), r["oldScenarios"], r["oldAbsFingerprints"])
     elif cmd == "gen":
         gen(rows)
+    elif cmd == "retry":  # alternate seeds for the cells that produced no complete body so far
+        v = json.loads((RELY / "verdicts.json").read_text())["cells"]
+        need = {x["cell"] for x in v if x["verdict"] == "INCONCLUSIVE" and x["why"].startswith("no complete")}
+        for sd in SEEDS:
+            gen(rows, sd, need)
     elif cmd == "probe":
         probe(rows, opt("--jobs", 12), opt("--limit", len(rows)))
     elif cmd == "analyze":
