@@ -50828,22 +50828,24 @@ export function renderSceneOnMovePresentation(
       age: state.age - DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG,
     });
     const playerToOpponent =
-      view.attacker.species === "CHARMELEON"
+      (liveField || view.attacker.species === "CHARMELEON")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "CHARMELEON"
+      (liveField || view.attacker.species === "CHARMELEON")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged DRAGON_RAGE pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const attackerSprite = playerToOpponent ? charmeleonBackSprite : charmeleonFrontSprite;
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? charmeleonBackSprite : charmeleonFrontSprite;
+    const targetSprite = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     const behindPlumes = orderFirePlumesForDraw(
       firePlumeView.firePlumes.filter((p) => p.subpriorityOffset >= 64),
@@ -50903,6 +50905,7 @@ export function renderSceneOnMovePresentation(
       drawFireSpit();
       drawAttacker();
     }
+    if (liveField) return;
     const opponentSpecies = playerToOpponent ? "ONIX" : "CHARMELEON";
     const playerSpecies = playerToOpponent ? "CHARMELEON" : "ONIX";
     drawSendOutHealthbox(

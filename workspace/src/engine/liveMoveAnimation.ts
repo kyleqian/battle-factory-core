@@ -108,6 +108,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
   // by creation order whatever the free order is).
   52,
+  // Dragon Rage: one plume per sort window (orderFirePlumesForDraw); the 21-frame script tail is not covered.
+  82,
 ] as const);
 
 /**
@@ -420,6 +422,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 118: return 127; // Metronome body (245..371 / 244..370); the called move is a separate request.
     case 269: return 125; // Taunt (76..200 / 80..204); script activation is 10 frames earlier.
     case 187: return 110; // Belly Drum (231..340 / 211..320).
+    case 82: return 150; // Dragon Rage (89..238 / 93..242); the script runs 21 frames past the window (259/263), uncovered.
     case 52: return 63; // Ember (388..450 / 442..504, ageOffset 0); script ends 3 frames later (453/507).
     case 288: return 209; // Grudge (66..274 / 70..278); script end 274/278 (no tail).
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
@@ -1066,6 +1069,7 @@ export function liveMoveAnimationPresentation(
           targetSubpriority: target.geometry.side === "player" ? 30 : 40,
         } };
       break;
+    case 82: config = { move: "DRAGON_RAGE", attacker, target, fieldProfile }; break;
     case 288: {
       // Order consumer (docs/order-consumer-prep.md §0): the six flames take the six lowest free slots in one
       // sort window and inherit their relative free order, so only a host-supplied order is exact. Unknown order
