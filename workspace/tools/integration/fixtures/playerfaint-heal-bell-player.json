@@ -34,5 +34,105 @@
   "endFrame": 1800,
   "ageOffset": 0
  },
- "note": "accepted window offset/length of postko-lend/postko-heal-bell-player.json (261 rows; Giga Drain P = prep9-giga-drain-player.json 214..443, same 230 rows); body after player faint -> forced party menu -> reshow -> forced switch-in"
+ "note": "accepted window offset/length of postko-lend/postko-heal-bell-player.json (261 rows; Giga Drain P = prep9-giga-drain-player.json 214..443, same 230 rows); body after player faint -> forced party menu -> reshow -> forced switch-in",
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    },
+    {
+     "kind": "faint-animation",
+     "battler": 0
+    },
+    {
+     "kind": "forced-party-menu",
+     "battlers": {
+      "player": false,
+      "opponent": true
+     }
+    },
+    {
+     "kind": "switch-in-animation",
+     "battler": 0,
+     "partyIndex": 1
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "113",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "129",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "215",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
 }

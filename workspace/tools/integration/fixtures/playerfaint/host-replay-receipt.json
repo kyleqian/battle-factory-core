@@ -1,0 +1,112 @@
+[
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-sunny-day-player.json",
+  "edge": 937,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": null,
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": null,
+  "roleLendFromHostEqualsModel": true
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-swift-opponent.json",
+  "edge": 1238,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": null,
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": null,
+  "roleLendFromHostEqualsModel": true
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-dragon-dance-player.json",
+  "edge": 1766,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": null,
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": null,
+  "roleLendFromHostEqualsModel": true
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-swift-player.json",
+  "edge": 2747,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": null,
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": null,
+  "roleLendFromHostEqualsModel": true
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-protect-player.json",
+  "edge": 1170,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": null,
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": null,
+  "roleLendFromHostEqualsModel": true
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-thunderbolt-opponent.json",
+  "edge": 1685,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": null,
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": null,
+  "roleLendFromHostEqualsModel": true
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-light-screen-player.json",
+  "edge": 921,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": null,
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": null,
+  "roleLendFromHostEqualsModel": true
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-heal-bell-player.json",
+  "edge": 1540,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": null,
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": null,
+  "roleLendFromHostEqualsModel": true
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-giga-drain-player.json",
+  "edge": 2223,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": null,
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": null,
+  "roleLendFromHostEqualsModel": true
+ },
+ {
+  "fixture": "tools/integration/fixtures/playerfaint-secondko-sunny-day-player.json",
+  "edge": 2773,
+  "hostKnown": true,
+  "invalidReason": null,
+  "hostViewEqualsModel": true,
+  "todayOrderLend": "lent",
+  "todayAllocatorInput": null,
+  "todayLendEqualsRole": true,
+  "roleLendFromHostEqualsModel": true
+ }
+]
