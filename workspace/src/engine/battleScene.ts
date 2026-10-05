@@ -19388,14 +19388,14 @@ export function renderSceneOnMovePresentation(
       age: rockState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "GRIMER"
+      (liveField || view.attacker.species === "GRIMER")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "GRIMER"
+      (liveField || view.attacker.species === "GRIMER")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -19404,19 +19404,23 @@ export function renderSceneOnMovePresentation(
       );
     }
     const attackerSource = playerToOpponent ? grimerBackSprite : grimerFrontSprite;
-    const attackerSprite = playerToOpponent
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? attackerSource
       : { ...attackerSource, tileset: subTileset(attackerSource.tileset, 0, 8) };
     const targetSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const targetSprite = playerToOpponent
+    const targetSprite = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...targetSource, tileset: subTileset(targetSource.tileset, 0, 8) }
       : targetSource;
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
+    const attackerIdle = liveIdle(view.attacker);
+    const targetIdleY2 = liveIdle(view.target).y2;
     const drawAttacker = (): void => drawSpriteSheet(
       fb,
       attackerSprite.tileset,
       attackerSprite.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     const targetDisplayX2 = rockTombTargetDisplayX2(rockState.age, {
       targetSpriteSlot: rockState.config.targetSpriteSlot,
@@ -19428,7 +19432,7 @@ export function renderSceneOnMovePresentation(
       targetSprite.tileset,
       targetSprite.palette,
       view.target.geometry.spriteCorner.x + targetDisplayX2,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.y + targetIdleY2,
     );
     const drawRock = (rock: typeof displayed.rocks[number]): void => {
       drawSpriteSheet(
@@ -19475,6 +19479,7 @@ export function renderSceneOnMovePresentation(
     }
     drawXSign();
 
+    if (liveField) return;
     const profile = rockState.config.fieldProfile;
     const opponentSpecies = playerToOpponent ? "ONIX" : "GRIMER";
     const playerSpecies = playerToOpponent ? "GRIMER" : "ONIX";

@@ -1,7 +1,7 @@
 {
   "schema": "prep6-adapter-draft/v1",
   "move": "SELF_DESTRUCT",
-  "probe": "tools/battle-lab/mechanic-self-destruct-player-sudowoodo-opponent-shuckle.json",
+  "probe": "tools/compare/selfDestructProbe.py",
   "scenario": "tools/battle-lab/mechanic-self-destruct-player-sudowoodo-opponent-shuckle.json",
   "attacker": {
     "species": "SUDOWOODO",

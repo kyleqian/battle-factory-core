@@ -1,7 +1,7 @@
 {
   "schema": "prep6-adapter-draft/v1",
   "move": "FAINT_ATTACK",
-  "probe": "tools/probe/stage-fire-punch-portable-on.py player faint-attack",
+  "probe": "tools/integration/prep6FaintAttackProbe.py",
   "scenario": "tools/probe/stage-fire-punch-portable-on.py player faint-attack",
   "attacker": {
     "species": "ONIX",

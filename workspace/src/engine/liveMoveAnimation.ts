@@ -449,6 +449,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 82: return 150; // Dragon Rage (89..238 / 93..242); the script runs 21 frames past the window (259/263), uncovered.
     case 52: return 63; // Ember (388..450 / 442..504, ageOffset 0); script ends 3 frames later (453/507).
     case 288: return 209; // Grudge (66..274 / 70..278); script end 274/278 (no tail).
+    // prep6 accepted windows (docs/next-adapters-prep6.md s0/s2.4).
+    case 317: return 174; // Rock Tomb (217..390 / 229..402); window end = script end.
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
@@ -1210,6 +1212,17 @@ export function liveMoveAnimationPresentation(
           animationRngSeed: 0,
         },
       };
+      break;
+    }
+    case 317: {
+      // docs/next-adapters-prep6.md s2.1: rocks/Red-X use the target pic point; the target's battler slot is the
+      // known-entry slot (opponent 8 / player 6, equal to liveSpriteSlotForOwner on the known-entry host); the rock
+      // slots 3,4,5,7,9 are first-free and seed-independent (0/42 seeds), so the reducer's slot rule needs no host.
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      config = { move: "ROCK_TOMB", attacker, target, fieldProfile,
+        targetSpriteSlot: target.geometry.side === "opponent" ? 8 : 6,
+        targetInitialX2: targetAnchors.frontIdleRest.x2,
+        effectCenter: targetAnchors.picOffsetPoint };
       break;
     }
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;

@@ -1,7 +1,7 @@
 {
   "schema": "prep6-adapter-draft/v1",
   "move": "ROCK_TOMB",
-  "probe": "tools/battle-lab/mechanic-rock-tomb-player-grimer-opponent-onix.json",
+  "probe": "tools/compare/rockTombProbe.py",
   "scenario": "tools/battle-lab/mechanic-rock-tomb-player-grimer-opponent-onix.json",
   "attacker": {
     "species": "GRIMER",

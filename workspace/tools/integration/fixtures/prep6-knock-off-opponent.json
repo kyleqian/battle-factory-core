@@ -1,7 +1,7 @@
 {
   "schema": "prep6-adapter-draft/v1",
   "move": "KNOCK_OFF",
-  "probe": "tools/battle-lab/mechanic-knock-off-opponent-shuppet-player-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "scenario": "tools/battle-lab/mechanic-knock-off-opponent-shuppet-player-onix.json",
   "attacker": {
     "species": "PLUSLE",
