@@ -152,6 +152,7 @@ export function handleBattleActionFinished(
       moveHistory,
       dynamicMoveType: 0,
       dynamicBasePower: 0,
+      battleMovePowerWritten: false,
       moveendState: 0,
       multiHitEffect: 0,
     }),

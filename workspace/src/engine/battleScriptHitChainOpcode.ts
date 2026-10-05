@@ -88,7 +88,7 @@ import {
   applyRandomDamageMultiplier,
   applyStab,
   calculateAccuracy,
-  calculateBaseDamage,
+  calculateBaseDamageWithPower,
   getCriticalHitChanceStage,
   isTypePhysical,
   rollAccuracyHits,
@@ -1507,6 +1507,13 @@ function toDamageCalcStatStages(battler: BattleScriptRulesBattlerState) {
 export function calculateBattleScriptBaseDamageForCurrentMove(
   rulesContext: BattleScriptRulesContext,
 ): number {
+  return calculateBattleScriptBaseDamageWithPowerForCurrentMove(rulesContext).damage;
+}
+
+/** Same call, also returning the source gBattleMovePower (presentation-only). */
+export function calculateBattleScriptBaseDamageWithPowerForCurrentMove(
+  rulesContext: BattleScriptRulesContext,
+): { readonly damage: number; readonly movePower: number } {
   const attacker = requireBattlerRole(rulesContext, "attacker");
   const target = requireBattlerRole(rulesContext, "target");
   const attackerBattler = rulesContext.battlers[attacker];
@@ -1535,7 +1542,7 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
   const attackerHoldEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, attacker);
   const defenderHoldEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
 
-  return calculateBaseDamage({
+  return calculateBaseDamageWithPower({
     attacker: {
       attack: attackerBattler.attack,
       defense: attackerBattler.defense,
@@ -1608,7 +1615,8 @@ export const damagecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRule
   const move = rulesContext.currentMove;
   const moveType = resolveMoveTypeName(rulesContext, move);
 
-  let damage = calculateBattleScriptBaseDamageForCurrentMove(rulesContext);
+  const baseCalc = calculateBattleScriptBaseDamageWithPowerForCurrentMove(rulesContext);
+  let damage = baseCalc.damage;
 
   damage = damage * rulesContext.critMultiplier * rulesContext.dmgMultiplier;
   if ((attackerBattler.status3 & STATUS3_CHARGED_UP) !== 0 && moveType === "TYPE_ELECTRIC") {
@@ -1621,7 +1629,14 @@ export const damagecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRule
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "advance" }),
-    { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: damage }) },
+    {
+      rulesContext: Object.freeze({
+        ...rulesContext,
+        battleMoveDamage: damage,
+        battleMovePower: baseCalc.movePower,
+        battleMovePowerWritten: true,
+      }),
+    },
   );
 };
 
@@ -2282,7 +2297,8 @@ function createAttackanimationOpcodeHandler(
             arguments: Object.freeze([
               String(move),
               String(rulesContext.animTurn),
-              String(moveRow.power),
+              // gBattleMovePower when this move's damagecalc ran; else the table power.
+              String(rulesContext.battleMovePowerWritten ? rulesContext.battleMovePower : moveRow.power),
               String(rulesContext.battleMoveDamage),
               String(attackerBattler.friendship),
               String(multihit),

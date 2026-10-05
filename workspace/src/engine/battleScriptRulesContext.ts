@@ -716,6 +716,10 @@ export type BattleScriptRulesContext = Readonly<
     painSplitHp: number;
     /** Source u16 gDynamicBasePower, read by Cmd_damagecalc as its power override. */
     dynamicBasePower: number;
+    /** Source u8 gBattleMovePower (CalculateBaseDamage's final power); presentation-only, never read by gameplay. */
+    battleMovePower: number;
+    /** True once this move's damagecalc wrote battleMovePower (cleared at action finish). */
+    battleMovePowerWritten: boolean;
     /** Source s32 gHpDealt -- Cmd_datahpupdate's real-damage-dealt bookkeeping. */
     hpDealt: number;
     /** Source s32 gBideDmg[MAX_BATTLERS_COUNT]. */
@@ -951,6 +955,8 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleMoveDamage?: number;
   painSplitHp?: number;
   dynamicBasePower?: number;
+  battleMovePower?: number;
+  battleMovePowerWritten?: boolean;
   hpDealt?: number;
   bideDmg?: readonly number[];
   bideTarget?: readonly BattleScriptBattlerId[];
@@ -2669,6 +2675,8 @@ export function createBattleScriptRulesContext(
       0xffff,
       "dynamicBasePower",
     ),
+    battleMovePower: requireUnsigned(input.battleMovePower ?? 0, 0xffff, "battleMovePower"),
+    battleMovePowerWritten: input.battleMovePowerWritten ?? false,
     hpDealt: requireSigned32(input.hpDealt ?? 0, "hpDealt"),
     bideDmg,
     bideTarget,
