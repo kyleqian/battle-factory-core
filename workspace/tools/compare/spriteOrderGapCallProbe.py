@@ -218,7 +218,10 @@ def main():
     st, setup = pass1()
     if not st["resets"]:
         raise RuntimeError("no battle ResetSpriteData boundary")
-    reset = max(st["resets"])
+    # Battle ResetSpriteData = last all-free frame at or before the first BeginBattleIntro frame (gBattleMainFunc).  Later all-free
+    # frames (party-menu open / battle reshow) stay in the recorded window as evidence.
+    intro = next(c["n"] for c in st["ctx"] if c["mainFunc"] == "BeginBattleIntro")
+    reset = max(r for r in st["resets"] if r <= intro)
     flag = {n: v for n, v in st["flag"].items() if n > reset}
     calls = pass2(set(flag))
     ref = ROOT / "reference/pokeemerald"

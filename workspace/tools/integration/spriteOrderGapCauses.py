@@ -29,6 +29,21 @@ VARIANTS = {
     "swords-dance-tackle": (168, 14, 95, 33, 305419897, 700),
     "tackle-vs-substitute-faster": (95, 33, 168, 164, 305419897, 700),
 }
+# prompt-cycle traces: name -> segments (replaces the default A,30,A,<frames>); same Onix-vs-Ariados Tackle battle
+def seg(frames, *buttons):
+    return {"frames": frames, "buttons": list(buttons)}
+
+
+TRACES = {
+    "prompt-move-cancel": [seg(2, "A"), seg(40), seg(2, "B"), seg(40), seg(2, "A"), seg(30), seg(2, "A"), seg(700)],
+    "prompt-move-cancel-x3": [seg(2, "A"), seg(40), seg(2, "B"), seg(40), seg(2, "A"), seg(40), seg(2, "B"), seg(40), seg(2, "A"),
+                              seg(40), seg(2, "B"), seg(40), seg(2, "A"), seg(30), seg(2, "A"), seg(700)],
+    "prompt-party-cancel": [seg(2, "DOWN"), seg(10), seg(2, "A"), seg(400), seg(2, "B"), seg(600), seg(2, "A"), seg(30), seg(2, "A"), seg(700)],
+    "prompt-cursor-moves": [seg(2, "RIGHT"), seg(10), seg(2, "DOWN"), seg(10), seg(2, "LEFT"), seg(10), seg(2, "UP"), seg(10), seg(2, "A"),
+                            seg(30), seg(2, "A"), seg(700)],
+}
+for _n in TRACES:
+    VARIANTS[_n] = (95, 33, 168, 33, 305419897, 0)
 for seed in (1, 2, 3, 4, 5, 6):
     VARIANTS[f"thunder-seed{seed}"] = (95, 87, 168, 33, seed, 700)
 
@@ -42,6 +57,11 @@ def gen() -> None:
         p, o = d["overrides"]["parties"]["player"][0], d["overrides"]["parties"]["opponent"][0]
         p["species"], p["moves"] = ps, [pm] * 4
         o["species"], o["moves"] = os_, [om] * 4
+        if name in TRACES:
+            segs = TRACES[name]
+            d["trace"] = {"segments": segs, "captureFrames": [0, sum(x["frames"] for x in segs)]}
+            (SCEN / f"{name}.json").write_text(json.dumps(d, separators=(",", ":")) + "\n")
+            continue
         d["trace"] = {"segments": [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []},
                                    {"frames": 2, "buttons": ["A"]}, {"frames": frames, "buttons": []}],
                       "captureFrames": [0, frames + 34]}
