@@ -445,7 +445,8 @@
       ],
       "liveEvidence": [
         "dense script activation through inactive cleanup/following controller display, both Exeggcute orientations twice and complete Slowpoke twice",
-        "generated command seeds 2/27/45/59/84/114: success then already-active failure, self target, complete text/body and next prompt"
+        "generated command seeds 2/27/45/59/84/114: success then already-active failure, self target, complete text/body and next prompt",
+        "species targets (#145b, elevated-opponent shadow returns on the last 2 rows, LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS): GOLBAT 88/88 twice fresh zero residual (was 86/88); accepted fixtures unchanged. Ordinary route seed 2 / slot 3: active 88/88, ON/OFF parity"
       ],
       "remaining": [
         "unknown entry/status/switch/summary/substitute/transform histories",
@@ -1961,7 +1962,8 @@
         "../tools/integration/fixtures/prep2-live-adapter-receipt.json"
       ],
       "liveEvidence": [
-        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-future-sight-*.json)"
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep2-future-sight-*.json)",
+        "species targets (#145b, same end-of-body shadow return): GOLBAT 114/114 twice fresh zero residual (was 112/114); accepted fixtures unchanged. Ordinary route seed 11 / slot 2: active 114/114, ON/OFF parity"
       ],
       "palettePlan": "no plan, history invalidates",
       "remaining": [
@@ -2008,7 +2010,8 @@
         "../tools/integration/fixtures/hbuffer-s1-live-adapter-receipt.json"
       ],
       "liveEvidence": [
-        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep4-smelling-salt-*.json)"
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep4-smelling-salt-*.json)",
+        "species targets (#145b, exclamation y = max(8, targetTop) - 16): GOLBAT 121/121 twice fresh zero residual (was 98/121); accepted fixtures unchanged. Ordinary route seed 21 / streak 21 / slot 1: adapter active 121/121, ON/OFF parity"
       ],
       "palettePlan": "no plan, history invalidates",
       "remaining": [
@@ -2324,7 +2327,8 @@
       "liveEvidence": [
         "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (order-consumer-rock-throw-*.json, 87 rows)",
         "ordinary route seed 33 / streak 0 / move slot 1 (GRAVELER): first body, adapter active 87/87, action-menu, ON/OFF rules/RNG equal",
-        "ordinary later-body route: seed 112 / slots [3,3] (opponent GRAVELER): Rock Throw is the 4th body after Agility, Defense Curl, Agility, active 87/87, action-menu; occupied prefix [62,60,0,63,1,61,6,8,2] equals the ROM order at all 44 real-route body edges with the known occupants (tests/spriteOrderEventTransform.test.ts)"
+        "ordinary later-body route: seed 112 / slots [3,3] (opponent GRAVELER): Rock Throw is the 4th body after Agility, Defense Curl, Agility, active 87/87, action-menu; occupied prefix [62,60,0,63,1,61,6,8,2] equals the ROM order at all 44 real-route body edges with the known occupants (tests/spriteOrderEventTransform.test.ts)",
+        "species targets (#145b, target x2 = species frontIdleRest.x2 until the shake write): GOLBAT opponent target 87/87 twice fresh zero residual (was 66/87), GOLEM 87/87; accepted ONIX fixtures unchanged (tools/integration/fixtures/issue145b-receipt.json)"
       ],
       "palettePlan": "no plan, history invalidates",
       "spriteOrder": "order consumer: live while the tracked order is known (liveSpriteOrderHost.ts: known entry and every prompt cycle, body, hit, stat and status unit since modelled; see productionProviders.spriteOrder.invalidationTriggers); otherwise liveMoveAnimationPresentation returns null (fallback). 64-entry seed = known-entry occupied prefix [62,60,0,63,1,61,6,8,2] + F",
@@ -3093,7 +3097,8 @@
       "id": 193,
       "sourceFieldEvidence": "../tools/integration/fixtures/prep11-live-adapter-receipt.json",
       "liveEvidence": [
-        "dense 3/3 zero residual twice (MACHOKE both orientations + HITMONLEE alternate)"
+        "dense 3/3 zero residual twice (MACHOKE both orientations + HITMONLEE alternate)",
+        "species targets (#145b, glass legs = InitAnimLinearTranslation arithmetic from the true coord-attr rectangle, foresight.ts exactTranslation): GOLBAT 167/167 twice fresh zero residual (was 66/167) and GOLEM 167/167; accepted MACHOKE/HITMONLEE fixtures 167/167 unchanged. Ordinary route seed 14 / slot 2: active 167/167, ON/OFF parity"
       ],
       "remaining": [
         "independent arbitrary-species/history framebuffer comparison",
