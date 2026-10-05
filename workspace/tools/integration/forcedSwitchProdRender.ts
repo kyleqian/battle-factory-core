@@ -46,6 +46,8 @@ function run(seed: number, streak: number, moveIdx: number, moveId: number) {
     const v: any = createBattleResolutionPresentationRenderView(r);
     const fb = new Uint8Array(240 * 160 * 4);
     renderBattleResolutionLiveView(fb, v);
+    const region = new Uint8Array(136 * 90 * 4);
+    for (let y = 0; y < 90; y += 1) region.set(fb.subarray((y * 240 + 104) * 4, (y * 240 + 240) * 4), y * 136 * 4);
     const so = v.switchOut, mi = v.midBattleSwitchIn, pt = v.midBattleSwitchParticles, si = v.switchIn;
     rows.push({ k, cmd: cmd.type, el: r.lifecycle.phaseElapsed,
       vis: [v.visibility.player.sprite, v.visibility.player.healthbox, v.visibility.opponent.sprite, v.visibility.opponent.healthbox],
@@ -55,7 +57,7 @@ function run(seed: number, streak: number, moveIdx: number, moveId: number) {
       particles: pt ? [pt.window, pt.schedules.length] : null,
       opp: v.field.opponent.name, player: v.field.player.name,
       msg: v.message ? [v.message.lines.join("|"), v.message.visibleCharacters] : null,
-      hash: createHash("sha256").update(fb).digest("hex").slice(0, 12) });
+      hash: createHash("sha256").update(fb).digest("hex").slice(0, 12), oppRegion: createHash("sha256").update(region).digest("hex").slice(0, 12) });
   };
   const phase = () => state.battleCommandPresentation?.lifecycle.phase;
   const until = (p: () => boolean) => { while (!p()) step((state.battleStartIntro && frame % 16 === 0) || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && frame % 2 === 0) ? ["A"] : []); };
