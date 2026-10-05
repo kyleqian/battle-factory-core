@@ -1,0 +1,73 @@
+{
+  "schema": "prep6-adapter-draft/v1",
+  "move": "FAINT_ATTACK",
+  "probe": "tools/probe/stage-fire-punch-portable-on.py player faint-attack",
+  "scenario": "tools/probe/stage-fire-punch-portable-on.py player faint-attack",
+  "attacker": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player"
+    }
+  },
+  "target": {
+    "species": "GROVYLE",
+    "geometry": {
+      "side": "opponent"
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 143,
+    "playerStatus": "none"
+  },
+  "orientation": "player-back ONIX -> GROVYLE",
+  "denseWindow": {
+    "startFrame": 2344,
+    "endFrame": 2564,
+    "ageOffset": 0
+  },
+  "draft": {
+    "activationFrame": 2340,
+    "scriptEndFirstInactive": 2565,
+    "shadowRow": -4,
+    "shadowRowInMap": false,
+    "expectedDuration": 221,
+    "consumedByTest": false,
+    "acceptedWindow": {
+      "startFrame": 2344,
+      "endFrame": 2564
+    },
+    "derivedFields": {
+      "attacker.geometry.spriteCorner": "40,48",
+      "attacker.geometry.animationCenter": "72,88",
+      "attacker.geometry.battlePositionCenter": "72,80",
+      "target.geometry.spriteCorner": "144,12",
+      "target.geometry.animationCenter": "176,44",
+      "target.geometry.battlePositionCenter": "176,40"
+    },
+    "consumedFieldDifferences": [],
+    "order": "ORDER-INDEPENDENT: no sprite entries in the view (0 ties)",
+    "acceptedConfigExtras": {
+      "animationProfile": {
+        "bgFadeOutFirstVisibleAge": 5,
+        "bgSwapAge": 24,
+        "bgSettledAge": 39,
+        "lungeFirstVisibleAge": 44,
+        "lungeLastVisibleAge": 74,
+        "hitsplatFirstVisibleAge": 87,
+        "hitsplatTicks": 10,
+        "shakeLastVisibleAge": 102,
+        "fadeInFirstVisibleAge": 147,
+        "attackerFullyVisibleAge": 177,
+        "restoreFadeFirstVisibleAge": 184,
+        "defaultBgSwapAge": 204,
+        "doneAge": 219,
+        "ellipseWidth": 18,
+        "ellipseHeight": 6,
+        "ellipseAngleStep": 8
+      },
+      "moveTextStartAge": -24
+    },
+    "adhocShadowDraw": "none in the branch"
+  }
+}

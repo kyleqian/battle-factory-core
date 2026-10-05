@@ -1,0 +1,444 @@
+{
+ "schema": "prep6-summary/v1",
+ "verdicts": {
+  "SELF_DESTRUCT": "READY",
+  "ROCK_TOMB": "READY",
+  "SAFEGUARD": "READY",
+  "SWEET_SCENT": "READY",
+  "KNOCK_OFF": "READY",
+  "SWALLOW": "READY",
+  "FAINT_ATTACK": "READY (player-attacker only)",
+  "PAIN_SPLIT": "NEEDS-INPUT (coords.yOffset per side into the reducer)",
+  "DRAGON_DANCE": "NEEDS-ORDER (1-bit seed, 1 frame)",
+  "FIRE_BLAST": "NEEDS-ORDER (persistent sSpriteOrder seed)",
+  "DOUBLE_TEAM": "NEEDS-ORDER (1-bit frontClone seed) + opponent evidence missing"
+ },
+ "rows": [
+  {
+   "move": "SELF_DESTRUCT",
+   "id": 120,
+   "orientation": "player-back",
+   "activation": 78,
+   "scriptEndFirstInactive": 204,
+   "window": [
+    82,
+    194
+   ],
+   "ageOffset": 0,
+   "shadowRow": -4,
+   "shadowRowInMap": false,
+   "windowStartMinusActivation": 4,
+   "duration": 113,
+   "windowEndMinusScriptEnd": -10
+  },
+  {
+   "move": "SELF_DESTRUCT",
+   "id": 120,
+   "orientation": "opponent-front",
+   "activation": 82,
+   "scriptEndFirstInactive": 208,
+   "window": [
+    86,
+    198
+   ],
+   "ageOffset": 0,
+   "shadowRow": -4,
+   "shadowRowInMap": false,
+   "windowStartMinusActivation": 4,
+   "duration": 113,
+   "windowEndMinusScriptEnd": -10
+  },
+  {
+   "move": "DOUBLE_TEAM",
+   "id": 104,
+   "orientation": "player-back",
+   "activation": 2336,
+   "scriptEndFirstInactive": 2494,
+   "window": [
+    2337,
+    2566
+   ],
+   "ageOffset": 0,
+   "shadowRow": -1,
+   "shadowRowInMap": false,
+   "windowStartMinusActivation": 1,
+   "duration": 230,
+   "windowEndMinusScriptEnd": 72
+  },
+  {
+   "move": "DOUBLE_TEAM",
+   "id": 104,
+   "orientation": "opponent-front",
+   "note": "no accepted evidence"
+  },
+  {
+   "move": "FAINT_ATTACK",
+   "id": 185,
+   "orientation": "player-back",
+   "activation": 2340,
+   "scriptEndFirstInactive": 2565,
+   "window": [
+    2344,
+    2564
+   ],
+   "ageOffset": 0,
+   "shadowRow": -4,
+   "shadowRowInMap": false,
+   "windowStartMinusActivation": 4,
+   "duration": 221,
+   "windowEndMinusScriptEnd": -1
+  },
+  {
+   "move": "FAINT_ATTACK",
+   "id": 185,
+   "orientation": "opponent-front",
+   "note": "no accepted evidence"
+  },
+  {
+   "move": "ROCK_TOMB",
+   "id": 317,
+   "orientation": "player-back",
+   "activation": 217,
+   "scriptEndFirstInactive": 390,
+   "window": [
+    217,
+    390
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 174,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "ROCK_TOMB",
+   "id": 317,
+   "orientation": "opponent-front",
+   "activation": 229,
+   "scriptEndFirstInactive": 402,
+   "window": [
+    229,
+    402
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 174,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "PAIN_SPLIT",
+   "id": 220,
+   "orientation": "player-back",
+   "activation": 445,
+   "scriptEndFirstInactive": 525,
+   "window": [
+    445,
+    525
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 81,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "PAIN_SPLIT",
+   "id": 220,
+   "orientation": "opponent-front",
+   "activation": 446,
+   "scriptEndFirstInactive": 526,
+   "window": [
+    446,
+    526
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 81,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "DRAGON_DANCE",
+   "id": 349,
+   "orientation": "player-back",
+   "activation": 74,
+   "scriptEndFirstInactive": 215,
+   "window": [
+    74,
+    215
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 142,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "DRAGON_DANCE",
+   "id": 349,
+   "orientation": "opponent-front",
+   "activation": 78,
+   "scriptEndFirstInactive": 219,
+   "window": [
+    78,
+    219
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 142,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SAFEGUARD",
+   "id": 219,
+   "orientation": "player-back",
+   "activation": 209,
+   "scriptEndFirstInactive": 279,
+   "window": [
+    209,
+    279
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 71,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SAFEGUARD",
+   "id": 219,
+   "orientation": "opponent-front",
+   "activation": 209,
+   "scriptEndFirstInactive": 279,
+   "window": [
+    209,
+    279
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 71,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SWEET_SCENT",
+   "id": 230,
+   "orientation": "player-back",
+   "activation": 222,
+   "scriptEndFirstInactive": 396,
+   "window": [
+    222,
+    396
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 175,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SWEET_SCENT",
+   "id": 230,
+   "orientation": "opponent-front",
+   "activation": 222,
+   "scriptEndFirstInactive": 396,
+   "window": [
+    222,
+    396
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 175,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "FIRE_BLAST",
+   "id": 126,
+   "orientation": "player-back",
+   "activation": 215,
+   "scriptEndFirstInactive": 411,
+   "window": [
+    215,
+    411
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 197,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "FIRE_BLAST",
+   "id": 126,
+   "orientation": "opponent-front",
+   "activation": 1147,
+   "scriptEndFirstInactive": 1343,
+   "window": [
+    1147,
+    1343
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 197,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SWALLOW",
+   "id": 256,
+   "orientation": "player-back",
+   "stockpile": 1,
+   "activation": 1247,
+   "scriptEndFirstInactive": 1409,
+   "window": [
+    1247,
+    1409
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 163,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SWALLOW",
+   "id": 256,
+   "orientation": "player-back",
+   "stockpile": 2,
+   "activation": 2174,
+   "scriptEndFirstInactive": 2351,
+   "window": [
+    2174,
+    2351
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 178,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SWALLOW",
+   "id": 256,
+   "orientation": "player-back",
+   "stockpile": 3,
+   "activation": 2999,
+   "scriptEndFirstInactive": 3191,
+   "window": [
+    2999,
+    3191
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 193,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SWALLOW",
+   "id": 256,
+   "orientation": "opponent-front",
+   "stockpile": 1,
+   "activation": 1140,
+   "scriptEndFirstInactive": 1300,
+   "window": [
+    1140,
+    1300
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 161,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SWALLOW",
+   "id": 256,
+   "orientation": "opponent-front",
+   "stockpile": 2,
+   "activation": 2066,
+   "scriptEndFirstInactive": 2241,
+   "window": [
+    2066,
+    2241
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 176,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "SWALLOW",
+   "id": 256,
+   "orientation": "opponent-front",
+   "stockpile": 3,
+   "activation": 6979,
+   "scriptEndFirstInactive": 7169,
+   "window": [
+    6979,
+    7169
+   ],
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "shadowRowInMap": true,
+   "windowStartMinusActivation": 0,
+   "duration": 191,
+   "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "KNOCK_OFF",
+   "id": 282,
+   "orientation": "player-back",
+   "activation": 75,
+   "scriptEndFirstInactive": 124,
+   "window": [
+    70,
+    128
+   ],
+   "ageOffset": -11,
+   "shadowRow": -6,
+   "shadowRowInMap": false,
+   "windowStartMinusActivation": -5,
+   "duration": 59,
+   "windowEndMinusScriptEnd": 4
+  },
+  {
+   "move": "KNOCK_OFF",
+   "id": 282,
+   "orientation": "opponent-front",
+   "activation": 79,
+   "scriptEndFirstInactive": 128,
+   "window": [
+    74,
+    132
+   ],
+   "ageOffset": -11,
+   "shadowRow": -6,
+   "shadowRowInMap": false,
+   "windowStartMinusActivation": -5,
+   "duration": 59,
+   "windowEndMinusScriptEnd": 4
+  }
+ ]
+}
