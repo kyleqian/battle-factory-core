@@ -107,7 +107,8 @@ describe("portable AERIAL ACE source components", () => {
     expect(aerialAceTargetSpriteXAtAge(57, "opponent", 145)).toBe(144);
     expect(aerialAceTargetSpriteXAtAge(238, "opponent", 145)).toBe(144);
     expect(aerialAceTargetSpriteXAtAge(57, "player", 40)).toBe(40);
-    expect(aerialAceSliceAtAge(49)).toBeNull();
+    expect(aerialAceTargetSpriteXAtAge(57, "opponent", 145, 0)).toBe(145);
+    expect(aerialAceTargetSpriteXAtAge(57, "opponent", 145, 1)).toBe(144);    expect(aerialAceSliceAtAge(49)).toBeNull();
     expect(aerialAceSliceAtAge(50)).toEqual({ x2: -4, y2: 4, frame: 0 });
     expect(aerialAceSliceAtAge(59)).toEqual({ x2: -36, y2: 35, frame: 2 });
     expect(aerialAceSliceAtAge(73)).toEqual({ x2: -63, y2: 62, frame: 3 });

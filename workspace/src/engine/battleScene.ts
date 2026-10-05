@@ -50317,6 +50317,7 @@ export function renderSceneOnMovePresentation(
         view.animationAge,
         target.geometry.side,
         target.geometry.spriteCorner.x + targetIdle.x2,
+        liveField ? targetIdle.x2 : 1,
       );
       const targetY =
         target.geometry.spriteCorner.y + targetIdle.y2 + view.targetShakeY2;
