@@ -54,6 +54,14 @@ for (const match of source.matchAll(/\[SPECIES_([A-Z0-9_]+)\]\s*=\s*(\d+)/g)) {
   elevations[match[1]!] = Number(match[2]);
   count += 1;
 }
+// GetBattlerElevation (battle_anim_mons.c:255-258) uses sCastformElevations[gBattleMonForms[b]]
+// (:62-68) instead of gEnemyMonElevation for CASTFORM; the normal form (index 0) is 13.
+// Weather forms (14/13/13) are not modelled here (ISSUES #143).
+const castformNormal = /sCastformElevations\[NUM_CASTFORM_FORMS\]\s*=\s*\{\s*\[CASTFORM_NORMAL\]\s*=\s*13\b/.test(
+  readFileSync(join(REF, "src", "battle_anim_mons.c"), "utf8").replace(/\/\/.*$/gm, ""),
+);
+if (castformNormal) elevations.CASTFORM = 13;
+else throw new Error("sCastformElevations normal-form value not 13");
 if (count < 50) throw new Error(`only parsed ${count} gEnemyMonElevation entries, expected 60+`);
 
 writeFileSync(join(DATA_GEN, "enemy-mon-elevations.json"), `${JSON.stringify(elevations)}\n`);

@@ -54,6 +54,10 @@ const backSprites = backSpritesData as Readonly<Record<string, BattleCommandMonP
 const frontSprites = frontSpritesData as Readonly<Record<string, BattleCommandMonPic>>;
 const coords = monPicCoordsData as CoordsAsset;
 
+/** GetBattlerYDelta (battle_anim_mons.c:208-210) returns sCastformBackSpriteYCoords[gBattleMonForms]
+ * (:72-79, all 0, normal form modelled) for a player CASTFORM instead of gMonBackPicCoords y_offset (13). */
+const SOURCE_BACK_Y_DELTA: Readonly<Record<string, number>> = { CASTFORM: 0 };
+
 function fieldArtBattler(
   species: number,
   side: "player" | "opponent",
@@ -84,7 +88,8 @@ function fieldArtBattler(
     coords: picCoords,
     origin: Object.freeze({
       x: side === "player" ? 40 : 144,
-      y: (side === "player" ? 48 : 8) + picCoords.yOffset,
+      y: (side === "player" ? 48 : 8) +
+        (side === "player" ? SOURCE_BACK_Y_DELTA[speciesSymbol] ?? picCoords.yOffset : picCoords.yOffset),
     }),
   });
 }
