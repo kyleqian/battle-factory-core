@@ -17029,8 +17029,8 @@ export function renderSceneOnMovePresentation(
         priority: 2,
         mode: "normal",
         declaredWidth: 64,
-        x: view.attacker.geometry.spriteCorner.x,
-        y: view.attacker.geometry.spriteCorner.y,
+        x: view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
+        y: view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
         ...spriteSheetRaster(pelipper.tileset, pelipper.palette),
       });
       rasters.push(cycleOnly(
@@ -17060,8 +17060,8 @@ export function renderSceneOnMovePresentation(
         fb,
         pelipper.tileset,
         pelipper.palette,
-        view.attacker.geometry.spriteCorner.x,
-        view.attacker.geometry.spriteCorner.y,
+        view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
+        view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
       );
     }
 

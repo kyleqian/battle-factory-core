@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py)",
  "rows": [
   {
    "id": 236,
@@ -1096,6 +1096,294 @@
     "fixture": "tools/integration/fixtures/next-glare-opponent.json",
     "body": "normal",
     "activation": "docs/next-adapters-prep.md s1 (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 57,
+   "move": "SURF",
+   "orientation": "player",
+   "variant": "prep2-surf-player",
+   "activationFrame": 72,
+   "windowStart": 72,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-surf-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 57,
+   "move": "SURF",
+   "orientation": "opponent",
+   "variant": "prep2-surf-opponent",
+   "activationFrame": 76,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-surf-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 330,
+   "move": "MUDDY_WATER",
+   "orientation": "player",
+   "variant": "prep2-muddy-water-player",
+   "activationFrame": 80,
+   "windowStart": 80,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-muddy-water-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 330,
+   "move": "MUDDY_WATER",
+   "orientation": "opponent",
+   "variant": "prep2-muddy-water-opponent",
+   "activationFrame": 84,
+   "windowStart": 84,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-muddy-water-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 196,
+   "move": "ICY_WIND",
+   "orientation": "player",
+   "variant": "prep2-icy-wind-player",
+   "activationFrame": 220,
+   "windowStart": 220,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-icy-wind-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 196,
+   "move": "ICY_WIND",
+   "orientation": "opponent",
+   "variant": "prep2-icy-wind-opponent",
+   "activationFrame": 220,
+   "windowStart": 220,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-icy-wind-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 59,
+   "move": "BLIZZARD",
+   "orientation": "player",
+   "variant": "prep2-blizzard-player",
+   "activationFrame": 214,
+   "windowStart": 214,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-blizzard-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 59,
+   "move": "BLIZZARD",
+   "orientation": "opponent",
+   "variant": "prep2-blizzard-opponent",
+   "activationFrame": 213,
+   "windowStart": 213,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-blizzard-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 252,
+   "move": "FAKE_OUT",
+   "orientation": "player",
+   "variant": "prep2-fake-out-player",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-fake-out-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 252,
+   "move": "FAKE_OUT",
+   "orientation": "opponent",
+   "variant": "prep2-fake-out-opponent",
+   "activationFrame": 82,
+   "windowStart": 82,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-fake-out-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 322,
+   "move": "COSMIC_POWER",
+   "orientation": "player",
+   "variant": "prep2-cosmic-power-player",
+   "activationFrame": 294,
+   "windowStart": 294,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-cosmic-power-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 322,
+   "move": "COSMIC_POWER",
+   "orientation": "opponent",
+   "variant": "prep2-cosmic-power-opponent",
+   "activationFrame": 294,
+   "windowStart": 294,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-cosmic-power-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 248,
+   "move": "FUTURE_SIGHT",
+   "orientation": "player",
+   "variant": "prep2-future-sight-player",
+   "activationFrame": 72,
+   "windowStart": 77,
+   "ageOffset": 0,
+   "shadowRow": -5,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-future-sight-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 248,
+   "move": "FUTURE_SIGHT",
+   "orientation": "opponent",
+   "variant": "prep2-future-sight-opponent",
+   "activationFrame": 76,
+   "windowStart": 81,
+   "ageOffset": 0,
+   "shadowRow": -5,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-future-sight-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 153,
+   "move": "EXPLOSION",
+   "orientation": "player",
+   "variant": "prep2-explosion-player",
+   "activationFrame": 72,
+   "windowStart": 76,
+   "ageOffset": 0,
+   "shadowRow": -4,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-explosion-player.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 153,
+   "move": "EXPLOSION",
+   "orientation": "opponent",
+   "variant": "prep2-explosion-opponent",
+   "activationFrame": 76,
+   "windowStart": 80,
+   "ageOffset": 0,
+   "shadowRow": -4,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep2-explosion-opponent.json",
+    "body": "normal",
+    "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
    }
   }
  ]

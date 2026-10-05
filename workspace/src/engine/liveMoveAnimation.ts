@@ -85,6 +85,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   135,
   // prep2 (docs/next-adapters-prep2.md s2): Surf + Muddy Water share one branch.
   57, 330,
+  // prep2: anchor-derived effect geometry.
+  196, 59,
 ] as const);
 
 /**
@@ -115,7 +117,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // Scary Face (-4) and Dizzy Punch (-13) start after it and have no row.
     137, 298, 135,
     // prep2 (issue142-shadow-rows-extra.json): Surf / Muddy Water windows start at activation.
-    57, 330,
+    57, 330, 196, 59,
   ].map((id) => [id, 0])),
 );
 
@@ -329,6 +331,9 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 184: return 190; // Scary Face accepted window (79..268); script tail 14 rows uncovered.
     case 137: return 213; // Glare accepted window (GLARE_SOURCE_FRAME_COUNT).
     case 57: case 330: return SURF_WAVE_FRAME_COUNT; // Surf / Muddy Water accepted window (144 rows).
+    case 196: return 287; // Icy Wind accepted window (220..506).
+    // Blizzard accepted windows: 214..585 player-back, 213..573 opponent-front (Guillotine precedent).
+    case 59: return request.attacker === 0 ? 372 : 361;
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -861,6 +866,17 @@ export function liveMoveAnimationPresentation(
     case 57: case 330:
       config = { move: request.moveId === 330 ? "MUDDY_WATER" : "SURF", attacker, target, fieldProfile };
       break;
+    case 196: case 59: {
+      // Source X_2/Y_PIC attacker and target centers; singles SetAverageBattlerPositions is the target's own point.
+      // Icy Wind's spikes aim at the target's sBattlerCoords point (battlePositionCenter).
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const geometry = { attackerCenter: attackerAnchors.picOffsetPoint, targetCenter: targetAnchors.picOffsetPoint };
+      config = request.moveId === 196
+        ? { move: "ICY_WIND", attacker, target, fieldProfile,
+            effectGeometry: { ...geometry, spikeTargetCenter: targetAnchors.battlePositionCenter } }
+        : { move: "BLIZZARD", attacker, target, fieldProfile, effectGeometry: geometry };
+      break;
+    }
     case 342:
       config = {
         move: "POISON_TAIL",
