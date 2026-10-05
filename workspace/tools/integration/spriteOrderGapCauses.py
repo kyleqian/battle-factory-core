@@ -245,7 +245,8 @@ def analyse_anims() -> dict:
             prev_end = max([w["f"] for v in sc["units"][:ui] for w in v["windows"]] + [d["resetFrame"]])
             lo = max(prev_end, 0)
             hi = max([w["f"] for w in u["windows"]] + [u["frame"]])
-            ids = [anim_identity(c) for c in launches if lo < c["n"] <= hi]
+            launched = [c for c in launches if lo < c["n"] <= hi]
+            ids = [anim_identity(c) for c in launched]
             if not ids:  # fallback: raw non-move LaunchBattleAnimation
                 ids = [{"table": ",".join(c["table"]).replace("gBattleAnims_", ""), "id": c["tableId"], "arg": None, "caller": c["caller"]}
                        for c in d["calls"] if c["kind"] == "marker:LaunchBattleAnimation" and not c["isMove"] and lo < c["n"] <= hi]
@@ -263,8 +264,9 @@ def analyse_anims() -> dict:
                     p["cls"][w["cls"]] += 1
                     if "why" in w:
                         p["why"][w["why"]] += 1
+            start = min([c["n"] for c in launched] + [hi])
             for c in d["calls"]:
-                if lo <= c["n"] <= hi and not c["kind"].startswith("marker:"):
+                if start <= c["n"] <= hi and not c["kind"].startswith("marker:"):
                     if c["kind"] == "DestroySprite":
                         p["destroyers"][c["caller"].split("+")[0] + " (" + ",".join(c["victim"]["cb"]) + ")"] += 1
                     elif c["caller"].split("+")[0] not in INTERNAL:
