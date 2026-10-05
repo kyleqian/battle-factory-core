@@ -58,6 +58,13 @@ export const SCENARIOS: Record<string, Step[]> = {
   "postko-frustration": [...TURN1, P, C, edge("218:player"), body(218, "player")],
   "postko-seismictoss": [...TURN1, P, C, edge("69:player"), body(69, "player")],
   "postko-safeguard": [...TURN1, P, C, edge("219:player"), body(219, "player")],
+  "postko-healbell": [...TURN1, P, C, edge("215:player"), body(215, "player")],
+  "postko-sweetscent": [...TURN1, P, C, edge("230:player"), body(230, "player")],
+  "postko-megadrain": [...TURN1, P, C, edge("72:player"), body(72, "player")],
+  "postko-leafblade": [...TURN1, P, C, edge("348:player"), body(348, "player")],
+  "postko-perishsong": [...TURN1, P, C, edge("195:player"), body(195, "player")],
+  "postko-magiccoat": [...TURN1, P, C, edge("277:player"), body(277, "player")],
+  "postko-grudge": [...TURN1, P, C, edge("288:player"), body(288, "player")],
 };
 
 const SUMMARY = decodeSpriteOrderPlan(UNIT_PLANS.summary), SENDOUT = decodeSpriteOrderPlan(UNIT_PLANS.nextSendOut);

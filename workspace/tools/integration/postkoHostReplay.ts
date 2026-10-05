@@ -55,7 +55,7 @@ export function replayPostKoTurnsThroughHost(
         if (!isBody(payload)) throw new Error("the last recorded event must be the body under test");
         host = advanceLiveSpriteOrderHost(host, resolution, event.sequence, true);
         return Object.freeze({
-          spriteOrderInput: lendLiveSpriteOrder(host),
+          spriteOrderInput: lendLiveSpriteOrder(host, requestOf(payload).moveId),
           spriteAllocatorInput: prepareLiveMoveSpriteAllocator(allocator, requestOf(payload)).input,
           host, allocator,
         });

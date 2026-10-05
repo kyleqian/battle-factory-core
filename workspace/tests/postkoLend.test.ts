@@ -2,7 +2,9 @@ import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createKnownEntrySpriteAllocatorProvider } from "../src/engine/knownEntrySpriteAllocator.ts";
 import { invalidateLiveSpriteAllocatorHost } from "../src/engine/liveSpriteAllocator.ts";
-import { createLiveSpriteOrderHost, reseedLiveSpriteAllocatorAfterSendOut } from "../src/engine/liveSpriteOrderHost.ts";
+import {
+  POSTKO_LEND_EXCLUDED_MOVE_IDS, createLiveSpriteOrderHost, lendLiveSpriteOrder, reseedLiveSpriteAllocatorAfterSendOut,
+} from "../src/engine/liveSpriteOrderHost.ts";
 import {
   applySpriteOrderPresentationEvent, createSpriteOrderTracker, spriteOrderEntryLabelRelabel, spriteOrderTrackerLend,
   spriteOrderTrackerPostUnitView, spriteOrderTrackerRoleIsomorphic, type SpriteOrderPresentationEvent, type SpriteOrderTracker,
@@ -141,6 +143,26 @@ describe("post-KO entry-label lend (rung 2, presentation-only)", () => {
     // Light Screen after the opponent KO: the host replay hands the entry-label allocator slots (wall 3, sparkles 4,5,7).
     const lightScreen = JSON.parse(readFileSync("tools/integration/fixtures/postko-light-screen-player.json", "utf8"));
     expect(replayPostKoTurnsThroughHost(lightScreen.precedingTurns).spriteAllocatorInput).toMatchObject({ wall: 3 });
+  });
+});
+
+describe("post-KO lend exclusions (measured not exact under pi)", () => {
+  it("Leaf Blade keeps declining after an opponent KO (pinned residual), still lends at the entry; other consumers lend", () => {
+    expect(POSTKO_LEND_EXCLUDED_MOVE_IDS).toEqual([348]);
+    const leaf = JSON.parse(readFileSync("tools/integration/fixtures/postko-lend/postko-leaf-blade-player.json", "utf8"));
+    expect(replayPostKoTurnsThroughHost(leaf.precedingTurns).spriteOrderInput).toBeUndefined();
+    const host = (...events: SpriteOrderPresentationEvent[]) =>
+      Object.freeze({ ...createLiveSpriteOrderHost(knownEntrySpriteOrderState("ordinary-factory")), tracker: feed(entry(), ...events) });
+    expect(lendLiveSpriteOrder(host(), 348)?.free).toEqual(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER);
+    expect(lendLiveSpriteOrder(host(...KO), 348)).toBeUndefined();
+    expect(lendLiveSpriteOrder(host(...KO), 218)?.free).toEqual(spriteOrderTrackerLend(feed(entry(), ...KO)));
+    // The lent measurement that motivated the exclusion: 212/224 rows on both fresh runs, 11,843 px, ages 0-11 only.
+    const dense = JSON.parse(readFileSync("tools/integration/fixtures/postko-lend/dense-class-batch4.json", "utf8")) as
+      { fixture: string; rows: number; exactRows: number[]; residualPixels: number[] }[];
+    const row = dense.find(r => r.fixture.endsWith("postko-leaf-blade-player.json"))!;
+    expect({ rows: row.rows, exactRows: row.exactRows, residualPixels: row.residualPixels })
+      .toEqual({ rows: 224, exactRows: [212, 212], residualPixels: [11843, 11843] });
+    expect(dense.filter(r => r !== row).every(r => r.exactRows.every(n => n === r.rows) && r.residualPixels.every(n => n === 0))).toBe(true);
   });
 });
 

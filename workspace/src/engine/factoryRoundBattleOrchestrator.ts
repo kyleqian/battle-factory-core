@@ -2237,7 +2237,7 @@ function prepareResolutionPalette(
       const spritePrepared = prepareLiveMoveSpriteAllocator(spriteHost, command.animation);
       spriteHost = spritePrepared.next;
       spriteInput = spritePrepared.input;
-      if (orderHost) spriteOrderInput = lendLiveSpriteOrder(orderHost);
+      if (orderHost) spriteOrderInput = lendLiveSpriteOrder(orderHost, command.animation.moveId);
     } else if (retainedSprites?.commandKey === commandKey) {
       spriteInput = resolution.liveMoveSpriteAllocatorInput;
       spriteOrderInput = resolution.liveMoveSpriteOrderInput;
