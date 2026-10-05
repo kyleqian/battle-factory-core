@@ -91,6 +91,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   252, 322,
   // prep2: Future Sight turn-1 body only (the delayed hit is a separate playanimation, battle_scripts_1.s:3519).
   248,
+  // prep2: Explosion body (attacker displayed HP is 0 at the event; setatkhptozero precedes attackanimation).
+  153,
 ] as const);
 
 /**
@@ -353,6 +355,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 252: return 86; // Fake Out accepted window (78..163 / 82..167).
     case 322: return 241; // Cosmic Power accepted window (294..534).
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
+    case 153: return 212; // Explosion accepted window (76..287 / 80..291).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     default: return null;
   }
@@ -902,6 +905,7 @@ export function liveMoveAnimationPresentation(
         targetPictureYOffset: liveBattlerCoordAttrs(target.geometry.side, art).yOffset };
       break;
     case 322: config = { move: "COSMIC_POWER", attacker, target, fieldProfile }; break;
+    case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:
       config = {

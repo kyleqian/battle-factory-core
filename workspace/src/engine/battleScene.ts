@@ -39743,27 +39743,27 @@ export function renderSceneOnMovePresentation(
       age: state.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "GLALIE"
+      (liveField || view.attacker.species === "GLALIE")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "GLALIE"
+      (liveField || view.attacker.species === "GLALIE")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged EXPLOSION pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const glalie = playerToOpponent
+    const glalie = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? explosionArt.glalieBack
       : {
           ...explosionArt.glalieFront,
           tileset: subTileset(explosionArt.glalieFront.tileset, 0, 8),
         };
-    const shuckle = playerToOpponent
+    const shuckle = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? {
           ...selfDestructArt.shuckleFront,
           tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
@@ -39815,6 +39815,7 @@ export function renderSceneOnMovePresentation(
         explosion.y - 16,
       );
     }
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -39849,6 +39850,7 @@ export function renderSceneOnMovePresentation(
       "EXPLOSION!",
       99,
     );
+    }
     return;
   }
 
