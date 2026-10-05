@@ -1325,7 +1325,8 @@ export function liveMoveAnimationPresentation(
       const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
       const top = pic.y - tc.height / 2;
       config = { move: "FORESIGHT", attacker, target, fieldProfile,
-        animationInputs: { targetBounds: { left: pic.x - tc.width / 2, right: pic.x + tc.width / 2, top, bottom: pic.y + tc.height / 2 - 1, rightTop: top + 1 },
+        animationInputs: { exactTranslation: true,
+          targetBounds: { left: pic.x - tc.width / 2, right: pic.x + tc.width / 2, top, bottom: pic.y + tc.height / 2 },
           targetPictureOffset: pic, targetSpriteSlot: target.geometry.side === "player" ? 6 : 8, glassSpriteSlot: 3, blendTaskSlot: 0,
           updateMonBgTaskSlot: 1, clearMonBgTaskSlot: 0, spriteOrder: fullOrder, glassPaletteBank: 7, glassTileSlot: 6, matrixBitmap: 6,
           monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", spriteX: cx, spriteY: cy, bgX: 32 - cx, bgY: 32 - cy,
