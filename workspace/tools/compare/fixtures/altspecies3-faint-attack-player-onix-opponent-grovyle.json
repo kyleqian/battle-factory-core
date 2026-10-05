@@ -1,0 +1,36 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "move": "FAINT_ATTACK",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/faint-attack-player-onix-opponent-grovyle.json",
+ "attacker": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GROVYLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 107,
+  "playerMaxHp": 110,
+  "opponentHp": 125,
+  "opponentMaxHp": 125,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 301,
+  "endFrame": 521,
+  "frameCount": 221
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep6-faint-attack-alt-base.json",
+ "swap": {
+  "player": "ONIX",
+  "opponent": "GROVYLE"
+ }
+}
