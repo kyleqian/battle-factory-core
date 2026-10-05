@@ -1,5 +1,25 @@
 # Animation integration progress
 
+## 2026-10-05 — cross-body sprite-order tracking live
+
+- Folded Opus worker `a7753047a` (code `35c7f902f`) as `27ae6f331`: event-driven
+  order host (`src/engine/liveSpriteOrderHost.ts`), pure presentation-event
+  transform, generated production table (381 EXACT bodies, 16.6 kB; +6 kB
+  gzip bundle). Order consumers (Grudge, Heal Bell, Leaf Blade, Rock Throw,
+  Blaze Kick, Perish Song) now render whenever the tracked order is known.
+- Evidence: TS corpus 1,044/1,044 exact; real-route strict 3/3 per trace (stops
+  at the unplanned Endeavor body); host == pure transform on 200 seeds (239
+  later bodies known, 0 mismatches). Supervisor: five later-body routes (both
+  sides) PASS, new tests green. Receipt `order-cross-body-supervisor-receipt.json`.
+- Limits: later-body pixels rest on the order claim + first-body dense proofs;
+  Intimidate entries, locked continuations, party-menu returns, hidden targets
+  invalidate.
+- prep7 measured prep (`ae18c3644`, `docs/next-adapters-prep7.md`): READY Aerial
+  Ace, Quick Attack, Ice Punch, Fake Tears, Sleep Talk, Rock Slide (opponent);
+  Fire Blast, Dragon Dance via the provider; Feather Dance / Double Team need
+  the order kept across their leading `stat` command.
+- Running: prep6 batch (integration); allocator plan v2 evidence (side).
+
 ## 2026-10-04 (night) — order-consumer batch folded: 166 live adapters
 
 - Folded worker `bd04c68bd` as `72610e111` (src `53130b776`): Ember, Dragon
