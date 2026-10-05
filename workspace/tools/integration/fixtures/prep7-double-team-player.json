@@ -1,0 +1,140 @@
+{
+  "schema": "prep7-adapter-draft/v1",
+  "move": "DOUBLE_TEAM",
+  "probe": "tools/probe/stage-fire-punch-portable-on.py player double-team",
+  "scenario": "tools/probe/stage-fire-punch-portable-on.py player double-team",
+  "attacker": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player"
+    }
+  },
+  "target": {
+    "species": "GROVYLE",
+    "geometry": {
+      "side": "opponent"
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 143,
+    "playerStatus": "none"
+  },
+  "orientation": "player-back ONIX -> GROVYLE",
+  "verdict": "NEEDS-ORDER-POLICY (stat command precedes the animation => first-body order unknown today); player-attacker only; frontClone = b on the first body (pixel-measured)",
+  "denseWindow": {
+    "startFrame": 2337,
+    "endFrame": 2566,
+    "ageOffset": 0
+  },
+  "draft": {
+    "activationFrame": 2336,
+    "scriptEndFirstInactive": 2494,
+    "shadowRow": -1,
+    "shadowRowInMap": false,
+    "expectedDuration": 230,
+    "scriptFrames": 158,
+    "windowEndMinusScriptEnd": 72,
+    "windowStartMinusActivation": 1,
+    "reducerAgeAtActivation": -1,
+    "liveAgeBasis": -1,
+    "consumedByTest": false,
+    "acceptedWindow": {
+      "startFrame": 2337,
+      "endFrame": 2566
+    },
+    "derivedFields": {
+      "attacker.geometry.spriteCorner": "40,48",
+      "attacker.geometry.animationCenter": "72,88",
+      "attacker.geometry.battlePositionCenter": "72,80",
+      "target.geometry.spriteCorner": "144,12",
+      "target.geometry.animationCenter": "176,44",
+      "target.geometry.battlePositionCenter": "176,40"
+    },
+    "consumedFieldDifferences": [],
+    "acceptedConfigExtras": {
+      "animationProfile": {
+        "cloneAnchorAge": 0,
+        "cloneVisibleStartAge": 2,
+        "cloneVisibleEndAge": 129,
+        "statsBannerStartAge": 163,
+        "statsBannerEndAge": 229,
+        "statsBannerBg1YAnchorAge": 166,
+        "frontClone": "a"
+      },
+      "moveTextStartAge": -28
+    },
+    "order": "frontClone = 'b' on a first body (provider free order 4 before 3, observed 'b' 2/2 lab scenarios); accepted literal 'a' was read after a preceding AI body. Pixel check (prep7-double-team-firstbody-pixels.json): b = 0 differing pixels over 230 ages, a = 35222 px over 77 ages (region x<128,y<112)",
+    "slotAudit": {
+      "spawnFrames": 1,
+      "spawnFramesFirstFree": 1,
+      "row0EqualsKnownEntryFirstMove": true,
+      "arbitrarySeedsWithDiff": 18,
+      "spawnSlotsInOrder": [
+        3,
+        4
+      ]
+    },
+    "adhocShadowDraw": "none in the branch (grep shadow|age === 0|liveField over the branch span)",
+    "rendererLiftNeeded": "branch :49467-49565; gate :49471-49477 (player ONIX -> opponent GROVYLE only); healthboxes :49531-49536; message :49556",
+    "firstBodyLab": {
+      "activation": 75,
+      "scriptEndFirstInactive": 233,
+      "scriptFrames": 158
+    },
+    "routes": [
+      {
+        "seed": 0,
+        "streak": 7,
+        "species": "SPECIES_DELCATTY",
+        "slot": 2,
+        "accepted": false,
+        "requestFrame": 585,
+        "orderInputKnown": false
+      },
+      {
+        "seed": 3,
+        "streak": 21,
+        "species": "SPECIES_RAICHU",
+        "slot": 3,
+        "accepted": false,
+        "requestFrame": 979,
+        "orderInputKnown": null
+      },
+      {
+        "seed": 10,
+        "streak": 0,
+        "species": "SPECIES_YANMA",
+        "slot": 2,
+        "accepted": false,
+        "requestFrame": 607,
+        "orderInputKnown": false
+      },
+      {
+        "seed": 14,
+        "streak": 28,
+        "species": "SPECIES_CLAYDOL",
+        "slot": 2,
+        "accepted": false,
+        "requestFrame": 599,
+        "orderInputKnown": false
+      },
+      {
+        "seed": 15,
+        "streak": 35,
+        "species": "SPECIES_METAGROSS",
+        "slot": 2,
+        "accepted": false,
+        "requestFrame": 807,
+        "orderInputKnown": null
+      }
+    ],
+    "livePlan": "frontClone = F.indexOf(4) < F.indexOf(3) ? 'b' : 'a' from the first-body free order; blocked until the order seam survives the preceding 'stat' command; decline the opponent-attacker orientation (no accepted evidence, renderer gate :49472)"
+  },
+  "precedingBodies": [
+    {
+      "moveId": "AI body (staged)",
+      "side": "opponent"
+    }
+  ]
+}
