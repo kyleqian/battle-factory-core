@@ -18,7 +18,16 @@
   Ace, Quick Attack, Ice Punch, Fake Tears, Sleep Talk, Rock Slide (opponent);
   Fire Blast, Dragon Dance via the provider; Feather Dance / Double Team need
   the order kept across their leading `stat` command.
-- Running: prep6 batch (integration); allocator plan v2 evidence (side).
+- Allocator plan v2 evidence (`d97eed5db`, `docs/allocator-plan-v2-evidence.md`;
+  supervisor fresh Swift probe identical, analysis regenerated identically):
+  affine matrix bitmap 0x6 and no active task at all 481 body activations
+  (195 scenarios + the Factory route); 467/467 closed bodies return to that
+  baseline; 12 move timelines reproduce the accepted matrix ids / task slots
+  (0 differing ages). Swift, Trick ready; Thunderbolt, Frustration, Horn Drill,
+  Seismic Toss, Aurora Beam, Stockpile, Uproar, Zap Cannon also need the order;
+  Rock Blast / Razor Wind need outcome input. Faint/send-out/switch baselines
+  unprobed.
+- Running: prep6 batch (integration); prep8 measured prep for the v2 moves (side).
 
 ## 2026-10-04 (night) — order-consumer batch folded: 166 live adapters
 
