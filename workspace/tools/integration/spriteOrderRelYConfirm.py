@@ -221,6 +221,19 @@ def main(argv):
             gen(rows, sd, need)
     elif cmd == "probe":
         probe(rows, opt("--jobs", 12), opt("--limit", len(rows)))
+    elif cmd == "report":  # markdown tables from verdicts.json (docs/sprite-order-rely-confirmation.md)
+        v = json.loads((RELY / "verdicts.json").read_text())["cells"]
+        pct = lambda x: f"{x['weight'] * 100:.3f}%"
+        print("| rank | cell | move | weight | tier | geometries | abs-y fingerprints |\n|---|---|---|---|---|---|---|")
+        for i, x in enumerate([x for x in v if x["verdict"].startswith("CONFIRMED")][:int(argv[2]) if len(argv) > 2 else 20], 1):
+            print(f"| {i} | {x['cell']} | {x['name']} | {pct(x)} | {'confirmed' if x['verdict'] == 'CONFIRMED' else 'abs-invariant'} | {len(x['planByGeometry'])} | {x['distinctAbsoluteYFingerprints']} |")
+        print("\n| cell | move | weight | observed difference |\n|---|---|---|---|")
+        for x in [x for x in v if x["verdict"] == "NEEDS-KEYS"]:
+            d = x.get("difference")
+            print(f"| {x['cell']} | {x['name']} | {pct(x)} | {x['why'][:110].replace('|', '/')}{' (first differing window ' + str(d['firstDifferingWindow']) + ' of ' + str(d['windows'][0]) + ')' if d else ''} |")
+        print("\n| cell | move | weight | why inconclusive |\n|---|---|---|---|")
+        for x in [x for x in v if x["verdict"] == "INCONCLUSIVE"]:
+            print(f"| {x['cell']} | {x['name']} | {pct(x)} | {x['why'][:70]} |")
     elif cmd == "analyze":
         analyze(rows, "--write" in argv)
 
