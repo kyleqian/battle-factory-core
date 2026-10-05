@@ -593,18 +593,18 @@
  },
  "q3Lab": {
   "without plan": {
-   "edges": 4,
-   "known": 2,
-   "exact": 2,
+   "edges": 10,
+   "known": 7,
+   "exact": 7,
    "mismatch": 0,
-   "lent": 2
+   "lent": 7
   },
   "with Endeavor plan": {
-   "edges": 4,
-   "known": 4,
-   "exact": 4,
+   "edges": 10,
+   "known": 10,
+   "exact": 10,
    "mismatch": 0,
-   "lent": 4
+   "lent": 10
   }
  },
  "q3LabEdges": {
@@ -634,6 +634,54 @@
    },
    {
     "n": 2448,
+    "key": "33:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "en2-player": [
+   {
+    "n": 2083,
+    "key": "33:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2308,
+    "key": "283:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "en3-player": [
+   {
+    "n": 2081,
+    "key": "33:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2233,
+    "key": "283:player",
+    "known": true,
+    "lent": true,
+    "exact": true
+   }
+  ],
+  "en3-opponent": [
+   {
+    "n": 2088,
+    "key": "283:opponent",
+    "known": true,
+    "lent": true,
+    "exact": true
+   },
+   {
+    "n": 2399,
     "key": "33:opponent",
     "known": true,
     "lent": true,

@@ -110,7 +110,7 @@ export function run() {
   receipt.q1 = q1;
   receipt.q1Edges = Object.fromEntries(scenarios.map(s => [s.name, replayEvents(entry, s.events, FAKE_TEARS, "proposed").edges]));
   // ---- Q3a: Endeavor on the lab scenarios
-  const en = ["en-player", "en-opponent"].map(name => read(new URL(`events/${name}.json`, GAPS)) as { name: string; events: Ev[] });
+  const en = ["en-player", "en-opponent", "en2-player", "en3-player", "en3-opponent"].map(name => read(new URL(`events/${name}.json`, GAPS)) as { name: string; events: Ev[] });
   receipt.q3Lab = Object.fromEntries([["without plan", NO_OVERRIDES], ["with Endeavor plan", ENDEAVOR]].map(([label, o]) =>
     [label as string, sum(en.map(s => count(replayEvents(entry, s.events, o as Overrides, "proposed").edges)))]));
   receipt.q3LabEdges = Object.fromEntries(en.map(s => [s.name, replayEvents(entry, s.events, ENDEAVOR, "proposed").edges]));

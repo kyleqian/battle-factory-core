@@ -14,6 +14,10 @@ LIST="104 $S/mechanic-double-team-player-dragonair-onix.json dt-player
 297 $L/mechanic-feather-dance-pidgeotto-onix.json fd-opponent
 283 $G/endeavor-player-diglett-opponent-chansey.json en-player
 283 $G/endeavor-opponent-diglett-player-chansey.json en-opponent
+283 $G/endeavor-player-onix-opponent-pidgeotto.json en2-player
+283 $G/endeavor-opponent-onix-player-pidgeotto.json en2-opponent
+283 $G/endeavor-player-dragonair-opponent-chansey.json en3-player
+283 $G/endeavor-opponent-dragonair-player-chansey.json en3-opponent
 313 $G/fake-tears-player-onix-opponent-tackle-pidgeotto.json ftb-player
 313 $G/fake-tears-opponent-onix-player-tackle-pidgeotto.json ftb-opponent
 313 $G/fake-tears-player-dragonair-opponent-tackle-chansey.json ftc-player

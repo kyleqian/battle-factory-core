@@ -16,7 +16,8 @@ NAMES = {"dt-player": "double-team player (Dragonair/Onix)", "dt-opponent": "dou
          "ft-opponent": "fake-tears opponent", "fd-player": "feather-dance player (Pidgeotto/Onix)", "fd-opponent": "feather-dance opponent",
          "ftb-player": "fake-tears player (Onix/Pidgeotto)", "ftb-opponent": "fake-tears opponent (Onix/Pidgeotto)",
          "ftc-player": "fake-tears player (Dragonair/Chansey)", "ftc-opponent": "fake-tears opponent (Dragonair/Chansey)",
-         "en-player": "endeavor player (Diglett/Chansey)", "en-opponent": "endeavor opponent"}
+         "en-player": "endeavor player (Diglett/Chansey)", "en-opponent": "endeavor opponent",
+         "en2-player": "endeavor player (Onix/Pidgeotto)", "en3-player": "endeavor player (Dragonair/Chansey)", "en3-opponent": "endeavor opponent (Dragonair/Chansey)"}
 STATUS = {0: "PSN", 1: "CONFUSION", 2: "BRN", 3: "INFATUATION", 4: "SLP", 5: "PRZ", 6: "FRZ", 7: "CURSED", 8: "NIGHTMARE"}
 GENERAL = {7: "HELD_ITEM_EFFECT", 11: "SUN_CONTINUES", 13: "HAIL_CONTINUES", 6: "TURN_TRAP", 20: "FOCUS_PUNCH_SETUP"}
 

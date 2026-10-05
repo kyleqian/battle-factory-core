@@ -436,6 +436,45 @@
    "bodyLaunchFrame": 2086,
    "firstBodyOfTurn": true,
    "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0
+  },
+  {
+   "scenario": "en2-player",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "0a22ba1d51771612",
+    "rows": "6f23a4cdfdc146b6"
+   },
+   "move": 283,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2308,
+   "firstBodyOfTurn": false,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 7
+  },
+  {
+   "scenario": "en3-player",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "08250784a38bccbd",
+    "rows": "a8c9ea290d727496"
+   },
+   "move": 283,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2233,
+   "firstBodyOfTurn": false,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 7
+  },
+  {
+   "scenario": "en3-opponent",
+   "runsIdentical": true,
+   "sha256": {
+    "calls": "79511ec05a69dcd2",
+    "rows": "5d638d2ac364351a"
+   },
+   "move": 283,
+   "commitDestroyFrame": 2041,
+   "bodyLaunchFrame": 2088,
+   "firstBodyOfTurn": true,
+   "allocatorCallsBetweenPromptDestroyAndBodyLaunch": 0
   }
  ],
  "allRunsIdentical": true,

@@ -7,7 +7,7 @@ import hashlib, json, os, sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 OUT = Path(os.environ.get("OUT", "/tmp/pgprobe"))
-NAMES = ["dt-player", "dt-opponent", "ft-player", "ft-opponent", "ftb-player", "ftb-opponent", "ftc-player", "ftc-opponent", "fd-player", "fd-opponent", "en-player", "en-opponent"]
+NAMES = ["dt-player", "dt-opponent", "ft-player", "ft-opponent", "ftb-player", "ftb-opponent", "ftc-player", "ftc-opponent", "fd-player", "fd-opponent", "en-player", "en-opponent", "en2-player", "en3-player", "en3-opponent"]
 sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
 ALLOC = ("CreateSprite", "CreateSpriteAtEnd", "CreateSpriteAt", "DestroySprite")
 
