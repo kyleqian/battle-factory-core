@@ -32,7 +32,7 @@ no new emulator run was made. All times are `k` = frames after the body end `E` 
      V_SHAKE_TWICE 78 vs 79, H_JUMPS_V_STRETCH 73 vs 74).
    * `castform(sp)` = +1 for Castform (385) only, on both sides (y2start 30/59, slide 149/76): **sweep-fitted exception, cause not found in source**
      (likely the form/palette load `battle_gfx_sfx_util.c:615/678`).
-   * Frame anim dominates in 202/338 species (`slide = 46 + S`, 126 species with `A+delay <= S`), the function animation in 136.
+   * Frame anim dominates in 202/338 species (`slide = 46 + S`), the function animation in the other 136.
    * **Leave-one-species-out**: 318/318 predicted exact (20 species are the sole evidence for their animId and cannot be predicted without a source-derived A).
      16 of 62 animIds never dominate (`A` unconstrained: only `A+delay-1 <= S` is known).
    * Range reproduced: k80..k244 (send-in +70..+234).
