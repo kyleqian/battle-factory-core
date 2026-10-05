@@ -1984,6 +1984,116 @@
         "whole-playable arbitrary-history framebuffer exactness",
         "ordinary route ends at the forced-replacement party screen"
       ]
+    },
+    {
+      "move": "MOVE_MEAN_LOOK",
+      "id": 212,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/hbuffer-s1-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep4-mean-look-*.json)",
+        "alternate-species dense proof twice fresh, zero residual (altspecies3-mean-look-opponent-sableye-player-onix.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SMELLING_SALT",
+      "id": 265,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/hbuffer-s1-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep4-smelling-salt-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_DEFENSE_CURL",
+      "id": 111,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/hbuffer-s1-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep4-defense-curl-*.json)",
+        "alternate-species dense proof twice fresh, zero residual (altspecies3-defense-curl-player-sandshrew-opponent-onix.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_INGRAIN",
+      "id": 275,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/hbuffer-s1-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep4-ingrain-*.json)",
+        "alternate-species dense proof twice fresh, zero residual (altspecies3-ingrain-player-lileep-opponent-onix.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_WRAP",
+      "id": 35,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/hbuffer-s1-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep4-wrap-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness",
+        "turn-trap end-of-turn animation is a separate status body, not covered"
+      ]
+    },
+    {
+      "move": "MOVE_BIND",
+      "id": 20,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/hbuffer-s1-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep4-bind-*.json)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness",
+        "turn-trap end-of-turn animation is a separate status body, not covered"
+      ]
+    },
+    {
+      "move": "MOVE_DRAGON_BREATH",
+      "id": 225,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/hbuffer-s1-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep4-dragon-breath-*.json); window starts at presentation age -2 (ageOffset -2, 85 rows, duration 83)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -2006,7 +2116,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 144,
+  "implementedCount": 151,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},
