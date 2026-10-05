@@ -15931,6 +15931,7 @@ export function renderSceneOnMovePresentation(
     objects.sort((a, b) => b.subpriority - a.subpriority || b.slot - a.slot);
     for (const object of objects) object.draw();
 
+    if (!liveField) {
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
     const profile = ingrainState.config.fieldProfile;
@@ -15957,6 +15958,7 @@ export function renderSceneOnMovePresentation(
       "INGRAIN!",
       99,
     );
+    }
     return;
   }
 
@@ -16435,6 +16437,7 @@ export function renderSceneOnMovePresentation(
         displayed.eye.invisible,
       );
     }
+    if (!liveField) {
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
     const profile = meanState.config.fieldProfile;
@@ -16461,6 +16464,7 @@ export function renderSceneOnMovePresentation(
       "MEAN LOOK!",
       99,
     );
+    }
     return;
   }
 
@@ -16673,6 +16677,7 @@ export function renderSceneOnMovePresentation(
       drawOrb();
     }
 
+    if (!liveField) {
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
@@ -16700,6 +16705,7 @@ export function renderSceneOnMovePresentation(
       "DEFENSE CURL!",
       99,
     );
+    }
     return;
   }
 
@@ -30426,22 +30432,26 @@ export function renderSceneOnMovePresentation(
     // task/component state by two captured advances.
     const view = sceneOnBindView({ ...state, age: state.age - 2 });
     const playerToOpponent =
-      view.attacker.species === "ONIX"
+      (liveField || view.attacker.species === "ONIX")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "MURKROW"
+      && (liveField || view.target.species === "MURKROW")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "ONIX"
+      (liveField || view.attacker.species === "ONIX")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "MURKROW"
+      && (liveField || view.target.species === "MURKROW")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged BIND pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const attackerSprite = playerToOpponent ? onixBackSprite : onixFrontSprite;
-    const targetSprite = playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? onixBackSprite : onixFrontSprite;
+    const targetSprite = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -30452,8 +30462,8 @@ export function renderSceneOnMovePresentation(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + liveIdle(view.target).x2,
+      view.target.geometry.spriteCorner.y + liveIdle(view.target).y2,
       view.targetAffine.xScale,
       view.targetAffine.yScale,
       0,
@@ -30468,6 +30478,7 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.x + view.attackerX2,
       view.attacker.geometry.spriteCorner.y + view.attackerY2,
     );
+    if (!liveField) {
     if (playerToOpponent) {
       drawSendOutHealthbox(
         fb,
@@ -30521,6 +30532,7 @@ export function renderSceneOnMovePresentation(
       "BIND!",
       99,
     );
+    }
     return;
   }
 
@@ -30531,29 +30543,31 @@ export function renderSceneOnMovePresentation(
     // captured advances (same pipeline as the BIND sway case).
     const view = sceneOnWrapView({ ...state, age: state.age - 2 });
     const playerToOpponent =
-      view.attacker.species === "TENTACOOL"
+      (liveField || view.attacker.species === "TENTACOOL")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "TENTACOOL"
+      (liveField || view.attacker.species === "TENTACOOL")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged WRAP pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const attackerSprite = playerToOpponent
-      ? tentacoolBackSprite
-      : tentacoolFrontSprite;
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? tentacoolBackSprite : tentacoolFrontSprite;
+    const targetSprite = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
     // Opponent-front ONIX keeps its permanent front-sprite idle-bob residual
     // (`x2=1`) for the whole window (speciesIdleAnim.ts, same RAPID_H_HOPS
     // finding as the other ONIX-target moves); the player-back target does
     // not.
-    const onixIdle = playerToOpponent
+    const onixIdle = playerToOpponent || (liveField && view.target.geometry.side === "opponent")
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(
@@ -30579,9 +30593,10 @@ export function renderSceneOnMovePresentation(
       fb,
       attackerSprite.tileset,
       attackerSprite.palette,
-      view.attacker.geometry.spriteCorner.x + view.attackerX2,
-      view.attacker.geometry.spriteCorner.y + view.attackerY2,
+      view.attacker.geometry.spriteCorner.x + view.attackerX2 + liveIdle(view.attacker).x2,
+      view.attacker.geometry.spriteCorner.y + view.attackerY2 + liveIdle(view.attacker).y2,
     );
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -30619,6 +30634,7 @@ export function renderSceneOnMovePresentation(
       "WRAP!",
       99,
     );
+    }
     return;
   }
 
@@ -41929,7 +41945,8 @@ export function renderSceneOnMovePresentation(
     const profile = saltState.config.animationProfile;
 
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    if (!playerAttacker && saltState.age === 0) {
+    // Live: the shared #142 hook draws it (liveMoveOpponentShadowRow).
+    if (!liveField && !playerAttacker && saltState.age === 0) {
       drawSourceOpponentEnemyShadow(
         fb,
         view.attacker.species,
@@ -42019,6 +42036,7 @@ export function renderSceneOnMovePresentation(
       drawEffects();
     }
 
+    if (!liveField) {
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
     const field = saltState.config.fieldProfile;
@@ -42051,6 +42069,7 @@ export function renderSceneOnMovePresentation(
       "SMELLINGSALT!",
       99,
     );
+    }
     return;
   }
 
@@ -48437,22 +48456,26 @@ export function renderSceneOnMovePresentation(
       age: state.age - DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
     }).targetEffect.blendCoeff;
     const playerToOpponent =
-      view.attacker.species === "ONIX"
+      (liveField || view.attacker.species === "ONIX")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "MURKROW"
+      && (liveField || view.target.species === "MURKROW")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "ONIX"
+      (liveField || view.attacker.species === "ONIX")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "MURKROW"
+      && (liveField || view.target.species === "MURKROW")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged DRAGON_BREATH pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const attackerSprite = playerToOpponent ? onixBackSprite : onixFrontSprite;
-    const targetSprite = playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    const attackerSprite = liveField ? liveSceneOnBattlerArt(view.attacker)
+      : playerToOpponent ? onixBackSprite : onixFrontSprite;
+    const targetSprite = liveField ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -48463,8 +48486,8 @@ export function renderSceneOnMovePresentation(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + liveIdle(view.target).x2,
+      view.target.geometry.spriteCorner.y + liveIdle(view.target).y2,
       256,
       256,
       0,
@@ -48503,6 +48526,7 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.y,
     );
     if (embersInFrontOfAttacker) drawFireSprites();
+    if (!liveField) {
     if (playerToOpponent) {
       drawSendOutHealthbox(
         fb,
@@ -48556,6 +48580,7 @@ export function renderSceneOnMovePresentation(
       "DRAGONBREATH!",
       99,
     );
+    }
     return;
   }
 
