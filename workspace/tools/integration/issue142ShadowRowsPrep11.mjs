@@ -4,7 +4,7 @@
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 const FX = "tools/integration/fixtures", extraPath = `${FX}/issue142-shadow-rows-extra.json`;
 const extra = JSON.parse(readFileSync(extraPath, "utf8"));
-const ids = { LEECH_SEED: 73, TRI_ATTACK: 161, PETAL_DANCE: 80, DESTINY_BOND: 194, AIR_CUTTER: 314, FORESIGHT: 193, SKY_UPPERCUT: 327, RECYCLE: 278, SPIDER_WEB: 169 };
+const ids = { LEECH_SEED: 73, TRI_ATTACK: 161, PETAL_DANCE: 80, DESTINY_BOND: 194, AIR_CUTTER: 314, FORESIGHT: 193, SKY_UPPERCUT: 327, RECYCLE: 278, SPIDER_WEB: 169, ROAR: 46, WHIRLWIND: 18 };
 const rows = [], seen = new Set();
 for (const f of readdirSync(`${FX}/prep11-live`).sort()) {
   const d = JSON.parse(readFileSync(`${FX}/prep11-live/${f}`, "utf8"));

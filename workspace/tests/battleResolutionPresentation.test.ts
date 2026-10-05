@@ -994,9 +994,10 @@ describe("battle resolution presentation receipt ownership", () => {
     });
   });
 
-  it("Scene ON forced switch-out after a live Whirlwind body: no recall animation, hide at E+4, send-in at E+10 (Baton Pass/OFF unchanged)", () => {
-    // docs/forced-switch-continuation.md §6: `returntoball` passes skipAnim = TRUE. The body's last dense row is E,
-    // so the hold covers E+1..E+3, the recall receipt hides sprite + healthbox E+4..E+9 and `switch-in` starts at E+10.
+  it("Scene ON forced switch-out after a live Whirlwind body: no recall animation, hide at E+5, send-in at E+11 (Baton Pass/OFF unchanged)", () => {
+    // docs/forced-switch-continuation.md §6: `returntoball` passes skipAnim = TRUE. The body's last dense row is E; ROM RAM
+    // E+4 / E+10 reach the framebuffer one latch later: the hold covers E+1..E+4, the recall receipt hides sprite +
+    // healthbox E+5..E+10 and `switch-in` starts at E+11 (forcedSwitchContinuationCompare.ts, zero residual through emerge).
     const initial = initialBattle();
     const context = initial.rules.rulesContext;
     const incoming = context.party.player[1]!;
@@ -1049,16 +1050,16 @@ describe("battle resolution presentation receipt ownership", () => {
       { type: "message", lines: ["Foe MACHOP was", "dragged out!"] },
       { type: "turn-end" },
     ]);
-    expect([FORCED_RETURN_TO_BALL_HOLD_FRAMES, FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES]).toEqual([3, 6]);
-    expect(battleResolutionCommandDuration(commands[2]!, on.field)).toBe(3);
+    expect([FORCED_RETURN_TO_BALL_HOLD_FRAMES, FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES]).toEqual([4, 6]);
+    expect(battleResolutionCommandDuration(commands[2]!, on.field)).toBe(4);
     expect(battleResolutionCommandDuration(commands[3]!, on.field)).toBe(6);
-    // E+1..E+3: no target pixels (the live body left it off-screen), healthbox still shown.
-    for (let elapsed = 0; elapsed < 3; elapsed += 1) {
+    // E+1..E+4: no target pixels (the live body left it off-screen), healthbox still shown.
+    for (let elapsed = 0; elapsed < 4; elapsed += 1) {
       const view = createBattleResolutionPresentationRenderView(atRenderClock(on, 2, elapsed));
       expect(view.switchOut).toMatchObject({ battler: 1, spriteVisible: false });
       expect(view.visibility.opponent).toEqual({ sprite: false, healthbox: true });
     }
-    // E+4..E+9: the recall receipt hides sprite and healthbox together.
+    // E+5..E+10: the recall receipt hides sprite and healthbox together.
     for (let elapsed = 0; elapsed < 6; elapsed += 1) {
       const view = createBattleResolutionPresentationRenderView(atRenderClock(on, 3, elapsed));
       expect(view.switchOut).toBeNull();

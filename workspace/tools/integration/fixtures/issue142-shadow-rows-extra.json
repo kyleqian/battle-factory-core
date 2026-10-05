@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py) (+ prep5 rows from issue142ShadowRowsPrep5.py) (+ order-consumer rows from issue142ShadowRowsOrderConsumer.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep6 rows from issue142ShadowRowsPrep6.py) (+ prep7 rows from issue142ShadowRowsPrep7.py) (+ prep8 rows from issue142ShadowRowsPrep8.py) (+ prep9 rows from issue142ShadowRowsPrep9.py) (+ prep11 rows from issue142ShadowRowsPrep11.mjs) (+ prep11 rows from issue142ShadowRowsPrep11.mjs)",
  "rows": [
   {
    "id": 236,
@@ -3805,6 +3805,42 @@
    }
   },
   {
+   "id": 46,
+   "move": "ROAR",
+   "orientation": "opponent",
+   "variant": "prep11-roar-opponent",
+   "activationFrame": 219,
+   "windowStart": 219,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep11-live/roar-opponent-roar-opponent-houndour-player-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep11-*.json draft (activation == accepted window start; docs/next-adapters-prep11.md s3)"
+   }
+  },
+  {
+   "id": 46,
+   "move": "ROAR",
+   "orientation": "player",
+   "variant": "prep11-roar-player",
+   "activationFrame": 252,
+   "windowStart": 252,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep11-live/roar-player-roar-player-houndour-opponent-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep11-*.json draft (activation == accepted window start; docs/next-adapters-prep11.md s3)"
+   }
+  },
+  {
    "id": 327,
    "move": "SKY_UPPERCUT",
    "orientation": "opponent",
@@ -3908,6 +3944,42 @@
    "inWindow": true,
    "sources": {
     "fixture": "tools/integration/fixtures/prep11-live/tri-attack-player-tri-attack-player-porygon-opponent-shuckle.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep11-*.json draft (activation == accepted window start; docs/next-adapters-prep11.md s3)"
+   }
+  },
+  {
+   "id": 18,
+   "move": "WHIRLWIND",
+   "orientation": "opponent",
+   "variant": "prep11-whirlwind-opponent",
+   "activationFrame": 316,
+   "windowStart": 316,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep11-live/whirlwind-opponent-whirlwind-opponent-butterfree-player-onix.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep11-*.json draft (activation == accepted window start; docs/next-adapters-prep11.md s3)"
+   }
+  },
+  {
+   "id": 18,
+   "move": "WHIRLWIND",
+   "orientation": "player",
+   "variant": "prep11-whirlwind-player",
+   "activationFrame": 222,
+   "windowStart": 222,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep11-live/whirlwind-player-whirlwind-player-butterfree-opponent-onix.json",
     "body": "normal",
     "activation": "tools/integration/fixtures/prep11-*.json draft (activation == accepted window start; docs/next-adapters-prep11.md s3)"
    }

@@ -3149,6 +3149,34 @@
         "COMBUSKEN tail: species-dependent 1-frame later end (prep11 open point 1) is NOT modelled",
         "ordinary command-input replay: see the receipt"
       ]
+    },
+    {
+      "move": "MOVE_ROAR",
+      "id": 46,
+      "sourceFieldEvidence": "../tools/integration/fixtures/roar-live-receipt.json",
+      "liveEvidence": [
+        "dense 3/3 zero residual twice (HOUNDOUR both orientations, 99 / 104 rows + VAPOREON alternate)",
+        "Scene ON forced switch-out after the body: no recall animation, target + healthbox hidden from E+4, send-in at E+10 (docs/forced-switch-continuation.md; ROM Cmd_returntoball skipAnim)"
+      ],
+      "remaining": [
+        "send-in tail (healthbox slide / dragged-out message start) is species-keyed in the ROM and a fixed span in production: ISSUES #146",
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay: see the receipt"
+      ]
+    },
+    {
+      "move": "MOVE_WHIRLWIND",
+      "id": 18,
+      "sourceFieldEvidence": "../tools/integration/fixtures/roar-live-receipt.json",
+      "liveEvidence": [
+        "dense 3/3 zero residual twice (BUTTERFREE both orientations, 83 rows + BEAUTIFLY alternate)",
+        "Scene ON forced switch-out after the body: no recall animation, target + healthbox hidden from E+4, send-in at E+10 (docs/forced-switch-continuation.md; ROM Cmd_returntoball skipAnim)"
+      ],
+      "remaining": [
+        "send-in tail (healthbox slide / dragged-out message start) is species-keyed in the ROM and a fixed span in production: ISSUES #146",
+        "independent arbitrary-species/history framebuffer comparison",
+        "ordinary command-input replay: see the receipt"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3171,7 +3199,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 213,
+  "implementedCount": 215,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},

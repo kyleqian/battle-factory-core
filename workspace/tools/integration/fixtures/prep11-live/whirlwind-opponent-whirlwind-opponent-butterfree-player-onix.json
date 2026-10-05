@@ -1,0 +1,42 @@
+{
+ "schema": "prep11-live-fixture/v1",
+ "move": "WHIRLWIND",
+ "sourceDraft": "tools/integration/fixtures/prep11-whirlwind-opponent-whirlwind-opponent-butterfree-player-onix.json",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/mechanic-whirlwind-opponent-butterfree-player-onix.json",
+ "attacker": {
+  "species": "BUTTERFREE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 136,
+  "opponentMaxHp": 167,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "denseWindow": {
+  "startFrame": 316,
+  "endFrame": 398,
+  "ageOffset": 0
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 35
+ },
+ "precedingBodies": [
+  {
+   "moveId": 33,
+   "side": "player"
+  }
+ ]
+}

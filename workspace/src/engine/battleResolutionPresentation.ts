@@ -654,10 +654,12 @@ const SWITCH_OUT_TIMING = Object.freeze({ minimumFrames: RETURN_TO_BALL_SPAN_FRA
 /**
  * Scene ON forced switch-out after a Roar/Whirlwind body (docs/forced-switch-continuation.md §1, §6): `Cmd_returntoball`
  * passes skipAnim = TRUE, so `OpponentHandleReturnMonToBall`/`PlayerHandleReturnMonToBall` destroy the sprite and hide
- * the healthbox in one step (body end E -> E+4), and `switchinanim` starts the send-in 6 frames later (E+10). The body's
- * final dense row is E itself, so the hold covers E+1..E+3 and the recall receipt E+4..E+9.
+ * the healthbox in one step (RAM: body end E -> E+4), and `switchinanim` starts the send-in 6 frames later (RAM E+10).
+ * Both reach the framebuffer one OAM latch later (direct-mGBA frames: healthbox gone from E+5, ball from E+13 = el 2 of a
+ * send-in starting at E+11; tools/integration/forcedSwitchContinuationCompare.ts). The body's final dense row is E, so
+ * the hold covers E+1..E+4 and the recall receipt E+5..E+10.
  */
-export const FORCED_RETURN_TO_BALL_HOLD_FRAMES = 3;
+export const FORCED_RETURN_TO_BALL_HOLD_FRAMES = 4;
 export const FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES = 6;
 const FORCED_SWITCH_OUT_TIMING = Object.freeze({ minimumFrames: FORCED_RETURN_TO_BALL_HOLD_FRAMES } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);

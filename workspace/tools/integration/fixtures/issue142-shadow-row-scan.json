@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 445,
-  "ids": 213,
+  "rows": 449,
+  "ids": 215,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -4646,6 +4646,28 @@
    "tailFirstAge": null
   },
   {
+   "id": 46,
+   "move": "ROAR",
+   "orientation": "opponent",
+   "duration": 104,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 46,
+   "move": "ROAR",
+   "orientation": "player",
+   "duration": 99,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
    "id": 327,
    "move": "SKY_UPPERCUT",
    "orientation": "opponent",
@@ -4705,6 +4727,28 @@
    "move": "TRI_ATTACK",
    "orientation": "player",
    "duration": 284,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 18,
+   "move": "WHIRLWIND",
+   "orientation": "opponent",
+   "duration": 83,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 18,
+   "move": "WHIRLWIND",
+   "orientation": "player",
+   "duration": 83,
    "expected": 0,
    "drawn": [
     0
