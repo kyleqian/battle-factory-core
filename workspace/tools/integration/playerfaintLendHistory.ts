@@ -99,7 +99,7 @@ export function replayPlayerfaintTurns(turns: readonly Turn[]) {
 }
 
 export const PLAYERFAINT_FIXTURES = ["sunny-day-player", "swift-opponent", "dragon-dance-player", "swift-player", "protect-player",
-  "thunderbolt-opponent", "light-screen-player", "heal-bell-player", "giga-drain-player", "secondko-sunny-day-player", "slot2-sunny-day-player"]
+  "thunderbolt-opponent", "light-screen-player", "heal-bell-player", "giga-drain-player", "secondko-sunny-day-player", "slot2-sunny-day-player", "afterko-sunny-day-player"]
   .map(name => `tools/integration/fixtures/playerfaint-${name}.json`);
 
 if (process.argv.includes("--run") || process.argv.includes("--write")) {

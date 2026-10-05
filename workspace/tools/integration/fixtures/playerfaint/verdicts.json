@@ -1,5 +1,42 @@
 [
  {
+  "fixture": "tools/integration/fixtures/playerfaint-afterko-sunny-day-player.json",
+  "move": "SUNNY_DAY",
+  "side": "player",
+  "edge": 2247,
+  "window": {
+   "startFrame": 2247,
+   "endFrame": 2404,
+   "ageOffset": 0
+  },
+  "whatIf": {
+   "role": {
+    "exactRows": 158,
+    "rows": 158,
+    "residualPixels": 0,
+    "digest": "95ff4e55339b676fcd0027a02fa912cb1af3bc2868a910f717a3e9e2c3983535"
+   },
+   "production": {
+    "exactRows": 48,
+    "rows": 158,
+    "residualPixels": 824656,
+    "digest": "43df686fc53c167a038a5ff09922507eeac6b11d4ece941da1a17073bc201135"
+   }
+  },
+  "hostReplay": {
+   "fixture": "tools/integration/fixtures/playerfaint-afterko-sunny-day-player.json",
+   "edge": 2247,
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "todayOrderLend": null,
+   "todayAllocatorInput": null,
+   "todayLendEqualsRole": null,
+   "roleLendFromHostEqualsModel": true
+  },
+  "verdict": "NEEDS-PARAM (role lend)"
+ },
+ {
   "fixture": "tools/integration/fixtures/playerfaint-dragon-dance-player.json",
   "move": "DRAGON_DANCE",
   "side": "player",

@@ -51,6 +51,11 @@ export const SCENARIOS: Record<string, Step[]> = {
   // as the first scenario with JOLTEON in party slot 2 (forced menu DOWN x2): turn 2 Sunny Day, Swift, sun.
   "playerfaint-slot2-sunnyday": [P, C, edge("129:opponent", "entry"), body(129, "opponent"), HIT, ...PLAYER_FAINT_SWITCH,
     P, C, edge("241:player"), body(241, "player"), edge("129:opponent"), body(129, "opponent"), HIT, ...SUN],
+  // player faint AFTER an opponent KO: L5 NINETALES Flamethrower KOs a L1 SHEDINJA lead (send-out: opponent battler slot 5), then the
+  // SLOWBRO's Swift KOs the L5 NINETALES (turn 2) -> forced menu -> JOLTEON; turn 3: Sunny Day, Swift, sun.
+  "playerfaint-afterko-sunnyday": [P, C, edge("53:player", "entry"), body(53, "player"), HIT, ...OPPONENT_KO_SEND_OUT,
+    P, C, edge("129:opponent"), body(129, "opponent"), HIT, ...PLAYER_FAINT_SWITCH,
+    P, C, edge("241:player"), body(241, "player"), edge("129:opponent"), body(129, "opponent"), HIT, ...SUN],
   // second opponent KO: NINETALES Flamethrower KOs SHEDINJA #1 (turn 1) and SHEDINJA #2 (turn 2; send-out #3 reuses slot 5);
   // turn 3: Sunny Day (first body after send-out #3), SHEDINJA #3 Swift, sun; turn 4: player Swift has no effect (Wonder Guard, no
   // animation), Swift, sun.
