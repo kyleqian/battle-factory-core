@@ -83,9 +83,14 @@ def main():
                 row.append({str(k): v for k, v in f["keys"].items()})
             rows.append(row)
         prev = sig
+    def mon(name, i):  # BoxPokemon.personality (+0x00) and decrypted-species-free proxy: personality + otId
+        b = names[name] + 100 * i
+        return [u16(b) | u16(b + 2) << 16, u16(b + 4) | u16(b + 6) << 16]
+    party = {"player": [mon("gPlayerParty", i) for i in range(3)], "opponent": [mon("gEnemyParty", i) for i in range(3)],
+             "rng": u16(names["gRngValue"]) | u16(names["gRngValue"] + 2) << 16}
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps({"schema": "sprite-order-event-raw/v2", "route": "ordinary-factory", "label": LABEL, "scenario": str(SCENARIO),
-        "toolSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), "frameCount": len(frames),
+        "toolSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), "endState": party, "frameCount": len(frames),
         "firstFrame": frames[0]["n"], "lastFrame": frames[-1]["n"], "rows": rows}, separators=(",", ":")) + "\n")
     print(f"wrote {OUTPUT} frames={len(frames)} rows={len(rows)}")
 
