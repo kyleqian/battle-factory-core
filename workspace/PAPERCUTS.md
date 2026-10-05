@@ -20,6 +20,15 @@ history.
 - **Fix:** run CLIs with `node --experimental-strip-types`, or make the
   check vite-node-aware (compare resolved file paths, not URLs).
 
+## Worktree and main checkout paths both end in `/workspace`
+
+- **What:** a side worker's `cd .../workspace` landed in the MAIN checkout instead of
+  `.worktrees/<id>/workspace`; its first commit went onto `master` (it moved the commit to
+  its branch and restored `master` with `update-ref`; the supervisor confirmed the tree).
+- **Hits:** 1 (2026-10-05 species audit 2, ~5 min + supervisor check).
+- **Fix:** briefs tell side workers to check `git rev-parse --show-toplevel` contains
+  `.worktrees/` before every commit; the launcher could export `WORKTREE_ROOT`.
+
 ## BattleLab scenario species ids are national-dex for some Hoenn species
 
 - **What:** several `tools/battle-lab/mechanic-*.json` files name a species
