@@ -129,6 +129,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   299,
 ] as const);
 
+const SWEET_SCENT_PETAL_SLOTS: readonly number[] = Object.freeze([
+  3, 4, 5, 7, 9, 10, 3, 11, 12, 13, 14, 15, 16, 17, 4, 5, 7, 9, 10, 3, 11, 12, 13, 14]);
+
 /**
  * ISSUES #142: live age on which the elevated-opponent enemy shadow is still
  * displayed. `SpriteCB_EnemyShadow` (battle_gfx_sfx_util.c:1203) hides the
@@ -451,6 +454,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 288: return 209; // Grudge (66..274 / 70..278); script end 274/278 (no tail).
     // prep6 accepted windows (docs/next-adapters-prep6.md s0/s2.4).
     case 317: return 174; // Rock Tomb (217..390 / 229..402); window end = script end.
+    case 219: return 71; // Safeguard (209..279 both).
+    case 230: return 175; // Sweet Scent (222..396 both).
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
@@ -1225,6 +1230,19 @@ export function liveMoveAnimationPresentation(
         effectCenter: targetAnchors.picOffsetPoint };
       break;
     }
+    case 219:
+      // ringSubpriority = GetBattlerSpriteSubpriority(attacker) - 2 (30/40 - 2); the three ring slots are the
+      // known-entry first-free slots 3,4,5 (prep6 s2.2) and seed-independent (0/42 seeds, s2.3): labels only.
+      config = { move: "SAFEGUARD", attacker, target, fieldProfile,
+        animationProfile: { ringSlots: [3, 4, 5], ringSubpriority: attacker.geometry.side === "player" ? 28 : 38 } };
+      break;
+    case 230:
+      // spriteSlots = ROM spawn order of the 24 petals on the known-entry first-free host with slot reuse
+      // (prep6-plans.json); seed-independent (0/42 seeds, 12 equal-key pairs none overlapping). targetSubpriority
+      // is attacker subpriority - 2.
+      config = { move: "SWEET_SCENT", attacker, target, fieldProfile,
+        animationProfile: { spriteSlots: SWEET_SCENT_PETAL_SLOTS, targetSubpriority: attacker.geometry.side === "player" ? 28 : 38 } };
+      break;
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:
@@ -1248,5 +1266,7 @@ export function liveMoveAnimationPresentation(
   // Barrier, Magic Coat and Protect anchor at the first script pointer.
   const wallAnchorOffset = request.moveId === 113 || request.moveId === 115
     || request.moveId === 243 ? 7 : 0;
-  return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1 : age };
+  // Sweet Scent's accepted rows start at reducer age -4 (the pointer-owned setup rows, sweetScentFramebuffer.ts:101).
+  const setupAge = request.moveId === 230 ? 4 : 0;
+  return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1 : age - setupAge };
 }

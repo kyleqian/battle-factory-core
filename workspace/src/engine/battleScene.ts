@@ -16056,6 +16056,7 @@ export function renderSceneOnMovePresentation(
     }
     drawRings(nonObjTarget2);
 
+    if (liveField) return;
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
     const profile = safeguardState.config.fieldProfile;
@@ -16793,6 +16794,7 @@ export function renderSceneOnMovePresentation(
       drawTarget();
     }
 
+    if (liveField) return;
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
