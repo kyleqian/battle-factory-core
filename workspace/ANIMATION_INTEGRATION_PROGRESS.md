@@ -18,6 +18,20 @@
   Heal Bell, Leaf Blade, Rock Throw, Blaze Kick, Perish Song first body).
   Next: cross-body order tracking keyed on prompt / body / hit-animation /
   stat events (`docs/sprite-order-gap-causes.md` §2).
+- prep6 measured prep (`9215f385e`, `docs/next-adapters-prep6.md`; supervisor
+  reproduced pins/slots): READY Rock Tomb, Safeguard, Sweet Scent,
+  Self-Destruct, Knock Off (age basis −6), Swallow (stockpile = request.turn),
+  Faint Attack (player attacker only); Pain Split needs per-side coords
+  yOffset in its reducer; Dragon Dance (1 frame), Fire Blast and Double Team
+  need the order provider.
+- Real-route order validation (`2ad3cb4e9`, `docs/sprite-order-real-route.md`;
+  supervisor fresh rerun identical): five canonical Factory battle-1 traces,
+  ROM per-frame order. Event rules (prompt bounce pair, hit-animation blip,
+  stat ±1/±2) 121/121 unit checks exact; with resync after each unknown unit
+  all 91 move edges exact. Strict tracking stops at the first body without a
+  plan (the opponent's Double Team on turn 1): table coverage is the limit.
+  Faint, next-mon summary/send-out, forced switch-in, party menu, battle
+  reshow and the end-of-battle slide must invalidate.
 
 ## 2026-10-04 (night) — prep5 folded: 157 live adapters; order-consumer prep
 
