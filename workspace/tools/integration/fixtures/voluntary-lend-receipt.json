@@ -619,5 +619,18 @@
    }
   ],
   "tests": "tests/liveSpriteOrderHost.test.ts 'lends after a voluntary switch or a cancelled party menu' (4 routes: ON/OFF rules/RNG/boundary parity, hitMarker xor 0x80, next prompt, adapters active)"
+ },
+ "unchangedDenseRechecked": {
+  "playerFaint": "13/13 playerfaint-lend-receipt digests re-rendered equal (postkoLendDense.ts, 2 fresh runs each)",
+  "postKo": "13/13 default POSTKO_DENSE_FIXTURES digests re-rendered equal; the other post-KO consumer receipts are pinned by tests/postkoLend.test.ts (passed), not re-rendered"
+ },
+ "gates": {
+  "testedCode": "daa3d59d9 (production) + 75cef8811 (tests/tooling), srcTree d4bccd5816c25da769bf4fe15a66f2b16a3f8d37",
+  "focused": "15 files / 142 tests passed (sprite-order set + liveOrderConsumerMoveAdapters + liveRoarWhirlwindMoveAdapters + liveSpriteAllocator + playableAnimationIntegration + voluntaryLend), --maxWorkers=4",
+  "typecheck": "passed",
+  "smoke": "8 files / 448 tests passed",
+  "fullSuite": "1521 files passed, 44 skipped; 12298 tests passed, 223 skipped (POKEBENCH_VITEST_MAX_WORKERS=4, --maxWorkers=4, 504 s)",
+  "build": "851 modules, passed",
+  "diffCheck": "passed"
  }
 }
