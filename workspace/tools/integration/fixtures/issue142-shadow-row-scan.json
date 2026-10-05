@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 291,
-  "ids": 136,
+  "rows": 307,
+  "ids": 144,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -3070,6 +3070,174 @@
     0
    ],
    "tailFirstAge": 213
+  },
+  {
+   "id": 57,
+   "move": "SURF",
+   "orientation": "player",
+   "duration": 144,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 57,
+   "move": "SURF",
+   "orientation": "opponent",
+   "duration": 144,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 330,
+   "move": "MUDDY_WATER",
+   "orientation": "player",
+   "duration": 144,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 330,
+   "move": "MUDDY_WATER",
+   "orientation": "opponent",
+   "duration": 144,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 196,
+   "move": "ICY_WIND",
+   "orientation": "player",
+   "duration": 287,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 196,
+   "move": "ICY_WIND",
+   "orientation": "opponent",
+   "duration": 287,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 59,
+   "move": "BLIZZARD",
+   "orientation": "player",
+   "duration": 372,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 59,
+   "move": "BLIZZARD",
+   "orientation": "opponent",
+   "duration": 361,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 252,
+   "move": "FAKE_OUT",
+   "orientation": "player",
+   "duration": 86,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 252,
+   "move": "FAKE_OUT",
+   "orientation": "opponent",
+   "duration": 86,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 322,
+   "move": "COSMIC_POWER",
+   "orientation": "player",
+   "duration": 241,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 322,
+   "move": "COSMIC_POWER",
+   "orientation": "opponent",
+   "duration": 241,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 248,
+   "move": "FUTURE_SIGHT",
+   "orientation": "player",
+   "duration": 114,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 248,
+   "move": "FUTURE_SIGHT",
+   "orientation": "opponent",
+   "duration": 114,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 153,
+   "move": "EXPLOSION",
+   "orientation": "player",
+   "duration": 212,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 153,
+   "move": "EXPLOSION",
+   "orientation": "opponent",
+   "duration": 212,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
   }
  ]
 }

@@ -26,6 +26,8 @@ const shadowPixels = (fb: Uint8Array): number => {
   }
   return n;
 };
+// Icy Wind / Blizzard are live only for pairs whose particle slot order is proven (liveMoveAnimation.ts provableEffectOrder).
+const PAIR: Record<number, [string, string]> = { 196: ["SHUCKLE", "MAGNEMITE"], 59: ["SHUCKLE", "BUTTERFREE"] };
 const render = (r: (typeof rows)[number], opponent: string, age: number): number => {
   const mon = (name: string, side: "player" | "opponent") => ({
     species: speciesStats.species.find((x) => x.name === `SPECIES_${name}`)!.id, speciesSymbol: name, name, level: 50,
@@ -33,7 +35,7 @@ const render = (r: (typeof rows)[number], opponent: string, age: number): number
     side: side === "player" ? "player" as const : "trainer" as const, battler: side === "player" ? 0 as const : 1 as const,
     partyIndex: 0 as const, moveIds: [0, 0, 0, 0] as const, currentPP: [0, 0, 0, 0] as const, ppBonuses: 0,
   });
-  const field = { player: mon("PHANPY", "player"), opponent: mon(opponent, "opponent") };
+  const field = { player: mon(PAIR[r.id]?.[0] ?? "PHANPY", "player"), opponent: mon(opponent, "opponent") };
   const attacker = r.orientation === "player" ? 0 : 1;
   const request = {
     moveId: r.id, attacker, target: attacker === 0 ? 1 : 0, turn: r.sources?.body === "shattered-wall" ? 1 : 0,
@@ -77,13 +79,13 @@ describe("live elevated-opponent shadow rows (#142)", () => {
   });
 
   // Public live render path: elevated GOLBAT target (player attacker) and attacker (opponent attacker).
-  const sample = [34, 5, 115, 280, 101, 2, 163, 44, 92, 93, 347, 158, 207, 339, 76, 236];
+  const sample = [57, 330, 196, 59, 252, 322, 34, 5, 115, 280, 101, 2, 163, 44, 92, 93, 347, 158, 207, 339, 76, 236];
   for (const id of sample) {
     for (const orientation of ["player", "opponent"] as const) {
       it(`id ${id} ${orientation}: shadow on row 0 iff the activation frame is in the window`, () => {
         const r = rows.find((x) => x.id === id && x.orientation === orientation)!;
         const expected = LIVE_MOVE_OPPONENT_SHADOW_ROW[id] === 0;
-        expect(render(r, "GOLBAT", 0) === 200).toBe(expected);
+        expect(render(r, PAIR[id]?.[1] ?? "GOLBAT", 0) === 200).toBe(expected);
         // A non-elevated opponent never gets the shadow mask drawn by the hook.
         expect(render(r, "ONIX", 0)).toBeLessThan(200);
       });
