@@ -27,7 +27,7 @@ for f in sorted(D.glob("*.json")):
         oam_changes = sorted({s["slot"] for s in plus})
         rows.append({"move": MOVES[b["move"]], "moveId": b["move"], "act": b["start"], "firstInactive": end, "duration": end - b["start"], "animTurn": a["animTurn"], "gAnimMovePower": a["gAnimMovePower"],
                      "gBattleMovePower": a["gBattleMovePower"], "bitmap": a["bitmap"], "tasksAtAct": a["tasks"], "monsAtAct": [(m["species"], m["hp"], m["status1"], m["status2"]) for m in a["mons"]],
-                     "regsAtAct": a["regs"], "regChanges": rev, "taskEvents": tev, "sprites": sprites, "spriteSlots": oam_changes, "battlerPal": d["battlerPal"],
+                     "regsAtAct": a["regs"], "regChanges": rev, "taskEvents": tev, "sprites": sprites, "spriteSlots": oam_changes, "battlerPal": a["battlerPalNum"], "battlerXY": a["battlerXY"], "monbgData": next(([e[0] - b["start"], k, e[2][k]] for e in d["taskEvents"] if b["start"] <= e[0] <= end for k, v in e[1].items() if name.get(v & ~1) == "Task_UpdateMonBg"), None),
                      "objUnfadedAtAct": a["objUnfaded"], "objFadedAtAct": a["objFaded"], "bgUnfadedAtAct": a["bgUnfaded"],
                      "spriteOrderAtAct": a["spriteOrder"][:24], "inUseAtAct": a["sprites"], "atEnd1": b.get("atEnd+1", {}).get("bitmap")})
     out[f.stem] = rows
@@ -37,7 +37,7 @@ for sc, rows in out.items():
     print("==", sc)
     for r in rows:
         print(f"  {r['move']} act {r['act']} dur {r['duration']} turn {r['animTurn']} pow {r['gAnimMovePower']} bitmap {r['bitmap']:#x} slots {r['spriteSlots']} tasks@act {r['tasksAtAct']} battlerPal {r['battlerPal']}")
-        print("     tasks:", [(t[0], list(t[1].values())) for t in r["taskEvents"]][:6])
+        print("     tasks:", [(t[0], list(t[1].values())) for t in r["taskEvents"]][:6], "monbg", r["monbgData"], "xy", r["battlerXY"], "pal", r["battlerPal"])
         print("     regs@act", {k: hex(v) for k, v in r["regsAtAct"].items()}, "changes", len(r["regChanges"]))
         pals = sorted({(s["tmpl"], s["palLate"], s["tileLate"], s["matrix"]) for s in r["sprites"]}, key=str)
         print("     tmpl/pal/matrix:", pals[:10])

@@ -43,7 +43,7 @@ def tfuncs():
     b = sym["gTasks"]; return {i: u32(b + i * 0x28) for i in range(16) if u8(b + i * 0x28 + 4)}
 def state():
     sc = sym["gBattleScripting"]
-    return {"regs": regs(), "objUnfaded": banks(sym["gPlttBufferUnfaded"]), "objFaded": banks(sym["gPlttBufferFaded"]),
+    return {"battlerXY": [[sg(sym["gSprites"] + u8(sym["gBattlerSpriteIds"] + b) * 0x44 + o) for o in (0x20, 0x22)] for b in (0, 1)], "battlerPalNum": [u16(sym["gSprites"] + u8(sym["gBattlerSpriteIds"] + b) * 0x44 + 4) >> 12 for b in (0, 1)], "regs": regs(), "objUnfaded": banks(sym["gPlttBufferUnfaded"]), "objFaded": banks(sym["gPlttBufferFaded"]),
             "bgUnfaded": bgb(sym["gPlttBufferUnfaded"])[:8], "taskFuncs": tfuncs(), "animTurn2": u8(sc + 24),
             "gBattleMovePower_": u16(sym["gBattleMovePower"]),"gAnimMovePower": u16(sym["gAnimMovePower"]), "gBattleMovePower": u16(sym["gBattleMovePower"]), "gDynamicBasePower": u16(sym["gDynamicBasePower"]),
             "gAnimMoveDmg": s32(sym["gAnimMoveDmg"]), "gBattleMoveDamage": s32(sym["gBattleMoveDamage"]), "animTurn": u8(sc + 24), "animTargetsHit": u8(sc + 25),
@@ -71,7 +71,8 @@ def step():
     global prev_tasks, prev_bg
     if ALWAYS or cur is not None or a:  # task table changes (slot -> func) and BG/blend register changes while a body is active
         tf = tfuncs()
-        if tf != prev_tasks: taskev.append([f, {str(k): v for k, v in tf.items()}]); prev_tasks = tf
+        if tf != prev_tasks:
+            tb = sym["gTasks"]; taskev.append([f, {str(k): v for k, v in tf.items()}, {str(k): [sg(tb + k * 0x28 + 8 + 2 * j) for j in range(8)] for k in tf}]); prev_tasks = tf
         rg = regs()
         if rg != prev_bg: bgev.append([f, rg]); prev_bg = rg
     if ALWAYS or cur is not None:  # sSpriteOrder whenever it changes inside a body (hardware tie-order derivation)
