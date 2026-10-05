@@ -10,11 +10,22 @@
  *   any other animation id                           general-animation (HELD_ITEM_EFFECT / SUN_CONTINUES / ...)
  *   status-animation                                 status-animation (InitAndLaunchChosenStatusAnimation name)
  *   set-battler-sprite-visibility                    hiding (semi-invulnerable) or a return-to-ball receipt invalidates
- *   faint, switch, switch-in, party summary, trainer slide, outcome   invalidate
+ *                                                    (the voluntary recall stays invalidating: provisional, one instance)
+ *   faint-animation battler 0 / 1                    faint (player / opponent battler slot; unknown slot invalidates)
+ *   draw-party-status-summary battler 1 / 0          party-summary-next / no allocation (no-op)
+ *   hide-party-status-summary battler 1 / 0          party-summary-hide (adjacency marker) / no-op
+ *   switch-in-animation battler 1                    next-mon-send-out (directly after the summary unit)
+ *   switch-in-animation battler 0                    switch-in-start + switch-in-finish (after the party-menu reshow)
+ *   switch (Cmd_getswitchedmondata)                  data only: no-op
+ *   trainer-slide-in                                 trainer-slide-end (end-of-battle win slide)
+ *   trainer-slide-out (mid-battle), outcome          invalidate
  *   other events (messages, HP, status data, PP, ...) no allocation: no-op
  *
- * The orchestrator additionally invalidates on the party menu, the switch-in presentation phase, a locked player
- * action (no prompt), a retained locked-action continuation, and any resolution whose events were not all applied.
+ * Party menu (docs/sprite-order-uncovered-units.md §2 rule (d)): opening it is a ResetSpriteData (party-menu-reset,
+ * which revives an invalid order); returning applies reset + battle-reshow (variant from whether the player battler
+ * sprite exists; a hidden battler or a missing opponent battler invalidates). The orchestrator additionally
+ * invalidates on a locked player action (no prompt), a retained locked-action continuation, and any resolution whose
+ * events were not all applied.
  */
 import type { BattleKernelSemanticEvent } from "./battleDecisionBoundary.ts";
 import { battleMoveAnimationRequest } from "./battleMoveAnimation.ts";
@@ -38,10 +49,7 @@ export interface LiveSpriteOrderHost {
 }
 
 const RECALL_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"]);
-const INVALIDATING_EVENTS: ReadonlySet<string> = new Set([
-  "faint-animation", "switch", "switch-in-animation", "draw-party-status-summary", "hide-party-status-summary",
-  "trainer-slide-in", "trainer-slide-out", "outcome",
-]);
+const INVALIDATING_EVENTS: ReadonlySet<string> = new Set(["trainer-slide-out", "outcome"]);
 
 export function createLiveSpriteOrderHost(order: SpriteOrderState): LiveSpriteOrderHost {
   const hidden: readonly [boolean, boolean] = Object.freeze([false, false] as const);
@@ -80,25 +88,99 @@ export function liveSpriteOrderHostOrder(host: LiveSpriteOrderHost): SpriteOrder
 }
 
 /**
+ * The voluntary party menu opened from the action prompt (ResetSpriteData): identity order, nothing allocated, no
+ * battler tracked; revives an invalid order. Events of the finished resolution that were never applied ran before
+ * the menu and are erased with it, so its cursor counts as drained.
+ */
+export function openLiveSpriteOrderHostPartyMenu(host: LiveSpriteOrderHost): LiveSpriteOrderHost {
+  return Object.freeze({
+    ...host,
+    tracker: applySpriteOrderPresentationEvent(host.tracker, { kind: "party-menu-reset" }),
+    cursor: host.cursor === null || host.cursor.drained ? host.cursor : Object.freeze({ ...host.cursor, drained: true }),
+  });
+}
+
+/**
+ * Return from a party menu to the battle: the exit ResetSpriteData, then the battle reshow (both battlers, or the
+ * opponent alone when the player battler sprite is gone). A hidden battler or a missing opponent battler is an
+ * unobserved reshow shape: invalidate.
+ */
+export function returnLiveSpriteOrderHostFromPartyMenu(
+  host: LiveSpriteOrderHost, battlers: Readonly<{ player: boolean; opponent: boolean }>,
+): LiveSpriteOrderHost {
+  const reset = applySpriteOrderPresentationEvent(host.tracker, { kind: "party-menu-reset" });
+  const tracker = !battlers.opponent ? invalidateSpriteOrderTracker(reset, "reshow without the opponent battler")
+    : host.hidden[0] || host.hidden[1] ? invalidateSpriteOrderTracker(reset, "reshow with a hidden battler")
+      : applySpriteOrderPresentationEvent(reset, { kind: "battle-reshow", playerBattlerPresent: battlers.player });
+  return Object.freeze({ ...host, tracker });
+}
+
+/**
+ * Whether each side's battler sprite exists before `segmentIndex` of a resolution: the last faint-animation /
+ * switch-in-animation of that battler in the earlier segments (none: present, as at every command prompt).
+ */
+export function liveSpriteOrderBattlersPresent(
+  resolution: ResolutionView, segmentIndex: number,
+): Readonly<{ player: boolean; opponent: boolean }> {
+  const present = [true, true];
+  for (const segment of resolution.segments.slice(0, segmentIndex)) {
+    for (const event of segment.events) {
+      const payload = event.payload;
+      if ((payload.kind === "faint-animation" || payload.kind === "switch-in-animation")
+        && (payload.battler === 0 || payload.battler === 1)) present[payload.battler] = payload.kind === "switch-in-animation";
+    }
+  }
+  return Object.freeze({ player: present[0]!, opponent: present[1]! });
+}
+
+/**
  * The player submitted request `requestId` from the action menu: the bounce pair was created at the prompt and is
  * destroyed at commit, before the turn's first body. `promptShown` false (a locked action, a retained locked-action
  * continuation) invalidates. A previous resolution whose events were not all applied invalidates.
+ * `fromPartyMenu`: the decision was chosen in the voluntary party menu, which erased the prompt's bounce pair; its
+ * return (reset + reshow with both battlers) replaces the prompt cycle (ROM: reshow, then the turn's first body).
  */
 export function beginLiveSpriteOrderTurn(
-  host: LiveSpriteOrderHost, requestId: number, promptShown: boolean,
+  host: LiveSpriteOrderHost, requestId: number, promptShown: boolean, fromPartyMenu = false,
 ): LiveSpriteOrderHost {
   let next = host;
-  if (next.cursor !== null && !next.cursor.drained) next = invalidateLiveSpriteOrderHost(next, "previous resolution not fully applied");
+  if (fromPartyMenu) {
+    next = returnLiveSpriteOrderHostFromPartyMenu(openLiveSpriteOrderHostPartyMenu(next), { player: true, opponent: true });
+  } else if (next.cursor !== null && !next.cursor.drained) {
+    next = invalidateLiveSpriteOrderHost(next, "previous resolution not fully applied");
+  }
   if (!promptShown) next = invalidateLiveSpriteOrderHost(next, "command resolution without an action prompt");
-  let tracker = applySpriteOrderPresentationEvent(next.tracker, { kind: "action-prompt" });
-  tracker = applySpriteOrderPresentationEvent(tracker, { kind: "actions-committed" });
+  let tracker = next.tracker;
+  if (!fromPartyMenu) {
+    tracker = applySpriteOrderPresentationEvent(tracker, { kind: "action-prompt" });
+    tracker = applySpriteOrderPresentationEvent(tracker, { kind: "actions-committed" });
+  }
   return Object.freeze({ ...next, tracker, promptRequestId: requestId });
 }
 
 function orderEventOf(
   event: BattleKernelSemanticEvent, hidden: readonly [boolean, boolean],
-): { event?: SpriteOrderPresentationEvent; hidden?: readonly [boolean, boolean] } {
+): { event?: SpriteOrderPresentationEvent; then?: SpriteOrderPresentationEvent; hidden?: readonly [boolean, boolean] } {
   const payload = event.payload;
+  if (payload.kind === "faint-animation" || payload.kind === "draw-party-status-summary"
+    || payload.kind === "hide-party-status-summary" || payload.kind === "switch-in-animation") {
+    const battler = payload.battler;
+    if (battler !== 0 && battler !== 1) return { event: { kind: "invalidate", reason: `${payload.kind} battler ${battler}` } };
+    switch (payload.kind) {
+      case "faint-animation":
+        return { event: { kind: "faint", side: battler === 0 ? "player" : "opponent" } };
+      case "draw-party-status-summary":
+        // The player-side summary allocates nothing (forced and voluntary: 0 allocator calls).
+        return battler === 1 ? { event: { kind: "party-summary-next" } } : {};
+      case "hide-party-status-summary":
+        return battler === 1 ? { event: { kind: "party-summary-hide" } } : {};
+      case "switch-in-animation":
+        return battler === 1 ? { event: { kind: "next-mon-send-out" } }
+          : { event: { kind: "switch-in-start" }, then: { kind: "switch-in-finish" } };
+    }
+  }
+  if (payload.kind === "switch") return {};
+  if (payload.kind === "trainer-slide-in") return { event: { kind: "trainer-slide-end" } };
   if (payload.kind === "animation") {
     const battler = payload.battler;
     if (battler !== 0 && battler !== 1) return { event: { kind: "invalidate", reason: `animation ${payload.animationId} battler ${battler}` } };
@@ -166,6 +248,7 @@ export function advanceLiveSpriteOrderHost(
       const mapped = orderEventOf(events[index]!, hidden);
       if (mapped.hidden) hidden = mapped.hidden;
       if (mapped.event) tracker = applySpriteOrderPresentationEvent(tracker, mapped.event);
+      if (mapped.then) tracker = applySpriteOrderPresentationEvent(tracker, mapped.then);
       index += 1;
     }
     return index;

@@ -18,33 +18,76 @@ export const ORDER_CONSUMER_MOVES: Readonly<Record<number, string>> = Object.fre
 type Replay = ReturnType<typeof generatedCommandAnimationReplay>;
 interface SemanticEvent { sequence: number; payload: { kind: string; [key: string]: unknown }; provenance?: { opcodeName?: string } }
 
-/** Independent re-statement of the §2 event mapping (not the host module) for the prediction. */
-function mapEvent(event: SemanticEvent, hidden: boolean[]): SpriteOrderPresentationEvent | null {
+/** Independent re-statement of the §2 event mapping (not the host module) for the prediction. `units`: the battle units
+ * of docs/sprite-order-uncovered-units.md §3 (faint / next-mon summary + send-out / player switch-in / win slide);
+ * false = the earlier behaviour (every unit invalidates), kept for before/after counts. */
+function mapEvent(event: SemanticEvent, hidden: boolean[], units = true): SpriteOrderPresentationEvent[] {
   const p = event.payload;
   if (p.kind === "animation") {
     const battler = p.battler as 0 | 1;
     if (p.animationId === "MOVE_ANIMATION") {
-      return { kind: "move-animation", moveId: battleMoveAnimationRequest(battler, p.target as number | undefined, p.arguments as string[]).moveId,
-        attackerSide: battler === 0 ? "player" : "opponent" };
+      return [{ kind: "move-animation", moveId: battleMoveAnimationRequest(battler, p.target as number | undefined, p.arguments as string[]).moveId,
+        attackerSide: battler === 0 ? "player" : "opponent" }];
     }
-    if (p.animationId === "HIT_ANIMATION") return { kind: "hit-animation", targetVisible: !hidden[battler] };
-    if (p.animationId === "STATS_CHANGE") return { kind: "stat-animation", argument: Number((p.arguments as string[])[0]) };
-    return { kind: "general-animation", animation: String(p.animationId) };
+    if (p.animationId === "HIT_ANIMATION") return [{ kind: "hit-animation", targetVisible: !hidden[battler] }];
+    if (p.animationId === "STATS_CHANGE") return [{ kind: "stat-animation", argument: Number((p.arguments as string[])[0]) }];
+    return [{ kind: "general-animation", animation: String(p.animationId) }];
   }
   if (p.kind === "status-animation") {
     const name = spriteOrderStatusAnimationName((p.isStatus2 as number) !== 0, p.status as number);
-    return name === null ? null : { kind: "status-animation", status: name };
+    return name === null ? [] : [{ kind: "status-animation", status: name }];
   }
   if (p.kind === "set-battler-sprite-visibility") {
     if (["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"].includes(event.provenance?.opcodeName ?? "")) {
-      return { kind: "invalidate", reason: "recall" };
+      return [{ kind: "invalidate", reason: "recall" }];
     }
     hidden[p.battler as number] = p.invisible as boolean;
-    return p.invisible ? { kind: "invalidate", reason: "hidden" } : null;
+    return p.invisible ? [{ kind: "invalidate", reason: "hidden" }] : [];
   }
+  const battler = p.battler as number | undefined;
+  if (units && (battler === 0 || battler === 1)) {
+    if (p.kind === "faint-animation") return [{ kind: "faint", side: battler === 0 ? "player" : "opponent" }];
+    if (p.kind === "draw-party-status-summary") return battler === 1 ? [{ kind: "party-summary-next" }] : [];
+    if (p.kind === "hide-party-status-summary") return battler === 1 ? [{ kind: "party-summary-hide" }] : [];
+    if (p.kind === "switch-in-animation") {
+      return battler === 1 ? [{ kind: "next-mon-send-out" }] : [{ kind: "switch-in-start" }, { kind: "switch-in-finish" }];
+    }
+  }
+  if (units && p.kind === "switch") return [];
+  if (units && p.kind === "trainer-slide-in") return [{ kind: "trainer-slide-end" }];
   if (["faint-animation", "switch", "switch-in-animation", "draw-party-status-summary", "hide-party-status-summary",
-    "trainer-slide-in", "trainer-slide-out", "outcome"].includes(p.kind)) return { kind: "invalidate", reason: p.kind };
-  return null;
+    "trainer-slide-in", "trainer-slide-out", "outcome"].includes(p.kind)) return [{ kind: "invalidate", reason: p.kind }];
+  return [];
+}
+
+/**
+ * Pure-transform tracker at every event position `"<requestId>:<segment>:<index>"` (= after `index` events of that
+ * segment; earlier segments complete) and before every MOVE_ANIMATION event (keyed by sequence). Same prompt-cycle
+ * assumption as `predictLentOrders`.
+ */
+export function predictTrackers(run: Replay, entryKnown: boolean, units = true) {
+  let tracker: SpriteOrderTracker = createSpriteOrderTracker(entryKnown ? knownEntrySpriteOrderState("ordinary-factory")
+    : invalidateSpriteOrderState(knownEntrySpriteOrderState("ordinary-factory")));
+  const hidden = [false, false];
+  const positions = new Map<string, SpriteOrderTracker>();
+  const preBody = new Map<number, SpriteOrderTracker>();
+  let request: number | null = null;
+  let segment = "";
+  let index = 0;
+  for (const row of run.semanticEvents) {
+    const event = row.event as SemanticEvent;
+    if (row.requestId !== request) {
+      request = row.requestId;
+      tracker = applySpriteOrderPresentationEvent(applySpriteOrderPresentationEvent(tracker, { kind: "action-prompt" }), { kind: "actions-committed" });
+    }
+    if (`${row.requestId}:${row.segmentIndex}` !== segment) { segment = `${row.requestId}:${row.segmentIndex}`; index = 0; }
+    positions.set(`${segment}:${index}`, tracker);
+    if (event.payload.kind === "animation" && event.payload.animationId === "MOVE_ANIMATION") preBody.set(event.sequence, tracker);
+    for (const mapped of mapEvent(event, hidden, units)) tracker = applySpriteOrderPresentationEvent(tracker, mapped);
+    index += 1;
+    positions.set(`${segment}:${index}`, tracker);
+  }
+  return { positions, preBody };
 }
 
 /**
@@ -69,8 +112,7 @@ export function predictLentOrders(run: Replay, entryKnown: boolean, invalidReque
         : applySpriteOrderPresentationEvent(applySpriteOrderPresentationEvent(tracker, { kind: "action-prompt" }), { kind: "actions-committed" });
     }
     if (event.payload.kind === "animation" && event.payload.animationId === "MOVE_ANIMATION") lent.set(event.sequence, spriteOrderTrackerLend(tracker));
-    const mapped = mapEvent(event, hidden);
-    if (mapped) tracker = applySpriteOrderPresentationEvent(tracker, mapped);
+    for (const mapped of mapEvent(event, hidden)) tracker = applySpriteOrderPresentationEvent(tracker, mapped);
   }
   return lent;
 }
