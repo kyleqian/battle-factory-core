@@ -1,0 +1,36 @@
+{
+ "schema": "postko-adapter-draft/v1",
+ "draft": true,
+ "move": "PROTECT",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/postko-lightscreen-protect-rockslide.json",
+ "stateFixture": "tools/integration/fixtures/postko/state-postko-lightscreen-protect-rockslide.json",
+ "modelCheck": "tools/integration/fixtures/postko/model-check-postko-lightscreen-protect-rockslide.json",
+ "attacker": {
+  "species": "NINETALES",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 148,
+  "opponentHp": 155,
+  "opponentMaxHp": 155,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "edgeRiseFrame": 3225,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 3225,
+  "endFrame": 3347
+ },
+ "note": "window = activation + 0, 123 rows (liveMoveAnimationDuration 182 = 123, anchor at the first script pointer; calibrated exact 123/123 x2 on mechanic-protect-player-houndour-opponent-onix.json activation 68 with verifyLiveAdapterFramebuffer); allocator input = liveView's known-entry host (entry labels); second post-KO body"
+}
