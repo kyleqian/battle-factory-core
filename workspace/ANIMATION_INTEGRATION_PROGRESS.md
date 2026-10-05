@@ -122,7 +122,17 @@
   patch-proven (Rock Throw idle x2, Smelling Salt y clamp, Light Screen / Future Sight end-of-body
   shadow; supervisor reran Rock Throw GOLBAT 66/87 -> 87/87); tail fades are species-keyed lag
   frames (not defects). ISSUES #145 updated.
-- Running: #145 open defects fix (production); voluntary-switch lend evidence (side).
+- Folded Sonnet worker `48a1bd913` (src tree `29450955`): #145 species fixes — Rock Throw target idle
+  x2 (ONIX keeps +1), Smelling Salt exclamation y clamp (`max(8, top) - 16`), Light Screen /
+  Future Sight end-of-body elevated-shadow return (`LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS`),
+  Foresight glass legs via exact `InitAnimLinearTranslation` truncation (GOLBAT 66 -> 167/167).
+  Supervisor: dense vs GOLBAT twice fresh zero residual (Foresight 167, Smelling Salt 121, Future
+  Sight 114), accepted Foresight unchanged, routes 5/5 PASS. Receipt `issue145b-receipt.json`.
+- Voluntary-switch lend audit (`8e58b3da1`, `docs/voluntary-switch-lend-audit.md`): after a
+  cancelled party menu or a voluntary switch the role relabel is exact (45 edges, 0 mismatches;
+  12/12 what-ifs); the provisional recall unit is promoted (18 edges). Supervisor reran
+  voluntary-cancel-slot1 (identical) + Swift O 80/80, Sunny Day P 158/158.
+- Running: voluntary-switch lends (production); elevated-opponent post-body audit (side).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 
