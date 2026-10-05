@@ -6,11 +6,13 @@ For each list.tsv row: bodies(orig) / bodies(swapped) from prep11Probe.py (body 
 (fixture copy with the derived denseWindow/sourceWindow) and prints a table.  usage: speciesAuditDerive.py list.tsv bodiesdir"""
 import json, sys, os
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-out = f"{ROOT}/tools/integration/fixtures/species-audit/derived"; os.makedirs(out, exist_ok=True)
+out = f"{ROOT}/tools/integration/fixtures/species-audit/derived" + (("-" + os.environ["SA_TAG"]) if os.environ.get("SA_TAG") else ""); os.makedirs(out, exist_ok=True)
 bd = sys.argv[2]
 OVERRIDES = json.load(open(f"{ROOT}/tools/integration/fixtures/species-audit/overrides.json"))
 def bodies(scen):
     d = json.load(open(f"{bd}/{os.path.basename(scen)}")); return [(b["move"], b["start"], b["end"]) for b in d["bodies"]], d["frames"]
+def sides(scen):  # attacker side of each body (gBattlerAttacker at activation: 0 player, 1 opponent)
+    return ["player" if b["atActivation"]["attacker"] == 0 else "opponent" for b in json.load(open(f"{bd}/{os.path.basename(scen)}"))["bodies"]]
 def mons(scen, i):  # ROM battler HP at the window body's activation edge (gBattleMons): the healthbox input the swap changes (Tackle damage, earlier hits)
     return json.load(open(f"{bd}/{os.path.basename(scen)}"))["bodies"][i]["atActivation"]["mons"]
 for l in open(sys.argv[1]):
@@ -22,18 +24,25 @@ for l in open(sys.argv[1]):
     try: ob, of_n = bodies(of["scenario"]); sb, sf_n = bodies(sw)
     except Exception as e: print(k, "NO-BODIES", e); continue
     idx = [i for i, b in enumerate(ob) if b[1] <= S]
-    if not idx or [b[0] for b in ob[:idx[-1] + 1]] != [b[0] for b in sb[:idx[-1] + 1]]:  # preceding bodies + the window body must agree (later ones may differ)
-        print(k, "BODY-MISMATCH", ob, sb); continue
-    i = idx[-1]; off = S - ob[i][1]; s2 = sb[i][1] + off; e2 = s2 + (E - S)
-    olen, slen = ob[i][2] - ob[i][1], sb[i][2] - sb[i][1]
+    if not idx: print(k, "BODY-MISMATCH", ob, sb); continue
+    i = idx[-1]; occ = sum(1 for b in ob[:i + 1] if b[0] == ob[i][0])  # the window body = the occ-th body of its move (the swap may reorder turns)
+    js = [j for j, b in enumerate(sb) if b[0] == ob[i][0]]
+    if len(js) < occ: print(k, "BODY-MISSING", ob, sb); continue
+    j = js[occ - 1]; osd, ssd = sides(of["scenario"]), sides(sw)
+    if ssd[j] != osd[i]: print(k, "BODY-SIDE-MISMATCH", ob, sb); continue
+    reordered = [b[0] for b in ob[:i]] != [b[0] for b in sb[:j]]
+    off = S - ob[i][1]; s2 = sb[j][1] + off; e2 = s2 + (E - S); i_orig = i; i = j
+    olen, slen = ob[i_orig][2] - ob[i_orig][1], sb[i][2] - sb[i][1]
     if olen != slen: e2 = min(e2, sb[i][2])  # the swapped ROM body is shorter: its probe records nothing past the body end
-    f = dict(af); m = mons(sw, i); mo = mons(of["scenario"], i)
+    f = dict(af); m = mons(sw, i); mo = mons(of["scenario"], i_orig)
+    f.pop("precedingBodies", None)
+    if i > 0: f["precedingBodies"] = [{"moveId": sb[q][0], "side": ssd[q]} for q in range(i)]  # ROM-derived units that ran before this body
     f["fieldProfile"] = {**af["fieldProfile"], "playerHp": m[0]["hp"], "playerMaxHp": m[0]["maxHP"], "opponentHp": m[1]["hp"], "opponentMaxHp": m[1]["maxHP"]}
     hpNote = {"orig": [mo[0]["hp"], mo[1]["hp"]], "swapped": [m[0]["hp"], m[1]["hp"]], "acceptedProfile": [of["fieldProfile"]["playerHp"], of["fieldProfile"]["opponentHp"]]}
     f[key] = {**W, "startFrame": s2, "endFrame": e2}
     # presentation inputs the ROM shows but gBattleMons (prep11Probe) does not record, read off the source frame (healthbox gender symbol)
     f["fieldProfile"].update(OVERRIDES.get(k, {}).get("fieldProfile", {}))
-    f["speciesAudit"] = {"acceptedWindow": [S, E], "bodyIndex": i, "origBody": ob[i], "swappedBody": sb[i], "offsetFromActivation": off, "romHpAtActivation": hpNote}
+    f["speciesAudit"] = {"acceptedWindow": [S, E], "bodyIndex": i, "origBodyIndex": i_orig, "turnOrderChanged": reordered, "origBody": ob[i_orig], "swappedBody": sb[i], "offsetFromActivation": off, "romHpAtActivation": hpNote}
     json.dump(f, open(f"{out}/{k}.json", "w"), indent=1); open(f"{out}/{k}.json", "a").write("\n")
     flag = "" if (olen == slen and sb[i][1] + 0 >= 0 and e2 < sf_n) else " **LEN/RANGE**"
-    print(f"{k}\tbody{i}/{len(ob)} move{ob[i][0]} orig[{ob[i][1]},{ob[i][2]}] sw[{sb[i][1]},{sb[i][2]}] acc[{S},{E}] -> [{s2},{e2}] len {olen}/{slen} frames {of_n}/{sf_n}{flag} hp {hpNote}")
+    print(f"{k}\tbody{i}/{len(ob)} {"REORDERED " if reordered else ""}move{ob[i_orig][0]} orig[{ob[i_orig][1]},{ob[i_orig][2]}] sw[{sb[i][1]},{sb[i][2]}] acc[{S},{E}] -> [{s2},{e2}] len {olen}/{slen} frames {of_n}/{sf_n}{flag} hp {hpNote}")

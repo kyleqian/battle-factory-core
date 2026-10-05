@@ -14,6 +14,7 @@ for l in open(a.list):
     src = json.load(open(f"{ROOT}/{orig}"))
     if src.get("sourceFixture"): src = {**json.load(open(f"{ROOT}/{src['sourceFixture']}")), **src}
     if src["target"]["species"] != "ONIX" or src["target"]["geometry"]["side"] != "opponent": print("skip", k); continue
+    if src.get("precedingTurns"): print("skip (precedingTurns)", k); continue
     sc = json.load(open(f"{ROOT}/{src['scenario']}"))
     party = sc.get("overrides", {}).get("parties", {}).get("opponent")
     if not party or party[0]["species"] != 95: print("skip (no explicit ONIX party[0])", k); continue
