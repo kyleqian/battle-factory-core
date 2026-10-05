@@ -3,6 +3,7 @@
 const pct = (x) => `${(+x).toFixed(2)}%`;
 const short = (c) => c.replace(/^src\/animation\//, "a/").replace(/^src\/engine\//, "e/").replace(/^reference\/pokeemerald\//, "rom/").replace(/^src\/data\/gen\//, "d/");
 const trunc = (s, n) => (s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s);
+const needsStr = (needs, b) => [...needs, ...(b ? ["B(first body)"] : [])].join("+") || "-";
 const cell = (s) => String(s).replaceAll("|", "\\|").replaceAll("\n", " ");
 
 const PROVIDERS_TODAY = [
@@ -55,7 +56,7 @@ export function renderDoc(c) {
   for (const [a, b, d] of PROVIDERS_TODAY) L.push(`| ${cell(a)} | ${cell(b)} | ${cell(d)} |`);
   L.push("", "## 3. Stale verdicts corrected", "", "| Older verdict | Correction (cite) |", "|---|---|");
   for (const [a, b] of STALE) L.push(`| ${cell(a)} | ${cell(b)} |`);
-  L.push("", "## 4. Per-move table (103 moves)", "", "Columns: `needs` = provider codes after removing what production supplies (`+B` = also needs sSpriteOrder, first body only; legend in section 5). Blockers cite the consumed field (`a/` = `src/animation/`, `e/` = `src/engine/`, `rom/` = `reference/pokeemerald/`). Full text per blocker is in the JSON.", "");
+  L.push("", "## 4. Per-move table (103 moves)", "", "Columns: `needs` = provider codes after removing what production supplies (`B(first body)` = also consumes sSpriteOrder, supplied by production for the first body only; legend in section 5). Blockers cite the consumed field (`a/` = `src/animation/`, `e/` = `src/engine/`, `rom/` = `reference/pokeemerald/`). Full text per blocker is in the JSON.", "");
   for (const g of ["READY-NOW", "SMALL-INPUT", "PROVIDER", "OUT", "MULTI"]) {
     const rs = rows.filter((r) => (g === "PROVIDER" ? r.group.startsWith("PROVIDER-") : r.group === g)).sort((a, b) => (g === "MULTI" ? a.providerNeeds.length - b.providerNeeds.length : 0) || b.weightShare - a.weightShare);
     if (!rs.length) continue;
@@ -64,7 +65,7 @@ export function renderDoc(c) {
       const bl = r.blockers.map((b) => `${b.code}: ${trunc(b.text, g === "MULTI" ? 44 : 260)} @ ${b.cites.map(short).join(", ")}`).join("; ");
       const act = r.activationReceipts.length ? ` Activation/window start: ${r.activationReceipts.map((a) => `${a.probe.replace(/^mechanic-/, "").slice(0, 34)} ${a.activation ?? "none produced"}${a.windowStart != null ? `/${a.windowStart}` : ""}`).join(", ")}.` : "";
       const note = trunc(r.notes.join(" "), g === "MULTI" ? 120 : 700) + (g === "MULTI" ? "" : act);
-      L.push(`| ${r.move.replace("MOVE_", "")} (${r.id}) | ${r.hostClass.join("+")} | ${pct(r.weightShare * 100)} | ${r.providerNeeds.join("+") || "-"}${r.orderFirstBodyOnly ? "+B" : ""} | ${cell(bl || "-")} | ${cell(note)} |`);
+      L.push(`| ${r.move.replace("MOVE_", "")} (${r.id}) | ${r.hostClass.join("+")} | ${pct(r.weightShare * 100)} | ${needsStr(r.providerNeeds, r.orderFirstBodyOnly)} | ${cell(bl || "-")} | ${cell(note)} |`);
     }
     L.push("");
   }
@@ -78,7 +79,7 @@ export function renderDoc(c) {
   L.push("## 6. Recommended next three batches (after the in-flight ones)", "");
   for (const b of c.batches) {
     L.push(`### ${b.id}: ${b.title}`, "", `${b.count} moves, ${pct(b.weightPct)} of Factory move uses.`, "", "| Order | Move | Group | needs | Weight | Measured prep / still needed |", "|---:|---|---|---|---:|---|");
-    b.moves.forEach((m, i) => L.push(`| ${i + 1} | ${m.move.replace("MOVE_", "")} | ${m.group} | ${m.providerNeeds.join("+") || "-"}${m.orderFirstBodyOnly ? "+B" : ""} | ${pct(m.weightPct)} | ${cell(m.prep)} |`));
+    b.moves.forEach((m, i) => L.push(`| ${i + 1} | ${m.move.replace("MOVE_", "")} | ${m.group} | ${needsStr(m.providerNeeds, m.orderFirstBodyOnly)} | ${pct(m.weightPct)} | ${cell(m.prep)} |`));
     L.push("");
   }
   L.push("Batch rationale: N1 has no provider dependency and mostly canonical-scenario evidence, and was probed here; N2 clears every one-named-input move (dynamic power on the request is the one shared input: Magnitude, Reversal, later Flail) and the two single-orientation evidence gaps; N3 is the first provider investment, chosen by remaining moves unlocked (+12, 3.29%) with an exact claim; palette snapshots (+5, 2.63%, Giga Drain / Sunny Day) is the cheaper alternative if N3's baseline probe is not ready, and the switch flow (+3, 1.82%: Roar, Baton Pass, Whirlwind) belongs to the pending actual-switch graphics ownership program.", "");

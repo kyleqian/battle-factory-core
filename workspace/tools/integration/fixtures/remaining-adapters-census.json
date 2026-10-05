@@ -13016,14 +13016,19 @@
    "blockers": [
     {
      "code": "B",
-     "text": "animationProfile:spriteOrderSeed (sSpriteOrder / live sort keys)",
+     "text": "sSpriteOrder: satisfied for the battle's FIRST body only (spriteOrderForSlots + occupied prefix); later bodies need the cross-body plan tracker",
      "cites": [
-      "src/engine/battleMenu.ts:1720"
+      "src/animation/sceneOnPresentation.ts:13474",
+      "src/engine/spriteOrderProvider.ts:38"
      ]
     }
    ],
-   "notes": [],
-   "staleCorrections": [],
+   "notes": [
+    "order input = GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE.spriteOrderSeed (64) = occupied prefix + free order (first action: KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER `4,3,21,20,5,...`, spriteOrderProvider.ts:38); accepted opponent-attacker only (rock-slide-grovyle-onix.json), no player-attacker evidence"
+   ],
+   "staleCorrections": [
+    "order input = GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE.spriteOrderSeed (64) = occupied prefix + free order (first action: KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER `4,3,21,20,5,...`, spriteOrderProvider.ts:38); accepted opponent-attacker only (rock-slide-grovyle-onix.json), no player-attacker evidence"
+   ],
    "consumedInputs": [
     {
      "path": "animationProfile:rockAnchorAge",
