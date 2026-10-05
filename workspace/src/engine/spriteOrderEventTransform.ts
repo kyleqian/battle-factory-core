@@ -32,18 +32,19 @@
  *                                docs/forced-switch-continuation.md §2.4, ROM free order 6/6); roles kept, unit "recall"
  *   party-menu-reset             ResetSpriteData: identity F, empty occupancy, battler slots and occupant roles
  *                                forgotten; revives an invalid tracker (the one revive path)
- *   battle-reshow                directly after a reset: reshowBoth / reshowPlayerGone by playerBattlerPresent;
- *                                reshowPlayerGone sets the occupant roles from its survivors (below)
- *   switch-out                   recall(player slot), PROVISIONAL (one instance); the live host never emits it; roles
- *                                forgotten
+ *   battle-reshow                directly after a reset: reshowBoth / reshowPlayerGone by playerBattlerPresent; both
+ *                                set the occupant roles from their survivors (below)
+ *   switch-out                   recall(player slot): the voluntary switch's `returnatktoball` (docs/voluntary-switch-
+ *                                lend-audit.md §2.3: 18/18 edges exact; the [n2, battler] group order is unobservable and
+ *                                lend-irrelevant); roles kept
  *   trainer-slide-end            Cf (end-of-battle win slide)
  *
  * Occupant roles (docs/playerfaint-lend-audit.md §2.2 / §4.1): the healthbox main sprite per side and the enemy shadow
  * (entry 0 / 1 / 2). The healthbox other/bar halves are always 63,62 / 61,60 (CreateSpriteAtEnd from a full-free order
  * in both creation paths). reshowPlayerGone "Cf;Cfee;Cfee;Cf" sets them from its survivors (player healthbox n1,
- * opponent healthbox n4, shadow n7: ROM 1 / 2 / 3); faint, summary, send-out, switch-in and bodies keep them. The
- * reshowBoth geometry (voluntary party menu) and the provisional recall are not ROM-verified for the role lend: their
- * roles are null (the lend declines there).
+ * opponent healthbox n4, shadow n7: ROM 1 / 2 / 3); reshowBoth "Cf;Cf;Cfee;Cfee;Cf" (voluntary party menu: cancel, or
+ * the return from a voluntary choose) from its survivors n2 / n5 / n8 (ROM 2 / 3 / 4; docs/voluntary-switch-lend-audit.md
+ * §2.2, 45 edges); faint, summary, send-out, recall, switch-in and bodies keep them.
  *
  * Any unit whose guard fails or whose plan does not resolve invalidates. Once invalid the tracker stays invalid
  * until a fresh known entry or a party-menu reset; it never guesses.
@@ -115,7 +116,11 @@ export const SPRITE_ORDER_UNIT_PLAN_TEXTS = Object.freeze({
   reshowPlayerGone: "Cf;Cfee;Cfee;Cf",
   reshowBoth: "Cf;Cf;Cfee;Cfee;Cf",
 });
-/** Provisional voluntary recall (one observed instance): 16 particles, the player battler freed with particle n2. */
+/**
+ * Voluntary recall: 16 particles, the player battler freed with particle n2 (docs/voluntary-switch-lend-audit.md §2.3:
+ * exact at 18 post-recall edges; the switch-in re-creates and re-destroys the freed pair's slots, so the group order
+ * inside the window is unobservable and cannot reach a body edge).
+ */
 export function spriteOrderRecallPlanText(battlerSlot: number): string {
   return `${"Cf;".repeat(16)}D0;D1;D2,o${battlerSlot};${Array.from({ length: 13 }, (_, i) => `D${i + 3}`).join(";")}`;
 }
@@ -333,9 +338,12 @@ function applyBattleUnit(
       const cursor = applyUnit(tracker, event.playerBattlerPresent ? UNIT_PLANS.reshowBoth : UNIT_PLANS.reshowPlayerGone);
       if (!cursor) return fail("reshow: plan did not resolve");
       const survivors = lastSurvivors(cursor);
+      // reshowBoth survivors: n0 / n1 player / opponent battler, n2..n4 / n5..n7 player / opponent healthbox, n8 shadow.
       // reshowPlayerGone survivors: n0 opponent battler, n1..n3 / n4..n6 player / opponent healthbox, n7 shadow.
       return event.playerBattlerPresent
-        ? withUnit(tracker, cursor, "reshow", { player: survivors[0]!, opponent: survivors[1]! }, null)
+        ? withUnit(tracker, cursor, "reshow", { player: survivors[0]!, opponent: survivors[1]! }, Object.freeze({
+          healthboxMain: Object.freeze({ player: survivors[2]!, opponent: survivors[5]! }), shadow: survivors[8]!,
+        }))
         : withUnit(tracker, cursor, "reshow", { player: null, opponent: survivors[0]! }, Object.freeze({
           healthboxMain: Object.freeze({ player: survivors[1]!, opponent: survivors[4]! }), shadow: survivors[7]!,
         }));
@@ -343,7 +351,7 @@ function applyBattleUnit(
     case "switch-out": {
       if (slots.player === null) return fail("recall: player battler slot unknown");
       const cursor = applyUnit(tracker, decodeSpriteOrderPlan(spriteOrderRecallPlanText(slots.player)));
-      return cursor ? withUnit(tracker, cursor, "recall", { ...slots, player: null }, null) : fail("recall: plan did not resolve");
+      return cursor ? withUnit(tracker, cursor, "recall", { ...slots, player: null }) : fail("recall: plan did not resolve");
     }
     case "trainer-slide-end": {
       const cursor = applyUnit(tracker, UNIT_PLANS.trainerSlide);
@@ -448,11 +456,12 @@ export function spriteOrderEntryLabelRelabel(view: Readonly<{
 /**
  * Order lent to a move body at its activation edge: known, no prompt pair alive, and allocator occupancy
  * role-isomorphic to the known entry (spriteOrderEntryLabelRelabel; the entry itself, after a modelled opponent
- * faint + next-mon summary + send-out, or after a player faint + forced party menu + reshowPlayerGone + forced
- * switch-in {0,1,2,3,5,60..63} with roles 1 / 2 / 3). The lend is the tracked free order relabelled to entry slot
+ * faint + next-mon summary + send-out, after a player faint + forced party menu + reshowPlayerGone + forced
+ * switch-in {0,1,2,3,5,60..63} with roles 1 / 2 / 3, or after a voluntary party menu's reshowBoth {0,1,2,3,4,60..63} and
+ * its recall + switch-in {1,2,3,4,5,60..63} with roles 2 / 3 / 4). The lend is the tracked free order relabelled to entry slot
  * labels, F.map(rho), so every consumer's entry slot constants, lowest-free slices and occupied prefix stay valid labels;
- * the raw post-unit F is never handed out. Otherwise (unknown roles: reshowBoth / recall; mid-summary, mid-reshow, prompt
- * pair alive) null: consumers decline.
+ * the raw post-unit F is never handed out. Otherwise (unknown roles; mid-summary, mid-reshow, prompt pair alive) null:
+ * consumers decline.
  */
 export function spriteOrderTrackerLend(tracker: SpriteOrderTracker): readonly number[] | null {
   const view = spriteOrderTrackerPostUnitView(tracker);

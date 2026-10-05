@@ -1668,6 +1668,9 @@ function beginOrderTurn(
 /**
  * Voluntary party menu closed back to the action prompt: its exit reset and
  * the battle reshow with both battlers (sprite-order-uncovered-units.md §2).
+ * The reshow leaves the allocator occupancy role-isomorphic to the known
+ * entry: the allocator host invalidated at menu open is re-seeded in entry
+ * labels (docs/voluntary-switch-lend-audit.md §4.4).
  */
 function returnOrderHostFromPartyMenu(
   state: FactoryRoundBattleOrchestratorState,
@@ -1677,9 +1680,13 @@ function returnOrderHostFromPartyMenu(
     state.config.battleScene !== "on" || sprites === undefined
     || sprites.battleCallStart !== state.activeBattleCallStart
   ) return sprites;
-  return withOrderHost(sprites, returnLiveSpriteOrderHostFromPartyMenu(
+  const orderHost = returnLiveSpriteOrderHostFromPartyMenu(
     orderHostOf(sprites), { player: true, opponent: true },
-  ));
+  );
+  return Object.freeze({
+    ...withOrderHost(sprites, orderHost),
+    host: reseedLiveSpriteAllocatorAfterSendOut(sprites.host, orderHost),
+  });
 }
 
 function beginCommandResolution(

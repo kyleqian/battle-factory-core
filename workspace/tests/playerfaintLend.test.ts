@@ -59,17 +59,14 @@ describe("player-faint role relabel (presentation-only)", () => {
     expect(spriteOrderEntryLabelRelabel({ ...view, occupantRoles: undefined })).toBeNull();
   });
 
-  it("null when roles are unknown (reset, reshowBoth, recall), a battler is untracked, or roles collide", () => {
+  it("null when roles are unknown (reset), a battler is untracked, or roles collide", () => {
     const reset = feed(entry(), { kind: "party-menu-reset" });
     expect(reset.occupantRoles).toBeNull();
     expect(createSpriteOrderTracker(initSpriteOrderState()).occupantRoles).toBeNull(); // roles kept only while occupied
-    const both = feed(reset, { kind: "battle-reshow", playerBattlerPresent: true });
-    expect(both.occupantRoles).toBeNull();
-    expect(spriteOrderTrackerLend(both)).toBeNull();
-    const recalled = feed(both, { kind: "switch-out" }, { kind: "switch-in-start" }, { kind: "switch-in-finish" });
-    expect(recalled.cursor.order.known).toBe(true);
-    expect(recalled.occupantRoles).toBeNull();
-    expect(spriteOrderTrackerLend(feed(recalled, ...PROMPT))).toBeNull(); // voluntary switch: declines
+    // reshowBoth / recall: roles from the reshowBoth survivors since docs/voluntary-switch-lend-audit.md (tests/voluntaryLend.test.ts)
+    const recalled = feed(reset, { kind: "battle-reshow", playerBattlerPresent: true }, { kind: "switch-out" });
+    expect(recalled.occupantRoles).not.toBeNull();
+    expect(spriteOrderTrackerLend(recalled)).toBeNull(); // mid-chain: the player battler is untracked until the switch-in
     const view = spriteOrderTrackerPostUnitView(feed(entry(), ...FORCED, ...PROMPT))!;
     expect(spriteOrderEntryLabelRelabel({ ...view, occupantRoles: null })).toBeNull();
     expect(spriteOrderEntryLabelRelabel({ ...view, battlerSlots: { player: null, opponent: 0 } })).toBeNull();
@@ -152,7 +149,7 @@ describe("player-faint lends through the production hosts (recorded histories + 
     expect(receipt.dense.rows.reduce((sum, r) => sum + r.rows, 0)).toBe(2029);
   });
 
-  it("allocator re-seed: after a forced switch-in (roles known) and after a send-out; never after the voluntary chain or mid-chain", () => {
+  it("allocator re-seed: after a forced switch-in (roles known) and after a send-out; never mid-chain", () => {
     const firstMove = createKnownEntrySpriteAllocatorProvider("ordinary-factory").firstMove;
     const invalid = invalidateLiveSpriteAllocatorHost(firstMove);
     const at = (...events: SpriteOrderPresentationEvent[]) =>
@@ -166,8 +163,11 @@ describe("player-faint lends through the production hosts (recorded histories + 
     const voluntary = at({ kind: "party-menu-reset" }, { kind: "battle-reshow", playerBattlerPresent: true }, { kind: "switch-out" },
       { kind: "switch-in-start" }, { kind: "switch-in-finish" });
     expect(voluntary.tracker.lastUnit).toBe("switch-in");
-    expect(liveSpriteAllocatorReseedable(voluntary)).toBe(false);
-    expect(reseedLiveSpriteAllocatorAfterSendOut(invalid, voluntary)).toBe(invalid);
+    // voluntary chain: roles kept from reshowBoth (docs/voluntary-switch-lend-audit.md §4.4), re-seeded after the switch-in only
+    expect(liveSpriteAllocatorReseedable(voluntary)).toBe(true);
+    expect(reseedLiveSpriteAllocatorAfterSendOut(invalid, voluntary)).toEqual(firstMove);
+    const recalled = at({ kind: "party-menu-reset" }, { kind: "battle-reshow", playerBattlerPresent: true }, { kind: "switch-out" });
+    expect(reseedLiveSpriteAllocatorAfterSendOut(invalid, recalled)).toBe(invalid);
   });
 });
 
