@@ -38,6 +38,9 @@ export const SCENARIOS: Record<string, Step[]> = {
     edge("129:opponent"), body(129, "opponent"), HIT, P, C, edge("129:player"), body(129, "player"), HIT, edge("129:opponent"), body(129, "opponent"), HIT],
   // turn 2: player Light Screen (faster), GOLEM Rock Slide misses (no animation); turn 3: player Protect (+4 priority), Rock Slide blocked (no animation).
   "postko-lightscreen-protect-rockslide": [...TURN1, P, C, edge("113:player"), body(113, "player"), P, C, edge("182:player"), body(182, "player")],
+  // turn 2: player Flamethrower (faster) -> SLOWBRO, SLOWBRO Rock Slide -> player (the only relied-on post-KO edge is 157:opponent; the later
+  // turns add burn / end-turn animations that are outside this check).
+  "postko-rockslide-opponent": [...TURN1, P, C, edge("53:player"), body(53, "player"), HIT, edge("157:opponent"), body(157, "opponent")],
 };
 
 const SUMMARY = decodeSpriteOrderPlan(UNIT_PLANS.summary), SENDOUT = decodeSpriteOrderPlan(UNIT_PLANS.nextSendOut);
