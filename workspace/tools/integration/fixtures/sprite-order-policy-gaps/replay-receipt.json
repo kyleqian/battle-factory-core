@@ -908,6 +908,16 @@
     "exact": 12,
     "mismatch": 0,
     "lent": 12
+   },
+   "firstInvalidationBaseline": {
+    "n": 2992,
+    "key": "283:opponent",
+    "reason": "no EXACT plan: body 283:opponent"
+   },
+   "firstInvalidationWithEndeavor": {
+    "n": 6519,
+    "key": "uncovered: RunTurnActionsFunctions",
+    "reason": "uncovered: RunTurnActionsFunctions"
    }
   },
   {
@@ -957,6 +967,16 @@
     "exact": 12,
     "mismatch": 0,
     "lent": 12
+   },
+   "firstInvalidationBaseline": {
+    "n": 2992,
+    "key": "283:opponent",
+    "reason": "no EXACT plan: body 283:opponent"
+   },
+   "firstInvalidationWithEndeavor": {
+    "n": 6519,
+    "key": "uncovered: RunTurnActionsFunctions",
+    "reason": "uncovered: RunTurnActionsFunctions"
    }
   },
   {
@@ -1006,6 +1026,16 @@
     "exact": 5,
     "mismatch": 0,
     "lent": 5
+   },
+   "firstInvalidationBaseline": {
+    "n": 2992,
+    "key": "283:opponent",
+    "reason": "no EXACT plan: body 283:opponent"
+   },
+   "firstInvalidationWithEndeavor": {
+    "n": 3336,
+    "key": "uncovered: HandleTurnActionSelectionState",
+    "reason": "uncovered: HandleTurnActionSelectionState"
    }
   },
   {
@@ -1055,6 +1085,16 @@
     "exact": 12,
     "mismatch": 0,
     "lent": 12
+   },
+   "firstInvalidationBaseline": {
+    "n": 2992,
+    "key": "283:opponent",
+    "reason": "no EXACT plan: body 283:opponent"
+   },
+   "firstInvalidationWithEndeavor": {
+    "n": 6519,
+    "key": "uncovered: RunTurnActionsFunctions",
+    "reason": "uncovered: RunTurnActionsFunctions"
    }
   },
   {
@@ -1104,6 +1144,16 @@
     "exact": 12,
     "mismatch": 0,
     "lent": 12
+   },
+   "firstInvalidationBaseline": {
+    "n": 2992,
+    "key": "283:opponent",
+    "reason": "no EXACT plan: body 283:opponent"
+   },
+   "firstInvalidationWithEndeavor": {
+    "n": 6519,
+    "key": "uncovered: RunTurnActionsFunctions",
+    "reason": "uncovered: RunTurnActionsFunctions"
    }
   }
  ]

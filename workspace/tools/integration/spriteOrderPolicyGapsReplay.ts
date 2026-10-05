@@ -25,7 +25,7 @@ const GENERAL: Record<number, string> = { 7: "HELD_ITEM_EFFECT", 11: "SUN_CONTIN
 const STAT_MOVES = new Set([104, 297, 313]);
 
 type Overrides = ReadonlyMap<string, SpriteOrderPlan>;
-interface Ev { n: number; k: "prompt" | "blip" | "body" | "anim" | "invalidate"; move?: number; side?: "player" | "opponent"; obsF?: number[]; table?: string; id?: number | null; arg?: number | null }
+interface Ev { n: number; k: "prompt" | "blip" | "body" | "anim" | "invalidate"; reason?: string; move?: number; side?: "player" | "opponent"; obsF?: number[]; table?: string; id?: number | null; arg?: number | null }
 type StatMode = "proposed" | "stat-command-invalidates" | "stat-plan-before-body";
 
 /** Mirror of the (unexported) spriteOrderEventTransform.applyPlan, for plans the production table does not have yet. */
@@ -57,7 +57,7 @@ function replayEvents(seed: SpriteOrderState, events: Ev[], overrides: Overrides
   let list = events.slice();
   if (mode === "stat-command-invalidates") {
     // the stat-stage-change event (seq 2) sits AHEAD of the move animation: an "any non-message command invalidates" policy
-    list = list.flatMap(e => e.k === "body" && STAT_MOVES.has(e.move!) ? [{ n: e.n, k: "invalidate" as const }, e] : [e]);
+    list = list.flatMap(e => e.k === "body" && STAT_MOVES.has(e.move!) ? [{ n: e.n, k: "invalidate" as const, reason: "stat command" }, e] : [e]);
   } else if (mode === "stat-plan-before-body") {
     for (let i = 0; i + 1 < list.length; i += 1) {
       if (list[i]!.k === "body" && STAT_MOVES.has(list[i]!.move!) && list[i + 1]!.k === "anim") [list[i], list[i + 1]] = [list[i + 1]!, list[i]!];
@@ -65,21 +65,28 @@ function replayEvents(seed: SpriteOrderState, events: Ev[], overrides: Overrides
   }
   let tracker = createSpriteOrderTracker(seed);
   const edges: Edge[] = [];
+  let firstInvalidation: { n: number; key: string; reason: string | null } | null = null;
   for (const e of list) {
     if (e.k === "prompt") {
       tracker = applySpriteOrderPresentationEvent(applySpriteOrderPresentationEvent(tracker, { kind: "action-prompt" }), { kind: "actions-committed" });
       continue;
     }
-    if (e.k === "invalidate") { tracker = invalidateSpriteOrderTracker(tracker, "stat command"); continue; }
+    if (e.k === "invalidate") {
+      if (tracker.cursor.order.known && firstInvalidation === null) firstInvalidation = { n: e.n, key: e.reason ?? "invalidating event", reason: e.reason ?? "invalidating event" };
+      tracker = invalidateSpriteOrderTracker(tracker, e.reason ?? "invalidating event");
+      continue;
+    }
     if (e.k === "body" || e.k === "anim") {
       const known = tracker.cursor.order.known;
       edges.push({ n: e.n, key: e.k === "body" ? `${e.move}:${e.side}` : `${e.table}:${e.id}:${e.arg}`, known,
         lent: spriteOrderTrackerLend(tracker) !== null, exact: known ? same(tracker.cursor.order.free, e.obsF!) : null });
     }
     const override = e.k === "body" ? overrides.get(`${e.move}:${e.side}`) : undefined;
+    const wasKnown = tracker.cursor.order.known;
     tracker = override ? applyOverridePlan(tracker, override, `body ${e.move}:${e.side} (override)`) : applySpriteOrderPresentationEvent(tracker, presentationOf(e));
+    if (wasKnown && !tracker.cursor.order.known && firstInvalidation === null) firstInvalidation = { n: e.n, key: e.k === "body" ? `${e.move}:${e.side}` : e.k, reason: tracker.invalidReason };
   }
-  return { edges, finalKnown: tracker.cursor.order.known, invalidReason: tracker.invalidReason };
+  return { edges, finalKnown: tracker.cursor.order.known, invalidReason: tracker.invalidReason, firstInvalidation };
 }
 const count = (edges: Edge[]) => ({ edges: edges.length, known: edges.filter(x => x.known).length, exact: edges.filter(x => x.exact === true).length,
   mismatch: edges.filter(x => x.exact === false).length, lent: edges.filter(x => x.lent).length });
@@ -148,7 +155,7 @@ export function run() {
       if (e.k === "prompt" || e.k === "blip") converted.push({ n: e.n, k: e.k });
       else if (e.k === "body") converted.push({ n: e.n, k: "body", move: e.move, side: e.side, obsF: e.obsF });
       else if (e.k === "anim") converted.push({ n: e.n, k: "anim", table: e.table, id: e.id, arg: e.arg ?? null, obsF: e.obsF });
-      else converted.push({ n: e.n, k: "invalidate" });
+      else converted.push({ n: e.n, k: "invalidate", reason: `${e.k}${e.k === "uncovered" ? `: ${String((e as { main?: unknown }).main)}` : ""}` });
     }
     const mine = (o: Overrides) => replayEvents(entry, converted, o, "proposed").edges;
     const baseline = mine(NO_OVERRIDES), withEndeavor = mine(ENDEAVOR), withAll = mine(ALL);
@@ -157,6 +164,8 @@ export function run() {
       copyNoOverride: count(baseline), copyMatchesOriginal: count(baseline).known === base.moveEdges.known + base.animEdges.known
         && count(baseline).mismatch === base.moveEdges.mismatched + base.animEdges.mismatched,
       withEndeavor: count(withEndeavor), withEndeavorAndFakeTears: count(withAll),
+      firstInvalidationBaseline: replayEvents(entry, converted, NO_OVERRIDES, "proposed").firstInvalidation,
+      firstInvalidationWithEndeavor: replayEvents(entry, converted, ENDEAVOR, "proposed").firstInvalidation,
     };
   });
   return receipt;
@@ -170,5 +179,5 @@ if (process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).
   for (const [k, v] of Object.entries(r.q1)) console.log("Q1", k, JSON.stringify((v as any).total));
   console.log("Q3 lab", JSON.stringify(r.q3Lab));
   console.log("Q2", JSON.stringify({ ...r.q2, rows: undefined }));
-  for (const t of r.q3RealRoute) console.log("Q3 real", t.trace, "orig", JSON.stringify(t.original.move), "|copy", JSON.stringify(t.copyNoOverride), t.copyMatchesOriginal, "| +Endeavor", JSON.stringify(t.withEndeavor), "| +FT", JSON.stringify(t.withEndeavorAndFakeTears));
+  for (const t of r.q3RealRoute) console.log("Q3 real", t.trace, "orig", JSON.stringify(t.original.move), "|copy", JSON.stringify(t.copyNoOverride), t.copyMatchesOriginal, "| +Endeavor", JSON.stringify(t.withEndeavor), "| +FT", JSON.stringify(t.withEndeavorAndFakeTears), "| firstInval base", JSON.stringify(t.firstInvalidationBaseline), "-> +Endeavor", JSON.stringify(t.firstInvalidationWithEndeavor));
 }
