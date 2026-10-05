@@ -226,11 +226,24 @@ def main():
                 for f, cs in cfs[:6]:
                     Fb = F_at(r["log"], f - 1, r["F0"]); ob = obs_free(raw, f - 1)
                     cw.append({"createFrame": f, "createdSlots": cs, "providerMatchesLiteral": cmp_lit(lit, Fb, None)[0], "observedMatchesLiteral": None if ob is None else cmp_lit(lit, ob, None)[0]})
-                rec["literal"] = dict(matchBeforeEachCreateWindow=cw, src=lit["src"], kind=lit["kind"], order=lit["order"] if lit["kind"] != "fixture-64" and lit["kind"] != "dense-64" else [x for x in lit["order"] if x not in OCC][:14] + ["..."],
+                occ_ok = None
+                if lit["kind"].endswith("-64") and raw is not None and n0 in raw:
+                    occ_ok = [x for x in lit["order"] if x in OCC] == [x for x in raw[n0]["order"] if x in OCC]
+                rec["literal"] = dict(occupiedPrefixEqualsObserved=occ_ok, matchBeforeEachCreateWindow=cw, src=lit["src"], kind=lit["kind"], order=lit["order"] if lit["kind"] != "fixture-64" and lit["kind"] != "dense-64" else [x for x in lit["order"] if x not in OCC][:14] + ["..."],
                                       slots=lit["slots"], frameChecked=n0, providerMatches=pm, providerDiff=pd, observedMatches=om, observedDiff=od,
                                       framesLiteralEqualsObserved=_ranges(scan["observed"]), framesLiteralEqualsProvider=_ranges(scan["provider"]),
                                       firstCreateFrame=f0, edgeFrame=u["frame"])
             out["scenarios"].append(rec)
+    # Rock Slide (157): no BattleLab scenario; accepted fixture seeds are static literals. Compare their free tails with the known-entry first-action F.
+    import re
+    ts = (ROOT / "src/engine/spriteOrderProvider.ts").read_text()
+    entry_F, _ = P.ts_entry()
+    def lit_from(path, name):
+        t = Path(path).read_text(); m = re.search(name + r"[^=]*=\s*\[(.*?)\]", t, re.S); return [int(x) for x in re.findall(r"\d+", m.group(1))]
+    rs = {"src/animation/sceneOnPresentation.ts GROVYLE_TO_ONIX_ROCK_SLIDE_ORDER_SEED": lit_from(ROOT / "src/animation/sceneOnPresentation.ts", "GROVYLE_TO_ONIX_ROCK_SLIDE_ORDER_SEED"),
+          "src/engine/battleMenu.ts ROCK_SLIDE_ORDER_SEED": lit_from(ROOT / "src/engine/battleMenu.ts", "ROCK_SLIDE_ORDER_SEED")}
+    out["rockSlideStatic"] = {k: {"freeTail": [x for x in v if x not in OCC][:8] + ["..."], "equalsKnownEntryFirstActionF": [x for x in v if x not in OCC] == entry_F, "occupiedPrefix": [x for x in v if x in OCC]} for k, v in rs.items()}
+    print("rock slide static", {k: v["equalsKnownEntryFirstActionF"] for k, v in out["rockSlideStatic"].items()})
     out["frameOffsetChecks"] = sorted(set(out["frameOffsetChecks"]))
     if "--write" in sys.argv:
         (FIX / "order-consumer-seeds.json").write_text(json.dumps(out, indent=1) + "\n")

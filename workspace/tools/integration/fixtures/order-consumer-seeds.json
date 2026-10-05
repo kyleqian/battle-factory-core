@@ -353,6 +353,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2091,
@@ -882,6 +883,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2087,
@@ -1411,6 +1413,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2095,
@@ -1887,6 +1890,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2091,
@@ -2273,6 +2277,7 @@
     10
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": null,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2122,
@@ -2616,6 +2621,7 @@
     10
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": null,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2118,
@@ -2971,6 +2977,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2212,
@@ -3341,6 +3348,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2215,
@@ -3707,6 +3715,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": null,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2462,
@@ -4062,6 +4071,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": null,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2408,
@@ -4541,6 +4551,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": null,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2466,
@@ -5040,6 +5051,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": null,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2412,
@@ -5423,6 +5435,7 @@
     4
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2306,
@@ -5797,6 +5810,7 @@
     4
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2306,
@@ -6147,6 +6161,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2334,
@@ -6472,6 +6487,7 @@
     3
    ],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [
      {
       "createFrame": 2210,
@@ -6663,6 +6679,7 @@
    "createFrames": [],
    "allocSlotsInCreationOrder": [],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [],
     "src": "tools/compare/evidence/magnitude-regular-opponent-dense-state.json.gz rows[0].spriteOrder (magnitudeFramebuffer.ts:82 spriteOrder: first.spriteOrder)",
     "kind": "dense-64",
@@ -6837,6 +6854,7 @@
    "createFrames": [],
    "allocSlotsInCreationOrder": [],
    "literal": {
+    "occupiedPrefixEqualsObserved": true,
     "matchBeforeEachCreateWindow": [],
     "src": "tools/compare/evidence/magnitude-regular-player-dense-state.json.gz rows[0].spriteOrder (magnitudeFramebuffer.ts:82 spriteOrder: first.spriteOrder)",
     "kind": "dense-64",
@@ -10485,5 +10503,57 @@
  "frameOffsetChecks": [
   2006,
   2126
- ]
+ ],
+ "rockSlideStatic": {
+  "src/animation/sceneOnPresentation.ts GROVYLE_TO_ONIX_ROCK_SLIDE_ORDER_SEED": {
+   "freeTail": [
+    4,
+    3,
+    21,
+    20,
+    5,
+    19,
+    18,
+    17,
+    "..."
+   ],
+   "equalsKnownEntryFirstActionF": true,
+   "occupiedPrefix": [
+    62,
+    60,
+    0,
+    63,
+    1,
+    61,
+    6,
+    8,
+    2
+   ]
+  },
+  "src/engine/battleMenu.ts ROCK_SLIDE_ORDER_SEED": {
+   "freeTail": [
+    3,
+    4,
+    21,
+    20,
+    5,
+    19,
+    18,
+    17,
+    "..."
+   ],
+   "equalsKnownEntryFirstActionF": false,
+   "occupiedPrefix": [
+    62,
+    60,
+    0,
+    63,
+    1,
+    61,
+    6,
+    8,
+    2
+   ]
+  }
+ }
 }
