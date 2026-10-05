@@ -12,7 +12,7 @@ import {
 } from "../../src/engine/spriteOrderEventTransform.ts";
 import {
   BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS, KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, applySpriteOrderUnitPlan, applySpriteOrderWindow,
-  createSpriteOrderPlanCursor, initSpriteOrderState, knownEntrySpriteOrderState, type SpriteOrderPlan, type SpriteOrderState,
+  initSpriteOrderState, knownEntrySpriteOrderState, type SpriteOrderPlan, type SpriteOrderState,
 } from "../../src/engine/spriteOrderProvider.ts";
 import { REAL_ROUTE_TRACES, replayCrossBodyTrace } from "./spriteOrderCrossBodyReplay.ts";
 
