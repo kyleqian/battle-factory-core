@@ -129,8 +129,8 @@ def extract_scenario(kind, path):
 def scen_files(extra):
     out = [("raw", f) for f in sorted(glob.glob(str(FIX / "sprite-order-event-raw/*-0.json")))]
     out += [("factory", f) for f in sorted(glob.glob(str(FIX / "sprite-order-factory-raw/*-0.json")))]
-    if extra:
-        out += [("extra", f) for f in sorted(glob.glob(str(Path(extra) / "*-0.json")))]
+    for d in (extra.split(",") if extra else []):
+        out += [("extra", f) for f in sorted(glob.glob(str(Path(d) / "*-0.json")))]
     return out
 
 
@@ -225,9 +225,12 @@ def sig(tw):
 
 
 def owner_side(sc, mv):
+    """named move -> its side; mv 0 = unattributed non-move animation; any other move in a 2-battler scenario belongs to the other side"""
     if sc["side"] is None:
         return "factory"
-    return sc["side"] if mv == sc["move"] else ("player" if sc["side"] == "opponent" else "opponent") if mv == 33 else ("any" if mv == 0 else None)
+    if mv == sc["move"]:
+        return sc["side"]
+    return "any" if mv == 0 else ("player" if sc["side"] == "opponent" else "opponent")
 
 
 def live_ids():
