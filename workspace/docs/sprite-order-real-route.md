@@ -33,12 +33,12 @@ byte-identical (sha1 below; the `-1` copies were deleted after comparing). The m
 |---|---|---|---|
 | prompt (DoBounceEffect pair → EndBounceEffect) | `C[2 lowest free]; D[pair, FDERIVED pw 782]` | 17 | 17/17 exact (all traces: 54 rule checks incl. blips) |
 | `DoHitAnimHealthboxEffect` marker | blip `C[f]; D[n0]` | 22 | 22/22 exact; every marker followed a damaging body; the "target sprite hidden → no blip" side was **not exercised** (no Fly/Dig/Dive target in these histories) |
-| body 157 Rock Slide, player | table plan | 14 | exact (unit + edge) |
-| body 332 opponent | table plan | 4 | exact |
+| body 157 Rock Slide, player | table plan | 9 | exact (unit + edge) |
+| body 332 opponent | table plan | 2 | exact |
 | General stat anim PLUS1 stat7 (arg 21) / MINUS1 stat6 (27) | `C[f]; D[n0]` | 2 / 1 | exact |
 | General stat anim MINUS2 stat1 (arg 46), ±2 | `C[f]` then carried `D[c1,0]` before the next unit | 3 | exact (first real-route confirmation of the ±2 carry) |
 | General HELD_ITEM_EFFECT (7, arg 49154) | table plan | 1 | exact |
-| bodies with no plan / NEEDS-KEYS (below) | invalidate | 22 + 2 BRN | model unknown (not mispredicted) |
+| bodies with no plan / NEEDS-KEYS (below) | invalidate | 18 + 2 BRN | model unknown (not mispredicted) |
 
 Distinct (move, side) bodies in these histories (counts over the five traces): `157:player` EXACT-PLAN 32, `332:opponent` EXACT-PLAN 6, `28:opponent` **NEEDS-KEYS** 3, and **NOT-IN-TABLE** (never a corpus scenario): `104:opponent` 9, `283:opponent` 13, `297:opponent` 9, `225:player` 8 (only `225:opponent` is in the table), `98:opponent` 5, `185:opponent` 2, `19:opponent` 2, `7:player` 2; plus status animation `Status:B_ANIM_STATUS_BRN` (not in the mid-battle table: "BRN/FRZ not in corpus").
 
