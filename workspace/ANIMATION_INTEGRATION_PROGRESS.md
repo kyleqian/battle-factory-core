@@ -18,8 +18,29 @@
   labels (π) makes all 13 probed bodies exact (7 already generalize, 6 need π), 0 need new
   inputs. Supervisor reproduced the Thunderbolt-opponent case: probe twice byte-identical,
   π lend 237/237 zero residual, raw lend 12/237.
-- Running: rung 2 (π lend + allocator re-seed + post-KO dense proofs); census regeneration
-  + measured prep for the single-input moves (side).
+- Folded Opus worker `a4a5e2fca` (code `17d6212c4`, src tree `b9da2cf4`) as `c35b3b64c`: post-KO
+  lends (rung 2). After an opponent KO + next-mon summary + send-out the occupancy is role-isomorphic
+  to the entry, so the tracker lends F relabelled to entry slot labels (π) and the allocator host is
+  re-seeded with the known-entry host; first bodies unchanged (π = identity). Dense through the
+  production lend, twice fresh, zero residual: the 13 audit drafts (2,001 rows) + Barrier, Reflect,
+  Magic Coat, Frustration, Seismic Toss, Safeguard, Heal Bell, Sweet Scent, Mega Drain, Perish Song,
+  Grudge. Leaf Blade (GOLEM target, ages 0-11 inside the target box, 212/224) is pinned out post-KO
+  (`POSTKO_LEND_EXCLUDED_MOVE_IDS`); cause not isolated (target species suspected, not π).
+  Supervisor: dense rerun Giga Drain O / Sunny Day P / Barrier P / Heal Bell P exact twice fresh;
+  64 generated battles master vs branch: 3 bodies changed, all fallback -> live after a faint;
+  ON/OFF parity exact on both changed routes. Worker gates: 1,511 files / 12,195 tests, build 851.
+  Receipt `postko-lend-receipt.json`. Limits: player-faint reshow geometry still declines; second
+  opponent KO predicted by the unit plans (route evidence), not pixel-probed; Horn Drill, Mirror
+  Coat and 11 more consumers class-inferred.
+- Census regenerated at 198 live (`61be66957`; 78 remaining: READY-NOW 2, SMALL-INPUT 6,
+  PROVIDER 22, MULTI 48, OUT 1; Random2 = code C is the dominant blocker, 52 moves) and prep10
+  measured prep (`docs/next-adapters-prep10.md`): Magnitude/Reversal/Flail power = gBattleMovePower
+  (request carries the static table power today), Reversal reducer toggle bug, Pain Split
+  closed formula 24/24, Fire Punch player body-only, Rock Blast / Razor Wind ready, Spark player
+  conditional, Endeavor needs the persistent register. Supervisor reran the Magnitude probes:
+  byte-identical, power 110 / 70.
+- Running: prep10 batch (power seam + Magnitude, Reversal, Pain Split, Fire Punch, Rock Blast,
+  Razor Wind, Spark player); Random2 trackability evidence (side).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 
