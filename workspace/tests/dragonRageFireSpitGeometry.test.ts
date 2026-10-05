@@ -9,8 +9,8 @@ describe("Dragon Rage fire-spit aim (#145 D1)", () => {
   });
   it("derives the delta from the target pic offset (player attacker)", () => {
     const dy = (y: number) => dragonRageFireSpitGeometryFor("player", charmeleonPic, { x: 176, y }).deltaYQ8;
-    expect(dy(35)).toBe(-1459);
-    expect(dy(25)).toBe(-1715);
-    expect(dy(39)).toBe(-1357);
+    expect(dy(45)).toBe(-1459);
+    expect(dy(35)).toBe(-1715);
+    expect(dy(49)).toBe(-1357);
   });
 });
