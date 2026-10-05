@@ -21716,14 +21716,14 @@ export function renderSceneOnMovePresentation(
       age: view.effectDisplayAge,
     });
     const playerAttacker =
-      view.attacker.species === "PELIPPER"
+      (liveField || view.attacker.species === "PELIPPER")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "DELCATTY"
+      && (liveField || view.target.species === "DELCATTY")
       && view.target.geometry.side === "opponent";
     const opponentAttacker =
-      view.attacker.species === "PELIPPER"
+      (liveField || view.attacker.species === "PELIPPER")
       && view.attacker.geometry.side === "opponent"
-      && (view.target.species === "DELCATTY" || view.target.species === "SABLEYE")
+      && (liveField || view.target.species === "DELCATTY" || view.target.species === "SABLEYE")
       && view.target.geometry.side === "player";
     if (!playerAttacker && !opponentAttacker) {
       throw new Error(
@@ -21733,7 +21733,11 @@ export function renderSceneOnMovePresentation(
     }
     const pelipperSource = playerAttacker
       ? swallowArt.pelipperBack : swallowArt.pelipperFront;
-    const pelipper = playerAttacker
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
+    const attackerIdle = liveIdle(view.attacker);
+    const targetIdle = liveIdle(view.target);
+    const pelipper = liveField ? liveSceneOnBattlerArt(view.attacker) : playerAttacker
       ? pelipperSource
       : { ...pelipperSource, tileset: subTileset(pelipperSource.tileset, 0, 8) };
     const delcattySource = playerAttacker
@@ -21741,7 +21745,7 @@ export function renderSceneOnMovePresentation(
       : view.target.species === "SABLEYE"
         ? shadowBallArt.sableyeBack
         : fakeTearsArt.delcattyBack;
-    const delcatty = playerAttacker
+    const delcatty = liveField ? liveSceneOnBattlerArt(view.target) : playerAttacker
       ? { ...delcattySource, tileset: subTileset(delcattySource.tileset, 0, 8) }
       : delcattySource;
     drawTileBg(
@@ -21752,7 +21756,7 @@ export function renderSceneOnMovePresentation(
     );
     // Pelipper is elevated. Its pre-animation enemy shadow survives in the
     // first hardware OAM row; SpriteCB_EnemyShadow hides it one display later.
-    if (opponentAttacker && swallowState.age === 0) {
+    if (!liveField && opponentAttacker && swallowState.age === 0) {
       const shadowX = view.attacker.geometry.animationCenter.x
         - battleEnemyShadow.width / 2;
       const shadowY = view.attacker.geometry.battlePositionCenter.y + 29
@@ -21771,9 +21775,9 @@ export function renderSceneOnMovePresentation(
       pelipper.tileset,
       pelipper.palette,
       view.attacker.geometry.animationCenter.x
-        + view.attackerDisplayedX2,
+        + view.attackerDisplayedX2 + attackerIdle.x2,
       view.attacker.geometry.animationCenter.y
-        + view.attackerDisplayedY2,
+        + view.attackerDisplayedY2 + attackerIdle.y2,
       displayedBattler.attackerMatrix.a,
       displayedBattler.attackerMatrix.b,
       displayedBattler.attackerMatrix.c,
@@ -21785,8 +21789,8 @@ export function renderSceneOnMovePresentation(
       fb,
       delcatty.tileset,
       delcatty.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
     );
     const drawOrbs = () => {
       for (const orb of displayedEffects.orbs) {
@@ -21824,6 +21828,7 @@ export function renderSceneOnMovePresentation(
         star.y - 16,
       );
     }
+    if (liveField) return;
     const profile = state.config.fieldProfile;
     drawSendOutHealthbox(
       fb,

@@ -107,6 +107,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   212, 265, 111, 275, 35, 20, 225,
   // prep5 (docs/next-adapters-prep5.md): Mist Ball, Aromatherapy, Follow Me, Metronome (body), Taunt, Belly Drum.
   296, 312, 266, 118, 269, 187,
+  // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow.
+  317, 219, 230, 120, 256,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -167,6 +169,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // prep5 (issue142-shadow-rows-extra.json): Mist Ball, Aromatherapy, Follow Me, Metronome, Belly Drum start at
     // activation. Taunt (-10) starts after it and has no row.
     296, 312, 266, 118, 187,
+    // prep6 (issue142-shadow-rows-extra.json): Rock Tomb, Safeguard, Sweet Scent, Swallow start at activation.
+    // Self-Destruct (-4), Knock Off (-6), Faint Attack (-4) start after it and have no row.
+    317, 219, 230, 256,
     // order consumers (issue142-shadow-rows-extra.json): Grudge's window starts at activation (66/70).
     // Heal Bell (215), Rock Throw (88), Perish Song (195), Leaf Blade (348) start at activation (0).
     288, 215, 348, 195, 88,
@@ -460,6 +465,10 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // selfDestructPortable.ts presentationAge 0), the Taunt/Dragon Rage convention: the window starts 4 frames after
     // the script activation (78/82, row -4, no #142 shadow row) and the script runs 10 frames past it (204/208), uncovered.
     case 120: return 113;
+    // Swallow: per stockpile branch (request.turn = gBattleScripting.animTurn = stockpileCounter, prep6 s2.1) and side:
+    // player 163/178/193 (1247..1409 ...), opponent 161/176/191 (= 148 + 15 turn / 146 + 15 turn), every window end = script end.
+    case 256:
+      return request.turn >= 1 && request.turn <= 3 ? (request.attacker === 0 ? 148 : 146) + 15 * request.turn : null;
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
@@ -1250,6 +1259,15 @@ export function liveMoveAnimationPresentation(
     // The attacker's displayed HP is already 0 at the event (setatkhptozero precedes attackanimation; prep6 s2.1),
     // the same displayed-field path as Explosion; the live seam reads it from the field.
     case 120: config = { move: "SELF_DESTRUCT", attacker, target, fieldProfile }; break;
+    case 256: {
+      // Stockpile count = request.turn (measured 1/2/3, prep6-swallow-probe.json). The attacker's affine centre is the
+      // OBJ/sprite centre (affineCenterBattler), not the pic point; the pic point and coords.yOffset are separate inputs.
+      const turn = request.turn as 1 | 2 | 3;
+      config = { move: "SWALLOW", attacker: affineCenterBattler(attacker), target, fieldProfile, stockpileCount: turn,
+        attackerPictureOffset: attackerAnchors.picOffsetPoint,
+        attackerPictureYOffset: liveBattlerCoordAttrs(attacker.geometry.side, art).yOffset };
+      break;
+    }
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:
