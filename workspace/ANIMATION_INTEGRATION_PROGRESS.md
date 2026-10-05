@@ -144,7 +144,21 @@
   resolution frames draw elevated opponents 8 px low without their shadow (ISSUES #147; every
   ordinary frame, before and after bodies); script-end shadow-return table over 214 fixtures;
   2-line patch proof (supervisor reran Whirlwind BUTTERFREE: post-body 0/30 -> 30/30).
-- Running: Scene OFF check for the elevated renderer (side); then the #147 fix (production).
+- Folded Opus worker `fb313c49e` (src tree `3ce320a6`): ISSUES #147 fix — the shared ordinary
+  resolution renderer draws elevated opponents at the elevated origin with their shadow (both
+  scene modes; `docs/elevated-renderer-off-check.md`: Scene OFF had the same bug), post-body
+  shadow hide table (Absorb 2, Dragon Rage 21, Dream Eater / Psybeam / Razor Wind / Sing / Sky
+  Uppercut / Horn Drill 1 by side), faint sink from the elevated origin, no shadow at HP 0.
+  Supervisor: post-body Whirlwind BUTTERFREE / Air Cutter GOLBAT 30/30 (master 0/30); Scene OFF
+  GOLBAT / BUTTERFREE 919/935 (master 0/935); magneton OFF trace 703/751 unchanged. Worker: 203
+  committed traces byte-identical; gates 1,523 files / 12,309 tests + build. Receipt
+  `elevated-renderer-receipt.json`. #147 trimmed to the hit-blink / HP-0 remainder.
+- Rollout / Endeavor prep (`a3093fa8e`, `docs/rollout-endeavor-prep.md`): Rollout counter =
+  `rolloutTimerStartValues - rolloutTimer` equals the ROM at every body (Defense Curl included);
+  Endeavor's stale gBattleMovePower is trackable (damagecalc, AI decision rule 16/16 movesets,
+  Battle TV writer, cross-battle persistence, 0 at the first battle). Drafts ready.
+- Running: Fly / Bounce with a presentation-only hidden-attacker state (supervisor-authorized);
+  send-in tail model evidence (side).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 

@@ -17,24 +17,16 @@ backlog.
 
 # Open
 
-## #147 — Ordinary resolution frames draw elevated opponents at ground level without their shadow (found 2026-10-05)
+## #147 — Elevated opponents in ordinary resolution frames: remainder (main bug FIXED 2026-10-05)
 
-- **Symptom (affects play today):** `renderBattleResolutionSceneOffView`
-  (`src/engine/battleScene.ts` ~:54427-54433) draws the opponent at `fieldArt.opponent.origin.y`
-  without subtracting `enemyMonElevation` and never calls `drawGeneratedOpponentShadow`; the
-  command-menu path (~:8107-8121, `battleCommandFieldSpriteOrigin`) does both. Every ordinary
-  resolution frame with an elevated opponent (GOLBAT, BUTTERFREE, PIDGEOT, MISDREAVUS, PELIPPER,
-  SKIPLOOM...) shows the sprite 8 px low and no shadow (k=1 after a body: 1,109-2,160 px).
-- **Evidence:** `docs/elevated-postbody-audit.md` (36 fixtures; patch proof 0 px). Supervisor
-  reran Whirlwind BUTTERFREE: post-body 0/30 frames exact today, 30/30 with the 2-line patch.
-- **Shadow timing rule:** `SpriteCB_EnemyShadow` hides the shadow while `gAnimScriptActive`; it
-  reappears on framebuffer (scriptEnd - E) + 1 after a body window ending at E: d = 0 for 184
-  rows, -2 for Future Sight / Light Screen (fixed in #145), +1 Dream Eater / Horn Drill / Psybeam
-  / Razor Wind / Sing / Sky Uppercut, +2 Absorb, +21 Dragon Rage (hide for E+1..E+d).
-- **Scene OFF shares it** (`docs/elevated-renderer-off-check.md`: GOLBAT 1,845 / BUTTERFREE 1,578 px
-  every OFF resolution frame; the patch changes 0 frames across 203 committed traces and 0 tests).
-  Fix in progress (shared renderer, both modes). The faint-sink branch (~:54418-54426) likely needs
-  the same elevation.
+- **Fixed (merge `b0818de83`):** ordinary resolution frames (both scene modes) draw elevated
+  opponents at the elevated origin with their shadow; post-body shadow hide table for live
+  bodies whose script outlives the window (d > 0); faint sink from the elevated origin, shadow
+  hidden at HP 0. Scene OFF GOLBAT / BUTTERFREE 0/935 -> 919/935; 203 committed traces unchanged.
+- **Open remainder:** the 16 hit-blink frames per body (sprite + shadow hidden 4 on / 4 off) are
+  not modelled for elevated opponents; the HP-0 shadow boundary uses the displayed HP (may be one
+  frame early vs the party-HP write); Sky Uppercut with a COMBUSKEN attacker measured d = 0 vs the
+  table's 1; Dream Eater / Sleep Talk swaps not harness-staged (table from the ROM d values only).
 
 ## #146 — Forced switch-out and send-in presentation timing differ from the ROM (S10A, found 2026-10-05)
 
