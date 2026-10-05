@@ -35,10 +35,18 @@ backlog.
   the message +96..+260 depending on the species' front animation (339 Factory species swept);
   production uses a fixed 91+11-frame span calibrated on RATTATA (slide +33, message +102).
   Player side: slide constant (+65 vs +66), message +101..+210 (cry overlap).
-- **Fix shape:** an instant-removal forced switch-out for `B_SCR_OP_RETURNTOBALL` (keep the
-  voluntary `RETURNATKTOBALL` recall), a 4-frame hold + 6-frame hide, send-in at E+10; a
-  species-keyed send-in tail; sprite-order `forced-switch-out {side}` (`D o<slot>`) + side-generic
-  switch-in units.
+- **Scene ON forced switch-out FIXED 2026-10-05 (merge of `634207ed8`):** no recall, hold 4 +
+  hide 6, send-in at the framebuffer E+11 (ROM E+4/E+10 are RAM writes, shown one frame later);
+  tracker `forced-switch-out` + side-generic switch-in units. Player-attacker Roar/Whirlwind exact
+  from body start through the emerge (128/128, 112/112).
+- **Open remainder:** (1) the send-in tail after a forced switch: production runs the ball-open
+  white fade + particles only for a voluntary switch (`sourceDecision.kind === "switch"`), then the
+  species-keyed healthbox slide / message above; (2) opponent-attacker Roar: the player-side ball
+  throw path differs from k=13 (6,718 px); (3) after any live body by an ELEVATED opponent attacker
+  (BUTTERFREE Whirlwind) the ordinary field drawing differs from the body's last frame by 1,444 px
+  (pre-existing, likely affects other live moves; untriaged); (4) Scene OFF forced switch-out is
+  still the recall chain (no OFF pixel compare yet); (5) Baton Pass (same opcode on the attacker)
+  unchanged.
 
 ## #145 — Live-adapter species audit: open defects and residuals (S10A; Dragon Rage + Aerial Ace FIXED 2026-10-05)
 
