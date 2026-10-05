@@ -225,3 +225,179 @@ export function knownEntrySpriteOrderState(route: "ordinary-factory" | "battle-l
   }
   return state;
 }
+
+/**
+ * Relative tie order of a move's allocation slots: `F.filter(slot in slots)`. A consumer allocates its sprites in
+ * the lowest-free slots (3,4,5,7,9,10,...), and sprites created in one sort window inherit the free order of exactly
+ * those slots (docs/order-consumer-prep.md §0 "correction"; `spriteOrderForFirstAllocation` = `F.slice(0, n)` is not
+ * this and must not feed consumers). Null when history is unknown, a slot repeats, or a slot is not free.
+ */
+export function spriteOrderForSlots(state: SpriteOrderState, slots: readonly number[]): readonly number[] | null {
+  if (!state.known || new Set(slots).size !== slots.length) return null;
+  for (const slot of slots) {
+    if (!Number.isInteger(slot) || slot < 0 || slot >= SPRITE_ORDER_SLOT_COUNT || !state.free.includes(slot)) return null;
+  }
+  return Object.freeze(state.free.filter(slot => slots.includes(slot)));
+}
+
+/**
+ * `sSpriteOrder` prefix of the nine known-entry occupants (battlers, healthboxes, shadow, ...) at the first move
+ * allocation, ordered by their sort keys. Equal to the accepted literal and to the observed order in all 12
+ * raw-backed 64-entry rows (Rock Throw, Mud Slap, Sand Attack, Dive, Magnitude: docs/order-consumer-prep.md §1 and
+ * §7 item 0, tools/integration/fixtures/order-consumer-seeds.json). Its slot set is the complement of
+ * `KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER`. Only valid while those occupants are unchanged (first body after the entry).
+ */
+export const KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER: readonly number[] = Object.freeze([62, 60, 0, 63, 1, 61, 6, 8, 2]);
+
+/**
+ * Full 64-entry order for consumers that read the whole `sSpriteOrder`: `[...occupiedPrefix, ...F]`. Null when
+ * unknown or when the prefix is not exactly the occupied (non-free) slot set.
+ */
+export function spriteOrderWithOccupiedPrefix(
+  state: SpriteOrderState, occupiedPrefix: readonly number[],
+): readonly number[] | null {
+  if (!state.known) return null;
+  const full = [...occupiedPrefix, ...state.free];
+  if (full.length !== SPRITE_ORDER_SLOT_COUNT || new Set(full).size !== SPRITE_ORDER_SLOT_COUNT) return null;
+  return Object.freeze(full);
+}
+
+/** Plan tokens (docs/sprite-order-body-plans.md §2): `n` = k-th sprite of this unit, `c` = survivor r of the unit
+ * `ago` units earlier, `o` = an occupant older than every unit (concrete slot). */
+export type SpriteOrderPlanToken = readonly ["n", number] | readonly ["c", number, number] | readonly ["o", number];
+/** One sort window: creates (`f` = CreateSprite lowest free, `e` = CreateSpriteAtEnd highest free) and one destroy
+ * group in array order. `pw` marks an FDERIVED group: order = (priority word, creation window, F index at creation),
+ * computed here; a group without `pw` is SINGLE/STATIC and its stored order is applied as is. */
+export interface SpriteOrderPlanWindow {
+  readonly C?: readonly (readonly ["n", number, "f" | "e"])[];
+  readonly D?: readonly SpriteOrderPlanToken[];
+  readonly pw?: readonly number[];
+}
+export type SpriteOrderPlan = readonly SpriteOrderPlanWindow[];
+
+/** EXACT-PLAN bodies (`"<moveId>:<side>"`) and gaps (`"<prevBody|entry>><nextBody>"`, plus the previous-body-only
+ * key where every observed gap after that body has one shape). NEEDS-KEYS / NOT-OBSERVED keys are absent. */
+export interface SpriteOrderPlanTable {
+  readonly bodies: ReadonlyMap<string, SpriteOrderPlan>;
+  readonly gaps: ReadonlyMap<string, SpriteOrderPlan>;
+  readonly gapAfterBody: ReadonlyMap<string, SpriteOrderPlan>;
+}
+
+interface SpriteOrderPlanFixture {
+  readonly bodies: Readonly<Record<string, { readonly verdict: string; readonly plan: SpriteOrderPlan }>>;
+  readonly gaps: Readonly<Record<string, { readonly verdict: string; readonly plan: SpriteOrderPlan }>>;
+  readonly gapShapesAfterBody: Readonly<Record<string, readonly string[]>>;
+}
+
+/** Load the EXACT-PLAN rows of `tools/integration/fixtures/sprite-order-body-plans.json` (caller supplies the JSON). */
+export function spriteOrderPlanTableFromFixture(fixture: SpriteOrderPlanFixture): SpriteOrderPlanTable {
+  const exact = (rows: SpriteOrderPlanFixture["bodies"]) => new Map(
+    Object.entries(rows).filter(([, row]) => row.verdict === "EXACT-PLAN").map(([key, row]) => [key, row.plan] as const));
+  const gaps = exact(fixture.gaps);
+  const exactShapes = new Set([...gaps.values()].map(plan => JSON.stringify(plan)));
+  const gapAfterBody = new Map<string, SpriteOrderPlan>();
+  for (const [body, shapes] of Object.entries(fixture.gapShapesAfterBody)) {
+    if (shapes.length !== 1 || !exactShapes.has(JSON.stringify(JSON.parse(shapes[0]!)))) continue;
+    gapAfterBody.set(body, JSON.parse(shapes[0]!) as SpriteOrderPlan);
+  }
+  return Object.freeze({ bodies: exact(fixture.bodies), gaps, gapAfterBody });
+}
+
+/**
+ * Order state plus what plan tokens need: allocator occupancy (the complement of `F` in this model), the survivors
+ * of every applied unit (creation order) and `(window seq, F index at creation)` per live created slot.
+ */
+export interface SpriteOrderPlanCursor {
+  readonly order: SpriteOrderState;
+  readonly occupied: readonly number[];
+  readonly units: number;
+  readonly windowSeq: number;
+  readonly survivors: readonly (readonly number[])[];
+  readonly creation: Readonly<Record<number, readonly [number, number]>>;
+}
+
+function invalidCursor(cursor: SpriteOrderPlanCursor): SpriteOrderPlanCursor {
+  return Object.freeze({ ...cursor, order: invalidateSpriteOrderState(cursor.order), units: cursor.units + 1 });
+}
+
+/**
+ * Start applying plans at `order` (e.g. `knownEntrySpriteOrderState`). If allocator occupancy is supplied it must
+ * equal the non-free slot set, otherwise the cursor starts invalid.
+ */
+export function createSpriteOrderPlanCursor(
+  order: SpriteOrderState, allocatorOccupied?: readonly number[],
+): SpriteOrderPlanCursor {
+  const occupied = order.known
+    ? Array.from({ length: SPRITE_ORDER_SLOT_COUNT }, (_, slot) => slot).filter(slot => !order.free.includes(slot))
+    : [];
+  const consistent = !order.known || allocatorOccupied === undefined
+    || (allocatorOccupied.length === occupied.length && occupied.every(slot => allocatorOccupied.includes(slot)));
+  return Object.freeze({
+    order: consistent ? order : invalidateSpriteOrderState(order),
+    occupied: Object.freeze(occupied), units: 0, windowSeq: 0, survivors: Object.freeze([]), creation: Object.freeze({}),
+  });
+}
+
+/**
+ * Apply one unit's (body or gap) plan exactly as docs/sprite-order-body-plans.md §2/§5 (mirrors
+ * `spriteOrderBodyPlans.Sim.apply_unit`). A missing plan (key absent, NEEDS-KEYS, NOT-OBSERVED) or any token that
+ * does not resolve invalidates the order; an invalid cursor stays invalid. Never guesses.
+ */
+export function applySpriteOrderUnitPlan(
+  cursor: SpriteOrderPlanCursor, plan: SpriteOrderPlan | null | undefined,
+): SpriteOrderPlanCursor {
+  if (!cursor.order.known || !plan) return invalidCursor(cursor);
+  const unit = cursor.units;
+  const occupied = new Set(cursor.occupied);
+  const creation: Record<number, readonly [number, number]> = { ...cursor.creation };
+  const made: number[] = [];
+  let free = [...cursor.order.free];
+  let seq = cursor.windowSeq;
+  for (const window of plan) {
+    seq += 1;
+    if (window.C) {
+      const created: number[] = [];
+      for (const [, k, mode] of window.C) {
+        const open = Array.from({ length: SPRITE_ORDER_SLOT_COUNT }, (_, slot) => slot).filter(slot => !occupied.has(slot));
+        const slot = mode === "e" ? open[open.length - 1] : open[0];
+        if (slot === undefined || k !== made.length || !free.includes(slot)) return invalidCursor(cursor);
+        creation[slot] = Object.freeze([seq, free.indexOf(slot)] as const);
+        occupied.add(slot);
+        made.push(slot);
+        created.push(slot);
+      }
+      free = free.filter(slot => !created.includes(slot));
+    }
+    if (window.D) {
+      const slots: number[] = [];
+      for (const token of window.D) {
+        const slot = token[0] === "n" ? made[token[1]]
+          : token[0] === "c" ? cursor.survivors[unit - token[1]]?.[token[2]]
+            : token[1];
+        if (slot === undefined || !occupied.has(slot) || slots.includes(slot)) return invalidCursor(cursor);
+        slots.push(slot);
+      }
+      if (window.pw) {
+        if (window.pw.length !== slots.length || slots.some(slot => creation[slot] === undefined)) return invalidCursor(cursor);
+        const word = new Map(slots.map((slot, index) => [slot, window.pw![index]!] as const));
+        slots.sort((left, right) => word.get(left)! - word.get(right)!
+          || creation[left]![0] - creation[right]![0] || creation[left]![1] - creation[right]![1]);
+      }
+      for (const slot of slots) {
+        occupied.delete(slot);
+        delete creation[slot];
+      }
+      free = [...slots, ...free.filter(slot => !slots.includes(slot))];
+    }
+  }
+  const survivors = [...cursor.survivors];
+  survivors[unit] = Object.freeze(made.filter(slot => occupied.has(slot)));
+  return Object.freeze({
+    order: make(true, free, cursor.order.pendingDestroyed),
+    occupied: Object.freeze([...occupied].sort((left, right) => left - right)),
+    units: unit + 1,
+    windowSeq: seq,
+    survivors: Object.freeze(survivors),
+    creation: Object.freeze(creation),
+  });
+}
