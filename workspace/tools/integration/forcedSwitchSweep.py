@@ -6,7 +6,7 @@ import json, subprocess, sys, os
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 name, side, tag, slot = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4])
-SPECIES = [19, 292, 304, 12, 2, 198, 111, 95, 134, 130, 150, 249]
+SPECIES = json.load(open(os.environ["FS_SPECIES"])) if os.environ.get("FS_SPECIES") else [19, 292, 304, 12, 2, 198, 111, 95, 134, 130, 150, 249]  # FS_SPECIES=<json list of species ids>
 cry = {r["id"]: r["durationTicks"] for r in json.load(open("src/data/gen/cry-durations.json"))["species"]}
 tmp = Path(f"/tmp/fs/sweep-{tag}"); tmp.mkdir(parents=True, exist_ok=True)
 base = json.load(open(f"tools/battle-lab/{name}.json"))
@@ -16,7 +16,7 @@ def run(sp):
     subprocess.run([os.environ["PY"], "tools/integration/forcedSwitchRomProbe.py", str(s), str(o)], capture_output=True)
     return sp, o
 rows = []
-with ThreadPoolExecutor(6) as ex:
+with ThreadPoolExecutor(8) as ex:
     for sp, o in ex.map(run, SPECIES):
         if not o.exists(): rows.append((sp, "FAILED")); continue
         d = json.loads(o.read_text()); E = d["E"] + 1; r = {int(k) - E: v for k, v in d["rows"].items()}

@@ -7,7 +7,7 @@ gBattlerPartyIndexes, species, gBattlerSpriteIds, text-printer active flag, task
 import json, os, subprocess, sys
 from pathlib import Path
 SCEN, OUT = map(Path, sys.argv[1:3])
-WINDOW = 170
+WINDOW = int(os.environ.get("FS_WINDOW", "170"))
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
