@@ -51467,7 +51467,8 @@ export function renderSceneOnMovePresentation(
     };
     const player = view.attacker.geometry.side === "player" ? view.attacker : view.target;
     const opponent = view.attacker.geometry.side === "opponent" ? view.attacker : view.target;
-    const playerArt = battlerArt(player), opponentArt = battlerArt(opponent);
+    const playerArt = liveField ? liveSceneOnBattlerArt(player) : battlerArt(player);
+    const opponentArt = liveField ? liveSceneOnBattlerArt(opponent) : battlerArt(opponent);
     const drawBySlot = new Map<number, () => void>([
       [view.allocator.playerSpriteSlot, () => drawSpriteSheet(
         fb, playerArt.tileset, playerArt.palette,
@@ -51482,6 +51483,7 @@ export function renderSceneOnMovePresentation(
     ]);
     for (const slot of view.allocator.painterOrder) drawBySlot.get(slot)?.();
 
+    if (liveField) return;
     const profile = magnitudeState.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponent.species, level: 50, gender: profile.opponentGender ?? "none",
