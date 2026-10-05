@@ -12,7 +12,10 @@
   tests green; later-body consumer routes PASS. Receipt `order-table-rows-receipt.json`.
 - `implementedCount` corrected 191 -> 198 (a batch had not bumped it) and pinned by
   `tests/liveStatusImplementedCount.test.ts`.
-- Final supervisor gates on `d9195447f`: typecheck, 1,509 files / 12,176 tests, build 851.
+- Intimidate battle-start seed (`782822914`): pre-prompt entry state + stat-animation plan
+  (12/12 corpus exact at the Intimidate and first-move edges); route seed 53 (Intimidate
+  lead) lends a known order, both bodies live. Receipt `intimidate-seed-receipt.json`.
+- Final supervisor gates on `782822914`: typecheck, 1,509 files / 12,178 tests, build 851.
 
 ## 2026-10-05 — final batch folded: 198 live adapters; session gates
 

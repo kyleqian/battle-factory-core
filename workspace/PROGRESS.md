@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-05 (night) — S10A wind-down: 144 -> 198 live adapters, sprite order live
 
-- **State:** S10A, local master; production `d9195447f` (198 live adapters, 78
+- **State:** S10A, local master; production `782822914` (198 live adapters, 78
   accepted bodies remain). Supervisor final gates on the final code: see the
   Notes line. Preview verified at the final checkpoint (receipt in
   `tools/integration/fixtures/`). Opus 5.5 supervisor; Sonnet 5.5 workers (Opus
@@ -19,19 +19,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   allocator-plan-v2 moves (10), prep9 + Double Team/Feather Dance (7); CASTFORM
   normal-form Y placement fixed (ISSUES #143 trimmed to weather forms);
   production order table extended 381 -> 445 bodies (Endeavor/Fake Tears +
-  60 REL-Y-confirmed rows; corpus 1,101/1,101 and strict real-route 10/10 exact).
+  60 REL-Y-confirmed rows; corpus 1,101/1,101 and strict real-route 10/10 exact);
+  Intimidate battle-start order seed (12/12 exact; Intimidate-lead battles lend).
 - **Did (side lane, evidence):** sprite-order module, real Factory entry probe,
   body/gap plans, gap causes, real-route validation, plan coverage (52 -> 68 ->
   81% weighted with REL-Y rows), policy gaps (Intimidate seed, Endeavor/Fake
   Tears), uncovered units (faint/switch), allocator v2 baseline, census of the
   remaining 103 moves, prep6/7/8/9, Castform diagnosis.
-- **Next:** ROADMAP S10A "Next (2026-10-05)": Intimidate seed + abs-invariant
-  REL-Y rows, post-knock-out lends, then the census queue.
+- **Next:** ROADMAP S10A "Next (2026-10-05)": post-knock-out lends, abs-invariant
+  REL-Y rows, then the census queue.
 - **Notes:** no DEFERRED entries. Soak gates are superseded for S10A
   integration work (SUPERVISOR.md: ANIMATION_VERIFICATION scoped policy); not run.
   Oracle freshness FAIL at orient was the known false positive. All worker
   branches merged and worktrees removed; evidence copied to `.integration/validation/`.
-  Final gates on `d9195447f`: typecheck, 1,509 files / 12,176 tests, build 851
+  Final gates on `782822914`: typecheck, 1,509 files / 12,178 tests, build 851
   (`final-supervisor-gates-20261005.json`).
 
 ---
