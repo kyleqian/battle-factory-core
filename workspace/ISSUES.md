@@ -48,26 +48,18 @@ backlog.
   still the recall chain (no OFF pixel compare yet); (5) Baton Pass (same opcode on the attacker)
   unchanged.
 
-## #145 — Live-adapter species audit: open defects and residuals (S10A; Dragon Rage + Aerial Ace FIXED 2026-10-05)
+## #145 — Live-adapter species audit: residual remainder (S10A; 7 defects FIXED 2026-10-05)
 
-- **Fixed (merge of `5b7a1ff3b`):** Dragon Rage fire-spit aim; Aerial Ace settled target x.
-- **Open defects (`docs/live-species-audit-2.md`, each patch-proven 0 px, two fresh runs):**
-  - Rock Throw (88): `rockThrowTargetX2` adds ONIX's idle +1 for every target
-    (`src/animation/rockThrow.ts:88`, `:346-351`); GOLBAT 17,405 px ages 0-20 (supervisor reran:
-    66/87 -> 87/87 patched). Fix: `frontIdleRest.x2` into the profile.
-  - Smelling Salt (265): the ROM clamps the exclamation sprite at y >= 8
-    (`if (sprite->y < 8) sprite->y = 8`); live draws it 5 px higher for GOLBAT (3,358 px ages
-    74-112). Fix at `src/engine/battleScene.ts:42107`: `Math.max(8, profile.targetTop) - 16`.
-  - Light Screen (113) / Future Sight (248): elevated-enemy shadow returns when the script ends;
-    these windows run 2 frames past the end, so the ROM shows it on the last 2 rows (400 px each).
-    Fix: an end-of-body shadow-return row table next to `LIVE_MOVE_OPPONENT_SHADOW_ROW`.
-- **Not defects:** one-frame-later tail fades (Psybeam, Amnesia, Cosmic Power, Aurora Beam, Horn
-  Drill, Sky Uppercut, Aromatherapy palette write) are species-keyed lag frames (main-loop pass
-  delta 0; ~5.6k extra instructions tip a frame past VBlank): not derivable from game state.
-- **Unresolved:** Foresight vs GOLBAT (22,875 px, glass position/shape; next: per-frame OBJ dump
-  of `AnimForesightMagnifyingGlass_Step`); Aerial Ace with a player-side GOLEM 1 px at ages 10-11;
-  Blizzard / Icy Wind fall back for the elevated pair by design; Dragon Rage with non-CHARMELEON
-  player attackers formula-derived, unmeasured.
+- **Fixed today:** Leaf Blade (#144), Dragon Rage fire-spit aim, Aerial Ace settled x, Rock Throw
+  idle x2, Smelling Salt y clamp, Light Screen / Future Sight end-of-body shadow return, Foresight
+  glass translation (merges of `5b7a1ff3b`, `48a1bd913`; audits `docs/live-species-audit{,-2}.md`).
+- **Not defects:** one-frame-later tail fades are species-keyed lag frames (CPU load past VBlank).
+- **Open remainder:** Aerial Ace with a player-side GOLEM 1 px at ages 10-11; Spider Web ARIADOS
+  back sprite 1 px; Sky Uppercut COMBUSKEN script one frame longer; Blizzard / Icy Wind fall back
+  for the elevated pair by design (retained OAM-order proof only for non-elevated pairs); Dragon
+  Rage with non-CHARMELEON player attackers formula-derived, unmeasured; Quick Attack / Mud Slap
+  `+1` literal not swap-checked; GOLEM swaps exist only for Rock Throw and Foresight among the
+  audit-2 fixes.
 
 ## #143 — CASTFORM non-normal forms (weather) are not modelled (S10A; normal-form residual FIXED 2026-10-05)
 
