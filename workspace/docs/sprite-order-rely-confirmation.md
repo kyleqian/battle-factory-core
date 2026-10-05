@@ -17,7 +17,7 @@ Direct mGBA (never the shared HTTP oracles), Scene ON. Source: `docs/sprite-orde
 
 Weighted EXACT coverage (the `spriteOrderPlanCoverageRank.py` weight model; every Level-50 move id x both sides; table = `sprite-order-body-plans-ext.json`):
 
-| table | weighted EXACT | EXACT cells / 574 |
+| table | weighted EXACT | EXACT cells / 550 |
 |---|---|---|
 | before (plans-ext) | **68.19%** | 372 |
 | + policy-gaps rows (Endeavor, Fake Tears; 4 rows) | 68.67% | 376 |
@@ -55,7 +55,7 @@ The strict real route gains nothing from the rely rows: none of the five canonic
 5. **Rows** (`spriteOrderRelYPlans.ts`): `fixtures/sprite-order-body-plans-rely.json`, 83 rows `{verdict: "EXACT-PLAN", rule, tier, plan, encoded, census, provenance}` (same shape as `relative-y-plans.json`; `plan` round-trips through `decodeSpriteOrderPlan`; 53 distinct plans). Tier `abs-invariant` rows are flagged so the production generator can include them or not.
 6. **Replays**: `spriteOrderRelYReplay.py` (union table, plan-only, gaps from the union's own EXACT gap plans) and `spriteOrderRelYReplay.ts` (production transform over the policy-gaps ROM streams and the strict real route).
 
-Script cites for the relative offsets (a sample; the other rows rest on the observed vectors): Bite (44): `reference/pokeemerald/data/battle_anim_scripts.s:5294-5295` two `create_sharp_teeth_sprite` at `y=-32` / `y=32` relative to the attacker (constant 64 spread; rel-y observed identical on 3 absolute geometries). Ice Beam (58): `:5359-5360` outer crystals at `(20, 12)` and `(20, -12)` offsets, then the `IceBeamCreateCrystals` calls (fixed offsets from the attacker). Endeavor `CreateSweatDroplets` is cited in `policy-gaps.md` §3.
+Script cites for the relative offsets (a sample; the other rows rest on the observed vectors): Bite (44): `reference/pokeemerald/data/battle_anim_scripts.s:5295-5296` two `create_sharp_teeth_sprite` at `y=-32` / `y=32` relative to the attacker (constant 64 spread; rel-y observed identical on 3 absolute geometries). Ice Beam (58): `:5359-5360` outer crystals at `(20, 12)` and `(20, -12)` offsets, then the `IceBeamCreateCrystals` calls (fixed offsets from the attacker). Endeavor `CreateSweatDroplets` is cited in `policy-gaps.md` §3.
 
 ## CONFIRMED, top 20 by weight (full list: `verdicts.json`)
 
