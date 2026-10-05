@@ -169,6 +169,887 @@
   "NEEDS-KEYS": 59,
   "NOT-OBSERVED": 13
  },
+ "orderDependentAdapterEdges": {
+  "28": [
+   {
+    "file": "28-mechanic-sand-attack-pidgeotto-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "28-mechanic-sand-attack-player-pidgeotto-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   }
+  ],
+  "52": [
+   {
+    "file": "52-mechanic-ember-opponent-onix-player-murkrow-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   },
+   {
+    "file": "52-mechanic-ember-player-onix-opponent-murkrow-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   }
+  ],
+  "53": [
+   {
+    "file": "53-mechanic-flamethrower-opponent-onix-player-murkrow-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   },
+   {
+    "file": "53-mechanic-flamethrower-player-onix-opponent-murkrow-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   }
+  ],
+  "82": [
+   {
+    "file": "82-mechanic-dragon-rage-charmeleon-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "82-mechanic-dragon-rage-onix-charmeleon-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   }
+  ],
+  "88": [
+   {
+    "file": "88-mechanic-rock-throw-opponent-graveler-player-onix-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   },
+   {
+    "file": "88-mechanic-rock-throw-player-graveler-opponent-onix-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   },
+   {
+    "file": "147-mechanic-spore-opponent-parasect-player-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "147-mechanic-spore-player-parasect-opponent-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "148-mechanic-flash-opponent-mareep-player-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "178-mechanic-cotton-spore-opponent-mareep-player-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "178-mechanic-cotton-spore-player-mareep-opponent-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "78-mechanic-stun-spore-opponent-hoppip-player-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "78-mechanic-stun-spore-player-hoppip-opponent-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "79-mechanic-sleep-powder-opponent-hoppip-player-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "79-mechanic-sleep-powder-player-hoppip-opponent-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   }
+  ],
+  "189": [
+   {
+    "file": "189-mechanic-mud-slap-pidgeotto-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "189-mechanic-mud-slap-player-pidgeotto-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   }
+  ],
+  "195": [
+   {
+    "file": "195-mechanic-perish-song-opponent-murkrow-player-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "195-mechanic-perish-song-player-murkrow-opponent-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   }
+  ],
+  "215": [
+   {
+    "file": "215-mechanic-heal-bell-opponent-chimecho-player-onix-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   },
+   {
+    "file": "215-mechanic-heal-bell-player-chimecho-opponent-onix-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   }
+  ],
+  "288": [
+   {
+    "file": "288-mechanic-grudge-opponent-haunter-player-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "288-mechanic-grudge-opponent-haunter-player-onix-0.json",
+    "edgeIndex": 1,
+    "status": "preceded by a non-EXACT unit"
+   },
+   {
+    "file": "288-mechanic-grudge-player-haunter-opponent-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "288-mechanic-grudge-player-haunter-opponent-onix-0.json",
+    "edgeIndex": 1,
+    "status": "preceded by a non-EXACT unit"
+   }
+  ],
+  "291": [
+   {
+    "file": "291-mechanic-dive-opponent-chinchou-player-onix-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   },
+   {
+    "file": "291-mechanic-dive-opponent-chinchou-player-onix-0.json",
+    "edgeIndex": 2,
+    "status": "preceded by a non-EXACT unit"
+   },
+   {
+    "file": "291-mechanic-dive-player-chinchou-opponent-onix-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   },
+   {
+    "file": "291-mechanic-dive-player-chinchou-opponent-onix-0.json",
+    "edgeIndex": 2,
+    "status": "preceded by a non-EXACT unit"
+   }
+  ],
+  "299": [
+   {
+    "file": "299-mechanic-blaze-kick-opponent-onix-player-murkrow-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   },
+   {
+    "file": "299-mechanic-blaze-kick-player-onix-opponent-murkrow-0.json",
+    "edgeIndex": 1,
+    "status": "exact"
+   }
+  ],
+  "325": [
+   {
+    "file": "325-mechanic-shadow-punch-haunter-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "325-mechanic-shadow-punch-onix-haunter-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   }
+  ],
+  "348": [
+   {
+    "file": "348-mechanic-leaf-blade-opponent-sceptile-player-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   },
+   {
+    "file": "348-mechanic-leaf-blade-player-sceptile-opponent-onix-0.json",
+    "edgeIndex": 0,
+    "status": "exact"
+   }
+  ]
+ },
+ "gapShapesAfterBody": {
+  "0:any": [
+   "[]",
+   "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]],\"pw\":[782,782]}]",
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]},{\"C\":[[\"n\",1,\"f\"],[\"n\",2,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",2]],\"pw\":[782,782]}]",
+   "[{\"D\":[[\"c\",1,0]]},{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]],\"pw\":[782,782]}]",
+   "[{\"D\":[[\"c\",1,0]]}]"
+  ],
+  "0:unattributed": [
+   "[]",
+   "[{\"D\":[[\"c\",1,0]]}]"
+  ],
+  "101:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "101:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "103:opponent": [
+   "[]"
+  ],
+  "103:player": [
+   "[]"
+  ],
+  "104:unattributed": [
+   "[]"
+  ],
+  "105:opponent": [
+   "[]"
+  ],
+  "105:player": [
+   "[]"
+  ],
+  "106:opponent": [
+   "[]"
+  ],
+  "106:player": [
+   "[]"
+  ],
+  "107:opponent": [
+   "[]"
+  ],
+  "107:player": [
+   "[]"
+  ],
+  "108:opponent": [
+   "[]"
+  ],
+  "108:player": [
+   "[]"
+  ],
+  "109:opponent": [
+   "[]"
+  ],
+  "109:player": [
+   "[]"
+  ],
+  "112:opponent": [
+   "[]"
+  ],
+  "112:player": [
+   "[]"
+  ],
+  "113:opponent": [
+   "[]"
+  ],
+  "113:player": [
+   "[]"
+  ],
+  "115:opponent": [
+   "[]"
+  ],
+  "115:player": [
+   "[]"
+  ],
+  "116:opponent": [
+   "[]"
+  ],
+  "116:player": [
+   "[]"
+  ],
+  "131:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "131:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "133:opponent": [
+   "[]"
+  ],
+  "133:player": [
+   "[]"
+  ],
+  "137:opponent": [
+   "[]"
+  ],
+  "137:player": [
+   "[]"
+  ],
+  "146:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "146:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "147:opponent": [
+   "[]"
+  ],
+  "147:player": [
+   "[]"
+  ],
+  "148:opponent": [
+   "[]"
+  ],
+  "148:player": [
+   "[]"
+  ],
+  "14:opponent": [
+   "[]"
+  ],
+  "14:player": [
+   "[]"
+  ],
+  "151:opponent": [
+   "[]"
+  ],
+  "151:player": [
+   "[]"
+  ],
+  "154:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "154:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "156:opponent": [
+   "[]"
+  ],
+  "156:player": [
+   "[]"
+  ],
+  "161:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "161:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "163:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "163:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "167:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "167:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "172:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "172:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "178:opponent": [
+   "[]"
+  ],
+  "178:player": [
+   "[]"
+  ],
+  "182:player": [
+   "[]"
+  ],
+  "184:opponent": [
+   "[]"
+  ],
+  "184:player": [
+   "[]"
+  ],
+  "185:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "186:opponent": [
+   "[]"
+  ],
+  "186:player": [
+   "[]"
+  ],
+  "188:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "188:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "189:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "189:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "195:player": [
+   "[]"
+  ],
+  "196:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "196:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "197:opponent": [
+   "[]"
+  ],
+  "197:player": [
+   "[]"
+  ],
+  "201:opponent": [
+   "[]"
+  ],
+  "201:player": [
+   "[]"
+  ],
+  "203:opponent": [
+   "[]"
+  ],
+  "204:opponent": [
+   "[]"
+  ],
+  "204:player": [
+   "[]"
+  ],
+  "208:player": [
+   "[]"
+  ],
+  "211:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "211:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "213:unattributed": [
+   "[]"
+  ],
+  "217:opponent": [
+   "[]",
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]},{\"C\":[[\"n\",1,\"f\"],[\"n\",2,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",2]],\"pw\":[782,782]}]",
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "217:player": [
+   "[]",
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "222:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "222:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "223:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "223:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "225:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "227:opponent": [
+   "[]"
+  ],
+  "227:player": [
+   "[]"
+  ],
+  "228:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "228:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "229:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "229:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "232:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "235:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]],\"pw\":[782,782]}]"
+  ],
+  "235:player": [
+   "[]"
+  ],
+  "241:opponent": [
+   "[]"
+  ],
+  "241:player": [
+   "[]"
+  ],
+  "242:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "242:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "247:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]},{\"C\":[[\"n\",1,\"f\"],[\"n\",2,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",2]],\"pw\":[782,782]}]"
+  ],
+  "247:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]},{\"C\":[[\"n\",1,\"f\"],[\"n\",2,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",2]],\"pw\":[782,782]}]"
+  ],
+  "248:opponent": [
+   "[]"
+  ],
+  "250:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "250:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "253:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "253:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "257:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "257:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "258:opponent": [
+   "[]"
+  ],
+  "259:opponent": [
+   "[]"
+  ],
+  "259:player": [
+   "[]"
+  ],
+  "272:player": [
+   "[]"
+  ],
+  "277:opponent": [
+   "[]"
+  ],
+  "277:player": [
+   "[]"
+  ],
+  "27:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "288:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]],\"pw\":[782,782]}]"
+  ],
+  "288:player": [
+   "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]],\"pw\":[782,782]}]"
+  ],
+  "28:opponent": [
+   "[]"
+  ],
+  "28:player": [
+   "[]"
+  ],
+  "290:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "291:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]],\"pw\":[782,782]}]"
+  ],
+  "291:player": [
+   "[]"
+  ],
+  "294:opponent": [
+   "[]"
+  ],
+  "294:player": [
+   "[]"
+  ],
+  "29:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "2:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "305:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "305:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "305:unattributed": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "306:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "306:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "319:opponent": [
+   "[]"
+  ],
+  "319:player": [
+   "[]"
+  ],
+  "320:opponent": [
+   "[]"
+  ],
+  "320:player": [
+   "[]"
+  ],
+  "321:opponent": [
+   "[]"
+  ],
+  "321:player": [
+   "[]"
+  ],
+  "322:opponent": [
+   "[]"
+  ],
+  "322:player": [
+   "[]"
+  ],
+  "323:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "325:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "325:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "332:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "334:opponent": [
+   "[]"
+  ],
+  "334:player": [
+   "[]"
+  ],
+  "336:opponent": [
+   "[]"
+  ],
+  "336:player": [
+   "[]"
+  ],
+  "337:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "337:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "339:opponent": [
+   "[]"
+  ],
+  "339:player": [
+   "[]"
+  ],
+  "33:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]},{\"C\":[[\"n\",1,\"f\"],[\"n\",2,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",2]],\"pw\":[782,782]}]",
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "33:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]},{\"C\":[[\"n\",1,\"f\"],[\"n\",2,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",2]],\"pw\":[782,782]}]",
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "341:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "343:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "343:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "347:opponent": [
+   "[]"
+  ],
+  "347:player": [
+   "[]"
+  ],
+  "38:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "38:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "39:opponent": [
+   "[]"
+  ],
+  "39:player": [
+   "[]"
+  ],
+  "3:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "3:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "42:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "42:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "43:opponent": [
+   "[]"
+  ],
+  "43:player": [
+   "[]"
+  ],
+  "47:opponent": [
+   "[]"
+  ],
+  "47:player": [
+   "[]"
+  ],
+  "48:opponent": [
+   "[]"
+  ],
+  "48:player": [
+   "[]"
+  ],
+  "49:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "49:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "4:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "4:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "50:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]],\"pw\":[782,782]}]"
+  ],
+  "51:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "51:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "5:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "5:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "62:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "63:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "65:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "65:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "74:opponent": [
+   "[]"
+  ],
+  "74:player": [
+   "[]"
+  ],
+  "75:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "75:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "76:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]],\"pw\":[782,782]}]"
+  ],
+  "76:player": [
+   "[]"
+  ],
+  "78:opponent": [
+   "[]"
+  ],
+  "78:player": [
+   "[]"
+  ],
+  "79:opponent": [
+   "[]"
+  ],
+  "79:player": [
+   "[]"
+  ],
+  "82:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "82:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "83:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "83:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "86:opponent": [
+   "[]"
+  ],
+  "86:player": [
+   "[]"
+  ],
+  "87:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "87:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "88:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "88:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "92:opponent": [
+   "[]"
+  ],
+  "92:player": [
+   "[]"
+  ],
+  "93:opponent": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "93:player": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "93:unattributed": [
+   "[{\"C\":[[\"n\",0,\"f\"]]},{\"D\":[[\"n\",0]]}]"
+  ],
+  "95:opponent": [
+   "[]"
+  ],
+  "95:player": [
+   "[]"
+  ],
+  "97:opponent": [
+   "[]"
+  ],
+  "97:player": [
+   "[]"
+  ],
+  "entry": [
+   "[]",
+   "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]],\"pw\":[782,782]}]"
+  ]
+ },
  "promptCycle": {
   "created [3, 4] destroyed [3, 4] class FDERIVED priorityWord 782 y -96": 20,
   "created [3, 4] destroyed [4, 3] class FDERIVED priorityWord 782 y -96": 8

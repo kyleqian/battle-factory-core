@@ -319,6 +319,9 @@ SHORT = {"equal priority word, different y (y is species/position dependent)": "
          "tied but a member predates the unit (no creation record)": "tied member predates unit"}
 
 
+ORDER_DEPENDENT = {52, 53, 299, 88, 189, 28, 288, 291, 215, 195, 348, 82, 325}  # Ember, Flamethrower, Blaze Kick, Rock Throw, Mud Slap, Sand Attack, Grudge, Dive, Heal Bell, Perish Song, Leaf Blade, Dragon Rage, Shadow Punch
+
+
 def markdown(out):
     names = {int(v): n for n, v in re.findall(r"#define MOVE_(\w+)\s+(\d+)", (ROOT / "reference/pokeemerald/include/constants/moves.h").read_text())}
 
@@ -416,6 +419,7 @@ def main(argv):
     # ---- replay: entry constant + plans only
     stat = collections.Counter()
     bad_edges = []
+    target_edges = collections.defaultdict(list)  # order-dependent adapter ids: how each of their activation edges replays
     for sc, T in zip(SC, toks):
         sim, ok, gap_ok = Sim(), True, True
         if not sc["entryMatchesProvider"]:
@@ -430,6 +434,9 @@ def main(argv):
                     break
                 key = ukey(sc, u)
                 stat["edges"] += 1
+                if u["mv"] in ORDER_DEPENDENT:
+                    target_edges[u["mv"]].append({"file": sc["file"], "edgeIndex": (ui - 1) // 2,
+                                                  "status": ("exact" if sim.F == u["observedFreeAtEdge"] else "MISMATCH") if ok else "preceded by a non-EXACT unit"})
                 if ok:
                     stat["edgesPrecededByExactPlans"] += 1
                     stat["laterEdgesPrecededByExactPlans" if ui > 1 else "firstEdgesPrecededByExactPlans"] += 1
@@ -452,6 +459,9 @@ def main(argv):
                 continue
             planw = [dict(pw_, cls=ow.get("cls", "SINGLE")) for pw_, ow in zip(plan, tw)]
             sim.apply_unit(planw, None)
+    gshape = collections.defaultdict(set)
+    for key, r in grow.items():
+        gshape[key.split(">")[0]] |= {json.dumps(r["plan"], separators=(",", ":"))} | set(r.get("otherPlans", {}))
     # ---- prompt cycle: cursor pair create + destroy inside one gap (turn boundary)
     pc = collections.Counter()
     for sc in SC:
@@ -476,7 +486,8 @@ def main(argv):
            "tokens": "('n',k)=k-th sprite created by this unit (creation order: lowest-free ascending then end descending); ('c',ago,k)=survivor k of the unit `ago` units earlier (units alternate body,gap); ('o',slot)=occupant that predates every unit",
            "groupClasses": "SINGLE | STATIC (distinct priority words) | FDERIVED (tied keys; creation window then free-order index) | KEYS",
            "replay": dict(stat), "replayMismatches": bad_edges[:20],
-           "liveIds": sorted(lives), "liveIdOrientationCells": dict(cells), "promptCycle": dict(pc),
+           "liveIds": sorted(lives), "liveIdOrientationCells": dict(cells), "orderDependentAdapterEdges": {str(k): v for k, v in sorted(target_edges.items())},
+           "gapShapesAfterBody": {k: sorted(v) for k, v in sorted(gshape.items())}, "promptCycle": dict(pc),
            "bodiesWithTwoOrMoreScenarios": sum(r["scenarios"] > 1 for r in brow.values()),
            "bodies": brow, "gaps": grow}
     covered = {int(k.split(":")[0]) for k in brow}
