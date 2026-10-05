@@ -2,7 +2,7 @@
 """Generate minimal BattleLab scenarios into tools/integration/fixtures/plan-coverage-scenarios/ for NOT-OBSERVED (move, side) pairs that have no
 stock mechanic-<move>-*.json for that attacker side. Template = tools/battle-lab/mechanic-quick-attack-{,player-}pidgeotto-onix.json (battler
 override of the lead's four moves = [move]*4, same A,A trace) -- the existing generator pattern of spriteOrderBodyPlansCoverageBatch.py's inputs.
-usage: spriteOrderPlanCoverageScenarios.py [plans.json] [--min-weight-pct 0.0]   (pure python3)"""
+usage: spriteOrderPlanCoverageScenarios.py [plans.json]  (--force: also for pairs whose stock scenarios exist but never produced a body edge) [--force]   (pure python3)"""
 import copy, glob, json, sys
 from pathlib import Path
 sys.path.insert(0, "tools/integration")
@@ -25,7 +25,7 @@ def main(argv):
             if R.verdict(plans, m, s) != "NOT-OBSERVED":
                 continue
             fs = glob.glob(f"tools/battle-lab/mechanic-{slug}-*.json") + glob.glob(str(OUT / f"{slug}-*.json"))
-            if any(P.side_of({"move": m, "scenario": str(f)}) == s for f in fs):
+            if "--force" not in argv and any(P.side_of({"move": m, "scenario": str(f)}) == s and json.loads(Path(f).read_text()).get("profile") == "battle-scene-on" for f in fs):
                 continue
             d = json.loads((R.ROOT / TPL[s]).read_text())
             d["overrides"]["battlers"] = {s: {"moves": [m] * 4, "ppUps": [0, 0, 0, 0]}}

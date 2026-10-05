@@ -28,7 +28,7 @@ def jobs():
             if R.verdict(plans, m, s) != "NOT-OBSERVED":
                 continue
             fs = sorted(glob.glob(f"tools/battle-lab/mechanic-{slug}-*.json")) + sorted(glob.glob(f"tools/integration/fixtures/plan-coverage-scenarios/{slug}-*.json"))
-            ok = [f for f in fs if P.side_of({"move": m, "scenario": f}) == s and f not in seen][:PER]
+            ok = [f for f in fs if P.side_of({"move": m, "scenario": f}) == s and f not in seen and json.loads(Path(f).read_text()).get("profile") == "battle-scene-on"][:PER]
             seen.update(ok)
             out += [(m, f) for f in ok]
     return out
