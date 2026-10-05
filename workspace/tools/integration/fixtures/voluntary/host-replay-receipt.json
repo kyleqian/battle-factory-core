@@ -412,5 +412,42 @@
    ],
    "lendEqualsRole": true
   }
+ },
+ {
+  "fixture": "tools/integration/fixtures/voluntary-swift-opponent-faintko2.json",
+  "edge": 2205,
+  "modelMismatches": 0,
+  "today": {
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "orderLend": "lent",
+   "allocatorInput": null,
+   "allocatorReseededAt": [
+    "switch-in (reseedLiveSpriteAllocatorAfterSendOut)",
+    "send-out (reseedLiveSpriteAllocatorAfterSendOut)"
+   ],
+   "allocatorHistoryLostAfterBodies": [
+    129,
+    53
+   ],
+   "lendEqualsRole": true
+  },
+  "proposed": {
+   "hostKnown": true,
+   "invalidReason": null,
+   "hostViewEqualsModel": true,
+   "orderLend": "lent",
+   "allocatorInput": null,
+   "allocatorReseededAt": [
+    "switch-in (reseedLiveSpriteAllocatorAfterSendOut)",
+    "send-out (reseedLiveSpriteAllocatorAfterSendOut)"
+   ],
+   "allocatorHistoryLostAfterBodies": [
+    129,
+    53
+   ],
+   "lendEqualsRole": true
+  }
  }
 ]

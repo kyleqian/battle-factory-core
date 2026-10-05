@@ -55,6 +55,10 @@ export const SCENARIOS: Record<string, Step[]> = {
   // SNORLAX (faster) vs SLOWBRO x3 Swift. T1 cancel, Light Screen / Swift; T2 Heal Bell / Swift.
   "voluntary-cancel-lightscreen": [...MENU_CANCEL, ...mv(113, "player"), ...mv(129, "opponent", true),
     P, C, ...mv(215, "player"), ...mv(129, "opponent", true)],
+  // As above with NINETALES from party slot 2 and a faster JOLTEON send-out: T3 Swift O (first), Sunny Day P, sun.
+  "voluntary-faint-ko-slot2-swift": [P, C, ...mv(129, "opponent", true), ...PLAYER_FAINT_SWITCH,
+    P, C, ...mv(53, "player", true), ...OPPONENT_KO_SEND_OUT,
+    P, C, ...mv(129, "opponent", true), ...mv(241, "player"), ...SUN],
 };
 
 const maskSlots = (mask: string) => { const b = BigInt(`0x${mask}`); return Array.from({ length: 64 }, (_, s) => s).filter(s => (b >> BigInt(s)) & 1n); };

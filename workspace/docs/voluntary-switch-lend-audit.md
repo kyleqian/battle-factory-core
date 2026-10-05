@@ -5,12 +5,12 @@ This follows `docs/playerfaint-lend-audit.md` (role map ρ, forced switch) and `
 
 ## 0. Results first
 
-* **ROM ground truth** (§2). 6 BattleLab scenarios (`overrides.parties`), each run twice fresh; every pair is byte-identical. Model vs ROM: **40 activation edges, all known, 0 mismatches**.
+* **ROM ground truth** (§2). 7 BattleLab scenarios (`overrides.parties`), each run twice fresh; every pair is byte-identical. Model vs ROM: **45 activation edges, all known, 0 mismatches**.
   The checks per edge are F, occupancy, battler slots, ROM roles (`gHealthboxSpriteIds` + other half + bar, `shadowSpriteId`), empty task table, condition (b), and proposed lend == role lend.
   Geometries:
   * cancel: 3 scenarios, JOLTEON / NINETALES / SNORLAX leads vs SLOWBRO / JOLTEON;
   * voluntary switch: to party slot 1 (SNORLAX, NINETALES) and to party slot 2 (SNORLAX ×2);
-  * player faint → forced switch-in → opponent KO + send-out.
+  * player faint → forced switch-in (from party slot 1 or slot 2) → opponent KO + send-out (SLOWBRO or JOLTEON).
 * **After the both-battlers reshow (cancel, or the return from a voluntary choose)**, occupancy is `{0,1,2,3,4,60..63}`:
   * battler sprites P 0 / O 1, healthbox mains P 2 / O 3 (other/bar 63,62 / 61,60), enemy shadow 4;
   * matrices P 0 / O 1, bitmap `0x3`, no tasks;
@@ -25,18 +25,18 @@ This follows `docs/playerfaint-lend-audit.md` (role map ρ, forced switch) and `
 
   A wrong guess there can never reach a body edge.
 * **Condition (b): YES under the role map** with the reshowBoth roles. The ROM occupant prefix is `[62,60,2,63,3,61,0,1,4]` after the reshow and `[62,60,2,63,3,61,5,1,4]` after the voluntary switch-in. With ρ (battlers → 6/8, healthbox mains → 0/1, shadow → 2) both relabel exactly to the entry prefix `[62,60,0,63,1,61,6,8,2]`, at every edge.
-* **Opponent KO after a player faint** (case (c)): **today's production already handles it.** The roles set by `reshowPlayerGone` persist through the faint, the summary and the send-out. At the edge, occupancy is `{1,2,3,5,6,60..63}` and battlers are P 5 / O 6. The production lend equals the role lend, and Sunny Day P renders 158/158 with today's lend.
-* **What-if** (§3): **14 dense windows, all 0 residual under the role lend**, compared against both fresh runs. Verdicts:
+* **Opponent KO after a player faint** (case (c)): **today's production already handles it.** The roles set by `reshowPlayerGone` persist through the faint, the summary and the send-out. At the edge, occupancy is `{1,2,3,5,6,60..63}` and battlers are P 5 / O 6. The production lend equals the role lend, and Sunny Day P renders 158/158 and Swift O (slot-2 geometry) 80/80 with today's lend.
+* **What-if** (§3): **15 dense windows, all 0 residual under the role lend**, compared against both fresh runs. Verdicts:
   * **NEEDS-PARAM (role lend):** Sunny Day P ×2, Swift O ×3, Thunderbolt O, Heal Bell P ×3, Giga Drain O;
   * **NEEDS-PARAM (role lend + allocator re-seed):** Light Screen P ×3. These are 88/88 with the entry allocator host and 15/88 without it;
-  * **GENERALIZES:** Sunny Day P after faint → KO, at 158/158 today.
+  * **GENERALIZES:** Sunny Day P and Swift O after faint → KO, at 158/158 and 80/80 today.
 
   Today's production declines: 12–48 exact rows where measured.
 * **Today's production host** (§3.1) has two separate failures:
   * After a **cancel** the tracker is known, but the lend is **null** because `reshowBoth` sets the roles to null.
   * After a **voluntary switch** the tracker is **invalid**: `RECALL_OPCODES` maps the recall to "return to ball".
 
-  The emulated proposal fixes both. At all 14 fixtures the host is known, its view equals the model, and the lend equals the role lend. The existing `reseedLiveSpriteAllocatorAfterSendOut` already re-seeds after the voluntary switch-in once the roles are kept. The cancel return needs its own re-seed.
+  The emulated proposal fixes both. At all 15 fixtures the host is known, its view equals the model, and the lend equals the role lend. The existing `reseedLiveSpriteAllocatorAfterSendOut` already re-seeds after the voluntary switch-in once the roles are kept. The cancel return needs its own re-seed.
 * **Proposal** (§4) has four parts:
   1. `battle-reshow {playerBattlerPresent: true}` sets roles from survivors n2/n5/n8.
   2. `switch-out` keeps the roles.
@@ -81,6 +81,7 @@ A **JOLTEON switch-in target absorbs Thunderbolt** (Volt Absorb: no animation), 
 | `voluntary-slot1-thunderbolt` | SNORLAX (speed 0), NINETALES, MAGIKARP / SLOWBRO ×3 Thunderbolt | 335 recall, **575 Thunderbolt O** (no EXACT plan for `85:opponent`: tracker ends after it) | 2/2 known, 0 | `998a41c4` |
 | `voluntary-slot2-gigadrain` | JOLTEON, MAGIKARP, SNORLAX / SLOWBRO ×3 Giga Drain | 347 recall, **578 Giga Drain O** (no EXACT plan for `202:opponent`) | 2/2 known, 0 | `6e318688` |
 | `voluntary-faint-ko-sunnyday` | MAGIKARP L5, NINETALES (Flamethrower, Sunny Day, Swift, …), SNORLAX / SHEDINJA (Swift), SLOWBRO ×2 | 99 Swift O (entry; KOs MAGIKARP) → forced → NINETALES; 935 Flamethrower P (KOs SHEDINJA) → summary + send-out; **2197 Sunny Day P**, 2498 Swift O, 2749 SUN, 3034 Swift P, 3218, 3470 | 8/8 known, 0 | `fff08091` |
+| `voluntary-faint-ko-slot2-swift` | MAGIKARP L5, SNORLAX, NINETALES (slot 2; forced menu DOWN ×2) / SHEDINJA (Swift), JOLTEON ×2 Swift | 99 Swift O (entry) → forced → NINETALES; 947 Flamethrower P (KOs SHEDINJA) → summary + JOLTEON send-out; **2205 Swift O**, 2395 Sunny Day P, 2752 SUN | 5/5 known, 0 | `75c4dd33` |
 
 The model is the production tracker (`createSpriteOrderTracker` + `applySpriteOrderPresentationEvent`), driven only by each scenario's semantic step list (`voluntaryModelCheck.ts` `SCENARIOS`).
 * A voluntary menu is `action-prompt, party-menu-reset (open), party-menu-reset (exit), battle-reshow {playerBattlerPresent: true}`.
@@ -94,7 +95,7 @@ The model is the production tracker (`createSpriteOrderTracker` + `applySpriteOr
 | known entry | `{0,1,2,6,8,60..63}` | [6, 8] | [1, 2] | `0x6` | – | `[62,60,0,63,1,61,6,8,2]` | `4,3,21,20,5,19,…` |
 | after reshowBoth (cancel, or before the recall; 14 edges, F head at the first post-menu activation) | `{0,1,2,3,4,60..63}` | [0, 1] | [0, 1] | `0x3` | – | `[62,60,2,63,3,61,0,1,4]` | `5,6,7,8,9,…` |
 | after the voluntary switch-in (slot 1 / slot 2; 18 edges, F head at the first one) | `{1,2,3,4,5,60..63}` | [5, 1] | [0, 1] | `0x3` | – | `[62,60,2,63,3,61,5,1,4]` | `21,20,6,19,18,…` |
-| after player faint → forced switch-in → opponent KO + send-out | `{1,2,3,5,6,60..63}` | [5, 6] | [1, 0] | `0x3` | – | `[62,60,1,63,2,61,5,6,3]` | `0,4,21,20,7,19,…` |
+| after player faint → forced switch-in → opponent KO + send-out (both geometries) | `{1,2,3,5,6,60..63}` | [5, 6] | [1, 0] | `0x3` | – | `[62,60,1,63,2,61,5,6,3]` | `0,4,21,20,7,19,…` |
 
 The matrix numbers after the reshow are P 0 / O 1. That is a third matrix assignment, after the entry's 1/2 and the post-KO 1/0. It is still lowest-free and isomorphic, so the entry-label allocator host fits it, as the Light Screen windows show (§3).
 
@@ -112,7 +113,7 @@ The matrix numbers after the reshow are P 0 / O 1. That is a third matrix assign
 * n5..n7 = opponent healthbox 3, 61, 60;
 * n8 = shadow 4.
 
-The roles in the model check are derived from these survivors and never from the ROM. They match the ROM read at all 40 edges (`checks.roles`). The recall and the switch-in leave the healthboxes and the shadow untouched.
+The roles in the model check are derived from these survivors and never from the ROM. They match the ROM read at all 45 edges (`checks.roles`). The recall and the switch-in leave the healthboxes and the shadow untouched.
 
 ### 2.3 Recall group order (`voluntaryRecallOrder.ts`, `fixtures/voluntary/recall-order-receipt.json`)
 
@@ -150,6 +151,7 @@ Lends:
 | LIGHT_SCREEN | P | cancel-slot1 @3153 | 88 | **88/88** (entry host) | 15/88 | **NEEDS-PARAM** ρ + re-seed |
 | LIGHT_SCREEN | P | cancel-slot2 @2432 | 88 | **88/88** (entry host) | 15/88 | **NEEDS-PARAM** ρ + re-seed |
 | SUNNY_DAY | P | faint-ko-sunnyday @2197 (faint → forced → KO + send-out) | 158 | 158/158 | **158/158** (today's lend) | **GENERALIZES** |
+| SWIFT | O | faint-ko-slot2-swift @2205 (faint → forced from slot 2 → KO + JOLTEON send-out) | 80 | 80/80 | **80/80** (today's lend) | **GENERALIZES** |
 
 The ρ lend without the allocator gives Light Screen 15/88 (`role-none`), so the allocator input is required. "declines" means today's lend is null at that edge: the model check and the host replay show `productionLend: null`. Those windows were not rendered a second time without an order.
 
@@ -161,11 +163,11 @@ Each draft's semantic history (`precedingTurns`) is replayed through `liveSprite
 
 The recall is the synthesized `set-battler-sprite-visibility` event with the `B_SCR_OP_RETURNATKTOBALL` provenance.
 
-| | 5 post-cancel drafts | 8 post-voluntary-switch drafts | faint → KO draft |
+| | 5 post-cancel drafts | 8 post-voluntary-switch drafts | 2 faint → KO drafts |
 |---|---|---|---|
 | today: host tracker | known, view == model | **invalid** ("return to ball") | known |
 | today: `lendLiveSpriteOrder` | **undefined** (roles null after reshowBoth) | undefined | lent, == role lend |
-| proposed: tracker known, view == model, lend == role lend | 5/5 | 8/8 | 1/1 |
+| proposed: tracker known, view == model, lend == role lend | 5/5 | 8/8 | 2/2 |
 | proposed: allocator re-seed | at the cancel return (Light Screen @325: input **present**) | by the **existing** `reseedLiveSpriteAllocatorAfterSendOut` after the switch-in (roles kept → reseedable) | existing |
 
 **Caveat (pre-existing, not voluntary-specific).** The allocator history is lost again after bodies that are not net-zero-known, such as Sunny Day 241, Swift 129 and Flamethrower 53 (`allocatorHistoryLostAfterBodies`). As a result, Light Screen @3153 / @2432, which come after Swift/Sunny Day turns, get no allocator input in a real history even with the proposal. Their 88/88 windows prove the re-seeded labels, not the host's history coverage. Light Screen as the first allocator body after a cancel (@325) is covered end to end.
@@ -183,10 +185,10 @@ The recall is the synthesized `set-battler-sprite-visibility` event with the `B_
 
 Tests to add, all hermetic and built from this step's fixtures:
 * A tracker unit test: `[party-menu-reset, battle-reshow{true}]` from any tracker gives roles `{2, 3, 4}`, battlers 0/1, and `spriteOrderTrackerLend` = `model-check-voluntary-cancel-slot1.json` edge 0 `roleLend` (`3,4,5,7,9,10,…`). Adding `switch-out, switch-in-start, switch-in-finish` then gives battlers 5/1, roles kept, and lend = edge 4 `roleLend` (`21,20,4,19,…`).
-* A tracker scenario test: feed `SCENARIOS` of `voluntaryModelCheck.ts` and assert that the lend equals `roleLend` at all 40 edges. Today that lend is null.
+* A tracker scenario test: feed `SCENARIOS` of `voluntaryModelCheck.ts` and assert that the lend equals `roleLend` at all 45 edges. Today that lend is null.
 * A host test: replay each draft's `precedingTurns` with the `voluntary-party-menu` markers, as `replayVoluntaryTurns(…, "today")` does once production implements the proposal. Assert that the lend is defined and equals `roleLend`, and that the Light Screen @325 allocator input is present.
 * Recall order: pin the §2.3 invariance, so that all four variants give an equal F after the switch-in.
-* Dense acceptance: the 14 drafted fixtures `tools/integration/fixtures/voluntary-*.json` are in schema `voluntary-adapter-draft/v1`, `draft: true`, with `precedingTurns` recorded. Run them through `verifyLiveAdapterFramebuffer` once `fixturePostKoLend`'s replay understands the `voluntary-party-menu` marker and the recall provenance field `provenanceOpcodeName`, about 15 lines as in `replayVoluntaryTurns`.
+* Dense acceptance: the 15 drafted fixtures `tools/integration/fixtures/voluntary-*.json` are in schema `voluntary-adapter-draft/v1`, `draft: true`, with `precedingTurns` recorded. Run them through `verifyLiveAdapterFramebuffer` once `fixturePostKoLend`'s replay understands the `voluntary-party-menu` marker and the recall provenance field `provenanceOpcodeName`, about 15 lines as in `replayVoluntaryTurns`.
 
 ## 5. Open questions / caveats
 
@@ -209,7 +211,7 @@ V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py
 python3 tools/integration/voluntaryScenarios.py /tmp/vol     # base parties + stager plans (prints the plans)
 $V/mgba-venv/bin/python tools/integration/voluntaryStage.py /tmp/vol/base-cancel-slot1.json tools/battle-lab/voluntary-cancel-slot1.json \
   '{"turns":[{"cancel":true},0,{"switch":1},0,1],"frames":5200}'   # already committed; re-running rewrites the same segments
-for n in cancel-slot1 cancel-slot2 cancel-lightscreen slot1-thunderbolt slot2-gigadrain faint-ko-sunnyday; do
+for n in cancel-slot1 cancel-slot2 cancel-lightscreen slot1-thunderbolt slot2-gigadrain faint-ko-sunnyday faint-ko-slot2-swift; do
   for r in a b; do python3 tools/run-mgba-probe.py /tmp/vol/$n-$r.json -- $V/mgba-venv/bin/python tools/integration/postkoStateProbe.py tools/battle-lab/voluntary-$n.json /tmp/vol/$n-$r.json /tmp/vol/$n-$r-rgb; done
   cmp /tmp/vol/$n-a.json /tmp/vol/$n-b.json      # output files must not pre-exist (run-mgba-probe.py requires a fresh output)
   python3 tools/run-mgba-probe.py /tmp/vol/roles-$n.json -- $V/mgba-venv/bin/python tools/integration/voluntaryRoleProbe.py tools/battle-lab/voluntary-$n.json /tmp/vol/$n-a.json /tmp/vol/roles-$n.json

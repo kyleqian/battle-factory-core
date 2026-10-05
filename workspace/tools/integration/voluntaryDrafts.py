@@ -22,6 +22,7 @@ DRAFTS = [
     ("heal-bell-player-slot2", "cancel-slot2", 3187, "heal-bell-player", "SNORLAX", "JOLTEON", "two turns after a voluntary switch to party slot 2"),
     ("light-screen-player-cancel", "cancel-lightscreen", 325, "light-screen-player", "SNORLAX", "SLOWBRO", "first body after a cancelled voluntary party menu"),
     ("heal-bell-player-cancel", "cancel-lightscreen", 835, "heal-bell-player", "SNORLAX", "SLOWBRO", "turn after a cancelled voluntary party menu"),
+    ("swift-opponent-faintko2", "faint-ko-slot2-swift", 2205, "swift-opponent", "JOLTEON", "NINETALES", "player faint -> forced switch-in from party slot 2 -> opponent KO + send-out"),
     ("sunny-day-player-faintko", "faint-ko-sunnyday", 2197, "sunny-day-player", "NINETALES", "SLOWBRO", "player faint -> forced switch-in -> opponent KO + send-out"),
 ]
 MOVES = {"sunny-day": "SUNNY_DAY", "swift": "SWIFT", "heal-bell": "HEAL_BELL", "light-screen": "LIGHT_SCREEN", "thunderbolt": "THUNDERBOLT", "giga-drain": "GIGA_DRAIN"}

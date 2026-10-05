@@ -48,6 +48,12 @@ SCENARIOS = {
     "cancel-lightscreen": ({"player": [mon(SNORLAX, [LSCREEN, HEALBELL, SWIFT, SUNNY]), mon(JOLTEON, [SWIFT] * 4), mon(MAGIKARP, [SPLASH] * 4)],
                            "opponent": [slowbro(SWIFT)] * 3},
                           {"turns": [{"cancel": True}, 0, 1], "frames": 2400}),
+    # G: as C with the replacement from party slot 2 (forced menu DOWN x2) and a faster JOLTEON send-out: T3 Swift O first, then Sunny Day P.
+    "faint-ko-slot2-swift": ({"player": [mon(MAGIKARP, [SPLASH] * 4, speed=0, level=5), mon(SNORLAX, [SWIFT] * 4),
+                                         mon(NINETALES, [FLAME, SUNNY, SWIFT, LSCREEN])],
+                              "opponent": [mon(SHEDINJA, [SWIFT] * 4, speed=0, nature=2, gender="genderless"),
+                                           mon(JOLTEON, [SWIFT] * 4, speed=0, nature=2), mon(JOLTEON, [SWIFT] * 4, speed=0, nature=2)]},
+                             {"turns": [0, 0, 1], "forcedDown": 2, "frames": 3400}),
 }
 
 if __name__ == "__main__":

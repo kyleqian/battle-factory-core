@@ -143,6 +143,19 @@
   "verdict": "NEEDS-PARAM (role lend)"
  },
  {
+  "draft": "voluntary-swift-opponent-faintko2.json",
+  "move": "SWIFT",
+  "side": "opponent",
+  "scenario": "tools/battle-lab/voluntary-faint-ko-slot2-swift.json",
+  "edge": 2205,
+  "rows": 80,
+  "whatif": {
+   "production-entry": "80/80",
+   "role-entry": "80/80"
+  },
+  "verdict": "GENERALIZES"
+ },
+ {
   "draft": "voluntary-swift-opponent-slot2.json",
   "move": "SWIFT",
   "side": "opponent",

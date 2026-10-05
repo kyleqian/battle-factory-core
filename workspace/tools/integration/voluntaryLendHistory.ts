@@ -177,7 +177,7 @@ export function replayVoluntaryTurns(turns: readonly Turn[], mode: "today" | "pr
 
 export const VOLUNTARY_FIXTURES = ["sunny-day-player", "swift-opponent", "heal-bell-player", "light-screen-player", "thunderbolt-opponent",
   "giga-drain-opponent", "swift-opponent-cancel", "sunny-day-player-cancel2", "swift-opponent-slot2", "light-screen-player-slot2",
-  "heal-bell-player-slot2", "light-screen-player-cancel", "heal-bell-player-cancel", "sunny-day-player-faintko"]
+  "heal-bell-player-slot2", "light-screen-player-cancel", "heal-bell-player-cancel", "sunny-day-player-faintko", "swift-opponent-faintko2"]
   .map(name => `tools/integration/fixtures/voluntary-${name}.json`);
 
 if (process.argv.includes("--run") || process.argv.includes("--write")) {
