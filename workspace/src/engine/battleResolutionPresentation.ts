@@ -105,7 +105,9 @@ export type BattleFaintTiming =
       healthboxVanishFrame: number;
     }>;
 export type BattleSwitchInTiming = Readonly<{ minimumFrames: number }>;
-export type BattleSpriteVisibilityTiming = Readonly<{ minimumFrames: 1 }>;
+export type BattleSpriteVisibilityTiming = Readonly<{
+  minimumFrames: 1 | typeof FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES;
+}>;
 export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 }>;
 export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38 }>;
 
@@ -218,6 +220,13 @@ export type BattleResolutionPresentationCommand =
       eventSequence: number;
       battler: 0 | 1;
       timing: BattleSwitchInTiming;
+      /**
+       * Scene ON forced switch-out (`Cmd_returntoball`, skipAnim = TRUE;
+       * docs/forced-switch-continuation.md): no recall animation -- the live
+       * body left the target off-screen, so this hold draws no target until
+       * the recall receipt removes it and its healthbox.
+       */
+      skipAnimation?: true;
     }>
   | Readonly<{
       type: "sprite-visibility";
@@ -642,6 +651,15 @@ export const SWITCH_IN_WAITSTATE_HOLD_FRAMES = 11;
  */
 export const RETURN_TO_BALL_SPAN_FRAMES = 32;
 const SWITCH_OUT_TIMING = Object.freeze({ minimumFrames: RETURN_TO_BALL_SPAN_FRAMES } as const);
+/**
+ * Scene ON forced switch-out after a Roar/Whirlwind body (docs/forced-switch-continuation.md §1, §6): `Cmd_returntoball`
+ * passes skipAnim = TRUE, so `OpponentHandleReturnMonToBall`/`PlayerHandleReturnMonToBall` destroy the sprite and hide
+ * the healthbox in one step (body end E -> E+4), and `switchinanim` starts the send-in 6 frames later (E+10). The body's
+ * final dense row is E itself, so the hold covers E+1..E+3 and the recall receipt E+4..E+9.
+ */
+export const FORCED_RETURN_TO_BALL_HOLD_FRAMES = 3;
+export const FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES = 6;
+const FORCED_SWITCH_OUT_TIMING = Object.freeze({ minimumFrames: FORCED_RETURN_TO_BALL_HOLD_FRAMES } as const);
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
 /**
  * ISSUES #73 rung B correction (2026-08-04): the prior port (53, from
@@ -3197,6 +3215,8 @@ export function projectBattleResolutionCommands(
   let lastFaintBattler: 0 | 1 | null = null;
   let pendingStatusMessageBattler: 0 | 1 | null = null;
   let lastMoveAttacker: 0 | 1 | null = null;
+  // Target of the latest Scene ON MOVE_ANIMATION receipt (Scene OFF has none): its `returntoball` is the forced removal.
+  let sceneOnMoveTarget: 0 | 1 | null = null;
   let pendingHeldItemEffectBattler: 0 | 1 | null = null;
   const heldItems = [
     beforeRules.battlers[0]!.item,
@@ -3348,11 +3368,13 @@ export function projectBattleResolutionCommands(
     ) {
       const battler = singlesBattler(payload.battler ?? -1, "attack pause");
       if (payload.animationId === "MOVE_ANIMATION") {
+        const animation = battleMoveAnimationRequest(battler, payload.target, payload.arguments);
+        sceneOnMoveTarget = animation.target === battler ? null : animation.target;
         commands.push(Object.freeze({
           type: "move-animation",
           eventSequence: event.sequence,
           battler,
-          animation: battleMoveAnimationRequest(battler, payload.target, payload.arguments),
+          animation,
           // An unadapted move retains a bounded pause, explicitly reported by
           // the readiness registry. No substitute effect receives exact credit.
           timing: Object.freeze({ minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES }),
@@ -3501,6 +3523,11 @@ export function projectBattleResolutionCommands(
       // command (the outgoing mon's scale-up + teardown, rendered from the
       // switch-out view) ahead of the recall receipt that commits the hidden
       // sprite/healthbox after the span.
+      // Scene ON only: Roar/Whirlwind's `returntoball BS_TARGET` after a MOVE_ANIMATION receipt on that target (Baton
+      // Pass's `returntoball BS_ATTACKER` and every Scene OFF receipt keep the voluntary-style span below).
+      const forcedRemoval = event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL"
+        && payload.invisible && sceneOnMoveTarget === battler;
+      if (forcedRemoval) sceneOnMoveTarget = null;
       if (
         event.provenance?.opcodeName === "B_SCR_OP_RETURNATKTOBALL"
         || event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL"
@@ -3509,7 +3536,9 @@ export function projectBattleResolutionCommands(
           type: "switch-out",
           eventSequence: event.sequence,
           battler,
-          timing: SWITCH_OUT_TIMING,
+          ...(forcedRemoval
+            ? { timing: FORCED_SWITCH_OUT_TIMING, skipAnimation: true as const }
+            : { timing: SWITCH_OUT_TIMING }),
         }));
       }
       commands.push(Object.freeze({
@@ -3519,8 +3548,10 @@ export function projectBattleResolutionCommands(
         visible: !payload.invisible,
         // Each of BtlController_EmitReturnMonToBall/EmitSpriteInvisibility is
         // one controller callback; the receipt itself owns the relative
-        // display edge.
-        timing: Object.freeze({ minimumFrames: 1 as const }),
+        // display edge. The forced removal holds until `switchinanim`.
+        timing: Object.freeze({
+          minimumFrames: forcedRemoval ? FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES : 1 as const,
+        }),
         // See the "sprite-visibility" command type's own doc comment: the
         // real CONTROLLER_RETURNMONTOBALL receipts are Cmd_various's
         // VARIOUS_RETURN_OPPONENT_MON1/MON2 case and the voluntary-switch

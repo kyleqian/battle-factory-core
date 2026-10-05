@@ -21,11 +21,14 @@ interface SemanticEvent { sequence: number; payload: { kind: string; [key: strin
 /** Independent re-statement of the §2 event mapping (not the host module) for the prediction. `units`: the battle units
  * of docs/sprite-order-uncovered-units.md §3 (faint / next-mon summary + send-out / player switch-in / win slide);
  * false = the earlier behaviour (every unit invalidates), kept for before/after counts. */
-function mapEvent(event: SemanticEvent, hidden: boolean[], units = true): SpriteOrderPresentationEvent[] {
+/** Segment context of the forced switch-out (Roar/Whirlwind `returntoball` of the latest MOVE_ANIMATION target). */
+interface ForcedContext { segment: string; moveTarget: number | null; forced: number | null }
+function mapEvent(event: SemanticEvent, hidden: boolean[], units = true, forced?: ForcedContext): SpriteOrderPresentationEvent[] {
   const p = event.payload;
   if (p.kind === "animation") {
     const battler = p.battler as 0 | 1;
     if (p.animationId === "MOVE_ANIMATION") {
+      if (forced) forced.moveTarget = p.target === battler ? null : p.target as number;
       return [{ kind: "move-animation", moveId: battleMoveAnimationRequest(battler, p.target as number | undefined, p.arguments as string[]).moveId,
         attackerSide: battler === 0 ? "player" : "opponent" }];
     }
@@ -38,6 +41,12 @@ function mapEvent(event: SemanticEvent, hidden: boolean[], units = true): Sprite
     return name === null ? [] : [{ kind: "status-animation", status: name }];
   }
   if (p.kind === "set-battler-sprite-visibility") {
+    if (units && forced && event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL" && p.invisible
+      && forced.moveTarget === p.battler) {
+      forced.forced = p.battler as number;
+      return [{ kind: "forced-switch-out", side: p.battler === 0 ? "player" : "opponent" }];
+    }
+    if (forced && forced.forced === p.battler) forced.forced = null;
     if (["B_SCR_OP_VARIOUS", "B_SCR_OP_RETURNATKTOBALL", "B_SCR_OP_RETURNTOBALL"].includes(event.provenance?.opcodeName ?? "")) {
       return [{ kind: "invalidate", reason: "recall" }];
     }
@@ -46,10 +55,18 @@ function mapEvent(event: SemanticEvent, hidden: boolean[], units = true): Sprite
   }
   const battler = p.battler as number | undefined;
   if (units && (battler === 0 || battler === 1)) {
+    if (p.kind === "faint-animation" && forced) forced.forced = null;
+    if (p.kind === "draw-party-status-summary" && forced) forced.forced = null;
     if (p.kind === "faint-animation") return [{ kind: "faint", side: battler === 0 ? "player" : "opponent" }];
     if (p.kind === "draw-party-status-summary") return battler === 1 ? [{ kind: "party-summary-next" }] : [];
     if (p.kind === "hide-party-status-summary") return battler === 1 ? [{ kind: "party-summary-hide" }] : [];
     if (p.kind === "switch-in-animation") {
+      if (forced && forced.forced === battler) {
+        forced.forced = null;
+        const side = battler === 0 ? "player" as const : "opponent" as const;
+        return [{ kind: "switch-in-start", side }, { kind: "switch-in-finish", side }];
+      }
+      if (forced) forced.forced = null;
       return battler === 1 ? [{ kind: "next-mon-send-out" }] : [{ kind: "switch-in-start" }, { kind: "switch-in-finish" }];
     }
   }
@@ -71,6 +88,7 @@ export function predictTrackers(run: Replay, entryKnown: boolean, units = true) 
   const hidden = [false, false];
   const positions = new Map<string, SpriteOrderTracker>();
   const preBody = new Map<number, SpriteOrderTracker>();
+  const forced: ForcedContext = { segment: "", moveTarget: null, forced: null };
   let request: number | null = null;
   let segment = "";
   let index = 0;
@@ -83,7 +101,8 @@ export function predictTrackers(run: Replay, entryKnown: boolean, units = true) 
     if (`${row.requestId}:${row.segmentIndex}` !== segment) { segment = `${row.requestId}:${row.segmentIndex}`; index = 0; }
     positions.set(`${segment}:${index}`, tracker);
     if (event.payload.kind === "animation" && event.payload.animationId === "MOVE_ANIMATION") preBody.set(event.sequence, tracker);
-    for (const mapped of mapEvent(event, hidden, units)) tracker = applySpriteOrderPresentationEvent(tracker, mapped);
+    if (forced.segment !== segment) Object.assign(forced, { segment, moveTarget: null, forced: null });
+    for (const mapped of mapEvent(event, hidden, units, forced)) tracker = applySpriteOrderPresentationEvent(tracker, mapped);
     index += 1;
     positions.set(`${segment}:${index}`, tracker);
   }
@@ -100,6 +119,7 @@ export function predictLentOrders(run: Replay, entryKnown: boolean, invalidReque
     : invalidateSpriteOrderState(knownEntrySpriteOrderState("ordinary-factory")));
   const hidden = [false, false];
   const lent = new Map<number, readonly number[] | null>();
+  const forced: ForcedContext = { segment: "", moveTarget: null, forced: null };
   let request: number | null = null;
   // A later segment of the same request (player locked-action follow-up: no prompt) applies no prompt cycle. The
   // host additionally declines after a retained opponent-locked continuation (a real prompt it does not model); the
@@ -112,7 +132,9 @@ export function predictLentOrders(run: Replay, entryKnown: boolean, invalidReque
         : applySpriteOrderPresentationEvent(applySpriteOrderPresentationEvent(tracker, { kind: "action-prompt" }), { kind: "actions-committed" });
     }
     if (event.payload.kind === "animation" && event.payload.animationId === "MOVE_ANIMATION") lent.set(event.sequence, spriteOrderTrackerLend(tracker));
-    for (const mapped of mapEvent(event, hidden)) tracker = applySpriteOrderPresentationEvent(tracker, mapped);
+    const segment = `${row.requestId}:${row.segmentIndex}`;
+    if (forced.segment !== segment) Object.assign(forced, { segment, moveTarget: null, forced: null });
+    for (const mapped of mapEvent(event, hidden, true, forced)) tracker = applySpriteOrderPresentationEvent(tracker, mapped);
   }
   return lent;
 }

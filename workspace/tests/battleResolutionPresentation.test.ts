@@ -7,6 +7,8 @@ import {
   createBattleResolutionPresentation,
   createBattleTerminalResolutionPresentation,
   storeBattleTerminalPresentationDismiss,
+  FORCED_RETURN_TO_BALL_HOLD_FRAMES,
+  FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES,
   SWITCH_IN_SPAN_FRAMES,
   SWITCH_IN_WAITSTATE_HOLD_FRAMES,
   WAITMESSAGE_LONG_MESSAGE_IDS,
@@ -990,6 +992,99 @@ describe("battle resolution presentation receipt ownership", () => {
       battler: 0,
       partyStates: ["fainted", "healthy", "empty", "empty", "empty", "empty"],
     });
+  });
+
+  it("Scene ON forced switch-out after a live Whirlwind body: no recall animation, hide at E+4, send-in at E+10 (Baton Pass/OFF unchanged)", () => {
+    // docs/forced-switch-continuation.md §6: `returntoball` passes skipAnim = TRUE. The body's last dense row is E,
+    // so the hold covers E+1..E+3, the recall receipt hides sprite + healthbox E+4..E+9 and `switch-in` starts at E+10.
+    const initial = initialBattle();
+    const context = initial.rules.rulesContext;
+    const incoming = context.party.player[1]!;
+    const beforeContext = Object.freeze({
+      ...context,
+      party: Object.freeze({
+        ...context.party,
+        opponent: Object.freeze([
+          context.party.opponent[0]!, incoming, context.party.opponent[2]!,
+          context.party.opponent[3]!, context.party.opponent[4]!, context.party.opponent[5]!,
+        ]),
+      }),
+    });
+    const beforeRules = Object.freeze({ ...initial.rules, rulesContext: beforeContext }) as FactoryFullTurnDecisionRules;
+    const afterContext = Object.freeze({
+      ...beforeContext,
+      battlers: Object.freeze([
+        context.battlers[0]!,
+        Object.freeze({ ...context.battlers[1]!, ...incoming, side: 1 as const, partyIndex: 1, species: incoming.species }),
+        context.battlers[2]!, context.battlers[3]!,
+      ]) as typeof context.battlers,
+    });
+    const afterRules = Object.freeze({ ...initial.rules, rulesContext: afterContext }) as FactoryFullTurnDecisionRules;
+    const resolve = (withBody: boolean) => {
+      const input = inputFor([
+        event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [],
+          actionSnapshot: { attacker: 0, currentMove: 18, currentMovePosition: 0 } }, 2),
+        event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }, 3),
+        ...(withBody ? [event(2, { kind: "animation", animationId: "MOVE_ANIMATION", battler: 0, target: 1,
+          arguments: ["18", "0", "0", "0", "70", "0"] }, 14)] : []),
+        opcodeEvent(3, { kind: "set-battler-sprite-visibility", battler: 1, invisible: true }, "B_SCR_OP_RETURNTOBALL"),
+        event(4, { kind: "switch", side: "opponent", fromPartyIndex: 0, toPartyIndex: 1 }),
+        event(5, { kind: "switch-in-animation", battler: 1, partyIndex: 1 }),
+        event(6, { kind: "message", messageId: "STRINGID_PKMNWASDRAGGEDOUT", substitutions: [] }),
+      ], NEXT_COMMAND, afterRules);
+      return createBattleResolutionPresentation({
+        ...input, beforeRules,
+        fieldBoundary: createBattleCommandPresentation(input.sourceRequest, beforeRules.rulesContext).field,
+      });
+    };
+    const on = resolve(true);
+    const commands = on.segments[0]!.commands;
+    expect(commands).toMatchObject([
+      { type: "message" },
+      { type: "move-animation", animation: { moveId: 18, attacker: 0, target: 1 } },
+      { type: "switch-out", battler: 1, skipAnimation: true, timing: { minimumFrames: FORCED_RETURN_TO_BALL_HOLD_FRAMES } },
+      { type: "sprite-visibility", battler: 1, visible: false, recall: true,
+        timing: { minimumFrames: FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES } },
+      { type: "switch-in", battler: 1, toPartyIndex: 1 },
+      { type: "message", lines: ["Foe MACHOP was", "dragged out!"] },
+      { type: "turn-end" },
+    ]);
+    expect([FORCED_RETURN_TO_BALL_HOLD_FRAMES, FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES]).toEqual([3, 6]);
+    expect(battleResolutionCommandDuration(commands[2]!, on.field)).toBe(3);
+    expect(battleResolutionCommandDuration(commands[3]!, on.field)).toBe(6);
+    // E+1..E+3: no target pixels (the live body left it off-screen), healthbox still shown.
+    for (let elapsed = 0; elapsed < 3; elapsed += 1) {
+      const view = createBattleResolutionPresentationRenderView(atRenderClock(on, 2, elapsed));
+      expect(view.switchOut).toMatchObject({ battler: 1, spriteVisible: false });
+      expect(view.visibility.opponent).toEqual({ sprite: false, healthbox: true });
+    }
+    // E+4..E+9: the recall receipt hides sprite and healthbox together.
+    for (let elapsed = 0; elapsed < 6; elapsed += 1) {
+      const view = createBattleResolutionPresentationRenderView(atRenderClock(on, 3, elapsed));
+      expect(view.switchOut).toBeNull();
+      expect(view.visibility.opponent).toEqual({ sprite: false, healthbox: false });
+    }
+    // Scene OFF (no MOVE_ANIMATION receipt): the 32-frame voluntary-style span is unchanged.
+    const off = resolve(false).segments[0]!.commands;
+    expect(off.slice(0, 3)).toMatchObject([
+      { type: "message" },
+      { type: "switch-out", battler: 1, timing: { minimumFrames: 32 } },
+      { type: "sprite-visibility", battler: 1, recall: true, timing: { minimumFrames: 1 } },
+    ]);
+    expect(off[1]).not.toHaveProperty("skipAnimation");
+    // Baton Pass shape (`returntoball BS_ATTACKER`: the hidden battler is the body's attacker) keeps the span.
+    const baton = createBattleResolutionPresentation(inputFor([
+      event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, 2),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }, 3),
+      event(2, { kind: "animation", animationId: "MOVE_ANIMATION", battler: 0, target: 1,
+        arguments: ["226", "0", "0", "0", "70", "0"] }, 14),
+      opcodeEvent(3, { kind: "set-battler-sprite-visibility", battler: 0, invisible: true }, "B_SCR_OP_RETURNTOBALL"),
+    ], NEXT_COMMAND)).segments[0]!.commands;
+    expect(baton.slice(2, 4)).toMatchObject([
+      { type: "switch-out", battler: 0, timing: { minimumFrames: 32 } },
+      { type: "sprite-visibility", battler: 0, recall: true, timing: { minimumFrames: 1 } },
+    ]);
+    expect(baton[2]).not.toHaveProperty("skipAnimation");
   });
 
   it("presents a forced opponent recall, send-in, then dragged-out message without an ordinary trainer send-out message", () => {

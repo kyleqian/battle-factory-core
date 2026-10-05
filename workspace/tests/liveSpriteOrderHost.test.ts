@@ -18,7 +18,9 @@ type Replay = ReturnType<typeof generatedCommandAnimationReplay>;
 // 20-battle sweep: command edges compared host vs pure, host known, host declines where pure is known (all 27 = seed 17,
 // "command resolution without an action prompt": the locked-action continuation the host refuses), later bodies with a
 // known pre-body tracker (35 of 80 without the battle units).
-const SWEEP_PIN = { compared: 863, hostKnown: 477, declines: 27, laterAfter: 47 };
+// hostKnown 477 -> 524, laterAfter 47 -> 51: Roar/Whirlwind forced switch-out + send-in units keep the tracker known
+// (docs/forced-switch-continuation.md §2.4); declines and mismatches unchanged.
+const SWEEP_PIN = { compared: 863, hostKnown: 524, declines: 27, laterAfter: 51 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {
@@ -77,9 +79,14 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
       // Rung 2 (docs/postko-consumer-audit.md §4): after a modelled opponent faint + summary + send-out the occupancy is
       // role-isomorphic to the entry and later bodies may lend pi(F) (checked == the pure prediction above). After a
       // player-side unit (player faint, player switch-in, trainer slide) the lend still declines for the rest of the battle.
-      const events = route.on.semanticEvents.map(row => row.event as { sequence: number; payload: { kind: string; battler?: number } });
-      const invalidating = events.find(event => event.payload.kind === "trainer-slide-in"
-        || (["faint-animation", "switch-in-animation"].includes(event.payload.kind) && event.payload.battler === 0));
+      const events = route.on.semanticEvents.map(row => row.event as {
+        sequence: number; payload: { kind: string; battler?: number }; provenance?: { opcodeName?: string } });
+      // A forced (Roar/Whirlwind) player send-in is a modelled unit pair: it keeps the tracker known.
+      const forcedSendIn = (index: number) => events.slice(0, index).reverse()
+        .find(event => event.payload.kind !== "switch")?.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL";
+      const invalidating = events.find((event, index) => event.payload.kind === "trainer-slide-in"
+        || (event.payload.kind === "faint-animation" && event.payload.battler === 0)
+        || (event.payload.kind === "switch-in-animation" && event.payload.battler === 0 && !forcedSendIn(index)));
       if (invalidating) {
         invalidatedBattles += 1;
         expect(route.bodies.filter(body => body.sequence > invalidating.sequence).every(body => !body.known)).toBe(true);
@@ -94,7 +101,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
       }
     }
     // laterKnown 34 -> 44: the 10 post-KO bodies of seeds 8 (2), 10 (1) and 11 (7, five after a second opponent KO) now lend.
-    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 44, postKoLent: 10 });
+    // laterKnown 44 -> 48: the 4 bodies after a Roar/Whirlwind forced switch-out + send-in now lend (same pure prediction).
+    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 48, postKoLent: 10 });
     expect(laterUnknownAfterKnown).toBeGreaterThan(0);
     expect(invalidatedBattles).toBeGreaterThan(0);
   }, 120000);

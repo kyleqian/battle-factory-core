@@ -10,12 +10,15 @@
  *   any other animation id                           general-animation (HELD_ITEM_EFFECT / SUN_CONTINUES / ...)
  *   status-animation                                 status-animation (InitAndLaunchChosenStatusAnimation name)
  *   set-battler-sprite-visibility                    hiding (semi-invulnerable) or a return-to-ball receipt invalidates
- *                                                    (the voluntary recall stays invalidating: provisional, one instance)
+ *                                                    (the voluntary recall stays invalidating: provisional, one instance),
+ *                                                    except Roar/Whirlwind's `returntoball` of the segment's latest
+ *                                                    MOVE_ANIMATION target: forced-switch-out {side}
  *   faint-animation battler 0 / 1                    faint (player / opponent battler slot; unknown slot invalidates)
  *   draw-party-status-summary battler 1 / 0          party-summary-next / no allocation (no-op)
  *   hide-party-status-summary battler 1 / 0          party-summary-hide (adjacency marker) / no-op
  *   switch-in-animation battler 1                    next-mon-send-out (directly after the summary unit)
  *   switch-in-animation battler 0                    switch-in-start + switch-in-finish (after the party-menu reshow)
+ *   switch-in-animation after a forced switch-out    switch-in-start + switch-in-finish {side} (no summary in between)
  *   switch (Cmd_getswitchedmondata)                  data only: no-op
  *   trainer-slide-in                                 trainer-slide-end (end-of-battle win slide)
  *   trainer-slide-out (mid-battle), outcome          invalidate
@@ -161,9 +164,40 @@ export function beginLiveSpriteOrderTurn(
   return Object.freeze({ ...next, tracker, promptRequestId: requestId });
 }
 
+/**
+ * Roar/Whirlwind's forced `returntoball` (skipAnim; docs/forced-switch-continuation.md §1.1): a RETURNTOBALL hide of the
+ * battler the segment's latest MOVE_ANIMATION targeted (not its attacker: Baton Pass's `returntoball BS_ATTACKER` is not
+ * modelled and keeps invalidating).
+ */
+function isForcedSwitchOut(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const event = events[index]!;
+  const payload = event.payload;
+  if (payload.kind !== "set-battler-sprite-visibility" || !payload.invisible
+    || event.provenance?.opcodeName !== "B_SCR_OP_RETURNTOBALL") return false;
+  for (let at = index - 1; at >= 0; at--) {
+    const earlier = events[at]!.payload;
+    if (earlier.kind === "animation" && earlier.animationId === "MOVE_ANIMATION") {
+      return earlier.target !== earlier.battler && earlier.target === payload.battler;
+    }
+  }
+  return false;
+}
+
+/** The send-in of a forced switch-out earlier in the segment (no party summary or other send-in in between). */
+function followsForcedSwitchOut(events: readonly BattleKernelSemanticEvent[], index: number, battler: 0 | 1): boolean {
+  for (let at = index - 1; at >= 0; at--) {
+    const earlier = events[at]!.payload;
+    if (earlier.kind === "draw-party-status-summary" || earlier.kind === "switch-in-animation"
+      || earlier.kind === "faint-animation") return false;
+    if (earlier.kind === "set-battler-sprite-visibility" && earlier.battler === battler) return isForcedSwitchOut(events, at);
+  }
+  return false;
+}
+
 function orderEventOf(
-  event: BattleKernelSemanticEvent, hidden: readonly [boolean, boolean],
+  events: readonly BattleKernelSemanticEvent[], index: number, hidden: readonly [boolean, boolean],
 ): { event?: SpriteOrderPresentationEvent; then?: SpriteOrderPresentationEvent; hidden?: readonly [boolean, boolean] } {
+  const event = events[index]!;
   const payload = event.payload;
   if (payload.kind === "faint-animation" || payload.kind === "draw-party-status-summary"
     || payload.kind === "hide-party-status-summary" || payload.kind === "switch-in-animation") {
@@ -178,6 +212,10 @@ function orderEventOf(
       case "hide-party-status-summary":
         return battler === 1 ? { event: { kind: "party-summary-hide" } } : {};
       case "switch-in-animation":
+        if (followsForcedSwitchOut(events, index, battler)) {
+          const side = battler === 0 ? "player" as const : "opponent" as const;
+          return { event: { kind: "switch-in-start", side }, then: { kind: "switch-in-finish", side } };
+        }
         return battler === 1 ? { event: { kind: "next-mon-send-out" } }
           : { event: { kind: "switch-in-start" }, then: { kind: "switch-in-finish" } };
     }
@@ -210,6 +248,9 @@ function orderEventOf(
     return name === null ? {} : { event: { kind: "status-animation", status: name } };
   }
   if (payload.kind === "set-battler-sprite-visibility") {
+    if (isForcedSwitchOut(events, index)) {
+      return { event: { kind: "forced-switch-out", side: payload.battler === 0 ? "player" : "opponent" } };
+    }
     if (RECALL_OPCODES.has(event.provenance?.opcodeName ?? "")) return { event: { kind: "invalidate", reason: "return to ball" } };
     if (payload.battler !== 0 && payload.battler !== 1) return { event: { kind: "invalidate", reason: "visibility battler" } };
     const next: [boolean, boolean] = [hidden[0], hidden[1]];
@@ -248,7 +289,7 @@ export function advanceLiveSpriteOrderHost(
   const apply = (events: readonly BattleKernelSemanticEvent[], from: number, limit: number, strict: boolean) => {
     let index = from;
     while (index < events.length && (strict ? events[index]!.sequence < limit : events[index]!.sequence <= limit)) {
-      const mapped = orderEventOf(events[index]!, hidden);
+      const mapped = orderEventOf(events, index, hidden);
       if (mapped.hidden) hidden = mapped.hidden;
       if (mapped.event) tracker = applySpriteOrderPresentationEvent(tracker, mapped.event);
       if (mapped.then) tracker = applySpriteOrderPresentationEvent(tracker, mapped.then);
