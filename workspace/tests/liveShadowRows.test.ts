@@ -88,7 +88,7 @@ describe("live elevated-opponent shadow rows (#142)", () => {
   });
 
   // Public live render path: elevated GOLBAT target (player attacker) and attacker (opponent attacker).
-  const sample = [57, 330, 196, 59, 252, 322, 34, 5, 115, 280, 101, 2, 163, 44, 92, 93, 347, 158, 207, 339, 76, 236, 212, 265, 111, 275, 35, 225];
+  const sample = [57, 330, 196, 59, 252, 322, 34, 5, 115, 280, 101, 2, 163, 44, 92, 93, 347, 158, 207, 339, 76, 236, 212, 265, 111, 275, 35, 225, 296, 312, 266, 118, 187];
   for (const id of sample) {
     for (const orientation of ["player", "opponent"] as const) {
       it(`id ${id} ${orientation}: shadow on row 0 iff the activation frame is in the window`, () => {
