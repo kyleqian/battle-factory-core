@@ -1,5 +1,16 @@
 # Animation integration progress
 
+## 2026-10-04 — visual-randomness prep banked (evidence only)
+
+- Side-lane prep `d4356b7a1` folded (new files only):
+  `docs/visual-randomness-prep.md`. Astonish, Double Kick, Thrash, Flail,
+  Luster Purge, Mud Slap and Sand Attack draw only `Random2()` (gRng2Value;
+  never gameplay RNG — Scene ON/OFF cannot desync gameplay); Dizzy Punch and
+  Teeter Dance need only the attacker personality (exact now). gRng2Value's
+  per-frame advance during Double Kick is empirical (caller not found) — open.
+- Recommended next: Dizzy Punch + Teeter Dance (personality), Flail (power +
+  2 words), then a presentation-only Random2 helper for the rest.
+
 ## 2026-10-04 — session wind-down: anchor4 folded, 131 live adapters
 
 - Folded anchor4 `17e7a98f9` as `d935baca4` (src tree `3dc209a36`):

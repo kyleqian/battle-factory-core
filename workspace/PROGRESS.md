@@ -23,11 +23,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   receipts, net-zero audit (all live ids), consumer tie audit, sSpriteOrder
   evidence + exact free-slot event model and provider design, status-animation
   sprite audit, alternate-species proofs (source-derived windows), #142
-  shadow-row table, multi-hit prep, Reversal shake evidence.
+  shadow-row table, multi-hit prep, Reversal shake evidence, visual-
+  randomness prep (Random2-only inputs; personality moves exact now).
 - **Next:** ROADMAP S10A resume points: sprite-order provider slices,
   status-animation occupancy persistence, Reversal reducer change (needs the
-  animation program's acceptance), Soft-Boiled, Scary Face/Glare, then
-  H_BUFFER/H_RANDOM/H_OUTCOME groups. Validate with alternate-species proofs.
+  animation program's acceptance), Dizzy Punch/Teeter Dance (personality),
+  Soft-Boiled, Scary Face/Glare, then H_BUFFER/H_RANDOM/H_OUTCOME groups. Validate with alternate-species proofs.
 - **Notes:** no material decision deferred; DEFERRED.md has no open entries.
   Oracle freshness FAIL at orient was a false positive (workspace-only
   commits). Papercuts added: replay forced-replacement, Supersonic probe
