@@ -39,8 +39,25 @@
   closed formula 24/24, Fire Punch player body-only, Rock Blast / Razor Wind ready, Spark player
   conditional, Endeavor needs the persistent register. Supervisor reran the Magnitude probes:
   byte-identical, power 110 / 70.
-- Running: prep10 batch (power seam + Magnitude, Reversal, Pain Split, Fire Punch, Rock Blast,
-  Razor Wind, Spark player); Random2 trackability evidence (side).
+- Folded Sonnet worker `58c49a7ae` (src tree `58c49a7a`) as `538047fc3`: **204 live adapters**
+  (+Magnitude, Reversal, Pain Split, Rock Blast, Razor Wind, Spark player attacker). Engine seam:
+  the MOVE_ANIMATION `power` argument is the ROM's gBattleMovePower when the move's damagecalc ran
+  (presentation-only register; damage unchanged); Reversal reducer toggle fixed (+ceil/-floor);
+  Pain Split closed-form y2 from per-side pic yOffset. Worker: 36/37 dense fixtures zero residual
+  twice fresh (4,237 rows/run), gates 1,512 files / 12,220 tests + build. Supervisor: dense rerun
+  of 6 fixtures (Magnitude CAMERUPT intense opp, Reversal power 80 and Vigoroth, Pain Split
+  DUSCLOPS, Rock Blast hit 3 OCTILLERY, Spark PLUSLE) zero residual twice fresh; routes 7/7 PASS.
+  Limits: Razor Wind ABSOL-opponent unleash 23 px at age 18 (reproduced; Nuzleaf exact); Spark
+  opponent attacker returns null; Fire Punch dropped (accepted body exists only in the staged
+  PPU scene; needs a generic Scene-ON renderer); Endeavor needs the persistent power register.
+  Receipt `prep10-live-adapter-receipt.json`.
+- Random2 trackability (`86bc0d7a1`, `docs/random2-trackability.md`): NOT TRACKABLE in play —
+  the wireless-link layer draws one Random2 per main-loop pass and between-turn lag frames vary
+  with identical inputs (strict chain 2/29 route bodies); words are exact from a known activation
+  value. Supervisor reproduced the lab probe (102 step runs, caller lists identical). User
+  decision recorded as DEFERRED D3 (surrogate presentation RNG vs fallback).
+- Running: abs-invariant order rows (source check + production table); prep11 measured prep +
+  Leaf Blade species diagnosis (side).
 
 ## 2026-10-05 (wind-down) — CASTFORM fix + order table 445 bodies
 
