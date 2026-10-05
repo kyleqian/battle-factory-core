@@ -2,20 +2,49 @@
  "schema": "sprite-order-body-plans/v1",
  "table": {
   "scenarios": 245,
-  "sha256": "170742f3e465584ba6f4e389f740511f94f64906ff5b1acdb7e4e98dabaa3ab9"
+  "sha256": "62ec21bf996f1879900389350f8824e973e668fd6690f2c038b809b2de1e8139"
  },
  "tokens": "('n',k)=k-th sprite created by this unit (creation order: lowest-free ascending then end descending); ('c',ago,k)=survivor k of the unit `ago` units earlier (units alternate body,gap); ('o',slot)=occupant that predates every unit",
  "groupClasses": "SINGLE | STATIC (distinct priority words) | FDERIVED (tied keys; creation window then free-order index) | KEYS",
  "replay": {
-  "edges": 600,
-  "edgesPrecededByExactPlans": 412,
-  "edgesExact": 406,
-  "edgesMismatched": 6
+  "edges": 584,
+  "edgesPrecededByExactPlans": 367,
+  "edgesExact": 360,
+  "edgesMismatched": 7
  },
  "replayMismatches": [
   {
+   "file": "227-mechanic-encore-player-minun-opponent-onix-0.json",
+   "unit": 5,
+   "move": 33,
+   "predicted": [
+    3,
+    4,
+    5,
+    9,
+    7,
+    21,
+    20,
+    19,
+    18,
+    17
+   ],
+   "observed": [
+    3,
+    9,
+    7,
+    4,
+    5,
+    21,
+    20,
+    19,
+    18,
+    17
+   ]
+  },
+  {
    "file": "336-howl-alternate-opponent-scenario-0.json",
-   "unit": 0,
+   "unit": 1,
    "move": 0,
    "predicted": [
     4,
@@ -44,7 +73,7 @@
   },
   {
    "file": "336-howl-alternate-player-scenario-0.json",
-   "unit": 0,
+   "unit": 1,
    "move": 0,
    "predicted": [
     4,
@@ -73,7 +102,7 @@
   },
   {
    "file": "38-mechanic-double-edge-opponent-hitmontop-player-onix-0.json",
-   "unit": 0,
+   "unit": 1,
    "move": 0,
    "predicted": [
     4,
@@ -102,7 +131,7 @@
   },
   {
    "file": "38-mechanic-double-edge-player-hitmontop-opponent-onix-0.json",
-   "unit": 0,
+   "unit": 1,
    "move": 0,
    "predicted": [
     4,
@@ -131,7 +160,7 @@
   },
   {
    "file": "68-mechanic-counter-opponent-hitmontop-player-onix-0.json",
-   "unit": 0,
+   "unit": 1,
    "move": 0,
    "predicted": [
     4,
@@ -160,7 +189,7 @@
   },
   {
    "file": "68-mechanic-counter-player-hitmontop-opponent-onix-0.json",
-   "unit": 0,
+   "unit": 1,
    "move": 0,
    "predicted": [
     4,
@@ -336,10 +365,10 @@
  ],
  "bodies": {
   "0:any": {
-   "scenarios": 115,
-   "distinctPlans": 14,
+   "scenarios": 101,
+   "distinctPlans": 11,
    "groupClasses": {
-    "SINGLE": 165,
+    "SINGLE": 162,
     "KEYS": 14
    },
    "keysReasons": {
@@ -371,18 +400,15 @@
     "189-mechanic-mud-slap-player-pidgeotto-onix-0.json"
    ],
    "otherPlans": {
-    "[{\"C\":[[\"n\",0,\"f\"]]}]": 23,
+    "[{\"C\":[[\"n\",0,\"f\"]]}]": 19,
     "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"],[\"n\",2,\"f\"],[\"n\",3,\"f\"],[\"n\",4,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",2],[\"n\",0],[\"n\",3],[\"n\",4]]}]": 14,
     "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0]]},{\"C\":[[\"n\",2,\"f\"]]},{\"D\":[[\"n\",1]]},{\"C\":[[\"n\",3,\"f\"]]},{\"D\":[[\"n\",2]]},{\"C\":[[\"n\",4,\"f\"]]},{\"D\":[[\"n\",3]]},{\"C\":[[\"n\",5,\"f\"]]},{\"D\":[[\"n\",4]]},{\"C\":[[\"n\",6,\"f\"]]},{\"D\":[[\"n\",5]]},{\"C\":[[\"n\",7,\"f\"]]},{\"D\":[[\"n\",6]]}]": 4,
     "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"C\":[[\"n\",2,\"f\"]]},{\"D\":[[\"n\",0]]},{\"D\":[[\"n\",1]]}]": 4,
-    "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0]]}]": 17,
-    "[]": 11,
-    "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0]]},{\"C\":[[\"n\",2,\"f\"]]}]": 1,
-    "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"C\":[[\"n\",2,\"f\"]]}]": 1,
-    "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"C\":[[\"n\",2,\"f\"]]},{\"C\":[[\"n\",3,\"f\"]]},{\"D\":[[\"n\",0]]}]": 1,
+    "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0]]}]": 16,
     "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0]]},{\"C\":[[\"n\",2,\"f\"]]},{\"D\":[[\"n\",2]]},{\"D\":[[\"n\",1]]}]": 3,
     "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"C\":[[\"n\",2,\"f\"]]},{\"C\":[[\"n\",3,\"f\"]]},{\"D\":[[\"n\",0]]},{\"D\":[[\"n\",1]]},{\"D\":[[\"n\",2]]},{\"D\":[[\"n\",3]]}]": 2,
     "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"C\":[[\"n\",2,\"f\"]]},{\"C\":[[\"n\",3,\"f\"]]},{\"C\":[[\"n\",4,\"f\"]]},{\"D\":[[\"n\",0]]},{\"D\":[[\"n\",1]]},{\"C\":[[\"n\",5,\"f\"]]},{\"D\":[[\"n\",2]]},{\"C\":[[\"n\",6,\"f\"]]},{\"D\":[[\"n\",3]]},{\"C\":[[\"n\",7,\"f\"]]},{\"D\":[[\"n\",4]]},{\"C\":[[\"n\",8,\"f\"]]},{\"C\":[[\"n\",9,\"f\"]]},{\"D\":[[\"n\",5]]},{\"D\":[[\"n\",6]]},{\"C\":[[\"n\",10,\"f\"]]},{\"D\":[[\"n\",7]]},{\"C\":[[\"n\",11,\"f\"]]},{\"D\":[[\"n\",8]]},{\"C\":[[\"n\",12,\"f\"]]},{\"D\":[[\"n\",9]]},{\"C\":[[\"n\",13,\"f\"]]},{\"C\":[[\"n\",14,\"f\"]]},{\"D\":[[\"n\",10]]},{\"D\":[[\"n\",11]]},{\"D\":[[\"n\",12]]},{\"D\":[[\"n\",13]]}]": 3,
+    "[]": 5,
     "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"C\":[[\"n\",2,\"f\"]]},{\"C\":[[\"n\",3,\"f\"]]},{\"C\":[[\"n\",4,\"f\"]]},{\"C\":[[\"n\",5,\"f\"]]},{\"C\":[[\"n\",6,\"f\"]]},{\"D\":[[\"n\",1]]},{\"C\":[[\"n\",7,\"f\"]]},{\"D\":[[\"n\",2]]},{\"D\":[[\"n\",0]]},{\"C\":[[\"n\",8,\"f\"]]},{\"C\":[[\"n\",9,\"f\"]]},{\"D\":[[\"n\",3]]},{\"C\":[[\"n\",10,\"f\"]]},{\"D\":[[\"n\",4]]},{\"C\":[[\"n\",11,\"f\"]]},{\"D\":[[\"n\",7]]},{\"D\":[[\"n\",5]]},{\"D\":[[\"n\",8]]},{\"D\":[[\"n\",6]]},{\"D\":[[\"n\",9]]},{\"D\":[[\"n\",10]]}]": 2
    },
    "move": "0",
@@ -22711,14 +22737,14 @@
    "live": false
   },
   "33:opponent": {
-   "scenarios": 95,
-   "distinctPlans": 3,
+   "scenarios": 93,
+   "distinctPlans": 1,
    "groupClasses": {
-    "SINGLE": 187
+    "SINGLE": 186
    },
    "keysReasons": {},
    "staticKeyWordsConstant": true,
-   "verdict": "NEEDS-KEYS",
+   "verdict": "EXACT-PLAN",
    "plan": [
     {
      "C": [
@@ -22759,10 +22785,6 @@
     "101-mechanic-night-shade-player-ariados-opponent-onix-0.json",
     "105-mechanic-recover-player-kadabra-opponent-onix-0.json"
    ],
-   "otherPlans": {
-    "[]": 1,
-    "[{\"C\":[[\"n\",0,\"f\"]]},{\"C\":[[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0]]}]": 1
-   },
    "move": "33",
    "side": "opponent",
    "live": false
@@ -35450,7 +35472,7 @@
  "gaps": {
   "0:any>0:any": {
    "scenarios": 16,
-   "distinctPlans": 4,
+   "distinctPlans": 3,
    "groupClasses": {
     "SINGLE": 7,
     "FDERIVED": 3
@@ -35464,9 +35486,8 @@
     "109-mechanic-confuse-ray-player-chinchou-opponent-onix-0.json"
    ],
    "otherPlans": {
-    "[{\"D\":[[\"c\",1,2]]},{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",0]]}]": 1,
-    "[{\"D\":[[\"c\",1,1]]},{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",0]]}]": 2,
-    "[{\"D\":[[\"c\",1,1]]}]": 4
+    "[{\"D\":[[\"c\",1,0]]},{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",1],[\"n\",0]]}]": 3,
+    "[{\"D\":[[\"c\",1,0]]}]": 4
    }
   },
   "0:any>113:?": {
@@ -35484,7 +35505,7 @@
       [
        "c",
        1,
-       14
+       0
       ]
      ]
     }
@@ -35509,7 +35530,7 @@
       [
        "c",
        1,
-       1
+       0
       ]
      ]
     }
@@ -35533,7 +35554,7 @@
       [
        "c",
        1,
-       1
+       0
       ]
      ]
     }
@@ -35714,7 +35735,7 @@
   },
   "0:any>33:opponent": {
    "scenarios": 10,
-   "distinctPlans": 4,
+   "distinctPlans": 3,
    "groupClasses": {
     "SINGLE": 5,
     "FDERIVED": 1
@@ -35739,13 +35760,12 @@
    ],
    "otherPlans": {
     "[]": 4,
-    "[{\"D\":[[\"c\",1,2]]}]": 1,
     "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]]}]": 1
    }
   },
   "0:any>33:player": {
    "scenarios": 12,
-   "distinctPlans": 4,
+   "distinctPlans": 3,
    "groupClasses": {
     "SINGLE": 6,
     "FDERIVED": 1
@@ -35753,14 +35773,23 @@
    "keysReasons": {},
    "staticKeyWordsConstant": true,
    "verdict": "NEEDS-KEYS",
-   "plan": [],
+   "plan": [
+    {
+     "D": [
+      [
+       "c",
+       1,
+       0
+      ]
+     ]
+    }
+   ],
    "planExamples": [
-    "109-mechanic-confuse-ray-opponent-chinchou-player-onix-0.json",
-    "242-mechanic-crunch-opponent-houndour-player-onix-0.json"
+    "103-mechanic-screech-opponent-voltorb-player-onix-0.json",
+    "112-wall-family-barrier-opponent-0.json"
    ],
    "otherPlans": {
-    "[{\"D\":[[\"c\",1,0]]}]": 4,
-    "[{\"D\":[[\"c\",1,2]]}]": 2,
+    "[]": 5,
     "[{\"C\":[[\"n\",0,\"f\"],[\"n\",1,\"f\"]]},{\"D\":[[\"n\",0],[\"n\",1]]}]": 1
    }
   },
@@ -43112,6 +43141,1620 @@
    "plan": [],
    "planExamples": [
     "97-mechanic-agility-player-ledyba-opponent-onix-0.json"
+   ]
+  },
+  "entry>0:any": {
+   "scenarios": 9,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "264-mechanic-focus-punch-opponent-breloom-player-starmie-0.json",
+    "264-mechanic-focus-punch-player-breloom-opponent-starmie-0.json"
+   ]
+  },
+  "entry>101:?": {
+   "scenarios": 2,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "114-support-batch-haze-opponent-koffing-player-gengar-0.json",
+    "114-support-batch-haze-player-koffing-opponent-gengar-0.json"
+   ]
+  },
+  "entry>101:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "101-status-alternate-night-shade-opponent-scenario-0.json"
+   ]
+  },
+  "entry>101:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "101-status-alternate-night-shade-player-scenario-0.json"
+   ]
+  },
+  "entry>103:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "103-mechanic-screech-opponent-voltorb-player-onix-0.json"
+   ]
+  },
+  "entry>103:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "103-mechanic-screech-player-voltorb-opponent-onix-0.json"
+   ]
+  },
+  "entry>104:factory": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "battle1-turn1-0.json"
+   ]
+  },
+  "entry>109:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "109-mechanic-confuse-ray-opponent-chinchou-player-onix-0.json"
+   ]
+  },
+  "entry>109:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "109-mechanic-confuse-ray-player-chinchou-opponent-onix-0.json"
+   ]
+  },
+  "entry>112:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "112-wall-family-barrier-opponent-0.json"
+   ]
+  },
+  "entry>112:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "112-wall-family-barrier-player-0.json"
+   ]
+  },
+  "entry>115:?": {
+   "scenarios": 2,
+   "distinctPlans": 2,
+   "groupClasses": {
+    "KEYS": 1
+   },
+   "keysReasons": {
+    "tied but a member predates the unit (no creation record)": 1
+   },
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "D": [
+      [
+       "o",
+       4
+      ],
+      [
+       "o",
+       3
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "280-mechanic-brick-break-opponent-lombre-player-onix-0.json"
+   ],
+   "otherPlans": {
+    "[]": 1
+   }
+  },
+  "entry>115:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "115-mechanic-reflect-opponent-shuppet-player-shuckle-0.json"
+   ]
+  },
+  "entry>115:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "115-mechanic-reflect-player-shuppet-opponent-shuckle-0.json"
+   ]
+  },
+  "entry>12:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "12-mechanic-guillotine-opponent-gligar-player-onix-0.json"
+   ]
+  },
+  "entry>12:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "12-mechanic-guillotine-player-gligar-opponent-onix-0.json"
+   ]
+  },
+  "entry>131:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "131-mechanic-spike-cannon-opponent-omastar-player-onix-0.json"
+   ]
+  },
+  "entry>131:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "131-mechanic-spike-cannon-player-omastar-opponent-onix-0.json"
+   ]
+  },
+  "entry>136:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "136-mechanic-hi-jump-kick-opponent-medicham-player-onix-0.json"
+   ]
+  },
+  "entry>136:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "136-mechanic-hi-jump-kick-player-medicham-opponent-onix-0.json"
+   ]
+  },
+  "entry>14:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "14-mechanic-swords-dance-opponent-ledian-player-onix-0.json"
+   ]
+  },
+  "entry>14:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "14-mechanic-swords-dance-player-ledian-opponent-onix-0.json"
+   ]
+  },
+  "entry>151:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "151-mechanic-acid-armor-opponent-grimer-player-onix-0.json"
+   ]
+  },
+  "entry>154:player": {
+   "scenarios": 2,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "154-mechanic-fury-swipes-player-aipom-opponent-onix-0.json",
+    "154-mechanic-fury-swipes-player-onix-opponent-aipom-0.json"
+   ]
+  },
+  "entry>157:factory": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "battle1-turn1-varB-0.json"
+   ]
+  },
+  "entry>161:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "161-mechanic-tri-attack-opponent-porygon-player-shuckle-0.json"
+   ]
+  },
+  "entry>161:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "161-mechanic-tri-attack-player-porygon-opponent-shuckle-0.json"
+   ]
+  },
+  "entry>163:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "163-mechanic-slash-opponent-charmeleon-player-onix-0.json"
+   ]
+  },
+  "entry>163:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "163-mechanic-slash-player-charmeleon-opponent-onix-0.json"
+   ]
+  },
+  "entry>172:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "172-mechanic-flame-wheel-opponent-quilava-player-onix-0.json"
+   ]
+  },
+  "entry>172:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "172-mechanic-flame-wheel-player-quilava-opponent-onix-0.json"
+   ]
+  },
+  "entry>180:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "FDERIVED": 1
+   },
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "180-mechanic-spite-opponent-haunter-player-onix-0.json"
+   ]
+  },
+  "entry>180:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "FDERIVED": 1
+   },
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "180-mechanic-spite-player-haunter-opponent-onix-0.json"
+   ]
+  },
+  "entry>182:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "182-mechanic-protect-opponent-houndour-player-onix-0.json"
+   ]
+  },
+  "entry>182:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "182-mechanic-protect-player-houndour-opponent-onix-0.json"
+   ]
+  },
+  "entry>185:?": {
+   "scenarios": 3,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "299-mechanic-blaze-kick-opponent-onix-player-murkrow-0.json",
+    "53-mechanic-flamethrower-opponent-onix-player-murkrow-0.json"
+   ]
+  },
+  "entry>186:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "186-mechanic-sweet-kiss-opponent-luvdisc-player-onix-0.json"
+   ]
+  },
+  "entry>186:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "186-mechanic-sweet-kiss-player-luvdisc-opponent-onix-0.json"
+   ]
+  },
+  "entry>189:factory": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "189-mechanic-mud-slap-pidgeotto-onix-0.json"
+   ]
+  },
+  "entry>189:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "189-mechanic-mud-slap-player-pidgeotto-onix-0.json"
+   ]
+  },
+  "entry>204:?": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "227-mechanic-encore-opponent-minun-player-onix-0.json"
+   ]
+  },
+  "entry>204:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "204-mechanic-charm-opponent-minun-player-shuckle-0.json"
+   ]
+  },
+  "entry>204:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "204-mechanic-charm-player-minun-opponent-shuckle-0.json"
+   ]
+  },
+  "entry>211:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "211-mechanic-steel-wing-opponent-wingull-player-onix-0.json"
+   ]
+  },
+  "entry>211:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "211-mechanic-steel-wing-player-wingull-opponent-onix-0.json"
+   ]
+  },
+  "entry>213:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "213-mechanic-attract-opponent-eevee-player-onix-0.json"
+   ]
+  },
+  "entry>213:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "213-mechanic-attract-player-eevee-opponent-onix-0.json"
+   ]
+  },
+  "entry>222:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "222-mechanic-magnitude-intense-opponent-camerupt-player-onix-0.json"
+   ]
+  },
+  "entry>222:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "222-mechanic-magnitude-intense-player-camerupt-opponent-onix-0.json"
+   ]
+  },
+  "entry>223:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "223-mechanic-dynamic-punch-opponent-hitmonchan-player-shuckle-0.json"
+   ]
+  },
+  "entry>223:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "223-mechanic-dynamic-punch-player-hitmonchan-opponent-shuckle-0.json"
+   ]
+  },
+  "entry>228:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "228-mechanic-pursuit-opponent-beedrill-player-shuckle-0.json"
+   ]
+  },
+  "entry>228:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "228-mechanic-pursuit-player-beedrill-opponent-shuckle-0.json"
+   ]
+  },
+  "entry>242:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "242-mechanic-crunch-opponent-houndour-player-onix-0.json"
+   ]
+  },
+  "entry>242:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "242-mechanic-crunch-player-houndour-opponent-onix-0.json"
+   ]
+  },
+  "entry>247:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "247-mechanic-shadow-ball-opponent-sableye-player-onix-0.json"
+   ]
+  },
+  "entry>247:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "247-mechanic-shadow-ball-player-sableye-opponent-onix-0.json"
+   ]
+  },
+  "entry>253:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "253-mechanic-uproar-opponent-vigoroth-player-onix-0.json"
+   ]
+  },
+  "entry>253:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "253-mechanic-uproar-player-vigoroth-opponent-onix-0.json"
+   ]
+  },
+  "entry>257:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "257-mechanic-heat-wave-opponent-ninetales-player-onix-0.json"
+   ]
+  },
+  "entry>257:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "257-mechanic-heat-wave-player-ninetales-opponent-onix-0.json"
+   ]
+  },
+  "entry>259:?": {
+   "scenarios": 3,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "299-mechanic-blaze-kick-player-onix-opponent-murkrow-0.json",
+    "53-mechanic-flamethrower-player-onix-opponent-murkrow-0.json"
+   ]
+  },
+  "entry>272:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "272-mechanic-role-play-opponent-kadabra-player-onix-0.json"
+   ]
+  },
+  "entry>272:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "272-mechanic-role-play-player-kadabra-opponent-onix-0.json"
+   ]
+  },
+  "entry>277:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "KEYS": 1
+   },
+   "keysReasons": {
+    "tied but a member predates the unit (no creation record)": 1
+   },
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "D": [
+      [
+       "o",
+       4
+      ],
+      [
+       "o",
+       3
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "277-mechanic-magic-coat-opponent-spoink-player-onix-0.json"
+   ]
+  },
+  "entry>277:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "277-mechanic-magic-coat-player-spoink-opponent-onix-0.json"
+   ]
+  },
+  "entry>27:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "27-mechanic-rolling-kick-opponent-hitmonlee-player-onix-0.json"
+   ]
+  },
+  "entry>27:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "27-mechanic-rolling-kick-player-hitmonlee-opponent-onix-0.json"
+   ]
+  },
+  "entry>280:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "280-mechanic-brick-break-normal-player-lombre-opponent-onix-0.json"
+   ]
+  },
+  "entry>281:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "281-mechanic-yawn-opponent-togetic-player-gengar-0.json"
+   ]
+  },
+  "entry>281:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "281-mechanic-yawn-player-togetic-opponent-gengar-0.json"
+   ]
+  },
+  "entry>288:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "288-mechanic-grudge-opponent-haunter-player-onix-0.json"
+   ]
+  },
+  "entry>288:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "288-mechanic-grudge-player-haunter-opponent-onix-0.json"
+   ]
+  },
+  "entry>28:factory": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "28-mechanic-sand-attack-pidgeotto-onix-0.json"
+   ]
+  },
+  "entry>28:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "28-mechanic-sand-attack-player-pidgeotto-onix-0.json"
+   ]
+  },
+  "entry>29:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "29-mechanic-headbutt-opponent-zigzagoon-player-onix-0.json"
+   ]
+  },
+  "entry>29:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "29-mechanic-headbutt-player-zigzagoon-opponent-onix-0.json"
+   ]
+  },
+  "entry>2:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "2-mechanic-karate-chop-opponent-primeape-player-onix-0.json"
+   ]
+  },
+  "entry>2:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "2-mechanic-karate-chop-player-primeape-opponent-onix-0.json"
+   ]
+  },
+  "entry>305:?": {
+   "scenarios": 8,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "158-mechanic-poison-fang-opponent-zubat-player-onix-0.json",
+    "158-mechanic-poison-fang-player-zubat-opponent-onix-0.json"
+   ]
+  },
+  "entry>305:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "305-mechanic-poison-fang-opponent-zubat-player-onix-0.json"
+   ]
+  },
+  "entry>305:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "305-mechanic-poison-fang-player-zubat-opponent-onix-0.json"
+   ]
+  },
+  "entry>306:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "306-mechanic-crush-claw-opponent-grovyle-player-onix-0.json"
+   ]
+  },
+  "entry>306:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "306-mechanic-crush-claw-player-grovyle-opponent-onix-0.json"
+   ]
+  },
+  "entry>323:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "323-mechanic-water-spout-opponent-wailmer-player-shuckle-0.json"
+   ]
+  },
+  "entry>323:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "323-mechanic-water-spout-player-wailmer-opponent-shuckle-0.json"
+   ]
+  },
+  "entry>337:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "337-mechanic-dragon-claw-opponent-altaria-player-onix-0.json"
+   ]
+  },
+  "entry>337:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "337-mechanic-dragon-claw-player-altaria-opponent-onix-0.json"
+   ]
+  },
+  "entry>33:opponent": {
+   "scenarios": 47,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "101-mechanic-night-shade-player-ariados-opponent-onix-0.json",
+    "105-mechanic-recover-player-kadabra-opponent-onix-0.json"
+   ]
+  },
+  "entry>33:player": {
+   "scenarios": 42,
+   "distinctPlans": 2,
+   "groupClasses": {
+    "KEYS": 1
+   },
+   "keysReasons": {
+    "tied but a member predates the unit (no creation record)": 1
+   },
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [],
+   "planExamples": [
+    "101-mechanic-night-shade-opponent-ariados-player-onix-0.json",
+    "112-mechanic-barrier-opponent-drowzee-player-onix-0.json"
+   ],
+   "otherPlans": {
+    "[{\"D\":[[\"o\",4],[\"o\",3]]}]": 1
+   }
+  },
+  "entry>343:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "343-mechanic-covet-opponent-linoone-player-shuckle-0.json"
+   ]
+  },
+  "entry>343:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "343-mechanic-covet-player-linoone-opponent-shuckle-0.json"
+   ]
+  },
+  "entry>34:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "34-mechanic-body-slam-opponent-lickitung-player-onix-0.json"
+   ]
+  },
+  "entry>39:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "39-mechanic-tail-whip-opponent-ponyta-player-onix-0.json"
+   ]
+  },
+  "entry>39:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "39-mechanic-tail-whip-player-ponyta-opponent-onix-0.json"
+   ]
+  },
+  "entry>42:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "42-mechanic-pin-missile-opponent-qwilfish-player-onix-0.json"
+   ]
+  },
+  "entry>42:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "42-mechanic-pin-missile-player-qwilfish-opponent-onix-0.json"
+   ]
+  },
+  "entry>43:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "43-mechanic-leer-opponent-dragonair-player-onix-0.json"
+   ]
+  },
+  "entry>48:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "48-mechanic-supersonic-opponent-loudred-player-onix-0.json"
+   ]
+  },
+  "entry>48:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "48-mechanic-supersonic-player-loudred-opponent-onix-0.json"
+   ]
+  },
+  "entry>49:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "49-mechanic-sonic-boom-opponent-magneton-player-onix-0.json"
+   ]
+  },
+  "entry>49:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "49-mechanic-sonic-boom-player-magneton-opponent-onix-0.json"
+   ]
+  },
+  "entry>5:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "5-mechanic-mega-punch-opponent-cacturne-player-onix-0.json"
+   ]
+  },
+  "entry>5:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "5-mechanic-mega-punch-player-cacturne-opponent-onix-0.json"
+   ]
+  },
+  "entry>63:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "63-mechanic-hyper-beam-opponent-aerodactyl-player-onix-0.json"
+   ]
+  },
+  "entry>63:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "63-mechanic-hyper-beam-player-aerodactyl-opponent-onix-0.json"
+   ]
+  },
+  "entry>65:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "65-mechanic-drill-peck-opponent-fearow-player-onix-0.json"
+   ]
+  },
+  "entry>65:player": {
+   "scenarios": 2,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "65-mechanic-drill-peck-player-dodrio-opponent-onix-0.json",
+    "65-mechanic-drill-peck-player-fearow-opponent-onix-0.json"
+   ]
+  },
+  "entry>66:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "66-mechanic-submission-opponent-poliwrath-player-lickitung-0.json"
+   ]
+  },
+  "entry>66:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "66-mechanic-submission-player-poliwrath-opponent-lickitung-0.json"
+   ]
+  },
+  "entry>72:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "72-mechanic-mega-drain-opponent-skiploom-player-onix-0.json"
+   ]
+  },
+  "entry>72:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "72-mechanic-mega-drain-player-skiploom-opponent-onix-0.json"
+   ]
+  },
+  "entry>75:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "75-mechanic-razor-leaf-opponent-weepinbell-player-shuckle-0.json"
+   ]
+  },
+  "entry>75:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "75-mechanic-razor-leaf-player-weepinbell-opponent-shuckle-0.json"
+   ]
+  },
+  "entry>83:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "83-mechanic-fire-spin-opponent-charmeleon-player-onix-0.json"
+   ]
+  },
+  "entry>83:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "83-mechanic-fire-spin-player-charmeleon-opponent-onix-0.json"
+   ]
+  },
+  "entry>88:?": {
+   "scenarios": 9,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "147-mechanic-spore-opponent-parasect-player-onix-0.json",
+    "147-mechanic-spore-player-parasect-opponent-onix-0.json"
+   ]
+  },
+  "entry>92:?": {
+   "scenarios": 2,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "287-mechanic-refresh-opponent-chansey-player-onix-0.json",
+    "287-mechanic-refresh-player-chansey-opponent-onix-0.json"
+   ]
+  },
+  "entry>93:?": {
+   "scenarios": 2,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "243-wall-family-mirror-coat-opponent-0.json",
+    "243-wall-family-mirror-coat-player-0.json"
+   ]
+  },
+  "entry>93:factory": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "93-mechanic-confusion-kadabra-onix-0.json"
+   ]
+  },
+  "entry>93:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "93-mechanic-confusion-opponent-kadabra-player-onix-0.json"
+   ]
+  },
+  "entry>94:factory": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "94-mechanic-psychic-kadabra-onix-0.json"
+   ]
+  },
+  "entry>94:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "94-mechanic-psychic-opponent-kadabra-player-onix-0.json"
+   ]
+  },
+  "entry>95:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "95-mechanic-hypnosis-opponent-politoed-player-onix-0.json"
+   ]
+  },
+  "entry>95:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "95-mechanic-hypnosis-player-politoed-opponent-onix-0.json"
    ]
   }
  },

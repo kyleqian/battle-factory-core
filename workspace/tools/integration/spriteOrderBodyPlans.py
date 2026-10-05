@@ -29,6 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools/integration"))
 import spriteOrderEventModel as M
 
+ENTRY_WINDOWS = 78  # nonempty sort windows of the known entry stream (BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS)
 FIX = ROOT / "tools/integration/fixtures"
 TABLE = FIX / "sprite-order-body-events.json"
 PLANS = FIX / "sprite-order-body-plans.json"
@@ -85,7 +86,9 @@ def extract_scenario(kind, path):
 
     def unit_of(kind, lo, hi, **extra):
         wl = []
-        for w in W[lo:hi]:
+        if extra.get("pre"):
+            lo, hi = extra.pop("windowsFrom"), extra.pop("upTo")
+        for i, w in enumerate(W[lo:hi]):
             if not (w["C"] or w["D"]):
                 continue
             ent = {"f": w["n"]}
@@ -107,12 +110,15 @@ def extract_scenario(kind, path):
         return {"kind": kind, "frame": W[min(lo, len(W) - 1)]["n"], "windows": wl, **extra}
 
     units = []
+    nonempty = [i for i, w in enumerate(W) if w["C"] or w["D"]]
+    pre0 = nonempty[ENTRY_WINDOWS] if len(nonempty) > ENTRY_WINDOWS else edges[0]  # entry stream is the known table
+    units.append(unit_of("gap", 0, 0, pre=True, last=False, nextMv=W[edges[0]]["mv"], windowsFrom=pre0, upTo=edges[0]))
     for j in range(len(edges) - 1):
         a, b = edges[j], edges[j + 1]
         k = a
         while k < b and W[k]["act"]:
             k += 1
-        units.append(unit_of("body", a, k, mv=W[a]["mv"], observedFreeAtEdge=W[a]["F"]))
+        units.append(unit_of("body", a, k, mv=W[a]["mv"], observedFreeAtEdge=W[a]["F"], truncated=(k >= len(W))))
         units.append(unit_of("gap", k, b, last=(j == len(edges) - 2), nextMv=(W[b]["mv"] if b < len(W) else None)))
     return {"file": Path(path).name, "kind": kind, "move": d.get("move"), "side": side,
             "freeAtFirstEdge": W[edges[0]]["obsF"], "units": units}
@@ -161,6 +167,7 @@ def classify_group(g):
 def tokenize_scenario(sc):
     """-> per unit: tokenised windows, survivors; slot->(unit,k) lifetimes across units."""
     life = {}  # slot -> ('u', unitIndex, k)
+    rank = {}  # (unit, k) -> rank among that unit's survivors at its end
     out = []
     for ui, u in enumerate(sc["units"]):
         k = 0
@@ -182,7 +189,7 @@ def tokenize_scenario(sc):
                     elif t[1] == ui:
                         ds.append(["n", t[2]])
                     else:
-                        ds.append(["c", ui - t[1], t[2]])
+                        ds.append(["c", ui - t[1], rank[(t[1], t[2])]])
                 ent["D"] = ds
                 if "G" in w:
                     cls, why = classify_group(w["G"])
@@ -193,6 +200,9 @@ def tokenize_scenario(sc):
                 else:
                     ent["cls"] = "SINGLE"
             tw.append(ent)
+        mine = sorted(t[2] for t in life.values() if t[1] == ui)
+        for r, kk in enumerate(mine):
+            rank[(ui, kk)] = r
         out.append(tw)
     return out
 
@@ -249,7 +259,8 @@ def entry_state():
 class Sim:
     def __init__(self):
         self.F, self.occ = entry_state()
-        self.life = {}  # ('u',unit,k) -> slot
+        self.life = {}  # (unit,k) -> slot
+        self.surv = {}  # unit -> survivors (slots) by creation order
         self.rank = {}  # slot -> (windowSeq, fidx)
         self.seq = 0
         self.unit = -1
@@ -274,12 +285,17 @@ class Sim:
                 slots = []
                 for t in w["D"]:
                     if t[0] == "n": slots.append(self.life[(self.unit, t[1])])
-                    elif t[0] == "c": slots.append(self.life[(self.unit - t[1], t[2])])
+                    elif t[0] == "c": slots.append(self.surv[self.unit - t[1]][t[2]])
                     else: slots.append(t[1])
                 if w["cls"] == "FDERIVED":
                     slots.sort(key=lambda s: self.rank[s])
                 self.occ -= set(slots)
                 self.F = slots + [s for s in self.F if s not in slots]
+        self.surv[self.unit] = [self.life[(self.unit, kk)] for kk in range(k) if self.life[(self.unit, kk)] in self.occ]
+
+
+def gkey(sc, U, ui):
+    return ("entry" if ui == 0 else ukey(sc, U[ui - 1])) + ">" + ukey(sc, U[ui + 1])
 
 
 def ukey(sc, u):
@@ -308,11 +324,13 @@ def main(argv):
         U = sc["units"]
         for ui, (u, tw) in enumerate(zip(U, T)):
             if u["kind"] == "body":
+                if u["truncated"]:
+                    continue
                 p = bodies[ukey(sc, u)]
             else:
                 if u["last"]:
                     continue  # truncated at end of trace (ends in the next prompt's cursor-pair create); not a plan
-                p = gaps[ukey(sc, U[ui - 1]) + ">" + ukey(sc, U[ui + 1])]
+                p = gaps[gkey(sc, U, ui)]
             p["sigs"][sig(tw)].append(sc["file"])
             p["scenarios"].append(sc["file"])
             for w in tw:
@@ -352,6 +370,8 @@ def main(argv):
         U = sc["units"]
         for ui, (u, tw) in enumerate(zip(U, T)):
             if u["kind"] == "body":
+                if u["truncated"]:
+                    break
                 key = ukey(sc, u)
                 stat["edges"] += 1
                 if ok:
@@ -365,7 +385,7 @@ def main(argv):
             else:
                 if u["last"]:
                     continue
-                key = ukey(sc, U[ui - 1]) + ">" + ukey(sc, U[ui + 1])
+                key = gkey(sc, U, ui)
                 plan, valid = (grow[key]["plan"], key in gex)
             if not valid:
                 ok = False
