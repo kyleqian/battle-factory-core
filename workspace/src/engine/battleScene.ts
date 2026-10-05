@@ -16128,7 +16128,8 @@ export function renderSceneOnMovePresentation(
     // The opponent shadow's preceding hardware-OAM entry survives the first
     // pointer row; its callback observes the active script and hides it for
     // the next display. Species eligibility and placement remain live facts.
-    if (!playerAttacker && grudgeState.age === 0) {
+    // Live: the shared #142 hook draws it (liveMoveOpponentShadowRow).
+    if (!liveField && !playerAttacker && grudgeState.age === 0) {
       drawSourceOpponentEnemyShadow(
         fb,
         view.attacker.species,
@@ -16181,6 +16182,7 @@ export function renderSceneOnMovePresentation(
     }
     drawFlameGroup(false, monBgBackdrop);
 
+    if (liveField) return;
     const opponentSpecies = playerAttacker ? view.target.species : view.attacker.species;
     const playerSpecies = playerAttacker ? view.attacker.species : view.target.species;
     const profile = grudgeState.config.fieldProfile;

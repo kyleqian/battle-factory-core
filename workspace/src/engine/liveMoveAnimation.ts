@@ -64,6 +64,7 @@ import { CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY } from "../animation/dragonBreath
 import { icyWindEffectOamOrderAtAge } from "../animation/icyWind.ts";
 import { blizzardEffectOamOrderAtAge } from "../animation/blizzard.ts";
 import { YAWN_CLEANUP_AGE } from "../animation/yawn.ts";
+import { spriteOrderForSlots } from "./spriteOrderProvider.ts";
 
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
@@ -102,6 +103,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   212, 265, 111, 275, 35, 20, 225,
   // prep5 (docs/next-adapters-prep5.md): Mist Ball, Aromatherapy, Follow Me, Metronome (body), Taunt, Belly Drum.
   296, 312, 266, 118, 269, 187,
+  // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
+  288,
 ] as const);
 
 /**
@@ -139,6 +142,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // prep5 (issue142-shadow-rows-extra.json): Mist Ball, Aromatherapy, Follow Me, Metronome, Belly Drum start at
     // activation. Taunt (-10) starts after it and has no row.
     296, 312, 266, 118, 187,
+    // order consumers (issue142-shadow-rows-extra.json): Grudge's window starts at activation (66/70).
+    288,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -412,6 +417,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 118: return 127; // Metronome body (245..371 / 244..370); the called move is a separate request.
     case 269: return 125; // Taunt (76..200 / 80..204); script activation is 10 frames earlier.
     case 187: return 110; // Belly Drum (231..340 / 211..320).
+    case 288: return 209; // Grudge (66..274 / 70..278); script end 274/278 (no tail).
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
@@ -429,7 +435,6 @@ export function liveMoveAnimationPresentation(
   spriteAllocatorInput?: LiveMoveSpriteAllocatorInput,
   spriteOrderInput?: LiveMoveSpriteOrderInput,
 ): SceneOnMovePresentationState | null {
-  void spriteOrderInput; // No order consumer yet.
   if (liveMoveAnimationDuration(request) === null) return null;
   const art = createBattleCommandFieldArtView(field);
   const battler = (side: "player" | "opponent"): SceneOnPresentationBattler => {
@@ -1043,6 +1048,40 @@ export function liveMoveAnimationPresentation(
       // SetSpriteCoordsToAnimAttackerCoords + the note's +8 y; HP is the displayed pre-move HP (healthbarupdate follows).
       const pic = attackerAnchors.picOffsetPoint;
       config = { move: "BELLY_DRUM", attacker, target, fieldProfile, attackerNoteOrigin: { x: pic.x, y: pic.y + 8 } };
+      break;
+    }
+    case 288: {
+      // Order consumer (docs/order-consumer-prep.md §0): the six flames take the six lowest free slots in one
+      // sort window and inherit their relative free order, so only a host-supplied order is exact. Unknown order
+      // (any body after the battle's first, docs/sprite-order-body-plans.md) -> null, the bounded scene-off view.
+      if (!spriteOrderInput?.known) return null;
+      const lowestFree = [...spriteOrderInput.free].sort((left, right) => left - right).slice(0, 6);
+      const seed = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, lowestFree);
+      if (lowestFree.length !== 6 || seed === null) return null;
+      const side = attacker.geometry.side;
+      // AnimTask_GrudgeFlames (battle_anim_ghost.c:1182-1187): X_2, GetBattlerYCoordWithElevation (sBattlerCoords y
+      // minus the enemy elevation), BG priority of the battler's BG (BG2 player / BG1 opponent), subpriority.
+      const elevation = art[side].origin.y - battleCommandFieldSpriteOrigin(art[side], side).y;
+      config = {
+        move: "GRUDGE",
+        attacker: affineCenterBattler(attacker),
+        target: affineCenterBattler(target),
+        fieldProfile,
+        animationProfile: {
+          flameSlots: lowestFree as unknown as readonly [number, number, number, number, number, number],
+          spriteOrderSeed: seed as unknown as readonly [number, number, number, number, number, number],
+          attackerSubpriority: side === "player" ? 30 : 40,
+          targetSubpriority: side === "player" ? 40 : 30,
+          attackerBgPriority: side === "player" ? 2 : 1,
+          attackerWidth: liveBattlerCoordAttrs(side, art).width,
+          flameCenter: {
+            x: attackerAnchors.battlePositionCenter.x,
+            y: attackerAnchors.battlePositionCenter.y - (side === "opponent" ? elevation : 0),
+          },
+          // State-only diagnostic in grudge.ts (no pixel consumer); the live seam has no ROM animation-RNG value.
+          animationRngSeed: 0,
+        },
+      };
       break;
     }
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
