@@ -9,7 +9,7 @@
  *   animation STATS_CHANGE                           stat-animation (B_ANIM_STATS_CHANGE argument)
  *   any other animation id                           general-animation (HELD_ITEM_EFFECT / SUN_CONTINUES / ...)
  *   status-animation                                 status-animation (InitAndLaunchChosenStatusAnimation name)
- *   set-battler-sprite-visibility (moveend toggle)   hidden flag only; a return-to-ball receipt invalidates
+ *   set-battler-sprite-visibility                    hiding (semi-invulnerable) or a return-to-ball receipt invalidates
  *   faint, switch, switch-in, party summary, trainer slide, outcome   invalidate
  *   other events (messages, HP, status data, PP, ...) no allocation: no-op
  *
@@ -105,7 +105,10 @@ function orderEventOf(
     if (payload.battler !== 0 && payload.battler !== 1) return { event: { kind: "invalidate", reason: "visibility battler" } };
     const next: [boolean, boolean] = [hidden[0], hidden[1]];
     next[payload.battler] = payload.invisible;
-    return { hidden: Object.freeze(next) as readonly [boolean, boolean] };
+    // Cmd_playanimation skips most table animations for a STATUS3_SEMI_INVULNERABLE battler and the hidden-target
+    // blip skip is unobserved on real routes (docs/sprite-order-real-route.md §4.6): hiding a battler invalidates.
+    return { hidden: Object.freeze(next) as readonly [boolean, boolean],
+      ...(payload.invisible ? { event: { kind: "invalidate", reason: "semi-invulnerable battler hidden" } as const } : {}) };
   }
   if (INVALIDATING_EVENTS.has(payload.kind)) return { event: { kind: "invalidate", reason: payload.kind } };
   return {};

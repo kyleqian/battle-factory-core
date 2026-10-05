@@ -81,11 +81,16 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
   }, 120000);
 
   it("a consumer as a LATER body renders with the tracked order; after an unmodelled body it declines", () => {
-    // Heal Bell (seed 12, player [slot 1, Heal Bell]) and Grudge (seed 16, player [slot 2, Grudge]) after modelled bodies.
-    for (const [seed, slots, moveId] of [[12, [1, 3], 215], [16, [2, 3], 288]] as const) {
+    // Later bodies after modelled bodies only (tools/integration/fixtures/order-cross-body-live-receipt.json routes):
+    // Heal Bell player (seed 12, 2nd body) / opponent (seed 186, 5th body), Grudge player (seed 16, 3rd body),
+    // Rock Throw opponent (seed 112, 4th body).
+    for (const [seed, slots, moveId, index] of [
+      [12, [1, 3], 215, 1], [186, [0, 0, 0], 215, 4], [16, [2, 3], 288, 2], [112, [3, 3], 88, 3],
+    ] as const) {
       const route = scanRoute(seed, slots);
       const body = route.bodies.find(row => row.moveId === moveId)!;
-      expect(body.index).toBeGreaterThan(0);
+      expect(body.index).toBe(index);
+      expect(route.bodies.every(row => row.index > index || (row.known && !row.mismatch))).toBe(true);
       expect(body.known && body.agrees).toBe(true);
       const anim = route.consumers.find(row => row.moveId === moveId)!;
       expect(anim.activeEveryAge && anim.ages > 0).toBe(true);

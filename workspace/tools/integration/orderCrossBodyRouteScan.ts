@@ -40,7 +40,7 @@ function mapEvent(event: SemanticEvent, hidden: boolean[]): SpriteOrderPresentat
       return { kind: "invalidate", reason: "recall" };
     }
     hidden[p.battler as number] = p.invisible as boolean;
-    return null;
+    return p.invisible ? { kind: "invalidate", reason: "hidden" } : null;
   }
   if (["faint-animation", "switch", "switch-in-animation", "draw-party-status-summary", "hide-party-status-summary",
     "trainer-slide-in", "trainer-slide-out", "outcome"].includes(p.kind)) return { kind: "invalidate", reason: p.kind };
@@ -58,6 +58,9 @@ export function predictLentOrders(run: Replay, entryKnown: boolean, invalidReque
   const hidden = [false, false];
   const lent = new Map<number, readonly number[] | null>();
   let request: number | null = null;
+  // A later segment of the same request (player locked-action follow-up: no prompt) applies no prompt cycle. The
+  // host additionally declines after a retained opponent-locked continuation (a real prompt it does not model); the
+  // prediction does not see that boundary, so `hostDeclines` disagreements are the host being more conservative.
   for (const row of run.semanticEvents) {
     const event = row.event as SemanticEvent;
     if (row.requestId !== request) {
@@ -85,6 +88,9 @@ export function scanRoute(seed: number, slots: readonly (0 | 1 | 2 | 3)[]) {
       index, sequence: command.eventSequence, moveId: command.animation?.moveId ?? 0, side: command.animation?.attacker === 0 ? "player" : "opponent",
       known: row.spriteOrderInput !== undefined, predicted: predicted.get(command.eventSequence) ?? null,
       agrees: JSON.stringify(row.spriteOrderInput ?? null) === JSON.stringify(predicted.get(command.eventSequence) ?? null),
+      /** Host lent an order that differs from the prediction (must never happen). */
+      mismatch: row.spriteOrderInput !== undefined
+        && JSON.stringify(row.spriteOrderInput) !== JSON.stringify(predicted.get(command.eventSequence) ?? null),
     };
   });
   const consumers = on.animations.filter(row => ORDER_CONSUMER_MOVES[row.moveId] !== undefined).map(row => ({
@@ -146,7 +152,7 @@ if (import.meta.url === `file://${process.argv[1]}` && process.argv[2] === "rout
 } else if (import.meta.url === `file://${process.argv[1]}`) {
   const seeds = Number(process.argv[2] ?? 200);
   const slots = (process.argv[3] ?? "0,0,0").split(",").map(Number) as (0 | 1 | 2 | 3)[];
-  let bodies = 0, later = 0, laterKnown = 0, disagree = 0;
+  let bodies = 0, later = 0, laterKnown = 0, disagree = 0, mismatch = 0;
   for (let seed = 0; seed < seeds; seed += 1) {
     let result;
     try { result = scanRoute(seed, slots); } catch (error) { console.log(seed, "error", String(error).slice(0, 120)); continue; }
@@ -154,8 +160,10 @@ if (import.meta.url === `file://${process.argv[1]}` && process.argv[2] === "rout
     later += result.bodies.filter(b => b.index > 0).length;
     laterKnown += result.bodies.filter(b => b.index > 0 && b.known).length;
     disagree += result.bodies.filter(b => !b.agrees).length;
+    mismatch += result.bodies.filter(b => b.mismatch).length;
+    for (const b of result.bodies.filter(body => !body.agrees)) console.log(seed, "disagree", JSON.stringify([b.index, b.moveId, b.side, b.known, b.mismatch]));
     const hits = result.bodies.filter(b => ORDER_CONSUMER_MOVES[b.moveId] !== undefined);
     if (hits.length) console.log(seed, JSON.stringify(hits.map(b => [b.index, b.moveId, b.side, b.known])), JSON.stringify(result.consumers));
   }
-  console.log(JSON.stringify({ seeds, slots, bodies, later, laterKnown, disagree }));
+  console.log(JSON.stringify({ seeds, slots, bodies, later, laterKnown, disagree, mismatch }));
 }
