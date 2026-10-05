@@ -56,7 +56,9 @@ NAMES, ADDRESS_NAMES, FUNCTIONS = symbol_data()
 FUNC_ADDRS = [a for a, _ in FUNCTIONS]
 ALLOCATORS = {NAMES[n]: n for n in ("CreateSprite", "CreateSpriteAtEnd", "CreateSpriteAt", "DestroySprite")}
 # Exact entry markers (LR + r0) for wrappers whose stack-scanned chain would otherwise be ambiguous.
-MARKERS = {NAMES[n]: n for n in ("CreateInvisibleSpriteWithCallback", "DoHitAnimHealthboxEffect", "DoBounceEffect")}
+MARKERS = {NAMES[n]: n for n in ("CreateInvisibleSpriteWithCallback", "DoHitAnimHealthboxEffect", "DoBounceEffect", "LaunchBattleAnimation",
+                                            "TryHandleLaunchBattleTableAnimation", "InitAndLaunchSpecialAnimation", "LaunchStatusAnimation",
+                                            "InitAndLaunchChosenStatusAnimation")}
 
 
 def sym(address: int) -> str:
@@ -137,6 +139,9 @@ def pass1():
         if st["tf"] is not None:
             st["tf"] += 1
         c = context(o)
+        if c["animActive"] and not st.get("prevAct"):
+            st["flag"].setdefault(st["n"], {"freed": [], "alloc": []})  # LaunchBattleAnimation frame (no sprite change needed)
+        st["prevAct"] = c["animActive"]
         key = json.dumps({k: c[k] for k in ("mainFunc", "ctrl", "attacker", "target", "curMove", "resultFlags", "animActive", "animMove", "hp")}, sort_keys=True)
         if key != st["lastctx"]:
             st["ctx"].append({"n": st["n"], "tf": st["tf"], **c})
@@ -163,8 +168,19 @@ def step_frame(o, buttons, n, calls):
         marker = MARKERS.get(pc)
         if marker:
             lr = int(o.core.cpu.lr)
-            calls.append({"n": n, "kind": "marker:" + marker, "lr": hex(lr), "caller": sym(lr), "r0": int(o.core.cpu.gprs[0]),
-                          "ctx": {k: v for k, v in context(o).items() if v is not None}})
+            row = {"n": n, "kind": "marker:" + marker, "lr": hex(lr), "caller": sym(lr), "r0": int(o.core.cpu.gprs[0]),
+                   "ctx": {k: v for k, v in context(o).items() if v is not None}}
+            if marker != "LaunchBattleAnimation" and marker.startswith(("TryHandle", "InitAnd", "LaunchStatus")):
+                row["args"] = [int(o.core.cpu.gprs[i]) for i in range(4)] + [o.read_u32(int(o.core.cpu.gprs[13]))]
+            if marker == "LaunchBattleAnimation":  # (const u8 *const animsTable[], u16 tableId, bool8 isMoveAnim)
+                table = int(o.core.cpu.gprs[0])
+                row["table"] = ADDRESS_NAMES.get(table & ~1, [hex(table)])
+                row["tableId"] = int(o.core.cpu.gprs[1]) & 0xFFFF
+                row["isMove"] = int(o.core.cpu.gprs[2]) & 0xFF
+                row["animArgs"] = [o.read_u16(NAMES["gBattleAnimArgs"] + 2 * i) for i in range(8)]
+                row["attacker"] = o.read_u8(NAMES["gBattleAnimAttacker"])
+                row["target"] = o.read_u8(NAMES["gBattleAnimTarget"])
+            calls.append(row)
         kind = ALLOCATORS.get(pc)
         if kind:
             r = [int(o.core.cpu.gprs[i]) for i in range(4)]
