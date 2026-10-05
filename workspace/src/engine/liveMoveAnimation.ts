@@ -110,6 +110,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   296, 312, 266, 118, 269, 187,
   // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off, Faint Attack (player attacker only).
   317, 219, 230, 120, 256, 282, 185,
+  // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack.
+  332, 98,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -176,6 +178,10 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // order consumers (issue142-shadow-rows-extra.json): Grudge's window starts at activation (66/70).
     // Heal Bell (215), Rock Throw (88), Perish Song (195), Leaf Blade (348) start at activation (0).
     288, 215, 348, 195, 88,
+    // prep7 (issue142-shadow-rows-extra.json): Aerial Ace / Quick Attack accepted windows begin before activation (idle
+    // rows owned by the preceding message command); the live age basis is the activation frame (reducer age 42 / 44), so
+    // the shadow row is live age 0.
+    332, 98,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -478,6 +484,10 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // player 163/178/193 (1247..1409 ...), opponent 161/176/191 (= 148 + 15 turn / 146 + 15 turn), every window end = script end.
     case 256:
       return request.turn >= 1 && request.turn <= 3 ? (request.attacker === 0 ? 148 : 146) + 15 * request.turn : null;
+    // prep7 accepted windows (docs/next-adapters-prep7.md s2.2), counted from the activation frame: the accepted dense
+    // windows start 35/31 (AA) and 37/33 (QA) rows earlier with idle body rows owned by the queue's `message` command.
+    case 332: return 50; // Aerial Ace: activation..first inactive row (81..130 / 77..126); the later hit/HP/text rows are queue commands.
+    case 98: return 33; // Quick Attack (83..115 / 79..111).
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
@@ -1288,6 +1298,26 @@ export function liveMoveAnimationPresentation(
         fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" },
         moveTextStartAge: -24 };
       break;
+    case 332:
+    case 98: {
+      // The body fns read the attacker side and the reducer age only (prep7 s2.1); the controller profile, hit reaction,
+      // HP and text are HUD owned by the queue's hit/HP/message commands (never-reached ages here). The accepted windows
+      // start before activation: the reducer age at the activation frame is 42 (Aerial Ace) / 44 (Quick Attack), the
+      // same for both orientations (the player preset's offset 4 re-expresses it, prep7-reducer-checks.json), so live
+      // age 0 = activation = reducer age 42 / 44. Rows before it are idle bodies under the preceding `message` command
+      // (the move compositor's age is the move-animation command's phaseElapsed, liveMoveAnimation.ts header comment).
+      const never = 1_000_000;
+      const common = { attacker, target, animationAgeOffset: request.moveId === 332 ? 42 : 44, moveTextStartAge: 0,
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" as const } };
+      config = request.moveId === 332
+        ? { move: "AERIAL_ACE", ...common, controllerProfile: { targetHpBefore: field.player.hp, targetHpAfter: field.player.hp,
+            hitReactionFirstAge: never, hpDrainFirstAge: never, moveTextClearAge: never, resultTextFirstAge: never,
+            currentMoveResetAge: never } }
+        : { move: "QUICK_ATTACK", ...common, controllerProfile: { targetHpBefore: field.player.hp, targetHpAfter: field.player.hp,
+            hitReactionFirstAge: never, hpDrainFirstAge: never, resultTextFirstAge: never,
+            resultKind: "notVeryEffective" as const, currentMoveResetAge: never } };
+      break;
+    }
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:
