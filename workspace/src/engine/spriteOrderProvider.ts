@@ -116,3 +116,108 @@ export function spriteOrderForFirstAllocation(state: SpriteOrderState, n: number
   if (!state.known || !Number.isInteger(n) || n < 0 || n > state.free.length) return null;
   return Object.freeze(state.free.slice(0, n));
 }
+
+/**
+ * BattleLab ordinary-singles entry as sort windows `[created, destroyedInArrayOrder]`, from reset to the cursor
+ * pair destroy. Derived from the first raw corpus scenario's per-frame occupied-mask diffs (sSpriteOrder rows
+ * 1168..2041 of `101-mechanic-night-shade-opponent-ariados-player-onix-0.json`; each non-empty frame diff is one sort window) and identical, as a
+ * slot stream, in all 44 raw files (frame spacing varies, the stream does not). Mirrors the call sequence of
+ * `createKnownEntrySpriteAllocatorProvider`; the last window is the cursor pair destroyed as [4, 3].
+ */
+export const BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS: readonly (readonly [readonly number[], readonly number[]])[] =
+  Object.freeze([
+  [[0, 62, 63], []],
+  [[1, 60, 61], []],
+  [[2], []],
+  [[3, 4], []],
+  [[5, 54, 55, 56, 57, 58, 59], []],
+  [[6, 48, 49, 50, 51, 52, 53], []],
+  [[7, 8], []],
+  [[9], []],
+  [[10], []],
+  [[11], []],
+  [[12], []],
+  [[13], []],
+  [[14], []],
+  [[15], []],
+  [[16], []],
+  [[17], []],
+  [[18], []],
+  [[19], []],
+  [[20], []],
+  [[21], []],
+  [[22], []],
+  [[], [48, 49, 50, 51, 52, 53]],
+  [[23], []],
+  [[], [4]],
+  [[], [10]],
+  [[], [11]],
+  [[], [12]],
+  [[], [13]],
+  [[], [14]],
+  [[], [15]],
+  [[], [16]],
+  [[], [17]],
+  [[], [18]],
+  [[], [19]],
+  [[], [20]],
+  [[], [21]],
+  [[], [22]],
+  [[], [9]],
+  [[], [6]],
+  [[], [23]],
+  [[], [7]],
+  [[4, 6], []],
+  [[], [54, 55, 56, 57, 58, 59]],
+  [[], [3]],
+  [[3], []],
+  [[7], []],
+  [[9], []],
+  [[10], []],
+  [[11], []],
+  [[12], []],
+  [[13], []],
+  [[14], []],
+  [[15], []],
+  [[16], []],
+  [[17], []],
+  [[18], []],
+  [[19], []],
+  [[20], []],
+  [[21], []],
+  [[], [3]],
+  [[], [7]],
+  [[], [9]],
+  [[], [10]],
+  [[], [11]],
+  [[], [12]],
+  [[], [13]],
+  [[], [14]],
+  [[], [15]],
+  [[], [16]],
+  [[], [17]],
+  [[], [18]],
+  [[], [19]],
+  [[], [5]],
+  [[], [20]],
+  [[], [21]],
+  [[], [4]],
+  [[3, 4], []],
+  [[], [4, 3]],
+  ].map(([created, destroyed]) => Object.freeze([Object.freeze(created!), Object.freeze(destroyed!)] as const)));
+
+/**
+ * Free order after the known entry stream (== KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER). Only the route the corpus
+ * covers is modelled; any other route is unknown history and returns an invalid state — never a guess.
+ */
+export function knownEntrySpriteOrderState(route: "ordinary-factory" | "battle-lab-ordinary-singles"): SpriteOrderState {
+  if (route !== "battle-lab-ordinary-singles") return invalidateSpriteOrderState(initSpriteOrderState());
+  // Entry windows only destroy groups whose array order is stored in the table; the array itself is not needed.
+  const identity = Array.from({ length: SPRITE_ORDER_SLOT_COUNT }, (_, slot) => slot);
+  let state = initSpriteOrderState();
+  for (const [created, destroyed] of BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS) {
+    // `previousArrayOrder` ordering is already baked into `destroyed`; pass it as the array prefix.
+    state = applySpriteOrderWindow(state, created, destroyed, [...destroyed, ...identity.filter(s => !destroyed.includes(s))]);
+  }
+  return state;
+}

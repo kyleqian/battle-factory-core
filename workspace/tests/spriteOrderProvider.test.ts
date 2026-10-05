@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { createKnownEntrySpriteAllocatorProvider } from "../src/engine/knownEntrySpriteAllocator.ts";
 import {
-  KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, applySpriteOrderWindow, initSpriteOrderState,
-  invalidateSpriteOrderState, onSpriteOrderCreate, onSpriteOrderDestroyGroup,
+  BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS, KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, applySpriteOrderWindow, initSpriteOrderState,
+  invalidateSpriteOrderState, knownEntrySpriteOrderState, onSpriteOrderCreate, onSpriteOrderDestroyGroup,
   spriteOrderForFirstAllocation,
 } from "../src/engine/spriteOrderProvider.ts";
 
@@ -133,5 +134,32 @@ describe("spriteOrderProvider corpus replay", () => {
     expect(totals.activationEdges).toBe(56);
     expect(edgeHeadMatches).toBe(edges);
     expect(firstActions).toBe(44);
+  });
+});
+
+describe("known-entry sprite order replay", () => {
+  it("yields the first-action free order and matches the allocator's occupants", () => {
+    const state = knownEntrySpriteOrderState("battle-lab-ordinary-singles");
+    expect(state.free).toEqual(KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER);
+    const provider = createKnownEntrySpriteAllocatorProvider("battle-lab-ordinary-singles");
+    const occupied = new Set(provider.firstMove.occupants.map(o => o.slot));
+    expect([...Array(64).keys()].filter(s => !state.free.includes(s))).toEqual([...occupied].sort((a, b) => a - b));
+    const lastWindow = BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS.at(-1)!;
+    expect(lastWindow[1]).toEqual([4, 3]);
+  });
+  it("matches the raw corpus entry stream and refuses unmodelled routes", () => {
+    const frames = loadFrames(readdirSync(RAW).find(f => f.includes("karate"))!);
+    const windows: [number[], number[]][] = [];
+    let prev = frames[0]!;
+    for (const frame of frames.slice(1)) {
+      const before = new Set(slotsOf(prev.mask)), after = new Set(slotsOf(frame.mask));
+      const created = [...after].filter(s => !before.has(s));
+      const destroyed = [...before].filter(s => !after.has(s)).sort((a, b) => prev.order.indexOf(a) - prev.order.indexOf(b));
+      if (created.length || destroyed.length) windows.push([created, destroyed]);
+      if (windows.length === BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS.length) break;
+      prev = frame;
+    }
+    expect(windows).toEqual(BATTLE_LAB_ORDINARY_SINGLES_ENTRY_WINDOWS.map(([c, d]) => [[...c], [...d]]));
+    expect(knownEntrySpriteOrderState("ordinary-factory").known).toBe(false);
   });
 });
