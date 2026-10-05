@@ -1,5 +1,7 @@
 export type PainSplitSide = "player" | "opponent";
 export type PainSplitSpecies = "MISDREAVUS" | "GENGAR";
+/** An accepted species cell, or the live pic-coords yOffset of any species. */
+export type PainSplitPicture = PainSplitSpecies | number;
 
 export interface PainSplitProjectile {
   readonly owner: "attacker" | "target";
@@ -73,27 +75,35 @@ function projectileAtAge(
   };
 }
 
+/**
+ * Species pic-coordinate `yOffset` (back table for the player, front for the opponent) of the four accepted cells; every
+ * other species supplies it directly (`GetBattlerSpriteCoordAttr(.., BATTLER_COORD_ATTR_..yOffset)`, liveBattlerCoordAttrs).
+ */
+const ACCEPTED_PIC_Y_OFFSET: Readonly<Record<string, number>> = {
+  "MISDREAVUS/player": 10, "MISDREAVUS/opponent": 12, "GENGAR/player": 9, "GENGAR/opponent": 5,
+};
+const PHASE_MATRIX_D = [320, 283, 283] as const;
+
+/**
+ * Closed form of SetBattlerSpriteYOffsetFromYScale (battle_anim_mons.c:1897): var = 64 - 2*yOffset,
+ * var2 = min((var << 8) / d, 128) for the matrix d, y2 = (var - var2) / 2 (C truncation); the latter two
+ * tasks add the literal +16 on the player side. Matches the ROM 24/24 (docs/next-adapters-prep10.md s3.4).
+ */
 function battlerYOffset(
   phase: 0 | 1 | 2,
   side: PainSplitSide,
-  species: PainSplitSpecies,
+  species: PainSplitPicture,
 ): number {
-  // SetBattlerSpriteYOffsetFromYScale derives these from each species'
-  // source pic dimensions. The latter two tasks then apply their literal
-  // +16 player-side correction.
-  const sourceScaleOffset = phase === 0
-    ? (species === "MISDREAVUS" ? 4 : 5)
-    // SetBattlerSpriteYOffsetFromYScale selects the source pic-coordinate
-    // table for the battler side. Gengar's back coordinate is 2 while its
-    // front coordinate is 3; Misdreavus is 2 in both tables.
-    : (side === "opponent" && species === "GENGAR" ? 3 : 2);
-  return sourceScaleOffset + (phase > 0 && side === "player" ? 16 : 0);
+  const yOffset = typeof species === "number" ? species : ACCEPTED_PIC_Y_OFFSET[`${species}/${side}`]!;
+  const height = 64 - 2 * yOffset;
+  const scaled = Math.min(Math.trunc((height << 8) / PHASE_MATRIX_D[phase]), 128);
+  return Math.trunc((height - scaled) / 2) + (phase > 0 && side === "player" ? 16 : 0);
 }
 
 export function painSplitBattlerTransformAtSourceAge(
   age: number,
   side: PainSplitSide,
-  species: PainSplitSpecies,
+  species: PainSplitPicture,
 ): PainSplitBattlerTransform {
   const phase = PAIN_SPLIT_TASK_START_AGES.findIndex((start) =>
     age >= start && age < start + 12
@@ -117,7 +127,7 @@ export function painSplitBattlerTransformAtSourceAge(
 export function painSplitDisplayedMatrixTransform(
   displayAge: number,
   side: PainSplitSide,
-  species: PainSplitSpecies,
+  species: PainSplitPicture,
 ): PainSplitBattlerTransform {
   const precedingSourceAge = displayAge - 1;
   const setupJustRan = PAIN_SPLIT_TASK_START_AGES.includes(
@@ -143,8 +153,8 @@ export function painSplitDisplayedMatrixTransform(
 /** Complete Move_PAIN_SPLIT source body at an age relative to its first row. */
 export function painSplitAtAge(
   age: number,
-  attacker: Readonly<{ side: PainSplitSide; species: PainSplitSpecies; center: Readonly<{ x: number; y: number }> }>,
-  target: Readonly<{ side: PainSplitSide; species: PainSplitSpecies; center: Readonly<{ x: number; y: number }> }>,
+  attacker: Readonly<{ side: PainSplitSide; species: PainSplitPicture; center: Readonly<{ x: number; y: number }> }>,
+  target: Readonly<{ side: PainSplitSide; species: PainSplitPicture; center: Readonly<{ x: number; y: number }> }>,
 ): PainSplitState {
   const projectiles: PainSplitProjectile[] = [];
   for (let phase = 0; phase < 3; phase += 1) {

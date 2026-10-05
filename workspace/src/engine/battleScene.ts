@@ -44972,17 +44972,17 @@ export function renderSceneOnMovePresentation(
     const gengarSource = playerToOpponent
       ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GENGAR!
       : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GENGAR!;
-    const misdreavus = playerToOpponent ? misdreavusSource : {
+    const misdreavus = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? misdreavusSource : {
       ...misdreavusSource,
       tileset: subTileset(misdreavusSource.tileset, 0, 8),
     };
-    const gengar = playerToOpponent ? {
+    const gengar = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? {
       ...gengarSource,
       tileset: subTileset(gengarSource.tileset, 0, 8),
     } : gengarSource;
 
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    if (opponentToPlayer && painState.age === 0) {
+    if (!liveField && opponentToPlayer && painState.age === 0) {
       const shadowX = 176 - battleEnemyShadow.width / 2;
       const shadowY = 40 + 29 - battleEnemyShadow.height / 2;
       for (const pixel of battleEnemyShadow.mask) {
@@ -44993,12 +44993,12 @@ export function renderSceneOnMovePresentation(
     const attackerTransform = painSplitDisplayedMatrixTransform(
       painState.age,
       view.attacker.geometry.side,
-      "MISDREAVUS",
+      painState.config.pictureYOffsets?.attacker ?? "MISDREAVUS",
     );
     const targetTransform = painSplitDisplayedMatrixTransform(
       painState.age,
       view.target.geometry.side,
-      "GENGAR",
+      painState.config.pictureYOffsets?.target ?? "GENGAR",
     );
     const drawBattler = (
       sprite: { tileset: Tileset; palette: RgbColor[] },
@@ -45036,6 +45036,7 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,
