@@ -1,0 +1,54 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "move": "GLARE",
+ "probe": "tools/compare/glareProbe.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/glare-opponent-seviper-player-shuckle.json",
+ "attacker": {
+  "species": "SEVIPER",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 127,
+  "playerMaxHp": 127,
+  "opponentHp": 180,
+  "opponentMaxHp": 180,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 76,
+  "endFrame": 288,
+  "frameCount": 213
+ },
+ "draft": {
+  "activationFrame": 78,
+  "shadowRow": 0,
+  "expectedDuration": 213,
+  "consumedByTest": false,
+  "attackerEyeCenter": {
+   "x": 176,
+   "y": 49
+  },
+  "eyeDotStart": {
+   "x": 168,
+   "y": 49
+  },
+  "eyeDotEnd": {
+   "x": 72,
+   "y": 99
+  },
+  "derivation": "eyeCenter = attacker picOffsetPoint + (0,-8) [sparkle arg]; dotStart.x = pic.x +/- BATTLER_COORD_ATTR_HEIGHT/4 (+ player, - opponent), dotStart.y = pic.y - HEIGHT/4; dotEnd = target picOffsetPoint"
+ },
+ "baseSourceFixture": "tools/integration/fixtures/next-glare-opponent.json",
+ "swap": {
+  "opponent": "SEVIPER"
+ }
+}
