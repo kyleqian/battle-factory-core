@@ -376,7 +376,7 @@ def main() -> None:
     staged_battler = PLAYER_BATTLER if ATTACKER_SIDE == "player" else OPPONENT_BATTLER
     staged_slot = 0 if ATTACKER_SIDE == "player" else OPPONENT_AI_SLOT
     battler_base = oracle.symbols["gBattleMons"] + staged_battler * BATTLE_MON_SIZE
-    staged_pp = {"faint-attack": 20, "double-team": 15, "rock-slide": 10, "endeavor": 5}[MOVE_NAME]
+    staged_pp = {"faint-attack": 20, "double-team": 15, "rock-slide": 10, "endeavor": 5, "ice-punch": 15, "fire-punch": 15}[MOVE_NAME]
     write_u16(oracle, battler_base + BATTLE_MON_MOVES + staged_slot * 2, STAGED_MOVE)
     oracle.write_u8(battler_base + BATTLE_MON_PP + staged_slot, staged_pp)
     for segment in segments[40:43]:

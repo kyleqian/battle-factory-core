@@ -3,7 +3,7 @@
 export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
 PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
 D=tools/integration/fixtures/census-activation
-for sm in "player rock-slide" "opponent rock-slide" "player endeavor" "opponent endeavor"; do
+for sm in "player rock-slide" "opponent rock-slide" "player endeavor" "opponent endeavor" "player ice-punch" "opponent ice-punch" "player fire-punch" "opponent fire-punch"; do
   set -- $sm
   $PY tools/integration/censusStageActivation.py $D/stage-$2-$1.json - $1 $2 > /dev/null 2>&1
 done

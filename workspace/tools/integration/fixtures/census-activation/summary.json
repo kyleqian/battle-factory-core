@@ -340,6 +340,90 @@
    "reducerAgeAtActivation": -8
   },
   {
+   "move": "ICE_PUNCH",
+   "probe": "ice-punch-player",
+   "staged": true,
+   "activation": 2339,
+   "scriptEnd": 2522,
+   "scriptFrames": 183,
+   "window": {
+    "start": 2339,
+    "end": 2800
+   },
+   "appStage": {
+    "id": "ice-punch-onix-grovyle-animation-owned",
+    "oracleFrame": 2339,
+    "presentationAge": 0
+   },
+   "note": "second action (after the AI Double Team body); window = body + controller tail",
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 278,
+   "reducerAgeAtActivation": 0
+  },
+  {
+   "move": "ICE_PUNCH",
+   "probe": "ice-punch-opponent",
+   "staged": true,
+   "activation": 1966,
+   "scriptEnd": 2149,
+   "scriptFrames": 183,
+   "window": {
+    "start": 1966,
+    "end": 3259
+   },
+   "appStage": {
+    "id": "ice-punch-grovyle-onix-animation-body",
+    "oracleFrame": 1966,
+    "presentationAge": 0
+   },
+   "note": "first body of the staged battle; window = body + controller tail (1293 frames)",
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 1110,
+   "reducerAgeAtActivation": 0
+  },
+  {
+   "move": "FIRE_PUNCH",
+   "probe": "fire-punch-player",
+   "staged": true,
+   "activation": 2340,
+   "scriptEnd": 2441,
+   "scriptFrames": 101,
+   "window": {
+    "start": 2313,
+    "end": 2537
+   },
+   "appStage": {
+    "id": "fire-punch-onix-grovyle-animation-owned",
+    "oracleFrame": 2313,
+    "presentationAge": 0
+   },
+   "note": "UNRESOLVED: accepted window starts 27 frames BEFORE the staged activation (window 2313 vs act 2340)",
+   "activationMinusWindowStart": 27,
+   "windowEndMinusScriptEnd": 96,
+   "reducerAgeAtActivation": 27
+  },
+  {
+   "move": "FIRE_PUNCH",
+   "probe": "fire-punch-opponent",
+   "staged": true,
+   "activation": 1967,
+   "scriptEnd": 2068,
+   "scriptFrames": 101,
+   "window": {
+    "start": 2081,
+    "end": 2357
+   },
+   "appStage": {
+    "id": "fire-punch-grovyle-onix-animation-owned",
+    "oracleFrame": 2081,
+    "presentationAge": 0
+   },
+   "note": "UNRESOLVED: accepted window starts 114 frames AFTER the staged activation and after the script end (2081 vs act 1967, end 2068); signs differ per side, so the accepted staging is not the copied stage boundary or the window is the burn/status phase",
+   "activationMinusWindowStart": -114,
+   "windowEndMinusScriptEnd": 289,
+   "reducerAgeAtActivation": -114
+  },
+  {
    "move": "ENDEAVOR",
    "probe": "endeavor-opponent",
    "staged": true,

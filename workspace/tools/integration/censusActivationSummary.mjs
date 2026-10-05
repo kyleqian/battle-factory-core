@@ -47,6 +47,10 @@ const STAGED = [
   [157, "ROCK_SLIDE", "rock-slide-player", "stage-rock-slide-player.json", null, "no accepted player-attacker evidence (rock-slide-grovyle-onix.json is opponent Grovyle -> player Onix only); staged run has the AI Double Team body first (history != first body)"],
   [157, "ROCK_SLIDE", "rock-slide-opponent", "stage-rock-slide-opponent.json", "tools/compare/fixtures/rock-slide-grovyle-onix.json", "first body of the staged battle"],
   [283, "ENDEAVOR", "endeavor-player", "stage-endeavor-player.json", "tools/compare/fixtures/endeavor-onix-grovyle.json", "second action (after the AI Double Team body)"],
+  [8, "ICE_PUNCH", "ice-punch-player", "stage-ice-punch-player.json", "tools/compare/fixtures/ice-punch-onix-grovyle.json", "second action (after the AI Double Team body); window = body + controller tail"],
+  [8, "ICE_PUNCH", "ice-punch-opponent", "stage-ice-punch-opponent.json", "tools/compare/fixtures/ice-punch-grovyle-onix.json", "first body of the staged battle; window = body + controller tail (1293 frames)"],
+  [7, "FIRE_PUNCH", "fire-punch-player", "stage-fire-punch-player.json", "tools/compare/fixtures/fire-punch-onix-grovyle.json", "UNRESOLVED: accepted window starts 27 frames BEFORE the staged activation (window 2313 vs act 2340)"],
+  [7, "FIRE_PUNCH", "fire-punch-opponent", "stage-fire-punch-opponent.json", "tools/compare/fixtures/fire-punch-grovyle-onix.json", "UNRESOLVED: accepted window starts 114 frames AFTER the staged activation and after the script end (2081 vs act 1967, end 2068); signs differ per side, so the accepted staging is not the copied stage boundary or the window is the burn/status phase"],
   [283, "ENDEAVOR", "endeavor-opponent", "stage-endeavor-opponent.json", null, "NOT PRODUCED: the staged AI selected Rock Slide (157) instead; opponent-attacker Endeavor evidence is missing"],
 ];
 for (const [id, move, probe, file, fx, note] of STAGED) {
