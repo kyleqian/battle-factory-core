@@ -17,26 +17,17 @@ backlog.
 
 # Open
 
-## #145 — Live Dragon Rage and Aerial Ace use ONIX-measured target constants (S10A, found 2026-10-05)
+## #145 — Live-adapter species audit: unresolved residuals (S10A; Dragon Rage + Aerial Ace FIXED 2026-10-05)
 
-- **Dragon Rage (82):** the fireball aim is the ONIX-measured literal
-  `DRAGON_RAGE_FIRE_SPIT_GEOMETRY` (`src/animation/dragonRage.ts:197-212`, used at
-  `sceneOnPresentation.ts:6852`); the ROM aims at the target's `X_2` / `Y_PIC_OFFSET` + 10
-  (`battle_anim_dragon.c:218-243`, `battle_anim_mons.c:1065-1091`). Player attacker vs GOLEM
-  2,115 px (ages 86-96), GOLBAT 2,574, SHUCKLE 2,566; opponent attacker vs a player GOLEM
-  3,626. The start point also encodes the CHARMELEON back sprite (other attackers: same class,
-  unmeasured). Fix: derive the delta from `liveBattlerAnchors(...).picOffsetPoint` with
-  `(|d|<<8)/duration` and the u16 low-bit rule (`speciesAuditFireSpit.ts` reproduces ONIX's
-  (1894, -1537)); patched `deltaYQ8` -1459 gives GOLEM 150/150 (supervisor reran).
-- **Aerial Ace (332):** `src/animation/aerialAce.ts:49-57` subtracts a hard-coded 1 (ONIX's
-  front-idle x2) from age 57: GOLEM 34,505 px (15/50), GOLBAT 29,295, SHUCKLE 16,399. Fix: use
-  `frontIdleRest.x2`; patched 0 gives 50/50 (supervisor reran). Quick Attack (98) shares the
-  body function: re-prove it with the fix.
-- **Unresolved audit residuals (`docs/live-species-audit.md` §3):** one-frame-later tail fade
-  (Psybeam GOLBAT/SHUCKLE, Amnesia, Cosmic Power, Horn Drill; suspected emulated lag frame);
-  GOLBAT-only small residuals (Light Screen / Future Sight 400 px last two ages, Smelling Salt
-  3,358 px ages 74-112, Aromatherapy 1,676 px age 364; suspected elevated-opponent shadow row);
-  Blizzard / Icy Wind fall back for the elevated pair by design.
+- **Fixed (merge of `5b7a1ff3b`):** Dragon Rage fire-spit aim from attacker/target pic offsets;
+  Aerial Ace settled target x from the species idle x2 (GOLEM/GOLBAT/SHUCKLE exact).
+- **Open remainder (`docs/live-species-audit.md` §3):** one-frame-later tail fade (Psybeam
+  GOLBAT/SHUCKLE, Amnesia, Cosmic Power, Horn Drill; suspected emulated lag frame — next:
+  record `gMain.vblankCounter1`/VCOUNT per frame); GOLBAT-only small residuals (Light Screen /
+  Future Sight 400 px last two ages, Smelling Salt 3,358 px ages 74-112, Aromatherapy 1,676 px
+  age 364; suspected elevated-opponent shadow row); Blizzard / Icy Wind fall back for the
+  elevated pair by design; Dragon Rage with non-CHARMELEON player attackers formula-derived,
+  unmeasured; Quick Attack species swap not staged (code reading: no hard-coded idle).
 
 ## #143 — CASTFORM non-normal forms (weather) are not modelled (S10A; normal-form residual FIXED 2026-10-05)
 
