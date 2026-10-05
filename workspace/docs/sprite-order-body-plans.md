@@ -257,7 +257,7 @@ stopping at the first unit that is not EXACT-PLAN.
 | edges whose preceding units are all EXACT-PLAN (replayed) | 659 (338 first edges, 321 later edges) |
 | **exact** / mismatched | **659 / 0** |
 | edges skipped (a preceding unit is NEEDS-KEYS or truncated) | 131 |
-| scenarios whose entry *windows* differ from the table (sort-window split differences, slot/F identical at the first edge: Magic Coat, Brick Break, Dizzy Punch, Fake Out, Light Screen, Poison-Fang-class) | 7 (replayed; F at first edge == constant) |
+| scenarios whose entry *windows* differ from the table (sort-window split differences, slot/F identical at the first edge: Magic Coat, Brick Break x2, Dizzy Punch, Fake Out, Light Screen, +1) | 7 (replayed; F at first edge == constant) |
 | scenarios with an intro animation before the first prompt (first body is mv 0 before the first prompt; presumably switch-in ability animations: Hitmontop, Ekans, Masquerain, Howl-alt) | 12 (skipped: F at first edge != constant) |
 
 Caveat (honest): plans are derived from the same corpus they are replayed on, so the replay proves composition (carry-over tokens, allocator
