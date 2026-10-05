@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 285,
-  "ids": 133,
+  "rows": 289,
+  "ids": 135,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -2986,6 +2986,42 @@
    "expected": null,
    "drawn": [],
    "tailFirstAge": 190
+  },
+  {
+   "id": 298,
+   "move": "TEETER_DANCE",
+   "orientation": "player",
+   "duration": 169,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": 169
+  },
+  {
+   "id": 298,
+   "move": "TEETER_DANCE",
+   "orientation": "opponent",
+   "duration": 169,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": 169
+  },
+  {
+   "id": 146,
+   "move": "DIZZY_PUNCH",
+   "orientation": "player",
+   "duration": 69,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": 69
+  },
+  {
+   "id": 146,
+   "move": "DIZZY_PUNCH",
+   "orientation": "opponent",
+   "duration": 69,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": 69
   },
   {
    "id": 137,

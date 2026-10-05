@@ -78,6 +78,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   89, 90, 152, 345, 133, 60,
   // next5: eye anchors from liveBattlerAnchors (docs/next-adapters-prep.md s4).
   184, 137,
+  // next5 personality: Spinda spots read the displayed party mon's personality (presentation-only).
+  298, 146,
 ] as const);
 
 /**
@@ -313,6 +315,8 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 345: return MAGICAL_LEAF_FRAME_COUNT;
     case 60: return 160; // Psybeam accepted window (source script through first inactive row).
     case 133: return 216; // Amnesia accepted window (source script through first inactive row).
+    case 298: return 169; // Teeter Dance accepted window (firstInactiveAge 168).
+    case 146: return 69; // Dizzy Punch accepted window; script tail 5 rows uncovered.
     case 184: return 190; // Scary Face accepted window (79..268); script tail 14 rows uncovered.
     case 137: return 213; // Glare accepted window (GLARE_SOURCE_FRAME_COUNT).
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
@@ -801,6 +805,21 @@ export function liveMoveAnimationPresentation(
       // Species-owned idle x2 of the target (player back sprites have none).
       config = { move: request.moveId === 152 ? "CRABHAMMER" : request.moveId === 60 ? "PSYBEAM" : "MAGICAL_LEAF", attacker, target, fieldProfile,
         targetIdleX2: liveBattlerAnchors(target.geometry.side, art).frontIdleRest.x2 };
+      break;
+    case 298: {
+      // teeterDanceFramebuffer.ts:84-110: the attacker's note/pic center is its pic point, the player-side
+      // target uses its OBJ center, and the attacker's own sprite x/y is the OBJ center.
+      config = { move: "TEETER_DANCE",
+        attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: attackerAnchors.picOffsetPoint } },
+        target: { ...target, geometry: { ...target.geometry, animationCenter: target.geometry.side === "player"
+          ? liveBattlerAnchors("player", art).spriteCenter : liveBattlerAnchors("opponent", art).picOffsetPoint } },
+        fieldProfile, attackerSpriteCenter: attackerAnchors.spriteCenter,
+        attackerPersonality: field[attacker.geometry.side].personality ?? 0 };
+      break;
+    }
+    case 146:
+      config = { move: "DIZZY_PUNCH", attacker, target, fieldProfile,
+        attackerPersonality: field[attacker.geometry.side].personality ?? 0 };
       break;
     case 184:
       // InitSpritePosToAnimAttacker(sprite, TRUE): attacker X_2 / Y_PIC_OFFSET.

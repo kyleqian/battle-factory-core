@@ -20064,14 +20064,14 @@ export function renderSceneOnMovePresentation(
       age: punchState.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "SPINDA"
+      (liveField || view.attacker.species === "SPINDA")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "SPINDA"
+      (liveField || view.attacker.species === "SPINDA")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -20079,13 +20079,22 @@ export function renderSceneOnMovePresentation(
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const spinda = playerToOpponent
+    const liveAttackerArt = liveField ? liveSceneOnBattlerArt(view.attacker) : null;
+    const spinda = liveAttackerArt
+      // Only the opponent front Spinda frame carries personality spots.
+      ? view.attacker.geometry.side === "opponent" && view.attacker.species === "SPINDA"
+        ? { ...liveAttackerArt, tileset: spindaFrontTilesetAtPersonality(
+            state.config.attackerPersonality, liveAttackerArt.tileset) }
+        : liveAttackerArt
+      : playerToOpponent
       ? dizzyPunchArt.spindaBack
       : {
           ...dizzyPunchArt.spindaFront,
           tileset: spindaFrontTilesetAtPersonality(state.config.attackerPersonality),
         };
-    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = liveField
+      ? liveSceneOnBattlerArt(view.target)
+      : playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -20097,7 +20106,10 @@ export function renderSceneOnMovePresentation(
     // animation-1 IMPACT. Its front idle x2 is cleared when the first
     // ShakeMon2 task is created.
     const targetBaselineX2 =
-      playerToOpponent && displayed.age < 8 ? 1 : 0;
+      liveField
+        ? view.target.geometry.side === "opponent" && displayed.age < 8
+          ? speciesFrontIdleRestOffsetOrZero(view.target.species).x2 : 0
+        : playerToOpponent && displayed.age < 8 ? 1 : 0;
     drawSpriteSheet(
       fb,
       onix.tileset,
@@ -20173,6 +20185,7 @@ export function renderSceneOnMovePresentation(
       drawEffects();
     }
 
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -20210,6 +20223,7 @@ export function renderSceneOnMovePresentation(
       "DIZZY PUNCH!",
       99,
     );
+    }
     return;
   }
 
@@ -43159,6 +43173,7 @@ export function renderSceneOnMovePresentation(
       ? view.target.species : view.attacker.species;
     const playerSpecies = view.target.geometry.side === "player"
       ? view.target.species : view.attacker.species;
+    if (!liveField) {
     drawSendOutHealthbox(
       fb,
       0,
@@ -43191,6 +43206,7 @@ export function renderSceneOnMovePresentation(
       "TEETER DANCE!",
       99,
     );
+    }
     return;
   }
 

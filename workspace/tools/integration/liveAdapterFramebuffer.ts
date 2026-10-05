@@ -36,6 +36,8 @@ export interface Fixture {
   attacker: { species: string; geometry: { side: "player" | "opponent" } };
   target: { species: string; geometry: { side: "player" | "opponent" } };
   fieldProfile: SceneOnDragonRageFieldProfile;
+  /** Real attacker party personality (Spinda spots); presentation-only. */
+  attackerPersonality?: number;
   body?: "normal" | "shattered-wall";
   /** Controller arguments the ROM held at this body (gAnimMoveTurn/Power/Dmg). */
   /** Source text box content during this body (default: the move-used banner). */
@@ -59,6 +61,8 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
     const species = speciesStats.species.find(s => s.name === `SPECIES_${mon.species}`)?.id;
     if (species === undefined) throw new Error(`Unknown species ${mon.species}`);
     return {
+      ...(f.attacker.geometry.side === side && f.attackerPersonality !== undefined
+        ? { personality: f.attackerPersonality } : {}),
       species, name: mon.species, side: side === "player" ? "player" as const : "trainer" as const,
       battler: side === "player" ? 0 as const : 1 as const, partyIndex: 0 as const, level: 50,
       hp: side === "player" ? profile.playerHp : profile.opponentHp,
