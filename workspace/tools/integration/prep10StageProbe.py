@@ -37,7 +37,8 @@ def state():
             "gAnimMoveDmg": s32(sym["gAnimMoveDmg"]), "gBattleMoveDamage": s32(sym["gBattleMoveDamage"]), "animTurn": u8(sc + 24), "animTargetsHit": u8(sc + 25),
             "multiHitCounter": u8(sym["gMultiHitCounter"]), "currentMove": u16(sym["gCurrentMove"]), "attacker": u8(sym["gBattlerAttacker"]), "target": u8(sym["gBattlerTarget"]),
             "mons": [mon(0), mon(1)], "bitmap": u32(sym["gOamMatrixAllocBitmap"]), "tasks": tasks(), "sprites": sprites(), "spriteOrder": [u8(sym["sSpriteOrder"] + i) for i in range(64)]}
-bodies, changes, spawns = [], [], []
+bodies, changes, spawns, bseries, oseries = [], [], [], [], []
+prev_order = None
 prev_sp = set()
 cur = None; prevp = (None, None, None); pending_end = []
 f = 0
@@ -49,7 +50,17 @@ def step():
         changes.append({"f": f, "gBattleMovePower": p[0], "gDynamicBasePower": p[1], "gAnimMovePower": p[2], "currentMove": u16(sym["gCurrentMove"]), "animActive": a}); prevp = p
     for e in pending_end:
         if f == e[0]: e[1]["atEnd+1"] = {k: v for k, v in state().items() if k in ("mons", "bitmap", "tasks", "sprites", "gAnimMovePower", "gBattleMovePower")}
-    global prev_sp
+    global prev_sp, prev_order
+    if cur is not None:  # sSpriteOrder whenever it changes inside a body (hardware tie-order derivation)
+        od = [u8(sym["sSpriteOrder"] + i) for i in range(64)]
+        if od != prev_order: oseries.append([f, od]); prev_order = od
+    if cur is not None:  # battler sprite y2/x2 + matrix per frame inside a body (Pain Split offsets, shake)
+        r = [f]
+        for b in (0, 1):
+            sa = sym["gSprites"] + u8(sym["gBattlerSpriteIds"] + b) * 0x44
+            mn = (u16(sa + 2) >> 9) & 31; ma = sym["gOamMatrices"] + 8 * mn
+            r += [sg(sa + 0x24), sg(sa + 0x26), mn, u8(sa + 0x3e) >> 2 & 1, sg(ma), sg(ma + 2), sg(ma + 4), sg(ma + 6)]  # x2, y2, matrixNum, invisible, matrix a b c d
+        bseries.append(r)
     if cur is not None or a:  # sprite spawn/free log only while an animation script is active (+ the frame it ends)
         sp = set(sprites())
         base = sym["gSprites"]
@@ -77,4 +88,4 @@ o.write_u8(a, mv & 255); o.write_u8(a + 1, mv >> 8); o.write_u8(base + 0x24 + sl
 for seg in trace[40:43]:
     for _ in range(int(seg["frames"])): adv(seg.get("buttons", []))
 for _ in range(1480): adv([])
-OUT.write_text(json.dumps({"scenario": f"staged-{MOVE}-{SIDE}", "frames": f, "bodies": bodies, "powerChanges": changes, "spawns": spawns}, separators=(",", ":")))
+OUT.write_text(json.dumps({"scenario": f"staged-{MOVE}-{SIDE}", "frames": f, "bodies": bodies, "powerChanges": changes, "spawns": spawns, "battlerSeries": bseries, "orderSeries": oseries}, separators=(",", ":")))
