@@ -2202,29 +2202,32 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-05): 198 live adapters (master after the 2026-10-04 night session).
-New production infrastructure: the free-slot sprite-order provider with
-event-driven cross-body tracking (`src/engine/liveSpriteOrderHost.ts`, generated
-445-body table `src/engine/spriteOrderProductionPlans.ts`); order consumers and
-allocator-plan-v2 moves render only while the tracked order is lent (known-entry
-occupancy). Resume points, in order:
-1. Order coverage: the Endeavor/Fake Tears rows, the 60 REL-Y-confirmed rows (445-body
-   table) and the Intimidate battle-start seed are in production. Remaining: the 23
-   abs-invariant REL-Y rows (need a second geometry; `docs/sprite-order-rely-confirmation.md`).
-2. Post-knock-out lends: every order-/allocator-gated adapter falls back after the
-   first faint/switch because battler slots and the affine baseline change
-   (`docs/sprite-order-uncovered-units.md`: unit transforms 36/36 exact); needs
-   occupancy-aware consumers and post-unit affine/task baselines.
-3. Remaining adapters: regenerate `docs/remaining-adapters-census.md`
-   (`node tools/integration/remainingAdaptersCensus.mjs --write --doc`; first drop its
-   hard-coded N1-N3 batch lists, which have all landed and now make it throw); single-input
-   moves (Magnitude/Reversal dynamic power, Pain Split yOffset, Spark, Fire Punch /
-   Endeavor outcome input), Rock Blast / Razor Wind outcome, the Random2 group (a
-   surrogate presentation RNG is never bit-exact in play: claim-boundary decision
-   first), the graphics-host group.
-4. Limits to revisit: Faint Attack lab-vs-staged fade frame, Aerial Ace opponent
-   platform clip for some species, Blaze Kick first-body ROM scenario, CASTFORM
-   weather forms (ISSUES #143 if still open).
+Next (2026-10-05 day): 215 live adapters (master after the 2026-10-05 day session).
+The sprite order now stays tracked and LENT after opponent knock-outs, player faints
+(forced switch-in), voluntary switches, cancelled party menus and Roar/Whirlwind forced
+switches (entry-label / role relabel; allocator re-seeded); 467-body production table.
+Resume points, in order:
+1. DEFERRED D3 (OPEN, user decision): the Random2 group (52 of the 61 remaining moves) is
+   NOT trackable in play (`docs/random2-trackability.md`); surrogate presentation RNG with
+   a separate claim bucket, or keep the fallback. Do not build Random2 adapters before
+   the answer.
+2. ISSUES #147 (if the day session's fix did not land): ordinary resolution frames draw
+   elevated opponents low without their shadow, both scene modes.
+3. Non-Random2 moves: Fly / Bounce (the attacker hidden across the turn gap; brief in
+   `.codex-logs/brief-flybounce-20261005.txt` carries the supervisor's authorization),
+   Rollout / Endeavor (`docs/rollout-endeavor-prep.md` if it landed), Baton Pass (instant
+   forced removal of the attacker + presented replacement), Fire Punch (needs a generic
+   Scene-ON renderer), Spark opponent, Flail (Random2), Memento, Substitute, Extreme Speed.
+4. ISSUES #146 remainder: send-in tail after a forced switch (ball-open fade/particles,
+   species-keyed healthbox slide/message), opponent-attacker Roar continuation, Scene OFF
+   forced switch-out; ISSUES #145 remainder (small species residuals).
+5. Order coverage: the 30 REFUTED (NEEDS-KEYS) and 8 INCONCLUSIVE REL-Y rows; bodies
+   without an exact plan still end tracking (e.g. 85:opponent, 202:player); opponent AI
+   switches, Pursuit and Baton Pass still invalidate; allocator history is lost after
+   non-net-zero bodies (later Light Screen declines).
+6. Limits to revisit: Faint Attack lab-vs-staged fade frame, Aerial Ace opponent
+   platform clip for some species, Blaze Kick first-body ROM scenario, CASTFORM weather
+   forms (#143), Razor Wind ABSOL opponent 23 px, Sky Uppercut COMBUSKEN tail.
 Validate new adapters with alternate-species dense proofs whose windows come from
 the source activation frame, not only the accepted fixture species.
 Latest progress supersedes this starting checkpoint as verified work lands.
