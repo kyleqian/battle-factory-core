@@ -1,0 +1,642 @@
+{
+ "schema": "sprite-order-policy-gaps-stat-moves/v1",
+ "source": {
+  "statUp": "data/battle_scripts_1.s:489 (attackcanceler, attackstring, ppreduce, statbuffchange @494, attackanimation @499, waitanimation, setgraphicalstatchangevalues, playanimation B_ANIM_STATS_CHANGE @503)",
+  "statDown": "data/battle_scripts_1.s:534 (statbuffchange @540, attackanimation @546, waitanimation, setgraphicalstatchangevalues, playanimation @549)"
+ },
+ "effects": {
+  "EFFECT_ATTACK_UP": "statUp",
+  "EFFECT_DEFENSE_UP": "statUp",
+  "EFFECT_SPECIAL_ATTACK_UP": "statUp",
+  "EFFECT_EVASION_UP": "statUp",
+  "EFFECT_ATTACK_DOWN": "statDown",
+  "EFFECT_DEFENSE_DOWN": "statDown",
+  "EFFECT_SPEED_DOWN": "statDown",
+  "EFFECT_ACCURACY_DOWN": "statDown",
+  "EFFECT_EVASION_DOWN": "statDown",
+  "EFFECT_ATTACK_UP_2": "statUp",
+  "EFFECT_DEFENSE_UP_2": "statUp",
+  "EFFECT_SPEED_UP_2": "statUp",
+  "EFFECT_SPECIAL_ATTACK_UP_2": "statUp",
+  "EFFECT_SPECIAL_DEFENSE_UP_2": "statUp",
+  "EFFECT_ATTACK_DOWN_2": "statDown",
+  "EFFECT_DEFENSE_DOWN_2": "statDown",
+  "EFFECT_SPEED_DOWN_2": "statDown",
+  "EFFECT_SPECIAL_DEFENSE_DOWN_2": "statDown",
+  "EFFECT_MINIMIZE": "statUp"
+ },
+ "moves": {
+  "statUp": [
+   {
+    "move": "MOVE_SWORDS_DANCE",
+    "id": 14,
+    "effect": "EFFECT_ATTACK_UP_2"
+   },
+   {
+    "move": "MOVE_GROWTH",
+    "id": 74,
+    "effect": "EFFECT_SPECIAL_ATTACK_UP"
+   },
+   {
+    "move": "MOVE_MEDITATE",
+    "id": 96,
+    "effect": "EFFECT_ATTACK_UP"
+   },
+   {
+    "move": "MOVE_AGILITY",
+    "id": 97,
+    "effect": "EFFECT_SPEED_UP_2"
+   },
+   {
+    "move": "MOVE_DOUBLE_TEAM",
+    "id": 104,
+    "effect": "EFFECT_EVASION_UP"
+   },
+   {
+    "move": "MOVE_HARDEN",
+    "id": 106,
+    "effect": "EFFECT_DEFENSE_UP"
+   },
+   {
+    "move": "MOVE_MINIMIZE",
+    "id": 107,
+    "effect": "EFFECT_MINIMIZE"
+   },
+   {
+    "move": "MOVE_WITHDRAW",
+    "id": 110,
+    "effect": "EFFECT_DEFENSE_UP"
+   },
+   {
+    "move": "MOVE_BARRIER",
+    "id": 112,
+    "effect": "EFFECT_DEFENSE_UP_2"
+   },
+   {
+    "move": "MOVE_AMNESIA",
+    "id": 133,
+    "effect": "EFFECT_SPECIAL_DEFENSE_UP_2"
+   },
+   {
+    "move": "MOVE_ACID_ARMOR",
+    "id": 151,
+    "effect": "EFFECT_DEFENSE_UP_2"
+   },
+   {
+    "move": "MOVE_SHARPEN",
+    "id": 159,
+    "effect": "EFFECT_ATTACK_UP"
+   },
+   {
+    "move": "MOVE_TAIL_GLOW",
+    "id": 294,
+    "effect": "EFFECT_SPECIAL_ATTACK_UP_2"
+   },
+   {
+    "move": "MOVE_IRON_DEFENSE",
+    "id": 334,
+    "effect": "EFFECT_DEFENSE_UP_2"
+   },
+   {
+    "move": "MOVE_HOWL",
+    "id": 336,
+    "effect": "EFFECT_ATTACK_UP"
+   }
+  ],
+  "statDown": [
+   {
+    "move": "MOVE_SAND_ATTACK",
+    "id": 28,
+    "effect": "EFFECT_ACCURACY_DOWN"
+   },
+   {
+    "move": "MOVE_TAIL_WHIP",
+    "id": 39,
+    "effect": "EFFECT_DEFENSE_DOWN"
+   },
+   {
+    "move": "MOVE_LEER",
+    "id": 43,
+    "effect": "EFFECT_DEFENSE_DOWN"
+   },
+   {
+    "move": "MOVE_GROWL",
+    "id": 45,
+    "effect": "EFFECT_ATTACK_DOWN"
+   },
+   {
+    "move": "MOVE_STRING_SHOT",
+    "id": 81,
+    "effect": "EFFECT_SPEED_DOWN"
+   },
+   {
+    "move": "MOVE_SCREECH",
+    "id": 103,
+    "effect": "EFFECT_DEFENSE_DOWN_2"
+   },
+   {
+    "move": "MOVE_SMOKESCREEN",
+    "id": 108,
+    "effect": "EFFECT_ACCURACY_DOWN"
+   },
+   {
+    "move": "MOVE_KINESIS",
+    "id": 134,
+    "effect": "EFFECT_ACCURACY_DOWN"
+   },
+   {
+    "move": "MOVE_FLASH",
+    "id": 148,
+    "effect": "EFFECT_ACCURACY_DOWN"
+   },
+   {
+    "move": "MOVE_COTTON_SPORE",
+    "id": 178,
+    "effect": "EFFECT_SPEED_DOWN_2"
+   },
+   {
+    "move": "MOVE_SCARY_FACE",
+    "id": 184,
+    "effect": "EFFECT_SPEED_DOWN_2"
+   },
+   {
+    "move": "MOVE_CHARM",
+    "id": 204,
+    "effect": "EFFECT_ATTACK_DOWN_2"
+   },
+   {
+    "move": "MOVE_SWEET_SCENT",
+    "id": 230,
+    "effect": "EFFECT_EVASION_DOWN"
+   },
+   {
+    "move": "MOVE_FEATHER_DANCE",
+    "id": 297,
+    "effect": "EFFECT_ATTACK_DOWN_2"
+   },
+   {
+    "move": "MOVE_FAKE_TEARS",
+    "id": 313,
+    "effect": "EFFECT_SPECIAL_DEFENSE_DOWN_2"
+   },
+   {
+    "move": "MOVE_METAL_SOUND",
+    "id": 319,
+    "effect": "EFFECT_SPECIAL_DEFENSE_DOWN_2"
+   }
+  ]
+ },
+ "counts": {
+  "statUp": 15,
+  "statDown": 16
+ },
+ "coverage": {
+  "MOVE_SWORDS_DANCE": {
+   "id": 14,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_GROWTH": {
+   "id": 74,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_MEDITATE": {
+   "id": 96,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": false,
+    "opponent": false
+   },
+   "observedVerdict": {
+    "player": null,
+    "opponent": null
+   }
+  },
+  "MOVE_AGILITY": {
+   "id": 97,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_DOUBLE_TEAM": {
+   "id": 104,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_HARDEN": {
+   "id": 106,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_MINIMIZE": {
+   "id": 107,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_WITHDRAW": {
+   "id": 110,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": false,
+    "opponent": false
+   },
+   "observedVerdict": {
+    "player": null,
+    "opponent": null
+   }
+  },
+  "MOVE_BARRIER": {
+   "id": 112,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_AMNESIA": {
+   "id": 133,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_ACID_ARMOR": {
+   "id": 151,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_SHARPEN": {
+   "id": 159,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": false,
+    "opponent": false
+   },
+   "observedVerdict": {
+    "player": null,
+    "opponent": null
+   }
+  },
+  "MOVE_TAIL_GLOW": {
+   "id": 294,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_IRON_DEFENSE": {
+   "id": 334,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_HOWL": {
+   "id": 336,
+   "families": [
+    "statUp"
+   ],
+   "productionBody": {
+    "player": false,
+    "opponent": false
+   },
+   "observedVerdict": {
+    "player": "NEEDS-KEYS",
+    "opponent": "NEEDS-KEYS"
+   }
+  },
+  "MOVE_SAND_ATTACK": {
+   "id": 28,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": false,
+    "opponent": false
+   },
+   "observedVerdict": {
+    "player": "NEEDS-KEYS",
+    "opponent": "NEEDS-KEYS"
+   }
+  },
+  "MOVE_TAIL_WHIP": {
+   "id": 39,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_LEER": {
+   "id": 43,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_GROWL": {
+   "id": 45,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": false,
+    "opponent": false
+   },
+   "observedVerdict": {
+    "player": "NEEDS-KEYS",
+    "opponent": "NEEDS-KEYS"
+   }
+  },
+  "MOVE_STRING_SHOT": {
+   "id": 81,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": false,
+    "opponent": false
+   },
+   "observedVerdict": {
+    "player": null,
+    "opponent": null
+   }
+  },
+  "MOVE_SCREECH": {
+   "id": 103,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_SMOKESCREEN": {
+   "id": 108,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": false,
+    "opponent": false
+   },
+   "observedVerdict": {
+    "player": "NEEDS-KEYS",
+    "opponent": "NEEDS-KEYS"
+   }
+  },
+  "MOVE_KINESIS": {
+   "id": 134,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": false,
+    "opponent": false
+   },
+   "observedVerdict": {
+    "player": null,
+    "opponent": null
+   }
+  },
+  "MOVE_FLASH": {
+   "id": 148,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_COTTON_SPORE": {
+   "id": 178,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_SCARY_FACE": {
+   "id": 184,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_CHARM": {
+   "id": 204,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_SWEET_SCENT": {
+   "id": 230,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": false,
+    "opponent": false
+   },
+   "observedVerdict": {
+    "player": "NEEDS-KEYS",
+    "opponent": "NEEDS-KEYS"
+   }
+  },
+  "MOVE_FEATHER_DANCE": {
+   "id": 297,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  },
+  "MOVE_FAKE_TEARS": {
+   "id": 313,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": false,
+    "opponent": false
+   },
+   "observedVerdict": {
+    "player": "NEEDS-KEYS",
+    "opponent": "NEEDS-KEYS"
+   }
+  },
+  "MOVE_METAL_SOUND": {
+   "id": 319,
+   "families": [
+    "statDown"
+   ],
+   "productionBody": {
+    "player": true,
+    "opponent": true
+   },
+   "observedVerdict": {
+    "player": "EXACT-PLAN",
+    "opponent": "EXACT-PLAN"
+   }
+  }
+ },
+ "coverageSummary": {
+  "moves": 31,
+  "withProductionBodyBothSides": 20,
+  "withProductionBodyAnySide": 20,
+  "needsKeysAnySide": [
+   "MOVE_FAKE_TEARS",
+   "MOVE_GROWL",
+   "MOVE_HOWL",
+   "MOVE_SAND_ATTACK",
+   "MOVE_SMOKESCREEN",
+   "MOVE_SWEET_SCENT"
+  ]
+ }
+}
