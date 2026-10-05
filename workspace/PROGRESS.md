@@ -29,8 +29,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   integration work (SUPERVISOR.md: ANIMATION_VERIFICATION scoped policy); not run.
   Oracle freshness FAIL at orient was the known false positive. All worker
   branches merged and worktrees removed; evidence copied to `.integration/validation/`.
-  Final gates on : typecheck, 1,508 files / 12,175 tests, build 851
-  ().
+  Final gates on `55d1ef1dd`: typecheck, 1,508 files / 12,175 tests, build 851
+  (`final-supervisor-gates-20261005.json`).
 
 ---
 
