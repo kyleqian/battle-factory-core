@@ -78,8 +78,17 @@ describe("live elevated-opponent shadow rows (#142)", () => {
     expect(liveMoveOpponentShadowRow({ moveId: 44 } as never)).toBeNull();
   });
 
+  // Bind (H_BUFFER S1) is the first non-zero row: the activation frame is live age 2, so the shared hook arms on
+  // age === row rather than age 0 (battleScene.ts renderBattleResolutionLiveView).
+  it("id 20 opponent (Bind): the shadow is drawn on row 2 and not on rows 0/1/3", () => {
+    expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[20]).toBe(2);
+    const r = rows.find((x) => x.id === 20 && x.orientation === "opponent")!;
+    expect(render(r, "GOLBAT", 2)).toBe(200);
+    for (const age of [0, 1, 3]) expect(render(r, "GOLBAT", age)).toBeLessThan(200);
+  });
+
   // Public live render path: elevated GOLBAT target (player attacker) and attacker (opponent attacker).
-  const sample = [57, 330, 196, 59, 252, 322, 34, 5, 115, 280, 101, 2, 163, 44, 92, 93, 347, 158, 207, 339, 76, 236];
+  const sample = [57, 330, 196, 59, 252, 322, 34, 5, 115, 280, 101, 2, 163, 44, 92, 93, 347, 158, 207, 339, 76, 236, 212, 265, 111, 275, 35, 225];
   for (const id of sample) {
     for (const orientation of ["player", "opponent"] as const) {
       it(`id ${id} ${orientation}: shadow on row 0 iff the activation frame is in the window`, () => {

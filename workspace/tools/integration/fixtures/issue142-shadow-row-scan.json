@@ -2,8 +2,8 @@
  "schema": "issue142-shadow-row-scan/v1",
  "generated": "tools/integration/issue142ShadowRowScan.ts",
  "summary": {
-  "rows": 307,
-  "ids": 144,
+  "rows": 321,
+  "ids": 151,
   "uncoveredIds": [],
   "mismatches": 0
  },
@@ -3235,6 +3235,156 @@
    "move": "EXPLOSION",
    "orientation": "opponent",
    "duration": 212,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 212,
+   "move": "MEAN_LOOK",
+   "orientation": "player",
+   "duration": 171,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 212,
+   "move": "MEAN_LOOK",
+   "orientation": "opponent",
+   "duration": 171,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 265,
+   "move": "SMELLING_SALT",
+   "orientation": "player",
+   "duration": 121,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 265,
+   "move": "SMELLING_SALT",
+   "orientation": "opponent",
+   "duration": 121,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 111,
+   "move": "DEFENSE_CURL",
+   "orientation": "player",
+   "duration": 100,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 111,
+   "move": "DEFENSE_CURL",
+   "orientation": "opponent",
+   "duration": 100,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 275,
+   "move": "INGRAIN",
+   "orientation": "player",
+   "duration": 164,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 275,
+   "move": "INGRAIN",
+   "orientation": "opponent",
+   "duration": 164,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 35,
+   "move": "WRAP",
+   "orientation": "player",
+   "duration": 38,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 35,
+   "move": "WRAP",
+   "orientation": "opponent",
+   "duration": 38,
+   "expected": 0,
+   "drawn": [
+    0
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 20,
+   "move": "BIND",
+   "orientation": "player",
+   "duration": 45,
+   "expected": 2,
+   "drawn": [
+    2
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 20,
+   "move": "BIND",
+   "orientation": "opponent",
+   "duration": 45,
+   "expected": 2,
+   "drawn": [
+    2
+   ],
+   "tailFirstAge": null
+  },
+  {
+   "id": 225,
+   "move": "DRAGON_BREATH",
+   "orientation": "player",
+   "duration": 83,
+   "expected": null,
+   "drawn": [],
+   "tailFirstAge": null
+  },
+  {
+   "id": 225,
+   "move": "DRAGON_BREATH",
+   "orientation": "opponent",
+   "duration": 83,
    "expected": null,
    "drawn": [],
    "tailFirstAge": null

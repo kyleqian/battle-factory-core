@@ -1,6 +1,6 @@
 {
  "schema": "issue142-shadow-rows-extra/v1",
- "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py)",
+ "generated": "tools/integration/issue142ShadowRowsExtra.mjs (+ multihit rows appended from multihit-shadow-rows.json) (+ anchor4 rows from issue142ShadowRowsAnchor4.mjs) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ next5 rows from issue142ShadowRowsNext5.py) (+ prep2 rows from issue142ShadowRowsPrep2.py) (+ H_BUFFER S1 rows from issue142ShadowRowsHBufferS1.py)",
  "rows": [
   {
    "id": 236,
@@ -1384,6 +1384,258 @@
     "fixture": "tools/integration/fixtures/prep2-explosion-opponent.json",
     "body": "normal",
     "activation": "docs/next-adapters-prep2-activation.json (issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 212,
+   "move": "MEAN_LOOK",
+   "orientation": "player",
+   "variant": "prep4-mean-look-player",
+   "activationFrame": 71,
+   "windowStart": 71,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-mean-look-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 212,
+   "move": "MEAN_LOOK",
+   "orientation": "opponent",
+   "variant": "prep4-mean-look-opponent",
+   "activationFrame": 75,
+   "windowStart": 75,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-mean-look-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 265,
+   "move": "SMELLING_SALT",
+   "orientation": "player",
+   "variant": "prep4-smelling-salt-player",
+   "activationFrame": 218,
+   "windowStart": 218,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-smelling-salt-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 265,
+   "move": "SMELLING_SALT",
+   "orientation": "opponent",
+   "variant": "prep4-smelling-salt-opponent",
+   "activationFrame": 218,
+   "windowStart": 218,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-smelling-salt-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 111,
+   "move": "DEFENSE_CURL",
+   "orientation": "player",
+   "variant": "prep4-defense-curl-player",
+   "activationFrame": 214,
+   "windowStart": 214,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-defense-curl-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 111,
+   "move": "DEFENSE_CURL",
+   "orientation": "opponent",
+   "variant": "prep4-defense-curl-opponent",
+   "activationFrame": 215,
+   "windowStart": 215,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-defense-curl-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 275,
+   "move": "INGRAIN",
+   "orientation": "player",
+   "variant": "prep4-ingrain-player",
+   "activationFrame": 205,
+   "windowStart": 205,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-ingrain-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 275,
+   "move": "INGRAIN",
+   "orientation": "opponent",
+   "variant": "prep4-ingrain-opponent",
+   "activationFrame": 293,
+   "windowStart": 293,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-ingrain-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 35,
+   "move": "WRAP",
+   "orientation": "player",
+   "variant": "prep4-wrap-player",
+   "activationFrame": 222,
+   "windowStart": 222,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-wrap-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 35,
+   "move": "WRAP",
+   "orientation": "opponent",
+   "variant": "prep4-wrap-opponent",
+   "activationFrame": 78,
+   "windowStart": 78,
+   "ageOffset": 0,
+   "shadowRow": 0,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-wrap-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 20,
+   "move": "BIND",
+   "orientation": "player",
+   "variant": "prep4-bind-player",
+   "activationFrame": 384,
+   "windowStart": 382,
+   "ageOffset": 0,
+   "shadowRow": 2,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-bind-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 20,
+   "move": "BIND",
+   "orientation": "opponent",
+   "variant": "prep4-bind-opponent",
+   "activationFrame": 438,
+   "windowStart": 436,
+   "ageOffset": 0,
+   "shadowRow": 2,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": true,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-bind-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 225,
+   "move": "DRAGON_BREATH",
+   "orientation": "player",
+   "variant": "prep4-dragon-breath-player",
+   "activationFrame": 391,
+   "windowStart": 395,
+   "ageOffset": -2,
+   "shadowRow": -6,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-dragon-breath-player.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
+   }
+  },
+  {
+   "id": 225,
+   "move": "DRAGON_BREATH",
+   "orientation": "opponent",
+   "variant": "prep4-dragon-breath-opponent",
+   "activationFrame": 445,
+   "windowStart": 449,
+   "ageOffset": -2,
+   "shadowRow": -6,
+   "cleanupFrame": null,
+   "tailFirstAge": null,
+   "inWindow": false,
+   "sources": {
+    "fixture": "tools/integration/fixtures/prep4-dragon-breath-opponent.json",
+    "body": "normal",
+    "activation": "tools/integration/fixtures/prep4-activation (docs/h-buffer-s1-prep.md; issue142ActivationProbe.py)"
    }
   }
  ]
