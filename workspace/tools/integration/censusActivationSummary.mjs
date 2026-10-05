@@ -42,5 +42,20 @@ for (const [id, move, probe, fx, body] of CASES) {
   }
   rows.push(row);
 }
+// staged (no BattleLab scenario): prep6StageActivation.py boundary copy censusStageActivation.py -> stage-<move>-<side>.json
+const STAGED = [
+  [157, "ROCK_SLIDE", "rock-slide-player", "stage-rock-slide-player.json", null, "no accepted player-attacker evidence (rock-slide-grovyle-onix.json is opponent Grovyle -> player Onix only); staged run has the AI Double Team body first (history != first body)"],
+  [157, "ROCK_SLIDE", "rock-slide-opponent", "stage-rock-slide-opponent.json", "tools/compare/fixtures/rock-slide-grovyle-onix.json", "first body of the staged battle"],
+  [283, "ENDEAVOR", "endeavor-player", "stage-endeavor-player.json", "tools/compare/fixtures/endeavor-onix-grovyle.json", "second action (after the AI Double Team body)"],
+  [283, "ENDEAVOR", "endeavor-opponent", "stage-endeavor-opponent.json", null, "NOT PRODUCED: the staged AI selected Rock Slide (157) instead; opponent-attacker Endeavor evidence is missing"],
+];
+for (const [id, move, probe, file, fx, note] of STAGED) {
+  const p = rd(`${DIR}/${file}`);
+  const iv = p.intervals.find((i) => i.move === id);
+  const f = fx ? rd(fx) : null, w = f ? win(f) : null, stage = f?.appStage ?? null;
+  const row = { move, probe, staged: true, activation: iv?.start ?? null, scriptEnd: iv?.end ?? null, scriptFrames: iv ? iv.end - iv.start : null, window: w ? { start: w.startFrame, end: w.endFrame } : null, appStage: stage, note };
+  if (iv && w) { row.activationMinusWindowStart = iv.start - w.startFrame; row.windowEndMinusScriptEnd = w.endFrame - iv.end; if (stage) row.reducerAgeAtActivation = iv.start - stage.oracleFrame + stage.presentationAge; }
+  rows.push(row);
+}
 fs.writeFileSync(`${DIR}/summary.json`, JSON.stringify({ schema: "census-activation-summary/v1", note: "activation = first frame with gAnimScriptActive for the move id (issue142ActivationProbe.py, direct mGBA, Scene ON, one fresh run per scenario); window = accepted evidence window; shadow row = activationMinusWindowStart + ageOffset", rows }, null, 1) + "\n");
 console.log(rows.map((r) => `${r.move.padEnd(13)} ${r.probe.slice(0, 44).padEnd(44)} act ${r.activation} win ${r.window?.start}..${r.window?.end} d=${r.activationMinusWindowStart} tail=${r.windowEndMinusScriptEnd} age@act=${r.reducerAgeAtActivation ?? "-"}`).join("\n"));

@@ -285,6 +285,70 @@
    "appStage": null,
    "activationMinusWindowStart": 0,
    "windowEndMinusScriptEnd": 0
+  },
+  {
+   "move": "ROCK_SLIDE",
+   "probe": "rock-slide-player",
+   "staged": true,
+   "activation": 2340,
+   "scriptEnd": 2477,
+   "scriptFrames": 137,
+   "window": null,
+   "appStage": null,
+   "note": "no accepted player-attacker evidence (rock-slide-grovyle-onix.json is opponent Grovyle -> player Onix only); staged run has the AI Double Team body first (history != first body)"
+  },
+  {
+   "move": "ROCK_SLIDE",
+   "probe": "rock-slide-opponent",
+   "staged": true,
+   "activation": 1967,
+   "scriptEnd": 2104,
+   "scriptFrames": 137,
+   "window": {
+    "start": 1967,
+    "end": 2141
+   },
+   "appStage": {
+    "id": "rock-slide-grovyle-onix-animation-owned",
+    "oracleFrame": 1967,
+    "presentationAge": 0
+   },
+   "note": "first body of the staged battle",
+   "activationMinusWindowStart": 0,
+   "windowEndMinusScriptEnd": 37,
+   "reducerAgeAtActivation": 0
+  },
+  {
+   "move": "ENDEAVOR",
+   "probe": "endeavor-player",
+   "staged": true,
+   "activation": 2339,
+   "scriptEnd": 2406,
+   "scriptFrames": 67,
+   "window": {
+    "start": 2345,
+    "end": 2485
+   },
+   "appStage": {
+    "id": "endeavor-onix-grovyle-animation-owned",
+    "oracleFrame": 2345,
+    "presentationAge": -2
+   },
+   "note": "second action (after the AI Double Team body)",
+   "activationMinusWindowStart": -6,
+   "windowEndMinusScriptEnd": 79,
+   "reducerAgeAtActivation": -8
+  },
+  {
+   "move": "ENDEAVOR",
+   "probe": "endeavor-opponent",
+   "staged": true,
+   "activation": null,
+   "scriptEnd": null,
+   "scriptFrames": null,
+   "window": null,
+   "appStage": null,
+   "note": "NOT PRODUCED: the staged AI selected Rock Slide (157) instead; opponent-attacker Endeavor evidence is missing"
   }
  ]
 }
