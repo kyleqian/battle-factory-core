@@ -11,7 +11,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 // EP_RENDERER=battleScene.patched.ts renders through an untracked in-memory-patched copy (patch proof, never committed).
 const { renderBattleResolutionLiveView, patchProof } = await import(`../../src/engine/${process.env.EP_RENDERER ?? "battleScene.ts"}`);
-import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
+import { liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows } from "../../src/engine/liveMoveAnimation.ts";
 import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";
 
 const [evidence, tailArg, windowArg, ...fixtures] = process.argv.slice(2);
@@ -34,7 +34,8 @@ for (const path of fixtures) {
   }
   const duration = liveMoveAnimationDuration(request)!;
   const view = (k: number) => k <= 0 ? liveView(f, Math.min(duration - 1, E - window.startFrame + k))
-    : { ...liveView(f, 0), effect: null };
+    // Production (no EP_RENDERER): ISSUES #147's post-body hide table supplies the hidden rows, not the ROM script end.
+    : { ...liveView(f, 0), effect: null, postBodyShadowHidden: k <= liveMoveOpponentShadowPostBodyHideRows(request) };
   for (const run of [0, 1]) {
     const dir = join(evidence, `${basename(path, ".json")}-run${run}`);
     if (!existsSync(dir)) continue;
