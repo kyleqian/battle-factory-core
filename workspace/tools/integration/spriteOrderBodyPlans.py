@@ -314,6 +314,35 @@ class Sim:
         self.surv[self.unit] = [self.life[(self.unit, kk)] for kk in range(k) if self.life[(self.unit, kk)] in self.occ]
 
 
+SHORT = {"equal priority word, different y (y is species/position dependent)": "same priority word, different y",
+         "observed order contradicts key/creation rule": "order contradicts key/creation rule",
+         "tied but a member predates the unit (no creation record)": "tied member predates unit"}
+
+
+def markdown(out):
+    names = {int(v): n for n, v in re.findall(r"#define MOVE_(\w+)\s+(\d+)", (ROOT / "reference/pokeemerald/include/constants/moves.h").read_text())}
+
+    def cell(r):
+        if r is None:
+            return "—"
+        c = r["groupClasses"]
+        bits = ",".join(f"{k[0]}{v}" for k, v in sorted(c.items()) if k != "KEYS" and v) if c else "no multi-destroy"
+        if r["verdict"] == "EXACT-PLAN":
+            return f"EXACT ({bits}; n={r['scenarios']})"
+        why = sorted({SHORT.get(x, x) for x in r["keysReasons"]}) or ["plan varies between scenarios"]
+        return f"KEYS ({'; '.join(why)}; n={r['scenarios']})"
+
+    rows = ["| id | move | opponent attacker | player attacker |", "|---|---|---|---|"]
+    B = out["bodies"]
+    for m in out["liveIds"]:
+        if m in out["liveNotObserved"]:
+            rows.append(f"| {m} | {names.get(m, '?')} | NOT-OBSERVED | NOT-OBSERVED |")
+            continue
+        un = B.get(f"{m}:unattributed")
+        rows.append(f"| {m} | {names.get(m, '?')} | {cell(B.get(f'{m}:opponent'))} | {cell(B.get(f'{m}:player'))}{' (+unattributed ' + cell(un) + ')' if un else ''} |")
+    return "\n".join(rows)
+
+
 def gkey(sc, U, ui):
     return ("entry" if ui == 0 else ukey(sc, U[ui - 1])) + ">" + ukey(sc, U[ui + 1])
 
@@ -402,8 +431,10 @@ def main(argv):
                 stat["edges"] += 1
                 if ok:
                     stat["edgesPrecededByExactPlans"] += 1
+                    stat["laterEdgesPrecededByExactPlans" if ui > 1 else "firstEdgesPrecededByExactPlans"] += 1
                     if sim.F == u["observedFreeAtEdge"]:
                         stat["edgesExact"] += 1
+                        stat["laterEdgesExact" if ui > 1 else "firstEdgesExact"] += 1
                     else:
                         stat["edgesMismatched"] += 1
                         bad_edges.append({"file": sc["file"], "unit": ui, "move": u["mv"], "predicted": sim.F[:10], "observed": u["observedFreeAtEdge"][:10]})
@@ -430,6 +461,8 @@ def main(argv):
     print(json.dumps({"bodyVerdicts": collections.Counter(r["verdict"] for r in brow.values()),
                       "gapVerdicts": collections.Counter(r["verdict"] for r in grow.values()), "replay": dict(stat),
                       "liveNotObserved": len(out["liveNotObserved"])}, indent=1))
+    if "--markdown" in argv:
+        print(markdown(out))
     if "--write" in argv:
         PLANS.write_text(json.dumps(out, indent=1) + "\n")
         print("wrote", PLANS)

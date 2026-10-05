@@ -1,16 +1,20 @@
 {
  "schema": "sprite-order-body-plans/v1",
  "table": {
-  "scenarios": 338,
-  "sha256": "93daa2fc302a5a170d3a177e432400bca8d4bada5fc453110da2f25642976f22"
+  "scenarios": 350,
+  "sha256": "8dadb8893faad5f5d2f3d8e32ba57f564235dbd8f02dfbf8b5671e2021e597a5"
  },
  "tokens": "('n',k)=k-th sprite created by this unit (creation order: lowest-free ascending then end descending); ('c',ago,k)=survivor k of the unit `ago` units earlier (units alternate body,gap); ('o',slot)=occupant that predates every unit",
  "groupClasses": "SINGLE | STATIC (distinct priority words) | FDERIVED (tied keys; creation window then free-order index) | KEYS",
  "replay": {
-  "edges": 769,
-  "edgesPrecededByExactPlans": 639,
-  "edgesExact": 639,
-  "scenariosEntryWindowsDiffer": 18,
+  "edges": 790,
+  "edgesPrecededByExactPlans": 659,
+  "firstEdgesPrecededByExactPlans": 338,
+  "edgesExact": 659,
+  "firstEdgesExact": 338,
+  "laterEdgesPrecededByExactPlans": 321,
+  "laterEdgesExact": 321,
+  "scenariosEntryWindowsDiffer": 19,
   "scenariosEntryFreeOrderDiffers(skipped)": 12
  },
  "replayMismatches": [],
@@ -7474,6 +7478,40 @@
    "side": "player",
    "live": true
   },
+  "150:opponent": {
+   "scenarios": 2,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "325-mechanic-shadow-punch-haunter-onix-0.json",
+    "82-mechanic-dragon-rage-charmeleon-onix-0.json"
+   ],
+   "move": "150",
+   "side": "opponent",
+   "live": false
+  },
+  "150:player": {
+   "scenarios": 2,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "325-mechanic-shadow-punch-onix-haunter-0.json",
+    "82-mechanic-dragon-rage-onix-charmeleon-0.json"
+   ],
+   "move": "150",
+   "side": "player",
+   "live": false
+  },
   "151:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -11946,10 +11984,10 @@
    "live": true
   },
   "185:player": {
-   "scenarios": 3,
+   "scenarios": 4,
    "distinctPlans": 1,
    "groupClasses": {
-    "SINGLE": 3
+    "SINGLE": 4
    },
    "keysReasons": {},
    "keysGroups": [],
@@ -13788,6 +13826,460 @@
     "189-mechanic-mud-slap-player-pidgeotto-onix-0.json"
    ],
    "move": "189",
+   "side": "player",
+   "live": false
+  },
+  "195:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 3,
+    "KEYS": 1
+   },
+   "keysReasons": {
+    "observed order contradicts key/creation rule": 1
+   },
+   "keysGroups": [
+    "[[[\"n\", 14], [\"n\", 13], [\"n\", 15], [\"n\", 12], [\"n\", 11], [\"n\", 10], [\"n\", 0], [\"n\", 9], [\"n\", 1], [\"n\", 8], [\"n\", 2], [\"n\", 7], [\"n\", 3], [\"n\", 4], [\"n\", 6], [\"n\", 5]], \"observed order contradicts key/creation rule\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ],
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ],
+      [
+       "n",
+       6,
+       "f"
+      ],
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ],
+      [
+       "n",
+       11,
+       "f"
+      ],
+      [
+       "n",
+       12,
+       "f"
+      ],
+      [
+       "n",
+       13,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       14,
+       "f"
+      ],
+      [
+       "n",
+       15,
+       "f"
+      ],
+      [
+       "n",
+       16,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       17,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       17
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       14
+      ],
+      [
+       "n",
+       13
+      ],
+      [
+       "n",
+       15
+      ],
+      [
+       "n",
+       12
+      ],
+      [
+       "n",
+       11
+      ],
+      [
+       "n",
+       10
+      ],
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       9
+      ],
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       8
+      ],
+      [
+       "n",
+       2
+      ],
+      [
+       "n",
+       7
+      ],
+      [
+       "n",
+       3
+      ],
+      [
+       "n",
+       4
+      ],
+      [
+       "n",
+       6
+      ],
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       16
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       18,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       18
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "195-mechanic-perish-song-opponent-murkrow-player-onix-0.json"
+   ],
+   "move": "195",
+   "side": "opponent",
+   "live": false
+  },
+  "195:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 3,
+    "KEYS": 1
+   },
+   "keysReasons": {
+    "observed order contradicts key/creation rule": 1
+   },
+   "keysGroups": [
+    "[[[\"n\", 14], [\"n\", 13], [\"n\", 15], [\"n\", 12], [\"n\", 11], [\"n\", 10], [\"n\", 0], [\"n\", 9], [\"n\", 1], [\"n\", 8], [\"n\", 2], [\"n\", 7], [\"n\", 3], [\"n\", 4], [\"n\", 6], [\"n\", 5]], \"observed order contradicts key/creation rule\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ],
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ],
+      [
+       "n",
+       6,
+       "f"
+      ],
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ],
+      [
+       "n",
+       11,
+       "f"
+      ],
+      [
+       "n",
+       12,
+       "f"
+      ],
+      [
+       "n",
+       13,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       14,
+       "f"
+      ],
+      [
+       "n",
+       15,
+       "f"
+      ],
+      [
+       "n",
+       16,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       17,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       17
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       14
+      ],
+      [
+       "n",
+       13
+      ],
+      [
+       "n",
+       15
+      ],
+      [
+       "n",
+       12
+      ],
+      [
+       "n",
+       11
+      ],
+      [
+       "n",
+       10
+      ],
+      [
+       "n",
+       0
+      ],
+      [
+       "n",
+       9
+      ],
+      [
+       "n",
+       1
+      ],
+      [
+       "n",
+       8
+      ],
+      [
+       "n",
+       2
+      ],
+      [
+       "n",
+       7
+      ],
+      [
+       "n",
+       3
+      ],
+      [
+       "n",
+       4
+      ],
+      [
+       "n",
+       6
+      ],
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       16
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       18,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       18
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "195-mechanic-perish-song-player-murkrow-opponent-onix-0.json"
+   ],
+   "move": "195",
    "side": "player",
    "live": false
   },
@@ -17323,6 +17815,556 @@
    "move": "213",
    "side": "unattributed",
    "live": true
+  },
+  "215:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "KEYS": 3,
+    "SINGLE": 10
+   },
+   "keysReasons": {
+    "equal priority word, different y (y is species/position dependent)": 3
+   },
+   "keysGroups": [
+    "[[[\"n\", 14], [\"n\", 12], [\"n\", 15]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 2], [\"n\", 4], [\"n\", 3], [\"n\", 5]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 7], [\"n\", 10]], \"equal priority word, different y (y is species/position dependent)\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ],
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ],
+      [
+       "n",
+       4
+      ],
+      [
+       "n",
+       3
+      ],
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ],
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ],
+      [
+       "n",
+       10
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       11,
+       "f"
+      ],
+      [
+       "n",
+       12,
+       "f"
+      ],
+      [
+       "n",
+       13,
+       "f"
+      ],
+      [
+       "n",
+       14,
+       "f"
+      ],
+      [
+       "n",
+       15,
+       "f"
+      ]
+     ],
+     "D": [
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       14
+      ],
+      [
+       "n",
+       12
+      ],
+      [
+       "n",
+       15
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       13
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       16,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       17,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       16
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       17
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       18,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       18
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "215-mechanic-heal-bell-opponent-chimecho-player-onix-0.json"
+   ],
+   "move": "215",
+   "side": "opponent",
+   "live": false
+  },
+  "215:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "KEYS": 3,
+    "SINGLE": 10
+   },
+   "keysReasons": {
+    "equal priority word, different y (y is species/position dependent)": 3
+   },
+   "keysGroups": [
+    "[[[\"n\", 14], [\"n\", 12], [\"n\", 15]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 2], [\"n\", 4], [\"n\", 3], [\"n\", 5]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 7], [\"n\", 10]], \"equal priority word, different y (y is species/position dependent)\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ],
+      [
+       "n",
+       2,
+       "f"
+      ],
+      [
+       "n",
+       3,
+       "f"
+      ],
+      [
+       "n",
+       4,
+       "f"
+      ],
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ],
+      [
+       "n",
+       4
+      ],
+      [
+       "n",
+       3
+      ],
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ],
+      [
+       "n",
+       7,
+       "f"
+      ],
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ],
+      [
+       "n",
+       10,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ],
+      [
+       "n",
+       10
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       11,
+       "f"
+      ],
+      [
+       "n",
+       12,
+       "f"
+      ],
+      [
+       "n",
+       13,
+       "f"
+      ],
+      [
+       "n",
+       14,
+       "f"
+      ],
+      [
+       "n",
+       15,
+       "f"
+      ]
+     ],
+     "D": [
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       14
+      ],
+      [
+       "n",
+       12
+      ],
+      [
+       "n",
+       15
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       13
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       16,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       17,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       16
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       17
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       18,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       18
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "215-mechanic-heal-bell-player-chimecho-opponent-onix-0.json"
+   ],
+   "move": "215",
+   "side": "player",
+   "live": false
   },
   "217:opponent": {
    "scenarios": 4,
@@ -22826,11 +23868,11 @@
    "live": false
   },
   "259:opponent": {
-   "scenarios": 4,
+   "scenarios": 5,
    "distinctPlans": 1,
    "groupClasses": {
-    "STATIC": 4,
-    "SINGLE": 8
+    "STATIC": 5,
+    "SINGLE": 10
    },
    "keysReasons": {},
    "keysGroups": [],
@@ -30845,6 +31887,376 @@
    "side": "player",
    "live": false
   },
+  "325:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 10
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       8
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "325-mechanic-shadow-punch-onix-haunter-0.json"
+   ],
+   "move": "325",
+   "side": "opponent",
+   "live": true
+  },
+  "325:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 10
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       8,
+       "f"
+      ],
+      [
+       "n",
+       9,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       8
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "325-mechanic-shadow-punch-haunter-onix-0.json"
+   ],
+   "move": "325",
+   "side": "player",
+   "live": true
+  },
   "330:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -32441,10 +33853,10 @@
    "live": true
   },
   "33:opponent": {
-   "scenarios": 124,
+   "scenarios": 126,
    "distinctPlans": 1,
    "groupClasses": {
-    "SINGLE": 248
+    "SINGLE": 252
    },
    "keysReasons": {},
    "keysGroups": [],
@@ -32495,10 +33907,10 @@
    "live": false
   },
   "33:player": {
-   "scenarios": 110,
+   "scenarios": 111,
    "distinctPlans": 1,
    "groupClasses": {
-    "SINGLE": 220
+    "SINGLE": 222
    },
    "keysReasons": {},
    "keysGroups": [],
@@ -34505,6 +35917,1574 @@
    "move": "347",
    "side": "player",
    "live": true
+  },
+  "348:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 36,
+    "KEYS": 5
+   },
+   "keysReasons": {
+    "equal priority word, different y (y is species/position dependent)": 5
+   },
+   "keysGroups": [
+    "[[[\"n\", 34], [\"n\", 39]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 35], [\"n\", 40]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 36], [\"n\", 41]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 37], [\"n\", 42]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 38], [\"n\", 43]], \"equal priority word, different y (y is species/position dependent)\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       8,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       9,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       10,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       11,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       12,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       13,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       14,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       15,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       10
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       16,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       17,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       18,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       19,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       20,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       21,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       22,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       12
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       23,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       13
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       24,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       14
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       25,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       15
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       26,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       16
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       27,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       17
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       28,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       18
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       29,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       19
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       30,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       20
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       31,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       21
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       32,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       22
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       33,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       23
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       34,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       24
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       35,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       25
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       36,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       26
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       37,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       27
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       38,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       28
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       39,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       29
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       40,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       30
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       41,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       31
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       42,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       32
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       43,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       33
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       44,
+       "f"
+      ]
+     ],
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       34
+      ],
+      [
+       "n",
+       39
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       35
+      ],
+      [
+       "n",
+       40
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       36
+      ],
+      [
+       "n",
+       41
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       37
+      ],
+      [
+       "n",
+       42
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       38
+      ],
+      [
+       "n",
+       43
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       44
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       45,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       45
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "348-mechanic-leaf-blade-opponent-sceptile-player-onix-0.json"
+   ],
+   "move": "348",
+   "side": "opponent",
+   "live": false
+  },
+  "348:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 36,
+    "KEYS": 5
+   },
+   "keysReasons": {
+    "equal priority word, different y (y is species/position dependent)": 5
+   },
+   "keysGroups": [
+    "[[[\"n\", 39], [\"n\", 34]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 40], [\"n\", 35]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 41], [\"n\", 36]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 42], [\"n\", 37]], \"equal priority word, different y (y is species/position dependent)\"]",
+    "[[[\"n\", 43], [\"n\", 38]], \"equal priority word, different y (y is species/position dependent)\"]"
+   ],
+   "staticKeyWordsConstant": true,
+   "verdict": "NEEDS-KEYS",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ],
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       8,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       9,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       10,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       11,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       12,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       13,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       14,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       15,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       10
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       16,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       17,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       18,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       19,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       20,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       21,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       11
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       22,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       12
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       23,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       13
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       24,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       14
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       25,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       15
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       26,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       16
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       27,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       17
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       28,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       18
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       29,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       19
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       30,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       20
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       31,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       21
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       32,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       22
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       33,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       23
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       34,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       24
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       35,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       25
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       36,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       26
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       37,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       27
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       38,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       28
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       39,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       29
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       40,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       30
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       41,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       31
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       42,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       32
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       43,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       33
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       44,
+       "f"
+      ]
+     ],
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       39
+      ],
+      [
+       "n",
+       34
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       40
+      ],
+      [
+       "n",
+       35
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       41
+      ],
+      [
+       "n",
+       36
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       42
+      ],
+      [
+       "n",
+       37
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       43
+      ],
+      [
+       "n",
+       38
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       44
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       45,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       45
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "348-mechanic-leaf-blade-player-sceptile-opponent-onix-0.json"
+   ],
+   "move": "348",
+   "side": "player",
+   "live": false
   },
   "34:opponent": {
    "scenarios": 1,
@@ -37000,6 +39980,248 @@
    "move": "51",
    "side": "player",
    "live": true
+  },
+  "52:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 6
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "52-mechanic-ember-opponent-onix-player-murkrow-0.json"
+   ],
+   "move": "52",
+   "side": "opponent",
+   "live": false
+  },
+  "52:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 6
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "52-mechanic-ember-player-onix-opponent-murkrow-0.json"
+   ],
+   "move": "52",
+   "side": "player",
+   "live": false
   },
   "53:opponent": {
    "scenarios": 1,
@@ -49315,6 +52537,418 @@
    "side": "player",
    "live": true
   },
+  "82:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 11
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       8,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       9,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       10,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       10
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "82-mechanic-dragon-rage-onix-charmeleon-0.json"
+   ],
+   "move": "82",
+   "side": "opponent",
+   "live": false
+  },
+  "82:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 11
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       1,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       1
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       2,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       3,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       4,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       5,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       6,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       7,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       8,
+       "f"
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       9,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       2
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       3
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       4
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       5
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       6
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       7
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       8
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       9
+      ]
+     ]
+    },
+    {
+     "C": [
+      [
+       "n",
+       10,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       10
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "82-mechanic-dragon-rage-charmeleon-onix-0.json"
+   ],
+   "move": "82",
+   "side": "player",
+   "live": false
+  },
   "83:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -55065,6 +58699,39 @@
     "299-mechanic-blaze-kick-opponent-onix-player-murkrow-0.json"
    ]
   },
+  "185:player>52:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "52-mechanic-ember-opponent-onix-player-murkrow-0.json"
+   ]
+  },
   "185:player>53:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -55287,6 +58954,19 @@
    ],
    "planExamples": [
     "189-mechanic-mud-slap-player-pidgeotto-onix-0.json"
+   ]
+  },
+  "195:player>33:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "195-mechanic-perish-song-player-murkrow-opponent-onix-0.json"
    ]
   },
   "196:opponent>0:any": {
@@ -56563,6 +60243,19 @@
     "259-mechanic-torment-opponent-murkrow-player-onix-0.json"
    ]
   },
+  "259:opponent>52:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "52-mechanic-ember-player-onix-opponent-murkrow-0.json"
+   ]
+  },
   "259:opponent>53:player": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -57277,6 +60970,72 @@
    ],
    "planExamples": [
     "323-mechanic-water-spout-player-wailmer-opponent-shuckle-0.json"
+   ]
+  },
+  "325:opponent>150:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "325-mechanic-shadow-punch-onix-haunter-0.json"
+   ]
+  },
+  "325:player>150:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "325-mechanic-shadow-punch-haunter-onix-0.json"
    ]
   },
   "332:opponent>33:opponent": {
@@ -58282,6 +62041,39 @@
    ],
    "planExamples": [
     "208-mechanic-milk-drink-player-miltank-opponent-onix-0.json"
+   ]
+  },
+  "33:opponent>215:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "215-mechanic-heal-bell-player-chimecho-opponent-onix-0.json"
    ]
   },
   "33:opponent>217:player": {
@@ -60749,6 +64541,39 @@
    ],
    "planExamples": [
     "208-mechanic-milk-drink-opponent-miltank-player-onix-0.json"
+   ]
+  },
+  "33:player>215:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "215-mechanic-heal-bell-opponent-chimecho-player-onix-0.json"
    ]
   },
   "33:player>217:opponent": {
@@ -63483,6 +67308,72 @@
     "79-mechanic-sleep-powder-player-hoppip-opponent-onix-0.json"
    ]
   },
+  "82:opponent>150:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "82-mechanic-dragon-rage-onix-charmeleon-0.json"
+   ]
+  },
+  "82:player>150:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {
+    "SINGLE": 1
+   },
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [
+    {
+     "C": [
+      [
+       "n",
+       0,
+       "f"
+      ]
+     ]
+    },
+    {
+     "D": [
+      [
+       "n",
+       0
+      ]
+     ]
+    }
+   ],
+   "planExamples": [
+    "82-mechanic-dragon-rage-charmeleon-onix-0.json"
+   ]
+  },
   "83:opponent>33:player": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -64775,7 +68666,7 @@
    ]
   },
   "entry>185:player": {
-   "scenarios": 3,
+   "scenarios": 4,
    "distinctPlans": 1,
    "groupClasses": {},
    "keysReasons": {},
@@ -64864,6 +68755,32 @@
    "plan": [],
    "planExamples": [
     "189-mechanic-mud-slap-player-pidgeotto-onix-0.json"
+   ]
+  },
+  "entry>195:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "195-mechanic-perish-song-opponent-murkrow-player-onix-0.json"
+   ]
+  },
+  "entry>195:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "195-mechanic-perish-song-player-murkrow-opponent-onix-0.json"
    ]
   },
   "entry>197:opponent": {
@@ -65247,7 +69164,7 @@
    ]
   },
   "entry>259:opponent": {
-   "scenarios": 4,
+   "scenarios": 5,
    "distinctPlans": 1,
    "groupClasses": {},
    "keysReasons": {},
@@ -65612,6 +69529,32 @@
     "323-mechanic-water-spout-player-wailmer-opponent-shuckle-0.json"
    ]
   },
+  "entry>325:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "325-mechanic-shadow-punch-onix-haunter-0.json"
+   ]
+  },
+  "entry>325:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "325-mechanic-shadow-punch-haunter-onix-0.json"
+   ]
+  },
   "entry>330:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -65705,7 +69648,7 @@
    ]
   },
   "entry>33:opponent": {
-   "scenarios": 64,
+   "scenarios": 65,
    "distinctPlans": 1,
    "groupClasses": {},
    "keysReasons": {},
@@ -65719,7 +69662,7 @@
    ]
   },
   "entry>33:player": {
-   "scenarios": 58,
+   "scenarios": 59,
    "distinctPlans": 1,
    "groupClasses": {},
    "keysReasons": {},
@@ -65782,6 +69725,32 @@
    "plan": [],
    "planExamples": [
     "345-mechanic-magical-leaf-player-roselia-opponent-onix-0.json"
+   ]
+  },
+  "entry>348:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "348-mechanic-leaf-blade-opponent-sceptile-player-onix-0.json"
+   ]
+  },
+  "entry>348:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "348-mechanic-leaf-blade-player-sceptile-opponent-onix-0.json"
    ]
   },
   "entry>34:opponent": {
@@ -66201,6 +70170,32 @@
     "75-mechanic-razor-leaf-player-weepinbell-opponent-shuckle-0.json"
    ]
   },
+  "entry>82:opponent": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "82-mechanic-dragon-rage-onix-charmeleon-0.json"
+   ]
+  },
+  "entry>82:player": {
+   "scenarios": 1,
+   "distinctPlans": 1,
+   "groupClasses": {},
+   "keysReasons": {},
+   "keysGroups": [],
+   "staticKeyWordsConstant": true,
+   "verdict": "EXACT-PLAN",
+   "plan": [],
+   "planExamples": [
+    "82-mechanic-dragon-rage-charmeleon-onix-0.json"
+   ]
+  },
   "entry>83:opponent": {
    "scenarios": 1,
    "distinctPlans": 1,
@@ -66484,7 +70479,6 @@
   158,
   162,
   207,
-  298,
-  325
+  298
  ]
 }
