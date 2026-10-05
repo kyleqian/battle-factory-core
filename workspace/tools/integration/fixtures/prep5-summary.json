@@ -1,0 +1,302 @@
+[
+ {
+  "move": "HEAL_BELL",
+  "id": 215,
+  "side": "player",
+  "activation": 209,
+  "scriptEndFirstInactive": 469,
+  "window": [
+   209,
+   469
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 261,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "HEAL_BELL",
+  "id": 215,
+  "side": "opponent",
+  "activation": 210,
+  "scriptEndFirstInactive": 470,
+  "window": [
+   210,
+   470
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 261,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "MIST_BALL",
+  "id": 296,
+  "side": "player",
+  "activation": 75,
+  "scriptEndFirstInactive": 287,
+  "window": [
+   75,
+   287
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 213,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "MIST_BALL",
+  "id": 296,
+  "side": "opponent",
+  "activation": 79,
+  "scriptEndFirstInactive": 291,
+  "window": [
+   79,
+   291
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 213,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "AROMATHERAPY",
+  "id": 312,
+  "side": "player",
+  "activation": 75,
+  "scriptEndFirstInactive": 474,
+  "window": [
+   75,
+   474
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 400,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "AROMATHERAPY",
+  "id": 312,
+  "side": "opponent",
+  "activation": 79,
+  "scriptEndFirstInactive": 474,
+  "window": [
+   79,
+   474
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 396,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "PERISH_SONG",
+  "id": 195,
+  "side": "player",
+  "activation": 71,
+  "scriptEndFirstInactive": 329,
+  "window": [
+   71,
+   329
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 259,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "PERISH_SONG",
+  "id": 195,
+  "side": "opponent",
+  "activation": 75,
+  "scriptEndFirstInactive": 333,
+  "window": [
+   75,
+   333
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 259,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "DRAGON_RAGE",
+  "id": 82,
+  "side": "player",
+  "activation": 82,
+  "scriptEndFirstInactive": 259,
+  "window": [
+   89,
+   238
+  ],
+  "shadowRow": -7,
+  "shadowRowInMap": false,
+  "duration": 150,
+  "windowEndMinusScriptEnd": -21
+ },
+ {
+  "move": "DRAGON_RAGE",
+  "id": 82,
+  "side": "opponent",
+  "activation": 86,
+  "scriptEndFirstInactive": 263,
+  "window": [
+   93,
+   242
+  ],
+  "shadowRow": -7,
+  "shadowRowInMap": false,
+  "duration": 150,
+  "windowEndMinusScriptEnd": -21
+ },
+ {
+  "move": "FOLLOW_ME",
+  "id": 266,
+  "side": "player",
+  "activation": 69,
+  "scriptEndFirstInactive": 253,
+  "window": [
+   69,
+   253
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 185,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "FOLLOW_ME",
+  "id": 266,
+  "side": "opponent",
+  "activation": 73,
+  "scriptEndFirstInactive": 257,
+  "window": [
+   73,
+   257
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 185,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "TAUNT",
+  "id": 269,
+  "side": "player",
+  "activation": 66,
+  "scriptEndFirstInactive": 200,
+  "window": [
+   76,
+   200
+  ],
+  "shadowRow": -10,
+  "shadowRowInMap": false,
+  "duration": 125,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "TAUNT",
+  "id": 269,
+  "side": "opponent",
+  "activation": 70,
+  "scriptEndFirstInactive": 204,
+  "window": [
+   80,
+   204
+  ],
+  "shadowRow": -10,
+  "shadowRowInMap": false,
+  "duration": 125,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "METRONOME",
+  "id": 118,
+  "side": "player",
+  "activation": 245,
+  "scriptEndFirstInactive": 371,
+  "window": [
+   245,
+   371
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 127,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "METRONOME",
+  "id": 118,
+  "side": "opponent",
+  "activation": 244,
+  "scriptEndFirstInactive": 370,
+  "window": [
+   244,
+   370
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 127,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "LEAF_BLADE",
+  "id": 348,
+  "side": "player",
+  "activation": 76,
+  "scriptEndFirstInactive": 299,
+  "window": [
+   76,
+   299
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 224,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "LEAF_BLADE",
+  "id": 348,
+  "side": "opponent",
+  "activation": 80,
+  "scriptEndFirstInactive": 303,
+  "window": [
+   80,
+   303
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 224,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "BELLY_DRUM",
+  "id": 187,
+  "side": "player",
+  "activation": 231,
+  "scriptEndFirstInactive": 340,
+  "window": [
+   231,
+   340
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 110,
+  "windowEndMinusScriptEnd": 0
+ },
+ {
+  "move": "BELLY_DRUM",
+  "id": 187,
+  "side": "opponent",
+  "activation": 211,
+  "scriptEndFirstInactive": 320,
+  "window": [
+   211,
+   320
+  ],
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "duration": 110,
+  "windowEndMinusScriptEnd": 0
+ }
+]
