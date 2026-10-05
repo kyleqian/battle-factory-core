@@ -70,6 +70,7 @@ function activeFieldBattler(
     name: battleCommandSpeciesDisplayName(member.species),
     level: member.level,
     gender: member.gender,
+    personality: member.personality,
     hp: member.hp,
     maxHP: member.maxHP,
     status: battleCommandUiStatusFromStatus1(member.status1),
