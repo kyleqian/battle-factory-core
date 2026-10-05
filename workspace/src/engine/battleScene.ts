@@ -39662,27 +39662,27 @@ export function renderSceneOnMovePresentation(
       ? 0
       : sceneOnSelfDestructView({ ...state, age: state.age - 2 }).battlerX2;
     const playerToOpponent =
-      view.attacker.species === "SUDOWOODO"
+      (liveField || view.attacker.species === "SUDOWOODO")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "SUDOWOODO"
+      (liveField || view.attacker.species === "SUDOWOODO")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged SELF_DESTRUCT pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const sudowoodo = playerToOpponent
+    const sudowoodo = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? selfDestructArt.sudowoodoBack
       : {
           ...selfDestructArt.sudowoodoFront,
           tileset: subTileset(selfDestructArt.sudowoodoFront.tileset, 0, 8),
         };
-    const shuckle = playerToOpponent
+    const shuckle = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? {
           ...selfDestructArt.shuckleFront,
           tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
@@ -39738,6 +39738,7 @@ export function renderSceneOnMovePresentation(
         explosion.y - 16,
       );
     }
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,

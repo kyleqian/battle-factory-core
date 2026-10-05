@@ -456,6 +456,10 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 317: return 174; // Rock Tomb (217..390 / 229..402); window end = script end.
     case 219: return 71; // Safeguard (209..279 both).
     case 230: return 175; // Sweet Scent (222..396 both).
+    // Self-Destruct: 113 rows (82..194 / 86..198) = the whole accepted window, live age 0 = its first row (reducer age 0,
+    // selfDestructPortable.ts presentationAge 0), the Taunt/Dragon Rage convention: the window starts 4 frames after
+    // the script activation (78/82, row -4, no #142 shadow row) and the script runs 10 frames past it (204/208), uncovered.
+    case 120: return 113;
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
@@ -1243,6 +1247,9 @@ export function liveMoveAnimationPresentation(
       config = { move: "SWEET_SCENT", attacker, target, fieldProfile,
         animationProfile: { spriteSlots: SWEET_SCENT_PETAL_SLOTS, targetSubpriority: attacker.geometry.side === "player" ? 28 : 38 } };
       break;
+    // The attacker's displayed HP is already 0 at the event (setatkhptozero precedes attackanimation; prep6 s2.1),
+    // the same displayed-field path as Explosion; the live seam reads it from the field.
+    case 120: config = { move: "SELF_DESTRUCT", attacker, target, fieldProfile }; break;
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:
