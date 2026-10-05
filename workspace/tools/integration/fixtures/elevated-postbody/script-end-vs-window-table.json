@@ -1,0 +1,1718 @@
+{
+"schema": "elevated-postbody-scriptend/v1",
+"note": "d = ROM script end (first gAnimScriptActive-false frame, prep11Probe body end) minus the accepted window's last row E, from the species-audit derived fixtures; the ROM elevated shadow reappears at framebuffer E+d+1",
+"rows": [
+{
+"fixture": "derived-elevpb/butterfree-prep7-dragon-dance-opponent.json",
+"move": "DRAGON_DANCE",
+"attackerSide": "opponent",
+"E": 220,
+"scriptEnd": 220,
+"d": 0
+},
+{
+"fixture": "derived-elevpb/butterfree-prep9-absorb-opponent.json",
+"move": "ABSORB",
+"attackerSide": "opponent",
+"E": 420,
+"scriptEnd": 422,
+"d": 2
+},
+{
+"fixture": "derived-elevpb/butterfree-prep9-dream-eater-opponent.json",
+"move": "DREAM_EATER",
+"attackerSide": "opponent",
+"E": 2412,
+"scriptEnd": 2412,
+"d": 0
+},
+{
+"fixture": "derived-elevpb/golbat-prep8-frustration-opponent.json",
+"move": "FRUSTRATION",
+"attackerSide": "opponent",
+"E": 308,
+"scriptEnd": 308,
+"d": 0
+},
+{
+"fixture": "derived-elevpb/golbat-prep8-horn-drill-opponent.json",
+"move": "HORN_DRILL",
+"attackerSide": "opponent",
+"E": 404,
+"scriptEnd": 405,
+"d": 1
+},
+{
+"fixture": "derived-elevpb/golbat-prep8-seismic-toss-opponent.json",
+"move": "SEISMIC_TOSS",
+"attackerSide": "opponent",
+"E": 307,
+"scriptEnd": 307,
+"d": 0
+},
+{
+"fixture": "derived-elevpb/golbat-prep8-uproar-opponent.json",
+"move": "UPROAR",
+"attackerSide": "opponent",
+"E": 149,
+"scriptEnd": 149,
+"d": 0
+},
+{
+"fixture": "derived-elevpb/golbat-prep9-giga-drain-opponent.json",
+"move": "GIGA_DRAIN",
+"attackerSide": "opponent",
+"E": 306,
+"scriptEnd": 306,
+"d": 0
+},
+{
+"fixture": "derived-elevpb/golbat-prep9-sunny-day-opponent.json",
+"move": "SUNNY_DAY",
+"attackerSide": "opponent",
+"E": 230,
+"scriptEnd": 230,
+"d": 0
+},
+{
+"fixture": "derived-elevpb/pidgeot-prep7-ice-punch-lab-opponent.json",
+"move": "ICE_PUNCH",
+"attackerSide": "opponent",
+"E": 263,
+"scriptEnd": 263,
+"d": 0
+},
+{
+"fixture": "derived-elevpb/pidgeot-prep8-aurora-beam-opponent.json",
+"move": "AURORA_BEAM",
+"attackerSide": "opponent",
+"E": 435,
+"scriptEnd": 435,
+"d": 0
+},
+{
+"fixture": "derived-elevpb/pidgeot-prep8-swift-opponent.json",
+"move": "SWIFT",
+"attackerSide": "opponent",
+"E": 153,
+"scriptEnd": 153,
+"d": 0
+},
+{
+"fixture": "derived-golbat/altspecies11-swift-player-elekid-opponent-onix.json",
+"move": "SWIFT",
+"attackerSide": "player",
+"E": 146,
+"scriptEnd": 146,
+"d": 0
+},
+{
+"fixture": "derived-golbat/anchor4-amnesia-player.json",
+"move": "AMNESIA",
+"attackerSide": "player",
+"E": 425,
+"scriptEnd": 425,
+"d": 0
+},
+{
+"fixture": "derived-golbat/anchor4-psybeam-player.json",
+"move": "PSYBEAM",
+"attackerSide": "player",
+"E": 379,
+"scriptEnd": 380,
+"d": 1
+},
+{
+"fixture": "derived-golbat/light-screen-live-slowpoke-player.json",
+"move": "LIGHT_SCREEN",
+"attackerSide": "player",
+"E": 409,
+"scriptEnd": 407,
+"d": -2
+},
+{
+"fixture": "derived-golbat/multihit-comet-punch-player-hit0.json",
+"move": "COMET_PUNCH",
+"attackerSide": "player",
+"E": 269,
+"scriptEnd": 269,
+"d": 0
+},
+{
+"fixture": "derived-golbat/multihit-comet-punch-player-hit1.json",
+"move": "COMET_PUNCH",
+"attackerSide": "player",
+"E": 383,
+"scriptEnd": 383,
+"d": 0
+},
+{
+"fixture": "derived-golbat/multihit-double-slap-player-hit0.json",
+"move": "DOUBLE_SLAP",
+"attackerSide": "player",
+"E": 269,
+"scriptEnd": 269,
+"d": 0
+},
+{
+"fixture": "derived-golbat/multihit-double-slap-player-hit1.json",
+"move": "DOUBLE_SLAP",
+"attackerSide": "player",
+"E": 463,
+"scriptEnd": 463,
+"d": 0
+},
+{
+"fixture": "derived-golbat/multihit-double-slap-player-hit2.json",
+"move": "DOUBLE_SLAP",
+"attackerSide": "player",
+"E": 574,
+"scriptEnd": 574,
+"d": 0
+},
+{
+"fixture": "derived-golbat/multihit-triple-kick-player-hit0.json",
+"move": "TRIPLE_KICK",
+"attackerSide": "player",
+"E": 266,
+"scriptEnd": 266,
+"d": 0
+},
+{
+"fixture": "derived-golbat/multihit-triple-kick-player-hit1.json",
+"move": "TRIPLE_KICK",
+"attackerSide": "player",
+"E": 372,
+"scriptEnd": 372,
+"d": 0
+},
+{
+"fixture": "derived-golbat/multihit-triple-kick-player-hit2.json",
+"move": "TRIPLE_KICK",
+"attackerSide": "player",
+"E": 480,
+"scriptEnd": 480,
+"d": 0
+},
+{
+"fixture": "derived-golbat/next-teeter-dance-player.json",
+"move": "TEETER_DANCE",
+"attackerSide": "player",
+"E": 404,
+"scriptEnd": 404,
+"d": 0
+},
+{
+"fixture": "derived-golbat/order-consumer-dive-player.json",
+"move": "DIVE",
+"attackerSide": "player",
+"E": 328,
+"scriptEnd": 328,
+"d": 0
+},
+{
+"fixture": "derived-golbat/order-consumer-dragon-rage-player.json",
+"move": "DRAGON_RAGE",
+"attackerSide": "player",
+"E": 480,
+"scriptEnd": 501,
+"d": 21
+},
+{
+"fixture": "derived-golbat/order-consumer-grudge-player.json",
+"move": "GRUDGE",
+"attackerSide": "player",
+"E": 274,
+"scriptEnd": 274,
+"d": 0
+},
+{
+"fixture": "derived-golbat/order-consumer-leaf-blade-player.json",
+"move": "LEAF_BLADE",
+"attackerSide": "player",
+"E": 299,
+"scriptEnd": 299,
+"d": 0
+},
+{
+"fixture": "derived-golbat/order-consumer-perish-song-player.json",
+"move": "PERISH_SONG",
+"attackerSide": "player",
+"E": 329,
+"scriptEnd": 329,
+"d": 0
+},
+{
+"fixture": "derived-golbat/physical2d-drill-peck-dodrio-player.json",
+"move": "DRILL_PECK",
+"attackerSide": "player",
+"E": 164,
+"scriptEnd": 164,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep2-blizzard-player.json",
+"move": "BLIZZARD",
+"attackerSide": "player",
+"E": 590,
+"scriptEnd": 590,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep2-cosmic-power-player.json",
+"move": "COSMIC_POWER",
+"attackerSide": "player",
+"E": 537,
+"scriptEnd": 537,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep2-future-sight-player.json",
+"move": "FUTURE_SIGHT",
+"attackerSide": "player",
+"E": 190,
+"scriptEnd": 188,
+"d": -2
+},
+{
+"fixture": "derived-golbat/prep2-icy-wind-player.json",
+"move": "ICY_WIND",
+"attackerSide": "player",
+"E": 516,
+"scriptEnd": 516,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep2-muddy-water-player.json",
+"move": "MUDDY_WATER",
+"attackerSide": "player",
+"E": 223,
+"scriptEnd": 223,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep4-defense-curl-player.json",
+"move": "DEFENSE_CURL",
+"attackerSide": "player",
+"E": 322,
+"scriptEnd": 322,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep4-ingrain-player.json",
+"move": "INGRAIN",
+"attackerSide": "player",
+"E": 374,
+"scriptEnd": 374,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep4-mean-look-player.json",
+"move": "MEAN_LOOK",
+"attackerSide": "player",
+"E": 241,
+"scriptEnd": 241,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep4-smelling-salt-player.json",
+"move": "SMELLING_SALT",
+"attackerSide": "player",
+"E": 344,
+"scriptEnd": 344,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep4-wrap-player.json",
+"move": "WRAP",
+"attackerSide": "player",
+"E": 268,
+"scriptEnd": 268,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep5-aromatherapy-player.json",
+"move": "AROMATHERAPY",
+"attackerSide": "player",
+"E": 622,
+"scriptEnd": 622,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep5-belly-drum-player.json",
+"move": "BELLY_DRUM",
+"attackerSide": "player",
+"E": 327,
+"scriptEnd": 327,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep5-dragon-rage-player.json",
+"move": "DRAGON_RAGE",
+"attackerSide": "player",
+"E": 480,
+"scriptEnd": 501,
+"d": 21
+},
+{
+"fixture": "derived-golbat/prep5-follow-me-player.json",
+"move": "FOLLOW_ME",
+"attackerSide": "player",
+"E": 253,
+"scriptEnd": 253,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep5-heal-bell-player.json",
+"move": "HEAL_BELL",
+"attackerSide": "player",
+"E": 475,
+"scriptEnd": 475,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep5-leaf-blade-player.json",
+"move": "LEAF_BLADE",
+"attackerSide": "player",
+"E": 299,
+"scriptEnd": 299,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep5-metronome-player.json",
+"move": "METRONOME",
+"attackerSide": "player",
+"E": 381,
+"scriptEnd": 381,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep5-perish-song-player.json",
+"move": "PERISH_SONG",
+"attackerSide": "player",
+"E": 329,
+"scriptEnd": 329,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep6-rock-tomb-player.json",
+"move": "ROCK_TOMB",
+"attackerSide": "player",
+"E": 398,
+"scriptEnd": 398,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep6-safeguard-player.json",
+"move": "SAFEGUARD",
+"attackerSide": "player",
+"E": 287,
+"scriptEnd": 287,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep6-sweet-scent-player.json",
+"move": "SWEET_SCENT",
+"attackerSide": "player",
+"E": 407,
+"scriptEnd": 407,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep7-aerial-ace-lab-player.json",
+"move": "AERIAL_ACE",
+"attackerSide": "player",
+"E": 126,
+"scriptEnd": 126,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep7-dragon-dance-player.json",
+"move": "DRAGON_DANCE",
+"attackerSide": "player",
+"E": 215,
+"scriptEnd": 215,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep7-fire-blast-player.json",
+"move": "FIRE_BLAST",
+"attackerSide": "player",
+"E": 418,
+"scriptEnd": 418,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep7-ice-punch-lab-player.json",
+"move": "ICE_PUNCH",
+"attackerSide": "player",
+"E": 261,
+"scriptEnd": 261,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep7-sleep-talk-player.json",
+"move": "SLEEP_TALK",
+"attackerSide": "player",
+"E": 1545,
+"scriptEnd": 1545,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep8-frustration-player.json",
+"move": "FRUSTRATION",
+"attackerSide": "player",
+"E": 304,
+"scriptEnd": 304,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep8-seismic-toss-player.json",
+"move": "SEISMIC_TOSS",
+"attackerSide": "player",
+"E": 304,
+"scriptEnd": 304,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep8-swift-player.json",
+"move": "SWIFT",
+"attackerSide": "player",
+"E": 146,
+"scriptEnd": 146,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep8-uproar-player.json",
+"move": "UPROAR",
+"attackerSide": "player",
+"E": 147,
+"scriptEnd": 147,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep9-alt-absorb-player-sp3.json",
+"move": "ABSORB",
+"attackerSide": "player",
+"E": 420,
+"scriptEnd": 422,
+"d": 2
+},
+{
+"fixture": "derived-golbat/prep9-alt-giga-drain-player-sp3.json",
+"move": "GIGA_DRAIN",
+"attackerSide": "player",
+"E": 447,
+"scriptEnd": 447,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep9-alt-sunny-day-player-sp3.json",
+"move": "SUNNY_DAY",
+"attackerSide": "player",
+"E": 374,
+"scriptEnd": 374,
+"d": 0
+},
+{
+"fixture": "derived-golbat/prep9-mega-drain-player.json",
+"move": "MEGA_DRAIN",
+"attackerSide": "player",
+"E": 445,
+"scriptEnd": 445,
+"d": 0
+},
+{
+"fixture": "derived-golbat/status-batch-sing-player.json",
+"move": "SING",
+"attackerSide": "player",
+"E": 467,
+"scriptEnd": 468,
+"d": 1
+},
+{
+"fixture": "derived-golbat2/destiny-bond-player-destiny-bond-alt-gengar.json",
+"move": "DESTINY_BOND",
+"attackerSide": "player",
+"E": 258,
+"scriptEnd": 258,
+"d": 0
+},
+{
+"fixture": "derived-golbat2/destiny-bond-player-destiny-bond-player-wobbuffet-opponent-onix.json",
+"move": "DESTINY_BOND",
+"attackerSide": "player",
+"E": 415,
+"scriptEnd": 415,
+"d": 0
+},
+{
+"fixture": "derived-golbat2/foresight-player-foresight-alt-hitmonlee.json",
+"move": "FORESIGHT",
+"attackerSide": "player",
+"E": 238,
+"scriptEnd": 238,
+"d": 0
+},
+{
+"fixture": "derived-golbat2/foresight-player-foresight-player-machoke-opponent-onix.json",
+"move": "FORESIGHT",
+"attackerSide": "player",
+"E": 385,
+"scriptEnd": 385,
+"d": 0
+},
+{
+"fixture": "derived-golbat2/leech-seed-player-leech-seed-alt-venusaur.json",
+"move": "LEECH_SEED",
+"attackerSide": "player",
+"E": 390,
+"scriptEnd": 390,
+"d": 0
+},
+{
+"fixture": "derived-golbat2/leech-seed-player-leech-seed-player-exeggcute-opponent-onix.json",
+"move": "LEECH_SEED",
+"attackerSide": "player",
+"E": 392,
+"scriptEnd": 392,
+"d": 0
+},
+{
+"fixture": "derived-golbat2/order-consumer-heal-bell-player.json",
+"move": "HEAL_BELL",
+"attackerSide": "player",
+"E": 475,
+"scriptEnd": 475,
+"d": 0
+},
+{
+"fixture": "derived-golbat2/order-consumer-rock-throw-player.json",
+"move": "ROCK_THROW",
+"attackerSide": "player",
+"E": 386,
+"scriptEnd": 386,
+"d": 0
+},
+{
+"fixture": "derived-golbat2/razor-wind-player-razor-wind-player-absol-opponent-onix-b0.json",
+"move": "RAZOR_WIND",
+"attackerSide": "player",
+"E": 243,
+"scriptEnd": 244,
+"d": 1
+},
+{
+"fixture": "derived-golbat2/razor-wind-player-razor-wind-player-absol-opponent-onix-b1.json",
+"move": "RAZOR_WIND",
+"attackerSide": "player",
+"E": 628,
+"scriptEnd": 629,
+"d": 1
+},
+{
+"fixture": "derived-golbat2/razor-wind-player-razor-wind-player-nuzleaf-opponent-onix-b0.json",
+"move": "RAZOR_WIND",
+"attackerSide": "player",
+"E": 251,
+"scriptEnd": 252,
+"d": 1
+},
+{
+"fixture": "derived-golbat2/razor-wind-player-razor-wind-player-nuzleaf-opponent-onix-b1.json",
+"move": "RAZOR_WIND",
+"attackerSide": "player",
+"E": 649,
+"scriptEnd": 650,
+"d": 1
+},
+{
+"fixture": "derived-golbat2b/petal-dance-player-petal-dance-alt-vileplume.json",
+"move": "PETAL_DANCE",
+"attackerSide": "player",
+"E": 468,
+"scriptEnd": 468,
+"d": 0
+},
+{
+"fixture": "derived-golbat2b/petal-dance-player-petal-dance-player-gloom-opponent-onix.json",
+"move": "PETAL_DANCE",
+"attackerSide": "player",
+"E": 466,
+"scriptEnd": 466,
+"d": 0
+},
+{
+"fixture": "derived-golbat2b/prep8-aurora-beam-player.json",
+"move": "AURORA_BEAM",
+"attackerSide": "player",
+"E": 436,
+"scriptEnd": 436,
+"d": 0
+},
+{
+"fixture": "derived-golbat2b/prep8-horn-drill-player.json",
+"move": "HORN_DRILL",
+"attackerSide": "player",
+"E": 413,
+"scriptEnd": 413,
+"d": 0
+},
+{
+"fixture": "derived-golbat2b/prep9-absorb-player.json",
+"move": "ABSORB",
+"attackerSide": "player",
+"E": 426,
+"scriptEnd": 428,
+"d": 2
+},
+{
+"fixture": "derived-golbat2b/prep9-alt-dream-eater-player-sp39.json",
+"move": "DREAM_EATER",
+"attackerSide": "player",
+"E": 1575,
+"scriptEnd": 1576,
+"d": 1
+},
+{
+"fixture": "derived-golbat2b/prep9-alt-giga-drain-player-sp114.json",
+"move": "GIGA_DRAIN",
+"attackerSide": "player",
+"E": 444,
+"scriptEnd": 444,
+"d": 0
+},
+{
+"fixture": "derived-golbat2b/prep9-alt-mega-drain-player-sp114.json",
+"move": "MEGA_DRAIN",
+"attackerSide": "player",
+"E": 433,
+"scriptEnd": 433,
+"d": 0
+},
+{
+"fixture": "derived-golbat2b/prep9-dream-eater-player.json",
+"move": "DREAM_EATER",
+"attackerSide": "player",
+"E": 1575,
+"scriptEnd": 1576,
+"d": 1
+},
+{
+"fixture": "derived-golbat2b/prep9-giga-drain-player.json",
+"move": "GIGA_DRAIN",
+"attackerSide": "player",
+"E": 451,
+"scriptEnd": 451,
+"d": 0
+},
+{
+"fixture": "derived-golbat2b/prep9-sunny-day-player.json",
+"move": "SUNNY_DAY",
+"attackerSide": "player",
+"E": 375,
+"scriptEnd": 375,
+"d": 0
+},
+{
+"fixture": "derived-golbat2b/sky-uppercut-player-sky-uppercut-alt-combusken.json",
+"move": "SKY_UPPERCUT",
+"attackerSide": "player",
+"E": 418,
+"scriptEnd": 418,
+"d": 0
+},
+{
+"fixture": "derived-golbat2b/sky-uppercut-player-sky-uppercut-player-hitmonchan-opponent-onix.json",
+"move": "SKY_UPPERCUT",
+"attackerSide": "player",
+"E": 416,
+"scriptEnd": 417,
+"d": 1
+},
+{
+"fixture": "derived-golbat2b/spider-web-player-spider-web-alt-ariados.json",
+"move": "SPIDER_WEB",
+"attackerSide": "player",
+"E": 428,
+"scriptEnd": 428,
+"d": 0
+},
+{
+"fixture": "derived-golbat2b/spider-web-player-spider-web-player-spinarak-opponent-onix.json",
+"move": "SPIDER_WEB",
+"attackerSide": "player",
+"E": 437,
+"scriptEnd": 437,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/altspecies11-swift-opponent-elekid-player-onix.json",
+"move": "SWIFT",
+"attackerSide": "opponent",
+"E": 152,
+"scriptEnd": 152,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/anchor4-amnesia-opponent.json",
+"move": "AMNESIA",
+"attackerSide": "opponent",
+"E": 425,
+"scriptEnd": 425,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/anchor4-psybeam-opponent.json",
+"move": "PSYBEAM",
+"attackerSide": "opponent",
+"E": 382,
+"scriptEnd": 382,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/multihit-comet-punch-opponent-hit0.json",
+"move": "COMET_PUNCH",
+"attackerSide": "opponent",
+"E": 124,
+"scriptEnd": 124,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/multihit-comet-punch-opponent-hit1.json",
+"move": "COMET_PUNCH",
+"attackerSide": "opponent",
+"E": 229,
+"scriptEnd": 229,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/multihit-comet-punch-opponent-hit2.json",
+"move": "COMET_PUNCH",
+"attackerSide": "opponent",
+"E": 335,
+"scriptEnd": 335,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/multihit-comet-punch-opponent-hit3.json",
+"move": "COMET_PUNCH",
+"attackerSide": "opponent",
+"E": 440,
+"scriptEnd": 440,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/multihit-comet-punch-opponent-hit4.json",
+"move": "COMET_PUNCH",
+"attackerSide": "opponent",
+"E": 545,
+"scriptEnd": 545,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/multihit-double-slap-opponent-hit0.json",
+"move": "DOUBLE_SLAP",
+"attackerSide": "opponent",
+"E": 123,
+"scriptEnd": 123,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/multihit-double-slap-opponent-hit1.json",
+"move": "DOUBLE_SLAP",
+"attackerSide": "opponent",
+"E": 225,
+"scriptEnd": 225,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/multihit-double-slap-opponent-hit2.json",
+"move": "DOUBLE_SLAP",
+"attackerSide": "opponent",
+"E": 327,
+"scriptEnd": 327,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/multihit-triple-kick-opponent-hit0.json",
+"move": "TRIPLE_KICK",
+"attackerSide": "opponent",
+"E": 268,
+"scriptEnd": 268,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/multihit-triple-kick-opponent-hit1.json",
+"move": "TRIPLE_KICK",
+"attackerSide": "opponent",
+"E": 397,
+"scriptEnd": 397,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/multihit-triple-kick-opponent-hit2.json",
+"move": "TRIPLE_KICK",
+"attackerSide": "opponent",
+"E": 527,
+"scriptEnd": 527,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/next-teeter-dance-opponent.json",
+"move": "TEETER_DANCE",
+"attackerSide": "opponent",
+"E": 404,
+"scriptEnd": 404,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/order-consumer-dive-opponent.json",
+"move": "DIVE",
+"attackerSide": "opponent",
+"E": 331,
+"scriptEnd": 331,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/order-consumer-dragon-rage-opponent.json",
+"move": "DRAGON_RAGE",
+"attackerSide": "opponent",
+"E": 242,
+"scriptEnd": 263,
+"d": 21
+},
+{
+"fixture": "derived-pgolem/order-consumer-grudge-opponent.json",
+"move": "GRUDGE",
+"attackerSide": "opponent",
+"E": 278,
+"scriptEnd": 278,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/order-consumer-heal-bell-opponent.json",
+"move": "HEAL_BELL",
+"attackerSide": "opponent",
+"E": 479,
+"scriptEnd": 479,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/order-consumer-leaf-blade-opponent.json",
+"move": "LEAF_BLADE",
+"attackerSide": "opponent",
+"E": 303,
+"scriptEnd": 303,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/order-consumer-perish-song-opponent.json",
+"move": "PERISH_SONG",
+"attackerSide": "opponent",
+"E": 333,
+"scriptEnd": 333,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/order-consumer-rock-throw-opponent.json",
+"move": "ROCK_THROW",
+"attackerSide": "opponent",
+"E": 386,
+"scriptEnd": 386,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep2-blizzard-opponent.json",
+"move": "BLIZZARD",
+"attackerSide": "opponent",
+"E": 579,
+"scriptEnd": 579,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep2-cosmic-power-opponent.json",
+"move": "COSMIC_POWER",
+"attackerSide": "opponent",
+"E": 539,
+"scriptEnd": 539,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep2-future-sight-opponent.json",
+"move": "FUTURE_SIGHT",
+"attackerSide": "opponent",
+"E": 194,
+"scriptEnd": 192,
+"d": -2
+},
+{
+"fixture": "derived-pgolem/prep2-icy-wind-opponent.json",
+"move": "ICY_WIND",
+"attackerSide": "opponent",
+"E": 523,
+"scriptEnd": 523,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep2-muddy-water-opponent.json",
+"move": "MUDDY_WATER",
+"attackerSide": "opponent",
+"E": 227,
+"scriptEnd": 227,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep4-defense-curl-opponent.json",
+"move": "DEFENSE_CURL",
+"attackerSide": "opponent",
+"E": 330,
+"scriptEnd": 330,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep4-ingrain-opponent.json",
+"move": "INGRAIN",
+"attackerSide": "opponent",
+"E": 473,
+"scriptEnd": 473,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep4-mean-look-opponent.json",
+"move": "MEAN_LOOK",
+"attackerSide": "opponent",
+"E": 245,
+"scriptEnd": 245,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep4-smelling-salt-opponent.json",
+"move": "SMELLING_SALT",
+"attackerSide": "opponent",
+"E": 345,
+"scriptEnd": 345,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep4-wrap-opponent.json",
+"move": "WRAP",
+"attackerSide": "opponent",
+"E": 274,
+"scriptEnd": 274,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep5-aromatherapy-opponent.json",
+"move": "AROMATHERAPY",
+"attackerSide": "opponent",
+"E": 474,
+"scriptEnd": 474,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep5-belly-drum-opponent.json",
+"move": "BELLY_DRUM",
+"attackerSide": "opponent",
+"E": 328,
+"scriptEnd": 328,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep5-dragon-rage-opponent.json",
+"move": "DRAGON_RAGE",
+"attackerSide": "opponent",
+"E": 242,
+"scriptEnd": 263,
+"d": 21
+},
+{
+"fixture": "derived-pgolem/prep5-follow-me-opponent.json",
+"move": "FOLLOW_ME",
+"attackerSide": "opponent",
+"E": 257,
+"scriptEnd": 257,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep5-heal-bell-opponent.json",
+"move": "HEAL_BELL",
+"attackerSide": "opponent",
+"E": 479,
+"scriptEnd": 479,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep5-leaf-blade-opponent.json",
+"move": "LEAF_BLADE",
+"attackerSide": "opponent",
+"E": 303,
+"scriptEnd": 303,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep5-metronome-opponent.json",
+"move": "METRONOME",
+"attackerSide": "opponent",
+"E": 386,
+"scriptEnd": 386,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep5-perish-song-opponent.json",
+"move": "PERISH_SONG",
+"attackerSide": "opponent",
+"E": 333,
+"scriptEnd": 333,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep6-rock-tomb-opponent.json",
+"move": "ROCK_TOMB",
+"attackerSide": "opponent",
+"E": 404,
+"scriptEnd": 404,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep6-safeguard-opponent.json",
+"move": "SAFEGUARD",
+"attackerSide": "opponent",
+"E": 290,
+"scriptEnd": 290,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep6-sweet-scent-opponent.json",
+"move": "SWEET_SCENT",
+"attackerSide": "opponent",
+"E": 414,
+"scriptEnd": 414,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep7-aerial-ace-lab-opponent.json",
+"move": "AERIAL_ACE",
+"attackerSide": "opponent",
+"E": 130,
+"scriptEnd": 130,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep7-dragon-dance-opponent.json",
+"move": "DRAGON_DANCE",
+"attackerSide": "opponent",
+"E": 219,
+"scriptEnd": 219,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep7-ice-punch-lab-opponent.json",
+"move": "ICE_PUNCH",
+"attackerSide": "opponent",
+"E": 265,
+"scriptEnd": 265,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep7-sleep-talk-opponent.json",
+"move": "SLEEP_TALK",
+"attackerSide": "opponent",
+"E": 4768,
+"scriptEnd": 4768,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep8-aurora-beam-opponent.json",
+"move": "AURORA_BEAM",
+"attackerSide": "opponent",
+"E": 442,
+"scriptEnd": 442,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep8-frustration-opponent.json",
+"move": "FRUSTRATION",
+"attackerSide": "opponent",
+"E": 308,
+"scriptEnd": 308,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep8-horn-drill-opponent.json",
+"move": "HORN_DRILL",
+"attackerSide": "opponent",
+"E": 416,
+"scriptEnd": 417,
+"d": 1
+},
+{
+"fixture": "derived-pgolem/prep8-seismic-toss-opponent.json",
+"move": "SEISMIC_TOSS",
+"attackerSide": "opponent",
+"E": 308,
+"scriptEnd": 308,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep8-swift-opponent.json",
+"move": "SWIFT",
+"attackerSide": "opponent",
+"E": 152,
+"scriptEnd": 152,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep8-uproar-opponent.json",
+"move": "UPROAR",
+"attackerSide": "opponent",
+"E": 151,
+"scriptEnd": 151,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep9-absorb-opponent.json",
+"move": "ABSORB",
+"attackerSide": "opponent",
+"E": 431,
+"scriptEnd": 433,
+"d": 2
+},
+{
+"fixture": "derived-pgolem/prep9-alt-absorb-opponent-sp3.json",
+"move": "ABSORB",
+"attackerSide": "opponent",
+"E": 278,
+"scriptEnd": 280,
+"d": 2
+},
+{
+"fixture": "derived-pgolem/prep9-alt-dream-eater-opponent-sp39.json",
+"move": "DREAM_EATER",
+"attackerSide": "opponent",
+"E": 2413,
+"scriptEnd": 2413,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep9-alt-giga-drain-opponent-sp114.json",
+"move": "GIGA_DRAIN",
+"attackerSide": "opponent",
+"E": 445,
+"scriptEnd": 445,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep9-alt-giga-drain-opponent-sp3.json",
+"move": "GIGA_DRAIN",
+"attackerSide": "opponent",
+"E": 308,
+"scriptEnd": 308,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep9-alt-mega-drain-opponent-sp114.json",
+"move": "MEGA_DRAIN",
+"attackerSide": "opponent",
+"E": 435,
+"scriptEnd": 435,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep9-alt-sunny-day-opponent-sp114.json",
+"move": "SUNNY_DAY",
+"attackerSide": "opponent",
+"E": 371,
+"scriptEnd": 371,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep9-dream-eater-opponent.json",
+"move": "DREAM_EATER",
+"attackerSide": "opponent",
+"E": 2413,
+"scriptEnd": 2413,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep9-giga-drain-opponent.json",
+"move": "GIGA_DRAIN",
+"attackerSide": "opponent",
+"E": 455,
+"scriptEnd": 455,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep9-mega-drain-opponent.json",
+"move": "MEGA_DRAIN",
+"attackerSide": "opponent",
+"E": 296,
+"scriptEnd": 296,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/prep9-sunny-day-opponent.json",
+"move": "SUNNY_DAY",
+"attackerSide": "opponent",
+"E": 378,
+"scriptEnd": 378,
+"d": 0
+},
+{
+"fixture": "derived-pgolem/status-batch-sing-opponent.json",
+"move": "SING",
+"attackerSide": "opponent",
+"E": 469,
+"scriptEnd": 469,
+"d": 0
+},
+{
+"fixture": "derived-pgolem2/prep7-aerial-ace-lab-opponent.json",
+"move": "AERIAL_ACE",
+"attackerSide": "opponent",
+"E": 130,
+"scriptEnd": 130,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/altspecies11-swift-player-elekid-opponent-onix.json",
+"move": "SWIFT",
+"attackerSide": "player",
+"E": 146,
+"scriptEnd": 146,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/anchor4-amnesia-player.json",
+"move": "AMNESIA",
+"attackerSide": "player",
+"E": 285,
+"scriptEnd": 285,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/anchor4-psybeam-player.json",
+"move": "PSYBEAM",
+"attackerSide": "player",
+"E": 235,
+"scriptEnd": 236,
+"d": 1
+},
+{
+"fixture": "derived-shuckle/light-screen-live-slowpoke-player.json",
+"move": "LIGHT_SCREEN",
+"attackerSide": "player",
+"E": 161,
+"scriptEnd": 159,
+"d": -2
+},
+{
+"fixture": "derived-shuckle/multihit-comet-punch-player-hit0.json",
+"move": "COMET_PUNCH",
+"attackerSide": "player",
+"E": 120,
+"scriptEnd": 120,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/multihit-comet-punch-player-hit1.json",
+"move": "COMET_PUNCH",
+"attackerSide": "player",
+"E": 224,
+"scriptEnd": 224,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/multihit-comet-punch-player-hit2.json",
+"move": "COMET_PUNCH",
+"attackerSide": "player",
+"E": 409,
+"scriptEnd": 409,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/multihit-comet-punch-player-hit3.json",
+"move": "COMET_PUNCH",
+"attackerSide": "player",
+"E": 513,
+"scriptEnd": 513,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/multihit-double-slap-player-hit0.json",
+"move": "DOUBLE_SLAP",
+"attackerSide": "player",
+"E": 119,
+"scriptEnd": 119,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/multihit-double-slap-player-hit1.json",
+"move": "DOUBLE_SLAP",
+"attackerSide": "player",
+"E": 220,
+"scriptEnd": 220,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/multihit-double-slap-player-hit2.json",
+"move": "DOUBLE_SLAP",
+"attackerSide": "player",
+"E": 321,
+"scriptEnd": 321,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/multihit-triple-kick-player-hit0.json",
+"move": "TRIPLE_KICK",
+"attackerSide": "player",
+"E": 126,
+"scriptEnd": 126,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/multihit-triple-kick-player-hit1.json",
+"move": "TRIPLE_KICK",
+"attackerSide": "player",
+"E": 240,
+"scriptEnd": 240,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/multihit-triple-kick-player-hit2.json",
+"move": "TRIPLE_KICK",
+"attackerSide": "player",
+"E": 354,
+"scriptEnd": 354,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/next-teeter-dance-player.json",
+"move": "TEETER_DANCE",
+"attackerSide": "player",
+"E": 253,
+"scriptEnd": 253,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/order-consumer-dive-player.json",
+"move": "DIVE",
+"attackerSide": "player",
+"E": 170,
+"scriptEnd": 170,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/order-consumer-dragon-rage-player.json",
+"move": "DRAGON_RAGE",
+"attackerSide": "player",
+"E": 238,
+"scriptEnd": 259,
+"d": 21
+},
+{
+"fixture": "derived-shuckle/order-consumer-grudge-player.json",
+"move": "GRUDGE",
+"attackerSide": "player",
+"E": 274,
+"scriptEnd": 274,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/order-consumer-leaf-blade-player.json",
+"move": "LEAF_BLADE",
+"attackerSide": "player",
+"E": 299,
+"scriptEnd": 299,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/order-consumer-perish-song-player.json",
+"move": "PERISH_SONG",
+"attackerSide": "player",
+"E": 329,
+"scriptEnd": 329,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/physical2d-drill-peck-dodrio-player.json",
+"move": "DRILL_PECK",
+"attackerSide": "player",
+"E": 164,
+"scriptEnd": 164,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep2-blizzard-player.json",
+"move": "BLIZZARD",
+"attackerSide": "player",
+"E": 447,
+"scriptEnd": 447,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep2-cosmic-power-player.json",
+"move": "COSMIC_POWER",
+"attackerSide": "player",
+"E": 313,
+"scriptEnd": 313,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep2-future-sight-player.json",
+"move": "FUTURE_SIGHT",
+"attackerSide": "player",
+"E": 190,
+"scriptEnd": 188,
+"d": -2
+},
+{
+"fixture": "derived-shuckle/prep2-icy-wind-player.json",
+"move": "ICY_WIND",
+"attackerSide": "player",
+"E": 360,
+"scriptEnd": 360,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep2-muddy-water-player.json",
+"move": "MUDDY_WATER",
+"attackerSide": "player",
+"E": 223,
+"scriptEnd": 223,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep4-defense-curl-player.json",
+"move": "DEFENSE_CURL",
+"attackerSide": "player",
+"E": 173,
+"scriptEnd": 173,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep4-ingrain-player.json",
+"move": "INGRAIN",
+"attackerSide": "player",
+"E": 231,
+"scriptEnd": 231,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep4-mean-look-player.json",
+"move": "MEAN_LOOK",
+"attackerSide": "player",
+"E": 241,
+"scriptEnd": 241,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep4-smelling-salt-player.json",
+"move": "SMELLING_SALT",
+"attackerSide": "player",
+"E": 202,
+"scriptEnd": 202,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep4-wrap-player.json",
+"move": "WRAP",
+"attackerSide": "player",
+"E": 111,
+"scriptEnd": 111,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep5-aromatherapy-player.json",
+"move": "AROMATHERAPY",
+"attackerSide": "player",
+"E": 474,
+"scriptEnd": 474,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep5-belly-drum-player.json",
+"move": "BELLY_DRUM",
+"attackerSide": "player",
+"E": 182,
+"scriptEnd": 182,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep5-dragon-rage-player.json",
+"move": "DRAGON_RAGE",
+"attackerSide": "player",
+"E": 238,
+"scriptEnd": 259,
+"d": 21
+},
+{
+"fixture": "derived-shuckle/prep5-follow-me-player.json",
+"move": "FOLLOW_ME",
+"attackerSide": "player",
+"E": 253,
+"scriptEnd": 253,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep5-heal-bell-player.json",
+"move": "HEAL_BELL",
+"attackerSide": "player",
+"E": 331,
+"scriptEnd": 331,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep5-leaf-blade-player.json",
+"move": "LEAF_BLADE",
+"attackerSide": "player",
+"E": 299,
+"scriptEnd": 299,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep5-metronome-player.json",
+"move": "METRONOME",
+"attackerSide": "player",
+"E": 225,
+"scriptEnd": 225,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep5-perish-song-player.json",
+"move": "PERISH_SONG",
+"attackerSide": "player",
+"E": 329,
+"scriptEnd": 329,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep6-rock-tomb-player.json",
+"move": "ROCK_TOMB",
+"attackerSide": "player",
+"E": 248,
+"scriptEnd": 248,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep6-safeguard-player.json",
+"move": "SAFEGUARD",
+"attackerSide": "player",
+"E": 140,
+"scriptEnd": 140,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep6-sweet-scent-player.json",
+"move": "SWEET_SCENT",
+"attackerSide": "player",
+"E": 252,
+"scriptEnd": 252,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep7-aerial-ace-lab-player.json",
+"move": "AERIAL_ACE",
+"attackerSide": "player",
+"E": 126,
+"scriptEnd": 126,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep7-dragon-dance-player.json",
+"move": "DRAGON_DANCE",
+"attackerSide": "player",
+"E": 215,
+"scriptEnd": 215,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep7-fire-blast-player.json",
+"move": "FIRE_BLAST",
+"attackerSide": "player",
+"E": 275,
+"scriptEnd": 275,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep7-ice-punch-lab-player.json",
+"move": "ICE_PUNCH",
+"attackerSide": "player",
+"E": 261,
+"scriptEnd": 261,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep8-frustration-player.json",
+"move": "FRUSTRATION",
+"attackerSide": "player",
+"E": 304,
+"scriptEnd": 304,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep8-seismic-toss-player.json",
+"move": "SEISMIC_TOSS",
+"attackerSide": "player",
+"E": 304,
+"scriptEnd": 304,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep8-swift-player.json",
+"move": "SWIFT",
+"attackerSide": "player",
+"E": 146,
+"scriptEnd": 146,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep8-uproar-player.json",
+"move": "UPROAR",
+"attackerSide": "player",
+"E": 147,
+"scriptEnd": 147,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep9-alt-absorb-player-sp3.json",
+"move": "ABSORB",
+"attackerSide": "player",
+"E": 274,
+"scriptEnd": 276,
+"d": 2
+},
+{
+"fixture": "derived-shuckle/prep9-alt-giga-drain-player-sp3.json",
+"move": "GIGA_DRAIN",
+"attackerSide": "player",
+"E": 304,
+"scriptEnd": 304,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep9-alt-sunny-day-player-sp3.json",
+"move": "SUNNY_DAY",
+"attackerSide": "player",
+"E": 228,
+"scriptEnd": 228,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/prep9-mega-drain-player.json",
+"move": "MEGA_DRAIN",
+"attackerSide": "player",
+"E": 292,
+"scriptEnd": 292,
+"d": 0
+},
+{
+"fixture": "derived-shuckle/status-batch-sing-player.json",
+"move": "SING",
+"attackerSide": "player",
+"E": 313,
+"scriptEnd": 314,
+"d": 1
+}
+]
+}

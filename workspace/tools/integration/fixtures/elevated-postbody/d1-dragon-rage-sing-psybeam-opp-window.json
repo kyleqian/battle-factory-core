@@ -1,0 +1,134 @@
+{
+ "schema": "elevated-postbody-receipt/v1",
+ "group": "d1",
+ "window": "opp",
+ "note": "k = frames after the body's last accepted row E; ':N' = residual px in the opponent-sprite window; trailing 's' = ROM elevated shadow drawn",
+ "rows": [
+  {
+   "fixture": "prep5-dragon-rage-player.json",
+   "run": 0,
+   "E": 480,
+   "scriptEndMinusE": 21,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+22 -27 +31 -35 +39",
+   "production": {
+    "postExact": 0,
+    "postRows": 40,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1699 2:1699 3:1699 4:1699 5:1699 6:1699 7:1699 8:1699 9:1699 10:1699 11:1699 12:1699 13:1699 14:1699 15:1699 16:1699 17:1699 18:1699 19:1699 20:1699 21:1699 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1326 28:1326 29:1326 30:1326 31:1845s 32:1845s 33:1845s 34:1845s 35:1326 36:1326 37:1326 38:1326 39:1845s 40:1845s",
+    "digest": "b7a8719704cfa55fddec234ea5b5e728a795caf4ddebd192654839873bc11a75"
+   },
+   "patched": {
+    "postExact": 32,
+    "postRows": 40,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0 2:0 3:0 4:0 5:0 6:0 7:0 8:0 9:0 10:0 11:0 12:0 13:0 14:0 15:0 16:0 17:0 18:0 19:0 20:0 21:0 22:0s 23:0s 24:0s 25:0s 26:0s 27:1526 28:1526 29:1526 30:1526 31:0s 32:0s 33:0s 34:0s 35:1526 36:1526 37:1526 38:1526 39:0s 40:0s",
+    "digest": "662354ce4e0b26822f032fb1fb0ec786c78eda4c948591ab04032480e80a2c68"
+   }
+  },
+  {
+   "fixture": "prep5-dragon-rage-player.json",
+   "run": 1,
+   "E": 480,
+   "scriptEndMinusE": 21,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+22 -27 +31 -35 +39",
+   "production": {
+    "postExact": 0,
+    "postRows": 40,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1699 2:1699 3:1699 4:1699 5:1699 6:1699 7:1699 8:1699 9:1699 10:1699 11:1699 12:1699 13:1699 14:1699 15:1699 16:1699 17:1699 18:1699 19:1699 20:1699 21:1699 22:1845s 23:1845s 24:1845s 25:1845s 26:1845s 27:1326 28:1326 29:1326 30:1326 31:1845s 32:1845s 33:1845s 34:1845s 35:1326 36:1326 37:1326 38:1326 39:1845s 40:1845s",
+    "digest": "b7a8719704cfa55fddec234ea5b5e728a795caf4ddebd192654839873bc11a75"
+   },
+   "patched": {
+    "postExact": 32,
+    "postRows": 40,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0 2:0 3:0 4:0 5:0 6:0 7:0 8:0 9:0 10:0 11:0 12:0 13:0 14:0 15:0 16:0 17:0 18:0 19:0 20:0 21:0 22:0s 23:0s 24:0s 25:0s 26:0s 27:1526 28:1526 29:1526 30:1526 31:0s 32:0s 33:0s 34:0s 35:1526 36:1526 37:1526 38:1526 39:0s 40:0s",
+    "digest": "662354ce4e0b26822f032fb1fb0ec786c78eda4c948591ab04032480e80a2c68"
+   }
+  },
+  {
+   "fixture": "status-batch-sing-player.json",
+   "run": 0,
+   "E": 467,
+   "scriptEndMinusE": 1,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+2 -7",
+   "production": {
+    "postExact": 0,
+    "postRows": 40,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1699 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1699 8:1699 9:1699 10:1699 11:1702 12:1704 13:1706 14:1708 15:1712 16:1716 17:1716 18:1726 19:1728 20:1732 21:1740 22:1748 23:1754 24:1760 25:1772 26:1776 27:1788 28:1788 29:1802 30:1805 31:1808 32:1823 33:1826 34:1835 35:1835 36:1831 37:1832 38:1832 39:1834 40:1838",
+    "digest": "2af96eecd429b6ed4460e8557d8037b5f8a2d027acd188d2d10158b1c443d14c"
+   },
+   "patched": {
+    "postExact": 6,
+    "postRows": 40,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0 2:0s 3:0s 4:0s 5:0s 6:0s 7:200 8:200 9:200 10:200 11:203 12:205 13:207 14:209 15:213 16:217 17:217 18:227 19:229 20:233 21:241 22:249 23:255 24:261 25:273 26:277 27:289 28:289 29:303 30:309 31:318 32:339 33:343 34:357 35:357 36:357 37:357 38:357 39:357 40:357",
+    "digest": "c70f7429b0276a7396aed02e9a829b57ffde895035b1ba88ffeb18cc1857bb09"
+   }
+  },
+  {
+   "fixture": "status-batch-sing-player.json",
+   "run": 1,
+   "E": 467,
+   "scriptEndMinusE": 1,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 0,
+   "romShadowToggles": "+2 -7",
+   "production": {
+    "postExact": 0,
+    "postRows": 40,
+    "k": "-3:0 -2:0 -1:0 0:0 1:1699 2:1845s 3:1845s 4:1845s 5:1845s 6:1845s 7:1699 8:1699 9:1699 10:1699 11:1702 12:1704 13:1706 14:1708 15:1712 16:1716 17:1716 18:1726 19:1728 20:1732 21:1740 22:1748 23:1754 24:1760 25:1772 26:1776 27:1788 28:1788 29:1802 30:1805 31:1808 32:1823 33:1826 34:1835 35:1835 36:1831 37:1832 38:1832 39:1834 40:1838",
+    "digest": "2af96eecd429b6ed4460e8557d8037b5f8a2d027acd188d2d10158b1c443d14c"
+   },
+   "patched": {
+    "postExact": 6,
+    "postRows": 40,
+    "k": "-3:0 -2:0 -1:0 0:0 1:0 2:0s 3:0s 4:0s 5:0s 6:0s 7:200 8:200 9:200 10:200 11:203 12:205 13:207 14:209 15:213 16:217 17:217 18:227 19:229 20:233 21:241 22:249 23:255 24:261 25:273 26:277 27:289 28:289 29:303 30:309 31:318 32:339 33:343 34:357 35:357 36:357 37:357 38:357 39:357 40:357",
+    "digest": "c70f7429b0276a7396aed02e9a829b57ffde895035b1ba88ffeb18cc1857bb09"
+   }
+  },
+  {
+   "fixture": "anchor4-psybeam-player.json",
+   "run": 0,
+   "E": 379,
+   "scriptEndMinusE": 1,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 9028,
+   "romShadowToggles": "",
+   "production": {
+    "postExact": 0,
+    "postRows": 1,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:1699",
+    "digest": "86311792299745c7af69880e8f53efd18ce41f9eb61a2e9d8b9816c60edf79d1"
+   },
+   "patched": {
+    "postExact": 1,
+    "postRows": 1,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:0",
+    "digest": "8537e8634db5459ee65bdcaabc355b2652c583d30c60185db18546ab19b71fcb"
+   }
+  },
+  {
+   "fixture": "anchor4-psybeam-player.json",
+   "run": 1,
+   "E": 379,
+   "scriptEndMinusE": 1,
+   "unreceiptedRows": 0,
+   "bodyRowsResidual": 9028,
+   "romShadowToggles": "",
+   "production": {
+    "postExact": 0,
+    "postRows": 1,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:1699",
+    "digest": "86311792299745c7af69880e8f53efd18ce41f9eb61a2e9d8b9816c60edf79d1"
+   },
+   "patched": {
+    "postExact": 1,
+    "postRows": 1,
+    "k": "-3:4514 -2:4514 -1:0 0:0 1:0",
+    "digest": "8537e8634db5459ee65bdcaabc355b2652c583d30c60185db18546ab19b71fcb"
+   }
+  }
+ ]
+}

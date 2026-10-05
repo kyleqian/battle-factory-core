@@ -1,0 +1,34 @@
+{
+ "schema": "prep7-adapter-draft/v1",
+ "move": "DRAGON_DANCE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/elevated-postbody-butterfree-prep7-dragon-dance-opponent.json",
+ "attacker": {
+  "species": "BUTTERFREE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 168,
+  "opponentMaxHp": 168,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent-front DRAGONAIR -> ONIX",
+ "verdict": "READY-WITH-PROVIDER (allocationOrder derived from the first-body free order)",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 219,
+  "ageOffset": 0
+ },
+ "precedingBodies": []
+}

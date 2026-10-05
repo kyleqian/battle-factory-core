@@ -1,0 +1,34 @@
+{
+ "schema": "prep8-adapter-draft/v1",
+ "move": "UPROAR",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "attacker": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 187,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "orientation": "opponent-front VIGOROTH -> ONIX",
+ "verdict": "READY-WITH-ORDER (both): spriteOrder (64) == provider [...occupiedPrefix, ...F] == observed (accepted scenario is a first body); pixel-neutral",
+ "denseWindow": {
+  "startFrame": 79,
+  "endFrame": 151,
+  "ageOffset": 0
+ },
+ "precedingBodies": [],
+ "scenario": "tools/battle-lab/elevated-postbody-golbat-prep8-uproar-opponent.json"
+}
