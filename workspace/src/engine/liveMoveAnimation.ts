@@ -82,7 +82,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
   56, 61, 197, 238, 259, 294, 341,
   // prep11 (docs/next-adapters-prep11.md): Leech Seed main body.
-  73, 161, 169, 193, 194, 278, 314, 327,
+  73, 80, 161, 169, 193, 194, 278, 314, 327,
   // anchor3: source battler anchors (position center, picture height, pic offset).
   86, 87, 107, 116, 203, 207, 263, 339,
   // selectors: request-selected branches and healing anchors.
@@ -221,7 +221,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // one frame after the activation (row -1): no row.
     297,
     // prep11 (issue142-shadow-rows-extra.json): Leech Seed main body window starts at the activation frame (row 0).
-    73, 161, 169, 193, 194, 278, 314, 327,
+    73, 80, 161, 169, 193, 194, 278, 314, 327,
   ].map((id) => [id, 0] as [number, number]).concat([
     // Bind (prep s2.7): activation 384/438 vs window 382/436 -> row +2, the first non-zero row; the shared hook
     // arms the shadow when the live age equals the row, so a non-zero row needs no further code.
@@ -499,6 +499,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 88: return 87; // Rock Throw (296..382 / 296..382, no tail).
     case 195: return 259; // Perish Song (71..329 / 75..333, no tail).
     case 348: return 224; // Leaf Blade (76..299 / 80..303, no tail).
+    case 80: return 244; // Petal Dance 215..458 / 217..460 (prep11 s0.2).
     case 278: return 203; // Recycle 2193..2395 / 2589..2791 (prep11 s0.2).
     case 169: return 207; // Spider Web 220..426 / 219..425.
     case 327: return 188; // Sky Uppercut 82..269 / 86..273; the COMBUSKEN script ends one frame later (prep11 open point 1).
@@ -1369,6 +1370,45 @@ export function liveMoveAnimationPresentation(
       config = { move: "RECYCLE", attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: arrowOrigin } }, target, fieldProfile,
         animationProfile: { attackerTop: top, attackerSubpriority: attacker.geometry.side === "player" ? 30 : 40, spriteSlot: 3, matrixNum: 0,
           attackerPaletteIdPlusOne: attacker.geometry.side === "player" ? 257 : 273 } };
+      break;
+    }
+    case 80: {
+      // prep11 s0.2: slots/tasks/matrix constants equal the accepted corpora. The thirteen flower translation steps are
+      // InitAnimLinearTranslation's (|dy| << 8) / duration with the movingUp bit, from the script arguments: the big flowers
+      // start at the BATTLER_COORD_Y position (+ initial y), the small ones at the pic offset (+ initial y); all end at pic offset + target y.
+      if (!spriteOrderInput?.known) return null;
+      const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
+      const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (fullOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const pic = attackerAnchors.picOffsetPoint;
+      const programs: readonly (readonly [big: boolean, initialY: number, targetY: number, duration: number])[] = [
+        [true, -24, 8, 140], [false, -24, 8, 100], [false, -24, 8, 100], [true, -24, 8, 140], [false, -24, 8, 100], [false, -24, 8, 100],
+        [true, -24, 8, 140], [false, -24, 8, 100], [false, -24, 8, 100], [false, -24, 0, 100], [false, -24, 0, 100],
+        [false, -16, 14, 80], [false, -14, 16, 80]];
+      const flowerFixedPointSteps = programs.map(([big, initialY, targetY, duration]) => {
+        const dy = (pic.y + targetY) - ((big ? attackerAnchors.battlePositionCenter.y : pic.y) + initialY);
+        const step = ((Math.abs(dy) << 8) & 0xffff) / duration | 0;
+        return { x: 0, y: dy < 0 ? step | 1 : step & ~1 };
+      });
+      const attackerSub = attacker.geometry.side === "player" ? 30 : 40;
+      const cx = targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, cy = targetAnchors.spriteCenter.y + targetAnchors.frontIdleRest.y2;
+      const targetSlot = target.geometry.side === "player" ? 6 : 8;
+      config = { move: "PETAL_DANCE",
+        attacker: { ...attacker, geometry: { ...attacker.geometry, animationCenter: attackerAnchors.spriteCenter } },
+        target: { ...target, geometry: { ...target.geometry, animationCenter: targetAnchors.spriteCenter, battlePositionCenter: targetAnchors.spriteCenter } },
+        fieldProfile,
+        animationInputs: { attackerPictureOrigin: pic, flowerFixedPointSteps,
+          flowerSpriteSlots: [3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17], flowerMatrixNum: 0,
+          attackerSpriteSlot: attacker.geometry.side === "player" ? 6 : 8, targetSpriteSlot: targetSlot,
+          attackerInitialOffset: { x: attackerAnchors.frontIdleRest.x2, y: attackerAnchors.frontIdleRest.y2 },
+          targetInitialOffset: { x: targetAnchors.frontIdleRest.x2, y: targetAnchors.frontIdleRest.y2 },
+          attackerSubpriority: attackerSub, ellipseTaskSlot: 0, shakeTaskSlot: 0, updateMonBgTaskSlot: 1, clearMonBgTaskSlot: 0,
+          offsetSlideSpriteSlot: 3, originalSlideSpriteSlot: 3, hitSplatSpriteSlot: 4, hitSplatMatrixSlot: 0,
+          dummySpriteOrigin: targetAnchors.picOffsetPoint, slideSubpriority: attackerSub - 2, hitSplatSubpriority: attackerSub - 3,
+          baseMatrixBitmap: 6, spriteOrder: fullOrder,
+          monbg: { layer: target.geometry.side === "player" ? "bg2" : "bg1", spriteSlot: targetSlot, spriteX: cx, spriteY: cy,
+            bgX: 32 - cx, bgY: 32 - cy, inBg2: target.geometry.side === "player", battlerId: target.geometry.side === "player" ? 0 : 1 } } };
       break;
     }
     case 348: {
