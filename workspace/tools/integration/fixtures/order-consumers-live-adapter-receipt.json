@@ -1050,5 +1050,15 @@
   "Leaf Blade's targetX2 idle (ONIX opponent-front) and Rock Throw's targetX2 residual remain species-specific reducer rules",
   "a live adapter is not whole-playable arbitrary-history exactness"
  ],
- "gates": {}
+ "gates": {
+  "focused": "22 files / 207 tests passed (liveOrderConsumerMoveAdapters, liveSpriteOrderHost, spriteOrderProvider, animationBoundaryRatchet, factoryAnimationInventory, liveMoveAnimationPalette, playableAnimationIntegration, liveShadowRows + staged blazeKick/dragonRage/ember/flamethrower/healBell*/leafBlade*/perishSong*/rockThrow* tests)",
+  "animation:coverage": "exit 0",
+  "animation:audit": "exit 0",
+  "typecheck": "clean",
+  "test:smoke": "8 files / 448 tests passed",
+  "fullSuite": "1500 passed | 44 skipped files; 12081 passed | 223 skipped tests (365.7 s, four workers) on srcTree 53130b776811978cabe39c3e0a23736816e9b6e9",
+  "build": "vite build ok",
+  "diffCheck": "clean",
+  "issue142Scan": "351 rows / 166 ids / 0 mismatches; tests/liveShadowRows.test.ts green"
+ }
 }
