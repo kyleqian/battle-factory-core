@@ -1,0 +1,43 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "move": "SURF",
+ "probe": "tools/compare/surfWaveProbe.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/surf-player-sealeo-opponent-shuckle.json",
+ "attacker": {
+  "species": "SEALEO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 165,
+  "playerMaxHp": 165,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 69,
+  "endFrame": 212,
+  "frameCount": 144
+ },
+ "draft": {
+  "activationFrame": 72,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "expectedDuration": 144,
+  "consumedByTest": false,
+  "configInputs": "none beyond attacker/target/fieldProfile"
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep2-surf-player.json",
+ "swap": {
+  "player": "SEALEO"
+ }
+}
