@@ -20,19 +20,33 @@ for (const f of readdirSync(FX).filter(x => x.startsWith(`prep10-${move.toLowerC
   const other = side === "player" ? "opponent" : "player";
   const attacker = { species: speciesName(parties[side][0].species), geometry: { side } };
   const target = { species: speciesName(parties[other][0].species), geometry: { side: other } };
-  d.draft.bodies.forEach((b, i) => {
+  d.draft.bodies.forEach((b0, i) => {
+    // Rock Blast: the third player hit was cut by the draft's recording end (end -1); every hit is 89 frames.
+    const b = move === "ROCK_BLAST" ? { ...b0, end: b0.start + 89 } : b0;
     if (only !== undefined && String(i) !== only) return;
+    // The third Rock Blast hit (448..537) is past the lab scenario's recorded trace: same deterministic prefix, longer last segment.
+    let scenarioPath = scenario;
+    if (move === "ROCK_BLAST" && b.end > sc.trace.captureFrames[1]) {
+      const longer = structuredClone(sc);
+      longer.trace.segments.at(-1).frames += 100;
+      longer.trace.captureFrames = [0, sc.trace.captureFrames[1] + 100];
+      scenarioPath = `${FX}/prep10-scenarios/${stem.replace(/^mechanic-/, "")}-long.json`;
+      writeFileSync(scenarioPath, JSON.stringify(longer));
+    }
     const out = {
       schema: "prep10-live-fixture/v1", move, sourceDraft: `${FX}/${f}`, bodyIndex: i, kind: d.kind,
-      probe: "tools/probe/run-battle-lab-rgb.py", scenario,
+      probe: "tools/probe/run-battle-lab-rgb.py", scenario: scenarioPath,
       attacker, target,
       fieldProfile: { playerHp: b.hpBefore[0], playerMaxHp: b.maxHp[0], opponentHp: b.hpBefore[1], opponentMaxHp: b.maxHp[1],
         playerGender: GEN[parties.player[0].gender], opponentGender: GEN[parties.opponent[0].gender] },
       denseWindow: { startFrame: b.start, endFrame: b.end - 1 + (move === "PAIN_SPLIT" ? 1 : 0), // Pain Split: the accepted window includes the first inactive row (81 rows)
  ageOffset: 0 },
       // Magnitude's ROM text box shows STRINGID_MAGNITUDESTRENGTH (queue-owned in production), not the move-used banner.
+      ...(move === "ROCK_BLAST" && i > 0 ? { messageLines: ["", ""] } : {}), // later hits: the text box is empty (queue-owned)
       ...(move === "MAGNITUDE" ? { messageLines: [`MAGNITUDE ${b.gAnimMovePower <= 10 ? 4 : b.gAnimMovePower <= 30 ? 5 : b.gAnimMovePower <= 50 ? 6 : b.gAnimMovePower <= 70 ? 7 : b.gAnimMovePower <= 90 ? 8 : b.gAnimMovePower <= 110 ? 9 : 10}!`, ""] } : {}),
-      requestFields: { turn: b.animTurn, power: b.gAnimMovePower },
+      requestFields: { turn: b.animTurn, power: b.gAnimMovePower, ...(b.multiHitCounter ? { multihit: b.multiHitCounter } : {}) },
+      // Later per-hit bodies follow the earlier hits of the same move (the lent order is tracker-predicted).
+      ...(i > 0 && move === "ROCK_BLAST" ? { precedingBodies: Array.from({ length: i }, () => ({ moveId: moveId[move], side })) } : {}),
     };
     writeFileSync(`${FX}/prep10-live/${f.replace(/^prep10-/, "").replace(/\.json$/, "")}-b${i}.json`, JSON.stringify(out, null, 1) + "\n");
   });

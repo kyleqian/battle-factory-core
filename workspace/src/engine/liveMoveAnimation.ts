@@ -150,6 +150,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   179,
   // prep10: Pain Split (per-side pic-coords yOffset into the closed-form battler y2).
   220,
+  // prep10: Rock Blast per-hit bodies (request.turn / request.multihit; lent order gate).
+  350,
 ] as const);
 
 const SWEET_SCENT_PETAL_SLOTS: readonly number[] = Object.freeze([
@@ -205,7 +207,7 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // prep8 (issue142-shadow-rows-extra.json): every window starts at the activation frame (row 0).
     129, 271, 218, 69, 32, 62, 253, 85, 254, 192,
     // prep10 (issue142-shadow-rows-extra.json): Magnitude / Reversal windows start at the activation frame (row 0).
-    222, 179, 220,
+    222, 179, 220, 350,
     // prep9 (issue142-shadow-rows-extra.json): Giga Drain, Sunny Day, Mega Drain, Dream Eater windows start at the
     // activation frame (row 0). Absorb's window starts 10 frames after it (row -10, the Taunt convention): no row.
     202, 241, 72, 138,
@@ -528,6 +530,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 271: return 225; // Trick 70..294 / 66..290.
     // Magnitude 411..585 (power 70, 174 frames) / 191..397 (power 110, 206 frames): the reducer's first inactive age.
     case 222: return request.power > 99 ? 206 : request.power >= 10 && request.power <= 99 ? 174 : null;
+    case 350: return 89; // Rock Blast per-hit body: activation..ROCK_BLAST_FIRST_INACTIVE_AGE (84/266/448 + 89 each).
     case 220: return 81; // Pain Split 445 / 446 .. +80 (81 accepted rows; the live window ends at the script's last active row).
     case 179: return 173; // Reversal 404..577 / 451..624: activation..first inactive row (reducer 174 displays, ages 0..173).
     case 218: return 229; // Frustration 80..308 / 76..304.
@@ -1476,6 +1479,24 @@ export function liveMoveAnimationPresentation(
             target: { spriteSlot: targetSlot, stretchTaskSlot: 0, shakeTaskSlot: 1 },
             orientation: attacker.geometry.side === "player" ? "player-back" : "opponent-front", gameplayRng: 0 } };
       }
+      break;
+    }
+    case 350: {
+      // prep10 s3.8: one body per hit (request.turn 0..n-1). Allocator ids are the known-entry constants (lunge 3, rock 4,
+      // hitsplat 3, fragments 4,5,7,9, ShakeMon task 0; matrix bitmap 0x6, no task at activation), identical for every hit:
+      // gate on the lent order. The reducer reads no order; the caller-owned RNG is echoed only.
+      if (!spriteOrderInput?.known) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      const slotOf = (side: "player" | "opponent") => side === "player" ? 6 : 8;
+      config = { move: "ROCK_BLAST", attacker, target, bodies: [{ fieldProfile, moveTextVisible: false,
+        animationProfile: { attackerSide: attacker.geometry.side,
+          attacker: { spriteSlot: slotOf(attacker.geometry.side), initialX2: attackerAnchors.frontIdleRest.x2,
+            initialY2: attackerAnchors.frontIdleRest.y2, battlePositionCenter: attackerAnchors.battlePositionCenter },
+          target: { spriteSlot: slotOf(target.geometry.side), initialX2: targetAnchors.frontIdleRest.x2,
+            initialY2: targetAnchors.frontIdleRest.y2, battlePositionCenter: targetAnchors.battlePositionCenter,
+            effectCenter: targetAnchors.picOffsetPoint },
+          allocator: { lungeSlot: 3, rockSlot: 4, hitsplatSlot: 3, fragmentSlots: [4, 5, 7, 9], shakeTaskSlot: 0 },
+          gameplayRng: 0 } }] };
       break;
     }
     case 220:
