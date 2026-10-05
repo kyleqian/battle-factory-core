@@ -1,0 +1,338 @@
+[
+ {
+  "name": "giga-drain-player-accepted",
+  "move": 202,
+  "side": "player",
+  "file": "tools/battle-lab/mechanic-giga-drain-player-roselia-opponent-onix.json"
+ },
+ {
+  "name": "giga-drain-player-firstbody",
+  "move": 202,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/giga-drain-player-firstbody.json"
+ },
+ {
+  "name": "giga-drain-player-sp3",
+  "move": 202,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/giga-drain-player-sp3.json"
+ },
+ {
+  "name": "giga-drain-player-sp114",
+  "move": 202,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/giga-drain-player-sp114.json"
+ },
+ {
+  "name": "giga-drain-player-tg213",
+  "move": 202,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/giga-drain-player-tg213.json"
+ },
+ {
+  "name": "giga-drain-player-tm45",
+  "move": 202,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/giga-drain-player-tm45.json"
+ },
+ {
+  "name": "giga-drain-opponent-accepted",
+  "move": 202,
+  "side": "opponent",
+  "file": "tools/battle-lab/mechanic-giga-drain-opponent-roselia-player-onix.json"
+ },
+ {
+  "name": "giga-drain-opponent-firstbody",
+  "move": 202,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/giga-drain-opponent-firstbody.json"
+ },
+ {
+  "name": "giga-drain-opponent-sp3",
+  "move": 202,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/giga-drain-opponent-sp3.json"
+ },
+ {
+  "name": "giga-drain-opponent-sp114",
+  "move": 202,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/giga-drain-opponent-sp114.json"
+ },
+ {
+  "name": "giga-drain-opponent-tg213",
+  "move": 202,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/giga-drain-opponent-tg213.json"
+ },
+ {
+  "name": "giga-drain-opponent-tm45",
+  "move": 202,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/giga-drain-opponent-tm45.json"
+ },
+ {
+  "name": "sunny-day-player-accepted",
+  "move": 241,
+  "side": "player",
+  "file": "tools/battle-lab/mechanic-sunny-day-player-bellossom-opponent-onix.json"
+ },
+ {
+  "name": "sunny-day-player-firstbody",
+  "move": 241,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/sunny-day-player-firstbody.json"
+ },
+ {
+  "name": "sunny-day-player-sp3",
+  "move": 241,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/sunny-day-player-sp3.json"
+ },
+ {
+  "name": "sunny-day-player-sp114",
+  "move": 241,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/sunny-day-player-sp114.json"
+ },
+ {
+  "name": "sunny-day-player-tg213",
+  "move": 241,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/sunny-day-player-tg213.json"
+ },
+ {
+  "name": "sunny-day-player-tm45",
+  "move": 241,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/sunny-day-player-tm45.json"
+ },
+ {
+  "name": "sunny-day-opponent-accepted",
+  "move": 241,
+  "side": "opponent",
+  "file": "tools/battle-lab/mechanic-sunny-day-opponent-bellossom-player-onix.json"
+ },
+ {
+  "name": "sunny-day-opponent-firstbody",
+  "move": 241,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/sunny-day-opponent-firstbody.json"
+ },
+ {
+  "name": "sunny-day-opponent-sp3",
+  "move": 241,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/sunny-day-opponent-sp3.json"
+ },
+ {
+  "name": "sunny-day-opponent-sp114",
+  "move": 241,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/sunny-day-opponent-sp114.json"
+ },
+ {
+  "name": "sunny-day-opponent-tg213",
+  "move": 241,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/sunny-day-opponent-tg213.json"
+ },
+ {
+  "name": "sunny-day-opponent-tm45",
+  "move": 241,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/sunny-day-opponent-tm45.json"
+ },
+ {
+  "name": "mega-drain-player-accepted",
+  "move": 72,
+  "side": "player",
+  "file": "tools/battle-lab/mechanic-mega-drain-player-skiploom-opponent-onix.json"
+ },
+ {
+  "name": "mega-drain-player-firstbody",
+  "move": 72,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/mega-drain-player-firstbody.json"
+ },
+ {
+  "name": "mega-drain-player-sp3",
+  "move": 72,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/mega-drain-player-sp3.json"
+ },
+ {
+  "name": "mega-drain-player-sp114",
+  "move": 72,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/mega-drain-player-sp114.json"
+ },
+ {
+  "name": "mega-drain-player-tg213",
+  "move": 72,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/mega-drain-player-tg213.json"
+ },
+ {
+  "name": "mega-drain-player-tm45",
+  "move": 72,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/mega-drain-player-tm45.json"
+ },
+ {
+  "name": "mega-drain-opponent-accepted",
+  "move": 72,
+  "side": "opponent",
+  "file": "tools/battle-lab/mechanic-mega-drain-opponent-skiploom-player-onix.json"
+ },
+ {
+  "name": "mega-drain-opponent-firstbody",
+  "move": 72,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/mega-drain-opponent-firstbody.json"
+ },
+ {
+  "name": "mega-drain-opponent-sp3",
+  "move": 72,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/mega-drain-opponent-sp3.json"
+ },
+ {
+  "name": "mega-drain-opponent-sp114",
+  "move": 72,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/mega-drain-opponent-sp114.json"
+ },
+ {
+  "name": "mega-drain-opponent-tg213",
+  "move": 72,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/mega-drain-opponent-tg213.json"
+ },
+ {
+  "name": "mega-drain-opponent-tm45",
+  "move": 72,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/mega-drain-opponent-tm45.json"
+ },
+ {
+  "name": "absorb-player-accepted",
+  "move": 71,
+  "side": "player",
+  "file": "tools/battle-lab/mechanic-absorb-player-lombre-opponent-onix.json"
+ },
+ {
+  "name": "absorb-player-firstbody",
+  "move": 71,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/absorb-player-firstbody.json"
+ },
+ {
+  "name": "absorb-player-sp3",
+  "move": 71,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/absorb-player-sp3.json"
+ },
+ {
+  "name": "absorb-player-sp114",
+  "move": 71,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/absorb-player-sp114.json"
+ },
+ {
+  "name": "absorb-player-tg213",
+  "move": 71,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/absorb-player-tg213.json"
+ },
+ {
+  "name": "absorb-player-tm45",
+  "move": 71,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/absorb-player-tm45.json"
+ },
+ {
+  "name": "absorb-opponent-accepted",
+  "move": 71,
+  "side": "opponent",
+  "file": "tools/battle-lab/mechanic-absorb-opponent-lombre-player-onix.json"
+ },
+ {
+  "name": "absorb-opponent-firstbody",
+  "move": 71,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/absorb-opponent-firstbody.json"
+ },
+ {
+  "name": "absorb-opponent-sp3",
+  "move": 71,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/absorb-opponent-sp3.json"
+ },
+ {
+  "name": "absorb-opponent-sp114",
+  "move": 71,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/absorb-opponent-sp114.json"
+ },
+ {
+  "name": "absorb-opponent-tg213",
+  "move": 71,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/absorb-opponent-tg213.json"
+ },
+ {
+  "name": "absorb-opponent-tm45",
+  "move": 71,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/absorb-opponent-tm45.json"
+ },
+ {
+  "name": "dream-eater-player-accepted",
+  "move": 138,
+  "side": "player",
+  "file": "tools/battle-lab/mechanic-dream-eater-player-wigglytuff-opponent-onix.json"
+ },
+ {
+  "name": "dream-eater-player-sp39",
+  "move": 138,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/dream-eater-player-sp39.json"
+ },
+ {
+  "name": "dream-eater-player-tg213",
+  "move": 138,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/dream-eater-player-tg213.json"
+ },
+ {
+  "name": "dream-eater-player-tg113",
+  "move": 138,
+  "side": "player",
+  "file": "tools/integration/fixtures/prep9-scenarios/dream-eater-player-tg113.json"
+ },
+ {
+  "name": "dream-eater-opponent-accepted",
+  "move": 138,
+  "side": "opponent",
+  "file": "tools/battle-lab/mechanic-dream-eater-opponent-wigglytuff-player-onix.json"
+ },
+ {
+  "name": "dream-eater-opponent-sp39",
+  "move": 138,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/dream-eater-opponent-sp39.json"
+ },
+ {
+  "name": "dream-eater-opponent-tg213",
+  "move": 138,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/dream-eater-opponent-tg213.json"
+ },
+ {
+  "name": "dream-eater-opponent-tg113",
+  "move": 138,
+  "side": "opponent",
+  "file": "tools/integration/fixtures/prep9-scenarios/dream-eater-opponent-tg113.json"
+ }
+]
