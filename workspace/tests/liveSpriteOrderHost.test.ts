@@ -58,7 +58,9 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     let later = 0, laterKnown = 0, laterUnknownAfterKnown = 0, invalidatedBattles = 0;
     for (let seed = 0; seed < 20; seed += 1) {
       const route = scanRoute(seed, [0, 0, 0]);
-      for (const body of route.bodies) expect(body.agrees, `seed ${seed} body ${body.index}`).toBe(true);
+      // The host may decline where the pure prediction is known (retained locked-action continuation, e.g. Rollout:
+      // predictLentOrders documents this); it must never lend an order the prediction does not.
+      for (const body of route.bodies) expect(body.mismatch || (!body.agrees && body.known), `seed ${seed} body ${body.index}`).toBe(false);
       later += route.bodies.filter(body => body.index > 0).length;
       laterKnown += route.bodies.filter(body => body.index > 0 && body.known).length;
       // Faint / switch / send-out / trainer slide invalidate for the rest of the battle.
@@ -75,7 +77,7 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
         if (firstUnknown > 0) laterUnknownAfterKnown += 1;
       }
     }
-    expect({ later, laterKnown }).toEqual({ later: 80, laterKnown: 25 });
+    expect({ later, laterKnown }).toEqual({ later: 80, laterKnown: 34 });
     expect(laterUnknownAfterKnown).toBeGreaterThan(0);
     expect(invalidatedBattles).toBeGreaterThan(0);
   }, 120000);

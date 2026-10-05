@@ -10,7 +10,7 @@ const read = (rel: string) => JSON.parse(readFileSync(new URL(`../tools/integrat
 describe("sprite-order policy gaps (S10A)", () => {
   it("Q1: stat-stage-change is no transform; the STATS_CHANGE animation after the move body is the stat plan (0 mismatches)", () => {
     const q1 = receipt.q1;
-    expect(q1["proposed (production table)"].total).toMatchObject({ edges: 29, known: 20, exact: 20, mismatch: 0 });
+    expect(q1["proposed (production table)"].total).toMatchObject({ edges: 29, known: 29, exact: 29, mismatch: 0 }); // was 20/20 before the 283/313 rows entered the production table
     expect(q1["proposed + Fake Tears relative-y plan"].total).toMatchObject({ edges: 29, known: 29, exact: 29, mismatch: 0 });
     // controls: the leading stat command invalidating the order loses it; applying the stat plan before the body is wrong
     expect(q1["control: stat command invalidates"].total.known).toBeLessThan(5);
@@ -31,8 +31,9 @@ describe("sprite-order policy gaps (S10A)", () => {
     for (const row of receipt.q3RealRoute) {
       expect(row.copyMatchesOriginal).toBe(true);
       expect(row.withEndeavor.mismatch).toBe(0);
-      expect(row.withEndeavor.known).toBeGreaterThan(row.copyNoOverride.known);
-      expect(row.firstInvalidationBaseline.key).toBe("283:opponent");
+      // 283:opponent is in the production table now: the no-override baseline already knows what the override adds.
+      expect(row.withEndeavor.known).toBeGreaterThanOrEqual(row.copyNoOverride.known);
+      expect(row.firstInvalidationBaseline.key).toMatch(/^uncovered: (RunTurnActionsFunctions|HandleTurnActionSelectionState)$/);
     }
     expect(receipt.q3RealRoute.map((row: any) => row.withEndeavor.known)).toEqual([12, 12, 5, 12, 12]);
   });

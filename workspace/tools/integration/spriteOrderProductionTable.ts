@@ -1,6 +1,7 @@
 // Generates src/engine/spriteOrderProductionPlans.ts: the compact production sprite-order plan table (EXACT-PLAN rows only)
 // from the evidence fixtures, so the app bundle never imports the 1.6 MB plan JSON.
 //   bodies: tools/integration/fixtures/sprite-order-body-plans-ext.json (committed + ext table, docs/sprite-order-plan-coverage.md)
+//   extra bodies: fixtures/sprite-order-policy-gaps/relative-y-plans.json (283/313 proposal B) + sprite-order-body-plans-rely.json (tier "confirmed" rows only)
 //   anims:  tools/integration/fixtures/sprite-order-gap-causes.json midBattleAnimations (docs/sprite-order-gap-causes.md §1 Q3)
 //   run: node --experimental-strip-types tools/integration/spriteOrderProductionTable.ts   (rewrites the module)
 // tests/spriteOrderEventTransform.test.ts regenerates the module text from the JSON and pins it byte-for-byte.
@@ -34,9 +35,10 @@ export function encodeSpriteOrderPlan(plan: Plan): string {
 const statClass = (arg: number): 1 | 2 | null =>
   (arg >= 15 && arg <= 28) || arg === 55 || arg === 57 ? 1 : arg >= 39 && arg <= 52 ? 2 : null;
 
+/** Extra EXACT-PLAN body rows merged after the ext table (policy-gaps relative-y rows; rely rows of tier "confirmed" only). */
 export function renderSpriteOrderProductionTable(ext: { bodies: Record<string, Row> }, gapCauses: {
   midBattleAnimations: { anims: Record<string, Row> };
-}): string {
+}, extraBodies: readonly Record<string, Row & { readonly tier?: string }>[] = []): string {
   const plans: string[] = [];
   const index = (plan: Plan) => {
     const text = encodeSpriteOrderPlan(plan);
@@ -45,9 +47,17 @@ export function renderSpriteOrderProductionTable(ext: { bodies: Record<string, R
     plans.push(text);
     return plans.length - 1;
   };
+  const merged: Record<string, Row> = { ...ext.bodies };
+  for (const extra of extraBodies) {
+    for (const [key, row] of Object.entries(extra)) {
+      if (row.tier !== undefined && row.tier !== "confirmed") continue; // abs-invariant rely rows stay out of production
+      if (merged[key]?.verdict === "EXACT-PLAN") throw new Error(`body row ${key} is already in the table`);
+      merged[key] = row;
+    }
+  }
   const bodies: [string, number][] = [];
-  for (const key of Object.keys(ext.bodies).sort(compareKeys)) {
-    const row = ext.bodies[key]!;
+  for (const key of Object.keys(merged).sort(compareKeys)) {
+    const row = merged[key]!;
     if (row.verdict !== "EXACT-PLAN" || !/^[1-9][0-9]*:(player|opponent)$/.test(key)) continue;
     bodies.push([key, index(row.plan)]);
   }
@@ -115,7 +125,9 @@ function chunk<T>(items: readonly T[], size: number): T[][] {
 
 export function renderSpriteOrderProductionTableFromFixtures(): string {
   const fixture = (name: string) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8"));
-  return renderSpriteOrderProductionTable(fixture("sprite-order-body-plans-ext.json"), fixture("sprite-order-gap-causes.json"));
+  return renderSpriteOrderProductionTable(fixture("sprite-order-body-plans-ext.json"), fixture("sprite-order-gap-causes.json"), [
+    fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, fixture("sprite-order-body-plans-rely.json").bodies,
+  ]);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

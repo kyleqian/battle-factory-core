@@ -21,17 +21,26 @@ describe("production sprite-order plan table (generated, pinned)", () => {
   it("regenerates byte-identically from the evidence JSON", () => {
     const committed = readFileSync(new URL("../src/engine/spriteOrderProductionPlans.ts", import.meta.url), "utf8");
     expect(renderSpriteOrderProductionTableFromFixtures()).toBe(committed);
-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(381);
-    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(133);
+    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(445);
+    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(176);
   });
 
   it("decodes every EXACT-PLAN (move, side) body of the ext table to the fixture plan", () => {
     const bodies = fixture("sprite-order-body-plans-ext.json").bodies as Record<string, { verdict: string; plan: unknown }>;
+    // Rows merged from the policy-gaps relative-y plans and the rely table (confirmed tier only) cover keys the ext table leaves non-EXACT.
+    const extra: Record<string, { verdict: string; plan: unknown; tier?: string }> = {
+      ...fixture("sprite-order-policy-gaps/relative-y-plans.json").bodies, ...fixture("sprite-order-body-plans-rely.json").bodies,
+    };
     let exact = 0;
     for (const [key, row] of Object.entries(bodies)) {
       const [move, side] = key.split(":");
       if (side !== "player" && side !== "opponent") continue;
       const plan = spriteOrderProductionBodyPlan(Number(move), side);
+      const merged = extra[key] !== undefined && (extra[key]!.tier ?? "confirmed") === "confirmed" ? extra[key]! : undefined;
+      if (row.verdict !== "EXACT-PLAN" && merged) {
+        expect(plan, key).toEqual(merged.plan);
+        continue;
+      }
       if (row.verdict !== "EXACT-PLAN" || move === "144" || move === "164") {
         expect(plan, key).toBeNull();
         continue;
@@ -78,7 +87,6 @@ describe("sprite-order presentation-event transform", () => {
   it("refuses everything the evidence does not model", () => {
     for (const event of [
       { kind: "hit-animation", targetVisible: false },
-      { kind: "move-animation", moveId: 283, attackerSide: "opponent" },
       { kind: "move-animation", moveId: 288, attackerSide: "player" },
       { kind: "move-animation", moveId: 164, attackerSide: "player" },
       { kind: "status-animation", status: "CONFUSION" },
@@ -117,6 +125,7 @@ describe("sprite-order presentation-event transform", () => {
 describe("strict real-route replay (docs/sprite-order-real-route.md events; no resync)", () => {
   it("knows more than the first edge in every trace and never mismatches", () => {
     const counts: Record<string, unknown> = {};
+    const invalidations: Record<string, unknown> = {};
     for (const trace of REAL_ROUTE_TRACES) {
       const strict = replayCrossBodyTrace(trace, "strict");
       counts[trace] = [strict.moveEdges.known, strict.moveEdges.exact, strict.moveEdges.mismatched];
@@ -124,9 +133,12 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
       expect(strict.moveEdges.occupiedMismatch).toBe(0);
       expect(strict.animEdges.mismatched).toBe(0);
       for (const edge of strict.edges.filter(row => row.known)) expect(edge.exact && edge.occupiedMatch && edge.lent).toBe(true);
-      expect(strict.firstInvalidation).toEqual({ frame: 2992, reason: "no EXACT plan: body 283:opponent" });
+      invalidations[trace] = strict.firstInvalidation;
     }
-    expect(counts).toEqual(Object.fromEntries(REAL_ROUTE_TRACES.map(trace => [trace, [3, 3, 0]])));
+    expect(counts).toEqual({ "battle1-turn17-dense": [10, 10, 0], "battle1-switch": [10, 10, 0], "battle1-turn2-dragonbreath": [4, 4, 0],
+      "battle1-grovyle-faint": [10, 10, 0], "battle1-victory": [10, 10, 0] });
+    expect(invalidations["battle1-turn2-dragonbreath"]).toEqual({ frame: 3336, reason: "uncovered: HandleTurnActionSelectionState" });
+    expect(invalidations["battle1-victory"]).toEqual({ frame: 6519, reason: "uncovered: RunTurnActionsFunctions" });
   });
 
   it("resync mode (rules in isolation): every tested edge exact, 91 move edges", () => {
@@ -164,7 +176,7 @@ describe("strict real-route replay (docs/sprite-order-real-route.md events; no r
     expect({ scenarios: corpus.scenarios, skipped: corpus.skipped, edges: corpus.edges, mismatched: corpus.mismatched })
       .toEqual({ scenarios: 573, skipped: 19, edges: 1366, mismatched: 0 });
     expect(corpus.exact).toBe(corpus.known);
-    expect(corpus.known).toBe(1044);
-    expect(corpus.laterKnown).toBe(490);
+    expect(corpus.known).toBe(1101);
+    expect(corpus.laterKnown).toBe(547);
   });
 });
