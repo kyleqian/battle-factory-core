@@ -12,7 +12,6 @@ import {
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 
-type Side = "player" | "opponent";
 // docs/next-adapters-prep2.md s2: accepted dense windows (rows); shadow row 0 iff the window starts at activation
 // (Explosion -4 and Future Sight -5 start after it and have no row). alt = an alternate carrier pair for the render test.
 const cases = [
