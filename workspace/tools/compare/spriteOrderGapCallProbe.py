@@ -9,7 +9,7 @@ sAnimMoveIndex, gBattleOutcome, gBattlerControllerFuncs).  Also a per-frame spar
 No framebuffer, ROM patch or breakpoint; direct mGBA only.  Adapted from lightScreenAllocatorCallProbe.py.
 """
 from __future__ import annotations
-import bisect, hashlib, json, os, subprocess, sys
+import bisect, gc, hashlib, json, os, subprocess, sys
 from pathlib import Path
 
 args = [a for a in sys.argv[1:] if not a.startswith("--")]
@@ -55,6 +55,8 @@ def symbol_data():
 NAMES, ADDRESS_NAMES, FUNCTIONS = symbol_data()
 FUNC_ADDRS = [a for a, _ in FUNCTIONS]
 ALLOCATORS = {NAMES[n]: n for n in ("CreateSprite", "CreateSpriteAtEnd", "CreateSpriteAt", "DestroySprite")}
+# Exact entry markers (LR + r0) for wrappers whose stack-scanned chain would otherwise be ambiguous.
+MARKERS = {NAMES[n]: n for n in ("CreateInvisibleSpriteWithCallback", "DoHitAnimHealthboxEffect", "DoBounceEffect")}
 
 
 def sym(address: int) -> str:
@@ -103,10 +105,9 @@ def stack_chain(o, limit=48):
     sp = int(o.core.cpu.gprs[13])
     chain = []
     for i in range(limit):
-        try:
-            w = o.read_u32(sp + 4 * i)
-        except Exception:
+        if not (0x02000000 <= sp + 4 * i < 0x03007FFC):  # reading past IWRAM/EWRAM end faults the core
             break
+        w = o.read_u32(sp + 4 * i)
         if 0x08000001 <= w < 0x09000000 and (w & 1):
             chain.append(sym(w - 1))
     return chain
@@ -130,8 +131,8 @@ def pass1():
         prior = st["prior"]
         if cur != prior:
             st["flag"][st["n"]] = {"freed": sorted(set(prior) - set(cur)), "alloc": sorted(s for s, v in cur.items() if s not in prior or prior[s][0] != v[0])}
-            if not cur and len(st["flag"][st["n"]]["freed"]) >= 10:
-                st["resets"].append(st["n"])
+            if not cur:
+                st["resets"].append(st["n"])  # last all-free frame = battle ResetSpriteData
         st["prior"] = cur
         if st["tf"] is not None:
             st["tf"] += 1
@@ -159,6 +160,11 @@ def step_frame(o, buttons, n, calls):
             if pc == call["_ret"]:
                 call["result"] = (int(o.core.cpu.gprs[0]) & 0xFF) if call["kind"] != "DestroySprite" else None
                 pending.remove(call)
+        marker = MARKERS.get(pc)
+        if marker:
+            lr = int(o.core.cpu.lr)
+            calls.append({"n": n, "kind": "marker:" + marker, "lr": hex(lr), "caller": sym(lr), "r0": int(o.core.cpu.gprs[0]),
+                          "ctx": {k: v for k, v in context(o).items() if v is not None}})
         kind = ALLOCATORS.get(pc)
         if kind:
             r = [int(o.core.cpu.gprs[i]) for i in range(4)]
@@ -203,11 +209,12 @@ def pass2(flag):
     for b in first_trace_frames(req["trace"]):
         adv(b)
     for c in calls:
-        c.pop("_ret")
+        c.pop("_ret", None)
     return calls
 
 
 def main():
+    gc.disable()  # cyclic GC segfaults inside the single-step loop on some scenarios (libmgba cffi objects)
     st, setup = pass1()
     if not st["resets"]:
         raise RuntimeError("no battle ResetSpriteData boundary")
@@ -225,6 +232,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except BaseException:
+        import traceback
+        traceback.print_exc()
+        sys.stdout.flush()
+        os._exit(1)
     sys.stdout.flush()
     os._exit(0)
