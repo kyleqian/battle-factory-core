@@ -33772,14 +33772,14 @@ export function renderSceneOnMovePresentation(
       age: fakeState.age - 2,
     }).rock;
     const playerToOpponent =
-      view.attacker.species === "DELCATTY"
+      (liveField || view.attacker.species === "DELCATTY")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "DELCATTY"
+      (liveField || view.attacker.species === "DELCATTY")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "SHUCKLE"
+      && (liveField || view.target.species === "SHUCKLE")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
@@ -33790,13 +33790,18 @@ export function renderSceneOnMovePresentation(
     const delcattySource = playerToOpponent
       ? fakeTearsArt.delcattyBack
       : fakeTearsArt.delcattyFront;
-    const delcatty = playerToOpponent
+    const delcatty = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
       ? delcattySource
       : {
           ...delcattySource,
           tileset: subTileset(delcattySource.tileset, 0, 8),
         };
-    const shuckle = playerToOpponent
+    // Live corners/centres are the production field geometry; the opponent's settled front idle offset is added.
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
+    const attackerIdle = liveIdle(view.attacker);
+    const targetIdle = liveIdle(view.target);
+    const shuckle = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? {
           ...selfDestructArt.shuckleFront,
           tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
@@ -33819,15 +33824,15 @@ export function renderSceneOnMovePresentation(
       fb,
       shuckle.tileset,
       shuckle.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
     );
     drawSpriteSheetAffineRotate(
       fb,
       delcatty.tileset,
       delcatty.palette,
-      view.attacker.geometry.animationCenter.x + displayedRock.x2,
-      view.attacker.geometry.animationCenter.y + displayedRock.y2,
+      view.attacker.geometry.animationCenter.x + attackerIdle.x2 + displayedRock.x2,
+      view.attacker.geometry.animationCenter.y + attackerIdle.y2 + displayedRock.y2,
       displayedRock.matrix.a,
       displayedRock.matrix.b,
       displayedRock.matrix.c,
@@ -33849,6 +33854,7 @@ export function renderSceneOnMovePresentation(
       );
     }
 
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,

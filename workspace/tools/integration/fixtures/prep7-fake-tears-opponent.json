@@ -1,7 +1,7 @@
 {
   "schema": "prep7-adapter-draft/v1",
   "move": "FAKE_TEARS",
-  "probe": "tools/compare/fixtures/mechanic-fake-tears-opponent-delcatty-player-shuckle.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "scenario": "tools/compare/fixtures/mechanic-fake-tears-opponent-delcatty-player-shuckle.json",
   "attacker": {
     "species": "DELCATTY",
@@ -177,5 +177,10 @@
     ],
     "livePlan": "attacker passed through affineCenterBattler (animationCenter = sprite centre), attackerPictureBounds = {left: pic.x - w/2, right: pic.x + w/2, top: pic.y - h/2} from liveBattlerAnchors + coords; window starts 1 frame after activation (row -1, no map row) and ends 4 clear rows after the script end"
   },
-  "precedingBodies": []
+  "precedingBodies": [],
+  "acceptedDenseWindow": {
+    "startFrame": 80,
+    "endFrame": 166,
+    "ageOffset": 0
+  }
 }

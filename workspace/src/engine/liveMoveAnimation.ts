@@ -110,8 +110,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   296, 312, 266, 118, 269, 187,
   // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off, Faint Attack (player attacker only).
   317, 219, 230, 120, 256, 282, 185,
-  // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack, Ice Punch.
-  332, 98, 8,
+  // prep7 (docs/next-adapters-prep7.md): Aerial Ace, Quick Attack, Ice Punch, Fake Tears.
+  332, 98, 8, 313,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -490,6 +490,7 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // windows start 35/31 (AA) and 37/33 (QA) rows earlier with idle body rows owned by the queue's `message` command.
     case 332: return 50; // Aerial Ace: activation..first inactive row (81..130 / 77..126); the later hit/HP/text rows are queue commands.
     case 98: return 33; // Quick Attack (83..115 / 79..111).
+    case 313: return 87; // Fake Tears 80..166 / 76..162: the first displayed row is one after activation (row -1, no shadow row), 83 script + 4 clear rows.
     case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
@@ -1330,6 +1331,26 @@ export function liveMoveAnimationPresentation(
         fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" },
         hpDrainProfile: { startHp: field.player.hp, endHp: field.player.hp, firstDisplayedAge: 1_000_000 } };
       break;
+    case 313: {
+      // prep7 s2.1: the picture bounds are the attacker pic point -/+ width/2 and - height/2 (GetBattlerSpriteCoordAttr
+      // LEFT/RIGHT/TOP, exact 2/2); the affine centre is the sprite centre, not the pic point. The typed
+      // controllerPresentation is read only by the renderer's bottom-UI/banner block, which liveField skips (the queue's
+      // stat command owns the banner, result text and menu): never-reached ages. The -2 Sp. Def receipt (6 -> 4, anim
+      // argument 55) is the move's fixed effect (EFFECT_SPECIAL_DEFENSE_DOWN_2), which the display fn validates.
+      const attrs = liveBattlerCoordAttrs(attacker.geometry.side, art);
+      const pic = attackerAnchors.picOffsetPoint;
+      const never = 1_000_000;
+      config = { move: "FAKE_TEARS", attacker: affineCenterBattler(attacker), target, fieldProfile,
+        attackerPictureBounds: { left: pic.x - attrs.width / 2, right: pic.x + attrs.width / 2, top: pic.y - attrs.height / 2 },
+        controllerPresentation: { kind: "resolved-stat-drop",
+          kickoff: { messageId: "STRINGID_USEDMOVE", firstAge: 0,
+            selection: { moveIds: [0, 0, 0, 0], maxPP: [0, 0, 0, 0], cursor: 0 } },
+          statChange: { battler: "target", stat: "special-defense", from: 6, to: 4 },
+          statAnimation: { animationId: "STATS_CHANGE", argument: 55, firstAge: never },
+          result: { messageId: "STRINGID_DEFENDERSSTATFELL", firstAge: never },
+          moveEnd: { clearAge: never } } };
+      break;
+    }
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:

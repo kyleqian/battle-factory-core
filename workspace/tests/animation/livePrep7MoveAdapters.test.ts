@@ -20,6 +20,8 @@ const cases: { id: number; move: string; duration: Orders; shadow: number | unde
   { id: 332, move: "AERIAL_ACE", duration: [50, 50], shadow: 0, alt: ["CHARIZARD", "ONIX"], route: { seed: 3, move: 0, streak: 0 } },
   { id: 98, move: "QUICK_ATTACK", duration: [33, 33], shadow: 0, alt: ["RAICHU", "ONIX"], route: { seed: 3, move: 1, streak: 0 } },
   // Ice Punch has no accepted-species rental carrier: the ordinary route is the alternate-species Gengar route (prep7 s2.5).
+  // Fake Tears: row -1 (the first displayed row is one frame after activation): no shadow row; 83 script rows + 4 clear rows.
+  { id: 313, move: "FAKE_TEARS", duration: [87, 87], shadow: undefined, alt: ["PLUSLE", "ONIX"], route: { seed: 0, move: 0, streak: 14 } },
   { id: 8, move: "ICE_PUNCH", duration: [184, 184], shadow: 0, alt: ["GENGAR", "ONIX"], route: { seed: 18, move: 2, streak: 42 } },
 ];
 
@@ -80,6 +82,15 @@ describe("live prep7 move adapters", () => {
         expect(liveMoveAnimationPresentation(request(id, a), field, 7)!.age).toBe(7);
       }
     }
+  });
+
+  it("derives the Fake Tears picture bounds and affine centre from the anchors (prep7 s2.1)", () => {
+    // Opponent-front DELCATTY: pic point (176,48), 48x48 -> left 152, right 200, top 24; the affine centre is the sprite centre.
+    expect(cfg(displayed("SHUCKLE", "DELCATTY"), 313, 1)).toMatchObject({
+      attackerPictureBounds: { left: 152, right: 200, top: 24 }, attacker: { geometry: { animationCenter: { x: 176, y: 48 } } } });
+    // Player-back DELCATTY: pic point (72,96), 64x48 -> 40..104, top 72; sprite centre (72,88).
+    expect(cfg(displayed("DELCATTY", "SHUCKLE"), 313, 0)).toMatchObject({
+      attackerPictureBounds: { left: 40, right: 104, top: 72 }, attacker: { geometry: { animationCenter: { x: 72, y: 88 } } } });
   });
 
   it("renders every move with an alternate carrier in both orientations without fixture-species throws", () => {
