@@ -30475,8 +30475,8 @@ export function renderSceneOnMovePresentation(
       fb,
       attackerSprite.tileset,
       attackerSprite.palette,
-      view.attacker.geometry.spriteCorner.x + view.attackerX2 + liveIdle(view.attacker).x2,
-      view.attacker.geometry.spriteCorner.y + view.attackerY2 + liveIdle(view.attacker).y2,
+      view.attacker.geometry.spriteCorner.x + view.attackerX2,
+      view.attacker.geometry.spriteCorner.y + view.attackerY2,
     );
     if (!liveField) {
     if (playerToOpponent) {
@@ -48522,8 +48522,8 @@ export function renderSceneOnMovePresentation(
       fb,
       attackerSprite.tileset,
       attackerSprite.palette,
-      view.attacker.geometry.spriteCorner.x + liveIdle(view.attacker).x2,
-      view.attacker.geometry.spriteCorner.y + liveIdle(view.attacker).y2,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
     );
     if (embersInFrontOfAttacker) drawFireSprites();
     if (!liveField) {
