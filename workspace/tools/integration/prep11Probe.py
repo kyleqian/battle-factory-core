@@ -90,6 +90,9 @@ def step():
         for i in sorted(sp - prev_sp): spawns.append({"f": f, "slot": i, "ev": "+", "tmpl": u32(base + i * 0x44 + 0x14), "attr": [u16(base + i * 0x44), u16(base + i * 0x44 + 2), u16(base + i * 0x44 + 4)],
                                                                  "x2": sg(base + i * 0x44 + 0x24), "y2": sg(base + i * 0x44 + 0x26), "cb": u32(base + i * 0x44 + 0x1c), "data": [sg(base + i * 0x44 + 0x2e + 2 * k) for k in range(8)], "sub": u8(base + i * 0x44 + 0x43)})
         for i in sorted(prev_sp - sp): spawns.append({"f": f, "slot": i, "ev": "-"})
+        for e in spawns:
+            if e["ev"] == "+" and "attrLate" not in e and f == e["f"] + 3 and e["slot"] in sp:
+                e["attrLate"] = [u16(base + e["slot"] * 0x44), u16(base + e["slot"] * 0x44 + 2), u16(base + e["slot"] * 0x44 + 4)]
         prev_sp = sp
     else: prev_sp = set(sprites())
     if cur is None and a:
