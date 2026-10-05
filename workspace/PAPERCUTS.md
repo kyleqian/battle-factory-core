@@ -79,17 +79,6 @@ history.
 - **Fix:** document in tools/battle-lab/README.md (continuous low-duty A
   spam self-times, as for the post-KO switch-in papercut).
 
-## `generatedCommandAnimationReplay` cannot drive the forced-replacement party screen
-
-- **What:** `tools/integration/generatedCommandAnimationReplay.ts` waits for
-  `action-menu` after each decision; when the player's mon faints the game
-  waits in `battleForcedPartySelect` and the tool throws "exceeded budget"
-  (same in Scene OFF and on master). Looks like a hang; it is not.
-- **Hits:** 3 (2026-10-04 supervisor route checks: Water Gun seed 69,
-  Sludge seed 4, Bubble Beam seed 38; ~15 min total).
-- **Fix:** let the driver pick the first healthy party member on forced
-  replacement (or accept a `{ forcedSwitch: n }` slot entry).
-
 ## `issue142ShadowRowScan.ts` cannot see a MISSING shadow-row id
 
 - **What:** the scan compares rows only for ids already in
