@@ -1,0 +1,38 @@
+{
+ "schema": "playerfaint-adapter-draft/v1",
+ "draft": true,
+ "move": "THUNDERBOLT",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/playerfaint-protect-thunderbolt.json",
+ "stateFixture": "tools/integration/fixtures/playerfaint/state-playerfaint-protect-thunderbolt.json",
+ "modelCheck": "tools/integration/fixtures/playerfaint/model-check-playerfaint-protect-thunderbolt.json",
+ "attacker": {
+  "species": "JOLTEON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 235,
+  "playerMaxHp": 235,
+  "opponentHp": 140,
+  "opponentMaxHp": 140,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 1685,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 1685,
+  "endFrame": 1921,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset/length of postko-thunderbolt-opponent.json (237 rows); body after player faint -> forced party menu -> reshow -> forced switch-in"
+}

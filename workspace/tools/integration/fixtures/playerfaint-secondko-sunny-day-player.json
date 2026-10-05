@@ -1,0 +1,38 @@
+{
+ "schema": "playerfaint-adapter-draft/v1",
+ "draft": true,
+ "move": "SUNNY_DAY",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/playerfaint-secondko-sunnyday-swift.json",
+ "stateFixture": "tools/integration/fixtures/playerfaint/state-playerfaint-secondko-sunnyday-swift.json",
+ "modelCheck": "tools/integration/fixtures/playerfaint/model-check-playerfaint-secondko-sunnyday-swift.json",
+ "attacker": {
+  "species": "NINETALES",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHEDINJA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 148,
+  "playerMaxHp": 148,
+  "opponentHp": 1,
+  "opponentMaxHp": 1,
+  "playerGender": "male",
+  "opponentGender": "genderless",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 2773,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 2773,
+  "endFrame": 2930,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset/length of postko-sunny-day-player.json (158 rows); body after the SECOND opponent KO + send-out #3"
+}

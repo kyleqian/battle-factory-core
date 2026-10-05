@@ -2337,6 +2337,8 @@
   }
  ],
  "edgeCount": 7,
+ "knownEdges": 7,
+ "knownMismatchedEdges": 0,
  "mismatchedEdges": 0,
  "romActivations": 7,
  "invalidReason": null

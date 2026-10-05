@@ -901,6 +901,8 @@
   }
  ],
  "edgeCount": 3,
+ "knownEdges": 3,
+ "knownMismatchedEdges": 0,
  "mismatchedEdges": 0,
  "romActivations": 5,
  "invalidReason": "no EXACT plan: body 85:opponent"

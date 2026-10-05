@@ -40,6 +40,14 @@ export const SCENARIOS: Record<string, Step[]> = {
   // body without an EXACT plan (85:opponent) and are not relied on.
   "playerfaint-protect-thunderbolt": [P, C, edge("85:opponent", "entry"), body(85, "opponent"), HIT, ...PLAYER_FAINT_SWITCH,
     P, C, edge("182:player"), body(182, "player"), P, C, edge("85:opponent"), body(85, "opponent")],
+  // turn 1 as above (SLOWBRO Swift KOs the MAGIKARP lead); forced menu -> SNORLAX (speed 31 > SLOWBRO). turns 2-5: SNORLAX Light Screen /
+  // Heal Bell / Giga Drain / Thunderbolt (first each turn), SLOWBRO Swift after each; turn 5 Thunderbolt paralyzes SLOWBRO (PRZ animation).
+  "playerfaint-lightscreen-healbell-gigadrain-thunderbolt": [P, C, edge("129:opponent", "entry"), body(129, "opponent"), HIT, ...PLAYER_FAINT_SWITCH,
+    P, C, edge("113:player"), body(113, "player"), edge("129:opponent"), body(129, "opponent"), HIT,
+    P, C, edge("215:player"), body(215, "player"), edge("129:opponent"), body(129, "opponent"), HIT,
+    P, C, edge("202:player"), body(202, "player"), HIT, edge("129:opponent"), body(129, "opponent"), HIT,
+    P, C, edge("85:player"), body(85, "player"), HIT, edge("status:PRZ:opponent"), { kind: "status-animation", status: "PRZ" },
+    edge("129:opponent"), body(129, "opponent"), HIT],
   // second opponent KO: NINETALES Flamethrower KOs SHEDINJA #1 (turn 1) and SHEDINJA #2 (turn 2; send-out #3 reuses slot 5);
   // turn 3: Sunny Day (first body after send-out #3), SHEDINJA #3 Swift, sun; turn 4: player Swift has no effect (Wonder Guard, no
   // animation), Swift, sun.
@@ -124,7 +132,10 @@ export function modelCheck(key: string, probe: { activations: { riseFrame: numbe
       roleLend: rho && view ? view.free.map(s => rho.get(s)!) : null,
       roleMap: rho ? Object.fromEntries([...rho].filter(([s, l]) => s !== l)) : null });
   }
-  return { scenario: key, edges, edgeCount: edges.length, mismatchedEdges: edges.filter(e => (e.mismatches as number) > 0 || e.missingInRom).length,
+  // unknown = the strict tracker invalidated earlier for plan-coverage reasons (a body without an EXACT plan); not a relied-on edge
+  return { scenario: key, edges, edgeCount: edges.length, knownEdges: edges.filter(e => e.known).length,
+    knownMismatchedEdges: edges.filter(e => e.known && (e.mismatches as number) > 0).length,
+    mismatchedEdges: edges.filter(e => (e.mismatches as number) > 0 || e.missingInRom).length,
     romActivations: probe.activations.length, invalidReason: tracker.invalidReason };
 }
 
@@ -133,7 +144,7 @@ if (process.argv.some(arg => arg.startsWith("playerfaint-"))) {
   const [key, path] = args;
   const result = modelCheck(key!, JSON.parse(readFileSync(path!, "utf8")));
   for (const e of result.edges) console.log(e.label, e.riseFrame, JSON.stringify(e.romMove), "known", e.known, "mismatches", e.mismatches, JSON.stringify(e.checks), "prod lend", e.productionLend === null ? "null" : "lent");
-  console.log(JSON.stringify({ edges: result.edgeCount, mismatchedEdges: result.mismatchedEdges, romActivations: result.romActivations, invalidReason: result.invalidReason }));
+  console.log(JSON.stringify({ edges: result.edgeCount, knownEdges: result.knownEdges, knownMismatchedEdges: result.knownMismatchedEdges, mismatchedEdges: result.mismatchedEdges, romActivations: result.romActivations, invalidReason: result.invalidReason }));
   if (process.argv.includes("--write")) {
     writeFileSync(new URL(`./fixtures/playerfaint/model-check-${key}.json`, import.meta.url), JSON.stringify(result, null, 1) + "\n");
   }
