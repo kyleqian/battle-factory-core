@@ -34,5 +34,6 @@
   "endFrame": 807,
   "ageOffset": 0
  },
- "note": "accepted window offset/length of playerfaint-giga-drain-player.json (230 rows); first body after a voluntary switch to party slot 2"
+ "note": "accepted window offset/length of playerfaint-giga-drain-player.json (230 rows); first body after a voluntary switch to party slot 2",
+ "precedingTurns": null
 }

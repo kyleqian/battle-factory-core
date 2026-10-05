@@ -34,5 +34,6 @@
   "endFrame": 3240,
   "ageOffset": 0
  },
- "note": "accepted window offset/length of playerfaint-light-screen-player.json (88 rows); two turns after a voluntary switch to party slot 1"
+ "note": "accepted window offset/length of playerfaint-light-screen-player.json (88 rows); two turns after a voluntary switch to party slot 1",
+ "precedingTurns": null
 }

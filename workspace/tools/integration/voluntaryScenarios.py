@@ -43,6 +43,11 @@ SCENARIOS = {
     "slot2-gigadrain": ({"player": [mon(JOLTEON, [SWIFT] * 4), mon(MAGIKARP, [SPLASH] * 4), mon(SNORLAX, [SUNNY, SWIFT, LSCREEN, HEALBELL])],
                          "opponent": [slowbro(GIGA)] * 3},
                         {"turns": [{"switch": 2}, 0], "frames": 2600}),
+    # F: SNORLAX lead (faster than SLOWBRO); cancel, then Light Screen (allocator consumer as the first body after a cancelled menu),
+    # Swift; T2 Heal Bell, Swift.
+    "cancel-lightscreen": ({"player": [mon(SNORLAX, [LSCREEN, HEALBELL, SWIFT, SUNNY]), mon(JOLTEON, [SWIFT] * 4), mon(MAGIKARP, [SPLASH] * 4)],
+                           "opponent": [slowbro(SWIFT)] * 3},
+                          {"turns": [{"cancel": True}, 0, 1], "frames": 2400}),
 }
 
 if __name__ == "__main__":

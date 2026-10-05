@@ -34,5 +34,6 @@
   "endFrame": 405,
   "ageOffset": 0
  },
- "note": "accepted window offset/length of playerfaint-swift-opponent.json (80 rows); first body after a cancelled voluntary party menu (opponent first)"
+ "note": "accepted window offset/length of playerfaint-swift-opponent.json (80 rows); first body after a cancelled voluntary party menu (opponent first)",
+ "precedingTurns": null
 }

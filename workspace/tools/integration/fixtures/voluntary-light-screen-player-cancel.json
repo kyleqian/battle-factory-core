@@ -1,0 +1,38 @@
+{
+ "schema": "voluntary-adapter-draft/v1",
+ "draft": true,
+ "move": "LIGHT_SCREEN",
+ "probe": "tools/integration/postkoStateProbe.py",
+ "scenario": "tools/battle-lab/voluntary-cancel-lightscreen.json",
+ "stateFixture": "tools/integration/fixtures/voluntary/state-voluntary-cancel-lightscreen.json",
+ "modelCheck": "tools/integration/fixtures/voluntary/model-check-voluntary-cancel-lightscreen.json",
+ "attacker": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 235,
+  "playerMaxHp": 235,
+  "opponentHp": 170,
+  "opponentMaxHp": 170,
+  "playerGender": "male",
+  "opponentGender": "male",
+  "playerStatus": "none"
+ },
+ "edgeRiseFrame": 325,
+ "windowOffsetFromActivation": 0,
+ "denseWindow": {
+  "startFrame": 325,
+  "endFrame": 412,
+  "ageOffset": 0
+ },
+ "note": "accepted window offset/length of playerfaint-light-screen-player.json (88 rows); first body after a cancelled voluntary party menu"
+}

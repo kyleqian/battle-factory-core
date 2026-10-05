@@ -34,5 +34,6 @@
   "endFrame": 3447,
   "ageOffset": 0
  },
- "note": "accepted window offset/length of playerfaint-heal-bell-player.json (261 rows); two turns after a voluntary switch to party slot 2"
+ "note": "accepted window offset/length of playerfaint-heal-bell-player.json (261 rows); two turns after a voluntary switch to party slot 2",
+ "precedingTurns": null
 }

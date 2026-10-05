@@ -34,5 +34,6 @@
   "endFrame": 673,
   "ageOffset": 0
  },
- "note": "accepted window offset/length of playerfaint-sunny-day-player.json (158 rows); second body after a cancelled voluntary party menu"
+ "note": "accepted window offset/length of playerfaint-sunny-day-player.json (158 rows); second body after a cancelled voluntary party menu",
+ "precedingTurns": null
 }

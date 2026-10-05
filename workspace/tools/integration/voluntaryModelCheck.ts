@@ -52,6 +52,9 @@ export const SCENARIOS: Record<string, Step[]> = {
   "voluntary-slot1-thunderbolt": [...MENU_SWITCH, ...mv(85, "opponent", true)],
   // JOLTEON lead switches to slot 2 (SNORLAX) into SLOWBRO Giga Drain (202:opponent has no EXACT plan).
   "voluntary-slot2-gigadrain": [...MENU_SWITCH, ...mv(202, "opponent", true)],
+  // SNORLAX (faster) vs SLOWBRO x3 Swift. T1 cancel, Light Screen / Swift; T2 Heal Bell / Swift.
+  "voluntary-cancel-lightscreen": [...MENU_CANCEL, ...mv(113, "player"), ...mv(129, "opponent", true),
+    P, C, ...mv(215, "player"), ...mv(129, "opponent", true)],
 };
 
 const maskSlots = (mask: string) => { const b = BigInt(`0x${mask}`); return Array.from({ length: 64 }, (_, s) => s).filter(s => (b >> BigInt(s)) & 1n); };
