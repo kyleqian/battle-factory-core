@@ -70,5 +70,103 @@
    "opponentGender": "female",
    "playerStatus": "none"
   }
+ },
+ {
+  "case": "knock-off-player-sableye-opponent-onix",
+  "acceptedStart": 70,
+  "acceptedActivations": [
+   75
+  ],
+  "acceptedIntervalIndex": 0,
+  "offset": -5,
+  "altIntervals": [
+   {
+    "move": 282,
+    "start": 249,
+    "end": 298
+   }
+  ],
+  "derivedStart": 244
+ },
+ {
+  "case": "knock-off-opponent-banette-player-onix",
+  "acceptedStart": 74,
+  "acceptedActivations": [
+   79
+  ],
+  "acceptedIntervalIndex": 0,
+  "offset": -5,
+  "altIntervals": [
+   {
+    "move": 282,
+    "start": 80,
+    "end": 129
+   }
+  ],
+  "derivedStart": 75
+ },
+ {
+  "case": "safeguard-player-wobbuffet-opponent-onix",
+  "acceptedStart": 209,
+  "acceptedActivations": [
+   209
+  ],
+  "acceptedIntervalIndex": 0,
+  "offset": 0,
+  "altIntervals": [
+   {
+    "move": 219,
+    "start": 214,
+    "end": 284
+   }
+  ],
+  "derivedStart": 214
+ },
+ {
+  "case": "rock-tomb-opponent-rhydon-player-onix",
+  "acceptedStart": 229,
+  "acceptedActivations": [
+   229
+  ],
+  "acceptedIntervalIndex": 0,
+  "offset": 0,
+  "altIntervals": [
+   {
+    "move": 317,
+    "start": 229,
+    "end": 402
+   }
+  ],
+  "derivedStart": 229
+ },
+ {
+  "case": "faint-attack-player-murkrow-opponent-onix",
+  "acceptedStart": 2344,
+  "acceptedActivations": [],
+  "acceptedIntervalIndex": 0,
+  "offset": 4,
+  "altIntervals": [
+   {
+    "move": 185,
+    "start": 77,
+    "end": 301
+   }
+  ],
+  "derivedStart": 81
+ },
+ {
+  "case": "faint-attack-player-onix-opponent-grovyle",
+  "acceptedStart": 2344,
+  "acceptedActivations": [],
+  "acceptedIntervalIndex": 0,
+  "offset": 4,
+  "altIntervals": [
+   {
+    "move": 185,
+    "start": 297,
+    "end": 521
+   }
+  ],
+  "derivedStart": 301
  }
 ]

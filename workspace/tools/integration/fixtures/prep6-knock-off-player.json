@@ -1,7 +1,7 @@
 {
   "schema": "prep6-adapter-draft/v1",
   "move": "KNOCK_OFF",
-  "probe": "tools/battle-lab/mechanic-knock-off-shuppet-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
   "scenario": "tools/battle-lab/mechanic-knock-off-shuppet-onix.json",
   "attacker": {
     "species": "PLUSLE",
@@ -66,6 +66,7 @@
       "liveWindowStartsAtActivation": -6,
       "note": "reducer animation age 0 = activation + 6; window started 5 frames before activation"
     },
-    "adhocShadowDraw": "none in the branch"
+    "adhocShadowDraw": "none in the branch",
+    "fixtureNote": "attacker species PLUSLE: the scenario file name says shuppet but the ROM shows PLUSLE (verified in the framebuffer); draft had it right"
   }
 }

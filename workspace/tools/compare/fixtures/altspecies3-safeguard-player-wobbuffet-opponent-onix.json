@@ -1,0 +1,69 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "move": "SAFEGUARD",
+ "probe": "tools/compare/safeguardProbe.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/safeguard-player-wobbuffet-opponent-onix.json",
+ "attacker": {
+  "species": "WOBBUFFET",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 270,
+  "playerMaxHp": 283,
+  "opponentHp": 117,
+  "opponentMaxHp": 117,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 214,
+  "endFrame": 284,
+  "frameCount": 71
+ },
+ "draft": {
+  "activationFrame": 209,
+  "scriptEndFirstInactive": 279,
+  "shadowRow": 0,
+  "shadowRowInMap": true,
+  "expectedDuration": 71,
+  "consumedByTest": false,
+  "acceptedWindow": {
+   "startFrame": 209,
+   "endFrame": 279
+  },
+  "derivedFields": {
+   "attacker.geometry.spriteCorner": "40,56",
+   "attacker.geometry.animationCenter": "72,96",
+   "attacker.geometry.battlePositionCenter": "72,80",
+   "target.geometry.spriteCorner": "144,10",
+   "target.geometry.animationCenter": "176,42",
+   "target.geometry.battlePositionCenter": "176,40",
+   "animationProfile.ringSubpriority": "28"
+  },
+  "consumedFieldDifferences": [],
+  "order": "ORDER-INDEPENDENT of the seed (0/42); renderer paints rings by an orientation rule (battleScene.ts:16018-16020) = the ROM y-key order",
+  "acceptedConfigExtras": {
+   "animationProfile": {
+    "ringSlots": [
+     3,
+     4,
+     5
+    ],
+    "ringSubpriority": 28
+   }
+  },
+  "adhocShadowDraw": "none in the branch"
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep6-safeguard-player.json",
+ "swap": {
+  "player": "WOBBUFFET"
+ }
+}

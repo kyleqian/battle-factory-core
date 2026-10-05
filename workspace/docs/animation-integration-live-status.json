@@ -2352,6 +2352,134 @@
         "unknown entry/status/switch/summary/substitute/transform histories",
         "whole-playable arbitrary-history framebuffer exactness"
       ]
+    },
+    {
+      "move": "MOVE_ROCK_TOMB",
+      "id": 317,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep6-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep6-rock-tomb-*.json, 174 rows)",
+        "ordinary route seed 41 / streak 0 / move index 1 (GRIMER; route 0/0/0 emits no body): adapter active 174/174, action-menu, ON/OFF rules/RNG equal",
+        "alternate species RHYDON opponent attacker dense proof (window start derived from the alternate scenario's source activation + the accepted offset; altSpecies9.py): 174/174 twice fresh, zero residual"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "slot-independent: target battler slot 8/6 and the reducer's rock slots are labels (measured identical pixels for relabelled slots); no order input (0/42 seeds)",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SAFEGUARD",
+      "id": 219,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep6-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep6-safeguard-*.json, 71 rows)",
+        "ordinary route seed 59 / streak 0 / move index 2 (BAYLEEF): adapter active 71/71, action-menu, ON/OFF rules/RNG equal",
+        "alternate species WOBBUFFET player attacker dense proof (window start derived from the alternate scenario's source activation + the accepted offset; altSpecies9.py): 71/71 twice fresh, zero residual"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "ring slots [3,4,5] = known-entry first-free labels, pixel-irrelevant (measured); no order input (0/42 seeds)",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SWEET_SCENT",
+      "id": 230,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep6-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep6-sweet-scent-*.json, 175 rows; reducer age = live age - 4: the accepted rows start at the pointer-owned setup age -4)",
+        "ordinary route seed 31 / streak 0 / move index 3 (WEEPINBELL): adapter active 175/175, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "24 petal slots = ROM spawn order labels, pixel-irrelevant (measured); no order input (0/42 seeds)",
+      "remaining": [
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SELF_DESTRUCT",
+      "id": 120,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep6-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep6-self-destruct-*.json, 113 rows; live age 0 = the window's first row, 4 frames after the script activation, no #142 row)",
+        "ordinary route seed 56 / streak 14 / move index 3 (SUDOWOODO): adapter active 113/113 with the attacker's displayed HP already 0, then the forced-replacement party screen (driver stalls there in both modes, rules/RNG equal)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "script runs 10 frames past the accepted window (204/208): uncovered tail",
+        "no idle offset for non-zero-idle opponent carriers (mirrors Explosion)",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_SWALLOW",
+      "id": 256,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep6-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window, six stockpile branches (prep6-swallow-{player,opponent}-{1,2,3}.json; request.turn = stockpile count; 163/178/193 player, 161/176/191 opponent rows); ad-hoc age-0 shadow retired for the shared #142 row-0 hook; the opponent three-stockpile Sableye branch is exact",
+        "ordinary route seed 33 / streak 7 (SWALOT), slots [0 x n, 1] for n = 1..3: Swallow request turn n, adapter active 163/178/193 ages, action-menu, ON/OFF rules/RNG equal"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "turn 0 (failed / unstocked Swallow) has no accepted body: no adapter (bounded fallback)",
+        "the accepted Pelipper pair is not a rental carrier; Swalot is the generated carrier",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_KNOCK_OFF",
+      "id": 282,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep6-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, both orientations, twice fresh, zero residual, rows = accepted window (prep6-knock-off-*.json, 59 rows at accepted presentation age -11, duration 48; attacker is PLUSLE in the ROM; reducer age 0 = activation + 6, no #142 row)",
+        "ordinary route seed 15 / streak 7 / move index 2 (SABLEYE): adapter active 48/48, action-menu, ON/OFF rules/RNG equal",
+        "alternate species SABLEYE player attacker dense proof (window start derived from the alternate scenario's source activation + the accepted offset; altSpecies9.py): 59/59 twice fresh, zero residual",
+        "alternate species BANETTE opponent attacker dense proof (window start derived from the alternate scenario's source activation + the accepted offset; altSpecies9.py): 49/59 exact; the 10 residual rows (2,000 px) are exactly the 32x8 elevated-attacker shadow before the activation and after the script end (the pre-existing #142 tail class)"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "spriteOrder": "no order input: the config has no order seed (known seed shapes identical; arbitrary seeds move 0..4 of 59 frames, unmodelled in the reducer)",
+      "remaining": [
+        "elevated opponent attacker: shadow tail after the script end (ages 44..47) is not drawn",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
+    },
+    {
+      "move": "MOVE_FAINT_ATTACK",
+      "id": 185,
+      "sourceFieldEvidence": [
+        "../tools/integration/fixtures/prep6-live-adapter-receipt.json"
+      ],
+      "liveEvidence": [
+        "dense source framebuffer, PLAYER attacker only, twice fresh, zero residual, 221 rows (prep6-faint-attack-player.json via the staged probe wrapper tools/integration/prep6FaintAttackProbe.py); live BG_DARK background via the CRUNCH recipe; opponent attacker has no accepted evidence and returns null (fallback)",
+        "ordinary route seed 0 / streak 7 / move index 1 (DELCATTY): adapter active 221/221, action-menu, ON/OFF rules/RNG equal",
+        "alternate species MURKROW player attacker dense proof (window start derived from the alternate scenario's source activation + the accepted offset; altSpecies9.py): 205/221 exact, 16 tail rows (286,928 px, ages 203..218) = the restore-fade phase; the control with the ACCEPTED pair in the same battle-lab context shows the same rows (281,024 px), so it is a lab-vs-staged-probe one-frame difference of the script, not a species effect"
+      ],
+      "palettePlan": "no plan, history invalidates",
+      "remaining": [
+        "opponent-attacker orientation (no accepted evidence)",
+        "restore-fade tail in a battle-lab context differs by one frame from the accepted staged evidence",
+        "unknown entry/status/switch/summary/substitute/transform histories",
+        "whole-playable arbitrary-history framebuffer exactness"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -2374,7 +2502,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 166,
+  "implementedCount": 173,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "unadaptedNotes": {},

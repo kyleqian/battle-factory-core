@@ -1,7 +1,7 @@
 {
   "schema": "prep6-adapter-draft/v1",
   "move": "SWEET_SCENT",
-  "probe": "tools/battle-lab/mechanic-sweet-scent-opponent-weepinbell-player-onix.json",
+  "probe": "tools/compare/sweetScentProbe.py",
   "scenario": "tools/battle-lab/mechanic-sweet-scent-opponent-weepinbell-player-onix.json",
   "attacker": {
     "species": "WEEPINBELL",

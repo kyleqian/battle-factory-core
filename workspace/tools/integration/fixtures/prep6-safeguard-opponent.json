@@ -1,7 +1,7 @@
 {
   "schema": "prep6-adapter-draft/v1",
   "move": "SAFEGUARD",
-  "probe": "tools/battle-lab/mechanic-safeguard-opponent-bayleef-player-onix.json",
+  "probe": "tools/compare/safeguardProbe.py",
   "scenario": "tools/battle-lab/mechanic-safeguard-opponent-bayleef-player-onix.json",
   "attacker": {
     "species": "BAYLEEF",

@@ -1,8 +1,8 @@
 {
   "schema": "prep6-adapter-draft/v1",
   "move": "FAINT_ATTACK",
-  "probe": "tools/probe/stage-fire-punch-portable-on.py player faint-attack",
-  "scenario": "tools/probe/stage-fire-punch-portable-on.py player faint-attack",
+  "probe": "tools/integration/prep6FaintAttackProbe.py",
+  "scenario": "tools/probe/stage-fire-punch-portable-on.py",
   "attacker": {
     "species": "ONIX",
     "geometry": {
@@ -18,7 +18,11 @@
   "fieldProfile": {
     "playerHp": 117,
     "opponentHp": 143,
-    "playerStatus": "none"
+    "playerStatus": "none",
+    "playerMaxHp": 117,
+    "opponentMaxHp": 143,
+    "playerGender": "male",
+    "opponentGender": "male"
   },
   "orientation": "player-back ONIX -> GROVYLE",
   "denseWindow": {

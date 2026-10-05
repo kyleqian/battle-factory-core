@@ -35,6 +35,7 @@ import { STUN_SPORE_FRAME_COUNT } from "../animation/stunSpore.ts";
 import { GRASS_WHISTLE_WINDOW_FRAMES } from "../animation/grassWhistle.ts";
 import { DOUBLE_EDGE_FRAME_COUNT } from "../animation/doubleEdge.ts";
 import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
+import { FAINT_ATTACK_ANIMATION_PROFILE } from "../animation/faintAttack.ts";
 import { RAZOR_LEAF_BODY_LAST_AGE } from "../animation/razorLeaf.ts";
 import { THUNDER_PUNCH_MOVE_BODY_LAST_AGE } from "../animation/thunderPunch.ts";
 import { NEEDLE_ARM_FRAME_COUNT } from "../animation/needleArm.ts";
@@ -107,6 +108,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   212, 265, 111, 275, 35, 20, 225,
   // prep5 (docs/next-adapters-prep5.md): Mist Ball, Aromatherapy, Follow Me, Metronome (body), Taunt, Belly Drum.
   296, 312, 266, 118, 269, 187,
+  // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off, Faint Attack (player attacker only).
+  317, 219, 230, 120, 256, 282, 185,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -128,6 +131,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // Blaze Kick (pixel-sensitive seed; 9-frame script tail beyond the accepted window is uncovered).
   299,
 ] as const);
+
+const SWEET_SCENT_PETAL_SLOTS: readonly number[] = Object.freeze([
+  3, 4, 5, 7, 9, 10, 3, 11, 12, 13, 14, 15, 16, 17, 4, 5, 7, 9, 10, 3, 11, 12, 13, 14]);
 
 /**
  * ISSUES #142: live age on which the elevated-opponent enemy shadow is still
@@ -164,6 +170,9 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     // prep5 (issue142-shadow-rows-extra.json): Mist Ball, Aromatherapy, Follow Me, Metronome, Belly Drum start at
     // activation. Taunt (-10) starts after it and has no row.
     296, 312, 266, 118, 187,
+    // prep6 (issue142-shadow-rows-extra.json): Rock Tomb, Safeguard, Sweet Scent, Swallow start at activation.
+    // Self-Destruct (-4), Knock Off (-6), Faint Attack (-4) start after it and have no row.
+    317, 219, 230, 256,
     // order consumers (issue142-shadow-rows-extra.json): Grudge's window starts at activation (66/70).
     // Heal Bell (215), Rock Throw (88), Perish Song (195), Leaf Blade (348) start at activation (0).
     288, 215, 348, 195, 88,
@@ -449,6 +458,26 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     case 82: return 150; // Dragon Rage (89..238 / 93..242); the script runs 21 frames past the window (259/263), uncovered.
     case 52: return 63; // Ember (388..450 / 442..504, ageOffset 0); script ends 3 frames later (453/507).
     case 288: return 209; // Grudge (66..274 / 70..278); script end 274/278 (no tail).
+    // prep6 accepted windows (docs/next-adapters-prep6.md s0/s2.4).
+    case 317: return 174; // Rock Tomb (217..390 / 229..402); window end = script end.
+    case 219: return 71; // Safeguard (209..279 both).
+    case 230: return 175; // Sweet Scent (222..396 both).
+    // Self-Destruct: 113 rows (82..194 / 86..198) = the whole accepted window, live age 0 = its first row (reducer age 0,
+    // selfDestructPortable.ts presentationAge 0), the Taunt/Dragon Rage convention: the window starts 4 frames after
+    // the script activation (78/82, row -4, no #142 shadow row) and the script runs 10 frames past it (204/208), uncovered.
+    case 120: return 113;
+    // Knock Off: 59 rows (70..128 / 74..132) at accepted presentation age -11 (ageOffset -11): reducer age 0 = frame 81/85 =
+    // activation + 6 (prep6 s2.4), so live age 0 is the reducer's age 0 and the activation is live age -6 (no #142 row).
+    // The window ends 4 frames after the script end (124/128); duration = rows + ageOffset (the Dragon Breath convention).
+    case 282: return 48;
+    // Faint Attack: 221 rows (2344..2564 player attacker), reducer ages 0..220 (faintAttack.ts LAST_ANIMATION_OWNED_AGE);
+    // the window starts 4 frames after the script activation (row -4, no #142 shadow row). Only the player-attacker
+    // orientation has accepted evidence (prep6 s0): an opponent attacker returns null (no adapter, scene-off view).
+    case 185: return request.attacker === 0 ? 221 : null;
+    // Swallow: per stockpile branch (request.turn = gBattleScripting.animTurn = stockpileCounter, prep6 s2.1) and side:
+    // player 163/178/193 (1247..1409 ...), opponent 161/176/191 (= 148 + 15 turn / 146 + 15 turn), every window end = script end.
+    case 256:
+      return request.turn >= 1 && request.turn <= 3 ? (request.attacker === 0 ? 148 : 146) + 15 * request.turn : null;
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 212; // Explosion accepted window (76..287 / 80..291).
@@ -1212,6 +1241,53 @@ export function liveMoveAnimationPresentation(
       };
       break;
     }
+    case 317: {
+      // docs/next-adapters-prep6.md s2.1: rocks/Red-X use the target pic point; the target's battler slot is the
+      // known-entry slot (opponent 8 / player 6, equal to liveSpriteSlotForOwner on the known-entry host); the rock
+      // slots 3,4,5,7,9 are first-free and seed-independent (0/42 seeds), so the reducer's slot rule needs no host.
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art);
+      config = { move: "ROCK_TOMB", attacker, target, fieldProfile,
+        targetSpriteSlot: target.geometry.side === "opponent" ? 8 : 6,
+        targetInitialX2: targetAnchors.frontIdleRest.x2,
+        effectCenter: targetAnchors.picOffsetPoint };
+      break;
+    }
+    case 219:
+      // ringSubpriority = GetBattlerSpriteSubpriority(attacker) - 2 (30/40 - 2); the three ring slots are the
+      // known-entry first-free slots 3,4,5 (prep6 s2.2) and seed-independent (0/42 seeds, s2.3): labels only.
+      config = { move: "SAFEGUARD", attacker, target, fieldProfile,
+        animationProfile: { ringSlots: [3, 4, 5], ringSubpriority: attacker.geometry.side === "player" ? 28 : 38 } };
+      break;
+    case 230:
+      // spriteSlots = ROM spawn order of the 24 petals on the known-entry first-free host with slot reuse
+      // (prep6-plans.json); seed-independent (0/42 seeds, 12 equal-key pairs none overlapping). targetSubpriority
+      // is attacker subpriority - 2.
+      config = { move: "SWEET_SCENT", attacker, target, fieldProfile,
+        animationProfile: { spriteSlots: SWEET_SCENT_PETAL_SLOTS, targetSubpriority: attacker.geometry.side === "player" ? 28 : 38 } };
+      break;
+    // The attacker's displayed HP is already 0 at the event (setatkhptozero precedes attackanimation; prep6 s2.1),
+    // the same displayed-field path as Explosion; the live seam reads it from the field.
+    case 120: config = { move: "SELF_DESTRUCT", attacker, target, fieldProfile }; break;
+    case 256: {
+      // Stockpile count = request.turn (measured 1/2/3, prep6-swallow-probe.json). The attacker's affine centre is the
+      // OBJ/sprite centre (affineCenterBattler), not the pic point; the pic point and coords.yOffset are separate inputs.
+      const turn = request.turn as 1 | 2 | 3;
+      config = { move: "SWALLOW", attacker: affineCenterBattler(attacker), target, fieldProfile, stockpileCount: turn,
+        attackerPictureOffset: attackerAnchors.picOffsetPoint,
+        attackerPictureYOffset: liveBattlerCoordAttrs(attacker.geometry.side, art).yOffset };
+      break;
+    }
+    // Knock Off reads only the target's animation centre (the hit splat) and the reducer age; no order seed exists in
+    // the config (known seed shapes give 0 differing frames, prep6 s2.3), so there is no order input to lend.
+    case 282: config = { move: "KNOCK_OFF", attacker, target, fieldProfile }; break;
+    case 185:
+      if (attacker.geometry.side !== "player") return null;
+      // The canonical ONIX_TO_GROVYLE profile = the source-age constants (prep6 s2.1: spriteCorners and the target's
+      // hit-splat centre derive exactly); the move text and HP chrome come from the live view under liveField.
+      config = { move: "FAINT_ATTACK", attacker, target, animationProfile: FAINT_ATTACK_ANIMATION_PROFILE,
+        fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" },
+        moveTextStartAge: -24 };
+      break;
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:
@@ -1235,5 +1311,7 @@ export function liveMoveAnimationPresentation(
   // Barrier, Magic Coat and Protect anchor at the first script pointer.
   const wallAnchorOffset = request.moveId === 113 || request.moveId === 115
     || request.moveId === 243 ? 7 : 0;
-  return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1 : age };
+  // Sweet Scent's accepted rows start at reducer age -4 (the pointer-owned setup rows, sweetScentFramebuffer.ts:101).
+  const setupAge = request.moveId === 230 ? 4 : 0;
+  return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1 : age - setupAge };
 }

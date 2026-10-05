@@ -1,0 +1,35 @@
+{
+ "schema": "altspecies3-portable-source/v1",
+ "move": "FAINT_ATTACK",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/integration/fixtures/altspecies3-scenarios/faint-attack-player-murkrow-opponent-onix.json",
+ "attacker": {
+  "species": "MURKROW",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 135,
+  "playerMaxHp": 135,
+  "opponentHp": 110,
+  "opponentMaxHp": 110,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "denseWindow": {
+  "startFrame": 81,
+  "endFrame": 301,
+  "frameCount": 221
+ },
+ "baseSourceFixture": "tools/integration/fixtures/prep6-faint-attack-alt-base.json",
+ "swap": {
+  "player": "MURKROW"
+ }
+}
