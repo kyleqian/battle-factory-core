@@ -107,8 +107,8 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   212, 265, 111, 275, 35, 20, 225,
   // prep5 (docs/next-adapters-prep5.md): Mist Ball, Aromatherapy, Follow Me, Metronome (body), Taunt, Belly Drum.
   296, 312, 266, 118, 269, 187,
-  // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow.
-  317, 219, 230, 120, 256,
+  // prep6 (docs/next-adapters-prep6.md): Rock Tomb, Safeguard, Sweet Scent, Self-Destruct, Swallow, Knock Off.
+  317, 219, 230, 120, 256, 282,
   // order consumers (docs/order-consumer-prep.md): Grudge, first move body of a battle only (sprite-order input).
   288,
   // order consumers, order-independent (docs/order-consumer-prep.md §0): Ember (one sprite per sort window, ties resolve
@@ -465,6 +465,10 @@ export function liveMoveAnimationDuration(request: BattleMoveAnimationRequest): 
     // selfDestructPortable.ts presentationAge 0), the Taunt/Dragon Rage convention: the window starts 4 frames after
     // the script activation (78/82, row -4, no #142 shadow row) and the script runs 10 frames past it (204/208), uncovered.
     case 120: return 113;
+    // Knock Off: 59 rows (70..128 / 74..132) at accepted presentation age -11 (ageOffset -11): reducer age 0 = frame 81/85 =
+    // activation + 6 (prep6 s2.4), so live age 0 is the reducer's age 0 and the activation is live age -6 (no #142 row).
+    // The window ends 4 frames after the script end (124/128); duration = rows + ageOffset (the Dragon Breath convention).
+    case 282: return 48;
     // Swallow: per stockpile branch (request.turn = gBattleScripting.animTurn = stockpileCounter, prep6 s2.1) and side:
     // player 163/178/193 (1247..1409 ...), opponent 161/176/191 (= 148 + 15 turn / 146 + 15 turn), every window end = script end.
     case 256:
@@ -1268,6 +1272,9 @@ export function liveMoveAnimationPresentation(
         attackerPictureYOffset: liveBattlerCoordAttrs(attacker.geometry.side, art).yOffset };
       break;
     }
+    // Knock Off reads only the target's animation centre (the hit splat) and the reducer age; no order seed exists in
+    // the config (known seed shapes give 0 differing frames, prep6 s2.3), so there is no order input to lend.
+    case 282: config = { move: "KNOCK_OFF", attacker, target, fieldProfile }; break;
     case 153: config = { move: "EXPLOSION", attacker, target, fieldProfile }; break;
     case 248: config = { move: "FUTURE_SIGHT", attacker, target, fieldProfile }; break;
     case 342:

@@ -30131,20 +30131,26 @@ export function renderSceneOnMovePresentation(
     // one display after the probe-visible source state.
     const view = sceneOnKnockOffView({ ...state, age: state.age - 1 });
     const playerToOpponent =
-      view.attacker.species === "PLUSLE"
+      (liveField || view.attacker.species === "PLUSLE")
       && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "PLUSLE"
+      (liveField || view.attacker.species === "PLUSLE")
       && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
+      && (liveField || view.target.species === "ONIX")
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged KNOCK_OFF pair ${view.attacker.species}->${view.target.species}`,
       );
     }
+    const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffsetOrZero(battler.species) : { x2: 0, y2: 0 };
+    const attackerIdle = liveIdle(view.attacker);
+    const targetIdle = liveIdle(view.target);
+    const liveAttackerArt = liveField ? liveSceneOnBattlerArt(view.attacker) : null;
+    const liveTargetArt = liveField ? liveSceneOnBattlerArt(view.target) : null;
     const white = { r: 255, g: 255, b: 255 };
     const paletteCoeff = view.palette?.coeff ?? 0;
     drawTileBg(
@@ -30155,14 +30161,14 @@ export function renderSceneOnMovePresentation(
     );
     drawSpriteSheetAffineStretch(
       fb,
-      playerToOpponent
+      liveTargetArt ? liveTargetArt.tileset : playerToOpponent
         ? onixFrontSprite.tileset
         : onixBackSprite.tileset,
-      playerToOpponent
+      liveTargetArt ? liveTargetArt.palette : playerToOpponent
         ? onixFrontSprite.palette
         : onixBackSprite.palette,
       view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
       256,
       256,
       view.targetOamOffset.y2,
@@ -30170,7 +30176,7 @@ export function renderSceneOnMovePresentation(
       paletteCoeff,
       false,
       view.targetOamOffset.x2
-        + (playerToOpponent && view.animationAge < 17 ? 1 : 0),
+        + (playerToOpponent && view.animationAge < 17 ? (liveField ? targetIdle.x2 : 1) : 0),
     );
     if (view.strike) {
       const strikeStep = view.animationAge - 6;
@@ -30216,14 +30222,14 @@ export function renderSceneOnMovePresentation(
     }
     drawSpriteSheetAffineStretch(
       fb,
-      playerToOpponent
+      liveAttackerArt ? liveAttackerArt.tileset : playerToOpponent
         ? knockOffArt.plusleBack.tileset
         : knockOffArt.plusleFront.tileset,
-      playerToOpponent
+      liveAttackerArt ? liveAttackerArt.palette : playerToOpponent
         ? knockOffArt.plusleBack.palette
         : knockOffArt.plusleFront.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
       256,
       256,
       view.attackerOffset.y2,
@@ -30232,6 +30238,7 @@ export function renderSceneOnMovePresentation(
       false,
       view.attackerOffset.x2,
     );
+    if (liveField) return;
     drawSendOutHealthbox(
       fb,
       0,
